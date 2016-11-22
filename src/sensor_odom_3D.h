@@ -50,9 +50,7 @@ class SensorOdom3D : public SensorBase
          * Constructor with arguments
          * \param _p_ptr StateBlock pointer to the sensor position wrt vehicle base
          * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
-         * \param _disp_noise_factor displacement noise factor
-         * \param _rot_noise_factor rotation noise factor
-         *
+         * \param _params shared_ptr to a struct with parameters
          **/
         SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _q_ptr, IntrinsicsOdom3D::Ptr params);
 
@@ -63,7 +61,6 @@ class SensorOdom3D : public SensorBase
         Scalar getRotVarToRotNoiseFactor() const;
         Scalar getMinDispVar() const;
         Scalar getMinRotVar() const;
-
 
     public:
         static SensorBasePtr create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBasePtr _intrinsics);

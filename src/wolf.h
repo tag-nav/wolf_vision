@@ -150,18 +150,6 @@ typedef enum
 
 } ConstraintType;
 
-/** \brief Enumeration of constraint categories
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    CTR_ABSOLUTE = 1,   ///< Constraint established with absolute reference.
-    CTR_FRAME,          ///< Constraint established with a frame (odometry).
-    CTR_FEATURE,        ///< Constraint established with a feature (correspondence).
-    CTR_LANDMARK        ///< Constraint established with a landmark (correpondence).
-} ConstraintCategory;
-
 /** \brief Enumeration of constraint status
  *
  * You may add items to this list as needed. Be concise with names, and document your entries.

@@ -33,6 +33,7 @@ static IntrinsicsBasePtr createIntrinsicsOdom3D(const std::string & _filename_do
         std::string sensor_name = config["sensor name"]     .as<std::string>();
 
         YAML::Node variances = config["motion variances"];
+        YAML::Node kf_vote = config["keyframe vote"];
 
         IntrinsicsOdom3D::Ptr params = std::make_shared<IntrinsicsOdom3D>();
 
@@ -42,15 +43,6 @@ static IntrinsicsBasePtr createIntrinsicsOdom3D(const std::string & _filename_do
         params->min_disp_var     = variances["min_disp_var"] .as<Scalar>();
         params->min_rot_var      = variances["min_rot_var"]  .as<Scalar>();
 
-        //=========================================
-        // ===== this part for debugging only =====
-        //=========================================
-//        std::cout << "\n--- Parameters Parsed from YAML file ---" << std::endl;
-//        std::cout << "sensor type: " << sensor_type << std::endl;
-//        std::cout << "sensor name: " << sensor_name << std::endl;
-
-        //=========================================
-        //=========================================
         return params;
     }
 

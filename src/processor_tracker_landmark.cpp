@@ -110,7 +110,7 @@ unsigned int ProcessorTrackerLandmark::processKnown()
 
     // Find landmarks in incoming_ptr_
     FeatureBaseList known_features_list_incoming;
-    unsigned int found_landmarks = findLandmarks(getProblem()->getMapPtr()->getLandmarkList(),
+    unsigned int n = findLandmarks(getProblem()->getMapPtr()->getLandmarkList(),
                                                  known_features_list_incoming, matches_landmark_from_incoming_);
     // Append found incoming features
     incoming_ptr_->addFeatureList(known_features_list_incoming);
@@ -122,7 +122,7 @@ unsigned int ProcessorTrackerLandmark::processKnown()
     //std::cout << "\tincoming correspondences: " << matches_landmark_from_incoming_.size() << std::endl;
     //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureList().size()) << std::endl;
     //std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
-    return found_landmarks;
+    return n;
 
 }
 

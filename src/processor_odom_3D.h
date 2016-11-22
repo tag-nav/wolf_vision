@@ -12,9 +12,31 @@
 #include "sensor_odom_3D.h"
 #include "constraint_odom_3D.h"
 #include "rotations.h"
+#include <cmath>
 
 
 namespace wolf {
+
+struct ProcessorOdom3DParams : public ProcessorParamsBase
+{
+        Scalar max_time_span;
+        Size   max_buff_length;
+        Scalar dist_traveled;
+        Scalar angle_turned;
+
+
+        ProcessorOdom3DParams() :
+            max_time_span(0),
+            max_buff_length(0),
+            dist_traveled(0),
+            angle_turned(0)
+        {
+            type = "ODOM 3D";
+            name = "";
+        }
+
+        typedef std::shared_ptr<ProcessorOdom3DParams> Ptr;
+};
 
 /** \brief Processor for 3d odometry integration.
  *
@@ -44,11 +66,7 @@ class ProcessorOdom3D : public ProcessorMotion
         typedef std::shared_ptr<ProcessorOdom3D> Ptr;
 
     public:
-        ProcessorOdom3D(Scalar _k_disp_to_disp = 0.1,
-                        Scalar _k_disp_to_rot = 0.1,
-                        Scalar _k_rot_to_rot = 0.1,
-                        Scalar _min_disp_var = 0.1,
-                        Scalar _min_rot_var = 0.1);
+        ProcessorOdom3D(ProcessorOdom3DParams::Ptr _params = nullptr, SensorOdom3D::Ptr _sensor_ptr = nullptr);
         virtual ~ProcessorOdom3D();
         void setup(SensorOdom3D::Ptr sen_ptr);
 
@@ -79,8 +97,20 @@ class ProcessorOdom3D : public ProcessorMotion
                                            FrameBasePtr _frame_origin);
 
     private:
-        Scalar k_disp_to_disp_, k_disp_to_rot_, k_rot_to_rot_;
-        Scalar min_disp_var_, min_rot_var_;
+        // noise parameters (stolen from owner SensorOdom3D)
+        Scalar k_disp_to_disp_; // displacement variance growth per meter of linear motion
+        Scalar k_disp_to_rot_;  // orientation  variance growth per meter of linear motion
+        Scalar k_rot_to_rot_;   // orientation  variance growth per radian of rotational motion
+        Scalar min_disp_var_;   // floor displacement variance when no  motion
+        Scalar min_rot_var_;    // floor orientation variance when no motion
+
+        // keyframe voting parameters
+        Scalar max_time_span_;  // maximum time between keyframes
+        Size   max_buff_length_;// maximum buffer size before keyframe
+        Scalar dist_traveled_;  // maximum linear motion between keyframes
+        Scalar angle_turned_;   // maximum rotation between keyframes
+
+        // Eigen::Map helpers
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;
         Eigen::Map<Eigen::Vector3s> p_out_;
         Eigen::Map<const Eigen::Quaternions> q1_, q2_;
@@ -97,28 +127,6 @@ class ProcessorOdom3D : public ProcessorMotion
 inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
 {
     return (Eigen::VectorXs(7) << 0,0,0, 0,0,0,1).finished(); // p, q
-}
-
-inline bool ProcessorOdom3D::voteForKeyFrame()
-{
-//    if (getBuffer().get().size() > 20)
-//    {
-//        std::cout << "PM::vote buffer big enough" << std::endl;
-//        return true;
-//    }
-    if (delta_integrated_.head(3).norm() > 1)
-    {
-        std::cout << "PM::vote position delta big enough" << std::endl;
-        return true;
-    }
-    if (delta_integrated_.tail(4).norm() > 0.7)
-    {
-        std::cout << "PM::vote orientation delta big enough" << std::endl;
-        return true;
-    }
-
-    std::cout << "PM::do not vote" << std::endl;
-    return false;
 }
 
 inline ConstraintBasePtr ProcessorOdom3D::createConstraint(FeatureBasePtr _feature_motion,

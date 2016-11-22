@@ -23,10 +23,33 @@ using Eigen::Vector4s;
 using Eigen::Vector6s;
 using Eigen::Vector7s;
 
+using namespace wolf;
+
+void cleanupMap(const ProblemPtr& wolf_problem_ptr_, const TimeStamp& t, Scalar dt_max,
+                                      Size min_constraints)
+{
+    std::list<LandmarkBasePtr> lmks_to_remove;
+    for (auto lmk : wolf_problem_ptr_->getMapPtr()->getLandmarkList())
+    {
+        TimeStamp t0 = std::static_pointer_cast<LandmarkAHP>(lmk)->getAnchorFrame()->getTimeStamp();
+        if (t - t0 > dt_max)
+        {
+            unsigned int nbr_ctr = lmk->getConstrainedByList().size();
+            if (nbr_ctr <= min_constraints)
+            {
+                lmks_to_remove.push_back(lmk);
+            }
+        }
+    }
+    for (auto lmk : lmks_to_remove)
+    {
+        std::cout << "clean up L" << lmk->id() << std::endl;
+        lmk->remove();
+    }
+}
+
 int main(int argc, char** argv)
 {
-    using namespace wolf;
-
     std::cout << std::endl << "==================== processor image landmark test ======================" << std::endl;
 
     //=====================================================
@@ -37,7 +60,7 @@ int main(int argc, char** argv)
     {
 //        filename = "/home/jtarraso/Videos/House_interior.mp4";
 //        filename = "/home/jtarraso/Vídeos/gray1.mp4";
-        filename = "/home/jtarraso/test_video/output6.mpg";
+        filename = "/home/jtarraso/Escritorio/video_test2/sim_video.mpg";
         capture.open(filename);
     }
     else if (std::string(argv[1]) == "0")
@@ -79,19 +102,18 @@ int main(int argc, char** argv)
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
 
-    // CAMERA SENSOR
+    // ODOM SENSOR AND PROCESSOR
+    SensorBasePtr sen_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
+    ProcessorBasePtr prc_ptr = wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", "odom",            wolf_root + "/src/examples/processor_odom_3D.yaml");
+    SensorOdom3D::Ptr sen_odo_ptr = std::static_pointer_cast<SensorOdom3D>(sen_ptr);
+
+    // CAMERA SENSOR AND PROCESSOR
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
     SensorCamera::Ptr camera_ptr = std::static_pointer_cast<SensorCamera>(sensor_ptr);
     camera_ptr->setImgWidth(img_width);
     camera_ptr->setImgHeight(img_height);
-
-    // IMAGE PROCESSOR
     wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_ORB.yaml");
 
-    // ODOM SENSOR AND PROCESSOR
-    SensorBasePtr sen_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/odom_3D.yaml");
-    ProcessorBasePtr prc_ptr = wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", "odom");
-    SensorOdom3D::Ptr sen_odo_ptr = std::static_pointer_cast<SensorOdom3D>(sen_ptr);
     //=====================================================
 
 
@@ -108,6 +130,15 @@ int main(int argc, char** argv)
 
 
     //=====================================================
+    // running CAPTURES preallocated
+    CaptureImage::Ptr image_ptr;
+    Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
+    CaptureMotion::Ptr cap_odo = std::make_shared<CaptureMotion>(t, sen_odo_ptr, data);
+    //=====================================================
+
+
+
+    //=====================================================
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
@@ -118,14 +149,6 @@ int main(int argc, char** argv)
     google::InitGoogleLogging(argv[0]);
 
     CeresManager ceres_manager(wolf_problem_ptr_, ceres_options);
-    //=====================================================
-
-
-    //=====================================================
-    // running CAPTURES preallocated
-    CaptureImage::Ptr image_ptr;
-    Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
-    CaptureMotion::Ptr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(t), sen_odo_ptr, data);
     //=====================================================
 
 
@@ -145,9 +168,10 @@ int main(int argc, char** argv)
 
     while(!(frame[f % buffer_size].empty()))
     {
+
         t += dt;
 
-        // Image ------------------------------------------------
+        // Image ---------------------------------------------
 
         // Preferred method with factory objects:
         image_ptr = std::make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
@@ -155,13 +179,10 @@ int main(int argc, char** argv)
         /* process */
         camera_ptr->process(image_ptr);
 
-        ceres::Solver::Summary summary = ceres_manager.solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-//        wolf_problem_ptr_->print(2,1,0,0);
 
 
-        // Odometry ---------------------------------------------
+        // Odometry --------------------------------------------
+
         cap_odo->setTimeStamp(t);
 
         // previous state and TS
@@ -186,9 +207,6 @@ int main(int argc, char** argv)
                 break;
             }
 
-        t_prev_prev = prev_prev_key_fr_ptr->getTimeStamp();
-        x_prev_prev = prev_prev_key_fr_ptr->getState();
-
         // compute delta state, and odometry data
         if (!prev_prev_key_fr_ptr)
         {
@@ -197,18 +215,26 @@ int main(int argc, char** argv)
         }
         else
         {
+            t_prev_prev = prev_prev_key_fr_ptr->getTimeStamp();
+            x_prev_prev = prev_prev_key_fr_ptr->getState();
+
             // some maps to avoid local variables
-            Eigen::Map<Eigen::Vector3s>     p1(x_prev_prev.data());
-            Eigen::Map<Eigen::Quaternions>  q1(x_prev_prev.data() + 3);
-            Eigen::Map<Eigen::Vector3s>     p2(x_prev.data());
-            Eigen::Map<Eigen::Quaternions>  q2(x_prev.data() + 3);
+            Eigen::Map<Eigen::Vector3s>     p_prev_prev(x_prev_prev.data());
+            Eigen::Map<Eigen::Quaternions>  q_prev_prev(x_prev_prev.data() + 3);
+            Eigen::Map<Eigen::Vector3s>     p_prev(x_prev.data());
+            Eigen::Map<Eigen::Quaternions>  q_prev(x_prev.data() + 3);
+            Eigen::Map<Eigen::Vector3s>     dp(dx.data());
+            Eigen::Map<Eigen::Quaternions>  dq(dx.data() + 3);
 
             // delta state PQ
-            Eigen::Vector3s dp = q1.conjugate() * (p2 - p1);
-            Eigen::Quaternions dq = q1.conjugate() * q2;
+//            Eigen::Vector3s dp = q_prev_prev.conjugate() * (p_prev - p_prev_prev);
+//            Eigen::Quaternions dq = q_prev_prev.conjugate() * q_prev;
+//
+//            dx.head<3>() = dp;
+//            dx.tail<4>() = dq.coeffs();
 
-            dx.head<3>() = dp;
-            dx.tail<4>() = dq.coeffs();
+            dp = q_prev_prev.conjugate() * (p_prev - p_prev_prev);
+            dq = q_prev_prev.conjugate() * q_prev;
 
             // odometry data
             data.head<3>() = dp;
@@ -228,7 +254,21 @@ int main(int argc, char** argv)
 //        std::cout << "          dt: " << t_prev - t_prev_prev << "; dx: " << dx.transpose() << std::endl;
 
 
-        cv::waitKey(0);
+        // Cleanup map ---------------------------------------
+
+        cleanupMap(wolf_problem_ptr_, t, 2, 5); // dt, min_ctr
+
+
+        // Solve -----------------------------------------------
+
+        ceres::Solver::Summary summary = ceres_manager.solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+
+
+        // Finish loop -----------------------------------------
+
+        cv::waitKey(10);
 
         std::cout << "=================================================================================================" << std::endl;
 

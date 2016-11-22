@@ -28,19 +28,18 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
     public:
 
-        ConstraintAHP(FeatureBasePtr _ftr_ptr,
-                      FrameBasePtr _current_frame_ptr,
-                      LandmarkAHP::Ptr _landmark_ptr,
-                      bool _apply_loss_function = false,
-                      ConstraintStatus _status = CTR_ACTIVE) :
+        ConstraintAHP(FeatureBasePtr    _ftr_ptr,
+                      LandmarkAHP::Ptr  _landmark_ptr,
+                      bool              _apply_loss_function = false,
+                      ConstraintStatus  _status              = CTR_ACTIVE) :
                 ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP,
                                                    _landmark_ptr->getAnchorFrame(),
                                                    nullptr,
                                                    _landmark_ptr,
                                                    _apply_loss_function,
                                                    _status,
-                                                   _current_frame_ptr->getPPtr(),
-                                                   _current_frame_ptr->getOPtr(),
+                                                   _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(),
+                                                   _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(),
                                                    _landmark_ptr->getAnchorFrame()->getPPtr(),
                                                    _landmark_ptr->getAnchorFrame()->getOPtr(),
                                                    _landmark_ptr->getPPtr()),
@@ -178,7 +177,6 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             return JAC_AUTO;
         }
 
-        // Factory method
 
         //////////////////////////////////////////////////////////////////////////////////////////
         // TODO: See if we rename this to 'emplace'. Tasks to evaluate:
@@ -186,12 +184,13 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         //         - Put this 'emplace' in ConstraintBase, or ConstraintSparse
         //         - Keep factory-methods (i.e. like this one)  in ALL derived classes, to be called by the 'emplace' in Base.
         //            - In such case, make a unique API, or use Variadic
-        static ConstraintAHP::Ptr create(FeatureBasePtr _ftr_ptr,
-                                         FrameBasePtr _frm_current_ptr,
-                                         LandmarkAHP::Ptr _lmk_ahp_ptr)
+        static ConstraintAHP::Ptr create(FeatureBasePtr     _ftr_ptr,
+                                         LandmarkAHP::Ptr   _lmk_ahp_ptr,
+                                         bool               _apply_loss_function    = false,
+                                         ConstraintStatus   _status                 = CTR_ACTIVE)
         {
             // construct constraint
-            Ptr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _frm_current_ptr, _lmk_ahp_ptr);
+            Ptr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _lmk_ahp_ptr, _apply_loss_function, _status);
 
             // link it to wolf tree <-- these pointers cannot be set at construction time
             _lmk_ahp_ptr->getAnchorFrame()->addConstrainedBy(ctr_ahp);

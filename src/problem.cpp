@@ -299,10 +299,19 @@ unsigned int Problem::getFrameStructureSize()
 Eigen::VectorXs Problem::zeroState()
 {
     Eigen::VectorXs state = Eigen::VectorXs::Zero(getFrameStructureSize());
-    if (trajectory_ptr_->getFrameStructure() == FRM_PO_3D || trajectory_ptr_->getFrameStructure() == FRM_POV_3D)
-        state(6) = 1;
-    if (trajectory_ptr_->getFrameStructure() == FRM_PQVBB_3D)
-        state(6) = 1;
+
+    // Set the quaternion identity for 3D states. Set only the real part to 1:
+    switch (trajectory_ptr_->getFrameStructure())
+    {
+        case FRM_PO_3D:
+        case FRM_POV_3D:
+        case FRM_PQVBB_3D:
+            state(6) = 1.0;
+            break;
+        default:
+            break;
+    }
+
     return state;
 }
 
@@ -674,7 +683,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                                 for (auto c : f->getConstraintList())
                                 {
                                     cout << "        c" << c->id() << " -->";
-                                    if (c->getCategory() == CTR_ABSOLUTE)
+                                    if (c->getFrameOtherPtr() != nullptr && c->getFeatureOtherPtr() != nullptr && c->getLandmarkOtherPtr() != nullptr)
                                         cout << " A";
                                     if (c->getFrameOtherPtr() != nullptr)
                                         cout << " F" << c->getFrameOtherPtr()->id();
@@ -806,69 +815,68 @@ bool Problem::check(int verbose_level)
                 {
                     if (verbose_level > 0)
                         std::cout << "        c" << c->id() << " @" << C.get();
-                    switch (c->getCategory())
+
+                    auto Fo = c->getFrameOtherPtr();
+                    auto fo = c->getFeatureOtherPtr();
+                    auto Lo = c->getLandmarkOtherPtr();
+
+                    if ( !Fo && !fo && !Lo )    // case ABSOLUTE:
                     {
-                        case CTR_ABSOLUTE:
-                            if (verbose_level > 0)
-                                std::cout << " --> A" << std::endl;
-                            break;
-                        case CTR_FRAME:
+                        if (verbose_level > 0)
+                            std::cout << " --> A" << std::endl;
+                    }
+
+                    if ( Fo )  // case FRAME:
+                    {
+                        if (verbose_level > 0)
+                            std::cout << " --> F" << Fo->id() << " <- ";
+                        bool found = false;
+                        for (auto cby : Fo->getConstrainedByList())
                         {
-                            auto Fo = c->getFrameOtherPtr();
                             if (verbose_level > 0)
-                                std::cout << " --> F" << Fo->id() << " <- ";
-                            bool found = false;
-                            for (auto cby : Fo->getConstrainedByList())
-                            {
-                                if (verbose_level > 0)
-                                    std::cout << " c" << cby->id();
-                                found = found || (c == cby);
-                            }
-                            if (verbose_level > 0)
-                                std::cout << std::endl;
-                            is_consistent = is_consistent && found;
-                            break;
+                                std::cout << " c" << cby->id();
+                            found = found || (c == cby);
                         }
-                        case CTR_FEATURE:
+                        if (verbose_level > 0)
+                            std::cout << std::endl;
+                        is_consistent = is_consistent && found;
+                    }
+
+                    if ( fo )   // case FEATURE:
+                    {
+                        if (verbose_level > 0)
+                            std::cout << " --> f" << fo->id() << " <- ";
+                        bool found = false;
+                        for (auto cby : fo->getConstrainedByList())
                         {
-                            auto fo = c->getFeatureOtherPtr();
                             if (verbose_level > 0)
-                                std::cout << " --> f" << fo->id() << " <- ";
-                            bool found = false;
-                            for (auto cby : fo->getConstrainedByList())
-                            {
-                                if (verbose_level > 0)
-                                    std::cout << " c" << cby->id();
-                                found = found || (c == cby);
-                            }
-                            if (verbose_level > 0)
-                                std::cout << std::endl;
-                            is_consistent = is_consistent && found;
-                            break;
+                                std::cout << " c" << cby->id();
+                            found = found || (c == cby);
                         }
-                        case CTR_LANDMARK:
+                        if (verbose_level > 0)
+                            std::cout << std::endl;
+                        is_consistent = is_consistent && found;
+                    }
+
+                    if ( Lo )      // case LANDMARK:
+                    {
+                        if (verbose_level > 0)
+                            std::cout << " --> L" << Lo->id() << " <- ";
+                        bool found = false;
+                        for (auto cby : Lo->getConstrainedByList())
                         {
-                            auto Lo = c->getLandmarkOtherPtr();
                             if (verbose_level > 0)
-                                std::cout << " --> L" << Lo->id() << " <- ";
-                            bool found = false;
-                            for (auto cby : Lo->getConstrainedByList())
-                            {
-                                if (verbose_level > 0)
-                                    std::cout << " c" << cby->id();
-                                found = found || (c == cby);
-                            }
-                            if (verbose_level > 0)
-                                std::cout << std::endl;
-                            is_consistent = is_consistent && found;
-                            break;
+                                std::cout << " c" << cby->id();
+                            found = found || (c == cby);
                         }
+                        if (verbose_level > 0)
+                            std::cout << std::endl;
+                        is_consistent = is_consistent && found;
                     }
                     if (verbose_level > 0)
                     {
                         std::cout << "          -> P  @ " << c->getProblem().get() << std::endl;
-                        std::cout << "          -> f" << c->getFeaturePtr()->id() << " @ " << c->getFeaturePtr().get()
-                                << std::endl;
+                        std::cout << "          -> f" << c->getFeaturePtr()->id() << " @ " << c->getFeaturePtr().get() << std::endl;
                     }
                     is_consistent = is_consistent && (c->getProblem().get() == P_raw);
                     is_consistent = is_consistent && (c->getFeaturePtr() == f);
@@ -886,14 +894,12 @@ bool Problem::check(int verbose_level)
             std::cout << "  L" << L->id() << " @" << L.get() << std::endl;
         is_consistent = is_consistent && (L->getProblem().get() == P_raw);
         is_consistent = is_consistent && (L->getMapPtr() == M);
-        bool found = false;
         for (auto cby : L->getConstrainedByList())
         {
             if (verbose_level > 0)
                 std::cout << "      <- c" << cby->id() << " -> L" << cby->getLandmarkOtherPtr()->id() << std::endl;
-            found = found || (cby->getLandmarkOtherPtr() && L == cby->getLandmarkOtherPtr());
+            is_consistent = is_consistent && (cby->getLandmarkOtherPtr() && L->id() == cby->getLandmarkOtherPtr()->id());
         }
-        is_consistent = is_consistent && found;
     }
 
     std::cout << "--------------------------- Wolf tree " << (is_consistent ? " OK" : "Not OK !!") << std::endl;

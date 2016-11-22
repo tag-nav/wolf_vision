@@ -40,8 +40,6 @@ class CaptureImage : public CaptureBase
         virtual void setKeypoints(const std::vector<cv::KeyPoint>& _keypoints);
         virtual cv::Mat& getDescriptors();
         virtual std::vector<cv::KeyPoint>& getKeypoints();
-
-
 };
 
 } // namespace wolf

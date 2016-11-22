@@ -287,7 +287,7 @@ inline typename Factory<TypeBase, TypeInput...>::TypeBasePtr Factory<TypeBase, T
 
     if (creator_callback_it == callbacks_.end())
         // not found
-        throw std::runtime_error("Unknown type. Possibly you tried to use an unregistered creator.");
+        throw std::runtime_error(getClass() + " : Unknown type \"" + _type + "\". Possibly you tried to use an unregistered creator.");
 
     // Invoke the creation function
     return (creator_callback_it->second)(std::forward<TypeInput>(_input)...);

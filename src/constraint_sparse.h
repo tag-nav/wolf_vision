@@ -174,7 +174,9 @@ ConstraintSparse<MEASUREMENT_SIZE,
                  BLOCK_6_SIZE,
                  BLOCK_7_SIZE,
                  BLOCK_8_SIZE,
-                 BLOCK_9_SIZE>::ConstraintSparse(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
+                 BLOCK_9_SIZE>::ConstraintSparse(ConstraintType     _tp,
+                                                 bool               _apply_loss_function,
+                                                 ConstraintStatus   _status,
                                                  StateBlockPtr _state0Ptr,
                                                  StateBlockPtr _state1Ptr,
                                                  StateBlockPtr _state2Ptr,
@@ -213,7 +215,12 @@ ConstraintSparse<MEASUREMENT_SIZE,
                  BLOCK_6_SIZE,
                  BLOCK_7_SIZE,
                  BLOCK_8_SIZE,
-                 BLOCK_9_SIZE>::ConstraintSparse(ConstraintType _tp, FrameBasePtr _frame_other_ptr, FeatureBasePtr _feature_other_ptr, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status,
+                 BLOCK_9_SIZE>::ConstraintSparse(ConstraintType     _tp,
+                                                 FrameBasePtr       _frame_other_ptr,
+                                                 FeatureBasePtr     _feature_other_ptr,
+                                                 LandmarkBasePtr    _landmark_other_ptr,
+                                                 bool               _apply_loss_function,
+                                                 ConstraintStatus   _status,
                                                  StateBlockPtr _state0Ptr,
                                                  StateBlockPtr _state1Ptr,
                                                  StateBlockPtr _state2Ptr,
@@ -228,125 +235,25 @@ ConstraintSparse<MEASUREMENT_SIZE,
             state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
+            //            std::cout << "before resizing c" << this->id();
+            //            Size id;
+            //            id = getFrameOtherPtr()    ? getFrameOtherPtr()   ->id() : 0;
+            //            std::cout << " with F" << id;
+            //            id = getFeatureOtherPtr()  ? getFeatureOtherPtr() ->id() : 0;
+            //            std::cout << " - f" << id;
+            //            id = getLandmarkOtherPtr() ? getLandmarkOtherPtr()->id() : 0;
+            //            std::cout << " - L" << id;
+            //            std::cout << std::endl;
+            //            std::cout << "sb0[" << BLOCK_0_SIZE << "] @ " << _state0Ptr.get() << std::endl;
+            //            std::cout << "sb1[" << BLOCK_1_SIZE << "] @ " << _state1Ptr.get() << std::endl;
+            //            std::cout << "sb2[" << BLOCK_2_SIZE << "] @ " << _state2Ptr.get() << std::endl;
+            //            std::cout << "sb3[" << BLOCK_3_SIZE << "] @ " << _state3Ptr.get() << std::endl;
+            //            std::cout << "sb4[" << BLOCK_4_SIZE << "] @ " << _state4Ptr.get() << std::endl;
+            //            std::cout << "sb5[" << BLOCK_5_SIZE << "] @ " << _state5Ptr.get() << std::endl;
+
             resizeVectors();
         }
 
-//template <const unsigned int MEASUREMENT_SIZE,
-//                unsigned int BLOCK_0_SIZE,
-//                unsigned int BLOCK_1_SIZE,
-//                unsigned int BLOCK_2_SIZE,
-//                unsigned int BLOCK_3_SIZE,
-//                unsigned int BLOCK_4_SIZE,
-//                unsigned int BLOCK_5_SIZE,
-//                unsigned int BLOCK_6_SIZE,
-//                unsigned int BLOCK_7_SIZE,
-//                unsigned int BLOCK_8_SIZE,
-//                unsigned int BLOCK_9_SIZE>
-//ConstraintSparse<MEASUREMENT_SIZE,
-//                 BLOCK_0_SIZE,
-//                 BLOCK_1_SIZE,
-//                 BLOCK_2_SIZE,
-//                 BLOCK_3_SIZE,
-//                 BLOCK_4_SIZE,
-//                 BLOCK_5_SIZE,
-//                 BLOCK_6_SIZE,
-//                 BLOCK_7_SIZE,
-//                 BLOCK_8_SIZE,
-//                 BLOCK_9_SIZE>::ConstraintSparse(ConstraintType _tp, FrameBasePtr _frame_other_ptr, bool _apply_loss_function, ConstraintStatus _status,
-//                                                 StateBlockPtr _state0Ptr,
-//                                                 StateBlockPtr _state1Ptr,
-//                                                 StateBlockPtr _state2Ptr,
-//                                                 StateBlockPtr _state3Ptr,
-//                                                 StateBlockPtr _state4Ptr,
-//                                                 StateBlockPtr _state5Ptr,
-//                                                 StateBlockPtr _state6Ptr,
-//                                                 StateBlockPtr _state7Ptr,
-//                                                 StateBlockPtr _state8Ptr,
-//                                                 StateBlockPtr _state9Ptr ) :
-//            ConstraintBase(_tp, _frame_other_ptr, _apply_loss_function, _status),
-//            state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
-//            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
-//        {
-//            resizeVectors();
-//        }
-//
-//template <const unsigned int MEASUREMENT_SIZE,
-//                unsigned int BLOCK_0_SIZE,
-//                unsigned int BLOCK_1_SIZE,
-//                unsigned int BLOCK_2_SIZE,
-//                unsigned int BLOCK_3_SIZE,
-//                unsigned int BLOCK_4_SIZE,
-//                unsigned int BLOCK_5_SIZE,
-//                unsigned int BLOCK_6_SIZE,
-//                unsigned int BLOCK_7_SIZE,
-//                unsigned int BLOCK_8_SIZE,
-//                unsigned int BLOCK_9_SIZE>
-//ConstraintSparse<MEASUREMENT_SIZE,
-//                 BLOCK_0_SIZE,
-//                 BLOCK_1_SIZE,
-//                 BLOCK_2_SIZE,
-//                 BLOCK_3_SIZE,
-//                 BLOCK_4_SIZE,
-//                 BLOCK_5_SIZE,
-//                 BLOCK_6_SIZE,
-//                 BLOCK_7_SIZE,
-//                 BLOCK_8_SIZE,
-//                 BLOCK_9_SIZE>::ConstraintSparse(ConstraintType _tp, FeatureBasePtr _feature_other_ptr, bool _apply_loss_function, ConstraintStatus _status,
-//                                                 StateBlockPtr _state0Ptr,
-//                                                 StateBlockPtr _state1Ptr,
-//                                                 StateBlockPtr _state2Ptr,
-//                                                 StateBlockPtr _state3Ptr,
-//                                                 StateBlockPtr _state4Ptr,
-//                                                 StateBlockPtr _state5Ptr,
-//                                                 StateBlockPtr _state6Ptr,
-//                                                 StateBlockPtr _state7Ptr,
-//                                                 StateBlockPtr _state8Ptr,
-//                                                 StateBlockPtr _state9Ptr ) :
-//            ConstraintBase( _tp, _feature_other_ptr, _apply_loss_function, _status),
-//            state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
-//            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
-//        {
-//            resizeVectors();
-//        }
-//
-//template <const unsigned int MEASUREMENT_SIZE,
-//                unsigned int BLOCK_0_SIZE,
-//                unsigned int BLOCK_1_SIZE,
-//                unsigned int BLOCK_2_SIZE,
-//                unsigned int BLOCK_3_SIZE,
-//                unsigned int BLOCK_4_SIZE,
-//                unsigned int BLOCK_5_SIZE,
-//                unsigned int BLOCK_6_SIZE,
-//                unsigned int BLOCK_7_SIZE,
-//                unsigned int BLOCK_8_SIZE,
-//                unsigned int BLOCK_9_SIZE>
-//ConstraintSparse<MEASUREMENT_SIZE,
-//                 BLOCK_0_SIZE,
-//                 BLOCK_1_SIZE,
-//                 BLOCK_2_SIZE,
-//                 BLOCK_3_SIZE,
-//                 BLOCK_4_SIZE,
-//                 BLOCK_5_SIZE,
-//                 BLOCK_6_SIZE,
-//                 BLOCK_7_SIZE,
-//                 BLOCK_8_SIZE,
-//                 BLOCK_9_SIZE>::ConstraintSparse(ConstraintType _tp, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status,
-//                                                 StateBlockPtr _state0Ptr,
-//                                                 StateBlockPtr _state1Ptr,
-//                                                 StateBlockPtr _state2Ptr,
-//                                                 StateBlockPtr _state3Ptr,
-//                                                 StateBlockPtr _state4Ptr,
-//                                                 StateBlockPtr _state5Ptr,
-//                                                 StateBlockPtr _state6Ptr,
-//                                                 StateBlockPtr _state7Ptr,
-//                                                 StateBlockPtr _state8Ptr,
-//                                                 StateBlockPtr _state9Ptr ) :
-//            ConstraintBase( _tp, _landmark_other_ptr, _apply_loss_function, _status),
-//            state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
-//            state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
-//        {
-//            resizeVectors();
-//        }
 
 template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_0_SIZE,
@@ -574,7 +481,7 @@ void ConstraintSparse<MEASUREMENT_SIZE,
         	for (unsigned int jj = 0; jj < ii; jj++)
         		assert(state_ptr_vector_.at(ii) != state_ptr_vector_.at(jj) && "ConstraintSparse: Repeated state block.");
         	assert(state_ptr_vector_.at(ii) != nullptr && "ConstraintSparse: Null state pointer in a non-zero sized block!");
-        	assert(state_ptr_vector_[ii]->getSize() == state_block_sizes_vector_[ii] && "incoherent state block size and template block size");
+        	assert(state_ptr_vector_[ii]->getSize() == state_block_sizes_vector_[ii] && "ConstraintSparse: Incoherent state block size and template block size");
         }
 
         else

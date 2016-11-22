@@ -32,7 +32,6 @@ void LandmarkBase::remove()
     if (!is_removing_)
     {
         is_removing_ = true;
-//        std::cout << "Removing   L" << id() << std::endl;
         LandmarkBasePtr this_L = shared_from_this(); // keep this alive while removing it
 
         // remove from upstream
@@ -66,18 +65,6 @@ void LandmarkBase::setStatus(LandmarkStatus _st)
                 if (getProblem() != nullptr)
                     getProblem()->updateStateBlockPtr(sb);
             }
-//        if (getPPtr()!=nullptr)
-//        {
-//            getPPtr()->fix();
-//            if (getProblem() != nullptr)
-//                getProblem()->updateStateBlockPtr(getPPtr());
-//        }
-//        if (getOPtr()!=nullptr)
-//        {
-//            getOPtr()->fix();
-//            if (getProblem() != nullptr)
-//                getProblem()->updateStateBlockPtr(getOPtr());
-//        }
     }
     else if(status_ == LANDMARK_ESTIMATED)
     {
@@ -88,18 +75,6 @@ void LandmarkBase::setStatus(LandmarkStatus _st)
                 if (getProblem() != nullptr)
                     getProblem()->updateStateBlockPtr(sb);
             }
-//        if (getPPtr()!=nullptr)
-//        {
-//            getPPtr()->unfix();
-//            if (getProblem() != nullptr)
-//                getProblem()->updateStateBlockPtr(getPPtr());
-//        }
-//        if (getOPtr()!=nullptr)
-//        {
-//            getOPtr()->unfix();
-//            if (getProblem() != nullptr)
-//                getProblem()->updateStateBlockPtr(getOPtr());
-//        }
     }
 }
 

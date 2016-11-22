@@ -2,23 +2,20 @@
 namespace wolf
 {
 
-ProcessorOdom3D::ProcessorOdom3D(Scalar _k_disp_to_disp,
-                                 Scalar _k_disp_to_rot,
-                                 Scalar _k_rot_to_rot,
-                                 Scalar _min_disp_var,
-                                 Scalar _min_rot_var) :
-        ProcessorMotion("ODOM 3D", 7, 7, 6, 6),
-        k_disp_to_disp_(_k_disp_to_disp),
-        k_disp_to_rot_(_k_disp_to_rot),
-        k_rot_to_rot_(_k_rot_to_rot),
-        min_disp_var_(_min_disp_var),
-        min_rot_var_(_min_rot_var),
-        p1_(nullptr), p2_(nullptr), p_out_(nullptr),
-        q1_(nullptr), q2_(nullptr), q_out_(nullptr)
-{
-    jacobian_delta_preint_.setIdentity(delta_cov_size_, delta_cov_size_);
-    jacobian_delta_.setIdentity(delta_cov_size_, delta_cov_size_);
-}
+ProcessorOdom3D::ProcessorOdom3D(ProcessorOdom3DParams::Ptr _params, SensorOdom3D::Ptr _sensor_ptr) :
+                ProcessorMotion("ODOM 3D", 7, 7, 6, 6),
+                max_time_span_  (_params ? _params    ->max_time_span   : 1.0  ),
+                max_buff_length_(_params ? _params    ->max_buff_length : 10   ),
+                dist_traveled_  (_params ? _params    ->dist_traveled   : 1.0  ),
+                angle_turned_   (_params ? _params    ->angle_turned    : 0.5  ),
+                p1_(nullptr), p2_(nullptr), p_out_(nullptr),
+                q1_(nullptr), q2_(nullptr), q_out_(nullptr)
+        {
+            setup(_sensor_ptr);
+            jacobian_delta_preint_.setIdentity(delta_cov_size_, delta_cov_size_);
+            jacobian_delta_.setIdentity(delta_cov_size_, delta_cov_size_);
+        }
+
 
 ProcessorOdom3D::~ProcessorOdom3D()
 {
@@ -26,18 +23,31 @@ ProcessorOdom3D::~ProcessorOdom3D()
 
 void ProcessorOdom3D::setup(SensorOdom3D::Ptr sen_ptr)
 {
-    k_disp_to_disp_ = sen_ptr->getDispVarToDispNoiseFactor();
-    k_disp_to_rot_ = sen_ptr->getDispVarToRotNoiseFactor();
-    k_rot_to_rot_ = sen_ptr->getRotVarToRotNoiseFactor();
-    min_disp_var_ = sen_ptr->getMinDispVar();
-    min_rot_var_ = sen_ptr->getMinRotVar();
+    if (sen_ptr)
+    {
+        // we steal the parameters from the provided odom3D sensor.
+        k_disp_to_disp_ = sen_ptr->getDispVarToDispNoiseFactor();
+        k_disp_to_rot_ = sen_ptr->getDispVarToRotNoiseFactor();
+        k_rot_to_rot_ = sen_ptr->getRotVarToRotNoiseFactor();
+        min_disp_var_ = sen_ptr->getMinDispVar();
+        min_rot_var_ = sen_ptr->getMinRotVar();
+    }
+    else
+    {
+        // we put default params.
+        k_disp_to_disp_ =   0;
+        k_disp_to_rot_  =   0;
+        k_rot_to_rot_   =   0;
+        min_disp_var_   = 0.1; // around 30cm error
+        min_rot_var_    = 0.1; // around 9 degrees error
+    }
 }
 
 void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
 {
     assert((_data.size() == 6 || _data.size() == 7) && "Wrong data size. Must be 6 or 7 for 3D.");
     Scalar disp, rot; // displacement and rotation of this motion step
-    if (_data.size() == 6)
+    if (_data.size() == (long int)6)
     {
         // rotation in vector form
         delta_.head<3>() = _data.head<3>();
@@ -236,10 +246,54 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion_s
 
 ProcessorBasePtr ProcessorOdom3D::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
-    std::shared_ptr<ProcessorOdom3D> prc_ptr = std::make_shared<ProcessorOdom3D>();
-    prc_ptr->setup(std::static_pointer_cast<SensorOdom3D>(_sen_ptr));
-    prc_ptr->setName(_unique_name);
-    return prc_ptr;
+    // cast inputs to the correct type
+    std::shared_ptr<ProcessorOdom3DParams> prc_odo_params = std::static_pointer_cast<ProcessorOdom3DParams>(_params);
+
+    SensorOdom3D::Ptr sen_odo =std::static_pointer_cast<SensorOdom3D>(_sen_ptr);
+
+    // construct processor
+    std::shared_ptr<ProcessorOdom3D> prc_odo = std::make_shared<ProcessorOdom3D>(prc_odo_params, sen_odo);
+
+    // setup processor
+    prc_odo->setName(_unique_name);
+
+    return prc_odo;
+}
+
+bool ProcessorOdom3D::voteForKeyFrame()
+{
+    WOLF_DEBUG( "Time span   : " , getBuffer().get().back().ts_ - getBuffer().get().front().ts_ );
+    WOLF_DEBUG( "BufferLength: " , getBuffer().get().size() );
+    WOLF_DEBUG( "DistTraveled: " , delta_integrated_.head(3).norm() );
+    WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
+    // time span
+    if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)
+    {
+        WOLF_DEBUG( "PM: vote: time span" );
+        return true;
+    }
+    // buffer length
+    if (getBuffer().get().size() > max_buff_length_)
+    {
+        WOLF_DEBUG( "PM: vote: buffer size" );
+        return true;
+    }
+    // distance traveled
+    Scalar dist = delta_integrated_.head(3).norm();
+    if (dist > dist_traveled_)
+    {
+        WOLF_DEBUG( "PM: vote: distance traveled" );
+        return true;
+    }
+    // angle turned
+    Scalar angle = 2.0 * acos(delta_integrated_(6));
+    if (angle > angle_turned_)
+    {
+        WOLF_DEBUG( "PM: vote: angle turned" );
+        return true;
+    }
+    WOLF_DEBUG( "PM: do not vote" );
+    return false;
 }
 
 }
