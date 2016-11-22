@@ -124,10 +124,10 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
 
     /* MATHS : jacobian dd_dn, of delta wrt noise
      * substituting a and w respectively by (a+a_n) and (w+w_n) (measurement noise is additive)
-     *                an           wn
-     *         dp [0.5*I*dt*dt     0      ]
-     * dd_dn = do [   0           Jr*dt   ]
-     *         dv [   I*dt         0      ] // see Sola-16
+     *                 an           wn
+     *         dp [ 0.5*I*dt*dt     0     ]
+     * dd_dn = do [    0           Jr*dt  ]
+     *         dv [    I*dt         0     ] // see Sola-16
      */
 
     // we go the sparse way:
@@ -137,17 +137,17 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     Eigen::Matrix3s ddo_dwn = (Eigen::Matrix3s::Identity() - 0.5 * skew(w * _dt) ) * _dt; // voila, the comment above is this
 
     /* Covariance is sparse:
-     *       [ A  0  B
-     * COV =   0  C  0
-     *         B' 0  D ]
+     *       [ Cpp   0   Cpv
+     * COV =    0   Coo   0
+     *         Cpv'  0   Cvv ]
      *
-     * where A, B, C and D are computed below
+     * where Cpp, Cpv, Coo and Cvv are computed below
      */
-    delta_cov_.block<3,3>(0,0).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddp_dan.transpose(); // A = cov(dp,dp) = ddp_dan * a_cov * ddp_dan'
-    delta_cov_.block<3,3>(0,6).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // B = cov(dp,dv) = ddp_dan * a_cov * ddv_dan'
-    delta_cov_.block<3,3>(3,3).noalias() = ddo_dwn*_data_cov.block<3,3>(3,3)*ddo_dwn.transpose(); // C = cov(do,do) = ddo_dwn * w_cov * ddo_dwn'
-    delta_cov_.block<3,3>(6,0)           = delta_cov_.block<3,3>(0,6).transpose();                // B'= cov(dv,dp) =
-    delta_cov_.block<3,3>(6,6).noalias() = ddv_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // D = cov(dv,dv) = ddv_dan * a_cov * ddv_dan'
+    delta_cov_.block<3,3>(0,0).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddp_dan.transpose(); // Cpp = ddp_dan * Caa * ddp_dan'
+    delta_cov_.block<3,3>(0,6).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cpv = ddp_dan * Caa * ddv_dan'
+    delta_cov_.block<3,3>(3,3).noalias() = ddo_dwn*_data_cov.block<3,3>(3,3)*ddo_dwn.transpose(); // Coo = ddo_dwn * Cww * ddo_dwn'
+    delta_cov_.block<3,3>(6,0)           = delta_cov_.block<3,3>(0,6).transpose();                // Cvp = Cpv'
+    delta_cov_.block<3,3>(6,6).noalias() = ddv_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cvv = ddv_dan * Caa * ddv_dan'
 
 }
 
@@ -351,7 +351,6 @@ inline void ProcessorIMU::resetDerived()
 
 inline ConstraintBasePtr ProcessorIMU::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
-    // TODO: return new ConstraintIMU(_feature_motion, _frame_origin);
     auto ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
     auto frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
     auto ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu);
