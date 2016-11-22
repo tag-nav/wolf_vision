@@ -112,7 +112,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 {
 
     unsigned int roi_width = params_.matcher.roi_width;
-    unsigned int roi_heigth = params_.matcher.roi_height;
+    unsigned int roi_height = params_.matcher.roi_height;
     unsigned int roi_x;
     unsigned int roi_y;
     std::vector<cv::KeyPoint> candidate_keypoints;
@@ -121,29 +121,28 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
     for (auto landmark_in_ptr : _landmark_list_in)
     {
-//        std::cout << "Landmark number [" << lmk_nbr << "] in " << std::endl;
 
-        /* project */
+        // project landmark into incoming capture
         std::shared_ptr<LandmarkAHP> landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_in_ptr);
         Eigen::Vector4s point3D_hmg;
-        Eigen::Vector3s point2D_hmg;
-        Eigen::Vector2s point2D;
+        Eigen::Vector3s pixel_hmg;
+        Eigen::Vector2s point_projected, point_distorted, pixel;
 
         LandmarkInCurrentCamera(incoming_ptr_, landmark_ptr, point3D_hmg);
 
-        point2D_hmg = point3D_hmg.head(3);
-        point2D = point2D_hmg.head(2)/point2D_hmg(2);
-        point2D = pinhole::distortPoint((std::static_pointer_cast<SensorCamera>(this->getSensorPtr()))->getDistortionVector(),point2D);
-        point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
+        pixel_hmg = point3D_hmg.head(3);
+        point_projected = pixel_hmg.head(2)/pixel_hmg(2);
+        point_distorted = pinhole::distortPoint((std::static_pointer_cast<SensorCamera>(this->getSensorPtr()))->getDistortionVector(),point_projected);
+        pixel = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point_distorted);
 
 
-        if(pinhole::isInImage(point2D,image_.width_,image_.height_))
+        if(pinhole::isInImage(pixel,image_.width_,image_.height_))
         {
-            roi_x = (point2D[0]) - (roi_heigth / 2);
-            roi_y = (point2D[1]) - (roi_width / 2);
-            cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
+            roi_x = (pixel[0]) - (roi_width  / 2);
+            roi_y = (pixel[1]) - (roi_height / 2);
+            cv::Rect roi(roi_x, roi_y, roi_width, roi_height);
 
-            active_search_grid_.hitCell(point2D);
+            active_search_grid_.hitCell(pixel);
 
             cv::Mat target_descriptor = landmark_ptr->getCvDescriptor();
 
@@ -163,7 +162,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                     incoming_point_ptr->setScore(normalized_score);
                     _feature_list_out.push_back(incoming_point_ptr);
 
-                    incoming_point_ptr->setExpectation(point2D);
+                    incoming_point_ptr->setExpectation(pixel);
 
                     _feature_landmark_correspondences[_feature_list_out.back()] = std::make_shared<LandmarkMatch>(landmark_in_ptr, normalized_score);
 
