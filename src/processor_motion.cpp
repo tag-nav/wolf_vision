@@ -240,7 +240,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
         feature_ptr->setMeasurementCovariance(
                 capture_ptr->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
                         capture_ptr->getBuffer().get().back().delta_integr_cov_ :
-                        Eigen::MatrixXs::Identity(delta_size_, delta_size_) * 1e-8);
+                        Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-8);
 
         // modify constraint
         // Instead of modifying, we remove one ctr, and create a new one.
