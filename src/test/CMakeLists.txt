@@ -65,6 +65,10 @@ target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
 wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
 target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
 
+# ProcessorOdom3D class test
+wolf_add_gtest(gtest_processor_imu gtest_processor_imu.cpp)
+target_link_libraries(gtest_processor_imu ${PROJECT_NAME})
+
 # TimeStamp class test
 wolf_add_gtest(gtest_time_stamp gtest_time_stamp.cpp)
 target_link_libraries(gtest_time_stamp ${PROJECT_NAME})
