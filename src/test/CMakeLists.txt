@@ -73,6 +73,10 @@ target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
 wolf_add_gtest(gtest_processor_imu gtest_processor_imu.cpp)
 target_link_libraries(gtest_processor_imu ${PROJECT_NAME})
 
+# Rotation test
+wolf_add_gtest(gtest_rotation gtest_rotation.cpp)
+target_link_libraries(gtest_rotation ${PROJECT_NAME})
+
 # TimeStamp class test
 wolf_add_gtest(gtest_time_stamp gtest_time_stamp.cpp)
 target_link_libraries(gtest_time_stamp ${PROJECT_NAME})
@@ -80,8 +84,4 @@ target_link_libraries(gtest_time_stamp ${PROJECT_NAME})
 # TrajectoryBase class test
 wolf_add_gtest(gtest_trajectory gtest_trajectory.cpp)
 target_link_libraries(gtest_trajectory ${PROJECT_NAME})
-
-# Rotation test
-wolf_add_gtest(gtest_rotation gtest_rotation.cpp)
-target_link_libraries(gtest_rotation ${PROJECT_NAME})
 
