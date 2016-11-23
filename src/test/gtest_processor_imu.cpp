@@ -47,7 +47,7 @@ shared_ptr<CaptureIMU> cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data
 
 
 
-TEST(ProcessorIMU, dx)
+TEST(ProcessorIMU, acc_x)
 {
     extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     t.set(0); // clock in 0,1 ms ticks
@@ -55,17 +55,36 @@ TEST(ProcessorIMU, dx)
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
-    data *= 0; data(0) = 2; data(2) = 9.8; // only dx, but measure gravity!
-
+    data << 2, 0, 9.8, 0, 0, 0; // only acc_x, but measure gravity!
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.1);
     sensor_ptr->process(cap_imu_ptr);
 
+    // Expected state after one integration
     VectorXs x(16);
-    x << 0.01,0,0, 0,0,0,1, 0.2,0,0, 0,0,0, 0,0,0; // advanced at a=2m/s2 during 0.1s ==> dx = 0.5*2*0.1^2 = 0.01; dv = 2*0.1 = 0.2
+    x << 0.01,0,0, 0,0,0,1, 0.2,0,0, 0,0,0, 0,0,0; // advanced at a=2m/s2 during 0.1s ==> dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2
 
-    std::cout << problem->getCurrentState().transpose() << std::endl;
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, EPS_SMALL));
+}
+
+TEST(ProcessorIMU, acc_z)
+{
+    extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
+    t.set(0); // clock in 0,1 ms ticks
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+
+    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+
+    data << 0, 0, 11.8, 0, 0, 0; // only acc_z, but measure gravity!
+
+    cap_imu_ptr->setData(data);
+    cap_imu_ptr->setTimeStamp(0.1);
+    sensor_ptr->process(cap_imu_ptr);
+
+    // Expected state after one integration
+    VectorXs x(16);
+    x << 0,0,0.01, 0,0,0,1, 0,0,0.2, 0,0,0, 0,0,0; // advanced at a=2m/s2 during 0.1s ==> dz = 0.5*2*0.1^2 = 0.01; dvz = 2*0.1 = 0.2
 
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, EPS_SMALL));
 }
