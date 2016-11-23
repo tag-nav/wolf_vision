@@ -1,4 +1,5 @@
 #include "processor_base.h"
+#include "processor_motion.h"
 #include "capture_base.h"
 #include "frame_base.h"
 
@@ -52,8 +53,15 @@ void ProcessorBase::remove()
     if (!is_removing_)
     {
         is_removing_ = true;
-//        std::cout << "Removing     p" << id() << std::endl;
         ProcessorBasePtr this_p = shared_from_this();
+
+        // clear Problem::processor_motion_ptr_
+        if (isMotion())
+        {
+            ProblemPtr P = getProblem();
+            if(P && P->getProcessorMotionPtr()->id() == this->id())
+                P->clearProcessorMotion();
+        }
 
         // remove from upstream
         SensorBasePtr sen = sensor_ptr_.lock();
