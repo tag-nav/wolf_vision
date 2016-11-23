@@ -269,21 +269,21 @@ void ProcessorMotion::integrate()
     // get data and convert it to delta, and obtain also the delta covariance
     data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
 
-    // then integrate the current delta to pre-integrated measurements, and get Jacobians
-    deltaPlusDelta(delta_integrated_, delta_, dt_, delta_integrated_, jacobian_delta_preint_, jacobian_delta_);
+    // integrate the current delta to pre-integrated measurements, and get Jacobians
+    deltaPlusDelta(getBuffer().get().back().delta_integr_, delta_, dt_, delta_integrated_, jacobian_delta_preint_, jacobian_delta_);
 
-    // and covariance
+    // integrate covariance covariance
     delta_integrated_cov_ = jacobian_delta_preint_ * getBuffer().get().back().delta_integr_cov_
             * jacobian_delta_preint_.transpose() + jacobian_delta_ * delta_cov_ * jacobian_delta_.transpose();
 
-    // then push it into buffer
+    // push all into buffer
     getBuffer().get().push_back(Motion( {incoming_ptr_->getTimeStamp(), delta_, delta_integrated_, delta_cov_,
                                          delta_integrated_cov_}));
 
     // Update state and time stamps
-    last_ptr_->getFramePtr()->setState(getCurrentState());
     last_ptr_->setTimeStamp(incoming_ptr_->getTimeStamp());
     last_ptr_->getFramePtr()->setTimeStamp(last_ptr_->getTimeStamp());
+    last_ptr_->getFramePtr()->setState(getCurrentState());
 }
 
 void ProcessorMotion::reintegrate(CaptureMotion::Ptr _capture_ptr)
