@@ -166,10 +166,14 @@ ProcessorMotion::Ptr Problem::setProcessorMotion(const std::string& _processor_n
     return nullptr;
 }
 
-
 void Problem::setProcessorMotion(ProcessorMotion::Ptr _processor_motion_ptr)
 {
     processor_motion_ptr_ = _processor_motion_ptr;
+}
+
+void Problem::clearProcessorMotion()
+{
+    processor_motion_ptr_.reset();
 }
 
 FrameBasePtr Problem::emplaceFrame(FrameType _frame_type, const TimeStamp& _time_stamp)

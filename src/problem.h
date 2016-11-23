@@ -135,7 +135,8 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         void setProcessorMotion(std::shared_ptr<ProcessorMotion> _processor_motion_ptr);
         std::shared_ptr<ProcessorMotion> setProcessorMotion(const std::string& _unique_processor_name);
-        std::shared_ptr<ProcessorMotion> getProcessorMotionPtr();
+        void clearProcessorMotion();
+        ProcessorMotionPtr& getProcessorMotionPtr();
 
 
         // Trajectory branch ----------------------------------
@@ -267,17 +268,17 @@ class Problem : public std::enable_shared_from_this<Problem>
 
 };
 
+inline wolf::ProcessorMotionPtr& Problem::getProcessorMotionPtr()
+{
+    return processor_motion_ptr_;
+}
+
 } // namespace wolf
 
 // IMPLEMENTATION
 
 namespace wolf
 {
-
-inline ProcessorMotionPtr Problem::getProcessorMotionPtr()
-{
-    return processor_motion_ptr_;
-}
 
 inline std::list<StateBlockNotification>& Problem::getStateBlockNotificationList()
 {
