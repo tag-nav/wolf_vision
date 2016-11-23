@@ -61,11 +61,15 @@ target_link_libraries(gtest_motion_2d ${PROJECT_NAME})
 wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
 target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
 
+# Problem class test
+wolf_add_gtest(gtest_problem gtest_problem.cpp)
+target_link_libraries(gtest_problem ${PROJECT_NAME})
+
 # ProcessorOdom3D class test
 wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
 target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
 
-# ProcessorOdom3D class test
+# ProcessorIMU class test
 wolf_add_gtest(gtest_processor_imu gtest_processor_imu.cpp)
 target_link_libraries(gtest_processor_imu ${PROJECT_NAME})
 

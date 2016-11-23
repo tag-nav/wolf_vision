@@ -159,6 +159,15 @@ class Problem : public std::enable_shared_from_this<Problem>
         FrameBasePtr emplaceFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
+        /** \brief Create and link frame
+         * \param _frame_structure String indicating the frame structure.
+         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _frame_state State vector; must match the size and format of the chosen frame structure
+         * \param _time_stamp Time stamp of the frame
+         */
+        FrameBasePtr emplaceFrame(const std::string& _frame_structure, FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
+                               const TimeStamp& _time_stamp);
+
         Eigen::VectorXs getCurrentState();
         Eigen::VectorXs getCurrentState(TimeStamp& _ts);
         void getCurrentState(Eigen::VectorXs& state);

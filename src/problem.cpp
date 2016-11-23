@@ -215,6 +215,15 @@ FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, const Eigen::Vecto
     }
 }
 
+FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, FrameType _frame_key_type,
+                                   const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
+{
+    FrameBasePtr frm = FrameFactory::get().create(_frame_structure, _frame_key_type, _time_stamp, _frame_state);
+    trajectory_ptr_->addFrame(frm);
+    return frm;
+}
+
+
 Eigen::VectorXs Problem::getCurrentState()
 {
     Eigen::VectorXs state(getFrameStructureSize());
