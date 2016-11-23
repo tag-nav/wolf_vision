@@ -49,7 +49,6 @@ shared_ptr<CaptureIMU> cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data
 
 TEST(ProcessorIMU, acc_x)
 {
-    extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
 
@@ -70,13 +69,12 @@ TEST(ProcessorIMU, acc_x)
 
 TEST(ProcessorIMU, acc_z)
 {
-    extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
-    data << 0, 0, 11.8, 0, 0, 0; // only acc_z, but measure gravity!
+    data << 0, 0, 9.8 + 2.0, 0, 0, 0; // only acc_z, but measure gravity!
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.1);
