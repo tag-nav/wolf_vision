@@ -294,7 +294,7 @@ FrameBasePtr FrameBase::create_POV_3D(const FrameType & _tp,
 #include "factory.h"
 namespace wolf
 {
-//namespace{ const bool Frame_PO_2D_Registered  = FrameFactory::get().registerCreator("PO 2D",  FrameBase::create_PO_2D ); }
-//namespace{ const bool Frame_PO_3D_Registered  = FrameFactory::get().registerCreator("PO 3D",  FrameBase::create_PO_3D ); }
-//namespace{ const bool Frame_POV_3D_Registered = FrameFactory::get().registerCreator("POV 3D", FrameBase::create_POV_3D); }
+namespace{ const bool Frame_PO_2D_Registered  = FrameFactory::get().registerCreator("PO 2D",  FrameBase::create_PO_2D ); }
+namespace{ const bool Frame_PO_3D_Registered  = FrameFactory::get().registerCreator("PO 3D",  FrameBase::create_PO_3D ); }
+namespace{ const bool Frame_POV_3D_Registered = FrameFactory::get().registerCreator("POV 3D", FrameBase::create_POV_3D); }
 } // namespace wolf
