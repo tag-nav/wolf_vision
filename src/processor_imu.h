@@ -96,7 +96,9 @@ class ProcessorIMU : public ProcessorMotion{
 
 namespace wolf{
 
-inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
+inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
+                                     const Eigen::MatrixXs& _data_cov,
+                                     const Scalar _dt)
 {
     assert(_data.size() == data_size_ && "Wrong data size!");
 
@@ -124,10 +126,10 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
 
     /* MATHS : jacobian dd_dn, of delta wrt noise
      * substituting a and w respectively by (a+a_n) and (w+w_n) (measurement noise is additive)
-     *                an           wn
-     *         dp [0.5*I*dt*dt     0      ]
-     * dd_dn = do [   0           Jr*dt   ]
-     *         dv [   I*dt         0      ] // see Sola-16
+     *                 an           wn
+     *         dp [ 0.5*I*dt*dt     0     ]
+     * dd_dn = do [    0           Jr*dt  ]
+     *         dv [    I*dt         0     ] // see Sola-16
      */
 
     // we go the sparse way:
@@ -137,23 +139,26 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data, const Eigen::
     Eigen::Matrix3s ddo_dwn = (Eigen::Matrix3s::Identity() - 0.5 * skew(w * _dt) ) * _dt; // voila, the comment above is this
 
     /* Covariance is sparse:
-     *       [ A  0  B
-     * COV =   0  C  0
-     *         B' 0  D ]
+     *       [ Cpp   0   Cpv
+     * COV =    0   Coo   0
+     *         Cpv'  0   Cvv ]
      *
-     * where A, B, C and D are computed below
+     * where Cpp, Cpv, Coo and Cvv are computed below
      */
-    delta_cov_.block<3,3>(0,0).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddp_dan.transpose(); // A = cov(dp,dp) = ddp_dan * a_cov * ddp_dan'
-    delta_cov_.block<3,3>(0,6).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // B = cov(dp,dv) = ddp_dan * a_cov * ddv_dan'
-    delta_cov_.block<3,3>(3,3).noalias() = ddo_dwn*_data_cov.block<3,3>(3,3)*ddo_dwn.transpose(); // C = cov(do,do) = ddo_dwn * w_cov * ddo_dwn'
-    delta_cov_.block<3,3>(6,0)           = delta_cov_.block<3,3>(0,6).transpose();                // B'= cov(dv,dp) =
-    delta_cov_.block<3,3>(6,6).noalias() = ddv_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // D = cov(dv,dv) = ddv_dan * a_cov * ddv_dan'
+    delta_cov_.block<3,3>(0,0).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddp_dan.transpose(); // Cpp = ddp_dan * Caa * ddp_dan'
+    delta_cov_.block<3,3>(0,6).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cpv = ddp_dan * Caa * ddv_dan'
+    delta_cov_.block<3,3>(3,3).noalias() = ddo_dwn*_data_cov.block<3,3>(3,3)*ddo_dwn.transpose(); // Coo = ddo_dwn * Cww * ddo_dwn'
+    delta_cov_.block<3,3>(6,0)           = delta_cov_.block<3,3>(0,6).transpose();                // Cvp = Cpv'
+    delta_cov_.block<3,3>(6,6).noalias() = ddv_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cvv = ddv_dan * Caa * ddv_dan'
 
 }
 
-inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
-                                         const Scalar _dt, Eigen::VectorXs& _delta_preint_plus_delta,
-                                         Eigen::MatrixXs& _jacobian_delta_preint, Eigen::MatrixXs& _jacobian_delta)
+inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
+                                         const Eigen::VectorXs& _delta,
+                                         const Scalar _dt,
+                                         Eigen::VectorXs& _delta_preint_plus_delta,
+                                         Eigen::MatrixXs& _jacobian_delta_preint,
+                                         Eigen::MatrixXs& _jacobian_delta)
 {
 
     remapPQV(_delta_preint, _delta, _delta_preint_plus_delta);
@@ -260,8 +265,10 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
 
 }
 
-inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta,
-                                         const Scalar _dt, Eigen::VectorXs& _delta_preint_plus_delta)
+inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
+                                         const Eigen::VectorXs& _delta,
+                                         const Scalar _dt,
+                                         Eigen::VectorXs& _delta_preint_plus_delta)
 {
     assert(_delta_preint.size() == 10 && "Wrong _delta_preint vector size");
     assert(_delta.size() == 10 && "Wrong _delta vector size");
@@ -293,7 +300,9 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, c
     Dq_out_ = Dq_ * dq_;
 }
 
-inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _dt,
+inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x,
+                                     const Eigen::VectorXs& _delta,
+                                     const Scalar _dt,
                                      Eigen::VectorXs& _x_plus_delta)
 {
     assert(_x.size() == 16 && "Wrong _x vector size");
@@ -322,7 +331,9 @@ inline Eigen::VectorXs ProcessorIMU::deltaZero() const
     return (Eigen::VectorXs(10) << 0,0,0,  0,0,0,1,  0,0,0 ).finished(); // p, q, v
 }
 
-inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
+inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref,
+                                        Motion& _motion,
+                                        TimeStamp& _ts)
 {
     Motion tmp(_motion_ref);
     tmp.ts_ = _ts;
@@ -349,16 +360,18 @@ inline void ProcessorIMU::resetDerived()
     dDq_dwb_.setZero();
 }
 
-inline ConstraintBasePtr ProcessorIMU::createConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
+inline ConstraintBasePtr ProcessorIMU::createConstraint(FeatureBasePtr _feature_motion,
+                                                        FrameBasePtr _frame_origin)
 {
-    // TODO: return new ConstraintIMU(_feature_motion, _frame_origin);
     auto ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
     auto frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
     auto ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu);
     return ctr_imu;
 }
 
-inline void ProcessorIMU::remapPQV(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out)
+inline void ProcessorIMU::remapPQV(const Eigen::VectorXs& _delta1,
+                                   const Eigen::VectorXs& _delta2,
+                                   Eigen::VectorXs& _delta_out)
 {
     new (&Dp_) Eigen::Map<const Eigen::Vector3s>    (_delta1.data() + 0);
     new (&Dq_) Eigen::Map<const Eigen::Quaternions> (_delta1.data() + 3);
