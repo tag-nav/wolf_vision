@@ -70,7 +70,26 @@ TEST(Problem, Processor)
 
 TEST(Problem, Installers)
 {
+    std::string wolf_root = _WOLF_ROOT_DIR;
+    ProblemPtr P = Problem::create(FRM_PO_3D);
+    Eigen::Vector7s xs;
 
+    SensorBasePtr    S = P->installSensor   ("ODOM 3D", "odometer",        xs,         wolf_root + "/src/examples/sensor_odom_3D.yaml");
+
+    // install processor tracker (dummy installation under an Odometry sensor -- it's OK for this test)
+    ProcessorBasePtr pt = P->installProcessor("IMAGE LANDMARK", "ORB landmark tracker", "odometer", wolf_root + "/src/examples/processor_image_ORB.yaml");
+
+    // check motion processor IS NOT set
+    ASSERT_FALSE(P->getProcessorMotionPtr());
+
+    // install processor motion
+    ProcessorBasePtr pm = P->installProcessor("ODOM 3D", "odom integrator", "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
+
+    // check motion processor is set
+    ASSERT_TRUE(P->getProcessorMotionPtr());
+
+    // check motion processor is correct
+    ASSERT_EQ(P->getProcessorMotionPtr(), pm);
 }
 
 
