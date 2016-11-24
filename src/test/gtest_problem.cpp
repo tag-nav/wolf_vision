@@ -206,10 +206,6 @@ TEST(Problem, emplaceFrame_factory)
 }
 
 
-TEST(Problem, Covariances)
-{
-}
-
 TEST(Problem, StateBlocks)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
@@ -244,6 +240,30 @@ TEST(Problem, StateBlocks)
     ASSERT_EQ(P->getStateBlockNotificationList().size(),    2 + 3 + 2 + 2); // XXX: 2 more notifications on the same SB!
 
     //    P->print(4,1,1,1);
+}
+
+TEST(Problem, Covariances)
+{
+    std::string wolf_root = _WOLF_ROOT_DIR;
+
+    ProblemPtr P = Problem::create(FRM_PO_3D);
+    Eigen::Vector7s xs;
+
+    SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
+    SensorBasePtr    St = P->installSensor   ("CAMERA", "camera",   xs, wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
+    ProcessorBasePtr pt = P->installProcessor("IMAGE LANDMARK",     "ORB landmark tracker", "camera",   wolf_root + "/src/examples/processor_image_ORB.yaml");
+    ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
+
+    // 4 state blocks, estimated
+    St->unfixExtrinsics();
+    FrameBasePtr F = P->emplaceFrame("PO 3D", KEY_FRAME, xs, 0);
+
+    Eigen::MatrixXs Cov = P->getFrameCovariance(F);
+
+    // FIXME Frame covariance should be 6x6, but it is actually 7x7 (the state of the state blocks, not of the local parametrizations)
+    ASSERT_EQ(Cov.cols() , 7);
+    ASSERT_EQ(Cov.rows() , 7);
+
 }
 
 
