@@ -516,22 +516,6 @@ Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBasePtr _landmark_ptr)
     return covariance;
 }
 
-MapBasePtr Problem::addMap(MapBasePtr _map_ptr)
-{
-    map_ptr_ = _map_ptr;
-    map_ptr_->setProblem(shared_from_this());
-
-    return map_ptr_;
-}
-
-TrajectoryBasePtr Problem::setTrajectory(TrajectoryBasePtr _trajectory_ptr)
-{
-    trajectory_ptr_ = _trajectory_ptr;
-    trajectory_ptr_->setProblem(shared_from_this());
-
-    return trajectory_ptr_;
-}
-
 MapBasePtr Problem::getMapPtr()
 {
     return map_ptr_;

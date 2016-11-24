@@ -141,7 +141,6 @@ class Problem : public std::enable_shared_from_this<Problem>
 
 
         // Trajectory branch ----------------------------------
-        TrajectoryBasePtr setTrajectory(TrajectoryBasePtr _trajectory_ptr);
         TrajectoryBasePtr getTrajectoryPtr();
         virtual void setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov,
                                const TimeStamp& _ts);
@@ -215,7 +214,6 @@ class Problem : public std::enable_shared_from_this<Problem>
 
 
         // Map branch -----------------------------------------
-        MapBasePtr addMap(MapBasePtr _map_ptr);
         MapBasePtr getMapPtr();
         LandmarkBasePtr addLandmark(LandmarkBasePtr _lmk_ptr);
         void addLandmarkList(LandmarkBaseList& _lmk_list);
