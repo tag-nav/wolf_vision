@@ -440,7 +440,7 @@ void ProcessorImageLandmark::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::R
     _image_roi = _image(_roi);
 }
 
-void ProcessorImageLandmark::drawRoi(cv::Mat _image, CaptureImage::Ptr _capture, cv::Scalar _color)
+void ProcessorImageLandmark::drawRoi(cv::Mat _image, CaptureImagePtr _capture, cv::Scalar _color)
 {
     for (auto feature : _capture->getFeatureList())
         cv::rectangle(_image, std::static_pointer_cast<FeaturePointImage>(feature)->getTrackerRoi(), _color, 1, 8, 0);
@@ -462,7 +462,7 @@ void ProcessorImageLandmark::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_li
 
 void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
 {
-    FeaturePointImage::Ptr ftr;
+    FeaturePointImagePtr ftr;
     for(auto feature_point : feat_lmk_found_)
     {
         ftr = std::static_pointer_cast<FeaturePointImage>(feature_point);

@@ -362,7 +362,7 @@ inline void ProcessorIMU::resetDerived()
 
 inline ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
-    FeatureIMU::Ptr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
+    FeatureIMUPtr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
     FrameIMU::Ptr frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
     ConstraintIMU::Ptr ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu);
 
