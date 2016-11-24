@@ -21,6 +21,11 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
 
         virtual ~ConstraintIMU();
 
+        /* \brief : compute the residual from the state blocks being iterated by the solver.
+            -> computes the expected measurement
+            -> compares the actual measurement with the expected one
+            -> weights the result with the covariance of the noise (residual = sqrt_info_matrix * err;)
+        */
         template<typename T>
         bool operator ()(const T* const _p1, const T* const _o1, const T* const _v1, const T* const _b_a1, const T* _b_g1,
                          const T* const _p2, const T* const _o2, const T* const _v2,
@@ -44,6 +49,10 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         void expectation(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D1> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab, const Eigen::MatrixBase<D1> & _wb,
                         const Eigen::MatrixBase<D1> & _p2, const Eigen::MatrixBase<D1> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::Matrix<D1,10,1> & _result) const;
 
+        /* \brief : return the expected value given the state blocks in the wolf tree
+            current frame data is taken from constraintIMU object.
+            IMU frame is taken from wolf tree
+        */
         Eigen::VectorXs expectation() const
         {
             Eigen::Matrix<wolf::Scalar, 10, 1> exp;
@@ -60,8 +69,7 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
             const Eigen::VectorXs frame_imu_ori   = (frm_imu->getOPtr()->getVector());
             const Eigen::VectorXs frame_imu_vel  = (frm_imu->getVPtr()->getVector());
             
-            //expectation(frame_current_pos, frame_current_ori, frame_current_vel, frame_current_ab, frame_current_wb,
-            //           frame_imu_pos, frame_imu_ori, frame_imu_vel, exp);
+            expectation(frame_current_pos, frame_current_ori, frame_current_vel, frame_current_ab, frame_current_wb, frame_imu_pos, frame_imu_ori, frame_imu_vel, exp);
             std::cout << frame_current_pos << std::endl;
             std::cout << frame_current_ori.w() << std::endl;
             std::cout << frame_current_vel << std::endl;
@@ -201,30 +209,6 @@ inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> & _p1, const 
     const_cast< Eigen::MatrixBase<D1> > (_result).segment(3,4) = dq_predict;
     const_cast< Eigen::MatrixBase<D1> > (_result).tail(3) = dv_predict;
 }
-
-/*Eigen::VectorXs ConstraintIMU::expectation(void) const
-{
-    Eigen::VectorXs exp(10);
-    FrameBasePtr frm_current    = getFeaturePtr()->getCapturePtr()->getFramePtr();
-    FrameBasePtr frm_imu     = getFrameOtherPtr();
-    //LandmarkBasePtr lmk         = getLandmarkOtherPtr();
-    const Scalar * const frame_current_pos  = frm_current->getPPtr()->getVector().data();
-    const Scalar * const frame_current_ori  = frm_current->getOPtr()->getVector().data();
-    const Scalar * const frame_current_vel  = frm_current->getVPtr()->getVector().data();
-    const Scalar * const frame_imu_pos   = frm_imu->getPPtr()->getVector().data();
-    const Scalar * const frame_imu_ori   = frm_imu->getOPtr()->getVector().data();
-    const Scalar * const frame_imu_vel  = frm_imu->getVPtr()->getVector().data();
-    //const Scalar * const lmk_pos_hmg        = lmk->getPPtr()->getVector().data();
-    //expectation(frame_current_pos, frame_current_ori, frame_current_vel,
-    //            frame_imu_pos, frame_imu_ori, frame_imu_vel, exp.data());
-    std::cout << frame_current_pos << std::endl;
-    std::cout << frame_current_ori << std::endl;
-    std::cout << frame_current_vel << std::endl;
-    std::cout << frame_imu_pos << std::endl;
-    std::cout << frame_imu_ori << std::endl;
-    std::cout << frame_imu_vel << std::endl;
-    return exp;
-}*/
 
 inline JacobianMethod ConstraintIMU::getJacobianMethod() const
 {
