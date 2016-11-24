@@ -9,13 +9,70 @@
 #include "../src/logging.h"
 
 #include "../problem.h"
-#include "../trajectory_base.h"
-#include "../frame_base.h"
+#include "../sensor_odom_3D.h"
+#include "../processor_odom_3D.h"
 
 #include <iostream>
 
 using namespace wolf;
 using namespace Eigen;
+
+TEST(Problem, create)
+{
+    ProblemPtr P = Problem::create(FRM_PQVBB_3D);
+
+    // check double ointers to branches
+    ASSERT_EQ(P, P->getHardwarePtr()->getProblem());
+    ASSERT_EQ(P, P->getTrajectoryPtr()->getProblem());
+    ASSERT_EQ(P, P->getMapPtr()->getProblem());
+
+    // check frame structure through the state size
+    ASSERT_EQ(P->getFrameStructureSize(), 16);
+}
+
+TEST(Problem, Sensors)
+{
+    ProblemPtr P = Problem::create(FRM_PQVBB_3D);
+
+    // add a dummy sensor
+    SensorBasePtr S = std::make_shared<SensorBase>("Dummy", nullptr, nullptr, nullptr, 2, false);
+    P->addSensor(S);
+
+    // check pointers
+    ASSERT_EQ(P, S->getProblem());
+    ASSERT_EQ(P->getHardwarePtr(), S->getHardwarePtr());
+
+}
+
+TEST(Problem, Processor)
+{
+    ProblemPtr P = Problem::create(FRM_PO_3D);
+
+    // check motion processor is null
+    ASSERT_FALSE(P->getProcessorMotionPtr());
+
+    // add a motion sensor and processor
+    SensorBasePtr Sm = std::make_shared<SensorOdom3D>(nullptr, nullptr, std::make_shared<IntrinsicsOdom3D>());
+    P->addSensor(Sm);
+
+    // add motion processor
+    ProcessorMotionPtr Pm = std::make_shared<ProcessorOdom3D>();
+    Sm->addProcessor(Pm);
+
+    // check motion processor IS NOT set by addSensor <-- using InstallProcessor it should, see test Installers
+    ASSERT_FALSE(P->getProcessorMotionPtr());
+
+    // set processor motion
+    P->setProcessorMotion(Pm);
+    // re-check motion processor IS set by addSensor
+    ASSERT_EQ(P->getProcessorMotionPtr(), Pm);
+}
+
+TEST(Problem, Installers)
+{
+
+}
+
 
 
 TEST(Problem, emplaceFrame_factory)
