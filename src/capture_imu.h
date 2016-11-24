@@ -9,6 +9,9 @@ namespace wolf {
 class CaptureIMU : public CaptureMotion
 {
     public:
+        typedef std::shared_ptr<CaptureIMU> Ptr;
+
+    public:
 
         CaptureIMU(const TimeStamp& _init_ts, SensorBasePtr _sensor_ptr, const Eigen::Vector6s& _data);
         virtual ~CaptureIMU();

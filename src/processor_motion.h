@@ -146,15 +146,15 @@ class ProcessorMotion : public ProcessorBase
         /** \brief Finds the capture that contains the closest previous motion of _ts
          * \return a pointer to the capture (if it exist) or a nullptr (otherwise)
          */
-        CaptureMotion::Ptr findCaptureContainingTimeStamp(const TimeStamp& _ts) const;
+        CaptureMotionPtr findCaptureContainingTimeStamp(const TimeStamp& _ts) const;
 
         /** Composes the deltas in two pre-integrated Captures
          * \param _cap1_ptr pointer to the first Capture
          * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
          * \param _delta1_plus_delta2 the concatenation of the deltas of Captures 1 and 2.
          */
-        void sumDeltas(CaptureMotion::Ptr _cap1_ptr,
-                       CaptureMotion::Ptr _cap2_ptr,
+        void sumDeltas(CaptureMotionPtr _cap1_ptr,
+                       CaptureMotionPtr _cap2_ptr,
                        Eigen::VectorXs& _delta1_plus_delta2);
 
         /** Set the origin of all motion for this processor
@@ -183,7 +183,7 @@ class ProcessorMotion : public ProcessorBase
     protected:
         void updateDt();
         void integrate();
-        void reintegrate(CaptureMotion::Ptr _capture_ptr);
+        void reintegrate(CaptureMotionPtr _capture_ptr);
 
         /** Pre-process incoming Capture
          *
@@ -561,8 +561,8 @@ class ProcessorMotion : public ProcessorBase
 
     public:
         virtual CaptureBasePtr getOriginPtr();
-        virtual CaptureMotion::Ptr getLastPtr();
-        virtual CaptureMotion::Ptr getIncomingPtr();
+        virtual CaptureMotionPtr getLastPtr();
+        virtual CaptureMotionPtr getIncomingPtr();
 
 
     protected:
@@ -572,8 +572,8 @@ class ProcessorMotion : public ProcessorBase
         Size delta_cov_size_;   ///< the size of the delta covariances matrix
         Size data_size_;        ///< the size of the incoming data
         CaptureBasePtr origin_ptr_; // TODO check pointer type
-        CaptureMotion::Ptr last_ptr_; // TODO check pointer type
-        CaptureMotion::Ptr incoming_ptr_; // TODO check pointer type
+        CaptureMotionPtr last_ptr_; // TODO check pointer type
+        CaptureMotionPtr incoming_ptr_; // TODO check pointer type
 
     protected:
         // helpers to avoid allocation
@@ -707,7 +707,7 @@ inline MotionBuffer& ProcessorMotion::getBuffer()
     return last_ptr_->getBuffer();
 }
 
-inline void ProcessorMotion::sumDeltas(CaptureMotion::Ptr _cap1_ptr, CaptureMotion::Ptr _cap2_ptr,
+inline void ProcessorMotion::sumDeltas(CaptureMotionPtr _cap1_ptr, CaptureMotionPtr _cap2_ptr,
                                        Eigen::VectorXs& _delta1_plus_delta2)
 {
     Scalar dt = _cap2_ptr->getTimeStamp() - _cap1_ptr->getTimeStamp();
@@ -730,12 +730,12 @@ inline CaptureBasePtr ProcessorMotion::getOriginPtr()
     return origin_ptr_;
 }
 
-inline CaptureMotion::Ptr ProcessorMotion::getLastPtr()
+inline CaptureMotionPtr ProcessorMotion::getLastPtr()
 {
     return last_ptr_;
 }
 
-inline CaptureMotion::Ptr ProcessorMotion::getIncomingPtr()
+inline CaptureMotionPtr ProcessorMotion::getIncomingPtr()
 {
     return incoming_ptr_;
 }

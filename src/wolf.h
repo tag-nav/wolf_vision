@@ -266,6 +266,10 @@ typedef std::weak_ptr<CaptureBase> CaptureBaseWPtr;
 typedef std::list<CaptureBasePtr> CaptureBaseList;
 typedef CaptureBaseList::iterator CaptureBaseIter;
 
+// - CaptureMotion
+typedef std::shared_ptr<CaptureMotion> CaptureMotionPtr;
+typedef std::weak_ptr<CaptureMotion> CaptureMotionWPtr;
+
 // - Feature
 typedef std::shared_ptr<FeatureBase> FeatureBasePtr;
 typedef std::weak_ptr<FeatureBase> FeatureBaseWPtr;

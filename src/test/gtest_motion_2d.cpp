@@ -91,7 +91,7 @@ TEST(ProcessorMotion, Motion2D)
     std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
     // Capture to use as container for all incoming data
     t += dt;
-    CaptureMotion::Ptr cap_ptr = std::make_shared<CaptureMotion>(t, sensor_odom_ptr, data, data_cov, nullptr);
+    CaptureMotionPtr cap_ptr = std::make_shared<CaptureMotion>(t, sensor_odom_ptr, data, data_cov, nullptr);
 
     // Check covariance values
     Eigen::Vector3s integrated_x = x0;

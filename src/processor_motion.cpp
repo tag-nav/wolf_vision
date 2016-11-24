@@ -28,7 +28,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     if (voteForKeyFrame() && permittedKeyFrame())
     {
         // key_capture
-        //        CaptureMotion::Ptr key_capture_ptr = last_ptr_;
+        //        CaptureMotionPtr key_capture_ptr = last_ptr_;
         //        FrameBasePtr key_frame_ptr = key_capture_ptr->getFramePtr();
         FrameBasePtr key_frame_ptr = last_ptr_->getFramePtr();
 
@@ -52,7 +52,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 //        origin_ptr_->getFramePtr() -> addConstrainedBy(ctr_ptr);
 
         // new last capture
-        CaptureMotion::Ptr new_capture_ptr = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(),
+        CaptureMotionPtr new_capture_ptr = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(),
                                                     getSensorPtr(),
                                                     Eigen::VectorXs::Zero(data_size_),
                                                     Eigen::MatrixXs::Zero(data_size_, data_size_),
@@ -90,7 +90,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }
 
-CaptureMotion::Ptr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
+CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
 {
     //std::cout << "ProcessorMotion::findCaptureContainingTimeStamp: ts = " << _ts.getSeconds() << "." << _ts.getNanoSeconds() << std::endl;
     auto capture_ptr = last_ptr_;
@@ -178,13 +178,13 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
     TimeStamp ts = _keyframe_ptr->getTimeStamp();
 
     // find capture in which the new keyframe is interpolated
-    CaptureMotion::Ptr capture_ptr = findCaptureContainingTimeStamp(ts);
+    CaptureMotionPtr capture_ptr = findCaptureContainingTimeStamp(ts);
     assert(capture_ptr != nullptr
             && "ProcessorMotion::keyFrameCallback: no motion capture containing the required TimeStamp found");
     FrameBasePtr key_frame_origin = capture_ptr->getOriginFramePtr();
 
     // create motion capture
-    CaptureMotion::Ptr key_capture_ptr = std::make_shared<CaptureMotion>(ts, getSensorPtr(),
+    CaptureMotionPtr key_capture_ptr = std::make_shared<CaptureMotion>(ts, getSensorPtr(),
                                                                          Eigen::VectorXs::Zero(data_size_),
                                                                          Eigen::MatrixXs::Zero(data_size_, data_size_),
                                                                          key_frame_origin);
@@ -286,7 +286,7 @@ void ProcessorMotion::integrate()
     last_ptr_->getFramePtr()->setState(getCurrentState());
 }
 
-void ProcessorMotion::reintegrate(CaptureMotion::Ptr _capture_ptr)
+void ProcessorMotion::reintegrate(CaptureMotionPtr _capture_ptr)
 {
 
     // start with empty motion
