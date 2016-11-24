@@ -53,10 +53,6 @@ target_link_libraries(gtest_frame_base ${PROJECT_NAME})
 wolf_add_gtest(gtest_local_param gtest_local_param.cpp)
 target_link_libraries(gtest_local_param ${PROJECT_NAME})
 
-# ProcessorMotion in 2D
-wolf_add_gtest(gtest_motion_2d gtest_motion_2d.cpp)
-target_link_libraries(gtest_motion_2d ${PROJECT_NAME})
-
 # MotionBuffer class test
 wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
 target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
@@ -65,13 +61,17 @@ target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
 wolf_add_gtest(gtest_problem gtest_problem.cpp)
 target_link_libraries(gtest_problem ${PROJECT_NAME})
 
-# ProcessorOdom3D class test
-wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
-target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
-
 # ProcessorIMU class test
 wolf_add_gtest(gtest_processor_imu gtest_processor_imu.cpp)
 target_link_libraries(gtest_processor_imu ${PROJECT_NAME})
+
+# ProcessorMotion in 2D
+wolf_add_gtest(gtest_motion_2d gtest_motion_2d.cpp)
+target_link_libraries(gtest_motion_2d ${PROJECT_NAME})
+
+# ProcessorOdom3D class test
+wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
+target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
 
 # Rotation test
 wolf_add_gtest(gtest_rotation gtest_rotation.cpp)
