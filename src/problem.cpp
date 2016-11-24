@@ -291,7 +291,7 @@ Eigen::VectorXs Problem::getStateAtTimeStamp(const TimeStamp& _ts)
     return state;
 }
 
-unsigned int Problem::getFrameStructureSize()
+Size Problem::getFrameStructureSize() const
 {
     switch (trajectory_ptr_->getFrameStructure())
     {
@@ -303,6 +303,28 @@ unsigned int Problem::getFrameStructureSize()
             return 10;
         case FRM_PQVBB_3D:
             return 16;
+        default:
+            throw std::runtime_error(
+                    "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
+    }
+}
+
+void Problem::getFrameStructureSize(Size& _x_size, Size& _cov_size) const
+{
+    switch (trajectory_ptr_->getFrameStructure())
+    {
+        case FRM_PO_2D:
+            _x_size = 3; _cov_size = 3;
+            break;
+        case FRM_PO_3D:
+            _x_size = 7; _cov_size = 6;
+            break;
+        case FRM_POV_3D:
+            _x_size = 10; _cov_size = 10;
+            break;
+        case FRM_PQVBB_3D:
+            _x_size = 16; _cov_size = 15;
+            break;
         default:
             throw std::runtime_error(
                     "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
@@ -542,17 +564,25 @@ StateBlockList& Problem::getStateBlockList()
 
 
 
-void Problem::setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov, const TimeStamp& _ts)
+void Problem::setOrigin(const Eigen::VectorXs& _origin_state, const Eigen::MatrixXs& _origin_state_cov, const TimeStamp& _ts)
 {
     if (!origin_is_set_)
     {
         // Create origin frame
-        FrameBasePtr origin_frame_ptr = emplaceFrame(KEY_FRAME, _origin_pose, _ts);
-        // FIXME: create a fix sensor
-        IntrinsicsBasePtr fix_instrinsics; // nullptr
-        SensorBasePtr fix_sensor_ptr = installSensor("GPS", "initial pose", Eigen::VectorXs::Zero(3), fix_instrinsics );
-        std::shared_ptr<CaptureFix> init_capture = std::make_shared<CaptureFix>(_ts, fix_sensor_ptr, _origin_pose, _origin_cov);
+        FrameBasePtr origin_frame_ptr = emplaceFrame(KEY_FRAME, _origin_state, _ts);
+
+        // create origin capture with just pose
+        //        Size pose_size, pose_cov_size;
+        //        getFrameStructureSize(pose_size, pose_cov_size);
+        //        VectorXs pose     = _origin_state.head(pose_size);
+        //        MatrixXs pose_cov = _origin_state_cov.topLeftCorner(pose_cov_size,pose_cov_size);
+        //        std::shared_ptr<CaptureFix> init_capture = std::make_shared<CaptureFix>(_ts, nullptr, pose, pose_cov);
+
+        // create origin capture with the given state as data
+        std::shared_ptr<CaptureFix> init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _origin_state, _origin_state_cov);
         origin_frame_ptr->addCapture(init_capture);
+
+        // create feature and constraint
         init_capture->process();
 
         // notify processors about the new keyframe
@@ -675,7 +705,10 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             {
                 for (auto C : F->getCaptureList())
                 {
-                    cout << "    C" << C->id() << " -> S" << C->getSensorPtr()->id() << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "") << endl;
+                    cout << "    C" << C->id();
+                    if (C->getSensorPtr()) cout << " -> S" << C->getSensorPtr()->id();
+                    else cout << " -> S-";
+                    cout << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "") << endl;
                     if (depth >= 3)
                     {
                         for (auto f : C->getFeatureList())

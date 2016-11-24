@@ -67,7 +67,8 @@ class Problem : public std::enable_shared_from_this<Problem>
         virtual ~Problem();
 
         // Properties -----------------------------------------
-        unsigned int getFrameStructureSize();
+        Size getFrameStructureSize() const;
+        void getFrameStructureSize(Size& _x_size, Size& _cov_size) const;
 
         // Hardware branch ------------------------------------
         HardwareBasePtr getHardwarePtr();
