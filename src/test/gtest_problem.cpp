@@ -9,6 +9,7 @@
 #include "../src/logging.h"
 
 #include "../problem.h"
+#include "../sensor_base.h"
 #include "../sensor_odom_3D.h"
 #include "../processor_odom_3D.h"
 
@@ -215,13 +216,34 @@ TEST(Problem, StateBlocks)
 
     ProblemPtr P = Problem::create(FRM_PO_3D);
     Eigen::Vector7s xs;
+
+    // 2 state blocks, fixed
     SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
+    ASSERT_EQ(P->getStateBlockList().size(),                2);
+    ASSERT_EQ(P->getStateBlockNotificationList().size(),    2);
+
+    // 3 state blocks, fixed
     SensorBasePtr    St = P->installSensor   ("CAMERA", "camera",   xs, wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
+    ASSERT_EQ(P->getStateBlockList().size(),                2 + 3);
+    ASSERT_EQ(P->getStateBlockNotificationList().size(),    2 + 3);
+
     ProcessorBasePtr pt = P->installProcessor("IMAGE LANDMARK",     "ORB landmark tracker", "camera",   wolf_root + "/src/examples/processor_image_ORB.yaml");
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
+    // 2 state blocks, estimated
     P->emplaceFrame("PO 3D", KEY_FRAME, xs, 0);
+    ASSERT_EQ(P->getStateBlockList().size(),                2 + 3 + 2);
+    ASSERT_EQ(P->getStateBlockNotificationList().size(),    2 + 3 + 2);
 
+
+    //    P->print(4,1,1,1);
+
+    // change some SB properties
+    St->unfixExtrinsics();
+    ASSERT_EQ(P->getStateBlockList().size(),                2 + 3 + 2);
+    ASSERT_EQ(P->getStateBlockNotificationList().size(),    2 + 3 + 2 + 2); // XXX: 2 more notifications on the same SB!
+
+    //    P->print(4,1,1,1);
 }
 
 
