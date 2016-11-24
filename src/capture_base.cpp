@@ -11,8 +11,8 @@ CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorB
         capture_id_(++capture_id_count_),
         time_stamp_(_ts),
         sensor_ptr_(_sensor_ptr),
-        sensor_p_ptr_(sensor_ptr_.lock()->getPPtr()),
-        sensor_o_ptr_(sensor_ptr_.lock()->getOPtr())
+        sensor_p_ptr_(!sensor_ptr_.expired() ? sensor_ptr_.lock()->getPPtr() : nullptr),
+        sensor_o_ptr_(!sensor_ptr_.expired() ? sensor_ptr_.lock()->getOPtr() : nullptr)
 {
     //
 //    std::cout << "constructed    +C" << id() << std::endl;
