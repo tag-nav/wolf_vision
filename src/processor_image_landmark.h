@@ -148,11 +148,6 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
          * \param _landmark_ptr LandmarkBase pointer to the Landmark constrained.
-         *
-         *
-         *
-         * TODO: Make a general ConstraintFactory, and put it in WolfProblem.
-         * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 

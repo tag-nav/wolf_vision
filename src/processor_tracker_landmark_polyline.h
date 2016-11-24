@@ -177,9 +177,6 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
          * \param _landmark_ptr LandmarkBase pointer to the Landmark constrained.
          *
          * Implement this method in derived classes.
-         *
-         * TODO: Make a general ConstraintFactory, and put it in WolfProblem. JV: I disagree..
-         * This factory only needs to know the two derived pointers to decide on the actual Constraint created.
          */
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 

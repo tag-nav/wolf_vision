@@ -11,7 +11,7 @@ namespace wolf
 {
 
 ProcessorGPS::ProcessorGPS() :
-        ProcessorBase("GPS"), //sensor_gps_ptr_((SensorGPS*)(upperNodePtr())), //TODO here there's a crash. Look at what they'll do in processorLaser and modify as consequence
+        ProcessorBase("GPS"),
         capture_gps_ptr_(nullptr)
 {
     gps_covariance_ = 10;

@@ -20,10 +20,6 @@ class StateBlock;
 namespace wolf {
 
 
-
-// TODO: add descriptor as a StateBlock -> Could be estimated or not. Aperture could be one case of "descriptor"that can be estimated or not
-// TODO: init and end Time stamps
-
 //class LandmarkBase
 class LandmarkBase : public NodeBase, public std::enable_shared_from_this<LandmarkBase>
 {

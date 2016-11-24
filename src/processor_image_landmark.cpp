@@ -321,24 +321,8 @@ void ProcessorImageLandmark::LandmarkInCurrentCamera(CaptureBasePtr _capture, st
     Eigen::Vector3s pwr1;
     Eigen::Vector4s quaternion_current_frame;
 
-    // TODO: manage different state sizes better!
-    switch(current_state.size())
-    {
-        case 7:
-        {
-            pwr1 = current_state.head<3>();
-            quaternion_current_frame = current_state.tail<4>();
-            break;
-        }
-        case 16:
-        {
-            pwr1 = current_state.head<3>();
-            quaternion_current_frame = current_state.segment<4>(6);
-            break;
-        }
-        default:
-            std::runtime_error("Unrecognized state size. Use 7 or 16");
-    }
+    pwr1 = current_state.head<3>();
+    quaternion_current_frame = current_state.segment<4>(3);
 
     Eigen::Vector3s pwr0 = _landmark->getAnchorFrame()->getPPtr()->getVector();
     Eigen::Vector3s prc = this->getSensorPtr()->getPPtr()->getVector();
@@ -354,7 +338,7 @@ void ProcessorImageLandmark::LandmarkInCurrentCamera(CaptureBasePtr _capture, st
     Eigen::Vector4s quaternion_sensor = this->getSensorPtr()->getOPtr()->getVector();
     qwr0 = quaternion_anchor;
     qwr1 = quaternion_current_frame;
-    qrc = quaternion_sensor;
+    qrc  = quaternion_sensor;
 
     Eigen::Vector4s landmark_hmg_c0 = _landmark->getPPtr()->getVector();
 

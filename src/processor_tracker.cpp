@@ -162,7 +162,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             if ( abs(key_frm->getTimeStamp() - incoming_ptr_->getTimeStamp() ) < time_tolerance_)
             {
                 // Append incoming to existing key-frame
-                key_frm->addCapture(incoming_ptr_); // TODO I think it should be last_ptr_ not incoming!
+                key_frm->addCapture(incoming_ptr_);
                 WOLF_DEBUG("Incoming adhered to existing KF" , key_frm->id());
             }
             else
