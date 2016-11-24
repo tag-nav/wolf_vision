@@ -115,7 +115,7 @@ void SensorBase::unfix()
         }
 }
 
-inline void SensorBase::fixExtrinsics()
+void SensorBase::fixExtrinsics()
 {
     for (unsigned int i = 0; i < 2; i++)
     {
@@ -129,7 +129,7 @@ inline void SensorBase::fixExtrinsics()
     }
 }
 
-inline void SensorBase::unfixExtrinsics()
+void SensorBase::unfixExtrinsics()
 {
     for (unsigned int i = 0; i < 2; i++)
     {
@@ -143,7 +143,7 @@ inline void SensorBase::unfixExtrinsics()
     }
 }
 
-inline void SensorBase::fixIntrinsics()
+void SensorBase::fixIntrinsics()
 {
     for (unsigned int i = 2; i < state_block_vec_.size(); i++)
     {
@@ -157,7 +157,7 @@ inline void SensorBase::fixIntrinsics()
     }
 }
 
-inline void SensorBase::unfixIntrinsics()
+void SensorBase::unfixIntrinsics()
 {
     for (unsigned int i = 2; i < state_block_vec_.size(); i++)
     {
