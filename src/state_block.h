@@ -73,6 +73,12 @@ class StateBlock
          **/
         unsigned int getSize() const;
 
+        /**\brief Returns the size of the local parametrization
+         *
+         * @return the size of the local parametrization
+         */
+        Size getLocalSize() const;
+
         /** \brief Returns if the state is fixed (not estimated)
          **/
         bool isFixed() const;
@@ -143,6 +149,13 @@ inline void StateBlock::setVector(const Eigen::VectorXs& _state)
 
 inline unsigned int StateBlock::getSize() const
 {
+    return state_.size();
+}
+
+inline Size StateBlock::getLocalSize() const
+{
+    if(local_param_ptr_)
+        return local_param_ptr_->getLocalSize();
     return state_.size();
 }
 
