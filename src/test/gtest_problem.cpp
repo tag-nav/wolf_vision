@@ -92,6 +92,44 @@ TEST(Problem, Installers)
     ASSERT_EQ(P->getProcessorMotionPtr(), pm);
 }
 
+TEST(Problem, SetOrigin)
+{
+    ProblemPtr P = Problem::create(FRM_PO_3D);
+    TimeStamp       t0(0);
+    Eigen::Vector7s x0; x0 << 1,2,3,4,5,6,7;
+    Eigen::Matrix6s P0; P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
+
+    P->setOrigin(x0, P0, t0);
+
+    // check that one sensor has been added
+    ASSERT_EQ(P->getHardwarePtr()->getSensorList().size(), 1);
+
+    // check that no processor has been added
+    ASSERT_EQ(P->getHardwarePtr()->getSensorList().front()->getProcessorList().size(), 0);
+
+    // check that the state is correct
+    ASSERT_TRUE((x0 - P->getCurrentState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+
+    // check that we have one frame, one capture, one feature, one constraint
+    TrajectoryBasePtr T = P->getTrajectoryPtr();
+    ASSERT_EQ(T->getFrameList().size(), 1);
+    FrameBasePtr F = P->getLastFramePtr();
+    ASSERT_EQ(F->getCaptureList().size(), 1);
+    CaptureBasePtr C = F->getCaptureList().front();
+    ASSERT_EQ(C->getFeatureList().size(), 1);
+    FeatureBasePtr f = C->getFeatureList().front();
+    ASSERT_EQ(f->getConstraintList().size(), 1);
+
+    // check that the constraint is absolute (no pointers to other F, f, or L)
+    ConstraintBasePtr c = f->getConstraintList().front();
+    ASSERT_FALSE(c->getFrameOtherPtr());
+    ASSERT_FALSE(c->getFrameOtherPtr());
+    ASSERT_FALSE(c->getLandmarkOtherPtr());
+
+    // check that the Feature measurement and covariance are the ones provided
+    ASSERT_TRUE((x0 - f->getMeasurement()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((P0 - f->getMeasurementCovariance()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+}
 
 
 TEST(Problem, emplaceFrame_factory)
