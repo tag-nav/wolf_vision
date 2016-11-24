@@ -27,7 +27,7 @@ void CaptureFix::process()
     else if (data_.size() == 7 && data_covariance_.rows() == 6 && data_covariance_.cols() == 6 )
         getFeatureList().front()->addConstraint(std::make_shared<ConstraintFix3D>(getFeatureList().front()));
     else
-        throw std::runtime_error("wrong data size in capture fix"); // TODO
+        throw std::runtime_error("Wrong data size in CaptureFix. Use 3 for 2D, 7 for 3D.");
     //std::cout << "ConstraintFix added " << std::endl;
 }
 
