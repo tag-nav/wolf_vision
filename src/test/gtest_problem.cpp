@@ -92,20 +92,17 @@ TEST(Problem, Installers)
     ASSERT_EQ(P->getProcessorMotionPtr(), pm);
 }
 
-TEST(Problem, SetOrigin)
+TEST(Problem, SetOrigin_PO_2D)
 {
-    ProblemPtr P = Problem::create(FRM_PO_3D);
+    ProblemPtr P = Problem::create(FRM_PO_2D);
     TimeStamp       t0(0);
-    Eigen::Vector7s x0; x0 << 1,2,3,4,5,6,7;
-    Eigen::Matrix6s P0; P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
+    Eigen::VectorXs x0(3); x0 << 1,2,3;
+    Eigen::MatrixXs P0(3,3); P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
 
     P->setOrigin(x0, P0, t0);
 
-    // check that one sensor has been added
-    ASSERT_EQ(P->getHardwarePtr()->getSensorList().size(), 1);
-
-    // check that no processor has been added
-    ASSERT_EQ(P->getHardwarePtr()->getSensorList().front()->getProcessorList().size(), 0);
+    // check that no sensor has been added
+    ASSERT_EQ(P->getHardwarePtr()->getSensorList().size(), 0);
 
     // check that the state is correct
     ASSERT_TRUE((x0 - P->getCurrentState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
@@ -129,7 +126,49 @@ TEST(Problem, SetOrigin)
     // check that the Feature measurement and covariance are the ones provided
     ASSERT_TRUE((x0 - f->getMeasurement()).isMuchSmallerThan(1, Constants::EPS_SMALL));
     ASSERT_TRUE((P0 - f->getMeasurementCovariance()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+
+    //    P->print(4,1,1,1);
 }
+
+
+TEST(Problem, SetOrigin_PO_3D)
+{
+    ProblemPtr P = Problem::create(FRM_PO_3D);
+    TimeStamp       t0(0);
+    Eigen::VectorXs x0(7); x0 << 1,2,3,4,5,6,7;
+    Eigen::MatrixXs P0(6,6); P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
+
+    P->setOrigin(x0, P0, t0);
+
+    // check that no sensor has been added
+    ASSERT_EQ(P->getHardwarePtr()->getSensorList().size(), 0);
+
+    // check that the state is correct
+    ASSERT_TRUE((x0 - P->getCurrentState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+
+    // check that we have one frame, one capture, one feature, one constraint
+    TrajectoryBasePtr T = P->getTrajectoryPtr();
+    ASSERT_EQ(T->getFrameList().size(), 1);
+    FrameBasePtr F = P->getLastFramePtr();
+    ASSERT_EQ(F->getCaptureList().size(), 1);
+    CaptureBasePtr C = F->getCaptureList().front();
+    ASSERT_EQ(C->getFeatureList().size(), 1);
+    FeatureBasePtr f = C->getFeatureList().front();
+    ASSERT_EQ(f->getConstraintList().size(), 1);
+
+    // check that the constraint is absolute (no pointers to other F, f, or L)
+    ConstraintBasePtr c = f->getConstraintList().front();
+    ASSERT_FALSE(c->getFrameOtherPtr());
+    ASSERT_FALSE(c->getFrameOtherPtr());
+    ASSERT_FALSE(c->getLandmarkOtherPtr());
+
+    // check that the Feature measurement and covariance are the ones provided
+    ASSERT_TRUE((x0 - f->getMeasurement()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((P0 - f->getMeasurementCovariance()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+
+    //    P->print(4,1,1,1);
+}
+
 
 
 TEST(Problem, emplaceFrame_factory)
@@ -163,8 +202,28 @@ TEST(Problem, emplaceFrame_factory)
     ASSERT_EQ(f2->getProblem(), P);
     ASSERT_EQ(f3->getProblem(), P);
     ASSERT_EQ(f4->getProblem(), P);
+}
+
+
+TEST(Problem, Covariances)
+{
+}
+
+TEST(Problem, StateBlocks)
+{
+    std::string wolf_root = _WOLF_ROOT_DIR;
+
+    ProblemPtr P = Problem::create(FRM_PO_3D);
+    Eigen::Vector7s xs;
+    SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
+    SensorBasePtr    St = P->installSensor   ("CAMERA", "camera",   xs, wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
+    ProcessorBasePtr pt = P->installProcessor("IMAGE LANDMARK",     "ORB landmark tracker", "camera",   wolf_root + "/src/examples/processor_image_ORB.yaml");
+    ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
+
+    P->emplaceFrame("PO 3D", KEY_FRAME, xs, 0);
 
 }
+
 
 int main(int argc, char **argv)
 {
