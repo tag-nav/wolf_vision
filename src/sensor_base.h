@@ -129,9 +129,9 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
 }
 
-#include "capture_base.h"
-#include "processor_base.h"
 #include "hardware_base.h"
+#include "processor_base.h"
+#include "capture_base.h"
 
 namespace wolf{
 
