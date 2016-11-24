@@ -57,12 +57,12 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
     std::shared_ptr<SensorCamera> sen_ptr = std::make_shared<SensorCamera>(_extrinsics_pq, intrinsics_ptr);
     sen_ptr->setName(_unique_name);
 
-    std::cout << "Created camera:\n\tintrinsics   : " << sen_ptr->getIntrinsicPtr()->getVector().transpose() << std::endl;
+//    std::cout << "Created camera:\n\tintrinsics   : " << sen_ptr->getIntrinsicPtr()->getVector().transpose() << std::endl;
 //    std::cout << "\tintrinsic matrix  : " << K_ << std::endl;
 //    std::cout << "\tdistortion  : " << distortion_.transpose() << std::endl;
 //    std::cout << "\tcorrection  : " << correction_.transpose() << std::endl;
-    std::cout << "\tposition     : " << sen_ptr->getPPtr()->getVector().transpose() << std::endl;
-    std::cout << "\torientation  : " << sen_ptr->getOPtr()->getVector().transpose() << std::endl;
+//    std::cout << "\tposition     : " << sen_ptr->getPPtr()->getVector().transpose() << std::endl;
+//    std::cout << "\torientation  : " << sen_ptr->getOPtr()->getVector().transpose() << std::endl;
 
     return sen_ptr;
 }
