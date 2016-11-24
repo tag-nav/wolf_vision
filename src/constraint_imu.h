@@ -40,31 +40,33 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
          * Vector3s _v2 : velocity in current frame
          * Matrix<10,1, wolf::Scalar> _expectation : to retrieve resulting expectation (PVQ)
         */
-        template<typename T>
-        void expectation(const T* const _p1, const T* const _q1, const T* const _v1, const T* const _ab, const T* _wb,
-                        const T* const _p2, const T* const _q2, const T* const _v2,//const T* const _lmk_hmg,
-                         T* _expectation) const;
+        template<typename D1>
+        void expectation(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D1> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab, const Eigen::MatrixBase<D1> & _wb,
+                        const Eigen::MatrixBase<D1> & _p2, const Eigen::MatrixBase<D1> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::Matrix<D1,10,1> & _result) const;
 
         Eigen::VectorXs expectation() const
         {
-            Eigen::VectorXs exp(10);
+            Eigen::Matrix<wolf::Scalar, 10, 1> exp;
             FrameBasePtr frm_current    = getFeaturePtr()->getCapturePtr()->getFramePtr();
             FrameBasePtr frm_imu     = getFrameOtherPtr();
-            const Scalar * const frame_imu_pos   = frm_imu->getPPtr()->getVector().data();
-            const Scalar * const frame_imu_ori   = frm_imu->getOPtr()->getVector().data();
-            const Scalar * const frame_imu_vel  = frm_imu->getVPtr()->getVector().data();
-            const Scalar * const frame_imu_ab  = frm_current->getAccBiasPtr()->getVector().data();
-            const Scalar * const frame_imu_wb  = frm_current->getGyroBiasPtr()->getVector().data();
-            const Scalar * const frame_current_pos  = frm_current->getPPtr()->getVector().data();
-            const Scalar * const frame_current_ori  = frm_current->getOPtr()->getVector().data();
-            const Scalar * const frame_current_vel  = frm_current->getVPtr()->getVector().data();
             
-            //const Scalar * const lmk_pos_hmg        = lmk->getPPtr()->getVector().data();
-            expectation(frame_imu_pos, frame_imu_ori, frame_imu_vel, frame_imu_ab, frame_imu_wb,
-                        frame_current_pos, frame_current_ori, frame_current_vel, exp.data());
+            //get information on current_frame in the constraintIMU
+            const Eigen::Vector3s frame_current_pos  = dp_preint_;
+            const Eigen::Quaternions frame_current_ori  = dq_preint_;
+            const Eigen::Vector3s frame_current_vel  = dv_preint_;
+            const Eigen::Vector3s frame_current_ab  = acc_bias_preint_;
+            const Eigen::Vector3s frame_current_wb  = gyro_bias_preint_;
+            const Eigen::VectorXs frame_imu_pos   = (frm_imu->getPPtr()->getVector());
+            const Eigen::VectorXs frame_imu_ori   = (frm_imu->getOPtr()->getVector());
+            const Eigen::VectorXs frame_imu_vel  = (frm_imu->getVPtr()->getVector());
+            
+            //expectation(frame_current_pos, frame_current_ori, frame_current_vel, frame_current_ab, frame_current_wb,
+            //           frame_imu_pos, frame_imu_ori, frame_imu_vel, exp);
             std::cout << frame_current_pos << std::endl;
-            std::cout << frame_current_ori << std::endl;
+            std::cout << frame_current_ori.w() << std::endl;
             std::cout << frame_current_vel << std::endl;
+            std::cout << frame_current_ab << std::endl;
+            std::cout << frame_current_wb << std::endl;
             std::cout << frame_imu_pos << std::endl;
             std::cout << frame_imu_ori << std::endl;
             std::cout << frame_imu_vel << std::endl;
@@ -134,7 +136,8 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
 {
     // MAPS
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
-    Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
+    const Eigen::Quaternion<T> q1(_q1);
+    //Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
     Eigen::Map<const Eigen::Matrix<T,3,1> > v1(_v1);
     Eigen::Map<const Eigen::Matrix<T,3,1> > ab(_ab);
     Eigen::Map<const Eigen::Matrix<T,3,1> > wb(_wb);
@@ -171,32 +174,32 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     return true;
 }
 
-template<typename T>
-inline void ConstraintIMU::expectation(const T* const _p1, const T* const _q1, const T* const _v1, const T* const _ab, const T* _wb,
-                        const T* const _p2, const T* const _q2, const T* const _v2,//const T* const _lmk_hmg,
-                         T* _expectation) const
+template<typename D1>
+inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D1> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab, const Eigen::MatrixBase<D1> & _wb,
+                        const Eigen::MatrixBase<D1> & _p2, const Eigen::MatrixBase<D1> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::Matrix<D1,10,1> & _result) const
 {
     // MAPS
-    Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
-    Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
-    Eigen::Map<const Eigen::Matrix<T,3,1> > v1(_v1);
-    Eigen::Map<const Eigen::Matrix<T,3,1> > ab(_ab);
-    Eigen::Map<const Eigen::Matrix<T,3,1> > wb(_wb);
 
-    Eigen::Map<const Eigen::Matrix<T,3,1> > p2(_p2);
-    Eigen::Map<const Eigen::Quaternion<T> > q2(_q2);
-    Eigen::Map<const Eigen::Matrix<T,3,1> > v2(_v2);
+    Eigen::Map<const Eigen::Matrix<D1,3,1> > p1(_p1);
+    Eigen::Map<const Eigen::Quaternion<D1> > q1(_q1);
+    Eigen::Map<const Eigen::Matrix<D1,3,1> > v1(_v1);
+    Eigen::Map<const Eigen::Matrix<D1,3,1> > ab(_ab);
+    Eigen::Map<const Eigen::Matrix<D1,3,1> > wb(_wb);
 
-    Eigen::Map<Eigen::Matrix<T,10,1> > expectation(_expectation);
-
+    Eigen::Map<const Eigen::Matrix<D1,3,1> > p2(_p2);
+    Eigen::Map<const Eigen::Quaternion<D1> > q2(_q2);
+    Eigen::Map<const Eigen::Matrix<D1,3,1> > v2(_v2);
+    
+    //Eigen::Map<Eigen::Matrix<D1,10,1> > result(_result);
+    
     // Predict delta: d_pred = x2 (-) x1
-    Eigen::Matrix<T,3,1> dp_predict = q1.conjugate() * ( p2 - p1 - v1 * (T)dt_ - (T)0.5 * g_.cast<T>() * (T)dt_2_ );
-    Eigen::Matrix<T,3,1> dv_predict = q1.conjugate() * ( v2 - v1 - g_.cast<T>() * (T)dt_ );
-    Eigen::Quaternion<T> dq_predict = q1.conjugate() * q2;
+    Eigen::Matrix<D1,3,1> dp_predict = q1.conjugate() * ( p2 - p1 - v1 * (D1)dt_ - (D1)0.5 * g_.cast<D1>() * (D1)dt_2_ );
+    Eigen::Matrix<D1,3,1> dv_predict = q1.conjugate() * ( v2 - v1 - g_.cast<D1>() * (D1)dt_ );
+    Eigen::Quaternion<D1> dq_predict = q1.conjugate() * q2;
 
-    expectation.head(3)         = dp_predict;
-    expectation.segment(3,4)    = dq_predict;
-    expectation.tail(3)         = dv_predict;
+    const_cast< Eigen::MatrixBase<D1> > (_result).head(3) = dp_predict;
+    const_cast< Eigen::MatrixBase<D1> > (_result).segment(3,4) = dq_predict;
+    const_cast< Eigen::MatrixBase<D1> > (_result).tail(3) = dv_predict;
 }
 
 /*Eigen::VectorXs ConstraintIMU::expectation(void) const
