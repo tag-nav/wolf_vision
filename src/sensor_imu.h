@@ -11,6 +11,7 @@ struct IntrinsicsIMU : public IntrinsicsBase
         // add IMU parameters here
 };
 
+WOLF_PTR_TYPEDEFS(SensorIMU);
 
 class SensorIMU : public SensorBase
 {

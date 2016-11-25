@@ -6,17 +6,10 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class CaptureIMU;
-typedef std::shared_ptr<CaptureIMU> CaptureIMUPtr;
-typedef std::shared_ptr<const CaptureIMU> CaptureIMUConstPtr;
-typedef std::weak_ptr<CaptureIMU> CaptureIMUWPtr;      
+WOLF_PTR_TYPEDEFS(CaptureIMU);
 
 class CaptureIMU : public CaptureMotion
 {
-    public:
-        typedef std::shared_ptr<CaptureIMU> Ptr;
-
     public:
 
         CaptureIMU(const TimeStamp& _init_ts, SensorBasePtr _sensor_ptr, const Eigen::Vector6s& _data);

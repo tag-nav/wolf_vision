@@ -13,12 +13,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class ProcessorTracker;
-typedef std::shared_ptr<ProcessorTracker> ProcessorTrackerPtr;
-typedef std::shared_ptr<const ProcessorTracker> ProcessorTrackerConstPtr;
-typedef std::weak_ptr<ProcessorTracker> ProcessorTrackerWPtr;
-    
+WOLF_PTR_TYPEDEFS(ProcessorTracker);
 
 struct ProcessorParamsTracker : public ProcessorParamsBase
 {

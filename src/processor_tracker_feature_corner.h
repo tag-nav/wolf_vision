@@ -29,11 +29,7 @@
 namespace wolf
 {
     
-//forward declaration to typedef class pointers
-class ProcessorTrackerFeatureCorner;
-typedef std::shared_ptr<ProcessorTrackerFeatureCorner> ProcessorTrackerFeatureCornerPtr;
-typedef std::shared_ptr<const ProcessorTrackerFeatureCorner> ProcessorTrackerFeatureCornerConstPtr;
-typedef std::weak_ptr<ProcessorTrackerFeatureCorner> ProcessorTrackerFeatureCornerWPtr;
+WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureCorner);
     
 
 //some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level

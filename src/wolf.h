@@ -195,131 +195,81 @@ typedef enum
 //      TYPEDEFS FOR POINTERS, LISTS AND ITERATORS IN THE WOLF TREE
 /////////////////////////////////////////////////////////////////////////
 
-// - forwards for pointers
-class NodeBase;
-class Problem;
-class HardwareBase;
-class SensorBase;
-struct IntrinsicsBase;
-class ProcessorBase;
-class ProcessorMotion;
-struct ProcessorParamsBase;
-class TrajectoryBase;
-class FrameBase;
-class CaptureBase;
-class CaptureMotion;
-class FeatureBase;
-class ConstraintBase;
-class MapBase;
-class LandmarkBase;
-class StateBlock;
-class StateQuaternion;
-class LocalParametrizationBase;
+#define WOLF_PTR_TYPEDEFS(ClassName) \
+        class ClassName; \
+        typedef std::shared_ptr<ClassName>          ClassName##Ptr; \
+        typedef std::shared_ptr<const ClassName>    ClassName##ConstPtr; \
+        typedef std::weak_ptr<ClassName>            ClassName##WPtr;
+
+#define WOLF_LIST_TYPEDEFS(ClassName) \
+        class ClassName; \
+        typedef std::list<ClassName##Ptr>          ClassName##List; \
+        typedef ClassName##List::iterator          ClassName##Iter;
+
 
 // NodeBase
-typedef std::shared_ptr<NodeBase> NodeBasePtr;
-typedef std::shared_ptr<const NodeBase> NodeBaseConstPtr;
-typedef std::weak_ptr<NodeBase> NodeBaseWPtr;
+WOLF_PTR_TYPEDEFS(NodeBase);
 
 // Problem
-typedef std::shared_ptr<Problem> ProblemPtr;
-typedef std::shared_ptr<const Problem> ProblemConstPtr;
-typedef std::weak_ptr<Problem> ProblemWPtr;
+WOLF_PTR_TYPEDEFS(Problem);
 
 // Hardware
-typedef std::shared_ptr<HardwareBase> HardwareBasePtr;
-typedef std::shared_ptr<const HardwareBase> HardwareBaseConstPtr;
-typedef std::weak_ptr<HardwareBase> HardwareBaseWPtr;
+WOLF_PTR_TYPEDEFS(HardwareBase);
 
 // - Sensors
-typedef std::shared_ptr<SensorBase> SensorBasePtr;
-typedef std::shared_ptr<const SensorBase> SensorBaseConstPtr;
-typedef std::weak_ptr<SensorBase> SensorBaseWPtr;
-typedef std::list<SensorBasePtr> SensorBaseList;
-typedef SensorBaseList::iterator SensorBaseIter;
+WOLF_PTR_TYPEDEFS(SensorBase);
+WOLF_LIST_TYPEDEFS(SensorBase);
 
 // - - Intrinsics
+struct IntrinsicsBase;
 typedef std::shared_ptr<IntrinsicsBase> IntrinsicsBasePtr;
 typedef std::shared_ptr<const IntrinsicsBase> IntrinsicsBaseConstPtr;
 
 // - Processors
-typedef std::shared_ptr<ProcessorBase> ProcessorBasePtr;
-typedef std::shared_ptr<const ProcessorBase> ProcessorBaseConstPtr;
-typedef std::weak_ptr<ProcessorBase> ProcessorBaseWPtr;
-typedef std::list<ProcessorBasePtr> ProcessorBaseList;
-typedef ProcessorBaseList::iterator ProcessorBaseIter;
+WOLF_PTR_TYPEDEFS(ProcessorBase);
+WOLF_LIST_TYPEDEFS(ProcessorBase);
 
 // - ProcessorMotion
-typedef std::shared_ptr<ProcessorMotion> ProcessorMotionPtr;
-typedef std::shared_ptr<const ProcessorMotion> ProcessorMotionConstPtr;
-typedef std::weak_ptr<ProcessorMotion> ProcessorMotionWPtr;
+WOLF_PTR_TYPEDEFS(ProcessorMotion);
 
 // - - Processor params
+struct ProcessorParamsBase;
 typedef std::shared_ptr<ProcessorParamsBase> ProcessorParamsBasePtr;
 typedef std::shared_ptr<const ProcessorParamsBase> ProcessorParamsBaseConstPtr;
 
 // Trajectory
-typedef std::shared_ptr<TrajectoryBase> TrajectoryBasePtr;
-typedef std::shared_ptr<const TrajectoryBase> TrajectoryBaseConstPtr;
-typedef std::weak_ptr<TrajectoryBase> TrajectoryBaseWPtr;
+WOLF_PTR_TYPEDEFS(TrajectoryBase);
 
 // - Frame
-typedef std::shared_ptr<FrameBase> FrameBasePtr;
-typedef std::shared_ptr<const FrameBase> FrameBaseConstPtr;
-typedef std::weak_ptr<FrameBase> FrameBaseWPtr;
-typedef std::list<FrameBasePtr> FrameBaseList;
-typedef FrameBaseList::iterator FrameBaseIter;
+WOLF_PTR_TYPEDEFS(FrameBase);
+WOLF_LIST_TYPEDEFS(FrameBase);
 
 // - Capture
-typedef std::shared_ptr<CaptureBase> CaptureBasePtr;
-typedef std::shared_ptr<const CaptureBase> CaptureBaseConstPtr;
-typedef std::weak_ptr<CaptureBase> CaptureBaseWPtr;
-typedef std::list<CaptureBasePtr> CaptureBaseList;
-typedef CaptureBaseList::iterator CaptureBaseIter;
-
-// - CaptureMotion
-typedef std::shared_ptr<CaptureMotion> CaptureMotionPtr;
-typedef std::weak_ptr<CaptureMotion> CaptureMotionWPtr;
+WOLF_PTR_TYPEDEFS(CaptureBase);
+WOLF_LIST_TYPEDEFS(CaptureBase);
 
 // - Feature
-typedef std::shared_ptr<FeatureBase> FeatureBasePtr;
-typedef std::shared_ptr<const FeatureBase> FeatureBaseConstPtr;
-typedef std::weak_ptr<FeatureBase> FeatureBaseWPtr;
-typedef std::list<FeatureBasePtr> FeatureBaseList;
-typedef FeatureBaseList::iterator FeatureBaseIter;
+WOLF_PTR_TYPEDEFS(FeatureBase);
+WOLF_LIST_TYPEDEFS(FeatureBase);
 
 // - Constraint
-typedef std::shared_ptr<ConstraintBase> ConstraintBasePtr;
-typedef std::shared_ptr<const ConstraintBase> ConstraintBaseConstPtr;
-typedef std::weak_ptr<ConstraintBase> ConstraintBaseWPtr;
-typedef std::list<ConstraintBasePtr> ConstraintBaseList;
-typedef ConstraintBaseList::iterator ConstraintBaseIter;
+WOLF_PTR_TYPEDEFS(ConstraintBase);
+WOLF_LIST_TYPEDEFS(ConstraintBase);
 
 // Map
-typedef std::shared_ptr<MapBase> MapBasePtr;
-typedef std::shared_ptr<const MapBase> MapBaseConstPtr;
-typedef std::weak_ptr<MapBase> MapBaseWPtr;
-typedef std::list<MapBasePtr> MapBaseList;
-typedef MapBaseList::iterator MapBaseIter;
+WOLF_PTR_TYPEDEFS(MapBase);
 
 // - Landmark
-typedef std::shared_ptr<LandmarkBase> LandmarkBasePtr;
-typedef std::shared_ptr<const LandmarkBase> LandmarkBaseConstPtr;
-typedef std::weak_ptr<LandmarkBase> LandmarkBaseWPtr;
-typedef std::list<LandmarkBasePtr> LandmarkBaseList;
-typedef LandmarkBaseList::iterator LandmarkBaseIter;
+WOLF_PTR_TYPEDEFS(LandmarkBase);
+WOLF_LIST_TYPEDEFS(LandmarkBase);
 
 // - - State blocks
-typedef std::shared_ptr<StateBlock> StateBlockPtr;
-typedef std::shared_ptr<const StateBlock> StateBlockConstPtr;
-typedef std::weak_ptr<StateBlock> StateBlockWPtr;
-typedef std::list<StateBlockPtr> StateBlockList;
-typedef StateBlockList::iterator StateBlockIter;
-typedef std::shared_ptr<StateQuaternion> StateQuaternionPtr;
+WOLF_PTR_TYPEDEFS(StateBlock);
+WOLF_LIST_TYPEDEFS(StateBlock);
+WOLF_PTR_TYPEDEFS(StateQuaternion);
 
 // - - Local Parametrization
-typedef std::shared_ptr<LocalParametrizationBase> LocalParametrizationBasePtr;
-typedef std::shared_ptr<const LocalParametrizationBase> LocalParametrizationBaseConstPtr;
+WOLF_PTR_TYPEDEFS(LocalParametrizationBase);
 
 
 // ==================================================

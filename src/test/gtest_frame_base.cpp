@@ -67,7 +67,7 @@ TEST(FrameBase, LinksToTree)
     // Problem with 2 frames and one motion constraint between them
     ProblemPtr P = Problem::create(FRM_PO_2D);
     TrajectoryBasePtr T = P->getTrajectoryPtr();
-    SensorOdom2D::Ptr S = make_shared<SensorOdom2D>(make_shared<StateBlock>(2), make_shared<StateBlock>(1), 1,1);
+    SensorOdom2DPtr S = make_shared<SensorOdom2D>(make_shared<StateBlock>(2), make_shared<StateBlock>(1), 1,1);
     P->getHardwarePtr()->addSensor(S);
     FrameBasePtr F1 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
     T->addFrame(F1);

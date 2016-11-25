@@ -40,12 +40,8 @@ typedef std::shared_ptr<LandmarkPolylineMatch> LandmarkPolylineMatchPtr;
 struct ProcessorParamsPolyline;
 typedef std::shared_ptr<ProcessorParamsPolyline> ProcessorParamsPolylinePtr;
 
-//forward declaration to typedef class pointers
-class ProcessorTrackerLandmarkPolyline;
-typedef std::shared_ptr<ProcessorTrackerLandmarkPolyline> ProcessorTrackerLandmarkPolylinePtr;
-typedef std::shared_ptr<const ProcessorTrackerLandmarkPolyline> ProcessorTrackerLandmarkPolylineConstPtr;
-typedef std::weak_ptr<ProcessorTrackerLandmarkPolyline> ProcessorTrackerLandmarkPolylineWPtr;
 
+WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmarkPolyline);
 
 
 // Match Feature - Landmark
@@ -99,9 +95,6 @@ struct ProcessorParamsPolyline : public ProcessorParamsBase
 
 class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 {
-    public:
-        typedef std::shared_ptr<ProcessorTrackerLandmarkPolyline> Ptr;
-
     private:
         laserscanutils::LineFinderIterative line_finder_;
         ProcessorParamsPolyline params_;

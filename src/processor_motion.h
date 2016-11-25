@@ -19,12 +19,6 @@
 namespace wolf
 {
     
-//forward declaration to typedef class pointers
-class ProcessorMotion;
-typedef std::shared_ptr<ProcessorMotion> ProcessorMotionPtr;
-typedef std::shared_ptr<const ProcessorMotion> ProcessorMotionConstPtr;
-typedef std::weak_ptr<ProcessorMotion> ProcessorMotionWPtr;
-
 /** \brief class for Motion processors
  *
  * This processor integrates motion data into vehicle states.

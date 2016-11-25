@@ -32,11 +32,10 @@ struct IntrinsicsOdom3D : public IntrinsicsBase
         {}
 };
 
+WOLF_PTR_TYPEDEFS(SensorOdom3D);
+
 class SensorOdom3D : public SensorBase
 {
-    public:
-        typedef std::shared_ptr<SensorOdom3D> Ptr;
-
     protected:
         Scalar k_disp_to_disp_; ///< ratio of displacement variance to displacement, for odometry noise calculation
         Scalar k_disp_to_rot_; ///< ratio of displacement variance to rotation, for odometry noise calculation

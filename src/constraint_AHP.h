@@ -12,11 +12,7 @@
 
 namespace wolf {
 
-//forward declaration to typedef class pointers
-class ConstraintAHP;
-typedef std::shared_ptr<ConstraintAHP> ConstraintAHPPtr;
-typedef std::shared_ptr<const ConstraintAHP> ConstraintAHPConstPtr;
-typedef std::weak_ptr<ConstraintAHP> ConstraintAHPWPtr;
+WOLF_PTR_TYPEDEFS(ConstraintAHP);
     
 //class    
 class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>

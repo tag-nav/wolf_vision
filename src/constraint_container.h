@@ -8,11 +8,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class ConstraintContainer;
-typedef std::shared_ptr<ConstraintContainer> ConstraintContainerPtr;
-typedef std::shared_ptr<const ConstraintContainer> ConstraintContainerConstPtr;
-typedef std::weak_ptr<ConstraintContainer> ConstraintContainerWPtr;
+WOLF_PTR_TYPEDEFS(ConstraintContainer);
 
 class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 {

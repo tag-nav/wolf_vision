@@ -123,7 +123,7 @@ int main(int argc, char** argv)
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    CaptureIMU::Ptr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_) );
+    CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_) );
 
     // main loop
     using namespace std;

@@ -2,7 +2,7 @@
 namespace wolf
 {
 
-ProcessorOdom3D::ProcessorOdom3D(ProcessorOdom3DParams::Ptr _params, SensorOdom3D::Ptr _sensor_ptr) :
+ProcessorOdom3D::ProcessorOdom3D(ProcessorOdom3DParams::Ptr _params, SensorOdom3DPtr _sensor_ptr) :
                 ProcessorMotion("ODOM 3D", 7, 7, 6, 6),
                 max_time_span_  (_params ? _params    ->max_time_span   : 1.0  ),
                 max_buff_length_(_params ? _params    ->max_buff_length : 10   ),
@@ -21,7 +21,7 @@ ProcessorOdom3D::~ProcessorOdom3D()
 {
 }
 
-void ProcessorOdom3D::setup(SensorOdom3D::Ptr sen_ptr)
+void ProcessorOdom3D::setup(SensorOdom3DPtr sen_ptr)
 {
     if (sen_ptr)
     {
@@ -249,7 +249,7 @@ ProcessorBasePtr ProcessorOdom3D::create(const std::string& _unique_name, const 
     // cast inputs to the correct type
     std::shared_ptr<ProcessorOdom3DParams> prc_odo_params = std::static_pointer_cast<ProcessorOdom3DParams>(_params);
 
-    SensorOdom3D::Ptr sen_odo =std::static_pointer_cast<SensorOdom3D>(_sen_ptr);
+    SensorOdom3DPtr sen_odo =std::static_pointer_cast<SensorOdom3D>(_sen_ptr);
 
     // construct processor
     std::shared_ptr<ProcessorOdom3D> prc_odo = std::make_shared<ProcessorOdom3D>(prc_odo_params, sen_odo);

@@ -10,11 +10,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class LandmarkContainer;
-typedef std::shared_ptr<LandmarkContainer> LandmarkContainerPtr;
-typedef std::shared_ptr<const LandmarkContainer> LandmarkContainerConstPtr;
-typedef std::weak_ptr<LandmarkContainer> LandmarkContainerWPtr;
+WOLF_PTR_TYPEDEFS(LandmarkContainer);
 
 //class LandmarkContainer
 class LandmarkContainer : public LandmarkBase

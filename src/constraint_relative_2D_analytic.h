@@ -8,11 +8,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class ConstraintRelative2DAnalytic;
-typedef std::shared_ptr<ConstraintRelative2DAnalytic> ConstraintRelative2DAnalyticPtr;
-typedef std::shared_ptr<const ConstraintRelative2DAnalytic> ConstraintRelative2DAnalyticConstPtr;
-typedef std::weak_ptr<ConstraintRelative2DAnalytic> ConstraintRelative2DAnalyticWPtr;
+WOLF_PTR_TYPEDEFS(ConstraintRelative2DAnalytic);
     
 //class
 class ConstraintRelative2DAnalytic : public ConstraintAnalytic

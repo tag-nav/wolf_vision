@@ -14,11 +14,7 @@
 
 namespace wolf {
 
-//forward declaration to typedef class pointers
-class ConstraintGPSPseudorange2D;
-typedef std::shared_ptr<ConstraintGPSPseudorange2D> ConstraintGPSPseudorange2DPtr;
-typedef std::shared_ptr<const ConstraintGPSPseudorange2D> ConstraintGPSPseudorange2DConstPtr;
-typedef std::weak_ptr<ConstraintGPSPseudorange2D> ConstraintGPSPseudorange2DWPtr;
+WOLF_PTR_TYPEDEFS(ConstraintGPSPseudorange2D);
     
 /*
  * NB:

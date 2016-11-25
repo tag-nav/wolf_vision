@@ -12,11 +12,7 @@
 
 namespace wolf {
 
-//forward declaration to typedef class pointers
-class CaptureFix;
-typedef std::shared_ptr<CaptureFix> CaptureFixPtr;
-typedef std::shared_ptr<const CaptureFix> CaptureFixConstPtr;
-typedef std::weak_ptr<CaptureFix> CaptureFixWPtr;
+WOLF_PTR_TYPEDEFS(CaptureFix);
 
 //class CaptureFix
 class CaptureFix : public CaptureBase

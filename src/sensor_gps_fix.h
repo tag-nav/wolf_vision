@@ -17,6 +17,8 @@ struct IntrinsicsGPSFix : public IntrinsicsBase
         // Empty -- it acts only as a typedef for IntrinsicsBase, but allows future extension with parameters
 };
 
+WOLF_PTR_TYPEDEFS(SensorGPSFix);
+
 class SensorGPSFix : public SensorBase
 {
     public:

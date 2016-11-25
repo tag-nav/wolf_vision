@@ -7,11 +7,7 @@
 
 namespace wolf {
 
-//forward declaration to typedef class pointers
-class ConstraintCorner2D;
-typedef std::shared_ptr<ConstraintCorner2D> ConstraintCorner2DPtr;
-typedef std::shared_ptr<const ConstraintCorner2D> ConstraintCorner2DConstPtr;
-typedef std::weak_ptr<ConstraintCorner2D> ConstraintCorner2DWPtr;
+WOLF_PTR_TYPEDEFS(ConstraintCorner2D);
     
 class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 {

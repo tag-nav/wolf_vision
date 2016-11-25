@@ -5,11 +5,7 @@
 
 namespace wolf {
 
-//forward declaration to typedef class pointers
-class ConstraintEpipolar;
-typedef std::shared_ptr<ConstraintEpipolar> ConstraintEpipolarPtr;
-typedef std::shared_ptr<const ConstraintEpipolar> ConstraintEpipolarConstPtr;
-typedef std::weak_ptr<ConstraintEpipolar> ConstraintEpipolarWPtr;
+WOLF_PTR_TYPEDEFS(ConstraintEpipolar);
     
 
 class ConstraintEpipolar : public ConstraintBase

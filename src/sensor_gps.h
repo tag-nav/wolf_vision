@@ -22,12 +22,10 @@ struct IntrinsicsGPS : public IntrinsicsBase
         // add GPS parameters here
 };
 
+WOLF_PTR_TYPEDEFS(SensorGPS);
+
 class SensorGPS : public SensorBase
 {
-    public:
-        typedef std::shared_ptr<SensorGPS> Ptr;
-        typedef std::weak_ptr<SensorGPS> WPtr;
-
 public:
     //pointer to sensor position, orientation, bias, init vehicle position and orientation
     SensorGPS(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _bias_ptr, StateBlockPtr _map_position_ptr, StateBlockPtr _map_orientation_ptr);

@@ -12,11 +12,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class LandmarkAHP;
-typedef std::shared_ptr<LandmarkAHP> LandmarkAHPPtr;
-typedef std::shared_ptr<const LandmarkAHP> LandmarkAHPConstPtr;
-typedef std::weak_ptr<LandmarkAHP> LandmarkAHPWPtr;
+WOLF_PTR_TYPEDEFS(LandmarkAHP);
 
 /* Landmark - Anchored Homogeneous Point*/
 class LandmarkAHP : public LandmarkBase

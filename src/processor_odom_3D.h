@@ -17,11 +17,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class ProcessorOdom3D;
-typedef std::shared_ptr<ProcessorOdom3D> ProcessorOdom3DPtr;
-typedef std::shared_ptr<const ProcessorOdom3D> ProcessorOdom3DConstPtr;
-typedef std::weak_ptr<ProcessorOdom3D> ProcessorOdom3DWPtr;
+WOLF_PTR_TYPEDEFS(ProcessorOdom3D);
  
 
 struct ProcessorOdom3DParams : public ProcessorParamsBase
@@ -70,9 +66,9 @@ struct ProcessorOdom3DParams : public ProcessorParamsBase
 class ProcessorOdom3D : public ProcessorMotion
 {
     public:
-        ProcessorOdom3D(ProcessorOdom3DParams::Ptr _params = nullptr, SensorOdom3D::Ptr _sensor_ptr = nullptr);
+        ProcessorOdom3D(ProcessorOdom3DParams::Ptr _params = nullptr, SensorOdom3DPtr _sensor_ptr = nullptr);
         virtual ~ProcessorOdom3D();
-        void setup(SensorOdom3D::Ptr sen_ptr);
+        void setup(SensorOdom3DPtr sen_ptr);
 
     public:
         virtual void data2delta(const Eigen::VectorXs& _data,

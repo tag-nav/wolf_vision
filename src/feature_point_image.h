@@ -11,11 +11,7 @@
 
 namespace wolf {
 
-//forward declaration to typedef class pointers
-class FeaturePointImage;
-typedef std::shared_ptr<FeaturePointImage> FeaturePointImagePtr;
-typedef std::shared_ptr<const FeaturePointImage> FeaturePointImageConstPtr;
-typedef std::weak_ptr<FeaturePointImage> FeaturePointImageWPtr;
+WOLF_PTR_TYPEDEFS(FeaturePointImage);
     
 //class FeaturePointImage
 class FeaturePointImage : public FeatureBase

@@ -26,11 +26,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class ProcessorImageFeature;
-typedef std::shared_ptr<ProcessorImageFeature> ProcessorImageFeaturePtr;
-typedef std::shared_ptr<const ProcessorImageFeature> ProcessorImageFeatureConstPtr;
-typedef std::weak_ptr<ProcessorImageFeature> ProcessorImageFeatureWPtr;
+WOLF_PTR_TYPEDEFS(ProcessorImageFeature);
     
 //class
 class ProcessorImageFeature : public ProcessorTrackerFeature
@@ -66,7 +62,7 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
         ProcessorImageFeature(ProcessorParamsImage _params);
         virtual ~ProcessorImageFeature();
 
-        virtual void setup(SensorCamera::Ptr _camera_ptr);
+        virtual void setup(SensorCameraPtr _camera_ptr);
 
     protected:
 

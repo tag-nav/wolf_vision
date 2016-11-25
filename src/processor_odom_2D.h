@@ -14,11 +14,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class ProcessorOdom2D;
-typedef std::shared_ptr<ProcessorOdom2D> ProcessorOdom2DPtr;
-typedef std::shared_ptr<const ProcessorOdom2D> ProcessorOdom2DConstPtr;
-typedef std::weak_ptr<ProcessorOdom2D> ProcessorOdom2DWPtr;
+WOLF_PTR_TYPEDEFS(ProcessorOdom2D);
    
 
 struct ProcessorParamsOdom2D : public ProcessorParamsBase

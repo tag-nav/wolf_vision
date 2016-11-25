@@ -12,11 +12,7 @@
 
 namespace wolf
 {
-//forward declaration to typedef class pointers
-class FeaturePolyline2D;
-typedef std::shared_ptr<FeaturePolyline2D> FeaturePolyline2DPtr;
-typedef std::shared_ptr<const FeaturePolyline2D> FeaturePolyline2DConstPtr;
-typedef std::weak_ptr<FeaturePolyline2D> FeaturePolyline2DWPtr;
+WOLF_PTR_TYPEDEFS(FeaturePolyline2D);
 
 //class
 class FeaturePolyline2D : public FeatureBase

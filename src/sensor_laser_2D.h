@@ -19,11 +19,10 @@ struct IntrinsicsLaser2D : public IntrinsicsBase
         laserscanutils::LaserScanParams scan_params;
 };
 
+WOLF_PTR_TYPEDEFS(SensorLaser2D);
 
 class SensorLaser2D : public SensorBase
 {
-    public:
-        typedef std::shared_ptr<SensorBase> Ptr;
     protected:
         laserscanutils::LaserScanParams scan_params_;
 

@@ -8,11 +8,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class ConstraintPoint2D;
-typedef std::shared_ptr<ConstraintPoint2D> ConstraintPoint2DPtr;
-typedef std::shared_ptr<const ConstraintPoint2D> ConstraintPoint2DConstPtr;
-typedef std::weak_ptr<ConstraintPoint2D> ConstraintPoint2DWPtr;
+WOLF_PTR_TYPEDEFS(ConstraintPoint2D);
     
 //class
 class ConstraintPoint2D: public ConstraintSparse<2,2,1,2,1,2>

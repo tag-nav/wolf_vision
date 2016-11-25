@@ -72,7 +72,7 @@ ProcessorImageLandmark::~ProcessorImageLandmark()
     //
 }
 
-void ProcessorImageLandmark::setup(SensorCamera::Ptr _camera_ptr)
+void ProcessorImageLandmark::setup(SensorCameraPtr _camera_ptr)
 {
     image_.width_ = _camera_ptr->getImgWidth();
     image_.height_ = _camera_ptr->getImgHeight();

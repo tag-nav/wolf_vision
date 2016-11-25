@@ -17,14 +17,12 @@ struct IntrinsicsCamera : public IntrinsicsBase
         Eigen::VectorXs distortion;         ///< d = [d_1, d_2, d_3, ...] radial distortion coefficients
 };
 
+WOLF_PTR_TYPEDEFS(SensorCamera);
+
 /**Pin-hole camera sensor
  */
 class SensorCamera : public SensorBase
 {
-    public:
-        typedef std::shared_ptr<SensorCamera> Ptr;
-        typedef std::weak_ptr<SensorCamera> WPtr;
-
     public:
         /** \brief Constructor with arguments
          *

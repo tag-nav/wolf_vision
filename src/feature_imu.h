@@ -9,11 +9,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class FeatureIMU;
-typedef std::shared_ptr<FeatureIMU> FeatureIMUPtr;
-typedef std::shared_ptr<const FeatureIMU> FeatureIMUConstPtr;
-typedef std::weak_ptr<FeatureIMU> FeatureIMUWPtr;
+WOLF_PTR_TYPEDEFS(FeatureIMU);
 
 //class FeatureIMU
 class FeatureIMU : public FeatureBase

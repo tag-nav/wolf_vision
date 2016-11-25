@@ -9,11 +9,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class FeatureGPSFix;
-typedef std::shared_ptr<FeatureGPSFix> FeatureGPSFixPtr;
-typedef std::shared_ptr<const FeatureGPSFix> FeatureGPSFixConstPtr;
-typedef std::weak_ptr<FeatureGPSFix> FeatureGPSFixWPtr;
+WOLF_PTR_TYPEDEFS(FeatureGPSFix);
 
 //class FeatureGPSFix
 class FeatureGPSFix : public FeatureBase

@@ -8,11 +8,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class CaptureGPS;
-typedef std::shared_ptr<CaptureGPS> CaptureGPSPtr;
-typedef std::shared_ptr<const CaptureGPS> CaptureGPSConstPtr;
-typedef std::weak_ptr<CaptureGPS> CaptureGPSWPtr;    
+WOLF_PTR_TYPEDEFS(CaptureGPS);
 
 class CaptureGPS : public CaptureBase
 {

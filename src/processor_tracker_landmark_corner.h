@@ -39,12 +39,7 @@ const Scalar min_features_ratio_th_ = 0.5;
 struct ProcessorParamsLaser;
 typedef std::shared_ptr<ProcessorParamsLaser> ProcessorParamsLaserPtr;
 
-//forward declaration to typedef class pointers
-class ProcessorTrackerLandmarkCorner;
-typedef std::shared_ptr<ProcessorTrackerLandmarkCorner> ProcessorTrackerLandmarkCornerPtr;
-typedef std::shared_ptr<const ProcessorTrackerLandmarkCorner> ProcessorTrackerLandmarkCornerConstPtr;
-typedef std::weak_ptr<ProcessorTrackerLandmarkCorner> ProcessorTrackerLandmarkCornerWPtr;
- 
+WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmarkCorner);
 
 struct ProcessorParamsLaser : public ProcessorParamsBase
 {

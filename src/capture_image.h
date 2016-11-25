@@ -14,11 +14,8 @@
 
 namespace wolf {
 
-//forward declaration to typedef class pointers
-class CaptureImage;
-typedef std::shared_ptr<CaptureImage> CaptureImagePtr;
-typedef std::shared_ptr<const CaptureImage> CaptureImageConstPtr;
-typedef std::weak_ptr<CaptureImage> CaptureImageWPtr;    
+// Set ClassPtr, ClassConstPtr and ClassWPtr typedefs;
+WOLF_PTR_TYPEDEFS(CaptureImage);
     
 /**
  * \brief class CaptureImage
@@ -34,7 +31,7 @@ class CaptureImage : public CaptureBase
         std::vector<cv::KeyPoint> keypoints_;
 
     public:
-        CaptureImage(const TimeStamp& _ts, SensorCamera::Ptr _camera_ptr, cv::Mat _data_cv);
+        CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv::Mat _data_cv);
         virtual ~CaptureImage();
 
         virtual const cv::Mat& getImage() const;

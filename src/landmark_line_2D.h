@@ -11,11 +11,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class LandmarkLine2D;
-typedef std::shared_ptr<LandmarkLine2D> LandmarkLine2DPtr;
-typedef std::shared_ptr<const LandmarkLine2D> LandmarkLine2DConstPtr;
-typedef std::weak_ptr<LandmarkLine2D> LandmarkLine2DWPtr;
+WOLF_PTR_TYPEDEFS(LandmarkLine2D);
 
 
 //class LandmarkLine2D

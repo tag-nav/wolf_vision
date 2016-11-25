@@ -10,11 +10,8 @@
 
 namespace wolf {
 
-//forward declaration to typedef class pointers
-class ConstraintGPSPseudorange3D;
-typedef std::shared_ptr<ConstraintGPSPseudorange3D> ConstraintGPSPseudorange3DPtr;
-typedef std::shared_ptr<const ConstraintGPSPseudorange3D> ConstraintGPSPseudorange3DConstPtr;
-typedef std::weak_ptr<ConstraintGPSPseudorange3D> ConstraintGPSPseudorange3DWPtr;
+// Set ClassPtr, ClassConstPtr and ClassWPtr typedefs;
+WOLF_PTR_TYPEDEFS(ConstraintGPSPseudorange3D);
     
 /*
  * NB:

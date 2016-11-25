@@ -20,11 +20,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class CaptureMotion;
-typedef std::shared_ptr<CaptureMotion> CaptureMotionPtr;
-typedef std::shared_ptr<const CaptureMotion> CaptureMotionConst;
-typedef std::weak_ptr<CaptureMotion> CaptureMotionWPtr;      
+WOLF_PTR_TYPEDEFS(CaptureMotion);
     
 
 /** \brief Base class for motion Captures.

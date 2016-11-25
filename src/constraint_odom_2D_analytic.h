@@ -7,11 +7,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class ConstraintOdom2DAnalytic;
-typedef std::shared_ptr<ConstraintOdom2DAnalytic> ConstraintOdom2DAnalyticPtr;
-typedef std::shared_ptr<const ConstraintOdom2DAnalytic> ConstraintOdom2DAnalyticConstPtr;
-typedef std::weak_ptr<ConstraintOdom2DAnalytic> ConstraintOdom2DAnalyticWPtr;
+WOLF_PTR_TYPEDEFS(ConstraintOdom2DAnalytic);
     
 //class
 class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic

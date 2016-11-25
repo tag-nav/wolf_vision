@@ -9,11 +9,7 @@
 
 namespace wolf {
     
-//forward declaration to typedef class pointers
-class ConstraintFix;
-typedef std::shared_ptr<ConstraintFix> ConstraintFixPtr;
-typedef std::shared_ptr<const ConstraintFix> ConstraintFixConstPtr;
-typedef std::weak_ptr<ConstraintFix> ConstraintFixWPtr;
+WOLF_PTR_TYPEDEFS(ConstraintFix);
 
 //class
 class ConstraintFix: public ConstraintSparse<3,2,1>
