@@ -14,13 +14,16 @@ class StateQuaternion;
 
 
 namespace wolf {
-
+    
+//forward declaration to typedef class pointers
+class FrameIMU;
+typedef std::shared_ptr<FrameIMU> FrameIMUPtr;
+typedef std::shared_ptr<const FrameIMU> FrameIMUConstPtr;
+typedef std::weak_ptr<FrameIMU> FrameIMUWPtr;
+    
+//class
   class FrameIMU : public FrameBase
   {
-      public:
-          typedef std::shared_ptr<FrameIMU> Ptr;
-          typedef std::weak_ptr<FrameIMU> WPtr;
-
       public:
 
           /** \brief Constructor with type, time stamp and state vector

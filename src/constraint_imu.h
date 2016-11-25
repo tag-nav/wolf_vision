@@ -20,10 +20,7 @@ typedef std::weak_ptr<ConstraintIMU> ConstraintIMUWPtr;
 class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
 {
     public:
-        typedef std::shared_ptr<ConstraintIMU> Ptr;
-
-    public:
-        ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMU::Ptr _frame_ptr, bool _apply_loss_function = false,
+        ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_ptr, bool _apply_loss_function = false,
                       ConstraintStatus _status = CTR_ACTIVE);
 
         virtual ~ConstraintIMU();
@@ -60,7 +57,7 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         const Eigen::Vector3s g_; ///< acceleration of gravity in World frame
 };
 
-inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMU::Ptr _frame_ptr, bool _apply_loss_function,
+inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_ptr, bool _apply_loss_function,
                                     ConstraintStatus _status) :
         ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, _apply_loss_function, _status,
                                                     _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _frame_ptr->getVPtr(),

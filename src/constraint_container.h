@@ -17,12 +17,12 @@ typedef std::weak_ptr<ConstraintContainer> ConstraintContainerWPtr;
 class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 {
 	protected:
-		LandmarkContainer::WPtr lmk_ptr_;
+		LandmarkContainerWPtr lmk_ptr_;
 		unsigned int corner_;
 
 	public:
 
-	    ConstraintContainer(FeatureBasePtr _ftr_ptr, LandmarkContainer::Ptr _lmk_ptr, const unsigned int _corner, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+	    ConstraintContainer(FeatureBasePtr _ftr_ptr, LandmarkContainerPtr _lmk_ptr, const unsigned int _corner, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
 			ConstraintSparse<3,2,1,2,1>(CTR_CONTAINER, nullptr, nullptr, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
 			lmk_ptr_(_lmk_ptr),
 			corner_(_corner)
@@ -38,7 +38,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 			//std::cout << "deleting ConstraintContainer " << id() << std::endl;
 		}
 
-		LandmarkContainer::Ptr getLandmarkPtr()
+		LandmarkContainerPtr getLandmarkPtr()
 		{
 			return lmk_ptr_.lock();
 		}
