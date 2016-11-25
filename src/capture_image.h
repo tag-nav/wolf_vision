@@ -34,11 +34,11 @@ class CaptureImage : public CaptureBase
         CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv::Mat _data_cv);
         virtual ~CaptureImage();
 
-        virtual const cv::Mat& getImage() const;
-        virtual void setDescriptors(const cv::Mat &_descriptors);
-        virtual void setKeypoints(const std::vector<cv::KeyPoint>& _keypoints);
-        virtual cv::Mat& getDescriptors();
-        virtual std::vector<cv::KeyPoint>& getKeypoints();
+        const cv::Mat& getImage() const;
+        void setDescriptors(const cv::Mat &_descriptors);
+        void setKeypoints(const std::vector<cv::KeyPoint>& _keypoints);
+        cv::Mat& getDescriptors();
+        std::vector<cv::KeyPoint>& getKeypoints();
 };
 
 } // namespace wolf
