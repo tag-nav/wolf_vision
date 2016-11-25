@@ -35,7 +35,7 @@ SensorBasePtr SensorOdom2D::create(const std::string& _unique_name, const Eigen:
     StateBlockPtr pos_ptr = std::make_shared<StateBlock>(_extrinsics_po.head(2), true);
     StateBlockPtr ori_ptr = std::make_shared<StateBlock>(_extrinsics_po.tail(1), true);
     // cast intrinsics into derived type
-    std::shared_ptr<SensorOdom2D> odo;
+    SensorOdom2DPtr odo;
     if (_intrinsics)
     {
         std::shared_ptr<IntrinsicsOdom2D> params = std::static_pointer_cast<IntrinsicsOdom2D>(_intrinsics);

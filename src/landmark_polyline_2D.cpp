@@ -250,7 +250,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
     {
         if (ctr_ptr->getTypeId() == CTR_POINT_2D)
         {
-            std::shared_ptr<ConstraintPoint2D> ctr_point_ptr = std::static_pointer_cast<ConstraintPoint2D>(ctr_ptr);
+            ConstraintPoint2DPtr ctr_point_ptr = std::static_pointer_cast<ConstraintPoint2D>(ctr_ptr);
 
             // If landmark point constrained -> new constraint
             if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
@@ -263,7 +263,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
         }
         else if  (ctr_ptr->getTypeId() == CTR_POINT_TO_LINE_2D)
         {
-            std::shared_ptr<ConstraintPointToLine2D> ctr_point_ptr = std::static_pointer_cast<ConstraintPointToLine2D>(ctr_ptr);
+            ConstraintPointToLine2DPtr ctr_point_ptr = std::static_pointer_cast<ConstraintPointToLine2D>(ctr_ptr);
 
             // If landmark point constrained -> new constraint
             if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
@@ -360,7 +360,7 @@ LandmarkBasePtr LandmarkPolyline2D::create(const YAML::Node& _lmk_node)
     }
 
     // Create a new landmark
-    std::shared_ptr<LandmarkPolyline2D> lmk_ptr = std::make_shared<LandmarkPolyline2D>(std::make_shared<StateBlock>(pos, pos_fixed), std::make_shared<StateBlock>(ori, ori_fixed), points, first_defined, last_defined, first_id, classification);
+    LandmarkPolyline2DPtr lmk_ptr = std::make_shared<LandmarkPolyline2D>(std::make_shared<StateBlock>(pos, pos_fixed), std::make_shared<StateBlock>(ori, ori_fixed), points, first_defined, last_defined, first_id, classification);
     lmk_ptr->setId(id);
 
     // fix all points

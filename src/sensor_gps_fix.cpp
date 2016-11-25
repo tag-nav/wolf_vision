@@ -27,7 +27,7 @@ SensorBasePtr SensorGPSFix::create(const std::string& _unique_name, const Eigen:
     assert((_extrinsics.size() == 2 || _extrinsics.size() == 3)
             && "Bad extrinsic vector size. Should be 2 for 2D, 3 for 3D.");
     StateBlockPtr pos_ptr = std::make_shared<StateBlock>(_extrinsics, true);
-    std::shared_ptr<SensorGPSFix> sen = std::make_shared<SensorGPSFix>(pos_ptr, nullptr, 0);
+    SensorGPSFixPtr sen = std::make_shared<SensorGPSFix>(pos_ptr, nullptr, 0);
     sen->setName(_unique_name);
     return sen;
 }

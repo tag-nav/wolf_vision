@@ -359,7 +359,7 @@ Eigen::VectorXs ProcessorTrackerLandmarkCorner::computeSquaredMahalanobisDistanc
 ProcessorBasePtr ProcessorTrackerLandmarkCorner::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
 {
     ProcessorParamsLaserPtr params = std::static_pointer_cast<ProcessorParamsLaser>(_params);
-    std::shared_ptr<ProcessorTrackerLandmarkCorner> prc_ptr = std::make_shared<ProcessorTrackerLandmarkCorner>(params->line_finder_params_, params->new_corners_th, params->loop_frames_th);
+    ProcessorTrackerLandmarkCornerPtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkCorner>(params->line_finder_params_, params->new_corners_th, params->loop_frames_th);
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

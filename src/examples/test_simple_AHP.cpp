@@ -141,19 +141,19 @@ int main(int argc, char** argv)
     cv::Mat desc;
 
     cv::KeyPoint kp_0;
-    std::shared_ptr<FeaturePointImage> feat_0 = std::make_shared<FeaturePointImage>(kp_0, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_0 = std::make_shared<FeaturePointImage>(kp_0, desc, Eigen::Matrix2s::Identity());
     image_0->addFeature(feat_0);
 
     cv::KeyPoint kp_1;
-    std::shared_ptr<FeaturePointImage> feat_1 = std::make_shared<FeaturePointImage>(kp_1, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_1 = std::make_shared<FeaturePointImage>(kp_1, desc, Eigen::Matrix2s::Identity());
     image_1->addFeature(feat_1);
 
     cv::KeyPoint kp_2;
-    std::shared_ptr<FeaturePointImage> feat_2 = std::make_shared<FeaturePointImage>(kp_2, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_2 = std::make_shared<FeaturePointImage>(kp_2, desc, Eigen::Matrix2s::Identity());
     image_2->addFeature(feat_2);
 
     // Landmark--------------------
-    std::shared_ptr<LandmarkAHP> lmk_1 = std::make_shared<LandmarkAHP>(lmk_hmg_c, kf_1, camera, desc);
+    LandmarkAHPPtr lmk_1 = std::make_shared<LandmarkAHP>(lmk_hmg_c, kf_1, camera, desc);
     problem->addLandmark(lmk_1);
     lmk_1->setStatus(LANDMARK_FIXED);
     std::cout << "Landmark 1: " << lmk_1->point().transpose() << std::endl;
@@ -190,10 +190,10 @@ int main(int argc, char** argv)
     //======== now we want to estimate a new lmk ===============
     //
     // Features -----------------
-    std::shared_ptr<FeaturePointImage> feat_3 = std::make_shared<FeaturePointImage>(kp_1, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_3 = std::make_shared<FeaturePointImage>(kp_1, desc, Eigen::Matrix2s::Identity());
     image_1->addFeature(feat_3);
 
-    std::shared_ptr<FeaturePointImage> feat_4 = std::make_shared<FeaturePointImage>(kp_2, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_4 = std::make_shared<FeaturePointImage>(kp_2, desc, Eigen::Matrix2s::Identity());
     image_2->addFeature(feat_4);
 
 

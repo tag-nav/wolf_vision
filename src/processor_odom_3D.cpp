@@ -252,7 +252,7 @@ ProcessorBasePtr ProcessorOdom3D::create(const std::string& _unique_name, const 
     SensorOdom3DPtr sen_odo =std::static_pointer_cast<SensorOdom3D>(_sen_ptr);
 
     // construct processor
-    std::shared_ptr<ProcessorOdom3D> prc_odo = std::make_shared<ProcessorOdom3D>(prc_odo_params, sen_odo);
+    ProcessorOdom3DPtr prc_odo = std::make_shared<ProcessorOdom3D>(prc_odo_params, sen_odo);
 
     // setup processor
     prc_odo->setName(_unique_name);

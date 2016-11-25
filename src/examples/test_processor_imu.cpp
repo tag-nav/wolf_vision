@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     ProblemPtr problem_ptr_ = Problem::create(FRM_PQVBB_3D);
     Eigen::VectorXs extrinsics(7);
     extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-    SensorBasePtr sensor_ptr = problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, shared_ptr<IntrinsicsBase>());
+    SensorBasePtr sensor_ptr = problem_ptr_->installSensor("IMU", "Main IMU", extrinsics, IntrinsicsBasePtr());
     problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Time and data variables
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
     problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    shared_ptr<CaptureIMU> imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data);
+    CaptureIMUPtr imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data);
     imu_ptr->setDataCovariance(data_cov);
 
 //    problem_ptr_->print();

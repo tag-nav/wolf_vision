@@ -24,7 +24,7 @@ void print(MapBase& _map)
         std::cout << "\nLmk type:  " << lmk_ptr->getType();
         if (lmk_ptr->getType() == "POLYLINE 2D")
         {
-            std::shared_ptr<LandmarkPolyline2D> poly_ptr = std::static_pointer_cast<LandmarkPolyline2D>(lmk_ptr);
+            LandmarkPolyline2DPtr poly_ptr = std::static_pointer_cast<LandmarkPolyline2D>(lmk_ptr);
             std::cout << "\npos:       " << poly_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getPPtr()->isFixed();
             std::cout << "\nori:       " << poly_ptr->getOPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getOPtr()->isFixed();
             std::cout << "\nn points:  " << poly_ptr->getNPoints();
@@ -37,7 +37,7 @@ void print(MapBase& _map)
         }
         else if (lmk_ptr->getType() == "AHP")
         {
-            std::shared_ptr<LandmarkAHP> ahp_ptr = std::static_pointer_cast<LandmarkAHP>(lmk_ptr);
+            LandmarkAHPPtr ahp_ptr = std::static_pointer_cast<LandmarkAHP>(lmk_ptr);
             std::cout << "\npos:       " << ahp_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << ahp_ptr->getPPtr()->isFixed();
             std::cout << "\ndescript:  " << ahp_ptr->getCvDescriptor().t();
             break;

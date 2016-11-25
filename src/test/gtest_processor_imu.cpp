@@ -29,7 +29,7 @@ using namespace wolf::Constants;
 // Wolf problem
 ProblemPtr problem = Problem::create(FRM_PQVBB_3D);
 Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
-SensorBasePtr    sensor_ptr     = problem->installSensor("IMU", "Main IMU", extrinsics, shared_ptr<IntrinsicsBase>());
+SensorBasePtr    sensor_ptr     = problem->installSensor("IMU", "Main IMU", extrinsics, IntrinsicsBasePtr());
 ProcessorBasePtr processor_ptr  = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
 // Time and data variables
@@ -43,7 +43,7 @@ Matrix6s data_cov = Matrix6s::Identity();
 VectorXs x0(16);
 
 // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-shared_ptr<CaptureIMU> cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data);
+CaptureIMUPtr cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data);
 
 
 

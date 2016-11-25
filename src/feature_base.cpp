@@ -45,7 +45,7 @@ void FeatureBase::remove()
     if (!is_removing_)
     {
         is_removing_ = true;
-        std::shared_ptr<FeatureBase> this_f = shared_from_this(); // keep this alive while removing it
+        FeatureBasePtr this_f = shared_from_this(); // keep this alive while removing it
         CaptureBasePtr C = capture_ptr_.lock();
         if (C)
         {

@@ -123,7 +123,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
     {
 
         // project landmark into incoming capture
-        std::shared_ptr<LandmarkAHP> landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_in_ptr);
+        LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_in_ptr);
         Eigen::Vector4s point3D_hmg;
         Eigen::Vector3s pixel_hmg;
         Eigen::Vector2s point_projected, point_distorted, pixel;
@@ -152,7 +152,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
                 if (normalized_score > params_.matcher.min_normalized_score)
                 {
-                    std::shared_ptr<FeaturePointImage> incoming_point_ptr = std::make_shared<FeaturePointImage>(
+                    FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                             candidate_keypoints[cv_matches[0].trainIdx],
                             candidate_descriptors.row(cv_matches[0].trainIdx),
                             Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
@@ -223,7 +223,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
                 if(new_keypoints[0].response > params_.algorithm.min_response_for_new_features)
                 {
                     list_response_.push_back(new_keypoints[0].response);
-                    std::shared_ptr<FeaturePointImage> point_ptr = std::make_shared<FeaturePointImage>(
+                    FeaturePointImagePtr point_ptr = std::make_shared<FeaturePointImage>(
                             new_keypoints[0],
                             new_descriptors.row(index),
                             Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
@@ -250,7 +250,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
 LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_ptr)
 {
 
-    std::shared_ptr<FeaturePointImage> feat_point_image_ptr = std::static_pointer_cast<FeaturePointImage>( _feature_ptr);
+    FeaturePointImagePtr feat_point_image_ptr = std::static_pointer_cast<FeaturePointImage>( _feature_ptr);
     FrameBasePtr anchor_frame = getLastPtr()->getFramePtr();
 
     Eigen::Vector2s point2D;
@@ -272,7 +272,7 @@ LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_p
 
     vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/distance};
 
-    std::shared_ptr<LandmarkAHP> lmk_ahp_ptr = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
+    LandmarkAHPPtr lmk_ahp_ptr = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
     _feature_ptr->setLandmarkId(lmk_ahp_ptr->id());
     return lmk_ahp_ptr;
 }
@@ -282,7 +282,7 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
 
     if ((std::static_pointer_cast<LandmarkAHP>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFramePtr())
     {
-        return std::shared_ptr<ConstraintBase>();
+        return ConstraintBasePtr();
     }
     else
     {
@@ -312,7 +312,7 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
 
 // ==================================================================== My own functions
 
-void ProcessorImageLandmark::LandmarkInCurrentCamera(CaptureBasePtr _capture, std::shared_ptr<LandmarkAHP> _landmark,Eigen::Vector4s& _point3D_hmg)
+void ProcessorImageLandmark::LandmarkInCurrentCamera(CaptureBasePtr _capture, LandmarkAHPPtr _landmark,Eigen::Vector4s& _point3D_hmg)
 {
     Eigen::VectorXs current_state = getProblem()->getStateAtTimeStamp(_capture->getTimeStamp());
 
@@ -470,7 +470,7 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
 
     for (auto landmark_base_ptr : last_landmark_list)
     {
-        std::shared_ptr<LandmarkAHP> landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_base_ptr);
+        LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_base_ptr);
         Eigen::Vector4s point3D_hmg;
         Eigen::Vector3s point2D_hmg;
         Eigen::Vector2s point2D;
@@ -516,7 +516,7 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
 
 ProcessorBasePtr ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
-    std::shared_ptr<ProcessorImageLandmark> prc_ptr = std::make_shared<ProcessorImageLandmark>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
+    ProcessorImageLandmarkPtr prc_ptr = std::make_shared<ProcessorImageLandmark>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
     prc_ptr->setup(std::static_pointer_cast<SensorCamera>(_sen_ptr));
     prc_ptr->setName(_unique_name);
     return prc_ptr;

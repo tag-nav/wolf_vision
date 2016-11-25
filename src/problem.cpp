@@ -80,7 +80,7 @@ SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
         return installSensor(_sen_type, _unique_sensor_name, _extrinsics, intr_ptr);
     }
     else
-        return installSensor(_sen_type, _unique_sensor_name, _extrinsics, std::shared_ptr<IntrinsicsBase>());
+        return installSensor(_sen_type, _unique_sensor_name, _extrinsics, IntrinsicsBasePtr());
 
 }
 
@@ -560,10 +560,10 @@ void Problem::setOrigin(const Eigen::VectorXs& _origin_state, const Eigen::Matri
         //        getFrameStructureSize(pose_size, pose_cov_size);
         //        VectorXs pose     = _origin_state.head(pose_size);
         //        MatrixXs pose_cov = _origin_state_cov.topLeftCorner(pose_cov_size,pose_cov_size);
-        //        std::shared_ptr<CaptureFix> init_capture = std::make_shared<CaptureFix>(_ts, nullptr, pose, pose_cov);
+        //        CaptureFixPtr init_capture = std::make_shared<CaptureFix>(_ts, nullptr, pose, pose_cov);
 
         // create origin capture with the given state as data
-        std::shared_ptr<CaptureFix> init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _origin_state, _origin_state_cov);
+        CaptureFixPtr init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _origin_state, _origin_state_cov);
         origin_frame_ptr->addCapture(init_capture);
 
         // create feature and constraint

@@ -47,7 +47,7 @@ class ProcessorIMU : public ProcessorMotion{
     protected:
 
         // Casted pointer to IMU frame
-        std::shared_ptr<FrameIMU> frame_imu_ptr_;
+        FrameIMUPtr frame_imu_ptr_;
 
         // gravity vector
         const Eigen::Vector3s gravity_;
