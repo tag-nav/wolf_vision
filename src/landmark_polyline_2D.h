@@ -20,6 +20,7 @@
 namespace wolf
 {
 
+//landmark classification
 typedef enum
 {
     UNCLASSIFIED,
@@ -28,10 +29,15 @@ typedef enum
     PALLET,           ///< A pallet box 0.9 x 1.2 (m)
 } LandmarkClassification;
 
+//forward declaration to typedef class pointers
+class LandmarkPolyline2D;
+typedef std::shared_ptr<LandmarkPolyline2D> LandmarkPolyline2DPtr;
+typedef std::shared_ptr<const LandmarkPolyline2D> LandmarkPolyline2DConstPtr;
+typedef std::weak_ptr<LandmarkPolyline2D> LandmarkPolyline2DWPtr;
+
+//class
 class LandmarkPolyline2D : public LandmarkBase
 {
-    public:
-        typedef std::shared_ptr<LandmarkPolyline2D> Ptr;
     protected:
         std::deque<StateBlockPtr> point_state_ptr_vector_; ///< polyline points state blocks
         int first_id_;

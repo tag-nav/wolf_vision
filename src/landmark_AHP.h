@@ -11,14 +11,16 @@
 #include "opencv2/features2d/features2d.hpp"
 
 namespace wolf {
+    
+//forward declaration to typedef class pointers
+class LandmarkAHP;
+typedef std::shared_ptr<LandmarkAHP> LandmarkAHPPtr;
+typedef std::shared_ptr<const LandmarkAHP> LandmarkAHPConstPtr;
+typedef std::weak_ptr<LandmarkAHP> LandmarkAHPWPtr;
 
 /* Landmark - Anchored Homogeneous Point*/
 class LandmarkAHP : public LandmarkBase
 {
-    public:
-        typedef std::shared_ptr<LandmarkAHP> Ptr;
-        typedef std::weak_ptr<LandmarkAHP> WPtr;
-
     protected:
         cv::Mat cv_descriptor_;
         FrameBasePtr anchor_frame_; // TODO check pointer type

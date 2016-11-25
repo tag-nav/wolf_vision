@@ -12,12 +12,15 @@
 
 namespace wolf {
 
+//forward declaration to typedef class pointers
+class ConstraintAHP;
+typedef std::shared_ptr<ConstraintAHP> ConstraintAHPPtr;
+typedef std::shared_ptr<const ConstraintAHP> ConstraintAHPConstPtr;
+typedef std::weak_ptr<ConstraintAHP> ConstraintAHPWPtr;
+    
+//class    
 class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 {
-    public:
-        typedef std::shared_ptr<ConstraintAHP> Ptr;
-        typedef std::weak_ptr<ConstraintAHP> WPtr;
-
     protected:
         Eigen::Vector3s anchor_sensor_extrinsics_p_;
         Eigen::Vector4s anchor_sensor_extrinsics_o_;
@@ -29,7 +32,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
     public:
 
         ConstraintAHP(FeatureBasePtr    _ftr_ptr,
-                      LandmarkAHP::Ptr  _landmark_ptr,
+                      LandmarkAHPPtr  _landmark_ptr,
                       bool              _apply_loss_function = false,
                       ConstraintStatus  _status              = CTR_ACTIVE) :
                 ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP,
@@ -184,13 +187,13 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         //         - Put this 'emplace' in ConstraintBase, or ConstraintSparse
         //         - Keep factory-methods (i.e. like this one)  in ALL derived classes, to be called by the 'emplace' in Base.
         //            - In such case, make a unique API, or use Variadic
-        static ConstraintAHP::Ptr create(FeatureBasePtr     _ftr_ptr,
-                                         LandmarkAHP::Ptr   _lmk_ahp_ptr,
+        static ConstraintAHPPtr create(FeatureBasePtr     _ftr_ptr,
+                                         LandmarkAHPPtr   _lmk_ahp_ptr,
                                          bool               _apply_loss_function    = false,
                                          ConstraintStatus   _status                 = CTR_ACTIVE)
         {
             // construct constraint
-            Ptr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _lmk_ahp_ptr, _apply_loss_function, _status);
+            ConstraintAHPPtr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _lmk_ahp_ptr, _apply_loss_function, _status);
 
             // link it to wolf tree <-- these pointers cannot be set at construction time
             _lmk_ahp_ptr->getAnchorFrame()->addConstrainedBy(ctr_ahp);

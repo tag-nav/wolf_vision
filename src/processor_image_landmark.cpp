@@ -291,7 +291,7 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
         auto current_frame = last_ptr_->getFramePtr();
         auto landmark_ahp = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
 
-        ConstraintAHP::Ptr constraint_ptr = ConstraintAHP::create(_feature_ptr, landmark_ahp, true);
+        ConstraintAHPPtr constraint_ptr = ConstraintAHP::create(_feature_ptr, landmark_ahp, true);
 
 
         Eigen::Vector2s expectation_;

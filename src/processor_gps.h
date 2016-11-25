@@ -13,12 +13,16 @@
 
 
 namespace wolf {
-
+    
+//forward declaration to typedef class pointers
+class ProcessorGPS;
+typedef std::shared_ptr<ProcessorGPS> ProcessorGPSPtr;
+typedef std::shared_ptr<const ProcessorGPS> ProcessorGPSConstPtr;
+typedef std::weak_ptr<ProcessorGPS> ProcessorGPSWPtr;
+    
+//class
 class ProcessorGPS : public ProcessorBase
 {
-    public:
-        typedef std::shared_ptr<ProcessorGPS> Ptr;
-
     protected:
         CaptureGPSPtr capture_gps_ptr_;
         Scalar gps_covariance_;

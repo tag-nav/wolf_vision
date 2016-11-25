@@ -32,11 +32,25 @@ const Scalar position_error_th_ = 1;
 const Scalar min_features_ratio_th_ = 0.5;
 
 
+//forward declaration to typedef class pointers
+struct LandmarkPolylineMatch;
+typedef std::shared_ptr<LandmarkPolylineMatch> LandmarkPolylineMatchPtr;
+
+//forward declaration to typedef class pointers
+struct ProcessorParamsPolyline;
+typedef std::shared_ptr<ProcessorParamsPolyline> ProcessorParamsPolylinePtr;
+
+//forward declaration to typedef class pointers
+class ProcessorTrackerLandmarkPolyline;
+typedef std::shared_ptr<ProcessorTrackerLandmarkPolyline> ProcessorTrackerLandmarkPolylinePtr;
+typedef std::shared_ptr<const ProcessorTrackerLandmarkPolyline> ProcessorTrackerLandmarkPolylineConstPtr;
+typedef std::weak_ptr<ProcessorTrackerLandmarkPolyline> ProcessorTrackerLandmarkPolylineWPtr;
+
+
+
 // Match Feature - Landmark
 struct LandmarkPolylineMatch : public LandmarkMatch
 {
-        typedef std::shared_ptr<LandmarkPolylineMatch> Ptr;
-
         int landmark_match_from_id_;
         int feature_match_from_id_;
         int landmark_match_to_id_;
@@ -70,8 +84,6 @@ struct LandmarkPolylineMatch : public LandmarkMatch
 
 struct ProcessorParamsPolyline : public ProcessorParamsBase
 {
-        typedef std::shared_ptr<ProcessorParamsPolyline> Ptr;
-
         laserscanutils::LineFinderIterativeParams line_finder_params;
         Scalar position_error_th;
         unsigned int new_features_th;

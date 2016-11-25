@@ -12,6 +12,13 @@
 #include "capture_motion.h"
 
 namespace wolf {
+    
+//forward declaration to typedef class pointers
+class ProcessorTracker;
+typedef std::shared_ptr<ProcessorTracker> ProcessorTrackerPtr;
+typedef std::shared_ptr<const ProcessorTracker> ProcessorTrackerConstPtr;
+typedef std::weak_ptr<ProcessorTracker> ProcessorTrackerWPtr;
+    
 
 struct ProcessorParamsTracker : public ProcessorParamsBase
 {
@@ -65,8 +72,6 @@ struct ProcessorParamsTracker : public ProcessorParamsBase
  */
 class ProcessorTracker : public ProcessorBase
 {
-    public:
-        typedef std::shared_ptr<ProcessorTracker> Ptr;
     protected:
         CaptureBasePtr origin_ptr_;             ///< Pointer to the origin of the tracker.
         CaptureBasePtr last_ptr_;               ///< Pointer to the last tracked capture.

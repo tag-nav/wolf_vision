@@ -34,10 +34,20 @@ const Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
 const Scalar position_error_th_ = 1;
 const Scalar min_features_ratio_th_ = 0.5;
 
+
+//forward declaration to typedef class pointers
+struct ProcessorParamsLaser;
+typedef std::shared_ptr<ProcessorParamsLaser> ProcessorParamsLaserPtr;
+
+//forward declaration to typedef class pointers
+class ProcessorTrackerLandmarkCorner;
+typedef std::shared_ptr<ProcessorTrackerLandmarkCorner> ProcessorTrackerLandmarkCornerPtr;
+typedef std::shared_ptr<const ProcessorTrackerLandmarkCorner> ProcessorTrackerLandmarkCornerConstPtr;
+typedef std::weak_ptr<ProcessorTrackerLandmarkCorner> ProcessorTrackerLandmarkCornerWPtr;
+ 
+
 struct ProcessorParamsLaser : public ProcessorParamsBase
 {
-        typedef std::shared_ptr<ProcessorParamsLaser> Ptr;
-
         laserscanutils::LineFinderIterativeParams line_finder_params_;
         //TODO: add corner_finder_params
         unsigned int new_corners_th;

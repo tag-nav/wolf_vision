@@ -159,11 +159,11 @@ int main(int argc, char** argv)
     std::cout << "Landmark 1: " << lmk_1->point().transpose() << std::endl;
 
     // Constraints------------------
-    ConstraintAHP::Ptr ctr_0 = ConstraintAHP::create(feat_0, lmk_1 );
+    ConstraintAHPPtr ctr_0 = ConstraintAHP::create(feat_0, lmk_1 );
     feat_0->addConstraint(ctr_0);
-    ConstraintAHP::Ptr ctr_1 = ConstraintAHP::create(feat_1, lmk_1 );
+    ConstraintAHPPtr ctr_1 = ConstraintAHP::create(feat_1, lmk_1 );
     feat_1->addConstraint(ctr_1);
-    ConstraintAHP::Ptr ctr_2 = ConstraintAHP::create(feat_2, lmk_1 );
+    ConstraintAHPPtr ctr_2 = ConstraintAHP::create(feat_2, lmk_1 );
     feat_2->addConstraint(ctr_2);
 
     // Projections----------------------------
@@ -205,14 +205,14 @@ int main(int argc, char** argv)
     Eigen::Vector3s dir_0 = K.inverse() * pix_0_hmg;
     Eigen::Vector4s pnt_hmg_0;
     pnt_hmg_0 << dir_0, 1/unknown_distance;
-    LandmarkAHP::Ptr lmk_2( std::make_shared<LandmarkAHP>(pnt_hmg_0, kf_2, camera, desc) );
+    LandmarkAHPPtr lmk_2( std::make_shared<LandmarkAHP>(pnt_hmg_0, kf_2, camera, desc) );
     problem->addLandmark(lmk_2);
     std::cout << "Landmark 2: " << lmk_2->point().transpose() << std::endl;
 
     // New constraints from kf3 and kf4
-    ConstraintAHP::Ptr ctr_3 = ConstraintAHP::create(feat_3, lmk_2 );
+    ConstraintAHPPtr ctr_3 = ConstraintAHP::create(feat_3, lmk_2 );
     feat_3->addConstraint(ctr_3);
-    ConstraintAHP::Ptr ctr_4 = ConstraintAHP::create(feat_4, lmk_2 );
+    ConstraintAHPPtr ctr_4 = ConstraintAHP::create(feat_4, lmk_2 );
     feat_4->addConstraint(ctr_4);
 
     Eigen::Vector2s pix_3 = ctr_3->expectation();

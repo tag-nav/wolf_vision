@@ -14,7 +14,14 @@
 
 namespace wolf
 {
-
+    
+//forward declaration to typedef class pointers
+class ProcessorTrackerFeatureDummy;
+typedef std::shared_ptr<ProcessorTrackerFeatureDummy> ProcessorTrackerFeatureDummyPtr;
+typedef std::shared_ptr<const ProcessorTrackerFeatureDummy> ProcessorTrackerFeatureDummyConstPtr;
+typedef std::weak_ptr<ProcessorTrackerFeatureDummy> ProcessorTrackerFeatureDummyWPtr;
+    
+//Class
 class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
 {
 

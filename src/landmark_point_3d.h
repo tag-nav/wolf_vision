@@ -12,6 +12,13 @@
 
 namespace wolf {
 
+//forward declaration to typedef class pointers
+class LandmarkPoint3D;
+typedef std::shared_ptr<LandmarkPoint3D> LandmarkPoint3DPtr;
+typedef std::shared_ptr<const LandmarkPoint3D> LandmarkPoint3DConstPtr;
+typedef std::weak_ptr<LandmarkPoint3D> LandmarkPoint3DWPtr;
+    
+//class    
 class LandmarkPoint3D : public LandmarkBase
 {
     protected:

@@ -10,12 +10,15 @@
 
 namespace wolf {
 
+//forward declaration to typedef class pointers
+class LandmarkCorner2D;
+typedef std::shared_ptr<LandmarkCorner2D> LandmarkCorner2DPtr;
+typedef std::shared_ptr<const LandmarkCorner2D> LandmarkCorner2DConstPtr;
+typedef std::weak_ptr<LandmarkCorner2D> LandmarkCorner2DWPtr;
+    
 //class LandmarkCorner2D
 class LandmarkCorner2D : public LandmarkBase
 {
-    public:
-        typedef std::shared_ptr<LandmarkCorner2D> Ptr;
-        
     public:
         /** \brief Constructor with type, time stamp and the position state pointer
          *

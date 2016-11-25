@@ -135,7 +135,7 @@ wolf::SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)
     return (*sen_it);
 }
 
-ProcessorMotion::Ptr Problem::setProcessorMotion(const std::string& _processor_name)
+ProcessorMotionPtr Problem::setProcessorMotion(const std::string& _processor_name)
 {
     for (auto sen : getHardwarePtr()->getSensorList()) // loop all sensors
     {
@@ -166,7 +166,7 @@ ProcessorMotion::Ptr Problem::setProcessorMotion(const std::string& _processor_n
     return nullptr;
 }
 
-void Problem::setProcessorMotion(ProcessorMotion::Ptr _processor_motion_ptr)
+void Problem::setProcessorMotion(ProcessorMotionPtr _processor_motion_ptr)
 {
     processor_motion_ptr_ = _processor_motion_ptr;
 }
@@ -622,7 +622,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     if (p->isMotion())
                     {
                         std::cout << "    pm" << p->id() << std::endl;
-                        ProcessorMotion::Ptr pm = std::static_pointer_cast<ProcessorMotion>(p);
+                        ProcessorMotionPtr pm = std::static_pointer_cast<ProcessorMotion>(p);
                         if (pm->getOriginPtr())
                             cout << "      o: C" << pm->getOriginPtr()->id() << " - F"
                             << pm->getOriginPtr()->getFramePtr()->id() << endl;
@@ -637,7 +637,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         try
                         {
                             cout << "    pt" << p->id() << endl;
-                            ProcessorTracker::Ptr pt = std::static_pointer_cast<ProcessorTracker>(p);
+                            ProcessorTrackerPtr pt = std::static_pointer_cast<ProcessorTracker>(p);
                             if (pt->getOriginPtr())
                                 cout << "      o: C" << pt->getOriginPtr()->id() << " - F"
                                 << pt->getOriginPtr()->getFramePtr()->id() << endl;

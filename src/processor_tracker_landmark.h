@@ -16,6 +16,12 @@
 namespace wolf
 {
 
+//forward declaration to typedef class pointers
+class ProcessorTrackerLandmark;
+typedef std::shared_ptr<ProcessorTrackerLandmark> ProcessorTrackerLandmarkPtr;
+typedef std::shared_ptr<const ProcessorTrackerLandmark> ProcessorTrackerLandmarkConstPtr;
+typedef std::weak_ptr<ProcessorTrackerLandmark> ProcessorTrackerLandmarkWPtr;
+    
 /** \brief Landmark tracker processor
  *
  * This is an abstract class.

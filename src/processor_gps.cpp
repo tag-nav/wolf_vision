@@ -60,7 +60,7 @@ bool ProcessorGPS::keyFrameCallback(wolf::FrameBasePtr, const Scalar& _time_tol)
 
 wolf::ProcessorBasePtr ProcessorGPS::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
 {
-    ProcessorGPS::Ptr prc_ptr = std::make_shared<ProcessorGPS>();
+    ProcessorGPSPtr prc_ptr = std::make_shared<ProcessorGPS>();
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

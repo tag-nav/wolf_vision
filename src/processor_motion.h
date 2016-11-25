@@ -18,6 +18,12 @@
 
 namespace wolf
 {
+    
+//forward declaration to typedef class pointers
+class ProcessorMotion;
+typedef std::shared_ptr<ProcessorMotion> ProcessorMotionPtr;
+typedef std::shared_ptr<const ProcessorMotion> ProcessorMotionConstPtr;
+typedef std::weak_ptr<ProcessorMotion> ProcessorMotionWPtr;
 
 /** \brief class for Motion processors
  *
@@ -79,11 +85,7 @@ namespace wolf
  */
 class ProcessorMotion : public ProcessorBase
 {
-    public:
-        typedef std::shared_ptr<ProcessorMotion> Ptr;
-        typedef std::weak_ptr<ProcessorMotion> WPtr;
-
-        // This is the main public interface
+    // This is the main public interface
     public:
         ProcessorMotion(const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance = 0.1);
         virtual ~ProcessorMotion();
