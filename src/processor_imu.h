@@ -7,7 +7,14 @@
 
 
 namespace wolf {
-
+    
+//forward declaration to typedef class pointers
+class ProcessorIMU;
+typedef std::shared_ptr<ProcessorIMU> ProcessorIMUPtr;
+typedef std::shared_ptr<const ProcessorIMU> ProcessorIMUConstPtr;
+typedef std::weak_ptr<ProcessorIMU> ProcessorIMUWPtr;
+    
+//class
 class ProcessorIMU : public ProcessorMotion{
     public:
         ProcessorIMU();

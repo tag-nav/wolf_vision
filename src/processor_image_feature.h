@@ -25,12 +25,16 @@
 
 
 namespace wolf {
-
+    
+//forward declaration to typedef class pointers
+class ProcessorImageFeature;
+typedef std::shared_ptr<ProcessorImageFeature> ProcessorImageFeaturePtr;
+typedef std::shared_ptr<const ProcessorImageFeature> ProcessorImageFeatureConstPtr;
+typedef std::weak_ptr<ProcessorImageFeature> ProcessorImageFeatureWPtr;
+    
+//class
 class ProcessorImageFeature : public ProcessorTrackerFeature
 {
-    public:
-        typedef std::shared_ptr<ProcessorImageFeature> Ptr;
-
     protected:
         std::shared_ptr<cv::DescriptorMatcher> matcher_ptr_;
         std::shared_ptr<cv::Feature2D> detector_descriptor_ptr_;

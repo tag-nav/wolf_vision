@@ -20,9 +20,6 @@ typedef std::weak_ptr<LandmarkCorner2D> LandmarkCorner2DWPtr;
 class LandmarkCorner2D : public LandmarkBase
 {
     public:
-        typedef std::shared_ptr<LandmarkCorner2D> Ptr;
-        
-    public:
         /** \brief Constructor with type, time stamp and the position state pointer
          *
          * Constructor with type, and state pointer

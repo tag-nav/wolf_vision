@@ -69,7 +69,7 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
         }
 
     // NAIVE NEAREST NEIGHBOR MATCHING
-    LandmarkPolylineMatch::Ptr best_match = nullptr;
+    LandmarkPolylineMatchPtr best_match = nullptr;
     FeaturePolyline2DPtr polyline_feature;
     LandmarkPolyline2DPtr polyline_landmark;
 
@@ -492,7 +492,7 @@ void ProcessorTrackerLandmarkPolyline::createNewLandmarks(LandmarkBaseList& _new
         // cast
         polyline_ft_ptr = std::static_pointer_cast<FeaturePolyline2D>(new_feature_ptr);
         // create new correspondence
-        LandmarkPolylineMatch::Ptr match = std::make_shared<LandmarkPolylineMatch>();
+        LandmarkPolylineMatchPtr match = std::make_shared<LandmarkPolylineMatch>();
         match->feature_match_from_id_= 0; // all points match
         match->landmark_match_from_id_ = 0;
         match->feature_match_to_id_= polyline_ft_ptr->getNPoints()-1; // all points match
@@ -543,7 +543,7 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
 	//TODO: update with new index in landmarks
 
     //std::cout << "ProcessorTrackerLandmarkPolyline::establishConstraints" << std::endl;
-    LandmarkPolylineMatch::Ptr polyline_match;
+    LandmarkPolylineMatchPtr polyline_match;
     FeaturePolyline2DPtr polyline_feature;
     LandmarkPolyline2DPtr polyline_landmark;
 
@@ -1008,8 +1008,8 @@ ConstraintBasePtr ProcessorTrackerLandmarkPolyline::createConstraint(FeatureBase
 
 ProcessorBasePtr ProcessorTrackerLandmarkPolyline::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr)
 {
-    ProcessorParamsPolyline::Ptr params = std::static_pointer_cast<ProcessorParamsPolyline>(_params);
-    ProcessorTrackerLandmarkPolyline::Ptr prc_ptr = std::make_shared<ProcessorTrackerLandmarkPolyline>(*params);
+    ProcessorParamsPolylinePtr params = std::static_pointer_cast<ProcessorParamsPolyline>(_params);
+    ProcessorTrackerLandmarkPolylinePtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkPolyline>(*params);
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

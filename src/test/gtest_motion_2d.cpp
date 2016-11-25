@@ -57,7 +57,7 @@ TEST(ProcessorMotion, Motion2D)
                                             std::make_shared<StateBlock>(Eigen::Vector1s::Zero(), true),
                                             std::make_shared<StateBlock>(Eigen::VectorXs::Zero(0), true), 0);
     SensorBasePtr sensor_fix_ptr = std::make_shared< SensorBase>("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
-    ProcessorOdom2D::Ptr odom2d_ptr = std::make_shared< ProcessorOdom2D>(100,100,100);
+    ProcessorOdom2DPtr odom2d_ptr = std::make_shared< ProcessorOdom2D>(100,100,100);
     // Assemble Wolf tree by linking the nodes
     sensor_odom_ptr->addProcessor(odom2d_ptr);
     problem_ptr->addSensor(sensor_odom_ptr);
