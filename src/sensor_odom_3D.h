@@ -13,10 +13,10 @@
 
 namespace wolf {
 
+WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsOdom3D);
+
 struct IntrinsicsOdom3D : public IntrinsicsBase
 {
-        typedef std::shared_ptr<IntrinsicsOdom3D> Ptr;
-
         Scalar k_disp_to_disp; ///< ratio of displacement variance to displacement, for odometry noise calculation
         Scalar k_disp_to_rot; ///< ratio of displacement variance to rotation, for odometry noise calculation
         Scalar k_rot_to_rot; ///< ratio of rotation variance to rotation, for odometry noise calculation
@@ -51,7 +51,7 @@ class SensorOdom3D : public SensorBase
          * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
          * \param _params shared_ptr to a struct with parameters
          **/
-        SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _q_ptr, IntrinsicsOdom3D::Ptr params);
+        SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _q_ptr, IntrinsicsOdom3DPtr params);
 
         virtual ~SensorOdom3D();
 

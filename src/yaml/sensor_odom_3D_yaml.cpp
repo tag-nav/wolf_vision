@@ -35,7 +35,7 @@ static IntrinsicsBasePtr createIntrinsicsOdom3D(const std::string & _filename_do
         YAML::Node variances = config["motion variances"];
         YAML::Node kf_vote = config["keyframe vote"];
 
-        IntrinsicsOdom3D::Ptr params = std::make_shared<IntrinsicsOdom3D>();
+        IntrinsicsOdom3DPtr params = std::make_shared<IntrinsicsOdom3D>();
 
         params->k_disp_to_disp   = variances["disp_to_disp"] .as<Scalar>();
         params->k_disp_to_rot    = variances["disp_to_rot"]  .as<Scalar>();

@@ -18,7 +18,7 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
     active_search_grid_()
 {
     // 1. detector-descriptor params
-    DetectorDescriptorParamsBase::Ptr _dd_params = _params.detector_descriptor_params_ptr;
+    DetectorDescriptorParamsBasePtr _dd_params = _params.detector_descriptor_params_ptr;
     switch (_dd_params->type){
         case DD_BRISK:
             {

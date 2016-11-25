@@ -24,7 +24,7 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
             //std::cout << "deleting ConstraintCorner2D " << id() << std::endl;
         }
 
-		std::shared_ptr<LandmarkCorner2D> getLandmarkPtr()
+        LandmarkCorner2DPtr getLandmarkPtr()
 		{
 			return std::static_pointer_cast<LandmarkCorner2D>( landmark_other_ptr_.lock() );
 		}

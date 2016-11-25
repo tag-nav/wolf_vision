@@ -2,7 +2,7 @@
 namespace wolf
 {
 
-ProcessorOdom3D::ProcessorOdom3D(ProcessorOdom3DParams::Ptr _params, SensorOdom3DPtr _sensor_ptr) :
+ProcessorOdom3D::ProcessorOdom3D(ProcessorOdom3DParamsPtr _params, SensorOdom3DPtr _sensor_ptr) :
                 ProcessorMotion("ODOM 3D", 7, 7, 6, 6),
                 max_time_span_  (_params ? _params    ->max_time_span   : 1.0  ),
                 max_buff_length_(_params ? _params    ->max_buff_length : 10   ),

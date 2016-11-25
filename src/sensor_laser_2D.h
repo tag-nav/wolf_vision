@@ -13,9 +13,10 @@
 
 namespace wolf {
 
+WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsLaser2D);
+
 struct IntrinsicsLaser2D : public IntrinsicsBase
 {
-        typedef std::shared_ptr<IntrinsicsLaser2D> Ptr;
         laserscanutils::LaserScanParams scan_params;
 };
 

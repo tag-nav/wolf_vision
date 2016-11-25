@@ -206,6 +206,11 @@ typedef enum
         typedef std::list<ClassName##Ptr>          ClassName##List; \
         typedef ClassName##List::iterator          ClassName##Iter;
 
+#define WOLF_STRUCT_PTR_TYPEDEFS(StructName) \
+        struct StructName; \
+        typedef std::shared_ptr<StructName>          StructName##Ptr; \
+        typedef std::shared_ptr<const StructName>    StructName##ConstPtr; \
+
 
 // NodeBase
 WOLF_PTR_TYPEDEFS(NodeBase);
@@ -221,9 +226,7 @@ WOLF_PTR_TYPEDEFS(SensorBase);
 WOLF_LIST_TYPEDEFS(SensorBase);
 
 // - - Intrinsics
-struct IntrinsicsBase;
-typedef std::shared_ptr<IntrinsicsBase> IntrinsicsBasePtr;
-typedef std::shared_ptr<const IntrinsicsBase> IntrinsicsBaseConstPtr;
+WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsBase);
 
 // - Processors
 WOLF_PTR_TYPEDEFS(ProcessorBase);
@@ -233,9 +236,7 @@ WOLF_LIST_TYPEDEFS(ProcessorBase);
 WOLF_PTR_TYPEDEFS(ProcessorMotion);
 
 // - - Processor params
-struct ProcessorParamsBase;
-typedef std::shared_ptr<ProcessorParamsBase> ProcessorParamsBasePtr;
-typedef std::shared_ptr<const ProcessorParamsBase> ProcessorParamsBaseConstPtr;
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsBase);
 
 // Trajectory
 WOLF_PTR_TYPEDEFS(TrajectoryBase);

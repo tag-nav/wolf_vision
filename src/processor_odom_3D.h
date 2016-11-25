@@ -17,8 +17,7 @@
 
 namespace wolf {
     
-WOLF_PTR_TYPEDEFS(ProcessorOdom3D);
- 
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorOdom3DParams);
 
 struct ProcessorOdom3DParams : public ProcessorParamsBase
 {
@@ -37,9 +36,10 @@ struct ProcessorOdom3DParams : public ProcessorParamsBase
             type = "ODOM 3D";
             name = "";
         }
-
-        typedef std::shared_ptr<ProcessorOdom3DParams> Ptr;
 };
+
+
+WOLF_PTR_TYPEDEFS(ProcessorOdom3D);
 
 /** \brief Processor for 3d odometry integration.
  *
@@ -66,7 +66,7 @@ struct ProcessorOdom3DParams : public ProcessorParamsBase
 class ProcessorOdom3D : public ProcessorMotion
 {
     public:
-        ProcessorOdom3D(ProcessorOdom3DParams::Ptr _params = nullptr, SensorOdom3DPtr _sensor_ptr = nullptr);
+        ProcessorOdom3D(ProcessorOdom3DParamsPtr _params = nullptr, SensorOdom3DPtr _sensor_ptr = nullptr);
         virtual ~ProcessorOdom3D();
         void setup(SensorOdom3DPtr sen_ptr);
 
