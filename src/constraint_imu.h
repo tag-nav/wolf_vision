@@ -7,6 +7,8 @@
 #include "frame_imu.h"
 #include "rotations.h"
 
+//Eigen include
+
 
 namespace wolf {
     
@@ -45,9 +47,9 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
          * Vector3s _v2 : velocity in current frame
          * Matrix<10,1, wolf::Scalar> _expectation : to retrieve resulting expectation (PVQ)
         */
-        template<typename D1>
-        void expectation(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D1> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab, const Eigen::MatrixBase<D1> & _wb,
-                        const Eigen::MatrixBase<D1> & _p2, const Eigen::MatrixBase<D1> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::Matrix<D1,10,1> & _result) const;
+        template<typename D1, typename D2, typename D3>
+        void expectation(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D2> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab, const Eigen::MatrixBase<D1> & _wb,
+                        const Eigen::MatrixBase<D1> & _p2, const Eigen::QuaternionBase<D2> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::MatrixBase<D3> & _result) const;
 
         /* \brief : return the expected value given the state blocks in the wolf tree
             current frame data is taken from constraintIMU object.
@@ -65,11 +67,13 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
             const Eigen::Vector3s frame_current_vel  = dv_preint_;
             const Eigen::Vector3s frame_current_ab  = acc_bias_preint_;
             const Eigen::Vector3s frame_current_wb  = gyro_bias_preint_;
-            const Eigen::VectorXs frame_imu_pos   = (frm_imu->getPPtr()->getVector());
-            const Eigen::VectorXs frame_imu_ori   = (frm_imu->getOPtr()->getVector());
-            const Eigen::VectorXs frame_imu_vel  = (frm_imu->getVPtr()->getVector());
+            const Eigen::Vector3s frame_imu_pos   = (frm_imu->getPPtr()->getVector());
+            const Eigen::Vector4s frame_imu_ori   = (frm_imu->getOPtr()->getVector());
+            const Eigen::Vector3s frame_imu_vel  = (frm_imu->getVPtr()->getVector());
+
+            Eigen::Quaternions frame_imu_ori_q(frame_imu_ori);
             
-            expectation(frame_current_pos, frame_current_ori, frame_current_vel, frame_current_ab, frame_current_wb, frame_imu_pos, frame_imu_ori, frame_imu_vel, exp);
+            expectation(frame_current_pos, frame_current_ori, frame_current_vel, frame_current_ab, frame_current_wb, frame_imu_pos, frame_imu_ori_q, frame_imu_vel, exp);
             std::cout << frame_current_pos << std::endl;
             std::cout << frame_current_ori.w() << std::endl;
             std::cout << frame_current_vel << std::endl;
@@ -182,32 +186,29 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     return true;
 }
 
-template<typename D1>
-inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D1> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab, const Eigen::MatrixBase<D1> & _wb,
-                        const Eigen::MatrixBase<D1> & _p2, const Eigen::MatrixBase<D1> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::Matrix<D1,10,1> & _result) const
+template<typename D1, typename D2, typename D3>
+inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D2> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab, const Eigen::MatrixBase<D1> & _wb,
+                        const Eigen::MatrixBase<D1> & _p2, const Eigen::QuaternionBase<D2> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::MatrixBase<D3> & _result) const
 {
-    // MAPS
+    //needed typedefs
+    typedef typename D2::Vector3 Vector3Map;
+    typedef typename D2::Scalar DataType;
+    typedef Eigen::Map <Eigen::Matrix<DataType,4,1> > ConstVector4Map;
 
-    Eigen::Map<const Eigen::Matrix<D1,3,1> > p1(_p1);
-    Eigen::Map<const Eigen::Quaternion<D1> > q1(_q1);
-    Eigen::Map<const Eigen::Matrix<D1,3,1> > v1(_v1);
-    Eigen::Map<const Eigen::Matrix<D1,3,1> > ab(_ab);
-    Eigen::Map<const Eigen::Matrix<D1,3,1> > wb(_wb);
-
-    Eigen::Map<const Eigen::Matrix<D1,3,1> > p2(_p2);
-    Eigen::Map<const Eigen::Quaternion<D1> > q2(_q2);
-    Eigen::Map<const Eigen::Matrix<D1,3,1> > v2(_v2);
-    
-    //Eigen::Map<Eigen::Matrix<D1,10,1> > result(_result);
+    //instead of maps we use static_asserts from eigen to detect size at compile time
+    //check entry sizes
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D1, 3)
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D3, 10)
     
     // Predict delta: d_pred = x2 (-) x1
-    Eigen::Matrix<D1,3,1> dp_predict = q1.conjugate() * ( p2 - p1 - v1 * (D1)dt_ - (D1)0.5 * g_.cast<D1>() * (D1)dt_2_ );
-    Eigen::Matrix<D1,3,1> dv_predict = q1.conjugate() * ( v2 - v1 - g_.cast<D1>() * (D1)dt_ );
-    Eigen::Quaternion<D1> dq_predict = q1.conjugate() * q2;
+    Vector3Map dp_predict = (_q1.conjugate() * ( _p2 - _p1 - _v1 * (DataType)dt_ - (DataType)0.5 * g_.cast<DataType>() * (DataType)dt_2_ ));
+    Vector3Map dv_predict (_q1.conjugate() * ( _v2 - _v1 - g_.cast<DataType>() * (DataType)dt_ ));
+    Eigen::Quaternion<DataType> dq_predict (_q1.conjugate() * _q2);
+    ConstVector4Map dq_vec4(dq_predict.coeffs().data());
 
-    const_cast< Eigen::MatrixBase<D1> > (_result).head(3) = dp_predict;
-    const_cast< Eigen::MatrixBase<D1> > (_result).segment(3,4) = dq_predict;
-    const_cast< Eigen::MatrixBase<D1> > (_result).tail(3) = dv_predict;
+    const_cast< Eigen::MatrixBase<D3>& > (_result).head(3) = dp_predict;
+    const_cast< Eigen::MatrixBase<D3>& > (_result).segment(3,4) = dq_vec4;
+    const_cast< Eigen::MatrixBase<D3>& > (_result).tail(3) = dv_predict;
 }
 
 inline JacobianMethod ConstraintIMU::getJacobianMethod() const
