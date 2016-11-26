@@ -416,7 +416,7 @@ int main(int argc, char** argv)
     Eigen::Vector3s point3D_backproj4;
     Eigen::MatrixXs jacobian_backproj2(3,2);
     Eigen::Vector3s depth_jacobian2;
-    pinhole::backProjectPoint(k_test2,correction_test2,point2D_test7,depth3,point3D_backproj4,jacobian_backproj2,depth_jacobian2);
+    pinhole::backprojectPoint(k_test2,correction_test2,point2D_test7,depth3,point3D_backproj4,jacobian_backproj2,depth_jacobian2);
 
     std::cout << std::endl << "Second function output" << std::endl;
     std::cout << "x: " << point3D_backproj4[0] << "; y: " << point3D_backproj4[1] << "; z: " << point3D_backproj4[2] << std::endl;
