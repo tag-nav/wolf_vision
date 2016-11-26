@@ -68,10 +68,14 @@ int main(int argc, char** argv)
     Eigen::Vector3s backproject_point_normalized_output;
 
     project_point_normalized_output = pinhole::projectPointToNormalizedPlane(project_point_normalized_test);
-    pinhole::projectPointToNormalizedPlane(project_point_normalized_test,project_point_normalized_output2,project_point_normalized_dist);
+
+    pinhole::projectPointToNormalizedPlane(project_point_normalized_test,
+                                           project_point_normalized_output2,
+                                           project_point_normalized_dist);
 
     backproject_point_normalized_output =
-            pinhole::backprojectPointFromNormalizedPlane(project_point_normalized_output,backproject_point_normalized_depth);
+            pinhole::backprojectPointFromNormalizedPlane(project_point_normalized_output,
+                                                         backproject_point_normalized_depth);
 
 
     std::cout << "TEST project and backproject PointToNormalizedPlane" << std::endl;
@@ -99,21 +103,29 @@ int main(int argc, char** argv)
     pp_normalized_test[2] = 3;
     Eigen::Vector2s pp_normalized_output;
     Eigen::Vector2s pp_normalized_output2;
-    Eigen::Matrix3s pp_normalized_jacobian;
-    Eigen::Matrix3s pp_normalized_jacobian2;
+    Eigen::Matrix<Scalar, 2, 3> pp_normalized_jacobian;
+    Eigen::Matrix<Scalar, 2, 3> pp_normalized_jacobian2;
     Scalar pp_normalized_distance;
 
     Scalar bpp_normalized_depth = 3;
     Eigen::Vector3s bpp_normalized_output;
-    Eigen::Matrix3s bpp_normalized_jacobian;
+    Eigen::Matrix<Scalar, 3, 2> bpp_normalized_jacobian;
     Eigen::Vector3s bpp_normalized_jacobian_depth;
 
 
-    pinhole::projectPointToNormalizedPlane(pp_normalized_test,pp_normalized_output,pp_normalized_jacobian);
-    pinhole::projectPointToNormalizedPlane(pp_normalized_test,pp_normalized_output2,pp_normalized_distance,pp_normalized_jacobian2);
+    pinhole::projectPointToNormalizedPlane(pp_normalized_test,
+                                           pp_normalized_output,
+                                           pp_normalized_jacobian);
+    pinhole::projectPointToNormalizedPlane(pp_normalized_test,
+                                           pp_normalized_output2,
+                                           pp_normalized_distance,
+                                           pp_normalized_jacobian2);
 
-    pinhole::backprojectPointFromNormalizedPlane(pp_normalized_output,bpp_normalized_depth,
-                                                 bpp_normalized_output,bpp_normalized_jacobian,bpp_normalized_jacobian_depth);
+    pinhole::backprojectPointFromNormalizedPlane(pp_normalized_output,
+                                                 bpp_normalized_depth,
+                                                 bpp_normalized_output,
+                                                 bpp_normalized_jacobian,
+                                                 bpp_normalized_jacobian_depth);
 
     std::cout << "\n--------------------------------------------------------" << std::endl;
     std::cout << "\nTEST project and backproject PointToNormalizedPlane with JACOBIAN" << std::endl;
@@ -123,38 +135,26 @@ int main(int argc, char** argv)
     std::cout << std:: endl << "Project" << std::endl;
     std::cout << "x: " << pp_normalized_output[0] << "; y: " << pp_normalized_output[1] << "; rows: " << pp_normalized_output.rows()
               << "; cols: " << pp_normalized_output.cols() << std::endl;
-    std::cout << "\n--> Jacobian" << std::endl <<
-                 pp_normalized_jacobian.row(0).col(0) << " " << pp_normalized_jacobian.row(0).col(1) << " " << pp_normalized_jacobian.row(0).col(2) << " " << std::endl <<
-                 pp_normalized_jacobian.row(1).col(0) << " " << pp_normalized_jacobian.row(1).col(1) << " " << pp_normalized_jacobian.row(1).col(2) << " " << std::endl <<
-                 pp_normalized_jacobian.row(2).col(0) << " " << pp_normalized_jacobian.row(2).col(1) << " " << pp_normalized_jacobian.row(2).col(2) << " " << std::endl;
+    std::cout << "\n--> Jacobian" << std::endl << pp_normalized_jacobian << std::endl;
 
     std::cout << std:: endl << "Alternate project" << std::endl;
     std::cout << "x: " << pp_normalized_output2[0] << "; y: " << pp_normalized_output2[1] << "; rows: "
               << pp_normalized_output2.rows() << "; cols: " << pp_normalized_output2.cols() << "; distance: "
               << pp_normalized_distance << std::endl;
-    std::cout << "\n--> Jacobian" << std::endl <<
-                 pp_normalized_jacobian2.row(0).col(0) << " " << pp_normalized_jacobian2.row(0).col(1) << " " << pp_normalized_jacobian2.row(0).col(2) << " " << std::endl <<
-                 pp_normalized_jacobian2.row(1).col(0) << " " << pp_normalized_jacobian2.row(1).col(1) << " " << pp_normalized_jacobian2.row(1).col(2) << " " << std::endl <<
-                 pp_normalized_jacobian2.row(2).col(0) << " " << pp_normalized_jacobian2.row(2).col(1) << " " << pp_normalized_jacobian2.row(2).col(2) << " " << std::endl;
+    std::cout << "\n--> Jacobian" << std::endl << pp_normalized_jacobian2 << std::endl;
 
     std::cout << std:: endl << "Backproject" << std::endl;
     std::cout << "x: " << bpp_normalized_output[0] << "; y: " << bpp_normalized_output[1] << "; z: " << bpp_normalized_output[2]
               << "; depth: " << bpp_normalized_depth << std::endl;
-    std::cout << "\n--> Jacobian" << std::endl <<
-                 bpp_normalized_jacobian.row(0).col(0) << " " << bpp_normalized_jacobian.row(0).col(1) << " " << bpp_normalized_jacobian.row(0).col(2) << " " << std::endl <<
-                 bpp_normalized_jacobian.row(1).col(0) << " " << bpp_normalized_jacobian.row(1).col(1) << " " << bpp_normalized_jacobian.row(1).col(2) << " " << std::endl <<
-                 bpp_normalized_jacobian.row(2).col(0) << " " << bpp_normalized_jacobian.row(2).col(1) << " " << bpp_normalized_jacobian.row(2).col(2) << " " << std::endl;
+    std::cout << "\n--> Jacobian" << std::endl << bpp_normalized_jacobian << std::endl;
     std::cout << "\n--> Jacobian - depth" << std::endl <<
                  bpp_normalized_jacobian_depth[0] << " " << bpp_normalized_jacobian_depth[1] << " " << bpp_normalized_jacobian_depth[2] << " " << std::endl;
 
 
-    Eigen::Matrix3s test_jacobian;
+    Eigen::Matrix2s test_jacobian; // (2x3) * (3x2) = (2x2)
     test_jacobian =  pp_normalized_jacobian * bpp_normalized_jacobian;
 
-    std::cout << "\n\n\n==> Jacobian Testing" << std::endl <<
-                 test_jacobian.row(0).col(0) << " " << test_jacobian.row(0).col(1) << " " << test_jacobian.row(0).col(2) << " " << std::endl <<
-                 test_jacobian.row(1).col(0) << " " << test_jacobian.row(1).col(1) << " " << test_jacobian.row(1).col(2) << " " << std::endl <<
-                 test_jacobian.row(2).col(0) << " " << test_jacobian.row(2).col(1) << " " << test_jacobian.row(2).col(2) << " " << std::endl;
+    std::cout << "\n\n\n==> Jacobian Testing" << std::endl << test_jacobian << std::endl;
 
 
     //================================= IsInRoi / IsInImage
@@ -241,7 +241,10 @@ int main(int argc, char** argv)
 
     Eigen::Vector2s distored_point4;
     Eigen::Matrix2s distortion_jacobian2;
-    pinhole::distortPoint(distortion2,distorting_point,distored_point4,distortion_jacobian2);
+    pinhole::distortPoint(distortion2,
+                          distorting_point,
+                          distored_point4,
+                          distortion_jacobian2);
 
     std::cout << "\n\nTEST distortPoint, jacobian" << std::endl;
     std::cout << std::endl << "Point to be distorted" << std::endl;
@@ -461,7 +464,8 @@ int main(int argc, char** argv)
     std::cout << "\nCorrection vector:\n" << correction_vector << std::endl;
 
     Eigen::Vector3s test_point3D;
-    Eigen::Vector2s test_point2D = {600,600};
+    Eigen::Vector2s test_point2D = {123,321};
+    std::cout << "\ntest_point2D ORIGINAL:\n" << test_point2D << std::endl;
 
 
 
