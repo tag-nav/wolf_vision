@@ -78,14 +78,14 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
         // Frame values ------------------------------------------------
     public:
-        void setTimeStamp(const TimeStamp& _ts);
-        TimeStamp getTimeStamp() const;
-        void getTimeStamp(TimeStamp& _ts) const;
+        void        setTimeStamp(const TimeStamp& _ts);
+        TimeStamp   getTimeStamp() const;
+        void        getTimeStamp(TimeStamp& _ts) const;
 
         // State blocks
     public:
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
-        std::vector<StateBlockPtr>& getStateBlockVec();
+        std::vector<StateBlockPtr>&       getStateBlockVec();
         StateBlockPtr getPPtr() const;
         StateBlockPtr getOPtr() const;
         StateBlockPtr getVPtr() const;

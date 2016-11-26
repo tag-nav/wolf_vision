@@ -6,11 +6,6 @@
 
 #ADD_EXECUTABLE(test_eigen_template test_eigen_template.cpp)
 
-# Complete Wolf tree skeleton with smart pointers
-#ADD_EXECUTABLE(test_sh_ptr test_sh_ptr.cpp)
-
-ADD_EXECUTABLE(test_wolf_root test_wolf_root.cpp)
-
 ADD_EXECUTABLE(test_kf_callback test_kf_callback.cpp)
 TARGET_LINK_LIBRARIES(test_kf_callback ${PROJECT_NAME})
 
@@ -33,17 +28,9 @@ ENDIF(Ceres_FOUND)
 #ADD_EXECUTABLE(test_state_quaternion test_state_quaternion.cpp)
 #TARGET_LINK_LIBRARIES(test_state_quaternion ${PROJECT_NAME})
 
-# Testing virtual hierarchy -- solving diamond of death
-#ADD_EXECUTABLE(test_virtual_hierarchy test_virtual_hierarchy.cpp)
-#TARGET_LINK_LIBRARIES(test_virtual_hierarchy ${PROJECT_NAME})
-
 # Testing Eigen Permutations
 #ADD_EXECUTABLE(test_permutations solver/test_permutations.cpp)
 #TARGET_LINK_LIBRARIES(test_permutations ${PROJECT_NAME})
-
-# Testing Sorting Key Frames
-ADD_EXECUTABLE(test_sort_keyframes test_sort_keyframes.cpp)
-TARGET_LINK_LIBRARIES(test_sort_keyframes ${PROJECT_NAME})
 
 # Enable Yaml config files
 IF(YAMLCPP_FOUND)
@@ -124,32 +111,32 @@ IF(OpenCV_FOUND)
     ENDIF(Ceres_FOUND)
 
     # Testing opencv matching and fundamental matrix with ransac
-    ADD_EXECUTABLE(test_opencv test_opencv.cpp)
-    TARGET_LINK_LIBRARIES(test_opencv ${PROJECT_NAME})
+#    ADD_EXECUTABLE(test_opencv test_opencv.cpp)
+#    TARGET_LINK_LIBRARIES(test_opencv ${PROJECT_NAME})
 
     # Testing OpenCV functions for projection of points
-    ADD_EXECUTABLE(test_projection_points test_projection_points.cpp)
-    TARGET_LINK_LIBRARIES(test_projection_points ${PROJECT_NAME})
+#    ADD_EXECUTABLE(test_projection_points test_projection_points.cpp)
+#    TARGET_LINK_LIBRARIES(test_projection_points ${PROJECT_NAME})
 
 
 
     # Constraint test
-    ADD_EXECUTABLE(test_constraint_AHP test_constraint_AHP.cpp)
-    TARGET_LINK_LIBRARIES(test_constraint_AHP ${PROJECT_NAME})
+#    ADD_EXECUTABLE(test_constraint_AHP test_constraint_AHP.cpp)
+#    TARGET_LINK_LIBRARIES(test_constraint_AHP ${PROJECT_NAME})
 
     # ORB tracker test
-    ADD_EXECUTABLE(test_tracker_ORB test_tracker_ORB.cpp)
-    TARGET_LINK_LIBRARIES(test_tracker_ORB ${PROJECT_NAME})
+#    ADD_EXECUTABLE(test_tracker_ORB test_tracker_ORB.cpp)
+#    TARGET_LINK_LIBRARIES(test_tracker_ORB ${PROJECT_NAME})
 
     # ORB tracker test
-    ADD_EXECUTABLE(test_ROI_ORB test_ROI_ORB.cpp)
-    TARGET_LINK_LIBRARIES(test_ROI_ORB ${PROJECT_NAME})
+#    ADD_EXECUTABLE(test_ROI_ORB test_ROI_ORB.cpp)
+#    TARGET_LINK_LIBRARIES(test_ROI_ORB ${PROJECT_NAME})
 ENDIF(OpenCV_FOUND)
 
 IF(Ceres_FOUND)
 # Simple AHP test
-ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
-TARGET_LINK_LIBRARIES(test_simple_AHP ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
+#TARGET_LINK_LIBRARIES(test_simple_AHP ${PROJECT_NAME})
 ENDIF(Ceres_FOUND)
 
 # Processor Tracker Feature test
@@ -165,12 +152,12 @@ ADD_EXECUTABLE(test_processor_imu test_processor_imu.cpp)
 TARGET_LINK_LIBRARIES(test_processor_imu ${PROJECT_NAME})
 
 # MPU6050 IMU test
-ADD_EXECUTABLE(test_mpu test_mpu.cpp)
-TARGET_LINK_LIBRARIES(test_mpu ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_mpu test_mpu.cpp)
+#TARGET_LINK_LIBRARIES(test_mpu ${PROJECT_NAME})
 
 # Processor IMU - Jacobian checking test
-ADD_EXECUTABLE(test_processor_imu_jacobians test_processor_imu_jacobians.cpp)
-TARGET_LINK_LIBRARIES(test_processor_imu_jacobians ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_processor_imu_jacobians test_processor_imu_jacobians.cpp)
+#TARGET_LINK_LIBRARIES(test_processor_imu_jacobians ${PROJECT_NAME})
 
 # IF (laser_scan_utils_FOUND)
 #     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
