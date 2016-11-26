@@ -79,20 +79,10 @@ int main(int argc, char** argv)
 
 
     std::cout << "TEST project and backproject PointToNormalizedPlane" << std::endl;
-    std::cout << std:: endl << "Original" << std::endl;
-    std::cout << "x: " << project_point_normalized_test[0] << "; y: " << project_point_normalized_test[1]
-              << "; z: " << project_point_normalized_test[2] << std::endl;
-    std::cout << std:: endl << "Project" << std::endl;
-    std::cout << "x: " << project_point_normalized_output[0] << "; y: " << project_point_normalized_output[1]
-              << "; rows: " << project_point_normalized_output.rows() << "; cols: " << project_point_normalized_output.cols()
-              << std::endl;
-    std::cout << std:: endl << "Alternate project" << std::endl;
-    std::cout << "x: " << project_point_normalized_output[0] << "; y: " << project_point_normalized_output[1]
-              << "; rows: " << project_point_normalized_output.rows() << "; cols: " << project_point_normalized_output.cols()
-              << "; distance: " << project_point_normalized_dist << std::endl;
-    std::cout << std:: endl << "Backproject" << std::endl;
-    std::cout << "x: " << backproject_point_normalized_output[0] << "; y: " << backproject_point_normalized_output[1]
-              << "; z: " << backproject_point_normalized_output[2] << "; depth: " << backproject_point_normalized_depth << std::endl;
+    std::cout << std:: endl << "Original         " << project_point_normalized_test.transpose() << std::endl;
+    std::cout << std:: endl << "Project          " << project_point_normalized_output.transpose() << std::endl;
+    std::cout << std:: endl << "Alternate project" << project_point_normalized_output.transpose() << std::endl;
+    std::cout << std:: endl << "Backproject      " << backproject_point_normalized_output.transpose() << std::endl;
 
 
     //================================= projectPoint and backprojectPoint to/from NormalizedPlane WITH JACOBIANS
@@ -130,25 +120,18 @@ int main(int argc, char** argv)
     std::cout << "\n--------------------------------------------------------" << std::endl;
     std::cout << "\nTEST project and backproject PointToNormalizedPlane with JACOBIAN" << std::endl;
 
-    std::cout << std:: endl << "Original" << std::endl;
-    std::cout << "x: " << pp_normalized_test[0] << "; y: " << pp_normalized_test[1] << "; z: " << pp_normalized_test[2] << std::endl;
-    std::cout << std:: endl << "Project" << std::endl;
-    std::cout << "x: " << pp_normalized_output[0] << "; y: " << pp_normalized_output[1] << "; rows: " << pp_normalized_output.rows()
-              << "; cols: " << pp_normalized_output.cols() << std::endl;
+    std::cout << std:: endl << "Original" << pp_normalized_test.transpose() << std::endl;
+    std::cout << std:: endl << "Project" << pp_normalized_output.transpose() << std::endl;
     std::cout << "\n--> Jacobian" << std::endl << pp_normalized_jacobian << std::endl;
 
-    std::cout << std:: endl << "Alternate project" << std::endl;
-    std::cout << "x: " << pp_normalized_output2[0] << "; y: " << pp_normalized_output2[1] << "; rows: "
-              << pp_normalized_output2.rows() << "; cols: " << pp_normalized_output2.cols() << "; distance: "
+    std::cout << std:: endl << "Alternate project" << pp_normalized_output2.transpose() << "; distance: "
               << pp_normalized_distance << std::endl;
     std::cout << "\n--> Jacobian" << std::endl << pp_normalized_jacobian2 << std::endl;
 
-    std::cout << std:: endl << "Backproject" << std::endl;
-    std::cout << "x: " << bpp_normalized_output[0] << "; y: " << bpp_normalized_output[1] << "; z: " << bpp_normalized_output[2]
+    std::cout << std:: endl << "Backproject" << bpp_normalized_output.transpose()
               << "; depth: " << bpp_normalized_depth << std::endl;
     std::cout << "\n--> Jacobian" << std::endl << bpp_normalized_jacobian << std::endl;
-    std::cout << "\n--> Jacobian - depth" << std::endl <<
-                 bpp_normalized_jacobian_depth[0] << " " << bpp_normalized_jacobian_depth[1] << " " << bpp_normalized_jacobian_depth[2] << " " << std::endl;
+    std::cout << "\n--> Jacobian - depth" << bpp_normalized_jacobian_depth.transpose() << std::endl;
 
 
     Eigen::Matrix2s test_jacobian; // (2x3) * (3x2) = (2x2)
@@ -252,8 +235,7 @@ int main(int argc, char** argv)
     std::cout << std::endl << "Distorted point" << std::endl;
     std::cout << "x: " << distored_point4[0] << "; y: " << distored_point4[1] << std::endl;
     std::cout << "\n--> Jacobian" << std::endl <<
-                 distortion_jacobian2.row(0).col(0) << " " << distortion_jacobian2.row(0).col(1) << std::endl <<
-                 distortion_jacobian2.row(1).col(0) << " " << distortion_jacobian2.row(1).col(1) << std::endl;
+                 distortion_jacobian2 << std::endl;
 
 
 
@@ -264,15 +246,13 @@ int main(int argc, char** argv)
     std::cout << std::endl << "Corrected point" << std::endl;
     std::cout << "x: " << corrected_point5[0] << "; y: " << corrected_point5[1] << std::endl;
     std::cout << "\n--> Jacobian" << std::endl <<
-                 corrected_jacobian2.row(0).col(0) << " " << corrected_jacobian2.row(0).col(1) << std::endl <<
-                 corrected_jacobian2.row(1).col(0) << " " << corrected_jacobian2.row(1).col(1) << std::endl;
+                 corrected_jacobian2 << std::endl;
 
     Eigen::Matrix2s test_jacobian_distortion;
     test_jacobian_distortion =  distortion_jacobian2 * corrected_jacobian2;
 
     std::cout << "\n\n\n==> Jacobian Testing" << std::endl <<
-                 test_jacobian_distortion.row(0).col(0) << " " << test_jacobian_distortion.row(0).col(1) << std::endl <<
-                 test_jacobian_distortion.row(1).col(0) << " " << test_jacobian_distortion.row(1).col(1) << std::endl;
+                 test_jacobian_distortion << std::endl;
 
     //================================= PixelizePoint
 
@@ -308,8 +288,7 @@ int main(int argc, char** argv)
     std::cout << std::endl << "Pixelized" << std::endl;
     std::cout << "x: " << pixelize_output4[0] << "; y: " << pixelize_output4[1] << std::endl;
     std::cout << "\n--> Jacobian" << std::endl <<
-                 pixelize_jacobian2.row(0).col(0) << " " << pixelize_jacobian2.row(0).col(1) << std::endl <<
-                 pixelize_jacobian2.row(1).col(0) << " " << pixelize_jacobian2.row(1).col(1) << std::endl;
+                 pixelize_jacobian2 << std::endl;
 
 
     Eigen::Vector2s depixelize_output4;
@@ -319,15 +298,13 @@ int main(int argc, char** argv)
     std::cout << std::endl << "Depixelized" << std::endl;
     std::cout << "x: " << depixelize_output4[0] << "; y: " << depixelize_output4[1] << std::endl;
     std::cout << "\n--> Jacobian" << std::endl <<
-                 depixelize_jacobian2.row(0).col(0) << " " << depixelize_jacobian2.row(0).col(1) << std::endl <<
-                 depixelize_jacobian2.row(1).col(0) << " " << depixelize_jacobian2.row(1).col(1) << std::endl;
+                 depixelize_jacobian2 << std::endl;
 
     Eigen::Matrix2s test_jacobian_pix;
     test_jacobian_pix =  pixelize_jacobian2 * depixelize_jacobian2;
 
     std::cout << "\n\n\n==> Jacobian Testing" << std::endl <<
-                 test_jacobian_pix.row(0).col(0) << " " << test_jacobian_pix.row(0).col(1) << std::endl <<
-                 test_jacobian_pix.row(1).col(0) << " " << test_jacobian_pix.row(1).col(1) << std::endl;
+                 test_jacobian_pix << std::endl;
 
 
 
@@ -377,8 +354,7 @@ int main(int argc, char** argv)
     std::cout << std::endl << "Third function output" << std::endl;
     std::cout << "x: " << point2D_test7[0] << "; y: " << point2D_test7[1] << std::endl;
     std::cout << "\n-->Jacobian" << std::endl <<
-                 jacobian_test3.row(0).col(0) << " " << jacobian_test3.row(0).col(1) << " " << jacobian_test3.row(0).col(2) << std::endl <<
-                 jacobian_test3.row(1).col(0) << " " << jacobian_test3.row(1).col(1) << " " << jacobian_test3.row(1).col(2) << std::endl;
+                 jacobian_test3 << std::endl;
 
         //jacobian and distance
     Eigen::Vector2s point2D_test8;
@@ -389,8 +365,7 @@ int main(int argc, char** argv)
     std::cout << std::endl << "Fourth function output" << std::endl;
     std::cout << "x: " << point2D_test8[0] << "; y: " << point2D_test8[1] << "; dist: " << distance_test3 << std::endl;
     std::cout << "\n-->Jacobian" << std::endl <<
-                 jacobian_test4.row(0).col(0) << " " << jacobian_test4.row(0).col(1) << " " << jacobian_test4.row(0).col(2) << std::endl <<
-                 jacobian_test4.row(1).col(0) << " " << jacobian_test4.row(1).col(1) << " " << jacobian_test4.row(1).col(2) << std::endl;
+                 jacobian_test4 << std::endl;
 
 
     /////////////////////////////
@@ -421,9 +396,7 @@ int main(int argc, char** argv)
     std::cout << std::endl << "Second function output" << std::endl;
     std::cout << "x: " << point3D_backproj4[0] << "; y: " << point3D_backproj4[1] << "; z: " << point3D_backproj4[2] << std::endl;
     std::cout << "\n--> Jacobian" << std::endl <<
-                 jacobian_backproj2.row(0).col(0) << " " << jacobian_backproj2.row(0).col(1) << std::endl <<
-                 jacobian_backproj2.row(1).col(0) << " " << jacobian_backproj2.row(1).col(1) << std::endl <<
-                 jacobian_backproj2.row(2).col(0) << " " << jacobian_backproj2.row(2).col(1) << std::endl;
+                 jacobian_backproj2 << std::endl;
     std::cout << "\n--> Jacobian - depth" << std::endl <<
                  depth_jacobian2[0] << " " << depth_jacobian2[1] << " " << depth_jacobian2[2] << " " << std::endl;
 
@@ -434,8 +407,7 @@ int main(int argc, char** argv)
     test_jacobian_complete =  jacobian_test4 * jacobian_backproj2;
 
     std::cout << "\n\n\n==> Jacobian Testing" << std::endl <<
-                 test_jacobian_complete.row(0).col(0) << " " << test_jacobian_complete.row(0).col(1) << std::endl <<
-                 test_jacobian_complete.row(1).col(0) << " " << test_jacobian_complete.row(1).col(1) << std::endl;
+                 test_jacobian_complete << std::endl;
 
 
 
