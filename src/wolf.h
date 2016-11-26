@@ -51,13 +51,15 @@ typedef double Scalar;        // Use this for double, 64 bit precision
  */
 typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE Size;
 
+#define M_TORAD 0.017453292519943295769236907684886127134  // pi / 180
+#define M_TODEG 57.295779513082320876798154814105170332    // 180 / pi
+
 namespace Constants{
 
 // Wolf standard tolerance
 const Scalar EPS = 1e-8;
 // Wolf smmmmall tolerance
 const Scalar EPS_SMALL = 1e-16;
-
 }
 
 } // namespace wolf
