@@ -22,6 +22,18 @@ inline T pi2pi(const T& angle)
             fmod(angle - (T)M_PI, (T)(2 * M_PI)) + (T)M_PI);
 }
 
+template<typename T>
+inline T toRad(const T& deg)
+{
+    return (T)M_TORAD * deg;
+}
+
+template<typename T>
+inline T toDeg(const T& rad)
+{
+    return (T)M_TODEG * rad;
+}
+
 //////////////////////////////////////////////////////////////////
 // Operators
 
@@ -72,12 +84,13 @@ inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<D
     }
 }
 
-template<typename T>
-inline Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q)
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v(const Eigen::QuaternionBase<Derived>& _q)
 {
+    typedef typename Derived::Scalar T;
     Eigen::Matrix<T, 3, 1> vec = _q.vec();
     T vecnorm = vec.norm();
-    if (vecnorm > wolf::Constants::EPS)
+    if (vecnorm > wolf::Constants::EPS_SMALL)
     { // regular angle-axis conversion
         T angle = atan2(vecnorm, _q.w());
         return vec * angle / vecnorm;
