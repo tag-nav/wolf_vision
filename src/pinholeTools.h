@@ -12,13 +12,9 @@
  *
  */
 
-//#include "jmath/jblas.hpp"
-//#include "jmath/linearSolvers.hpp"
-//#include "jmath/ublasExtra.hpp"
-
-//#include "jmath/matlab.hpp"
 #include "wolf.h"
-#include "iostream"
+
+#include <iostream>
 
 namespace wolf {
 /**
@@ -29,381 +25,422 @@ namespace wolf {
  */
 namespace pinhole {
 
+using Eigen::MatrixBase;
+using Eigen::Matrix;
 
-            /**
-             * Pin-hole canonical projection.
-             * \return the projected point in the normalized 2D plane
-             * \param v a 3D point
-             */
-            template<class V>
-            Eigen::Vector2s projectPointToNormalizedPlane(const V & v) {
+/**
+ * Pin-hole canonical projection.
+ * \param _v a 3D point to project
+ * \param _up the projected point in the normalized 2D plane
+ */
+template<typename Derived1, typename Derived2>
+inline void
+projectPointToNormalizedPlane(const MatrixBase<Derived1>& _v,
+                              MatrixBase<Derived2>&       _up)
+{
+    MatrixSizeCheck<3, 1>::check(_v);
+    MatrixSizeCheck<2, 1>::check(_up);
 
-                Eigen::Vector2s up;
-                up(0) = v(0) / v(2);
-                up(1) = v(1) / v(2);
-                return up;
-            }
+    _up(0) = _v(0) / _v(2);
+    _up(1) = _v(1) / _v(2);
+}
 
-            //TEMPLATE
-            template<class T>
-            Eigen::Matrix<T,2,1> projectPointToNormalizedPlane(const Eigen::Matrix<T,3,1>& v) {
+/**
+ * Pin-hole canonical projection.
+ * \return the projected point in the normalized 2D plane
+ * \param _v a 3D point
+ */
+template<typename Derived>
+inline Matrix<typename Derived::Scalar, 2, 1>
+projectPointToNormalizedPlane(const MatrixBase<Derived>& _v)
+{
+    MatrixSizeCheck<3, 1>::check(_v);
 
-                Eigen::Matrix<T,2,1> up;
-                up(0) = v(0) / v(2);
-                up(1) = v(1) / v(2);
-                return up;
-            }
+    typedef typename Derived::Scalar T;
+    Matrix<T, 2, 1> up;
 
-            /**
-             * Pin-hole canonical projection. Give distance.
-             * \param v a 3D point
-             * \param up the projected point in the normalized 2D plane
-             * \param dist the distance from the camera to the point
-             */
-            template<class V, class P>
-            void projectPointToNormalizedPlane(const V & v, P & up, Scalar & dist) {
+    projectPointToNormalizedPlane(_v, up);
 
-                up(0) = v(0) / v(2);
-                up(1) = v(1) / v(2);
-                dist = v.norm();
-            }
+    return up;
+}
 
-            /**
-             * Pin-hole canonical projection, with jacobian
-             * \param v the 3D point to project
-             * \param up the projected 2D point
-             * \param UP_v the Jacibian of \a u wrt \a v
-             */
-            template<class V, class U, class MU_v>
-            void projectPointToNormalizedPlane(const V & v, U & up, MU_v & UP_v) {
+/**
+ * Pin-hole canonical projection, return also distance (not depth!).
+ * \param _v a 3D point
+ * \param _up the projected point in the normalized 2D plane
+ * \param _dist the distance from the camera to the point
+ */
+template<typename Derived1, typename Derived2>
+inline void
+projectPointToNormalizedPlane(const MatrixBase<Derived1>& _v,
+                              MatrixBase<Derived2>&       _up,
+                              typename Derived1::Scalar&  _dist)
+{
+    MatrixSizeCheck<3, 1>::check(_v);
+    MatrixSizeCheck<2, 1>::check(_up);
 
-                up = projectPointToNormalizedPlane(v);
+    projectPointToNormalizedPlane(_v, _up);
+    _dist = _v.norm();
+}
 
-                UP_v(0, 0) = 1.0 / v(2);
-                UP_v(0, 1) = 0.0;
-                UP_v(0, 2) = -v(0) / (v(2) * v(2));
-                UP_v(1, 0) = 0.0;
-                UP_v(1, 1) = 1.0 / v(2);
-                UP_v(1, 2) = -v(1) / (v(2) * v(2));
+/**
+ * Pin-hole canonical projection, with jacobian
+ * \param _v the 3D point to project
+ * \param _up the projected 2D point
+ * \param _UP_v the Jacibian of \a u wrt \a v
+ */
+template<typename Derived1, typename Derived2, typename Derived3>
+inline void
+projectPointToNormalizedPlane(const MatrixBase<Derived1>& _v,
+                              MatrixBase<Derived2>&       _up,
+                              MatrixBase<Derived3>&       _UP_v)
+{
+    MatrixSizeCheck<3, 1>::check(_v);
+    MatrixSizeCheck<2, 1>::check(_up);
+    MatrixSizeCheck<2, 3>::check(_UP_v);
 
-            }
+    projectPointToNormalizedPlane(_v, _up);
 
-            /**
-             * Pin-hole canonical projection, distance and with jacobian
-             * \param v the 3D point to project
-             * \param up the projected 2D point
-             * \param dist the distance from the camera to the point
-             * \param UP_v the Jacibian of \a u wrt \a v
-             */
-            template<class V, class U, class MU_v>
-            void projectPointToNormalizedPlane(const V & v, U & up, Scalar & dist, MU_v & UP_v) {
+    _UP_v(0, 0) = 1.0 / _v(2);
+    _UP_v(0, 1) = 0.0;
+    _UP_v(0, 2) = -_v(0) / (_v(2) * _v(2));
+    _UP_v(1, 0) = 0.0;
+    _UP_v(1, 1) = 1.0 / _v(2);
+    _UP_v(1, 2) = -_v(1) / (_v(2) * _v(2));
+}
 
-                projectPointToNormalizedPlane(v, up, dist);
+/**
+ * Pin-hole canonical projection, with distance (not depth!) and jacobian
+ * \param _v the 3D point to project
+ * \param _up the projected 2D point
+ * \param _UP_v the Jacibian of \a u wrt \a v
+ */
+template<typename Derived1, typename Derived2, typename Derived3>
+inline void
+projectPointToNormalizedPlane(const MatrixBase<Derived1>& _v,
+                              MatrixBase<Derived2>&       _up,
+                              typename Derived1::Scalar&  _dist,
+                              MatrixBase<Derived3>&       _UP_v)
+{
+    MatrixSizeCheck<3, 1>::check(_v);
+    MatrixSizeCheck<2, 1>::check(_up);
+    MatrixSizeCheck<2, 3>::check(_UP_v);
 
-                UP_v(0, 0) = 1.0 / v(2);
-                UP_v(0, 1) = 0.0;
-                UP_v(0, 2) = -v(0) / (v(2) * v(2));
-                UP_v(1, 0) = 0.0;
-                UP_v(1, 1) = 1.0 / v(2);
-                UP_v(1, 2) = -v(1) / (v(2) * v(2));
+    projectPointToNormalizedPlane(_v, _up, _UP_v);
 
-            }
-
-            /**
-             * Canonical back-projection.
-             * \param u the 2D point in the image plane
-             * \param depth point's depth orthogonal to image plane. Defaults to 1.0
-             * \return the 3D point
-             */
-            template<class U>
-            Eigen::Vector3s backprojectPointFromNormalizedPlane(const U & u, Scalar depth = 1) {
-
-                Eigen::Vector3s p;
-                p(0) = depth * u(0);
-                p(1) = depth * u(1);
-                p(2) = depth;
-                //std::cout << "backprojectPoint. p(0): " << p(0) << "; p(1): " << p(1) << "; p(2): " << p(2) << std::endl;
-                return p;
-            }
-
-            /**
-             * Canonical back-projection.
-             * \param u the 2D point in the image plane.
-             * \param depth point's depth orthogonal to image plane.
-             * \param p the 3D point.
-             * \param P_u Jacobian of p wrt u.
-             * \param P_depth Jacobian of p wrt depth.
-             */
-            template<class U, class P, class MP_u, class MP_depth>
-            void backprojectPointFromNormalizedPlane(const U & u, const Scalar depth, P & p, MP_u & P_u, MP_depth & P_depth) {
-                p = backprojectPointFromNormalizedPlane(u, depth);
-
-                P_u(0, 0) = depth;
-                P_u(0, 1) = 0.0;
-                P_u(1, 0) = 0.0;
-                P_u(1, 1) = depth;
-                P_u(2, 0) = 0.0;
-                P_u(2, 1) = 0.0;
-
-                P_depth(0, 0) = u(0);
-                P_depth(1, 0) = u(1);
-                P_depth(2, 0) = 1.0;
-            }
-
-            /**
-             * Distortion factor for the model s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
-             * \param d the distortion parameters vector
-             * \param r2 the square of the radius to evaluate, r2 = r^2.
-             * \return the distortion factor so that rd = s*r
-             */
-            template<class VD>
-            Scalar distortFactor(const VD & d, Scalar r2){
-                if (d.size() == 0) return 1.0;
-                Scalar s = 1.0;
-                Scalar r2i = 1.0;
-                for (Size i = 0; i < d.size(); i++) { //   here we are doing:
-                    r2i = r2i * r2; //                    r2i = r^(2*(i+1))
-                    s += d(i) * r2i; //                   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
-//                    std::cout << "s: " << s << std::endl;
-                }
-                /*
-                    The model is not valid out of the image, and it can bring back landmarks very quickly after they got out.
-                    We should compute the point where the monotony changes by solving d/du u.f(u,v) = 0, but it would require a lot
-                    more computations to check the validity of the transform than to compute the distortion... and it should be done
-                    manually for every size of d (fortunately only 2 or 3 usually).
-                    So we just make a rough test on s, no camera should have a distortion greater than this, and anyway it will just
-                    prevent from observing some points on the borders of the image. In that case the landmark will seem to suddenly
-                    jump outside of the image.
-                */
-                if (s < 0.6) s = 1.0;
-                return s;
-            }
+    _dist = _v.norm();
+}
 
 
-            //TEMPLATE
-            template<class T>
-            T distortFactor(Eigen::Matrix<T,Eigen::Dynamic,1>& d, T r2){
-                if (d.size() == 0) return (T)1.0;
-                T s = (T)1.0;
-                T r2i = (T)1.0;
-                for (unsigned int i = 0; i < d.size(); i++) { //   here we are doing:
-                    r2i = r2i * r2; //                    r2i = r^(2*(i+1))
-                    s += d(i) * r2i; //                   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
-                }
-                if (s < (T)0.6) s = (T)1.0; // TODO what's this?
-                return s;
-            }
+/**
+ * Canonical back-projection.
+ * \param _u the 2D point in the image plane
+ * \param _depth point's depth orthogonal to image plane. Defaults to 1.0
+ * \return the back-projected 3D point at the given depth
+ */
+template<typename Derived>
+Matrix<typename Derived::Scalar, 3, 1>
+backprojectPointFromNormalizedPlane(const MatrixBase<Derived> &    _u,
+                                    const typename Derived::Scalar _depth = 1)
+{
+    MatrixSizeCheck<2,1>::check(_u);
 
-            /**
-             * Radial distortion: ud = (1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + etc) * u
-             * \param d the distortion parameters vector
-             * \param up the point to distort
-             * \return the distorted point
-             */
-            template<class VD, class VU>
-            Eigen::Vector2s distortPoint(const VD & d, const VU & up) {
-                Size n = d.size();
-                if (n == 0)
-                    return up;
-                else {
-                    Scalar r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
-                    return distortFactor(d, r2) * up;
-//					Scalar s = 1.0;
-//					Scalar r2i = 1.0;
-//					for (Size i = 0; i < n; i++) { //   here we are doing:
-//						r2i = r2i * r2; //                    r2i = r^(2*(i+1))
-//						s += d(i) * r2i; //                   s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
-//					}
-//					return s * up; //                     finally: ud = (1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...) * u;
-                }
-            }
+    Matrix<typename Derived::Scalar, 3, 1> p;
 
+    p << _depth*_u ,
+         _depth;
 
-            //TEMPLATE
-            template<class T>
-            Eigen::Matrix<T, 2, 1> distortPoint(Eigen::Matrix<T, Eigen::Dynamic, 1>& d, Eigen::Matrix<T, 2, 1>& up) {
-                unsigned int n = d.size();
-                if (n == 0)
-                    return up;
-                else {
-                    T r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
-                    return distortFactor(d, r2) * up;
-                }
-            }
+    return p;
+}
 
+/**
+ * Canonical back-projection.
+ * \param u the 2D point in the image plane.
+ * \param depth point's depth orthogonal to image plane.
+ * \param p the 3D point.
+ * \param P_u Jacobian of p wrt u.
+ * \param P_depth Jacobian of p wrt depth.
+ */
+template<typename Derived1, typename Derived2, typename Derived3, typename Derived4>
+void backprojectPointFromNormalizedPlane(const MatrixBase<Derived1> &    u,
+                                         const typename Derived1::Scalar depth,
+                                         MatrixBase<Derived2>&           p,
+                                         MatrixBase<Derived3>&           P_u,
+                                         MatrixBase<Derived4>&           P_depth )
+{
+    MatrixSizeCheck<2,1>::check(u);
+    MatrixSizeCheck<3,1>::check(p);
+    MatrixSizeCheck<3,2>::check(P_u);
+    MatrixSizeCheck<3,1>::check(P_depth);
 
-            /**
-             * Radial distortion: ud = (1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + etc) * u, with jacobians
-             * \param d the radial distortion parameters vector
-             * \param up the point to distort
-             * \param ud the distorted point
-             * \param UD_up the Jacobian of \a ud wrt \a up
-             */
-            template<class VD, class VUp, class VUd, class MUD_up>
-            void distortPoint(const VD & d, const VUp & up, VUd & ud, MUD_up & UD_up) {
-                Size n = d.size();
-                Eigen::Vector2s R2_up;
-                Eigen::Vector2s S_up;
+    p = backprojectPointFromNormalizedPlane(u, depth);
 
-                if (n == 0) {
-                    ud = up;
-                    UD_up(0, 0) = 1;
-                    UD_up(0, 1) = 0;
-                    UD_up(1, 0) = 0;
-                    UD_up(1, 1) = 1;
-                }
+    P_u(0, 0) = depth;
+    P_u(0, 1) = 0.0;
+    P_u(1, 0) = 0.0;
+    P_u(1, 1) = depth;
+    P_u(2, 0) = 0.0;
+    P_u(2, 1) = 0.0;
 
-                else {
-                    Scalar r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
-                    Scalar s = 1.0;
-                    Scalar r2i = 1.0;
-                    Scalar r2im1 = 1.0; //r2*(i-1)
-                    Scalar S_r2 = 0.0;
+    P_depth(0, 0) = u(0);
+    P_depth(1, 0) = u(1);
+    P_depth(2, 0) = 1.0;
+}
 
-                    for (Size i = 0; i < n; i++) { //.. here we are doing:
-                        r2i = r2i * r2; //................. r2i = r^(2*(i+1))
-                        s += d(i) * r2i; //................ s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
+/**
+ * Distortion factor for the model s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
+ * \param d the distortion parameters vector
+ * \param r2 the square of the radius to evaluate, r2 = r^2.
+ * \return the distortion factor so that rd = s*r
+ */
+template<typename Derived, typename T>
+T distortionFactor(const MatrixBase<Derived> & d,
+                   T r2)
+{
+    StaticSizeCheck<Derived::ColsAtCompileTime, 1>(d.cols());
 
-                        S_r2 = S_r2 + (i + 1) * d(i) * r2im1; //jacobian of s wrt r2 : S_r2 = d_0 + 2 * d1 * r^2 + 3 * d_2 * r^4 +  ...
-                        r2im1 = r2im1 * r2;
-                    }
+    if (d.size() == 0)
+        return (T)1.0;
+    T s = (T)1.0;
+    T r2i = (T)1.0;
+    for (Size i = 0; i < d.size(); i++)
+    {                           //   here we are doing:
+        r2i = r2i * r2;         //      r2i = r^(2*(i+1))
+        s  += d(i) * r2i;       //      s   = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
+    }
+    /*
+     The model is not valid out of the image, and it can bring back landmarks very quickly after they got out.
+     We should compute the point where the monotony changes by solving d/du u.f(u,v) = 0, but it would require a lot
+     more computations to check the validity of the transform than to compute the distortion... and it should be done
+     manually for every size of d (fortunately only 2 or 3 usually).
+     So we just make a rough test on s, no camera should have a distortion greater than this, and anyway it will just
+     prevent from observing some points on the borders of the image. In that case the landmark will seem to suddenly
+     jump outside of the image.
+     */
+    if (s < 0.6)
+        s = (T)1.0;
+    return s;
+}
 
-                    if (s < 0.5) s = 1.0; // because the model is not valid too much out of the image, avoid to wrongly bring them back in the field of view
-                    ud = s * up; // finally ud = (1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...) * u;
+/**
+ * Correction factor for the model s = 1 + c_0 * r^2 + c_1 * r^4 + c_2 * r^6 + ...
+ * \param c the correction parameters vector
+ * \param r2 the square of the radius to evaluate, r2 = r^2.
+ * \return the correction factor so that rc = s*r
+ */
+template<typename Derived, typename T>
+T correctionFactor(const MatrixBase<Derived> & c,
+                   T r2)
+{
+    StaticSizeCheck<Derived::ColsAtCompileTime, 1>(c.cols());
 
-                    R2_up(0) = 2 * up(0);
-                    R2_up(1) = 2 * up(1);
+    /*
+     * Since we use the same polynomial kernel as for the distortion factor, we just call distortionFactor()
+     */
+    return distortionFactor(c, r2);
+}
 
-                    S_up(0) = R2_up(0) * S_r2;
-                    S_up(1) = R2_up(1) * S_r2;
+/**
+ * Radial distortion: ud = (1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + etc) * u
+ * \param d the distortion parameters vector
+ * \param up the point to distort
+ * \return the distorted point
+ */
+template<typename Derived1, typename Derived2>
+Matrix<typename Derived2::Scalar, 2, 1> distortPoint(const MatrixBase<Derived1> & d,
+                                                     const MatrixBase<Derived2> & up)
+{
+    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(d.cols());
+    MatrixSizeCheck<2,1>::check(up);
 
-                    UD_up(0, 0) = S_up(0) * up(0) + s;
-                    UD_up(0, 1) = S_up(1) * up(0);
-                    UD_up(1, 0) = S_up(0) * up(1);
-                    UD_up(1, 1) = S_up(1) * up(1) + s;
-                }
-
-            }
-
-            // c is correction?
-            template<class VC, class VU>
-            Eigen::Vector2s undistortPoint(const VC & c, const VU & ud) {
-                Size n = c.size();
-                if (n == 0)
-                    return ud;
-                else {
-                    Scalar r2 = ud(0) * ud(0) + ud(1) * ud(1); // this is the norm squared: r2 = ||u||^2
-                    //std::cout << "undistortPoint: \n" << distortFactor(c, r2) * ud;
-                    return distortFactor(c, r2) * ud;
-//					Scalar s = 1.0;
-//					Scalar r2i = 1.0;
-//					for (Size i = 0; i < n; i++) { //   here we are doing:
-//						r2i = r2i * r2; //                    r2i = r^(2*(i+1))
-//						s += c(i) * r2i; //                   s = 1 + c_0 * r^2 + c_1 * r^4 + c_2 * r^6 + ...
-//					}
-//					return s * ud; //                     finally: up = (1 + c_0 * r^2 + c_1 * r^4 + c_2 * r^6 + ...) * u;
-                }
-            }
-
-            template<class VC, class VUd, class VUp, class MUP_ud>
-            void undistortPoint(const VC & c, const VUd & ud, VUp & up, MUP_ud & UP_ud) {
-                Size n = c.size();
-                Eigen::Vector2s R2_ud;
-                Eigen::Vector2s S_ud;
-
-                if (n == 0) {
-                    up = ud;
-                    UP_ud(0, 0) = 1;
-                    UP_ud(0, 1) = 0;
-                    UP_ud(1, 0) = 0;
-                    UP_ud(1, 1) = 1;
-                }
-
-                else {
-                    Scalar r2 = ud(0) * ud(0) + ud(1) * ud(1); // this is the norm squared: r2 = ||u||^2
-                    Scalar s = 1.0;
-                    Scalar r2i = 1.0;
-                    Scalar r2im1 = 1.0; //r2*(i-1)
-                    Scalar S_r2 = 0.0;
-
-                    for (Size i = 0; i < n; i++) { //.. here we are doing:
-                        r2i = r2i * r2; //................. r2i = r^(2*(i+1))
-                        s += c(i) * r2i; //................ s = 1 + c_0 * r^2 + c_1 * r^4 + c_2 * r^6 + ...
-
-                        S_r2 = S_r2 + (i + 1) * c(i) * r2im1; //jacobian of s wrt r2 : S_r2 = c_0 + 2 * d1 * r^2 + 3 * c_2 * r^4 +  ...
-                        r2im1 = r2im1 * r2;
-                    }
-
-                    up = s * ud; // finally up = (1 + c_0 * r^2 + c_1 * r^4 + c_2 * r^6 + ...) * u;
-
-                    R2_ud(0) = 2 * ud(0);
-                    R2_ud(1) = 2 * ud(1);
-
-                    S_ud(0) = R2_ud(0) * S_r2;
-                    S_ud(1) = R2_ud(1) * S_r2;
-
-                    UP_ud(0, 0) = S_ud(0) * ud(0) + s;
-                    UP_ud(0, 1) = S_ud(1) * ud(0);
-                    UP_ud(1, 0) = S_ud(0) * ud(1);
-                    UP_ud(1, 1) = S_ud(1) * ud(1) + s;
-                }
-                //std::cout << "undistortPoint. up(0): " << up(0) << "; up(1): " << up(1) << std::endl;
-            }
+    Size n = d.size();
+    if (n == 0)
+        return up;
+    else {
+        typename Derived2::Scalar r2 = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
+        return distortionFactor(d, r2) * up;
+    }
+}
 
 
-            /**
-             * Pixellization from k = [u_0, v_0, a_u, a_v]
-             * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
-             * \param ud the point to pixellize, adimensional
-             * \return the point in pixels coordinates
-             */
-            template<class VK, class VU>
-            Eigen::Vector2s pixellizePoint(const VK & k, const VU & ud) {
-                Scalar u_0 = k(0);
-                Scalar v_0 = k(1);
-                Scalar a_u = k(2);
-                Scalar a_v = k(3);
-                Eigen::Vector2s u;
-                u(0) = u_0 + a_u * ud(0);
-                u(1) = v_0 + a_v * ud(1);
-                return u;
-            }
+/**
+ * Radial distortion: ud = (1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + etc) * u, with jacobians
+ * \param d the radial distortion parameters vector
+ * \param up the point to distort
+ * \param ud the distorted point
+ * \param UD_up the Jacobian of \a ud wrt \a up
+ */
+template<typename Derived1, typename Derived2, typename Derived3, typename Derived4>
+void distortPoint(const MatrixBase<Derived1> & d,
+                  const MatrixBase<Derived2> & up,
+                  MatrixBase<Derived3> & ud,
+                  MatrixBase<Derived4> & UD_up)
+{
+    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(d.cols());
+    MatrixSizeCheck<2,1>::check(up);
+    MatrixSizeCheck<2,1>::check(ud);
+    MatrixSizeCheck<2,2>::check(UD_up);
 
-            //TEMPLATE
-            template<class T, class R>
-            Eigen::Matrix<T,2,1> pixellizePoint(Eigen::Matrix<T,4,1>& k, Eigen::Matrix<T,2,1>& ud) {
-                R u_0 = k(0);
-                R v_0 = k(1);
-                R a_u = k(2);
-                R a_v = k(3);
-                Eigen::Matrix<T,2,1> u;
-                u(0) = u_0 + a_u * ud(0);
-                u(1) = v_0 + a_v * ud(1);
-                return u;
-            }
+    typedef typename Derived2::Scalar T;
+
+    Matrix<T, 2, 1> R2_up;
+    Matrix<T, 2, 1> S_up;
+
+    Size n = d.size();
+    if (n == 0) {
+        ud = up;
+        UD_up.setIdentity();
+    }
+
+    else {
+        T r2    = up(0) * up(0) + up(1) * up(1); // this is the norm squared: r2 = ||u||^2
+        T s     = (T) 1.0;
+        T r2i   = (T) 1.0;
+        T r2im1 = (T) 1.0; //r2*(i-1)
+        T S_r2  = (T) 0.0;
+
+        for (Size i = 0; i < n; i++) { //.. here we are doing:
+            r2i = r2i * r2; //................. r2i = r^(2*(i+1))
+            s += d(i) * r2i; //................ s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
+
+            S_r2 = S_r2 + (i + 1) * d(i) * r2im1; //jacobian of s wrt r2 : S_r2 = d_0 + 2 * d1 * r^2 + 3 * d_2 * r^4 +  ...
+            r2im1 = r2im1 * r2;
+        }
+
+        if (s < (T)0.6) s = (T)1.0; // because the model is not valid too much out of the image, avoid to wrongly bring them back in the field of view
+                                    // see extensive note in distortionFactor()
+        ud = s * up; // finally ud = (1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...) * u;
+
+        R2_up(0) = 2 * up(0);
+        R2_up(1) = 2 * up(1);
+
+        S_up(0) = R2_up(0) * S_r2;
+        S_up(1) = R2_up(1) * S_r2;
+
+        UD_up(0, 0) = S_up(0) * up(0) + s;
+        UD_up(0, 1) = S_up(1) * up(0);
+        UD_up(1, 0) = S_up(0) * up(1);
+        UD_up(1, 1) = S_up(1) * up(1) + s;
+    }
+
+}
+
+template<typename Derived1, typename Derived2>
+Matrix<typename Derived2::Scalar, 2, 1> undistortPoint(const MatrixBase<Derived1>& c, const MatrixBase<Derived2>& ud)
+{
+    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(c.cols());
+    MatrixSizeCheck<2,1>::check(ud);
+
+    Size n = c.size();
+    if (n == 0)
+        return ud;
+    else {
+        typename Derived2::Scalar r2 = ud(0) * ud(0) + ud(1) * ud(1); // this is the norm squared: r2 = ||u||^2
+        return correctionFactor(c, r2) * ud;
+    }
+}
+
+template<class VC, class VUd, class VUp, class MUP_ud>
+void undistortPoint(const VC & c, const VUd & ud, VUp & up, MUP_ud & UP_ud)
+{
+    Size n = c.size();
+    Eigen::Vector2s R2_ud;
+    Eigen::Vector2s S_ud;
+
+    if (n == 0)
+    {
+        up = ud;
+        UP_ud.setIdentity();
+    }
+
+    else
+    {
+        Scalar r2   = ud(0) * ud(0) + ud(1) * ud(1); // this is the norm squared: r2 = ||u||^2
+        Scalar s    = 1.0;
+        Scalar r2i  = 1.0;
+        Scalar r2im1 = 1.0; //r2*(i-1)
+        Scalar S_r2 = 0.0;
+
+        for (Size i = 0; i < n; i++)
+        { //.. here we are doing:
+            r2i = r2i * r2; //................. r2i = r^(2*(i+1))
+            s += c(i) * r2i; //................ s = 1 + c_0 * r^2 + c_1 * r^4 + c_2 * r^6 + ...
+
+            S_r2 = S_r2 + (i + 1) * c(i) * r2im1; //jacobian of s wrt r2 : S_r2 = c_0 + 2 * d1 * r^2 + 3 * c_2 * r^4 +  ...
+            r2im1 = r2im1 * r2;
+        }
+
+        up = s * ud; // finally up = (1 + c_0 * r^2 + c_1 * r^4 + c_2 * r^6 + ...) * u;
+
+        R2_ud(0) = 2 * ud(0);
+        R2_ud(1) = 2 * ud(1);
+
+        S_ud(0) = R2_ud(0) * S_r2;
+        S_ud(1) = R2_ud(1) * S_r2;
+
+        UP_ud(0, 0) = S_ud(0) * ud(0) + s;
+        UP_ud(0, 1) = S_ud(1) * ud(0);
+        UP_ud(1, 0) = S_ud(0) * ud(1);
+        UP_ud(1, 1) = S_ud(1) * ud(1) + s;
+    }
+}
 
 
-            /**
-             * Pixellization from k = [u_0, v_0, a_u, a_v] with jacobians
-             * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
-             * \param ud the point to pixellize, adimensional
-             * \param u the pixellized point
-             * \param U_ud the Jacobian of \a u wrt \a ud
-             */
-            template<class VK, class VUd, class VU, class MU_ud>
-            void pixellizePoint(const VK & k, const VUd & ud, VU & u, MU_ud & U_ud) {
-                //Scalar u_0 = k(0);
-                //Scalar v_0 = k(1);
-                Scalar a_u = k(2);
-                Scalar a_v = k(3);
+/**
+ * Pixellization from k = [u_0, v_0, a_u, a_v]
+ * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
+ * \param ud the point to pixellize, adimensional
+ * \return the point in pixels coordinates
+ */
+template<typename Derived1, typename Derived2>
+Matrix<typename Derived2::Scalar, 2, 1> pixellizePoint(const MatrixBase<Derived1>& k, const MatrixBase<Derived2>& ud)
+{
+    MatrixSizeCheck<4,1>::check(k);
+    MatrixSizeCheck<2,1>::check(ud);
 
-                u = pixellizePoint(k, ud);
+    typedef typename Derived2::Scalar T;
 
-                U_ud(0, 0) = a_u;
-                U_ud(0, 1) = 0;
-                U_ud(1, 0) = 0;
-                U_ud(1, 1) = a_v;
-            }
+    T u_0 = k(0);
+    T v_0 = k(1);
+    T a_u = k(2);
+    T a_v = k(3);
+    Matrix<T, 2, 1> u;
+
+    u(0) = u_0 + a_u * ud(0);
+    u(1) = v_0 + a_v * ud(1);
+
+    return u;
+}
+
+
+
+/**
+ * Pixellization from k = [u_0, v_0, a_u, a_v] with jacobians
+ * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
+ * \param ud the point to pixellize, adimensional
+ * \param u the pixellized point
+ * \param U_ud the Jacobian of \a u wrt \a ud
+ */
+template<typename Derived1, typename Derived2, typename Derived3, typename Derived4>
+void pixellizePoint(const MatrixBase<Derived1>& k, const MatrixBase<Derived2>& ud, MatrixBase<Derived3>& u, MatrixBase<Derived4>& U_ud)
+{
+    MatrixSizeCheck<4,1>::check(k);
+    MatrixSizeCheck<2,1>::check(ud);
+    MatrixSizeCheck<2,1>::check(u);
+    MatrixSizeCheck<2,2>::check(U_ud);
+
+    typedef typename Derived1::Scalar T;
+
+    u = pixellizePoint(k, ud);
+
+    T a_u = k(2);
+    T a_v = k(3);
+
+    U_ud(0, 0) = a_u;
+    U_ud(0, 1) = 0;
+    U_ud(1, 0) = 0;
+    U_ud(1, 1) = a_v;
+}
 
 
             /**
@@ -412,18 +449,25 @@ namespace pinhole {
              * \param u the point to depixellize, in pixels
              * \return the depixellized point, adimensional
              */
-            template<class VK, class VU>
-            Eigen::Vector2s depixellizePoint(const VK & k, const VU & u) {
-                Scalar u_0 = k(0);
-                Scalar v_0 = k(1);
-                Scalar a_u = k(2);
-                Scalar a_v = k(3);
-                Eigen::Vector2s ud;
-                ud(0) = (u(0) - u_0) / a_u;
-                ud(1) = (u(1) - v_0) / a_v;
-                //std::cout << "depixellizePoint. ud(0): " << ud(0) << "; ud(1): " << ud(1) << std::endl;
-                return ud;
-            }
+template<typename Derived1, typename Derived2>
+Matrix<typename Derived2::Scalar, 2, 1> depixellizePoint(const MatrixBase<Derived1>& k, const MatrixBase<Derived2>& u)
+{
+    MatrixSizeCheck<4,1>::check(k);
+    MatrixSizeCheck<2,1>::check(u);
+
+    typedef typename Derived1::Scalar T;
+
+    T u_0 = k(0);
+    T v_0 = k(1);
+    T a_u = k(2);
+    T a_v = k(3);
+    Matrix<typename Derived2::Scalar, 2, 1> ud;
+
+    ud(0) = (u(0) - u_0) / a_u;
+    ud(1) = (u(1) - v_0) / a_v;
+
+    return ud;
+}
 
 
             /**
@@ -622,7 +666,7 @@ namespace pinhole {
 
                         rc(sample) = sample * rd_max * iN_samples; // sample * rd_max / N_samples
                         rc_2 = rc(sample) * rc(sample);
-                        rd(sample) = distortFactor(d, rc_2) * rc(sample);
+                        rd(sample) = distortionFactor(d, rc_2) * rc(sample);
                         rd_2 = rd(sample) * rd(sample);
 
                         rd_n = rd(sample); // start with rd
