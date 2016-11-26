@@ -115,8 +115,8 @@ IF(OpenCV_FOUND)
 #    TARGET_LINK_LIBRARIES(test_opencv ${PROJECT_NAME})
 
     # Testing OpenCV functions for projection of points
-#    ADD_EXECUTABLE(test_projection_points test_projection_points.cpp)
-#    TARGET_LINK_LIBRARIES(test_projection_points ${PROJECT_NAME})
+    ADD_EXECUTABLE(test_projection_points test_projection_points.cpp)
+    TARGET_LINK_LIBRARIES(test_projection_points ${PROJECT_NAME})
 
 
 
