@@ -290,23 +290,11 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
     {
         assert (last_ptr_ && "bad last ptr");
         assert (_landmark_ptr && "bad lmk ptr");
-        auto current_frame = last_ptr_->getFramePtr();
-        auto landmark_ahp = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
+
+        LandmarkAHPPtr landmark_ahp = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
 
         ConstraintAHPPtr constraint_ptr = ConstraintAHP::create(_feature_ptr, landmark_ahp, true);
 
-
-        Eigen::Vector2s expectation_;
-        Eigen::Vector3s current_frame_p = last_ptr_->getFramePtr()->getPPtr()->getVector();
-        Eigen::Vector4s current_frame_o  = last_ptr_->getFramePtr()->getOPtr()->getVector();
-        Eigen::Vector3s anchor_frame_p = landmark_ahp->getAnchorFrame()->getPPtr()->getVector();
-        Eigen::Vector4s anchor_frame_o = landmark_ahp->getAnchorFrame()->getOPtr()->getVector();
-        Eigen::Vector4s landmark_ = landmark_ahp->getPPtr()->getVector();
-
-        (*constraint_ptr).expectation(current_frame_p.data(), current_frame_o.data(),
-                anchor_frame_p.data(), anchor_frame_o.data(),
-                landmark_.data(),expectation_.data());
-//        std::cout << "====================expectation: " << expectation_.transpose() << std::endl;
         return constraint_ptr;
     }
 }
