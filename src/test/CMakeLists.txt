@@ -57,6 +57,10 @@ target_link_libraries(gtest_local_param ${PROJECT_NAME})
 wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
 target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
 
+# Pinhole test
+wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
+target_link_libraries(gtest_pinhole ${PROJECT_NAME})
+
 # Problem class test
 wolf_add_gtest(gtest_problem gtest_problem.cpp)
 target_link_libraries(gtest_problem ${PROJECT_NAME})

@@ -732,7 +732,7 @@ void computeCorrectionModel(const Vk & k, const Vd & d, Vc & c)
     {
 
         Scalar r_max = sqrt(k(0) * k(0) / (k(2) * k(2)) + k(1) * k(1) / (k(3) * k(3)));
-        Scalar rd_max = 1.25 * r_max;
+        Scalar rd_max = 1.2 * r_max;
 
         Size N_samples = 200; // number of samples
         Scalar iN_samples = 1 / (Scalar)N_samples;
@@ -763,6 +763,7 @@ void computeCorrectionModel(const Vk & k, const Vd & d, Vc & c)
 
         // this does not work:
         // jmath::LinearSolvers::solve_Cholesky(Rd, (rc - rd), c);
+
 
         // therefore we solve manually the pseudo-inverse:
         Eigen::MatrixXs RdtRd(size, size);
