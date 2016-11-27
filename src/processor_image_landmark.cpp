@@ -126,19 +126,17 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
         // project landmark into incoming capture
         LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_in_ptr);
+        SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(this->getSensorPtr());
         Eigen::Vector4s point3D_hmg;
-        Eigen::Vector3s pixel_hmg;
-        Eigen::Vector2s point_projected, point_distorted, pixel;
+        Eigen::Vector2s pixel;
 
         landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
 
-        pixel_hmg = point3D_hmg.head(3);
-        point_projected = pixel_hmg.head(2)/pixel_hmg(2);
-        point_distorted = pinhole::distortPoint((std::static_pointer_cast<SensorCamera>(this->getSensorPtr()))->getDistortionVector(),point_projected);
-        pixel = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point_distorted);
+        pixel = pinhole::projectPoint(camera->getIntrinsicPtr()->getVector(),
+                                      camera->getDistortionVector(),
+                                      point3D_hmg.head<3>());
 
-
-        if(pinhole::isInImage(pixel,image_.width_,image_.height_))
+        if(pinhole::isInImage(pixel, image_.width_, image_.height_))
         {
             roi_x = (pixel[0]) - (roi_width  / 2);
             roi_y = (pixel[1]) - (roi_height / 2);
@@ -162,11 +160,12 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                     incoming_point_ptr->setTrackId(landmark_in_ptr->id());
                     incoming_point_ptr->setLandmarkId(landmark_in_ptr->id());
                     incoming_point_ptr->setScore(normalized_score);
-                    _feature_list_out.push_back(incoming_point_ptr);
-
                     incoming_point_ptr->setExpectation(pixel);
 
-                    _feature_landmark_correspondences[_feature_list_out.back()] = std::make_shared<LandmarkMatch>(landmark_in_ptr, normalized_score);
+                    _feature_list_out.push_back(incoming_point_ptr);
+
+
+                    _feature_landmark_correspondences[incoming_point_ptr] = std::make_shared<LandmarkMatch>(landmark_in_ptr, normalized_score);
 
                     feat_lmk_found_.push_back(incoming_point_ptr);
 
@@ -353,9 +352,9 @@ void ProcessorImageLandmark::landmarkInCurrentCamera(const Eigen::VectorXs& _cur
     T_R0_C0 = t_r0_c0 * q_r0_c0;
 
     // current robot to current camera
-    Translation<Scalar,3>  tr1c1(this->getSensorPtr()->getPPtr()->getVector());
-    Map<const Quaternions> qr1c1(this->getSensorPtr()->getOPtr()->getPtr());
-    T_R1_C1 = tr1c1 * qr1c1;
+    Translation<Scalar,3>  t_r1_c1(this->getSensorPtr()->getPPtr()->getVector());
+    Map<const Quaternions> q_r1_c1(this->getSensorPtr()->getOPtr()->getPtr());
+    T_R1_C1 = t_r1_c1 * q_r1_c1;
 
     // Transform lmk from c0 to c1 and exit
     Vector4s landmark_hmg_c0 = _landmark->getPPtr()->getVector(); // lmk in anchor frame
