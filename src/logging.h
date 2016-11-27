@@ -170,7 +170,7 @@ inline bool Logger::set_async_queue(const std::size_t q_size)
 #ifdef _WOLF_TRACE
   #define WOLF_TRACE(...) \
     {char this_file[] = __FILE__;\
-    wolf::internal::Logger::get().trace("[", basename(this_file), " l#", __LINE__, \
+    wolf::internal::Logger::get().trace("[", basename(this_file), " L", __LINE__, \
               " : ", __FUNCTION__, "] ", __VA_ARGS__);}
 #else
   #define WOLF_TRACE(...)
