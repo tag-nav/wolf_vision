@@ -319,7 +319,7 @@ void ProcessorImageLandmark::landmarkInCurrentCamera(const Eigen::VectorXs& _cur
      *      'C' is 'camera'
      *      'W' is 'world',
      *
-     * by concatenating the individual transforms T_X_Y:
+     * by concatenating the individual transforms:
      *
      *      T_W_R0,
      *      T_W_R1,
@@ -359,50 +359,6 @@ void ProcessorImageLandmark::landmarkInCurrentCamera(const Eigen::VectorXs& _cur
     // Transform lmk from c0 to c1 and exit
     Vector4s landmark_hmg_c0 = _landmark->getPPtr()->getVector(); // lmk in anchor frame
     _point3D_hmg = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
-
-
-    //    // OLD CODE
-    //    Eigen::VectorXs current_state = getProblem()->getStateAtTimeStamp(_capture->getTimeStamp());
-    //
-    //    assert((current_state.size() == 7 || current_state.size() == 16) && "Wrong state size! Should be 7 for 3D pose or 16 for IMU.");
-    //
-    //    Eigen::Vector3s pwr1;
-    //    Eigen::Vector4s quaternion_current_frame;
-    //
-    //    pwr1 = current_state.head<3>();
-    //    quaternion_current_frame = current_state.segment<4>(3);
-    //
-    //    Eigen::Vector3s pwr0 = _landmark->getAnchorFrame()->getPPtr()->getVector();
-    //    Eigen::Vector3s prc = this->getSensorPtr()->getPPtr()->getVector();
-    //
-    //    Eigen::Translation<Scalar,3> twr1, twr0, trc;
-    //    twr1.x() = pwr1(0); twr1.y() = pwr1(1); twr1.z() = pwr1(2);
-    //    twr0.x() = pwr0(0); twr0.y() = pwr0(1); twr0.z() = pwr0(2);
-    //    trc.x() = prc(0); trc.y() = prc(1); trc.z() = prc(2);
-    //
-    //
-    //    Eigen::Quaternion<Scalar> qwr1, qwr0, qrc;
-    //    Eigen::Vector4s quaternion_anchor = _landmark->getAnchorFrame()->getOPtr()->getVector();
-    //    Eigen::Vector4s quaternion_sensor = this->getSensorPtr()->getOPtr()->getVector();
-    //    qwr0 = quaternion_anchor;
-    //    qwr1 = quaternion_current_frame;
-    //    qrc  = quaternion_sensor;
-    //
-    //    Eigen::Vector4s landmark_hmg_c0 = _landmark->getPPtr()->getVector();
-    //
-    //
-    //    Eigen::Transform<Scalar,3,Eigen::Affine> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
-    //
-    //    T_W_R0 = twr0 * qwr0;
-    //    T_W_R1 = twr1 * qwr1;
-    //    T_R0_C0 = trc * qrc;
-    //    T_R1_C1 = T_R0_C0;
-    //
-    //    Eigen::Vector4s landmark_hmg_c1;
-    //    landmark_hmg_c1 = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
-    ////    std::cout << "landmark_hmg_c1: " << landmark_hmg_c1 << std::endl;
-    //
-    //    _point3D_hmg = landmark_hmg_c1;
 }
 
 Scalar ProcessorImageLandmark::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches)
