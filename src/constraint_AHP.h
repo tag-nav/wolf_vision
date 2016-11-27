@@ -20,6 +20,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
     protected:
         Eigen::Vector3s anchor_sensor_extrinsics_p_;
         Eigen::Vector4s anchor_sensor_extrinsics_o_;
+        Eigen::Vector4s intrinsic_;
         Eigen::Matrix3s K_;
         Eigen::VectorXs distortion_;
         FeaturePointImage feature_image_;
@@ -44,6 +45,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                                                    _landmark_ptr->getPPtr()),
                 anchor_sensor_extrinsics_p_(_ftr_ptr->getCapturePtr()->getSensorPPtr()->getVector()),
                 anchor_sensor_extrinsics_o_(_ftr_ptr->getCapturePtr()->getSensorOPtr()->getVector()),
+                intrinsic_(_ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr()->getVector()),
                 feature_image_(*std::static_pointer_cast<FeaturePointImage>(_ftr_ptr))
         {
             setType("AHP");
@@ -66,59 +68,57 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                          const T* const _lmk_hmg,
                          T* _expectation) const
         {
-            // Maps over the input pointers
-            Eigen::Matrix<T, 3, 3> K = K_.cast<T>();
-            Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg_c0(_lmk_hmg);
-
-            Eigen::Map<const Eigen::Matrix<T, 3, 1> > pwr1(_current_frame_p);
-            Eigen::Map<const Eigen::Matrix<T, 3, 1> > pwr0(_anchor_frame_p);
-            Eigen::Matrix<T, 3, 1> prc = anchor_sensor_extrinsics_p_.cast<T>();
-
-            Eigen::Quaternion<T> qwr1, qwr0, qrc;
-            qwr0 = _anchor_frame_o;
-            qwr1 = _current_frame_o;
-            qrc = anchor_sensor_extrinsics_o_.cast<T>();
-
-
-            /* TRANSFORM MATRIX APPROACH */
-
-            Eigen::Translation<T,3> twr1, twr0, trc;
-            twr1.x() = pwr1(0); twr1.y() = pwr1(1); twr1.z() = pwr1(2);
-            twr0.x() = pwr0(0); twr0.y() = pwr0(1); twr0.z() = pwr0(2);
-            trc.x() = prc(0); trc.y() = prc(1); trc.z() = prc(2);
+            using namespace Eigen;
 
 
             Eigen::Transform<T,3,Eigen::Affine> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
 
-            T_W_R0 = twr0 * qwr0;
-            T_W_R1 = twr1 * qwr1;
-            T_R0_C0 = trc * qrc;
-            T_R1_C1 = T_R0_C0;
+            // world to anchor robot frame
+            Map<const Matrix<T, 3, 1>>  p_w_r0(_anchor_frame_p);
+            Translation<T,3>            t_w_r0(p_w_r0);
+            Map<const Quaternion<T>>    q_w_r0(_anchor_frame_o);
+            T_W_R0 = t_w_r0 * q_w_r0;
 
-            // hmg point in C1 frame (current frame)
-            Eigen::Matrix<T,4,1> landmark_hmg_c1;
-            landmark_hmg_c1 = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
-            //            std::cout << "\nlandmark_hmg_c1:\n" << landmark_hmg_c1(0) << "\t" << landmark_hmg_c1(1) << "\t" << landmark_hmg_c1(2) << "\t" << landmark_hmg_c1(3) << std::endl;
+            // world to current robot frame
+            Map<const Matrix<T, 3, 1> > p_w_r1(_current_frame_p);
+            Translation<T,3>            t_w_r1(p_w_r1);
+            Map<const Quaternion<T>>    q_w_r1(_current_frame_o);
+            T_W_R1 = t_w_r1 * q_w_r1;
 
+            // anchor robot to anchor camera
+            Translation<T,3> t_r0_c0(anchor_sensor_extrinsics_p_.cast<T>());
+            Quaternion<T>    q_r0_c0(anchor_sensor_extrinsics_o_.cast<T>());
+            T_R0_C0 = t_r0_c0 * q_r0_c0;
+
+            // current robot to current camera
+            CaptureBasePtr current_capture = this->getFeaturePtr()->getCapturePtr();
+            Translation<T,3>    t_r1_c1  (current_capture->getSensorPPtr()->getVector().cast<T>());
+            Quaternions         q_r1_c1_s(current_capture->getSensorOPtr()->getPtr());
+            Quaternion<T>       q_r1_c1 = q_r1_c1_s.cast<T>();
+            T_R1_C1 = t_r1_c1 * q_r1_c1;
+
+
+            // hmg point in current camera frame C1
+            Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg_c0(_lmk_hmg);
+            Eigen::Matrix<T,4,1> landmark_hmg_c1 = T_R1_C1.inverse(Eigen::Affine)
+                                                 * T_W_R1.inverse(Eigen::Affine)
+                                                 * T_W_R0
+                                                 * T_R0_C0
+                                                 * landmark_hmg_c0;
 
             // lmk direction vector
             Eigen::Matrix<T,3,1> v_dir = landmark_hmg_c1.head(3);
 
-            // projected point in canonical sensor
-            Eigen::Matrix<T,2,1> point_undistorted;
-            point_undistorted = v_dir.head(2)/v_dir(2);
-            //            std::cout << "\nv:\n" << point_undistorted(0) << "\t" << point_undistorted(1) << std::endl;
+            // camera parameters
+            Matrix<T, 4, 1> intrinsic = intrinsic_.cast<T>();
+            Eigen::Matrix<T,Eigen::Dynamic,1> distortion = distortion_.cast<T>();
 
-            Eigen::Matrix<T,Eigen::Dynamic,1> distortion_vector = distortion_.cast<T>();
-            //            std::cout << "\ndistortion_vector:\n" << distortion_vector(0) << "\t" << distortion_vector(1) << std::endl;
-
-            // distort point
-            Eigen::Matrix<T,2,1> point_distorted = pinhole::distortPoint(distortion_vector, point_undistorted);
-
-            // pixellize
+            // project point and exit
             Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
-            expectation(0) = K(0,0) * point_distorted(0) + K(0,2);
-            expectation(1) = K(1,1) * point_distorted(1) + K(1,2);
+
+            expectation = pinhole::projectPoint(intrinsic,
+                                                distortion,
+                                                v_dir);
 
         }
 
@@ -150,21 +150,21 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                           const T* const _lmk_hmg,
                           T* _residuals) const
         {
-//            std::cout << "operator: " << id() << std::endl;
-            Eigen::Matrix<T, Eigen::Dynamic, 1> expected(2) ;
-            expectation(_current_frame_p, _current_frame_o,  _anchor_frame_p,
-                          _anchor_frame_o,  _lmk_hmg, expected.data()) ;
+            // expected
+            Eigen::Matrix<T, 2, 1> expected ;
+            expectation(_current_frame_p,
+                        _current_frame_o,
+                        _anchor_frame_p,
+                        _anchor_frame_o,
+                        _lmk_hmg,
+                        expected.data()) ;
 
+            // measured
             Eigen::Matrix<T, 2, 1> measured = getMeasurement().cast<T>();
 
+            // residual
             Eigen::Map<Eigen::Matrix<T, 2, 1> > residuals(_residuals);
-
             residuals = getMeasurementSquareRootInformation().cast<T>() * (expected - measured);
-
-            // debug info:
-            Eigen::Map<const Eigen::Matrix< T, 4, 1> > landmark(_lmk_hmg);
-//            std::cout << "\nLANDMARK  L" <<  getLandmarkOtherPtr()->id() << ":\n\t" << landmark[0] << "\n\t" << landmark[1] << "\n\t" << landmark[2] << "\n\t" << landmark[3] << std::endl;
-//            std::cout << "\nRESIDUALS c" <<  id() << ":\n\t" << residuals[0] << "\n\t" << residuals[1] << std::endl;
 
             return true;
         }
@@ -177,12 +177,7 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         }
 
 
-        //////////////////////////////////////////////////////////////////////////////////////////
-        // TODO: See if we rename this to 'emplace'. Tasks to evaluate:
-        //         - Make it standard for all wolf nodes
-        //         - Put this 'emplace' in ConstraintBase, or ConstraintSparse
-        //         - Keep factory-methods (i.e. like this one)  in ALL derived classes, to be called by the 'emplace' in Base.
-        //            - In such case, make a unique API, or use Variadic
+        // Static creator method
         static ConstraintAHPPtr create(FeatureBasePtr     _ftr_ptr,
                                          LandmarkAHPPtr   _lmk_ahp_ptr,
                                          bool               _apply_loss_function    = false,
@@ -196,8 +191,6 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
             _lmk_ahp_ptr->addConstrainedBy(ctr_ahp);
             return  ctr_ahp;
         }
-        //
-        //////////////////////////////////////////////////////////////////////////////////////////
 
 
 };
