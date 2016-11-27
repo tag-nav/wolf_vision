@@ -10,7 +10,7 @@ MESSAGE(STATUS ${CMAKE_MODULE_PATH})
 
 # Some wolf compilation options
 
-IF(CMAKE_BUILD_TYPE MATCHES DEBUG)
+IF((CMAKE_BUILD_TYPE MATCHES DEBUG) OR (CMAKE_BUILD_TYPE MATCHES debug))
   set(_WOLF_DEBUG true)
 ENDIF()
 
@@ -21,14 +21,10 @@ option(BUILD_EXAMPLES "Build examples" ON)
 
 # Does this has any other interest
 # but for the examples ?
-IF(BUILD_EXAMPLES)
+# yes, for the tests !
+IF(BUILD_EXAMPLES OR BUILD_TESTS)
   set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
 ENDIF(BUILD_EXAMPLES)
-#
-# yes, for the tests !
-IF(BUILD_TESTS)
-  set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
-ENDIF(BUILD_TESTS)
 
 
 #find dependencies.

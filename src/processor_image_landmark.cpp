@@ -119,6 +119,8 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
     cv::Mat candidate_descriptors;
     std::vector<cv::DMatch> cv_matches;
 
+    Eigen::VectorXs current_state = getProblem()->getStateAtTimeStamp(incoming_ptr_->getTimeStamp());
+
     for (auto landmark_in_ptr : _landmark_list_in)
     {
 
@@ -128,7 +130,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
         Eigen::Vector3s pixel_hmg;
         Eigen::Vector2s point_projected, point_distorted, pixel;
 
-        LandmarkInCurrentCamera(incoming_ptr_, landmark_ptr, point3D_hmg);
+        landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
 
         pixel_hmg = point3D_hmg.head(3);
         point_projected = pixel_hmg.head(2)/pixel_hmg(2);
@@ -312,49 +314,108 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
 
 // ==================================================================== My own functions
 
-void ProcessorImageLandmark::LandmarkInCurrentCamera(CaptureBasePtr _capture, LandmarkAHPPtr _landmark,Eigen::Vector4s& _point3D_hmg)
+void ProcessorImageLandmark::landmarkInCurrentCamera(const Eigen::VectorXs& _current_state,
+                                                     const LandmarkAHPPtr   _landmark,
+                                                     Eigen::Vector4s&       _point3D_hmg)
 {
-    Eigen::VectorXs current_state = getProblem()->getStateAtTimeStamp(_capture->getTimeStamp());
+    using namespace Eigen;
 
-    assert((current_state.size() == 7 || current_state.size() == 16) && "Wrong state size! Should be 7 for 3D pose or 16 for IMU.");
-
-    Eigen::Vector3s pwr1;
-    Eigen::Vector4s quaternion_current_frame;
-
-    pwr1 = current_state.head<3>();
-    quaternion_current_frame = current_state.segment<4>(3);
-
-    Eigen::Vector3s pwr0 = _landmark->getAnchorFrame()->getPPtr()->getVector();
-    Eigen::Vector3s prc = this->getSensorPtr()->getPPtr()->getVector();
-
-    Eigen::Translation<Scalar,3> twr1, twr0, trc;
-    twr1.x() = pwr1(0); twr1.y() = pwr1(1); twr1.z() = pwr1(2);
-    twr0.x() = pwr0(0); twr0.y() = pwr0(1); twr0.z() = pwr0(2);
-    trc.x() = prc(0); trc.y() = prc(1); trc.z() = prc(2);
-
-
-    Eigen::Quaternion<Scalar> qwr1, qwr0, qrc;
-    Eigen::Vector4s quaternion_anchor = _landmark->getAnchorFrame()->getOPtr()->getVector();
-    Eigen::Vector4s quaternion_sensor = this->getSensorPtr()->getOPtr()->getVector();
-    qwr0 = quaternion_anchor;
-    qwr1 = quaternion_current_frame;
-    qrc  = quaternion_sensor;
-
-    Eigen::Vector4s landmark_hmg_c0 = _landmark->getPPtr()->getVector();
+    /*
+     * Rationale: we transform the landmark from anchor camera to current camera:
+     *
+     *      C0 ---> R0 ---> W ---> R1 ---> C1
+     *
+     * where
+     *      '0' is 'anchor'
+     *      '1' is 'current',
+     *      'R' is 'robot'
+     *      'C' is 'camera'
+     *      'W' is 'world',
+     *
+     * by concatenating the individual transforms T_X_Y:
+     *
+     *      T_W_R0,
+     *      T_W_R1,
+     *      T_R0_C0,
+     *      T_R1_C1
+     *
+     * We use Eigen::Transform which is like using homogeneous transform matrices with a simpler API
+     */
 
 
-    Eigen::Transform<Scalar,3,Eigen::Affine> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
+    // Assert frame is 3D with at least PQ
+    assert((_current_state.size() == 7 || _current_state.size() == 16) && "Wrong state size! Should be 7 for 3D pose or 16 for IMU.");
 
-    T_W_R0 = twr0 * qwr0;
-    T_W_R1 = twr1 * qwr1;
-    T_R0_C0 = trc * qrc;
-    T_R1_C1 = T_R0_C0;
+    // ALL TRANSFORMS
+    Transform<Scalar,3,Eigen::Affine> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
 
-    Eigen::Vector4s landmark_hmg_c1;
-    landmark_hmg_c1 = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
-//    std::cout << "landmark_hmg_c1: " << landmark_hmg_c1 << std::endl;
+    // world to anchor robot frame
+    Translation<Scalar,3>  t_w_r0(_landmark->getAnchorFrame()->getPPtr()->getVector()); // sadly we cannot put a Map over a translation
+    Map<const Quaternions> q_w_r0(_landmark->getAnchorFrame()->getOPtr()->getPtr());
+    T_W_R0 = t_w_r0 * q_w_r0;
 
-    _point3D_hmg = landmark_hmg_c1;
+    // world to current robot frame
+    Translation<Scalar,3>  t_w_r1(_current_state.head<3>());
+    Map<const Quaternions> q_w_r1(_current_state.data() + 3);
+    T_W_R1 = t_w_r1 * q_w_r1;
+
+    // anchor robot to anchor camera
+    Translation<Scalar,3>  t_r0_c0(_landmark->getAnchorSensor()->getPPtr()->getVector());
+    Map<const Quaternions> q_r0_c0(_landmark->getAnchorSensor()->getOPtr()->getPtr());
+    T_R0_C0 = t_r0_c0 * q_r0_c0;
+
+    // current robot to current camera
+    Translation<Scalar,3>  tr1c1(this->getSensorPtr()->getPPtr()->getVector());
+    Map<const Quaternions> qr1c1(this->getSensorPtr()->getOPtr()->getPtr());
+    T_R1_C1 = tr1c1 * qr1c1;
+
+    // Transform lmk from c0 to c1 and exit
+    Vector4s landmark_hmg_c0 = _landmark->getPPtr()->getVector(); // lmk in anchor frame
+    _point3D_hmg = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
+
+
+    //    // OLD CODE
+    //    Eigen::VectorXs current_state = getProblem()->getStateAtTimeStamp(_capture->getTimeStamp());
+    //
+    //    assert((current_state.size() == 7 || current_state.size() == 16) && "Wrong state size! Should be 7 for 3D pose or 16 for IMU.");
+    //
+    //    Eigen::Vector3s pwr1;
+    //    Eigen::Vector4s quaternion_current_frame;
+    //
+    //    pwr1 = current_state.head<3>();
+    //    quaternion_current_frame = current_state.segment<4>(3);
+    //
+    //    Eigen::Vector3s pwr0 = _landmark->getAnchorFrame()->getPPtr()->getVector();
+    //    Eigen::Vector3s prc = this->getSensorPtr()->getPPtr()->getVector();
+    //
+    //    Eigen::Translation<Scalar,3> twr1, twr0, trc;
+    //    twr1.x() = pwr1(0); twr1.y() = pwr1(1); twr1.z() = pwr1(2);
+    //    twr0.x() = pwr0(0); twr0.y() = pwr0(1); twr0.z() = pwr0(2);
+    //    trc.x() = prc(0); trc.y() = prc(1); trc.z() = prc(2);
+    //
+    //
+    //    Eigen::Quaternion<Scalar> qwr1, qwr0, qrc;
+    //    Eigen::Vector4s quaternion_anchor = _landmark->getAnchorFrame()->getOPtr()->getVector();
+    //    Eigen::Vector4s quaternion_sensor = this->getSensorPtr()->getOPtr()->getVector();
+    //    qwr0 = quaternion_anchor;
+    //    qwr1 = quaternion_current_frame;
+    //    qrc  = quaternion_sensor;
+    //
+    //    Eigen::Vector4s landmark_hmg_c0 = _landmark->getPPtr()->getVector();
+    //
+    //
+    //    Eigen::Transform<Scalar,3,Eigen::Affine> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
+    //
+    //    T_W_R0 = twr0 * qwr0;
+    //    T_W_R1 = twr1 * qwr1;
+    //    T_R0_C0 = trc * qrc;
+    //    T_R1_C1 = T_R0_C0;
+    //
+    //    Eigen::Vector4s landmark_hmg_c1;
+    //    landmark_hmg_c1 = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
+    ////    std::cout << "landmark_hmg_c1: " << landmark_hmg_c1 << std::endl;
+    //
+    //    _point3D_hmg = landmark_hmg_c1;
 }
 
 Scalar ProcessorImageLandmark::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches)
@@ -466,21 +527,19 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
 {
     unsigned int num_lmks_in_img = 0;
 //    cv::Mat image = image_incoming_.clone();
-    LandmarkBaseList& last_landmark_list = getProblem()->getMapPtr()->getLandmarkList();
+    Eigen::VectorXs current_state = last_ptr_->getFramePtr()->getState();
+    SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensorPtr());
 
-    for (auto landmark_base_ptr : last_landmark_list)
+    for (auto landmark_base_ptr : getProblem()->getMapPtr()->getLandmarkList())
     {
         LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_base_ptr);
+
         Eigen::Vector4s point3D_hmg;
-        Eigen::Vector3s point2D_hmg;
-        Eigen::Vector2s point2D;
+        landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
 
-        LandmarkInCurrentCamera(last_ptr_, landmark_ptr,point3D_hmg);
-
-        point2D_hmg = point3D_hmg.head(3);
-        point2D = point2D_hmg.head(2)/point2D_hmg(2);
-        point2D = pinhole::distortPoint((std::static_pointer_cast<SensorCamera>(getSensorPtr()))->getDistortionVector(),point2D);
-        point2D = pinhole::pixellizePoint(this->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
+        Eigen::Vector2s point2D = pinhole::projectPoint(camera->getIntrinsicPtr()->getVector(), // k
+                                        camera->getDistortionVector(),          // d
+                                        point3D_hmg.head(3));                   // v
 
         if(pinhole::isInImage(point2D,image_.width_,image_.height_))
         {

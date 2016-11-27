@@ -200,7 +200,9 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          */
         Scalar match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
 
-        void LandmarkInCurrentCamera(CaptureBasePtr _capture, LandmarkAHPPtr _landmark, Eigen::Vector4s& _point3D_hmg);
+        void landmarkInCurrentCamera(const Eigen::VectorXs& _frame_state,
+                                     const LandmarkAHPPtr   _landmark,
+                                     Eigen::Vector4s&       _point3D_hmg);
 
         // These only to debug, will disappear one day soon
     public:
