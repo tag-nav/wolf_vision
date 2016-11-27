@@ -74,7 +74,7 @@ template<typename Derived1, typename Derived2>
 inline void
 projectPointToNormalizedPlane(const MatrixBase<Derived1>& _v,
                               MatrixBase<Derived2>&       _up,
-                              typename Derived1::Scalar&  _dist)
+                              typename Derived2::Scalar&  _dist)
 {
     MatrixSizeCheck<3, 1>::check(_v);
     MatrixSizeCheck<2, 1>::check(_up);
@@ -163,7 +163,7 @@ backprojectPointFromNormalizedPlane(const MatrixBase<Derived> &    _u,
  */
 template<typename Derived1, typename Derived2, typename Derived3, typename Derived4>
 void backprojectPointFromNormalizedPlane(const MatrixBase<Derived1> &    u,
-                                         const typename Derived1::Scalar depth,
+                                         const typename Derived2::Scalar depth,
                                          MatrixBase<Derived2>&           p,
                                          MatrixBase<Derived3>&           P_u,
                                          MatrixBase<Derived4>&           P_depth )
@@ -539,34 +539,6 @@ Matrix<typename Derived3::Scalar, 2, 1> projectPoint(const MatrixBase<Derived1>&
 }
 
 /**
- * Project a point into a pin-hole camera with radial distortion.
- * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
- * \param d the radial distortion parameters vector
- * \param v the 3D point to project, or the 3D director vector
- * \param u the projected and distorted point
- * \param dist distance from the optical center to the 3D point
- */
-template<typename Derived1, typename Derived2, typename Derived3, typename Derived4, typename T>
-void projectPoint(const MatrixBase<Derived1>& k,
-                  const MatrixBase<Derived2>& d,
-                  const MatrixBase<Derived3>& v,
-                  MatrixBase<Derived4>&       u,
-                  T&                          dist)
-{
-    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(k.cols());
-    StaticSizeCheck<Derived2::ColsAtCompileTime, 1>(d.cols());
-    MatrixSizeCheck<3,1>::check(v);
-    MatrixSizeCheck<2,1>::check(u);
-
-    Matrix<typename Derived4::Scalar, 2, 1> up;
-    projectPointToNormalizedPlane(v, up, dist);
-
-    u = pixellizePoint( k, distortPoint( d, up ));
-}
-
-
-
-/**
  * Project a point into a pin-hole camera with radial distortion
  * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
  * \param d the radial distortion parameters vector
@@ -599,6 +571,33 @@ void projectPoint(const MatrixBase<Derived1>& k,
 }
 
 /**
+ * Project a point into a pin-hole camera with radial distortion.
+ * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
+ * \param d the radial distortion parameters vector
+ * \param v the 3D point to project, or the 3D director vector
+ * \param u the projected and distorted point
+ * \param dist distance from the optical center to the 3D point
+ */
+template<typename Derived1, typename Derived2, typename Derived3, typename Derived4>//, typename T>
+void projectPoint(const MatrixBase<Derived1>& k,
+                  const MatrixBase<Derived2>& d,
+                  const MatrixBase<Derived3>& v,
+                  MatrixBase<Derived4>&       u,
+                  typename Derived3::Scalar&  dist)
+{
+    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(k.cols());
+    StaticSizeCheck<Derived2::ColsAtCompileTime, 1>(d.cols());
+    MatrixSizeCheck<3,1>::check(v);
+    MatrixSizeCheck<2,1>::check(u);
+
+    Matrix<typename Derived4::Scalar, 2, 1> up;
+    projectPointToNormalizedPlane(v, up, dist);
+    u = pixellizePoint( k, distortPoint( d, up ));
+}
+
+
+
+/**
  * Project a point into a pin-hole camera with radial distortion
  * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
  * \param d the radial distortion parameters vector
@@ -607,12 +606,12 @@ void projectPoint(const MatrixBase<Derived1>& k,
  * \param dist the distance from the camera to the point
  * \param U_v the Jacobian of \a u wrt \a v
  */
-template<typename Derived1, typename Derived2, typename Derived3, typename Derived4, typename T, typename Derived5>
+template<typename Derived1, typename Derived2, typename Derived3, typename Derived4, typename Derived5>
 void projectPoint(const MatrixBase<Derived1>& k,
                   const MatrixBase<Derived2>& d,
                   const MatrixBase<Derived3>& v,
                   MatrixBase<Derived4>&       u,
-                  T&                          dist,
+                  typename Derived3::Scalar&  dist,
                   MatrixBase<Derived5>&       U_v)
 {
     StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(k.cols());
@@ -641,11 +640,11 @@ void projectPoint(const MatrixBase<Derived1>& k,
  * \param depth the depth prior
  * \return the back-projected 3D point
  */
-template<typename Derived1, typename Derived2, typename Derived3, typename T>
-Matrix<typename Derived3::Scalar, 3, 1> backprojectPoint(const MatrixBase<Derived1>& k,
-                                                     const MatrixBase<Derived2>&     c,
-                                                     const MatrixBase<Derived3>&     u,
-                                                     const T&                        depth = 1.0)
+template<typename Derived1, typename Derived2, typename Derived3>
+Matrix<typename Derived3::Scalar, 3, 1> backprojectPoint(const MatrixBase<Derived1>&  k,
+                                                     const MatrixBase<Derived2>&      c,
+                                                     const MatrixBase<Derived3>&      u,
+                                                     const typename Derived3::Scalar& depth = 1.0)
 {
     StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(k.cols());
     StaticSizeCheck<Derived2::ColsAtCompileTime, 1>(c.cols());
@@ -664,14 +663,14 @@ Matrix<typename Derived3::Scalar, 3, 1> backprojectPoint(const MatrixBase<Derive
  * \param P_u Jacobian of p wrt u
  * \param P_depth Jacobian of p wrt depth
  */
-template<typename Derived1, typename Derived2, typename Derived3, typename T, typename Derived4, typename Derived5, typename Derived6>
-void backprojectPoint(const MatrixBase<Derived1>& k,
-                      const MatrixBase<Derived2>& c,
-                      const MatrixBase<Derived3>& u,
-                      const T&                    depth,
-                      MatrixBase<Derived4>&       p,
-                      MatrixBase<Derived5>&       P_u,
-                      MatrixBase<Derived6>&       P_depth)
+template<typename Derived1, typename Derived2, typename Derived3, typename Derived4, typename Derived5, typename Derived6>
+void backprojectPoint(const MatrixBase<Derived1>&       k,
+                      const MatrixBase<Derived2>&       c,
+                      const MatrixBase<Derived3>&       u,
+                      const typename Derived4::Scalar&  depth,
+                      MatrixBase<Derived4>&             p,
+                      MatrixBase<Derived5>&             P_u,
+                      MatrixBase<Derived6>&             P_depth)
 {
     StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(k.cols());
     StaticSizeCheck<Derived2::ColsAtCompileTime, 1>(c.cols());

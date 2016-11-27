@@ -156,8 +156,14 @@ int main(int argc, char** argv)
 
     bool is_in_roi;
     bool is_in_image;
-    is_in_roi = pinhole::isInRoi(pix,roi_x,roi_y,roi_width,roi_height);
-    is_in_image = pinhole::isInImage(pix,image_width,image_height);
+    is_in_roi = pinhole::isInRoi(pix,
+                                 roi_x,
+                                 roi_y,
+                                 roi_width,
+                                 roi_height);
+    is_in_image = pinhole::isInImage(pix,
+                                     image_width,
+                                     image_height);
 
     std::cout << "\n--------------------------------------------------------" << std::endl;
     std::cout << "\nTEST isInRoi/isInImage" << std::endl;
@@ -177,7 +183,7 @@ int main(int argc, char** argv)
     Eigen::Vector2s distortion2;
     distortion2[0] = -0.301701;
     distortion2[1] = 0.0963189;
-    Eigen::Vector4f k_test2;
+    Eigen::Vector4s k_test2;
     //k = [u0, v0, au, av]
     k_test2[0] = 516.686; //u0
     k_test2[1] = 355.129; //v0
@@ -185,7 +191,9 @@ int main(int argc, char** argv)
     k_test2[3] = 995.269; //av
 
     Eigen::Vector2s correction_test2;
-    pinhole::computeCorrectionModel(k_test2,distortion2,correction_test2);
+    pinhole::computeCorrectionModel(k_test2,
+                                    distortion2,
+                                    correction_test2);
 
     std::cout << "\n--------------------------------------------------------" << std::endl;
     std::cout << "\nTEST computeCorrectionModel" << std::endl;
@@ -206,7 +214,8 @@ int main(int argc, char** argv)
     distorting_point[1] = 0.35355;
 
     Eigen::Vector2s distored_point3;
-    distored_point3 = pinhole::distortPoint(distortion2,distorting_point);
+    distored_point3 = pinhole::distortPoint(distortion2,
+                                            distorting_point);
 
     std::cout << "\n--------------------------------------------------------" << std::endl;
     std::cout << "\nTEST distortPoint" << std::endl;
@@ -216,7 +225,8 @@ int main(int argc, char** argv)
     std::cout << "x: " << distored_point3[0] << "; y: " << distored_point3[1] << std::endl;
 
     Eigen::Vector2s corrected_point4;
-    corrected_point4 = pinhole::undistortPoint(correction_test2,distored_point3);
+    corrected_point4 = pinhole::undistortPoint(correction_test2,
+                                               distored_point3);
     std::cout << std::endl << "Corrected point" << std::endl;
     std::cout << "x: " << corrected_point4[0] << "; y: " << corrected_point4[1] << std::endl;
 
@@ -241,7 +251,10 @@ int main(int argc, char** argv)
 
     Eigen::Vector2s corrected_point5;
     Eigen::Matrix2s corrected_jacobian2;
-    pinhole::undistortPoint(correction_test2,distored_point4,corrected_point5,corrected_jacobian2);
+    pinhole::undistortPoint(correction_test2,
+                            distored_point4,
+                            corrected_point5,
+                            corrected_jacobian2);
 
     std::cout << std::endl << "Corrected point" << std::endl;
     std::cout << "x: " << corrected_point5[0] << "; y: " << corrected_point5[1] << std::endl;
@@ -261,7 +274,8 @@ int main(int argc, char** argv)
     pixelize_ud[1] = 28;
 
     Eigen::Vector2s pixelize_output3;
-    pixelize_output3 = pinhole::pixellizePoint(k_test2,pixelize_ud);
+    pixelize_output3 = pinhole::pixellizePoint(k_test2,
+                                               pixelize_ud);
 
     std::cout << "\n--------------------------------------------------------" << std::endl;
     std::cout << "\nTEST pixelizePoint; Eigen::Vector2s" << std::endl;
@@ -271,7 +285,8 @@ int main(int argc, char** argv)
     std::cout << "x: " << pixelize_output3[0] << "; y: " << pixelize_output3[1] << std::endl;
 
     Eigen::Vector2s depixelize_output3;
-    depixelize_output3 = pinhole::depixellizePoint(k_test2,pixelize_output3);
+    depixelize_output3 = pinhole::depixellizePoint(k_test2,
+                                                   pixelize_output3);
     std::cout << std::endl << "Depixelized" << std::endl;
     std::cout << "x: " << depixelize_output3[0] << "; y: " << depixelize_output3[1] << std::endl;
 
@@ -280,7 +295,10 @@ int main(int argc, char** argv)
 
     Eigen::Vector2s pixelize_output4;
     Eigen::Matrix2s pixelize_jacobian2;
-    pinhole::pixellizePoint(k_test2,pixelize_ud,pixelize_output4,pixelize_jacobian2);
+    pinhole::pixellizePoint(k_test2,
+                            pixelize_ud,
+                            pixelize_output4,
+                            pixelize_jacobian2);
 
     std::cout << std::endl << "TEST pixelizePoint; Jacobians" << std::endl;
     std::cout << std::endl << "Original" << std::endl;
@@ -293,7 +311,10 @@ int main(int argc, char** argv)
 
     Eigen::Vector2s depixelize_output4;
     Eigen::Matrix2s depixelize_jacobian2;
-    pinhole::depixellizePoint(k_test2,pixelize_output4,depixelize_output4,depixelize_jacobian2);
+    pinhole::depixellizePoint(k_test2,
+                              pixelize_output4,
+                              depixelize_output4,
+                              depixelize_jacobian2);
 
     std::cout << std::endl << "Depixelized" << std::endl;
     std::cout << "x: " << depixelize_output4[0] << "; y: " << depixelize_output4[1] << std::endl;
@@ -323,7 +344,9 @@ int main(int argc, char** argv)
 
 
     Eigen::Vector2s point2D_test5;
-    point2D_test5 = pinhole::projectPoint(k_test2,distortion2,project_point_normalized_test);
+    point2D_test5 = pinhole::projectPoint(k_test2,
+                                          distortion2,
+                                          project_point_normalized_test);
 
     std::cout << "\n--------------------------------------------------------" << std::endl;
     std::cout << std::endl << "TEST projectPoint Complete" << std::endl;
@@ -341,7 +364,11 @@ int main(int argc, char** argv)
         //distance
     Eigen::Vector2s point2D_test6;
     Scalar distance_test4;
-    pinhole::projectPoint(k_test2,distortion2,project_point_normalized_test,point2D_test6,distance_test4);
+    pinhole::projectPoint(k_test2,
+                          distortion2,
+                          project_point_normalized_test,
+                          point2D_test6,
+                          distance_test4);
 
     std::cout << std::endl << "Second function output" << std::endl;
     std::cout << "x: " << point2D_test6[0] << "; y: " << point2D_test6[1] << "; dist: " << distance_test4 << std::endl;
@@ -349,7 +376,11 @@ int main(int argc, char** argv)
         //jacobian
     Eigen::Vector2s point2D_test7;
     Eigen::MatrixXs jacobian_test3(2,3);
-    pinhole::projectPoint(k_test2,distortion2,project_point_normalized_test,point2D_test7,jacobian_test3);
+    pinhole::projectPoint(k_test2,
+                          distortion2,
+                          project_point_normalized_test,
+                          point2D_test7,
+                          jacobian_test3);
 
     std::cout << std::endl << "Third function output" << std::endl;
     std::cout << "x: " << point2D_test7[0] << "; y: " << point2D_test7[1] << std::endl;
@@ -360,7 +391,12 @@ int main(int argc, char** argv)
     Eigen::Vector2s point2D_test8;
     Eigen::MatrixXs jacobian_test4(2,3);
     Scalar distance_test3;
-    pinhole::projectPoint(k_test2,distortion2,project_point_normalized_test,point2D_test8,distance_test3,jacobian_test4);
+    pinhole::projectPoint(k_test2,
+                          distortion2,
+                          project_point_normalized_test,
+                          point2D_test8,
+                          distance_test3,
+                          jacobian_test4);
 
     std::cout << std::endl << "Fourth function output" << std::endl;
     std::cout << "x: " << point2D_test8[0] << "; y: " << point2D_test8[1] << "; dist: " << distance_test3 << std::endl;
@@ -379,7 +415,10 @@ int main(int argc, char** argv)
     Scalar depth3 = project_point_normalized_test[2];
 
     Eigen::Vector3s point3D_backproj5;
-    point3D_backproj5 = pinhole::backprojectPoint(k_test2,correction_test2,point2D_test5,depth3);
+    point3D_backproj5 = pinhole::backprojectPoint(k_test2,
+                                                  correction_test2,
+                                                  point2D_test5,
+                                                  depth3);
 
     std::cout << "\n\nTEST backprojectPoint Complete" << std::endl;
     std::cout << std::endl << "First function output" << std::endl;
@@ -391,7 +430,13 @@ int main(int argc, char** argv)
     Eigen::Vector3s point3D_backproj4;
     Eigen::MatrixXs jacobian_backproj2(3,2);
     Eigen::Vector3s depth_jacobian2;
-    pinhole::backprojectPoint(k_test2,correction_test2,point2D_test7,depth3,point3D_backproj4,jacobian_backproj2,depth_jacobian2);
+    pinhole::backprojectPoint(k_test2,
+                              correction_test2,
+                              point2D_test7,
+                              depth3,
+                              point3D_backproj4,
+                              jacobian_backproj2,
+                              depth_jacobian2);
 
     std::cout << std::endl << "Second function output" << std::endl;
     std::cout << "x: " << point3D_backproj4[0] << "; y: " << point3D_backproj4[1] << "; z: " << point3D_backproj4[2] << std::endl;
@@ -431,7 +476,9 @@ int main(int argc, char** argv)
     std::cout << "\nDistortion vector:\n" << distortion_vector << std::endl;
 
     Eigen::Vector4s correction_vector;
-    pinhole::computeCorrectionModel(K_params,distortion_vector,correction_vector);
+    pinhole::computeCorrectionModel(K_params,
+                                    distortion_vector,
+                                    correction_vector);
 
     std::cout << "\nCorrection vector:\n" << correction_vector << std::endl;
 
@@ -441,20 +488,25 @@ int main(int argc, char** argv)
 
 
 
-    test_point2D = pinhole::depixellizePoint(K_params,test_point2D);
+    test_point2D = pinhole::depixellizePoint(K_params,
+                                             test_point2D);
     std::cout << "\ntest_point2D DEPIXELIZED:\n" << test_point2D << std::endl;
-    test_point2D = pinhole::undistortPoint(correction_vector,test_point2D);
+    test_point2D = pinhole::undistortPoint(correction_vector,
+                                           test_point2D);
     std::cout << "\ntest_point2D UNDISTORTED:\n" << test_point2D << std::endl;
-    test_point3D = pinhole::backprojectPointFromNormalizedPlane(test_point2D,2);
+    test_point3D = pinhole::backprojectPointFromNormalizedPlane(test_point2D,
+                                                                2);
     std::cout << "\ntest_point3D BACKPROJECTED:\n" << test_point3D << std::endl;
 
 
 
     test_point2D = pinhole::projectPointToNormalizedPlane(test_point3D);
     std::cout << "\ntest_point2D NORMALIZED:\n" << test_point2D << std::endl;
-    test_point2D = pinhole::distortPoint(distortion_vector,test_point2D);
+    test_point2D = pinhole::distortPoint(distortion_vector,
+                                         test_point2D);
     std::cout << "\ntest_point2D DISTORTED:\n" << test_point2D << std::endl;
-    test_point2D = pinhole::pixellizePoint(K_params,test_point2D);
+    test_point2D = pinhole::pixellizePoint(K_params,
+                                           test_point2D);
     std::cout << "\ntest_point2D PIXELIZED:\n" << test_point2D << std::endl;
 
 }
