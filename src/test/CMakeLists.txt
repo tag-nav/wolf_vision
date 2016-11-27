@@ -1,13 +1,6 @@
 # Retrieve googletest from github & compile
 add_subdirectory(gtest)
 
-# Include config.h directory at first.
-include_directories(${PROJECT_BINARY_DIR}/conf/)
-
-# Include third party directory.
-include_directories(${PROJECT_SOURCE_DIR}/third_party/spdlog/include/)
-
-
 
 ## Added these two include_dirs: ######################
 #
