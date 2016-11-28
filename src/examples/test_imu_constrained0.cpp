@@ -88,17 +88,33 @@ int main(int argc, char** argv)
     const int keyframe_spacing = 10;
     int last_keyframe_dt = 0;
     Eigen::VectorXs state_vec;
-    FrameBasePtr last_frame;
+    Eigen::VectorXs delta_preint;
+    FrameIMUPtr last_frame;
+    FrameIMUPtr previous_frame;
+    Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
     
     while(!data_file.eof()){
         if(last_keyframe_dt >= keyframe_spacing){
+            previous_frame = last_frame; //to constraint the new frame and link it to previous one
             ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
             state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-
             last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
             //FrameBasePtr last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts_.get(),std::make_shared<StateBlock>(frame_val.head(3)), std::make_shared<StateQuaternion>(frame_val.tail(4)));
             wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
 
+            //create a feature
+            delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
+            delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
+            std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
+
+            //create a constraintIMU
+            //wolf_problem_ptr_->getProcessorMotionPtr()->emplaceConstraint(feat_imu, previous_frame);
+            ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, previous_frame);
+            feat_imu->addConstraint(constraint_imu);
+            previous_frame->addConstrainedBy(constraint_imu);
+
+            //reset origin of motion to new frame
+            wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(last_frame);
             last_keyframe_dt = 0;
         }
         else
@@ -128,6 +144,7 @@ int main(int argc, char** argv)
     //create an ODOM constraint between first and last keyframes
     ConstraintOdom3DPtr constraintOdom_ptr = std::make_shared<ConstraintOdom3D>(last_feature, origin_frame);
     last_feature -> addConstraint(constraintOdom_ptr);
+    origin_frame -> addConstrainedBy(constraintOdom_ptr);
 
     Eigen::Vector7s expec;
     expec  = constraintOdom_ptr -> expectation();
