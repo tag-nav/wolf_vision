@@ -126,7 +126,11 @@ int main(int argc, char** argv)
     FeatureBasePtr last_feature = std::make_shared<FeatureBase>("ODOM_3D", origin_state.head(7),Eigen::Matrix7s::Identity());
     
     //create an ODOM constraint between first and last keyframes
-    ConstraintOdom3DPtr constraint_ptr = std::make_shared<ConstraintOdom3D>(last_feature, last_frame);
+    ConstraintOdom3DPtr constraintOdom_ptr = std::make_shared<ConstraintOdom3D>(last_feature, origin_frame);
+    last_feature -> addConstraint(constraintOdom_ptr);
+
+    Eigen::Vector7s expec;
+    expec  = constraintOdom_ptr -> expectation();
 
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
