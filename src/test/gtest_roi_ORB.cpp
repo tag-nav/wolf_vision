@@ -36,20 +36,20 @@ TEST(RoiORB, LoadImageFromFile)
 }
 
 // Test_ORB.png image file has the following interest points that should be detected:
-// [ 65.6 , 100.6 ]
-// [ 164 , 100.6 ]
-// [ 266 , 100.6 ]
-// [ 365.2 , 100.6 ]
-// [ 467.04 , 101.32 ]
-// [ 565.6 , 100.6 ]
-// [ 71.6 , 237.8 ]
-// [ 164.8 , 237.8 ]
-// [ 251.36 , 239.24 ]
-// [ 330.2 , 237.8 ]
-// [ 349 , 270 ]
-// [ 584 , 237.8 ]
-// [ 467.2 , 455.4 ]
-// [ 566 , 455.4 ]
+// 0  [ 65.6 , 100.6 ]
+// 1  [ 164 , 100.6 ]
+// 2  [ 266 , 100.6 ]
+// 3  [ 365.2 , 100.6 ]
+// 4  [ 467.04 , 101.32 ]
+// 5  [ 565.6 , 100.6 ]
+// 6  [ 71.6 , 237.8 ]
+// 7  [ 164.8 , 237.8 ]
+// 8  [ 251.36 , 239.24 ]
+// 9  [ 330.2 , 237.8 ]
+// 10 [ 349 , 270 ]
+// 11 [ 584 , 237.8 ]
+// 12 [ 467.2 , 455.4 ]
+// 13 [ 566 , 455.4 ]
 std::vector<cv::Point2f> points_to_check({
     cv::Point2f(  65.6 , 100.6 ),
     cv::Point2f( 164   , 100.6 ),
@@ -227,8 +227,16 @@ TEST(RoiORB, RoiBounds)
     if (debug) for (auto p_pair : points_found)
         WOLF_DEBUG("kp " , p_pair.first , " at (" , p_pair.second.x , " , " , p_pair.second.y , " )" );
 
-    // check that at least all keypoints in the list have been detected
-    ASSERT_GE( points_found.size() , points_to_check.size() );
+    // check that at least all keypoints in the list except #10 have been detected
+    // (note: #10 is out of the ROI)
+    std::vector<int> v({0,1,2,3,4,5,6,7,8,9,11,12,13});
+    for (int n : v)
+    {
+        WOLF_DEBUG("Checking if we found point " , n , " ... " , (points_found.count(n) ? "YES": "NO"));
+        ASSERT_TRUE(points_found.count(n));
+    }
+    WOLF_DEBUG("Checking if we found point " , 10 , " ... " , (points_found.count(10) ? "YES": "NO"));
+    ASSERT_FALSE(points_found.count(10));
 
 }
 
