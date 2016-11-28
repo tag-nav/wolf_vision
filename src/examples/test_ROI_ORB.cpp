@@ -66,13 +66,15 @@ int main(int argc, char** argv)
 
     roi_y = (102) - (roi_width / 2);
 
-    for(unsigned int i = 0; i < 2; i++)
+    for(unsigned int i = 0; i < 3; i++)
     {
         if(i == 0)
-            roi_y = (102) - (roi_width / 2);
+            roi_y = 102 - (roi_width / 2);
+        else if(i == 1)
+            roi_y = 250 - (roi_width / 2);
         else
-            roi_y = (476) - (roi_width / 2);
-        for(roi_x = 0; roi_x < img_width; roi_x++)
+            roi_y = 476 - (roi_width / 2);
+        for(roi_x = 0; roi_x < img_width; roi_x += 5)
         {
 
             cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
