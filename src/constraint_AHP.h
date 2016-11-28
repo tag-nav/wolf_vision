@@ -67,7 +67,10 @@ inline ConstraintAHP::ConstraintAHP(FeatureBasePtr   _ftr_ptr,
                                     LandmarkAHPPtr   _landmark_ptr,
                                     bool             _apply_loss_function,
                                     ConstraintStatus _status) :
-        ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP, _landmark_ptr->getAnchorFrame(), nullptr, _landmark_ptr,
+        ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP,
+                                           _landmark_ptr->getAnchorFrame(),
+                                           nullptr,
+                                           _landmark_ptr,
                                            _apply_loss_function, _status,
                                            _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(),
                                            _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(),
@@ -116,35 +119,33 @@ inline void ConstraintAHP::expectation(const T* const _current_frame_p,
 {
     using namespace Eigen;
 
-    // All involved transforms
-    Eigen::Transform<T, 3, Eigen::Affine> T_W_R0;  ///< world to anchor robot transform
-    Eigen::Transform<T, 3, Eigen::Affine> T_W_R1;  ///< world to current robot transform
-    Eigen::Transform<T, 3, Eigen::Affine> T_R0_C0; ///< anchor robot to anchor camera transform
-    Eigen::Transform<T, 3, Eigen::Affine> T_R1_C1; ///< current robot to current camera transform
 
-    // world to anchor robot frame
+    // All involved transforms typedef
+    typedef Eigen::Transform<T, 3, Eigen::Affine> TransformType;
+
+    // world to anchor robot transform
     Map<const Matrix<T, 3, 1> > p_w_r0(_anchor_frame_p);
     Translation<T, 3>           t_w_r0(p_w_r0);
     Map<const Quaternion<T> >   q_w_r0(_anchor_frame_o);
-    T_W_R0 = t_w_r0 * q_w_r0;
+    TransformType               T_W_R0 = t_w_r0 * q_w_r0;
 
-    // world to current robot frame
+    // world to current robot transform
     Map<const Matrix<T, 3, 1> > p_w_r1(_current_frame_p);
     Translation<T, 3>           t_w_r1(p_w_r1);
     Map<const Quaternion<T> >   q_w_r1(_current_frame_o);
-    T_W_R1 = t_w_r1 * q_w_r1;
+    TransformType               T_W_R1 = t_w_r1 * q_w_r1;
 
-    // anchor robot to anchor camera
+    // anchor robot to anchor camera transform
     Translation<T, 3>   t_r0_c0(anchor_sensor_extrinsics_p_.cast<T>());
     Quaternion<T>       q_r0_c0(anchor_sensor_extrinsics_o_.cast<T>());
-    T_R0_C0 = t_r0_c0 * q_r0_c0;
+    TransformType       T_R0_C0 = t_r0_c0 * q_r0_c0;
 
-    // current robot to current camera
+    // current robot to current camera transform
     CaptureBasePtr      current_capture = this->getFeaturePtr()->getCapturePtr();
     Translation<T, 3>   t_r1_c1  (current_capture->getSensorPPtr()->getVector().cast<T>());
     Quaternions         q_r1_c1_s(current_capture->getSensorOPtr()->getPtr());
     Quaternion<T>       q_r1_c1 = q_r1_c1_s.cast<T>();
-    T_R1_C1 = t_r1_c1 * q_r1_c1;
+    TransformType       T_R1_C1 = t_r1_c1 * q_r1_c1;
 
     // hmg point in current camera frame C1
     Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg_c0(_lmk_hmg);
