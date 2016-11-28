@@ -223,18 +223,15 @@ TEST(RoiORB, RoiBounds)
             }
     }
 
-    WOLF_DEBUG("Detected keypoints from the original list:");
-    if (debug) for (auto p_pair : points_found)
-        WOLF_DEBUG("kp " , p_pair.first , " at (" , p_pair.second.x , " , " , p_pair.second.y , " )" );
-
     // check that at least all keypoints in the list except #10 have been detected
     // (note: #10 is out of the ROI)
-    std::vector<int> v({0,1,2,3,4,5,6,7,8,9,11,12,13});
-    for (int n : v)
+    std::vector<int> nn({0,1,2,3,4,5,6,7,8,9,11,12,13});
+    for (int n : nn)
     {
         WOLF_DEBUG("Checking if we found point " , n , " ... " , (points_found.count(n) ? "YES": "NO"));
         ASSERT_TRUE(points_found.count(n));
     }
+
     WOLF_DEBUG("Checking if we found point " , 10 , " ... " , (points_found.count(10) ? "YES": "NO"));
     ASSERT_FALSE(points_found.count(10));
 
