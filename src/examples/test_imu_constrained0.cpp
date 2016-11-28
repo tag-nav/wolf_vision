@@ -3,6 +3,7 @@
 #include "problem.h"
 #include "sensor_imu.h"
 #include "capture_imu.h"
+#include "constraint_odom_3D.h"
 #include "state_block.h"
 #include "state_quaternion.h"
 #include "processor_imu.h"
@@ -54,7 +55,7 @@ int main(int argc, char** argv)
         }
         
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PVQBB_3D);
+    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
     Eigen::VectorXs IMU_extrinsics(7);
     IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, shared_ptr<IntrinsicsBase>());
@@ -74,19 +75,21 @@ int main(int argc, char** argv)
 
     //create a keyframe at origin
     TimeStamp ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
-    Eigen::VectorXs state_vec = x0;
-    FrameBasePtr last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
-    wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
+    Eigen::VectorXs origin_state = x0;
+    FrameBasePtr origin_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, origin_state);
+    wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    CaptureIMU::Ptr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_) );
+    CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_) );
 
     // main loop
     using namespace std;
     clock_t begin = clock();
     const int keyframe_spacing = 10;
     int last_keyframe_dt = 0;
-
+    Eigen::VectorXs state_vec;
+    FrameBasePtr last_frame;
+    
     while(!data_file.eof()){
         if(last_keyframe_dt >= keyframe_spacing){
             ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
@@ -119,6 +122,11 @@ int main(int argc, char** argv)
     last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
 
+    //create a feature
+    FeatureBasePtr last_feature = std::make_shared<FeatureBase>("ODOM_3D", origin_state.head(7),Eigen::Matrix7s::Identity());
+    
+    //create an ODOM constraint between first and last keyframes
+    ConstraintOdom3DPtr constraint_ptr = std::make_shared<ConstraintOdom3D>(last_feature, last_frame);
 
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;

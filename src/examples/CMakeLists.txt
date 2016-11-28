@@ -173,8 +173,8 @@ ADD_EXECUTABLE(test_processor_imu_jacobians test_processor_imu_jacobians.cpp)
 TARGET_LINK_LIBRARIES(test_processor_imu_jacobians ${PROJECT_NAME})
 
 # IMU - constraintAHP
-ADD_EXECUTABLE(test_imu_constraintAHP test_imu_constraintAHP.cpp)
-TARGET_LINK_LIBRARIES(test_imu_constraintAHP ${PROJECT_NAME})
+ADD_EXECUTABLE(test_imu_constrained0 test_imu_constrained0.cpp)
+TARGET_LINK_LIBRARIES(test_imu_constrained0 ${PROJECT_NAME})
 
 # IF (laser_scan_utils_FOUND)
 #     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
