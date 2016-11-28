@@ -46,7 +46,7 @@ TEST(RoiORB, LoadImageFromFile)
 // 7  [ 164.8 , 237.8 ]
 // 8  [ 251.36 , 239.24 ]
 // 9  [ 330.2 , 237.8 ]
-// 10 [ 349 , 270 ]
+// 10 [ 349 , 270 ]     // point #10 is out of the ROI scanned area and should not be detected
 // 11 [ 584 , 237.8 ]
 // 12 [ 467.2 , 455.4 ]
 // 13 [ 566 , 455.4 ]
