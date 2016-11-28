@@ -22,8 +22,6 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         Eigen::Vector4s anchor_sensor_extrinsics_o_;
         Eigen::Vector4s intrinsic_;
         Eigen::VectorXs distortion_;
-        FeaturePointImage feature_image_;
-
 
     public:
 
@@ -65,7 +63,9 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
 };
 
-inline ConstraintAHP::ConstraintAHP(FeatureBasePtr _ftr_ptr, LandmarkAHPPtr _landmark_ptr, bool _apply_loss_function,
+inline ConstraintAHP::ConstraintAHP(FeatureBasePtr   _ftr_ptr,
+                                    LandmarkAHPPtr   _landmark_ptr,
+                                    bool             _apply_loss_function,
                                     ConstraintStatus _status) :
         ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP, _landmark_ptr->getAnchorFrame(), nullptr, _landmark_ptr,
                                            _apply_loss_function, _status,
@@ -73,10 +73,9 @@ inline ConstraintAHP::ConstraintAHP(FeatureBasePtr _ftr_ptr, LandmarkAHPPtr _lan
                                            _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(),
                                            _landmark_ptr->getAnchorFrame()->getPPtr(),
                                            _landmark_ptr->getAnchorFrame()->getOPtr(), _landmark_ptr->getPPtr()),
-                anchor_sensor_extrinsics_p_(_ftr_ptr->getCapturePtr()->getSensorPPtr()->getVector()),
-                anchor_sensor_extrinsics_o_(_ftr_ptr->getCapturePtr()->getSensorOPtr()->getVector()),
-                intrinsic_(_ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr()->getVector()),
-                feature_image_(*std::static_pointer_cast<FeaturePointImage>(_ftr_ptr))
+        anchor_sensor_extrinsics_p_(_ftr_ptr->getCapturePtr()->getSensorPPtr()->getVector()),
+        anchor_sensor_extrinsics_o_(_ftr_ptr->getCapturePtr()->getSensorOPtr()->getVector()),
+        intrinsic_(_ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr()->getVector())
 {
     setType("AHP");
 
@@ -91,16 +90,16 @@ inline ConstraintAHP::~ConstraintAHP()
 
 inline Eigen::VectorXs ConstraintAHP::expectation() const
 {
-    Eigen::VectorXs exp(2);
+    Eigen::Vector2s exp;
     FrameBasePtr frm_current = getFeaturePtr()->getCapturePtr()->getFramePtr();
     FrameBasePtr frm_anchor  = getFrameOtherPtr();
     LandmarkBasePtr lmk      = getLandmarkOtherPtr();
 
-    const Scalar* const frame_current_pos   = frm_current->getPPtr()->getVector().data();
-    const Scalar* const frame_current_ori   = frm_current->getOPtr()->getVector().data();
-    const Scalar* const frame_anchor_pos    = frm_anchor ->getPPtr()->getVector().data();
-    const Scalar* const frame_anchor_ori    = frm_anchor ->getOPtr()->getVector().data();
-    const Scalar* const lmk_pos_hmg         = lmk        ->getPPtr()->getVector().data();
+    const Scalar* const frame_current_pos   = frm_current->getPPtr()->getPtr();
+    const Scalar* const frame_current_ori   = frm_current->getOPtr()->getPtr();
+    const Scalar* const frame_anchor_pos    = frm_anchor ->getPPtr()->getPtr();
+    const Scalar* const frame_anchor_ori    = frm_anchor ->getOPtr()->getPtr();
+    const Scalar* const lmk_pos_hmg         = lmk        ->getPPtr()->getPtr();
 
     expectation(frame_current_pos, frame_current_ori, frame_anchor_pos, frame_anchor_ori, lmk_pos_hmg, exp.data());
 
