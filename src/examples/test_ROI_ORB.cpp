@@ -45,9 +45,6 @@ int main(int argc, char** argv)
     unsigned int scoreType = 0;              //#enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
     unsigned int patchSize = 31;
 
-    unsigned int roi_width = 50;
-    unsigned int roi_heigth = 50;
-
     detector_descriptor_ptr_ = new cv::ORB(nfeatures, //
                                            scaleFactor, //
                                            nlevels, //
@@ -63,8 +60,8 @@ int main(int argc, char** argv)
 
     unsigned int roi_x;
     unsigned int roi_y;
-
-    roi_y = (102) - (roi_width / 2);
+    unsigned int roi_width = 50;
+    unsigned int roi_heigth = 50;
 
     for(unsigned int i = 0; i < 3; i++)
     {
@@ -74,7 +71,7 @@ int main(int argc, char** argv)
             roi_y = 250 - (roi_width / 2);
         else
             roi_y = 476 - (roi_width / 2);
-        for(roi_x = 0; roi_x < img_width; roi_x += 5)
+        for(roi_x = 0; roi_x < img_width; roi_x += 20)
         {
 
             cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
@@ -110,13 +107,12 @@ int main(int argc, char** argv)
 
             cv::Mat image_roi = image(roi_inflate);
             detector_descriptor_ptr_->detect(image_roi, target_keypoints);
-            std::cout << "Keypoints detected: " << target_keypoints.size();
 
-            keypoint_filter.retainBest(target_keypoints,1);
-
-            std::cout << " - retained: " << target_keypoints.size();
             if (!target_keypoints.empty())
             {
+                std::cout << "Keypoints detected: " << target_keypoints.size();
+                keypoint_filter.retainBest(target_keypoints,1);
+                std::cout << " - retained: " << target_keypoints.size();
                 std::cout << "  at: ";
                 for(unsigned int i = 0; i < target_keypoints.size(); i++)
                 {
@@ -124,8 +120,8 @@ int main(int argc, char** argv)
                     target_keypoints[i].pt.y += roi_inflate.y;
                     std::cout << "[ " << target_keypoints[i].pt.x << " , " << target_keypoints[i].pt.y << " ] ";
                 }
+                std::cout << std::endl;
             }
-            std::cout << std::endl;
 
             cv::Mat image_graphics = image.clone();
             cv::drawKeypoints(image_graphics,target_keypoints,image_graphics);
