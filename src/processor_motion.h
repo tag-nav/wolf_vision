@@ -127,9 +127,15 @@ class ProcessorMotion : public ProcessorBase
          */
         Eigen::VectorXs& getState(const TimeStamp& _ts);
 
+        /** \brief Gets a constant reference delta preintegrated covariance from all integrations so far
+         * \return the delta preintegrated covariance matrix
+         */
+        const Eigen::MatrixXs getCurrentDeltaPreintCov();
+
         /** \brief Provides the motion integrated so far
          * \return a const reference to the integrated delta state
          */
+         
         const Motion& getMotion() const;
         void getMotion(Motion& _motion) const;
 
@@ -655,6 +661,11 @@ inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts
 {
     getCurrentState(_x);
     _ts = getCurrentTimeStamp();
+}
+
+inline const Eigen::MatrixXs ProcessorMotion::getCurrentDeltaPreintCov()
+{
+    return delta_integrated_cov_;
 }
 
 inline const Motion& ProcessorMotion::getMotion() const
