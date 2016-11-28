@@ -21,7 +21,6 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
         Eigen::Vector3s anchor_sensor_extrinsics_p_;
         Eigen::Vector4s anchor_sensor_extrinsics_o_;
         Eigen::Vector4s intrinsic_;
-        Eigen::Matrix3s K_;
         Eigen::VectorXs distortion_;
         FeaturePointImage feature_image_;
 
@@ -29,36 +28,11 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
     public:
 
         ConstraintAHP(FeatureBasePtr    _ftr_ptr,
-                      LandmarkAHPPtr  _landmark_ptr,
+                      LandmarkAHPPtr    _landmark_ptr,
                       bool              _apply_loss_function = false,
-                      ConstraintStatus  _status              = CTR_ACTIVE) :
-                ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP,
-                                                   _landmark_ptr->getAnchorFrame(),
-                                                   nullptr,
-                                                   _landmark_ptr,
-                                                   _apply_loss_function,
-                                                   _status,
-                                                   _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(),
-                                                   _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(),
-                                                   _landmark_ptr->getAnchorFrame()->getPPtr(),
-                                                   _landmark_ptr->getAnchorFrame()->getOPtr(),
-                                                   _landmark_ptr->getPPtr()),
-                anchor_sensor_extrinsics_p_(_ftr_ptr->getCapturePtr()->getSensorPPtr()->getVector()),
-                anchor_sensor_extrinsics_o_(_ftr_ptr->getCapturePtr()->getSensorOPtr()->getVector()),
-                intrinsic_(_ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr()->getVector()),
-                feature_image_(*std::static_pointer_cast<FeaturePointImage>(_ftr_ptr))
-        {
-            setType("AHP");
+                      ConstraintStatus  _status = CTR_ACTIVE);
 
-            // obtain some intrinsics from provided sensor
-            K_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getIntrinsicMatrix();
-            distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
-        }
-
-        virtual ~ConstraintAHP()
-        {
-            //
-        }
+        virtual ~ConstraintAHP();
 
         template<typename T>
         void expectation(const T* const _current_frame_p,
@@ -66,134 +40,173 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
                          const T* const _anchor_frame_p,
                          const T* const _anchor_frame_o,
                          const T* const _lmk_hmg,
-                         T* _expectation) const
-        {
-            using namespace Eigen;
+                         T* _expectation) const;
 
-
-            Eigen::Transform<T,3,Eigen::Affine> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
-
-            // world to anchor robot frame
-            Map<const Matrix<T, 3, 1>>  p_w_r0(_anchor_frame_p);
-            Translation<T,3>            t_w_r0(p_w_r0);
-            Map<const Quaternion<T>>    q_w_r0(_anchor_frame_o);
-            T_W_R0 = t_w_r0 * q_w_r0;
-
-            // world to current robot frame
-            Map<const Matrix<T, 3, 1> > p_w_r1(_current_frame_p);
-            Translation<T,3>            t_w_r1(p_w_r1);
-            Map<const Quaternion<T>>    q_w_r1(_current_frame_o);
-            T_W_R1 = t_w_r1 * q_w_r1;
-
-            // anchor robot to anchor camera
-            Translation<T,3> t_r0_c0(anchor_sensor_extrinsics_p_.cast<T>());
-            Quaternion<T>    q_r0_c0(anchor_sensor_extrinsics_o_.cast<T>());
-            T_R0_C0 = t_r0_c0 * q_r0_c0;
-
-            // current robot to current camera
-            CaptureBasePtr current_capture = this->getFeaturePtr()->getCapturePtr();
-            Translation<T,3>    t_r1_c1  (current_capture->getSensorPPtr()->getVector().cast<T>());
-            Quaternions         q_r1_c1_s(current_capture->getSensorOPtr()->getPtr());
-            Quaternion<T>       q_r1_c1 = q_r1_c1_s.cast<T>();
-            T_R1_C1 = t_r1_c1 * q_r1_c1;
-
-
-            // hmg point in current camera frame C1
-            Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg_c0(_lmk_hmg);
-            Eigen::Matrix<T,4,1> landmark_hmg_c1 = T_R1_C1.inverse(Eigen::Affine)
-                                                 * T_W_R1.inverse(Eigen::Affine)
-                                                 * T_W_R0
-                                                 * T_R0_C0
-                                                 * landmark_hmg_c0;
-
-            // lmk direction vector
-            Eigen::Matrix<T,3,1> v_dir = landmark_hmg_c1.head(3);
-
-            // camera parameters
-            Matrix<T, 4, 1> intrinsic = intrinsic_.cast<T>();
-            Eigen::Matrix<T,Eigen::Dynamic,1> distortion = distortion_.cast<T>();
-
-            // project point and exit
-            Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
-
-            expectation = pinhole::projectPoint(intrinsic,
-                                                distortion,
-                                                v_dir);
-
-        }
-
-        Eigen::VectorXs expectation() const
-        {
-            Eigen::VectorXs exp(2);
-            FrameBasePtr frm_current    = getFeaturePtr()->getCapturePtr()->getFramePtr();
-            FrameBasePtr frm_anchor     = getFrameOtherPtr();
-            LandmarkBasePtr lmk         = getLandmarkOtherPtr();
-            const Scalar * const frame_current_pos  = frm_current->getPPtr()->getVector().data();
-            const Scalar * const frame_current_ori  = frm_current->getOPtr()->getVector().data();
-            const Scalar * const frame_anchor_pos   = frm_anchor->getPPtr()->getVector().data();
-            const Scalar * const frame_anchor_ori   = frm_anchor->getOPtr()->getVector().data();
-            const Scalar * const lmk_pos_hmg        = lmk->getPPtr()->getVector().data();
-            expectation(frame_current_pos,
-                        frame_current_ori,
-                        frame_anchor_pos,
-                        frame_anchor_ori,
-                        lmk_pos_hmg,
-                        exp.data());
-            return exp;
-        }
+        Eigen::VectorXs expectation() const;
 
         template<typename T>
-        bool operator () (const T* const _current_frame_p,
-                          const T* const _current_frame_o,
-                          const T* const _anchor_frame_p,
-                          const T* const _anchor_frame_o,
-                          const T* const _lmk_hmg,
-                          T* _residuals) const
-        {
-            // expected
-            Eigen::Matrix<T, 2, 1> expected ;
-            expectation(_current_frame_p,
-                        _current_frame_o,
-                        _anchor_frame_p,
-                        _anchor_frame_o,
-                        _lmk_hmg,
-                        expected.data()) ;
-
-            // measured
-            Eigen::Matrix<T, 2, 1> measured = getMeasurement().cast<T>();
-
-            // residual
-            Eigen::Map<Eigen::Matrix<T, 2, 1> > residuals(_residuals);
-            residuals = getMeasurementSquareRootInformation().cast<T>() * (expected - measured);
-
-            return true;
-        }
+        bool operator ()(const T* const _current_frame_p,
+                         const T* const _current_frame_o,
+                         const T* const _anchor_frame_p,
+                         const T* const _anchor_frame_o,
+                         const T* const _lmk_hmg,
+                         T* _residuals) const;
 
         /** \brief Returns the jacobians computation method
          **/
-        virtual JacobianMethod getJacobianMethod() const
-        {
-            return JAC_AUTO;
-        }
+        virtual JacobianMethod getJacobianMethod() const;
 
 
         // Static creator method
-        static ConstraintAHPPtr create(FeatureBasePtr     _ftr_ptr,
-                                         LandmarkAHPPtr   _lmk_ahp_ptr,
-                                         bool               _apply_loss_function    = false,
-                                         ConstraintStatus   _status                 = CTR_ACTIVE)
-        {
-            // construct constraint
-            ConstraintAHPPtr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _lmk_ahp_ptr, _apply_loss_function, _status);
-
-            // link it to wolf tree <-- these pointers cannot be set at construction time
-            _lmk_ahp_ptr->getAnchorFrame()->addConstrainedBy(ctr_ahp);
-            _lmk_ahp_ptr->addConstrainedBy(ctr_ahp);
-            return  ctr_ahp;
-        }
-
+        static ConstraintAHPPtr create(FeatureBasePtr   _ftr_ptr,
+                                       LandmarkAHPPtr   _lmk_ahp_ptr,
+                                       bool             _apply_loss_function = false,
+                                       ConstraintStatus _status              = CTR_ACTIVE);
 
 };
+
+inline ConstraintAHP::ConstraintAHP(FeatureBasePtr _ftr_ptr, LandmarkAHPPtr _landmark_ptr, bool _apply_loss_function,
+                                    ConstraintStatus _status) :
+        ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP, _landmark_ptr->getAnchorFrame(), nullptr, _landmark_ptr,
+                                           _apply_loss_function, _status,
+                                           _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(),
+                                           _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(),
+                                           _landmark_ptr->getAnchorFrame()->getPPtr(),
+                                           _landmark_ptr->getAnchorFrame()->getOPtr(), _landmark_ptr->getPPtr()),
+                anchor_sensor_extrinsics_p_(_ftr_ptr->getCapturePtr()->getSensorPPtr()->getVector()),
+                anchor_sensor_extrinsics_o_(_ftr_ptr->getCapturePtr()->getSensorOPtr()->getVector()),
+                intrinsic_(_ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr()->getVector()),
+                feature_image_(*std::static_pointer_cast<FeaturePointImage>(_ftr_ptr))
+{
+    setType("AHP");
+
+    // obtain some intrinsics from provided sensor
+    distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
+}
+
+inline ConstraintAHP::~ConstraintAHP()
+{
+    //
+}
+
+inline Eigen::VectorXs ConstraintAHP::expectation() const
+{
+    Eigen::VectorXs exp(2);
+    FrameBasePtr frm_current = getFeaturePtr()->getCapturePtr()->getFramePtr();
+    FrameBasePtr frm_anchor  = getFrameOtherPtr();
+    LandmarkBasePtr lmk      = getLandmarkOtherPtr();
+
+    const Scalar* const frame_current_pos   = frm_current->getPPtr()->getVector().data();
+    const Scalar* const frame_current_ori   = frm_current->getOPtr()->getVector().data();
+    const Scalar* const frame_anchor_pos    = frm_anchor ->getPPtr()->getVector().data();
+    const Scalar* const frame_anchor_ori    = frm_anchor ->getOPtr()->getVector().data();
+    const Scalar* const lmk_pos_hmg         = lmk        ->getPPtr()->getVector().data();
+
+    expectation(frame_current_pos, frame_current_ori, frame_anchor_pos, frame_anchor_ori, lmk_pos_hmg, exp.data());
+
+    return exp;
+}
+
+template<typename T>
+inline void ConstraintAHP::expectation(const T* const _current_frame_p,
+                                       const T* const _current_frame_o,
+                                       const T* const _anchor_frame_p,
+                                       const T* const _anchor_frame_o,
+                                       const T* const _lmk_hmg,
+                                       T* _expectation) const
+{
+    using namespace Eigen;
+
+    // All involved transforms
+    Eigen::Transform<T, 3, Eigen::Affine> T_W_R0;  ///< world to anchor robot transform
+    Eigen::Transform<T, 3, Eigen::Affine> T_W_R1;  ///< world to current robot transform
+    Eigen::Transform<T, 3, Eigen::Affine> T_R0_C0; ///< anchor robot to anchor camera transform
+    Eigen::Transform<T, 3, Eigen::Affine> T_R1_C1; ///< current robot to current camera transform
+
+    // world to anchor robot frame
+    Map<const Matrix<T, 3, 1> > p_w_r0(_anchor_frame_p);
+    Translation<T, 3>           t_w_r0(p_w_r0);
+    Map<const Quaternion<T> >   q_w_r0(_anchor_frame_o);
+    T_W_R0 = t_w_r0 * q_w_r0;
+
+    // world to current robot frame
+    Map<const Matrix<T, 3, 1> > p_w_r1(_current_frame_p);
+    Translation<T, 3>           t_w_r1(p_w_r1);
+    Map<const Quaternion<T> >   q_w_r1(_current_frame_o);
+    T_W_R1 = t_w_r1 * q_w_r1;
+
+    // anchor robot to anchor camera
+    Translation<T, 3>   t_r0_c0(anchor_sensor_extrinsics_p_.cast<T>());
+    Quaternion<T>       q_r0_c0(anchor_sensor_extrinsics_o_.cast<T>());
+    T_R0_C0 = t_r0_c0 * q_r0_c0;
+
+    // current robot to current camera
+    CaptureBasePtr      current_capture = this->getFeaturePtr()->getCapturePtr();
+    Translation<T, 3>   t_r1_c1  (current_capture->getSensorPPtr()->getVector().cast<T>());
+    Quaternions         q_r1_c1_s(current_capture->getSensorOPtr()->getPtr());
+    Quaternion<T>       q_r1_c1 = q_r1_c1_s.cast<T>();
+    T_R1_C1 = t_r1_c1 * q_r1_c1;
+
+    // hmg point in current camera frame C1
+    Eigen::Map<const Eigen::Matrix<T, 4, 1> > landmark_hmg_c0(_lmk_hmg);
+    Eigen::Matrix<T, 4, 1> landmark_hmg_c1 = T_R1_C1.inverse(Eigen::Affine)
+                                           * T_W_R1. inverse(Eigen::Affine)
+                                           * T_W_R0
+                                           * T_R0_C0
+                                           * landmark_hmg_c0;
+
+    // lmk direction vector
+    Eigen::Matrix<T, 3, 1> v_dir = landmark_hmg_c1.head(3);
+
+    // camera parameters
+    Matrix<T, 4, 1> intrinsic = intrinsic_.cast<T>();
+    Eigen::Matrix<T, Eigen::Dynamic, 1> distortion = distortion_.cast<T>();
+
+    // project point and exit
+    Eigen::Map<Eigen::Matrix<T, 2, 1> > expectation(_expectation);
+    expectation = pinhole::projectPoint(intrinsic, distortion, v_dir);
+}
+
+template<typename T>
+inline bool ConstraintAHP::operator ()(const T* const _current_frame_p,
+                                       const T* const _current_frame_o,
+                                       const T* const _anchor_frame_p,
+                                       const T* const _anchor_frame_o,
+                                       const T* const _lmk_hmg,
+                                       T* _residuals) const
+{
+    // expected
+    Eigen::Matrix<T, 2, 1> expected;
+    expectation(_current_frame_p, _current_frame_o, _anchor_frame_p, _anchor_frame_o, _lmk_hmg, expected.data());
+
+    // measured
+    Eigen::Matrix<T, 2, 1> measured = getMeasurement().cast<T>();
+
+    // residual
+    Eigen::Map<Eigen::Matrix<T, 2, 1> > residuals(_residuals);
+    residuals = getMeasurementSquareRootInformation().cast<T>() * (expected - measured);
+    return true;
+}
+
+inline wolf::JacobianMethod ConstraintAHP::getJacobianMethod() const
+{
+    return JAC_AUTO;
+}
+
+inline wolf::ConstraintAHPPtr ConstraintAHP::create(FeatureBasePtr   _ftr_ptr,
+                                                    LandmarkAHPPtr   _lmk_ahp_ptr,
+                                                    bool             _apply_loss_function,
+                                                    ConstraintStatus _status)
+{
+    // construct constraint
+    ConstraintAHPPtr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _lmk_ahp_ptr, _apply_loss_function, _status);
+
+    // link it to wolf tree <-- these pointers cannot be set at construction time
+    _lmk_ahp_ptr->getAnchorFrame()->addConstrainedBy(ctr_ahp);
+    _lmk_ahp_ptr->addConstrainedBy(ctr_ahp);
+
+    return ctr_ahp;
+}
 
 } // namespace wolf
 
