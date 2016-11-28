@@ -93,7 +93,6 @@ inline ConstraintAHP::~ConstraintAHP()
 
 inline Eigen::VectorXs ConstraintAHP::expectation() const
 {
-    Eigen::Vector2s exp;
     FrameBasePtr frm_current = getFeaturePtr()->getCapturePtr()->getFramePtr();
     FrameBasePtr frm_anchor  = getFrameOtherPtr();
     LandmarkBasePtr lmk      = getLandmarkOtherPtr();
@@ -104,6 +103,7 @@ inline Eigen::VectorXs ConstraintAHP::expectation() const
     const Scalar* const frame_anchor_ori    = frm_anchor ->getOPtr()->getPtr();
     const Scalar* const lmk_pos_hmg         = lmk        ->getPPtr()->getPtr();
 
+    Eigen::Vector2s exp;
     expectation(frame_current_pos, frame_current_ori, frame_anchor_pos, frame_anchor_ori, lmk_pos_hmg, exp.data());
 
     return exp;
