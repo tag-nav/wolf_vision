@@ -54,10 +54,15 @@ namespace wolf {
 
 
         public:
-            IMU_jac_bias operator=(IMU_jac_bias const& right){
+            void copyfrom(IMU_jac_bias const& right){
 
-                IMU_jac_bias res(right);
-                return res;
+                Deltas_noisy_vect_ = right.Deltas_noisy_vect_;
+                Delta0_ = right.Delta0_;
+                dDp_dab_ = right.dDp_dab_;
+                dDv_dab_ = right.dDv_dab_;
+                dDp_dwb_ = right.dDp_dwb_;
+                dDv_dwb_ = right.dDv_dwb_;
+                dDq_dwb_ = right.dDq_dwb_;
             }
     };
 
@@ -108,10 +113,14 @@ namespace wolf {
             Eigen::MatrixXs jacobian_delta_;
 
         public:
-            IMU_jac_deltas operator=(IMU_jac_deltas const& right){
+            void copyfrom(IMU_jac_deltas const& right){
 
-                IMU_jac_deltas res(right);
-                return res;
+                Delta_noisy_vect_ = right.Delta_noisy_vect_;
+                delta_noisy_vect_ = right.delta_noisy_vect_;
+                Delta0_ = right.Delta0_;
+                delta0_ = right.delta0_;
+                jacobian_delta_preint_ = right.jacobian_delta_preint_;
+                jacobian_delta_ = right.jacobian_delta_;
             }
     };
 
