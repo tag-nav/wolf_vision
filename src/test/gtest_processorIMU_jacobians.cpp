@@ -59,19 +59,8 @@ class ProcessorIMU_jacobians : public testing::Test
         ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
         Eigen::VectorXs IMU_extrinsics(7);
         IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-        //SensorBase* sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, nullptr);
-        //wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
-
-        // Set the origin
-        t.set(0.0001); // clock in 0,1 ms ticks
-        Eigen::VectorXs x0(16);
-        x0 << 0,1,0,  0,0,0,1,  1,0,0,  0,0,.000,  0,0,.000; // P Q V B B
-
-        //wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
-        //CaptureIMU* imu_ptr;
 
         ProcessorIMU_UnitTester processor_imu;
-        //processor_imu.setOrigin(x0, t);
         wolf::Scalar ddelta_bias = 0.00000001;
         wolf::Scalar dt = 0.001;
 
@@ -82,7 +71,7 @@ class ProcessorIMU_jacobians : public testing::Test
         Delta0.segment<3>(3) = Delta0.segment<3>(3)*10;
         Eigen::Vector3s ang0, ang;
         ang0 << 120.08*deg_to_rad, 12.36*deg_to_rad, 54.32*deg_to_rad; 
-        //Delta0 << 0,0,0, 1,0,0,0 ,0,0,0; 
+
         Eigen::Map<Eigen::Quaternions> Delta0_quat(Delta0.data()+6);
         Delta0_quat = v2q(ang0);
         Delta0_quat.normalize();
