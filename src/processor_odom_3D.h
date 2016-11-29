@@ -96,7 +96,7 @@ class ProcessorOdom3D : public ProcessorMotion
         ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
                                            FrameBasePtr _frame_origin);
 
-    private:
+    protected:
         // noise parameters (stolen from owner SensorOdom3D)
         Scalar k_disp_to_disp_; // displacement variance growth per meter of linear motion
         Scalar k_disp_to_rot_;  // orientation  variance growth per meter of linear motion
