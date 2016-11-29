@@ -30,31 +30,29 @@
 using namespace wolf;
 
 // A new one of these is created for each test
-class ProcessorIMU_jacobians : public testing::Test
+class ProcessorIMU_jacobians_bias : public testing::Test
 {
     public:
-    TimeStamp t;
-    Eigen::Vector6s data_;
-    struct IMU_jac_bias bias_jac;
-    Eigen::Matrix<wolf::Scalar,9,1> Delta_noise;
-    Eigen::Matrix<wolf::Scalar,9,1> delta_noise;
+        TimeStamp t;
+        Eigen::Vector6s data_;
+        struct IMU_jac_bias bias_jac;
 
-    void remapJacDeltas_quat0(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq0, Eigen::Map<Eigen::Quaternions>& _dq0){
+        void remapJacDeltas_quat0(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq0, Eigen::Map<Eigen::Quaternions>& _dq0){
 
-        new (&_Dq0) Eigen::Map<const Eigen::Quaternions>(_jac_delta.Delta0_.data() + 6);
-        new (&_dq0) Eigen::Map<const Eigen::Quaternions>(_jac_delta.delta0_.data() + 6);
-    }
+            new (&_Dq0) Eigen::Map<const Eigen::Quaternions>(_jac_delta.Delta0_.data() + 6);
+            new (&_dq0) Eigen::Map<const Eigen::Quaternions>(_jac_delta.delta0_.data() + 6);
+        }
 
-    void remapJacDeltas_quat(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq, Eigen::Map<Eigen::Quaternions>& _dq, const int& place ){
+        void remapJacDeltas_quat(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq, Eigen::Map<Eigen::Quaternions>& _dq, const int& place ){
     
-        assert(place < _jac_delta.Delta_noisy_vect_.size());
-        new (&_Dq) Eigen::Map<const Eigen::Quaternions>(_jac_delta.Delta_noisy_vect_(place).data() + 6);
-        new (&_dq) Eigen::Map<const Eigen::Quaternions>(_jac_delta.delta_noisy_vect_(place).data() + 6);
-    }
+            assert(place < _jac_delta.Delta_noisy_vect_.size());
+            new (&_Dq) Eigen::Map<const Eigen::Quaternions>(_jac_delta.Delta_noisy_vect_(place).data() + 6);
+            new (&_dq) Eigen::Map<const Eigen::Quaternions>(_jac_delta.delta_noisy_vect_(place).data() + 6);
+        }
 
     virtual void SetUp()
     {
-        //SetUp for 
+        //SetUp for jacobians wrt bias testing
         wolf::Scalar deg_to_rad = M_PI/180.0;
         data_ << 10,0.5,3, 100*deg_to_rad,110*deg_to_rad,30*deg_to_rad;
 
@@ -101,7 +99,16 @@ class ProcessorIMU_jacobians : public testing::Test
     }
 };
 
-TEST_F(ProcessorIMU_jacobians, Dummy)
+
+// A new one of these is created for each test
+class ProcessorIMU_jacobians_bias : public testing::Test
+{
+    public:
+        TimeStamp t;
+        Eigen::Vector6s data_;         
+}
+
+TEST_F(ProcessorIMU_jacobians_bias, Dummy)
 {
     ASSERT_TRUE(data_.size() == 6);
 }
