@@ -179,7 +179,7 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
     data_cov = Eigen::MatrixXs::Zero(6,6);
     jacobian_delta_preint = Eigen::MatrixXs::Zero(9,9);
     jacobian_delta = Eigen::MatrixXs::Zero(9,9);
-    delta_preint_plus_delta0 << 0,0,0, 0,0,0, 1,0,0,0;
+    delta_preint_plus_delta0 << 0,0,0, 1,0,0,0 ,0,0,0; //PQV
 
     /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
         place 1 : added da_bx in data         place 2 : added da_by in data       place 3 : added da_bz in data
@@ -209,7 +209,7 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
         dDp_dwb_.setZero();
         dDv_dwb_.setZero();
         dDq_dwb_.setZero();
-        delta_preint_plus_delta0 << 0,0,0, 0,0,0, 1,0,0,0;
+        delta_preint_plus_delta0 << 0,0,0, 1,0,0,0 ,0,0,0;  //PQV
         data_cov = Eigen::MatrixXs::Zero(6,6);
 
         // add da_b
@@ -234,7 +234,7 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     Eigen::VectorXs delta_preint_plus_delta;
     delta0.resize(10);
     delta_preint_plus_delta.resize(10);
-    delta_preint_plus_delta << 0,0,0 ,0,0,0, 1,0,0,0;
+    delta_preint_plus_delta << 0,0,0 ,1,0,0,0 ,0,0,0;
 
     Eigen::MatrixXs jacobian_delta_preint;  //will be used as input for deltaPlusDelta
     Eigen::MatrixXs jacobian_delta;         //will be used as input for deltaPlusDelta
