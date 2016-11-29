@@ -36,6 +36,8 @@ class ProcessorIMU_jacobians : public testing::Test
     TimeStamp t;
     Eigen::Vector6s data_;
     struct IMU_jac_bias bias_jac;
+    Eigen::Matrix<wolf::Scalar,9,1> Delta_noise;
+    Eigen::Matrix<wolf::Scalar,9,1> delta_noise;
 
     void remapJacDeltas_quat0(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq0, Eigen::Map<Eigen::Quaternions>& _dq0){
 
@@ -52,6 +54,7 @@ class ProcessorIMU_jacobians : public testing::Test
 
     virtual void SetUp()
     {
+        //SetUp for 
         wolf::Scalar deg_to_rad = M_PI/180.0;
         data_ << 10,0.5,3, 100*deg_to_rad,110*deg_to_rad,30*deg_to_rad;
 
@@ -84,7 +87,18 @@ class ProcessorIMU_jacobians : public testing::Test
         bias_jac = bias_jac_c;
     }
 
-    virtual void TearDown(){}
+    virtual void TearDown()
+    {
+        // code here will be called just after the test completes
+        // ok to through exceptions from here if need be
+        /*
+            You can do deallocation of resources in TearDown or the destructor routine. 
+                However, if you want exception handling you must do it only in the TearDown code because throwing an exception 
+                from the destructor results in undefined behavior.
+            The Google assertion macros may throw exceptions in platforms where they are enabled in future releases. 
+                Therefore, it's a good idea to use assertion macros in the TearDown code for better maintenance.
+        */
+    }
 };
 
 TEST_F(ProcessorIMU_jacobians, Dummy)
