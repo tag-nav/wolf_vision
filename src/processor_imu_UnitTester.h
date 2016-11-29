@@ -97,8 +97,8 @@ namespace wolf {
                             Delta_noisy_vect_                                                                       delta_noisy_vect_
                             0: + 0,                                                                                 0: + 0
                             1: +dPx, 2: +dPy, 3: +dPz                                                               1: + dpx, 2: +dpy, 3: +dpz
-                            4: +dVx, 5: +dVy, 6: +dVz                                                               4: + dvx, 5: +dvy, 6: +dvz
-                            7: +dOx, 8: +dOy, 9: +dOz                                                               7: + dox, 8: +doy, 9: +doz
+                            4: +dOx, 5: +dOy, 6: +dOz                                                               4: + dox, 5: +doy, 6: +doz
+                            7: +dVx, 8: +dVy, 9: +dVz                                                               7: + dvx, 9: +dvy, +: +dvz
              */
             Eigen::VectorXs Delta0_; //this will contain the Delta not affected by noise
             Eigen::VectorXs delta0_; //this will contain the delta not affected by noise
@@ -263,16 +263,22 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     jacobian_delta0 = jacobian_delta;
 
     //We compute all the jacobians wrt deltas and noisy deltas
-    for(int i=0; i<6; i++) //for 6 first component we just add to add noise as vector component since it is in the R^3 space
-    {
+    for(int i=0; i<3; i++) //for 3 first and 3 last components we just add to add noise as vector component since it is in the R^3 space
+    {   
+        //PQV formulation
 
         delta_ = delta0;
         delta_(i) = delta_(i) + _delta_noise(i); //noise has been added
         delta_noisy_vect(i) = delta_;
+
+        delta_ = delta0;
+        delta_(i+6) = delta_(i+6) + _delta_noise(i+6); //noise has been added
+        delta_noisy_vect(i+6) = delta_;
     }
 
     for(int i=0; i<3; i++) //for noise dtheta, it is in SO3, need to work on quaternions
-    {
+    {   
+        //PQV formulation
         //fist we need to reset some stuff
         Eigen::Matrix3s dqr_tmp;
         Eigen::Vector3s dtheta = Eigen::Vector3s::Zero();
@@ -280,18 +286,23 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         delta_ = delta0;
         remapDelta(delta_); //not sure that we need this
         dqr_tmp = Dq_out_.matrix();
-        dtheta(i) +=  _delta_noise(i+6); //introduce perturbation
+        dtheta(i) +=  _delta_noise(i+3); //introduce perturbation
         dqr_tmp = dqr_tmp * v2R(dtheta); //Apply perturbation : R * exp(dtheta) --> using matrix
         Dq_out_ = v2q(R2v(dqr_tmp)); //orientation noise has been added --> get back to quaternion form
-        delta_noisy_vect(i+6) = delta_;
+        delta_noisy_vect(i+3) = delta_;
     }
 
     //We compute all the jacobians wrt Deltas and noisy Deltas
-    for(int i=0; i<6; i++) //for 6 first component we just add to add noise as vector component since it is in the R^3 space
+    for(int i=0; i<3; i++) //for 3 first and 3 last components we just add to add noise as vector component since it is in the R^3 space
     {
+        //PQV formulation
         Delta_ = _Delta0;
         Delta_(i) = Delta_(i) + _Delta_noise(i); //noise has been added
         Delta_noisy_vect(i) = Delta_;
+
+        Delta_ = _Delta0;
+        Delta_(i+6) = Delta_(i+6) + _Delta_noise(i+6); //noise has been added
+        Delta_noisy_vect(i+6) = Delta_;
     }
 
     for(int i=0; i<3; i++) //for noise dtheta, it is in SO3, need to work on quaternions
@@ -303,10 +314,10 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         Delta_ = _Delta0;
         remapDelta(Delta_); //this time we need it
         dQr_tmp = Dq_out_.matrix();
-        dtheta(i) += _Delta_noise(i+6); //introduce perturbation
+        dtheta(i) += _Delta_noise(i+3); //introduce perturbation
         dQr_tmp = dQr_tmp * v2R(dtheta); //Apply perturbation : R * exp(dtheta) --> using matrix
         Dq_out_ = v2q(R2v(dQr_tmp)); //orientation noise has been added --> get back to quaternion form
-        Delta_noisy_vect(i+6) = Delta_;
+        Delta_noisy_vect(i+3) = Delta_;
     }
     
     IMU_jac_deltas jac_deltas(_Delta0, delta0, Delta_noisy_vect, delta_noisy_vect, jacobian_delta_preint0, jacobian_delta0);
