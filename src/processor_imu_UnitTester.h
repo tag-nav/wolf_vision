@@ -13,6 +13,31 @@ namespace wolf {
         IMU_jac_bias(Eigen::Matrix<Eigen::VectorXs,6,1> _Deltas_noisy_vect, Eigen::VectorXs _Delta0 , Eigen::Matrix3s _dDp_dab, Eigen::Matrix3s _dDv_dab, 
                     Eigen::Matrix3s _dDp_dwb, Eigen::Matrix3s _dDv_dwb, Eigen::Matrix3s _dDq_dwb) : Deltas_noisy_vect_(_Deltas_noisy_vect), Delta0_(_Delta0) ,
                     dDp_dab_(_dDp_dab), dDv_dab_(_dDv_dab), dDp_dwb_(_dDp_dwb), dDv_dwb_(_dDv_dwb), dDq_dwb_(_dDq_dwb){}
+                
+        IMU_jac_bias(){
+
+            for (int i=0; i<6; i++){
+                Deltas_noisy_vect_(i) = Eigen::VectorXs::Zero(1,1);
+            }
+
+            Delta0_ = Eigen::VectorXs::Zero(1,1);
+            dDp_dab_ = Eigen::Matrix3s::Zero();
+            dDv_dab_ = Eigen::Matrix3s::Zero();
+            dDp_dwb_ = Eigen::Matrix3s::Zero();
+            dDv_dwb_ = Eigen::Matrix3s::Zero();
+            dDq_dwb_ = Eigen::Matrix3s::Zero();
+        }
+
+        IMU_jac_bias(IMU_jac_bias const & toCopy){
+
+            Deltas_noisy_vect_ = toCopy.Deltas_noisy_vect_;
+            Delta0_ = toCopy.Delta0_;
+            dDp_dab_ = toCopy.dDp_dab_;
+            dDv_dab_ = toCopy.dDv_dab_;
+            dDp_dwb_ = toCopy.dDp_dwb_;
+            dDv_dwb_ = toCopy.dDv_dwb_;
+            dDq_dwb_ = toCopy.dDq_dwb_;
+        }
 
         public:
             /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
@@ -26,6 +51,14 @@ namespace wolf {
             Eigen::Matrix3s dDp_dwb_;
             Eigen::Matrix3s dDv_dwb_;
             Eigen::Matrix3s dDq_dwb_;
+
+
+        public:
+            IMU_jac_bias operator=(IMU_jac_bias const& right){
+
+                IMU_jac_bias res(right);
+                return res;
+            }
     };
 
     struct IMU_jac_deltas{
@@ -34,6 +67,29 @@ namespace wolf {
                         Eigen::MatrixXs _jacobian_delta_preint, Eigen::MatrixXs _jacobian_delta ) :
                         Delta0_(_Delta0), delta0_(_delta0), Delta_noisy_vect_(_Delta_noisy_vect), delta_noisy_vect_(_delta_noisy_vect), 
                        jacobian_delta_preint_(_jacobian_delta_preint), jacobian_delta_(_jacobian_delta) {}
+
+        IMU_jac_deltas(){
+            for (int i=0; i<9; i++){
+                Delta_noisy_vect_(i) = Eigen::VectorXs::Zero(1,1);
+                delta_noisy_vect_(i) = Eigen::VectorXs::Zero(1,1);
+            }
+
+            Delta0_ = Eigen::VectorXs::Zero(1,1);
+            delta0_ = Eigen::VectorXs::Zero(1,1);
+            jacobian_delta_preint_ = Eigen::MatrixXs::Zero(9,9);
+            jacobian_delta_ = Eigen::MatrixXs::Zero(9,9);
+        }
+
+        IMU_jac_deltas(IMU_jac_deltas const & toCopy){
+
+            Delta_noisy_vect_ = toCopy.Delta_noisy_vect_;
+            delta_noisy_vect_ = toCopy.delta_noisy_vect_;
+
+            Delta0_ = toCopy.Delta0_;
+            delta0_ = toCopy.delta0_;
+            jacobian_delta_preint_ = toCopy.jacobian_delta_preint_;
+            jacobian_delta_ = toCopy.jacobian_delta_;
+        }
         
         public:
             /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
@@ -50,6 +106,13 @@ namespace wolf {
             Eigen::Matrix<Eigen::VectorXs,9,1> delta_noisy_vect_; //this will contain the deltas affected by noises
             Eigen::MatrixXs jacobian_delta_preint_;
             Eigen::MatrixXs jacobian_delta_;
+
+        public:
+            IMU_jac_deltas operator=(IMU_jac_deltas const& right){
+
+                IMU_jac_deltas res(right);
+                return res;
+            }
     };
 
     class ProcessorIMU_UnitTester : public ProcessorIMU{
