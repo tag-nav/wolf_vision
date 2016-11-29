@@ -101,12 +101,12 @@ class ProcessorIMU_jacobians_bias : public testing::Test
 
 
 // A new one of these is created for each test
-class ProcessorIMU_jacobians_bias : public testing::Test
+class ProcessorIMU_jacobians_noise : public testing::Test
 {
     public:
         TimeStamp t;
         Eigen::Vector6s data_;         
-}
+};
 
 TEST_F(ProcessorIMU_jacobians_bias, Dummy)
 {
