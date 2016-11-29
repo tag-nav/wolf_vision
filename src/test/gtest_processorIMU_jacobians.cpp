@@ -36,6 +36,8 @@ class ProcessorIMU_jacobians_bias : public testing::Test
         TimeStamp t;
         Eigen::Vector6s data_;
         struct IMU_jac_bias bias_jac;
+        wolf::Scalar ddelta_bias;
+        wolf::Scalar dt;
 
         void remapJacDeltas_quat0(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq0, Eigen::Map<Eigen::Quaternions>& _dq0){
 
@@ -62,8 +64,8 @@ class ProcessorIMU_jacobians_bias : public testing::Test
         IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
 
         ProcessorIMU_UnitTester processor_imu;
-        wolf::Scalar ddelta_bias = 0.00000001;
-        wolf::Scalar dt = 0.001;
+        ddelta_bias = 0.00000001;
+        dt = 0.001;
 
         //defining a random Delta to begin with (not to use Origin point)
         Eigen::Matrix<wolf::Scalar,10,1> Delta0;
@@ -82,7 +84,7 @@ class ProcessorIMU_jacobians_bias : public testing::Test
         std::cout << "\n rotation vector we start with :\n" << ang << std::endl;
 
         struct IMU_jac_bias bias_jac_c = processor_imu.finite_diff_ab(dt, data_, ddelta_bias, Delta0);
-        bias_jac = bias_jac_c;
+        bias_jac.copyfrom(bias_jac_c);
     }
 
     virtual void TearDown()
@@ -108,9 +110,16 @@ class ProcessorIMU_jacobians_noise : public testing::Test
         Eigen::Vector6s data_;         
 };
 
-TEST_F(ProcessorIMU_jacobians_bias, Dummy)
+TEST_F(ProcessorIMU_jacobians_bias, dDp_dab)
 {
-    ASSERT_TRUE(data_.size() == 6);
+    using namespace wolf;
+    Eigen::Matrix3s dDp_dab;
+
+    for(int i=0;i<3;i++)
+         dDp_dab.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
+
+    EXPECT_TRUE((dDp_dab - bias_jac.dDp_dab_).isMuchSmallerThan(1,0.000001)) << "dDp_dab : \n" << dDp_dab << "\n bias_jac.dDp_dab_ :\n" << bias_jac.dDp_dab_ <<
+     "\ndDp_dab_a - dDp_dab_ : \n" << bias_jac.dDp_dab_ - dDp_dab << std::endl;
 }
 
 int main(int argc, char **argv)
