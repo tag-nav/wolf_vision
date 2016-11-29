@@ -30,6 +30,7 @@
         prc_ptr->deltaPlusDelta(D, dd, dt, DDo);\
         J_d.col(i) = (DDo - Do)/dx; \
         DD = D; \
+        DD(i) += dx; \
         prc_ptr->deltaPlusDelta(DD, d, dt, DDo); \
         J_D.col(i) = (DDo - Do)/dx; \
     }\
@@ -115,6 +116,23 @@ TEST(ProcessorOdom3D, deltaPlusDelta)
     ASSERT_TRUE((Dpd - Dpd_check).isMuchSmallerThan(1, 1e-10))
         << "\nDpd  : " << Dpd.transpose()
         << "\ncheck: " << Dpd_check.transpose();
+}
+
+TEST(ProcessorOdom3D, deltaPlusDelta_Jac)
+{
+    ProcessorOdom3DTest prc;
+
+    VectorXs D(7); D.setRandom(); D.tail<4>().normalize();
+    VectorXs d(7); d.setRandom(); d *= 1; d.tail<4>().normalize();
+    Scalar dt = 1;
+    VectorXs Do(7);
+    MatrixXs DD(6,6);
+    MatrixXs Dd(6,6);
+
+    prc.deltaPlusDelta(D, d, dt, Do, DD, Dd);
+
+    WOLF_DEBUG("DD:\n ", DD);
+    WOLF_DEBUG("Dd:\n ", Dd);
 }
 
 
