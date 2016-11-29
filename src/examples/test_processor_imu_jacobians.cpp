@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     // Set the origin
     t.set(0.0001); // clock in 0,1 ms ticks
     Eigen::VectorXs x0(16);
-    x0 << 0,1,0,  1,0,0,  0,0,0,1,  0,0,.000,  0,0,.000; // P Q V B B
+    x0 << 0,1,0,   0,0,0,1,  1,0,0,  0,0,.000,  0,0,.000; // P Q V B B
 
     //wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -64,11 +64,11 @@ int main(int argc, char** argv)
     Eigen::Matrix<wolf::Scalar,10,1> Delta0;
     Delta0 = Eigen::Matrix<wolf::Scalar,10,1>::Random();
     Delta0.head<3>() = Delta0.head<3>()*100;
-    Delta0.segment<3>(3) = Delta0.segment<3>(3)*10;
+    Delta0.tail<3>() = Delta0.tail<3>()*10;
     Eigen::Vector3s ang0, ang;
     ang0 << 120.08*deg_to_rad, 12.36*deg_to_rad, 54.32*deg_to_rad; 
-    //Delta0 << 0,0,0, 0,0,0, 1,0,0,0;
-    Eigen::Map<Eigen::Quaternions> Delta0_quat(Delta0.data()+6);
+    //Delta0 << 0,0,0, 0,0,0,1, 0,0,0;
+    Eigen::Map<Eigen::Quaternions> Delta0_quat(Delta0.data()+3);
     Delta0_quat = v2q(ang0);
     Delta0_quat.normalize();
     ang = q2v(Delta0_quat);
@@ -117,18 +117,18 @@ int main(int argc, char** argv)
 
      std::cout << "\n input data : \n" << data_ << std::endl;
 
-     new (&q_in_1) Eigen::Map<Eigen::Quaternions>(bias_jac.Delta0_.data() + 6);
+     new (&q_in_1) Eigen::Map<Eigen::Quaternions>(bias_jac.Delta0_.data() + 3);
      for(int i=0;i<3;i++){
          dDp_dab.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
-         dDv_dab.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i).segment(3,3) - bias_jac.Delta0_.segment(3,3))/ddelta_bias;
+         dDv_dab.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i).tail(3) - bias_jac.Delta0_.tail(3))/ddelta_bias;
 
          dDp_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
-         dDv_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).segment(3,3) - bias_jac.Delta0_.segment(3,3))/ddelta_bias;
+         dDv_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).tail(3) - bias_jac.Delta0_.tail(3))/ddelta_bias;
 
-         new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i).data() + 6);
+         new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i).data() + 3);
          dDq_dab.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
 
-         new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i+3).data() + 6);
+         new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i+3).data() + 3);
          dDq_dwb.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
          //std::cout << "matrix operation result :" << i << "\n" << q_in_1.matrix().transpose() * q_in_2.matrix() << std::endl;
          //std::cout << "matrix operation result to vector :" << i << "\n" << R2v( q_in_1.matrix().transpose() * q_in_2.matrix()) << std::endl;
@@ -267,8 +267,8 @@ int main(int argc, char** argv)
     Eigen::Matrix<wolf::Scalar,9,1> Delta_noise;
     Eigen::Matrix<wolf::Scalar,9,1> delta_noise;
 
-    Delta_noise << 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.0001, 0.0001, 0.0001;
-    delta_noise << 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.00000001, 0.0001, 0.0001, 0.0001;
+    Delta_noise << 0.00000001, 0.00000001, 0.00000001,  0.0001, 0.0001, 0.0001,  0.00000001, 0.00000001, 0.00000001;
+    delta_noise << 0.00000001, 0.00000001, 0.00000001,  0.0001, 0.0001, 0.0001,  0.00000001, 0.00000001, 0.00000001;
 
     struct IMU_jac_deltas deltas_jac = processor_imu.finite_diff_noise(dt, data_, Delta_noise, delta_noise, Delta0);
 
@@ -276,8 +276,8 @@ int main(int argc, char** argv)
                             jacobian_delta_preint_vect_                                                            jacobian_delta_vect_
                             0: + 0,                                                                                 0: + 0
                             1: +dPx, 2: +dPy, 3: +dPz                                                               1: + dpx, 2: +dpy, 3: +dpz
-                            4: +dVx, 5: +dVy, 6: +dVz                                                               4: + dvx, 5: +dvy, 6: +dvz
-                            7: +dOx, 8: +dOy, 9: +dOz                                                               7: + dox, 8: +doy, 9: +doz
+                            4: +dOx, 5: +dOy, 6: +dOz                                                               4: + dox, 5: +doy, 6: +doz
+                            7: +dVx, 8: +dVy, 9: +dVz                                                               7: + dvx, 8: +dvy, 9: +dvz
     */
 
     Eigen::Matrix3s dDp_dP, dDp_dV, dDp_dO, dDv_dP, dDv_dV, dDv_dO, dDo_dP, dDo_dV, dDo_dO;
@@ -290,20 +290,20 @@ int main(int argc, char** argv)
         //dDp_dPx = ((P + dPx) - P)/dPx
         dDp_dP.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i).head(3) - deltas_jac.Delta0_.head(3))/Delta_noise(i);
         //Dp_dVx = ((V + dVx)*dt - V*dt)/dVx
-        dDp_dV.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i+3).segment(3,3)*dt - deltas_jac.Delta0_.segment(3,3)*dt)/Delta_noise(i+3);
+        dDp_dV.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i+6).tail(3)*dt - deltas_jac.Delta0_.tail(3)*dt)/Delta_noise(i+6);
         //dDp_dOx = (( dR(Theta) * exp(dThetax,0,0)*dp ) - ( dR(Theta)*dp ))/dThetax
-        remapJacDeltas_quat(deltas_jac, Dq_noisy, dq_noisy, i+6);
-        dDp_dO.block<3,1>(0,i) = ((Dq_noisy.matrix() * deltas_jac.delta0_.head(3)) - (Dq0.matrix()* deltas_jac.delta0_.head(3)))/Delta_noise(i+6);
+        remapJacDeltas_quat(deltas_jac, Dq_noisy, dq_noisy, i+3);
+        dDp_dO.block<3,1>(0,i) = ((Dq_noisy.matrix() * deltas_jac.delta0_.head(3)) - (Dq0.matrix()* deltas_jac.delta0_.head(3)))/Delta_noise(i+3);
 
         //dDv_dP = [0, 0, 0]
         //dDv_dVx = ((V + dVx) - V)/dVx
-        dDv_dV.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i+3).segment(3,3) - deltas_jac.Delta0_.segment(3,3))/Delta_noise(i+3);
+        dDv_dV.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i+6).tail(3) - deltas_jac.Delta0_.tail(3))/Delta_noise(i+6);
         //dDv_dOx = (( dR(Theta) * exp(dThetax,0,0)*dv ) - ( dR(Theta)*dv ))/dThetax
-        dDv_dO.block<3,1>(0,i) = ((Dq_noisy.matrix() * deltas_jac.delta0_.segment(3,3)) - (Dq0.matrix()* deltas_jac.delta0_.segment(3,3)))/Delta_noise(i+6);
+        dDv_dO.block<3,1>(0,i) = ((Dq_noisy.matrix() * deltas_jac.delta0_.tail(3)) - (Dq0.matrix()* deltas_jac.delta0_.tail(3)))/Delta_noise(i+3);
 
         //dDo_dP = dDo_dV = [0, 0, 0]
         //dDo_dOx = log( (dR(Theta) * dr(theta)).transpose() * (dR(Theta)*exp(dThetax,0,0)) * dr(theta) )/dThetax
-        dDo_dO.block<3,1>(0,i) = R2v( (Dq0.matrix() * dq0.matrix()).transpose() * (Dq_noisy.matrix() * dq0.matrix()) )/Delta_noise(i+6);
+        dDo_dO.block<3,1>(0,i) = R2v( (Dq0.matrix() * dq0.matrix()).transpose() * (Dq_noisy.matrix() * dq0.matrix()) )/Delta_noise(i+3);
 
         //dDp_dpx = ( dR*(p + dpx) - dR*(p))/dpx
         dDp_dp.block<3,1>(0,i) = ( (Dq0.matrix() * deltas_jac.delta_noisy_vect_(i).head(3)) - (Dq0.matrix() * deltas_jac.delta0_.head(3)) )/delta_noise(i);
@@ -311,12 +311,12 @@ int main(int argc, char** argv)
 
         //dDv_dp = [0, 0, 0]
         //dDv_dvx = ( dR*(v + dvx) - dR*(v))/dvx
-        dDv_dv.block<3,1>(0,i) = ( (Dq0 * deltas_jac.delta_noisy_vect_(i+3).segment(3,3)) - (Dq0 * deltas_jac.delta0_.segment(3,3)) )/delta_noise(i+3);
+        dDv_dv.block<3,1>(0,i) = ( (Dq0 * deltas_jac.delta_noisy_vect_(i+6).tail(3)) - (Dq0 * deltas_jac.delta0_.tail(3)) )/delta_noise(i+6);
         //dDv_do = [0, 0, 0]
 
         //dDo_dp = dDo_dv = [0, 0, 0]
         //dDo_dox = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(dthetax,0,0)) )/dthetax
-        dDo_do.block<3,1>(0,i) = R2v( (Dq0.matrix() * dq0.matrix()).transpose() * (Dq0.matrix() * dq_noisy.matrix()) )/Delta_noise(i+6);
+        dDo_do.block<3,1>(0,i) = R2v( (Dq0.matrix() * dq0.matrix()).transpose() * (Dq0.matrix() * dq_noisy.matrix()) )/Delta_noise(i+3);
     }
 
     /* jacobians wrt deltas have PVQ form :
@@ -333,50 +333,50 @@ int main(int argc, char** argv)
         std::cout << "dDp_dP_a - dDp_dP : \n" << deltas_jac.jacobian_delta_preint_.block(0,0,3,3) - dDp_dP <<  "\n" << std::endl;
     }
 
-    if(dDp_dV.isApprox(deltas_jac.jacobian_delta_preint_.block(0,3,3,3), wolf::Constants::EPS) )
+    if(dDp_dV.isApprox(deltas_jac.jacobian_delta_preint_.block(0,6,3,3), wolf::Constants::EPS) )
         std::cout<< "dDp_dV jacobian is correct !" << std::endl;
     else{
         std::cout<< "\t\tdDp_dV jacobian is not correct ..." << std::endl;
-        std::cout << "dDp_dV : \n" << dDp_dV << "\n deltas_jac.jacobian_delta_preint_.block(0,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,3,3,3) << "\n" << std::endl;
-        std::cout << "dDp_dV_a - dDp_dV : \n" << deltas_jac.jacobian_delta_preint_.block(0,3,3,3) - dDp_dV <<  "\n" << std::endl;
+        std::cout << "dDp_dV : \n" << dDp_dV << "\n deltas_jac.jacobian_delta_preint_.block(0,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,6,3,3) << "\n" << std::endl;
+        std::cout << "dDp_dV_a - dDp_dV : \n" << deltas_jac.jacobian_delta_preint_.block(0,6,3,3) - dDp_dV <<  "\n" << std::endl;
     }
 
-    if(dDp_dO.isApprox(deltas_jac.jacobian_delta_preint_.block(0,6,3,3), wolf::Constants::EPS) )
+    if(dDp_dO.isApprox(deltas_jac.jacobian_delta_preint_.block(0,3,3,3), wolf::Constants::EPS) )
         std::cout<< "dDp_dO jacobian is correct !" << std::endl;
     else{
         std::cout<< "\t\tdDp_dO jacobian is not correct ..." << std::endl;
-        std::cout << "dDp_dO : \n" << dDp_dO << "\n deltas_jac.jacobian_delta_preint_.block(0,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,6,3,3) << "\n" << std::endl;
-        std::cout << "dDp_dO_a - dDp_dO : \n" << deltas_jac.jacobian_delta_preint_.block(0,6,3,3) - dDp_dO <<  "\n" << std::endl;
+        std::cout << "dDp_dO : \n" << dDp_dO << "\n deltas_jac.jacobian_delta_preint_.block(0,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,3,3,3) << "\n" << std::endl;
+        std::cout << "dDp_dO_a - dDp_dO : \n" << deltas_jac.jacobian_delta_preint_.block(0,3,3,3) - dDp_dO <<  "\n" << std::endl;
     }
 
-    if(dDv_dV.isApprox(deltas_jac.jacobian_delta_preint_.block(3,3,3,3), wolf::Constants::EPS) )
+    if(dDv_dV.isApprox(deltas_jac.jacobian_delta_preint_.block(6,6,3,3), wolf::Constants::EPS) )
         std::cout<< "dDv_dV jacobian is correct !" << std::endl;
     else{
         std::cout<< "\t\tdDv_dV jacobian is not correct ..." << std::endl;
-        std::cout << "dDv_dV : \n" << dDv_dV << "\n deltas_jac.jacobian_delta_preint_.block(3,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(3,3,3,3) << "\n" << std::endl;
-        std::cout << "dDv_dV_a - dDv_dV : \n" << deltas_jac.jacobian_delta_preint_.block(3,3,3,3) - dDv_dV <<  "\n" << std::endl;    
+        std::cout << "dDv_dV : \n" << dDv_dV << "\n deltas_jac.jacobian_delta_preint_.block(6,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(6,6,3,3) << "\n" << std::endl;
+        std::cout << "dDv_dV_a - dDv_dV : \n" << deltas_jac.jacobian_delta_preint_.block(6,6,3,3) - dDv_dV <<  "\n" << std::endl;    
     }
 
-    if(dDv_dO.isApprox(deltas_jac.jacobian_delta_preint_.block(3,6,3,3), wolf::Constants::EPS) )
+    if(dDv_dO.isApprox(deltas_jac.jacobian_delta_preint_.block(6,3,3,3), wolf::Constants::EPS) )
         std::cout<< "dDv_dO jacobian is correct !" << std::endl;
     else{
         std::cout<< "\t\tdDv_dO jacobian is not correct ..." << std::endl;
-        std::cout << "dDv_dO : \n" << dDv_dO << "\n deltas_jac.jacobian_delta_preint_.block(3,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(3,6,3,3) << "\n" << std::endl;
-        std::cout << "dDv_dO_a - dDv_dO : \n" << deltas_jac.jacobian_delta_preint_.block(3,6,3,3) - dDv_dO <<  "\n" << std::endl;
+        std::cout << "dDv_dO : \n" << dDv_dO << "\n deltas_jac.jacobian_delta_preint_.block(6,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(6,3,3,3) << "\n" << std::endl;
+        std::cout << "dDv_dO_a - dDv_dO : \n" << deltas_jac.jacobian_delta_preint_.block(6,3,3,3) - dDv_dO <<  "\n" << std::endl;
     }
 
-    if(dDo_dO.isApprox(deltas_jac.jacobian_delta_preint_.block(6,6,3,3), wolf::Constants::EPS) )
+    if(dDo_dO.isApprox(deltas_jac.jacobian_delta_preint_.block(3,3,3,3), wolf::Constants::EPS) )
         std::cout<< "dDo_dO jacobian is correct !" << std::endl;
     else{
         std::cout<< "\t\tdDo_dO jacobian is not correct ..." << std::endl;
-        std::cout << "dDo_dO : \n" << dDo_dO << "\n deltas_jac.jacobian_delta_preint_.block(6,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(6,6,3,3) << "\n" << std::endl;
-        std::cout << "dDo_dO_a - dDo_dO : \n" << deltas_jac.jacobian_delta_preint_.block(6,6,3,3) - dDo_dO <<  "\n" << std::endl;
+        std::cout << "dDo_dO : \n" << dDo_dO << "\n deltas_jac.jacobian_delta_preint_.block(3,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(3,3,3,3) << "\n" << std::endl;
+        std::cout << "dDo_dO_a - dDo_dO : \n" << deltas_jac.jacobian_delta_preint_.block(3,3,3,3) - dDo_dO <<  "\n" << std::endl;
     }
 
      Eigen::Matrix3s dDp_dp_a, dDv_dv_a, dDo_do_a;
      dDp_dp_a = deltas_jac.jacobian_delta_.block(0,0,3,3);
-     dDv_dv_a = deltas_jac.jacobian_delta_.block(3,3,3,3);
-     dDo_do_a = deltas_jac.jacobian_delta_.block(6,6,3,3);
+     dDv_dv_a = deltas_jac.jacobian_delta_.block(6,6,3,3);
+     dDo_do_a = deltas_jac.jacobian_delta_.block(3,3,3,3);
 
     if(dDp_dp.isApprox(dDp_dp_a, wolf::Constants::EPS) )
         std::cout<< "dDp_dp jacobian is correct !" << std::endl;
@@ -409,13 +409,13 @@ using namespace wolf;
 
 void remapJacDeltas_quat0(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq0, Eigen::Map<Eigen::Quaternions>& _dq0){
 
-        new (&_Dq0) Eigen::Map<const Eigen::Quaternions>(_jac_delta.Delta0_.data() + 6);
-        new (&_dq0) Eigen::Map<const Eigen::Quaternions>(_jac_delta.delta0_.data() + 6);
+        new (&_Dq0) Eigen::Map<const Eigen::Quaternions>(_jac_delta.Delta0_.data() + 3);
+        new (&_dq0) Eigen::Map<const Eigen::Quaternions>(_jac_delta.delta0_.data() + 3);
 }
 
 void remapJacDeltas_quat(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq, Eigen::Map<Eigen::Quaternions>& _dq, const int& place ){
     
     assert(place < _jac_delta.Delta_noisy_vect_.size());
-    new (&_Dq) Eigen::Map<const Eigen::Quaternions>(_jac_delta.Delta_noisy_vect_(place).data() + 6);
-    new (&_dq) Eigen::Map<const Eigen::Quaternions>(_jac_delta.delta_noisy_vect_(place).data() + 6);
+    new (&_Dq) Eigen::Map<const Eigen::Quaternions>(_jac_delta.Delta_noisy_vect_(place).data() + 3);
+    new (&_dq) Eigen::Map<const Eigen::Quaternions>(_jac_delta.delta_noisy_vect_(place).data() + 3);
 }
