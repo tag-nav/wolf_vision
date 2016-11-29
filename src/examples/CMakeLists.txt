@@ -6,6 +6,8 @@
 
 #ADD_EXECUTABLE(test_eigen_template test_eigen_template.cpp)
 
+ADD_EXECUTABLE(test_fcn_ptr test_fcn_ptr.cpp)
+
 ADD_EXECUTABLE(test_kf_callback test_kf_callback.cpp)
 TARGET_LINK_LIBRARIES(test_kf_callback ${PROJECT_NAME})
 
