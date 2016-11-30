@@ -26,9 +26,11 @@
     VectorXs DDo(7); \
     for (int i = 0; i< 7; i++) {\
         dd = d;\
+        DD = D; \
         dd(i) += dx;\
         prc_ptr->deltaPlusDelta(D, dd, dt, DDo);\
         J_d.col(i) = (DDo - Do)/dx; \
+        dd = d;\
         DD = D; \
         DD(i) += dx; \
         prc_ptr->deltaPlusDelta(DD, d, dt, DDo); \
@@ -45,7 +47,7 @@ using namespace wolf;
 class ProcessorOdom3DTest : public ProcessorOdom3D
 {
     public:
-        ProcessorOdom3DTest() : ProcessorOdom3D() {}
+        ProcessorOdom3DTest();
 
         // getters :-D !!
         VectorXs& delta() {return delta_;}
@@ -55,9 +57,14 @@ class ProcessorOdom3DTest : public ProcessorOdom3D
         Scalar& kdd() {return k_disp_to_disp_;}
         Scalar& kdr() {return k_disp_to_rot_;}
         Scalar& krr() {return k_rot_to_rot_;}
-        Scalar& dvar() {return min_disp_var_;}
-        Scalar& rvar() {return min_rot_var_;}
+        Scalar& dvar_min() {return min_disp_var_;}
+        Scalar& rvar_min() {return min_rot_var_;}
 };
+ProcessorOdom3DTest::ProcessorOdom3DTest() : ProcessorOdom3D()
+{
+    dvar_min() = 0.5;
+    rvar_min() = 0.25;
+}
 
 TEST(ProcessorOdom3D, data2delta)
 {
@@ -80,8 +87,8 @@ TEST(ProcessorOdom3D, data2delta)
     // construct covariance from processor parameters and motion magnitudes
     Scalar disp = data_dp.norm();
     Scalar rot = data_do.norm();
-    Scalar dvar = prc.dvar() + prc.kdd()*disp;
-    Scalar rvar = prc.rvar() + prc.kdr()*disp + prc.krr()*rot;
+    Scalar dvar = prc.dvar_min() + prc.kdd()*disp;
+    Scalar rvar = prc.rvar_min() + prc.kdr()*disp + prc.krr()*rot;
     Vector6s diag; diag << dvar, dvar, dvar, rvar, rvar, rvar;
     Matrix6s data_cov = diag.asDiagonal();
     Matrix6s delta_cov = data_cov;
@@ -100,39 +107,47 @@ TEST(ProcessorOdom3D, deltaPlusDelta)
 
     VectorXs D(7); D.setRandom(); D.tail<4>().normalize();
     VectorXs d(7); d.setRandom(); d *= 1; d.tail<4>().normalize();
-    VectorXs Dpd_check(7);
 
-    // Dp <-- Dp + Dq * dp
-    // Dq <-- Dq * dq
-    Dpd_check.head<3>() = D.head<3>() + Quaternions(D.data()+3)*d.head<3>();
-    Dpd_check.tail<4>() = (Quaternions(D.data()+3)*Quaternions(d.data()+3)).coeffs();
+    // Integrated delta value to check aginst
+    // Dp_int <-- Dp + Dq * dp
+    // Dq_int <-- Dq * dq
+    VectorXs D_int_check(7);
+    D_int_check.head<3>() = D.head<3>() + Quaternions(D.data()+3) * d.head<3>();
+    D_int_check.tail<4>() = (Quaternions(D.data()+3) * Quaternions(d.data()+3)).coeffs();
 
-    Scalar dt = 1; // dummy
+    Scalar dt = 1; // dummy, not used in Odom3D
 
-    VectorXs Dpd(7);
+    VectorXs D_int(7);
 
-    prc.deltaPlusDelta(D, d, dt, Dpd);
+    prc.deltaPlusDelta(D, d, dt, D_int);
 
-    ASSERT_TRUE((Dpd - Dpd_check).isMuchSmallerThan(1, 1e-10))
-        << "\nDpd  : " << Dpd.transpose()
-        << "\ncheck: " << Dpd_check.transpose();
+    ASSERT_TRUE((D_int - D_int_check).isMuchSmallerThan(1, 1e-10))
+        << "\nDpd  : " << D_int.transpose()
+        << "\ncheck: " << D_int_check.transpose();
 }
 
 TEST(ProcessorOdom3D, deltaPlusDelta_Jac)
 {
-    ProcessorOdom3DTest prc;
+    std::shared_ptr<ProcessorOdom3DTest> prc_ptr = std::make_shared<ProcessorOdom3DTest>();
 
     VectorXs D(7); D.setRandom(); D.tail<4>().normalize();
     VectorXs d(7); d.setRandom(); d *= 1; d.tail<4>().normalize();
     Scalar dt = 1;
     VectorXs Do(7);
-    MatrixXs DD(6,6);
-    MatrixXs Dd(6,6);
+    MatrixXs D_D(6,6);
+    MatrixXs D_d(6,6);
 
-    prc.deltaPlusDelta(D, d, dt, Do, DD, Dd);
+    prc_ptr->deltaPlusDelta(D, d, dt, Do, D_D, D_d);
 
-    WOLF_DEBUG("DD:\n ", DD);
-    WOLF_DEBUG("Dd:\n ", Dd);
+    WOLF_DEBUG("DD:\n ", D_D);
+    WOLF_DEBUG("Dd:\n ", D_d);
+
+    MatrixXs J_D(7,7), J_d(7,7);
+
+    JAC_NUMERIC(prc_ptr, D, d, dt, J_D, J_d, Constants::EPS);
+    WOLF_DEBUG("J_D:\n ", J_D);
+    WOLF_DEBUG("J_d:\n ", J_d);
+
 }
 
 
