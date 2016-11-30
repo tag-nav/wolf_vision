@@ -110,6 +110,38 @@ class ProcessorIMU_jacobians_noise : public testing::Test
         Eigen::Vector6s data_;         
 };
 
+                            ///BIAS TESTS
+                            
+/*                              IMU_jac_deltas struct form :
+    contains vectors of size 7 :
+    Elements at place 0 are those not affected by the bias noise that we add (da_bx,..., dw_bx,... ).
+                place 1 : added da_bx in data         place 2 : added da_by in data       place 3 : added da_bz in data
+                place 4 : added dw_bx in data         place 5 : added dw_by in data       place 6 : added dw_bz in data
+*/
+
+/*                                  Mathematics
+
+        dDp_dab = [dDp_dab_x, dDp_dab_y, dDp_dab_z]
+        dDp_dab_x = (dDp(ab_x + dab_x, ab_y, ab_z) - dDp(ab_x,ab_y,ab_z)) / dab_x
+        dDp_dab_x = (dDp(ab_x, ab_y + dab_y, ab_z) - dDp(ab_x,ab_y,ab_z)) / dab_y
+        dDp_dab_x = (dDp(ab_x, ab_y, ab_z + dab_z) - dDp(ab_x,ab_y,ab_z)) / dab_z
+
+        similar for dDv_dab
+        note dDp_dab_x, dDp_dab_y, dDp_dab_z, dDv_dab_x, dDv_dab_y, dDv_dab_z are 3x1 vectors !
+
+        dDq_dab = 0_{3x3}
+        dDq_dwb = [dDq_dwb_x, dDq_dwb_y, dDq_dwb_z]
+        dDq_dwb_x = log( dR(wb).transpose() * dR(wb - dwb_x))/dwb_x
+                  = log( dR(wb).transpose() * exp((wx - wbx - dwb_x)dt, (wy - wby)dt, (wy - wby)dt))/dwb_x
+        dDq_dwb_y = log( dR(wb).transpose() * dR(wb - dwb_y))/dwb_y
+        dDq_dwb_z = log( dR(wb).transpose() * dR(wb + dwb_z))/dwb_z
+
+        Note : dDq_dwb must be computed recursively ! So comparing the one returned by processor_imu and the numerical 
+        one will have no sense if we aredoing this from a random Delta. The Delta here should be the origin.
+        dDq_dwb_ = dR.tr()*dDq_dwb - Jr(wdt)*dt
+        Then at first step, dR.tr() = Id, dDq_dwb = 0_{3x3}, which boils down to dDq_dwb_ = Jr(wdt)*dt 
+*/
+
 TEST_F(ProcessorIMU_jacobians_bias, dDp_dab)
 {
     using namespace wolf;
