@@ -134,6 +134,18 @@ TEST_F(ProcessorIMU_jacobians_bias, dDv_dab)
      "\ndDv_dab_a - dDv_dab_ : \n" << bias_jac.dDv_dab_ - dDv_dab << std::endl;
 }
 
+TEST_F(ProcessorIMU_jacobians_bias, dDp_dwb)
+{
+    using namespace wolf;
+    Eigen::Matrix3s dDp_dwb;
+
+    for(int i=0;i<3;i++)
+         dDp_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
+
+    EXPECT_TRUE((dDp_dwb - bias_jac.dDp_dwb_).isMuchSmallerThan(1,0.000001)) << "dDp_dwb : \n" << dDp_dwb << "\n bias_jac.dDp_dwb_ :\n" << bias_jac.dDp_dwb_ <<
+     "\ndDp_dwb_a - dDv_dab_ : \n" << bias_jac.dDp_dwb_ - dDp_dwb << std::endl;
+}
+
 int main(int argc, char **argv)
 {
     using namespace wolf;
