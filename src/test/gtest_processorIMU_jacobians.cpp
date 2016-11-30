@@ -173,6 +173,23 @@ TEST_F(ProcessorIMU_jacobians_bias, dDq_dab)
     EXPECT_TRUE(dDq_dab.isZero(wolf::Constants::EPS)) << "\t\tdDq_dab_ jacobian is not Zero :" << dDq_dab << std::endl;
 }
 
+TEST_F(ProcessorIMU_jacobians_bias, dDq_dwb)
+{
+    using namespace wolf;
+    Eigen::Map<Eigen::Quaternions> q_in_1(NULL), q_in_2(NULL);
+    Eigen::Matrix3s dDq_dwb;
+
+    new (&q_in_1) Eigen::Map<Eigen::Quaternions>(bias_jac.Delta0_.data() + 3);
+    for(int i=0;i<3;i++){
+        new (&q_in_2) Eigen::Map<Eigen::Quaternions>(bias_jac.Deltas_noisy_vect_(i+3).data() + 3);
+        dDq_dwb.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
+    }
+
+    EXPECT_TRUE((dDq_dwb - bias_jac.dDq_dwb_).isMuchSmallerThan(1,0.000001)) << "dDq_dwb : \n" << dDq_dwb << "\n bias_jac.dDq_dwb_ :\n" << bias_jac.dDq_dwb_ <<
+     "\ndDq_dwb_a - dDq_dwb_ : \n" << bias_jac.dDq_dwb_ - dDq_dwb << std::endl;
+}
+
+
 int main(int argc, char **argv)
 {
     using namespace wolf;
