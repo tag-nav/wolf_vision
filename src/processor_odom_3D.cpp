@@ -12,8 +12,8 @@ ProcessorOdom3D::ProcessorOdom3D(ProcessorOdom3DParamsPtr _params, SensorOdom3DP
                 q1_(nullptr), q2_(nullptr), q_out_(nullptr)
         {
             setup(_sensor_ptr);
-            jacobian_delta_preint_.setIdentity(delta_cov_size_, delta_cov_size_);
-            jacobian_delta_.setIdentity(delta_cov_size_, delta_cov_size_);
+            jacobian_delta_preint_.setZero(delta_cov_size_, delta_cov_size_);
+            jacobian_delta_.setZero(delta_cov_size_, delta_cov_size_);
         }
 
 
