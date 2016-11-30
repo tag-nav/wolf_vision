@@ -139,7 +139,7 @@ int main(int argc, char** argv)
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
 
     //create a feature
-    FeatureBasePtr last_feature = std::make_shared<FeatureBase>("ODOM_3D", origin_state.head(7),Eigen::Matrix7s::Identity());
+    FeatureBasePtr last_feature = std::make_shared<FeatureBase>("ODOM_3D", origin_state.head(7),Eigen::Matrix7s::Identity()); //first KF and last KF at same position
     
     //create an ODOM constraint between first and last keyframes
     ConstraintOdom3DPtr constraintOdom_ptr = std::make_shared<ConstraintOdom3D>(last_feature, origin_frame);
