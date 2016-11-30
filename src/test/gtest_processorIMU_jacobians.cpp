@@ -30,14 +30,18 @@
 using namespace wolf;
 
 // A new one of these is created for each test
-class ProcessorIMU_jacobians_bias : public testing::Test
+class ProcessorIMU_jacobians : public testing::Test
 {
     public:
         TimeStamp t;
         Eigen::Vector6s data_;
-        struct IMU_jac_bias bias_jac;
+        Eigen::Matrix<wolf::Scalar,10,1> Delta0;
         wolf::Scalar ddelta_bias;
         wolf::Scalar dt;
+        Eigen::Matrix<wolf::Scalar,9,1> Delta_noise;
+        Eigen::Matrix<wolf::Scalar,9,1> delta_noise;
+        struct IMU_jac_bias bias_jac;
+        struct IMU_jac_deltas deltas_jac;
 
         void remapJacDeltas_quat0(IMU_jac_deltas& _jac_delta, Eigen::Map<Eigen::Quaternions>& _Dq0, Eigen::Map<Eigen::Quaternions>& _dq0){
 
@@ -54,7 +58,7 @@ class ProcessorIMU_jacobians_bias : public testing::Test
 
     virtual void SetUp()
     {
-        //SetUp for jacobians wrt bias testing
+        //SetUp for jacobians 
         wolf::Scalar deg_to_rad = M_PI/180.0;
         data_ << 10,0.5,3, 100*deg_to_rad,110*deg_to_rad,30*deg_to_rad;
 
@@ -83,8 +87,15 @@ class ProcessorIMU_jacobians_bias : public testing::Test
         std::cout << "\ninput Delta0 : " << Delta0 << std::endl;
         std::cout << "\n rotation vector we start with :\n" << ang << std::endl;
 
+        //get data to compute jacobians
         struct IMU_jac_bias bias_jac_c = processor_imu.finite_diff_ab(dt, data_, ddelta_bias, Delta0);
         bias_jac.copyfrom(bias_jac_c);
+
+        Delta_noise << 0.00000001, 0.00000001, 0.00000001,  0.0001, 0.0001, 0.0001,  0.00000001, 0.00000001, 0.00000001;
+        delta_noise << 0.00000001, 0.00000001, 0.00000001,  0.0001, 0.0001, 0.0001,  0.00000001, 0.00000001, 0.00000001;
+
+        struct IMU_jac_deltas deltas_jac_c = processor_imu.finite_diff_noise(dt, data_, Delta_noise, delta_noise, Delta0);
+        deltas_jac = deltas_jac_c;
     }
 
     virtual void TearDown()
@@ -101,17 +112,8 @@ class ProcessorIMU_jacobians_bias : public testing::Test
     }
 };
 
-
-// A new one of these is created for each test
-class ProcessorIMU_jacobians_noise : public testing::Test
-{
-    public:
-        TimeStamp t;
-        Eigen::Vector6s data_;         
-};
-
                             ///BIAS TESTS
-                            
+
 /*                              IMU_jac_deltas struct form :
     contains vectors of size 7 :
     Elements at place 0 are those not affected by the bias noise that we add (da_bx,..., dw_bx,... ).
@@ -142,7 +144,7 @@ class ProcessorIMU_jacobians_noise : public testing::Test
         Then at first step, dR.tr() = Id, dDq_dwb = 0_{3x3}, which boils down to dDq_dwb_ = Jr(wdt)*dt 
 */
 
-TEST_F(ProcessorIMU_jacobians_bias, dDp_dab)
+TEST_F(ProcessorIMU_jacobians, dDp_dab)
 {
     using namespace wolf;
     Eigen::Matrix3s dDp_dab;
@@ -154,7 +156,7 @@ TEST_F(ProcessorIMU_jacobians_bias, dDp_dab)
      "\ndDp_dab_a - dDp_dab_ : \n" << bias_jac.dDp_dab_ - dDp_dab << std::endl;
 }
 
-TEST_F(ProcessorIMU_jacobians_bias, dDv_dab)
+TEST_F(ProcessorIMU_jacobians, dDv_dab)
 {
     using namespace wolf;
     Eigen::Matrix3s dDv_dab;
@@ -166,7 +168,7 @@ TEST_F(ProcessorIMU_jacobians_bias, dDv_dab)
      "\ndDv_dab_a - dDv_dab_ : \n" << bias_jac.dDv_dab_ - dDv_dab << std::endl;
 }
 
-TEST_F(ProcessorIMU_jacobians_bias, dDp_dwb)
+TEST_F(ProcessorIMU_jacobians, dDp_dwb)
 {
     using namespace wolf;
     Eigen::Matrix3s dDp_dwb;
@@ -178,7 +180,7 @@ TEST_F(ProcessorIMU_jacobians_bias, dDp_dwb)
      "\ndDp_dwb_a - dDv_dab_ : \n" << bias_jac.dDp_dwb_ - dDp_dwb << std::endl;
 }
 
-TEST_F(ProcessorIMU_jacobians_bias, dDv_dwb_)
+TEST_F(ProcessorIMU_jacobians, dDv_dwb_)
 {
     using namespace wolf;
     Eigen::Matrix3s dDv_dwb;
@@ -190,7 +192,7 @@ TEST_F(ProcessorIMU_jacobians_bias, dDv_dwb_)
      "\ndDv_dwb_a - dDv_dwb_ : \n" << bias_jac.dDv_dwb_ - dDv_dwb << std::endl;
 }
 
-TEST_F(ProcessorIMU_jacobians_bias, dDq_dab)
+TEST_F(ProcessorIMU_jacobians, dDq_dab)
 {
     using namespace wolf;
     Eigen::Map<Eigen::Quaternions> q_in_1(NULL), q_in_2(NULL);
@@ -205,7 +207,7 @@ TEST_F(ProcessorIMU_jacobians_bias, dDq_dab)
     EXPECT_TRUE(dDq_dab.isZero(wolf::Constants::EPS)) << "\t\tdDq_dab_ jacobian is not Zero :" << dDq_dab << std::endl;
 }
 
-TEST_F(ProcessorIMU_jacobians_bias, dDq_dwb)
+TEST_F(ProcessorIMU_jacobians, dDq_dwb)
 {
     using namespace wolf;
     Eigen::Map<Eigen::Quaternions> q_in_1(NULL), q_in_2(NULL);
