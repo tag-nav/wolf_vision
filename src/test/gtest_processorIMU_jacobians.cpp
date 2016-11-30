@@ -223,6 +223,84 @@ TEST_F(ProcessorIMU_jacobians, dDq_dwb)
      "\ndDq_dwb_a - dDq_dwb_ : \n" << bias_jac.dDq_dwb_ - dDq_dwb << std::endl;
 }
 
+                                ///Perturbation TESTS
+
+/* reminder : 
+                            jacobian_delta_preint_vect_                                                            jacobian_delta_vect_
+                            0: + 0,                                                                                 0: + 0
+                            1: +dPx, 2: +dPy, 3: +dPz                                                               1: + dpx, 2: +dpy, 3: +dpz
+                            4: +dOx, 5: +dOy, 6: +dOz                                                               4: + dox, 5: +doy, 6: +doz
+                            7: +dVx, 8: +dVy, 9: +dVz                                                               7: + dvx, 8: +dvy, 9: +dvz
+*/
+
+/*              Numerical method to check jacobians wrt noise
+
+                                                            dDp_dP = [dDp_dPx, dDp_dPy, dDp_dPz]
+    dDp_dPx = ((P + dPx) - P)/dPx = Id
+    dDp_dPy = ((P + dPy) - P)/dPy = Id
+    dDp_dPz = ((P + dPz) - P)/dPz = Id
+
+                                                            dDp_dV = [dDp_dVx, dDp_dVy, dDp_dVz]
+    dDp_dVx = ((V + dVx)*dt - V*dt)/dVx = Id*dt
+    dDp_dVy = ((V + dVy)*dt - V*dt)/dVy = Id*dt
+    dDp_dVz = ((V + dVz)*dt - V*dt)/dVz = Id*dt
+
+                                                            dDp_dO = [dDp_dOx, dDp_dOy, dDp_dOz]
+    dDp_dOx = (( dR(Theta + dThetax)*dp ) - ( dR(Theta)*dp ))/dThetax 
+            = (( dR(Theta) * exp(dThetax,0,0)*dp ) - ( dR(Theta)*dp ))/dThetax
+    dDp_dOy = (( dR(Theta) * exp(0,dThetay,0)*dp ) - ( dR(Theta)*dp ))/dThetay
+    dDp_dOz = (( dR(Theta) * exp(0,0,dThetaz)*dp ) - ( dR(Theta)*dp ))/dThetaz
+
+                                                            dDv_dP = [dDv_dPx, dDv_dPy, dDv_dPz] = [0, 0, 0]
+
+                                                            dDv_dV = [dDv_dVx, dDv_dVy, dDv_dVz]
+    dDv_dVx = ((V + dVx) - V)/dVx = Id
+    dDv_dVy = ((V + dVy) - V)/dVy = Id
+    dDv_dVz = ((V + dVz) - V)/dVz = Id
+    
+                                                            dDv_dO = [dDv_dOx, dDv_dOy, dDv_dOz]
+    dDv_dOx = (( dR(Theta + dThetax)*dv ) - ( dR(Theta)*dv ))/dThetax 
+            = (( dR(Theta) * exp(dThetax,0,0)*dv ) - ( dR(Theta)*dv ))/dThetax
+    dDv_dOx = (( dR(Theta) * exp(0,dThetay,0)*dv ) - ( dR(Theta)*dv ))/dThetay
+    dDv_dOz = (( dR(Theta) * exp(0,0,dThetaz)*dv ) - ( dR(Theta)*dv ))/dThetaz
+
+                                                            dDp_dp = [dDp_dpx, dDp_dpy, dDp_dpz]
+    dDp_dpx = ( dR*(p + dpx) - dR*(p))/dpx
+    dDp_dpy = ( dR*(p + dpy) - dR*(p))/dpy
+    dDp_dpz = ( dR*(p + dpz) - dR*(p))/dpy
+
+                                                            dDp_dv = [dDp_dvx, dDp_dvy, dDp_dvz] = [0, 0, 0]
+    
+                                                            dDp_do = [dDp_dox, dDp_doy, dDp_doz] = [0, 0, 0]
+
+                                                            dDv_dp = [dDv_dpx, dDv_dpy, dDv_dpz] = [0, 0, 0]
+                                                            
+                                                            dDv_dv = [dDv_dvx, dDv_dvy, dDv_dvz]
+    dDv_dvx = ( dR*(v + dvx) - dR*(v))/dvx
+    dDv_dvy = ( dR*(v + dvy) - dR*(v))/dvy
+    dDv_dvz = ( dR*(v + dvz) - dR*(v))/dvz
+
+                                                            dDv_do = [dDv_dox, dDv_doy, dDv_doz] = [0, 0, 0]
+
+                                                            dDo_dp = dDo_dv = dDo_dP = dDo_dV = [0, 0, 0]
+
+                                                            dDo_dO = [dDo_dOx, dDo_dOy, dDo_dOz]
+                                                            
+    dDo_dOx = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta+dThetax) * dr(theta) )/dThetax
+            = log( (dR(Theta) * dr(theta)).transpose() * (dR(Theta)*exp(dThetax,0,0)) * dr(theta) )/dThetax
+            = log( (_Delta * _delta).transpose() * (_Delta_noisy * _delta))
+    dDo_dOy = log( (dR(Theta) * dr(theta)).transpose() * (dR(Theta)*exp(0,dThetay,0)) * dr(theta) )/dThetay
+    dDo_dOz = log( (dR(Theta) * dr(theta)).transpose() * (dR(Theta)*exp(0,0,dThetaz)) * dr(theta) )/dThetaz
+
+                                                            dDo_do = [dDo_dox, dDo_doy, dDo_doz]
+
+    dDo_dox = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * dr(theta+dthetax) )/dthetax
+            = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(dthetax,0,0)) )/dthetax
+            = log( (_Delta * _delta).transpose() * (_Delta * _delta_noisy))
+    dDo_doy = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,dthetay,0)) )/dthetay
+    dDo_doz = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,0,dthetaz)) )/dthetaz
+     */
+
 
 int main(int argc, char **argv)
 {
