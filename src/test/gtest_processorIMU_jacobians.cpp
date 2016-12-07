@@ -84,8 +84,8 @@ class ProcessorIMU_jacobians : public testing::Test
         Delta0_quat.normalize();
         ang = q2v(Delta0_quat);
 
-        std::cout << "\ninput Delta0 : " << Delta0 << std::endl;
-        std::cout << "\n rotation vector we start with :\n" << ang << std::endl;
+        //std::cout << "\ninput Delta0 : " << Delta0 << std::endl;
+        //std::cout << "\n rotation vector we start with :\n" << ang << std::endl;
 
         //get data to compute jacobians
         struct IMU_jac_bias bias_jac_c = processor_imu.finite_diff_ab(dt, data_, ddelta_bias, Delta0);
