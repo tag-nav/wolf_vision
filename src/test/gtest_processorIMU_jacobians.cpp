@@ -300,7 +300,18 @@ TEST_F(ProcessorIMU_jacobians, dDq_dwb)
     dDo_doy = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,dthetay,0)) )/dthetay
     dDo_doz = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(0,0,dthetaz)) )/dthetaz
      */
+     
+TEST_F(ProcessorIMU_jacobians, dDp_dP)
+{
+    using namespace wolf;
+    Eigen::Matrix3s dDp_dP;
 
+    for(int i=0;i<3;i++)
+        dDp_dP.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i).head(3) - deltas_jac.Delta0_.head(3))/Delta_noise(i);
+
+    EXPECT_TRUE((dDp_dP - deltas_jac.jacobian_delta_preint_.block(0,0,3,3)).isMuchSmallerThan(1,0.000001)) << "dDp_dP : \n" << dDp_dP << "\n deltas_jac.jacobian_delta_preint_.block(0,0,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,0,3,3) <<
+     "\ndDp_dP_a - dDp_dP_ : \n" << deltas_jac.jacobian_delta_preint_.block(0,0,3,3) - dDp_dP << std::endl;
+}
 
 int main(int argc, char **argv)
 {
