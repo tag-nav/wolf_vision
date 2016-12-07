@@ -306,6 +306,7 @@ TEST_F(ProcessorIMU_jacobians, dDp_dP)
     using namespace wolf;
     Eigen::Matrix3s dDp_dP;
 
+    //dDp_dPx = ((P + dPx) - P)/dPx
     for(int i=0;i<3;i++)
         dDp_dP.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i).head(3) - deltas_jac.Delta0_.head(3))/Delta_noise(i);
 
@@ -318,6 +319,7 @@ TEST_F(ProcessorIMU_jacobians, dDp_dV)
     using namespace wolf;
     Eigen::Matrix3s dDp_dV;
 
+    //Dp_dVx = ((V + dVx)*dt - V*dt)/dVx
     for(int i=0;i<3;i++)
         dDp_dV.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i+6).tail(3)*dt - deltas_jac.Delta0_.tail(3)*dt)/Delta_noise(i+6);
 
@@ -330,6 +332,7 @@ TEST_F(ProcessorIMU_jacobians, dDv_dV)
     using namespace wolf;
     Eigen::Matrix3s dDv_dV;
 
+    //dDv_dVx = ((V + dVx) - V)/dVx
     for(int i=0;i<3;i++)
         dDv_dV.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i+6).tail(3) - deltas_jac.Delta0_.tail(3))/Delta_noise(i+6);
 
