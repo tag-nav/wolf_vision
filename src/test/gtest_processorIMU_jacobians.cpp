@@ -429,6 +429,26 @@ TEST_F(ProcessorIMU_jacobians, dDv_dv)
      "\ndDv_dv_a - dDv_dv_ : \n" << dDv_dv_a - dDv_dv << std::endl;
 }
 
+//dDo_dp = dDo_dv = [0, 0, 0]
+
+TEST_F(ProcessorIMU_jacobians, dDo_do)
+{
+    using namespace wolf;
+    Eigen::Map<Eigen::Quaternions> Dq0(NULL), dq0(NULL), Dq_noisy(NULL), dq_noisy(NULL);
+    Eigen::Matrix3s dDo_do, dDo_do_a;
+
+    //dDo_dox = log( (dR(Theta) * dr(theta)).transpose() * dR(Theta) * (dr(theta)*exp(dthetax,0,0)) )/dthetax
+    remapJacDeltas_quat0(deltas_jac, Dq0, dq0);
+    dDo_do_a = deltas_jac.jacobian_delta_.block(3,3,3,3);
+
+    for(int i=0;i<3;i++){
+        remapJacDeltas_quat(deltas_jac, Dq_noisy, dq_noisy, i+3);
+        dDo_do.block<3,1>(0,i) = R2v( (Dq0.matrix() * dq0.matrix()).transpose() * (Dq0.matrix() * dq_noisy.matrix()) )/Delta_noise(i+3);
+    }
+
+    EXPECT_TRUE((dDo_do - dDo_do_a).isMuchSmallerThan(1,0.000001)) << "dDo_do : \n" << dDo_do << "\n dDo_do_a :\n" << dDo_do_a <<
+     "\ndDo_do_a - dDo_do_ : \n" << dDo_do_a - dDo_do << std::endl;
+}
 
 
 int main(int argc, char **argv)
