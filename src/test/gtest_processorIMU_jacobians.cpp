@@ -357,7 +357,22 @@ TEST_F(ProcessorIMU_jacobians, dDv_dV)
      "\ndDv_dV_a - dDv_dV_ : \n" << deltas_jac.jacobian_delta_preint_.block(6,6,3,3) - dDv_dV << std::endl;
 }
 
+TEST_F(ProcessorIMU_jacobians, dDv_dO)
+{
+    using namespace wolf;
+    Eigen::Map<Eigen::Quaternions> Dq0(NULL), dq0(NULL), Dq_noisy(NULL), dq_noisy(NULL);
+    Eigen::Matrix3s dDv_dO;
 
+    //dDp_dOx = (( dR(Theta) * exp(dThetax,0,0)*dp ) - ( dR(Theta)*dp ))/dThetax
+    remapJacDeltas_quat0(deltas_jac, Dq0, dq0);
+    for(int i=0;i<3;i++){
+        remapJacDeltas_quat(deltas_jac, Dq_noisy, dq_noisy, i+3);
+        dDv_dO.block<3,1>(0,i) = ((Dq_noisy.matrix() * deltas_jac.delta0_.tail(3)) - (Dq0.matrix()* deltas_jac.delta0_.tail(3)))/Delta_noise(i+3);
+    }
+
+    EXPECT_TRUE((dDv_dO - deltas_jac.jacobian_delta_preint_.block(6,3,3,3)).isMuchSmallerThan(1,0.000001)) << "dDv_dO : \n" << dDv_dO << "\n deltas_jac.jacobian_delta_preint_.block(6,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(6,3,3,3) <<
+     "\ndDv_dO_a - dDv_dO_ : \n" << deltas_jac.jacobian_delta_preint_.block(6,3,3,3) - dDv_dO << std::endl;
+}
 
 int main(int argc, char **argv)
 {
