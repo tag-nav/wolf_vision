@@ -75,11 +75,11 @@ class ProcessorIMU_jacobians : public testing::Test
         Eigen::Matrix<wolf::Scalar,10,1> Delta0;
         Delta0 = Eigen::Matrix<wolf::Scalar,10,1>::Random();
         Delta0.head<3>() = Delta0.head<3>()*100;
-        Delta0.segment<3>(3) = Delta0.segment<3>(3)*10;
+        Delta0.tail<3>() = Delta0.tail<3>()*10;
         Eigen::Vector3s ang0, ang;
         ang0 << 120.08*deg_to_rad, 12.36*deg_to_rad, 54.32*deg_to_rad; 
 
-        Eigen::Map<Eigen::Quaternions> Delta0_quat(Delta0.data()+6);
+        Eigen::Map<Eigen::Quaternions> Delta0_quat(Delta0.data()+3);
         Delta0_quat = v2q(ang0);
         Delta0_quat.normalize();
         ang = q2v(Delta0_quat);
