@@ -363,7 +363,7 @@ TEST_F(ProcessorIMU_jacobians, dDv_dO)
     Eigen::Map<Eigen::Quaternions> Dq0(NULL), dq0(NULL), Dq_noisy(NULL), dq_noisy(NULL);
     Eigen::Matrix3s dDv_dO;
 
-    //dDp_dOx = (( dR(Theta) * exp(dThetax,0,0)*dp ) - ( dR(Theta)*dp ))/dThetax
+    //dDv_dOx = (( dR(Theta) * exp(dThetax,0,0)*dv ) - ( dR(Theta)*dv ))/dThetax
     remapJacDeltas_quat0(deltas_jac, Dq0, dq0);
     for(int i=0;i<3;i++){
         remapJacDeltas_quat(deltas_jac, Dq_noisy, dq_noisy, i+3);
