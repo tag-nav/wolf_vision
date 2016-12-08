@@ -390,6 +390,27 @@ TEST_F(ProcessorIMU_jacobians, dDp_dp)
      "\ndDp_dp_a - dDp_dp_ : \n" << dDp_dp_a - dDp_dp << std::endl;
 }
 
+//dDv_dp = [0, 0, 0]
+
+
+TEST_F(ProcessorIMU_jacobians, dDv_dv)
+{
+    using namespace wolf;
+    Eigen::Map<Eigen::Quaternions> Dq0(NULL), dq0(NULL);
+    Eigen::Matrix3s dDv_dv, dDv_dv_a;
+
+    dDv_dv_a = deltas_jac.jacobian_delta_.block(6,6,3,3);
+    remapJacDeltas_quat0(deltas_jac, Dq0, dq0);
+    //dDv_dvx = ( dR*(v + dvx) - dR*(v))/dvx
+    for(int i=0;i<3;i++)
+        dDv_dv.block<3,1>(0,i) = ( (Dq0 * deltas_jac.delta_noisy_vect_(i+6).tail(3)) - (Dq0 * deltas_jac.delta0_.tail(3)) )/delta_noise(i+6);
+
+    EXPECT_TRUE((dDv_dv - dDv_dv_a).isMuchSmallerThan(1,0.000001)) << "dDv_dv : \n" << dDv_dv << "\n dDv_dv_a :\n" << dDv_dv_a <<
+     "\ndDv_dv_a - dDv_dv_ : \n" << dDv_dv_a - dDv_dv << std::endl;
+}
+
+
+
 int main(int argc, char **argv)
 {
     using namespace wolf;
