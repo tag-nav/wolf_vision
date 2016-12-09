@@ -226,7 +226,7 @@ TEST_F(ProcessorIMU_jacobians, dDp_dab)
     for(int i=0;i<3;i++)
          dDp_dab.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
 
-    EXPECT_TRUE((dDp_dab - bias_jac.dDp_dab_).isMuchSmallerThan(1,0.000001)) << "dDp_dab : \n" << dDp_dab << "\n bias_jac.dDp_dab_ :\n" << bias_jac.dDp_dab_ <<
+    ASSERT_TRUE((dDp_dab - bias_jac.dDp_dab_).isMuchSmallerThan(1,0.000001)) << "dDp_dab : \n" << dDp_dab << "\n bias_jac.dDp_dab_ :\n" << bias_jac.dDp_dab_ <<
      "\ndDp_dab_a - dDp_dab_ : \n" << bias_jac.dDp_dab_ - dDp_dab << std::endl;
 }
 
@@ -238,7 +238,7 @@ TEST_F(ProcessorIMU_jacobians, dDv_dab)
     for(int i=0;i<3;i++)
          dDv_dab.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i).tail(3) - bias_jac.Delta0_.tail(3))/ddelta_bias;
 
-    EXPECT_TRUE((dDv_dab - bias_jac.dDv_dab_).isMuchSmallerThan(1,0.000001)) << "dDv_dab : \n" << dDv_dab << "\n bias_jac.dDv_dab_ :\n" << bias_jac.dDv_dab_ <<
+    ASSERT_TRUE((dDv_dab - bias_jac.dDv_dab_).isMuchSmallerThan(1,0.000001)) << "dDv_dab : \n" << dDv_dab << "\n bias_jac.dDv_dab_ :\n" << bias_jac.dDv_dab_ <<
      "\ndDv_dab_a - dDv_dab_ : \n" << bias_jac.dDv_dab_ - dDv_dab << std::endl;
 }
 
@@ -250,7 +250,7 @@ TEST_F(ProcessorIMU_jacobians, dDp_dwb)
     for(int i=0;i<3;i++)
          dDp_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).head(3) - bias_jac.Delta0_.head(3))/ddelta_bias;
 
-    EXPECT_TRUE((dDp_dwb - bias_jac.dDp_dwb_).isMuchSmallerThan(1,0.000001)) << "dDp_dwb : \n" << dDp_dwb << "\n bias_jac.dDp_dwb_ :\n" << bias_jac.dDp_dwb_ <<
+    ASSERT_TRUE((dDp_dwb - bias_jac.dDp_dwb_).isMuchSmallerThan(1,0.000001)) << "dDp_dwb : \n" << dDp_dwb << "\n bias_jac.dDp_dwb_ :\n" << bias_jac.dDp_dwb_ <<
      "\ndDp_dwb_a - dDv_dab_ : \n" << bias_jac.dDp_dwb_ - dDp_dwb << std::endl;
 }
 
@@ -262,7 +262,7 @@ TEST_F(ProcessorIMU_jacobians, dDv_dwb_)
     for(int i=0;i<3;i++)
          dDv_dwb.block<3,1>(0,i) = (bias_jac.Deltas_noisy_vect_(i+3).tail(3) - bias_jac.Delta0_.tail(3))/ddelta_bias;
 
-    EXPECT_TRUE((dDv_dwb - bias_jac.dDv_dwb_).isMuchSmallerThan(1,0.000001)) << "dDv_dwb : \n" << dDv_dwb << "\n bias_jac.dDv_dwb_ :\n" << bias_jac.dDv_dwb_ <<
+    ASSERT_TRUE((dDv_dwb - bias_jac.dDv_dwb_).isMuchSmallerThan(1,0.000001)) << "dDv_dwb : \n" << dDv_dwb << "\n bias_jac.dDv_dwb_ :\n" << bias_jac.dDv_dwb_ <<
      "\ndDv_dwb_a - dDv_dwb_ : \n" << bias_jac.dDv_dwb_ - dDv_dwb << std::endl;
 }
 
@@ -278,7 +278,7 @@ TEST_F(ProcessorIMU_jacobians, dDq_dab)
         dDq_dab.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
     }
 
-    EXPECT_TRUE(dDq_dab.isZero(wolf::Constants::EPS)) << "\t\tdDq_dab_ jacobian is not Zero :" << dDq_dab << std::endl;
+    ASSERT_TRUE(dDq_dab.isZero(wolf::Constants::EPS)) << "\t\tdDq_dab_ jacobian is not Zero :" << dDq_dab << std::endl;
 }
 
 TEST_F(ProcessorIMU_jacobians, dDq_dwb_noise_1Em8_)
@@ -293,7 +293,7 @@ TEST_F(ProcessorIMU_jacobians, dDq_dwb_noise_1Em8_)
         dDq_dwb.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias;
     }
 
-    EXPECT_FALSE((dDq_dwb - bias_jac.dDq_dwb_).isMuchSmallerThan(1,0.000001)) << "dDq_dwb : \n" << dDq_dwb << "\n bias_jac.dDq_dwb_ :\n" << bias_jac.dDq_dwb_ <<
+    ASSERT_FALSE((dDq_dwb - bias_jac.dDq_dwb_).isMuchSmallerThan(1,0.000001)) << "dDq_dwb : \n" << dDq_dwb << "\n bias_jac.dDq_dwb_ :\n" << bias_jac.dDq_dwb_ <<
      "\ndDq_dwb_a - dDq_dwb_ : \n" << bias_jac.dDq_dwb_ - dDq_dwb << "\n R1^T * R2 : \n"  << q_in_1.matrix().transpose() * q_in_2.matrix() << std::endl;
 }
 
@@ -309,7 +309,7 @@ TEST_F(ProcessorIMU_jacobians_Dq, dDq_dwb_noise_1Em4_precision_1Em3_)
         dDq_dwb.block<3,1>(0,i) = R2v( q_in_1.matrix().transpose() * q_in_2.matrix())/ddelta_bias2;
     }
 
-    EXPECT_TRUE((dDq_dwb - bias_jac2.dDq_dwb_).isMuchSmallerThan(1,0.001)) << "dDq_dwb : \n" << dDq_dwb << "\n bias_jac2.dDq_dwb_ :\n" << bias_jac2.dDq_dwb_ <<
+    ASSERT_TRUE((dDq_dwb - bias_jac2.dDq_dwb_).isMuchSmallerThan(1,0.001)) << "dDq_dwb : \n" << dDq_dwb << "\n bias_jac2.dDq_dwb_ :\n" << bias_jac2.dDq_dwb_ <<
      "\ndDq_dwb_a - dDq_dwb_ : \n" << bias_jac2.dDq_dwb_ - dDq_dwb << "\n R1^T * R2 : \n"  << q_in_1.matrix().transpose() * q_in_2.matrix() << std::endl;
 }
 
@@ -400,7 +400,7 @@ TEST_F(ProcessorIMU_jacobians, dDp_dP)
     for(int i=0;i<3;i++)
         dDp_dP.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i).head(3) - deltas_jac.Delta0_.head(3))/Delta_noise(i);
 
-    EXPECT_TRUE((dDp_dP - deltas_jac.jacobian_delta_preint_.block(0,0,3,3)).isMuchSmallerThan(1,0.000001)) << "dDp_dP : \n" << dDp_dP << "\n deltas_jac.jacobian_delta_preint_.block(0,0,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,0,3,3) <<
+    ASSERT_TRUE((dDp_dP - deltas_jac.jacobian_delta_preint_.block(0,0,3,3)).isMuchSmallerThan(1,0.000001)) << "dDp_dP : \n" << dDp_dP << "\n deltas_jac.jacobian_delta_preint_.block(0,0,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,0,3,3) <<
      "\ndDp_dP_a - dDp_dP_ : \n" << deltas_jac.jacobian_delta_preint_.block(0,0,3,3) - dDp_dP << std::endl;
 }
 
@@ -413,7 +413,7 @@ TEST_F(ProcessorIMU_jacobians, dDp_dV)
     for(int i=0;i<3;i++)
         dDp_dV.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i+6).tail(3)*dt - deltas_jac.Delta0_.tail(3)*dt)/Delta_noise(i+6);
 
-    EXPECT_TRUE((dDp_dV - deltas_jac.jacobian_delta_preint_.block(0,6,3,3)).isMuchSmallerThan(1,0.000001)) << "dDp_dV : \n" << dDp_dV << "\n deltas_jac.jacobian_delta_preint_.block(0,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,6,3,3) <<
+    ASSERT_TRUE((dDp_dV - deltas_jac.jacobian_delta_preint_.block(0,6,3,3)).isMuchSmallerThan(1,0.000001)) << "dDp_dV : \n" << dDp_dV << "\n deltas_jac.jacobian_delta_preint_.block(0,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,6,3,3) <<
      "\ndDp_dV_a - dDp_dV_ : \n" << deltas_jac.jacobian_delta_preint_.block(0,6,3,3) - dDp_dV << std::endl;
 }
 
@@ -430,7 +430,7 @@ TEST_F(ProcessorIMU_jacobians, dDp_dO)
         dDp_dO.block<3,1>(0,i) = ((Dq_noisy.matrix() * deltas_jac.delta0_.head(3)) - (Dq0.matrix()* deltas_jac.delta0_.head(3)))/Delta_noise(i+3);
     }
 
-    EXPECT_TRUE((dDp_dO - deltas_jac.jacobian_delta_preint_.block(0,3,3,3)).isMuchSmallerThan(1,0.000001)) << "dDp_dO : \n" << dDp_dO << "\n deltas_jac.jacobian_delta_preint_.block(0,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,3,3,3) <<
+    ASSERT_TRUE((dDp_dO - deltas_jac.jacobian_delta_preint_.block(0,3,3,3)).isMuchSmallerThan(1,0.000001)) << "dDp_dO : \n" << dDp_dO << "\n deltas_jac.jacobian_delta_preint_.block(0,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(0,3,3,3) <<
      "\ndDp_dO_a - dDp_dO_ : \n" << deltas_jac.jacobian_delta_preint_.block(0,3,3,3) - dDp_dO << std::endl;
 }
 
@@ -443,7 +443,7 @@ TEST_F(ProcessorIMU_jacobians, dDv_dV)
     for(int i=0;i<3;i++)
         dDv_dV.block<3,1>(0,i) = (deltas_jac.Delta_noisy_vect_(i+6).tail(3) - deltas_jac.Delta0_.tail(3))/Delta_noise(i+6);
 
-    EXPECT_TRUE((dDv_dV - deltas_jac.jacobian_delta_preint_.block(6,6,3,3)).isMuchSmallerThan(1,0.000001)) << "dDv_dV : \n" << dDv_dV << "\n deltas_jac.jacobian_delta_preint_.block(6,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(6,6,3,3) <<
+    ASSERT_TRUE((dDv_dV - deltas_jac.jacobian_delta_preint_.block(6,6,3,3)).isMuchSmallerThan(1,0.000001)) << "dDv_dV : \n" << dDv_dV << "\n deltas_jac.jacobian_delta_preint_.block(6,6,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(6,6,3,3) <<
      "\ndDv_dV_a - dDv_dV_ : \n" << deltas_jac.jacobian_delta_preint_.block(6,6,3,3) - dDv_dV << std::endl;
 }
 
@@ -460,7 +460,7 @@ TEST_F(ProcessorIMU_jacobians, dDv_dO)
         dDv_dO.block<3,1>(0,i) = ((Dq_noisy.matrix() * deltas_jac.delta0_.tail(3)) - (Dq0.matrix()* deltas_jac.delta0_.tail(3)))/Delta_noise(i+3);
     }
 
-    EXPECT_TRUE((dDv_dO - deltas_jac.jacobian_delta_preint_.block(6,3,3,3)).isMuchSmallerThan(1,0.000001)) << "dDv_dO : \n" << dDv_dO << "\n deltas_jac.jacobian_delta_preint_.block(6,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(6,3,3,3) <<
+    ASSERT_TRUE((dDv_dO - deltas_jac.jacobian_delta_preint_.block(6,3,3,3)).isMuchSmallerThan(1,0.000001)) << "dDv_dO : \n" << dDv_dO << "\n deltas_jac.jacobian_delta_preint_.block(6,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(6,3,3,3) <<
      "\ndDv_dO_a - dDv_dO_ : \n" << deltas_jac.jacobian_delta_preint_.block(6,3,3,3) - dDv_dO << std::endl;
 }
 
@@ -480,7 +480,7 @@ TEST_F(ProcessorIMU_jacobians, dDo_dO)
         dDo_dO.block<3,1>(0,i) = R2v( (Dq0.matrix() * dq0.matrix()).transpose() * (Dq_noisy.matrix() * dq0.matrix()) )/Delta_noise(i+3);
     }
 
-    EXPECT_TRUE((dDo_dO - deltas_jac.jacobian_delta_preint_.block(3,3,3,3)).isMuchSmallerThan(1,0.000001)) << "dDo_dO : \n" << dDo_dO << "\n deltas_jac.jacobian_delta_preint_.block(3,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(3,3,3,3) <<
+    ASSERT_TRUE((dDo_dO - deltas_jac.jacobian_delta_preint_.block(3,3,3,3)).isMuchSmallerThan(1,0.000001)) << "dDo_dO : \n" << dDo_dO << "\n deltas_jac.jacobian_delta_preint_.block(3,3,3,3) :\n" << deltas_jac.jacobian_delta_preint_.block(3,3,3,3) <<
      "\ndDo_dO_a - dDo_dO_ : \n" << deltas_jac.jacobian_delta_preint_.block(3,3,3,3) - dDo_dO << std::endl;
 }
 
@@ -496,7 +496,7 @@ TEST_F(ProcessorIMU_jacobians, dDp_dp)
     for(int i=0;i<3;i++)
         dDp_dp.block<3,1>(0,i) = ( (Dq0.matrix() * deltas_jac.delta_noisy_vect_(i).head(3)) - (Dq0.matrix() * deltas_jac.delta0_.head(3)) )/delta_noise(i);
 
-    EXPECT_TRUE((dDp_dp - dDp_dp_a).isMuchSmallerThan(1,0.000001)) << "dDp_dp : \n" << dDp_dp << "\n dDp_dp_a :\n" << dDp_dp_a <<
+    ASSERT_TRUE((dDp_dp - dDp_dp_a).isMuchSmallerThan(1,0.000001)) << "dDp_dp : \n" << dDp_dp << "\n dDp_dp_a :\n" << dDp_dp_a <<
      "\ndDp_dp_a - dDp_dp_ : \n" << dDp_dp_a - dDp_dp << std::endl;
 }
 
@@ -515,7 +515,7 @@ TEST_F(ProcessorIMU_jacobians, dDv_dv)
     for(int i=0;i<3;i++)
         dDv_dv.block<3,1>(0,i) = ( (Dq0 * deltas_jac.delta_noisy_vect_(i+6).tail(3)) - (Dq0 * deltas_jac.delta0_.tail(3)) )/delta_noise(i+6);
 
-    EXPECT_TRUE((dDv_dv - dDv_dv_a).isMuchSmallerThan(1,0.000001)) << "dDv_dv : \n" << dDv_dv << "\n dDv_dv_a :\n" << dDv_dv_a <<
+    ASSERT_TRUE((dDv_dv - dDv_dv_a).isMuchSmallerThan(1,0.000001)) << "dDv_dv : \n" << dDv_dv << "\n dDv_dv_a :\n" << dDv_dv_a <<
      "\ndDv_dv_a - dDv_dv_ : \n" << dDv_dv_a - dDv_dv << std::endl;
 }
 
@@ -536,7 +536,7 @@ TEST_F(ProcessorIMU_jacobians, dDo_do)
         dDo_do.block<3,1>(0,i) = R2v( (Dq0.matrix() * dq0.matrix()).transpose() * (Dq0.matrix() * dq_noisy.matrix()) )/Delta_noise(i+3);
     }
 
-    EXPECT_TRUE((dDo_do - dDo_do_a).isMuchSmallerThan(1,0.000001)) << "dDo_do : \n" << dDo_do << "\n dDo_do_a :\n" << dDo_do_a <<
+    ASSERT_TRUE((dDo_do - dDo_do_a).isMuchSmallerThan(1,0.000001)) << "dDo_do : \n" << dDo_do << "\n dDo_do_a :\n" << dDo_do_a <<
      "\ndDo_do_a - dDo_do_ : \n" << dDo_do_a - dDo_do << std::endl;
 }
 
