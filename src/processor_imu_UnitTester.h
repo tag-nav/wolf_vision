@@ -276,11 +276,15 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     for(int i=0; i<3; i++) //for 3 first and 3 last components we just add to add noise as vector component since it is in the R^3 space
     {   
         //PQV formulation
-
+            //Add perturbation in position
         delta_ = delta0;
         delta_(i) = delta_(i) + _delta_noise(i); //noise has been added
         delta_noisy_vect(i) = delta_;
 
+            //Add perturbation in velocity
+            /*
+            delta_ is size 10 (P Q V),  _delta_noise is size 9 (P O V)
+            */
         delta_ = delta0;
         delta_(i+7) = delta_(i+7) + _delta_noise(i+6); //noise has been added
         delta_noisy_vect(i+6) = delta_;
@@ -306,10 +310,15 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     for(int i=0; i<3; i++) //for 3 first and 3 last components we just add to add noise as vector component since it is in the R^3 space
     {
         //PQV formulation
+            //Add perturbation in position
         Delta_ = _Delta0;
         Delta_(i) = Delta_(i) + _Delta_noise(i); //noise has been added
         Delta_noisy_vect(i) = Delta_;
 
+            //Add perturbation in velocity
+            /*
+            Delta_ is size 10 (P Q V),  _Delta_noise is size 9 (P O V)
+            */
         Delta_ = _Delta0;
         Delta_(i+7) = Delta_(i+7) + _Delta_noise(i+6); //noise has been added
         Delta_noisy_vect(i+6) = Delta_;
