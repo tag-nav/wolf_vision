@@ -271,6 +271,7 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     jacobian_delta_preint0 = jacobian_delta_preint;
     jacobian_delta0 = jacobian_delta;
 
+    std::cout << "size test : delta_\n" << delta_ << std::endl;
     //We compute all the jacobians wrt deltas and noisy deltas
     for(int i=0; i<3; i++) //for 3 first and 3 last components we just add to add noise as vector component since it is in the R^3 space
     {   
@@ -281,7 +282,7 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         delta_noisy_vect(i) = delta_;
 
         delta_ = delta0;
-        delta_(i+6) = delta_(i+6) + _delta_noise(i+6); //noise has been added
+        delta_(i+7) = delta_(i+7) + _delta_noise(i+6); //noise has been added
         delta_noisy_vect(i+6) = delta_;
     }
 
@@ -310,7 +311,7 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         Delta_noisy_vect(i) = Delta_;
 
         Delta_ = _Delta0;
-        Delta_(i+6) = Delta_(i+6) + _Delta_noise(i+6); //noise has been added
+        Delta_(i+7) = Delta_(i+7) + _Delta_noise(i+6); //noise has been added
         Delta_noisy_vect(i+6) = Delta_;
     }
 
