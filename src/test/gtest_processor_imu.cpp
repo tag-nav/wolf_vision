@@ -21,7 +21,7 @@
 class ProcessorIMU : public testing::Test
 {
 
-    public:
+    public: //These can be accessed in fixtures
         wolf::ProblemPtr problem;
         wolf::SensorBasePtr sensor_ptr;
         wolf::TimeStamp t;
@@ -31,6 +31,7 @@ class ProcessorIMU : public testing::Test
         Eigen::VectorXs x0;
         std::shared_ptr<wolf::CaptureIMU> cap_imu_ptr;
 
+    //a new of this will be created for each new test
     virtual void SetUp()
     {
         using namespace wolf;
@@ -99,7 +100,7 @@ VectorXs x0(16);
 shared_ptr<CaptureIMU> cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data);
 */
 
-
+//replace TEST by TEST_F
 TEST_F(ProcessorIMU, acc_x)
 {
     t.set(0); // clock in 0,1 ms ticks
