@@ -172,7 +172,7 @@ TARGET_LINK_LIBRARIES(test_mpu ${PROJECT_NAME})
 ADD_EXECUTABLE(test_processor_imu_jacobians test_processor_imu_jacobians.cpp)
 TARGET_LINK_LIBRARIES(test_processor_imu_jacobians ${PROJECT_NAME})
 
-# IMU - constraintAHP
+# ConstraintIMU - factors test
 ADD_EXECUTABLE(test_imu_constrained0 test_imu_constrained0.cpp)
 TARGET_LINK_LIBRARIES(test_imu_constrained0 ${PROJECT_NAME})
 
