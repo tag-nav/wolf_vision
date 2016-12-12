@@ -67,6 +67,26 @@ TEST(ProcessorIMU, acc_x)
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, EPS_SMALL));
 }
 
+TEST(ProcessorIMU, acc_y)
+{
+    t.set(0); // clock in 0,1 ms ticks
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+
+    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+
+    data << 0, 20, 9.8, 0, 0, 0; // only acc_y, but measure gravity!
+
+    cap_imu_ptr->setData(data);
+    cap_imu_ptr->setTimeStamp(0.001);
+    sensor_ptr->process(cap_imu_ptr);
+
+    // Expected state after one integration
+    VectorXs x(16);
+    x << 0,0.00001,0, 0,0,0,1, 0,0.02,0, 0,0,0, 0,0,0; // advanced at a=20m/s2 during 0.001s ==> dx = 0.5*20*0.001^2 = 0.00001; dvx = 20*0.001 = 0.02
+
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, EPS_SMALL));
+}
+
 TEST(ProcessorIMU, acc_z)
 {
     t.set(0); // clock in 0,1 ms ticks
