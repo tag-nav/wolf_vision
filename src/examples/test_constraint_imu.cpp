@@ -46,6 +46,7 @@ int main(int argc, char** argv)
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_) );
+    imu_ptr->setFramePtr(origin_frame);
 
 
     // set variables
