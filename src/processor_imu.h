@@ -79,6 +79,8 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void remapPQV(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
         virtual void remapDelta(Eigen::VectorXs& _delta_out);
         virtual void remapData(const Eigen::VectorXs& _data);
+        void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
+
 
 
     public:
@@ -405,7 +407,16 @@ inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
     new (&gyro_measured_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
 }
 
-/*void ProcessorIMU::getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb)
+inline void ProcessorIMU::getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb)
+{
+    _dDp_dab = dDp_dab_;
+    _dDv_dab = dDv_dab_;
+    _dDp_dwb = dDp_dwb_;
+    _dDv_dwb = dDv_dwb_;
+    _dDq_dwb = dDq_dwb_;
+}
+
+/*inline void ProcessorIMU::getJacobians(Eigen::Matrix9s& _dD_db)
 {
     _dDp_dab = dDp_dab_;
     _dDv_dab = dDv_dab_;
