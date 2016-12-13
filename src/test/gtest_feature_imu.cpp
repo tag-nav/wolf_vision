@@ -45,13 +45,12 @@ class FeatureIMU_test : public testing::Test
     // Time and data variables
         TimeStamp t;
         Eigen::Vector6s data_;
-        Scalar mpu_clock = 0;
 
-        t.set(mpu_clock);
+        t.set(0);
 
     // Set the origin
         Eigen::VectorXs x0(16);
-        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.001,  0,0,.002; // Try some non-zero biases
+        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
         wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     //create a keyframe at origin
@@ -65,9 +64,10 @@ class FeatureIMU_test : public testing::Test
         imu_ptr->setFramePtr(origin_frame);
 
     //process data
-        mpu_clock = 0.001003;
-        data_ << 0.579595, -0.143701, 9.939331, 0.127445, 0.187814, -0.055003;
-        t.set(mpu_clock);
+        data_ << 2, 0, 9.8, 0, 0, 0;
+        t.set(0.1);
+        // Expected state after one integration
+        //x << 0.01,0,0, 0,0,0,1, 0.2,0,0, 0,0,0, 0,0,0; // advanced at a=2m/s2 during 0.1s ==> dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2
     // assign data to capture
         imu_ptr->setData(data_);
         imu_ptr->setTimeStamp(t);
@@ -133,6 +133,15 @@ TEST_F(FeatureIMU_test, check_frame)
     //ConstraintIMU constraint_imu(feat_imu, last_frame);
     //feat_imu->addConstraint(constraint_imu);
     //previous_frame->addConstrainedBy(constraint_imu);
+}
+
+TEST_F(FeatureIMU_test, access_members)
+{
+    using namespace wolf;
+
+    // Expected state after one integration
+    Eigen::VectorXs x(16);
+    x << 0.01,0,0, 0,0,0,1, 0.2,0,0, 0,0,0, 0,0,0; // advanced at a=2m/s2 during 0.1s ==> dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2
 }
 
 TEST_F(FeatureIMU_test, addConstraint)
