@@ -85,7 +85,6 @@ class FeatureIMU_test : public testing::Test
         delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
         feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
         feat_imu->setCapturePtr(imu_ptr); //associate the feature to a capture
-        //FIXME : capture may not be associated to a frame...
 
     }
 
@@ -108,7 +107,6 @@ TEST_F(FeatureIMU_test, check_frame)
     // set variables
     using namespace wolf;
 
-    //FIXME : Feature not linked to origin frame
     FrameBasePtr left_frame = feat_imu->getFramePtr();
     wolf::TimeStamp t;
     left_frame->getTimeStamp(t);
