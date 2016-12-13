@@ -139,10 +139,10 @@ TEST_F(FeatureIMU_test, access_members)
 {
     using namespace wolf;
 
-    // Expected state after one integration
-    Eigen::VectorXs x(16);
-    x << 0.01,0,0, 0,0,0,1, 0.2,0,0, 0,0,0, 0,0,0; // advanced at a=2m/s2 during 0.1s ==> dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2
-    ASSERT_EQ(feat_imu->dp_preint_, x.head<3>()) << "feat_imu->dp_preint_ : " << feat_imu->dp_preint_.transpose() << ",\t x.head<3>() :" << x.head<3>().transpose() << 
+    Eigen::VectorXs delta(16);
+    //dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2; dz = 0.5*9.8*0.1^2 = 0.049; dvz = 9.8*0.1 = 0.98
+    delta << 0.01,0,0.049, 0,0,0,1, 0.2,0,0.98, 0,0,0, 0,0,0;
+    ASSERT_TRUE((feat_imu->dp_preint_ - delta.head<3>()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "feat_imu->dp_preint_ : " << feat_imu->dp_preint_.transpose() << ",\t delta.head<3>() :" << delta.head<3>().transpose() << 
     ",\n delta_preint : " << delta_preint.transpose() << std::endl;
 }
 
