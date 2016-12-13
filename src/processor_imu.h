@@ -80,8 +80,7 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void remapDelta(Eigen::VectorXs& _delta_out);
         virtual void remapData(const Eigen::VectorXs& _data);
         void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
-
-
+        void getJacobians(Eigen::Matrix<wolf::Scalar,9,6>& _dD_db);
 
     public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
@@ -416,14 +415,22 @@ inline void ProcessorIMU::getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3
     _dDq_dwb = dDq_dwb_;
 }
 
-/*inline void ProcessorIMU::getJacobians(Eigen::Matrix9s& _dD_db)
+inline void ProcessorIMU::getJacobians(Eigen::Matrix<wolf::Scalar,9,6>& _dD_db)
 {
-    _dDp_dab = dDp_dab_;
-    _dDv_dab = dDv_dab_;
-    _dDp_dwb = dDp_dwb_;
-    _dDv_dwb = dDv_dwb_;
-    _dDq_dwb = dDq_dwb_;
-}*/
+    /* structure of dD_db :
+                ab       wb
+            [ dDp_dab  dDp_dwb ]            Each block is 3x3 !! Even dDq_db --> minimal form
+            [ dDq_dab  dDq_dwb ] 
+            [ dDv_dab  dDv_dwb ]
+    */
+
+    _dD_db.block(3,3,0,0) = dDp_dab_;
+    _dD_db.block(3,3,3,0) = Eigen::Matrix3s::Zero();
+    _dD_db.block(3,3,6,0) = dDv_dab_;
+    _dD_db.block(3,3,0,3) = dDp_dwb_;
+    _dD_db.block(3,3,3,3) = dDq_dwb_;
+    _dD_db.block(3,3,6,3) = dDv_dwb_;
+}
 
 } // namespace wolf
 
