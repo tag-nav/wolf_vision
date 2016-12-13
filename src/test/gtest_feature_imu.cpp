@@ -3,20 +3,23 @@
 #include "problem.h"
 #include "sensor_imu.h"
 #include "capture_imu.h"
-#include "constraint_odom_3D.h"
 #include "state_block.h"
 #include "state_quaternion.h"
 #include "processor_imu.h"
 
+#include "utils_gtest.h"
+#include "../src/logging.h"
+
 //#define DEBUG_RESULTS
 
 
-class FeatureIMU : public testing::Test
+class FeatureIMU_test : public testing::Test
 {
 
     public: //These can be accessed in fixtures
         wolf::ProblemPtr wolf_problem_ptr_;
         wolf::TimeStamp ts;
+        wolf::CaptureIMUPtr imu_ptr;
 
     //a new of this will be created for each new test
     virtual void SetUp()
@@ -52,7 +55,7 @@ class FeatureIMU : public testing::Test
         wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-        CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_) );
+        imu_ptr = std::make_shared<CaptureIMU>(t, sensor_ptr, data_);
         imu_ptr->setFramePtr(origin_frame);
 
     //process data
@@ -83,10 +86,10 @@ class FeatureIMU : public testing::Test
     }
 };
 
-TEST_F(FeatureIMU, test0)
+TEST_F(FeatureIMU_test, test0)
 {
     // set variables
-    using namespace std;
+    using namespace wolf;
     Eigen::VectorXs state_vec;
     Eigen::VectorXs delta_preint;
     //FrameIMUPtr last_frame;
