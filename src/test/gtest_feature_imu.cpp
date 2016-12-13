@@ -26,6 +26,7 @@ class FeatureIMU_test : public testing::Test
         std::shared_ptr<wolf::FeatureIMU> feat_imu;
         wolf::FrameIMUPtr last_frame;
         wolf::FrameBasePtr origin_frame;
+        Eigen::Matrix<wolf::Scalar,9,6> dD_db_jacobians;
 
     //a new of this will be created for each new test
     virtual void SetUp()
@@ -79,11 +80,14 @@ class FeatureIMU_test : public testing::Test
         state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
    	    last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
         wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
+        
 
     //create a feature
         delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
         delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
         feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
+        //wolf_problem_ptr_->getProcessorMotionPtr()->getJacobians(dD_db_jacobians);            FIXME
+        //feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov, dD_db_jacobians);
         feat_imu->setCapturePtr(imu_ptr); //associate the feature to a capture
 
     }
