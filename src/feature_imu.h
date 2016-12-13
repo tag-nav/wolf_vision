@@ -24,6 +24,15 @@ class FeatureIMU : public FeatureBase
          */
         FeatureIMU(const Eigen::VectorXs& _delta_preintegrated, const Eigen::MatrixXs& _delta_preintegrated_covariance);
 
+        /** \brief Constructor from capture pointer and measure
+         *
+         * \param _measurement the measurement
+         * \param _meas_covariance the noise of the measurement
+         * \param _dD_db_jacobians Jacobians of preintegrated delta wrt IMU biases
+         *
+         */
+        FeatureIMU(const Eigen::VectorXs& _delta_preintegrated, const Eigen::MatrixXs& _delta_preintegrated_covariance, const Eigen::Matrix<wolf::Scalar,9,6>& _dD_db_jacobians);
+
         virtual ~FeatureIMU();
 
     public: // TODO eventually produce getters for these and then go private
