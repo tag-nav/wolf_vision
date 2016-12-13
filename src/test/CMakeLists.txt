@@ -88,3 +88,7 @@ target_link_libraries(gtest_trajectory ${PROJECT_NAME})
 # ProcessorIMU_jacobians test
 wolf_add_gtest(gtest_processorIMU_jacobians gtest_processorIMU_jacobians.cpp)
 target_link_libraries(gtest_processorIMU_jacobians ${PROJECT_NAME})
+
+# FeatureIMU test
+wolf_add_gtest(gtest_feature_imu gtest_feature_imu.cpp)
+target_link_libraries(gtest_feature_imu ${PROJECT_NAME})
