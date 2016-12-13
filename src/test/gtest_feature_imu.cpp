@@ -20,6 +20,11 @@ class FeatureIMU_test : public testing::Test
         wolf::ProblemPtr wolf_problem_ptr_;
         wolf::TimeStamp ts;
         wolf::CaptureIMUPtr imu_ptr;
+        Eigen::VectorXs state_vec;
+        Eigen::VectorXs delta_preint;
+        Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
+        std::shared_ptr<wolf::FeatureIMU> feat_imu;
+        wolf::FrameIMUPtr last_frame;
 
     //a new of this will be created for each new test
     virtual void SetUp()
@@ -68,7 +73,17 @@ class FeatureIMU_test : public testing::Test
     // process data in capture
         sensor_ptr->process(imu_ptr);
 
+    //create FrameIMU
+        ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
+        state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+   	    last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
+        wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
 
+    //create a feature
+        delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
+        delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
+        feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
+        feat_imu->setCapturePtr(imu_ptr);
 
     }
 
@@ -90,23 +105,6 @@ TEST_F(FeatureIMU_test, test0)
 {
     // set variables
     using namespace wolf;
-    Eigen::VectorXs state_vec;
-    Eigen::VectorXs delta_preint;
-    //FrameIMUPtr last_frame;
-    Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
-
-    //create the constraint
-        //create FrameIMU
-    ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
-    state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-    FrameIMUPtr last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
-    wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
-
-        //create a feature
-    delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
-    delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
-    std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
-    feat_imu->setCapturePtr(imu_ptr);
 
         //create a constraintIMU
     //ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
