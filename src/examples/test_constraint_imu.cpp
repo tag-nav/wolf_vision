@@ -52,8 +52,7 @@ int main(int argc, char** argv)
     using namespace std;
     Eigen::VectorXs state_vec;
     Eigen::VectorXs delta_preint;
-    FrameIMUPtr last_frame;
-    FrameIMUPtr previous_frame;
+    //FrameIMUPtr last_frame;
     Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
 
     //process data
@@ -94,6 +93,25 @@ int main(int argc, char** argv)
     imu_ptr->setTimeStamp(t);
     sensor_ptr->process(imu_ptr);
 
+    //create the constraint
+        //create FrameIMU
+    ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
+    state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+    FrameIMUPtr last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
+    wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
+
+        //create a feature
+    delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
+    delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
+    std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
+
+        //create a constraintIMU
+    //ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
+    //FIXME : Feature not linked to origin frame
+    FrameBasePtr frame_base = feat_imu->getFramePtr();
+    //ConstraintIMU constraint_imu(feat_imu, last_frame);
+    //feat_imu->addConstraint(constraint_imu);
+    //previous_frame->addConstrainedBy(constraint_imu);
 
     return 0;
 }
