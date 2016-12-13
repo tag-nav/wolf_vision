@@ -142,6 +142,8 @@ TEST_F(FeatureIMU_test, access_members)
     // Expected state after one integration
     Eigen::VectorXs x(16);
     x << 0.01,0,0, 0,0,0,1, 0.2,0,0, 0,0,0, 0,0,0; // advanced at a=2m/s2 during 0.1s ==> dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2
+    ASSERT_EQ(feat_imu->dp_preint_, x.head<3>()) << "feat_imu->dp_preint_ : " << feat_imu->dp_preint_.transpose() << ",\t x.head<3>() :" << x.head<3>().transpose() << 
+    ",\n delta_preint : " << delta_preint.transpose() << std::endl;
 }
 
 TEST_F(FeatureIMU_test, addConstraint)
