@@ -135,6 +135,15 @@ TEST_F(FeatureIMU_test, check_frame)
     //previous_frame->addConstrainedBy(constraint_imu);
 }
 
+TEST_F(FeatureIMU_test, addConstraint)
+{
+    using namespace wolf;
+
+    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
+    //feat_imu->addConstraint(constraint_imu);
+    //left_frame->addConstrainedBy(constraint_imu);
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
