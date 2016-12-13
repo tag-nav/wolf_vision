@@ -25,6 +25,7 @@ class FeatureIMU_test : public testing::Test
         Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
         std::shared_ptr<wolf::FeatureIMU> feat_imu;
         wolf::FrameIMUPtr last_frame;
+        wolf::FrameBasePtr origin_frame;
 
     //a new of this will be created for each new test
     virtual void SetUp()
@@ -56,7 +57,7 @@ class FeatureIMU_test : public testing::Test
     //create a keyframe at origin
         ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
         Eigen::VectorXs origin_state = x0;
-        FrameBasePtr origin_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, origin_state);
+        origin_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, origin_state);
         wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
@@ -108,8 +109,28 @@ TEST_F(FeatureIMU_test, check_frame)
     using namespace wolf;
 
     //FIXME : Feature not linked to origin frame
-    FrameBasePtr frame_base = feat_imu->getFramePtr();
+    FrameBasePtr left_frame = feat_imu->getFramePtr();
+    wolf::TimeStamp t;
+    left_frame->getTimeStamp(t);
+    origin_frame->getTimeStamp(ts);
 
+    ASSERT_EQ(t,ts) << "t != ts \t t=" << t << "\t ts=" << ts << std::endl;
+    ASSERT_TRUE(origin_frame->isKey());
+    ASSERT_TRUE(left_frame->isKey());
+
+    wolf::StateBlockPtr origin_pptr, origin_optr, origin_vptr, left_pptr, left_optr, left_vptr;
+    origin_pptr = origin_frame->getPPtr();
+    origin_optr = origin_frame->getOPtr();
+    origin_vptr = origin_frame->getVPtr();
+    left_pptr = left_frame->getPPtr();
+    left_optr = left_frame->getOPtr();
+    left_vptr = left_frame->getVPtr();
+
+    ASSERT_TRUE((origin_pptr->getVector() - left_pptr->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_TRUE((origin_optr->getVector() - left_optr->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_TRUE((origin_vptr->getVector() - left_vptr->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+
+    ASSERT_EQ(origin_frame->id(), left_frame->id());
     //ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
     //ConstraintIMU constraint_imu(feat_imu, last_frame);
     //feat_imu->addConstraint(constraint_imu);
