@@ -83,7 +83,8 @@ class FeatureIMU_test : public testing::Test
         delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
         delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
         feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
-        feat_imu->setCapturePtr(imu_ptr);
+        feat_imu->setCapturePtr(imu_ptr); //associate the feature to a capture
+        //FIXME : capture may not be associated to a frame...
 
     }
 
@@ -101,15 +102,15 @@ class FeatureIMU_test : public testing::Test
     }
 };
 
-TEST_F(FeatureIMU_test, test0)
+TEST_F(FeatureIMU_test, check_frame)
 {
     // set variables
     using namespace wolf;
 
-        //create a constraintIMU
-    //ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
     //FIXME : Feature not linked to origin frame
     FrameBasePtr frame_base = feat_imu->getFramePtr();
+
+    //ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
     //ConstraintIMU constraint_imu(feat_imu, last_frame);
     //feat_imu->addConstraint(constraint_imu);
     //previous_frame->addConstrainedBy(constraint_imu);
