@@ -104,6 +104,7 @@ int main(int argc, char** argv)
     delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
     delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
     std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
+    feat_imu->setCapturePtr(imu_ptr);
 
         //create a constraintIMU
     //ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
