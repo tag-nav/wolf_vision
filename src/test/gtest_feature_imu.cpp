@@ -86,7 +86,7 @@ class FeatureIMU_test : public testing::Test
         delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
         delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
         feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
-        //wolf_problem_ptr_->getProcessorMotionPtr()->getJacobians(dD_db_jacobians);            FIXME
+        std::static_pointer_cast<wolf::ProcessorIMU>(wolf_problem_ptr_->getProcessorMotionPtr())->getJacobians(dD_db_jacobians);
         //feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov, dD_db_jacobians);
         feat_imu->setCapturePtr(imu_ptr); //associate the feature to a capture
 
