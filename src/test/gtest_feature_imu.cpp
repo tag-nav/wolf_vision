@@ -163,7 +163,10 @@ TEST_F(FeatureIMU_test, addConstraint)
 {
     using namespace wolf;
 
-    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
+    feat_imu->getFramePtr()->getTimeStamp();
+    last_frame->getTimeStamp();
+    ConstraintIMU constraint_imu(feat_imu,last_frame);
+    //ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
     //feat_imu->addConstraint(constraint_imu);
     //left_frame->addConstrainedBy(constraint_imu);
 }
