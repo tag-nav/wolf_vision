@@ -143,10 +143,19 @@ TEST_F(FeatureIMU_test, access_members)
 {
     using namespace wolf;
 
-    Eigen::VectorXs delta(16);
+    Eigen::VectorXs delta(10);
     //dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2; dz = 0.5*9.8*0.1^2 = 0.049; dvz = 9.8*0.1 = 0.98
-    delta << 0.01,0,0.049, 0,0,0,1, 0.2,0,0.98, 0,0,0, 0,0,0;
+    delta << 0.01,0,0.049, 0,0,0,1, 0.2,0,0.98;
     ASSERT_TRUE((feat_imu->dp_preint_ - delta.head<3>()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "feat_imu->dp_preint_ : " << feat_imu->dp_preint_.transpose() << ",\t delta.head<3>() :" << delta.head<3>().transpose() << 
+    ",\n delta_preint : " << delta_preint.transpose() << std::endl;
+    EXPECT_TRUE((feat_imu->dv_preint_ - delta.tail<3>()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "feat_imu->dv_preint_ : " << feat_imu->dv_preint_.transpose() << ",\t delta.tail<3>() :" << delta.tail<3>().transpose() << 
+    ",\n (feat_imu->dv_preint_ - delta.tail<3>() : " << (feat_imu->dv_preint_ - delta.tail<3>()).transpose() << std::endl;
+    ASSERT_TRUE((feat_imu->dv_preint_ - delta.tail<3>()).isMuchSmallerThan(1, wolf::Constants::EPS)) << "feat_imu->dv_preint_ : " << feat_imu->dv_preint_.transpose() << ",\t delta.tail<3>() :" << delta.tail<3>().transpose() << 
+    ",\n delta_preint : " << delta_preint.transpose() << std::endl;
+
+    Eigen::Vector4s quat;
+    quat << feat_imu->dq_preint_.x(), feat_imu->dq_preint_.y(), feat_imu->dq_preint_.z(), feat_imu->dq_preint_.w();
+    ASSERT_TRUE((quat - delta.segment<4>(3)).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "feat_imu->dq_preint_ : " << quat.transpose() << ",\t delta.segment<4>(3) :" << delta.segment<4>(3).transpose() << 
     ",\n delta_preint : " << delta_preint.transpose() << std::endl;
 }
 
