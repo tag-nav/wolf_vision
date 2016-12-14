@@ -424,12 +424,12 @@ inline void ProcessorIMU::getJacobians(Eigen::Matrix<wolf::Scalar,9,6>& _dD_db)
             [ dDv_dab  dDv_dwb ]
     */
 
-    _dD_db.block(3,3,0,0) = dDp_dab_;
-    _dD_db.block(3,3,3,0) = Eigen::Matrix3s::Zero();
-    _dD_db.block(3,3,6,0) = dDv_dab_;
-    _dD_db.block(3,3,0,3) = dDp_dwb_;
+    _dD_db.block(0,0,3,3) = dDp_dab_;
+    _dD_db.block(3,0,3,3) = Eigen::Matrix3s::Zero();
+    _dD_db.block(6,0,3,3) = dDv_dab_;
+    _dD_db.block(0,3,3,3) = dDp_dwb_;
     _dD_db.block(3,3,3,3) = dDq_dwb_;
-    _dD_db.block(3,3,6,3) = dDv_dwb_;
+    _dD_db.block(6,3,3,3) = dDv_dwb_;
 }
 
 } // namespace wolf
