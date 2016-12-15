@@ -108,12 +108,9 @@ int main(int argc, char** argv)
     feat_imu->setCapturePtr(imu_ptr);
 
         //create a constraintIMU
-    //ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
-    //FIXME : Feature not linked to origin frame
-    FrameBasePtr frame_base = feat_imu->getFramePtr();
-    //ConstraintIMU constraint_imu(feat_imu, last_frame);
-    //feat_imu->addConstraint(constraint_imu);
-    //previous_frame->addConstrainedBy(constraint_imu);
+    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
+    feat_imu->addConstraint(constraint_imu);
+    last_frame->addConstrainedBy(constraint_imu);
 
     return 0;
 }
