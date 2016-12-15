@@ -133,10 +133,6 @@ TEST_F(FeatureIMU_test, check_frame)
     ASSERT_TRUE((origin_vptr->getVector() - left_vptr->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 
     ASSERT_EQ(origin_frame->id(), left_frame->id());
-    //ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
-    //ConstraintIMU constraint_imu(feat_imu, last_frame);
-    //feat_imu->addConstraint(constraint_imu);
-    //previous_frame->addConstrainedBy(constraint_imu);
 }
 
 TEST_F(FeatureIMU_test, access_members)
@@ -165,10 +161,10 @@ TEST_F(FeatureIMU_test, addConstraint)
 
     feat_imu->getFramePtr()->getTimeStamp();
     last_frame->getTimeStamp();
-    ConstraintIMU constraint_imu(feat_imu,last_frame);
-    //ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
-    //feat_imu->addConstraint(constraint_imu);
-    //left_frame->addConstrainedBy(constraint_imu);
+    
+    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
+    feat_imu->addConstraint(constraint_imu);
+    last_frame->addConstrainedBy(constraint_imu);
 }
 
 int main(int argc, char **argv)
