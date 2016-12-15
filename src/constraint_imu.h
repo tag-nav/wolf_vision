@@ -91,8 +91,8 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
     private:
         /// Preintegrated delta
         Eigen::Vector3s dp_preint_;
-        Eigen::Vector3s dv_preint_;
         Eigen::Quaternions dq_preint_;
+        Eigen::Vector3s dv_preint_;
 
         // Biases used during preintegration
         Eigen::Vector3s acc_bias_preint_;
@@ -119,8 +119,8 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_p
                                                     _ftr_ptr->getFramePtr()->getOPtr(),
                                                     _ftr_ptr->getFramePtr()->getVPtr()),
         dp_preint_(_ftr_ptr->dp_preint_), // dp, dv, dq at preintegration time
-        dv_preint_(_ftr_ptr->dv_preint_),
         dq_preint_(_ftr_ptr->dq_preint_),
+        dv_preint_(_ftr_ptr->dv_preint_),
         acc_bias_preint_(_ftr_ptr->acc_bias_preint_), // state biases at preintegration time
         gyro_bias_preint_(_ftr_ptr->gyro_bias_preint_),
         dDp_dab_(_ftr_ptr->dDp_dab_), // Jacs of dp dv dq wrt biases
@@ -128,7 +128,7 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_p
         dDp_dwb_(_ftr_ptr->dDp_dwb_),
         dDv_dwb_(_ftr_ptr->dDv_dwb_),
         dDq_dwb_(_ftr_ptr->dDq_dwb_),
-        dt_(_frame_ptr->getTimeStamp() - getFeaturePtr()->getFramePtr()->getTimeStamp()),
+        dt_(_frame_ptr->getTimeStamp() - _ftr_ptr->getFramePtr()->getTimeStamp()),
         dt_2_(dt_*dt_),
         g_(wolf::gravity())
 
