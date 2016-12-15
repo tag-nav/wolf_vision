@@ -161,6 +161,26 @@ TEST_F(ProcessorIMU, acc_z)
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 }
 
+TEST_F(ProcessorIMU, check_Covariance)
+{
+    t.set(0); // clock in 0,1 ms ticks
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+
+    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+
+    data << 2, 0, 9.8, 0, 0, 0; // only acc_x, but measure gravity!
+
+    cap_imu_ptr->setData(data);
+    cap_imu_ptr->setTimeStamp(0.1);
+    sensor_ptr->process(cap_imu_ptr);
+
+    Eigen::VectorXs delta_preint(problem->getProcessorMotionPtr()->getMotion().delta_integr_);
+    Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov = problem->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
+
+    ASSERT_FALSE(delta_preint.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_FALSE(delta_preint_cov.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+}
+
 TEST_F(ProcessorIMU, Covariances)
 {
     data_cov.topLeftCorner(3,3)     *= 0.01; // acc variance
