@@ -44,7 +44,7 @@ class ConstraintIMU_testBase : public testing::Test
     // Time and data variables
         TimeStamp t;
         Eigen::Vector6s data_;
-
+        state_vec.resize(16);
         t.set(0);
 
     // Set the origin
@@ -89,7 +89,7 @@ class ConstraintIMU_testBase : public testing::Test
 
 };
 
-TEST_F(ConstraintIMU_testBase, constructors)
+TEST_F(ConstraintIMU_testBase, constructorIMU)
 {   
     using namespace wolf;
 
@@ -97,9 +97,9 @@ TEST_F(ConstraintIMU_testBase, constructors)
     ts = 0.1;
     state_vec << 0.01,0,0, 0,0,0,1, 0.2,0,0, 0,0,0, 0,0,0;
    	last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
-    
     //create a feature
-    delta_preint_cov = Eigen::MatrixXs::Random(9,9);
+    delta_preint_cov = Eigen::MatrixXs::Identity(9,9);
+    delta_preint.resize(10);
     delta_preint << 0.01,0,0.049, 0,0,0,1, 0.2,0,0.98;
     dD_db_jacobians = Eigen::Matrix<wolf::Scalar,9,6>::Random();
     feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov, imu_ptr, dD_db_jacobians);
