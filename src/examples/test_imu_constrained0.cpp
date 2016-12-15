@@ -92,6 +92,7 @@ int main(int argc, char** argv)
     FrameIMUPtr last_frame;
     FrameIMUPtr previous_frame;
     Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
+    int iteration = 0;
     
     while(!data_file.eof()){
         if(last_keyframe_dt >= keyframe_spacing){
@@ -130,6 +131,8 @@ int main(int argc, char** argv)
 
         // process data in capture
         sensor_ptr->process(imu_ptr);
+        std::cout << "iteration : " << iteration << std::endl;
+        iteration++;
     }
 
     //make final a keyframe
