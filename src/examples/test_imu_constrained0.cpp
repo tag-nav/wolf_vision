@@ -45,8 +45,8 @@ int main(int argc, char** argv)
             data_file.open(filename);
             std::cout << "file: " << filename << std::endl;
 
-            //std::string dummy; //this is needed only if first line is headers
-            //getline(data_file, dummy);
+            std::string dummy; //this is needed only if first line is headers
+            getline(data_file, dummy);
         }
 
         if(!data_file.is_open()){
