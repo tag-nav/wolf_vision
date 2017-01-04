@@ -95,6 +95,7 @@ int main(int argc, char** argv)
     int iteration = 0;
     
     while(!data_file.eof()){
+        //std::cout << "last_keyframe_dt :  " << last_keyframe_dt << std::endl;
         if(last_keyframe_dt >= keyframe_spacing){
             previous_frame = last_frame; //to constraint the new frame and link it to previous one
             ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
@@ -105,6 +106,7 @@ int main(int argc, char** argv)
 
             //create a feature
             delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
+            std::cout << "\n \t delta_preint_cov : \n" << delta_preint_cov << std::endl;
             delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
             std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
 
