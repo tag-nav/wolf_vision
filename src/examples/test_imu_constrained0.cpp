@@ -80,7 +80,7 @@ int main(int argc, char** argv)
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_) );
+    CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_, origin_frame) );
 
     // main loop
     using namespace std;
