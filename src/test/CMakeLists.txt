@@ -49,6 +49,10 @@ target_link_libraries(gtest_example ${PROJECT_NAME})      #
 wolf_add_gtest(gtest_frame_base gtest_frame_base.cpp)
 target_link_libraries(gtest_frame_base ${PROJECT_NAME})
 
+# FrameIMU class test
+wolf_add_gtest(gtest_frame_imu gtest_frame_imu.cpp)
+target_link_libraries(gtest_frame_imu ${PROJECT_NAME})
+
 # LocalParametrizationXxx classes test
 wolf_add_gtest(gtest_local_param gtest_local_param.cpp)
 target_link_libraries(gtest_local_param ${PROJECT_NAME})
