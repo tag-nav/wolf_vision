@@ -92,7 +92,11 @@ int main(int argc, char** argv)
     FrameIMUPtr last_frame;
     FrameIMUPtr previous_frame;
     Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
+    Eigen::Matrix<wolf::Scalar,9,6> dD_db;
     int iteration = 0;
+
+    //needed to retrieve jacobians wrt biases
+    wolf::ProcessorIMUPtr proc_imu = std::static_pointer_cast<ProcessorIMU>(wolf_problem_ptr_->getProcessorMotionPtr());
     
     while(!data_file.eof()){
         //std::cout << "last_keyframe_dt :  " << last_keyframe_dt << std::endl;
@@ -107,7 +111,8 @@ int main(int argc, char** argv)
             //create a feature
             delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
             delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
-            std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
+            proc_imu -> getJacobians(dD_db);
+            std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov, imu_ptr, dD_db);
 
             //create a constraintIMU
             //wolf_problem_ptr_->getProcessorMotionPtr()->emplaceConstraint(feat_imu, previous_frame);
