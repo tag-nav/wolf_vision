@@ -101,7 +101,7 @@ int main(int argc, char** argv)
     while(!data_file.eof()){
         //std::cout << "last_keyframe_dt :  " << last_keyframe_dt << std::endl;
         if(last_keyframe_dt >= keyframe_spacing){
-            previous_frame = last_frame; //to constraint the new frame and link it to previous one
+            previous_frame = std::static_pointer_cast<FrameIMU>(imu_ptr->getFramePtr()); //to constraint the new frame and link it to previous one
             ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
             state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
             last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
