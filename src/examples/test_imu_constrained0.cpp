@@ -98,7 +98,7 @@ int main(int argc, char** argv)
     //needed to retrieve jacobians wrt biases
     wolf::ProcessorIMUPtr proc_imu = std::static_pointer_cast<ProcessorIMU>(wolf_problem_ptr_->getProcessorMotionPtr());
     
-    while(!data_file.eof()){
+    while(!data_file.eof() && iteration<100){
         //std::cout << "last_keyframe_dt :  " << last_keyframe_dt << std::endl;
         if(last_keyframe_dt >= keyframe_spacing){
             //previous_frame = std::static_pointer_cast<FrameIMU>(imu_ptr->getFramePtr()); //to constraint the new frame and link it to previous one
@@ -140,6 +140,9 @@ int main(int argc, char** argv)
         std::cout << "iteration : " << iteration << std::endl;
         iteration++;
     }
+
+    //first close the file no longer needed
+    data_file.close();
 
     //make final a keyframe
     ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
