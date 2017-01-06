@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     //create a keyframe at origin
     TimeStamp ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
     Eigen::VectorXs origin_state = x0;
-    FrameBasePtr origin_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, origin_state);
+    wolf::FrameIMUPtr origin_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, origin_state);
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
@@ -90,7 +90,7 @@ int main(int argc, char** argv)
     Eigen::VectorXs state_vec;
     Eigen::VectorXs delta_preint;
     FrameIMUPtr last_frame;
-    FrameIMUPtr previous_frame;
+    //FrameIMUPtr previous_frame;
     Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
     Eigen::Matrix<wolf::Scalar,9,6> dD_db;
     int iteration = 0;
@@ -101,7 +101,7 @@ int main(int argc, char** argv)
     while(!data_file.eof()){
         //std::cout << "last_keyframe_dt :  " << last_keyframe_dt << std::endl;
         if(last_keyframe_dt >= keyframe_spacing){
-            previous_frame = std::static_pointer_cast<FrameIMU>(imu_ptr->getFramePtr()); //to constraint the new frame and link it to previous one
+            //previous_frame = std::static_pointer_cast<FrameIMU>(imu_ptr->getFramePtr()); //to constraint the new frame and link it to previous one
             ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
             state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
             last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
@@ -116,9 +116,9 @@ int main(int argc, char** argv)
 
             //create a constraintIMU
             //wolf_problem_ptr_->getProcessorMotionPtr()->emplaceConstraint(feat_imu, previous_frame);
-            ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, previous_frame);
+            ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
             feat_imu->addConstraint(constraint_imu);
-            previous_frame->addConstrainedBy(constraint_imu);
+            last_frame->addConstrainedBy(constraint_imu);
 
             //reset origin of motion to new frame
             wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(last_frame);
