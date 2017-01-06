@@ -24,7 +24,7 @@ class ConstraintIMU_testBase : public testing::Test
         Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
         std::shared_ptr<wolf::FeatureIMU> feat_imu;
         wolf::FrameIMUPtr last_frame;
-        wolf::FrameBasePtr origin_frame;
+        wolf::FrameIMUPtr origin_frame;
         Eigen::Matrix<wolf::Scalar,9,6> dD_db_jacobians;
     
     virtual void SetUp()
@@ -45,7 +45,7 @@ class ConstraintIMU_testBase : public testing::Test
         TimeStamp t;
         Eigen::Vector6s data_;
         state_vec.resize(16);
-        t.set(0);
+        t.set(0.01);
 
     // Set the origin
         Eigen::VectorXs x0(16);
