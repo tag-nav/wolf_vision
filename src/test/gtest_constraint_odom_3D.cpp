@@ -23,19 +23,16 @@ TEST(ConstraintOdom3D, constructors)
     using std::make_shared;
     using std::static_pointer_cast;
 
-    std::cout << "start" << std::endl;
     // Wolf problem
     wolf::ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
-    std::cout << "started" << std::endl;
+
     //just to make it work
     Eigen::VectorXs extrinsics(7);
     extrinsics << 0,0,0, 0,0,0,1; // pose in the robot
-    std::cout << "sensor installing" << std::endl;
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "Main ODOM_3D", extrinsics, shared_ptr<IntrinsicsOdom3D>());
-    std::cout << "sensor installed" << std::endl;
+    IntrinsicsOdom3DPtr intrinsics = std::make_shared<IntrinsicsOdom3D>();
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "Main ODOM_3D", extrinsics, intrinsics);
     wolf_problem_ptr_->installProcessor("ODOM 3D", "ODOM_3D integrator", "Main ODOM_3D", "");
 
-    std::cout << "debug" << std::endl;
     ProcessorOdom3D prc;
     Motion ref(0,7,6), final(0,7,6);
     Eigen::VectorXs origin_state(7);
