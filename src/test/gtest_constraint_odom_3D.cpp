@@ -77,7 +77,7 @@ TEST(ConstraintOdom3D, constructors)
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(final_frame);
     
     //create a feature
-    //FeatureBasePtr last_feature = std::make_shared<FeatureBase>("ODOM_3D", x0.head(7),Eigen::Matrix7s::Identity());
+    FeatureBasePtr last_feature = std::make_shared<FeatureBase>("ODOM 3D", final_state.head(7),Eigen::Matrix7s::Identity()); //TODO : use true covariance
 }
 
 int main(int argc, char **argv)
