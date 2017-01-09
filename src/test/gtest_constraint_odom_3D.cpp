@@ -33,7 +33,6 @@ TEST(ConstraintOdom3D, constructors)
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "Main ODOM_3D", extrinsics, intrinsics);
     wolf_problem_ptr_->installProcessor("ODOM 3D", "ODOM_3D integrator", "Main ODOM_3D", "");
 
-    ProcessorOdom3D prc;
     Motion ref(0,7,6), final(0,7,6);
     Eigen::VectorXs origin_state(7);
     TimeStamp t_o, ts;
@@ -52,20 +51,26 @@ TEST(ConstraintOdom3D, constructors)
     origin_state << 0,0,0, 0,0,0,1;
     t_o.set(0);
 
-    std::cout << "debug" << std::endl;
-    prc.setOrigin(origin_state, t_o);
-    std::cout << "debug" << std::endl;
-    prc.deltaPlusDelta(ref.delta_integr_, final.delta_, (final.ts_ - ref.ts_), final.delta_integr_);
-
     //create a keyframe at origin
     StateBlockPtr o_p = std::make_shared<StateBlock>(origin_state.head<3>());
     StateBlockPtr o_q = std::make_shared<StateBlock>(origin_state.tail<3>());
     wolf::FrameBasePtr origin_frame = std::make_shared<FrameBase>(t_o, o_p, o_q);
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
+
+    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(origin_state, t_o);
+
+    Eigen::Vector6s data;
+    data << 10.06,42,2.4, 0,0,0;
+
+    CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>((final.ts_ - ref.ts_), sensor_ptr, data);
+    mot_ptr->setFramePtr(origin_frame);
+
+    wolf_problem_ptr_->getProcessorMotionPtr()->process(mot_ptr);
+
     //create a keyframe at final state
     ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
     Eigen::VectorXs final_state;
-    final_state = prc.getCurrentState().head(7);
+    final_state = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(7);
     StateBlockPtr f_p = std::make_shared<StateBlock>(final_state.head<3>());
     StateBlockPtr f_q = std::make_shared<StateBlock>(final_state.tail<3>());
     wolf::FrameBasePtr final_frame = std::make_shared<FrameBase>(KEY_FRAME, ts, f_p, f_q);
