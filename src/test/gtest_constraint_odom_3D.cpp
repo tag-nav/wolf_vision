@@ -53,7 +53,7 @@ TEST(ConstraintOdom3D, constructors)
 
     //create a keyframe at origin
     StateBlockPtr o_p = std::make_shared<StateBlock>(origin_state.head<3>());
-    StateBlockPtr o_q = std::make_shared<StateBlock>(origin_state.tail<3>());
+    StateBlockPtr o_q = std::make_shared<StateBlock>(origin_state.tail<4>());
     wolf::FrameBasePtr origin_frame = std::make_shared<FrameBase>(t_o, o_p, o_q);
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
 
@@ -72,12 +72,16 @@ TEST(ConstraintOdom3D, constructors)
     Eigen::VectorXs final_state;
     final_state = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(7);
     StateBlockPtr f_p = std::make_shared<StateBlock>(final_state.head<3>());
-    StateBlockPtr f_q = std::make_shared<StateBlock>(final_state.tail<3>());
+    StateBlockPtr f_q = std::make_shared<StateBlock>(final_state.tail<4>());
     wolf::FrameBasePtr final_frame = std::make_shared<FrameBase>(KEY_FRAME, ts, f_p, f_q);
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(final_frame);
     
     //create a feature
     FeatureBasePtr last_feature = std::make_shared<FeatureBase>("ODOM 3D", final_state.head(7),Eigen::Matrix7s::Identity()); //TODO : use true covariance
+    last_feature->setCapturePtr(mot_ptr);
+
+    //create the constraint
+    ConstraintOdom3D constraint_odom(last_feature,final_frame);
 }
 
 int main(int argc, char **argv)
