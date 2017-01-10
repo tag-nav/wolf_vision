@@ -15,7 +15,7 @@
 #include <ctime>
 #include <cmath>
 
-//#define DEBUG_RESULTS
+#define DEBUG_RESULTS
 
 int _kbhit();
 
@@ -152,11 +152,12 @@ int main(int argc, char** argv)
 
     //create a feature
     FeatureBasePtr last_feature = std::make_shared<FeatureBase>("ODOM_3D", origin_state.head(7),Eigen::Matrix7s::Identity()); //first KF and last KF at same position
-    
+    last_feature->setCapturePtr(imu_ptr);
+
     //create an ODOM constraint between first and last keyframes
-    ConstraintOdom3DPtr constraintOdom_ptr = std::make_shared<ConstraintOdom3D>(last_feature, origin_frame);
+    ConstraintOdom3DPtr constraintOdom_ptr = std::make_shared<ConstraintOdom3D>(last_feature, last_frame);
     last_feature -> addConstraint(constraintOdom_ptr);
-    origin_frame -> addConstrainedBy(constraintOdom_ptr);
+    last_frame -> addConstrainedBy(constraintOdom_ptr);
 
     Eigen::Vector7s expec;
     expec  = constraintOdom_ptr -> expectation();
