@@ -8,7 +8,7 @@
 namespace wolf {
 
 FrameIMU::FrameIMU(const FrameType& _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x) :
-        FrameBase(_tp, _ts, std::make_shared<StateBlock>(3), std::make_shared<StateQuaternion>(), std::make_shared<StateBlock>(3))
+        FrameBase(_tp, _ts, std::make_shared<StateBlock>(_x.head(3)), std::make_shared<StateQuaternion>(_x.segment(3,4)), std::make_shared<StateBlock>(_x.segment(6,3)))
 {
     assert(_x.size() == 16 && "Wrong vector size! Must be 16.");
 
