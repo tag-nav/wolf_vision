@@ -70,7 +70,7 @@ int main(int argc, char** argv)
 
     // Set the origin
     Eigen::VectorXs x0(16);
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.001,  0,0,.002; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0.05,0.05,.08,  0.02,0.02,.02; // Try some non-zero biases
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     //create a keyframe at origin
@@ -94,11 +94,12 @@ int main(int argc, char** argv)
     //FrameIMUPtr previous_frame;
     Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
     Eigen::Matrix<wolf::Scalar,9,6> dD_db;
+    unsigned int iteration = 0; //used just in case we want to stop the loop before the eof
 
     //needed to retrieve jacobians wrt biases
     wolf::ProcessorIMUPtr proc_imu = std::static_pointer_cast<ProcessorIMU>(wolf_problem_ptr_->getProcessorMotionPtr());
     
-    while(!data_file.eof()){
+    while(!data_file.eof() && iteration <= 10000){
         if(last_keyframe_dt >= keyframe_spacing){
             //previous_frame = std::static_pointer_cast<FrameIMU>(imu_ptr->getFramePtr()); //to constraint the new frame and link it to previous one
             ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
@@ -117,9 +118,12 @@ int main(int argc, char** argv)
             ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
             feat_imu->addConstraint(constraint_imu);
             last_frame->addConstrainedBy(constraint_imu);
+            Eigen::VectorXs exp = constraint_imu->expectation();
+            std::cout << "exp : " << exp.transpose() << std::endl;
 
             //reset origin of motion to new frame
             wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(last_frame);
+            imu_ptr->setFramePtr(last_frame);
             last_keyframe_dt = 0;
         }
         else
@@ -135,6 +139,7 @@ int main(int argc, char** argv)
 
         // process data in capture
         sensor_ptr->process(imu_ptr);
+        iteration++;
     }
 
     //first close the file no longer needed
@@ -143,6 +148,7 @@ int main(int argc, char** argv)
     //make final a keyframe
     ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
     state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+    std::cout << "last state : " << state_vec.transpose() << std::endl;
     last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
 
