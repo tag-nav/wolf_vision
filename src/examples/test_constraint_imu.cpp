@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 
     Eigen::Matrix<wolf::Scalar, 10, 1> expect;
     Eigen::Vector3s ref_frame_p = origin_frame->getPPtr()->getVector();
-    Eigen::Quaternions ref_frame_o(origin_frame->getOPtr()->getVector().data()); //transform to quaternion
+    Eigen::Quaternions ref_frame_o(origin_frame->getOPtr()->getVector().data());
     Eigen::Vector3s ref_frame_v = origin_frame->getVPtr()->getVector();
     Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
     Eigen::Quaternions current_frame_o(last_frame->getOPtr()->getVector().data());
@@ -112,6 +112,13 @@ int main(int argc, char** argv)
     imu_ptr->setTimeStamp(t);
     sensor_ptr->process(imu_ptr);
 
+    mpu_clock = 0.003040;
+    data_ << 0.596360, -0.225132, 10.205178, 0.154276, 0.174399, -0.036221;
+    t.set(mpu_clock);
+    imu_ptr->setData(data_);
+    imu_ptr->setTimeStamp(t);
+    sensor_ptr->process(imu_ptr);
+
     if(c1){
     /// ******************************************************************************************** ///
     /// constraint creation
@@ -123,7 +130,6 @@ int main(int argc, char** argv)
 
         //create a feature
     delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
-    std::cout << "new preint cov : \n" << delta_preint_cov << std::endl;
     delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
     std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
     feat_imu->setCapturePtr(imu_ptr);
@@ -149,13 +155,6 @@ int main(int argc, char** argv)
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(last_frame);
     imu_ptr->setFramePtr(last_frame);
     }
-
-    mpu_clock = 0.003040;
-    data_ << 0.596360, -0.225132, 10.205178, 0.154276, 0.174399, -0.036221;
-    t.set(mpu_clock);
-    imu_ptr->setData(data_);
-    imu_ptr->setTimeStamp(t);
-    sensor_ptr->process(imu_ptr);
 
     mpu_clock = 0.004046;
     data_ << 0.553250, -0.203577, 10.324929, 0.128787, 0.156959, -0.044270;
@@ -188,6 +187,18 @@ int main(int argc, char** argv)
     ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
     feat_imu->addConstraint(constraint_imu);
     last_frame->addConstrainedBy(constraint_imu);
+
+    Eigen::Matrix<wolf::Scalar, 10, 1> expect;
+    Eigen::Vector3s ref_frame_p = origin_frame->getPPtr()->getVector();
+    Eigen::Quaternions ref_frame_o(origin_frame->getOPtr()->getVector().data()); //transform to quaternion
+    Eigen::Vector3s ref_frame_v = origin_frame->getVPtr()->getVector();
+    Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
+    Eigen::Quaternions current_frame_o(last_frame->getOPtr()->getVector().data());
+    Eigen::Vector3s current_frame_v = last_frame->getVPtr()->getVector();
+    Eigen::Vector3s acc_bias(origin_frame->getAccBiasPtr()->getVector()), gyro_bias(origin_frame->getGyroBiasPtr()->getVector());
+    
+    constraint_imu->expectation(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v, expect);
+    std::cout << "expectation : " << expect.transpose() << std::endl;
 
     return 0;
 }
