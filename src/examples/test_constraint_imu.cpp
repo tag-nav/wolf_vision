@@ -19,7 +19,7 @@ int main(int argc, char** argv)
 
     std::cout << std::endl << "==================== test_constraint_imu ======================" << std::endl;
 
-    bool c0(true);// c1(true), c2(true), c3(true), c4(true);
+    bool c0(true), c1(true);// c2(true), c3(true), c4(true);
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
     Eigen::VectorXs IMU_extrinsics(7);
@@ -105,13 +105,50 @@ int main(int argc, char** argv)
     }
     /// ******************************************************************************************** ///
 
-
     mpu_clock = 0.002135;
     data_ << 0.581990, -0.191602, 10.071057, 0.136836, 0.203912, -0.057686;
     t.set(mpu_clock);
     imu_ptr->setData(data_);
     imu_ptr->setTimeStamp(t);
     sensor_ptr->process(imu_ptr);
+
+    if(c1){
+    /// ******************************************************************************************** ///
+    /// constraint creation
+    //create FrameIMU
+    ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
+    state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
+    FrameIMUPtr last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
+    wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
+
+        //create a feature
+    delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
+    std::cout << "new preint cov : \n" << delta_preint_cov << std::endl;
+    delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
+    std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
+    feat_imu->setCapturePtr(imu_ptr);
+
+        //create a constraintIMU
+    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
+    feat_imu->addConstraint(constraint_imu);
+    last_frame->addConstrainedBy(constraint_imu);
+
+    Eigen::Matrix<wolf::Scalar, 10, 1> expect;
+    Eigen::Vector3s ref_frame_p = origin_frame->getPPtr()->getVector();
+    Eigen::Quaternions ref_frame_o(origin_frame->getOPtr()->getVector().data()); //transform to quaternion
+    Eigen::Vector3s ref_frame_v = origin_frame->getVPtr()->getVector();
+    Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
+    Eigen::Quaternions current_frame_o(last_frame->getOPtr()->getVector().data());
+    Eigen::Vector3s current_frame_v = last_frame->getVPtr()->getVector();
+    Eigen::Vector3s acc_bias(origin_frame->getAccBiasPtr()->getVector()), gyro_bias(origin_frame->getGyroBiasPtr()->getVector());
+    
+    constraint_imu->expectation(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v, expect);
+    std::cout << "expectation : " << expect.transpose() << std::endl;
+
+    //reset origin of motion to new frame
+    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(last_frame);
+    imu_ptr->setFramePtr(last_frame);
+    }
 
     mpu_clock = 0.003040;
     data_ << 0.596360, -0.225132, 10.205178, 0.154276, 0.174399, -0.036221;
