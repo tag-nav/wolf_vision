@@ -74,14 +74,14 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
             Eigen::Quaternions frame_imu_ori_q(frame_imu_ori);
             
             expectation(frame_current_pos, frame_current_ori, frame_current_vel, frame_current_ab, frame_current_wb, frame_imu_pos, frame_imu_ori_q, frame_imu_vel, exp);
-            std::cout << frame_current_pos << std::endl;
+            /*std::cout << frame_current_pos << std::endl;
             std::cout << frame_current_ori.w() << std::endl;
             std::cout << frame_current_vel << std::endl;
             std::cout << frame_current_ab << std::endl;
             std::cout << frame_current_wb << std::endl;
             std::cout << frame_imu_pos << std::endl;
             std::cout << frame_imu_ori << std::endl;
-            std::cout << frame_imu_vel << std::endl;
+            std::cout << frame_imu_vel << std::endl;*/
             return exp;
         }
 
