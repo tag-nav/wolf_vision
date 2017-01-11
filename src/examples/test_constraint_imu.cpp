@@ -98,6 +98,10 @@ int main(int argc, char** argv)
     
     constraint_imu->expectation(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v, expect);
     std::cout << "expectation : " << expect.transpose() << std::endl;
+
+    //reset origin of motion to new frame
+    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(last_frame);
+    imu_ptr->setFramePtr(last_frame);
     }
     /// ******************************************************************************************** ///
 
