@@ -95,9 +95,14 @@ int main(int argc, char** argv)
     Eigen::Quaternions current_frame_o(last_frame->getOPtr()->getVector().data());
     Eigen::Vector3s current_frame_v = last_frame->getVPtr()->getVector();
     Eigen::Vector3s acc_bias(origin_frame->getAccBiasPtr()->getVector()), gyro_bias(origin_frame->getGyroBiasPtr()->getVector());
+    Eigen::Matrix<wolf::Scalar, 9, 1> residu;
+    residu << 0,0,0,  0,0,0,  0,0,0;
     
     constraint_imu->expectation(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v, expect);
     std::cout << "expectation : " << expect.transpose() << std::endl;
+
+    constraint_imu->getResiduals(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v,residu);
+    std::cout << "residuals : " << residu.transpose() << std::endl;
 
     //reset origin of motion to new frame
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(last_frame);
@@ -141,15 +146,20 @@ int main(int argc, char** argv)
 
     Eigen::Matrix<wolf::Scalar, 10, 1> expect;
     Eigen::Vector3s ref_frame_p = origin_frame->getPPtr()->getVector();
-    Eigen::Quaternions ref_frame_o(origin_frame->getOPtr()->getVector().data()); //transform to quaternion
+    Eigen::Quaternions ref_frame_o(origin_frame->getOPtr()->getVector().data());
     Eigen::Vector3s ref_frame_v = origin_frame->getVPtr()->getVector();
     Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
     Eigen::Quaternions current_frame_o(last_frame->getOPtr()->getVector().data());
     Eigen::Vector3s current_frame_v = last_frame->getVPtr()->getVector();
     Eigen::Vector3s acc_bias(origin_frame->getAccBiasPtr()->getVector()), gyro_bias(origin_frame->getGyroBiasPtr()->getVector());
+    Eigen::Matrix<wolf::Scalar, 9, 1> residu;
+    residu << 0,0,0,  0,0,0,  0,0,0;
     
     constraint_imu->expectation(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v, expect);
     std::cout << "expectation : " << expect.transpose() << std::endl;
+
+    constraint_imu->getResiduals(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v,residu);
+    std::cout << "residuals : " << residu.transpose() << std::endl;
 
     //reset origin of motion to new frame
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(last_frame);
@@ -190,15 +200,20 @@ int main(int argc, char** argv)
 
     Eigen::Matrix<wolf::Scalar, 10, 1> expect;
     Eigen::Vector3s ref_frame_p = origin_frame->getPPtr()->getVector();
-    Eigen::Quaternions ref_frame_o(origin_frame->getOPtr()->getVector().data()); //transform to quaternion
+    Eigen::Quaternions ref_frame_o(origin_frame->getOPtr()->getVector().data());
     Eigen::Vector3s ref_frame_v = origin_frame->getVPtr()->getVector();
     Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
     Eigen::Quaternions current_frame_o(last_frame->getOPtr()->getVector().data());
     Eigen::Vector3s current_frame_v = last_frame->getVPtr()->getVector();
     Eigen::Vector3s acc_bias(origin_frame->getAccBiasPtr()->getVector()), gyro_bias(origin_frame->getGyroBiasPtr()->getVector());
+    Eigen::Matrix<wolf::Scalar, 9, 1> residu;
+    residu << 0,0,0,  0,0,0,  0,0,0;
     
     constraint_imu->expectation(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v, expect);
     std::cout << "expectation : " << expect.transpose() << std::endl;
+
+    constraint_imu->getResiduals(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v,residu);
+    std::cout << "residuals : " << residu.transpose() << std::endl;
 
     return 0;
 }
