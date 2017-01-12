@@ -158,7 +158,7 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     Eigen::Map<const Eigen::Quaternion<T> > q2(_q2);
     Eigen::Map<const Eigen::Matrix<T,3,1> > v2(_v2);
 
-    Eigen::Map<Eigen::Matrix<T,10,1> > residuals(_residuals);
+    Eigen::Map<Eigen::Matrix<T,9,1> > residuals(_residuals);
 
 
     // Predict delta: d_pred = x2 (-) x1
@@ -180,8 +180,8 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
 
     // Assign to residuals vector
     residuals.head(3)       = dp_error;
-    residuals.segment(3,3)  = dv_error;
-    residuals.tail(3)       = do_error;
+    residuals.segment(3,3)  = do_error;
+    residuals.tail(3)       = dv_error;
 
     return true;
 }
