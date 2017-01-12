@@ -33,6 +33,10 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
                          const T* const _p2, const T* const _o2, const T* const _v2,
                          T* _residuals) const;
 
+        template<typename D1, typename D2, typename D3>
+        bool getResiduals(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D2> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab, const Eigen::MatrixBase<D1> & _wb,
+                        const Eigen::MatrixBase<D1> & _p2, const Eigen::QuaternionBase<D2> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::MatrixBase<D3> & _residuals) const;
+
         virtual JacobianMethod getJacobianMethod() const;
 
         /* Function expectation(...)
@@ -182,6 +186,41 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     residuals.head(3)       = dp_error;
     residuals.segment(3,3)  = do_error;
     residuals.tail(3)       = dv_error;
+
+    return true;
+}
+
+template<typename D1, typename D2, typename D3>
+inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D2> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab, const Eigen::MatrixBase<D1> & _wb,
+                        const Eigen::MatrixBase<D1> & _p2, const Eigen::QuaternionBase<D2> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::MatrixBase<D3> & _residuals) const
+{
+    //needed typedefs
+    typedef typename D2::Scalar DataType;
+
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D3, 9)
+
+    const Eigen::Matrix<DataType,3,1> ab(_ab);
+    const Eigen::Matrix<DataType,3,1> wb(_wb);
+    Eigen::Matrix<DataType,10,1> expected;
+    this->expectation(_p1, _q1, _v1, _ab, _wb, _p2, _q2, _v2, expected);
+
+    // Correct measured delta: delta_corr = delta + J_bias * (bias - bias_measured)
+    Eigen::Matrix<DataType,3,1> dp_correct = dp_preint_.cast<DataType>() + dDp_dab_.cast<DataType>() * (ab - acc_bias_preint_.cast<DataType>()) + dDp_dwb_.cast<DataType>() * (wb - gyro_bias_preint_.cast<DataType>());
+    Eigen::Matrix<DataType,3,1> dv_correct = dv_preint_.cast<DataType>() + dDv_dab_.cast<DataType>() * (ab - acc_bias_preint_.cast<DataType>()) + dDv_dwb_.cast<DataType>() * (wb - gyro_bias_preint_.cast<DataType>());
+    Eigen::Matrix<DataType,3,1> do_step    = dDq_dwb_  .cast<DataType>() * (wb - gyro_bias_preint_.cast<DataType>());
+    Eigen::Quaternion<DataType> dq_correct = dq_preint_.cast<DataType>() * v2q(do_step);
+
+    // Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
+    // Note the Dt here is zero because it's the delta-time between the same time stamps!
+    Eigen::Quaternion<DataType> dq_predict((expected.segment(3,4)).data());
+    Eigen::Matrix<DataType,3,1> dp_error   = expected.head(3) - dp_correct;
+    Eigen::Matrix<DataType,3,1> do_error   = q2v(dq_correct.conjugate() * dq_predict); // In the name, 'o' of orientation, not 'q'
+    Eigen::Matrix<DataType,3,1> dv_error   = expected.tail(3) - dv_correct;
+
+    // Assign to residuals vector
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).head(3) = dp_error;
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(3,3) = do_error;
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).tail(3) = dv_error;
 
     return true;
 }
