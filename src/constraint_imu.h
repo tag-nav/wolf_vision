@@ -32,7 +32,22 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
         bool operator ()(const T* const _p1, const T* const _o1, const T* const _v1, const T* const _b_a1, const T* _b_g1,
                          const T* const _p2, const T* const _o2, const T* const _v2,
                          T* _residuals) const;
-
+        
+        /* \brief : compute the residual from the state blocks being iterated by the solver. (same as operator())
+            -> computes the expected measurement
+            -> compares the actual measurement with the expected one
+            -> weights the result with the covariance of the noise (residual = sqrt_info_matrix * err;)
+         * params :
+         * Vector3s _p1 : position in imu frame
+         * Vector4s _q1 : orientation quaternion in imu frame
+         * Vector3s _v1 : velocity in imu frame
+         * Vector3s _ab : accelerometer bias in imu frame
+         * Vector3s _wb : gyroscope bias in imu frame
+         * Vector3s _p2 : position in current frame
+         * Vector4s _q2 : orientation quaternion in current frame
+         * Vector3s _v2 : velocity in current frame
+         * Matrix<9,1, wolf::Scalar> _residuals : to retrieve residuals (POV) O is rotation vector... NOT A QUATERNION
+        */
         template<typename D1, typename D2, typename D3>
         bool getResiduals(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D2> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab, const Eigen::MatrixBase<D1> & _wb,
                         const Eigen::MatrixBase<D1> & _p2, const Eigen::QuaternionBase<D2> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::MatrixBase<D3> & _residuals) const;
@@ -78,14 +93,6 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
             Eigen::Quaternions frame_imu_ori_q(frame_imu_ori);
             
             expectation(frame_current_pos, frame_current_ori, frame_current_vel, frame_current_ab, frame_current_wb, frame_imu_pos, frame_imu_ori_q, frame_imu_vel, exp);
-            /*std::cout << frame_current_pos << std::endl;
-            std::cout << frame_current_ori.w() << std::endl;
-            std::cout << frame_current_vel << std::endl;
-            std::cout << frame_current_ab << std::endl;
-            std::cout << frame_current_wb << std::endl;
-            std::cout << frame_imu_pos << std::endl;
-            std::cout << frame_imu_ori << std::endl;
-            std::cout << frame_imu_vel << std::endl;*/
             return exp;
         }
 
@@ -238,8 +245,7 @@ inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> & _p1, const 
     //check entry sizes
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D1, 3)
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D3, 10)
-    
-    //TODO : FIXME - This only work between two consecutive measurements ! 
+     
     // Predict delta: d_pred = x2 (-) x1
     Vector3Map dp_predict = (_q1.conjugate() * ( _p2 - _p1 - _v1 * (DataType)dt_ - (DataType)0.5 * g_.cast<DataType>() * (DataType)dt_2_ ));
     Vector3Map dv_predict (_q1.conjugate() * ( _v2 - _v1 - g_.cast<DataType>() * (DataType)dt_ ));
