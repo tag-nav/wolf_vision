@@ -239,6 +239,7 @@ inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> & _p1, const 
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D1, 3)
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D3, 10)
     
+    //TODO : FIXME - This only work between two consecutive measurements ! 
     // Predict delta: d_pred = x2 (-) x1
     Vector3Map dp_predict = (_q1.conjugate() * ( _p2 - _p1 - _v1 * (DataType)dt_ - (DataType)0.5 * g_.cast<DataType>() * (DataType)dt_2_ ));
     Vector3Map dv_predict (_q1.conjugate() * ( _v2 - _v1 - g_.cast<DataType>() * (DataType)dt_ ));
