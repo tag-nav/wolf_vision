@@ -87,14 +87,16 @@ int main(int argc, char** argv)
     feat_imu->addConstraint(constraint_imu);
     last_frame->addConstrainedBy(constraint_imu);
 
+    FrameIMUPtr ref_frame_ptr(std::static_pointer_cast<FrameIMU>(imu_ptr->getFramePtr()));
+
     Eigen::Matrix<wolf::Scalar, 10, 1> expect;
-    Eigen::Vector3s ref_frame_p = origin_frame->getPPtr()->getVector();
-    Eigen::Quaternions ref_frame_o(origin_frame->getOPtr()->getVector().data());
-    Eigen::Vector3s ref_frame_v = origin_frame->getVPtr()->getVector();
+    Eigen::Vector3s ref_frame_p = ref_frame_ptr->getPPtr()->getVector();
+    Eigen::Quaternions ref_frame_o(ref_frame_ptr->getOPtr()->getVector().data());
+    Eigen::Vector3s ref_frame_v = ref_frame_ptr->getVPtr()->getVector();
     Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
     Eigen::Quaternions current_frame_o(last_frame->getOPtr()->getVector().data());
     Eigen::Vector3s current_frame_v = last_frame->getVPtr()->getVector();
-    Eigen::Vector3s acc_bias(origin_frame->getAccBiasPtr()->getVector()), gyro_bias(origin_frame->getGyroBiasPtr()->getVector());
+    Eigen::Vector3s acc_bias(ref_frame_ptr->getAccBiasPtr()->getVector()), gyro_bias(ref_frame_ptr->getGyroBiasPtr()->getVector());
     Eigen::Matrix<wolf::Scalar, 9, 1> residu;
     residu << 0,0,0,  0,0,0,  0,0,0;
     
@@ -144,14 +146,16 @@ int main(int argc, char** argv)
     feat_imu->addConstraint(constraint_imu);
     last_frame->addConstrainedBy(constraint_imu);
 
+    FrameIMUPtr ref_frame_ptr(std::static_pointer_cast<FrameIMU>(imu_ptr->getFramePtr()));
+
     Eigen::Matrix<wolf::Scalar, 10, 1> expect;
-    Eigen::Vector3s ref_frame_p = origin_frame->getPPtr()->getVector();
-    Eigen::Quaternions ref_frame_o(origin_frame->getOPtr()->getVector().data());
-    Eigen::Vector3s ref_frame_v = origin_frame->getVPtr()->getVector();
+    Eigen::Vector3s ref_frame_p = ref_frame_ptr->getPPtr()->getVector();
+    Eigen::Quaternions ref_frame_o(ref_frame_ptr->getOPtr()->getVector().data());
+    Eigen::Vector3s ref_frame_v = ref_frame_ptr->getVPtr()->getVector();
     Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
     Eigen::Quaternions current_frame_o(last_frame->getOPtr()->getVector().data());
     Eigen::Vector3s current_frame_v = last_frame->getVPtr()->getVector();
-    Eigen::Vector3s acc_bias(origin_frame->getAccBiasPtr()->getVector()), gyro_bias(origin_frame->getGyroBiasPtr()->getVector());
+    Eigen::Vector3s acc_bias(ref_frame_ptr->getAccBiasPtr()->getVector()), gyro_bias(ref_frame_ptr->getGyroBiasPtr()->getVector());
     Eigen::Matrix<wolf::Scalar, 9, 1> residu;
     residu << 0,0,0,  0,0,0,  0,0,0;
     
@@ -198,14 +202,16 @@ int main(int argc, char** argv)
     feat_imu->addConstraint(constraint_imu);
     last_frame->addConstrainedBy(constraint_imu);
 
+    FrameIMUPtr ref_frame_ptr(std::static_pointer_cast<FrameIMU>(imu_ptr->getFramePtr()));
+
     Eigen::Matrix<wolf::Scalar, 10, 1> expect;
-    Eigen::Vector3s ref_frame_p = origin_frame->getPPtr()->getVector();
-    Eigen::Quaternions ref_frame_o(origin_frame->getOPtr()->getVector().data());
-    Eigen::Vector3s ref_frame_v = origin_frame->getVPtr()->getVector();
+    Eigen::Vector3s ref_frame_p = ref_frame_ptr->getPPtr()->getVector();
+    Eigen::Quaternions ref_frame_o(ref_frame_ptr->getOPtr()->getVector().data());
+    Eigen::Vector3s ref_frame_v = ref_frame_ptr->getVPtr()->getVector();
     Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
     Eigen::Quaternions current_frame_o(last_frame->getOPtr()->getVector().data());
     Eigen::Vector3s current_frame_v = last_frame->getVPtr()->getVector();
-    Eigen::Vector3s acc_bias(origin_frame->getAccBiasPtr()->getVector()), gyro_bias(origin_frame->getGyroBiasPtr()->getVector());
+    Eigen::Vector3s acc_bias(ref_frame_ptr->getAccBiasPtr()->getVector()), gyro_bias(ref_frame_ptr->getGyroBiasPtr()->getVector());
     Eigen::Matrix<wolf::Scalar, 9, 1> residu;
     residu << 0,0,0,  0,0,0,  0,0,0;
     
