@@ -7,6 +7,8 @@
 #include "state_block.h"
 #include "state_quaternion.h"
 #include "processor_imu.h"
+#include "capture_fix.h"
+#include "ceres_wrapper/ceres_manager.h"
 
 //#define DEBUG_RESULTS
 
@@ -19,13 +21,20 @@ int main(int argc, char** argv)
 
     std::cout << std::endl << "==================== test_constraint_imu ======================" << std::endl;
 
-    bool c0(true), c1(true);// c2(true), c3(true), c4(true);
+    bool c0(false), c1(false);// c2(true), c3(true), c4(true);
     // Wolf problem
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
     Eigen::VectorXs IMU_extrinsics(7);
     IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, shared_ptr<IntrinsicsBase>());
     wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
+
+    // Ceres wrappers
+    ceres::Solver::Options ceres_options;
+    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
+    ceres_options.max_line_search_step_contraction = 1e-3;
+    ceres_options.max_num_iterations = 1e4;
+    CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
 
     // Time and data variables
     TimeStamp t;
@@ -220,6 +229,32 @@ int main(int argc, char** argv)
 
     constraint_imu->getResiduals(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v,residu);
     std::cout << "residuals : " << residu.transpose() << std::endl;
+
+        ///Optimization
+    // PRIOR
+    FrameBasePtr first_frame = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front();
+    SensorBasePtr sensorbase = std::make_shared<SensorBase>("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
+    CaptureFixPtr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensorbase, first_frame->getState().head(7), Eigen::Matrix6s::Identity() * 0.01);
+    first_frame->addCapture(initial_covariance);
+    initial_covariance->process();
+    //std::cout << "initial covariance: constraint " << initial_covariance->getFeatureList().front()->getConstrainedByList().front()->id() << std::endl << initial_covariance->getFeatureList().front()->getMeasurementCovariance() << std::endl;
+
+    // COMPUTE COVARIANCES
+    std::cout << "computing covariances..." << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS
+    std::cout << "computed!" << std::endl;
+
+    /*
+    // SOLVING PROBLEMS
+    ceres::Solver::Summary summary_diff;
+    std::cout << "solving..." << std::endl;
+    Eigen::VectorXs prev_wolf_state = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getState();
+    summary_diff = ceres_manager_wolf_diff->solve();
+    Eigen::VectorXs post_wolf_state = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getState();
+    std::cout << " prev_wolf_state : " << prev_wolf_state.transpose() << "\n post_wolf_state : " << post_wolf_state.transpose() << std::endl;
+    //std::cout << summary_wolf_diff.BriefReport() << std::endl;
+    std::cout << "solved!" << std::endl;
+    */
 
     return 0;
 }
