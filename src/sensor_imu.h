@@ -8,7 +8,13 @@ namespace wolf {
 
 struct IntrinsicsIMU : public IntrinsicsBase
 {
-        // add IMU parameters here
+        //noise
+        wolf::Scalar gyro_noise; //Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
+        wolf::Scalar accel_noise; //Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
+
+        //Sensor Bias
+        Eigen::Vector3s gyro_bias;
+        Eigen::Vector3s accel_bias;
 };
 
 WOLF_PTR_TYPEDEFS(SensorIMU);
