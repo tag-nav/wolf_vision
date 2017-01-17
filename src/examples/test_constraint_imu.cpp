@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
     // Ceres wrappers
     ceres::Solver::Options ceres_options;
-    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
+    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
     CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
@@ -55,7 +55,7 @@ int main(int argc, char** argv)
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_) );
+    CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_, Eigen::Matrix6s::Identity()) );
     imu_ptr->setFramePtr(origin_frame);
 
 
@@ -230,18 +230,25 @@ int main(int argc, char** argv)
     constraint_imu->getResiduals(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v,residu);
     std::cout << "residuals : " << residu.transpose() << std::endl;
 
+    ///having a look at covariances
+    Eigen::MatrixXs predelta_cov;
+    predelta_cov.resize(9,9);
+    predelta_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
+    std::cout << "predelta_cov : \n" << predelta_cov << std::endl; 
+
         ///Optimization
     // PRIOR
-    FrameBasePtr first_frame = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front();
-    SensorBasePtr sensorbase = std::make_shared<SensorBase>("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
-    CaptureFixPtr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensorbase, first_frame->getState().head(7), Eigen::Matrix6s::Identity() * 0.01);
-    first_frame->addCapture(initial_covariance);
-    initial_covariance->process();
+    //FrameBasePtr first_frame = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front();
+    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front());
+    //SensorBasePtr sensorbase = std::make_shared<SensorBase>("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
+    //CaptureFixPtr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensorbase, first_frame->getState().head(7), Eigen::Matrix6s::Identity() * 0.01);
+    //first_frame->addCapture(initial_covariance);
+    //initial_covariance->process();
     //std::cout << "initial covariance: constraint " << initial_covariance->getFeatureList().front()->getConstrainedByList().front()->id() << std::endl << initial_covariance->getFeatureList().front()->getMeasurementCovariance() << std::endl;
 
     // COMPUTE COVARIANCES
     std::cout << "computing covariances..." << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS
     std::cout << "computed!" << std::endl;
 
     /*
@@ -254,6 +261,12 @@ int main(int argc, char** argv)
     std::cout << " prev_wolf_state : " << prev_wolf_state.transpose() << "\n post_wolf_state : " << post_wolf_state.transpose() << std::endl;
     //std::cout << summary_wolf_diff.BriefReport() << std::endl;
     std::cout << "solved!" << std::endl;
+    */
+
+    /*
+    std::cout << "WOLF AUTO DIFF" << std::endl;
+    std::cout << "Jacobian evaluation: " << summary_wolf.jacobian_evaluation_time_in_seconds << std::endl;
+    std::cout << "Total time: " << summary_wolf.total_time_in_seconds << std::endl;
     */
 
     return 0;
