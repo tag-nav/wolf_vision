@@ -70,7 +70,8 @@ int main(int argc, char** argv)
 
     // Set the origin
     Eigen::VectorXs x0(16);
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0.05,0.05,.08,  0.02,0.02,.02; // Try some non-zero biases
+    //x0 << 0,0,0,  0,0,0,1,  0,0,0,  0.05,0.05,.08,  0.02,0.02,.02; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0.25,0.01,.15,  -0.014,0.01,-.01; // Try some non-zero biases
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     //create a keyframe at origin
