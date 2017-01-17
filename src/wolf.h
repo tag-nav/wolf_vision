@@ -51,13 +51,15 @@ typedef double Scalar;        // Use this for double, 64 bit precision
  */
 typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE Size;
 
+#define M_TORAD 0.017453292519943295769236907684886127134  // pi / 180
+#define M_TODEG 57.295779513082320876798154814105170332    // 180 / pi
+
 namespace Constants{
 
 // Wolf standard tolerance
 const Scalar EPS = 1e-8;
 // Wolf smmmmall tolerance
 const Scalar EPS_SMALL = 1e-16;
-
 }
 
 } // namespace wolf
@@ -103,6 +105,62 @@ typedef Rotation2D<wolf::Scalar> Rotation2Ds;               ///< Rotation2D of r
 }
 
 namespace wolf {
+
+/*/////////////////////////////////////////////////////////
+ * Check Matrix sizes, both statically and dynamically
+ *
+ * Help:
+ *
+ * The rotations.h file implements many template functions using Eigen Matrix and Quaternions, in different versions
+ * (Static, Dynamic, Map). In order to achieve full templatization, we use extensively a prototype of this kind:
+ *
+ * template<typename Derived>
+ * inline Eigen::Matrix<typename Derived::Scalar, 3, 3> function(const Eigen::MatrixBase<Derived>& _v){
+ *
+ *     MatrixSizeCheck<3,1>::check(_v);
+ *     typedef typename Derived::Scalar T;
+ *
+ *     ... code ...
+ *
+ *     return M;
+ *     }
+ *
+ * The function :  MatrixSizeCheck <Rows, Cols>::check(M)   checks that the Matrix M is size Rows x Cols.
+ * This check is performed statically or dynamically, depending on the type of argument provided.
+ */
+template<int Size, int DesiredSize>
+struct StaticSizeCheck
+{
+        template<typename T>
+        StaticSizeCheck(const T&)
+        {
+            static_assert(Size == DesiredSize, "Size of static Vector or Matrix does not match");
+        }
+};
+//
+template<int DesiredSize>
+struct StaticSizeCheck<Eigen::Dynamic, DesiredSize>
+{
+        template<typename T>
+        StaticSizeCheck(const T& t)
+        {
+            assert(t == DesiredSize && "Size of dynamic Vector or Matrix does not match");
+        }
+};
+//
+template<int DesiredR, int DesiredC>
+struct MatrixSizeCheck
+{
+        template<typename T>
+        static void check(const T& t)
+        {
+            StaticSizeCheck<T::RowsAtCompileTime, DesiredR>(t.rows());
+            StaticSizeCheck<T::ColsAtCompileTime, DesiredC>(t.cols());
+        }
+};
+//
+// End of check matrix sizes /////////////////////////////////////////////////
+
 
 /** \brief Enumeration of frame types: key-frame or non-key-frame
  */

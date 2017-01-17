@@ -12,8 +12,8 @@ ProcessorOdom3D::ProcessorOdom3D(ProcessorOdom3DParamsPtr _params, SensorOdom3DP
                 q1_(nullptr), q2_(nullptr), q_out_(nullptr)
         {
             setup(_sensor_ptr);
-            jacobian_delta_preint_.setIdentity(delta_cov_size_, delta_cov_size_);
-            jacobian_delta_.setIdentity(delta_cov_size_, delta_cov_size_);
+            jacobian_delta_preint_.setZero(delta_cov_size_, delta_cov_size_);
+            jacobian_delta_.setZero(delta_cov_size_, delta_cov_size_);
         }
 
 
@@ -110,13 +110,19 @@ void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen
      * dDo'/ddp = 0
      * dDo'/ddo = I
      */
+
     // temporaries
     Eigen::Matrix3s DR = q1_.matrix();
     Eigen::Matrix3s dR = q2_.matrix();
-    // fill Jacobians -- parts not shown are constant and set at construction time.
+
+    // fill Jacobians
+    _jacobian1.setIdentity();
     _jacobian1.block<3, 3>(0, 3) = -DR * skew(p2_); // (Sola 16, ex. B.3.2 and Sec. 7.2.3)
     _jacobian1.block<3, 3>(3, 3) = dR.transpose(); // (Sola 16, Sec. 7.2.3)
+
+    _jacobian2.setIdentity();
     _jacobian2.block<3, 3>(0, 0) = DR; // (Sola 16, Sec. 7.2.3)
+
     // perform composition here to avoid aliasing problems if _delta1 and _delta_plus_delta share the same storage
     p_out_ = p1_ + q1_ * p2_;
     q_out_ = q1_ * q2_;
@@ -252,7 +258,7 @@ ProcessorBasePtr ProcessorOdom3D::create(const std::string& _unique_name, const 
     SensorOdom3DPtr sen_odo =std::static_pointer_cast<SensorOdom3D>(_sen_ptr);
 
     // construct processor
-    std::shared_ptr<ProcessorOdom3D> prc_odo = std::make_shared<ProcessorOdom3D>(prc_odo_params, sen_odo);
+    ProcessorOdom3DPtr prc_odo = std::make_shared<ProcessorOdom3D>(prc_odo_params, sen_odo);
 
     // setup processor
     prc_odo->setName(_unique_name);

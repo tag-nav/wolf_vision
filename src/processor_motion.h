@@ -433,7 +433,7 @@ class ProcessorMotion : public ProcessorBase
          * ```
          * where again the operator (*) needs to be defined properly.
          *
-         * ### Defining the operators (*) and (+)
+         * ### Defining the operators (*), (+), and (-)
          *
          * We often break down these 'd' and 'D' deltas into chunks of data, e.g.
          *
@@ -444,7 +444,9 @@ class ProcessorMotion : public ProcessorBase
          *     etc...
          *
          * which makes it easier to define the operators (+) and (*).
-         * In effect, defining (*) is now easy:
+         * In effect, defining (*) is now easy. We examine them below.
+         *
+         * #### Operator (*)
          *
          *   - for linear magnitudes, (*) is the regular product *:
          * ```
@@ -458,7 +460,25 @@ class ProcessorMotion : public ProcessorBase
          * ```
          *     dq_I = 1.slerp(tau, dq_F) // '1' is the unit quaternion
          * ```
+         *
+         * #### Operator (+)
+         *
          * As for the operator (+), we simply make use of `deltaPlusDelta()`, which is implemented in each derived class.
+         *
+         *
+         * #### Operator (-)
+         *
+         * For the operator (-) we have two options. We might implement it explicitly inside interpolate(),
+         * or through a `deltaMinusDelta()` defined akin to `deltaPlusDelta()`.
+         *
+         * By now, this `deltaMinusDelta()` is not enforced by this class as an abstract method,
+         * and its implementation in derived classes is up to the user.
+         *
+         * The general rule for the operator (-) is that it is the inverse of (+).
+         * But this needs to be taken carefully, since (+) is not commutative in the general case.
+         * therefore, we must define this inverse in the following way:
+         *
+         *     C = B (-) A  <==> A (+) C = B        (4)
          *
          * ### Computing `d_S`
          *
@@ -466,11 +486,7 @@ class ProcessorMotion : public ProcessorBase
          *
          *     d_S = d_F (-) d_I
          *
-         * where the operator (-) might be implemented explicitly,
-         * or through a `deltaMinusDelta()` defined akin to `deltaPlusDelta()`.
-         *
-         * By now, this `deltaMinusDelta()` is not enforced by this class as an abstract method,
-         * and its implementation in derived classes is up to the user.
+         * with the (-) operator defined according to (4), that is, `d_F = d_I (+) d_S`, as can be also observed in the sketch above.
          *
          * For simple pose increments, we can use a local implementation:
          *

@@ -21,6 +21,7 @@ set(GTEST_DISABLE_PTHREADS OFF)
 # Download GoogleTest
 ExternalProject_Add(googletest
     GIT_REPOSITORY https://github.com/google/googletest.git
+    # TIMEOUT 1 # We'll try this
     CMAKE_ARGS -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG:PATH=DebugLibs
     -DCMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE:PATH=ReleaseLibs
     -DCMAKE_CXX_FLAGS=${MSVC_COMPILER_DEFS}
@@ -30,6 +31,7 @@ ExternalProject_Add(googletest
     PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
     # Disable install step
     INSTALL_COMMAND ""
+    # UPDATE_DISCONNECTED 1
 )
 
 # Get GTest source and binary directories from CMake project

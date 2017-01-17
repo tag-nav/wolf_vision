@@ -11,37 +11,30 @@ int main(int argc, char** argv)
 
     std::cout << std::endl << "==================== tracker ORB test ======================" << std::endl;
 
-    cv::VideoCapture capture;
+    cv::Mat image;
     const char * filename;
     if (argc == 1)
     {
-//        filename = "/home/jtarraso/Vídeos/gray.mp4";
-        filename = "/home/jtarraso/Imágenes/Test_ORB.png";
-        capture.open(filename);
-    }
-    else if (std::string(argv[1]) == "0")
-    {
-        //camera
-        filename = "0";
-        capture.open(0);
+        std::cout <<" Usage: ./test_ROI_ORB image_file_name" << std::endl;
+        return -1;
     }
     else
     {
         filename = argv[1];
-        capture.open(filename);
+        image = cv::imread(filename, CV_LOAD_IMAGE_GRAYSCALE);
     }
-    std::cout << "Input video file: " << filename << std::endl;
-    if(!capture.isOpened()) std::cout << "failed" << std::endl; else std::cout << "succeded" << std::endl;
-    capture.set(CV_CAP_PROP_POS_MSEC, 3000);
-
-    unsigned int img_width  = capture.get(CV_CAP_PROP_FRAME_WIDTH);
-    unsigned int img_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+    std::cout << "Input image file: " << filename << std::endl;
+    if(!image.data)
+    {
+        std::cout << "failed" << std::endl;
+        return -1;
+    }
+    else std::cout << "succeded" << std::endl;
+    unsigned int img_width = image.cols;
+    unsigned int img_height = image.rows;
     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
 
-
-
     cv::Feature2D* detector_descriptor_ptr_;
-//    cv::DescriptorMatcher* matcher_ptr_;
 
     unsigned int nfeatures = 20;
     float scaleFactor = 1.2;
@@ -52,11 +45,6 @@ int main(int argc, char** argv)
     unsigned int scoreType = 0;              //#enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
     unsigned int patchSize = 31;
 
-//    unsigned int fastThreshold = 20;
-
-    unsigned int roi_width = 50;
-    unsigned int roi_heigth = 50;
-
     detector_descriptor_ptr_ = new cv::ORB(nfeatures, //
                                            scaleFactor, //
                                            nlevels, //
@@ -65,57 +53,25 @@ int main(int argc, char** argv)
                                            WTA_K, //
                                            scoreType, //
                                            patchSize);//,
-//                                           fastThreshold);
-
-//    unsigned int nominal_pattern_radius = 0;
-//    unsigned int pattern_radius = (unsigned int)( (nominal_pattern_radius) * pow(scaleFactor, nlevels-1));
-
-//    std::cout << "nominal pattern radius: " << _dd_params->nominal_pattern_radius << std::endl;
-//    std::cout << "scale factor: " << params_orb->scaleFactor << std::endl;
-//    std::cout << "nlevels: " << params_orb->nlevels << std::endl;
-
-//    unsigned int size_bits = detector_descriptor_ptr_->descriptorSize() * 8;
-
-//    matcher_ptr_ = new cv::BFMatcher(6);
-
-
-
-
-    unsigned int buffer_size = 20;
-    std::vector<cv::Mat> frame(buffer_size);
-    unsigned int f  = 1;
-    capture >> frame[f % buffer_size];
-
-
-//    image_ptr = new CaptureImage(t, camera_ptr_, frame[f % buffer_size]);
-
 
     std::vector<cv::KeyPoint> target_keypoints;
-//    std::vector<cv::KeyPoint> tracked_keypoints_;
-//    std::vector<cv::KeyPoint> tracked_keypoints_2;
-//    std::vector<cv::KeyPoint> current_keypoints;
-    cv::Mat target_descriptors;
-//    cv::Mat tracked_descriptors;
-//    cv::Mat tracked_descriptors2;
-//    cv::Mat current_descriptors;
-    cv::Mat image_original = frame[f % buffer_size].clone();
-    cv::Mat image;
-    cv::Mat image_graphics = image_original;
     cv::KeyPointsFilter keypoint_filter;
 
 
     unsigned int roi_x;
     unsigned int roi_y;
+    unsigned int roi_width = 50;
+    unsigned int roi_heigth = 50;
 
-    roi_y = (102) - (roi_width / 2);
-
-    for(unsigned int i = 0; i < 2; i++)
+    for(unsigned int i = 0; i < 3; i++)
     {
         if(i == 0)
-            roi_y = (102) - (roi_width / 2);
+            roi_y = 102 - (roi_width / 2);
+        else if(i == 1)
+            roi_y = 250 - (roi_width / 2);
         else
-            roi_y = (476) - (roi_width / 2);
-        for(roi_x = 0; roi_x < img_width; roi_x++)
+            roi_y = 476 - (roi_width / 2);
+        for(roi_x = 0; roi_x < img_width; roi_x += 20)
         {
 
             cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
@@ -149,27 +105,31 @@ int main(int argc, char** argv)
                 roi_inflate.height = roi_inflate.height+diff_height;
             }
 
-
-            image = image_original.clone();
-
             cv::Mat image_roi = image(roi_inflate);
             detector_descriptor_ptr_->detect(image_roi, target_keypoints);
-            detector_descriptor_ptr_->compute(image_roi, target_keypoints, target_descriptors);
 
-            keypoint_filter.retainBest(target_keypoints,1);
-            std::cout << "number of keypoints found: " << target_keypoints.size() << std::endl;
-            for(unsigned int i = 0; i < target_keypoints.size(); i++)
+            if (!target_keypoints.empty())
             {
-                target_keypoints[i].pt.x += roi_inflate.x;
-                target_keypoints[i].pt.y += roi_inflate.y;
+                std::cout << "Keypoints detected: " << target_keypoints.size();
+                keypoint_filter.retainBest(target_keypoints,1);
+                std::cout << " - retained: " << target_keypoints.size();
+                std::cout << "  at: ";
+                for(unsigned int i = 0; i < target_keypoints.size(); i++)
+                {
+                    target_keypoints[i].pt.x += roi_inflate.x;
+                    target_keypoints[i].pt.y += roi_inflate.y;
+                    std::cout << "[ " << target_keypoints[i].pt.x << " , " << target_keypoints[i].pt.y << " ] ";
+                }
+                std::cout << std::endl;
             }
-            image_graphics = image_original.clone();
+
+            cv::Mat image_graphics = image.clone();
             cv::drawKeypoints(image_graphics,target_keypoints,image_graphics);
             cv::rectangle(image_graphics, roi, cv::Scalar(255.0, 0.0, 255.0), 1, 8, 0);
-            //cv::circle(image_graphics, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
+            cv::rectangle(image_graphics, roi_inflate, cv::Scalar(255.0, 255.0, 0.0), 1, 8, 0);
 
             cv::imshow("test",image_graphics);
-            cv::waitKey(0);
+            cv::waitKey(5);
 
         }
     }

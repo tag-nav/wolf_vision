@@ -9,13 +9,14 @@
 
 
 #include "utils_gtest.h"
-#include "../logging.h"
 
-#include "../processor_odom_3D.h"
+#include "wolf.h"
+#include "logging.h"
 
-#include "../wolf.h"
+#include "processor_odom_3D.h"
 
 #include <iostream>
+
 
 #define JAC_NUMERIC(prc_ptr, D, d, dt, J_D, J_d, dx) \
 {   VectorXs Do(7); \
@@ -25,10 +26,13 @@
     VectorXs DDo(7); \
     for (int i = 0; i< 7; i++) {\
         dd = d;\
+        DD = D; \
         dd(i) += dx;\
         prc_ptr->deltaPlusDelta(D, dd, dt, DDo);\
         J_d.col(i) = (DDo - Do)/dx; \
+        dd = d;\
         DD = D; \
+        DD(i) += dx; \
         prc_ptr->deltaPlusDelta(DD, d, dt, DDo); \
         J_D.col(i) = (DDo - Do)/dx; \
     }\
@@ -38,8 +42,116 @@ using namespace Eigen;
 using namespace std;
 using namespace wolf;
 
+/** Gain access to members of ProcessorOdom3D
+ */
+class ProcessorOdom3DTest : public ProcessorOdom3D
+{
+    public:
+        ProcessorOdom3DTest();
 
-TEST(TestOdom3D, Interpolate0) // basic test
+        // getters :-D !!
+        VectorXs& delta() {return delta_;}
+        VectorXs& deltaInt() {return delta_integrated_;}
+        MatrixXs& deltaCov() {return delta_cov_;}
+        MatrixXs& deltaIntCov() {return delta_integrated_cov_;}
+        Scalar& kdd() {return k_disp_to_disp_;}
+        Scalar& kdr() {return k_disp_to_rot_;}
+        Scalar& krr() {return k_rot_to_rot_;}
+        Scalar& dvar_min() {return min_disp_var_;}
+        Scalar& rvar_min() {return min_rot_var_;}
+};
+ProcessorOdom3DTest::ProcessorOdom3DTest() : ProcessorOdom3D()
+{
+    dvar_min() = 0.5;
+    rvar_min() = 0.25;
+}
+
+TEST(ProcessorOdom3D, data2delta)
+{
+    // One instance of the processor to test
+    ProcessorOdom3DTest prc;
+
+    // input data
+    Vector6s data; data.setRandom();
+    Scalar dt = 1; // irrelevant, just for the API.
+
+    // Build delta from Eigen tools
+    Vector3s data_dp = data.head<3>();
+    Vector3s data_do = data.tail<3>();
+    Vector3s delta_dp = data_dp;
+    Quaternions delta_dq = v2q(data_do);
+    Vector7s delta;
+    delta.head<3>() = delta_dp;
+    delta.tail<4>() = delta_dq.coeffs();
+
+    // construct covariance from processor parameters and motion magnitudes
+    Scalar disp = data_dp.norm();
+    Scalar rot = data_do.norm();
+    Scalar dvar = prc.dvar_min() + prc.kdd()*disp;
+    Scalar rvar = prc.rvar_min() + prc.kdr()*disp + prc.krr()*rot;
+    Vector6s diag; diag << dvar, dvar, dvar, rvar, rvar, rvar;
+    Matrix6s data_cov = diag.asDiagonal();
+    Matrix6s delta_cov = data_cov;
+
+    // call the function under test
+    prc.data2delta(data, data_cov, dt);
+
+    ASSERT_TRUE((prc.delta() - delta).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((prc.deltaCov() - delta_cov).isMuchSmallerThan(1, Constants::EPS_SMALL));
+
+}
+
+TEST(ProcessorOdom3D, deltaPlusDelta)
+{
+    ProcessorOdom3DTest prc;
+
+    VectorXs D(7); D.setRandom(); D.tail<4>().normalize();
+    VectorXs d(7); d.setRandom(); d *= 1; d.tail<4>().normalize();
+
+    // Integrated delta value to check aginst
+    // Dp_int <-- Dp + Dq * dp
+    // Dq_int <-- Dq * dq
+    VectorXs D_int_check(7);
+    D_int_check.head<3>() = D.head<3>() + Quaternions(D.data()+3) * d.head<3>();
+    D_int_check.tail<4>() = (Quaternions(D.data()+3) * Quaternions(d.data()+3)).coeffs();
+
+    Scalar dt = 1; // dummy, not used in Odom3D
+
+    VectorXs D_int(7);
+
+    prc.deltaPlusDelta(D, d, dt, D_int);
+
+    ASSERT_TRUE((D_int - D_int_check).isMuchSmallerThan(1, 1e-10))
+        << "\nDpd  : " << D_int.transpose()
+        << "\ncheck: " << D_int_check.transpose();
+}
+
+TEST(ProcessorOdom3D, deltaPlusDelta_Jac)
+{
+    std::shared_ptr<ProcessorOdom3DTest> prc_ptr = std::make_shared<ProcessorOdom3DTest>();
+
+    VectorXs D(7); D.setRandom(); D.tail<4>().normalize();
+    VectorXs d(7); d.setRandom(); d *= 1; d.tail<4>().normalize();
+    Scalar dt = 1;
+    VectorXs Do(7);
+    MatrixXs D_D(6,6);
+    MatrixXs D_d(6,6);
+
+    prc_ptr->deltaPlusDelta(D, d, dt, Do, D_D, D_d);
+
+    WOLF_DEBUG("DD:\n ", D_D);
+    WOLF_DEBUG("Dd:\n ", D_d);
+
+    MatrixXs J_D(7,7), J_d(7,7);
+
+    JAC_NUMERIC(prc_ptr, D, d, dt, J_D, J_d, Constants::EPS);
+    WOLF_DEBUG("J_D:\n ", J_D);
+    WOLF_DEBUG("J_d:\n ", J_d);
+
+}
+
+
+TEST(ProcessorOdom3D, Interpolate0) // basic test
 {
     /* Conditions:
      * ref d = id
@@ -86,7 +198,7 @@ TEST(TestOdom3D, Interpolate0) // basic test
 
 }
 
-TEST(TestOdom3D, Interpolate1) // delta algebra test
+TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
 {
     ProcessorOdom3D prc;
 
@@ -260,7 +372,7 @@ TEST(TestOdom3D, Interpolate1) // delta algebra test
 
 }
 
-TEST(TestOdom3D, Interpolate2) // timestamp out of bounds test
+TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
 {
     ProcessorOdom3D prc;
 
@@ -348,7 +460,7 @@ TEST(TestOdom3D, Interpolate2) // timestamp out of bounds test
     I = prc.interpolate(R, S, t_i);
 
     WOLF_DEBUG("* I.d = ", I.delta_.transpose());
-    WOLF_DEBUG("  ri  = ", prc.deltaZero());
+    WOLF_DEBUG("  ri  = ", prc.deltaZero().transpose());
     ASSERT_TRUE((I.delta_  - prc.deltaZero()).isMuchSmallerThan(1.0, Constants::EPS));
 
     WOLF_DEBUG("  I.D = ", I.delta_integr_.transpose());
@@ -378,7 +490,7 @@ TEST(TestOdom3D, Interpolate2) // timestamp out of bounds test
     ASSERT_TRUE((I.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS));
 
     WOLF_DEBUG("* S.d = ", S.delta_.transpose());
-    WOLF_DEBUG("  is  = ", prc.deltaZero());
+    WOLF_DEBUG("  is  = ", prc.deltaZero().transpose());
     ASSERT_TRUE((S.delta_ - prc.deltaZero()).isMuchSmallerThan(1.0, Constants::EPS));
 
     WOLF_DEBUG("  S.D = ", S.delta_integr_.transpose());

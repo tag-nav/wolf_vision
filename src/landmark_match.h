@@ -7,6 +7,10 @@
 //wolf nampseace
 namespace wolf {
     
+// Map of Feature - Landmark matches
+WOLF_STRUCT_PTR_TYPEDEFS(LandmarkMatch);
+typedef std::map<FeatureBasePtr, LandmarkMatchPtr> LandmarkMatchMap;
+
 /** \brief Match between a feature and a landmark
  *
  * Match between a feature and a landmark
@@ -29,9 +33,6 @@ struct LandmarkMatch
     }
 };
 
-// Map of Feature - Landmark matches
-typedef std::shared_ptr<LandmarkMatch> LandmarkMatchPtr;
-typedef std::map<FeatureBasePtr, LandmarkMatchPtr> LandmarkMatchMap;
 
 }//end namespace
 

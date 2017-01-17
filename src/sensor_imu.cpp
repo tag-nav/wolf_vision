@@ -27,7 +27,7 @@ SensorBasePtr SensorIMU::create(const std::string& _unique_name, const Eigen::Ve
     StateBlockPtr ori_ptr  = std::make_shared<StateQuaternion>(_extrinsics_pq.tail(4), true);
     StateBlockPtr bias_ptr = std::make_shared<StateBlock>(6, false); // We'll have the IMU biases here
 
-    std::shared_ptr<SensorIMU> sen = std::make_shared<SensorIMU>(pos_ptr, ori_ptr, bias_ptr);
+    SensorIMUPtr sen = std::make_shared<SensorIMU>(pos_ptr, ori_ptr, bias_ptr);
     sen->setName(_unique_name);
     return sen;
 }

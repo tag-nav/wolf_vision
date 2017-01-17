@@ -13,60 +13,6 @@
 namespace wolf
 {
 
-/*/////////////////////////////////////////////////////////
- * Check Matrix sizes, both statically and dynamically
- *
- * Help:
- *
- * The rotations.h file implements many template functions using Eigen Matrix and Quaternions, in different versions
- * (Static, Dynamic, Map). In order to achieve full templatization, we use extensively a prototype of this kind:
- *
- * template<typename Derived>
- * inline Eigen::Matrix<typename Derived::Scalar, 3, 3> function(const Eigen::MatrixBase<Derived>& _v){
- *
- *     MatrixSizeCheck<3,1>::check(_v);
- *     typedef typename Derived::Scalar T;
- *
- *     ... code ...
- *
- *     return M;
- *     }
- *
- * The function :  MatrixSizeCheck <Rows, Cols>::check(M)   checks that the Matrix M is size Rows x Cols.
- * This check is performed statically or dynamically, depending on the type of argument provided.
- */
-
-template<int Size, int DesiredSize>
-struct StaticSizeCheck
-{
-        template<typename T>
-        StaticSizeCheck(const T&)
-        {
-            static_assert(Size == DesiredSize, "Size of static Vector or Matrix does not match");
-        }
-};
-
-template<int DesiredSize>
-struct StaticSizeCheck<Eigen::Dynamic, DesiredSize>
-{
-        template<typename T>
-        StaticSizeCheck(const T& t)
-        {
-            assert(t == DesiredSize && "Size of dynamic Vector or Matrix does not match");
-        }
-};
-
-template<int DesiredR, int DesiredC>
-struct MatrixSizeCheck
-{
-        template<typename T>
-        static void check(const T& t)
-        {
-            StaticSizeCheck<T::RowsAtCompileTime, DesiredR>(t.rows());
-            StaticSizeCheck<T::ColsAtCompileTime, DesiredC>(t.cols());
-        }
-};
-
 //////////////////////////////////////////////////////////////
 // Simple angular functions
 template<typename T>
@@ -74,6 +20,18 @@ inline T pi2pi(const T& angle)
 {
     return (angle > (T)0 ? fmod(angle + (T)M_PI, (T)(2 * M_PI)) - (T)M_PI :
             fmod(angle - (T)M_PI, (T)(2 * M_PI)) + (T)M_PI);
+}
+
+template<typename T>
+inline T toRad(const T& deg)
+{
+    return (T)M_TORAD * deg;
+}
+
+template<typename T>
+inline T toDeg(const T& rad)
+{
+    return (T)M_TODEG * rad;
 }
 
 //////////////////////////////////////////////////////////////////
@@ -126,12 +84,13 @@ inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<D
     }
 }
 
-template<typename T>
-inline Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q)
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v(const Eigen::QuaternionBase<Derived>& _q)
 {
+    typedef typename Derived::Scalar T;
     Eigen::Matrix<T, 3, 1> vec = _q.vec();
     T vecnorm = vec.norm();
-    if (vecnorm > wolf::Constants::EPS)
+    if (vecnorm > wolf::Constants::EPS_SMALL)
     { // regular angle-axis conversion
         T angle = atan2(vecnorm, _q.w());
         return vec * angle / vecnorm;

@@ -1,13 +1,6 @@
 # Retrieve googletest from github & compile
 add_subdirectory(gtest)
 
-# Include config.h directory at first.
-include_directories(${PROJECT_BINARY_DIR}/conf/)
-
-# Include third party directory.
-include_directories(${PROJECT_SOURCE_DIR}/third_party/spdlog/include/)
-
-
 
 ## Added these two include_dirs: ######################
 #
@@ -73,6 +66,10 @@ target_link_libraries(gtest_local_param ${PROJECT_NAME})
 wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
 target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
 
+# Pinhole test
+wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
+target_link_libraries(gtest_pinhole ${PROJECT_NAME})
+
 # Problem class test
 wolf_add_gtest(gtest_problem gtest_problem.cpp)
 target_link_libraries(gtest_problem ${PROJECT_NAME})
@@ -92,6 +89,10 @@ target_link_libraries(gtest_motion_2d ${PROJECT_NAME})
 # ProcessorOdom3D class test
 wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
 target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
+
+# ROI test
+wolf_add_gtest(gtest_roi_ORB gtest_roi_ORB.cpp)
+target_link_libraries(gtest_roi_ORB ${PROJECT_NAME})
 
 # Rotation test
 wolf_add_gtest(gtest_rotation gtest_rotation.cpp)

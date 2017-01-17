@@ -39,7 +39,7 @@ int main()
     /* Do this while there aren't extrinsic parameters on the yaml */
 
     SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", extr, wolf_root + "/src/examples/camera_params_ueye_radial_dist.yaml");
-    std::shared_ptr<SensorCamera> camera_ptr_ = std::static_pointer_cast<SensorCamera>(sensor_ptr);
+    SensorCameraPtr camera_ptr_ = std::static_pointer_cast<SensorCamera>(sensor_ptr);
 
     // PROCESSOR
     // one-liner API
@@ -64,7 +64,7 @@ int main()
     wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
 
     // Capture
-    std::shared_ptr<CaptureImage> image_ptr;
+    CaptureImagePtr image_ptr;
     t.setToNow();
     cv::Mat frame; //puede que necesite una imagen
 
@@ -76,7 +76,7 @@ int main()
     cv::KeyPoint kp; kp.pt = {10,20};
     cv::Mat desc;
 
-    std::shared_ptr<FeaturePointImage> feat_point_image_ptr = std::make_shared<FeaturePointImage>(kp, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_point_image_ptr = std::make_shared<FeaturePointImage>(kp, desc, Eigen::Matrix2s::Identity());
     image_ptr->addFeature(feat_point_image_ptr);
 
     FrameBasePtr anchor_frame = std::make_shared< FrameBase>(t,std::make_shared<StateBlock>(frame_val.head(3)), std::make_shared<StateQuaternion>(frame_val.tail(4)));
@@ -111,7 +111,7 @@ int main()
     vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/distance};
     std::cout << "vec_homogeneous: " << vec_homogeneous.transpose() << std::endl;
 
-    std::shared_ptr<LandmarkAHP> landmark = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, image_ptr->getSensorPtr(), feat_point_image_ptr->getDescriptor());
+    LandmarkAHPPtr landmark = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, image_ptr->getSensorPtr(), feat_point_image_ptr->getDescriptor());
 
     std::cout << "Landmark AHP created" << std::endl;
 

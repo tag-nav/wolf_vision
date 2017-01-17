@@ -54,7 +54,7 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
     assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
 
     std::shared_ptr<IntrinsicsCamera> intrinsics_ptr = std::static_pointer_cast<IntrinsicsCamera>(_intrinsics);
-    std::shared_ptr<SensorCamera> sen_ptr = std::make_shared<SensorCamera>(_extrinsics_pq, intrinsics_ptr);
+    SensorCameraPtr sen_ptr = std::make_shared<SensorCamera>(_extrinsics_pq, intrinsics_ptr);
     sen_ptr->setName(_unique_name);
 
 //    std::cout << "Created camera:\n\tintrinsics   : " << sen_ptr->getIntrinsicPtr()->getVector().transpose() << std::endl;
