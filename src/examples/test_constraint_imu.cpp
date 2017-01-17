@@ -46,17 +46,15 @@ int main(int argc, char** argv)
     // Set the origin
     Eigen::VectorXs x0(16);
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.001,  0,0,.002; // Try some non-zero biases
-    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
+    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t); //this also creates a keyframe at origin
+    wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix(); //fix the keyframe at origin
 
-    //create a keyframe at origin
-    TimeStamp ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
+    TimeStamp ts(0);
     Eigen::VectorXs origin_state = x0;
-    FrameIMUPtr origin_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, origin_state);
-    wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_, Eigen::Matrix6s::Identity()) );
-    imu_ptr->setFramePtr(origin_frame);
+    imu_ptr->setFramePtr(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back());
 
 
     // set variables
@@ -229,6 +227,11 @@ int main(int argc, char** argv)
 
     constraint_imu->getResiduals(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v,residu);
     std::cout << "residuals : " << residu.transpose() << std::endl;
+
+    if(wolf_problem_ptr_->check(1)){
+        wolf_problem_ptr_->print(4,1,1,1);
+    }
+
 
     ///having a look at covariances
     Eigen::MatrixXs predelta_cov;
