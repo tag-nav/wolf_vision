@@ -102,6 +102,10 @@ target_link_libraries(gtest_roi_ORB ${PROJECT_NAME})
 wolf_add_gtest(gtest_rotation gtest_rotation.cpp)
 target_link_libraries(gtest_rotation ${PROJECT_NAME})
 
+# SensorIMU test
+wolf_add_gtest(gtest_sensor_imu gtest_sensor_imu.cpp)
+target_link_libraries(gtest_sensor_imu ${PROJECT_NAME})
+
 # TimeStamp class test
 wolf_add_gtest(gtest_time_stamp gtest_time_stamp.cpp)
 target_link_libraries(gtest_time_stamp ${PROJECT_NAME})

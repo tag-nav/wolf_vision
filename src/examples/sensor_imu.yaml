@@ -1,0 +1,7 @@
+sensor type: "IMU"              # This must match the KEY used in the SensorFactory. Otherwise it is an error.
+sensor name: "Main IMU"        # This is ignored. The name provided to the SensorFactory prevails
+motion variances: 
+    accel_noise:   0.02  # Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
+    gyro_noise:    0.02  # Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
+    ab_constr:     0.01  # micro_g/sec
+    wb_constr:   0.01  # rad/sec
