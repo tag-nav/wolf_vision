@@ -8,6 +8,9 @@ namespace wolf {
 
 WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsIMU);
 
+//TODO : bias_ptr defined as intrinsics StateBlock in constructor (see SensorBase) but here we also have another intrinsics
+//       This is confusing.
+
 struct IntrinsicsIMU : public IntrinsicsBase
 {
         //noise
