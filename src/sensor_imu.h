@@ -66,12 +66,37 @@ class SensorIMU : public SensorBase
          **/
         SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPtr params, StateBlockPtr _a_w_biases_ptr = nullptr);
 
+        Scalar gyroNoise() const;
+        Scalar accelNoise() const;
+        Scalar wbConstr() const;
+        Scalar abConstr() const;
+
         virtual ~SensorIMU();
 
     public:
         static SensorBasePtr create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBasePtr _intrinsics = nullptr);
 
 };
+
+inline Scalar SensorIMU::gyroNoise() const
+{
+    return gyro_noise;
+}
+
+inline Scalar SensorIMU::accelNoise() const
+{
+    return accel_noise;
+}
+
+inline Scalar SensorIMU::wbConstr() const
+{
+    return wb_constr;
+}
+
+inline Scalar SensorIMU::abConstr() const
+{
+    return ab_constr;
+}
 
 } // namespace wolf
 
