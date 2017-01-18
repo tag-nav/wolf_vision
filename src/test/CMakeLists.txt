@@ -38,6 +38,10 @@ target_link_libraries(gtest_example ${PROJECT_NAME})      #
 #           ==== IN ALPHABETICAL ORDER! ====              #
 #                                                         #
 
+# Ceres solver tests
+wolf_add_gtest(gtest_ceres gtest_ceres.cpp)
+target_link_libraries(gtest_ceres ${PROJECT_NAME})
+
 # ConstraintIMU test
 wolf_add_gtest(gtest_constraint_imu gtest_constraint_imu.cpp)
 target_link_libraries(gtest_constraint_imu ${PROJECT_NAME})
