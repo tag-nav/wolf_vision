@@ -400,6 +400,7 @@ IF(YAMLCPP_FOUND)
         yaml/processor_odom_3D_yaml.cpp
         yaml/sensor_camera_yaml.cpp
         yaml/sensor_odom_3D_yaml.cpp
+        yaml/sensor_imu_yaml.cpp
         )
     IF(laser_scan_utils_FOUND)
         SET(SRCS ${SRCS}

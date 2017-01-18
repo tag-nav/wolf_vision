@@ -11,6 +11,17 @@ SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _
     //
 }
 
+SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPtr params, StateBlockPtr _a_w_biases_ptr) :
+        SensorBase("IMU", _p_ptr, _o_ptr, _a_w_biases_ptr, 6),
+        gyro_noise(params->gyro_noise),
+        accel_noise(params->accel_noise),
+        wb_constr(params->wb_constr),
+        ab_constr(params->ab_constr)
+{
+    //
+}
+
+
 SensorIMU::~SensorIMU()
 {
     //
@@ -27,7 +38,8 @@ SensorBasePtr SensorIMU::create(const std::string& _unique_name, const Eigen::Ve
     StateBlockPtr ori_ptr  = std::make_shared<StateQuaternion>(_extrinsics_pq.tail(4), true);
     StateBlockPtr bias_ptr = std::make_shared<StateBlock>(6, false); // We'll have the IMU biases here
 
-    SensorIMUPtr sen = std::make_shared<SensorIMU>(pos_ptr, ori_ptr, bias_ptr);
+    IntrinsicsIMUPtr params = std::static_pointer_cast<IntrinsicsIMU>(_intrinsics);
+    SensorIMUPtr sen = std::make_shared<SensorIMU>(pos_ptr, ori_ptr, params, bias_ptr);
     sen->setName(_unique_name);
     return sen;
 }
