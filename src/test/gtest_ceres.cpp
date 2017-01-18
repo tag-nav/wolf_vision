@@ -31,6 +31,7 @@ TEST(ProcessorOdom3D, static_ceresOptimiszation)
     using std::shared_ptr;
     using std::make_shared;
     using std::static_pointer_cast;
+                                            /************** SETTING PROBLEM  **************/
 
     std::string wolf_root = _WOLF_ROOT_DIR;
 
@@ -47,6 +48,8 @@ TEST(ProcessorOdom3D, static_ceresOptimiszation)
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
     CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+
+                                             /************** USE ODOM_3D CLASSES  **************/
 
     VectorXs D(7); D.setRandom(); D.tail<4>().normalize();
     VectorXs d(7);
@@ -72,6 +75,7 @@ TEST(ProcessorOdom3D, static_ceresOptimiszation)
     FeatureBasePtr last_feature = std::make_shared<FeatureBase>("ODOM_3D", (Vector7s()<<0,0,0,0,0,0,1).finished(),Eigen::Matrix7s::Identity()); //first KF and last KF at same position
     last_feature->setCapturePtr(odom_ptr);
 
+                                             /************** CREATE ODOM_3D CONSTRAINT  **************/
     //create an ODOM constraint between first and last keyframes
     ConstraintOdom3DPtr constraintOdom_ptr = std::make_shared<ConstraintOdom3D>(last_feature, last_frame);
     last_feature -> addConstraint(constraintOdom_ptr);
@@ -81,7 +85,7 @@ TEST(ProcessorOdom3D, static_ceresOptimiszation)
         wolf_problem_ptr_->print(4,1,1,1);
     }
 
-
+                                             /************** SOLVER PART  **************/                                    
     // COMPUTE COVARIANCES
     std::cout << "computing covariances..." << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
