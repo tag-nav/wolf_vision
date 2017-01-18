@@ -66,10 +66,10 @@ class SensorIMU : public SensorBase
          **/
         SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPtr params, StateBlockPtr _a_w_biases_ptr = nullptr);
 
-        Scalar gyroNoise() const;
-        Scalar accelNoise() const;
-        Scalar wbConstr() const;
-        Scalar abConstr() const;
+        Scalar getGyroNoise() const;
+        Scalar getAccelNoise() const;
+        Scalar getWbConstr() const;
+        Scalar getAbConstr() const;
 
         virtual ~SensorIMU();
 
@@ -78,22 +78,22 @@ class SensorIMU : public SensorBase
 
 };
 
-inline Scalar SensorIMU::gyroNoise() const
+inline Scalar SensorIMU::getGyroNoise() const
 {
     return gyro_noise;
 }
 
-inline Scalar SensorIMU::accelNoise() const
+inline Scalar SensorIMU::getAccelNoise() const
 {
     return accel_noise;
 }
 
-inline Scalar SensorIMU::wbConstr() const
+inline Scalar SensorIMU::getWbConstr() const
 {
     return wb_constr;
 }
 
-inline Scalar SensorIMU::abConstr() const
+inline Scalar SensorIMU::getAbConstr() const
 {
     return ab_constr;
 }
