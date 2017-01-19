@@ -68,6 +68,15 @@ TEST(SensorIMU, Constructors)
     ASSERT_EQ(0.02, sensor_ptr->getAccelNoise()) << "please check accel_noise value in yaml, sensor got " << sensor_ptr->getAccelNoise() <<std::endl;
     ASSERT_EQ(0.01, sensor_ptr->getAbConstr()) << "please check ab_constr value in yaml, sensor got " << sensor_ptr->getAbConstr() <<std::endl;
     ASSERT_EQ(0.01, sensor_ptr->getWbConstr()) << "please check wb_constr value in yaml, sensor got " << sensor_ptr->getWbConstr() <<std::endl;
+
+                                                      //FACTORY SENSOR CONSTRUCTOR without YAML
+    // Wolf problem
+    SensorBasePtr sensor_sec_ptr = wolf_problem_ptr_->installSensor("IMU", "Sec IMU", IMU_extrinsics, std::make_shared<IntrinsicsIMU>());
+    ASSERT_EQ(0.02, sensor_ptr->getGyroNoise()) << "please check gyro_noise value in yaml, sensor got " << sensor_ptr->getGyroNoise() <<std::endl;
+    ASSERT_EQ(0.02, sensor_ptr->getAccelNoise()) << "please check accel_noise value in yaml, sensor got " << sensor_ptr->getAccelNoise() <<std::endl;
+    ASSERT_EQ(0.01, sensor_ptr->getAbConstr()) << "please check ab_constr value in yaml, sensor got " << sensor_ptr->getAbConstr() <<std::endl;
+    ASSERT_EQ(0.01, sensor_ptr->getWbConstr()) << "please check wb_constr value in yaml, sensor got " << sensor_ptr->getWbConstr() <<std::endl;
+   
 }
 
 

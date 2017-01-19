@@ -3,6 +3,7 @@
 
 //wolf includes
 #include "sensor_base.h"
+#include <iostream>
 
 namespace wolf {
 
