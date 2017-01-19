@@ -7,13 +7,33 @@
 
 
 namespace wolf {
-    
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorIMUParams);
+
+struct ProcessorIMUParams : public ProcessorParamsBase
+{
+        Scalar max_time_span;
+        Size   max_buff_length;
+        Scalar dist_traveled;
+        Scalar angle_turned;
+
+
+        ProcessorIMUParams() :
+            max_time_span(0),
+            max_buff_length(0),
+            dist_traveled(0),
+            angle_turned(0)
+        {
+            type = "IMU";
+            name = "";
+        }
+};
+
 WOLF_PTR_TYPEDEFS(ProcessorIMU);
     
 //class
 class ProcessorIMU : public ProcessorMotion{
     public:
-        ProcessorIMU();
+        ProcessorIMU(ProcessorIMUParamsPtr _params = nullptr);
         virtual ~ProcessorIMU();
 
         //void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
@@ -45,6 +65,12 @@ class ProcessorIMU : public ProcessorMotion{
         void resetDerived();
 
     protected:
+
+        // keyframe voting parameters
+        Scalar max_time_span_;  // maximum time between keyframes
+        Size   max_buff_length_;// maximum buffer size before keyframe
+        Scalar dist_traveled_;  // maximum linear motion between keyframes
+        Scalar angle_turned_;   // maximum rotation between keyframes
 
         // Casted pointer to IMU frame
         FrameIMUPtr frame_imu_ptr_;
@@ -81,8 +107,14 @@ class ProcessorIMU : public ProcessorMotion{
         virtual void remapData(const Eigen::VectorXs& _data);
 
     public:
+        //getters
         void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
         void getJacobians(Eigen::Matrix<wolf::Scalar,9,6>& _dD_db);
+        Scalar getMaxTimeSpan() const;
+        Scalar getMaxBuffLength() const;
+        Scalar getDistTraveled() const;
+        Scalar getAngleTurned() const;
+        //for factory
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 };
 
@@ -430,6 +462,26 @@ inline void ProcessorIMU::getJacobians(Eigen::Matrix<wolf::Scalar,9,6>& _dD_db)
     _dD_db.block(0,3,3,3) = dDp_dwb_;
     _dD_db.block(3,3,3,3) = dDq_dwb_;
     _dD_db.block(6,3,3,3) = dDv_dwb_;
+}
+
+inline Scalar ProcessorIMU::getMaxTimeSpan() const
+{
+    return max_time_span_;
+}
+
+inline Scalar ProcessorIMU::getMaxBuffLength() const
+{
+    return max_buff_length_;
+}
+
+inline Scalar ProcessorIMU::getDistTraveled() const
+{
+    return dist_traveled_;
+}
+
+inline Scalar ProcessorIMU::getAngleTurned() const
+{
+    return angle_turned_;
 }
 
 } // namespace wolf

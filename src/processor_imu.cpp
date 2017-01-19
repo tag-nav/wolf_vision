@@ -2,8 +2,12 @@
 
 namespace wolf {
 
-ProcessorIMU::ProcessorIMU() :
+ProcessorIMU::ProcessorIMU(ProcessorIMUParamsPtr _params) :
         ProcessorMotion("IMU", 16, 10, 9, 6),
+        max_time_span_  (_params ? _params    ->max_time_span   : 1.0  ),
+        max_buff_length_(_params ? _params    ->max_buff_length : 10000   ),
+        dist_traveled_  (_params ? _params    ->dist_traveled   : 1.0  ),
+        angle_turned_   (_params ? _params    ->angle_turned    : 0.2  ),
         frame_imu_ptr_(nullptr),
         gravity_(wolf::gravity()),
         acc_bias_(Eigen::Vector3s::Zero()),
@@ -24,9 +28,12 @@ ProcessorIMU::~ProcessorIMU()
 //    std::cout << "destructed     -p-IMU" << id() << std::endl;
 }
 
-ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr)
+ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
-    ProcessorIMUPtr prc_ptr = std::make_shared<ProcessorIMU>();
+    // cast inputs to the correct type
+    std::shared_ptr<ProcessorIMUParams> prc_imu_params = std::static_pointer_cast<ProcessorIMUParams>(_params);
+
+    ProcessorIMUPtr prc_ptr = std::make_shared<ProcessorIMU>(prc_imu_params);
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
