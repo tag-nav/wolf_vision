@@ -114,10 +114,10 @@ ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const Pro
 
 bool ProcessorIMU::voteForKeyFrame()
 {
-    WOLF_DEBUG( "Time span   : " , getBuffer().get().back().ts_ - getBuffer().get().front().ts_ );
-    WOLF_DEBUG( "BufferLength: " , getBuffer().get().size() );
-    WOLF_DEBUG( "DistTraveled: " , delta_integrated_.head(3).norm() );
-    WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
+    //WOLF_DEBUG( "Time span   : " , getBuffer().get().back().ts_ - getBuffer().get().front().ts_ );
+    //WOLF_DEBUG( "BufferLength: " , getBuffer().get().size() );
+    //WOLF_DEBUG( "DistTraveled: " , delta_integrated_.head(3).norm() );
+    //WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
     // time span
     if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)
     {
@@ -144,7 +144,7 @@ bool ProcessorIMU::voteForKeyFrame()
         WOLF_DEBUG( "PM: vote: angle turned" );
         return true;
     }
-    WOLF_DEBUG( "PM: do not vote" );
+    //WOLF_DEBUG( "PM: do not vote" );
     return false;
 }
 
