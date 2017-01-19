@@ -577,6 +577,8 @@ class ProcessorMotion : public ProcessorBase
 
         Motion motionZero(const TimeStamp& _ts);
 
+        wolf::TimeStamp getCurrentTimeStamp(); //move this back to private if process() not defined in derived classes
+
     public:
         virtual CaptureBasePtr getOriginPtr();
         virtual CaptureMotionPtr getLastPtr();
@@ -606,7 +608,7 @@ class ProcessorMotion : public ProcessorBase
         Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
 
     private:
-        wolf::TimeStamp getCurrentTimeStamp();
+        //wolf::TimeStamp getCurrentTimeStamp();
 };
 
 }

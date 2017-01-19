@@ -36,6 +36,7 @@ class ProcessorIMU : public ProcessorMotion{
         ProcessorIMU(ProcessorIMUParamsPtr _params = nullptr);
         virtual ~ProcessorIMU();
 
+        virtual void process(CaptureBasePtr _incoming_ptr);
         //void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
 
     protected:
