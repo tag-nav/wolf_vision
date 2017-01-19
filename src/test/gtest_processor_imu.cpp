@@ -118,6 +118,73 @@ TEST(ProcessorIMU_constructors, ALL)
     ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getAngleTurned(), 0.2);
 }
 
+TEST(ProcessorIMU, voteForKeyFrame)
+{
+    using namespace wolf;
+    using namespace Eigen;
+    using std::shared_ptr;
+    using std::make_shared;
+    using std::static_pointer_cast;
+    using namespace wolf::Constants;
+
+    std::string wolf_root = _WOLF_ROOT_DIR;
+
+    // Wolf problem
+    ProblemPtr problem = Problem::create(FRM_PQVBB_3D);
+    Eigen::Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
+    SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
+    ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu.yaml");
+    
+    //setting origin
+    Eigen::VectorXs x0(16);
+    TimeStamp t(0);
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.000,  0,0,.000; // Try some non-zero biases
+    problem->getProcessorMotionPtr()->setOrigin(x0, t); //this also creates a keyframe at origin
+
+    // Time and data variables
+    Scalar dt = std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan() + 0.1;
+    Eigen::Vector6s data;
+    data << 1,0,0, 0,0,0;
+    Eigen::Matrix6s data_cov(Matrix6s::Zero());
+    data_cov(0,0) = 0.5;
+    t.set(dt);
+
+    // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
+    std::shared_ptr<wolf::CaptureIMU> cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data);
+    sensor_ptr->process(cap_imu_ptr);
+
+    /*There should be 3 frames :
+        - 1 KeyFrame at origin
+        - 1 keyframe created by process() in voteForKeyFrame() since conditions to create a keyframe are met
+        - 1 frame that would be used by future data
+    */
+    ASSERT_EQ(problem->getTrajectoryPtr()->getFrameList().size(),3);
+
+    /* if max_time_span == 2,  Wolf tree should be
+
+    Hardware
+        S1
+            pm5
+            o: C2 - F2
+            l: C4 - F3
+        Trajectory
+        KF1
+            Estim, ts=0,	 x = ( 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0)
+            C1 -> S1
+        KF2
+            Estim, ts=2.1,	 x = ( 2.2     0       -22     0       0       0       1       2.1     0       -21     0       0       0       0       0       0      )
+            C2 -> S1
+                f1
+                    m = ( 2.21 0   0   0   0   0   1   2.1 0   0  )
+                    c1 --> F1
+        F3
+            Estim, ts=2.1,	 x = ( . . .)
+            C4 -> S1
+    */
+    //TODO : ASSERT TESTS to make sure the constraints are correctly set + check the tree above
+
+}
+
 //replace TEST by TEST_F if SetUp() needed
 TEST_F(ProcessorIMUt, acc_x)
 {
