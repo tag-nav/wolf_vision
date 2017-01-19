@@ -66,7 +66,8 @@ int main(int argc, char** argv)
 
     //process data
     mpu_clock = 0.001003;
-    data_ << 0.579595, -0.143701, 9.939331, 0.127445, 0.187814, -0.055003;
+    //data_ << 0.579595, -0.143701, 9.939331, 0.127445, 0.187814, -0.055003;
+    data_ << 0.0, 0.0, 9.81, 0.0, 0.0, 0.0;
     t.set(mpu_clock);
     // assign data to capture
     imu_ptr->setData(data_);
@@ -120,14 +121,16 @@ int main(int argc, char** argv)
     /// ******************************************************************************************** ///
 
     mpu_clock = 0.002135;
-    data_ << 0.581990, -0.191602, 10.071057, 0.136836, 0.203912, -0.057686;
+    //data_ << 0.581990, -0.191602, 10.071057, 0.136836, 0.203912, -0.057686;
+	data_ << 0.0, 0.0, 9.81, 0.0, 0.0, 0.0;
     t.set(mpu_clock);
     imu_ptr->setData(data_);
     imu_ptr->setTimeStamp(t);
     sensor_ptr->process(imu_ptr);
 
     mpu_clock = 0.003040;
-    data_ << 0.596360, -0.225132, 10.205178, 0.154276, 0.174399, -0.036221;
+    //data_ << 0.596360, -0.225132, 10.205178, 0.154276, 0.174399, -0.036221;
+    data_ << 0.0, 0.0, 9.81, 0.0, 0.0, 0.0;
     t.set(mpu_clock);
     imu_ptr->setData(data_);
     imu_ptr->setTimeStamp(t);
@@ -178,14 +181,16 @@ int main(int argc, char** argv)
     }
 
     mpu_clock = 0.004046;
-    data_ << 0.553250, -0.203577, 10.324929, 0.128787, 0.156959, -0.044270;
+    //data_ << 0.553250, -0.203577, 10.324929, 0.128787, 0.156959, -0.044270;
+    data_ << 0.0, 0.0, 9.81, 0.0, 0.0, 0.0;
     t.set(mpu_clock);
     imu_ptr->setData(data_);
     imu_ptr->setTimeStamp(t);
     sensor_ptr->process(imu_ptr);
 
     mpu_clock = 0.005045;
-    data_ << 0.548459, -0.184417, 10.387200, 0.083175, 0.120738, -0.026831;
+    //data_ << 0.548459, -0.184417, 10.387200, 0.083175, 0.120738, -0.026831;
+    data_ << 0.0, 0.0, 9.81, 0.0, 0.0, 0.0;
     t.set(mpu_clock);
     imu_ptr->setData(data_);
     imu_ptr->setTimeStamp(t);
@@ -237,7 +242,7 @@ int main(int argc, char** argv)
     Eigen::MatrixXs predelta_cov;
     predelta_cov.resize(9,9);
     predelta_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
-    std::cout << "predelta_cov : \n" << predelta_cov << std::endl; 
+    //std::cout << "predelta_cov : \n" << predelta_cov << std::endl; 
 
         ///Optimization
     // PRIOR
@@ -251,7 +256,7 @@ int main(int argc, char** argv)
 
     // COMPUTE COVARIANCES
     std::cout << "computing covariances..." << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     std::cout << "computed!" << std::endl;
 
     /*
