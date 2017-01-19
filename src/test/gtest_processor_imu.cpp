@@ -18,7 +18,7 @@
 
 #include <iostream>
 
-class ProcessorIMU : public testing::Test
+class ProcessorIMUt : public testing::Test
 {
 
     public: //These can be accessed in fixtures
@@ -41,10 +41,12 @@ class ProcessorIMU : public testing::Test
         using std::static_pointer_cast;
         using namespace wolf::Constants;
 
+        std::string wolf_root = _WOLF_ROOT_DIR;
+
         // Wolf problem
         problem = Problem::create(FRM_PQVBB_3D);
         Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
-        sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics, shared_ptr<IntrinsicsBase>());
+        sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
         ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
         // Time and data variables
@@ -101,8 +103,51 @@ shared_ptr<CaptureIMU> cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data
 CaptureIMUPtr cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data);
 */
 
-//replace TEST by TEST_F
-TEST_F(ProcessorIMU, acc_x)
+TEST(ProcessorIMU_constructors, ALL)
+{
+    using namespace wolf;
+
+    //constructor without any argument
+    ProcessorIMUPtr prc0 = std::make_shared<ProcessorIMU>();
+    ASSERT_EQ(prc0->getMaxTimeSpan(), 1.0);
+    ASSERT_EQ(prc0->getMaxBuffLength(), 10000);
+    ASSERT_EQ(prc0->getDistTraveled(), 1.0);
+    ASSERT_EQ(prc0->getAngleTurned(), 0.2);
+
+    //constructor with ProcessorIMUParamsPtr argument only
+    ProcessorIMUParamsPtr param_ptr = std::make_shared<ProcessorIMUParams>();
+    param_ptr->max_time_span = 2.0;
+    param_ptr->max_buff_length = 20000;
+    param_ptr->dist_traveled = 2.0;
+    param_ptr->angle_turned = 2.0;
+
+    ProcessorIMUPtr prc1 = std::make_shared<ProcessorIMU>(param_ptr);
+    ASSERT_EQ(prc1->getMaxTimeSpan(), param_ptr->max_time_span);
+    ASSERT_EQ(prc1->getMaxBuffLength(), param_ptr->max_buff_length);
+    ASSERT_EQ(prc1->getDistTraveled(), param_ptr->dist_traveled);
+    ASSERT_EQ(prc1->getAngleTurned(), param_ptr->angle_turned);
+
+    //Factory constructor without yaml
+    std::string wolf_root = _WOLF_ROOT_DIR;
+    ProblemPtr problem = Problem::create(FRM_PQVBB_3D);
+    Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
+    SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics, wolf_root + "/src/examples/sensor_imu.yaml");
+    ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan(), 1.0);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxBuffLength(), 10000);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getDistTraveled(), 1.0);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getAngleTurned(), 0.2);
+
+    //Factory constructor with yaml
+    processor_ptr = problem->installProcessor("IMU", "Sec IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu.yaml");
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan(), 2.0);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxBuffLength(), 20000);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getDistTraveled(), 2.0);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getAngleTurned(), 0.2);
+}
+
+//replace TEST by TEST_F if SetUp() needed
+TEST_F(ProcessorIMUt, acc_x)
 {
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
@@ -122,7 +167,7 @@ TEST_F(ProcessorIMU, acc_x)
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 }
 
-TEST_F(ProcessorIMU, acc_y)
+TEST_F(ProcessorIMUt, acc_y)
 {
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
@@ -142,7 +187,7 @@ TEST_F(ProcessorIMU, acc_y)
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 }
 
-TEST_F(ProcessorIMU, acc_z)
+TEST_F(ProcessorIMUt, acc_z)
 {
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
@@ -162,7 +207,7 @@ TEST_F(ProcessorIMU, acc_z)
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 }
 
-TEST_F(ProcessorIMU, check_Covariance)
+TEST_F(ProcessorIMUt, check_Covariance)
 {
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
@@ -182,7 +227,7 @@ TEST_F(ProcessorIMU, check_Covariance)
     ASSERT_FALSE(delta_preint_cov.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 }
 
-TEST_F(ProcessorIMU, Covariances)
+TEST_F(ProcessorIMUt, Covariances)
 {
     data_cov.topLeftCorner(3,3)     *= 0.01; // acc variance
     data_cov.bottomRightCorner(3,3) *= 0.01; // gyro variance
@@ -208,7 +253,7 @@ TEST(ProcessorIMU_constraints, KF_c_KF)
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
     Eigen::VectorXs IMU_extrinsics(7);
     IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, shared_ptr<IntrinsicsBase>());
+    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, std::make_shared<IntrinsicsIMU>());
     wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Ceres wrappers
