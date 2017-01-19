@@ -111,6 +111,7 @@ class ProcessorIMU : public ProcessorMotion{
         //getters
         void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
         void getJacobians(Eigen::Matrix<wolf::Scalar,9,6>& _dD_db);
+        Eigen::Matrix<wolf::Scalar,9,6> getJacobians();
         Scalar getMaxTimeSpan() const;
         Scalar getMaxBuffLength() const;
         Scalar getDistTraveled() const;
@@ -463,6 +464,26 @@ inline void ProcessorIMU::getJacobians(Eigen::Matrix<wolf::Scalar,9,6>& _dD_db)
     _dD_db.block(0,3,3,3) = dDp_dwb_;
     _dD_db.block(3,3,3,3) = dDq_dwb_;
     _dD_db.block(6,3,3,3) = dDv_dwb_;
+}
+
+inline Eigen::Matrix<wolf::Scalar,9,6> ProcessorIMU::getJacobians()
+{
+    /* structure of dD_db :
+                ab       wb
+            [ dDp_dab  dDp_dwb ]            Each block is 3x3 !! Even dDq_db --> minimal form
+            [ dDq_dab  dDq_dwb ] 
+            [ dDv_dab  dDv_dwb ]
+    */
+    Eigen::Matrix<wolf::Scalar,9,6> dD_db;
+
+    dD_db.block(0,0,3,3) = dDp_dab_;
+    dD_db.block(3,0,3,3) = Eigen::Matrix3s::Zero();
+    dD_db.block(6,0,3,3) = dDv_dab_;
+    dD_db.block(0,3,3,3) = dDp_dwb_;
+    dD_db.block(3,3,3,3) = dDq_dwb_;
+    dD_db.block(6,3,3,3) = dDv_dwb_;
+
+    return dD_db;
 }
 
 inline Scalar ProcessorIMU::getMaxTimeSpan() const
