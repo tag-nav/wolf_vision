@@ -38,6 +38,42 @@ ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const Pro
     return prc_ptr;
 }
 
+bool ProcessorIMU::voteForKeyFrame()
+{
+    WOLF_DEBUG( "Time span   : " , getBuffer().get().back().ts_ - getBuffer().get().front().ts_ );
+    WOLF_DEBUG( "BufferLength: " , getBuffer().get().size() );
+    WOLF_DEBUG( "DistTraveled: " , delta_integrated_.head(3).norm() );
+    WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
+    // time span
+    if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)
+    {
+        WOLF_DEBUG( "PM: vote: time span" );
+        return true;
+    }
+    // buffer length
+    if (getBuffer().get().size() > max_buff_length_)
+    {
+        WOLF_DEBUG( "PM: vote: buffer size" );
+        return true;
+    }
+    // distance traveled
+    Scalar dist = delta_integrated_.head(3).norm();
+    if (dist > dist_traveled_)
+    {
+        WOLF_DEBUG( "PM: vote: distance traveled" );
+        return true;
+    }
+    // angle turned
+    Scalar angle = 2.0 * acos(delta_integrated_(6));
+    if (angle > angle_turned_)
+    {
+        WOLF_DEBUG( "PM: vote: angle turned" );
+        return true;
+    }
+    WOLF_DEBUG( "PM: do not vote" );
+    return false;
+}
+
 } // namespace wolf
 
 

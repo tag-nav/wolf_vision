@@ -60,6 +60,7 @@ class ProcessorIMU : public ProcessorMotion{
         virtual Motion interpolate(const Motion& _motion_ref,
                                    Motion& _motion,
                                    TimeStamp& _ts);
+        virtual bool voteForKeyFrame();
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
                                                    FrameBasePtr _frame_origin);
         void resetDerived();
