@@ -194,29 +194,6 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     residuals.segment(3,3)  = do_error;
     residuals.tail(3)       = dv_error;
 
-
-    std::cout << "\t\t\t\t\t debugging constraintIMU::operator()" << std::endl;
-
-    std::cout << "input _q1 : " << "\n" << *(_q1) << "\n" << *(_q1+1) << "\n" << *(_q1+2) << "\n" << *(_q1+3) << std::endl;
-    std::cout << "input _q2 : " << "\n" << *(_q2) << "\n" << *(_q2+1) << "\n" << *(_q2+2) << "\n" << *(_q2+3) << std::endl;
-    std::cout << "dq_predict : " << "\n" << dq_predict.x() << "\n" << dq_predict.w() << "\n" << dq_predict.y() << "\n" << dq_predict.z() << std::endl; 
-    std::cout << "do_step : " << "\n" << do_step(0) << "\n" << do_step(1) << "\n" << do_step(2) << std::endl;
-    Eigen::Quaternion<T> temp = v2q(do_step);
-    std::cout << "temp : " << "\n" << temp.x() << "\n" << temp.w() << "\n" << temp.y() << "\n" << temp.z() << std::endl; 
-    std::cout << "dq_correct : " << "\n" << dq_correct.x() << "\n" << dq_correct.w() << "\n" << dq_correct.y() << "\n" << dq_correct.z() << std::endl; 
-    std::cout << "do_error : " << "\n" << do_error(0) << "\n" << do_error(1) << "\n" << do_error(2) << std::endl;
-
-    std::cout << "residuals : " << std::endl;
-    std::cout << residuals(0) << std::endl;
-    std::cout << residuals(1) << std::endl;
-    std::cout << residuals(2) << std::endl;
-    std::cout << residuals(3) << std::endl;
-    std::cout << residuals(4) << std::endl;
-    std::cout << residuals(5) << std::endl;
-    std::cout << residuals(6) << std::endl;
-    std::cout << residuals(7) << std::endl;
-    std::cout << residuals(8) << std::endl;
-
     return true;
 }
 
