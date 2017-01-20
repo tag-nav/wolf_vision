@@ -61,13 +61,17 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> vee(const Eigen::MatrixBase
 // Rotation conversions
 
 template<typename Derived>
-inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<Derived>& _v)
+inline Eigen::Quaternion<typename Derived::Scalar> q2v_original(const Eigen::MatrixBase<Derived>& _v)
 {
 
     MatrixSizeCheck<3, 1>::check(_v);
     typedef typename Derived::Scalar T;
 
     Eigen::Quaternion<T> q;
+    const T& a0 = _v[0];
+    const T& a1 = _v[1];
+    const T& a2 = _v[2];
+    const T angle0 = a0 * a0 + a1 * a1 + a2 * a2;
     T angle = _v.norm();
     T angle_half = angle / (T)2.0;
     if (angle > wolf::Constants::EPS)
@@ -85,7 +89,40 @@ inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<D
 }
 
 template<typename Derived>
-inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v(const Eigen::QuaternionBase<Derived>& _q)
+inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<Derived>& _v)
+{
+    MatrixSizeCheck<3, 1>::check(_v);
+    typedef typename Derived::Scalar T;
+
+    Eigen::Quaternion<T> q;
+    const T& a0 = _v[0];
+    const T& a1 = _v[1];
+    const T& a2 = _v[2];
+    const T angle_square = a0 * a0 + a1 * a1 + a2 * a2;
+
+    //We need the angle : means we have to take the square root of angle_square, 
+    // which is defined for all angle_square beonging to R+ (except 0)
+    if (angle_square > (T)0.0 ){
+        //sqrt is defined here
+        const T angle = sqrt(angle_square);
+        const T angle_half = angle / (T)2.0;
+        
+        q.w() = cos(angle_half);
+        q.vec() = _v / angle * sin(angle_half);
+        return q;
+    }
+    else
+    {
+        //sqrt not defined at 0 and will produce NaNs, thuswe use an approximation with taylor series truncated at one term
+        q.w() = (T)1.0;
+        q.vec() = _v *(T)0.5; // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
+                                                                    //                                 for angle_half == 0 then ,     = v/2
+        return q;
+    }
+}
+
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v_original(const Eigen::QuaternionBase<Derived>& _q)
 {
     typedef typename Derived::Scalar T;
     Eigen::Matrix<T, 3, 1> vec = _q.vec();
@@ -99,6 +136,39 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v(const Eigen::Quaternion
     { // small-angle approximation using truncated Taylor series
         T r2 = vec.squaredNorm() / (_q.w() *_q.w());
         return vec * ( (T)2.0 -  r2 / (T)1.5 ) / _q.w(); // log = 2 * vec * ( 1 - norm(vec)^2 / 3*w^2 ) / w.
+    }
+}
+
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v(const Eigen::QuaternionBase<Derived>& _q)
+{
+    typedef typename Derived::Scalar T;
+    Eigen::Matrix<T, 3, 1> vec = _q.vec();
+    const T sin_angle_square = vec(0) * vec(0) + vec(1) * vec(1) + vec(2) * vec(2);
+
+    //everything shouold be OK for non-zero rotations
+    if (sin_angle_square > (T)0.0)
+    {
+        const T sin_angle = sqrt(sin_angle_square);
+        const T& cos_angle = _q.w();
+
+        /* If (cos_theta < 0) then theta >= pi/2 , means : angle for angle_axis vector >= pi (== 2*theta) 
+                    |-> results in correct rotation but not a normalized angle_axis vector 
+    
+        In that case we observe that 2 * theta ~ 2 * theta - 2 * pi,
+        which is equivalent saying
+    
+            theta - pi = atan(sin(theta - pi), cos(theta - pi))
+                        = atan(-sin(theta), -cos(theta))
+        */
+        const T two_angle = T(2.0) * ((cos_angle < 0.0) ? atan2(-sin_angle, -cos_angle) : atan2(sin_angle, cos_angle));
+        const T k = two_angle / sin_angle;
+        return vec * k;
+    }
+    else
+    { // small-angle approximation using truncated Taylor series
+        //zero rotation --> sqrt will result in NaN
+        return vec * (T)2.0; // log = 2 * vec * ( 1 - norm(vec)^2 / 3*w^2 ) / w.
     }
 }
 
