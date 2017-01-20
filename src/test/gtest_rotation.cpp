@@ -58,7 +58,6 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v_o(const Eigen::Quaterni
     typedef typename Derived::Scalar T;
     Eigen::Matrix<T, 3, 1> vec = _q.vec();
     T vecnorm = vec.norm();
-    //WOLF_DEBUG("vecnorm : " , vecnorm );
     if (vecnorm > wolf::Constants::EPS_SMALL)
     { // regular angle-axis conversion
         T angle = atan2(vecnorm, _q.w());
@@ -67,10 +66,6 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v_o(const Eigen::Quaterni
     else
     { // small-angle approximation using truncated Taylor series
         T r2 = vec.squaredNorm() / (_q.w() *_q.w());
-        /*WOLF_DEBUG("_q.w() : " , _q.w() )
-        WOLF_DEBUG("res(0) : " , res(0) );
-        WOLF_DEBUG("res(1) : " , res(1) );
-        WOLF_DEBUG("res(2) : " , res(2) );*/
         return vec * ( (T)2.0 -  r2 / (T)1.5 ) / _q.w(); // log = 2 * vec * ( 1 - norm(vec)^2 / 3*w^2 ) / w.
     }
 }
