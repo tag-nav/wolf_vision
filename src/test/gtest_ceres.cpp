@@ -133,11 +133,11 @@ TEST(ProcessorIMU, static_ceresOptimiszation)
                                              /************** SOLVER PART  **************/
      ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
      std::cout << summary.BriefReport() << std::endl;
-
+     
     // COMPUTE COVARIANCES
-    //std::cout << "\t\t\t ______computing covariances______" << std::endl;
-    //ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    //std::cout << "\t\t\t ______computed!______" << std::endl;
+    std::cout << "\t\t\t ______computing covariances______" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______" << std::endl;
 }
 
 
