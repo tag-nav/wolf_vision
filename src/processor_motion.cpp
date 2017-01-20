@@ -38,13 +38,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         key_frame_ptr->setKey();
 
         // create motion feature and add it to the key_capture
-        FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
-                "MOTION",
-                last_ptr_->getBuffer().get().back().delta_integr_,
-                last_ptr_->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
-                        last_ptr_->getBuffer().get().back().delta_integr_cov_ :
-                        Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-4); // avoid a strict zero in the covariance
-        last_ptr_->addFeature(key_feature_ptr);
+        FeatureBasePtr key_feature_ptr = emplaceFeature(last_ptr_, key_frame_ptr);
 
         // create motion constraint and link it to parent feature and other frame (which is origin's frame)
         auto ctr_ptr    =  emplaceConstraint(key_feature_ptr, origin_ptr_->getFramePtr());

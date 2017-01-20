@@ -36,7 +36,6 @@ class ProcessorIMU : public ProcessorMotion{
         ProcessorIMU(ProcessorIMUParamsPtr _params = nullptr);
         virtual ~ProcessorIMU();
 
-        virtual void process(CaptureBasePtr _incoming_ptr);
         //void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
 
     protected:
@@ -64,6 +63,8 @@ class ProcessorIMU : public ProcessorMotion{
         virtual bool voteForKeyFrame();
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
                                                    FrameBasePtr _frame_origin);
+        virtual FeatureBasePtr emplaceFeature(CaptureBasePtr _capture_motion, 
+                                                    FrameBasePtr _related_frame);
         void resetDerived();
 
     protected:
@@ -409,6 +410,24 @@ inline ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature
     _frame_origin->addConstrainedBy(ctr_imu);
 
     return ctr_imu;
+}
+
+inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureBasePtr _capture_motion, FrameBasePtr _related_frame)
+{
+    CaptureIMUPtr capt_imu = std::static_pointer_cast<CaptureIMU>(_capture_motion);
+    FrameIMUPtr key_frame_ptr = std::static_pointer_cast<FrameIMU>(_related_frame);
+    // create motion feature and add it to the key_capture
+    FeatureIMUPtr key_feature_ptr = std::make_shared<FeatureIMU>(
+            capt_imu->getBuffer().get().back().delta_integr_,
+            capt_imu->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
+                    capt_imu->getBuffer().get().back().delta_integr_cov_ :
+                    Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-4, // avoid a strict zero in the covariance
+            key_frame_ptr->getAccBiasPtr()->getVector(),
+            key_frame_ptr->getGyroBiasPtr()->getVector(),
+            this->getJacobians()); 
+        capt_imu->addFeature(key_feature_ptr);
+
+    return key_feature_ptr;
 }
 
 inline void ProcessorIMU::remapPQV(const Eigen::VectorXs& _delta1,

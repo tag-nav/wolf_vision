@@ -55,6 +55,7 @@ class ProcessorOdom2D : public ProcessorMotion
                            TimeStamp& _ts);
 
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
+        virtual FeatureBasePtr emplaceFeature(CaptureBasePtr _capture_motion, FrameBasePtr _related_frame); 
 
     protected:
         Scalar dist_traveled_th_;
@@ -216,6 +217,22 @@ inline ConstraintBasePtr ProcessorOdom2D::emplaceConstraint(FeatureBasePtr _feat
     _feature_motion->addConstraint(ctr_odom);
     _frame_origin->addConstrainedBy(ctr_odom);
     return ctr_odom;
+}
+
+inline FeatureBasePtr ProcessorOdom2D::emplaceFeature(CaptureBasePtr _capture_motion, FrameBasePtr _related_frame)
+{
+    CaptureMotionPtr key_capture_ptr = std::static_pointer_cast<CaptureMotion>(_capture_motion);
+    FrameBasePtr key_frame_ptr = std::static_pointer_cast<FrameBase>(_related_frame);
+    // create motion feature and add it to the key_capture
+    FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
+            "MOTION",
+            key_capture_ptr->getBuffer().get().back().delta_integr_,
+            key_capture_ptr->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
+                    key_capture_ptr->getBuffer().get().back().delta_integr_cov_ :
+                    Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-8);
+    key_capture_ptr->addFeature(key_feature_ptr);
+
+    return key_feature_ptr;
 }
 
 inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)

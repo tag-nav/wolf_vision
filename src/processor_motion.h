@@ -575,6 +575,11 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin) = 0;
 
+        /** \brief create a feature corresponding to given capture and add the feature to this capture
+         * \param _capture_motion: the parent capture
+         */
+        virtual FeatureBasePtr emplaceFeature(CaptureBasePtr _capture_motion, FrameBasePtr _related_frame) = 0;
+
         Motion motionZero(const TimeStamp& _ts);
 
         wolf::TimeStamp getCurrentTimeStamp(); //move this back to private if process() not defined in derived classes
