@@ -75,6 +75,12 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v_o(const Eigen::Quaterni
     }
 }
 
+inline Eigen::VectorXs q2v_aa(const Eigen::Quaternions& _q)
+{
+    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
+    return aa.axis() * aa.angle();
+}
+
 //here is an alternative version to be tested
 template<typename Derived>
 inline Eigen::Quaternion<typename Derived::Scalar> v2q_new(const Eigen::MatrixBase<Derived>& _v)
@@ -144,7 +150,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v_new(const Eigen::Quater
     
 }
 
-TEST(rotations, v2q_o_VS_v2q_new)
+TEST(rotations, v2q_o_VS_v2q_new) //this test will use functions defined above
 {
     using namespace wolf;
     //defines scalars
@@ -156,6 +162,7 @@ TEST(rotations, v2q_o_VS_v2q_new)
     Eigen::Vector3s rot_vector0, rot_vector1;
     Eigen::Quaternions quat_o, quat_o1, quat_new, quat_new1;
     Eigen::Vector4s vec_o, vec_o1, vec_new, vec_new1;
+    Eigen::Vector3s qvec_o, qvec_o1, qvec_new, qvec_new1, qvec_aao, qvec_aa1;
     for (unsigned int iter = 0; iter < 10000; iter ++)
     {
         rot_vector0 = Eigen::Vector3s::Random();
@@ -178,18 +185,24 @@ TEST(rotations, v2q_o_VS_v2q_new)
     
 
         //q2v
-    Eigen::Vector3s qvec_o, qvec_o1, qvec_new, qvec_new1;
-
     qvec_o     = q2v_o(quat_o);
     qvec_o1    = q2v_o(quat_o1);
+    qvec_aao   = q2v_aa(quat_o);
+    qvec_aa1   = q2v_aa(quat_o1);
     qvec_new   = q2v_new(quat_new);
     qvec_new1  = q2v_new(quat_new1);
 
+    // 'New' version of q2v is working, result with template version gives the same that the regular version with Eigen::Quaternions argument
+    ASSERT_TRUE((qvec_aao - qvec_new).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_aao : " << qvec_aao.transpose() << "\n qvec_new : " << qvec_new.transpose() << std::endl;
+    ASSERT_TRUE((qvec_aa1 - qvec_new1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_aa1 : " << qvec_aa1.transpose() << "\n qvec_new1 : " << qvec_new1.transpose() << std::endl;
+    EXPECT_TRUE((qvec_new - rot_vector0).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_new : " << qvec_new.transpose() << "\n rot_vector0 : " << rot_vector0.transpose() << std::endl;
+    EXPECT_TRUE((qvec_new1 - rot_vector1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_new1 : " << qvec_new1.transpose() << "\n rot_vector1 : " << rot_vector1.transpose() << std::endl;
 
-    //std::cout << "\n quaternion near origin : \n" << vec0 << "\n quaternion far from origin : \n" << vec1 << std::endl;
-
-    ASSERT_TRUE((qvec_o1 - qvec_new1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_o1 : " << qvec_o1.transpose() << "\n qvec_new1 : " << qvec_new1.transpose() << std::endl;
-    ASSERT_TRUE((qvec_o - qvec_new).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_o : " << qvec_o.transpose() << "\n qvec_new : " << qvec_new.transpose() << std::endl;
+    //Something went wrong with old version of 'q2v' : values in vector are twice that expected.
+    EXPECT_FALSE((qvec_o1 - qvec_new1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_o1 : " << qvec_o1.transpose() << "\n qvec_new1 : " << qvec_new1.transpose() << std::endl;
+    EXPECT_FALSE((qvec_o - qvec_new).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_o : " << qvec_o.transpose() << "\n qvec_new : " << qvec_new.transpose() << std::endl;
+    EXPECT_FALSE((qvec_o1 - rot_vector0).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_o1 : " << qvec_o1.transpose() << "\n rot_vector0 : " << rot_vector0.transpose() << std::endl;
+    EXPECT_FALSE((qvec_o - rot_vector1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_o : " << qvec_o.transpose() << "\n rot_vector1 : " << rot_vector1.transpose() << std::endl;
     }
 }
 
@@ -240,7 +253,7 @@ TEST(rotations, v2q_q2v)
 
     //std::cout << "\n quaternion near origin : \n" << vec0 << "\n quaternion far from origin : \n" << vec1 << std::endl;
 
-    ASSERT_TRUE(rot_vector0.isApprox(quat_to_v0, wolf::Constants::EPS));
+    ASSERT_TRUE((rot_vector0 - quat_to_v0).isMuchSmallerThan(1,wolf::Constants::EPS));
     ASSERT_TRUE(rot_vector1.isApprox(quat_to_v1, wolf::Constants::EPS));
     ASSERT_TRUE(rot_vector0.isApprox(quat_to_v0x, wolf::Constants::EPS));
     ASSERT_TRUE(rot_vector1.isApprox(quat_to_v1x, wolf::Constants::EPS));
