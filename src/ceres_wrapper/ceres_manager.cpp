@@ -78,14 +78,14 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         case ALL:
         {
             // first create a vector containing all state blocks
-            std::vector<StateBlockPtr> all_state_blocks, landmark_state_blocks;
+            std::vector<StateBlockPtr> all_state_blocks, landmark_state_blocks, Frame_state_blocks;
             //frame state blocks
             for(auto fr_ptr : wolf_problem_->getTrajectoryPtr()->getFrameList())
             {
                 if (fr_ptr->isKey())
                 {
-                    all_state_blocks.push_back(fr_ptr->getPPtr());
-                    all_state_blocks.push_back(fr_ptr->getOPtr());
+                    Frame_state_blocks = fr_ptr->getStateBlockVec();
+                    all_state_blocks.insert(all_state_blocks.end(), Frame_state_blocks.begin(), Frame_state_blocks.end());
                 }
             }
             // landmark state blocks
