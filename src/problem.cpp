@@ -563,7 +563,13 @@ void Problem::setOrigin(const Eigen::VectorXs& _origin_state, const Eigen::Matri
         //        CaptureFixPtr init_capture = std::make_shared<CaptureFix>(_ts, nullptr, pose, pose_cov);
 
         // create origin capture with the given state as data
-        CaptureFixPtr init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _origin_state, _origin_state_cov);
+        // Capture fix only takes 3D position and Quaternion orientation
+        CaptureFixPtr init_capture;
+        if ((trajectory_ptr_->getFrameStructure() == FRM_PQVBB_3D) || (trajectory_ptr_->getFrameStructure() == FRM_POV_3D) )
+            init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _origin_state.head(7), _origin_state_cov);
+        else
+            init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _origin_state, _origin_state_cov);
+
         origin_frame_ptr->addCapture(init_capture);
 
         // create feature and constraint
