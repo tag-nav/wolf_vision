@@ -151,8 +151,7 @@ TEST(ProcessorIMU, static_ceresOptimiszation_fixBias)
 TEST(ProcessorIMU, static_ceresOptimisation_Odom0)
 {
     //With IMU data only, biases are not observable ! So covariance cannot be computed due to jacobian rank deficiency.
-    // We must add an odometry to make covariances observable Or... we could fix all bias stateBlocks
-    //First we will try to fix bias stateBlocks
+    // We must add an odometry to make covariances observable
 
     using std::shared_ptr;
     using std::make_shared;
@@ -164,7 +163,7 @@ TEST(ProcessorIMU, static_ceresOptimisation_Odom0)
     // WOLF PROBLEM
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
     Eigen::VectorXs x0(16);
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.001,  0,0,.002;
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
     TimeStamp t(0);
     wolf_problem_ptr_->setOrigin(x0, Eigen::Matrix6s::Identity() * 0.001, t);
 
@@ -184,7 +183,7 @@ TEST(ProcessorIMU, static_ceresOptimisation_Odom0)
 
     // SET ORIGIN AND FIX ORIGIN KEYFRAME
     //wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t); //this also creates a keyframe at origin
-    wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();
+    //wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();
 
 
     // SENSOR + PROCESSOR ODOM 3D
@@ -204,34 +203,20 @@ TEST(ProcessorIMU, static_ceresOptimisation_Odom0)
     }*/
     ASSERT_TRUE(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->isKey()) << "origin_frame is not a KeyFrame..." << std::endl;
 
-    /*wolf_problem_ptr_->setProcessorMotion(processor_ptr_odom3D);
-    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0.head(7), t); //this also creates a keyframe at origin
-    wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();*/
-
     //===================================================== END{SETTING PROBLEM}
 
     //===================================================== PROCESS DATA
-
     // PROCESS IMU DATA
-    wolf_problem_ptr_->print(4,1,1,1);
-                                             std::cout << " STARTING " << std::endl;
+
     Eigen::Vector6s data;
-    Eigen::Vector6s data_odom3D;
-    data << 0.0019, 0.0001, 9.8122, 0.1022, 0.1171, -0.0413;
+    //data << 0.0019, 0.0001, 9.8122, 0.1022, 0.1171, -0.0413;
+    data << 0.00, 0.000, 9.81, 0.0, 0.0, 0.0;
     Scalar dt = t.get();
     TimeStamp ts(0.001);
     wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
-    //sen_imu->process(imu_ptr);
-
-    //data_odom3D << 0,0,0, 0,0,0;
-    //Add an Odom3D constraint
-    //wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
-    //sen_odom3D->process(mot_ptr);
-
     wolf_problem_ptr_->setProcessorMotion(processor_ptr_imu);
-    WOLF_DEBUG("Processor Odom front ts : ", processor_ptr_odom3D->getBuffer().get().front().ts_);
 
-    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()) ){
+    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()*2) ){
         
         // Time and data variables
         dt += 0.001;
@@ -243,16 +228,10 @@ TEST(ProcessorIMU, static_ceresOptimisation_Odom0)
         imu_ptr->getTimeStamp();
         sen_imu->process(imu_ptr);
     }
-    WOLF_DEBUG("Processor Odom front ts : ", processor_ptr_odom3D->getBuffer().get().front().ts_);
-    wolf_problem_ptr_->setProcessorMotion(processor_ptr_odom3D);
+
     // PROCESS ODOM 3D DATA
-    /*std::cout << "doing ODOM" << std::endl;
-    CaptureBasePtr origin_cap = processor_ptr_odom3D->getOriginPtr();
-    std::cout << "debug0" << std::endl;
-    FrameBasePtr origin_fr = std::static_pointer_cast<CaptureMotion>(origin_cap)->getOriginFramePtr();
-    std::cout << "debug1" << std::endl;
-    wolf::TimeStamp origin_stamp = processor_ptr_odom3D->getOriginPtr()->getTimeStamp();
-    std::cout << "debug2" << std::endl;*/
+    Eigen::Vector6s data_odom3D;
+    wolf_problem_ptr_->setProcessorMotion(processor_ptr_odom3D);
     data_odom3D << 0,0,0, 0,0,0;
     //Add an Odom3D constraint
     //dt += 0.001;
@@ -270,13 +249,16 @@ TEST(ProcessorIMU, static_ceresOptimisation_Odom0)
     /*if(wolf_problem_ptr_->check(1)){
         wolf_problem_ptr_->print(4,1,1,1);
     }*/
+    std::cout << "print...\n" << std::endl;
     wolf_problem_ptr_->print(4,1,1,1);
      
     std::cout << "\t\t\t ______solving______" << std::endl;
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.FullReport() << std::endl;
     std::cout << "\t\t\t ______solved______" << std::endl;
-     
+    
+    wolf_problem_ptr_->print(4,1,1,1);
+
     // COMPUTE COVARIANCES
     std::cout << "\t\t\t ______computing covariances______" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
