@@ -126,6 +126,7 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
                                                   Eigen::VectorXs::Zero(data_size_),
                                                   Eigen::MatrixXs::Zero(data_size_, data_size_), nullptr);
     // Add origin capture to origin frame
+    WOLF_DEBUG("Capture origin timestamp : ", _origin_frame->getTimeStamp().get());
     _origin_frame->addCapture(origin_ptr_);
 
     // make (emtpy) last Capture
@@ -201,13 +202,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
     }
 
     // create motion feature and add it to the capture
-    FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
-            "MOTION",
-            key_capture_ptr->getBuffer().get().back().delta_integr_,
-            key_capture_ptr->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
-                    key_capture_ptr->getBuffer().get().back().delta_integr_cov_ :
-                    Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-8);
-    key_capture_ptr->addFeature(key_feature_ptr);
+    FeatureBasePtr key_feature_ptr = emplaceFeature(key_capture_ptr, key_frame_origin);
 
     // create motion constraint and add it to the feature, and link it to the other frame (origin)
     auto key_ctr_ptr = emplaceConstraint(key_feature_ptr, key_frame_origin);
