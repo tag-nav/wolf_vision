@@ -39,17 +39,9 @@ TEST(SensorIMU, Constructors)
     //StateBlock _a_w_bias should be empty
 
     //parameter containing accelerometer and gyroscope biases
-    Eigen::Vector6s bias; //ab_x, ab_y, ab_z, wb_x, wb_y, wb_z
-    bias.setRandom();
-    StateBlockPtr bias_ptr = std::make_shared<StateBlock>(bias);
-    SensorIMUPtr sen1 = std::make_shared<SensorIMU>(p_ptr, q_ptr, bias_ptr);
-
-    Eigen::Vector6s get_bias(sen1->getIntrinsicPtr()->getVector());
-
-    ASSERT_TRUE((bias - get_bias).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
 
     IntrinsicsIMUPtr params = std::make_shared<IntrinsicsIMU>();
-    SensorIMUPtr sen2 = std::make_shared<SensorIMU>(p_ptr, q_ptr, params, bias_ptr);
+    SensorIMUPtr sen2 = std::make_shared<SensorIMU>(p_ptr, q_ptr, params);
 
     ASSERT_EQ(params->gyro_noise, sen2->getGyroNoise());
     ASSERT_EQ(params->accel_noise, sen2->getAccelNoise());

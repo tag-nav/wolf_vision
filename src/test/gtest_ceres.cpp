@@ -132,8 +132,6 @@ TEST(ProcessorIMU, static_ceresOptimiszation_fixBias)
         ( std::static_pointer_cast<FrameIMU>(it) )->getAccBiasPtr()->fix();
         ( std::static_pointer_cast<FrameIMU>(it) )->getGyroBiasPtr()->fix();
     }
-    // Fix also sensor bias
-    sen_imu->getStateBlockPtr(2)->fix();
 
     //Check and print wolf tree
     if(wolf_problem_ptr_->check(1)){
@@ -150,7 +148,7 @@ TEST(ProcessorIMU, static_ceresOptimiszation_fixBias)
     std::cout << "\t\t\t ______computed!______" << std::endl;
 }
 
-TEST(ProcessorIMU, static_ceresOptimiszation_Odom)
+TEST(ProcessorIMU, static_ceresOptimisation_Odom0)
 {
     //With IMU data only, biases are not observable ! So covariance cannot be computed due to jacobian rank deficiency.
     // We must add an odometry to make covariances observable Or... we could fix all bias stateBlocks
@@ -177,7 +175,6 @@ TEST(ProcessorIMU, static_ceresOptimiszation_Odom)
     ceres_options.max_num_iterations = 1e4;
     CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
 
-    wolf_problem_ptr_->print(4,1,1,1);
 
     // SENSOR + PROCESSOR IMU
     SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -189,7 +186,6 @@ TEST(ProcessorIMU, static_ceresOptimiszation_Odom)
     //wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t); //this also creates a keyframe at origin
     wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();
 
-    wolf_problem_ptr_->print(4,1,1,1);
 
     // SENSOR + PROCESSOR ODOM 3D
     SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
@@ -199,7 +195,7 @@ TEST(ProcessorIMU, static_ceresOptimiszation_Odom)
 
     // There should be a FrameIMU at origin as KeyFrame + 1 FrameIMU and 1 FrameOdom Non-KeyFrame
     ASSERT_EQ(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().size(),3);
-    wolf_problem_ptr_->print(4,1,1,1);
+
     //There should be 3 captures at origin_frame : CaptureOdom, captureIMU + CaptureFix due to setting problem origin before installing processors
     EXPECT_EQ((wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front())->getCaptureList().size(),3);
     /*for ( for CaptureBasePtr C : (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front())->getCaptureList() )
@@ -217,6 +213,7 @@ TEST(ProcessorIMU, static_ceresOptimiszation_Odom)
     //===================================================== PROCESS DATA
 
     // PROCESS IMU DATA
+    wolf_problem_ptr_->print(4,1,1,1);
                                              std::cout << " STARTING " << std::endl;
     Eigen::Vector6s data;
     Eigen::Vector6s data_odom3D;
@@ -273,6 +270,7 @@ TEST(ProcessorIMU, static_ceresOptimiszation_Odom)
     /*if(wolf_problem_ptr_->check(1)){
         wolf_problem_ptr_->print(4,1,1,1);
     }*/
+    wolf_problem_ptr_->print(4,1,1,1);
      
     std::cout << "\t\t\t ______solving______" << std::endl;
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
