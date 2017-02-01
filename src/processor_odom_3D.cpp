@@ -141,11 +141,11 @@ void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen
 
 void ProcessorOdom3D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
                                  Eigen::VectorXs& _x_plus_delta)
-{
-    assert(_x.size() == x_size_ && "Wrong _x vector size");
+{   
+    assert(_x.size() >= x_size_ && "Wrong _x vector size"); //we need a state vector which size is at least x_size_
     assert(_delta.size() == delta_size_ && "Wrong _delta vector size");
     assert(_x_plus_delta.size() == x_size_ && "Wrong _x_plus_delta vector size");
-    remap(_x, _delta, _x_plus_delta);
+    remap(_x.head(x_size_), _delta, _x_plus_delta); //we take only the x_sixe_ first elements of the state Vectors (Position + Orientation)
     p_out_ = p1_ + q1_ * p2_;
     q_out_ = q1_ * q2_;
 }
@@ -269,6 +269,8 @@ ProcessorBasePtr ProcessorOdom3D::create(const std::string& _unique_name, const 
 bool ProcessorOdom3D::voteForKeyFrame()
 {
     WOLF_DEBUG( "Time span   : " , getBuffer().get().back().ts_ - getBuffer().get().front().ts_ );
+    WOLF_DEBUG( " last ts : ", getBuffer().get().back().ts_);
+    WOLF_DEBUG( " first ts : ", getBuffer().get().front().ts_);
     WOLF_DEBUG( "BufferLength: " , getBuffer().get().size() );
     WOLF_DEBUG( "DistTraveled: " , delta_integrated_.head(3).norm() );
     WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
