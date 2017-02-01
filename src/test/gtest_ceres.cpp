@@ -498,7 +498,7 @@ TEST(ProcessorIMU, Pure_translation)
         // PROCESS IMU DATA
         // Time and data variables
         imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
-        //data_imu[2] += 9.806;
+        data_imu[2] += 9.806;
         //9.81 added in Az because gravity was not added in the perfect imu simulation
         ts.set(input_clock);
         imu_ptr->setTimeStamp(ts);

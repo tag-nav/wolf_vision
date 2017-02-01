@@ -2,11 +2,14 @@
 #include "wolf.h"
 #include "problem.h"
 #include "sensor_imu.h"
+#include "sensor_odom_3D.h"
 #include "capture_imu.h"
 #include "constraint_odom_3D.h"
 #include "state_block.h"
 #include "state_quaternion.h"
 #include "processor_imu.h"
+#include "processor_odom_3D.h"
+#include "ceres_wrapper/ceres_manager.h"
 
 //std
 #include <iostream>
@@ -28,142 +31,120 @@ int main(int argc, char** argv)
 
     std::cout << std::endl << "==================== test_imu_constraintAHP ======================" << std::endl;
 
-    /*load files containing accelerometer and data
-    structure is : Timestampt\t Ax\t Ay\t Az\t Wx\t Wy\t Wz
-    */
+
+    // LOADING DATA FILES (IMU + ODOM)
+    // FOR IMU, file content is : Timestampt\t Ax\t Ay\t Az\t Wx\t Wy\t Wz
+    // FOR ODOM, file content is : ΔT(current - last), Δpx, Δpy, Δpz, Δox, Δoy, Δoz
     
-    std::ifstream data_file;
-    const char * filename;
-    if (argc < 2)
+    
+    std::ifstream data_file_imu;
+    std::ifstream data_file_odom;
+    const char * filename_imu;
+    const char * filename_odom;
+    if (argc < 3)
         {
-            std::cout << "Missing input argument! : needs 1 argument (path to data file)." << std::endl;
+            std::cout << "Missing input argument! : needs 2 argument (path to imu and odom data files)." << std::endl;
             return 1;
         }
         else
         {
-            filename = argv[1];
-            data_file.open(filename);
-            std::cout << "file: " << filename << std::endl;
+            filename_imu = argv[1];
+            filename_odom = argv[2];
 
-            std::string dummy; //this is needed only if first line is headers
-            getline(data_file, dummy);
+            data_file_imu.open(filename_imu);
+            data_file_odom.open(filename_odom);
+
+            std::cout << "file imu : " << filename_imu <<"\t file odom : " << filename_odom << std::endl;
+
+            std::string dummy; //this is needed only if first line is headers or useless data
+            getline(data_file_imu, dummy);
         }
 
-        if(!data_file.is_open()){
+        if(!data_file_imu.is_open() || !data_file_odom.is_open()){
             std::cerr << "Failed to open data files... Exiting" << std::endl;
             return 1;
         }
+
+    //===================================================== SETTING PROBLEM
+    std::string wolf_root = _WOLF_ROOT_DIR;
         
-    // Wolf problem
+    // WOLF PROBLEM
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
-    Eigen::VectorXs IMU_extrinsics(7);
-    IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, shared_ptr<IntrinsicsBase>());
-    wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
-
-    // Time and data variables
-    TimeStamp t;
-    Eigen::Vector6s data_;
-    Scalar mpu_clock = 0;
-
-    t.set(mpu_clock);
-
-    // Set the origin
     Eigen::VectorXs x0(16);
-    //x0 << 0,0,0,  0,0,0,1,  0,0,0,  0.05,0.05,.08,  0.02,0.02,.02; // Try some non-zero biases
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0.25,0.01,.15,  -0.014,0.01,-.01; // Try some non-zero biases
-    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
+    x0 << 0,0,0,  0,0,0,1,  1,2,2,  0,0,.00,  0,0,.00; //INITIAL CONDITIONS
+    TimeStamp t(0);
+    wolf_problem_ptr_->setOrigin(x0, Eigen::Matrix6s::Identity() * 0.001, t);
 
-    //create a keyframe at origin
-    TimeStamp ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
-    Eigen::VectorXs origin_state = x0;
-    wolf::FrameIMUPtr origin_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, origin_state);
-    wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
-    origin_frame->fix();
-    
-    // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_, origin_frame) );
+    // CERES WRAPPER
+    ceres::Solver::Options ceres_options;
+    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
+    ceres_options.max_line_search_step_contraction = 1e-3;
+    ceres_options.max_num_iterations = 1e4;
+    //CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
 
-    // main loop
-    using namespace std;
+
+    // SENSOR + PROCESSOR IMU
+    SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+    ProcessorBasePtr processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu.yaml");
+    SensorIMUPtr sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
+    ProcessorIMUPtr processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
+
+    // SET ORIGIN AND FIX ORIGIN KEYFRAME
+    //wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t); //this also creates a keyframe at origin
+    //wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();
+
+
+    // SENSOR + PROCESSOR ODOM 3D
+    SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
+    ProcessorBasePtr processor_ptr_odom = wolf_problem_ptr_->installProcessor("ODOM 3D", "odom", "odom", wolf_root + "/src/examples/processor_odom_3D.yaml");
+    SensorOdom3DPtr sen_odom3D = std::static_pointer_cast<SensorOdom3D>(sen1_ptr);
+    ProcessorOdom3DPtr processor_ptr_odom3D = std::static_pointer_cast<ProcessorOdom3D>(processor_ptr_odom);
+
+    //===================================================== PROCESS DATA
+    // PROCESS DATA
+
+    Eigen::Vector6s data_imu, data_odom3D;
+    data_imu << 0,0,9.806, 0,0,0;
+    //data_imu << 0.00, 0.000, 9.81, 0.0, 0.0, 0.0;
+    data_odom3D << 0,0,0, 0,0,0;
+    Scalar input_clock;
+    TimeStamp ts(0.001);
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
+    wolf_problem_ptr_->setProcessorMotion(processor_ptr_imu);
+    unsigned int iter = 0;
+    const unsigned int odom_freq = 50; //odom data generated every 50 ms
+
     clock_t begin = clock();
-    const int keyframe_spacing = 10;
-    int last_keyframe_dt = 0;
-    Eigen::VectorXs state_vec;
-    Eigen::VectorXs delta_preint;
-    FrameIMUPtr last_frame;
-    //FrameIMUPtr previous_frame;
-    Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
-    Eigen::Matrix<wolf::Scalar,9,6> dD_db;
-    unsigned int iteration = 0; //used just in case we want to stop the loop before the eof
 
-    //needed to retrieve jacobians wrt biases
-    wolf::ProcessorIMUPtr proc_imu = std::static_pointer_cast<ProcessorIMU>(wolf_problem_ptr_->getProcessorMotionPtr());
-    
-    while(!data_file.eof() && iteration <= 10000){
-        if(last_keyframe_dt >= keyframe_spacing){
-            //previous_frame = std::static_pointer_cast<FrameIMU>(imu_ptr->getFramePtr()); //to constraint the new frame and link it to previous one
-            ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
-            state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-            last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
-            //FrameBasePtr last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts_.get(),std::make_shared<StateBlock>(frame_val.head(3)), std::make_shared<StateQuaternion>(frame_val.tail(4)));
-            wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
+    while( (!data_file_imu.eof() && !data_file_odom.eof())){
 
-            //create a feature
-            delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
-            delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
-            proc_imu -> getJacobians(dD_db);
-            std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov, imu_ptr, dD_db);
-
-            //create a constraintIMU
-            ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
-            feat_imu->addConstraint(constraint_imu);
-            last_frame->addConstrainedBy(constraint_imu);
-            Eigen::VectorXs exp = constraint_imu->expectation();
-            std::cout << "exp : " << exp.transpose() << std::endl;
-
-            //reset origin of motion to new frame
-            wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(last_frame);
-            imu_ptr->setFramePtr(last_frame);
-            last_keyframe_dt = 0;
-        }
-        else
-            last_keyframe_dt++;
-
-        // read new data
-        data_file >> mpu_clock >> data_[0] >> data_[1] >> data_[2] >> data_[3] >> data_[4] >> data_[5];
-        t.set(mpu_clock); //
-
-        // assign data to capture
-        imu_ptr->setData(data_);
-        imu_ptr->setTimeStamp(t);
+        iter++;
+        // PROCESS IMU DATA
+        // Time and data variables
+        data_file_imu >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
+        data_imu[2] += 9.806;
+        //9.806 added in Az because gravity was not added in the perfect imu simulation
+        ts.set(input_clock);
+        imu_ptr->setTimeStamp(ts);
+        imu_ptr->setData(data_imu);
 
         // process data in capture
-        sensor_ptr->process(imu_ptr);
-        iteration++;
+        imu_ptr->getTimeStamp();
+        sen_imu->process(imu_ptr);
+
+        if(iter == odom_freq)
+        {
+            // PROCESS ODOM 3D DATA
+            data_file_odom >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
+            mot_ptr->setTimeStamp(ts);
+            mot_ptr->setData(data_odom3D);
+            sen_odom3D->process(mot_ptr);
+            iter = 0;
+        }
     }
 
-    //first close the file no longer needed
-    data_file.close();
-
-    //make final a keyframe
-    ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
-    state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-    std::cout << "last state : " << state_vec.transpose() << std::endl;
-    last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
-    wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
-
-    //create a feature
-    FeatureBasePtr last_feature = std::make_shared<FeatureBase>("ODOM_3D", origin_state.head(7),Eigen::Matrix7s::Identity()); //first KF and last KF at same position
-    last_feature->setCapturePtr(imu_ptr);
-
-    //create an ODOM constraint between first and last keyframes
-    ConstraintOdom3DPtr constraintOdom_ptr = std::make_shared<ConstraintOdom3D>(last_feature, last_frame);
-    last_feature -> addConstraint(constraintOdom_ptr);
-    last_frame -> addConstrainedBy(constraintOdom_ptr);
-
-    Eigen::Vector7s expec;
-    expec  = constraintOdom_ptr -> expectation();
+    //===================================================== END{PROCESS DATA}
 
     clock_t end = clock();
     double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
