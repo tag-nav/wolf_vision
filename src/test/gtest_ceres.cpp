@@ -397,27 +397,27 @@ TEST(ProcessorIMU, static_ceresOptimisation_Odom1)
 TEST(ProcessorIMU, Pure_translation)
 {
     //In this test we will process both IMU and Odom3D data at the same time (in a same loop).
-    //difference with test above, we don't wait for a KeyFrame to be created y processorIMU to process Odom data'
+    //we use data simulating a perfect IMU doing pure translation
 
     using std::shared_ptr;
     using std::make_shared;
     using std::static_pointer_cast;
-    //load files containing accelerometer and gyroscope data
+
     std::ifstream imu_data_input;
     std::ifstream odom_data_input;
 
-        imu_data_input.open(filename_pure_tranlation_imu_data);
-        odom_data_input.open(filename_pure_tranlation_odom);
-        std::cout << "pure translation imu file: " << filename_pure_tranlation_imu_data << std::endl;
-        std::cout << "pure translation odom: " << filename_pure_tranlation_odom << std::endl;
+    imu_data_input.open(filename_pure_tranlation_imu_data);
+    odom_data_input.open(filename_pure_tranlation_odom);
+    std::cout << "pure translation imu file: " << filename_pure_tranlation_imu_data << std::endl;
+    std::cout << "pure translation odom: " << filename_pure_tranlation_odom << std::endl;
 
-        std::string dummy;
-        getline(imu_data_input, dummy); getline(odom_data_input, dummy);
+    std::string dummy;
+    getline(imu_data_input, dummy); getline(odom_data_input, dummy); //needed only to delete headers or first useless data
 
-        if(!imu_data_input.is_open() || !odom_data_input.is_open()){
-            std::cerr << "Failed to open data files... Exiting" << std::endl;
-            ADD_FAILURE();
-        }
+    if(!imu_data_input.is_open() || !odom_data_input.is_open()){
+        std::cerr << "Failed to open data files... Exiting" << std::endl;
+        ADD_FAILURE();
+    }
 
     //prepare creation of file if DEBUG_RESULTS activated
 #ifdef DEBUG_RESULTS
@@ -432,12 +432,12 @@ TEST(ProcessorIMU, Pure_translation)
 
 
     //===================================================== SETTING PROBLEM
-    /*std::string wolf_root = _WOLF_ROOT_DIR;
+    std::string wolf_root = _WOLF_ROOT_DIR;
 
     // WOLF PROBLEM
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
     Eigen::VectorXs x0(16);
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
+    x0 << 0,0,0,  0,0,0,1,  1,2,2,  0,0,.00,  0,0,.00; //INITIAL CONDITIONS
     TimeStamp t(0);
     wolf_problem_ptr_->setOrigin(x0, Eigen::Matrix6s::Identity() * 0.001, t);
 
@@ -479,36 +479,43 @@ TEST(ProcessorIMU, Pure_translation)
     //===================================================== PROCESS DATA
     // PROCESS DATA
 
-    Eigen::Vector6s data, data_odom3D;
-    data << 0.0019, 0.0001, 9.8122, 0.1022, 0.1171, -0.0413;
-    //data << 0.00, 0.000, 9.81, 0.0, 0.0, 0.0;
+    Eigen::Vector6s data_imu, data_odom3D;
+    data_imu << 0,0,9.81, 0,0,0;
+    //data_imu << 0.00, 0.000, 9.81, 0.0, 0.0, 0.0;
     data_odom3D << 0,0,0, 0,0,0;
-    Scalar dt = t.get();
+    //Scalar dt = t.get();
+    Scalar input_clock;
     TimeStamp ts(0.001);
-    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
     wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
     wolf_problem_ptr_->setProcessorMotion(processor_ptr_imu);
     unsigned int iter = 0;
+    const unsigned int odom_freq = 50; //odom data generated every 50 ms
 
-    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()*2) ){
-        
+    while( !imu_data_input.eof() && !odom_data_input.eof() ){
+
+        iter++;
         // PROCESS IMU DATA
         // Time and data variables
-        dt += 0.001;
-        ts.set(dt);
+        imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
+        //data_imu[2] += 9.806;
+        //9.81 added in Az because gravity was not added in the perfect imu simulation
+        ts.set(input_clock);
         imu_ptr->setTimeStamp(ts);
-        imu_ptr->setData(data);
+        imu_ptr->setData(data_imu);
 
         // process data in capture
         imu_ptr->getTimeStamp();
         sen_imu->process(imu_ptr);
 
-        if(iter == 100) //every 100 ms
+        if(iter == odom_freq) //every 100 ms
         {
             // PROCESS ODOM 3D DATA
+            odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
             mot_ptr->setTimeStamp(ts);
             mot_ptr->setData(data_odom3D);
             sen_odom3D->process(mot_ptr);
+            iter = 0;
         }
     }
 
@@ -521,7 +528,8 @@ TEST(ProcessorIMU, Pure_translation)
     /*if(wolf_problem_ptr_->check(1)){
         wolf_problem_ptr_->print(4,1,1,1);
     }*/
-    /*std::cout << "print...\n" << std::endl;
+
+    std::cout << "print...\n" << std::endl;
     wolf_problem_ptr_->print(4,1,1,1);
      
     std::cout << "\t\t\t ______solving______" << std::endl;
@@ -534,7 +542,7 @@ TEST(ProcessorIMU, Pure_translation)
     // COMPUTE COVARIANCES
     std::cout << "\t\t\t ______computing covariances______" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______" << std::endl;*/
+    std::cout << "\t\t\t ______computed!______" << std::endl;
 
     //===================================================== END{SOLVER PART}
 }
@@ -551,7 +559,8 @@ int main(int argc, char **argv)
  else{
      filename_pure_tranlation_imu_data = argv[1];
      filename_pure_tranlation_odom = argv[2];
-     ::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*:*Pure_translation*"; //if arguments given, run test for static_optimisation + pure_translation
+     //::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*:*Pure_translation*"; //if arguments given, run test for static_optimisation + pure_translation
+    ::testing::GTEST_FLAG(filter) = "*Pure_translation*";
  }
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
