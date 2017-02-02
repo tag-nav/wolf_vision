@@ -372,14 +372,98 @@ inline Eigen::VectorXs ProcessorIMU::deltaZero() const
 }
 
 inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref,
-                                        Motion& _motion,
+                                        Motion& _motion_second,
                                         TimeStamp& _ts)
 {
-    Motion tmp(_motion_ref);
-    tmp.ts_ = _ts;
-    tmp.delta_ = deltaZero();
-    tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-    return tmp;
+    // resolve out-of-bounds time stamp as if the time stamp was exactly on the bounds
+    if (_ts <= _motion_ref.ts_)     // behave as if _ts == _motion_ref.ts_
+    { // return null motion. Second stays the same.
+        Motion motion_int(_motion_ref);
+        motion_int.delta_ = deltaZero();
+        motion_int.delta_cov_.setZero();
+        return motion_int;
+    }
+    if (_motion_second.ts_ <= _ts)  // behave as if _ts == _motion_second.ts_
+    { // return original second motion. Second motion becomes null motion
+        Motion motion_int(_motion_second);
+        _motion_second.delta_ = deltaZero();
+        _motion_second.delta_cov_.setZero();
+        return motion_int;
+    }
+
+    assert(_motion_ref.ts_ <= _ts && "Interpolation time stamp out of bounds");
+    assert(_ts <= _motion_second.ts_ && "Interpolation time stamp out of bounds");
+
+    assert(_motion_ref.delta_.size() == delta_size_ && "Wrong delta size");
+    assert(_motion_ref.delta_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_ref.delta_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_ref.delta_integr_.size() == delta_size_ && "Wrong delta size");
+    assert(_motion_ref.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_ref.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_second.delta_.size() == delta_size_ && "Wrong delta size");
+    assert(_motion_second.delta_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_second.delta_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_second.delta_integr_.size() == delta_size_ && "Wrong delta size");
+    assert(_motion_second.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+    assert(_motion_second.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+
+    // Interpolate between motion_ref and motion, as in:
+    //
+    // motion_ref ------ ts_ ------ motion
+    //                 return
+    //
+    // and return the value at the given time_stamp ts_.
+    //
+    // The position and velocity receive linear interpolation:
+    //    p_ret = (ts - t_ref) / dt * (p - p_ref)
+    //    v_ret = (ts - t_ref) / dt * (v - v_ref)
+    //
+    // the quaternion receives a slerp interpolation
+    //    q_ret = q_ref.slerp( (ts - t_ref) / dt , q);
+    //
+    // See extensive documentation in ProcessorMotion::interpolate().
+
+    // reference
+    TimeStamp           t_ref       = _motion_ref.ts_;
+
+    // final
+    TimeStamp           t_sec       = _motion_second.ts_;
+    Map<VectorXs>       dp_sec(_motion_second.delta_.data(), 3);
+    Map<Quaternions>    dq_sec(_motion_second.delta_.data() + 3);
+    Map<VectorXs>       dv_sec(_motion_second.delta_.data(), 7);
+
+    // interpolated
+    Motion              motion_int  = motionZero(_ts);
+    Map<VectorXs>       dp_int(motion_int.delta_.data(), 3);
+    Map<Quaternions>    dq_int(motion_int.delta_.data() + 3);
+    Map<VectorXs>       dv_int(motion_int.delta_.data(), 7);
+
+    // Jacobians for covariance propagation
+    MatrixXs            J_ref(delta_cov_size_, delta_cov_size_);
+    MatrixXs            J_int(delta_cov_size_, delta_cov_size_);
+
+    // interpolate delta
+    Scalar     tau  = (_ts - t_ref) / (t_sec - t_ref); // interpolation factor (0 to 1)
+    motion_int.ts_  = _ts;
+    dp_int          = tau * dp_sec;
+    dq_int          = Quaternions::Identity().slerp(tau, dq_sec);
+    dv_int          = tau * dv_sec;
+    deltaPlusDelta(_motion_ref.delta_integr_, motion_int.delta_, (t_sec - t_ref), motion_int.delta_integr_, J_ref, J_int);
+
+    // interpolate covariances
+    motion_int.delta_cov_           = tau * _motion_second.delta_cov_;
+    motion_int.delta_integr_cov_    = J_ref * _motion_ref.delta_integr_cov_ * J_ref.transpose() + J_int * _motion_second.delta_cov_ * J_int.transpose();
+
+    // update second delta ( in place update )
+    dp_sec          = dq_int.conjugate() * ((1 - tau) * dp_sec);
+    dq_sec          = dq_int.conjugate() * dq_sec;
+    dv_sec          = dq_int.conjugate() * ((1 - tau) * dv_sec);
+    _motion_second.delta_cov_ = (1 - tau) * _motion_second.delta_cov_; // easy interpolation // TODO check for correctness
+    //Dp            = Dp; // trivial, just leave the code commented
+    //Dq            = Dq; // trivial, just leave the code commented
+    //_motion.delta_integr_cov_ = _motion.delta_integr_cov_; // trivial, just leave the code commented
+
+    return motion_int;
 }
 
 
