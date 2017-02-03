@@ -396,7 +396,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
      * First we change only Px, then Py, then Pz, then all of them
      * Second : we change Ox, then Oy, then Oz, then all of them
      * Third : we change everything
-     * Everything should converge and final keyFrame State should be exactly [0,0,0, 0,0,0,1]
+     * Everything should converge and final keyFrame State should be exactly [0,0,0, 0,0,0,1 ,0,0,0] -->Checked with Assertions
      *
      */
 
@@ -447,10 +447,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
                                              /************** SOLVER PART  **************/
 
     //If we want the covariances to be computed, then we need to fix all Velocity StateBlocks because they cannot be observed we Odometry measurements only
-    for(FrameBasePtr Frame_ptr : wolf_problem_ptr_->getTrajectoryPtr()->getFrameList())
+    /*for(FrameBasePtr Frame_ptr : wolf_problem_ptr_->getTrajectoryPtr()->getFrameList())
     {
         Frame_ptr->getVPtr()->fix();
-    }
+    }*/
 
      /* ___________________________________________ CHANGING FINAL FRAME BEFORE OPTIMIZATION ___________________________________________*/
     
@@ -472,7 +472,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
 
     // COMPUTE COVARIANCES
     //std::cout << "\t\t\t ______computing covariances______" << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    //ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     //std::cout << "\t\t\t ______computed!______" << std::endl;
 
 
@@ -502,7 +502,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
 
     // COMPUTE COVARIANCES
     //std::cout << "\t\t\t ______computing covariances______ Px changed" << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    //ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     //std::cout << "\t\t\t ______computed!______ Px changed" << std::endl;
 
 
@@ -525,7 +525,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
 
     // COMPUTE COVARIANCES
     //std::cout << "\t\t\t ______computing covariances______ Py changed" << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    //ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     //std::cout << "\t\t\t ______computed!______ Py changed" << std::endl;
 
 
@@ -548,7 +548,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
 
     // COMPUTE COVARIANCES
     //std::cout << "\t\t\t ______computing covariances______ Pz changed" << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    //ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     //std::cout << "\t\t\t ______computed!______ Pz changed" << std::endl;
 
 
@@ -571,7 +571,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
 
     // COMPUTE COVARIANCES
     //std::cout << "\n\t\t\t ______computing covariances______ Px, Py and Pz changed" << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    //ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     //std::cout << "\t\t\t ______computed!______ Px, Py and Pz changed" << std::endl;
 
 
@@ -598,7 +598,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
 
     // COMPUTE COVARIANCES
     //std::cout << "\t\t\t ______computing covariances______ Ox changed" << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    //ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     //std::cout << "\t\t\t ______computed!______ Ox changed" << std::endl;
 
 
@@ -622,7 +622,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
 
     // COMPUTE COVARIANCES
     //std::cout << "\t\t\t ______computing covariances______ Oy changed" << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    //ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     //std::cout << "\t\t\t ______computed!______ Oy changed" << std::endl;
 
                                                     /*********************/
@@ -645,7 +645,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
 
     // COMPUTE COVARIANCES
     //std::cout << "\t\t\t ______computing covariances______ Oz changed" << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    //ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     //std::cout << "\t\t\t ______computed!______ Oz changed" << std::endl;
 
 
@@ -669,7 +669,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
 
     // COMPUTE COVARIANCES
     //std::cout << "\t\t\t ______computing covariances______ Ox, Oy and Oz changed" << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    //ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     //std::cout << "\t\t\t ______computed!______ Ox, Oy and Oz changed" << std::endl;
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -678,9 +678,15 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
 
 TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
 {
-    //With IMU data only, biases are not observable ! So covariance cannot be computed due to jacobian rank deficiency.
-    // We must add an odometry to make covariances observable Or... we could fix all bias stateBlocks
-    //First we will try to fix bias stateBlocks
+    /* In this scenario, we simulate the integration of a perfect IMU that is not moving.
+     * Initial State is [0,0,0, 0,0,0,1, 0,0,0] so we expect the Final State to be exactly the same
+     * Origin KeyFrame is fixed
+     * 
+     * With IMU data only, biases are not observable ! So covariance cannot be computed due to jacobian rank deficiency.
+     * We must add an odometry to make covariances observable Or... we could fix all bias stateBlocks
+     * First we will try to fix bias stateBlocks
+     */
+
 
     using std::shared_ptr;
     using std::make_shared;
@@ -693,12 +699,21 @@ TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
 
     SensorBasePtr sen_imu = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
-    ProcessorBasePtr processor_ptr = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu.yaml");
 
-    //setting origin
+    // We want to create a processorIMU with a max_time_span of 1 seconds.
+    // Default processorIMUParams is made so that a KeyFrame will be created at each step.
+    ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
+    prc_imu_params->max_time_span = 1;
+    prc_imu_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
+    prc_imu_params->dist_traveled = 1000000000;
+    prc_imu_params->angle_turned = 1000000000;
+
+    ProcessorBasePtr processor_ptr = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", sen_imu, prc_imu_params);
+
+    //setting origin and fixing origin KeyFrame
     Eigen::VectorXs x0(16);
     TimeStamp t(0);
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.001,  0,0,.002;
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0;
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t); //this also creates a keyframe at origin
     wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();
 
@@ -711,8 +726,9 @@ TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
 
                                              /************** USE IMU CLASSES  **************/
     Eigen::Vector6s data;
-    //data << 0.15,0.10,9.88, 0.023,0.014,0.06;
-    data << 0.0,0.0,9.81, 0.0,0.0,0.0;
+    data << 0.0,0.0,wolf::gravity()(2), 0.0,0.0,0.0; //we use exactly the value of gravity defined in wolf.h
+
+    //integrate IMU data until KeyFrame creation (until we reach max_time_span)
     Scalar dt = t.get();
     TimeStamp ts(0);
     while((dt-t.get())<=std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan()){
@@ -725,7 +741,7 @@ TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
     sen_imu->process(imu_ptr);
     }
 
-    //Fix all biases StateBlocks
+    //Fix all biases StateBlocks -> to make covariances computable
     for(FrameBasePtr it : wolf_problem_ptr_->getTrajectoryPtr()->getFrameList()){
         ( std::static_pointer_cast<FrameIMU>(it) )->getAccBiasPtr()->fix();
         ( std::static_pointer_cast<FrameIMU>(it) )->getGyroBiasPtr()->fix();
@@ -739,6 +755,13 @@ TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
                                              /************** SOLVER PART  **************/
      ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
      std::cout << summary.FullReport() << std::endl;
+
+     //We check with assertions if Final KeyFrame has the same state as origin_KF
+     FrameBasePtr origin_KF = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front();
+     FrameBasePtr last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
+     ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+     ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+     ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
      
     // COMPUTE COVARIANCES
     std::cout << "\t\t\t ______computing covariances______" << std::endl;
@@ -1147,8 +1170,8 @@ TEST(ProcessorIMU, Pure_translation)
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*"; //default : use all test for static optimisation (not using any input)
-  //::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation_convergenceOdom_POV*";
+  //::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*"; //default : use all test for static optimisation (not using any input)
+  ::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation_fixBias*";
   if (argc < 3)
     {
         std::cout << "Missing input argument to run pure_translation test! : needs 2 arguments (path to accelerometer file and path to gyroscope data)." << std::endl;
