@@ -177,13 +177,13 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
 
     std::cout << "______ solving...______" << std::endl;
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::cout << summary.BriefReport() << std::endl;
     std::cout << "______ solved !______" << std::endl;
 
-                    // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______" << std::endl;
+    //std::cout << "\t\t\t ______computed!______" << std::endl;
 
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
@@ -201,7 +201,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
 
     std::cout << "______ solving... Px changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::cout << summary.BriefReport() << std::endl;
     std::cout << "______ solved ! Px changed______" << std::endl;
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
@@ -210,10 +210,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Px is changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Px changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Px changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Px changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Px changed" << std::endl;
 
 
                                                     /*********************/
@@ -224,7 +224,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
 
     std::cout << "______ solving... Py changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::cout << summary.BriefReport() << std::endl;
     std::cout << "______ solved ! Py changed______" << std::endl;
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
@@ -233,10 +233,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Py is changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Py changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Py changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Py changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Py changed" << std::endl;
 
 
                                                     /*********************/
@@ -247,7 +247,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
 
     std::cout << "______ solving... Pz changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::cout << summary.BriefReport() << std::endl;
     std::cout << "______ solved ! Pz changed______" << std::endl;
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
@@ -256,10 +256,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Pz is changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Pz changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Pz changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Pz changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Pz changed" << std::endl;
 
 
                                                     /********************************/
@@ -270,19 +270,19 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
 
     std::cout << "______ solving... Px, Py and Pz changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::cout << summary.BriefReport() << std::endl;
     std::cout << "______ solved ! Px, Py and Pz changed______" << std::endl;
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
-                "origin and final frame position are different - problem when Px, Py and Pz sare changed" << std::endl;
+                "origin and final frame position are different - problem when Px, Py and Pz are changed" << std::endl;
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
-                "origin and final frame orientation are different - problem when Px, Py and Pz sare changed" << std::endl;
+                "origin and final frame orientation are different - problem when Px, Py and Pz are changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Px, Py and Pz changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Px, Py and Pz changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Px, Py and Pz changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Px, Py and Pz changed" << std::endl;
 
                                                     /*********************/
                                                     //CHANGE OX AND SOLVE//
@@ -296,7 +296,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
 
     std::cout << "______ solving... Ox changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::cout << summary.BriefReport() << std::endl;
     std::cout << "______ solved ! Ox changed______" << std::endl;
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
@@ -305,10 +305,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Ox is changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Ox changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Ox changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Ox changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Ox changed" << std::endl;
 
 
                                                     /*********************/
@@ -320,7 +320,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
 
     std::cout << "______ solving... Oy changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::cout << summary.BriefReport() << std::endl;
     std::cout << "______ solved ! Oy changed______" << std::endl;
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
@@ -329,10 +329,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Oy is changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Oy changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Oy changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Oy changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Oy changed" << std::endl;
 
                                                     /*********************/
                                                     //CHANGE OZ AND SOLVE//
@@ -343,7 +343,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
 
     std::cout << "______ solving... Oz changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::cout << summary.BriefReport() << std::endl;
     std::cout << "______ solved ! Oz changed______" << std::endl;
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
@@ -352,10 +352,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Oz is changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Oz changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Oz changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Oz changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Oz changed" << std::endl;
 
 
                                                     /********************************/
@@ -367,7 +367,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
 
     std::cout << "______ solving... Ox, Oy and Oz changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::cout << summary.BriefReport() << std::endl;
     std::cout << "______ solved ! Ox, Oy and Oz changed______" << std::endl;
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
@@ -376,11 +376,12 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Ox, Oy and Oz changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    WOLF_WARN("covariance computation deactivated beacause of segmentation fault : [Check failed: it != collection.end() Map key not found] ")
-    std::cout << "\t\t\t ______computing covariances______ Ox, Oy and Oz changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Ox, Oy and Oz changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Ox, Oy and Oz changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Ox, Oy and Oz changed" << std::endl;
+
+    wolf_problem_ptr_->print(4,1,1,1);
 }
 
 
@@ -469,10 +470,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     std::cout << summary.BriefReport() << std::endl;
     std::cout << "\t\t\t______ solved !______" << std::endl;
 
-                    // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______" << std::endl;
+    //std::cout << "\t\t\t ______computed!______" << std::endl;
 
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
@@ -499,12 +500,12 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Px is changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Px changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Px changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Px changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Px changed" << std::endl;
 
-    wolf_problem_ptr_->print(4,1,1,1);
+
                                                     /*********************/
                                                     //CHANGE PY AND SOLVE//
                                                     /*********************/
@@ -522,10 +523,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Py is changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Py changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Py changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Py changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Py changed" << std::endl;
 
 
                                                     /*********************/
@@ -545,10 +546,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Pz is changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Pz changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Pz changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Pz changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Pz changed" << std::endl;
 
 
                                                     /********************************/
@@ -568,10 +569,11 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Px, Py and Pz are changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\n\t\t\t ______computing covariances______ Px, Py and Pz changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\n\t\t\t ______computing covariances______ Px, Py and Pz changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Px, Py and Pz changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Px, Py and Pz changed" << std::endl;
+
 
                                                     /*********************/
                                                     //CHANGE OX AND SOLVE//
@@ -588,18 +590,16 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     std::cout << summary.BriefReport() << std::endl;
     std::cout << "\t\t\t______ solved ! Ox changed______" << std::endl;
 
-    wolf_problem_ptr_->print(4,1,1,1);
-
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Ox is changed" << std::endl;
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
                 "origin and final frame orientation are different - problem when Ox is changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Ox changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Ox changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Ox changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Ox changed" << std::endl;
 
 
                                                     /*********************/
@@ -620,10 +620,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
                 "origin and final frame orientation are different - problem when Oy is changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Oy changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Oy changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Oy changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Oy changed" << std::endl;
 
                                                     /*********************/
                                                     //CHANGE OZ AND SOLVE//
@@ -643,10 +643,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
                 "origin and final frame orientation are different - problem when Oz is changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Oz changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Oz changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Oz changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Oz changed" << std::endl;
 
 
                                                     /********************************/
@@ -667,10 +667,10 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
                 "origin and final frame orientation are different - problem when Ox, Oy and Oz changed" << std::endl;
 
-                // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______ Ox, Oy and Oz changed" << std::endl;
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______ Ox, Oy and Oz changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Ox, Oy and Oz changed" << std::endl;
+    //std::cout << "\t\t\t ______computed!______ Ox, Oy and Oz changed" << std::endl;
 
     wolf_problem_ptr_->print(4,1,1,1);
 }
@@ -1147,8 +1147,8 @@ TEST(ProcessorIMU, Pure_translation)
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
-  //::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*"; //default : use all test for static optimisation (not using any input)
-  ::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation_convergenceOdom_POV*";
+  ::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*"; //default : use all test for static optimisation (not using any input)
+  //::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation_convergenceOdom_POV*";
   if (argc < 3)
     {
         std::cout << "Missing input argument to run pure_translation test! : needs 2 arguments (path to accelerometer file and path to gyroscope data)." << std::endl;
