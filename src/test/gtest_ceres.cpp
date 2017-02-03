@@ -769,7 +769,7 @@ TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
     std::cout << "\t\t\t ______computed!______" << std::endl;
 }
 
-TEST(ProcessorIMU, static_ceresOptimisation_Odom0)
+TEST(ProcessorIMU, static_Optim_IMUOdom_2KF)
 {
     /* In this scenario, we simulate the integration of a perfect IMU that is not moving and we add an odometry measurement.
      * Initial State is [0,0,0, 0,0,0,1, 0,0,0] so we expect the Final State to be exactly the same
@@ -913,7 +913,7 @@ TEST(ProcessorIMU, static_ceresOptimisation_Odom0)
     //===================================================== END{SOLVER PART}
 }
 
-TEST(ProcessorIMU, static_ceresOptimisation_Odom1)
+TEST(ProcessorIMU, static_Optim_IMUOdom_SeveralKFs)
 {
     //In this test we will process both IMU and Odom3D data at the same time (in a same loop).
     //difference with test above, we don't wait for a KeyFrame to be created y processorIMU to process Odom data'
@@ -1196,7 +1196,7 @@ int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*"; //default : use all test for static optimisation (not using any input)
-  ::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation_Odom0*";
+  ::testing::GTEST_FLAG(filter) = "*static_Optim_IMUOdom_2KF*";
   if (argc < 3)
     {
         std::cout << "Missing input argument to run pure_translation test! : needs 2 arguments (path to accelerometer file and path to gyroscope data)." << std::endl;
