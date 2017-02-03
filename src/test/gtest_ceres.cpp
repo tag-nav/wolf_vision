@@ -18,6 +18,7 @@
 #include "ceres_wrapper/ceres_manager.h"
 #include "state_quaternion.h"
 #include "sensor_imu.h"
+#include "rotations.h"
 
 #include <iostream>
 #include <fstream>
@@ -160,9 +161,8 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergence)
         wolf_problem_ptr_->print(4,1,1,1);
     }
 
-
-
                                              /************** SOLVER PART  **************/
+
      /* ___________________________________________ CHANGING FINAL FRAME BEFORE OPTIMIZATION ___________________________________________*/
     
     //There should be 3 frames : origin KeyFrame, Generated KeyFrame at t = 2s, and another Frame for incoming data to be processed
@@ -184,7 +184,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergence)
     std::cout << "\t\t\t ______computing covariances______" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     std::cout << "\t\t\t ______computed!______" << std::endl;
-    
+
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
@@ -262,9 +262,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergence)
     std::cout << "\t\t\t ______computed!______ Pz changed" << std::endl;
 
 
-                                                    /*********************/
+                                                    /********************************/
                                                     //CHANGE PX, Py AND PZ AND SOLVE//
-                                                    /*********************/
+                                                    /********************************/
 
     last_KF->setState((Vector7s()<<25,20,30,0,0,0,1).finished());
 
@@ -284,6 +284,101 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergence)
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     std::cout << "\t\t\t ______computed!______ Px, Py and Pz changed" << std::endl;
 
+                                                    /*********************/
+                                                    //CHANGE OX AND SOLVE//
+                                                    /*********************/
+    Eigen::Vector3s o_initial_guess;
+
+    o_initial_guess << 40,0,0;
+    last_KF->setOPtr( std::make_shared<StateQuaternion>(v2q(o_initial_guess)) );
+
+    std::cout << "______ solving... Ox changed______" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+    std::cout << "______ solved ! Ox changed______" << std::endl;
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame position are different - problem when Ox is changed" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame orientation are different - problem when Ox is changed" << std::endl;
+
+                // COMPUTE COVARIANCES
+    WOLF_WARN("covariance computation deactivated beacause of segmentation fault : [Check failed: it != collection.end() Map key not found] ")
+    /*std::cout << "\t\t\t ______computing covariances______ Ox changed" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______ Ox changed" << std::endl;*/
+
+
+                                                    /*********************/
+                                                    //CHANGE OY AND SOLVE//
+                                                    /*********************/
+    o_initial_guess << 0,40,0;
+    last_KF->setOPtr( std::make_shared<StateQuaternion>(v2q(o_initial_guess)) );
+
+    std::cout << "______ solving... Oy changed______" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+    std::cout << "______ solved ! Oy changed______" << std::endl;
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame position are different - problem when Oy is changed" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame orientation are different - problem when Oy is changed" << std::endl;
+
+                // COMPUTE COVARIANCES
+    WOLF_WARN("covariance computation deactivated beacause of segmentation fault : [Check failed: it != collection.end() Map key not found] ")
+    /*std::cout << "\t\t\t ______computing covariances______ Oy changed" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______ Oy changed" << std::endl;*/
+
+                                                    /*********************/
+                                                    //CHANGE OZ AND SOLVE//
+                                                    /*********************/
+    o_initial_guess << 0,0,40;
+    last_KF->setOPtr( std::make_shared<StateQuaternion>(v2q(o_initial_guess)) );
+
+    std::cout << "______ solving... Oz changed______" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+    std::cout << "______ solved ! Oz changed______" << std::endl;
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame position are different - problem when Oz is changed" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame orientation are different - problem when Oz is changed" << std::endl;
+
+                // COMPUTE COVARIANCES
+    WOLF_WARN("covariance computation deactivated beacause of segmentation fault : [Check failed: it != collection.end() Map key not found] ")
+    /*std::cout << "\t\t\t ______computing covariances______ Oz changed" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______ Oz changed" << std::endl;*/
+
+
+                                                    /********************************/
+                                                    //CHANGE OX, OY AND OZ AND SOLVE//
+                                                    /********************************/
+    o_initial_guess << 80,50,40;
+    last_KF->setOPtr( std::make_shared<StateQuaternion>(v2q(o_initial_guess)) );
+
+    std::cout << "______ solving... Ox, Oy and Oz changed______" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+    std::cout << "______ solved ! Ox, Oy and Oz changed______" << std::endl;
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame position are different - problem when Ox, Oy and Oz changed" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame orientation are different - problem when Ox, Oy and Oz changed" << std::endl;
+
+                // COMPUTE COVARIANCES
+    WOLF_WARN("covariance computation deactivated beacause of segmentation fault : [Check failed: it != collection.end() Map key not found] ")
+    /*std::cout << "\t\t\t ______computing covariances______ Ox, Oy and Oz changed" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______ Ox, Oy and Oz changed" << std::endl;*/
 }
 
 TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
