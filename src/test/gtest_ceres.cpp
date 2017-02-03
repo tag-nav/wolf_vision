@@ -33,7 +33,7 @@ using namespace wolf;
 const char * filename_pure_tranlation_imu_data;
 const char * filename_pure_tranlation_odom;
 
-TEST(ProcessorOdom3D, static_ceresOptimisation)
+TEST(ProcessorOdom3D, static_ceresOptimisation_Odom_PO)
 {
 
     /* Simple odom test including only processorOdom3D :
@@ -107,7 +107,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation)
     std::cout << "\t\t\t ______computed!______" << std::endl;
 }
 
-TEST(ProcessorOdom3D, static_ceresOptimisation_convergence)
+TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
 {
 
     /* Simple odom test including only processorOdom3D :
@@ -380,6 +380,300 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergence)
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
     std::cout << "\t\t\t ______computed!______ Ox, Oy and Oz changed" << std::endl;*/
 }
+
+
+TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
+{
+
+    /* Simple odom test including only processorOdom3D :
+     * First keyFrame (origin) is fixed (0,0,0, 0,0,0,1). Then the odometry data for 2 second is [0,0,0, 0,0,0,1], meaning that we did not move at all. 
+     * We give this simple graph to solver and let it solve. 
+     *
+     * But before solving, we change the state of final KeyFrame.
+     * First we change only Px, then Py, then Pz, then all of them
+     * Second : we change Ox, then Oy, then Oz, then all of them
+     * Third : we change everything
+     * Everything should converge and final keyFrame State should be exactly [0,0,0, 0,0,0,1]
+     *
+     */
+
+    using std::shared_ptr;
+    using std::make_shared;
+    using std::static_pointer_cast;
+                                            /************** SETTING PROBLEM  **************/
+
+    std::string wolf_root = _WOLF_ROOT_DIR;
+
+    // Wolf problem
+    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_POV_3D);
+    Eigen::VectorXs x0(10);
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
+    TimeStamp t(0);
+    wolf_problem_ptr_->setOrigin(x0, Eigen::Matrix6s::Identity() * 0.001, t);
+
+    SensorBasePtr sen = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
+
+    // We want to create a processorMotion with a max_time_span of 2 seconds. but here we integrate only odometry and there should be no interpolation between
+    // Default processorMotionParams is made so that a KeyFrame will be created at each step. This works in this case
+    ProcessorOdom3DParamsPtr prc_odom_params = std::make_shared<ProcessorOdom3DParams>();
+    wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", sen, prc_odom_params);
+
+    // Ceres wrappers
+    ceres::Solver::Options ceres_options;
+    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
+    ceres_options.max_line_search_step_contraction = 1e-3;
+    ceres_options.max_num_iterations = 1e4;
+    CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+
+                                             /************** USE ODOM_3D CLASSES  **************/
+
+    VectorXs d(7);
+    d << 0,0,0, 0,0,0,1;
+    t.set(2);
+
+    wolf::CaptureMotionPtr odom_ptr = std::make_shared<CaptureMotion>(t, sen, d);
+    wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();
+    // process data in capture
+    sen->process(odom_ptr);
+
+    /*if(wolf_problem_ptr_->check(1)){
+        wolf_problem_ptr_->print(4,1,1,1);
+    }*/
+    wolf_problem_ptr_->print(4,1,1,1);
+
+                                             /************** SOLVER PART  **************/
+
+    //If we want the covariances to be computed, then we need to fix all Velocity StateBlocks because they cannot be observed we Odometry measurements only
+    for(FrameBasePtr Frame_ptr : wolf_problem_ptr_->getTrajectoryPtr()->getFrameList())
+    {
+        Frame_ptr->getVPtr()->fix();
+    }
+
+     /* ___________________________________________ CHANGING FINAL FRAME BEFORE OPTIMIZATION ___________________________________________*/
+    
+    //There should be 3 frames : origin KeyFrame, Generated KeyFrame at t = 2s, and another Frame for incoming data to be processed
+    ASSERT_EQ(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().size(),3);
+    EXPECT_TRUE(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->isFixed()) << "origin_frame is not fixed" << std::endl;
+
+    //get pointer to the last KeyFrame (which is at t = 2s)
+    EXPECT_EQ(t.get(),2);
+    FrameBasePtr last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t);
+    Eigen::Matrix<wolf::Scalar, 10, 1> kf2_state = last_KF->getState(); //This state vector will be used to get the velocity state
+
+    // FIRST SOLVER TEST WITHOUT CHANGING ANYTHING - WE DID NOT MOVE
+
+    std::cout << "\n\t\t\t______ solving...______" << std::endl;
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+    std::cout << "\t\t\t______ solved !______" << std::endl;
+
+                    // COMPUTE COVARIANCES
+    std::cout << "\t\t\t ______computing covariances______" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______" << std::endl;
+
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame position are different" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame orientation are different" << std::endl;
+    
+
+                                                    /*********************/
+                                                    //CHANGE PX AND SOLVE//
+                                                    /*********************/
+
+    last_KF->setState((Eigen::Matrix<wolf::Scalar,10,1>()<<30,0,0,0,0,0,1,kf2_state(7),kf2_state(8),kf2_state(9)).finished());
+
+    std::cout << "\n\t\t\t______ solving... Px changed______" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+    std::cout << "\t\t\t______ solved ! Px changed______" << std::endl;
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+                "origin and final frame position are different - problem when Px is changed" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame orientation are different - problem when Px is changed" << std::endl;
+
+                // COMPUTE COVARIANCES
+    std::cout << "\t\t\t ______computing covariances______ Px changed" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______ Px changed" << std::endl;
+
+    wolf_problem_ptr_->print(4,1,1,1);
+                                                    /*********************/
+                                                    //CHANGE PY AND SOLVE//
+                                                    /*********************/
+
+    last_KF->setState((Eigen::Matrix<wolf::Scalar,10,1>()<<0,30,0,0,0,0,1,kf2_state(7),kf2_state(8),kf2_state(9)).finished());
+
+    std::cout << "\n\t\t\t______ solving... Py changed______" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+    std::cout << "\t\t\t______ solved ! Py changed______" << std::endl;
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+                "origin and final frame position are different - problem when Py is changed" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame orientation are different - problem when Py is changed" << std::endl;
+
+                // COMPUTE COVARIANCES
+    std::cout << "\t\t\t ______computing covariances______ Py changed" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______ Py changed" << std::endl;
+
+
+                                                    /*********************/
+                                                    //CHANGE PZ AND SOLVE//
+                                                    /*********************/
+
+    last_KF->setState((Eigen::Matrix<wolf::Scalar,10,1>()<<0,0,30,0,0,0,1,kf2_state(7),kf2_state(8),kf2_state(9)).finished());
+
+    std::cout << "\n\t\t\t______ solving... Pz changed______" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+    std::cout << "\t\t\t______ solved ! Pz changed______" << std::endl;
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+                "origin and final frame position are different - problem when Pz is changed" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame orientation are different - problem when Pz is changed" << std::endl;
+
+                // COMPUTE COVARIANCES
+    std::cout << "\t\t\t ______computing covariances______ Pz changed" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______ Pz changed" << std::endl;
+
+
+                                                    /********************************/
+                                                    //CHANGE PX, Py AND PZ AND SOLVE//
+                                                    /********************************/
+
+    last_KF->setState((Eigen::Matrix<wolf::Scalar,10,1>()<<25,20,30,0,0,0,1,kf2_state(7),kf2_state(8),kf2_state(9)).finished());
+
+    std::cout << "\n\t\t\t______ solving... Px, Py and Pz changed______" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+    std::cout << "\t\t\t______ solved ! Px, Py and Pz changed______" << std::endl;
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+                "origin and final frame position are different - problem when Px, Py and Pz are changed" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame orientation are different - problem when Px, Py and Pz are changed" << std::endl;
+
+                // COMPUTE COVARIANCES
+    std::cout << "\n\t\t\t ______computing covariances______ Px, Py and Pz changed" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______ Px, Py and Pz changed" << std::endl;
+
+                                                    /*********************/
+                                                    //CHANGE OX AND SOLVE//
+                                                    /*********************/
+    Eigen::Vector3s o_initial_guess;
+    Eigen::Quaternions q_init_guess;
+
+    o_initial_guess << 40,0,0;
+    q_init_guess = v2q(o_initial_guess);
+    last_KF->setState((Eigen::Matrix<wolf::Scalar,10,1>()<<0,0,0,q_init_guess.x(),q_init_guess.y(),q_init_guess.z(),q_init_guess.w(),kf2_state(7),kf2_state(8),kf2_state(9)).finished());
+    //last_KF->setOPtr( std::make_shared<StateQuaternion>(v2q(o_initial_guess)) );
+
+    std::cout << "\n\t\t\t______ solving... Ox changed______" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+    std::cout << "\t\t\t______ solved ! Ox changed______" << std::endl;
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame position are different - problem when Ox is changed" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+                "origin and final frame orientation are different - problem when Ox is changed" << std::endl;
+
+                // COMPUTE COVARIANCES
+    std::cout << "\t\t\t ______computing covariances______ Ox changed" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______ Ox changed" << std::endl;
+
+
+                                                    /*********************/
+                                                    //CHANGE OY AND SOLVE//
+                                                    /*********************/
+    o_initial_guess << 0,40,0;
+    q_init_guess = v2q(o_initial_guess);
+    last_KF->setState((Eigen::Matrix<wolf::Scalar,10,1>()<<0,0,0,q_init_guess.x(),q_init_guess.y(),q_init_guess.z(),q_init_guess.w(),kf2_state(7),kf2_state(8),kf2_state(9)).finished());
+
+    std::cout << "\n\t\t\t______ solving... Oy changed______" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+    std::cout << "\t\t\t______ solved ! Oy changed______" << std::endl;
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame position are different - problem when Oy is changed" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+                "origin and final frame orientation are different - problem when Oy is changed" << std::endl;
+
+                // COMPUTE COVARIANCES
+    std::cout << "\t\t\t ______computing covariances______ Oy changed" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______ Oy changed" << std::endl;
+
+                                                    /*********************/
+                                                    //CHANGE OZ AND SOLVE//
+                                                    /*********************/
+    o_initial_guess << 0,0,40;
+    q_init_guess = v2q(o_initial_guess);
+    last_KF->setState((Eigen::Matrix<wolf::Scalar,10,1>()<<0,0,0,q_init_guess.x(),q_init_guess.y(),q_init_guess.z(),q_init_guess.w(),kf2_state(7),kf2_state(8),kf2_state(9)).finished());
+
+    std::cout << "\n\t\t\t______ solving... Oz changed______" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+    std::cout << "\t\t\t______ solved ! Oz changed______" << std::endl;
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame position are different - problem when Oz is changed" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+                "origin and final frame orientation are different - problem when Oz is changed" << std::endl;
+
+                // COMPUTE COVARIANCES
+    std::cout << "\t\t\t ______computing covariances______ Oz changed" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______ Oz changed" << std::endl;
+
+
+                                                    /********************************/
+                                                    //CHANGE OX, OY AND OZ AND SOLVE//
+                                                    /********************************/
+    o_initial_guess << 80,50,40;
+    q_init_guess = v2q(o_initial_guess);
+    last_KF->setState((Eigen::Matrix<wolf::Scalar,10,1>()<<0,0,0,q_init_guess.x(),q_init_guess.y(),q_init_guess.z(),q_init_guess.w(),kf2_state(7),kf2_state(8),kf2_state(9)).finished());
+
+    std::cout << "\n\t\t\t______ solving... Ox, Oy and Oz changed______" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+    std::cout << "\t\t\t______ solved ! Ox, Oy and Oz changed______" << std::endl;
+
+    //This is a static test so we are not supposed to have moved from origin to last KeyFrame
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame position are different - problem when Ox, Oy and Oz changed" << std::endl;
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+                "origin and final frame orientation are different - problem when Ox, Oy and Oz changed" << std::endl;
+
+                // COMPUTE COVARIANCES
+    std::cout << "\t\t\t ______computing covariances______ Ox, Oy and Oz changed" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______ Ox, Oy and Oz changed" << std::endl;
+
+    wolf_problem_ptr_->print(4,1,1,1);
+}
+
 
 TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
 {
@@ -852,7 +1146,8 @@ TEST(ProcessorIMU, Pure_translation)
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*"; //default : use all test for static optimisation (not using any input)
+  //::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*"; //default : use all test for static optimisation (not using any input)
+  ::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation_convergenceOdom_POV*";
   if (argc < 3)
     {
         std::cout << "Missing input argument to run pure_translation test! : needs 2 arguments (path to accelerometer file and path to gyroscope data)." << std::endl;
