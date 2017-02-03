@@ -34,6 +34,13 @@ const char * filename_pure_tranlation_odom;
 
 TEST(ProcessorOdom3D, static_ceresOptimisation)
 {
+
+    /* Simple odom test including only processorOdom3D :
+     * First keyFrame (origin) is fixed (0,0,0, 0,0,0,1). Then the odometry data for 2 second is [0,0,0, 0,0,0,1], meaning that we did not move at all. 
+     * We give this simple graph to solver and let it solve.
+     * Everything should converge and final keyFrame State should be exactly [0,0,0, 0,0,0,1]
+     */
+
     using std::shared_ptr;
     using std::make_shared;
     using std::static_pointer_cast;
@@ -45,7 +52,11 @@ TEST(ProcessorOdom3D, static_ceresOptimisation)
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
 
     SensorBasePtr sen = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
-    wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", "odom");
+
+    // We want to create a processorMotion with a max_time_span of 2 seconds. but here we integrate only odometry and there should be no interpolation between
+    // Default processorMotionParams is made so that a KeyFrame will be created at each step. This works in this case
+    ProcessorOdom3DParamsPtr prc_odom_params = std::make_shared<ProcessorOdom3DParams>();
+    wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", sen, prc_odom_params);
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin((Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
 
     // Ceres wrappers
@@ -78,6 +89,14 @@ TEST(ProcessorOdom3D, static_ceresOptimisation)
                                              /************** SOLVER PART  **************/
      ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
      std::cout << summary.FullReport() << std::endl;
+
+     //There should be 3 frames : origin KeyFrame, Generated KeyFrame at t = 2s, and another Frame for incoming data to be processed
+     ASSERT_EQ(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().size(),3);
+     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame position are different" << std::endl;
+     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+                "origin and final frame orientation are different" << std::endl;
+     EXPECT_TRUE(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->isFixed()) << "origin_frame is not fixed" << std::endl;
 
     // COMPUTE COVARIANCES
     std::cout << "\t\t\t ______computing covariances______" << std::endl;
@@ -411,8 +430,8 @@ TEST(ProcessorIMU, Pure_translation)
     std::cout << "pure translation imu file: " << filename_pure_tranlation_imu_data << std::endl;
     std::cout << "pure translation odom: " << filename_pure_tranlation_odom << std::endl;
 
-    std::string dummy;
-    getline(imu_data_input, dummy); getline(odom_data_input, dummy); //needed only to delete headers or first useless data
+    //std::string dummy;
+    //getline(imu_data_input, dummy); getline(odom_data_input, dummy); //needed only to delete headers or first useless data
 
     if(!imu_data_input.is_open() || !odom_data_input.is_open()){
         std::cerr << "Failed to open data files... Exiting" << std::endl;
@@ -437,7 +456,8 @@ TEST(ProcessorIMU, Pure_translation)
     // WOLF PROBLEM
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
     Eigen::VectorXs x0(16);
-    x0 << 0,0,0,  0,0,0,1,  1,2,2,  0,0,.00,  0,0,.00; //INITIAL CONDITIONS
+    //x0 << 0,0,0,  0,0,0,1,  1,2,2,  0,0,.00,  0,0,.00; //INITIAL CONDITIONS
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00; //INITIAL CONDITIONS
     TimeStamp t(0);
     wolf_problem_ptr_->setOrigin(x0, Eigen::Matrix6s::Identity() * 0.001, t);
 
@@ -486,19 +506,22 @@ TEST(ProcessorIMU, Pure_translation)
     //Scalar dt = t.get();
     Scalar input_clock;
     TimeStamp ts(0.001);
+    TimeStamp t_odom(0);
     wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
     wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
     wolf_problem_ptr_->setProcessorMotion(processor_ptr_imu);
-    unsigned int iter = 0;
-    const unsigned int odom_freq = 50; //odom data generated every 50 ms
+    
+    //read first odom data from file
+    odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
+    t_odom.set(input_clock);
+    //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
 
-    while( !imu_data_input.eof() && !odom_data_input.eof() ){
-
-        iter++;
+    while( !imu_data_input.eof() && !odom_data_input.eof() )
+    {
         // PROCESS IMU DATA
         // Time and data variables
         imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
-        data_imu[2] += 9.806;
+        //data_imu[2] += 9.806;
         //9.81 added in Az because gravity was not added in the perfect imu simulation
         ts.set(input_clock);
         imu_ptr->setTimeStamp(ts);
@@ -508,14 +531,16 @@ TEST(ProcessorIMU, Pure_translation)
         imu_ptr->getTimeStamp();
         sen_imu->process(imu_ptr);
 
-        if(iter == odom_freq) //every 100 ms
+        if(ts == t_odom) //every 100 ms
         {
             // PROCESS ODOM 3D DATA
-            odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
-            mot_ptr->setTimeStamp(ts);
+            mot_ptr->setTimeStamp(t_odom);
             mot_ptr->setData(data_odom3D);
             sen_odom3D->process(mot_ptr);
-            iter = 0;
+
+            //prepare next odometry measurement if there is any
+            odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
+            t_odom.set(input_clock);
         }
     }
 
