@@ -288,9 +288,11 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
                                                     //CHANGE OX AND SOLVE//
                                                     /*********************/
     Eigen::Vector3s o_initial_guess;
+    Eigen::Quaternions q_init_guess;
 
     o_initial_guess << 40,0,0;
-    last_KF->setOPtr( std::make_shared<StateQuaternion>(v2q(o_initial_guess)) );
+    q_init_guess = v2q(o_initial_guess);
+    last_KF->setState((Eigen::Matrix<wolf::Scalar,7,1>()<<0,0,0,q_init_guess.x(),q_init_guess.y(),q_init_guess.z(),q_init_guess.w()).finished());
 
     std::cout << "______ solving... Ox changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
@@ -304,17 +306,17 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
                 "origin and final frame orientation are different - problem when Ox is changed" << std::endl;
 
                 // COMPUTE COVARIANCES
-    WOLF_WARN("covariance computation deactivated beacause of segmentation fault : [Check failed: it != collection.end() Map key not found] ")
-    /*std::cout << "\t\t\t ______computing covariances______ Ox changed" << std::endl;
+    std::cout << "\t\t\t ______computing covariances______ Ox changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Ox changed" << std::endl;*/
+    std::cout << "\t\t\t ______computed!______ Ox changed" << std::endl;
 
 
                                                     /*********************/
                                                     //CHANGE OY AND SOLVE//
                                                     /*********************/
     o_initial_guess << 0,40,0;
-    last_KF->setOPtr( std::make_shared<StateQuaternion>(v2q(o_initial_guess)) );
+    q_init_guess = v2q(o_initial_guess);
+    last_KF->setState((Eigen::Matrix<wolf::Scalar,7,1>()<<0,0,0,q_init_guess.x(),q_init_guess.y(),q_init_guess.z(),q_init_guess.w()).finished());
 
     std::cout << "______ solving... Oy changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
@@ -328,16 +330,16 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
                 "origin and final frame orientation are different - problem when Oy is changed" << std::endl;
 
                 // COMPUTE COVARIANCES
-    WOLF_WARN("covariance computation deactivated beacause of segmentation fault : [Check failed: it != collection.end() Map key not found] ")
-    /*std::cout << "\t\t\t ______computing covariances______ Oy changed" << std::endl;
+    std::cout << "\t\t\t ______computing covariances______ Oy changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Oy changed" << std::endl;*/
+    std::cout << "\t\t\t ______computed!______ Oy changed" << std::endl;
 
                                                     /*********************/
                                                     //CHANGE OZ AND SOLVE//
                                                     /*********************/
     o_initial_guess << 0,0,40;
-    last_KF->setOPtr( std::make_shared<StateQuaternion>(v2q(o_initial_guess)) );
+    q_init_guess = v2q(o_initial_guess);
+    last_KF->setState((Eigen::Matrix<wolf::Scalar,7,1>()<<0,0,0,q_init_guess.x(),q_init_guess.y(),q_init_guess.z(),q_init_guess.w()).finished());
 
     std::cout << "______ solving... Oz changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
@@ -351,17 +353,17 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
                 "origin and final frame orientation are different - problem when Oz is changed" << std::endl;
 
                 // COMPUTE COVARIANCES
-    WOLF_WARN("covariance computation deactivated beacause of segmentation fault : [Check failed: it != collection.end() Map key not found] ")
-    /*std::cout << "\t\t\t ______computing covariances______ Oz changed" << std::endl;
+    std::cout << "\t\t\t ______computing covariances______ Oz changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Oz changed" << std::endl;*/
+    std::cout << "\t\t\t ______computed!______ Oz changed" << std::endl;
 
 
                                                     /********************************/
                                                     //CHANGE OX, OY AND OZ AND SOLVE//
                                                     /********************************/
     o_initial_guess << 80,50,40;
-    last_KF->setOPtr( std::make_shared<StateQuaternion>(v2q(o_initial_guess)) );
+    q_init_guess = v2q(o_initial_guess);
+    last_KF->setState((Eigen::Matrix<wolf::Scalar,7,1>()<<0,0,0,q_init_guess.x(),q_init_guess.y(),q_init_guess.z(),q_init_guess.w()).finished());
 
     std::cout << "______ solving... Ox, Oy and Oz changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
@@ -376,9 +378,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
 
                 // COMPUTE COVARIANCES
     WOLF_WARN("covariance computation deactivated beacause of segmentation fault : [Check failed: it != collection.end() Map key not found] ")
-    /*std::cout << "\t\t\t ______computing covariances______ Ox, Oy and Oz changed" << std::endl;
+    std::cout << "\t\t\t ______computing covariances______ Ox, Oy and Oz changed" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______ Ox, Oy and Oz changed" << std::endl;*/
+    std::cout << "\t\t\t ______computed!______ Ox, Oy and Oz changed" << std::endl;
 }
 
 
@@ -580,7 +582,6 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     o_initial_guess << 40,0,0;
     q_init_guess = v2q(o_initial_guess);
     last_KF->setState((Eigen::Matrix<wolf::Scalar,10,1>()<<0,0,0,q_init_guess.x(),q_init_guess.y(),q_init_guess.z(),q_init_guess.w(),kf2_state(7),kf2_state(8),kf2_state(9)).finished());
-    //last_KF->setOPtr( std::make_shared<StateQuaternion>(v2q(o_initial_guess)) );
 
     std::cout << "\n\t\t\t______ solving... Ox changed______" << std::endl;
     summary = ceres_manager_wolf_diff->solve();
