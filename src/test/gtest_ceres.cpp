@@ -726,7 +726,7 @@ TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
 
                                              /************** USE IMU CLASSES  **************/
     Eigen::Vector6s data;
-    data << 0.0,0.0,wolf::gravity()(2), 0.0,0.0,0.0; //we use exactly the value of gravity defined in wolf.h
+    data << 0.0,0.0,-wolf::gravity()(2), 0.0,0.0,0.0; //we use exactly the value of gravity defined in wolf.h
 
     //integrate IMU data until KeyFrame creation (until we reach max_time_span)
     Scalar dt = t.get();
@@ -755,6 +755,8 @@ TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
                                              /************** SOLVER PART  **************/
      ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
      std::cout << summary.FullReport() << std::endl;
+
+     wolf_problem_ptr_->print(4,1,1,1);
 
      //We check with assertions if Final KeyFrame has the same state as origin_KF
      FrameBasePtr origin_KF = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front();
@@ -851,7 +853,7 @@ TEST(ProcessorIMU, static_Optim_IMUOdom_2KF)
 
     Eigen::Vector6s data;
     //data << 0.0019, 0.0001, 9.8122, 0.1022, 0.1171, -0.0413;
-    data << 0.00, 0.000, wolf::gravity()(2), 0.0, 0.0, 0.0;
+    data << 0.00, 0.000, -wolf::gravity()(2), 0.0, 0.0, 0.0;
     Scalar dt = t.get();
     TimeStamp ts(0.001);
     wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
@@ -1228,7 +1230,7 @@ int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*"; //default : use all test for static optimisation (not using any input)
-  ::testing::GTEST_FLAG(filter) = "*static_Optim_IMUOdom_SeveralKFs*";
+  ::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation_fixBias*";
   if (argc < 3)
     {
         std::cout << "Missing input argument to run pure_translation test! : needs 2 arguments (path to accelerometer file and path to gyroscope data)." << std::endl;
