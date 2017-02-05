@@ -1376,6 +1376,19 @@ TEST(ProcessorIMU, Pure_translation)
 
 int main(int argc, char **argv)
 {
+    /*  LIST OF TESTS :
+     *      - ProcessorOdom3D:
+     *          - static_ceresOptimisation_Odom_PO
+     *          - static_ceresOptimisation_convergenceOdom_PO
+     *          - static_ceresOptimisation_convergenceOdom_POV
+     *      - ProcessorIMU:
+     *          - static_ceresOptimisation_fixBias
+     *          - static_Optim_IMUOdom_2KF
+     *          - static_Optim_IMUOdom_nKFs
+     *          - static_Optim_IMUOdom_SeveralKFs
+     *          - Pure_translation
+     */
+
   ::testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*"; //default : use all test for static optimisation (not using any input)
   ::testing::GTEST_FLAG(filter) = "*static_Optim_IMUOdom_nKFs*";
