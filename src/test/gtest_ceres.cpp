@@ -1244,7 +1244,7 @@ TEST(ProcessorIMU, static_Optim_IMUOdom_SeveralKFs)
 
     //===================================================== SETTING PROBLEM
     std::string wolf_root = _WOLF_ROOT_DIR;
-    const unsigned int n = 2; //determine the number of final keyframes that will be created (except origin, so n>=1)
+    const unsigned int n = 10; //determine the number of final keyframes that will be created (except origin, so n>=1)
     ASSERT_TRUE(n>0) << "n (number of Keyframe created) must be int >0";
 
     // WOLF PROBLEM
@@ -1550,7 +1550,7 @@ int main(int argc, char **argv)
 
   ::testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*"; //default : use all test for static optimisation (not using any input)
-  ::testing::GTEST_FLAG(filter) = "*static_Optim_IMUOdom_nKFs_biasFixed*";
+  ::testing::GTEST_FLAG(filter) = "*static_Optim_IMUOdom_SeveralKFs*";
   if (argc < 3)
     {
         std::cout << "Missing input argument to run pure_translation test! : needs 2 arguments (path to accelerometer file and path to gyroscope data)." << std::endl;

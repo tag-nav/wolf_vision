@@ -139,7 +139,7 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_p
         dDp_dwb_(_ftr_ptr->dDp_dwb_),
         dDv_dwb_(_ftr_ptr->dDv_dwb_),
         dDq_dwb_(_ftr_ptr->dDq_dwb_),
-        dt_(_frame_ptr->getTimeStamp() - _ftr_ptr->getFramePtr()->getTimeStamp()),
+        dt_(_ftr_ptr->getFramePtr()->getTimeStamp() - _frame_ptr->getTimeStamp()),
         dt_2_(dt_*dt_),
         g_(wolf::gravity())
 
