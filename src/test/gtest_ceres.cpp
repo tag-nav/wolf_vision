@@ -39,7 +39,7 @@ char * filename_pure_tranlation_imu_data;
 char * filename_pure_tranlation_odom;
 char * filename_pure_rotation_imu_data;
 char * filename_pure_rotation_odom;
-unsigned int number_of_KF = 2;
+unsigned int number_of_KF = 2; //determine the number of final keyframes that will be created (except origin, so n>=1) in some of processorIMU tests
 
 TEST(ProcessorOdom3D, static_ceresOptimisation_Odom_PO)
 {
@@ -950,8 +950,7 @@ TEST(ProcessorIMU, static_Optim_IMUOdom_nKFs_biasUnfixed)
 
     //===================================================== SETTING PROBLEM
     std::string wolf_root = _WOLF_ROOT_DIR;
-    const unsigned int n = 2; //determine the number of final keyframes that will be created (except origin, so n>=1)
-    ASSERT_TRUE(n>0) << "n (number of Keyframe created) must be int >0";
+    ASSERT_TRUE(number_of_KF>0) << "number_of_KF (number of Keyframe created) must be int >0";
 
     // WOLF PROBLEM
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
@@ -985,7 +984,7 @@ TEST(ProcessorIMU, static_Optim_IMUOdom_nKFs_biasUnfixed)
     // SENSOR + PROCESSOR ODOM 3D
     SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
     ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-    prc_odom3D_params->max_time_span = n;
+    prc_odom3D_params->max_time_span = number_of_KF;
     prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
     prc_odom3D_params->dist_traveled = 1000000000;
     prc_odom3D_params->angle_turned = 1000000000;
@@ -1018,7 +1017,7 @@ TEST(ProcessorIMU, static_Optim_IMUOdom_nKFs_biasUnfixed)
     wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
     //wolf_problem_ptr_->setProcessorMotion(processor_ptr_imu);
 
-    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()*n) ){
+    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()*number_of_KF) ){
         
         // Time and data variables
         dt += 0.001;
@@ -1097,8 +1096,7 @@ TEST(ProcessorIMU, static_Optim_IMUOdom_nKFs_biasFixed)
 
     //===================================================== SETTING PROBLEM
     std::string wolf_root = _WOLF_ROOT_DIR;
-    const unsigned int n = 2; //determine the number of final keyframes that will be created (except origin, so n>=1)
-    ASSERT_TRUE(n>0) << "n (number of Keyframe created) must be int >0";
+    ASSERT_TRUE(number_of_KF>0) << "number_of_KF (number of Keyframe created) must be int >0";
 
     // WOLF PROBLEM
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
@@ -1132,7 +1130,7 @@ TEST(ProcessorIMU, static_Optim_IMUOdom_nKFs_biasFixed)
     // SENSOR + PROCESSOR ODOM 3D
     SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
     ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-    prc_odom3D_params->max_time_span = n;
+    prc_odom3D_params->max_time_span = number_of_KF;
     prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
     prc_odom3D_params->dist_traveled = 1000000000;
     prc_odom3D_params->angle_turned = 1000000000;
@@ -1165,7 +1163,7 @@ TEST(ProcessorIMU, static_Optim_IMUOdom_nKFs_biasFixed)
     wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
     //wolf_problem_ptr_->setProcessorMotion(processor_ptr_imu);
 
-    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()*n) ){
+    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()*number_of_KF) ){
         
         // Time and data variables
         dt += 0.001;
@@ -1254,8 +1252,7 @@ TEST(ProcessorIMU, static_Optim_IMUOdom_SeveralKFs)
 
     //===================================================== SETTING PROBLEM
     std::string wolf_root = _WOLF_ROOT_DIR;
-    const unsigned int n = 10; //determine the number of final keyframes that will be created (except origin, so n>=1)
-    ASSERT_TRUE(n>0) << "n (number of Keyframe created) must be int >0";
+    ASSERT_TRUE(number_of_KF>0) << "number_of_KF (number of Keyframe created) must be int >0";
 
     // WOLF PROBLEM
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
@@ -1322,7 +1319,7 @@ TEST(ProcessorIMU, static_Optim_IMUOdom_SeveralKFs)
     unsigned int iter = 0;
     const unsigned int odom_freq = 10; //processing odometry data every 10 ms
 
-    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()*n) ){
+    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()*number_of_KF) ){
         
         // PROCESS IMU DATA
         // Time and data variables
@@ -1559,10 +1556,10 @@ int main(int argc, char **argv)
      */
 
      /* Running simply ./gtest_ceres will run all tests that do not need any input file
-     ** If you want to run specific test, just modify booleans in 'gtest_ceres.yaml' to specify the tests you want to run
+      * If you want to run specific test, just modify booleans in 'gtest_ceres.yaml' to specify the tests you want to run
       * In this file you can also modify some values that will be used in the tests (example : number of keyframes)
       * to make it simple, we modify global variables given values in this file
-     */
+      */
 
      //We use parser to determine from yaml which tests will be executed
      //initialize all variables
@@ -1580,9 +1577,9 @@ int main(int argc, char **argv)
      std::string wolf_root = _WOLF_ROOT_DIR;
      std::string gtest_ceres_yaml_path;
      gtest_ceres_yaml_path = wolf_root + "/src/examples/gtest_ceres.yaml";
-     //parser used only if first argument is a valid file ending in '.yaml.'
      std::string tests_to_run = "";
 
+     //if first argument is --use_yaml then we parse yaml file to configure the execution of tests
      if (argc == 2)
      {
          const char * option = argv[1];
@@ -1622,6 +1619,7 @@ int main(int argc, char **argv)
          }
      }
 
+     // use booleans to Filter all tests that will be executed
     if(static_ceresOptimisation_Odom_PO)
         tests_to_run +=":ProcessorOdom3D.static_ceresOptimisation_Odom_PO";
     if(static_ceresOptimisation_convergenceOdom_PO)
@@ -1643,11 +1641,9 @@ int main(int argc, char **argv)
         tests_to_run +=":ProcessorIMU.Pure_translation";
 
 
-    std::string final_tests =  tests_to_run;
   ::testing::InitGoogleTest(&argc, argv);
-  //::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*"; //default : use all test for static optimisation (not using any input)
   //::testing::GTEST_FLAG(filter) = "*static_Optim_IMUOdom_2KF*";
-  ::testing::GTEST_FLAG(filter) = final_tests;
+  ::testing::GTEST_FLAG(filter) = tests_to_run;
 
   if (argc < 3)
     {
