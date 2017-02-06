@@ -39,8 +39,8 @@ target_link_libraries(gtest_example ${PROJECT_NAME})      #
 #                                                         #
 
 # Ceres solver tests
-wolf_add_gtest(gtest_ceres gtest_ceres.cpp)
-target_link_libraries(gtest_ceres ${PROJECT_NAME})
+wolf_add_gtest(gtest_processorMotion_optimization_testCase gtest_processorMotion_optimization_testCase.cpp)
+target_link_libraries(gtest_processorMotion_optimization_testCase ${PROJECT_NAME})
 
 # ConstraintIMU test
 wolf_add_gtest(gtest_constraint_imu gtest_constraint_imu.cpp)

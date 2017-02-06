@@ -1556,8 +1556,8 @@ int main(int argc, char **argv)
      *          - Pure_translation
      */
 
-     /* Running simply ./gtest_ceres will run all tests that do not need any input file
-      * If you want to run specific test, just modify booleans in 'gtest_ceres.yaml' to specify the tests you want to run
+     /* Running simply ./gtest_processorMotion_optimization_testCase will run all tests that do not need any input file
+      * If you want to run specific test, just modify booleans in 'gtest_processorMotion_optimization_testCase.yaml.yaml' to specify the tests you want to run
       * In this file you can also modify some values that will be used in the tests (example : number of keyframes)
       * to make it simple, we modify global variables given values in this file
       */
@@ -1577,7 +1577,7 @@ int main(int argc, char **argv)
 
      std::string wolf_root = _WOLF_ROOT_DIR;
      std::string gtest_ceres_yaml_path;
-     gtest_ceres_yaml_path = wolf_root + "/src/examples/gtest_ceres.yaml";
+     gtest_ceres_yaml_path = wolf_root + "/src/examples/gtest_processorMotion_optimization_testCase.yaml";
      std::string tests_to_run = "";
 
      //if first argument is --use_yaml then we parse yaml file to configure the execution of tests
