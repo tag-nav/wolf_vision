@@ -20,6 +20,11 @@
 #include "sensor_imu.h"
 #include "rotations.h"
 
+// wolf yaml
+#include "../yaml/yaml_conversion.h"
+// yaml-cpp library
+#include <../yaml-cpp/yaml.h>
+
 #include <iostream>
 #include <fstream>
 
@@ -30,8 +35,11 @@ using namespace wolf;
 //Global variables
 
 //used in pure_translation test
-const char * filename_pure_tranlation_imu_data;
-const char * filename_pure_tranlation_odom;
+char * filename_pure_tranlation_imu_data;
+char * filename_pure_tranlation_odom;
+char * filename_pure_rotation_imu_data;
+char * filename_pure_rotation_odom;
+unsigned int number_of_KF = 2;
 
 TEST(ProcessorOdom3D, static_ceresOptimisation_Odom_PO)
 {
@@ -681,6 +689,8 @@ TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
     /* In this scenario, we simulate the integration of a perfect IMU that is not moving.
      * Initial State is [0,0,0, 0,0,0,1, 0,0,0] so we expect the Final State to be exactly the same
      * Origin KeyFrame is fixed
+     * 
+     * Bias of all frames are fixed before we call the solver
      * 
      * With IMU data only, biases are not observable ! So covariance cannot be computed due to jacobian rank deficiency.
      * We must add an odometry to make covariances observable Or... we could fix all bias stateBlocks
@@ -1548,9 +1558,97 @@ int main(int argc, char **argv)
      *          - Pure_translation
      */
 
+     /* Running simply ./gtest_ceres will run all tests that do not need any input file
+     ** If you want to run specific test, just modify booleans in 'gtest_ceres.yaml' to specify the tests you want to run
+      * In this file you can also modify some values that will be used in the tests (example : number of keyframes)
+      * to make it simple, we modify global variables given values in this file
+     */
+
+     //We use parser to determine from yaml which tests will be executed
+     //initialize all variables
+     //Default is to only run tests which do not need any file input
+     bool static_ceresOptimisation_Odom_PO = true;
+     bool static_ceresOptimisation_convergenceOdom_PO = true;
+     bool static_ceresOptimisation_convergenceOdom_POV = true;
+     bool static_ceresOptimisation_fixBias = true;
+     bool static_Optim_IMUOdom_2KF = true;
+     bool static_Optim_IMUOdom_nKFs_biasUnfixed = true;
+     bool static_Optim_IMUOdom_nKFs_biasFixed = true;
+     bool static_Optim_IMUOdom_SeveralKFs = true;
+     bool Pure_translation = false;
+
+     std::string wolf_root = _WOLF_ROOT_DIR;
+     std::string gtest_ceres_yaml_path;
+     gtest_ceres_yaml_path = wolf_root + "/src/examples/gtest_ceres.yaml";
+     //parser used only if first argument is a valid file ending in '.yaml.'
+     std::string tests_to_run = "";
+
+     if (argc == 2)
+     {
+         const char * option = argv[1];
+         std:: string option_string(option);
+         
+         if(option_string == "--use_yaml") // use yaml option detected
+         {
+             YAML::Node gtest_config = YAML::LoadFile(gtest_ceres_yaml_path);
+
+             static_ceresOptimisation_Odom_PO               = gtest_config["ProcessorOdom3D"]["static_ceresOptimisation_Odom_PO"]                  .as<bool>();
+             static_ceresOptimisation_convergenceOdom_PO    = gtest_config["ProcessorOdom3D"]["static_ceresOptimisation_convergenceOdom_PO"]       .as<bool>();
+             static_ceresOptimisation_convergenceOdom_POV   = gtest_config["ProcessorOdom3D"]["static_ceresOptimisation_convergenceOdom_POV"]      .as<bool>();
+
+             static_ceresOptimisation_fixBias               = gtest_config["ProcessorIMU"]["static_ceresOptimisation_fixBias"]                  .as<bool>();
+             static_Optim_IMUOdom_2KF                       = gtest_config["ProcessorIMU"]["static_Optim_IMUOdom_2KF"]                          .as<bool>();
+             static_Optim_IMUOdom_nKFs_biasUnfixed          = gtest_config["ProcessorIMU"]["static_Optim_IMUOdom_nKFs_biasUnfixed"]             .as<bool>();
+             static_Optim_IMUOdom_nKFs_biasFixed            = gtest_config["ProcessorIMU"]["static_Optim_IMUOdom_nKFs_biasFixed"]               .as<bool>();
+             static_Optim_IMUOdom_SeveralKFs                = gtest_config["ProcessorIMU"]["static_Optim_IMUOdom_SeveralKFs"]                   .as<bool>();
+             Pure_translation                               = gtest_config["ProcessorIMU"]["Pure_translation"]                                  .as<bool>();
+             number_of_KF                                   = gtest_config["ProcessorIMU"]["n_KF"]                                              .as<unsigned int>();
+
+             std::string pure_tranlation_imu_data_string    = gtest_config["ProcessorIMU"]["Pure_translation_IMU_filepath"]                     .as<std::string>();
+             std::string pure_tranlation_odom_string        = gtest_config["ProcessorIMU"]["Pure_translation_Odom_filepath"]                    .as<std::string>();
+             std::string pure_rotation_imu_data_string      = gtest_config["ProcessorIMU"]["Pure_rotation_IMU_filepath"]                        .as<std::string>();
+             std::string pure_rotation_odom_string          = gtest_config["ProcessorIMU"]["Pure_rotation_Odom_filepath"]                       .as<std::string>();
+
+             //store filename in global variables
+            filename_pure_tranlation_imu_data   = new char[pure_tranlation_imu_data_string.length() + 1];
+            filename_pure_tranlation_odom       = new char[pure_tranlation_odom_string.length()     + 1];
+            filename_pure_rotation_imu_data     = new char[pure_rotation_imu_data_string.length()   + 1];
+            filename_pure_rotation_odom         = new char[pure_rotation_odom_string.length()       + 1];
+
+            std::strcpy(filename_pure_tranlation_imu_data, pure_tranlation_imu_data_string.c_str());
+            std::strcpy(filename_pure_tranlation_odom, pure_tranlation_odom_string.c_str());
+            std::strcpy(filename_pure_rotation_imu_data, pure_rotation_imu_data_string.c_str());
+            std::strcpy(filename_pure_rotation_odom, pure_rotation_odom_string.c_str());
+         }
+     }
+
+    if(static_ceresOptimisation_Odom_PO)
+        tests_to_run +=":ProcessorOdom3D.static_ceresOptimisation_Odom_PO";
+    if(static_ceresOptimisation_convergenceOdom_PO)
+        tests_to_run +=":ProcessorOdom3D.static_ceresOptimisation_convergenceOdom_PO";
+    if(static_ceresOptimisation_convergenceOdom_POV)
+        tests_to_run +=":ProcessorOdom3D.static_ceresOptimisation_convergenceOdom_POV";
+    
+    if(static_ceresOptimisation_fixBias)
+        tests_to_run +=":ProcessorIMU.static_ceresOptimisation_fixBias";
+    if(static_Optim_IMUOdom_2KF)
+        tests_to_run +=":ProcessorIMU.static_Optim_IMUOdom_2KF";
+    if(static_Optim_IMUOdom_nKFs_biasUnfixed)
+        tests_to_run +=":ProcessorIMU.static_Optim_IMUOdom_nKFs_biasUnfixed";
+    if(static_Optim_IMUOdom_nKFs_biasFixed)
+        tests_to_run +=":ProcessorIMU.static_Optim_IMUOdom_nKFs_biasFixed";
+    if(static_Optim_IMUOdom_SeveralKFs)
+        tests_to_run +=":ProcessorIMU.static_Optim_IMUOdom_SeveralKFs";
+    if(Pure_translation)
+        tests_to_run +=":ProcessorIMU.Pure_translation";
+
+
+    std::string final_tests =  tests_to_run;
   ::testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "*static_ceresOptimisation*"; //default : use all test for static optimisation (not using any input)
-  ::testing::GTEST_FLAG(filter) = "*static_Optim_IMUOdom_SeveralKFs*";
+  //::testing::GTEST_FLAG(filter) = "*static_Optim_IMUOdom_2KF*";
+  ::testing::GTEST_FLAG(filter) = final_tests;
+
   if (argc < 3)
     {
         std::cout << "Missing input argument to run pure_translation test! : needs 2 arguments (path to accelerometer file and path to gyroscope data)." << std::endl;
