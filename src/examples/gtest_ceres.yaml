@@ -23,7 +23,7 @@
         static_Optim_IMUOdom_nKFs_biasUnfixed: false
         static_Optim_IMUOdom_nKFs_biasFixed: false
         static_Optim_IMUOdom_SeveralKFs: false
-        Pure_translation: true
+        Pure_translation: false
         n_KF: 2
         Pure_translation_IMU_filepath: "./data_pure_translation.txt" # 'currentfolder being bin'
         Pure_translation_Odom_filepath: "./odom_pure_translation.txt"  # 'currentfolder being bin'

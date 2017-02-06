@@ -1380,6 +1380,7 @@ TEST(ProcessorIMU, static_Optim_IMUOdom_SeveralKFs)
     //===================================================== END{SOLVER PART}
 }
 
+
 TEST(ProcessorIMU, Pure_translation)
 {
     //In this test we will process both IMU and Odom3D data at the same time (in a same loop).
