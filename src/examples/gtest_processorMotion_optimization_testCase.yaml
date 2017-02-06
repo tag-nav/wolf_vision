@@ -1,0 +1,31 @@
+    #  LIST OF TESTS :
+    #      - ProcessorOdom3D:
+    #          - static_ceresOptimisation_Odom_PO
+    #          - static_ceresOptimisation_convergenceOdom_PO
+    #          - static_ceresOptimisation_convergenceOdom_POV
+    #      - ProcessorIMU:
+    #          - static_ceresOptimisation_fixBias
+    #          - static_Optim_IMUOdom_2KF
+    #          - static_Optim_IMUOdom_nKFs_biasUnfixed
+    #          - static_Optim_IMUOdom_nKFs_biasFixed
+    #          - static_Optim_IMUOdom_SeveralKFs
+    #          - Pure_translation
+    #
+
+
+    ProcessorOdom3D:
+        static_ceresOptimisation_Odom_PO: false
+        static_ceresOptimisation_convergenceOdom_PO: false
+        static_ceresOptimisation_convergenceOdom_POV: false
+    ProcessorIMU:
+        static_ceresOptimisation_fixBias: false
+        static_Optim_IMUOdom_2KF: false
+        static_Optim_IMUOdom_nKFs_biasUnfixed: false
+        static_Optim_IMUOdom_nKFs_biasFixed: false
+        static_Optim_IMUOdom_SeveralKFs: false
+        Pure_translation: false
+        n_KF: 2
+        Pure_translation_IMU_filepath: "./data_pure_translation.txt" # 'currentfolder being bin'
+        Pure_translation_Odom_filepath: "./odom_pure_translation.txt"  # 'currentfolder being bin'
+        Pure_rotation_IMU_filepath: "./data_pure_rotation.txt"      # 'currentfolder being bin'
+        Pure_rotation_Odom_filepath: "./odom_pure_rotation.txt"     # 'currentfolder being bin'
