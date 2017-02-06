@@ -13,6 +13,8 @@
 #include "../sensor_imu.h"
 #include "../processor_imu.h"
 #include "../capture_imu.h"
+#include "rotations.h"
+#include <cmath>
 #include "ceres_wrapper/ceres_manager.h"
 #include "constraint_odom_3D.h"
 
@@ -300,7 +302,43 @@ TEST_F(ProcessorIMUt, Covariances)
 
 }
 
+TEST_F(ProcessorIMUt, gyro_z)
+{
+    t.set(0); // clock in 0,1 ms ticks
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
 
+    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+
+    wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
+    data << 0, 0, 9.8, 0, 0, rate_of_turn; // only acc_x, but measure gravity!
+
+    cap_imu_ptr->setData(data);
+    cap_imu_ptr->setTimeStamp(0.001);
+    sensor_ptr->process(cap_imu_ptr);
+
+    // Expected state after one integration
+    Eigen::VectorXs x(16);
+    Eigen::Vector3s expected_rotation((Eigen::Vector3s()<<0, 0, 0.005 * M_PI/180).finished());
+    Eigen::Quaternions quat_expected = wolf::v2q(expected_rotation);
+    x << 0,0,0, quat_expected.x(),quat_expected.y(),quat_expected.z(),quat_expected.w(), 0,0,0, 0,0,0, 0,0,0; // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180
+
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+
+    //do so for 5s
+    const unsigned int iter = 5000; //how many ms 
+    for(int i = 1; i < iter; i++) //already did one integration above
+    {
+        cap_imu_ptr->setTimeStamp(i*0.001 + 0.001); //first one will be 0.002 and last will be 5.000
+        sensor_ptr->process(cap_imu_ptr);
+    }
+
+    // rotated at 5 deg/s for 5s = 25 deg => 0.005 * M_PI/180
+    expected_rotation << 0, 0, 25 * M_PI/180;
+    quat_expected = wolf::v2q(expected_rotation);
+    x << 0,0,0, quat_expected.x(),quat_expected.y(),quat_expected.z(),quat_expected.w(), 0,0,0, 0,0,0, 0,0,0;
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
+    "\n current x is : \n" << x.transpose() << std::endl;
+}
 
 int main(int argc, char **argv)
 {
