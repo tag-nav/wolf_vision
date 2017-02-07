@@ -210,7 +210,8 @@ TEST_F(ProcessorIMUt, acc_x)
 
 TEST_F(ProcessorIMUt, acc_y)
 {
-    //last part of this test fails with precision wolf::Constants::EPS_SMALL beacause error is in 1e-12
+    // last part of this test fails with precision wolf::Constants::EPS_SMALL beacause error is in 1e-12
+    // difference hier is that we integrate over 1ms periods
 
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
@@ -381,6 +382,74 @@ TEST_F(ProcessorIMUt, gyro_z)
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
     "\n current x is : \n" << x.transpose() << std::endl;
 }
+
+
+TEST_F(ProcessorIMUt, gyro_xyz)
+{
+    t.set(0); // clock in 0,1 ms ticks
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+
+    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+
+    Eigen::Vector3s tmp_vec; //will be used to store rate of turn data
+    wolf::Scalar time = 0;
+    const unsigned int x_rot_vel = 5;
+    const unsigned int y_rot_vel = 0;
+    const unsigned int z_rot_vel = 10;
+
+    wolf::Scalar tmpx, tmpy, tmpz;
+    /*
+        ox oy oz evolution in degrees (for understanding) --> converted in rad
+        with * pi/180
+        ox = pi*sin(alpha*t*pi/180); %express angle in rad before using sinus
+        oy = pi*sin(beta*t*pi/180);
+        oz = pi*sin(gamma*t*pi/180);
+
+        corresponding rate of turn
+        %rate of turn expressed in radians/s
+        wx = pi*alpha*cos(alpha*t*pi/180)*pi/180;
+        wy = pi*beta*cos(beta*t*pi/180)*pi/180;
+        wz = pi*gamma*cos(gamma*t*pi/180)*pi/180;
+     */
+    for(unsigned int data_iter = 0; data_iter < 100; data_iter ++)
+    {   
+        tmpx = M_PI*x_rot_vel*cos(wolf::toRad(x_rot_vel * time))*M_PI/180;
+        tmpy = M_PI*y_rot_vel*cos(wolf::toRad(y_rot_vel * time))*M_PI/180;
+        tmpz = M_PI*z_rot_vel*cos(wolf::toRad(z_rot_vel * time))*M_PI/180;
+        tmp_vec << tmpx, tmpy, tmpz;
+
+        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        data.head(3) =  rot.conjugate() * (- wolf::gravity()); //gravity measured
+        data.tail(3) = tmp_vec;
+
+        cap_imu_ptr->setData(data);
+        cap_imu_ptr->setTimeStamp(time);
+        sensor_ptr->process(cap_imu_ptr);
+
+        time += 0.1;
+    }
+
+    /* We focus on orientation here. position is supposed not to have moved
+     * we integrated on 10s. After 10s, the orientation state is supposed to be :
+     * ox = pi * sin(x_rot_vel * 10 *pi/180) = 2.406423361789617
+     * oy = pi * sin(y_rot_vel * 10 *pi/180) = 3.093959968206382
+     * oz = pi * sin(z_rot_vel * 10 *pi/180) = 3.093959968206382
+     */
+
+    Eigen::VectorXs x(16);
+    //Eigen::Vector3s expected_rotation((Eigen::Vector3s()<<2.406423361789617, 3.093959968206382, 3.093959968206382).finished());
+    Eigen::Vector3s expected_rotation((Eigen::Vector3s()<<2.406423361789617, 0, 3.093959968206382).finished());
+    Eigen::Quaternions quat_expected = wolf::v2q(expected_rotation);
+    x << 0,0,0, quat_expected.x(),quat_expected.y(),quat_expected.z(),quat_expected.w(), 0,0,0, 0,0,0, 0,0,0;
+
+    Eigen::Quaternions result_quat(problem->getCurrentState().data() + 3);
+    std::cout << "final orientation : " << wolf::q2v(result_quat).transpose() << std::endl;
+
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "current state is : \n" << problem->getCurrentState().transpose() <<
+    "\n current x is : \n" << x.transpose() << std::endl;
+
+}
+
 
 int main(int argc, char **argv)
 {
