@@ -411,7 +411,10 @@ TEST_F(ProcessorIMUt, gyro_xyz)
         wy = pi*beta*cos(beta*t*pi/180)*pi/180;
         wz = pi*gamma*cos(gamma*t*pi/180)*pi/180;
      */
-    for(unsigned int data_iter = 0; data_iter < 100; data_iter ++)
+
+     const wolf::Scalar dt = 0.001;
+
+    for(unsigned int data_iter = 0; data_iter < 1000; data_iter ++)
     {   
         tmpx = M_PI*x_rot_vel*cos(wolf::toRad(x_rot_vel * time))*M_PI/180;
         tmpy = M_PI*y_rot_vel*cos(wolf::toRad(y_rot_vel * time))*M_PI/180;
@@ -426,27 +429,35 @@ TEST_F(ProcessorIMUt, gyro_xyz)
         cap_imu_ptr->setTimeStamp(time);
         sensor_ptr->process(cap_imu_ptr);
 
-        time += 0.1;
+        time += dt;
     }
 
     /* We focus on orientation here. position is supposed not to have moved
-     * we integrated on 10s. After 10s, the orientation state is supposed to be :
-     * ox = pi * sin(x_rot_vel * 10 *pi/180) = 2.406423361789617
-     * oy = pi * sin(y_rot_vel * 10 *pi/180) = 3.093959968206382
-     * oz = pi * sin(z_rot_vel * 10 *pi/180) = 3.093959968206382
+     * we integrated on 1s. After 1s, the orientation state is supposed to be :
+     * ox = pi * sin(x_rot_vel * 1 *pi/180) = 0.273807841134205
+     * oy = pi * sin(y_rot_vel * 1 *pi/180) = 0
+     * oz = pi * sin(z_rot_vel * 1 *pi/180) = 0.545531839267684
      */
 
     Eigen::VectorXs x(16);
-    //Eigen::Vector3s expected_rotation((Eigen::Vector3s()<<2.406423361789617, 3.093959968206382, 3.093959968206382).finished());
-    Eigen::Vector3s expected_rotation((Eigen::Vector3s()<<2.406423361789617, 0, 3.093959968206382).finished());
+    Eigen::Vector3s expected_rotation((Eigen::Vector3s()<<0.273807841134205, 0, 0.545531839267684).finished());
     Eigen::Quaternions quat_expected = wolf::v2q(expected_rotation);
     x << 0,0,0, quat_expected.x(),quat_expected.y(),quat_expected.z(),quat_expected.w(), 0,0,0, 0,0,0, 0,0,0;
 
     Eigen::Quaternions result_quat(problem->getCurrentState().data() + 3);
-    std::cout << "final orientation : " << wolf::q2v(result_quat).transpose() << std::endl;
+    //std::cout << "final orientation : " << wolf::q2v(result_quat).transpose() << std::endl;
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    //check position part
+    ASSERT_TRUE((problem->getCurrentState().head(3) - x.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*0.001)) << "current position is : \n" << problem->getCurrentState().head(3).transpose() <<
+    "\n expected is : \n" << x.head(3).transpose() << std::endl;
+
+    //check velocity and bias parts
+    ASSERT_TRUE((problem->getCurrentState().tail(9) - x.tail(9)).isMuchSmallerThan(1, wolf::Constants::EPS*0.001)) << "current VBB is : \n" << problem->getCurrentState().tail(9).transpose() <<
+    "\n expected is : \n" << x.tail(9).transpose() << std::endl;
+
+    //check orientation part
+    ASSERT_TRUE((problem->getCurrentState().segment(3,4) - x.segment(3,4)).isMuchSmallerThan(1, 0.001)) << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
+    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
 
 }
 
