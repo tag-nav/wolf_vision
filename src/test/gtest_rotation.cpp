@@ -427,77 +427,67 @@ TEST(rotations, Quat_compos_const_rateOfTurn)
     using namespace wolf;
 
                                 // ********* constant rate of turn *********
+    /* First idea was to integrate data on SO3 (succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)) and in R3
+    (q2v(v2q(v0*n*dt))). with v0 << 30.0*deg_to_rad, 5.0*deg_to_rad, 10.0*deg_to_rad : constant rate-of-turn in rad/s and dt the time step.
+    But this is not OK, we cannot expect those 2 rotation integration to be equal.
+    The whole point of the SO3 thing is that we cannot integrate rotation in the R3 space and expect it to work. This is why we must integrate it in the manifold of SO3
+    
+    more specifically : 
+    - At a constant velocity, because we keep a constant rotation axis, the integral is the same.
+    - for non-contant velocities, especially if we change the axis of rotation, then it’s not the same, and the only good method is the SO3.
+
+    We change the idea :
+    define orientation and derive ox, oy, oz so that we get the rate of turn wx, wy, wz.
+    Then compare the final orientation from ox, oy, oz and quaternion we get by data integration
+    */
+
     wolf::Scalar deg_to_rad = M_PI/180.0;
     Eigen::Quaternions q0;
     q0.setIdentity();
-    Eigen::Vector3s v0, v1, v2;
-    Eigen::VectorXs const_diff_ox, const_diff_oy, const_diff_oz, ox, oy, oz, qox, qoy, qoz;
-    Eigen::VectorXs cdox_abs, cdoy_abs, cdoz_abs, vector0, t_vec; //= const_diff_## with absolute values
-    const wolf::Scalar dt = 0.001;
-    const wolf::Scalar N = 100;
+    Eigen::Vector3s tmp_vec; //will be used to store rate of turn data
 
-    v0 << 30.0*deg_to_rad, 5.0*deg_to_rad, 10.0*deg_to_rad; //constant rate-of-turn in rad/s
-    const_diff_ox.resize(N/dt);
-    const_diff_oy.resize(N/dt);
-    const_diff_oz.resize(N/dt);
-    cdox_abs.resize(N/dt);
-    cdoy_abs.resize(N/dt);
-    cdoz_abs.resize(N/dt);
-    vector0 = Eigen::VectorXs::Zero(N/dt);
-    t_vec.resize(N/dt);
-    ox.resize(N/dt);
-    oy.resize(N/dt);
-    oz.resize(N/dt);
-    qox.resize(N/dt);
-    qoy.resize(N/dt);
-    qoz.resize(N/dt);
+    const unsigned int x_rot_vel = 5;   // deg/s
+    const unsigned int y_rot_vel = 2;   // deg/s
+    const unsigned int z_rot_vel = 10;  // deg/s
 
-    for(wolf::Scalar n=0; n<N/dt; n++){
-        v2 = q2v(v2q(v0*n*dt));
-        ox(n) = v2(0);
-        oy(n) = v2(1);
-        oz(n) = v2(2);
-        /*ox(n) = pi2pi(v0(0)*n*dt);
-        oy(n) = pi2pi(v0(1)*n*dt);
-        oz(n) = pi2pi(v0(2)*n*dt);*/
-        t_vec(n) = n*dt;
-    }
-    
-    for(wolf::Scalar n=0; n<N/dt; n++){
-        if(n!=0)
-            q0 = q0 * v2q(v0*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
-        v1 = q2v(q0);   //corresponding rotation vector of current quaternion
-        qox(n) = v1(0); //angle X component
-        qoy(n) = v1(1); //angle Y component
-        qoz(n) = v1(2); //angle Z component
+    wolf::Scalar tmpx, tmpy, tmpz;
+    /*
+        ox oy oz evolution in degrees (for understanding) --> converted in rad
+        with * pi/180
+        ox = x_rot_vel * t; %express angle in rad before using sinus
+        oy = y_rot_vel * t;
+        oz = z_rot_vel * t;
+
+        corresponding rate of turn
+        %rate of turn expressed in radians/s
+        wx = x_rot_vel;
+        wy = y_rot_vel;
+        wz = z_rot_vel;
+     */
+
+     //there is no need to compute the rate of turn at each time because it is constant here : 
+    tmpx = deg_to_rad * x_rot_vel;  // rad/s
+    tmpy = deg_to_rad * y_rot_vel;
+    tmpz = deg_to_rad * z_rot_vel;
+    tmp_vec << tmpx, tmpy, tmpz;
+    const wolf::Scalar dt = 0.1;
+
+    for(unsigned int data_iter = 0; data_iter < 100; data_iter ++)
+    {   
+        q0 = q0 * v2q(tmp_vec*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
+
     }
 
-    //Compute difference between orientation vectors (expected - real)
-    const_diff_ox = ox - qox;
-    const_diff_oy = oy - qoy;
-    const_diff_oz = oz - qoz;
+    /* We focus on orientation here. position is supposed not to have moved
+     * we integrated on 10s. After 10s, the orientation state is supposed to be :
+     * ox = x_rot_vel * t = 50; (in degree ! -> *M_PI/180 to get rad)
+     * oy = y_rot_vel * t = 20;
+     * oz = z_rot_vel * t = 100;
+     */
 
-    //get absolute difference
-    cdox_abs = const_diff_ox.array().abs();
-    cdoy_abs = const_diff_oy.array().abs();
-    cdoz_abs = const_diff_oz.array().abs();
-
-    EXPECT_TRUE((ox - qox).isMuchSmallerThan(1,0.000001) && (oy - qoy).isMuchSmallerThan(1,0.000001) && (oz - qoz).isMuchSmallerThan(1,0.000001)) << 
-    "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
-
-    #ifdef write_results
-        std::ofstream const_rot;
-        const_rot.open("const_rot.dat");
-        if(const_rot){
-            const_rot << "%%timestamp\t" << "ox\t" << "oy\t" << "oz\t" << "qox\t" << "qoy\t" << "qoz\t" << "\n";
-            for(int i = 0; i<N/dt; i++)
-                const_rot << t_vec(i) << "\t" << ox(i) << "\t" << oy(i) << "\t" << oz(i) << "\t" << qox(i) << "\t" << qoy(i) << "\t" << qoz(i) << "\n";
-            const_rot.close();
-        }
-        else
-        PRINTF("could not open file const_rot");
-    #endif
-
+     Eigen::Vector3s final_orientation((Eigen::Vector3s()<< deg_to_rad*50, deg_to_rad*20, deg_to_rad*100).finished());
+     ASSERT_TRUE((final_orientation - wolf::q2v(q0)).isMuchSmallerThan(1,wolf::Constants::EPS)) << "final orientation expected : " << final_orientation.transpose() << 
+     "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
 }
 
 TEST(rotations, Quat_compos_var_rateOfTurn)
@@ -694,5 +684,6 @@ int main(int argc, char **argv)
      */
 
      testing::InitGoogleTest(&argc, argv);
+     ::testing::GTEST_FLAG(filter) = "*Quat_compos_const_rateOfTurn";
      return RUN_ALL_TESTS();
 }
