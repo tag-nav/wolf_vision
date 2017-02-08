@@ -275,6 +275,104 @@ TEST_F(ProcessorIMUt, acc_z)
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "current state is " << problem->getCurrentState().transpose() << std::endl;
 }
 
+TEST_F(ProcessorIMUt, acc_xyz)
+{
+    /* Here again the error seems to be in the discretization.
+     * integrating over 10s with a dt of 0.001s lead to an error in velocity of order 1e-3. 
+     * The smaller is the time step the more precise is the integration
+     * Same conclusion for position
+     */
+
+    Eigen::Vector3s tmp_a_vec; //will be used to store IMU acceleration data
+    Eigen::Vector3s w_vec((Eigen::Vector3s()<<0,0,0).finished());
+    wolf::Scalar time = 0;
+    const wolf::Scalar x_freq = 2;
+    const wolf::Scalar y_freq = 1;
+    const wolf::Scalar z_freq = 4;
+
+    wolf::Scalar tmp_ax, tmp_ay, tmp_az;
+    /*
+        From evolution of position we determine the acceleration : 
+        x = sin(x_freq*t);
+        y = sin(y_freq*t);
+        z = sin(z_freq*t);
+
+        corresponding acceleration
+        ax = - (x_freq * x_freq) * sin(x_freq * t);
+        ay = - (y_freq * y_freq) * sin(y_freq * t);
+        az = - (z_freq * z_freq) * sin(z_freq * t);
+
+        Notice that in this case, initial velocity is given exactly as :
+        initial_vx = x_freq;
+        initial_vy = y_freq;
+        initial_vz = z_freq;
+     */
+
+    t.set(0); // clock in 0,1 ms ticks
+    x0 << 0,0,0,  0,0,0,1,  x_freq,y_freq,z_freq,  0,0,0,  0,0,0; // Try some non-zero biases
+
+    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+
+    const wolf::Scalar dt = 0.0001;
+    
+    // This test is for pure translation -> no rotation ==> constant rate of turn vector = [0,0,0]
+    data.tail(3) = w_vec;
+
+    for(unsigned int data_iter = 0; data_iter <= 10000; data_iter ++)
+    {   
+        tmp_ax = - (x_freq * x_freq) * sin(x_freq * time);
+        tmp_ay = - (y_freq * y_freq) * sin(y_freq * time);
+        tmp_az = - (z_freq * z_freq) * sin(z_freq * time);
+        tmp_a_vec << tmp_ax, tmp_ay, tmp_az;
+
+        Eigen::Quaternions rot(problem->getCurrentState().data()+3); //should always be identity quaternion here...
+        data.head(3) =  tmp_a_vec + rot.conjugate() * (- wolf::gravity()); //gravity measured
+
+        cap_imu_ptr->setData(data);
+        cap_imu_ptr->setTimeStamp(time);
+        sensor_ptr->process(cap_imu_ptr);
+
+        time += dt;
+    }
+    time -= dt; //to get final time
+
+    /* We should not have turned : final quaternion must be identity quaternion [0,0,0,1]
+     * We integrated over 1 s : 
+     * x = sin(x_freq * 1)
+     * y = sin(y_freq * 1)
+     * z = sin(z_freq * 1)
+
+     * Velocity is given by first derivative :
+     * vx = x_freq * cos(x_freq * 1)
+     * vy = y_freq * cos(y_freq * 1)
+     * vz = z_freq * cos(z_freq * 1)
+     */
+
+    Eigen::VectorXs x(16);
+    wolf::Scalar exp_px = sin(x_freq * time);
+    wolf::Scalar exp_py = sin(y_freq * time);
+    wolf::Scalar exp_pz = sin(z_freq * time);
+
+    wolf::Scalar exp_vx = x_freq * cos(x_freq * time);
+    wolf::Scalar exp_vy = y_freq * cos(y_freq * time);
+    wolf::Scalar exp_vz = z_freq * cos(z_freq * time);
+
+    x << exp_px,exp_py,exp_pz, 0,0,0,1, exp_vx,exp_vy,exp_vz, 0,0,0, 0,0,0;
+
+    //check velocity and bias parts
+    ASSERT_TRUE((problem->getCurrentState().tail(9) - x.tail(9)).isMuchSmallerThan(1, 0.001)) << "current VBB is : \n" << problem->getCurrentState().tail(9).transpose() <<
+    "\n expected is : \n" << x.tail(9).transpose() << std::endl;
+
+    //check orientation part
+    ASSERT_TRUE((problem->getCurrentState().segment(3,4) - x.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10)) << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
+    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
+
+    //check position part
+    ASSERT_TRUE((problem->getCurrentState().head(3) - x.head(3)).isMuchSmallerThan(1, 0.001)) << "current position is : \n" << problem->getCurrentState().head(3).transpose() <<
+    "\n expected is : \n" << x.head(3).transpose() << std::endl;
+
+}
+
 TEST_F(ProcessorIMUt, check_Covariance)
 {
     t.set(0); // clock in 0,1 ms ticks
