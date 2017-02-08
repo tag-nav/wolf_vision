@@ -19,11 +19,12 @@
         static_ceresOptimisation_convergenceOdom_POV: false
     ProcessorIMU:
         static_ceresOptimisation_fixBias: false
+    ProcessorIMU_Odom_tests:
         static_Optim_IMUOdom_2KF: false
         static_Optim_IMUOdom_nKFs_biasUnfixed: false
         static_Optim_IMUOdom_nKFs_biasFixed: false
         static_Optim_IMUOdom_SeveralKFs: false
         Motion_IMU_and_Odom: true
         n_KF: 2
-        motion_IMU_filepath: "./data_pure_translation.txt" # 'currentfolder being bin'
-        motion_Odom_filepath: "./odom_pure_translation.txt"  # 'currentfolder being bin'
+        motion_IMU_filepath: "./application_test30s_imu.txt" # 'currentfolder being bin'
+        motion_Odom_filepath: "./application_test30s_odom.txt"  # 'currentfolder being bin'
