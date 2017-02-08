@@ -168,7 +168,7 @@ class ProcessorMotion : public ProcessorBase
          * \param _x_origin the state at the origin
          * \param _ts_origin origin timestamp.
          */
-        void setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin);
+        FrameBasePtr setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin);
 
         virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol);
 
@@ -620,12 +620,14 @@ class ProcessorMotion : public ProcessorBase
 
 namespace wolf{
 
-inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
+inline FrameBasePtr ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
     // make a new key frame
     FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(KEY_FRAME, _x_origin, _ts_origin);
     // set the key frame as origin
     setOrigin(key_frame_ptr);
+
+    return key_frame_ptr ;
 }
 
 inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part)
