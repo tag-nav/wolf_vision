@@ -23,9 +23,7 @@
         static_Optim_IMUOdom_nKFs_biasUnfixed: false
         static_Optim_IMUOdom_nKFs_biasFixed: false
         static_Optim_IMUOdom_SeveralKFs: false
-        Pure_translation: false
+        Motion_IMU_and_Odom: true
         n_KF: 2
-        Pure_translation_IMU_filepath: "./data_pure_translation.txt" # 'currentfolder being bin'
-        Pure_translation_Odom_filepath: "./odom_pure_translation.txt"  # 'currentfolder being bin'
-        Pure_rotation_IMU_filepath: "./data_pure_rotation.txt"      # 'currentfolder being bin'
-        Pure_rotation_Odom_filepath: "./odom_pure_rotation.txt"     # 'currentfolder being bin'
+        motion_IMU_filepath: "./data_pure_translation.txt" # 'currentfolder being bin'
+        motion_Odom_filepath: "./odom_pure_translation.txt"  # 'currentfolder being bin'
