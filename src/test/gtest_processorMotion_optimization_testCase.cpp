@@ -864,6 +864,399 @@ TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
     std::cout << "\t\t\t ______computed!______" << std::endl;
 }
 
+//_______________________________________________________________________________________________________________
+// ##################################### static_Optim_IMUOdom_2KF TESTS #####################################
+//_______________________________________________________________________________________________________________
+
+/*
+ *  Tests below will be based on the following representation :
+ *     KF0 ---- constraintIMU ---- KF1
+ *        \____constraintOdom3D___/
+ *
+ *
+ */
+
+TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_Unfix1StateBlock)
+{
+
+    /* In this scenario, we simulate the integration of a perfect IMU that is not moving and we add an odometry measurement.
+     * Initial State is [0,0,0, 0,0,0,1, 0,0,0] so we expect the Final State to be exactly the same
+     * Origin KeyFrame is fixed
+     * 
+     * Finally, we can represent the graph as :
+     *
+     *  KF0 ---- constraintIMU ---- KF1
+     *     \____constraintOdom3D___/
+     *
+     *
+     */
+
+     //===================================================== END OF SETTINGS
+
+     // set origin of processorMotions
+    Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
+    t.set(0);
+
+    FrameBasePtr setOrigin_KF = processor_ptr_imu->setOrigin(x_origin, t);
+    processor_ptr_odom3D->setOrigin(setOrigin_KF);
+
+    wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();
+    //There should be 3 captures at origin_frame : CaptureOdom, captureIMU
+    EXPECT_EQ((wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front())->getCaptureList().size(),2);
+    ASSERT_TRUE(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->isKey()) << "origin_frame is not a KeyFrame..." << std::endl;
+
+    //===================================================== END{END OF SETTINGS}
+
+    //===================================================== PROCESS DATA
+
+    // PROCESS IMU DATA
+
+    Eigen::Vector6s data;
+    data << 0.00, 0.000, -wolf::gravity()(2), 0.0, 0.0, 0.0;
+    Scalar dt = t.get();
+    TimeStamp ts(0.001);
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
+
+    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()) ){
+        
+        // Time and data variables
+        dt += 0.001;
+        ts.set(dt);
+        imu_ptr->setTimeStamp(ts);
+        imu_ptr->setData(data);
+
+        // process data in capture
+        imu_ptr->getTimeStamp();
+        sen_imu->process(imu_ptr);
+    }
+
+    // PROCESS ODOM 3D DATA
+    Eigen::Vector6s data_odom3D;
+    data_odom3D << 0,0,0, 0,0,0;
+    
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
+    sen_odom3D->process(mot_ptr);
+
+    //===================================================== END{PROCESS DATA}
+
+    //===================================================== SOLVER PART
+
+    FrameIMUPtr origin_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front());
+    FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+    Eigen::VectorXs initial_origin_state(16);
+    Eigen::VectorXs initial_final_state(16);
+
+    //store states before optimization so that we can reset the frames to their original state for other optimization tests
+    origin_KF->getState(initial_origin_state);
+    last_KF->getState(initial_final_state);
+
+    //Check and print wolf tree
+    /*if(wolf_problem_ptr_->check(1)){
+        wolf_problem_ptr_->print(4,1,1,1);
+    }*/
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    //get stateblocks from origin and last KF and concatenate them in one std::vector to unfix stateblocks
+    std::vector<StateBlockPtr> originStateBlock_vec = origin_KF->getStateBlockVec();
+    std::vector<StateBlockPtr> finalStateBlock_vec = last_KF->getStateBlockVec();
+    std::vector<StateBlockPtr> allStateBlocks;
+
+    allStateBlocks.reserve(originStateBlock_vec.size() + finalStateBlock_vec.size());
+    allStateBlocks.insert( allStateBlocks.end(), originStateBlock_vec.begin(), originStateBlock_vec.end() );
+    allStateBlocks.insert( allStateBlocks.end(), finalStateBlock_vec.begin(), finalStateBlock_vec.end() );
+
+    /*std::cout << "\n\t ######### TEST 1 : ONLY 1 STATEBLOCK UNFIXED (BOTH KF FIXED) #########" << std::endl;
+    for(int i = 0; i<allStateBlocks.size(); i++)
+    {
+        origin_KF->setState(initial_origin_state);
+        last_KF->setState(initial_final_state);
+
+        origin_KF->fix(); //this fix the all keyframe
+        last_KF->fix();
+        //we now unfix only one StateBlock
+        allStateBlocks[i]->unfix();
+
+        std::cout << "\t\t\t ______solving______ test number " << i <<  std::endl;
+        ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10000 ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+    }
+
+    std::cout << "\n\t ######### TEST 2 : ONLY 1 STATEBLOCK UNFIXED (ONLY ORIGIN_KF FIXED) #########" << std::endl;
+    for(int i = 0; i<originStateBlock_vec.size(); i++)
+    {
+        origin_KF->setState(initial_origin_state);
+        last_KF->setState(initial_final_state);
+
+        origin_KF->fix(); //this fix the all keyframe
+
+        //we now unfix only one StateBlock
+        originStateBlock_vec[i]->unfix();
+
+        std::cout << "\t\t\t ______solving______ test number " << i <<  std::endl;
+        ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10000 ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+    }
+
+    std::cout << "\n\t ######### TEST 3 : ONLY 1 STATEBLOCK UNFIXED (ONLY LAST_KF FIXED) #########" << std::endl;
+    for(int i = 0; i<finalStateBlock_vec.size(); i++)
+    {
+        origin_KF->setState(initial_origin_state);
+        last_KF->setState(initial_final_state);
+
+        last_KF->fix(); //this fix the all keyframe
+
+        //we now unfix only one StateBlock
+        finalStateBlock_vec[i]->unfix();
+
+        std::cout << "\t\t\t ______solving______ test number " << i <<  std::endl;
+        ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10000 ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+    }
+
+    //we do the same but we unfix 2 state blocks
+
+    std::cout << "\n\t ######### TEST 4 : 2 STATEBLOCK UNFIXED (BOTH KF FIXED) #########" << std::endl;
+    for(int i = 0; i<allStateBlocks.size(); i++)
+    {
+        for(int j = 0; j<allStateBlocks.size(); j++)
+        {   
+            std::cout << "\t\t\t ______solving______ test number " << i << "." << j << std::endl;
+
+            origin_KF->setState(initial_origin_state);
+            last_KF->setState(initial_final_state);
+
+            origin_KF->fix(); //this fix the all keyframe
+            last_KF->fix();
+            //we now unfix only one StateBlock
+            allStateBlocks[i]->unfix();
+            allStateBlocks[j]->unfix();
+
+            ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+            std::cout << summary.BriefReport() << std::endl;
+
+            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10000 ));
+            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+        }
+    }
+
+    std::cout << "\n\t ######### TEST 5 : 2 STATEBLOCK UNFIXED (ONLY ORIGIN KF FIXED) #########" << std::endl;
+    for(int i = 0; i<originStateBlock_vec.size(); i++)
+    {
+        for(int j = 0; j<originStateBlock_vec.size(); j++)
+        {   
+            std::cout << "\t\t\t ______solving______ test number " << i << "." << j << std::endl;
+
+            origin_KF->setState(initial_origin_state);
+            last_KF->setState(initial_final_state);
+
+            origin_KF->fix(); //this fix the all keyframe
+
+            //we now unfix only one StateBlock
+            originStateBlock_vec[i]->unfix();
+            originStateBlock_vec[j]->unfix();
+
+            ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+            std::cout << summary.BriefReport() << std::endl;
+
+            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10000 ));
+            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+        }
+    }
+
+    std::cout << "\n\t ######### TEST 6 : 2 STATEBLOCK UNFIXED (ONLY LAST KF FIXED) #########" << std::endl;
+    for(int i = 0; i<finalStateBlock_vec.size(); i++)
+    {
+        for(int j = 0; j<finalStateBlock_vec.size(); j++)
+        {   
+            std::cout << "\t\t\t ______solving______ test number " << i << "." << j << std::endl;
+
+            origin_KF->setState(initial_origin_state);
+            last_KF->setState(initial_final_state);
+
+            last_KF->fix();
+
+            //we now unfix only one StateBlock
+            finalStateBlock_vec[i]->unfix();
+            finalStateBlock_vec[j]->unfix();
+
+            ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+            std::cout << summary.BriefReport() << std::endl;
+
+            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10000 ));
+            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+        }
+    }*/
+
+    std::cout << "\n\t ######### TEST 1 : BOTH KF FIXED, UNFIX UP TO 5 STATEBLOCKS #########" << std::endl;
+    for(int i = 0; i<allStateBlocks.size(); i++)
+    {
+        for(int j = 0; j<allStateBlocks.size(); j++)
+        {   
+            for(int k = 0; k<allStateBlocks.size(); k++)
+            {
+                for(int l = 0; l<allStateBlocks.size(); l++)
+                {
+                    for(int m = 0; m<allStateBlocks.size(); m++)
+                    {
+                        std::cout << "\t\t\t ______solving______ test number " << i << "." << j << "." << k << "." << l << "." << m << std::endl;
+
+                        origin_KF->setState(initial_origin_state);
+                        last_KF->setState(initial_final_state);
+
+                        origin_KF->fix(); //this fix the all keyframe
+                        last_KF->fix();
+                        //we now unfix only one StateBlock
+                        allStateBlocks[i]->unfix();
+                        allStateBlocks[j]->unfix();
+                        allStateBlocks[k]->unfix();
+                        allStateBlocks[l]->unfix();
+                        allStateBlocks[m]->unfix();
+
+                        ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+                        //std::cout << summary.BriefReport() << std::endl;
+
+                        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10000 ));
+                        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+                        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+                    }
+                }
+            }
+        }
+    }
+
+    std::cout << "\n\t ######### TEST 2 : ORIGIN KF FIXED, UNFIX UP TO 3 STATEBLOCKS #########" << std::endl;
+
+    last_KF->unfix();
+    for(int i = 0; i<originStateBlock_vec.size(); i++)
+    {
+        for(int j = 0; j<originStateBlock_vec.size(); j++)
+        {   
+            for(int k = 0; k<originStateBlock_vec.size(); k++)
+            {
+                for(int l = 0; l<originStateBlock_vec.size(); l++)
+                {
+                    std::cout << "\t\t\t ______solving______ test number " << i << "." << j << "." << k << "." << l << std::endl;
+
+                    origin_KF->setState(initial_origin_state);
+                    last_KF->setState(initial_final_state);
+
+                    origin_KF->fix(); //this fix the all keyframe
+
+                    //we now unfix only one StateBlock
+                    originStateBlock_vec[i]->unfix();
+                    originStateBlock_vec[j]->unfix();
+                    originStateBlock_vec[k]->unfix();
+                    originStateBlock_vec[l]->unfix();
+
+                    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+                    //std::cout << summary.BriefReport() << std::endl;
+
+                    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10000 ));
+                    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+                    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+                }
+            }
+        }
+    }
+
+    //case with origin and last KF completely unfixed
+
+    std::cout << "\n\t ######### TEST 2 : LAST KF FIXED, UNFIX UP TO 3 STATEBLOCKS #########" << std::endl;
+    
+    origin_KF->unfix();
+    for(int i = 0; i<finalStateBlock_vec.size(); i++)
+    {
+        for(int j = 0; j<finalStateBlock_vec.size(); j++)
+        {   
+            for(int k = 0; k<finalStateBlock_vec.size(); k++)
+            {
+                for(int l = 0; l<finalStateBlock_vec.size(); l++)
+                {
+                    //std::cout << "\t\t\t ______solving______ test number " << i << "." << j << "." << k << "." << l << std::endl;
+
+                    origin_KF->setState(initial_origin_state);
+                    last_KF->setState(initial_final_state);
+
+                    last_KF->fix(); //this fix the all keyframe
+
+                    //we now unfix only one StateBlock
+                    finalStateBlock_vec[i]->unfix();
+                    finalStateBlock_vec[j]->unfix();
+                    finalStateBlock_vec[k]->unfix();
+                    finalStateBlock_vec[l]->unfix();
+
+                    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+                    //std::cout << summary.BriefReport() << std::endl;
+
+                    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10000 ));
+                    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+                    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+                }
+            }
+        }
+    }
+
+    std::cout << "\t\t\t ______solving______ BOTH KF UNFIXED" << std::endl;
+    origin_KF->setState(initial_origin_state);
+    last_KF->setState(initial_final_state);
+
+    origin_KF->unfix(); //this fix the all keyframe
+    last_KF->unfix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10000 ));
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 )); //because we simulate a perfect IMU
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    // COMPUTE COVARIANCES
+    //std::cout << "\t\t\t ______computing covariances______" << std::endl;
+    //ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
+    //std::cout << "\t\t\t ______computed!______" << std::endl;
+
+    //===================================================== END{SOLVER PART}
+
+}
+
 
 TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF)
 {
@@ -964,6 +1357,9 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF)
 
 }
 
+//_______________________________________________________________________________________________________________
+// END ##################################### static_Optim_IMUOdom_2KF TESTS #####################################
+//_______________________________________________________________________________________________________________
 
 
 TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_nKFs_biasUnfixed)
@@ -1543,6 +1939,7 @@ int main(int argc, char **argv)
 
   ::testing::InitGoogleTest(&argc, argv);
   ::testing::GTEST_FLAG(filter) = tests_to_run;
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.static_Optim_IMUOdom_2KF_Unfix1StateBlock";
 
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
