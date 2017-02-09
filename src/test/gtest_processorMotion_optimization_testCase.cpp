@@ -1708,6 +1708,469 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_position)
 }
 
 
+TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
+{
+
+    /* In this scenario, we simulate the integration of a perfect IMU that is not moving and we add an odometry measurement.
+     * Initial State is [0,0,0, 0,0,0,1, 0,0,0] so we expect the Final State to be exactly the same
+     * Origin KeyFrame is fixed
+     * 
+     * Finally, we can represent the graph as :
+     *
+     *  KF0 ---- constraintIMU ---- KF1
+     *     \____constraintOdom3D___/
+     *
+     * We perturbate a velocity value (x,y or z or 2 of them or all of them before calling ceres)
+     */
+
+     //===================================================== END OF SETTINGS
+
+     WOLF_WARN("THIS TEST IS VERY LONG TO COMPUTE...")
+
+     // set origin of processorMotions
+    Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
+    t.set(0);
+
+    FrameBasePtr setOrigin_KF = processor_ptr_imu->setOrigin(x_origin, t);
+    processor_ptr_odom3D->setOrigin(setOrigin_KF);
+
+    wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();
+    //There should be 3 captures at origin_frame : CaptureOdom, captureIMU
+    EXPECT_EQ((wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front())->getCaptureList().size(),2);
+    ASSERT_TRUE(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->isKey()) << "origin_frame is not a KeyFrame..." << std::endl;
+
+    //===================================================== END{END OF SETTINGS}
+
+    //===================================================== PROCESS DATA
+
+    // PROCESS IMU DATA
+
+    Eigen::Vector6s data;
+    data << 0.00, 0.000, -wolf::gravity()(2), 0.0, 0.0, 0.0;
+    Scalar dt = t.get();
+    TimeStamp ts(0.001);
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
+
+    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()) ){
+        
+        // Time and data variables
+        dt += 0.001;
+        ts.set(dt);
+        imu_ptr->setTimeStamp(ts);
+        imu_ptr->setData(data);
+
+        // process data in capture
+        imu_ptr->getTimeStamp();
+        sen_imu->process(imu_ptr);
+    }
+
+    // PROCESS ODOM 3D DATA
+    Eigen::Vector6s data_odom3D;
+    data_odom3D << 0,0,0, 0,0,0;
+    
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
+    sen_odom3D->process(mot_ptr);
+
+    //===================================================== END{PROCESS DATA}
+
+    //===================================================== SOLVER PART
+
+    FrameIMUPtr origin_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front());
+    FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+    Eigen::VectorXs initial_origin_state(16);
+    Eigen::VectorXs initial_final_state(16);
+
+    //store states before optimization so that we can reset the frames to their original state for other optimization tests
+    origin_KF->getState(initial_origin_state);
+    last_KF->getState(initial_final_state);
+
+    //Check and print wolf tree
+    /*if(wolf_problem_ptr_->check(1)){
+        wolf_problem_ptr_->print(4,1,1,1);
+    }*/
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    //get stateblocks from origin and last KF and concatenate them in one std::vector to unfix stateblocks
+    std::vector<StateBlockPtr> originStateBlock_vec = origin_KF->getStateBlockVec();
+    std::vector<StateBlockPtr> finalStateBlock_vec = last_KF->getStateBlockVec();
+    std::vector<StateBlockPtr> allStateBlocks;
+
+    allStateBlocks.reserve(originStateBlock_vec.size() + finalStateBlock_vec.size());
+    allStateBlocks.insert( allStateBlocks.end(), originStateBlock_vec.begin(), originStateBlock_vec.end() );
+    allStateBlocks.insert( allStateBlocks.end(), finalStateBlock_vec.begin(), finalStateBlock_vec.end() );
+
+
+    std::cout << "\n\t ### TEST 1 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE 1 ORIGIN VELOCITY (EXCEPT FINAL VELOCITY)###" << std::endl;
+
+    for(int pert_index = 7; pert_index<10; pert_index++)
+    {
+        //perturate initial state
+        Eigen::VectorXs perturbated_origin_state(16);
+        perturbated_origin_state = initial_origin_state;
+        perturbated_origin_state(pert_index) += 1.0;
+
+        for(int i = 0; i<originStateBlock_vec.size(); i++)
+        {
+
+            //std::cout << "\t\t\t ______solving______ test number " << i << "." << j << "." << k << "." << l << "." << m << std::endl;
+
+            origin_KF->setState(perturbated_origin_state);
+            last_KF->setState(initial_final_state);
+
+            origin_KF->fix(); //this fix the all keyframe
+            last_KF->fix();
+
+            //we unfix origin velocity stateblock to let it converge
+            originStateBlock_vec[2]->unfix();
+            
+            //we now unfix one StateBlock
+            originStateBlock_vec[i]->unfix();
+
+            ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+            std::cout << summary.BriefReport() << std::endl;
+
+            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+            "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
+            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
+            "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        }
+
+        for(int i = 0; i<finalStateBlock_vec.size(); i++)
+        {
+
+            //std::cout << "\t\t\t ______solving______ test number " << i << "." << j << "." << k << "." << l << "." << m << std::endl;
+
+            origin_KF->setState(perturbated_origin_state);
+            last_KF->setState(initial_final_state);
+
+            origin_KF->fix(); //this fix the all keyframe
+            last_KF->fix();
+            //we unfix origin VELOCITY stateblock to let it converge
+            originStateBlock_vec[2]->unfix();
+
+            //we now unfix only one StateBlock
+            finalStateBlock_vec[i]->unfix();
+
+            ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+            std::cout << summary.BriefReport() << std::endl;
+
+            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+            "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
+            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
+            "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        }
+    }
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    std::cout << "\n\t ### TEST 2 : BOTH KF FIXED, UNFIX 1 STATEBLOCKS, PERTURBATE 2 ORIGIN VELOCITY ###" << std::endl;
+
+    for(int pert_index0 = 7; pert_index0<10; pert_index0++)
+    {
+        for(int pert_index1 = 8; pert_index1<10; pert_index1++)
+        {
+            //perturate initial state
+            Eigen::VectorXs perturbated_origin_state(16);
+            perturbated_origin_state = initial_origin_state;
+            perturbated_origin_state(pert_index0) += 1.0;
+            perturbated_origin_state(pert_index1) += 1.0;
+
+            for(int i = 1; i<originStateBlock_vec.size(); i++)
+            {
+
+                std::cout << "\t\t\t ______solving______ test number " << i << std::endl;
+
+                origin_KF->setState(perturbated_origin_state);
+                last_KF->setState(initial_final_state);
+
+                origin_KF->fix(); //this fix the all keyframe
+                last_KF->fix();
+                //we unfix origin VELOCITY stateblock to let it converge
+                originStateBlock_vec[2]->unfix();
+
+                //we now unfix only one StateBlock
+                originStateBlock_vec[i]->unfix();
+
+                ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+                std::cout << summary.BriefReport() << std::endl;
+
+                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) <<
+                "origin orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n last orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) <<
+                "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
+                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+            }
+
+            for(int i = 1; i<finalStateBlock_vec.size(); i++)
+            {
+
+                std::cout << "\t\t\t ______solving______ test number " << i << std::endl;
+
+                origin_KF->setState(perturbated_origin_state);
+                last_KF->setState(initial_final_state);
+
+                origin_KF->fix(); //this fix the all keyframe
+                last_KF->fix();
+                //we unfix origin position stateblock to let it converge
+                originStateBlock_vec[2]->unfix();
+
+                //we now unfix only one StateBlock
+                finalStateBlock_vec[i]->unfix();
+
+                ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+                std::cout << summary.BriefReport() << std::endl;
+
+                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
+                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+            }
+        }
+    }
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    std::cout << "\n\t ### TEST 3 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE ALL ORIGIN VELOCITIES ###" << std::endl;
+
+    //perturate initial state
+    Eigen::VectorXs perturbated_origin_state(16);
+    perturbated_origin_state = initial_origin_state;
+    perturbated_origin_state(7) += 1.0;
+    perturbated_origin_state(8) += 2.0;
+    perturbated_origin_state(9) += 3.0;
+
+    for(int i = 1; i<originStateBlock_vec.size(); i++)
+    {
+        std::cout << "\t\t\t ______solving______ test number " << i << std::endl;
+
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(initial_final_state);
+
+        origin_KF->fix(); //this fix the all keyframe
+        last_KF->fix();
+        //we unfix origin VELOCITY stateblock to let it converge
+        originStateBlock_vec[2]->unfix();
+
+        //we now unfix only one StateBlock
+        originStateBlock_vec[i]->unfix();
+
+        ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
+        "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+    }
+
+    for(int i = 1; i<finalStateBlock_vec.size(); i++)
+    {
+        //std::cout << "\t\t\t ______solving______ test number " << i << "." << j << "." << k << "." << l << "." << m << std::endl;
+
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(initial_final_state);
+
+        origin_KF->fix(); //this fix the all keyframe
+        last_KF->fix();
+        //we unfix origin velocity stateblock to let it converge
+        originStateBlock_vec[2]->unfix();
+
+        //we now unfix only one StateBlock
+        finalStateBlock_vec[i]->unfix();
+
+        ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
+        "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+    }
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    std::cout << "\n\t ### TEST 4 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE ALL FINAL VELOCITIES ###" << std::endl;
+
+    //perturate initial state
+    Eigen::VectorXs perturbated_final_state(16);
+    perturbated_final_state = initial_final_state;
+    perturbated_final_state(7) += 1.0;
+    perturbated_final_state(8) += 2.0;
+    perturbated_final_state(9) += 3.0;
+
+    for(int i = 1; i<originStateBlock_vec.size(); i++)
+    {
+        std::cout << "\t\t\t ______solving______ test number " << i << std::endl;
+
+        origin_KF->setState(initial_origin_state);
+        last_KF->setState(perturbated_final_state);
+
+        origin_KF->fix(); //this fix the all keyframe
+        last_KF->fix();
+        //we unfix origin velocity stateblock to let it converge
+        finalStateBlock_vec[2]->unfix();
+
+        //we now unfix only one StateBlock
+        originStateBlock_vec[i]->unfix();
+
+        ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) << 
+        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
+        "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+    }
+
+    for(int i = 1; i<finalStateBlock_vec.size(); i++)
+    {
+        std::cout << "\t\t\t ______solving______ test number " << i << std::endl;
+
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(initial_final_state);
+
+        origin_KF->fix(); //this fix the all keyframe
+        last_KF->fix();
+        //we unfix origin velocity stateblock to let it converge
+        finalStateBlock_vec[2]->unfix();
+
+        //we now unfix only one StateBlock
+        finalStateBlock_vec[i]->unfix();
+
+        ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        /*
+         * Origin KF is fixed. Only 1 StateBlock is unfixed in last_KF.
+         * Even with the odometry constraint imposing no movement. It is not sure that we can converge exactly to the velocity of origin_KF.
+         * otherwise, one of the conditions is likely not to be met.
+         */
+
+        EXPECT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        EXPECT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) <<
+        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+    }
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    std::cout << "\n\t ### TEST 5 : BOTH KF UNFIXED, PERTURBATE ALL ORIGIN VELOCITIES ###" << std::endl;
+
+    origin_KF->setState(perturbated_origin_state);
+    last_KF->setState(initial_final_state);
+
+    origin_KF->unfix();
+    last_KF->unfix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+    EXPECT_FALSE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) << 
+    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+    EXPECT_FALSE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+    /*ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));*/
+
+    /* Here we gave an velocity position and final velocity. Everything is unfixed. We did not move between both KF according to
+     * odometry constraint. There is no reason for the origin KF to impose its values to last in an optimization point of view.
+     * the minimal cost should be somewhere between both keyframe velocities. The Robot couldhave done anything between both KF
+     *
+     * Robot could have done anything. Velocity changed. So acc bias could also change to anything... But gyroscope bias should still be 0
+     *
+     */
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    std::cout << "\n\t ### TEST 6 : BOTH KF UNFIXED, PERTURBATE ALL FINAL VELOCITIES ###" << std::endl;
+
+    origin_KF->setState(initial_origin_state);
+    last_KF->setState(perturbated_final_state);
+
+    origin_KF->unfix(); //this fix the all keyframe
+    last_KF->unfix();
+
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+    EXPECT_FALSE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) << 
+    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+    EXPECT_FALSE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+    /*ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));*/
+
+    /* Here we gave an initial velocity and final velocity. Everything is unfixed. We did not move between both KF according to
+     * odometry constraint. But we perturbated the final velocities before optimization.
+     * There is no reason for the origin KF to impose its values to last in an optimization point of view.
+     * the minimal cost should be somewhere between both keyframe velocities.
+     *
+     */
+
+    wolf_problem_ptr_->print(4,1,1,1);
+}
+
+
 TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF)
 {
 
@@ -2389,7 +2852,7 @@ int main(int argc, char **argv)
 
   ::testing::InitGoogleTest(&argc, argv);
   ::testing::GTEST_FLAG(filter) = tests_to_run;
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.static_Optim_IMUOdom_2KF_perturbate_position";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.static_Optim_IMUOdom_2KF_perturbate_velocity";
 
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
