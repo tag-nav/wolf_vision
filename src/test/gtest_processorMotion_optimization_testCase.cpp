@@ -1759,8 +1759,6 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
 
      //===================================================== END OF SETTINGS
 
-     WOLF_WARN("THIS TEST IS VERY LONG TO COMPUTE...")
-
      // set origin of processorMotions
     Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
     t.set(0);
@@ -2192,6 +2190,48 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
      * the minimal cost should be somewhere between both keyframe velocities.
      *
      */
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    std::cout << "\n\t ### TEST 7 : BOTH KF UNFIXED, PERTURBATE ALL ORIGIN VELOCITIES, FIX LAST_KF ###" << std::endl;
+
+    origin_KF->setState(perturbated_origin_state);
+    last_KF->setState(initial_final_state);
+
+    origin_KF->unfix(); //this fix the all keyframe
+    last_KF->fix();
+
+     summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
+    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    std::cout << "\n\t ### TEST 8 : BOTH KF UNFIXED, PERTURBATE ALL FINAL VELOCITIES, FIX ORIGIN_KF ###" << std::endl;
+
+    origin_KF->setState(initial_origin_state);
+    last_KF->setState(perturbated_final_state);
+
+    origin_KF->fix(); //this fix the all keyframe
+    last_KF->unfix();
+
+     summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS )) << 
+    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
 
     wolf_problem_ptr_->print(4,1,1,1);
 }
@@ -2878,7 +2918,7 @@ int main(int argc, char **argv)
 
   ::testing::InitGoogleTest(&argc, argv);
   ::testing::GTEST_FLAG(filter) = tests_to_run;
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.static_Optim_IMUOdom_2KF_perturbate_position";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.static_Optim_IMUOdom_2KF_perturbate_velocity";
 
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
