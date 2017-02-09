@@ -2103,8 +2103,8 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
     {
         std::cout << "\t\t\t ______solving______ test number " << i << std::endl;
 
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(initial_final_state);
+        origin_KF->setState(initial_origin_state);
+        last_KF->setState(perturbated_final_state);
 
         origin_KF->fix(); //this fix the all keyframe
         last_KF->fix();
@@ -2116,12 +2116,6 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
 
         ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
         std::cout << summary.BriefReport() << std::endl;
-
-        /*
-         * Origin KF is fixed. Only 1 StateBlock is unfixed in last_KF.
-         * Even with the odometry constraint imposing no movement. It is not sure that we can converge exactly to the velocity of origin_KF.
-         * otherwise, one of the conditions is likely not to be met.
-         */
 
         EXPECT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
         "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
@@ -2154,7 +2148,7 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
     "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
     ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
 
-    /* Here we gave an velocity position and final velocity. Everything is unfixed. We did not move between both KF according to
+    /* Here we gave an initial velocity and a final velocity. Everything is unfixed. We did not move between both KF according to
      * odometry constraint. There is no reason for the origin KF to impose its values to last in an optimization point of view.
      * the minimal cost should be somewhere between both keyframe velocities. The Robot couldhave done anything between both KF
      *
@@ -2188,7 +2182,12 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
      * odometry constraint. But we perturbated the final velocities before optimization.
      * There is no reason for the origin KF to impose its values to last in an optimization point of view.
      * the minimal cost should be somewhere between both keyframe velocities.
-     *
+     * 
+     * Acceleration bias can also change here. And in fact it will. We may wonder what happens if we only fix acceleration biases (in origin and last KF) :
+     * We can suppose that velocities will be changed even more. The difference in velocity cannot be compensated in acceleration biases but both origin_KF and last_KF
+     * velocities can be changed so that the 'robot' does not move. So we can either expect the velocities to be 0, or we can expect the velocities to be contrary.
+     * But due to IMU constraint saying 'no acceleration' we expect both velocity StateBlocks to be null.
+     * We will try this case in test TEST 9
      */
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -2216,6 +2215,12 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
 
     std::cout << "\n\t ### TEST 8 : BOTH KF UNFIXED, PERTURBATE ALL FINAL VELOCITIES, FIX ORIGIN_KF ###" << std::endl;
 
+    /* we only fixed acceleration biases (in origin and last KF) :
+     * We can suppose that velocities will be changed even more. The difference in velocity cannot be compensated in acceleration biases but both origin_KF and last_KF
+     * velocities can be changed so that the 'robot' does not move. So we can either expect the velocities to be 0, or we can expect the velocities to be contrary.
+     * But due to IMU constraint saying 'no acceleration' we expect both velocity StateBlocks to be null.
+    */
+
     origin_KF->setState(initial_origin_state);
     last_KF->setState(perturbated_final_state);
 
@@ -2234,6 +2239,33 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
     ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
 
     wolf_problem_ptr_->print(4,1,1,1);
+
+    std::cout << "\n\t ### TEST 9 : BOTH KF UNFIXED, PERTURBATE ALL FINAL VELOCITIES, FIX ACCELERATION BIASES (IN ORIGIN AND LAST) ###" << std::endl;
+
+    origin_KF->setState(initial_origin_state);
+    last_KF->setState(perturbated_final_state);
+
+    origin_KF->unfix(); //this fix the all keyframe
+    last_KF->unfix();
+    //fix acceleration biases
+    originStateBlock_vec[3]->fix();
+    finalStateBlock_vec[3]->fix();
+
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+    EXPECT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS*100 )) << 
+    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+
+    wolf_problem_ptr_->print(4,1,1,1); 
+
+    // As expected, both velocity StateBlocks converge to 0. The error is in 1e-6
 }
 
 
