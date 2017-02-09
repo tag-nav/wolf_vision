@@ -1630,6 +1630,12 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_position)
         ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
         std::cout << summary.BriefReport() << std::endl;
 
+        /*
+         * Origin KF is fixed. Only 1 StateBlock is unfixed in last_KF.
+         * Even with the odometry constraint imposing no movement. It is not sure that we can converge exactly to the pose of origin_KF.
+         * otherwise, one of the conditions wil not be met.
+         */
+
         EXPECT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
         "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
         ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
