@@ -2286,7 +2286,7 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
 
     orientation_perturbation(0) = 1.0;
     orientation_perturbation(1) = 2.0;
-    orientation_perturbation(2) = 1.0; //DOES NOT WORK IF = 3.0
+    orientation_perturbation(2) = 0.5; //DOES NOT WORK IF = 3.0
 
     //introduce the perturbation directly in the quaternion StateBlock
     quat_map = quat_map * v2q(orientation_perturbation);
@@ -2887,7 +2887,7 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF)
 
 }
 
-/* 1 of the tests above seem to indicate that more precise tests are required :
+/* 2 of the tests above seem to indicate that more precise tests are required :
  *  - ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast :
  *          If the gyroscope perturbation is too strong, then the test does not pass, from tests below , we see that when we introduce perturbation along 1 axis only
  *          then this threshold is the same on all axis : 3.2
@@ -3069,6 +3069,78 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF)
         ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
         "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;  
     }
+}
+
+/*  - ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_orientation3Origin_Unfix1 :
+ *          If the introduced orientation perturbation is bigger than pi then the test does not pass.
+ */
+
+TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orientation3Origin_Unfix1_extensive)
+{
+    /* Both KeyFrames are fixed. We unfix 1 stateblock among those we have in these 2 KeyFrames.
+     * We perturbate all 3 angles (ox, oy, oz) in origin_KF. ==> We also unfix origin_KF's quaternion StateBlock.
+     * The perturbation is introduced in this quaternion stateblocks using q * v2q(rotation_vector_perturbation)
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
+
+    Eigen::Vector3s orientation_perturbation((Eigen::Vector3s()<<0,0,0).finished());
+    perturbated_origin_state = initial_origin_state;
+    Eigen::Map<Eigen::Quaternions> quat_map(perturbated_origin_state.data() + 3);
+
+    //M_PI not passed, it should work
+    perturbated_origin_state = initial_origin_state;
+    orientation_perturbation(2) += M_PI;
+    WOLF_DEBUG("Introduced perturbation : ", orientation_perturbation(2))
+
+    //introduce the perturbation directly in the quaternion StateBlock
+    quat_map = quat_map * v2q(orientation_perturbation);
+    WOLF_DEBUG("q2v(quat_map) : ", q2v(quat_map).transpose())
+    origin_KF->setState(perturbated_origin_state);
+    last_KF->setState(initial_final_state);
+
+    origin_KF->fix();
+    last_KF->fix();
+        
+    //we unfix origin ORIENTATION stateblock to let it converge
+    originStateBlock_vec[1]->unfix();
+
+    summary = ceres_manager_wolf_diff->solve();
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+    "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+
+    // Now we reach PI, and it will not work 
+    orientation_perturbation(2) = M_PI+0.0001;
+
+    perturbated_origin_state = initial_origin_state;
+    WOLF_DEBUG("Introduced perturbation : ", orientation_perturbation(2))
+
+    //introduce the perturbation directly in the quaternion StateBlock
+    quat_map = quat_map * v2q(orientation_perturbation);
+    WOLF_DEBUG("q2v(quat_map) : ", q2v(quat_map).transpose())
+    origin_KF->setState(perturbated_origin_state);
+    last_KF->setState(initial_final_state);
+
+    origin_KF->fix();
+    last_KF->fix();
+        
+    //we unfix origin ORIENTATION stateblock to let it converge
+    originStateBlock_vec[1]->unfix();
+
+    summary = ceres_manager_wolf_diff->solve();
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+    EXPECT_FALSE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+    "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
 }
 
 //_______________________________________________________________________________________________________________
@@ -3654,8 +3726,8 @@ int main(int argc, char **argv)
 
   ::testing::InitGoogleTest(&argc, argv);
   ::testing::GTEST_FLAG(filter) = tests_to_run;
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive*";
-  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
+  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_orientation3Origin_Unfix1_extensive*";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
