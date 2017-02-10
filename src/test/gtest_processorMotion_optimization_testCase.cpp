@@ -1180,11 +1180,6 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_position)
     origin_KF->getState(initial_origin_state);
     last_KF->getState(initial_final_state);
 
-    //Check and print wolf tree
-    /*if(wolf_problem_ptr_->check(1)){
-        wolf_problem_ptr_->print(4,1,1,1);
-    }*/
-
     wolf_problem_ptr_->print(4,1,1,1);
 
     //get stateblocks from origin and last KF and concatenate them in one std::vector to unfix stateblocks
@@ -1197,7 +1192,16 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_position)
     allStateBlocks.insert( allStateBlocks.end(), finalStateBlock_vec.begin(), finalStateBlock_vec.end() );
 
 
-    std::cout << "\n\t ### TEST 1 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE 1 ORIGIN POSITION (EXCEPT FINAL POSITION)###" << std::endl;
+    std::cout << "\n\t ### TEST 1 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE 1 ORIGIN POSITION (EXCEPT FINAL POSITION) ###" << std::endl;
+    
+    /* In this test, only the position StateBlock from origin_KF and another StateBlock are unfixed. All the other KF are fixed.
+     * We perturbate 1 of the origin positions before calling Ceres.
+     * The added odometry and IMU constraints say that we did not move between both KF. We expect CERES to converge and get the same position for both KF
+     * Since IMU constraint says that we did not move at all, we also expect the velocities to be equal in both KF.
+     * The orientation should also be the same in both KeyFrames.
+     *
+     * Finally, we expect the Acceleration and Gyroscope Bias to be equal in both KeyFrames (Zero Vector)
+     */
 
     for(int pert_index = 0; pert_index<3; pert_index++)
     {
@@ -1272,6 +1276,15 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_position)
     wolf_problem_ptr_->print(4,1,1,1);
 
     std::cout << "\n\t ### TEST 2 : BOTH KF FIXED, UNFIX 1 STATEBLOCKS, PERTURBATE 2 ORIGIN POSITIONS ###" << std::endl;
+    
+    /* In this test, only the position StateBlock from origin_KF and another StateBlock are unfixed. All the other KF are fixed.
+     * We perturbate 2 of the origin positions before calling Ceres.
+     * The added odometry and IMU constraints say that we did not move between both KF. We expect CERES to converge and get the same position for both KF
+     * Since IMU constraint says that we did not move at all, we also expect the velocities to be equal in both KF.
+     * The orientation should also be the same in both KeyFrames.
+     *
+     * Finally, we expect the Acceleration and Gyroscope Bias to be equal in both KeyFrames (Zero Vector)
+     */
 
     for(int pert_index0 = 0; pert_index0<3; pert_index0++)
     {
@@ -1351,6 +1364,15 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_position)
 
     std::cout << "\n\t ### TEST 3 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE ALL ORIGIN POSITIONS ###" << std::endl;
 
+    /* In this test, only the position StateBlock from origin_KF and another StateBlock are unfixed. All the other KF are fixed.
+     * We perturbate all of the origin positions (Px, Py, Pz) before calling Ceres.
+     * The added odometry and IMU constraints say that we did not move between both KF. We expect CERES to converge and get the same position for both KF
+     * Since IMU constraint says that we did not move at all, we also expect the velocities to be equal in both KF.
+     * The orientation should also be the same in both KeyFrames.
+     *
+     * Finally, we expect the Acceleration and Gyroscope Bias to be equal in both KeyFrames (Zero Vector)
+     */
+
     //perturate initial state
     Eigen::VectorXs perturbated_origin_state(16);
     perturbated_origin_state = initial_origin_state;
@@ -1421,6 +1443,15 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_position)
     wolf_problem_ptr_->print(4,1,1,1);
 
     std::cout << "\n\t ### TEST 4 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE ALL FINAL POSITIONS ###" << std::endl;
+
+    /* In this test, only the position StateBlock from last_KF and another StateBlock are unfixed. All the other KF are fixed.
+     * We perturbate all of the final positions (Px, Py, Pz) before calling Ceres.
+     * The added odometry and IMU constraints say that we did not move between both KF. We expect CERES to converge and get the same position for both KF
+     * Since IMU constraint says that we did not move at all, we also expect the velocities to be equal in both KF.
+     * The orientation should also be the same in both KeyFrames.
+     *
+     * Finally, we expect the Acceleration and Gyroscope Bias to be equal in both KeyFrames (Zero Vector)
+     */
 
     //perturate initial state
     Eigen::VectorXs perturbated_final_state(16);
@@ -1495,10 +1526,19 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_position)
 
     std::cout << "\n\t ### TEST 5 : BOTH KF UNFIXED, PERTURBATE ALL ORIGIN POSITIONS ###" << std::endl;
 
+    /* Both KeyFrames are here unfixed.
+     * We perturbate all of the origin positions (Px, Py, Pz) before calling Ceres.
+     * The added odometry and IMU constraints say that we did not move between both KF. We expect CERES to converge and get the same position for both KF
+     * Since IMU constraint says that we did not move at all, we also expect the velocities to be equal in both KF.
+     * The orientation should also be the same in both KeyFrames.
+     *
+     * Finally, we expect the Acceleration and Gyroscope Bias to be equal in both KeyFrames (Zero Vector)
+     */
+
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(initial_final_state);
 
-    origin_KF->unfix(); //this fix the all keyframe
+    origin_KF->unfix(); 
     last_KF->unfix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
@@ -1514,17 +1554,25 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_position)
     /* Here we gave an initial position and final position. Everything is unfixed. We did not move between both KF according to
      * odometry constraint. There is no reason for the origin KF to impose its values to last in an optimization point of view.
      * the minimal cost should be somwhere between both keyframe positions.
-     *
      */
 
     wolf_problem_ptr_->print(4,1,1,1);
 
     std::cout << "\n\t ### TEST 6 : BOTH KF UNFIXED, PERTURBATE ALL FINAL POSITIONS ###" << std::endl;
 
+    /* Both KeyFrames are here unfixed.
+     * We perturbate all of the final positions (Px, Py, Pz) before calling Ceres.
+     * The added odometry and IMU constraints say that we did not move between both KF. We expect CERES to converge and get the same position for both KF
+     * Since IMU constraint says that we did not move at all, we also expect the velocities to be equal in both KF.
+     * The orientation should also be the same in both KeyFrames.
+     *
+     * Finally, we expect the Acceleration and Gyroscope Bias to be equal in both KeyFrames (Zero Vector)
+     */
+
     origin_KF->setState(initial_origin_state);
     last_KF->setState(perturbated_final_state);
 
-    origin_KF->unfix(); //this fix the all keyframe
+    origin_KF->unfix(); 
     last_KF->unfix();
 
     summary = ceres_manager_wolf_diff->solve();
@@ -1540,12 +1588,20 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_position)
     /* Here we gave an initial position and final position. Everything is unfixed. We did not move between both KF according to
      * odometry constraint. There is no reason for the origin KF to impose its values to last in an optimization point of view.
      * the minimal cost should be somwhere between both keyframe positions.
-     *
      */
 
      wolf_problem_ptr_->print(4,1,1,1);
 
      std::cout << "\n\t ### TEST 7 : BOTH KF UNFIXED, PERTURBATE ALL ORIGIN POSITIONS, FIX LAST_KF ###" << std::endl;
+
+     /* origin_KF is here unfixed. last_KF is fixed.
+     * We perturbate all of the origin positions (Px, Py, Pz) before calling Ceres.
+     * The added odometry and IMU constraints say that we did not move between both KF. We expect CERES to converge and get the same position for both KF
+     * Since IMU constraint says that we did not move at all, we also expect the velocities to be equal in both KF.
+     * The orientation should also be the same in both KeyFrames.
+     *
+     * Finally, we expect the Acceleration and Gyroscope Bias to be equal in both KeyFrames (Zero Vector)
+     */
 
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(initial_final_state);
@@ -1568,13 +1624,22 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_position)
 
     std::cout << "\n\t ### TEST 8 : BOTH KF UNFIXED, PERTURBATE ALL FINAL POSITIONS, FIX ORIGIN_KF ###" << std::endl;
 
+    /* last_KF is here unfixed. origin_KF is fixed.
+     * We perturbate all of the last positions (Px, Py, Pz) before calling Ceres.
+     * The added odometry and IMU constraints say that we did not move between both KF. We expect CERES to converge and get the same position for both KF
+     * Since IMU constraint says that we did not move at all, we also expect the velocities to be equal in both KF.
+     * The orientation should also be the same in both KeyFrames.
+     *
+     * Finally, we expect the Acceleration and Gyroscope Bias to be equal in both KeyFrames (Zero Vector)
+     */
+
     origin_KF->setState(initial_origin_state);
     last_KF->setState(perturbated_final_state);
 
-    origin_KF->fix(); //this fix the all keyframe
+    origin_KF->fix();
     last_KF->unfix();
 
-     summary = ceres_manager_wolf_diff->solve();
+    summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.BriefReport() << std::endl;
 
     ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) << 
@@ -1663,11 +1728,6 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
     origin_KF->getState(initial_origin_state);
     last_KF->getState(initial_final_state);
 
-    //Check and print wolf tree
-    /*if(wolf_problem_ptr_->check(1)){
-        wolf_problem_ptr_->print(4,1,1,1);
-    }*/
-
     wolf_problem_ptr_->print(4,1,1,1);
 
     //get stateblocks from origin and last KF and concatenate them in one std::vector to unfix stateblocks
@@ -1680,7 +1740,14 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
     allStateBlocks.insert( allStateBlocks.end(), finalStateBlock_vec.begin(), finalStateBlock_vec.end() );
 
 
-    std::cout << "\n\t ### TEST 1 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE 1 ORIGIN VELOCITY (EXCEPT FINAL VELOCITY)###" << std::endl;
+    std::cout << "\n\t ### TEST 1 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE 1 ORIGIN VELOCITY (EXCEPT FINAL VELOCITY) ###" << std::endl;
+
+    /* Here we have only 1 StateBlock unfixed (Plus the velocity StateBlock from origin_KF that we perturbate)
+     * only 1 component of origin_KF velocity is perturbated here : first we perturbate Vx, then Vy and finally Vz
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
 
     for(int pert_index = 7; pert_index<10; pert_index++)
     {
@@ -1757,6 +1824,13 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
 
     std::cout << "\n\t ### TEST 2 : BOTH KF FIXED, UNFIX 1 STATEBLOCKS, PERTURBATE 2 ORIGIN VELOCITY ###" << std::endl;
 
+    /* Here we have only 1 StateBlock unfixed (Plus the velocity StateBlock from origin_KF that we perturbate)
+     * 2 components of origin_KF velocity are perturbated here
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
+
     for(int pert_index0 = 7; pert_index0<10; pert_index0++)
     {
         for(int pert_index1 = 8; pert_index1<10; pert_index1++)
@@ -1775,8 +1849,9 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
                 origin_KF->setState(perturbated_origin_state);
                 last_KF->setState(initial_final_state);
 
-                origin_KF->fix(); //this fix the all keyframe
+                origin_KF->fix();
                 last_KF->fix();
+
                 //we unfix origin VELOCITY stateblock to let it converge
                 originStateBlock_vec[2]->unfix();
 
@@ -1808,8 +1883,9 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
                 origin_KF->setState(perturbated_origin_state);
                 last_KF->setState(initial_final_state);
 
-                origin_KF->fix(); //this fix the all keyframe
+                origin_KF->fix();
                 last_KF->fix();
+
                 //we unfix origin position stateblock to let it converge
                 originStateBlock_vec[2]->unfix();
 
@@ -1837,6 +1913,13 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
 
     std::cout << "\n\t ### TEST 3 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE ALL ORIGIN VELOCITIES ###" << std::endl;
 
+    /* Here we have only 1 StateBlock unfixed (Plus the velocity StateBlock from origin_KF that we perturbate)
+     * All 3 components of origin_KF velocity are perturbated here.
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
+
     //perturate initial state
     Eigen::VectorXs perturbated_origin_state(16);
     perturbated_origin_state = initial_origin_state;
@@ -1851,8 +1934,9 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
         origin_KF->setState(perturbated_origin_state);
         last_KF->setState(initial_final_state);
 
-        origin_KF->fix(); //this fix the all keyframe
+        origin_KF->fix();
         last_KF->fix();
+
         //we unfix origin VELOCITY stateblock to let it converge
         originStateBlock_vec[2]->unfix();
 
@@ -1881,8 +1965,9 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
         origin_KF->setState(perturbated_origin_state);
         last_KF->setState(initial_final_state);
 
-        origin_KF->fix(); //this fix the all keyframe
+        origin_KF->fix();
         last_KF->fix();
+
         //we unfix origin velocity stateblock to let it converge
         originStateBlock_vec[2]->unfix();
 
@@ -1907,6 +1992,13 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
     wolf_problem_ptr_->print(4,1,1,1);
 
     std::cout << "\n\t ### TEST 4 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE ALL FINAL VELOCITIES ###" << std::endl;
+
+    /* Here we have only 1 StateBlock unfixed (Plus the velocity StateBlock of last_KF that we perturbate)
+     * All 3 components of last_KF velocity are perturbated here.
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
 
     //perturate initial state
     Eigen::VectorXs perturbated_final_state(16);
@@ -1977,6 +2069,13 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
 
     std::cout << "\n\t ### TEST 5 : BOTH KF UNFIXED, PERTURBATE ALL ORIGIN VELOCITIES ###" << std::endl;
 
+    /* Both KeyFrames are unfixed
+     * All 3 components of origin_KF velocity are perturbated here.
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
+
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(initial_final_state);
 
@@ -2000,12 +2099,18 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
      * the minimal cost should be somewhere between both keyframe velocities. The Robot couldhave done anything between both KF
      *
      * Robot could have done anything. Velocity changed. So acc bias could also change to anything... But gyroscope bias should still be 0
-     *
      */
 
     wolf_problem_ptr_->print(4,1,1,1);
 
     std::cout << "\n\t ### TEST 6 : BOTH KF UNFIXED, PERTURBATE ALL FINAL VELOCITIES ###" << std::endl;
+
+    /* Both KeyFrames are unfixed
+     * All 3 components of last_KF velocity are perturbated here.
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
 
     origin_KF->setState(initial_origin_state);
     last_KF->setState(perturbated_final_state);
@@ -2039,7 +2144,14 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
 
     wolf_problem_ptr_->print(4,1,1,1);
 
-    std::cout << "\n\t ### TEST 7 : BOTH KF UNFIXED, PERTURBATE ALL ORIGIN VELOCITIES, FIX LAST_KF ###" << std::endl;
+    std::cout << "\n\t ### TEST 7 : FIX LAST_KF, PERTURBATE ALL ORIGIN VELOCITIES ###" << std::endl;
+
+    /* last_KF is fixed 
+     * All 3 components of origin_KF velocity are perturbated here.
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
 
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(initial_final_state);
@@ -2088,6 +2200,13 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_velocity)
     wolf_problem_ptr_->print(4,1,1,1);
 
     std::cout << "\n\t ### TEST 9 : BOTH KF UNFIXED, PERTURBATE ALL FINAL VELOCITIES, FIX ACCELERATION BIASES (IN ORIGIN AND LAST) ###" << std::endl;
+
+    /* Both KeyFrames are unfixed here. however, all Acceleration bias StateBlocks are fixed.
+     * All 3 components of last_KF velocity are perturbated here.
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
 
     origin_KF->setState(initial_origin_state);
     last_KF->setState(perturbated_final_state);
@@ -2190,11 +2309,6 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
     origin_KF->getState(initial_origin_state);
     last_KF->getState(initial_final_state);
 
-    //Check and print wolf tree
-    /*if(wolf_problem_ptr_->check(1)){
-        wolf_problem_ptr_->print(4,1,1,1);
-    }*/
-
     wolf_problem_ptr_->print(4,1,1,1);
 
     //get stateblocks from origin and last KF and concatenate them in one std::vector to unfix stateblocks
@@ -2207,7 +2321,15 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
     allStateBlocks.insert( allStateBlocks.end(), finalStateBlock_vec.begin(), finalStateBlock_vec.end() );
 
 
-    std::cout << "\n\t ### TEST 1 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE 1 ORIGIN ORIENTATION (EXCEPT FINAL VELOCITY)###" << std::endl;
+    std::cout << "\n\t ### TEST 1 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE 1 ORIGIN ORIENTATION (EXCEPT FINAL ORIENTATION)###" << std::endl;
+
+    /* Both KeyFrames are fixed. We unfix 1 stateblock among those we have in these 2 KeyFrames.
+     * We perturbate 1 orientation (ox, oy, oz) in origin_KF. ==> We also unfix origin_KF's quaternion StateBlock.
+     * The perturbation is introduced in this quaternion stateblocks using q * v2q(rotation_vector_perturbation)
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
 
     for(int pert_index = 0; pert_index<3; pert_index++)
     {
@@ -2229,7 +2351,7 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
             origin_KF->setState(perturbated_origin_state);
             last_KF->setState(initial_final_state);
 
-            origin_KF->fix(); //this fix the all keyframe
+            origin_KF->fix();
             last_KF->fix();
 
             //we unfix origin orientation stateblock to let it converge
@@ -2261,7 +2383,7 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
             origin_KF->setState(perturbated_origin_state);
             last_KF->setState(initial_final_state);
 
-            origin_KF->fix(); //this fix the all keyframe
+            origin_KF->fix();
             last_KF->fix();
 
             //we unfix origin orientation stateblock to let it converge
@@ -2291,6 +2413,14 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
 
     std::cout << "\n\t ### TEST 2 : BOTH KF FIXED, UNFIX 1 STATEBLOCKS, PERTURBATE 2 ORIGIN ORIENTATION ###" << std::endl;
 
+    /* Both KeyFrames are fixed. We unfix 1 stateblock among those we have in these 2 KeyFrames.
+     * We perturbate 2 angles (ox, oy, oz) in origin_KF. ==> We also unfix origin_KF's quaternion StateBlock.
+     * The perturbation is introduced in this quaternion stateblocks using q * v2q(rotation_vector_perturbation)
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
+
     for(int pert_index0 = 0; pert_index0<3; pert_index0++)
     {
         for(int pert_index1 = 1; pert_index1<3; pert_index1++)
@@ -2315,7 +2445,7 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
                 origin_KF->setState(perturbated_origin_state);
                 last_KF->setState(initial_final_state);
 
-                origin_KF->fix(); //this fix the all keyframe
+                origin_KF->fix();
                 last_KF->fix();
 
                 //we unfix origin ORIENTATION stateblock to let it converge
@@ -2350,7 +2480,7 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
                 origin_KF->setState(perturbated_origin_state);
                 last_KF->setState(initial_final_state);
 
-                origin_KF->fix(); //this fix the all keyframe
+                origin_KF->fix();
                 last_KF->fix();
 
                 //we unfix origin ORIENTATION stateblock to let it converge
@@ -2383,6 +2513,14 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
 
     std::cout << "\n\t ### TEST 3 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE ALL ORIGIN ORIENTATIONS ###" << std::endl;
 
+    /* Both KeyFrames are fixed. We unfix 1 stateblock among those we have in these 2 KeyFrames.
+     * We perturbate all 3 angles (ox, oy, oz) in origin_KF. ==> We also unfix origin_KF's quaternion StateBlock.
+     * The perturbation is introduced in this quaternion stateblocks using q * v2q(rotation_vector_perturbation)
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
+
     //perturate initial state
     Eigen::Vector3s orientation_perturbation((Eigen::Vector3s()<<0,0,0).finished());
     Eigen::VectorXs perturbated_origin_state(16);
@@ -2403,7 +2541,7 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
         origin_KF->setState(perturbated_origin_state);
         last_KF->setState(initial_final_state);
 
-        origin_KF->fix(); //this fix the all keyframe
+        origin_KF->fix();
         last_KF->fix();
         
         //we unfix origin ORIENTATION stateblock to let it converge
@@ -2438,7 +2576,7 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
         origin_KF->setState(perturbated_origin_state);
         last_KF->setState(initial_final_state);
 
-        origin_KF->fix(); //this fix the all keyframe
+        origin_KF->fix(); 
         last_KF->fix();
 
         //we unfix origin ORIENTATION stateblock to let it converge
@@ -2466,6 +2604,14 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
     wolf_problem_ptr_->print(4,1,1,1);
 
     std::cout << "\n\t ### TEST 4 : BOTH KF FIXED, UNFIX 1 STATEBLOCK, PERTURBATE ALL FINAL ORIENTATIONS ###" << std::endl;
+
+    /* Both KeyFrames are fixed. We unfix 1 stateblock among those we have in these 2 KeyFrames.
+     * We perturbate all 3 angles (ox, oy, oz) in last_KF. ==> We also unfix last_KF's quaternion StateBlock.
+     * The perturbation is introduced in this quaternion stateblocks using q * v2q(rotation_vector_perturbation)
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
 
     //perturate initial state
     Eigen::VectorXs perturbated_final_state(16);
@@ -2518,7 +2664,7 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
         origin_KF->setState(initial_origin_state);
         last_KF->setState(perturbated_final_state);
 
-        origin_KF->fix(); //this fix the all keyframe
+        origin_KF->fix();
         last_KF->fix();
 
         //we unfix final orientation stateblock to let it converge
@@ -2542,6 +2688,14 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
     wolf_problem_ptr_->print(4,1,1,1);
 
     std::cout << "\n\t ### TEST 5 : BOTH KF UNFIXED, PERTURBATE ALL ORIGIN ORIENTATIONS ###" << std::endl;
+
+    /* Both KeyFrames are unfixed.
+     * We perturbate all 3 angles (ox, oy, oz) in origin_KF.
+     * The perturbation is introduced in this quaternion stateblocks using q * v2q(rotation_vector_perturbation)
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
 
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(initial_final_state);
@@ -2567,18 +2721,24 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
      * the minimal cost should be somewhere between both keyframe velocities. The Robot couldhave done anything between both KF.
      * However, IMU constraint imposes no rate of turn. So we expect both velocities to be equal after optimization but biases could have been changed. Or bias is
      * unchanged and orientations have changed or both have been changed.
-     *
-     *
      */
 
     wolf_problem_ptr_->print(4,1,1,1);
 
     std::cout << "\n\t ### TEST 6 : BOTH KF UNFIXED, PERTURBATE ALL FINAL ORIENTATIONS ###" << std::endl;
 
+    /* Both KeyFrames are unfixed.
+     * We perturbate all 3 angles (ox, oy, oz) in last_KF.
+     * The perturbation is introduced in this quaternion stateblocks using q * v2q(rotation_vector_perturbation)
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
+
     origin_KF->setState(initial_origin_state);
     last_KF->setState(perturbated_final_state);
 
-    origin_KF->unfix(); //this fix the all keyframe
+    origin_KF->unfix();
     last_KF->unfix();
 
     summary = ceres_manager_wolf_diff->solve();
@@ -2604,10 +2764,18 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
 
     std::cout << "\n\t ### TEST 7 : BOTH KF UNFIXED, PERTURBATE ALL ORIGIN ORIENTATIONS, FIX LAST_KF ###" << std::endl;
 
+    /* Both KeyFrames are unfixed.
+     * We perturbate all 3 angles (ox, oy, oz) in origin_KF.
+     * The perturbation is introduced in this quaternion stateblocks using q * v2q(rotation_vector_perturbation)
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
+
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(initial_final_state);
 
-    origin_KF->unfix(); //this fix the all keyframe
+    origin_KF->unfix();
     last_KF->fix();
 
     summary = ceres_manager_wolf_diff->solve();
@@ -2635,7 +2803,7 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
     origin_KF->setState(initial_origin_state);
     last_KF->setState(perturbated_final_state);
 
-    origin_KF->fix(); //this fix the all keyframe
+    origin_KF->fix();
     last_KF->unfix();
 
      summary = ceres_manager_wolf_diff->solve();
@@ -2656,7 +2824,7 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF_perturbate_orientation)
     origin_KF->setState(initial_origin_state);
     last_KF->setState(perturbated_final_state);
 
-    origin_KF->unfix(); //this fix the all keyframe
+    origin_KF->unfix();
     last_KF->unfix();
     
     //fix gyroscope biases
