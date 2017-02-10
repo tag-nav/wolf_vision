@@ -1363,11 +1363,12 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
         originStateBlock_vec[i]->unfix();
 
         summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
+        //std::cout << summary.BriefReport() << std::endl;
 
         ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
         "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000)) <<
+        "last velocity : " << last_KF->getOPtr()->getVector().transpose() << "\n origin velocity : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
         ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
         ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
         ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
@@ -1427,13 +1428,13 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
 
     for(int i = 1; i<originStateBlock_vec.size(); i++)
     {
-        std::cout << "\t\t\t ______solving______ test number " << i << std::endl;
 
         origin_KF->setState(initial_origin_state);
         last_KF->setState(perturbated_final_state);
 
-        origin_KF->fix(); //this fix the all keyframe
+        origin_KF->fix();
         last_KF->fix();
+
         //we unfix origin position stateblock to let it converge
         finalStateBlock_vec[0]->unfix();
 
@@ -2634,6 +2635,150 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
     ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
 
     // As expected, both velocity StateBlocks converge to 0. The error is in 1e-6
+}
+
+
+TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_AccBiasOrigin_FixedLast)
+{
+    /* last_KF is fixed. Origin_KF is unfixed
+     * Accelerometer bias of origin_KF is perturbated. 
+     * We expect Ceres to be able to converge anyway and solve the problem so that the bias goes back to Zero
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
+
+    perturbated_origin_state = initial_origin_state;
+    perturbated_origin_state(10) += 1.0;
+    perturbated_origin_state(11) += 2.0;
+    perturbated_origin_state(12) += 4.0;
+
+    origin_KF->setState(perturbated_origin_state);
+    last_KF->setState(initial_final_state);
+
+    origin_KF->unfix();
+    last_KF->fix();
+
+    summary = ceres_manager_wolf_diff->solve();
+    //std::cout << summary.BriefReport() << std::endl;
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
+    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+}
+
+TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_AccBiasLast_FixedOrigin)
+{
+    /* Origin_KF is fixed. Last_KF is unfixed
+     * Accelerometer bias of Last_KF is perturbated. 
+     * We expect Ceres to be able to converge anyway and solve the problem so that the bias goes back to Zero
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
+
+    perturbated_final_state = initial_final_state;
+    perturbated_final_state(10) += 1.0;
+    perturbated_final_state(11) += 2.0;
+    perturbated_final_state(12) += 3.0;
+
+    origin_KF->setState(initial_origin_state);
+    last_KF->setState(perturbated_final_state);
+
+    origin_KF->fix();
+    last_KF->unfix();
+
+    summary = ceres_manager_wolf_diff->solve();
+    //std::cout << summary.BriefReport() << std::endl;
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
+    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+}
+
+TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast)
+{
+    /* last_KF is fixed. Origin_KF is unfixed
+     * Gyrometer bias of origin_KF is perturbated. 
+     * We expect Ceres to be able to converge anyway and solve the problem so that the bias goes back to Zero
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
+
+    WOLF_WARN("not working if perturbation is too strong")
+    perturbated_origin_state = initial_origin_state;
+    perturbated_origin_state(13) += 1.0;
+    perturbated_origin_state(14) += 0.5;
+    perturbated_origin_state(15) += 1.0;
+
+    origin_KF->setState(perturbated_origin_state);
+    last_KF->setState(initial_final_state);
+
+    origin_KF->unfix();
+    last_KF->fix();
+
+    summary = ceres_manager_wolf_diff->solve();
+    //std::cout << summary.BriefReport() << std::endl;
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
+    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;  
+}
+
+TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_GyroBiaslast_FixedOrigin)
+{
+    /* Origin_KF is fixed. Last_KF is unfixed
+     * Gyrometer bias of Last_KF is perturbated. 
+     * We expect Ceres to be able to converge anyway and solve the problem so that the bias goes back to Zero
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     */
+
+    perturbated_final_state = initial_final_state;
+    perturbated_final_state(13) += 1.0;
+    perturbated_final_state(14) += 1.5;
+    perturbated_final_state(15) += 0.8;
+
+    origin_KF->setState(initial_origin_state);
+    last_KF->setState(perturbated_final_state);
+
+    origin_KF->fix();
+    last_KF->unfix();
+
+    summary = ceres_manager_wolf_diff->solve();
+    //std::cout << summary.BriefReport() << std::endl;
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
+    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl; 
 }
 
 
