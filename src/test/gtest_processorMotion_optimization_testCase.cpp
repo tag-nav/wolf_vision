@@ -270,6 +270,157 @@ class ProcessorIMU_Odom_tests_details : public testing::Test
 };
 
 
+class ProcessorIMU_Odom_tests_details3KF : public testing::Test
+{
+    /* In this scenario, we simulate the integration of a perfect IMU that is not moving and we add an odometry and IMU constraint.
+     * 
+     * Finally, we can represent the graph as :
+     *
+     *  KF0 ---- constraintIMU ---- KF1
+     *     \____constraintOdom3D___/
+     */
+
+    public:
+
+        ProblemPtr wolf_problem_ptr_;
+        CeresManager* ceres_manager_wolf_diff;
+        Eigen::VectorXs initial_origin_state;
+        Eigen::VectorXs initial_final_state;
+        FrameIMUPtr origin_KF;
+        FrameIMUPtr last_KF;
+        std::vector<StateBlockPtr> originStateBlock_vec;
+        std::vector<StateBlockPtr> finalStateBlock_vec;
+        std::vector<StateBlockPtr> allStateBlocks;
+        Eigen::VectorXs perturbated_origin_state;
+        Eigen::VectorXs perturbated_final_state;
+        ceres::Solver::Summary summary;
+
+    virtual void SetUp()
+    {
+        using std::shared_ptr;
+        using std::make_shared;
+        using std::static_pointer_cast;
+
+        //===================================================== SETTING PROBLEM
+        std::string wolf_root = _WOLF_ROOT_DIR;
+        ASSERT_TRUE(number_of_KF>0) << "number_of_KF (number of Keyframe created) must be int >0";
+
+        // WOLF PROBLEM
+        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        Eigen::VectorXs x0(16);
+        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
+        TimeStamp t(0);
+
+        // CERES WRAPPER
+        ceres::Solver::Options ceres_options;
+        ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
+        ceres_options.max_line_search_step_contraction = 1e-3;
+        ceres_options.max_num_iterations = 1e4;
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+
+
+        // SENSOR + PROCESSOR IMU
+        //We want a processorIMU with a specific max_time_span (1s) forour test
+        SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+        ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
+        prc_imu_params->max_time_span = 1;
+        prc_imu_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
+        prc_imu_params->dist_traveled = 1000000000;
+        prc_imu_params->angle_turned = 1000000000;
+        prc_imu_params->voting_active = true;
+
+        ProcessorBasePtr processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", sen0_ptr, prc_imu_params);
+        SensorIMUPtr sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
+        ProcessorIMUPtr processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
+
+
+        // SENSOR + PROCESSOR ODOM 3D
+        SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
+        ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
+        prc_odom3D_params->max_time_span = 1;
+        prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
+        prc_odom3D_params->dist_traveled = 1000000000;
+        prc_odom3D_params->angle_turned = 1000000000;
+
+        ProcessorBasePtr processor_ptr_odom = wolf_problem_ptr_->installProcessor("ODOM 3D", "odom", sen1_ptr, prc_odom3D_params);
+        SensorOdom3DPtr sen_odom3D = std::static_pointer_cast<SensorOdom3D>(sen1_ptr);
+        ProcessorOdom3DPtr processor_ptr_odom3D = std::static_pointer_cast<ProcessorOdom3D>(processor_ptr_odom);
+
+        //set processorMotions
+        FrameBasePtr setOrigin_KF = processor_ptr_imu->setOrigin(x0, t);
+        processor_ptr_odom3D->setOrigin(setOrigin_KF);
+
+        wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();
+        //There should be 3 captures at origin_frame : CaptureOdom, captureIMU
+        EXPECT_EQ((wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front())->getCaptureList().size(),2);
+        ASSERT_TRUE(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->isKey()) << "origin_frame is not a KeyFrame..." << std::endl;
+
+    //===================================================== END{SETTING PROBLEM}
+
+    //===================================================== PROCESS DATA
+    // PROCESS IMU DATA
+
+        Eigen::Vector6s data;
+        data << 0.00, 0.000, -wolf::gravity()(2), 0.0, 0.0, 0.0;
+        Scalar dt = t.get();
+        TimeStamp ts(0.001);
+        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
+
+        while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()*2) ){
+        
+            // Time and data variables
+            dt += 0.001;
+            ts.set(dt);
+            imu_ptr->setTimeStamp(ts);
+        	imu_ptr->setData(data);
+
+            // process data in capture
+            imu_ptr->getTimeStamp();
+            sen_imu->process(imu_ptr);
+
+            if(ts.get() == 1 || ts.get() == 2)
+            {
+                // PROCESS ODOM 3D DATA
+                Eigen::Vector6s data_odom3D;
+                data_odom3D << 0,0,0, 0,0,0;
+    
+                wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
+                sen_odom3D->process(mot_ptr);
+            }
+        }
+
+        //===================================================== END{PROCESS DATA}
+
+        //===================================================== TESTS PREPARATION
+
+        origin_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front());
+        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+
+        initial_origin_state.resize(16);
+        initial_final_state.resize(16);
+        perturbated_origin_state.resize(16);
+        perturbated_final_state.resize(16);
+
+        //store states before optimization so that we can reset the frames to their original state for other optimization tests
+        origin_KF->getState(initial_origin_state);
+        last_KF->getState(initial_final_state);
+
+        //get stateblocks from origin and last KF and concatenate them in one std::vector to unfix stateblocks
+        originStateBlock_vec = origin_KF->getStateBlockVec();
+        finalStateBlock_vec = last_KF->getStateBlockVec();
+
+        allStateBlocks.reserve(originStateBlock_vec.size() + finalStateBlock_vec.size());
+        allStateBlocks.insert( allStateBlocks.end(), originStateBlock_vec.begin(), originStateBlock_vec.end() );
+        allStateBlocks.insert( allStateBlocks.end(), finalStateBlock_vec.begin(), finalStateBlock_vec.end() );
+
+        //===================================================== END{TESTS PREPARATION}
+    }
+
+    virtual void TearDown(){}
+};
+
+
+
 TEST(ProcessorOdom3D, static_ceresOptimisation_Odom_PO)
 {
 
@@ -1015,12 +1166,9 @@ TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
 // ##################################### static_Optim_IMUOdom_2KF TESTS #####################################
 //_______________________________________________________________________________________________________________
 
-/*
- *  Tests below will be based on the following representation :
+/*  Tests below will be based on the following representation :
  *     KF0 ---- constraintIMU ---- KF1
  *        \____constraintOdom3D___/
- *
- *
  */
 
  //Following tests have been tested and work. They are commented because not sorelevant but very long at execution
@@ -3192,6 +3340,25 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
 //_______________________________________________________________________________________________________________
 
 
+//_______________________________________________________________________________________________________________
+// ##################################### static_Optim_IMUOdom_3KF TESTS #####################################
+//_______________________________________________________________________________________________________________
+
+/*  Tests below will be based on the following representation :
+ *     KF0 ---- constraintIMU ---- KF1 --- constraintIMU -- KF2
+ *        \____constraintOdom3D___/  \____constraintOdom3D___/
+ */
+
+TEST_F(ProcessorIMU_Odom_tests_details3KF, simple_check)
+{
+    wolf_problem_ptr_->print(4,1,1,1);
+}
+
+//_______________________________________________________________________________________________________________
+// END ##################################### static_Optim_IMUOdom_3KF TESTS #####################################
+//_______________________________________________________________________________________________________________
+
+
 TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_nKFs_biasUnfixed)
 {
     /* In this scenario, we simulate the integration of a perfect IMU that is not moving and we add an odometry measurement.
@@ -3770,8 +3937,9 @@ int main(int argc, char **argv)
 
   ::testing::InitGoogleTest(&argc, argv);
   ::testing::GTEST_FLAG(filter) = tests_to_run;
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
+  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details3KF.simple_check";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
