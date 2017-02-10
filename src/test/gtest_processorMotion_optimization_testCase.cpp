@@ -2722,7 +2722,7 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_Gyro
     perturbated_origin_state = initial_origin_state;
     perturbated_origin_state(13) += 1.0;
     perturbated_origin_state(14) += 0.5;
-    perturbated_origin_state(15) += 1.0;
+    perturbated_origin_state(15) += 1.5;
 
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(initial_final_state);
@@ -2885,6 +2885,190 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF)
 
     //===================================================== END{SOLVER PART}
 
+}
+
+/* 1 of the tests above seem to indicate that more precise tests are required :
+ *  - ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast :
+ *          If the gyroscope perturbation is too strong, then the test does not pass, from tests below , we see that when we introduce perturbation along 1 axis only
+ *          then this threshold is the same on all axis : 3.2
+ *          If another gyroscope bias is perturbated, then the threshold is different
+ */
+
+ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_bwx)
+{
+    /* last_KF is fixed. Origin_KF is unfixed
+     * Gyrometer bias of origin_KF is perturbated. 
+     * We expect Ceres to be able to converge anyway and solve the problem so that the bias goes back to Zero
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     *
+     *Due to detected strange behaviour. We try here to see how perturbated can a gyroscope bias value be before the optimation gives incorrect values
+     */
+
+    WOLF_WARN("not working if perturbation is too strong")
+    perturbated_origin_state = initial_origin_state;
+    perturbated_origin_state(13) += 3.0;
+
+    //loop over the bwz to find the problematic threshold
+    for(int i = 0; i<5 ; i++)
+    {
+        perturbated_origin_state(13) += 0.1;
+        WOLF_INFO("added perturbation : ", perturbated_origin_state(13))
+
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(initial_final_state);
+
+        origin_KF->unfix();
+        last_KF->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        //std::cout << summary.BriefReport() << std::endl;
+
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
+        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+        "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+        "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;  
+    }
+}
+
+ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_bwy)
+{
+    /* last_KF is fixed. Origin_KF is unfixed
+     * Gyrometer bias of origin_KF is perturbated. 
+     * We expect Ceres to be able to converge anyway and solve the problem so that the bias goes back to Zero
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     *
+     *Due to detected strange behaviour. We try here to see how perturbated can a gyroscope bias value be before the optimation gives incorrect values
+     */
+
+    WOLF_WARN("not working if perturbation is too strong")
+    perturbated_origin_state = initial_origin_state;
+    perturbated_origin_state(14) += 3.0;
+
+    //loop over the bwz to find the problematic threshold
+    for(int i = 0; i<5 ; i++)
+    {
+        perturbated_origin_state(14) += 0.1;
+        WOLF_INFO("added perturbation : ", perturbated_origin_state(14))
+
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(initial_final_state);
+
+        origin_KF->unfix();
+        last_KF->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        //std::cout << summary.BriefReport() << std::endl;
+
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
+        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+        "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+        "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;  
+    }
+}
+
+ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_bwz)
+{
+    /* last_KF is fixed. Origin_KF is unfixed
+     * Gyrometer bias of origin_KF is perturbated. 
+     * We expect Ceres to be able to converge anyway and solve the problem so that the bias goes back to Zero
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     *
+     *Due to detected strange behaviour. We try here to see how perturbated can a gyroscope bias value be before the optimation gives incorrect values
+     */
+
+    WOLF_WARN("not working if perturbation is too strong")
+    perturbated_origin_state = initial_origin_state;
+    perturbated_origin_state(15) += 3.0;
+
+    //loop over the bwz to find the problematic threshold
+    for(int i = 0; i<5; i++)
+    {
+        perturbated_origin_state(15) += 0.1;
+        WOLF_INFO("added perturbation : ", perturbated_origin_state(15))
+
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(initial_final_state);
+
+        origin_KF->unfix();
+        last_KF->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        //std::cout << summary.BriefReport() << std::endl;
+
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
+        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+        "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+        "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;  
+    }
+}
+
+ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_bwxy)
+{
+    /* last_KF is fixed. Origin_KF is unfixed
+     * Gyrometer bias of origin_KF is perturbated. 
+     * We expect Ceres to be able to converge anyway and solve the problem so that the bias goes back to Zero
+     *
+     * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     *
+     *Due to detected strange behaviour. We try here to see how perturbated can a gyroscope bias value be before the optimation gives incorrect values
+     */
+
+    WOLF_WARN("not working if perturbation is too strong")
+    perturbated_origin_state = initial_origin_state;
+    perturbated_origin_state(13) +=1.5;
+    perturbated_origin_state(14) += 2.5;
+
+    //loop over the bwz to find the problematic threshold
+    for(int i = 0; i<5 ; i++)
+    {
+        perturbated_origin_state(14) += 0.1;
+        WOLF_INFO("added perturbation : ", perturbated_origin_state(14))
+
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(initial_final_state);
+
+        origin_KF->unfix();
+        last_KF->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        //std::cout << summary.BriefReport() << std::endl;
+
+        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
+        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+        "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+        "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;  
+    }
 }
 
 //_______________________________________________________________________________________________________________
@@ -3470,8 +3654,8 @@ int main(int argc, char **argv)
 
   ::testing::InitGoogleTest(&argc, argv);
   ::testing::GTEST_FLAG(filter) = tests_to_run;
-  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.static_Optim_IMUOdom_2KF_perturbate_orientation";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive*";
+  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
