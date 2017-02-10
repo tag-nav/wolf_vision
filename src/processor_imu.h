@@ -15,13 +15,15 @@ struct ProcessorIMUParams : public ProcessorParamsBase
         Size   max_buff_length;
         Scalar dist_traveled;
         Scalar angle_turned;
+        bool voting_active; //IMU will not vote for key Frames to be created
 
 
         ProcessorIMUParams() :
             max_time_span(0),
             max_buff_length(0),
             dist_traveled(0),
-            angle_turned(0)
+            angle_turned(0),
+            voting_active(false)
         {
             type = "IMU";
             name = "";
@@ -74,6 +76,7 @@ class ProcessorIMU : public ProcessorMotion{
         Size   max_buff_length_;// maximum buffer size before keyframe
         Scalar dist_traveled_;  // maximum linear motion between keyframes
         Scalar angle_turned_;   // maximum rotation between keyframes
+        bool voting_active_;    // IMU will be voting for KeyFrame only if this is true
 
         // Casted pointer to IMU frame
         FrameIMUPtr frame_imu_ptr_;
