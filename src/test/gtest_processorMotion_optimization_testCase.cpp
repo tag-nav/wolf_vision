@@ -180,7 +180,7 @@ class ProcessorIMU_Odom_tests_details : public testing::Test
         prc_imu_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_imu_params->dist_traveled = 1000000000;
         prc_imu_params->angle_turned = 1000000000;
-        prc_imu_params->voting_active = false;
+        prc_imu_params->voting_active = true;
 
         ProcessorBasePtr processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", sen0_ptr, prc_imu_params);
         SensorIMUPtr sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
@@ -2403,15 +2403,16 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
         ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
         ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
         "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
-        "last orientation state : " << last_KF->getOPtr()->getVector().transpose() ;
+        // if only orientation stateblocks are unfixed. We can hardly expect the final orienation to converge toward the one in origin_KF.
+        // Both are likely to be changed to an intermediate orientation state.
+        // but in the other cases, if origin orientation is fixed to identity quaternion and the robot did not move we expect the final orientation to converge to identity quaternion too
+        if(i != 1) 
+            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 )) << "last orientation state : " << last_KF->getOPtr()->getVector().transpose() ;
         ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
     }
 
     for(int i = 1; i<finalStateBlock_vec.size(); i++)
     {
-        std::cout << "\t\t\t ______solving______ test number " << i << std::endl;
-
         origin_KF->setState(initial_origin_state);
         last_KF->setState(perturbated_final_state);
 
@@ -2671,10 +2672,12 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_AccB
 {
     /* Origin_KF is fixed. Last_KF is unfixed
      * Accelerometer bias of Last_KF is perturbated. 
-     * We expect Ceres to be able to converge anyway and solve the problem so that the bias goes back to Zero
+     * Let's think about the situation we have here ... The problem is that the sensor bias in t2 has no effect on all measurements made before t2 
+     * and thus no efect on keyFrames created before timeStamp t2 (except if the bias was always the same...)
+     * Thus we do not expect the acc bias to be changed by CERES.
      *
      * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
-     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
+     * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin.
      */
 
     perturbated_final_state = initial_final_state;
@@ -2697,8 +2700,11 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_AccB
     "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
     ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
     "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    //See description above to understand why we assert this to be false
+    ASSERT_FALSE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
     "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - (Eigen::Vector3s()<<perturbated_final_state(10),perturbated_final_state(11),perturbated_final_state(12)).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n perturbated_final_state acc bias : " << (Eigen::Vector3s()<<perturbated_final_state(10),perturbated_final_state(11),perturbated_final_state(12)).finished().transpose() << std::endl; 
     ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
 }
 
@@ -2743,7 +2749,10 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_Gyro
 {
     /* Origin_KF is fixed. Last_KF is unfixed
      * Gyrometer bias of Last_KF is perturbated. 
-     * We expect Ceres to be able to converge anyway and solve the problem so that the bias goes back to Zero
+     *
+     * Let's think about the situation we have here ... The problem is that the sensor bias in t2 has no effect on all measurements made before t2 
+     * and thus no efect on keyFrames created before timeStamp t2 (except if the bias was always the same...)
+     * Thus we do not expect the gyroscope bias to be changed by CERES.
      *
      * Odom and IMU contraints say that the 'robot' did not move between both KeyFrames.
      * So we expect CERES to converge so that origin_KF (=) last_KF meaning that all the stateBlocks should ideally be equal and at the origin..
@@ -2751,8 +2760,8 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_Gyro
 
     perturbated_final_state = initial_final_state;
     perturbated_final_state(13) += 1.0;
-    //perturbated_final_state(14) += 1.5;
-    //perturbated_final_state(15) += 0.8;
+    perturbated_final_state(14) += 1.5;
+    perturbated_final_state(15) += 0.8;
 
     origin_KF->setState(initial_origin_state);
     last_KF->setState(perturbated_final_state);
@@ -2771,8 +2780,11 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_Gyro
     "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
     ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
     "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    //See description to understand why we assert this to false
+    ASSERT_FALSE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
     "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl; 
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - (Eigen::Vector3s()<<perturbated_final_state(13),perturbated_final_state(14),perturbated_final_state(15)).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "last gyro bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n perturbated_final_state gyro bias : " << (Eigen::Vector3s()<<perturbated_final_state(13),perturbated_final_state(14),perturbated_final_state(15)).finished().transpose() << std::endl; 
 }
 
 
@@ -3254,15 +3266,15 @@ TEST_F(ProcessorIMU_Odom_tests,Motion_IMU_and_Odom)
     std::cout << "opened" << std::endl;
 
     //prepare creation of file if DEBUG_RESULTS activated
-#ifdef DEBUG_RESULTS
-    std::ofstream debug_results;
-    debug_results.open("debug_results.dat");
-    if(debug_results)
-        debug_results << "%%TimeStamp\t"
-                      << "dp_x\t" << "dp_y\t" << "dp_z\t" << "dq_x\t" << "dq_y\t" << "dq_z\t" << "dq_w\t" << "dv_x\t" << "dv_y\t" << "dv_z\t"
-                      << "Dp_x\t" << "Dp_y\t" << "Dp_z\t" << "Dq_x\t" << "Dq_y\t" << "Dq_z\t" << "Dq_w\t" << "Dv_x\t" << "Dv_y\t" << "Dv_z\t"
-                      << "X_x\t" << "X_y\t" << "X_z\t" << "Xq_x\t" << "Xq_y\t" << "Xq_z\t" << "Xq_w\t" << "Xv_x\t" << "Xv_y\t" << "Xv_z\t" << std::endl;
-#endif
+    #ifdef DEBUG_RESULTS
+        std::ofstream debug_results;
+        debug_results.open("debug_results.dat");
+        if(debug_results)
+            debug_results << "%%TimeStamp\t"
+                        << "dp_x\t" << "dp_y\t" << "dp_z\t" << "dq_x\t" << "dq_y\t" << "dq_z\t" << "dq_w\t" << "dv_x\t" << "dv_y\t" << "dv_z\t"
+                        << "Dp_x\t" << "Dp_y\t" << "Dp_z\t" << "Dq_x\t" << "Dq_y\t" << "Dq_z\t" << "Dq_w\t" << "Dv_x\t" << "Dv_y\t" << "Dv_z\t"
+                        << "X_x\t" << "X_y\t" << "X_z\t" << "Xq_x\t" << "Xq_y\t" << "Xq_z\t" << "Xq_w\t" << "Xv_x\t" << "Xv_y\t" << "Xv_z\t" << std::endl;
+    #endif
 
 
     //===================================================== SETTING PROBLEM
@@ -3459,7 +3471,7 @@ int main(int argc, char **argv)
   ::testing::InitGoogleTest(&argc, argv);
   ::testing::GTEST_FLAG(filter) = tests_to_run;
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.static_Optim_IMUOdom_2KF_perturbate_orientation";
-  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
