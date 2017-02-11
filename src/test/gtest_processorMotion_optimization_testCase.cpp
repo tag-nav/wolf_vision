@@ -286,12 +286,16 @@ class ProcessorIMU_Odom_tests_details3KF : public testing::Test
         CeresManager* ceres_manager_wolf_diff;
         Eigen::VectorXs initial_origin_state;
         Eigen::VectorXs initial_final_state;
+        Eigen::VectorXs initial_middle_state;
         FrameIMUPtr origin_KF;
+        FrameIMUPtr middle_KF;
         FrameIMUPtr last_KF;
         std::vector<StateBlockPtr> originStateBlock_vec;
+        std::vector<StateBlockPtr> middleStateBlock_vec;
         std::vector<StateBlockPtr> finalStateBlock_vec;
         std::vector<StateBlockPtr> allStateBlocks;
         Eigen::VectorXs perturbated_origin_state;
+        Eigen::VectorXs perturbated_middle_state;
         Eigen::VectorXs perturbated_final_state;
         ceres::Solver::Summary summary;
 
@@ -392,25 +396,32 @@ class ProcessorIMU_Odom_tests_details3KF : public testing::Test
         //===================================================== END{PROCESS DATA}
 
         //===================================================== TESTS PREPARATION
+        wolf::TimeStamp middle_ts(1);
 
         origin_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front());
+        middle_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(middle_ts));
         last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
 
         initial_origin_state.resize(16);
+        initial_middle_state.resize(16);
         initial_final_state.resize(16);
         perturbated_origin_state.resize(16);
+        perturbated_middle_state.resize(16);
         perturbated_final_state.resize(16);
 
         //store states before optimization so that we can reset the frames to their original state for other optimization tests
         origin_KF->getState(initial_origin_state);
+        middle_KF->getState(initial_middle_state);
         last_KF->getState(initial_final_state);
 
         //get stateblocks from origin and last KF and concatenate them in one std::vector to unfix stateblocks
         originStateBlock_vec = origin_KF->getStateBlockVec();
+        middleStateBlock_vec = middle_KF->getStateBlockVec();
         finalStateBlock_vec = last_KF->getStateBlockVec();
 
-        allStateBlocks.reserve(originStateBlock_vec.size() + finalStateBlock_vec.size());
+        allStateBlocks.reserve(originStateBlock_vec.size() + finalStateBlock_vec.size() + middleStateBlock_vec.size());
         allStateBlocks.insert( allStateBlocks.end(), originStateBlock_vec.begin(), originStateBlock_vec.end() );
+        allStateBlocks.insert( allStateBlocks.end(), middleStateBlock_vec.begin(), middleStateBlock_vec.end() );
         allStateBlocks.insert( allStateBlocks.end(), finalStateBlock_vec.begin(), finalStateBlock_vec.end() );
 
         //===================================================== END{TESTS PREPARATION}
@@ -3349,9 +3360,72 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
  *        \____constraintOdom3D___/  \____constraintOdom3D___/
  */
 
-TEST_F(ProcessorIMU_Odom_tests_details3KF, simple_check)
+TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbatePositionOrigin_fixLast)
 {
-    wolf_problem_ptr_->print(4,1,1,1);
+    /* We perturbate the origin KF and fix the last KF. (origin_KF and middle_KF are unfixed)
+     * We want tomake sure that the middle KF will not have undesired behaviour.
+     *
+     * We notice some strange thing about acceleration bias here.
+     * We could think that the optimizer can use the fact that origin and middle KF are unfixed and uses acc biases to meet position conditions given odom and imu constraints
+     * Thus we cannot expect accelerometer bias in origin_KF and middle_KF to be equal 
+     * in practice, We notice that if we perturbate Pz in origin_KF, then the equality of acc biases in origin and middle_KF is met.
+     * but if Pz is not perturbated then this equality does not seem to be true. 
+     */
+     WOLF_WARN("investigation required here ...")
+
+    for(int pert_index0 = 0; pert_index0<3; pert_index0++)
+    {
+        for(int pert_index1 = 0; pert_index1<3; pert_index1++)
+        {
+            for(int pert_index2 = 0; pert_index2<3; pert_index2++)
+            {
+                //perturate initial state
+                perturbated_origin_state = initial_origin_state;
+                perturbated_origin_state(pert_index0) += 1.0;
+                perturbated_origin_state(pert_index1) += 1.0;
+                perturbated_origin_state(pert_index2) += 1.0;
+
+                origin_KF->setState(perturbated_origin_state);
+                middle_KF->setState(initial_middle_state);
+                last_KF->setState(initial_final_state);
+
+                origin_KF->unfix();
+                middle_KF->unfix();
+                last_KF->fix();
+
+                summary = ceres_manager_wolf_diff->solve();
+                //std::cout << summary.BriefReport() << std::endl;
+
+                //test last against origin
+                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+
+                //test middle against origin
+                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+
+                /*EXPECT_FALSE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() <<
+                "\n perturbation index : " << pert_index0 << "." << pert_index1 << "." << pert_index2 << std::endl;*/
+                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+
+            }
+        }
+    }
 }
 
 //_______________________________________________________________________________________________________________
@@ -3939,7 +4013,7 @@ int main(int argc, char **argv)
   ::testing::GTEST_FLAG(filter) = tests_to_run;
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details3KF.simple_check";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details3KF.static_optim_IMUOdom_perturbatePositionOrigin_fixLast";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
