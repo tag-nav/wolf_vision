@@ -2613,7 +2613,10 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
 
     orientation_perturbation(0) = 1.0;
     orientation_perturbation(1) = 2.0;
-    orientation_perturbation(2) = 1.0; //DOES NOT WORK IF = 3.0
+    orientation_perturbation(2) = 3.0; //DOES NOT WORK IF = 3.0
+
+    //introduce the perturbation directly in the quaternion StateBlock
+    //quat_map = quat_map * v2q(orientation_perturbation);
 
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(initial_final_state);
@@ -2660,6 +2663,9 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
     orientation_perturbation(1) = 2.0;
     orientation_perturbation(2) = 1.0;
 
+    //introduce the perturbation directly in the quaternion StateBlock
+    //quat_map = quat_map * v2q(orientation_perturbation);
+
     origin_KF->setState(initial_origin_state);
     last_KF->setState(perturbated_final_state);
 
@@ -2703,6 +2709,9 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
     orientation_perturbation(1) = 2.0;
     orientation_perturbation(2) = 1.0;
 
+    //introduce the perturbation directly in the quaternion StateBlock
+    //quat_map = quat_map * v2q(orientation_perturbation);
+
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(initial_final_state);
 
@@ -2738,6 +2747,9 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
     orientation_perturbation(1) = 2.0;
     orientation_perturbation(2) = 1.0;
 
+    //introduce the perturbation directly in the quaternion StateBlock
+    //quat_map = quat_map * v2q(orientation_perturbation);
+
     origin_KF->setState(initial_origin_state);
     last_KF->setState(perturbated_final_state);
 
@@ -2765,6 +2777,9 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
     orientation_perturbation(0) = 1.0;
     orientation_perturbation(1) = 2.0;
     orientation_perturbation(2) = 1.0;
+
+    //introduce the perturbation directly in the quaternion StateBlock
+    //quat_map = quat_map * v2q(orientation_perturbation);
 
     origin_KF->setState(initial_origin_state);
     last_KF->setState(perturbated_final_state);
@@ -3560,6 +3575,7 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbateOrient
      * We want tomake sure that the middle KF will not have undesired behaviour.
      *
      * We notice that acceleration biasare sometimes equal in origin_KF and middle_KF but sometimes not. Still have to understand why.
+     * perturbation index resulting in false : 0.1.2, 0.2.1
      */
 
      WOLF_WARN("investigation required here ...")
@@ -4209,7 +4225,7 @@ int main(int argc, char **argv)
   ::testing::GTEST_FLAG(filter) = tests_to_run;
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details3KF.static_optim_IMUOdom_perturbateOrientationOrigin_fixLast";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_orientation3Origin_UnfixAll";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
