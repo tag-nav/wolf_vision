@@ -5296,7 +5296,10 @@ TEST_F(ProcessorIMU_Odom_tests,Motion_IMU_and_Odom)
     t.set(0);
     FrameBasePtr origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
     processor_ptr_odom3D->setOrigin(origin_KF);
-    wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();
+    //wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
 
     //===================================================== END{SETTING PROBLEM}
 
@@ -5478,7 +5481,7 @@ int main(int argc, char **argv)
   ::testing::GTEST_FLAG(filter) = tests_to_run;
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.Plateform_2s_move_fixLastPositionVelocity";
+  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.Plateform_2s_move_fixLastPositionVelocity";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
