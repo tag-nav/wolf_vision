@@ -34,7 +34,7 @@ int main(int argc, char** argv)
 
     // LOADING DATA FILES (IMU + ODOM)
     // FOR IMU, file content is : Timestampt\t Ax\t Ay\t Az\t Wx\t Wy\t Wz
-    // FOR ODOM, file content is : ΔT(current - last), Δpx, Δpy, Δpz, Δox, Δoy, Δoz
+    // FOR ODOM, file content is : Timestampt\t Δpx\t  Δpy\t  Δpz\t  Δox\t  Δoy\t  Δoz
     
     
     std::ifstream data_file_imu;
@@ -56,8 +56,8 @@ int main(int argc, char** argv)
 
             std::cout << "file imu : " << filename_imu <<"\t file odom : " << filename_odom << std::endl;
 
-            std::string dummy; //this is needed only if first line is headers or useless data
-            getline(data_file_imu, dummy);
+            //std::string dummy; //this is needed only if first line is headers or useless data
+            //getline(data_file_imu, dummy);
         }
 
         if(!data_file_imu.is_open() || !data_file_odom.is_open()){
@@ -70,17 +70,20 @@ int main(int argc, char** argv)
         
     // WOLF PROBLEM
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
-    Eigen::VectorXs x0(16);
-    x0 << 0,0,0,  0,0,0,1,  1,2,2,  0,0,.00,  0,0,.00; //INITIAL CONDITIONS
+    Eigen::VectorXs x_origin(16);
+    x_origin << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00; //INITIAL CONDITIONS
     TimeStamp t(0);
-    wolf_problem_ptr_->setOrigin(x0, Eigen::Matrix6s::Identity() * 0.001, t);
+
+    // initial conditions defined from data file
+    // remember that matlab's quaternion is W,X,Y,Z and the one in Eigen has X,Y,Z,W form
+    data_file_imu >> x_origin[0] >> x_origin[1] >> x_origin[2] >> x_origin[6] >> x_origin[3] >> x_origin[4] >> x_origin[5] >> x_origin[7] >> x_origin[8] >> x_origin[9];
 
     // CERES WRAPPER
     ceres::Solver::Options ceres_options;
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
-    //CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+    CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
 
 
     // SENSOR + PROCESSOR IMU
@@ -89,58 +92,64 @@ int main(int argc, char** argv)
     SensorIMUPtr sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
     ProcessorIMUPtr processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
 
-    // SET ORIGIN AND FIX ORIGIN KEYFRAME
-    //wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t); //this also creates a keyframe at origin
-    //wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->fix();
-
 
     // SENSOR + PROCESSOR ODOM 3D
     SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
-    ProcessorBasePtr processor_ptr_odom = wolf_problem_ptr_->installProcessor("ODOM 3D", "odom", "odom", wolf_root + "/src/examples/processor_odom_3D.yaml");
+    ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
+    prc_odom3D_params->max_time_span = 1;
+    prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
+    prc_odom3D_params->dist_traveled = 1000000000;
+    prc_odom3D_params->angle_turned = 1000000000;
+
+    ProcessorBasePtr processor_ptr_odom = wolf_problem_ptr_->installProcessor("ODOM 3D", "odom", sen1_ptr, prc_odom3D_params);
     SensorOdom3DPtr sen_odom3D = std::static_pointer_cast<SensorOdom3D>(sen1_ptr);
     ProcessorOdom3DPtr processor_ptr_odom3D = std::static_pointer_cast<ProcessorOdom3D>(processor_ptr_odom);
+
+    // Set origin KF and fix origin PQV
+    t.set(0);
+    FrameBasePtr origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
+    processor_ptr_odom3D->setOrigin(origin_KF);
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
 
     //===================================================== PROCESS DATA
     // PROCESS DATA
 
     Eigen::Vector6s data_imu, data_odom3D;
     data_imu << 0,0,9.806, 0,0,0;
-    //data_imu << 0.00, 0.000, 9.81, 0.0, 0.0, 0.0;
     data_odom3D << 0,0,0, 0,0,0;
+
     Scalar input_clock;
-    TimeStamp ts(0.001);
+    TimeStamp ts(0);
     wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
     wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
-    wolf_problem_ptr_->setProcessorMotion(processor_ptr_imu);
-    unsigned int iter = 0;
-    const unsigned int odom_freq = 50; //odom data generated every 50 ms
+
+    data_file_odom >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
+    t.set(input_clock);
 
     clock_t begin = clock();
 
     while( (!data_file_imu.eof() && !data_file_odom.eof())){
 
-        iter++;
-        // PROCESS IMU DATA
-        // Time and data variables
         data_file_imu >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
-        data_imu[2] += 9.806;
-        //9.806 added in Az because gravity was not added in the perfect imu simulation
+
         ts.set(input_clock);
         imu_ptr->setTimeStamp(ts);
         imu_ptr->setData(data_imu);
 
         // process data in capture
-        imu_ptr->getTimeStamp();
         sen_imu->process(imu_ptr);
 
-        if(iter == odom_freq)
+        if(ts.get() == t.get())
         {
             // PROCESS ODOM 3D DATA
-            data_file_odom >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
-            mot_ptr->setTimeStamp(ts);
             mot_ptr->setData(data_odom3D);
             sen_odom3D->process(mot_ptr);
-            iter = 0;
+
+            data_file_odom >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
+            t.set(input_clock);
+            mot_ptr->setTimeStamp(t);
         }
     }
 
@@ -152,7 +161,7 @@ int main(int argc, char** argv)
     // Final state
     std::cout << "\nIntegration results ----------------------------------------------------------------------------------------------" << std::endl;
     std::cout << "Initial    state: " << std::fixed << std::setprecision(3) << std::setw(8)
-    << x0.head(16).transpose() << std::endl;
+    << x_origin.head(16).transpose() << std::endl;
     std::cout << "Integrated delta: " << std::fixed << std::setprecision(3) << std::setw(8)
     << wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
     std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
@@ -177,6 +186,15 @@ int main(int argc, char** argv)
     std::cout << "CPU time  : " << elapsed_secs << " s" << std::endl;
     std::cout << "s/integr  : " << elapsed_secs/(N-1)*1e6 << " us" << std::endl;
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+    
+    std::cout << "\t\t\t ______solving______" << std::endl;
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+    std::cout << "\t\t\t ______solved______" << std::endl;
+
+    wolf_problem_ptr_->print(4,1,1,1);
 
     return 0;
 
