@@ -6288,17 +6288,15 @@ TEST_F(ProcessorIMU_Odom_tests,Motion_IMU_and_Odom)
     std::ifstream imu_data_input;
     std::ifstream odom_data_input;
 
-    std::cout << "opening" << std::endl;
     imu_data_input.open(filename_motion_imu_data);
     odom_data_input.open(filename_motion_odom);
-    std::cout << "pure translation imu file: " << filename_motion_imu_data << std::endl;
-    std::cout << "pure translation odom: " << filename_motion_odom << std::endl;
+    WOLF_INFO("pure translation imu file: ", filename_motion_imu_data)
+    WOLF_INFO( "pure translation odom: ", filename_motion_odom)
 
     if(!imu_data_input.is_open() || !odom_data_input.is_open()){
         std::cerr << "Failed to open data files... Exiting" << std::endl;
         ADD_FAILURE();
     }
-    std::cout << "opened" << std::endl;
 
     //prepare creation of file if DEBUG_RESULTS activated
     #ifdef DEBUG_RESULTS
@@ -6348,7 +6346,6 @@ TEST_F(ProcessorIMU_Odom_tests,Motion_IMU_and_Odom)
     //read first odom data from file
     odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
     t_odom.set(input_clock);
-
     //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
 
     while( !imu_data_input.eof() && !odom_data_input.eof() )
@@ -6365,13 +6362,13 @@ TEST_F(ProcessorIMU_Odom_tests,Motion_IMU_and_Odom)
         imu_ptr->getTimeStamp();
         sen_imu->process(imu_ptr);
 
-        if(ts == t_odom) //every 100 ms
+        if(ts.get() == t_odom.get()) //every 100 ms
         {
             // PROCESS ODOM 3D DATA
             mot_ptr->setTimeStamp(t_odom);
             mot_ptr->setData(data_odom3D);
             sen_odom3D->process(mot_ptr);
-\
+
             //prepare next odometry measurement if there is any
             odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
             t_odom.set(input_clock);
@@ -6387,13 +6384,9 @@ TEST_F(ProcessorIMU_Odom_tests,Motion_IMU_and_Odom)
     //===================================================== SOLVER PART
 
     //Check and print wolf tree
-    //wolf_problem_ptr_->print(4,1,1,1);
-    /*if(wolf_problem_ptr_->check(1)){
+    if(wolf_problem_ptr_->check()){
         wolf_problem_ptr_->print(4,1,1,1);
-    }*/
-
-    std::cout << "print...\n" << std::endl;
-    wolf_problem_ptr_->print(4,1,1,1);
+    }
      
     std::cout << "\t\t\t ______solving______" << std::endl;
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
@@ -6511,7 +6504,7 @@ int main(int argc, char **argv)
   ::testing::GTEST_FLAG(filter) = tests_to_run;
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.Plateform_10s_move_fixOriginPQV";
+  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details3KF.static_optim_IMUOdom_perturbate*";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }

@@ -26,5 +26,5 @@
         static_Optim_IMUOdom_SeveralKFs: false
         Motion_IMU_and_Odom: true
         n_KF: 2
-        motion_IMU_filepath: "./application_test30s_imu.txt" # 'currentfolder being bin'
-        motion_Odom_filepath: "./application_test30s_odom.txt"  # 'currentfolder being bin'
+        motion_IMU_filepath: "./../src/test/data/IMU/Static_and_odom/imu_static_300s.txt" # 'currentfolder being bin'
+        motion_Odom_filepath: "./../src/test/data/IMU/Static_and_odom/odom_static_300s_freq100.txt"  # 'currentfolder being bin'
