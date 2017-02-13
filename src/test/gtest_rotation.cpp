@@ -439,11 +439,12 @@ TEST(rotations, Quat_compos_const_rateOfTurn)
 
     We change the idea :
     define orientation and derive ox, oy, oz so that we get the rate of turn wx, wy, wz.
-    Then compare the final orientation from ox, oy, oz and quaternion we get by data integration
+    Then compare the final orientation from rotation matrix composition and quaternion composition
     */
 
     wolf::Scalar deg_to_rad = M_PI/180.0;
-    Eigen::Quaternions q0;
+    Eigen::Matrix3s rot0(Eigen::Matrix3s::Identity());
+    Eigen::Quaternions q0, qRot;
     q0.setIdentity();
     Eigen::Vector3s tmp_vec; //will be used to store rate of turn data
 
@@ -475,18 +476,15 @@ TEST(rotations, Quat_compos_const_rateOfTurn)
 
     for(unsigned int data_iter = 0; data_iter < 100; data_iter ++)
     {   
+        rot0 = rot0 * v2R(tmp_vec*dt);
         q0 = q0 * v2q(tmp_vec*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
 
     }
 
-    /* We focus on orientation here. position is supposed not to have moved
-     * we integrated on 10s. After 10s, the orientation state is supposed to be :
-     * ox = x_rot_vel * t = 50; (in degree ! -> *M_PI/180 to get rad)
-     * oy = y_rot_vel * t = 20;
-     * oz = z_rot_vel * t = 100;
-     */
-
-     Eigen::Vector3s final_orientation((Eigen::Vector3s()<< deg_to_rad*50, deg_to_rad*20, deg_to_rad*100).finished());
+    // Compare results from rotation matrix composition and quaternion composition
+     qRot = (v2q(R2v(rot0)));
+     
+     Eigen::Vector3s final_orientation(q2v(qRot));
      ASSERT_TRUE((final_orientation - wolf::q2v(q0)).isMuchSmallerThan(1,wolf::Constants::EPS)) << "final orientation expected : " << final_orientation.transpose() << 
      "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
 }
@@ -516,7 +514,8 @@ TEST(rotations, Quat_compos_var_rateOfTurn)
     */
 
     wolf::Scalar deg_to_rad = M_PI/180.0;
-    Eigen::Quaternions q0;
+    Eigen::Matrix3s rot0(Eigen::Matrix3s::Identity());
+    Eigen::Quaternions q0, qRot;
     q0.setIdentity();
 
     Eigen::Vector3s tmp_vec; //will be used to store rate of turn data
@@ -549,23 +548,21 @@ TEST(rotations, Quat_compos_var_rateOfTurn)
         tmpz = M_PI*z_rot_vel*cos(wolf::toRad(z_rot_vel * time))*deg_to_rad;
         tmp_vec << tmpx, tmpy, tmpz;
 
+        rot0 = rot0 * v2R(tmp_vec*dt);
         q0 = q0 * v2q(tmp_vec*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
 
         time += dt;
     }
 
-    /* We focus on orientation here. position is supposed not to have moved
-     * we integrated on 10s. After 10s, the orientation state is supposed to be :
-     * ox = pi*sin(x_rot_vel * t * pi/180) = 1.570796326794896; // with x_rot_vel = y_rot_vel = z_rot_vel = 15
-     * oy = pi*sin(y_rot_vel * t * pi/180) = 1.570796326794896;
-     * oz = pi*sin(z_rot_vel * t * pi/180) = 1.570796326794896;
-     */
-
-     Eigen::Vector3s final_orientation((Eigen::Vector3s()<< 1.570796326794896, 1.570796326794896, 1.570796326794896).finished());
-     EXPECT_TRUE((final_orientation - wolf::q2v(q0)).isMuchSmallerThan(1,wolf::Constants::EPS)) << "final orientation expected : " << final_orientation.transpose() << 
-     "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
-     ASSERT_TRUE((final_orientation - wolf::q2v(q0)).isMuchSmallerThan(1,0.0001)) << "final orientation expected : " << final_orientation.transpose() << 
-     "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
+    // Compare results from rotation matrix composition and quaternion composition
+    qRot = (v2q(R2v(rot0)));
+     
+    Eigen::Vector3s final_orientation(q2v(qRot));
+     
+    EXPECT_TRUE((final_orientation - wolf::q2v(q0)).isMuchSmallerThan(1,wolf::Constants::EPS)) << "final orientation expected : " << final_orientation.transpose() << 
+    "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
+    ASSERT_TRUE((final_orientation - wolf::q2v(q0)).isMuchSmallerThan(1,0.0001)) << "final orientation expected : " << final_orientation.transpose() << 
+    "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
 
 }
 
@@ -594,7 +591,8 @@ TEST(rotations, Quat_compos_var_rateOfTurn_diff)
     */
 
     wolf::Scalar deg_to_rad = M_PI/180.0;
-    Eigen::Quaternions q0;
+    Eigen::Matrix3s rot0(Eigen::Matrix3s::Identity());
+    Eigen::Quaternions q0, qRot;
     q0.setIdentity();
 
     Eigen::Vector3s tmp_vec; //will be used to store rate of turn data
@@ -627,24 +625,22 @@ TEST(rotations, Quat_compos_var_rateOfTurn_diff)
         tmpz = M_PI*z_rot_vel*cos(wolf::toRad(z_rot_vel * time))*deg_to_rad;
         tmp_vec << tmpx, tmpy, tmpz;
 
+        rot0 = rot0 * v2R(tmp_vec*dt);
         q0 = q0 * v2q(tmp_vec*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
 
         time += dt;
     }
 
-    /* We focus on orientation here. position is supposed not to have moved
-     * we integrated on 1s. After 1s, the orientation state is supposed to be :
-     * ox = pi*sin(x_rot_vel * t * pi/180) = 0.054828351850833; // with x_rot_vel = 1
-     * oy = pi*sin(y_rot_vel * t * pi/180) = 0.164418255651429; // with y_rot_vel = 3
-     * oz = pi*sin(z_rot_vel * t * pi/180) = 0.328385852292691; // with z_rot_vel = 6
-     */
-
-     Eigen::Vector3s final_orientation((Eigen::Vector3s()<< 0.054828351850833, 0.164418255651429, 0.328385852292691).finished());
-     EXPECT_TRUE((final_orientation - wolf::q2v(q0)).isMuchSmallerThan(1,wolf::Constants::EPS)) << "final orientation expected : " << final_orientation.transpose() << 
-     "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
+    // Compare results from rotation matrix composition and quaternion composition
+    qRot = (v2q(R2v(rot0)));
      
-     ASSERT_TRUE((final_orientation - wolf::q2v(q0)).isMuchSmallerThan(1,0.001)) << "final orientation expected : " << final_orientation.transpose() << 
-     "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
+    Eigen::Vector3s final_orientation(q2v(qRot));
+
+    EXPECT_TRUE((final_orientation - wolf::q2v(q0)).isMuchSmallerThan(1,wolf::Constants::EPS)) << "final orientation expected : " << final_orientation.transpose() << 
+    "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
+     
+    ASSERT_TRUE((final_orientation - wolf::q2v(q0)).isMuchSmallerThan(1,0.001)) << "final orientation expected : " << final_orientation.transpose() << 
+    "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
 }
 
 int main(int argc, char **argv)
