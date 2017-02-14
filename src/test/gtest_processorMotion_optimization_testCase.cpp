@@ -5926,6 +5926,314 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_10s_move_fixOriginPQV)
 // END ##################################### Plateform TESTS #####################################
 //_______________________________________________________________________________________________________________
 
+//_______________________________________________________________________________________________________________
+// ##################################### Imperfect IMU TESTS #####################################
+//_______________________________________________________________________________________________________________
+
+TEST_F(ProcessorIMU_Odom_tests, IMU_Biased)
+{
+
+    /* In this scenario, we simulate the integration of a static IMU biased in X Acceleration and we add an odometry measurement.
+     * Initial State is [0,0,0, 0,0,0,1, 0,0,0] so we expect the Final State to be exactly the same and the bias to be identified correctly.
+     * Origin KeyFrame is fixed
+     * 
+     * Finally, we can represent the graph as :
+     *
+     *  KF0 ---- constraintIMU ---- KF1
+     *     \____constraintOdom3D___/
+     *
+     * a first test to check that bias is correctly used in state reconstruction
+     */
+
+     //===================================================== END OF SETTINGS
+
+     // set origin of processorMotions
+     Vector6s imuBias((Eigen::Vector6s() << 0.01, 0.005, 0.015, 0.05, 0.014, 0.1).finished() );
+    Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, imuBias(0),imuBias(1),imuBias(2), imuBias(3),imuBias(4),imuBias(5)).finished());
+    t.set(0);
+
+    FrameBasePtr setOrigin_KF = processor_ptr_imu->setOrigin(x_origin, t);
+    processor_ptr_odom3D->setOrigin(setOrigin_KF);
+
+    //===================================================== END{END OF SETTINGS}
+
+    //===================================================== PROCESS DATA
+
+    // PROCESS IMU DATA
+
+    Eigen::Vector6s data;
+    data << 0.0, 0.0, -wolf::gravity()(2), 0.0, 0.0, 0.0;
+    data += imuBias; //Biased IMU
+    Scalar dt = t.get();
+    TimeStamp ts(0);
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
+
+    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()) ){
+
+        // Time and data variables
+        dt += 0.001;
+        ts.set(dt);
+        imu_ptr->setTimeStamp(ts);
+        imu_ptr->setData(data);
+
+        // process data in capture
+        imu_ptr->getTimeStamp();
+        sen_imu->process(imu_ptr);
+    }
+
+    // PROCESS ODOM 3D DATA
+    Eigen::Vector6s data_odom3D;
+    data_odom3D << 0,0,0, 0,0,0;
+    
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
+    sen_odom3D->process(mot_ptr);
+
+    //===================================================== END{PROCESS DATA}
+
+    //===================================================== SOLVER PART
+
+    FrameIMUPtr origin_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front());
+    FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+     
+    std::cout << "\t\t\t ______solving______" << std::endl;
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+    std::cout << "\t\t\t ______solved______" << std::endl;
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "origin_KF position : " << origin_KF->getPPtr()->getVector().transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "origin_KF orientation : " << origin_KF->getOPtr()->getVector().transpose() << "\n last_KF orientation : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "origin_KF velocity : " << origin_KF->getVPtr()->getVector().transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - imuBias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - imuBias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS ));
+
+    // COMPUTE COVARIANCES
+    std::cout << "\t\t\t ______computing covariances______" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______" << std::endl;
+
+    //===================================================== END{SOLVER PART}
+}
+
+TEST_F(ProcessorIMU_Odom_tests, IMU_Biased_perturb)
+{
+
+    /* In this scenario, we simulate the integration of a static IMU biased in X Acceleration and we add an odometry measurement.
+     * Initial State is [0,0,0, 0,0,0,1, 0,0,0] so we expect the Final State to be exactly the same and the bias to be identified correctly.
+     * Origin KeyFrame is fixed
+     * 
+     * Finally, we can represent the graph as :
+     *
+     *  KF0 ---- constraintIMU ---- KF1
+     *     \____constraintOdom3D___/
+     *
+     * Perturb biases in last_KF before calling CERES. Expect Ceres to converge towards initial bias values.
+     */
+
+     //===================================================== END OF SETTINGS
+
+     // set origin of processorMotions
+     Vector6s imuBias((Eigen::Vector6s() << 0.01, 0.005, 0.015, 0.05, 0.014, 0.1).finished() );
+    Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, imuBias(0),imuBias(1),imuBias(2), imuBias(3),imuBias(4),imuBias(5)).finished());
+    t.set(0);
+
+    FrameBasePtr setOrigin_KF = processor_ptr_imu->setOrigin(x_origin, t);
+    processor_ptr_odom3D->setOrigin(setOrigin_KF);
+
+    //===================================================== END{END OF SETTINGS}
+
+    //===================================================== PROCESS DATA
+
+    // PROCESS IMU DATA
+
+    Eigen::Vector6s data;
+    data << 0.0, 0.0, -wolf::gravity()(2), 0.0, 0.0, 0.0;
+    data += imuBias; //Biased IMU
+    //Eigen::Vector6s imuBias_perturb((Eigen::Vector6s() << 0.001, 0.005, 0.0015, 0.005, 0.006, 0.01).finished() );
+    Eigen::Vector6s imuBias_perturb((Eigen::Vector6s() << 0.001, 0, 0, 0, 0, 0).finished() );
+    Scalar dt = t.get();
+    TimeStamp ts(0);
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
+
+    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()) ){
+
+        // Time and data variables
+        dt += 0.001;
+        ts.set(dt);
+        imu_ptr->setTimeStamp(ts);
+        imu_ptr->setData(data);
+
+        // process data in capture
+        imu_ptr->getTimeStamp();
+        sen_imu->process(imu_ptr);
+    }
+
+    // PROCESS ODOM 3D DATA
+    Eigen::Vector6s data_odom3D;
+    data_odom3D << 0,0,0, 0,0,0;
+    
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
+    sen_odom3D->process(mot_ptr);
+
+    //===================================================== END{PROCESS DATA}
+
+    //===================================================== SOLVER PART
+
+    // Perturb bias before calling the solver
+
+    FrameIMUPtr origin_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front());
+    FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+
+    Eigen::VectorXs tmp_state(last_KF->getState());
+    tmp_state.tail(6) += imuBias_perturb;
+    last_KF->setState(tmp_state);
+
+    wolf_problem_ptr_->print(4,1,1,1);
+     
+    std::cout << "\t\t\t ______solving______" << std::endl;
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+    std::cout << "\t\t\t ______solved______" << std::endl;
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "origin_KF position : " << origin_KF->getPPtr()->getVector().transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "origin_KF orientation : " << origin_KF->getOPtr()->getVector().transpose() << "\n last_KF orientation : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "origin_KF velocity : " << origin_KF->getVPtr()->getVector().transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << "\n last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - imuBias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - imuBias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS ));
+
+    // COMPUTE COVARIANCES
+    std::cout << "\t\t\t ______computing covariances______" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______" << std::endl;
+
+    //===================================================== END{SOLVER PART}
+}
+
+TEST_F(ProcessorIMU_Odom_tests, IMU_Biased_perturbData)
+{
+
+    /* In this scenario, we simulate the integration of a static IMU biased in X Acceleration and we add an odometry measurement.
+     * Initial State is [0,0,0, 0,0,0,1, 0,0,0] so we expect the Final State to be exactly the same and the bias to be identified correctly.
+     * Origin KeyFrame is fixed
+     * 
+     * Finally, we can represent the graph as :
+     *
+     *  KF0 ---- constraintIMU ---- KF1
+     *     \____constraintOdom3D___/
+     *
+     * Perturb biases in last_KF before calling CERES. Expect Ceres to converge towards initial bias values.
+     */
+
+     //===================================================== END OF SETTINGS
+
+     // set origin of processorMotions
+     Vector6s imuBias((Eigen::Vector6s() << 0.01, 0.005, 0.015, 0.05, 0.014, 0.1).finished() );
+    Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, imuBias(0),imuBias(1),imuBias(2), imuBias(3),imuBias(4),imuBias(5)).finished());
+    t.set(0);
+
+    FrameBasePtr setOrigin_KF = processor_ptr_imu->setOrigin(x_origin, t);
+    processor_ptr_odom3D->setOrigin(setOrigin_KF);
+
+    //===================================================== END{END OF SETTINGS}
+
+    //===================================================== PROCESS DATA
+
+    // PROCESS IMU DATA
+
+    Eigen::Vector6s data;
+    data << 0.0, 0.0, -wolf::gravity()(2), 0.0, 0.0, 0.0;
+    data += imuBias; //Biased IMU
+    //Eigen::Vector6s imuBias_perturb((Eigen::Vector6s() << 0.001, 0.005, 0.0015, 0.005, 0.006, 0.01).finished() );
+    Eigen::Vector6s imuBias_perturb((Eigen::Vector6s() << 0.001, 0, 0, 0, 0, 0).finished() );
+    data == imuBias_perturb;
+    Scalar dt = t.get();
+    TimeStamp ts(0);
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
+
+    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()) ){
+
+        // Time and data variables
+        dt += 0.001;
+        ts.set(dt);
+        imu_ptr->setTimeStamp(ts);
+        imu_ptr->setData(data);
+
+        // process data in capture
+        imu_ptr->getTimeStamp();
+        sen_imu->process(imu_ptr);
+    }
+
+    // PROCESS ODOM 3D DATA
+    Eigen::Vector6s data_odom3D;
+    data_odom3D << 0,0,0, 0,0,0;
+    
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
+    sen_odom3D->process(mot_ptr);
+
+    //===================================================== END{PROCESS DATA}
+
+    //===================================================== SOLVER PART
+
+    // Perturb bias before calling the solver
+
+    FrameIMUPtr origin_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front());
+    FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+
+    Eigen::VectorXs tmp_state(last_KF->getState());
+    tmp_state.tail(6) += imuBias_perturb;
+    last_KF->setState(tmp_state);
+
+    wolf_problem_ptr_->print(4,1,1,1);
+     
+    std::cout << "\t\t\t ______solving______" << std::endl;
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+    std::cout << "\t\t\t ______solved______" << std::endl;
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "origin_KF position : " << origin_KF->getPPtr()->getVector().transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "origin_KF orientation : " << origin_KF->getOPtr()->getVector().transpose() << "\n last_KF orientation : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    "origin_KF velocity : " << origin_KF->getVPtr()->getVector().transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+    
+    // IMU data was perturbed. We expect the bias of last_KF to have changed due to this perturbation
+    EXPECT_FALSE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << "\n last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - (imuBias.head(3) + imuBias_perturb.head(3))).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - (imuBias.tail(3) + imuBias_perturb.tail(3))).isMuchSmallerThan(1, wolf::Constants::EPS ));
+
+    // COMPUTE COVARIANCES
+    std::cout << "\t\t\t ______computing covariances______" << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
+    std::cout << "\t\t\t ______computed!______" << std::endl;
+
+    //===================================================== END{SOLVER PART}
+}
+
+//_______________________________________________________________________________________________________________
+// END ##################################### Imperfect IMU TESTS #####################################
+//_______________________________________________________________________________________________________________
+
 
 TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_nKFs_biasUnfixed)
 {
@@ -6504,7 +6812,7 @@ int main(int argc, char **argv)
   ::testing::GTEST_FLAG(filter) = tests_to_run;
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
-  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details3KF.static_optim_IMUOdom_perturbate*";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.IMU_Biased_perturbData";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
