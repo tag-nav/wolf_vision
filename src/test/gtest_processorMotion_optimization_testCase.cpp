@@ -3064,8 +3064,8 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF)
 /* 2 of the tests above seem to indicate that more precise tests are required :
  *  - ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast :
  *          If the gyroscope perturbation is too strong, then the test does not pass, from tests below , we see that when we introduce perturbation along 1 axis only
- *          then this threshold is the same on all axis : 3.2
- *          If another gyroscope bias is perturbated, then the threshold is different
+ *          then this threshold is the same on all axis : PI
+ *          If another gyr+oscope bias is perturbated, then the threshold is different
  */
 
  TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_bwx)
@@ -3381,7 +3381,7 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbatePositi
      * We want tomake sure that the middle KF will not have undesired behaviour.
      *
      * We notice some strange thing about acceleration bias here.
-     * We could think that the optimizer can use the fact that origin and middle KF are unfixed and uses acc biases to meet position conditions given odom and imu constraints
+     * We could think that the optimizer can use the fact that origin and middle KF are unfixed and use acc biases to satisfy position conditions given odom and imu constraints
      * Thus we cannot expect accelerometer bias in origin_KF and middle_KF to be equal 
      * in practice, We notice that if we perturbate Pz in origin_KF, then the equality of acc biases in origin and middle_KF is met.
      * but if Pz is not perturbated then this equality does not seem to be true. 
@@ -3431,7 +3431,7 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbatePositi
                 ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
                 ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
 
-                /*EXPECT_FALSE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                /*EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
                 "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() <<
                 "\n perturbation index : " << pert_index0 << "." << pert_index1 << "." << pert_index2 << std::endl;*/
                 ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
@@ -3574,7 +3574,7 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbateOrient
     /* We perturbate the origin KF (orientation) and fix the last KF. (origin_KF and middle_KF are unfixed)
      * We want tomake sure that the middle KF will not have undesired behaviour.
      *
-     * We notice that acceleration biasare sometimes equal in origin_KF and middle_KF but sometimes not. Still have to understand why.
+     * We notice that acceleration biases are sometimes equal in origin_KF and middle_KF but sometimes not. Still have to understand why.
      * perturbation index resulting in false : 0.1.2, 0.2.1
      */
 
@@ -5027,7 +5027,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbatePositionOrigin_fixLas
     imu_data_input.close();
 
     FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
-    last_KF->getPPtr()->fix();
+    last_KF->fix();
     Eigen::VectorXs initial_final_state(16);
     initial_final_state = last_KF->getState();
 
@@ -5037,7 +5037,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbatePositionOrigin_fixLas
 
     Eigen::VectorXs origin_state_afterCeres(16);
     origin_state_afterCeres = origin_KF->getState();
-    last_KF->fix();
+
     //===================================================== END{PROCESS DATA}
 
     Eigen::VectorXs initial_origin_state = origin_KF->getState();
@@ -5062,9 +5062,9 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbatePositionOrigin_fixLas
                 summary = ceres_manager_wolf_diff->solve();
                 std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.001 )) << 
+                EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
                 "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, 0.01 )) <<
+                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
                 "origin_state_afterCeres quaternion : " << origin_state_afterCeres.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
             }
         }
@@ -5160,8 +5160,8 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateVelocityOrigin_fixLas
     imu_data_input.close();
 
     FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
-    //last_KF->getPPtr()->fix();
-    last_KF->getVPtr()->fix();
+
+    last_KF->fix();
     Eigen::VectorXs initial_final_state(16);
     initial_final_state = last_KF->getState();
 
@@ -5171,7 +5171,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateVelocityOrigin_fixLas
 
     Eigen::VectorXs origin_state_afterCeres(16);
     origin_state_afterCeres = origin_KF->getState();
-    last_KF->fix();
+
     //===================================================== END{PROCESS DATA}
 
     Eigen::VectorXs initial_origin_state = origin_KF->getState();
@@ -5196,11 +5196,11 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateVelocityOrigin_fixLas
                 summary = ceres_manager_wolf_diff->solve();
                 std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (origin_state_afterCeres.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, 0.01 ) ) <<
+                EXPECT_TRUE( (origin_state_afterCeres.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ) ) <<
                 "origin_state_afterCeres velocity state : " << origin_state_afterCeres.segment(7,3).transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.001 )) << 
+                EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
                 "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, 0.01 )) <<
+                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
                 "origin_state_afterCeres quaternion : " << origin_state_afterCeres.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
             }
         }
@@ -5299,8 +5299,8 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_fix
     imu_data_input.close();
 
     FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
-    //last_KF->getPPtr()->fix();
-    last_KF->getOPtr()->fix();
+    last_KF->fix();
+    
     Eigen::VectorXs initial_final_state(16);
     initial_final_state = last_KF->getState();
 
@@ -5310,7 +5310,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_fix
 
     Eigen::VectorXs origin_state_afterCeres(16);
     origin_state_afterCeres = origin_KF->getState();
-    last_KF->fix();
+
     //===================================================== END{PROCESS DATA}
 
     Eigen::VectorXs initial_origin_state = origin_KF->getState();
@@ -5340,8 +5340,8 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_fix
                 summary = ceres_manager_wolf_diff->solve();
                 std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (origin_state_afterCeres.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, 0.1 ) ) <<
-                "origin_state_afterCeres velocity state : " << origin_state_afterCeres.segment(7,3).transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (origin_state_afterCeres.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ) ) << "iteration " << i<<"."<<j<<"."<<k <<
+                "\norigin_state_afterCeres velocity state : " << origin_state_afterCeres.segment(7,3).transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
                 EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.000000001 )) << 
                 "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
                 ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, 0.000000001 )) <<
@@ -5441,7 +5441,6 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbatePositionOrigin_UnfixP
     imu_data_input.close();
 
     FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
-    last_KF->getPPtr()->fix();
     Eigen::VectorXs initial_final_state(16);
     initial_final_state = last_KF->getState();
 
@@ -5451,6 +5450,8 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbatePositionOrigin_UnfixP
 
     Eigen::VectorXs origin_state_afterCeres(16);
     origin_state_afterCeres = origin_KF->getState();
+
+    //Unfix only StateBlcok of interest
     last_KF->fix();
     origin_KF->fix();
     origin_KF->getPPtr()->unfix();
@@ -5577,6 +5578,8 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateVelocityOrigin_UnfixP
     last_KF->getVPtr()->fix();
     Eigen::VectorXs initial_final_state(16);
     initial_final_state = last_KF->getState();
+    Eigen::VectorXs initial_origin_state = origin_KF->getState();
+    Eigen::VectorXs perturbated_state(16);
 
     // call solver to get values after optimization. Wemwill compare the following output to these
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
@@ -5584,19 +5587,18 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateVelocityOrigin_UnfixP
 
     Eigen::VectorXs origin_state_afterCeres(16);
     origin_state_afterCeres = origin_KF->getState();
+
+    //Unfix only StateBlock of interest
     last_KF->fix();
     origin_KF->fix();
     origin_KF->getVPtr()->unfix();
     //===================================================== END{PROCESS DATA}
-
-    Eigen::VectorXs initial_origin_state = origin_KF->getState();
-    Eigen::VectorXs perturbated_state(16);
     
-    for (int i = 7 ; i < 9 ; i++)
+    for (int i = 7 ; i < 10 ; i++)
     {
-        for (int j = 7 ; j < 9 ; j++)
+        for (int j = 7 ; j < 10 ; j++)
         {
-            for (int k = 7 ; k < 9 ; k++)
+            for (int k = 7 ; k < 10 ; k++)
             {
                 perturbated_state = initial_origin_state;
                 perturbated_state(i) += 1.0;
@@ -5707,10 +5709,14 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_Unf
     imu_data_input.close();
 
     FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
-    //last_KF->getPPtr()->fix();
+
     last_KF->getOPtr()->fix();
     Eigen::VectorXs initial_final_state(16);
     initial_final_state = last_KF->getState();
+
+    Eigen::VectorXs initial_origin_state = origin_KF->getState();
+    Eigen::VectorXs perturbated_state(initial_origin_state);
+    Eigen::Map<Eigen::Quaternions> quat_map(perturbated_state.data() + 3);
 
     // call solver to get values after optimization. Wemwill compare the following output to these
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
@@ -5718,15 +5724,12 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_Unf
 
     Eigen::VectorXs origin_state_afterCeres(16);
     origin_state_afterCeres = origin_KF->getState();
+
+    //unfix only StateBlock of interest
     last_KF->fix();
     origin_KF->fix();
     origin_KF->getOPtr()->unfix();
     //===================================================== END{PROCESS DATA}
-
-    Eigen::VectorXs initial_origin_state = origin_KF->getState();
-    Eigen::VectorXs perturbated_state(16);
-    Eigen::Map<Eigen::Quaternions> quat_map(perturbated_state.data() + 3);
-
     
     for (int i = 0 ; i < 3 ; i++)
     {
@@ -6023,108 +6026,6 @@ TEST_F(ProcessorIMU_Odom_tests, IMU_Biased)
     //===================================================== END{SOLVER PART}
 }
 
-TEST_F(ProcessorIMU_Odom_tests, IMU_Biased_perturb)
-{
-
-    /* In this scenario, we simulate the integration of a static IMU biased in X Acceleration and we add an odometry measurement.
-     * Initial State is [0,0,0, 0,0,0,1, 0,0,0] so we expect the Final State to be exactly the same and the bias to be identified correctly.
-     * Origin KeyFrame is fixed
-     * 
-     * Finally, we can represent the graph as :
-     *
-     *  KF0 ---- constraintIMU ---- KF1
-     *     \____constraintOdom3D___/
-     *
-     * Perturb biases in last_KF before calling CERES. Expect Ceres to converge towards initial bias values.
-     */
-
-     //===================================================== END OF SETTINGS
-
-     // set origin of processorMotions
-     Vector6s imuBias((Eigen::Vector6s() << 0.01, 0.005, 0.015, 0.05, 0.014, 0.1).finished() );
-    Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, imuBias(0),imuBias(1),imuBias(2), imuBias(3),imuBias(4),imuBias(5)).finished());
-    t.set(0);
-
-    FrameBasePtr setOrigin_KF = processor_ptr_imu->setOrigin(x_origin, t);
-    processor_ptr_odom3D->setOrigin(setOrigin_KF);
-
-    //===================================================== END{END OF SETTINGS}
-
-    //===================================================== PROCESS DATA
-
-    // PROCESS IMU DATA
-
-    Eigen::Vector6s data;
-    data << 0.0, 0.0, -wolf::gravity()(2), 0.0, 0.0, 0.0;
-    data += imuBias; //Biased IMU
-    //Eigen::Vector6s imuBias_perturb((Eigen::Vector6s() << 0.001, 0.005, 0.0015, 0.005, 0.006, 0.01).finished() );
-    Eigen::Vector6s imuBias_perturb((Eigen::Vector6s() << 0.001, 0, 0, 0, 0, 0).finished() );
-    Scalar dt = t.get();
-    TimeStamp ts(0);
-    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
-
-    while( (dt-t.get()) < (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()) ){
-
-        // Time and data variables
-        dt += 0.001;
-        ts.set(dt);
-        imu_ptr->setTimeStamp(ts);
-        imu_ptr->setData(data);
-
-        // process data in capture
-        imu_ptr->getTimeStamp();
-        sen_imu->process(imu_ptr);
-    }
-
-    // PROCESS ODOM 3D DATA
-    Eigen::Vector6s data_odom3D;
-    data_odom3D << 0,0,0, 0,0,0;
-    
-    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
-    sen_odom3D->process(mot_ptr);
-
-    //===================================================== END{PROCESS DATA}
-
-    //===================================================== SOLVER PART
-
-    // Perturb bias before calling the solver
-
-    FrameIMUPtr origin_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front());
-    FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
-
-    Eigen::VectorXs tmp_state(last_KF->getState());
-    tmp_state.tail(6) += imuBias_perturb;
-    last_KF->setState(tmp_state);
-
-    wolf_problem_ptr_->print(4,1,1,1);
-     
-    std::cout << "\t\t\t ______solving______" << std::endl;
-    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
-    std::cout << "\t\t\t ______solved______" << std::endl;
-
-    wolf_problem_ptr_->print(4,1,1,1);
-
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "origin_KF position : " << origin_KF->getPPtr()->getVector().transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "origin_KF orientation : " << origin_KF->getOPtr()->getVector().transpose() << "\n last_KF orientation : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "origin_KF velocity : " << origin_KF->getVPtr()->getVector().transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-    "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << "\n last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - imuBias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - imuBias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS ));
-
-    // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______" << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______" << std::endl;
-
-    //===================================================== END{SOLVER PART}
-}
-
 TEST_F(ProcessorIMU_Odom_tests, IMU_Biased_perturbData)
 {
 
@@ -6137,7 +6038,8 @@ TEST_F(ProcessorIMU_Odom_tests, IMU_Biased_perturbData)
      *  KF0 ---- constraintIMU ---- KF1
      *     \____constraintOdom3D___/
      *
-     * Perturb biases in last_KF before calling CERES. Expect Ceres to converge towards initial bias values.
+     * Add a small bias perturbation in imu data before it is processed by the capture.
+     * Expect this small increment to be corrected in the bias StateBlock of the generated KeyFrame.
      */
 
      //===================================================== END OF SETTINGS
@@ -6161,7 +6063,7 @@ TEST_F(ProcessorIMU_Odom_tests, IMU_Biased_perturbData)
     data += imuBias; //Biased IMU
     //Eigen::Vector6s imuBias_perturb((Eigen::Vector6s() << 0.001, 0.005, 0.0015, 0.005, 0.006, 0.01).finished() );
     Eigen::Vector6s imuBias_perturb((Eigen::Vector6s() << 0.001, 0, 0, 0, 0, 0).finished() );
-    data == imuBias_perturb;
+    data += imuBias_perturb;
     Scalar dt = t.get();
     TimeStamp ts(0);
     wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
@@ -6195,37 +6097,38 @@ TEST_F(ProcessorIMU_Odom_tests, IMU_Biased_perturbData)
     FrameIMUPtr origin_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front());
     FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
 
-    Eigen::VectorXs tmp_state(last_KF->getState());
-    tmp_state.tail(6) += imuBias_perturb;
-    last_KF->setState(tmp_state);
+    origin_KF->fix();
+    last_KF->fix();
+    last_KF->getAccBiasPtr()->fix();
 
     wolf_problem_ptr_->print(4,1,1,1);
      
     std::cout << "\t\t\t ______solving______" << std::endl;
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::cout << summary.BriefReport() << std::endl;
     std::cout << "\t\t\t ______solved______" << std::endl;
 
     wolf_problem_ptr_->print(4,1,1,1);
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    EXPECT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
     "origin_KF position : " << origin_KF->getPPtr()->getVector().transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    EXPECT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
     "origin_KF orientation : " << origin_KF->getOPtr()->getVector().transpose() << "\n last_KF orientation : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
+    EXPECT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
     "origin_KF velocity : " << origin_KF->getVPtr()->getVector().transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
     
     // IMU data was perturbed. We expect the bias of last_KF to have changed due to this perturbation
-    EXPECT_FALSE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-    "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << "\n last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - (imuBias.head(3) + imuBias_perturb.head(3))).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - (imuBias.tail(3) + imuBias_perturb.tail(3))).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    EXPECT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << "\n last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getAccBiasPtr()->getVector() - (imuBias.head(3) + imuBias_perturb.head(3))).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last_KF Acc bias :" << last_KF->getAccBiasPtr()->getVector().transpose() << "\n  expected Acc bias : " << (imuBias.head(3) + imuBias_perturb.head(3)).transpose() << std::endl; 
+    EXPECT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    EXPECT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - (imuBias.tail(3) + imuBias_perturb.tail(3))).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
     // COMPUTE COVARIANCES
-    std::cout << "\t\t\t ______computing covariances______" << std::endl;
+    //std::cout << "\t\t\t ______computing covariances______" << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
-    std::cout << "\t\t\t ______computed!______" << std::endl;
+    //std::cout << "\t\t\t ______computed!______" << std::endl;
 
     //===================================================== END{SOLVER PART}
 }
@@ -6811,8 +6714,8 @@ int main(int argc, char **argv)
   ::testing::InitGoogleTest(&argc, argv);
   ::testing::GTEST_FLAG(filter) = tests_to_run;
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
-  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details*";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.IMU_Biased_perturbData";
+  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.IMU_Biased_perturbData";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.Plateform_2s_move_PerturbateOrientationOrigin_UnfixPerturbatedOnly";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
