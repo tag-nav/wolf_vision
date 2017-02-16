@@ -503,10 +503,11 @@ TEST_F(ProcessorIMUt, gyro_xyz)
     Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
     wolf::Scalar time = 0;
     const unsigned int x_rot_vel = 5;
-    const unsigned int y_rot_vel = 0;
-    const unsigned int z_rot_vel = 10;
+    const unsigned int y_rot_vel = 6;
+    const unsigned int z_rot_vel = 13;
 
     wolf::Scalar tmpx, tmpy, tmpz;
+    
     /*
         ox oy oz evolution in degrees (for understanding) --> converted in rad
         with * pi/180
@@ -525,9 +526,11 @@ TEST_F(ProcessorIMUt, gyro_xyz)
 
     for(unsigned int data_iter = 0; data_iter <= 1000; data_iter ++)
     {   
-        tmpx = M_PI*x_rot_vel*cos(M_PI/180 * x_rot_vel * time)*M_PI/180;
-        tmpy = M_PI*y_rot_vel*cos(M_PI/180 * y_rot_vel * time)*M_PI/180;
-        tmpz = M_PI*z_rot_vel*cos(M_PI/180 * z_rot_vel * time)*M_PI/180;
+        time += dt;
+
+        tmpx = M_PI*x_rot_vel*cos((M_PI/180) * x_rot_vel * time)*M_PI/180;
+        tmpy = M_PI*y_rot_vel*cos((M_PI/180) * y_rot_vel * time)*M_PI/180;
+        tmpz = M_PI*z_rot_vel*cos((M_PI/180) * z_rot_vel * time)*M_PI/180;
         tmp_vec << tmpx, tmpy, tmpz;
 
         // quaternion composition
@@ -541,11 +544,7 @@ TEST_F(ProcessorIMUt, gyro_xyz)
         cap_imu_ptr->setData(data);
         cap_imu_ptr->setTimeStamp(time);
         sensor_ptr->process(cap_imu_ptr);
-
-        time += dt;
     }
-    
-    time -= dt; //get final time
 
     /* We focus on orientation here. position is supposed not to have moved
      * we integrated using 2 ways : 
