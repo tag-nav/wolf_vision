@@ -431,6 +431,173 @@ class ProcessorIMU_Odom_tests_details3KF : public testing::Test
 };
 
 
+class ProcessorIMU_Odom_tests_plateform_simulation : public testing::Test
+{
+    public:
+        wolf::TimeStamp t;
+        Eigen::Vector6s data_;
+        wolf::Scalar dt;
+        SensorIMUPtr sen_imu;
+        SensorOdom3DPtr sen_odom3D;
+        ProblemPtr wolf_problem_ptr_;
+        CeresManager* ceres_manager_wolf_diff;
+        ProcessorBasePtr processor_ptr_;
+        ProcessorIMUPtr processor_ptr_imu;
+        ProcessorOdom3DPtr processor_ptr_odom3D;
+        FrameIMUPtr origin_KF;
+        FrameIMUPtr last_KF;
+        Eigen::Matrix<wolf::Scalar, 10, 1> expected_final_state;
+
+
+
+    virtual void SetUp()
+    {
+        using std::shared_ptr;
+        using std::make_shared;
+        using std::static_pointer_cast;
+
+        //===================================================== SETTING PROBLEM
+        std::string wolf_root = _WOLF_ROOT_DIR;
+        ASSERT_TRUE(number_of_KF>0) << "number_of_KF (number of Keyframe created) must be int >0";
+
+        // WOLF PROBLEM
+        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        Eigen::VectorXs x0(16);
+        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
+        t.set(0);
+
+        // CERES WRAPPER
+        ceres::Solver::Options ceres_options;
+        ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
+        ceres_options.max_line_search_step_contraction = 1e-3;
+        ceres_options.max_num_iterations = 1e4;
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+
+
+        // SENSOR + PROCESSOR IMU
+        //We want a processorIMU with a specific max_time_span (1s) forour test
+        SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+        ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
+        prc_imu_params->max_time_span = 1;
+        prc_imu_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
+        prc_imu_params->dist_traveled = 1000000000;
+        prc_imu_params->angle_turned = 1000000000;
+
+        processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", sen0_ptr, prc_imu_params);
+        sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
+        processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
+
+
+        // SENSOR + PROCESSOR ODOM 3D
+        SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
+        ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
+        prc_odom3D_params->max_time_span = 0.99;
+        prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
+        prc_odom3D_params->dist_traveled = 1000000000;
+        prc_odom3D_params->angle_turned = 1000000000;
+
+        ProcessorBasePtr processor_ptr_odom = wolf_problem_ptr_->installProcessor("ODOM 3D", "odom", sen1_ptr, prc_odom3D_params);
+        sen_odom3D = std::static_pointer_cast<SensorOdom3D>(sen1_ptr);
+        processor_ptr_odom3D = std::static_pointer_cast<ProcessorOdom3D>(processor_ptr_odom);
+
+        //ORIGIN MUST BE SET IN THE TEST
+
+    //===================================================== END{SETTING PROBLEM}
+
+        char* imu_filepath;
+        char* odom_filepath;
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_pure_translation.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_pure_translation.txt");
+        imu_filepath   = new char[imu_filepath_string.length() + 1];
+        odom_filepath   = new char[odom_filepath_string.length() + 1];
+        std::strcpy(imu_filepath, imu_filepath_string.c_str());
+        std::strcpy(odom_filepath, odom_filepath_string.c_str());
+        std::ifstream imu_data_input;
+        std::ifstream odom_data_input;
+
+        imu_data_input.open(imu_filepath);
+        odom_data_input.open(odom_filepath);
+        WOLF_INFO("imu file: ", imu_filepath)
+        if(!imu_data_input.is_open() | !odom_data_input.is_open()){
+            std::cerr << "Failed to open data files... Exiting" << std::endl;
+            ADD_FAILURE();
+        }
+
+        //===================================================== SETTING PROBLEM
+
+        // reset origin of problem
+        Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
+
+        // initial conditions defined from data file
+        // remember that matlab's quaternion is W,X,Y,Z and the one in Eigen has X,Y,Z,W form
+        imu_data_input >> x_origin[0] >> x_origin[1] >> x_origin[2] >> x_origin[6] >> x_origin[3] >> x_origin[4] >> x_origin[5] >> x_origin[7] >> x_origin[8] >> x_origin[9];
+
+        t.set(0);
+        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        processor_ptr_odom3D->setOrigin(origin_KF);
+
+        odom_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
+                             expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
+    
+    //===================================================== END{SETTING PROBLEM}
+
+    //===================================================== PROCESS DATA
+    // PROCESS DATA
+
+        Eigen::Vector6s data_imu, data_odom3D;
+        data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
+        data_odom3D << 0,0,0, 0,0,0;
+
+        Scalar input_clock;
+        TimeStamp ts(0);
+        TimeStamp t_odom(0);
+        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
+        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
+    
+        //read first odom data from file
+        odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
+        t_odom.set(input_clock);
+        //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
+
+        while( !imu_data_input.eof() && !odom_data_input.eof() )
+        {
+            // PROCESS IMU DATA
+            // Time and data variables
+            imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
+
+            ts.set(input_clock);
+            imu_ptr->setTimeStamp(ts);
+            imu_ptr->setData(data_imu);
+
+            // process data in capture
+            imu_ptr->getTimeStamp();
+            sen_imu->process(imu_ptr);
+
+            if(ts.get() == t_odom.get()) //every 100 ms
+            {
+                // PROCESS ODOM 3D DATA
+                mot_ptr->setTimeStamp(t_odom);
+                mot_ptr->setData(data_odom3D);
+                sen_odom3D->process(mot_ptr);
+
+                //prepare next odometry measurement if there is any
+                odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
+                t_odom.set(input_clock);
+            }
+        }
+
+        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+
+        //closing file
+        imu_data_input.close();
+        odom_data_input.close();
+
+    //===================================================== END{PROCESS DATA}
+    }
+
+    virtual void TearDown(){}
+};
+
 
 TEST(ProcessorOdom3D, static_ceresOptimisation_Odom_PO)
 {
@@ -6470,6 +6637,169 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_10s_move_fixOriginPQV)
     //===================================================== END{SOLVER PART}
 }
 
+//___________________________________________
+// PLATEFORM TESTS BIS - simulated data
+//___________________________________________
+
+TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, No_Perturbation)
+{
+    origin_KF->fix();
+    //last_KF->getPPtr()->fix();
+    //last_KF->getOPtr()->fix();
+
+    wolf_problem_ptr_->print(4,1,1,1);
+     
+    std::cout << "\t\t\t ______solving______" << std::endl;
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+    std::cout << "\t\t\t ______solved______" << std::endl;
+    
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
+    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
+    "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100) ) <<
+    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+}
+
+/* if we try to unfix only the perturbed stateblock, then the optimizatio does not work.
+    iteration : -2,
+    Initial cost = Final cost, Termination : Convergence.
+    It seems that it does not even try to correct the perturbed StateBlock.
+
+    This works when last_KF is fixed and origin_KF unfixed.
+ */
+
+TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginPosition_UnfixPertubedOnly)
+{
+    origin_KF->fix();
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    last_KF->fix();
+    last_KF->getAccBiasPtr()->unfix();
+    last_KF->getGyroBiasPtr()->unfix();
+    origin_KF->getPPtr()->unfix();
+    origin_KF->getOPtr()->unfix();
+    origin_KF->getVPtr()->unfix();
+    //origin_KF->getAccBiasPtr()->unfix();
+    //origin_KF->unfix();
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    Eigen::VectorXs initial_origin_state = origin_KF->getState();
+    Eigen::VectorXs perturbed_state(16);
+    
+    for (int i = 0 ; i < 3 ; i++)
+    {
+        for (int j = 0 ; j < 3 ; j++)
+        {
+            for (int k = 1 ; k < 3 ; k++)
+            {
+                perturbed_state = initial_origin_state;
+                perturbed_state(i) += 0.05; //variation between 5 cm and 15 cm
+                perturbed_state(j) += 0.05;
+                perturbed_state(k) += 0.05;
+
+                origin_KF->setState(perturbed_state);
+                //last_KF is fixed. There is no need to reinitialize its state
+
+                //===================================================== SOLVER PART
+     
+                ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+                std::cout << summary.BriefReport() << std::endl;
+
+                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << 
+                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
+            }
+        }
+    }
+
+    wolf_problem_ptr_->print(4,1,1,1);
+}
+
+TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginVelocity_UnfixPertubedOnly)
+{
+    origin_KF->fix();
+    last_KF->fix();
+    origin_KF->getVPtr()->unfix();
+
+    Eigen::VectorXs initial_origin_state = origin_KF->getState();
+    Eigen::VectorXs perturbed_state(16);
+    
+    for (int i = 7 ; i < 10 ; i++)
+    {
+        for (int j = 7 ; j < 10 ; j++)
+        {
+            for (int k = 7 ; k < 10 ; k++)
+            {
+                perturbed_state = initial_origin_state;
+                perturbed_state(i) += 0.5;
+                perturbed_state(j) += 0.5;
+                perturbed_state(k) += 0.5;
+
+                origin_KF->setState(perturbed_state);
+                //last_KF is fixed. There is no need to reinitialize its state
+
+                //===================================================== SOLVER PART
+     
+                ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+                std::cout << summary.BriefReport() << std::endl;
+
+                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, 0.0001 )) << 
+                "initial_origin_state position state : " << initial_origin_state.segment(7,3).transpose() << "\n origin position state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+            }
+        }
+    }
+}
+
+TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginOrientation_UnfixPertubedOnly)
+{
+    origin_KF->fix();
+    origin_KF->getPPtr()->fix();
+    origin_KF->getVPtr()->fix();
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    last_KF->fix();
+    origin_KF->getOPtr()->unfix();
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    Eigen::VectorXs initial_origin_state = origin_KF->getState();
+    Eigen::VectorXs perturbed_state(16);
+    Eigen::Map<Eigen::Quaternions> quat_map(perturbed_state.data() + 3);
+    
+    for (int i = 7 ; i < 10 ; i++)
+    {
+        for (int j = 7 ; j < 10 ; j++)
+        {
+            for (int k = 7 ; k < 10 ; k++)
+            {
+                Eigen::Vector3s orientation_perturbation((Eigen::Vector3s()<<0,0,0).finished());
+                orientation_perturbation(0) += i*0.2;
+                orientation_perturbation(1) += j*0.1;
+                orientation_perturbation(2) += k*0.15;
+
+                perturbed_state = initial_origin_state;
+                quat_map = quat_map * v2q(orientation_perturbation);
+
+                origin_KF->setState(perturbed_state);
+
+                //===================================================== SOLVER PART
+     
+                ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+                std::cout << summary.BriefReport() << std::endl;
+
+                ASSERT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, 0.0001 )) <<
+                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+            }
+        }
+    }
+}
+
+//___________________________________________
+// END{ PLATEFORM TESTS BIS - simulated data }
+//___________________________________________
+
 //_______________________________________________________________________________________________________________
 // END ##################################### Plateform TESTS #####################################
 //_______________________________________________________________________________________________________________
@@ -7260,7 +7590,7 @@ int main(int argc, char **argv)
   ::testing::GTEST_FLAG(filter) = tests_to_run;
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.IMU_Biased_perturbData";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.Plateform_2s_move_PerturbateGyroBiasOrigin_fixLast";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_plateform_simulation.PerturbOriginOrientation_UnfixPertubedOnly";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
