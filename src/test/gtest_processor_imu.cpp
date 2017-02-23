@@ -501,6 +501,7 @@ TEST_F(ProcessorIMUt, gyro_xyz)
 
     Eigen::Vector3s tmp_vec; //will be used to store rate of turn data
     Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Eigen::Matrix3s R0(Eigen::Matrix3s::Identity());
     wolf::Scalar time = 0;
     const unsigned int x_rot_vel = 5;
     const unsigned int y_rot_vel = 6;
@@ -535,7 +536,7 @@ TEST_F(ProcessorIMUt, gyro_xyz)
 
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(tmp_vec*dt);
-
+        R0 = R0 * wolf::v2R(tmp_vec*dt);
         // use processorIMU
         Eigen::Quaternions rot(problem->getCurrentState().data()+3);
         data.head(3) =  rot.conjugate() * (- wolf::gravity()); //gravity measured
@@ -554,6 +555,12 @@ TEST_F(ProcessorIMUt, gyro_xyz)
         We check one against the other
      */
 
+     // validating that the quaternion composition and rotation matrix composition actually describe the same rotation.
+    Eigen::Quaternions R2quat(wolf::v2q(wolf::R2v(R0)));
+    Eigen::Vector4s quat_comp_vec((Eigen::Vector4s() <<quat_comp.x(), quat_comp.y(), quat_comp.z(), quat_comp.w()).finished() );
+    Eigen::Vector4s R2quat_vec((Eigen::Vector4s() <<R2quat.x(), R2quat.y(), R2quat.z(), R2quat.w()).finished() );
+
+    ASSERT_TRUE((quat_comp_vec - R2quat_vec).isMuchSmallerThan(1, wolf::Constants::EPS)) << "quat_comp_vec : " << quat_comp_vec.transpose() << "\n R2quat_vec : " << R2quat_vec.transpose() << std::endl;
 
     Eigen::VectorXs x(16);
     x << 0,0,0, quat_comp.x(), quat_comp.y(), quat_comp.z(), quat_comp.w(), 0,0,0, 0,0,0, 0,0,0;
@@ -581,6 +588,7 @@ TEST_F(ProcessorIMUt, gyro_xyz)
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMUt.gyro_xyz";
   return RUN_ALL_TESTS();
 }
 

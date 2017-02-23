@@ -506,8 +506,12 @@ class ProcessorIMU_Odom_tests_plateform_simulation : public testing::Test
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_pure_translation.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_pure_translation.txt");
+        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_pure_translation.txt");
+        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_pure_translation.txt");
+        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full.txt");
+        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_pure_rotation.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_pure_rotation.txt");
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
         std::strcpy(imu_filepath, imu_filepath_string.c_str());
@@ -6644,8 +6648,6 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_10s_move_fixOriginPQV)
 TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, No_Perturbation)
 {
     origin_KF->fix();
-    //last_KF->getPPtr()->fix();
-    //last_KF->getOPtr()->fix();
 
     wolf_problem_ptr_->print(4,1,1,1);
      
@@ -6658,7 +6660,7 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, No_Perturbation)
 
     ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
     "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
+    ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
     "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
     ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100) ) <<
     "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
@@ -6670,9 +6672,9 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginPosition_Unfix
     last_KF->unfix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    // fix / unfix StateBlocks
     last_KF->fix();
-    //last_KF->getAccBiasPtr()->unfix();
-    //last_KF->getGyroBiasPtr()->unfix();
     origin_KF->unfix();
     origin_KF->getPPtr()->unfix();
     origin_KF->getOPtr()->fix();
@@ -6720,8 +6722,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginVelocity_Unfix
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     last_KF->fix();
-    //last_KF->getAccBiasPtr()->unfix();
-    //last_KF->getGyroBiasPtr()->unfix();
+
+    // fix / unfix StateBlocks
     origin_KF->unfix();
     origin_KF->getPPtr()->fix();
     origin_KF->getOPtr()->fix();
@@ -6766,6 +6768,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginOrientation_Un
     last_KF->unfix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    // fix / unfix StateBlocks
     last_KF->fix();
     origin_KF->unfix();
     origin_KF->getPPtr()->fix();
@@ -6814,6 +6818,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginAccBias_UnfixP
     last_KF->unfix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    // fix / unfix StateBlocks
     last_KF->fix();
     origin_KF->unfix();
     origin_KF->getPPtr()->fix();
@@ -6860,6 +6866,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginGyroBias_Unfix
     last_KF->unfix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    // fix / unfix StateBlocks
     last_KF->fix();
     origin_KF->unfix();
     origin_KF->getPPtr()->fix();
@@ -6906,6 +6914,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginPosition_Unfix
     last_KF->unfix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    // fix / unfix StateBlocks
     last_KF->fix();
     origin_KF->unfix();
 
@@ -6947,7 +6957,7 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginPosition_Unfix
         }
     }
 
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 }
 
 TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginVelocity_UnfixOrigin)
@@ -6956,6 +6966,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginVelocity_Unfix
     last_KF->unfix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    // fix / unfix StateBlocks
     last_KF->fix();
     origin_KF->unfix();
 
@@ -6997,7 +7009,7 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginVelocity_Unfix
         }
     }
 
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 }
 
 TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginOrientation_UnfixOrigin)
@@ -7006,6 +7018,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginOrientation_Un
     last_KF->unfix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    // fix / unfix StateBlocks
     last_KF->fix();
     origin_KF->unfix();
 
@@ -7057,6 +7071,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginAccBias_UnfixO
     last_KF->unfix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    // fix / unfix StateBlocks
     last_KF->fix();
     origin_KF->unfix();
 
@@ -7106,6 +7122,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginGyroBias_Unfix
     last_KF->unfix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    // fix / unfix StateBlocks
     last_KF->fix();
     origin_KF->unfix();
 
@@ -7157,6 +7175,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginAll_UnfixOrigi
     wolf_problem_ptr_->print(4,1,1,1);
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    // fix / unfix StateBlocks
     last_KF->fix();
     origin_KF->unfix();
 
@@ -7206,8 +7226,7 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginAll_UnfixOrigi
     EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
     "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
 
-
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 }
 
 TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, FixOriginPQV_UnfixLast)
@@ -7226,7 +7245,7 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, FixOriginPQV_UnfixLast)
     "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
     ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*1000) ) <<
     "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 }
 
 TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, FixOriginPQV_UnfixLast_fixlastP)
@@ -7246,7 +7265,7 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, FixOriginPQV_UnfixLast_fixl
     "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
     ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*1000) ) <<
     "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 }
 
 TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, FixOriginPQV_UnfixLast_fixlastV)
@@ -7266,7 +7285,7 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, FixOriginPQV_UnfixLast_fixl
     "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
     //ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*1000) ) <<
     //"expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 }
 
 TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbLastAll_UnfixLast_fixOrigin)
@@ -7274,10 +7293,7 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbLastAll_UnfixLast_fi
     origin_KF->fix();
     last_KF->unfix();
 
-    wolf_problem_ptr_->print(4,1,1,1);
-
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    origin_KF->fix();
 
     wolf_problem_ptr_->print(4,1,1,1);
 
@@ -7309,7 +7325,6 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbLastAll_UnfixLast_fi
 
     last_KF->setState(perturbed_state);
 
-
     //===================================================== SOLVER PART
     summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.BriefReport() << std::endl;
@@ -7326,7 +7341,7 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbLastAll_UnfixLast_fi
     "initial_final_state gyro bias state : " << initial_final_state.tail(3).transpose() << "\n last gyro bias state : " << last_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
 
 
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 }
 
 //___________________________________________
@@ -8123,7 +8138,7 @@ int main(int argc, char **argv)
   ::testing::GTEST_FLAG(filter) = tests_to_run;
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.IMU_Biased_perturbData";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_plateform_simulation.PerturbLastAll_UnfixLast_fixOrigin";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_plateform_simulation.No_Perturbation";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
