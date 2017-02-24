@@ -508,10 +508,10 @@ class ProcessorIMU_Odom_tests_plateform_simulation : public testing::Test
         char* odom_filepath;
         //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_pure_translation.txt");
         //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_pure_translation.txt");
-        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full.txt");
-        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full.txt");
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_pure_rotation.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_pure_rotation.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full.txt");
+        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_pure_rotation.txt");
+        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_pure_rotation.txt");
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
         std::strcpy(imu_filepath, imu_filepath_string.c_str());
@@ -6658,11 +6658,11 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, No_Perturbation)
     
     wolf_problem_ptr_->print(4,1,1,1);
 
-    ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
+    ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10 ) ) <<
     "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
     ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
     "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100) ) <<
+    ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10) ) <<
     "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
 }
 
@@ -7264,6 +7264,24 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, FixOriginPQV_UnfixLast_fixl
     ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
     "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
     ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*1000) ) <<
+    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+    //wolf_problem_ptr_->print(4,1,1,1);
+}
+
+TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, FixOriginPQV_UnfixLast_fixlastQ)
+{
+    origin_KF->unfix();
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+    last_KF->unfix();
+    last_KF->getOPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
+    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS) ) <<
     "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
     //wolf_problem_ptr_->print(4,1,1,1);
 }
@@ -8138,7 +8156,7 @@ int main(int argc, char **argv)
   ::testing::GTEST_FLAG(filter) = tests_to_run;
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.IMU_Biased_perturbData";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_plateform_simulation.No_Perturbation";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_plateform_simulation.FixOriginPQV_UnfixLast_fixlastQ";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
