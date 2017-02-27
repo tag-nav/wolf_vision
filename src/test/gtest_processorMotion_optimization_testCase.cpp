@@ -678,8 +678,12 @@ class ProcessorIMU_Odom_tests_plateform_simulation_biased : public testing::Test
         char* imu_filepath;
         char* odom_filepath;
         //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full_biased.txt");
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full_biased_noisy.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full.txt");
+        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full_biased_noisy.txt");
+        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full.txt");
+        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check.txt");
+        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_noisy.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_noisy.txt");
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
         std::strcpy(imu_filepath, imu_filepath_string.c_str());
@@ -7163,13 +7167,13 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginVelocity_Unfix
                 ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
                 std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
+                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
                 "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
                 EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
                 "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
+                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << 
                 "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
+                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << 
                 "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
                 EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
                 "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
@@ -7550,6 +7554,15 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation_biased, FixOriginPQV_FixLast
     
     wolf_problem_ptr_->print(4,1,1,1);
 
+    last_KF->unfix();
+    last_KF->getAccBiasPtr()->fix();
+    last_KF->getGyroBiasPtr()->fix();
+
+    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
+    Eigen::MatrixXs cov(wolf_problem_ptr_->getFrameCovariance(last_KF));
+
+    std::cout << "cov : \n" << cov << std::endl;
+
     EXPECT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10 ) ) <<
     "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
     EXPECT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
@@ -7580,7 +7593,7 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation_biased, FixOriginPQV)
 
     EXPECT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
     "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
+    EXPECT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
     "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
     EXPECT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10) ) <<
     "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
