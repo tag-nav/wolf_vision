@@ -682,8 +682,11 @@ class ProcessorIMU_Odom_tests_plateform_simulation_biased : public testing::Test
         //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full.txt");
         //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check.txt");
         //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check.txt");
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_noisy.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_noisy.txt");
+        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_noisy.txt");
+        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_noisy.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full_noisy_4s.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full_noisy_4s.txt");
+
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
         std::strcpy(imu_filepath, imu_filepath_string.c_str());
@@ -7623,6 +7626,57 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation_biased, FixOriginPQV)
     std::cout << "\n last_KF velocity covariance : \n" << cov3 << std::endl;
 }
 
+TEST_F(ProcessorIMU_Odom_tests_plateform_simulation_biased, FullTrajectory_FixOriginPQV)
+{
+    FrameBaseList framelist = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
+    if(framelist.size() < 7)
+        return; //we do not do this test
+    
+    //There are at least 7 Frames, 2 of them are non keyFrames, 5 others are KeyFrames (origin_KF(KF0), last_KF(KF4), and 3 between created each second)
+    FrameIMUPtr KF1 = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(1));
+    FrameIMUPtr KF2 = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(2));
+    FrameIMUPtr KF3 = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(3));
+
+
+    origin_KF->unfix();
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+     
+    std::cout << "\t\t\t ______solving______" << std::endl;
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+    std::cout << "\t\t\t ______solved______" << std::endl;
+    
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    EXPECT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
+    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
+    "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10) ) <<
+    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (origin_bias.head(3) - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
+    "origin_bias Acc bias : " << origin_bias.head(3).transpose() << "\n origin_KF Acc Bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (origin_bias.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
+    "origin_bias gyro bias : " << origin_bias.tail(3).transpose() << "\n origin_KF Gyro Bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+
+    last_KF->unfix();
+    last_KF->getAccBiasPtr()->fix();
+    last_KF->getGyroBiasPtr()->fix();
+
+    /*ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
+    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
+    Eigen::MatrixXs cov4(Eigen::Matrix4s::Zero());
+
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov3);
+    std::cout << "\n last_KF position covariance : \n" << cov3 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getOPtr(), last_KF->getOPtr(), cov4);
+    std::cout << "\n last_KF orientation covariance : \n" << cov4 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getVPtr(), last_KF->getVPtr(), cov3);
+    std::cout << "\n last_KF velocity covariance : \n" << cov3 << std::endl;*/
+}
+
 //___________________________________________
 // END{ PLATEFORM TESTS BIS - simulated data }
 //___________________________________________
@@ -8417,7 +8471,7 @@ int main(int argc, char **argv)
   ::testing::GTEST_FLAG(filter) = tests_to_run;
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.IMU_Biased_perturbData";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_plateform_simulation_biased.FixOriginPQV";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_plateform_simulation_biased.FullTrajectory_FixOriginPQV";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
