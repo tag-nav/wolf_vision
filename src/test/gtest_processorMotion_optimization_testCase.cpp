@@ -7558,11 +7558,6 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation_biased, FixOriginPQV_FixLast
     last_KF->getAccBiasPtr()->fix();
     last_KF->getGyroBiasPtr()->fix();
 
-    ceres_manager_wolf_diff->computeCovariances(ALL_MARGINALS);//ALL_MARGINALS, ALL
-    Eigen::MatrixXs cov(wolf_problem_ptr_->getFrameCovariance(last_KF));
-
-    std::cout << "cov : \n" << cov << std::endl;
-
     EXPECT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10 ) ) <<
     "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
     EXPECT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
@@ -7573,6 +7568,16 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation_biased, FixOriginPQV_FixLast
     "origin_bias Acc bias : " << origin_bias.head(3).transpose() << "\n origin_KF Acc Bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
     EXPECT_TRUE( (origin_bias.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
     "origin_bias gyro bias : " << origin_bias.tail(3).transpose() << "\n origin_KF Gyro Bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+
+    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
+    Eigen::MatrixXs cov4(Eigen::Matrix4s::Zero());
+
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov3);
+    std::cout << "\n last_KF position covariance : \n" << cov3 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getOPtr(), last_KF->getOPtr(), cov4);
+    std::cout << "\n last_KF orientation covariance : \n" << cov4 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getVPtr(), last_KF->getVPtr(), cov3);
+    std::cout << "\n last_KF velocity covariance : \n" << cov3 << std::endl;
 }
 
 TEST_F(ProcessorIMU_Odom_tests_plateform_simulation_biased, FixOriginPQV)
@@ -7601,6 +7606,21 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation_biased, FixOriginPQV)
     "origin_bias Acc bias : " << origin_bias.head(3).transpose() << "\n origin_KF Acc Bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
     EXPECT_TRUE( (origin_bias.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
     "origin_bias gyro bias : " << origin_bias.tail(3).transpose() << "\n origin_KF Gyro Bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+
+    last_KF->unfix();
+    last_KF->getAccBiasPtr()->fix();
+    last_KF->getGyroBiasPtr()->fix();
+
+    ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
+    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
+    Eigen::MatrixXs cov4(Eigen::Matrix4s::Zero());
+
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov3);
+    std::cout << "\n last_KF position covariance : \n" << cov3 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getOPtr(), last_KF->getOPtr(), cov4);
+    std::cout << "\n last_KF orientation covariance : \n" << cov4 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getVPtr(), last_KF->getVPtr(), cov3);
+    std::cout << "\n last_KF velocity covariance : \n" << cov3 << std::endl;
 }
 
 //___________________________________________
