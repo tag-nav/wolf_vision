@@ -660,9 +660,9 @@ class ProcessorIMU_Odom_tests_plateform_simulation_biased : public testing::Test
 
 
         // SENSOR + PROCESSOR ODOM 3D
-        SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
+        SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 0.99;
+        prc_odom3D_params->max_time_span = 0.999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
         prc_odom3D_params->angle_turned = 1000000000;
@@ -684,8 +684,17 @@ class ProcessorIMU_Odom_tests_plateform_simulation_biased : public testing::Test
         //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check.txt");
         //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_noisy.txt");
         //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_noisy.txt");
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full_noisy_4s.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full_noisy_4s.txt");
+        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full_noisy_4s.txt");
+        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full_noisy_4s.txt");
+
+        //tests added for longer trajectory (total of 5 KeyFrames)
+            //IMU biased only
+        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full_biased_4s.txt");
+        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full_biased_4s.txt");
+            //same data coming fro a perfect IMU
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full_perfectIMU_4s.txt");
+        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full_perfectIMU_4s.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full_perfectIMU_4s_freq100.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -6839,6 +6848,21 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, No_Perturbation)
     "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
     ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10) ) <<
     "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+
+    last_KF->unfix();
+    last_KF->getAccBiasPtr()->fix();
+    last_KF->getGyroBiasPtr()->fix();
+
+    ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
+    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
+    /*Eigen::MatrixXs cov4(Eigen::Matrix4s::Zero());
+
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov3);
+    std::cout << "\n last_KF position covariance : \n" << cov3 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getOPtr(), last_KF->getOPtr(), cov4);
+    std::cout << "\n last_KF orientation covariance : \n" << cov4 << std::endl;*/
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getVPtr(), last_KF->getVPtr(), cov3);
+    std::cout << "\n last_KF velocity covariance : \n" << cov3 << std::endl;
 }
 
 TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginPosition_UnfixPertubedOnly)
@@ -7648,9 +7672,9 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation_biased, FullTrajectory_FixOr
     std::cout << summary.FullReport() << std::endl;
     std::cout << "\t\t\t ______solved______" << std::endl;
     
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 
-    EXPECT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
+    EXPECT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10 ) ) <<
     "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
     EXPECT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
     "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
@@ -7665,16 +7689,44 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation_biased, FullTrajectory_FixOr
     last_KF->getAccBiasPtr()->fix();
     last_KF->getGyroBiasPtr()->fix();
 
-    /*ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
+    ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
     Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
     Eigen::MatrixXs cov4(Eigen::Matrix4s::Zero());
+
+    wolf_problem_ptr_->getCovarianceBlock(origin_KF->getPPtr(), origin_KF->getPPtr(), cov3);
+    std::cout << "\n origin_KF position covariance : \n" << cov3 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(origin_KF->getOPtr(), origin_KF->getOPtr(), cov4);
+    std::cout << "\n origin_KF orientation covariance : \n" << cov4 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(origin_KF->getVPtr(), origin_KF->getVPtr(), cov3);
+    std::cout << "\n origin_KF velocity covariance : \n" << cov3 << std::endl;
+
+    wolf_problem_ptr_->getCovarianceBlock(KF1->getPPtr(), KF1->getPPtr(), cov3);
+    std::cout << "\n KF1 position covariance : \n" << cov3 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(KF1->getOPtr(), KF1->getOPtr(), cov4);
+    std::cout << "\n KF1 orientation covariance : \n" << cov4 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(KF1->getVPtr(), KF1->getVPtr(), cov3);
+    std::cout << "\n KF1 velocity covariance : \n" << cov3 << std::endl;
+
+    wolf_problem_ptr_->getCovarianceBlock(KF2->getPPtr(), KF2->getPPtr(), cov3);
+    std::cout << "\n KF2 position covariance : \n" << cov3 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(KF2->getOPtr(), KF2->getOPtr(), cov4);
+    std::cout << "\n KF2 orientation covariance : \n" << cov4 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(KF2->getVPtr(), KF2->getVPtr(), cov3);
+    std::cout << "\n KF2 velocity covariance : \n" << cov3 << std::endl;
+
+    wolf_problem_ptr_->getCovarianceBlock(KF3->getPPtr(), KF3->getPPtr(), cov3);
+    std::cout << "\n KF3 position covariance : \n" << cov3 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(KF3->getOPtr(), KF3->getOPtr(), cov4);
+    std::cout << "\n KF3 orientation covariance : \n" << cov4 << std::endl;
+    wolf_problem_ptr_->getCovarianceBlock(KF3->getVPtr(), KF3->getVPtr(), cov3);
+    std::cout << "\n KF3 velocity covariance : \n" << cov3 << std::endl;
 
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov3);
     std::cout << "\n last_KF position covariance : \n" << cov3 << std::endl;
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getOPtr(), last_KF->getOPtr(), cov4);
     std::cout << "\n last_KF orientation covariance : \n" << cov4 << std::endl;
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getVPtr(), last_KF->getVPtr(), cov3);
-    std::cout << "\n last_KF velocity covariance : \n" << cov3 << std::endl;*/
+    std::cout << "\n last_KF velocity covariance : \n" << cov3 << std::endl;
 }
 
 //___________________________________________
