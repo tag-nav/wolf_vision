@@ -15,7 +15,7 @@ namespace wolf {
 WOLF_PTR_TYPEDEFS(ConstraintIMU);
 
 //class
-class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
+class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3>
 {
     public:
         ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_ptr, bool _apply_loss_function = false,
@@ -123,7 +123,7 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>
 
 inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_ptr, bool _apply_loss_function,
                                     ConstraintStatus _status) :
-        ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, _apply_loss_function, _status,
+        ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, _apply_loss_function, _status,
                                                     _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _frame_ptr->getVPtr(),
                                                     _frame_ptr->getAccBiasPtr(), _frame_ptr->getGyroBiasPtr(),
                                                     _ftr_ptr->getFramePtr()->getPPtr(),
@@ -157,6 +157,13 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
                                        const T* const _p2, const T* const _q2, const T* const _v2,
                                        T* _residuals) const
 {
+    T a_stdev = (T)0.000001; //for standard deviation
+    T w_stdev = (T)0.000001;
+    const Eigen::Matrix<T,3,3> A_r(Eigen::Matrix<T,3,3>::Identity()*a_stdev);
+    const Eigen::Matrix<T,3,3> W_r(Eigen::Matrix<T,3,3>::Identity()*w_stdev);
+    const Eigen::Matrix<T,3,3> sqrt_A_r(Eigen::Matrix<T,3,3>::Identity() * sqrt(a_stdev));
+    const Eigen::Matrix<T,3,3> sqrt_W_r(Eigen::Matrix<T,3,3>::Identity() * sqrt(w_stdev));
+
     // MAPS
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
     const Eigen::Quaternion<T> q1(_q1);
@@ -169,13 +176,15 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     Eigen::Map<const Eigen::Quaternion<T> > q2(_q2);
     Eigen::Map<const Eigen::Matrix<T,3,1> > v2(_v2);
 
-    Eigen::Map<Eigen::Matrix<T,9,1> > residuals(_residuals);
+    Eigen::Map<Eigen::Matrix<T,15,1> > residuals(_residuals);
 
 
     // Predict delta: d_pred = x2 (-) x1
     Eigen::Matrix<T,3,1> dp_predict = q1.conjugate() * ( p2 - p1 - v1 * (T)dt_ - (T)0.5 * g_.cast<T>() * (T)dt_2_ );
     Eigen::Matrix<T,3,1> dv_predict = q1.conjugate() * ( v2 - v1 - g_.cast<T>() * (T)dt_ );
     Eigen::Quaternion<T> dq_predict = q1.conjugate() * q2;
+    Eigen::Matrix<T,3,1> ab_error(acc_bias_preint_.cast<T>() - ab);
+    Eigen::Matrix<T,3,1> wb_error(gyro_bias_preint_.cast<T>() - wb);
 
     // Correct measured delta: delta_corr = delta + J_bias * (bias - bias_measured)
     Eigen::Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>() * (ab - acc_bias_preint_.cast<T>()) + dDp_dwb_.cast<T>() * (wb - gyro_bias_preint_.cast<T>());
@@ -192,7 +201,11 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     // Assign to residuals vector
     residuals.head(3)       = dp_error;
     residuals.segment(3,3)  = do_error;
-    residuals.tail(3)       = dv_error;
+    residuals.segment(6,3)  = dv_error;
+    residuals.segment(9,3)  = sqrt_A_r * ab_error; //const diagonal matrix. could be more efficient to store the inverse somewhere 
+    residuals.tail(3)       = sqrt_W_r * wb_error; //instead of calculating it everytime
+    //residuals.segment(9,3)  = (T)0.00001 * ab_error; //const diagonal matrix. could be more efficient to store the inverse somewhere 
+    //residuals.tail(3)       = (T)0.00001 * wb_error; //instead of calculating it everytime
 
     return true;
 }
