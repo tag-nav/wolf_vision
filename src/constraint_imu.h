@@ -157,12 +157,12 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
                                        const T* const _p2, const T* const _q2, const T* const _v2,
                                        T* _residuals) const
 {
-    T a_stdev = (T)0.000001; //for standard deviation
-    T w_stdev = (T)0.000001;
-    const Eigen::Matrix<T,3,3> A_r(Eigen::Matrix<T,3,3>::Identity()*a_stdev);
-    const Eigen::Matrix<T,3,3> W_r(Eigen::Matrix<T,3,3>::Identity()*w_stdev);
-    const Eigen::Matrix<T,3,3> sqrt_A_r(Eigen::Matrix<T,3,3>::Identity() * sqrt(a_stdev));
-    const Eigen::Matrix<T,3,3> sqrt_W_r(Eigen::Matrix<T,3,3>::Identity() * sqrt(w_stdev));
+    T a_stdev = (T)0.001; //for standard deviation
+    T w_stdev = (T)0.001;
+    //const Eigen::Matrix<T,3,3> A_r(Eigen::Matrix<T,3,3>::Identity()*a_stdev);
+    //const Eigen::Matrix<T,3,3> W_r(Eigen::Matrix<T,3,3>::Identity()*w_stdev);
+    const Eigen::Matrix<T,3,3> sqr_A_r(Eigen::Matrix<T,3,3>::Identity() * a_stdev * a_stdev);
+    const Eigen::Matrix<T,3,3> sqr_W_r(Eigen::Matrix<T,3,3>::Identity() * w_stdev * w_stdev);
 
     // MAPS
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
@@ -183,7 +183,7 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     Eigen::Matrix<T,3,1> dp_predict = q1.conjugate() * ( p2 - p1 - v1 * (T)dt_ - (T)0.5 * g_.cast<T>() * (T)dt_2_ );
     Eigen::Matrix<T,3,1> dv_predict = q1.conjugate() * ( v2 - v1 - g_.cast<T>() * (T)dt_ );
     Eigen::Quaternion<T> dq_predict = q1.conjugate() * q2;
-    Eigen::Matrix<T,3,1> ab_error(acc_bias_preint_.cast<T>() - ab);
+    Eigen::Matrix<T,3,1> ab_error(acc_bias_preint_.cast<T>() - ab); //bias used for preintegration - bias in KeyFrame
     Eigen::Matrix<T,3,1> wb_error(gyro_bias_preint_.cast<T>() - wb);
 
     // Correct measured delta: delta_corr = delta + J_bias * (bias - bias_measured)
@@ -202,10 +202,8 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     residuals.head(3)       = dp_error;
     residuals.segment(3,3)  = do_error;
     residuals.segment(6,3)  = dv_error;
-    residuals.segment(9,3)  = sqrt_A_r * ab_error; //const diagonal matrix. could be more efficient to store the inverse somewhere 
-    residuals.tail(3)       = sqrt_W_r * wb_error; //instead of calculating it everytime
-    //residuals.segment(9,3)  = (T)0.00001 * ab_error; //const diagonal matrix. could be more efficient to store the inverse somewhere 
-    //residuals.tail(3)       = (T)0.00001 * wb_error; //instead of calculating it everytime
+    residuals.segment(9,3)  = sqr_A_r.inverse() * ab_error; //const diagonal matrix. could be more efficient to store the inverse somewhere 
+    residuals.tail(3)       = sqr_W_r.inverse() * wb_error; //instead of calculating it everytime
 
     return true;
 }
