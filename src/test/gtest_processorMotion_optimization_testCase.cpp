@@ -7689,6 +7689,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation_biased, FullTrajectory_FixOr
     last_KF->getAccBiasPtr()->fix();
     last_KF->getGyroBiasPtr()->fix();
 
+    wolf_problem_ptr_->print(4,1,1,1);
+
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
     Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
     Eigen::MatrixXs cov4(Eigen::Matrix4s::Zero());
