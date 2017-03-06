@@ -682,6 +682,8 @@ class ProcessorIMU_Odom_tests_plateform_simulation_biased : public testing::Test
         //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full.txt");
         //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check.txt");
         //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_only_check.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_only_check.txt");
         //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_noisy.txt");
         //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_noisy.txt");
         //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full_noisy_4s.txt");
@@ -692,9 +694,9 @@ class ProcessorIMU_Odom_tests_plateform_simulation_biased : public testing::Test
         //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full_biased_4s.txt");
         //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full_biased_4s.txt");
             //same data coming fro a perfect IMU
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full_perfectIMU_4s.txt");
+        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full_perfectIMU_4s.txt");
         //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full_perfectIMU_4s.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full_perfectIMU_4s_freq100.txt");
+        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full_perfectIMU_4s_freq100.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -8525,7 +8527,7 @@ int main(int argc, char **argv)
   ::testing::GTEST_FLAG(filter) = tests_to_run;
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_details.static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast_extensive_**";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests.IMU_Biased_perturbData";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_plateform_simulation_biased.FullTrajectory_FixOriginPQV";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Odom_tests_plateform_simulation_biased.FixOriginPQV";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }

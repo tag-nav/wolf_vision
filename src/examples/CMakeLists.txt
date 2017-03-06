@@ -166,8 +166,8 @@ ADD_EXECUTABLE(test_imu_constrained0 test_imu_constrained0.cpp)
 TARGET_LINK_LIBRARIES(test_imu_constrained0 ${PROJECT_NAME})
 
 # IMU - constraintIMU
-ADD_EXECUTABLE(test_constraint_imu test_constraint_imu.cpp)
-TARGET_LINK_LIBRARIES(test_constraint_imu ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_constraint_imu test_constraint_imu.cpp)
+#TARGET_LINK_LIBRARIES(test_constraint_imu ${PROJECT_NAME})
 
 # IF (laser_scan_utils_FOUND)
 #     ADD_EXECUTABLE(test_capture_laser_2D test_capture_laser_2D.cpp)
