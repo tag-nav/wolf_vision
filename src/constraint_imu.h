@@ -5,6 +5,7 @@
 #include "constraint_sparse.h"
 #include "feature_imu.h"
 #include "frame_imu.h"
+#include "sensor_imu.h"
 #include "rotations.h"
 
 //Eigen include
@@ -119,6 +120,7 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
         /// Metrics
         const wolf::Scalar dt_, dt_2_; ///< delta-time and delta-time-squared between keyframes
         const Eigen::Vector3s g_; ///< acceleration of gravity in World frame
+        const wolf::Scalar ab_stdev_, wb_stdev_;
 };
 
 inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_ptr, bool _apply_loss_function,
@@ -143,7 +145,9 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_p
         dDq_dwb_(_ftr_ptr->dDq_dwb_),
         dt_(_ftr_ptr->getFramePtr()->getTimeStamp() - _frame_ptr->getTimeStamp()),
         dt_2_(dt_*dt_),
-        g_(wolf::gravity())
+        g_(wolf::gravity()),
+        ab_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getAbStdev()),
+        wb_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getWbStdev())
 
 {
     setType("IMU");
@@ -159,12 +163,10 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
                                        const T* const _p2, const T* const _q2, const T* const _v2, const T* const _ab2, const T* _wb2,
                                        T* _residuals) const
 {
-    T a_stdev = (T)0.0001; //for standard deviation
-    T w_stdev = (T)0.0001;
-    const Eigen::Matrix<T,3,3> A_r(Eigen::Matrix<T,3,3>::Identity()*a_stdev);
-    const Eigen::Matrix<T,3,3> W_r(Eigen::Matrix<T,3,3>::Identity()*w_stdev);
-    const Eigen::Matrix<T,3,3> sqr_A_r(Eigen::Matrix<T,3,3>::Identity() * a_stdev * a_stdev);
-    const Eigen::Matrix<T,3,3> sqr_W_r(Eigen::Matrix<T,3,3>::Identity() * w_stdev * w_stdev);
+    const Eigen::Matrix<T,3,3> A_r(Eigen::Matrix<T,3,3>::Identity() * (T)ab_stdev_); //A_r = diag(stdev, stdev, stdev)
+    const Eigen::Matrix<T,3,3> W_r(Eigen::Matrix<T,3,3>::Identity() * (T)wb_stdev_);
+    const Eigen::Matrix<T,3,3> sqr_A_r(Eigen::Matrix<T,3,3>::Identity() * (T)ab_stdev_ * (T)ab_stdev_); //stdev = sqrt(var) -> sqr_A_r = diag(var, var, var)
+    const Eigen::Matrix<T,3,3> sqr_W_r(Eigen::Matrix<T,3,3>::Identity() * (T)wb_stdev_ * (T)wb_stdev_);
 
     // MAPS
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
@@ -221,12 +223,10 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const
 
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D3, 15)
 
-    DataType a_stdev = (DataType)0.0001;
-    DataType w_stdev = (DataType)0.0001;
-    const Eigen::Matrix<DataType,3,3> A_r(Eigen::Matrix<DataType,3,3>::Identity()*a_stdev);
-    const Eigen::Matrix<DataType,3,3> W_r(Eigen::Matrix<DataType,3,3>::Identity()*w_stdev);
-    const Eigen::Matrix<DataType,3,3> sqr_A_r(Eigen::Matrix<DataType,3,3>::Identity() * a_stdev * a_stdev);
-    const Eigen::Matrix<DataType,3,3> sqr_W_r(Eigen::Matrix<DataType,3,3>::Identity() * w_stdev * w_stdev);
+    const Eigen::Matrix<DataType,3,3> A_r(Eigen::Matrix<DataType,3,3>::Identity() * (DataType)ab_stdev_);
+    const Eigen::Matrix<DataType,3,3> W_r(Eigen::Matrix<DataType,3,3>::Identity() * (DataType)wb_stdev_);
+    const Eigen::Matrix<DataType,3,3> sqr_A_r(Eigen::Matrix<DataType,3,3>::Identity() * (DataType)ab_stdev_ * (DataType)ab_stdev_);
+    const Eigen::Matrix<DataType,3,3> sqr_W_r(Eigen::Matrix<DataType,3,3>::Identity() * (DataType)wb_stdev_ * (DataType)wb_stdev_);
 
     const Eigen::Matrix<DataType,3,1> ab1(_ab1);
     const Eigen::Matrix<DataType,3,1> wb1(_wb1);
