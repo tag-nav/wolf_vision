@@ -33,15 +33,15 @@ static IntrinsicsBasePtr createIntrinsicsIMU(const std::string & _filename_dot_y
         std::string sensor_type = config["sensor type"]     .as<std::string>();
         std::string sensor_name = config["sensor name"]     .as<std::string>();
 
-        YAML::Node variances = config["motion variances"];
-        YAML::Node kf_vote = config["keyframe vote"];
+        YAML::Node variances    = config["motion variances"];
+        YAML::Node kf_vote      = config["keyframe vote"];
 
         IntrinsicsIMUPtr params = std::make_shared<IntrinsicsIMU>();
 
-        params->accel_noise   = variances["accel_noise"] .as<Scalar>();
-        params->gyro_noise    = variances["gyro_noise"]  .as<Scalar>();
-        params->ab_constr     = variances["ab_constr"]   .as<Scalar>();
-        params->wb_constr     = variances["wb_constr"]   .as<Scalar>();
+        params->accel_noise     = variances["accel_noise"]  .as<Scalar>();
+        params->gyro_noise      = variances["gyro_noise"]   .as<Scalar>();
+        params->ab_stdev        = variances["ab_stdev"]     .as<Scalar>();
+        params->wb_stdev        = variances["wb_stdev"]     .as<Scalar>();
 
         return params;
     }

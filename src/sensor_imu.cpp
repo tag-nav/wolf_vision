@@ -15,8 +15,8 @@ SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPt
         SensorBase("IMU", _p_ptr, _o_ptr, nullptr, 6),
         gyro_noise(params->gyro_noise),
         accel_noise(params->accel_noise),
-        wb_constr(params->wb_constr),
-        ab_constr(params->ab_constr)
+        ab_stdev(params->ab_stdev),
+        wb_stdev(params->wb_stdev)
 {
     //
 }
