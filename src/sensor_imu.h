@@ -18,16 +18,15 @@ struct IntrinsicsIMU : public IntrinsicsBase
         wolf::Scalar gyro_noise; //Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
         wolf::Scalar accel_noise; //Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
 
-        //Sensor Bias is optimized and stored in processorIMU
         //This is a trial to constraint how much can the bias change in 1 sec at most
-        wolf::Scalar wb_constr; //gyroscope rad/sec
-        wolf::Scalar ab_constr; //accelerometer micro_g/sec
+        wolf::Scalar ab_stdev; //accelerometer micro_g/sec
+        wolf::Scalar wb_stdev; //gyroscope rad/sec
 
         IntrinsicsIMU() :
             gyro_noise(0),
             accel_noise(0),
-            wb_constr(0),
-            ab_constr(0)
+            ab_stdev(0),
+            wb_stdev(0)
         {}
 };
 
@@ -40,10 +39,9 @@ class SensorIMU : public SensorBase
         wolf::Scalar gyro_noise; //Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
         wolf::Scalar accel_noise; //Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
 
-        //Sensor Bias is optimized and stored in processorIMU
         //This is a trial to constraint how much can the bias change in 1 sec at most
-        wolf::Scalar wb_constr; //gyroscope rad/sec
-        wolf::Scalar ab_constr; //accelerometer micro_g/sec
+        wolf::Scalar ab_stdev; //accelerometer micro_g/sec
+        wolf::Scalar wb_stdev; //gyroscope rad/sec
 
     public:
         /** \brief Constructor with arguments
@@ -69,8 +67,8 @@ class SensorIMU : public SensorBase
 
         Scalar getGyroNoise() const;
         Scalar getAccelNoise() const;
-        Scalar getWbConstr() const;
-        Scalar getAbConstr() const;
+        Scalar getWbStdev() const;
+        Scalar getAbStdev() const;
 
         virtual ~SensorIMU();
 
@@ -89,14 +87,14 @@ inline Scalar SensorIMU::getAccelNoise() const
     return accel_noise;
 }
 
-inline Scalar SensorIMU::getWbConstr() const
+inline Scalar SensorIMU::getWbStdev() const
 {
-    return wb_constr;
+    return wb_stdev;
 }
 
-inline Scalar SensorIMU::getAbConstr() const
+inline Scalar SensorIMU::getAbStdev() const
 {
-    return ab_constr;
+    return ab_stdev;
 }
 
 } // namespace wolf
