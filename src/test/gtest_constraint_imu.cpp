@@ -646,11 +646,15 @@ TEST_F(ConstraintIMU_PrcImuOdom, acc_biased_static)
     Scalar dt = t.get();
     TimeStamp ts(0.001);
     wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data);
+    wolf::CaptureMotionPtr mot_ptr;
+    unsigned int ms = 0;
 
-    while( (dt-t.get()) <= (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan()) ){
+    while( (dt-t.get()) <= (std::static_pointer_cast<ProcessorIMU>(processor_ptr_)->getMaxTimeSpan())*2 ){
         
         // Time and data variables
         dt += 0.001;
+        ms += 1;
+
         ts.set(dt);
         imu_ptr->setTimeStamp(ts);
         imu_ptr->setData(data);
@@ -658,27 +662,28 @@ TEST_F(ConstraintIMU_PrcImuOdom, acc_biased_static)
         // process data in capture
         imu_ptr->getTimeStamp();
         sen_imu->process(imu_ptr);
+
+        if(ms % 1000 == 0)
+        {
+            // PROCESS ODOM 3D DATA
+            Eigen::Vector6s data_odom3D;
+            data_odom3D << 0,0,0, 0,0,0;
+            mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
+            sen_odom3D->process(mot_ptr);
+        }
     }
 
-    // PROCESS ODOM 3D DATA
-    Eigen::Vector6s data_odom3D;
-    data_odom3D << 0,0,0, 0,0,0;
-    
-    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
-    sen_odom3D->process(mot_ptr);
-
     FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+    TimeStamp t1(1.0);
+    FrameIMUPtr middle_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t1));
 
     origin_KF->unfix();
     origin_KF->getPPtr()->fix();
     origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->fix();
+    //origin_KF->getVPtr()->fix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.BriefReport() << std::endl;
-
-    last_KF->getAccBiasPtr()->fix();
-    last_KF->getGyroBiasPtr()->fix();
 
     wolf_problem_ptr_->print(4,1,1,1);
 
@@ -688,10 +693,11 @@ TEST_F(ConstraintIMU_PrcImuOdom, acc_biased_static)
     ASSERT_TRUE((last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<< 0, 0, 0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
     EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
     "\n introduced Acc bias : " << bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
     "\n introduced Gyro bias : " << bias.tail(3).transpose() << std::endl;
 
     ConstraintBaseList origin_KF_constraints = origin_KF->getConstrainedByList();
+    ConstraintBaseList middle_KF_constraints = middle_KF->getConstrainedByList();
     Eigen::Matrix<wolf::Scalar,15,1> residuals;
 
     Eigen::Vector3s p1(origin_KF->getPPtr()->getVector());
@@ -700,21 +706,40 @@ TEST_F(ConstraintIMU_PrcImuOdom, acc_biased_static)
     Eigen::Vector3s v1(origin_KF->getVPtr()->getVector());
     Eigen::Vector3s ab1(origin_KF->getAccBiasPtr()->getVector());
     Eigen::Vector3s wb1(origin_KF->getGyroBiasPtr()->getVector());
-    Eigen::Vector3s p2(last_KF->getPPtr()->getVector());
-    Eigen::Vector4s q2_vec(last_KF->getOPtr()->getVector());
+    Eigen::Vector3s p2(middle_KF->getPPtr()->getVector());
+    Eigen::Vector4s q2_vec(middle_KF->getOPtr()->getVector());
     Eigen::Map<Quaternions> q2(q2_vec.data());
-    Eigen::Vector3s v2(last_KF->getVPtr()->getVector());
-    Eigen::Vector3s ab2(last_KF->getAccBiasPtr()->getVector());
-    Eigen::Vector3s wb2(last_KF->getGyroBiasPtr()->getVector());
+    Eigen::Vector3s v2(middle_KF->getVPtr()->getVector());
+    Eigen::Vector3s ab2(middle_KF->getAccBiasPtr()->getVector());
+    Eigen::Vector3s wb2(middle_KF->getGyroBiasPtr()->getVector());
+    Eigen::Vector3s p3(last_KF->getPPtr()->getVector());
+    Eigen::Vector4s q3_vec(last_KF->getOPtr()->getVector());
+    Eigen::Map<Quaternions> q3(q3_vec.data());
+    Eigen::Vector3s v3(last_KF->getVPtr()->getVector());
+    Eigen::Vector3s ab3(last_KF->getAccBiasPtr()->getVector());
+    Eigen::Vector3s wb3(last_KF->getGyroBiasPtr()->getVector());
 
     for(auto ctr_ptr : origin_KF_constraints)
     {
         if (ctr_ptr->getTypeId() == wolf::CTR_IMU)
             {
                 std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, residuals);
-                WOLF_DEBUG("ConstraintIMU residuals : \n", residuals.transpose())
+                WOLF_DEBUG("KF0 ConstraintIMU residuals : \n", residuals.transpose())
             }
     }
+
+    for(auto ctr_ptr : middle_KF_constraints)
+    {
+        if (ctr_ptr->getTypeId() == wolf::CTR_IMU)
+            {
+                std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p2, q2, v2, ab2, wb2, p3, q3, v3, ab3, wb3, residuals);
+                WOLF_DEBUG("KF1 ConstraintIMU residuals : \n", residuals.transpose())
+            }
+    }
+
+    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
+    wolf_problem_ptr_->getCovarianceBlock(last_KF->getVPtr(), last_KF->getVPtr(), cov3);
+    std::cout << "\n last_KF velocity covariance : \n" << cov3 << std::endl;
 }
 
 TEST_F(ConstraintIMU_PrcImuOdom, acc_gyro_biased_static)
@@ -894,7 +919,7 @@ TEST_F(ConstraintIMU_accBiasObservation, acc_gyro_bias_observation)
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_PrcImuOdom.gyro_biased_static";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_PrcImuOdom.acc_biased_static";
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_accBiasObservation.acc_gyro_bias_observation";
   return RUN_ALL_TESTS();
 }
