@@ -919,7 +919,7 @@ TEST_F(ConstraintIMU_accBiasObservation, acc_gyro_bias_observation)
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_PrcImuOdom.acc_biased_static";
-  //::testing::GTEST_FLAG(filter) = "ConstraintIMU_accBiasObservation.acc_gyro_bias_observation";
+  //::testing::GTEST_FLAG(filter) = "ConstraintIMU_PrcImuOdom.acc_biased_static";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_accBiasObservation.acc_gyro_bias_observation";
   return RUN_ALL_TESTS();
 }

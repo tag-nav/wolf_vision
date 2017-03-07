@@ -159,8 +159,8 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
                                        const T* const _p2, const T* const _q2, const T* const _v2, const T* const _ab2, const T* _wb2,
                                        T* _residuals) const
 {
-    T a_stdev = (T)0.001; //for standard deviation
-    T w_stdev = (T)0.001;
+    T a_stdev = (T)0.0001; //for standard deviation
+    T w_stdev = (T)0.0001;
     const Eigen::Matrix<T,3,3> A_r(Eigen::Matrix<T,3,3>::Identity()*a_stdev);
     const Eigen::Matrix<T,3,3> W_r(Eigen::Matrix<T,3,3>::Identity()*w_stdev);
     const Eigen::Matrix<T,3,3> sqr_A_r(Eigen::Matrix<T,3,3>::Identity() * a_stdev * a_stdev);
@@ -221,8 +221,8 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const
 
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D3, 15)
 
-    DataType a_stdev = (DataType)0.001;
-    DataType w_stdev = (DataType)0.001;
+    DataType a_stdev = (DataType)0.0001;
+    DataType w_stdev = (DataType)0.0001;
     const Eigen::Matrix<DataType,3,3> A_r(Eigen::Matrix<DataType,3,3>::Identity()*a_stdev);
     const Eigen::Matrix<DataType,3,3> W_r(Eigen::Matrix<DataType,3,3>::Identity()*w_stdev);
     const Eigen::Matrix<DataType,3,3> sqr_A_r(Eigen::Matrix<DataType,3,3>::Identity() * a_stdev * a_stdev);
@@ -247,15 +247,15 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const
     Eigen::Matrix<DataType,3,1> dp_error   = expected.head(3) - dp_correct;
     Eigen::Matrix<DataType,3,1> do_error   = q2v(dq_correct.conjugate() * dq_predict); // In the name, 'o' of orientation, not 'q'
     Eigen::Matrix<DataType,3,1> dv_error   = expected.tail(3) - dv_correct;
-    Eigen::Matrix<DataType,3,1> ab_error(ab1 - ab2); //bias used for preintegration - bias in KeyFrame
+    Eigen::Matrix<DataType,3,1> ab_error(ab1 - ab2); // KF1.bias - KF2.bias
     Eigen::Matrix<DataType,3,1> wb_error(wb1 - wb2);
 
     // Assign to residuals vector
     const_cast< Eigen::MatrixBase<D3>& > (_residuals).head(3) = dp_error;
     const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(3,3) = do_error;
     const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(6,3) = dv_error;
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(9,3)  = A_r.inverse() * ab_error;
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).tail(3)       = W_r.inverse() * wb_error;
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(9,3)  = A_r.inverse() * ab_error; //will do dt_ * A_r.inverse() * ab_error
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).tail(3)       = W_r.inverse() * wb_error; //will do dt_ * W_r.inverse() * wb_error
 
     return true;
 }
