@@ -208,8 +208,8 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     residuals.head(3)       = dp_error;
     residuals.segment(3,3)  = do_error;
     residuals.segment(6,3)  = dv_error;
-    residuals.segment(9,3)  = A_r.inverse() * ab_error; //const diagonal matrix. could be more efficient to store the inverse somewhere 
-    residuals.tail(3)       = W_r.inverse() * wb_error; //instead of calculating it everytime
+    residuals.segment(9,3)  = (T)dt_ * A_r.inverse() * ab_error; // if A_r is the slow variation introduced from 1 KF to another in 1s -> multiply by dt_ to have time actually taken into account 
+    residuals.tail(3)       = (T)dt_ * W_r.inverse() * wb_error;
 
     return true;
 }
