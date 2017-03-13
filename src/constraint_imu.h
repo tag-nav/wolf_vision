@@ -121,6 +121,21 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
         const wolf::Scalar dt_, dt_2_; ///< delta-time and delta-time-squared between keyframes
         const Eigen::Vector3s g_; ///< acceleration of gravity in World frame
         const wolf::Scalar ab_stdev_, wb_stdev_; //stdev for standard_deviation (= sqrt(variance))
+        
+        /* bias covariance and bias residuals
+         *
+         * continuous bias covariance matrix for accelerometer would then be A_r = diag(ab_stdev_^2, ab_stdev_^2, ab_stdev_^2)
+         * To compute bias residuals, we will need to do (sqrt(A_r)).inverse() * ab_error
+         *
+         * In our case, we introduce time 'distance' in the computation of this residual (SEE FORSTER17), thus we have to use the discret covariance matrix
+         * discrete bias covariance matrix for accelerometer : A_r_dt = dt_ * A_r
+         * taking the square root for bias residuals : sqrt_A_r_dt = sqrt(dt_ * A_r) = sqrt(dt_) * sqrt(A_r)
+         * then with the inverse : sqrt_A_r_dt_inv = (sqrt(dt_ * A_r)).inverse() = (1/sqrt(dt_)) * sqrt(A_r).inverse()
+         *
+         * same logic for gyroscope bias
+         */ 
+        const Eigen::Matrix3s sqrt_A_r_dt_inv;
+        const Eigen::Matrix3s sqrt_W_r_dt_inv;
 };
 
 inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_ptr, bool _apply_loss_function,
@@ -147,7 +162,9 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_p
         dt_2_(dt_*dt_),
         g_(wolf::gravity()),
         ab_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getAbStdev()),
-        wb_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getWbStdev())
+        wb_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getWbStdev()),
+        sqrt_A_r_dt_inv((Eigen::Matrix3s::Identity() * ab_stdev_ * sqrt(dt_)).inverse()),
+        sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_stdev_ * sqrt(dt_)).inverse())
 
 {
     setType("IMU");
@@ -163,15 +180,6 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
                                        const T* const _p2, const T* const _q2, const T* const _v2, const T* const _ab2, const T* _wb2,
                                        T* _residuals) const
 {
-    //const Eigen::Matrix<T,3,3> sqrt_A_r(Eigen::Matrix<T,3,3>::Identity() * (T)ab_stdev_); //A_r = diag(stdev, stdev, stdev)
-    //const Eigen::Matrix<T,3,3> sqrt_W_r(Eigen::Matrix<T,3,3>::Identity() * (T)wb_stdev_);
-    //const Eigen::Matrix<T,3,3> A_r(Eigen::Matrix<T,3,3>::Identity() * (T)ab_stdev_ * (T)ab_stdev_); //stdev = sqrt(var) -> sqr_A_r = diag(var, var, var)
-    //const Eigen::Matrix<T,3,3> W_r(Eigen::Matrix<T,3,3>::Identity() * (T)wb_stdev_ * (T)wb_stdev_);
-
-    //const Eigen::Matrix<T,3,3> sqrt_A_r_dt(Eigen::Matrix<T,3,3>::Identity() * (T)ab_stdev_ * (T)sqrt(dt_));
-    const Eigen::Matrix<T,3,3> sqrt_A_r_dt_inv((Eigen::Matrix<T,3,3>::Identity() * (T)ab_stdev_ * (T)sqrt(dt_)).inverse());
-    const Eigen::Matrix<T,3,3> sqrt_W_r_dt_inv((Eigen::Matrix<T,3,3>::Identity() * (T)wb_stdev_ * (T)sqrt(dt_)).inverse());
-
     // MAPS
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
     const Eigen::Quaternion<T> q1(_q1);
@@ -212,8 +220,8 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     residuals.head(3)       = dp_error;
     residuals.segment(3,3)  = do_error;
     residuals.segment(6,3)  = dv_error;
-    residuals.segment(9,3)  = sqrt_A_r_dt_inv * ab_error; // if A_r is the slow variation introduced from 1 KF to another in 1s -> multiply by dt_ to have time actually taken into account 
-    residuals.tail(3)       = sqrt_W_r_dt_inv * wb_error;
+    residuals.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error; // ab_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * ab_error;
+    residuals.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error; // wb_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * wb_error;      
 
     return true;
 }
@@ -226,11 +234,6 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const
     typedef typename D2::Scalar DataType;
 
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D3, 15)
-
-    const Eigen::Matrix<DataType,3,3> A_r(Eigen::Matrix<DataType,3,3>::Identity() * (DataType)ab_stdev_);
-    const Eigen::Matrix<DataType,3,3> W_r(Eigen::Matrix<DataType,3,3>::Identity() * (DataType)wb_stdev_);
-    const Eigen::Matrix<DataType,3,3> sqr_A_r(Eigen::Matrix<DataType,3,3>::Identity() * (DataType)ab_stdev_ * (DataType)ab_stdev_);
-    const Eigen::Matrix<DataType,3,3> sqr_W_r(Eigen::Matrix<DataType,3,3>::Identity() * (DataType)wb_stdev_ * (DataType)wb_stdev_);
 
     const Eigen::Matrix<DataType,3,1> ab1(_ab1);
     const Eigen::Matrix<DataType,3,1> wb1(_wb1);
@@ -255,11 +258,11 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const
     Eigen::Matrix<DataType,3,1> wb_error(wb1 - wb2);
 
     // Assign to residuals vector
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).head(3) = dp_error;
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(3,3) = do_error;
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(6,3) = dv_error;
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(9,3)  = A_r.inverse() * ab_error; //will do dt_ * A_r.inverse() * ab_error
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).tail(3)       = W_r.inverse() * wb_error; //will do dt_ * W_r.inverse() * wb_error
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).head(3)       = dp_error;
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(3,3)  = do_error;
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(6,3)  = dv_error;
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(9,3)  = sqrt_A_r_dt_inv.cast<DataType>() * ab_error; //will do dt_ * A_r.inverse() * ab_error
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).tail(3)       = sqrt_A_r_dt_inv.cast<DataType>() * wb_error; //will do dt_ * W_r.inverse() * wb_error
 
     return true;
 }
