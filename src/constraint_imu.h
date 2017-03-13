@@ -120,7 +120,7 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
         /// Metrics
         const wolf::Scalar dt_, dt_2_; ///< delta-time and delta-time-squared between keyframes
         const Eigen::Vector3s g_; ///< acceleration of gravity in World frame
-        const wolf::Scalar ab_stdev_, wb_stdev_;
+        const wolf::Scalar ab_stdev_, wb_stdev_; //stdev for standard_deviation (= sqrt(variance))
 };
 
 inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_ptr, bool _apply_loss_function,
@@ -163,10 +163,14 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
                                        const T* const _p2, const T* const _q2, const T* const _v2, const T* const _ab2, const T* _wb2,
                                        T* _residuals) const
 {
-    const Eigen::Matrix<T,3,3> A_r(Eigen::Matrix<T,3,3>::Identity() * (T)ab_stdev_); //A_r = diag(stdev, stdev, stdev)
-    const Eigen::Matrix<T,3,3> W_r(Eigen::Matrix<T,3,3>::Identity() * (T)wb_stdev_);
-    const Eigen::Matrix<T,3,3> sqr_A_r(Eigen::Matrix<T,3,3>::Identity() * (T)ab_stdev_ * (T)ab_stdev_); //stdev = sqrt(var) -> sqr_A_r = diag(var, var, var)
-    const Eigen::Matrix<T,3,3> sqr_W_r(Eigen::Matrix<T,3,3>::Identity() * (T)wb_stdev_ * (T)wb_stdev_);
+    //const Eigen::Matrix<T,3,3> sqrt_A_r(Eigen::Matrix<T,3,3>::Identity() * (T)ab_stdev_); //A_r = diag(stdev, stdev, stdev)
+    //const Eigen::Matrix<T,3,3> sqrt_W_r(Eigen::Matrix<T,3,3>::Identity() * (T)wb_stdev_);
+    //const Eigen::Matrix<T,3,3> A_r(Eigen::Matrix<T,3,3>::Identity() * (T)ab_stdev_ * (T)ab_stdev_); //stdev = sqrt(var) -> sqr_A_r = diag(var, var, var)
+    //const Eigen::Matrix<T,3,3> W_r(Eigen::Matrix<T,3,3>::Identity() * (T)wb_stdev_ * (T)wb_stdev_);
+
+    //const Eigen::Matrix<T,3,3> sqrt_A_r_dt(Eigen::Matrix<T,3,3>::Identity() * (T)ab_stdev_ * (T)sqrt(dt_));
+    const Eigen::Matrix<T,3,3> sqrt_A_r_dt_inv((Eigen::Matrix<T,3,3>::Identity() * (T)ab_stdev_ * (T)sqrt(dt_)).inverse());
+    const Eigen::Matrix<T,3,3> sqrt_W_r_dt_inv((Eigen::Matrix<T,3,3>::Identity() * (T)wb_stdev_ * (T)sqrt(dt_)).inverse());
 
     // MAPS
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
@@ -208,8 +212,8 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     residuals.head(3)       = dp_error;
     residuals.segment(3,3)  = do_error;
     residuals.segment(6,3)  = dv_error;
-    residuals.segment(9,3)  = (T)dt_ * A_r.inverse() * ab_error; // if A_r is the slow variation introduced from 1 KF to another in 1s -> multiply by dt_ to have time actually taken into account 
-    residuals.tail(3)       = (T)dt_ * W_r.inverse() * wb_error;
+    residuals.segment(9,3)  = sqrt_A_r_dt_inv * ab_error; // if A_r is the slow variation introduced from 1 KF to another in 1s -> multiply by dt_ to have time actually taken into account 
+    residuals.tail(3)       = sqrt_W_r_dt_inv * wb_error;
 
     return true;
 }
