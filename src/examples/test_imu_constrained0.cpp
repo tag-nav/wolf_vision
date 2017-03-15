@@ -39,28 +39,37 @@ int main(int argc, char** argv)
     const char * filename_imu;
     const char * filename_odom;
     if (argc < 3)
-        {
-            std::cout << "Missing input argument! : needs 2 argument (path to imu and odom data files)." << std::endl;
-            return 1;
-        }
-        else
-        {
-            filename_imu = argv[1];
-            filename_odom = argv[2];
+    {
+        std::cout << "Missing input argument! : needs 2 argument (path to imu and odom data files)." << std::endl;
+        return 1;
+    }
+    else
+    {
+        filename_imu = argv[1];
+        filename_odom = argv[2];
 
-            imu_data_input.open(filename_imu);
-            odom_data_input.open(filename_odom);
+        imu_data_input.open(filename_imu);
+        odom_data_input.open(filename_odom);
 
-            std::cout << "file imu : " << filename_imu <<"\t file odom : " << filename_odom << std::endl;
+        std::cout << "file imu : " << filename_imu <<"\t file odom : " << filename_odom << std::endl;
 
-            //std::string dummy; //this is needed only if first line is headers or useless data
-            //getline(imu_data_input, dummy);
-        }
+        //std::string dummy; //this is needed only if first line is headers or useless data
+        //getline(imu_data_input, dummy);
+    }
 
-        if(!imu_data_input.is_open() || !odom_data_input.is_open()){
-            std::cerr << "Failed to open data files... Exiting" << std::endl;
-            return 1;
-        }
+    if(!imu_data_input.is_open() || !odom_data_input.is_open()){
+        std::cerr << "Failed to open data files... Exiting" << std::endl;
+        return 1;
+    }
+
+    #ifdef DEBUG_RESULTS
+    std::ofstream debug_results;
+    debug_results.open("debug_results_imu_constrained0.dat");
+    if(debug_results)
+        debug_results   << "%%TimeStamp\t"
+                        << "X_x\t" << "X_y\t" << "X_z\t" << "Xq_x\t" << "Xq_y\t" << "Xq_z\t" << "Xq_w\t" << "Xv_x\t" << "Xv_y\t" << "Xv_z\t"
+                        << "Cov_X\t" << "Cov_Y\t" << "Cov_Z\t" << "Cov_Qx\t" << "Cov_Qy\t" << "Cov_Qz\t" << "Cov_Qw" << "Cov_Vx\t" << "Cov_Vy\t" << "Cov_Vz\t" << std::endl;
+    #endif
 
     //===================================================== SETTING PROBLEM
     std::string wolf_root = _WOLF_ROOT_DIR;
@@ -99,9 +108,9 @@ int main(int argc, char** argv)
 
 
     // SENSOR + PROCESSOR ODOM 3D
-    SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
+    SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
     ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-    prc_odom3D_params->max_time_span = 0.999;
+    prc_odom3D_params->max_time_span = 0.049;
     prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
     prc_odom3D_params->dist_traveled = 1000000000;
     prc_odom3D_params->angle_turned = 1000000000;
@@ -207,14 +216,62 @@ int main(int argc, char** argv)
     std::cout << "s/integr  : " << elapsed_secs/(N-1)*1e6 << " us" << std::endl;
     std::cout << "integr/s  : " << (N-1)/elapsed_secs << " ips" << std::endl;
 
-    //wolf_problem_ptr_->print(4,1,1,1);
+    //fix parts of the problem if needed
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+
     
     std::cout << "\t\t\t ______solving______" << std::endl;
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.FullReport() << std::endl;
+    ceres_manager_wolf_diff->computeCovariances(ALL);
     std::cout << "\t\t\t ______solved______" << std::endl;
 
     wolf_problem_ptr_->print(4,1,1,1);
+
+    #ifdef DEBUG_RESULTS
+    Eigen::VectorXs frm_state(16);
+    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev;
+    Eigen::MatrixXs covX(16,16);
+    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
+
+    wolf::FrameBaseList frame_list = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
+    for(FrameBasePtr frm_ptr : frame_list)
+    {
+        if(frm_ptr->isKey())
+        {   
+            //prepare needed variables
+            FrameIMUPtr frmIMU_ptr = std::static_pointer_cast<FrameIMU>(frm_ptr);
+            frm_state = frmIMU_ptr->getState();
+            ts = frmIMU_ptr->getTimeStamp();
+
+            //get data from covariance blocks
+            wolf_problem_ptr_->getFrameCovariance(frmIMU_ptr, covX);
+            wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getVPtr(), frmIMU_ptr->getVPtr(), cov3);
+            covX.block(7,7,3,3) = cov3;
+            wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getAccBiasPtr(), frmIMU_ptr->getAccBiasPtr(), cov3);
+            covX.block(10,10,3,3) = cov3;
+            wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getGyroBiasPtr(), frmIMU_ptr->getGyroBiasPtr(), cov3);
+            covX.block(13,13,3,3) = cov3;
+            for(int i = 0; i<16; i++)
+                cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
+
+
+            debug_results << std::setprecision(16) << ts.get() << "\t" << frm_state(0) << "\t" << frm_state(1) << "\t" << frm_state(2)
+            << "\t" << frm_state(3) << "\t" << frm_state(4) << "\t" << frm_state(5) << "\t" << frm_state(6)
+            << "\t" << frm_state(7) << "\t" << frm_state(8) << "\t" << frm_state(9)
+            << "\t" << frm_state(10) << "\t" << frm_state(11) << "\t" << frm_state(12) << "\t" << frm_state(13) << "\t" << frm_state(14) << "\t" << frm_state(15)
+            << "\t" << cov_stdev(0) << "\t" << cov_stdev(1) << "\t" << cov_stdev(2)
+            << "\t" << cov_stdev(3) << "\t" << cov_stdev(4) << "\t" << cov_stdev(5) << "\t" << cov_stdev(6)
+            << "\t" << cov_stdev(7) << "\t" << cov_stdev(8) << "\t" << cov_stdev(9)
+            << "\t" << cov_stdev(10) << "\t" << cov_stdev(11) << "\t" << cov_stdev(12) << "\t" << cov_stdev(13) << "\t" << cov_stdev(14) << "\t" << cov_stdev(15) << std::endl;
+        }
+    }
+
+    debug_results.close();
+    WOLF_WARN("WARNING : DEBUG_RESULTS ACTIVATED - slows the process (writing results to result_debugs.dat file)")
+
+    #endif
 
     return 0;
 
