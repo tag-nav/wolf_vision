@@ -16,7 +16,7 @@ The basic Wolf structure is a tree of base classes reproducing the elements of t
 
 Wolf can be used within ROS for an easy integration. We provide examples of ROS nodes using Wolf. Wolf can also be used in other robotics frameworks.
 
-### Features
+#### Features
 
 -   Keyframe based
 -   Multi-sensor
@@ -26,7 +26,7 @@ Wolf can be used within ROS for an easy integration. We provide examples of ROS 
 -   Built with polymorphic classes using virtual inheritance and templates.
 -   Solver agnostic: choose your solver and build your wrapper to Wolf.
 
-### Some preliminary documentation
+#### Some preliminary documentation
 
 -   You can visit this [Wolf inspiring document](https://docs.google.com/document/d/1_kBtvCIo33pdP59M3Ib4iEBleDDLcN6yCbmwJDBLtcA). Contact [Joan](mailto:jsola@iri.upc.edu) if you need permissions for the link.
 -   You can also have a look at the [Wolf tree](https://docs.google.com/drawings/d/1jj5VVjQThddswpTPMLG2xv87vtT3o1jiMJo3Mk1Utjg), showing the organization of the main elements in the Wolf project. Contact [Andreu](mailto:acorominas@iri.upc.edu) if you need permissions for the link.
@@ -37,250 +37,301 @@ Dependencies
 
 ! Please notice that we are detailing two installation procedures below. If you are familiar with `ROS` and more especially the [`catkin_tools`](https://catkin-tools.readthedocs.io/en/latest/index.html) package then you may jump directly to the 'Using the `catkin_tools` package' section.
 
-### Eigen
+#### Eigen
 
-[Eigen](http://eigen.tuxfamily.org). Linear algebra, header library. Eigen 3.2 is also a depencency of ROS-Hydro. In case you don't have ROS in your machine, you can install Eigen by typing:
+    [Eigen](http://eigen.tuxfamily.org). Linear algebra, header library. Eigen 3.2 is also a depencency of ROS-Hydro. In case you don't have ROS in your machine, you can install Eigen by typing:
 
-        $ sudo apt-get install libeigen3-dev
+    ```terminal
+    $ sudo apt-get install libeigen3-dev
+    ```
 
-### Ceres (5 steps)
+#### Ceres (5 steps)
 
 [Ceres](http://www.ceres-solver.org/) is an optimization library. Currently, this dependency is optional, so the build procedure of Wolf skips part of compilation in case this dependency is not found on the system. **Installation** is desctibed at [Ceres site](http://www.ceres-solver.org/building.html). However we report here an alternative step by step procedure to install Ceres.
 
-**(1)** Skip this step if Cmake 2.8.0+ and Eigen3.0+ are already installed. Otherwise install them with *apt-get*.
+    **(1)** Skip this step if Cmake 2.8.0+ and Eigen3.0+ are already installed. Otherwise install them with *apt-get*.
 
-**(2) GFLAGS**
+    **(2) GFLAGS**
 
--   Git clone the source
+    -   Git clone the source:
 
-`$ git clone `[`https://github.com/gflags/gflags.git`](https://github.com/gflags/gflags.git)
+    ```terminal
+    $ git clone [https://github.com/gflags/gflags.git](https://github.com/gflags/gflags.git)
+    ```
 
--   Build and install with:
+    -   Build and install with:
 
-        $ cd gflags
-        $ mkdir build
-        $ cd build
-        $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" -DGFLAGS_NAMESPACE="google" ..
-        $ make
-        $ sudo make install 
+    ```terminal
+    $ cd gflags
+    $ mkdir build
+    $ cd build
+    $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" -DGFLAGS_NAMESPACE="google" ..
+    $ make
+    $ sudo make install 
+    ```
 
-libgflags.a will be installed at **/usr/local/lib**
+    libgflags.a will be installed at **/usr/local/lib**
 
-**(3) GLOG**
+    **(3) GLOG**
 
--   Download a tar-gz-ball from [here](https://code.google.com/p/google-glog/), download section.
--   Uncompress it with:
+    -   Git clone the source:
 
-        $ tar -xvzf glog-0.3.3.tar.gz 
+    ```terminal
+    $ git clone [https://github.com/google/glog.git](https://github.com/google/glog.git)
+    ```
 
--   Build and install with:
+    -   Build and install with:
 
-        $ cd glog-0.3.3
-        $ ./configure --with-gflags=/usr/local/
-        $ make
-        $ sudo make install
+    ```terminal
+    $ cd glog
+    $ ./configure --with-gflags=/usr/local/
+    $ make
+    $ sudo make install
+    ```
 
-libglog.so will be installed at **/usr/local/lib**
+    libglog.so will be installed at **/usr/local/lib**
 
-**(4) SUITESPARSE**
+    -   Tourbleshooting:
 
--   Easy way!:
+    If the `make` command fails with the error: `/bin/bash: aclocal-1.14: command not found`, install Glog with the following commands:
+        
+    ```terminal
+    $ cd glog
+    $ sudo apt-get install autoconf
+    $ autoreconf --force --install
+    $ ./configure --with-gflags=/usr/local/
+    $ make
+    $ sudo make install
+    ```
 
-        $ sudo apt-get install libsuitesparse-dev
+    **(4) SUITESPARSE**
 
-**(5) CERES**
+    -   Easy way!:
 
--   Get the tar-gz-ball corresponding to the latest stable release from [here](http://www.ceres-solver.org/building.html).
--   Uncompress it with:
+    ```terminal
+    $ sudo apt-get install libsuitesparse-dev
+    ```
 
-        $ tar -xvzf ceres-solver-1.10.0.tar.gz
+    **(5) CERES**
+    
+    -   Git clone the source:
 
--   Build and install with:
+    ```terminal
+    $ git clone [https://ceres-solver.googlesource.com/ceres-solver](https://ceres-solver.googlesource.com/ceres-solver)
+    ```
+        
+    -   Build and install with:
 
-        $ cd ceres-solver-1.10.0
-        $ mkdir build
-        $ cd build
-        $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" ..
-        $ make
-        $ sudo make install 
+    ```terminal
+    $ cd ceres-solver
+    $ mkdir build
+    $ cd build
+    $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" ..
+    $ make
+    $ sudo make install 
+    ```
 
-libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/include/ceres**
+    libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/include/ceres**
 
-### Yaml-cpp. Wolf uses YAML files for configuration and for saving and loading workspaces.
+#### Yaml-cpp 
 
-**(1)** Obtain:
+Wolf uses YAML files for configuration and for saving and loading workspaces. To obtain it run:
 
-- Ubuntu:
+    -   Ubuntu:
 
-  ```
-  $ sudo apt-get install libyaml-cpp-dev
-  ```
-- Mac:
+    ```terminal
+    $ sudo apt-get install libyaml-cpp-dev
+    ```
 
-  ```
-  $ brew install yaml-cpp
-  ```
+    -   Mac:
+
+    ```terminal
+    $ brew install yaml-cpp
+    ```
+        
 We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it at `[wolf]/cmake_modules/FindYamlCpp.cmake`
 
-### Laser Scan Utils (Optional. Install only if you want to use IRI's laser scan utils)
+#### Optional: Laser Scan Utils (Install only if you want to use IRI's laser scan utils)
 
-**(1)** Download:
+    **(1)** Git clone the source:
 
-`$ git clone `[`https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git`](https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git)` laser_scan_utils`
+    ```terminal
+    $ git clone [https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git](https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git)
+    ```
+    
+    **(2)** Build and install:
 
-**(2)** Build and install:
-
+    ```terminal
     $ cd laser_scan_utils/trunk/build
     $ cmake ..
     $ make
     $ sudo make install
+    ```
 
-### Raw GPS Utils (Optional. Install only if you want to use IRI's raw gps utils)
+#### Optional: Raw GPS Utils (Install only if you want to use IRI's raw gps utils)
 
-**(1)** Download:
+    **(1)** Git clone the source:
 
-`$ git clone `[`https://github.com/pt07/raw_gps_utils.git`](https://github.com/pt07/raw_gps_utils.git)` `
+    ```terminal
+    $ git clone [https://github.com/pt07/raw_gps_utils.git](https://github.com/pt07/raw_gps_utils.git)
+    ```
 
-**(2)** Build and install:
+    **(2)** Build and install:
 
+    ```terminal
     $ cd raw_gps_utils/build
     $ cmake ..
     $ make
     $ sudo make install
+    ```
+
 
 Download and build
 ------------------
 
-### Wolf C++ Library
+#### Wolf C++ Library
 
-**Download:**
+    **Download:**
+    
+    ```terminal
+    $ git clone [https://gitlab.iri.upc.edu/mobile_robotics/wolf.git](https://gitlab.iri.upc.edu/mobile_robotics/wolf.git)
+    ```
 
-`$ git clone `[`https://gitlab.iri.upc.edu/mobile_robotics/wolf.git`](https://gitlab.iri.upc.edu/mobile_robotics/wolf.git)
+    **Build:**
 
-**Build:**
-
-    $ cd wolf/build
+    ```terminal    
+    $ cd wolf
+    $ mkdir build
+    $ cd build
     $ cmake ..
     $ make
     $ sudo make install  //optional in case you want to install wolf library
+    ```
 
+    **Set the WOLF_ROOT environment variable**
 
-**Set the WOLF_ROOT environment variable**
+    We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at run-time.
+    For example, if we want to use YAML files for configuring sensors, `YAML::LoadFile(filename)` needs an absolute path to a `filename`. This name is platform-specific, and many times user-specific.
 
-We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at run-time.
-For example, if we want to use YAML files for configuring sensors, `YAML::LoadFile(filename)` needs an absolute path to a `filename`. This name is platform-specific, and many times user-specific.
+    Usually, these files are out of the WOLF project. But for testing purposes, some of these files exist within the WOLF directories.
 
-Usually, these files are out of the WOLF project. But for testing purposes, some of these files exist within the WOLF directories.
+    Proceed as follows:
 
-Proceed as follows:
+    1. To run from __Terminal__ (the default), you need to create an environment variable WOLF_ROOT pointing to where the wolf project is.
+    
+    Edit file `~/.bashrc`, or `~/.bash_profile`, and add these lines:
+    ```      
+    export WOLF_ROOT="/abs/path/to/wolf"
+    ```
+    
+    Then you need to source the file to get effect,
+    ```      
+    source ~/.bash_profile    // or ~/.bashrc, of course
+    ```
+    
+    2. If you are using Eclipse or other __GUIs__ and you want this environment variable to be accessed by them, edit the file `/etc/environment` (you need to use `sudo`) and add this line:
 
-1. To run from __Terminal__ (the default), you need to create an environment variable WOLF_ROOT pointing to where the wolf project is.
-  - Edit file `~/.bashrc`, or `~/.bash_profile`, and add these lines:
-  ```      
-  export WOLF_ROOT="/abs/path/to/wolf"
-  ```
-  * Then you need to source the file to get effect,
-  ```      
-  source ~/.bash_profile    // or ~/.bashrc, of course
-  ```
-2. If you are using Eclipse or other __GUIs__ and you want this environment variable to be accessed by them, edit the file `/etc/environment` (you need to use `sudo`) and add this line:
-
-  ```
-  WOLF_ROOT="/abs/path/to/wolf"
-  ```   
-Then reboot your machine.  
-Alternatively, you can set up the environment variables in your GUIs only. Follow these guidelines:
-  - If you run your application from __eclipse__, do:  
-    - Menu Run > Run configurations...  
-    - Add, or edit, a run configuration for the executable you want to run  
-    - Click on tab 'Environment'  
-    - Add a variable named `WOLF_ROOT`, with value `/abs/path/to/wolf`  
-  - If you run from __QtCreator__  
-    - Click on Left bar > Projects > Tab 'Build'  
-      - Under 'Build Environment', click 'Details'  
-      - Add variable `WOLF_ROOT` with value `/abs/path/to/wolf`  
-    - Click on Tab 'Run'  
-      - Select your Run configuration  
-      - Under 'Run Environment', make sure it says 'Use Build Environment'  
-      - If not, click on 'Details'   
+    ```
+    WOLF_ROOT="/abs/path/to/wolf"
+    ```   
+    Then reboot your machine.  
+    
+    Alternatively, you can set up the environment variables in your GUIs only. Follow these guidelines:
+    
+    - If you run your application from __eclipse__, do:  
+        - Menu Run > Run configurations...  
+        - Add, or edit, a run configuration for the executable you want to run  
+        - Click on tab 'Environment'  
+        - Add a variable named `WOLF_ROOT`, with value `/abs/path/to/wolf`  
+    
+    - If you run from __QtCreator__  
+        - Click on Left bar > Projects > Tab 'Build'  
+        - Under 'Build Environment', click 'Details'  
+        - Add variable `WOLF_ROOT` with value `/abs/path/to/wolf`  
+        - Click on Tab 'Run'  
+        - Select your Run configuration  
+        - Under 'Run Environment', make sure it says 'Use Build Environment'  
+        - If not, click on 'Details'   
         - Under 'Base environment for this run configuration', select 'Build Environment'  
 
-### Wolf ROS Node
+#### Wolf ROS Node
 
-`$ git clone `[`https://github.com/IRI-MobileRobotics/wolf_ros.git`](https://github.com/IRI-MobileRobotics/wolf_ros.git)
+    -   Git clone the source (inside your ROS workspace):
 
-
+    ```terminal
+    $ git clone [https://github.com/IRI-MobileRobotics/wolf_ros.git](https://github.com/IRI-MobileRobotics/wolf_ros.git)
+    ```
 
 Using the `catkin_tools` package
 --------------------------------
 
-1.  Install `catkin_tools` :
+    **(1)**  Install `catkin_tools` :
 
     [`installation webpage.`](https://catkin-tools.readthedocs.io/en/latest/installing.html)
 
     .  Installing on Ubuntu with `apt-get`
 
-      ```terminal
-        $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
-        $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
-        $ sudo apt-get update
-        $ sudo apt-get install python-catkin-tools
-      ```
+    ```terminal
+    $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
+    $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+    $ sudo apt-get update
+    $ sudo apt-get install python-catkin-tools
+    ```
 
     .  Installing with [`pip`](https://pip.pypa.io/en/stable/installing/)
 
-      ```terminal
-        $ sudo pip install -U catkin_tools
-      ```
+    ```terminal
+    $ sudo pip install -U catkin_tools
+    ```
 
-2.  Create a `catkin workspace` :
+    **(2)**  Create a `catkin workspace` :
 
-      ```terminal
-      $ cd ~/my_workspace_directory/
-      $ create mkdir -p wolf_ws/src
-      $ cd wolf_ws/src
-      ```
+    ```terminal
+    $ cd ~/my_workspace_directory/
+    $ create mkdir -p wolf_ws/src
+    $ cd wolf_ws/src
+    ```
 
-3.  Download `Ceres` :
+    **(3)**  Download `Ceres` :
 
     In the previously created directory `~/my_workspace_directory/wolf_ws/src/` clone `Ceres` & `wolf`.
 
-     ```terminal
-        $ git clone https://github.com/artivis/ceres_solver.git
+    ```terminal
+    $ git clone [https://github.com/artivis/ceres_solver.git](https://github.com/artivis/ceres_solver.git)
+    ```
+
+    **(4)**  Download `wolf` :
+
+    ```terminal
+    $ git clone [https://gitlab.iri.upc.edu/mobile_robotics/wolf.git](https://gitlab.iri.upc.edu/mobile_robotics/wolf.git)
      ```
-
-4.  Download `wolf` :
-
-      ```terminal
-        $ git clone https://gitlab.iri.upc.edu/mobile_robotics/wolf.git
-      ```
 
     At this point you might need to switch to the `catkin_build` branch of the wolf project.
 
-      ```terminal
-        $ cd wolf
-        $ git checkout catkin_build
-      ```
+    ```terminal
+    $ cd wolf
+    $ git checkout catkin_build
+    ```
 
     (optional) Download `wolf_ros` :
 
-      ```terminal
-        $ git clone https://github.com/IRI-MobileRobotics/Wolf_ros.git
-        ```
+    ```terminal
+    $ git clone [https://github.com/IRI-MobileRobotics/Wolf_ros.git](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
+    ```
 
-5.  Let's Compile !
+    **(5)**  Let's Compile !
 
     The command below can be launch from any sub-directory in `~/my_workspace_directory/wolf_ws/`.
 
-      ```terminal
-      $ catkin build
-      ```
+    ```terminal
+    $ catkin build
+    ```
 
-6.  Run tests:
+    **(6)**  Run tests:
 
-      ```terminal
-      $ catkin run_tests
-      ```
+    ```terminal
+    $ catkin run_tests
+    ```
 
 Inspiring Links
 ---------------
@@ -294,44 +345,60 @@ Inspiring Links
 Useful tools
 ------------
 
-### Profiling with Valgrind and Kcachegrind
+#### Profiling with Valgrind and Kcachegrind
 
 Kcachegrind is a graphical frontend for profiling your program and optimizing your code.
 
-#### Install in Ubuntu
+- Ubuntu:
 
-Get the programs with
+    Get the programs with
 
+    ```terminal
     $ sudo apt-get install valgrind kcachegrind
+    ```
 
-#### Install in Mac OSX
+- Mac OSX
 
-In Mac, you can use qcachegrind instead. To get it through Homebrew, type
+    In Mac, you can use qcachegrind instead. To get it through Homebrew, type
 
+    ```terminal
     $ brew install valgrind qcachegrind
+    ```
+    
+    I don't know if these packages are available through MacPorts. Try
 
-I don't know if these packages are available through MacPorts. Try
-
+    ```terminal
     $ ports search --name valgrind
     $ ports search --name qcachegrind
+    ```
 
-If they are available, just do
+    If they are available, just do
 
+    ```terminal
     $ sudo port install valgrind qcachegrind
+    ```
 
 #### Do the profiling and watch the reports
 
 Type in your `wolf/bin/` directory:
 
+    ```terminal
     $ cd bin/
     $ valgrind --tool=callgrind ./my_program <my_prg_params>
+    ```
 
-this produces a log report called `callgrind.out.XXXX`, where XXXX is a number. Then type (Ubuntu)
+this produces a log report called `callgrind.out.XXXX`, where XXXX is a number. Then type 
 
+- Ubuntu
+
+    ```terminal
     $ kcachegrind callgrind.out.XXXX
+    ```
 
-or (Mac)
+- Mac OSX
 
+    ```terminal
     $ qcachegrind callgrind.out.XXXX
+    ```
 
 and enjoy.
