@@ -287,10 +287,28 @@ Using the `catkin_tools` package
     **(2)**  Create a `catkin workspace` :
 
     ```terminal
-    $ cd ~/my_workspace_directory/
-    $ create mkdir -p wolf_ws/src
+    $ cd 
+    $ mkdir -p wolf_ws/src
     $ cd wolf_ws/src
+    $ catkin_init_workspace
+    $ cd ..
+    $ catkin_make
     ```
+    
+    **(3)** Setup your `bash_rc`:
+    
+    Add at the end of the ~/.bashrc file with the following command:
+    
+    ```terminal
+    echo "source ~/wolf_ws/devel/setup.bash" >> ~/.bashrc
+    ```
+    
+    Source your bash:
+    
+    ```terminal
+    source ~/.bashrc
+    ```
+    
 
     **(3)**  Download `Ceres` :
 
