@@ -53,7 +53,7 @@ Dependencies
 
 -   Git clone the source:
 
-        $ git clone [https://github.com/gflags/gflags.git](https://github.com/gflags/gflags.git)
+        $ git clone https://github.com/gflags/gflags.git
     
 -   Build and install with:
 
@@ -70,7 +70,7 @@ libgflags.a will be installed at **/usr/local/lib**
 
 -   Git clone the source:
 
-        $ git clone [https://github.com/google/glog.git](https://github.com/google/glog.git)
+        $ git clone https://github.com/google/glog.git
     
 -   Build and install with:
 
@@ -102,7 +102,7 @@ libglog.so will be installed at **/usr/local/lib**
     
 -   Git clone the source:
 
-        $ git clone [https://ceres-solver.googlesource.com/ceres-solver](https://ceres-solver.googlesource.com/ceres-solver)
+        $ git clone https://ceres-solver.googlesource.com/ceres-solver
         
 -   Build and install with:
 
@@ -133,7 +133,7 @@ We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it a
 
 **(1)** Git clone the source:
 
-        $ git clone [https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git](https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git)
+        $ git clone https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git
     
 **(2)** Build and install:
 
@@ -146,7 +146,7 @@ We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it a
 
 **(1)** Git clone the source:
 
-    $ git clone [https://github.com/pt07/raw_gps_utils.git](https://github.com/pt07/raw_gps_utils.git)
+    $ git clone https://github.com/pt07/raw_gps_utils.git
     
 **(2)** Build and install:
 
@@ -162,7 +162,7 @@ Download and build
 
 **Download:**
     
-    $ git clone [https://gitlab.iri.upc.edu/mobile_robotics/wolf.git](https://gitlab.iri.upc.edu/mobile_robotics/wolf.git)
+    $ git clone https://gitlab.iri.upc.edu/mobile_robotics/wolf.git
     
 **Build:**
 
@@ -216,7 +216,7 @@ Alternatively, you can set up the environment variables in your GUIs only. Follo
 
 -   Git clone the source (inside your ROS workspace):
 
-    $ git clone [https://github.com/IRI-MobileRobotics/wolf_ros.git](https://github.com/IRI-MobileRobotics/wolf_ros.git)
+    $ git clone https://github.com/IRI-MobileRobotics/wolf_ros.git
 
 Using the `catkin_tools` package
 --------------------------------
@@ -259,11 +259,11 @@ Source your bash:
 
 In the previously created directory `~/my_workspace_directory/wolf_ws/src/` clone `Ceres` & `wolf`.
 
-    $ git clone [https://github.com/artivis/ceres_solver.git](https://github.com/artivis/ceres_solver.git)
+    $ git clone https://github.com/artivis/ceres_solver.git
 
 **(4)**  Download `wolf` :
 
-    $ git clone [https://gitlab.iri.upc.edu/mobile_robotics/wolf.git](https://gitlab.iri.upc.edu/mobile_robotics/wolf.git)
+    $ git clone https://gitlab.iri.upc.edu/mobile_robotics/wolf.git
 
 At this point you might need to switch to the `catkin_build` branch of the wolf project.
 
@@ -272,7 +272,7 @@ At this point you might need to switch to the `catkin_build` branch of the wolf 
 
 (optional) Download `wolf_ros` :
 
-    $ git clone [https://github.com/IRI-MobileRobotics/Wolf_ros.git](https://github.com/IRI-MobileRobotics/Wolf_ros.git)
+    $ git clone https://github.com/IRI-MobileRobotics/Wolf_ros.git
 
 **(5)**  Let's Compile !
 
