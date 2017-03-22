@@ -111,10 +111,15 @@ include_directories("${PROJECT_BINARY_DIR}/conf")
 
 INCLUDE_DIRECTORIES(.)
 
-# include spdlog (logging) third_party
-set(SPDLOG_INCLUDE_DIRS "/usr/local/include/spdlog")
-INCLUDE_DIRECTORIES(${SPDLOG_INCLUDE_DIRS})
-
+# include spdlog (logging library)
+FIND_PATH(SPDLOG_INCLUDE_DIR spdlog.h /usr/local/include/spdlog /usr/include/spdlog)
+IF (SPDLOG_INCLUDE_DIR)
+  INCLUDE_DIRECTORIES(${SPDLOG_INCLUDE_DIR})
+  MESSAGE(STATUS "Found spdlog: ${SPDLOG_INCLUDE_DIR}")
+ELSE (SPDLOG_INCLUDE_DIR)
+ MESSAGE(FATAL_ERROR "Could not find spdlog")
+ENDIF (SPDLOG_INCLUDE_DIR)  
+  
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 
 IF(Ceres_FOUND)
