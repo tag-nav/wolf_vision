@@ -112,8 +112,8 @@ include_directories("${PROJECT_BINARY_DIR}/conf")
 INCLUDE_DIRECTORIES(.)
 
 # include spdlog (logging) third_party
-INCLUDE_DIRECTORIES(../third_party/spdlog/include)
-set(SPDLOG_INCLUDE_DIRS "../third_party/spdlog/include/")
+set(SPDLOG_INCLUDE_DIRS "/usr/local/include/spdlog")
+INCLUDE_DIRECTORIES(${SPDLOG_INCLUDE_DIRS})
 
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 
