@@ -19,6 +19,15 @@ class StateBlock;
 
 namespace wolf {
 
+typedef enum
+{
+//    LANDMARK_CANDIDATE = 1,   ///< A landmark, just created. Association with it allowed, but not yet establish an actual constraint for the solver
+    LANDMARK_ESTIMATED,   ///< A landmark being estimated. Association with it allowed, establishing actual constraints for the solver where both vehicle and landmark states are being estimated
+    LANDMARK_FIXED,       ///< A landmark estimated. Association with it allowed, establishing actual constraints for the solver, but its value remains static, no longer optimized
+} LandmarkStatus;
+
+
+
 
 //class LandmarkBase
 class LandmarkBase : public NodeBase, public std::enable_shared_from_this<LandmarkBase>
@@ -30,7 +39,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
         static unsigned int landmark_id_count_;
         bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
-        
+
     protected:
         unsigned int landmark_id_; ///< landmark unique id
         LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)

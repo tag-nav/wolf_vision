@@ -18,6 +18,17 @@ class StateBlock;
 
 namespace wolf {
 
+/** \brief Enumeration of all possible state status
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ */
+typedef enum
+{
+    ST_ESTIMATED = 0,   ///< State in estimation (default)
+    ST_FIXED = 1,       ///< State fixed, estimated enough or fixed infrastructure.
+} StateStatus;
+
+
 //class FrameBase
 class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase>
 {
