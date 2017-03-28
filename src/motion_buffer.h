@@ -21,16 +21,18 @@ using namespace Eigen;
 struct Motion
 {
     public:
-        TimeStamp ts_;                      ///< Time stamp
-        Eigen::VectorXs delta_;             ///< instantaneous motion delta
-        Eigen::VectorXs delta_integr_;      ///< the integrated motion or delta-integral
-        Eigen::MatrixXs delta_cov_;         ///< covariance of the instantaneous delta
-        Eigen::MatrixXs delta_integr_cov_;  ///< covariance of the integrated delta
+        TimeStamp ts_;                          ///< Time stamp
+        Eigen::VectorXs delta_;                 ///< instantaneous motion delta
+        Eigen::VectorXs delta_integr_;          ///< the integrated motion or delta-integral
+        Eigen::MatrixXs jacobian_delta_;        ///< Jacobian of the integration wrt delta_
+        Eigen::MatrixXs jacobian_delta_integr_; ///< Jacobian of the integration wrt delta_integr_
+        Eigen::MatrixXs delta_cov_;             ///< covariance of the instantaneous delta
+        Eigen::MatrixXs delta_integr_cov_;      ///< covariance of the integrated delta
     public:
         Motion();
         Motion(const TimeStamp& _ts, Size _delta_size = 0, Size _cov_size = 0);
         Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, Size _cov_size);
-        Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, const MatrixXs& _delta_cov, const MatrixXs& _delta_int_cov);
+        Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, const MatrixXs& _jac_delta, const MatrixXs& _jac_delta_int, const MatrixXs& _delta_cov);
         ~Motion();
         void resize(Size ds, Size dcs);
         void resize(Size ds);

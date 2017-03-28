@@ -8,9 +8,13 @@ Motion::Motion():
     resize(0);
 }
 
-Motion::Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, const MatrixXs& _delta_cov,
-               const MatrixXs& _delta_int_cov) :
-        ts_(_ts), delta_(_delta), delta_integr_(_delta_int), delta_cov_(_delta_cov), delta_integr_cov_(_delta_int_cov)
+Motion::Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, const MatrixXs& _jac_delta, const MatrixXs& _jac_delta_int, const MatrixXs& _delta_cov) :
+        ts_(_ts),
+        delta_(_delta),
+        delta_integr_(_delta_int),
+        jacobian_delta_(_jac_delta),
+        jacobian_delta_integr_(_jac_delta_int),
+        delta_cov_(_delta_cov)
 {
 }
 
@@ -33,6 +37,8 @@ void Motion::resize(Size ds, Size dcs)
 {
     delta_.resize(ds);
     delta_integr_.resize(ds);
+    jacobian_delta_.resize(dcs, dcs);
+    jacobian_delta_integr_.resize(dcs, dcs);
     delta_cov_.resize(dcs, dcs);
     delta_integr_cov_.resize(dcs, dcs);
 }

@@ -23,7 +23,14 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     incoming_ptr_ = std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
 
     preProcess();
-    integrate();
+
+    // integrate data
+    integrateOneStep();
+
+    // Update state and time stamps
+    last_ptr_->setTimeStamp(incoming_ptr_->getTimeStamp());
+    last_ptr_->getFramePtr()->setTimeStamp(last_ptr_->getTimeStamp());
+    last_ptr_->getFramePtr()->setState(getCurrentState());
 
     if (voteForKeyFrame() && permittedKeyFrame())
     {
@@ -38,12 +45,13 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         key_frame_ptr->setKey();
 
         // create motion feature and add it to the key_capture
+        delta_integrated_cov_ = integrateBufferCovariance(last_ptr_->getBuffer());
+
+
         FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
                 "MOTION",
                 last_ptr_->getBuffer().get().back().delta_integr_,
-                last_ptr_->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
-                        last_ptr_->getBuffer().get().back().delta_integr_cov_ :
-                        Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-4); // avoid a strict zero in the covariance
+                delta_integrated_cov_); // avoid a strict zero in the covariance
         last_ptr_->addFeature(key_feature_ptr);
 
         // create motion constraint and link it to parent feature and other frame (which is origin's frame)
@@ -60,7 +68,8 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         // reset the new buffer
         new_capture_ptr->getBuffer().get().push_back(Motion( {key_frame_ptr->getTimeStamp(), deltaZero(), deltaZero(),
                                              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
-                                             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)}));
+                                             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
+                                             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_) } ) ) ;
 
 
         // create a new frame
@@ -206,13 +215,14 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
         key_capture_ptr->getBuffer().get().push_back(mot);
     }
 
+    Eigen::MatrixXs covariance = integrateBufferCovariance(key_capture_ptr->getBuffer());
+
     // create motion feature and add it to the capture
     FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
             "MOTION",
             key_capture_ptr->getBuffer().get().back().delta_integr_,
-            key_capture_ptr->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
-                    key_capture_ptr->getBuffer().get().back().delta_integr_cov_ :
-                    Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-8);
+            covariance);
+
     key_capture_ptr->addFeature(key_feature_ptr);
 
     // create motion constraint and add it to the feature, and link it to the other frame (origin)
@@ -228,7 +238,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
     capture_ptr->setOriginFramePtr(_keyframe_ptr);
 
     // reintegrate own buffer // XXX: where is the result of re-integration stored?
-    reintegrate(capture_ptr);
+    reintegrateBuffer(capture_ptr);
 
     // modify feature and constraint (if they exist)
     if (!capture_ptr->getFeatureList().empty())
@@ -260,9 +270,8 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
     return true;
 }
 
-void ProcessorMotion::integrate()
+void ProcessorMotion::integrateOneStep()
 {
-
     // Set dt
     updateDt();
 
@@ -272,21 +281,13 @@ void ProcessorMotion::integrate()
     // integrate the current delta to pre-integrated measurements, and get Jacobians
     deltaPlusDelta(getBuffer().get().back().delta_integr_, delta_, dt_, delta_integrated_, jacobian_delta_preint_, jacobian_delta_);
 
-    // integrate covariance covariance
-    delta_integrated_cov_ = jacobian_delta_preint_ * getBuffer().get().back().delta_integr_cov_
-            * jacobian_delta_preint_.transpose() + jacobian_delta_ * delta_cov_ * jacobian_delta_.transpose();
-
     // push all into buffer
-    getBuffer().get().push_back(Motion( {incoming_ptr_->getTimeStamp(), delta_, delta_integrated_, delta_cov_,
-                                         delta_integrated_cov_}));
+    getBuffer().get().push_back(Motion( {incoming_ptr_->getTimeStamp(), delta_, delta_integrated_,
+                                         jacobian_delta_, jacobian_delta_preint_, delta_cov_}));
 
-    // Update state and time stamps
-    last_ptr_->setTimeStamp(incoming_ptr_->getTimeStamp());
-    last_ptr_->getFramePtr()->setTimeStamp(last_ptr_->getTimeStamp());
-    last_ptr_->getFramePtr()->setState(getCurrentState());
 }
 
-void ProcessorMotion::reintegrate(CaptureMotionPtr _capture_ptr)
+void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
 {
 
     // start with empty motion
@@ -299,20 +300,33 @@ void ProcessorMotion::reintegrate(CaptureMotionPtr _capture_ptr)
         // get dt
         const Scalar dt = motion_it->ts_ - prev_motion_it->ts_;
 
-        // integrate delta into delta_integr
+        // integrate delta into delta_integr, and rewrite the buffer
         deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, dt, motion_it->delta_integr_,
-                       jacobian_delta_preint_, jacobian_delta_);
-
-        // integrate covariances
-        delta_integrated_cov_ = jacobian_delta_preint_ * getBuffer().get().back().delta_integr_cov_
-                * jacobian_delta_preint_.transpose() + jacobian_delta_ * delta_cov_ * jacobian_delta_.transpose();
-
-        // XXX: Are we not pushing into buffer?
+                       motion_it->jacobian_delta_integr_, motion_it->jacobian_delta_);
 
         // advance in buffer
         motion_it++;
         prev_motion_it++;
     }
 }
+
+Eigen::MatrixXs ProcessorMotion::integrateBufferCovariance(const MotionBuffer& _motion_buffer)
+{
+
+    Eigen::MatrixXs cov(delta_cov_size_,delta_cov_size_);
+    cov.setZero();
+
+    for (Motion mot : _motion_buffer.get())
+    {
+        cov = mot.jacobian_delta_integr_*cov*mot.jacobian_delta_integr_.transpose() + mot.jacobian_delta_* mot.delta_cov_ * mot.jacobian_delta_.transpose();
+    }
+
+    // TODO Remove this by ensuring that mot.delta_cov_ is never zero
+    if (cov.determinant() <= Constants::EPS_SMALL)
+        cov = Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-4;
+
+    return cov;
+}
+
 
 }

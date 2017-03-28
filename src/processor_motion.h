@@ -107,13 +107,13 @@ class ProcessorMotion : public ProcessorBase
         /** \brief Gets a constant reference to the state integrated so far
          * \return the state vector
          */
-        const Eigen::VectorXs& getCurrentState();
+        Eigen::VectorXs getCurrentState();
 
         /** \brief Gets a constant reference to the state integrated so far and its stamp
          * \param _ts the returned stamp
          * return the state vector
          */
-        const Eigen::VectorXs& getCurrentState(TimeStamp& _ts);
+        Eigen::VectorXs getCurrentState(TimeStamp& _ts);
 
         /** \brief Fills the state corresponding to the provided time-stamp
          * \param _ts the time stamp
@@ -125,18 +125,18 @@ class ProcessorMotion : public ProcessorBase
          * \param _ts the time stamp
          * \return the state vector
          */
-        Eigen::VectorXs& getState(const TimeStamp& _ts);
+        Eigen::VectorXs getState(const TimeStamp& _ts);
 
         /** \brief Provides the motion integrated so far
-         * \return a const reference to the integrated delta state
+         * \return the integrated delta state
          */
-        const Motion& getMotion() const;
+        Motion getMotion() const;
         void getMotion(Motion& _motion) const;
 
         /** \brief Provides the motion integrated until a given timestamp
          * \return a reference to the integrated delta state
          */
-        const Motion& getMotion(const TimeStamp& _ts) const;
+        Motion getMotion(const TimeStamp& _ts) const;
         void getMotion(const TimeStamp& _ts, Motion& _motion) const;
 
         /** \brief Finds the capture that contains the closest previous motion of _ts
@@ -178,8 +178,9 @@ class ProcessorMotion : public ProcessorBase
 
     protected:
         void updateDt();
-        void integrate();
-        void reintegrate(CaptureMotionPtr _capture_ptr);
+        void integrateOneStep();
+        void reintegrateBuffer(CaptureMotionPtr _capture_ptr);
+        Eigen::MatrixXs integrateBufferCovariance(const MotionBuffer& _motion_buffer);
 
         /** Pre-process incoming Capture
          *
@@ -633,7 +634,7 @@ inline bool ProcessorMotion::voteForKeyFrame()
     return false;
 }
 
-inline Eigen::VectorXs& ProcessorMotion::getState(const TimeStamp& _ts)
+inline Eigen::VectorXs ProcessorMotion::getState(const TimeStamp& _ts)
 {
     getState(_ts, x_);
     return x_;
@@ -649,13 +650,13 @@ inline wolf::TimeStamp ProcessorMotion::getCurrentTimeStamp()
     return getBuffer().get().back().ts_;
 }
 
-inline const Eigen::VectorXs& ProcessorMotion::getCurrentState()
+inline Eigen::VectorXs ProcessorMotion::getCurrentState()
 {
     getCurrentState(x_);
     return x_;
 }
 
-inline const Eigen::VectorXs& ProcessorMotion::getCurrentState(TimeStamp& _ts)
+inline Eigen::VectorXs ProcessorMotion::getCurrentState(TimeStamp& _ts)
 {
     getCurrentState(x_, _ts);
     return x_;
@@ -673,12 +674,12 @@ inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts
     _ts = getCurrentTimeStamp();
 }
 
-inline const Motion& ProcessorMotion::getMotion() const
+inline Motion ProcessorMotion::getMotion() const
 {
     return getBuffer().get().back();
 }
 
-inline const Motion& ProcessorMotion::getMotion(const TimeStamp& _ts) const
+inline Motion ProcessorMotion::getMotion(const TimeStamp& _ts) const
 {
     auto capture_ptr = findCaptureContainingTimeStamp(_ts);
     assert(capture_ptr != nullptr && "ProcessorMotion::getMotion: timestamp older than first motion");
@@ -732,6 +733,7 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
             {_ts,
              deltaZero(),
              deltaZero(),
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)
              });
