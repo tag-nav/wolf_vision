@@ -22,6 +22,7 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         FeatureBaseWPtr feature_ptr_;                    ///< FeatureBase pointer (upper node)
 
         static unsigned int constraint_id_count_;
+        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
 
     protected:
         unsigned int constraint_id_;

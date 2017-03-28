@@ -9,6 +9,7 @@ unsigned int FeatureBase::feature_id_count_ = 0;
 FeatureBase::FeatureBase(const std::string& _type, unsigned int _dim_measurement) :
     NodeBase("FEATURE", _type),
     capture_ptr_(),
+    is_removing_(false),
     feature_id_(++feature_id_count_),
     track_id_(0),
     landmark_id_(0),
@@ -21,6 +22,7 @@ FeatureBase::FeatureBase(const std::string& _type, unsigned int _dim_measurement
 FeatureBase::FeatureBase(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
 	NodeBase("FEATURE", _type),
     capture_ptr_(),
+    is_removing_(false),
     feature_id_(++feature_id_count_),
     track_id_(0),
     landmark_id_(0),

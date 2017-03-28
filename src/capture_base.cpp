@@ -8,6 +8,7 @@ unsigned int CaptureBase::capture_id_count_ = 0;
 CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr) :
         NodeBase("CAPTURE", _type),
         frame_ptr_(), // nullptr
+        is_removing_(false),
         capture_id_(++capture_id_count_),
         time_stamp_(_ts),
         sensor_ptr_(_sensor_ptr),

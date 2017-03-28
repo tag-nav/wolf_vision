@@ -32,6 +32,10 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 {
     private:
         SensorBaseWPtr sensor_ptr_;
+
+        static unsigned int processor_id_count_;
+        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
+
     public:
         ProcessorBase(const std::string& _type, const Scalar& _time_tolerance = 0);
         virtual ~ProcessorBase();
@@ -80,9 +84,6 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
         ProblemPtr getProblem();
 
         void setTimeTolerance(Scalar _time_tolerance);
-
-    private:
-        static unsigned int processor_id_count_;
 
     protected:
         unsigned int processor_id_;

@@ -11,6 +11,7 @@ SensorBase::SensorBase(const std::string& _type, StateBlockPtr _p_ptr, StateBloc
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
         state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
+        is_removing_(false),
         sensor_id_(++sensor_id_count_), // simple ID factory
         extrinsic_dynamic_(_extr_dyn),
         noise_std_(_noise_size),
@@ -28,6 +29,7 @@ SensorBase::SensorBase(const std::string& _type, StateBlockPtr _p_ptr, StateBloc
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
         state_block_vec_(6), // allow for 3 state blocks by default. Resize in derived constructors if needed.
+        is_removing_(false),
         sensor_id_(++sensor_id_count_), // simple ID factory
         extrinsic_dynamic_(_extr_dyn),
         noise_std_(_noise_std),

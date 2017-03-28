@@ -24,6 +24,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         FeatureBaseList feature_list_;
 
         static unsigned int capture_id_count_;
+        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
 
     protected:
         unsigned int capture_id_;
