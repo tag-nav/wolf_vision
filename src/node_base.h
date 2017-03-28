@@ -14,7 +14,7 @@ namespace wolf {
  *  - A unique ID. The class implements the ID factory.
  *
  *  - A unique class name, strictly within this range of possibilities:
- *    - "UNDEFINED" -- used for NodeTerminus
+ *    - "BASE" -- should not be used
  *    - "PROBLEM"
  *    - "HARDWARE"
  *    - "SENSOR"

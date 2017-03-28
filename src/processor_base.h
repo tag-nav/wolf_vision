@@ -68,6 +68,7 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
          *
          * Provide the following functionality:
          *   - Construct a Frame,
+         *   - Set its state vector
          *   - Put it in the Trajectory, and
          *   - Add the provided capture on it.
          */
