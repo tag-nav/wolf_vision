@@ -49,6 +49,9 @@ class CaptureMotion : public CaptureBase
         CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
                       FrameBasePtr _origin_frame_ptr = nullptr);
 
+//        CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
+//                      const Eigen::VectorXs& _data_sigmas, FrameBasePtr _origin_frame_ptr = nullptr);
+
         CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
                       const Eigen::MatrixXs& _data_cov, FrameBasePtr _origin_frame_ptr = nullptr);
 
@@ -85,6 +88,21 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_
     //
 //    std::cout << "constructed    +C-Mot" << id() << std::endl;
 }
+
+//inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
+//                                    const Eigen::VectorXs& _data_sigmas, FrameBasePtr _origin_frame_ptr) :
+//        CaptureBase("MOTION", _ts, _sensor_ptr),
+//        data_(_data),
+//        data_cov_(_data_sigmas.size(), _data_sigmas.size()),
+//        buffer_(),
+//        origin_frame_ptr_(_origin_frame_ptr)
+//{
+//    data_cov_.setZero();
+//    for (int i = 0; i < _data_sigmas.size(); i++)
+//        data_cov_(i,i) = _data_sigmas(i) * _data_sigmas(i);
+//
+////    std::cout << "constructed    +C-Mot" << id() << std::endl;
+//}
 
 inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
                                     const Eigen::MatrixXs& _data_cov, FrameBasePtr _origin_frame_ptr) :
