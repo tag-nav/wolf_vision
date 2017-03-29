@@ -17,18 +17,17 @@ CaptureFix::~CaptureFix()
 
 void CaptureFix::process()
 {
-	// EXTRACT AND ADD FEATURES
-    addFeature(std::make_shared<FeatureFix>(data_,data_covariance_));
-    //std::cout << "FeatureFix extracted " << std::endl;
+    // Emplace feature
+    FeatureFixPtr feature_fix = std::make_shared<FeatureFix>(data_,data_covariance_);
+    addFeature(feature_fix);
 
-    // ADD CONSTRAINT
+    // Emplace constraint
     if (data_.size() == 3 && data_covariance_.rows() == 3 && data_covariance_.cols() == 3 )
-        getFeatureList().front()->addConstraint(std::make_shared<ConstraintFix>(getFeatureList().front()));
+        feature_fix->addConstraint(std::make_shared<ConstraintFix>(feature_fix));
     else if (data_.size() == 7 && data_covariance_.rows() == 6 && data_covariance_.cols() == 6 )
-        getFeatureList().front()->addConstraint(std::make_shared<ConstraintFix3D>(getFeatureList().front()));
+        feature_fix->addConstraint(std::make_shared<ConstraintFix3D>(feature_fix));
     else
         throw std::runtime_error("Wrong data size in CaptureFix. Use 3 for 2D, 7 for 3D.");
-    //std::cout << "ConstraintFix added " << std::endl;
 }
 
 

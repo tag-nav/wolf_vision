@@ -79,6 +79,13 @@ namespace wolf
  */
 class ProcessorMotion : public ProcessorBase
 {
+    private:
+        enum
+        {
+            IDLE,
+            RUNNING
+        } status_;
+
     // This is the main public interface
     public:
         ProcessorMotion(const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance = 0.1);
@@ -609,14 +616,6 @@ class ProcessorMotion : public ProcessorBase
 #include "frame_base.h"
 
 namespace wolf{
-
-inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
-{
-    // make a new key frame
-    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(KEY_FRAME, _x_origin, _ts_origin);
-    // set the key frame as origin
-    setOrigin(key_frame_ptr);
-}
 
 inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part)
 {
