@@ -102,7 +102,7 @@ class ProcessorMotion : public ProcessorBase
          * \param _x the returned state vector
          * \param _ts the returned stamp
          */
-        void getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts);
+        void getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts);
 
         /** \brief Gets a constant reference to the state integrated so far
          * \return the state vector
@@ -113,7 +113,7 @@ class ProcessorMotion : public ProcessorBase
          * \param _ts the returned stamp
          * return the state vector
          */
-        Eigen::VectorXs getCurrentState(TimeStamp& _ts);
+        Eigen::VectorXs getCurrentStateAndStamp(TimeStamp& _ts);
 
         /** \brief Fills the state corresponding to the provided time-stamp
          * \param _ts the time stamp
@@ -656,9 +656,9 @@ inline Eigen::VectorXs ProcessorMotion::getCurrentState()
     return x_;
 }
 
-inline Eigen::VectorXs ProcessorMotion::getCurrentState(TimeStamp& _ts)
+inline Eigen::VectorXs ProcessorMotion::getCurrentStateAndStamp(TimeStamp& _ts)
 {
-    getCurrentState(x_, _ts);
+    getCurrentStateAndStamp(x_, _ts);
     return x_;
 }
 
@@ -668,7 +668,7 @@ inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
     xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().get().back().delta_integr_, Dt, _x);
 }
 
-inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts)
+inline void ProcessorMotion::getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts)
 {
     getCurrentState(_x);
     _ts = getCurrentTimeStamp();
@@ -733,9 +733,9 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
             {_ts,
              deltaZero(),
              deltaZero(),
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)  // Cov
              });
 }
 

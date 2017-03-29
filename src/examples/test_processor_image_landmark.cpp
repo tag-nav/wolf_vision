@@ -191,7 +191,7 @@ int main(int argc, char** argv)
         Eigen::VectorXs x_prev(7);
         TimeStamp t_prev;
         Vector7s dx;
-        wolf_problem_ptr_->getCurrentState(x_prev, t_prev);
+        wolf_problem_ptr_->getCurrentStateAndStamp(x_prev, t_prev);
 
         // before the previous state
         FrameBasePtr prev_key_fr_ptr = wolf_problem_ptr_->getLastKeyFramePtr();

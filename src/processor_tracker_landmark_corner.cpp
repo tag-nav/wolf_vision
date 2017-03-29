@@ -10,7 +10,7 @@ void ProcessorTrackerLandmarkCorner::preProcess()
     extractCorners(std::static_pointer_cast<CaptureLaser2D>(incoming_ptr_), corners_incoming_);
 
     // compute transformations
-    t_world_robot_ = getProblem()->getStateAtTimeStamp(incoming_ptr_->getTimeStamp());
+    t_world_robot_ = getProblem()->getState(incoming_ptr_->getTimeStamp());
 
     // world_robot
     Eigen::Matrix3s R_world_robot = Eigen::Matrix3s::Identity();

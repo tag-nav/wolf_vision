@@ -184,11 +184,11 @@ class Problem : public std::enable_shared_from_this<Problem>
                                const TimeStamp& _time_stamp);
 
         Eigen::VectorXs getCurrentState();
-        Eigen::VectorXs getCurrentState(TimeStamp& _ts);
+        Eigen::VectorXs getCurrentStateAndStamp(TimeStamp& _ts);
         void getCurrentState(Eigen::VectorXs& state);
-        void getCurrentState(Eigen::VectorXs& state, TimeStamp& _ts);
-        Eigen::VectorXs getStateAtTimeStamp(const TimeStamp& _ts);
-        void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
+        void getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& _ts);
+        Eigen::VectorXs getState(const TimeStamp& _ts);
+        void getState(const TimeStamp& _ts, Eigen::VectorXs& state);
 
         Eigen::VectorXs zeroState();
 

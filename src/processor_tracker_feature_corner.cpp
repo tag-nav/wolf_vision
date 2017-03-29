@@ -21,7 +21,7 @@ void ProcessorTrackerFeatureCorner::preProcess()
     t_world_sensor_prev_ = t_world_sensor_;
 
     // compute transformations
-    t_world_robot_ = getProblem()->getStateAtTimeStamp(incoming_ptr_->getTimeStamp());
+    t_world_robot_ = getProblem()->getState(incoming_ptr_->getTimeStamp());
 
     // world_robot
     Eigen::Matrix3s R_world_robot = Eigen::Matrix3s::Identity();

@@ -18,7 +18,7 @@ void ProcessorTrackerLandmarkPolyline::preProcess()
 
 void ProcessorTrackerLandmarkPolyline::computeTransformations(const TimeStamp& _ts)
 {
-    Eigen::Vector3s vehicle_pose = getProblem()->getStateAtTimeStamp(_ts);
+    Eigen::Vector3s vehicle_pose = getProblem()->getState(_ts);
     t_world_robot_ = vehicle_pose.head<2>();
 
     // world_robot

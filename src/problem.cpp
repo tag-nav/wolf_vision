@@ -178,7 +178,7 @@ void Problem::clearProcessorMotion()
 
 FrameBasePtr Problem::emplaceFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
 {
-    return emplaceFrame(_frame_type, getStateAtTimeStamp(_time_stamp), _time_stamp);
+    return emplaceFrame(_frame_type, getState(_time_stamp), _time_stamp);
 }
 
 FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
@@ -235,26 +235,26 @@ Eigen::VectorXs Problem::getCurrentState()
     return state;
 }
 
-Eigen::VectorXs Problem::getCurrentState(TimeStamp& ts)
+Eigen::VectorXs Problem::getCurrentStateAndStamp(TimeStamp& ts)
 {
     Eigen::VectorXs state(getFrameStructureSize());
-    getCurrentState(state, ts);
+    getCurrentStateAndStamp(state, ts);
     return state;
 }
 
 void Problem::getCurrentState(Eigen::VectorXs& state)
 {
     TimeStamp ts;
-    getCurrentState(state, ts);
+    getCurrentStateAndStamp(state, ts);
 }
 
 
-void Problem::getCurrentState(Eigen::VectorXs& state, TimeStamp& ts)
+void Problem::getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& ts)
 {
     assert(state.size() == getFrameStructureSize() && "Problem::getCurrentState: bad state size");
 
     if (processor_motion_ptr_ != nullptr)
-        processor_motion_ptr_->getCurrentState(state, ts);
+        processor_motion_ptr_->getCurrentStateAndStamp(state, ts);
     else if (trajectory_ptr_->getLastKeyFramePtr() != nullptr)
     {
         trajectory_ptr_->getLastKeyFramePtr()->getTimeStamp(ts);
@@ -264,7 +264,7 @@ void Problem::getCurrentState(Eigen::VectorXs& state, TimeStamp& ts)
         state = zeroState();
 }
 
-void Problem::getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state)
+void Problem::getState(const TimeStamp& _ts, Eigen::VectorXs& state)
 {
     assert(state.size() == getFrameStructureSize() && "Problem::getStateAtTimeStamp: bad state size");
 
@@ -284,10 +284,10 @@ void Problem::getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state)
     }
 }
 
-Eigen::VectorXs Problem::getStateAtTimeStamp(const TimeStamp& _ts)
+Eigen::VectorXs Problem::getState(const TimeStamp& _ts)
 {
     Eigen::VectorXs state(getFrameStructureSize());
-    getStateAtTimeStamp(_ts, state);
+    getState(_ts, state);
     return state;
 }
 

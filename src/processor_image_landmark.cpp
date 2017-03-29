@@ -119,7 +119,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
     cv::Mat candidate_descriptors;
     std::vector<cv::DMatch> cv_matches;
 
-    Eigen::VectorXs current_state = getProblem()->getStateAtTimeStamp(incoming_ptr_->getTimeStamp());
+    Eigen::VectorXs current_state = getProblem()->getState(incoming_ptr_->getTimeStamp());
 
     for (auto landmark_in_ptr : _landmark_list_in)
     {

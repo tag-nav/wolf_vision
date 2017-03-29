@@ -60,7 +60,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         {
             // Make KF
             FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(KEY_FRAME,
-                                                                   getProblem()->getStateAtTimeStamp(last_ptr_->getTimeStamp()),
+                                                                   getProblem()->getState(last_ptr_->getTimeStamp()),
                                                                    last_ptr_->getTimeStamp());
             new_frame_ptr->addCapture(last_ptr_); // Add incoming Capture to the new Frame
             WOLF_DEBUG( "Last appended to new KF" , new_frame_ptr->id() );
@@ -248,7 +248,7 @@ void ProcessorTracker::setKeyFrame(CaptureBasePtr _capture_ptr)
         // Set key
         _capture_ptr->getFramePtr()->setKey();
         // Set state to the keyframe
-        _capture_ptr->getFramePtr()->setState(getProblem()->getStateAtTimeStamp(_capture_ptr->getTimeStamp()));
+        _capture_ptr->getFramePtr()->setState(getProblem()->getState(_capture_ptr->getTimeStamp()));
         // Call the new keyframe callback in order to let the other processors to establish their constraints
         getProblem()->keyFrameCallback(_capture_ptr->getFramePtr(), std::static_pointer_cast<ProcessorBase>(shared_from_this()), time_tolerance_);
     }
