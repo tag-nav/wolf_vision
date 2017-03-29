@@ -10,6 +10,7 @@ ProcessorMotion::ProcessorMotion(const std::string& _type, Size _state_size, Siz
                 _delta_size), delta_integrated_cov_(_delta_cov_size, _delta_cov_size), data_(_data_size), jacobian_delta_preint_(
                 delta_cov_size_, delta_cov_size_), jacobian_delta_(delta_cov_size_, delta_cov_size_)
 {
+    status_ = IDLE;
     //
 }
 
@@ -20,6 +21,31 @@ ProcessorMotion::~ProcessorMotion()
 
 void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 {
+
+
+    if (status_ == IDLE)
+    {
+        TimeStamp t0 = _incoming_ptr->getTimeStamp();
+
+        if (origin_ptr_ == nullptr)
+        {
+            FrameBasePtr frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t0);
+            if (frm && fabs(frm->getTimeStamp() - t0) < time_tolerance_)
+            {
+                // Join existing KF
+                setOrigin(frm);
+            }
+            else
+            {
+                // Create new KF for origin
+                VectorXs x0 = getProblem()->zeroState();
+                setOrigin(x0, t0);
+            }
+        }
+        status_ = RUNNING;
+    }
+
+
     incoming_ptr_ = std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
 
     preProcess();
@@ -126,6 +152,12 @@ CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp
         }
     }
     return capture_ptr;
+}
+
+void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
+{
+    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(KEY_FRAME, _x_origin, _ts_origin);
+    setOrigin(key_frame_ptr);
 }
 
 void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
