@@ -56,6 +56,8 @@ class ProcessorOdom2D : public ProcessorMotion
 
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
 
+        virtual void resetDerived();
+
     protected:
         Scalar dist_traveled_th_;
         Scalar cov_det_th_;
@@ -226,12 +228,13 @@ inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _m
     tmp.ts_ = _ts;
     tmp.delta_ = deltaZero();
     tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-    tmp.delta_integr_cov_ += Eigen::MatrixXs::Zero(delta_size_, delta_size_);
+//    tmp.delta_integr_cov_ += Eigen::MatrixXs::Zero(delta_size_, delta_size_);
     return tmp;
 }
 
 inline bool ProcessorOdom2D::voteForKeyFrame()
 {
+    // Distance criterion
     //std::cout << "ProcessorOdom2D::voteForKeyFrame: traveled distance " << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
     if (getBuffer().get().back().delta_integr_.head<2>().norm() > dist_traveled_th_)
     {
@@ -239,12 +242,17 @@ inline bool ProcessorOdom2D::voteForKeyFrame()
                 << getBuffer().get().back().delta_integr_.head<2>().norm() << std::endl;
         return true;
     }
-    if (getBuffer().get().back().delta_integr_cov_.determinant() > cov_det_th_)
+
+    // Uncertainty criterion
+    delta_integrated_cov_ = getBuffer().get().back().jacobian_delta_integr_ * delta_integrated_cov_ * getBuffer().get().back().jacobian_delta_integr_.transpose() + getBuffer().get().back().jacobian_delta_ * getBuffer().get().back().delta_cov_ * getBuffer().get().back().jacobian_delta_.transpose();
+    if (delta_integrated_cov_.determinant() > cov_det_th_)
     {
         std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME covariance det "
-                << getBuffer().get().back().delta_integr_cov_.determinant() << std::endl;
+                << delta_integrated_cov_.determinant() << std::endl;
         return true;
     }
+
+    // Time criterion
     if (getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() > elapsed_time_th_)
     {
         std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME elapsed time "
@@ -253,6 +261,12 @@ inline bool ProcessorOdom2D::voteForKeyFrame()
         return true;
     }
     return false;
+}
+
+inline void ProcessorOdom2D::resetDerived()
+{
+    // We want this covariance up-to-date because we use it in vote_for_keyframe().
+    delta_integrated_cov_ = integrateBufferCovariance(getBuffer());
 }
 
 } // namespace wolf

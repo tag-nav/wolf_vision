@@ -40,7 +40,7 @@ void Motion::resize(Size ds, Size dcs)
     jacobian_delta_.resize(dcs, dcs);
     jacobian_delta_integr_.resize(dcs, dcs);
     delta_cov_.resize(dcs, dcs);
-    delta_integr_cov_.resize(dcs, dcs);
+//    delta_integr_cov_.resize(dcs, dcs);
 }
 
 const Motion& MotionBuffer::getMotion(const TimeStamp& _ts) const

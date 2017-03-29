@@ -259,8 +259,6 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
 
     // create motion constraint and add it to the feature, and link it to the other frame (origin)
     auto key_ctr_ptr = emplaceConstraint(key_feature_ptr, key_frame_origin);
-//    key_feature_ptr->addConstraint(key_ctr_ptr);
-//    key_frame_origin->addConstrainedBy(key_ctr_ptr);
 
     // Fix the remaining capture
     if (capture_ptr == last_ptr_)
@@ -269,22 +267,20 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar&
 
     capture_ptr->setOriginFramePtr(_keyframe_ptr);
 
-    // reintegrate own buffer // XXX: where is the result of re-integration stored?
+    // reintegrate own buffer // JS: where is the result of re-integration stored? JS: in the same buffer!
     reintegrateBuffer(capture_ptr);
 
-    // modify feature and constraint (if they exist)
+    // modify feature and constraint (if they exist in the capture)
     if (!capture_ptr->getFeatureList().empty())
     {
         FeatureBasePtr feature_ptr = capture_ptr->getFeatureList().back(); // there is only one feature!
 
-        // modify feature
+        // Modify feature --------
         feature_ptr->setMeasurement(capture_ptr->getBuffer().get().back().delta_integr_);
-        feature_ptr->setMeasurementCovariance(
-                capture_ptr->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
-                        capture_ptr->getBuffer().get().back().delta_integr_cov_ :
-                        Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-8);
+        covariance = integrateBufferCovariance(capture_ptr->getBuffer());
+        feature_ptr->setMeasurementCovariance(covariance);
 
-        // modify constraint
+        // Modify constraint --------
         // Instead of modifying, we remove one ctr, and create a new one.
 
         // get the constraint to be removed later

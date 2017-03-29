@@ -23,7 +23,7 @@ Motion newMotion(TimeStamp t, Scalar d, Scalar D, Scalar c, Scalar C)
     m.delta_(0) = d;
     m.delta_integr_(0) = D;
     m.delta_cov_(0) = c;
-    m.delta_integr_cov_(0) = C;
+//    m.delta_integr_cov_(0) = C;
     return m;
 }
 

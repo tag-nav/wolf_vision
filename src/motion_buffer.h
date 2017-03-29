@@ -27,7 +27,7 @@ struct Motion
         Eigen::MatrixXs jacobian_delta_;        ///< Jacobian of the integration wrt delta_
         Eigen::MatrixXs jacobian_delta_integr_; ///< Jacobian of the integration wrt delta_integr_
         Eigen::MatrixXs delta_cov_;             ///< covariance of the instantaneous delta
-        Eigen::MatrixXs delta_integr_cov_;      ///< covariance of the integrated delta
+//        Eigen::MatrixXs delta_integr_cov_;      ///< covariance of the integrated delta
     public:
         Motion();
         Motion(const TimeStamp& _ts, Size _delta_size = 0, Size _cov_size = 0);
