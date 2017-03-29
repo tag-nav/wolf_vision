@@ -139,7 +139,6 @@ class ConstraintIMU_accBiasObservation : public testing::Test
 
 
         // SENSOR + PROCESSOR IMU
-        //We want a processorIMU with a specific max_time_span (1s) forour test
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
         ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
         prc_imu_params->max_time_span = 10;
@@ -432,6 +431,131 @@ class ConstraintIMU_accBiasObservation : public testing::Test
 
     virtual void TearDown(){}
 };*/
+
+class ConstraintIMU_biasTest_Class1 : public testing::Test
+{
+    public:
+        wolf::TimeStamp t;
+        Eigen::Vector6s data_;
+        wolf::Scalar dt;
+        wolf::Scalar time_step;
+        wolf::Scalar last_ts;
+        SensorIMUPtr sen_imu;
+        ProblemPtr wolf_problem_ptr_;
+        CeresManager* ceres_manager_wolf_diff;
+        ProcessorBasePtr processor_ptr_;
+        ProcessorIMUPtr processor_ptr_imu;
+        FrameIMUPtr origin_KF;
+        FrameIMUPtr last_KF;
+        Eigen::Matrix<wolf::Scalar, 10, 1> expected_final_state;
+        Eigen::Vector6s origin_bias;
+
+
+    virtual void SetUp()
+    {
+        using std::shared_ptr;
+        using std::make_shared;
+        using std::static_pointer_cast;
+
+        //===================================================== INPUT FILES
+        std::string wolf_root = _WOLF_ROOT_DIR;
+
+        char* imu_filepath;
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check2.txt");
+
+        imu_filepath   = new char[imu_filepath_string.length() + 1];
+        std::strcpy(imu_filepath, imu_filepath_string.c_str());
+        std::ifstream imu_data_input;
+
+        imu_data_input.open(imu_filepath);
+        WOLF_INFO("imu file: ", imu_filepath)
+        if(!imu_data_input.is_open()){
+            std::cerr << "Failed to open data files... Exiting" << std::endl;
+            ADD_FAILURE();
+
+        }
+        //===================================================== END{INPUT FILES}
+
+        //===================================================== TEST PROPERTIES
+        //save some caracteristics of the test in variables so that we can use them to initialize the problem
+
+        // remember that matlab's quaternion is W,X,Y,Z and the one in Eigen has X,Y,Z,W form
+        Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
+
+        imu_data_input >> x_origin[0] >> x_origin[1] >> x_origin[2] >> x_origin[6] >> x_origin[3] >> x_origin[4] >> x_origin[5] >> x_origin[7] >> x_origin[8] >> x_origin[9];
+        imu_data_input >> origin_bias[0] >> origin_bias[1] >> origin_bias[2] >> origin_bias[3] >> origin_bias[4] >> origin_bias[5] >> time_step;
+
+        t.set(0);
+        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+
+        imu_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
+                             expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9] >> last_ts;
+
+        //===================================================== SETTING PROBLEM
+
+        // WOLF PROBLEM
+        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        t.set(0);
+
+        // CERES WRAPPER
+        ceres::Solver::Options ceres_options;
+        ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
+        ceres_options.max_line_search_step_contraction = 1e-3;
+        ceres_options.max_num_iterations = 1e4;
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+
+
+        // SENSOR + PROCESSOR IMU
+        SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+        ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
+        prc_imu_params->max_time_span = last_ts - 0.1*time_step;
+        prc_imu_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
+        prc_imu_params->dist_traveled = 1000000000;
+        prc_imu_params->angle_turned = 1000000000;
+
+        processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", sen0_ptr, prc_imu_params);
+        sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
+        processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
+
+        //set origin of the problem
+        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+    
+    //===================================================== END{SETTING PROBLEM}
+
+    //===================================================== PROCESS DATA
+    // PROCESS DATA
+
+        Eigen::Vector6s data_imu;
+        data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
+
+        Scalar input_clock;
+        TimeStamp ts(0);
+        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
+
+        while( !imu_data_input.eof())
+        {
+            // PROCESS IMU DATA
+            // Time and data variables
+            imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
+
+            ts.set(input_clock);
+            imu_ptr->setTimeStamp(ts);
+            imu_ptr->setData(data_imu);
+
+            // process data in capture
+            sen_imu->process(imu_ptr);
+        }
+
+        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+
+        //closing file
+        imu_data_input.close();
+
+    //===================================================== END{PROCESS DATA}
+    }
+
+    virtual void TearDown(){}
+};
 
 class ConstraintIMU_testBase : public testing::Test
 {
