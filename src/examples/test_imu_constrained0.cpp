@@ -19,6 +19,7 @@
 #include <cmath>
 
 #define DEBUG_RESULTS
+#define KF0_EVOLUTION
 
 int _kbhit();
 
@@ -71,6 +72,15 @@ int main(int argc, char** argv)
                         << "Cov_X\t" << "Cov_Y\t" << "Cov_Z\t" << "Cov_Qx\t" << "Cov_Qy\t" << "Cov_Qz\t" << "Cov_Qw" << "Cov_Vx\t" << "Cov_Vy\t" << "Cov_Vz\t" << std::endl;
     #endif
 
+    #ifdef KF0_EVOLUTION
+    std::ofstream KF0_evolution;
+    KF0_evolution.open("KF0_evolution.dat");
+    if(KF0_evolution)
+        KF0_evolution   << "%%TimeStamp\t"
+                        << "X_x\t" << "X_y\t" << "X_z\t" << "Xq_x\t" << "Xq_y\t" << "Xq_z\t" << "Xq_w\t" << "Xv_x\t" << "Xv_y\t" << "Xv_z\t"
+                        << "Cov_X\t" << "Cov_Y\t" << "Cov_Z\t" << "Cov_Qx\t" << "Cov_Qy\t" << "Cov_Qz\t" << "Cov_Qw" << "Cov_Vx\t" << "Cov_Vy\t" << "Cov_Vz\t" << std::endl;
+    #endif
+
     //===================================================== SETTING PROBLEM
     std::string wolf_root = _WOLF_ROOT_DIR;
         
@@ -78,7 +88,7 @@ int main(int argc, char** argv)
     ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
     Eigen::VectorXs x_origin(16);
     Eigen::Vector6s origin_bias;
-    x_origin << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00; //INITIAL CONDITIONS
+    x_origin << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; //INITIAL CONDITIONS    0.05,0.03,.00,  0.2,-0.05,.00;
     TimeStamp t(0);
 
     // initial conditions defined from data file
@@ -110,7 +120,7 @@ int main(int argc, char** argv)
     // SENSOR + PROCESSOR ODOM 3D
     SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
     ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-    prc_odom3D_params->max_time_span = 0.049;
+    prc_odom3D_params->max_time_span = 20.9999;
     prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
     prc_odom3D_params->dist_traveled = 1000000000;
     prc_odom3D_params->angle_turned = 1000000000;
@@ -129,6 +139,9 @@ int main(int argc, char** argv)
     odom_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
                             expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
 
+    //fix parts of the problem if needed
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
     //===================================================== PROCESS DATA
     // PROCESS DATA
 
@@ -146,9 +159,10 @@ int main(int argc, char** argv)
     odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
     t_odom.set(input_clock);
     //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
+    t = ts;
 
     clock_t begin = clock();
-
+    
     while( !imu_data_input.eof() && !odom_data_input.eof() )
     {
         // PROCESS IMU DATA
@@ -163,7 +177,7 @@ int main(int argc, char** argv)
         imu_ptr->getTimeStamp();
         sen_imu->process(imu_ptr);
 
-        if(ts.get() == t_odom.get()) //every 100 ms
+        if(ts.get() == t_odom.get())
         {
             // PROCESS ODOM 3D DATA
             mot_ptr->setTimeStamp(t_odom);
@@ -174,6 +188,25 @@ int main(int argc, char** argv)
             odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
             t_odom.set(input_clock);
         }
+
+        #ifdef KF0_EVOLUTION
+        
+        if( (ts.get() - t.get()) >= 0.05 )
+        {
+            t = ts;
+            //ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+        
+        
+            Eigen::VectorXs frm_state(16);
+            frm_state = origin_KF->getState();
+
+            KF0_evolution << std::setprecision(16) << ts.get() << "\t" << frm_state(0) << "\t" << frm_state(1) << "\t" << frm_state(2)
+                << "\t" << frm_state(3) << "\t" << frm_state(4) << "\t" << frm_state(5) << "\t" << frm_state(6)
+                << "\t" << frm_state(7) << "\t" << frm_state(8) << "\t" << frm_state(9)
+                << "\t" << frm_state(10) << "\t" << frm_state(11) << "\t" << frm_state(12) << "\t" << frm_state(13) << "\t" << frm_state(14) << "\t" << frm_state(15) << std::endl;
+        }
+
+        #endif
     }
 
     clock_t end = clock();
@@ -182,6 +215,10 @@ int main(int argc, char** argv)
     //closing file
     imu_data_input.close();
     odom_data_input.close();
+
+    #ifdef KF0_EVOLUTION
+    KF0_evolution.close();
+    #endif
 
     //===================================================== END{PROCESS DATA}
 
@@ -219,11 +256,19 @@ int main(int argc, char** argv)
     //fix parts of the problem if needed
     origin_KF->getPPtr()->fix();
     origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
 
     
     std::cout << "\t\t\t ______solving______" << std::endl;
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.FullReport() << std::endl;
+
+    last_KF->getAccBiasPtr()->fix();
+    last_KF->getGyroBiasPtr()->fix();
+
+    std::cout << "\t\t\t solving after fixBias" << std::endl;
+    summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL);
     std::cout << "\t\t\t ______solved______" << std::endl;
 
@@ -265,6 +310,51 @@ int main(int argc, char** argv)
             << "\t" << cov_stdev(3) << "\t" << cov_stdev(4) << "\t" << cov_stdev(5) << "\t" << cov_stdev(6)
             << "\t" << cov_stdev(7) << "\t" << cov_stdev(8) << "\t" << cov_stdev(9)
             << "\t" << cov_stdev(10) << "\t" << cov_stdev(11) << "\t" << cov_stdev(12) << "\t" << cov_stdev(13) << "\t" << cov_stdev(14) << "\t" << cov_stdev(15) << std::endl;
+        }
+    }
+
+    //trials to print all constraintIMUs' residuals
+    Eigen::Matrix<wolf::Scalar,15,1> IMU_residuals;
+    Eigen::Vector3s p1(Eigen::Vector3s::Zero());
+    Eigen::Vector4s q1_vec(Eigen::Vector4s::Zero());
+    Eigen::Map<Quaternions> q1(q1_vec.data());
+    Eigen::Vector3s v1(Eigen::Vector3s::Zero());
+    Eigen::Vector3s ab1(Eigen::Vector3s::Zero());
+    Eigen::Vector3s wb1(Eigen::Vector3s::Zero());
+    Eigen::Vector3s p2(Eigen::Vector3s::Zero());
+    Eigen::Vector4s q2_vec(Eigen::Vector4s::Zero());
+    Eigen::Map<Quaternions> q2(q2_vec.data());
+    Eigen::Vector3s v2(Eigen::Vector3s::Zero());
+    Eigen::Vector3s ab2(Eigen::Vector3s::Zero());
+    Eigen::Vector3s wb2(Eigen::Vector3s::Zero());
+
+    for(FrameBasePtr frm_ptr : frame_list)
+    {
+        if(frm_ptr->isKey())
+        {
+            ConstraintBaseList ctr_list =  frm_ptr->getConstrainedByList();
+            for(ConstraintBasePtr ctr_ptr : ctr_list)
+            {
+                if(ctr_ptr->getTypeId() == CTR_IMU)
+                {
+                    //Eigen::VectorXs prev_KF_state(ctr_ptr->getFrameOtherPtr()->getState());
+                    //Eigen::VectorXs curr_KF_state(ctr_ptr->getFeaturePtr()->getFramePtr()->getState());
+                    p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
+                    q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
+                    v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
+                    ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
+                    wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+
+                    p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
+                    q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
+                    v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
+                    ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
+                    wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+
+                    std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
+                    std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
+                }
+            }
         }
     }
 
