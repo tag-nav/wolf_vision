@@ -88,7 +88,7 @@ void FrameBase::registerNewStateBlocks()
 {
     if (getProblem() != nullptr)
     {
-        for (auto sbp : getStateBlockVec())
+        for (StateBlockPtr sbp : getStateBlockVec())
             if (sbp != nullptr)
                 getProblem()->addStateBlock(sbp);
     }
@@ -98,7 +98,7 @@ void FrameBase::removeStateBlocks()
 {
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        StateBlockPtr sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
         {
             if (getProblem() != nullptr && type_ == KEY_FRAME)
@@ -146,7 +146,7 @@ void FrameBase::setState(const Eigen::VectorXs& _st)
 Eigen::VectorXs FrameBase::getState() const
 {
     Size size = 0;
-    for (auto sb : state_block_vec_)
+    for (StateBlockPtr sb : state_block_vec_)
         if (sb)
             size += sb->getSize();
     Eigen::VectorXs state(size);
@@ -159,7 +159,7 @@ Eigen::VectorXs FrameBase::getState() const
 void FrameBase::getState(Eigen::VectorXs& state) const
 {
     Size size = 0;
-    for (auto sb : state_block_vec_)
+    for (StateBlockPtr sb : state_block_vec_)
         if (sb)
             size += sb->getSize();
 
@@ -167,7 +167,7 @@ void FrameBase::getState(Eigen::VectorXs& state) const
 
     unsigned int index = 0;
 
-    for (auto sb : state_block_vec_)
+    for (StateBlockPtr sb : state_block_vec_)
         if (sb)
         {
             state.segment(index,sb->getSize()) = sb->getState();
@@ -232,7 +232,7 @@ void FrameBase::setStatus(StateStatus _st)
 
     if (status_ == ST_FIXED)
     {
-        for (auto sb : state_block_vec_)
+        for (StateBlockPtr sb : state_block_vec_)
             if (sb != nullptr)
             {
                 sb->fix();
@@ -242,7 +242,7 @@ void FrameBase::setStatus(StateStatus _st)
     }
     else if (status_ == ST_ESTIMATED)
     {
-        for (auto sb : state_block_vec_)
+        for (StateBlockPtr sb : state_block_vec_)
             if (sb != nullptr)
             {
                 sb->unfix();
