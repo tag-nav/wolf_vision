@@ -24,7 +24,31 @@ namespace wolf
  * This processor integrates motion data into vehicle states.
  *
  * The motion data is provided by the sensor owning this processor.
- * This data is, in the general case, in the reference frame of the sensor, while the integrated motion refers to the robot frame.
+ *
+ * This data is, in the general case, in the reference frame of the sensor:
+ *
+ *   - Beware of the frame transformations Map to Robot, and Robot to Sensor, so that your produced
+ *   motion Constraints are correctly expressed.
+ *     - The robot state R is expressed in a global or 'Map' reference frame, named M.
+ *     - The sensor frame S is expressed in the robot frame R.
+ *     - The motion data data_ is expressed in the sensor frame S.
+ *   - You can use three basic methods for this:
+ *     - The trivial: make the sensor frame and the robot frame the same frame, that is, S = Id.
+ *     - Transform incoming data from sensor frame to robot frame, and then integrate motion in robot frame.
+ *     - Integrate motion directly in sensor frame, and transform to robot frame at the time of:
+ *       - Publishing the robot state (see getCurrentState() and similar functions)
+ *       - Creating Keyframes and Constraints (see emplaceConstraint() ).
+ *
+ * Should you need extra functionality for your derived types, you can overload these two methods,
+ *
+ *   -  preProcess() { }
+ *   -  postProcess() { }
+ *
+ * which are called at the beginning and at the end of process(). See the doc of these functions for more info.
+ */
+ /* // TODO: JS: review these instructions from here onwards:
+ *
+ * while the integrated motion refers to the robot frame.
  *
  * The reference frame convention used are specified as follows.
  *   - The robot state R is expressed in a global or 'Map' reference frame, named M.
@@ -57,13 +81,6 @@ namespace wolf
  *
  *     \code    xPlusDelta(R_old, delta_R, R_new) \endcode
  *
- * Should you need extra functionality for your derived types, you can overload these two methods,
- *
- *   -  preProcess() { }
- *   -  postProcess() { }
- *
- * which are called at the beginning and at the end of process(). See the doc of these functions for more info.
- *
  *
  * ### Defining (or not) the fromSensorFrame():
  *
@@ -76,6 +93,9 @@ namespace wolf
  *   - In cases where this identification is not possible, or not desired,
  * classes deriving from this class will have to implement fromSensorFrame(),
  * and call it within data2delta(), or write the frame transformation code directly in data2delta().
+ *
+ * // TODO: JS: review instructions up to here
+ *
  */
 class ProcessorMotion : public ProcessorBase
 {
@@ -508,23 +528,7 @@ class ProcessorMotion : public ProcessorBase
          *     D_I = D_R (+) d_I
          *         = deltaPlusDelta(D_R, d_I)         // This form provides an easy implementation.
          * ```
-         * ### Covariances
          *
-         * The Motion structure adds local and global covariances, that we rename as,
-         *
-         *     dC: delta_cov_
-         *     DC: delta_integr_cov_
-         *
-         * and which are integrated as follows
-         * ```
-         *     dC_I = tau * dC_F
-         *     DC_I = (1-tau) * DC_R + tau * dC_F = DC_R + dC_I
-         * ```
-         * and
-         * ```
-         *     dC_S = (1-tau) * dC_F
-         *     DC_S = DC_F
-         * ```
          * ### Examples
          *
          * #### Example 1: For 2D poses
@@ -559,6 +563,26 @@ class ProcessorMotion : public ProcessorBase
          *     dq_S = dq_I.conj * dq_F
          *
          *     D_S  = D_F
+         * ```
+         */
+        /* //TODO: JS: Remove these instructions since we will remove covariances from Motion.
+         *
+         * ### Covariances
+         *
+         * The Motion structure adds local and global covariances, that we rename as,
+         *
+         *     dC: delta_cov_
+         *     DC: delta_integr_cov_
+         *
+         * and which are integrated as follows
+         * ```
+         *     dC_I = tau * dC_F
+         *     DC_I = (1-tau) * DC_R + tau * dC_F = DC_R + dC_I
+         * ```
+         * and
+         * ```
+         *     dC_S = (1-tau) * dC_F
+         *     DC_S = DC_F
          * ```
          */
         virtual Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts) = 0;
