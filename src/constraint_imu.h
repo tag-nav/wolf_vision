@@ -30,8 +30,8 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
             -> weights the result with the covariance of the noise (residual = sqrt_info_matrix * err;)
         */
         template<typename T>
-        bool operator ()(const T* const _p1, const T* const _o1, const T* const _v1, const T* const _b_a1, const T* _b_g1,
-                         const T* const _p2, const T* const _o2, const T* const _v2, const T* const _b_a2, const T* _b_g2,
+        bool operator ()(const T* const _p1, const T* const _o1, const T* const _v1, const T* const _b_a1, const T* const _b_g1,
+                         const T* const _p2, const T* const _o2, const T* const _v2, const T* const _b_a2, const T* const _b_g2,
                          T* _residuals) const;
         
         /* \brief : compute the residual from the state blocks being iterated by the solver. (same as operator())
@@ -96,6 +96,8 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
             expectation(frame_current_pos, frame_current_ori, frame_current_vel, frame_current_ab, frame_current_wb, frame_imu_pos, frame_imu_ori_q, frame_imu_vel, exp);
             return exp;
         }
+
+        Eigen::Matrix3s get_SqrtArDtInv() const;
 
     public:
         static wolf::ConstraintBasePtr create(FeatureIMUPtr _feature_ptr, NodeBasePtr _correspondant_ptr);
@@ -164,7 +166,7 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_p
         ab_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getAbStdev()),
         wb_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getWbStdev()),
         sqrt_A_r_dt_inv((Eigen::Matrix3s::Identity() * ab_stdev_ * sqrt(dt_)).inverse()),
-        sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_stdev_ * sqrt(dt_)).inverse())
+        sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_stdev_ * sqrt(dt_)).inverse()) // * sqrt(dt_)
 
 {
     setType("IMU");
@@ -176,8 +178,8 @@ inline ConstraintIMU::~ConstraintIMU()
 }
 
 template<typename T>
-inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, const T* const _v1, const T* const _ab1, const T* _wb1,
-                                       const T* const _p2, const T* const _q2, const T* const _v2, const T* const _ab2, const T* _wb2,
+inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, const T* const _v1, const T* const _ab1, const T* const _wb1,
+                                       const T* const _p2, const T* const _q2, const T* const _v2, const T* const _ab2, const T* const _wb2,
                                        T* _residuals) const
 {
     // MAPS
@@ -206,6 +208,9 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     Eigen::Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>() * (ab1 - acc_bias_preint_.cast<T>()) + dDp_dwb_.cast<T>() * (wb1 - gyro_bias_preint_.cast<T>());
     Eigen::Matrix<T,3,1> dv_correct = dv_preint_.cast<T>() + dDv_dab_.cast<T>() * (ab1 - acc_bias_preint_.cast<T>()) + dDv_dwb_.cast<T>() * (wb1 - gyro_bias_preint_.cast<T>());
     Eigen::Matrix<T,3,1> do_step    = dDq_dwb_  .cast<T>() * (wb1 - gyro_bias_preint_.cast<T>());
+    //Eigen::Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>() * (ab1 - ab2) + dDp_dwb_.cast<T>() * (wb1 - wb2);
+    //Eigen::Matrix<T,3,1> dv_correct = dv_preint_.cast<T>() + dDv_dab_.cast<T>() * (ab1 - ab2) + dDv_dwb_.cast<T>() * (wb1 - wb2);
+    //Eigen::Matrix<T,3,1> do_step    = dDq_dwb_  .cast<T>() * (wb1 - wb2);
     Eigen::Quaternion<T> dq_correct = dq_preint_.cast<T>() * v2q(do_step);
 
     // Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
@@ -246,6 +251,9 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const
     Eigen::Matrix<DataType,3,1> dp_correct = dp_preint_.cast<DataType>() + dDp_dab_.cast<DataType>() * (ab1 - acc_bias_preint_.cast<DataType>()) + dDp_dwb_.cast<DataType>() * (wb1 - gyro_bias_preint_.cast<DataType>());
     Eigen::Matrix<DataType,3,1> dv_correct = dv_preint_.cast<DataType>() + dDv_dab_.cast<DataType>() * (ab1 - acc_bias_preint_.cast<DataType>()) + dDv_dwb_.cast<DataType>() * (wb1 - gyro_bias_preint_.cast<DataType>());
     Eigen::Matrix<DataType,3,1> do_step    = dDq_dwb_  .cast<DataType>() * (wb1 - gyro_bias_preint_.cast<DataType>());
+    //Eigen::Matrix<DataType,3,1> dp_correct = dp_preint_.cast<DataType>() + dDp_dab_.cast<DataType>() * (ab1 - ab2) + dDp_dwb_.cast<DataType>() * (wb2);
+    //Eigen::Matrix<DataType,3,1> dv_correct = dv_preint_.cast<DataType>() + dDv_dab_.cast<DataType>() * (ab1 - ab2) + dDv_dwb_.cast<DataType>() * (wb1 - wb2);
+    //Eigen::Matrix<DataType,3,1> do_step    = dDq_dwb_  .cast<DataType>() * (wb1 - wb2);
     Eigen::Quaternion<DataType> dq_correct = dq_preint_.cast<DataType>() * v2q(do_step);
 
     // Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
@@ -300,6 +308,11 @@ inline JacobianMethod ConstraintIMU::getJacobianMethod() const
 inline wolf::ConstraintBasePtr ConstraintIMU::create(FeatureIMUPtr _feature_ptr, NodeBasePtr _correspondant_ptr)
 {
     return std::make_shared<ConstraintIMU>(_feature_ptr, std::static_pointer_cast<FrameIMU>(_correspondant_ptr));
+}
+
+inline Eigen::Matrix3s ConstraintIMU::get_SqrtArDtInv() const
+{
+    return sqrt_A_r_dt_inv;
 }
 
 } // namespace wolf
