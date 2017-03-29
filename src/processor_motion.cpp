@@ -318,7 +318,7 @@ Eigen::MatrixXs ProcessorMotion::integrateBufferCovariance(const MotionBuffer& _
 
     for (Motion mot : _motion_buffer.get())
     {
-        cov = mot.jacobian_delta_integr_*cov*mot.jacobian_delta_integr_.transpose() + mot.jacobian_delta_* mot.delta_cov_ * mot.jacobian_delta_.transpose();
+        cov = mot.jacobian_delta_integr_ * cov * mot.jacobian_delta_integr_.transpose() + mot.jacobian_delta_ * mot.delta_cov_ * mot.jacobian_delta_.transpose();
     }
 
     // TODO Remove this by ensuring that mot.delta_cov_ is never zero
