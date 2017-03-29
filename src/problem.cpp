@@ -184,6 +184,8 @@ FrameBasePtr Problem::emplaceFrame(FrameType _frame_type, const TimeStamp& _time
 FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                 const TimeStamp& _time_stamp)
 {
+    assert(_frame_state.size() == getFrameStructureSize() && "Wrong state vector size");
+
     //std::cout << "Problem::createFrame" << std::endl;
     // ---------------------- CREATE NEW FRAME ---------------------
     // Create frame
@@ -191,26 +193,26 @@ FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, const Eigen::Vecto
     {
         case FRM_PO_2D:
         {
-            assert(_frame_state.size() == 3 && "Wrong state vector size");
+//            assert(_frame_state.size() == 3 && "Wrong state vector size");
             return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, std::make_shared<StateBlock>(_frame_state.head(2)),
                                   std::make_shared<StateBlock>(_frame_state.tail(1))));
         }
         case FRM_PO_3D:
         {
-            assert(_frame_state.size() == 7 && "Wrong state vector size");
+//            assert(_frame_state.size() == 7 && "Wrong state vector size");
             return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, std::make_shared<StateBlock>(_frame_state.head(3)),
                                   std::make_shared<StateQuaternion>(_frame_state.tail(4))));
         }
         case FRM_POV_3D:
         {
-            assert(_frame_state.size() == 10 && "Wrong state vector size");
+//            assert(_frame_state.size() == 10 && "Wrong state vector size");
             return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, std::make_shared<StateBlock>(_frame_state.head(3)),
                                   std::make_shared<StateQuaternion>(_frame_state.segment<4>(3)),
                                   std::make_shared<StateBlock>(_frame_state.tail(3))));
         }
         case FRM_PQVBB_3D:
         {
-            assert(_frame_state.size() == 16 && "Wrong state vector size");
+//            assert(_frame_state.size() == 16 && "Wrong state vector size");
             return trajectory_ptr_->addFrame(std::make_shared<FrameIMU>(_frame_key_type, _time_stamp, _frame_state));
         }
         default:
@@ -578,7 +580,7 @@ void Problem::setOrigin(const Eigen::VectorXs& _origin_state, const Eigen::Matri
         origin_is_set_ = true;
     }
     else
-        throw std::runtime_error("Origin already setted!");
+        throw std::runtime_error("Origin already set!");
 }
 
 void Problem::loadMap(const std::string& _filename_dot_yaml)
