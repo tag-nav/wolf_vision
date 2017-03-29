@@ -42,8 +42,8 @@ TEST(FrameBase, StateBlocks)
     FrameBasePtr F = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
 
     ASSERT_EQ(F->getStateBlockVec().size(), 3);
-    ASSERT_EQ(F->getPPtr()->getVector().size(), 2);
-    ASSERT_EQ(F->getOPtr()->getVector().size(), 1);
+    ASSERT_EQ(F->getPPtr()->getState().size(), 2);
+    ASSERT_EQ(F->getOPtr()->getState().size(), 1);
     ASSERT_EQ(F->getVPtr(), nullptr);
 }
 
@@ -133,9 +133,9 @@ TEST(FrameBase, GetSetState)
 
     // Set the state, check that state blocks hold the current states
     F.setState(x);
-    ASSERT_TRUE((p - F.getPPtr()->getVector()).isMuchSmallerThan(1, Constants::EPS_SMALL));
-    ASSERT_TRUE((q - F.getOPtr()->getVector()).isMuchSmallerThan(1, Constants::EPS_SMALL));
-    ASSERT_TRUE((v - F.getVPtr()->getVector()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((p - F.getPPtr()->getState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((q - F.getOPtr()->getState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((v - F.getVPtr()->getState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
 
     // Get the state, form 1 by reference
     F.getState(x1);

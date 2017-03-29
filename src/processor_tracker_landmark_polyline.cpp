@@ -28,8 +28,8 @@ void ProcessorTrackerLandmarkPolyline::computeTransformations(const TimeStamp& _
     if (getSensorPtr()->isExtrinsicDynamic() || !getSensorPtr()->getPPtr()->isFixed()
             || !getSensorPtr()->getOPtr()->isFixed() || !extrinsics_transformation_computed_)
     {
-        t_robot_sensor_ = getSensorPtr()->getPPtr()->getVector();
-        R_robot_sensor_ = Eigen::Rotation2Ds(getSensorPtr()->getOPtr()->getVector()(0)).matrix();
+        t_robot_sensor_ = getSensorPtr()->getPPtr()->getState();
+        R_robot_sensor_ = Eigen::Rotation2Ds(getSensorPtr()->getOPtr()->getState()(0)).matrix();
         extrinsics_transformation_computed_ = true;
     }
 
@@ -369,8 +369,8 @@ void ProcessorTrackerLandmarkPolyline::expectedFeature(LandmarkBasePtr _landmark
     ////////// landmark with origin
     else
     {
-        Eigen::Matrix2s R_world_points = Eigen::Rotation2Ds(polyline_landmark->getOPtr()->getVector()(0)).matrix();
-        const Eigen::VectorXs& t_world_points = polyline_landmark->getPPtr()->getVector();
+        Eigen::Matrix2s R_world_points = Eigen::Rotation2Ds(polyline_landmark->getOPtr()->getState()(0)).matrix();
+        const Eigen::VectorXs& t_world_points = polyline_landmark->getPPtr()->getState();
 
         for (auto i = 0; i < polyline_landmark->getNPoints(); i++)
         {
@@ -957,9 +957,9 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList& _lmk_
                 getProblem()->updateStateBlockPtr(polyline_ptr->getOPtr());
 
                 // Move origin to B
-                polyline_ptr->getPPtr()->setVector(polyline_ptr->getPointVector((configuration ? B_id : A_id)));
+                polyline_ptr->getPPtr()->setState(polyline_ptr->getPointVector((configuration ? B_id : A_id)));
                 Eigen::Vector2s frame_x = (configuration ? polyline_ptr->getPointVector(A_id)-polyline_ptr->getPointVector(B_id) : polyline_ptr->getPointVector(C_id)-polyline_ptr->getPointVector(B_id));
-                polyline_ptr->getOPtr()->setVector(Eigen::Vector1s::Constant(atan2(frame_x(1),frame_x(0))));
+                polyline_ptr->getOPtr()->setState(Eigen::Vector1s::Constant(atan2(frame_x(1),frame_x(0))));
 
                 //std::cout << "A: " << polyline_ptr->getPointVector(A_id).transpose() << std::endl;
                 //std::cout << "B: " << polyline_ptr->getPointVector(B_id).transpose() << std::endl;
@@ -971,17 +971,17 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList& _lmk_
                 // Fix polyline points to its respective relative positions
                 if (configuration)
                 {
-                    polyline_ptr->getPointStateBlockPtr(A_id)->setVector(Eigen::Vector2s(object_L[classification], 0));
-                    polyline_ptr->getPointStateBlockPtr(B_id)->setVector(Eigen::Vector2s(0, 0));
-                    polyline_ptr->getPointStateBlockPtr(C_id)->setVector(Eigen::Vector2s(0, object_W[classification]));
-                    polyline_ptr->getPointStateBlockPtr(D_id)->setVector(Eigen::Vector2s(object_L[classification], object_W[classification]));
+                    polyline_ptr->getPointStateBlockPtr(A_id)->setState(Eigen::Vector2s(object_L[classification], 0));
+                    polyline_ptr->getPointStateBlockPtr(B_id)->setState(Eigen::Vector2s(0, 0));
+                    polyline_ptr->getPointStateBlockPtr(C_id)->setState(Eigen::Vector2s(0, object_W[classification]));
+                    polyline_ptr->getPointStateBlockPtr(D_id)->setState(Eigen::Vector2s(object_L[classification], object_W[classification]));
                 }
                 else
                 {
-                    polyline_ptr->getPointStateBlockPtr(A_id)->setVector(Eigen::Vector2s(0, 0));
-                    polyline_ptr->getPointStateBlockPtr(B_id)->setVector(Eigen::Vector2s(0, object_W[classification]));
-                    polyline_ptr->getPointStateBlockPtr(C_id)->setVector(Eigen::Vector2s(object_L[classification], object_W[classification]));
-                    polyline_ptr->getPointStateBlockPtr(D_id)->setVector(Eigen::Vector2s(object_L[classification], 0));
+                    polyline_ptr->getPointStateBlockPtr(A_id)->setState(Eigen::Vector2s(0, 0));
+                    polyline_ptr->getPointStateBlockPtr(B_id)->setState(Eigen::Vector2s(0, object_W[classification]));
+                    polyline_ptr->getPointStateBlockPtr(C_id)->setState(Eigen::Vector2s(object_L[classification], object_W[classification]));
+                    polyline_ptr->getPointStateBlockPtr(D_id)->setState(Eigen::Vector2s(object_L[classification], 0));
                 }
                 for (auto id = polyline_ptr->getFirstId(); id <= polyline_ptr->getLastId(); id++)
                 {

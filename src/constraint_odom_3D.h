@@ -122,10 +122,10 @@ inline Eigen::VectorXs wolf::ConstraintOdom3D::expectation() const
     Eigen::VectorXs exp(7);
     FrameBasePtr frm_current = getFeaturePtr()->getFramePtr();
     FrameBasePtr frm_past = getFrameOtherPtr();
-    const Scalar * const frame_current_pos  = frm_current->getPPtr()->getVector().data();
-    const Scalar * const frame_current_ori  = frm_current->getOPtr()->getVector().data();
-    const Scalar * const frame_past_pos     = frm_past->getPPtr()->getVector().data();
-    const Scalar * const frame_past_ori     = frm_past->getOPtr()->getVector().data();
+    const Scalar * const frame_current_pos  = frm_current->getPPtr()->getState().data();
+    const Scalar * const frame_current_ori  = frm_current->getOPtr()->getState().data();
+    const Scalar * const frame_past_pos     = frm_past->getPPtr()->getState().data();
+    const Scalar * const frame_past_ori     = frm_past->getOPtr()->getState().data();
 
 //    std::cout << "frame_current_pos: " << frm_current->getPPtr()->getVector().transpose() << std::endl;
 //    std::cout << "frame_past_pos: " << frm_past->getPPtr()->getVector().transpose() << std::endl;

@@ -138,7 +138,7 @@ void FrameBase::setState(const Eigen::VectorXs& _st)
     for (StateBlockPtr sb : state_block_vec_)
         if (sb)
         {
-            sb->setVector(_st.segment(index, sb->getSize()));
+            sb->setState(_st.segment(index, sb->getSize()));
             index += sb->getSize();
         }
 }
@@ -170,7 +170,7 @@ void FrameBase::getState(Eigen::VectorXs& state) const
     for (auto sb : state_block_vec_)
         if (sb)
         {
-            state.segment(index,sb->getSize()) = sb->getVector();
+            state.segment(index,sb->getSize()) = sb->getState();
             index += sb->getSize();
         }
 }

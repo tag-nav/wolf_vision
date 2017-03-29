@@ -129,21 +129,21 @@ inline void ConstraintRelative2DAnalytic::evaluateJacobians(
 inline void ConstraintRelative2DAnalytic::evaluatePureJacobians(std::vector<Eigen::MatrixXs>& jacobians) const
 {
     jacobians[0]
-              << -cos(getStatePtrVector()[1]->getVector()(0)), -sin(getStatePtrVector()[1]->getVector()(0)), sin(
-            getStatePtrVector()[1]->getVector()(0)), -cos(getStatePtrVector()[1]->getVector()(0)), 0, 0;
+              << -cos(getStatePtrVector()[1]->getState()(0)), -sin(getStatePtrVector()[1]->getState()(0)), sin(
+            getStatePtrVector()[1]->getState()(0)), -cos(getStatePtrVector()[1]->getState()(0)), 0, 0;
 
     jacobians[1]
-              << -(getStatePtrVector()[2]->getVector()(0) - getStatePtrVector()[0]->getVector()(0))
-                    * sin(getStatePtrVector()[1]->getVector()(0))
-                    + (getStatePtrVector()[2]->getVector()(1) - getStatePtrVector()[0]->getVector()(1))
-                            * cos(getStatePtrVector()[1]->getVector()(0)), -(getStatePtrVector()[2]->getVector()(0)
-            - getStatePtrVector()[0]->getVector()(0)) * cos(getStatePtrVector()[1]->getVector()(0))
-            - (getStatePtrVector()[2]->getVector()(1) - getStatePtrVector()[0]->getVector()(1))
-                    * sin(getStatePtrVector()[1]->getVector()(0)), -1;
+              << -(getStatePtrVector()[2]->getState()(0) - getStatePtrVector()[0]->getState()(0))
+                    * sin(getStatePtrVector()[1]->getState()(0))
+                    + (getStatePtrVector()[2]->getState()(1) - getStatePtrVector()[0]->getState()(1))
+                            * cos(getStatePtrVector()[1]->getState()(0)), -(getStatePtrVector()[2]->getState()(0)
+            - getStatePtrVector()[0]->getState()(0)) * cos(getStatePtrVector()[1]->getState()(0))
+            - (getStatePtrVector()[2]->getState()(1) - getStatePtrVector()[0]->getState()(1))
+                    * sin(getStatePtrVector()[1]->getState()(0)), -1;
 
     jacobians[2]
-              << cos(getStatePtrVector()[1]->getVector()(0)), sin(getStatePtrVector()[1]->getVector()(0)), -sin(
-            getStatePtrVector()[1]->getVector()(0)), cos(getStatePtrVector()[1]->getVector()(0)), 0, 0;
+              << cos(getStatePtrVector()[1]->getState()(0)), sin(getStatePtrVector()[1]->getState()(0)), -sin(
+            getStatePtrVector()[1]->getState()(0)), cos(getStatePtrVector()[1]->getState()(0)), 0, 0;
 
     jacobians[3]
               << 0, 0, 1;

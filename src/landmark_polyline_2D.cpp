@@ -53,7 +53,7 @@ void LandmarkPolyline2D::setFirst(const Eigen::VectorXs& _point, bool _defined)
     //std::cout << "LandmarkPolyline2D::setFirst. Defined " << _defined << std::endl;
     assert(_point.size() >= 2 && "LandmarkPolyline2D::setFirstExtreme: bad point size");
     assert(!(!_defined && first_defined_) && "setting a defined extreme with a not defined point");
-    point_state_ptr_vector_.front()->setVector(_point.head(2));
+    point_state_ptr_vector_.front()->setState(_point.head(2));
     if (!first_defined_ && _defined)
     	defineExtreme(false);
 }
@@ -63,7 +63,7 @@ void LandmarkPolyline2D::setLast(const Eigen::VectorXs& _point, bool _defined)
     //std::cout << "LandmarkPolyline2D::setLast. Defined " << _defined << std::endl;
     assert(_point.size() >= 2 && "LandmarkPolyline2D::setLastExtreme: bad point size");
     assert(!(!_defined && last_defined_) && "setting a defined extreme with a not defined point");
-    point_state_ptr_vector_.back()->setVector(_point.head(2));
+    point_state_ptr_vector_.back()->setState(_point.head(2));
     if (!last_defined_ && _defined)
     	defineExtreme(true);
 }
@@ -73,7 +73,7 @@ const Eigen::VectorXs& LandmarkPolyline2D::getPointVector(int _i) const
 	//std::cout << "LandmarkPolyline2D::getPointVector: " << _i << std::endl;
 	//std::cout << "First: " << first_id_ << " - size: " << point_state_ptr_vector_.size() << std::endl;
 	assert(_i >= first_id_ && _i < first_id_+(int)(point_state_ptr_vector_.size()));
-    return point_state_ptr_vector_[_i-first_id_]->getVector();
+    return point_state_ptr_vector_[_i-first_id_]->getState();
 }
 
 StateBlockPtr LandmarkPolyline2D::getPointStateBlockPtr(int _i)
@@ -240,7 +240,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
 
     // take a defined extreme as remaining
     StateBlockPtr remove_state = getPointStateBlockPtr(_remove_id);
-    std::cout << "state block to remove " << remove_state->getVector().transpose() << std::endl;
+    std::cout << "state block to remove " << remove_state->getState().transpose() << std::endl;
 
     // Change constraints from remove_state to remain_state
     ConstraintBaseList old_constraints_list = getConstrainedByList();
@@ -385,7 +385,7 @@ YAML::Node LandmarkPolyline2D::saveToYaml() const
 
     for (int i = 0; i < npoints; i++)
     {
-        node["points"].push_back(point_state_ptr_vector_[i]->getVector());
+        node["points"].push_back(point_state_ptr_vector_[i]->getState());
     }
 
     return node;

@@ -31,8 +31,8 @@ void ProcessorTrackerFeatureCorner::preProcess()
     if (getSensorPtr()->isExtrinsicDynamic() || !getSensorPtr()->getPPtr()->isFixed()
             || !getSensorPtr()->getOPtr()->isFixed() || !extrinsics_transformation_computed_)
     {
-        t_robot_sensor_.head<2>() = getSensorPtr()->getPPtr()->getVector();
-        t_robot_sensor_(2) = getSensorPtr()->getOPtr()->getVector()(0);
+        t_robot_sensor_.head<2>() = getSensorPtr()->getPPtr()->getState();
+        t_robot_sensor_(2) = getSensorPtr()->getOPtr()->getState()(0);
         R_robot_sensor_.topLeftCorner<2, 2>() = Eigen::Rotation2Ds(t_robot_sensor_(2)).matrix();
         extrinsics_transformation_computed_ = true;
     }
