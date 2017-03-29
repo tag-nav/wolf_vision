@@ -73,8 +73,8 @@ public:
                                Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
 };
 
-typedef LocalParametrizationQuaternion<DQ_GLOBAL> LocalParametrizationQuaternionG;
-typedef LocalParametrizationQuaternion<DQ_LOCAL>  LocalParametrizationQuaternionL;
+typedef LocalParametrizationQuaternion<DQ_GLOBAL> LocalParametrizationQuaternionGlobal;
+typedef LocalParametrizationQuaternion<DQ_LOCAL>  LocalParametrizationQuaternionLocal;
 
 } // namespace wolf
 
