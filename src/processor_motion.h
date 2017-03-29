@@ -492,7 +492,14 @@ class ProcessorMotion : public ProcessorBase
          * But this needs to be taken carefully, since (+) is not commutative in the general case.
          * therefore, we must define this inverse in the following way:
          *
-         *     C = B (-) A  <==> A (+) C = B        (4)
+         *     C = A (+) B  <==> B = C (-) A        (4)
+         *
+         *           A
+         *         o--->o
+         *          \   |
+         *         C \  | B
+         *            \ v
+         *              o
          *
          * ### Computing `d_S`
          *
