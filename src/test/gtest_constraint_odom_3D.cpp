@@ -34,8 +34,6 @@ Matrix6s data_cov = data_var.asDiagonal();
 Vector7s x0 = data2delta(Vector6s::Random()*0.25);
 Vector7s x1 = data2delta(data + Vector6s::Random()*0.25);
 
-
-
 // Problem and solver
 ProblemPtr problem = Problem::create(FRM_PO_3D);
 CeresManager ceres_mgr(problem);
@@ -50,6 +48,8 @@ FeatureBasePtr fea1 = cap1->addFeature(std::make_shared<FeatureBase>("ODOM 3D", 
 ConstraintOdom3DPtr ctr1(std::make_shared<ConstraintOdom3D>(fea1, frm0));
 
 
+////////////////////////////////////////////////////////
+
 TEST(ConstraintOdom3D, check_tree)
 {
     fea1->addConstraint(ctr1);
@@ -60,8 +60,7 @@ TEST(ConstraintOdom3D, check_tree)
 
 TEST(ConstraintOdom3D, expectation)
 {
-    VectorXs e = ctr1->expectation();
-    ASSERT_EIGEN_APPROX(e , delta);
+    ASSERT_EIGEN_APPROX(ctr1->expectation() , delta);
 }
 
 TEST(ConstraintOdom3D, fix_0_solve)
