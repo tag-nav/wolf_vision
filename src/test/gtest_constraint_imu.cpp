@@ -440,14 +440,10 @@ class ConstraintIMU_accBiasObservation : public testing::Test
  * and finally the last stateafter integration and the last timestamp, Then it should contain all IMU data and related timestamps
  */
 
-class ConstraintIMU_biasTest_Class1 : public testing::Test
+class ConstraintIMU_biasTest_VarB1B2_InvarP1Q1V1P2Q2V2 : public testing::Test
 {
     public:
         wolf::TimeStamp t;
-        Eigen::Vector6s data_;
-        wolf::Scalar dt;
-        wolf::Scalar time_step;
-        wolf::Scalar last_ts;
         SensorIMUPtr sen_imu;
         ProblemPtr wolf_problem_ptr_;
         CeresManager* ceres_manager_wolf_diff;
@@ -455,9 +451,8 @@ class ConstraintIMU_biasTest_Class1 : public testing::Test
         ProcessorIMUPtr processor_ptr_imu;
         FrameIMUPtr origin_KF;
         FrameIMUPtr last_KF;
-        Eigen::Matrix<wolf::Scalar, 10, 1> expected_final_state;
         Eigen::Vector6s origin_bias;
-
+        Eigen::VectorXs expected_final_state;
 
     virtual void SetUp()
     {
@@ -465,47 +460,29 @@ class ConstraintIMU_biasTest_Class1 : public testing::Test
         using std::make_shared;
         using std::static_pointer_cast;
 
-        //===================================================== INPUT FILES
         std::string wolf_root = _WOLF_ROOT_DIR;
 
-        char* imu_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check2.txt");
+        //===================================================== INPUT FILES
 
-        imu_filepath   = new char[imu_filepath_string.length() + 1];
+        char* imu_filepath;
+
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_static_biasNull.txt");
+
+        imu_filepath = new char[imu_filepath_string.length() + 1];
+
         std::strcpy(imu_filepath, imu_filepath_string.c_str());
         std::ifstream imu_data_input;
 
         imu_data_input.open(imu_filepath);
-        WOLF_INFO("imu file: ", imu_filepath)
         if(!imu_data_input.is_open()){
             std::cerr << "Failed to open data files... Exiting" << std::endl;
             ADD_FAILURE();
-
         }
         //===================================================== END{INPUT FILES}
-
-        //===================================================== TEST PROPERTIES
-        //save some caracteristics of the test in variables so that we can use them to initialize the problem
-
-        // remember that matlab's quaternion is W,X,Y,Z and the one in Eigen has X,Y,Z,W form
-        Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
-
-        imu_data_input >> x_origin[0] >> x_origin[1] >> x_origin[2] >> x_origin[6] >> x_origin[3] >> x_origin[4] >> x_origin[5] >> x_origin[7] >> x_origin[8] >> x_origin[9];
-        imu_data_input >> origin_bias[0] >> origin_bias[1] >> origin_bias[2] >> origin_bias[3] >> origin_bias[4] >> origin_bias[5] >> time_step;
-
-        t.set(0);
-        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
-
-        imu_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
-                             expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9] >> last_ts;
         
-        //===================================================== END{TEST PROPERTIES}
-
         //===================================================== SETTING PROBLEM
-
         // WOLF PROBLEM
         wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
-        t.set(0);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -514,26 +491,34 @@ class ConstraintIMU_biasTest_Class1 : public testing::Test
         ceres_options.max_num_iterations = 1e4;
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
 
-
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
-        ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
-        prc_imu_params->max_time_span = last_ts - 0.1*time_step;
-        prc_imu_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
-        prc_imu_params->dist_traveled = 1000000000;
-        prc_imu_params->angle_turned = 1000000000;
-
-        processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", sen0_ptr, prc_imu_params);
+        processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_t1.yaml");
         sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
         processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
+    
+        //===================================================== END{SETTING PROBLEM}
+
+        //===================================================== INITIALIZATION
+
+        expected_final_state.resize(16);
+        Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
+        t.set(0);
+
+        imu_data_input >> x_origin[0] >> x_origin[1] >> x_origin[2] >> x_origin[6] >> x_origin[3] >> x_origin[4] >> x_origin[5] >> x_origin[7] >> x_origin[8] >> x_origin[9];
+        imu_data_input >> origin_bias[0] >> origin_bias[1] >> origin_bias[2] >> origin_bias[3] >> origin_bias[4] >> origin_bias[5];
+        imu_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
+                    expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
+        expected_final_state.tail(6) = origin_bias;
 
         //set origin of the problem
         origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
-    
-    //===================================================== END{SETTING PROBLEM}
 
-    //===================================================== PROCESS DATA
-    // PROCESS DATA
+        //===================================================== END{INITIALIZATION}
+
+
+        //===================================================== PROCESS DATA
+        // PROCESS DATA
 
         Eigen::Vector6s data_imu;
         data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
@@ -562,6 +547,7 @@ class ConstraintIMU_biasTest_Class1 : public testing::Test
         imu_data_input.close();
 
     //===================================================== END{PROCESS DATA}
+
     }
 
     virtual void TearDown(){}
@@ -1280,11 +1266,29 @@ TEST_F(ConstraintIMU_accBiasObservation, acc_gyro_bias_observation)
     std::cout << "\n last_KF velocity covariance : \n" << cov3 << std::endl;
 }*/
 
+TEST_F(ConstraintIMU_biasTest_VarB1B2_InvarP1Q1V1P2Q2V2,initOK)
+{
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+    last_KF->getVPtr()->fix();
+
+    WOLF_INFO("Solving . . .")
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_PrcImuOdom.acc_biased_static";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_accBiasObservation*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_VarB1B2_InvarP1Q1V1P2Q2V2*";
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_accBiasObservation_2KF.acc_gyro_bias_observation";
   return RUN_ALL_TESTS();
 }
