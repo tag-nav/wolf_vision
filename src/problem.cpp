@@ -346,6 +346,8 @@ Eigen::VectorXs Problem::zeroState()
     // Set the quaternion identity for 3D states. Set only the real part to 1:
     switch (trajectory_ptr_->getFrameStructure())
     {
+        case FRM_PO_2D:
+            break;
         case FRM_PO_3D:
         case FRM_POV_3D:
         case FRM_PQVBB_3D:
