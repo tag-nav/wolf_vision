@@ -440,7 +440,7 @@ class ConstraintIMU_accBiasObservation : public testing::Test
  * and finally the last stateafter integration and the last timestamp, Then it should contain all IMU data and related timestamps
  */
 
-class ConstraintIMU_biasTest_VarB1B2_InvarP1Q1V1P2Q2V2 : public testing::Test
+class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
 {
     public:
         wolf::TimeStamp t;
@@ -547,7 +547,8 @@ class ConstraintIMU_biasTest_VarB1B2_InvarP1Q1V1P2Q2V2 : public testing::Test
         imu_data_input.close();
 
     //===================================================== END{PROCESS DATA}
-
+    origin_KF->unfix();
+    last_KF->unfix();
     }
 
     virtual void TearDown(){}
@@ -1266,7 +1267,7 @@ TEST_F(ConstraintIMU_accBiasObservation, acc_gyro_bias_observation)
     std::cout << "\n last_KF velocity covariance : \n" << cov3 << std::endl;
 }*/
 
-TEST_F(ConstraintIMU_biasTest_VarB1B2_InvarP1Q1V1P2Q2V2,initOK)
+TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
 {
     //prepare problem for solving
     origin_KF->getPPtr()->fix();
@@ -1278,6 +1279,8 @@ TEST_F(ConstraintIMU_biasTest_VarB1B2_InvarP1Q1V1P2Q2V2,initOK)
     last_KF->getPPtr()->fix();
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->fix();
+
+    //wolf_problem_ptr_->print(4,1,1,1);
 
     WOLF_INFO("Solving . . .")
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
@@ -1297,11 +1300,45 @@ TEST_F(ConstraintIMU_biasTest_VarB1B2_InvarP1Q1V1P2Q2V2,initOK)
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 }
 
+TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias1em6)
+{
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    wolf::Scalar epsilon_bias = 0.0000001;
+    Eigen::VectorXs perturbated_final_state(expected_final_state);
+
+    perturbated_final_state[10] += epsilon_bias;
+    last_KF->setState(perturbated_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+    last_KF->getVPtr()->fix();
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+
+    //Only biases are unfixed
+    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_PrcImuOdom.acc_biased_static";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_VarB1B2_InvarP1Q1V1P2Q2V2*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Static_NullBias*";
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_accBiasObservation_2KF.acc_gyro_bias_observation";
   return RUN_ALL_TESTS();
 }
