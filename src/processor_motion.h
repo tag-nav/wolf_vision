@@ -161,7 +161,7 @@ class ProcessorMotion : public ProcessorBase
                        Eigen::VectorXs& _delta1_plus_delta2);
 
         /** Set the origin of all motion for this processor
-         * \param _origin_frame the key frame to be the origin
+         * \param _origin_frame the keyframe to be the origin
          */
         void setOrigin(FrameBasePtr _origin_frame);
 
