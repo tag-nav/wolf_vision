@@ -56,7 +56,7 @@ inline bool ConstraintFix3D::operator ()(const T* const _p, const T* const _o, T
     er.tail(3)        = q2v(q.conjugate() * q_measured.cast<T>());
 
     // residual
-    Eigen::Matrix<T, 6, 1> res(_residuals);
+    Eigen::Map<Eigen::Matrix<T, 6, 1>> res(_residuals);
     res               = getFeaturePtr()->getMeasurementSquareRootInformation().cast<T>() * er;
 
     return true;
