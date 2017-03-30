@@ -100,54 +100,54 @@ class ProcessorMotion : public ProcessorBase
 
         virtual bool voteForKeyFrame();
 
-        /** \brief Fills a reference to the state integrated so far
+        /** \brief Fill a reference to the state integrated so far
          * \param _x the returned state vector
          */
         void getCurrentState(Eigen::VectorXs& _x);
 
-        /** \brief Fills a reference to the state integrated so far and its stamp
+        /** \brief Get a constant reference to the state integrated so far
+         * \return the state vector
+         */
+        Eigen::VectorXs getCurrentState();
+
+        /** \brief Fill a reference to the state integrated so far and its stamp
          * \param _x the returned state vector
          * \param _ts the returned stamp
          */
         void getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts);
 
-        /** \brief Gets a constant reference to the state integrated so far
-         * \return the state vector
-         */
-        Eigen::VectorXs getCurrentState();
-
-        /** \brief Gets a constant reference to the state integrated so far and its stamp
+        /** \brief Get the state integrated so far and its stamp
          * \param _ts the returned stamp
          * return the state vector
          */
         Eigen::VectorXs getCurrentStateAndStamp(TimeStamp& _ts);
 
-        /** \brief Fills the state corresponding to the provided time-stamp
+        /** \brief Fill the state corresponding to the provided time-stamp
          * \param _ts the time stamp
          * \param _x the returned state
          */
         void getState(const TimeStamp& _ts, Eigen::VectorXs& _x);
 
-        /** \brief Gets the state corresponding to the provided time-stamp
+        /** \brief Get the state corresponding to the provided time-stamp
          * \param _ts the time stamp
          * \return the state vector
          */
         Eigen::VectorXs getState(const TimeStamp& _ts);
 
-        /** \brief Provides the motion integrated so far
+        /** \brief Provide the motion integrated so far
          * \return the integrated delta state
          */
         Motion getMotion() const;
         void getMotion(Motion& _motion) const;
 
-        /** \brief Provides the motion integrated until a given timestamp
-         * \return a reference to the integrated delta state
+        /** \brief Provide the motion integrated until a given timestamp
+         * \return the integrated delta state
          */
         Motion getMotion(const TimeStamp& _ts) const;
         void getMotion(const TimeStamp& _ts, Motion& _motion) const;
 
         /** \brief Finds the capture that contains the closest previous motion of _ts
-         * \return a pointer to the capture (if it exist) or a nullptr (otherwise)
+         * \return a pointer to the capture (if it exists) or a nullptr (otherwise)
          */
         CaptureMotionPtr findCaptureContainingTimeStamp(const TimeStamp& _ts) const;
 

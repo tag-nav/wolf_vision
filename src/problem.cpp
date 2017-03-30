@@ -246,8 +246,14 @@ Eigen::VectorXs Problem::getCurrentStateAndStamp(TimeStamp& ts)
 
 void Problem::getCurrentState(Eigen::VectorXs& state)
 {
-    TimeStamp ts;
-    getCurrentStateAndStamp(state, ts);
+    assert(state.size() == getFrameStructureSize() && "Problem::getCurrentState: bad state size");
+
+    if (processor_motion_ptr_ != nullptr)
+        processor_motion_ptr_->getCurrentState(state);
+    else if (trajectory_ptr_->getLastKeyFramePtr() != nullptr)
+        trajectory_ptr_->getLastKeyFramePtr()->getState(state);
+    else
+        state = zeroState();
 }
 
 

@@ -183,13 +183,15 @@ class Problem : public std::enable_shared_from_this<Problem>
         FrameBasePtr emplaceFrame(const std::string& _frame_structure, FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
+        // State getters
         Eigen::VectorXs getCurrentState();
-        Eigen::VectorXs getCurrentStateAndStamp(TimeStamp& _ts);
         void getCurrentState(Eigen::VectorXs& state);
+        Eigen::VectorXs getCurrentStateAndStamp(TimeStamp& _ts);
         void getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& _ts);
         Eigen::VectorXs getState(const TimeStamp& _ts);
         void getState(const TimeStamp& _ts, Eigen::VectorXs& state);
 
+        // Zero state provider
         Eigen::VectorXs zeroState();
 
         /** \brief Give the permission to a processor to create a new keyFrame

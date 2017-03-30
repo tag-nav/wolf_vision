@@ -186,12 +186,9 @@ int main(int argc, char** argv)
         cap_odo->setTimeStamp(t);
 
         // previous state and TS
-        TimeStamp t_prev_prev;
+        Eigen::Vector7s x_prev = wolf_problem_ptr_->getCurrentState();
         Vector7s x_prev_prev;
-        Eigen::VectorXs x_prev(7);
-        TimeStamp t_prev;
         Vector7s dx;
-        wolf_problem_ptr_->getCurrentStateAndStamp(x_prev, t_prev);
 
         // before the previous state
         FrameBasePtr prev_key_fr_ptr = wolf_problem_ptr_->getLastKeyFramePtr();
@@ -215,7 +212,6 @@ int main(int argc, char** argv)
         }
         else
         {
-            t_prev_prev = prev_prev_key_fr_ptr->getTimeStamp();
             x_prev_prev = prev_prev_key_fr_ptr->getState();
 
             // some maps to avoid local variables
