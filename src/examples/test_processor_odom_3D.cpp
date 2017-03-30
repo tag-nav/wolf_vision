@@ -44,7 +44,13 @@ int main (int argc, char** argv)
     cout << "Final timestamp tf = " << tf.get() << " s" << endl;
 
     ProblemPtr problem = Problem::create(FRM_PO_3D);
-    CeresManager ceres_manager(problem);
+    ceres::Solver::Options ceres_options;
+//    ceres_options.max_num_iterations = 1000;
+//    ceres_options.function_tolerance = 1e-10;
+//    ceres_options.gradient_check_relative_precision = 1e-10;
+//    ceres_options.gradient_tolerance = 1e-10;
+    ceres_options.minimizer_progress_to_stdout = true;
+    CeresManager ceres_manager(problem, ceres_options);
 
     SensorBasePtr sen = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
     problem->installProcessor("ODOM 3D", "odometry integrator", "odom");
@@ -69,7 +75,7 @@ int main (int argc, char** argv)
 
         cout << "t: " << std::setprecision(2) << t.get() << "  \t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
 
-        ceres::Solver::Summary summary = ceres_manager.solve();
+//        ceres::Solver::Summary summary = ceres_manager.solve();
 
 //        ceres_manager.computeCovariances(ALL);
 
@@ -77,7 +83,16 @@ int main (int argc, char** argv)
 
     }
 
-    problem->print();
+    problem->print(1,0,1,0);
+//    for (auto frm : problem->getTrajectoryPtr()->getFrameList())
+//    {
+//        frm->setState(problem->zeroState());
+//    }
+//    problem->print(1,0,1,0);
+    ceres::Solver::Summary summary = ceres_manager.solve();
+    std::cout << summary.BriefReport() << std::endl;
+    summary.FullReport();
+    problem->print(1,0,1,0);
 
     problem.reset();
 
