@@ -5,3 +5,4 @@ keyframe vote:
     max buffer length:  20000    # motion deltas
     dist traveled:      2.0   # meters
     angle turned:       0.2   # radians (1 rad approx 57 deg, approx 60 deg)
+    voting_active:      false

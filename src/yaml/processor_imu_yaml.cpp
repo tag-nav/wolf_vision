@@ -42,6 +42,7 @@ static ProcessorParamsBasePtr createProcessorIMUParams(const std::string & _file
         params->max_buff_length     = kf_vote["max buffer length"]  .as<Size  >();
         params->dist_traveled       = kf_vote["dist traveled"]      .as<Scalar>();
         params->angle_turned        = kf_vote["angle turned"]       .as<Scalar>();
+        params->voting_active       = kf_vote["voting_active"]      .as<bool>();
 
         return params;
     }
