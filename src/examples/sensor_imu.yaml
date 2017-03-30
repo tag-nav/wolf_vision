@@ -3,5 +3,5 @@ sensor name: "Main IMU"        # This is ignored. The name provided to the Senso
 motion variances: 
     accel_noise:   0.02  # Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
     gyro_noise:    0.02  # Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
-    ab_stdev:     0.0001  # micro_g/sec
-    wb_stdev:   0.0001  # rad/sec
+    ab_stdev:     0.001  # micro_g/sec
+    wb_stdev:   0.001  # rad/sec
