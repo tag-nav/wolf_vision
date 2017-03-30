@@ -112,7 +112,7 @@ class ConstraintIMU_accBiasObservation : public testing::Test
         ProcessorOdom3DPtr processor_ptr_odom3D;
         FrameIMUPtr origin_KF;
         FrameIMUPtr last_KF;
-        Eigen::Matrix<wolf::Scalar, 10, 1> expected_origin_state;
+        Eigen::Matrix<wolf::Scalar, 10, 1> expected_final_state;
         Eigen::Vector6s origin_bias;
 
 
@@ -203,8 +203,8 @@ class ConstraintIMU_accBiasObservation : public testing::Test
         origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
         processor_ptr_odom3D->setOrigin(origin_KF);
 
-        odom_data_input >> expected_origin_state[0] >> expected_origin_state[1] >> expected_origin_state[2] >> expected_origin_state[6] >> expected_origin_state[3] >>
-                             expected_origin_state[4] >> expected_origin_state[5] >> expected_origin_state[7] >> expected_origin_state[8] >> expected_origin_state[9];
+        odom_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
+                             expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
     
     //===================================================== END{SETTING PROBLEM}
 
@@ -280,7 +280,7 @@ class ConstraintIMU_accBiasObservation : public testing::Test
         ProcessorOdom3DPtr processor_ptr_odom3D;
         FrameIMUPtr origin_KF;
         FrameIMUPtr last_KF;
-        Eigen::Matrix<wolf::Scalar, 10, 1> expected_origin_state;
+        Eigen::Matrix<wolf::Scalar, 10, 1> expected_final_state;
         Eigen::Vector6s origin_bias;
 
 
@@ -371,8 +371,8 @@ class ConstraintIMU_accBiasObservation : public testing::Test
         origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
         processor_ptr_odom3D->setOrigin(origin_KF);
 
-        odom_data_input >> expected_origin_state[0] >> expected_origin_state[1] >> expected_origin_state[2] >> expected_origin_state[6] >> expected_origin_state[3] >>
-                             expected_origin_state[4] >> expected_origin_state[5] >> expected_origin_state[7] >> expected_origin_state[8] >> expected_origin_state[9];
+        odom_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
+                             expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
     
     //===================================================== END{SETTING PROBLEM}
 
@@ -453,7 +453,8 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
         FrameIMUPtr origin_KF;
         FrameIMUPtr last_KF;
         Eigen::Vector6s origin_bias;
-        Eigen::VectorXs expected_origin_state;
+        Eigen::VectorXs expected_final_state;
+        Eigen::VectorXs x_origin;
 
     virtual void SetUp()
     {
@@ -502,15 +503,134 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
 
         //===================================================== INITIALIZATION
 
-        expected_origin_state.resize(16);
-        Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
+        expected_final_state.resize(16);
+        x_origin.resize(16);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
         t.set(0);
 
         imu_data_input >> x_origin[0] >> x_origin[1] >> x_origin[2] >> x_origin[6] >> x_origin[3] >> x_origin[4] >> x_origin[5] >> x_origin[7] >> x_origin[8] >> x_origin[9];
         imu_data_input >> origin_bias[0] >> origin_bias[1] >> origin_bias[2] >> origin_bias[3] >> origin_bias[4] >> origin_bias[5];
-        imu_data_input >> expected_origin_state[0] >> expected_origin_state[1] >> expected_origin_state[2] >> expected_origin_state[6] >> expected_origin_state[3] >>
-                    expected_origin_state[4] >> expected_origin_state[5] >> expected_origin_state[7] >> expected_origin_state[8] >> expected_origin_state[9];
-        expected_origin_state.tail(6) = origin_bias;
+        imu_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
+                    expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
+        expected_final_state.tail(6) = origin_bias;
+        x_origin.tail(6) = origin_bias;
+
+        //set origin of the problem
+        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+
+        //===================================================== END{INITIALIZATION}
+
+
+        //===================================================== PROCESS DATA
+        // PROCESS DATA
+
+        Eigen::Vector6s data_imu;
+        data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
+
+        Scalar input_clock;
+        TimeStamp ts(0);
+        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
+
+        while( !imu_data_input.eof())
+        {
+            // PROCESS IMU DATA
+            // Time and data variables
+            imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
+
+            ts.set(input_clock);
+            imu_ptr->setTimeStamp(ts);
+            imu_ptr->setData(data_imu);
+
+            // process data in capture
+            sen_imu->process(imu_ptr);
+        }
+
+        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+
+        //closing file
+        imu_data_input.close();
+
+    //===================================================== END{PROCESS DATA}
+    origin_KF->unfix();
+    last_KF->unfix();
+    }
+
+    virtual void TearDown(){}
+};
+
+class ConstraintIMU_biasTest_Static_NonNullBias : public testing::Test
+{
+    public:
+        wolf::TimeStamp t;
+        SensorIMUPtr sen_imu;
+        ProblemPtr wolf_problem_ptr_;
+        CeresManager* ceres_manager_wolf_diff;
+        ProcessorBasePtr processor_ptr_;
+        ProcessorIMUPtr processor_ptr_imu;
+        FrameIMUPtr origin_KF;
+        FrameIMUPtr last_KF;
+        Eigen::Vector6s origin_bias;
+        Eigen::VectorXs expected_final_state;
+        Eigen::VectorXs x_origin;
+
+    virtual void SetUp()
+    {
+        using std::shared_ptr;
+        using std::make_shared;
+        using std::static_pointer_cast;
+
+        std::string wolf_root = _WOLF_ROOT_DIR;
+
+        //===================================================== INPUT FILES
+
+        char* imu_filepath;
+
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_static_biasNonNull.txt");
+
+        imu_filepath = new char[imu_filepath_string.length() + 1];
+
+        std::strcpy(imu_filepath, imu_filepath_string.c_str());
+        std::ifstream imu_data_input;
+
+        imu_data_input.open(imu_filepath);
+        if(!imu_data_input.is_open()){
+            std::cerr << "Failed to open data files... Exiting" << std::endl;
+            ADD_FAILURE();
+        }
+        //===================================================== END{INPUT FILES}
+        
+        //===================================================== SETTING PROBLEM
+        // WOLF PROBLEM
+        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+
+        // CERES WRAPPER
+        ceres::Solver::Options ceres_options;
+        ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
+        ceres_options.max_line_search_step_contraction = 1e-3;
+        ceres_options.max_num_iterations = 1e4;
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+
+        // SENSOR + PROCESSOR IMU
+        SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+        processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_t1.yaml");
+        sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
+        processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
+    
+        //===================================================== END{SETTING PROBLEM}
+
+        //===================================================== INITIALIZATION
+
+        expected_final_state.resize(16);
+        x_origin.resize(16);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        t.set(0);
+
+        imu_data_input >> x_origin[0] >> x_origin[1] >> x_origin[2] >> x_origin[6] >> x_origin[3] >> x_origin[4] >> x_origin[5] >> x_origin[7] >> x_origin[8] >> x_origin[9];
+        imu_data_input >> origin_bias[0] >> origin_bias[1] >> origin_bias[2] >> origin_bias[3] >> origin_bias[4] >> origin_bias[5];
+        imu_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
+                    expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
+        expected_final_state.tail(6) = origin_bias;
+        x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
         origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
@@ -1129,12 +1249,12 @@ TEST_F(ConstraintIMU_accBiasObservation, acc_gyro_bias_observation)
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
     //===================================================== END{PROCESS DATA}
 
-    EXPECT_TRUE( (expected_origin_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10 ) ) <<
-    "expected_origin_state position : " << expected_origin_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (expected_origin_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
-    "expected_origin_state quaternion : " << expected_origin_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (expected_origin_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10) ) <<
-    "expected_origin_state velocity : " << expected_origin_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10 ) ) <<
+    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
+    "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10) ) <<
+    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
     EXPECT_TRUE( (origin_bias.head(3) - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
     "origin_bias Acc bias : " << origin_bias.head(3).transpose() << "\n origin_KF Acc Bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
     EXPECT_TRUE( (origin_bias.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
@@ -1220,12 +1340,12 @@ TEST_F(ConstraintIMU_accBiasObservation, acc_gyro_bias_observation)
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
     //===================================================== END{PROCESS DATA}
 
-    EXPECT_TRUE( (expected_origin_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10 ) ) <<
-    "expected_origin_state position : " << expected_origin_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (expected_origin_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
-    "expected_origin_state quaternion : " << expected_origin_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (expected_origin_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10) ) <<
-    "expected_origin_state velocity : " << expected_origin_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10 ) ) <<
+    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
+    "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10) ) <<
+    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
     EXPECT_TRUE( (origin_bias.head(3) - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
     "origin_bias Acc bias : " << origin_bias.head(3).transpose() << "\n origin_KF Acc Bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
     EXPECT_TRUE( (origin_bias.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
@@ -1275,7 +1395,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
     origin_KF->getOPtr()->fix();
     origin_KF->getVPtr()->fix();
 
-    last_KF->setState(expected_origin_state);
+    last_KF->setState(expected_final_state);
 
     last_KF->getPPtr()->fix();
     last_KF->getOPtr()->fix();
@@ -1320,9 +1440,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias1
     origin_KF->getVPtr()->fix();
 
     wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbated_origin_state(expected_origin_state);
-    Eigen::VectorXs KF1_frm_state_init(16);
-    KF1_frm_state_init = last_KF->getState();
+    Eigen::VectorXs perturbated_origin_state(x_origin);
     ceres::Solver::Summary summary;
 
     //==============================================================
@@ -1330,9 +1448,9 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias1
 
     for(int i = 1; i<9; i++)
     {
-        perturbated_origin_state[10] = expected_origin_state(10) + i * epsilon_bias;
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(KF1_frm_state_init);
+        last_KF->setState(expected_final_state);
 
         last_KF->getPPtr()->fix();
         last_KF->getOPtr()->fix();
@@ -1371,9 +1489,9 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias1
 
     for(int i = 1; i<9; i++)
     {
-        perturbated_origin_state[10] = expected_origin_state(10) + i * epsilon_bias;
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(KF1_frm_state_init);
+        last_KF->setState(expected_final_state);
 
         last_KF->getPPtr()->fix();
         last_KF->getOPtr()->fix();
@@ -1412,9 +1530,9 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias1
 
     for(int i = 1; i<9; i++)
     {
-        perturbated_origin_state[10] = expected_origin_state(10) + i * epsilon_bias;
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(KF1_frm_state_init);
+        last_KF->setState(expected_final_state);
 
         last_KF->getPPtr()->fix();
         last_KF->getOPtr()->fix();
@@ -1453,9 +1571,9 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias1
 
     for(int i = 1; i<9; i++)
     {
-        perturbated_origin_state[10] = expected_origin_state(10) + i * epsilon_bias;
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(KF1_frm_state_init);
+        last_KF->setState(expected_final_state);
 
         last_KF->getPPtr()->fix();
         last_KF->getOPtr()->fix();
@@ -1494,9 +1612,9 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias1
 
     for(int i = 1; i<9; i++)
     {
-        perturbated_origin_state[10] = expected_origin_state(10) + i * epsilon_bias;
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(KF1_frm_state_init);
+        last_KF->setState(expected_final_state);
 
         last_KF->getPPtr()->fix();
         last_KF->getOPtr()->fix();
@@ -1535,9 +1653,9 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias1
 
     for(int i = 1; i<9; i++)
     {
-        perturbated_origin_state[10] = expected_origin_state(10) + i * epsilon_bias;
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(KF1_frm_state_init);
+        last_KF->setState(expected_final_state);
 
         last_KF->getPPtr()->fix();
         last_KF->getOPtr()->fix();
@@ -1576,9 +1694,9 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias1
 
     for(int i = 1; i<9; i++)
     {
-        perturbated_origin_state[10] = expected_origin_state(10) + i * epsilon_bias;
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(KF1_frm_state_init);
+        last_KF->setState(expected_final_state);
 
         last_KF->getPPtr()->fix();
         last_KF->getOPtr()->fix();
@@ -1617,9 +1735,9 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias1
 
     for(int i = 1; i<9; i++)
     {
-        perturbated_origin_state[10] = expected_origin_state(10) + i * epsilon_bias;
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(KF1_frm_state_init);
+        last_KF->setState(expected_final_state);
 
         last_KF->getPPtr()->fix();
         last_KF->getOPtr()->fix();
@@ -1651,15 +1769,45 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias1
         #endif
     }
     //std::cout << summary.FullReport() << std::endl;
-
-
 }
+
+TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
+{
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+    last_KF->getVPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+
+    Eigen::VectorXs last_KF_state(16);
+
+    //Only biases are unfixed
+    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+}
+
+
 
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_PrcImuOdom.acc_biased_static";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Static_NullBias*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Static_NonNullBias*";
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_accBiasObservation_2KF.acc_gyro_bias_observation";
   return RUN_ALL_TESTS();
 }
