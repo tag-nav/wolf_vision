@@ -432,6 +432,14 @@ class ConstraintIMU_accBiasObservation : public testing::Test
     virtual void TearDown(){}
 };*/
 
+/*
+ * This test is designed to test IMU biases in a particular case : perfect IMU, not moving.
+ * var(b1,b2,p2,v2,q2), inv(p1,q1,v1); fac1: imu+(b1=b2)
+ * So there is no odometry data.
+ * IMU data file should first contain initial conditions, then the time_step between each new imu and the last one (in seconds) data,
+ * and finally the last stateafter integration and the last timestamp, Then it should contain all IMU data and related timestamps
+ */
+
 class ConstraintIMU_biasTest_Class1 : public testing::Test
 {
     public:
@@ -490,6 +498,8 @@ class ConstraintIMU_biasTest_Class1 : public testing::Test
 
         imu_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
                              expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9] >> last_ts;
+        
+        //===================================================== END{TEST PROPERTIES}
 
         //===================================================== SETTING PROBLEM
 
