@@ -51,7 +51,7 @@ ProblemPtr Problem::create(FrameStructure _frame_structure)
 
 Problem::~Problem()
 {
-    WOLF_DEBUG("destructed -P");
+    //    WOLF_DEBUG("destructed -P");
 }
 
 void Problem::addSensor(SensorBasePtr _sen_ptr)
@@ -770,8 +770,8 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
 bool Problem::check(int verbose_level)
 {
     bool is_consistent = true;
-    std::cout << std::endl;
-    std::cout << "Wolf tree integrity ---------------------" << std::endl;
+    if (verbose_level) std::cout << std::endl;
+    if (verbose_level) std::cout << "Wolf tree integrity ---------------------" << std::endl;
     auto P_raw = this;
     auto H = hardware_ptr_;
     if (verbose_level > 0)
@@ -942,8 +942,8 @@ bool Problem::check(int verbose_level)
         }
     }
 
-    std::cout << "--------------------------- Wolf tree " << (is_consistent ? " OK" : "Not OK !!") << std::endl;
-    std::cout << std::endl;
+    if (verbose_level) std::cout << "--------------------------- Wolf tree " << (is_consistent ? " OK" : "Not OK !!") << std::endl;
+    if (verbose_level) std::cout << std::endl;
 
     return is_consistent;
 }
