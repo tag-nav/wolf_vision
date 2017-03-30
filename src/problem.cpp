@@ -558,12 +558,12 @@ StateBlockList& Problem::getStateBlockList()
 
 
 
-void Problem::setOrigin(const Eigen::VectorXs& _origin_state, const Eigen::MatrixXs& _origin_state_cov, const TimeStamp& _ts)
+void Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov, const TimeStamp& _ts)
 {
     if (!origin_is_set_)
     {
         // Create origin frame
-        FrameBasePtr origin_frame_ptr = emplaceFrame(KEY_FRAME, _origin_state, _ts);
+        FrameBasePtr origin_frame_ptr = emplaceFrame(KEY_FRAME, _prior_state, _ts);
 
         // create origin capture with just pose
         //        Size pose_size, pose_cov_size;
@@ -573,7 +573,7 @@ void Problem::setOrigin(const Eigen::VectorXs& _origin_state, const Eigen::Matri
         //        CaptureFixPtr init_capture = std::make_shared<CaptureFix>(_ts, nullptr, pose, pose_cov);
 
         // create origin capture with the given state as data
-        CaptureFixPtr init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _origin_state, _origin_state_cov);
+        CaptureFixPtr init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state, _prior_cov);
         origin_frame_ptr->addCapture(init_capture);
 
         // create feature and constraint
@@ -815,13 +815,17 @@ bool Problem::check(int verbose_level)
             std::cout << (F->isKey() ? "  KF" : "  F") << F->id() << " @ " << F.get() << std::endl;
             std::cout << "    -> P @ " << F->getProblem().get() << std::endl;
             std::cout << "    -> T @ " << F->getTrajectoryPtr().get() << std::endl;
-            for (auto c : F->getConstrainedByList())
-            {
-                std::cout << "    <- c" << c->id() << " -> F" << c->getFrameOtherPtr()->id() << std::endl;
-            }
         }
         is_consistent = is_consistent && (F->getProblem().get() == P_raw);
         is_consistent = is_consistent && (F->getTrajectoryPtr() == T);
+        for (auto cby : F->getConstrainedByList())
+        {
+            if (verbose_level > 0)
+            {
+                std::cout << "    <- c" << cby->id() << " -> F" << cby->getFrameOtherPtr()->id() << std::endl;
+            }
+            is_consistent = is_consistent && (cby->getFrameOtherPtr() == F);
+        }
         for (auto C : F->getCaptureList())
         {
             if (verbose_level > 0)
@@ -844,12 +848,13 @@ bool Problem::check(int verbose_level)
                 is_consistent = is_consistent && (f->getProblem().get() == P_raw);
                 is_consistent = is_consistent && (f->getCapturePtr() == C);
 
-                if (verbose_level > 0)
+                for (auto cby : f->getConstrainedByList())
                 {
-                    for (auto c : f->getConstrainedByList())
+                    if (verbose_level > 0)
                     {
-                        std::cout << "     <- c" << c->id() << " -> f" << c->getFeatureOtherPtr()->id() << std::endl;
+                        std::cout << "     <- c" << cby->id() << " -> f" << cby->getFeatureOtherPtr()->id() << std::endl;
                     }
+                    is_consistent = is_consistent && (cby->getFeatureOtherPtr() == f);
                 }
                 for (auto c : f->getConstraintList())
                 {
