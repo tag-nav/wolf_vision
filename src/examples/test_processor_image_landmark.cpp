@@ -214,13 +214,13 @@ int main(int argc, char** argv)
         {
             x_prev_prev = prev_prev_key_fr_ptr->getState();
 
-            // some maps to avoid local variables
-            Eigen::Map<Eigen::Vector3s>     p_prev_prev(x_prev_prev.data());
-            Eigen::Map<Eigen::Quaternions>  q_prev_prev(x_prev_prev.data() + 3);
-            Eigen::Map<Eigen::Vector3s>     p_prev(x_prev.data());
-            Eigen::Map<Eigen::Quaternions>  q_prev(x_prev.data() + 3);
-            Eigen::Map<Eigen::Vector3s>     dp(dx.data());
-            Eigen::Map<Eigen::Quaternions>  dq(dx.data() + 3);
+            // define local variables on top of existing vectors to avoid memory allocation
+            Eigen::Vector3s     p_prev_prev(x_prev_prev.data());
+            Eigen::Quaternions  q_prev_prev(x_prev_prev.data() + 3);
+            Eigen::Vector3s     p_prev(x_prev.data());
+            Eigen::Quaternions  q_prev(x_prev.data() + 3);
+            Eigen::Vector3s     dp(dx.data());
+            Eigen::Quaternions  dq(dx.data() + 3);
 
             // delta state PQ
 //            Eigen::Vector3s dp = q_prev_prev.conjugate() * (p_prev - p_prev_prev);
