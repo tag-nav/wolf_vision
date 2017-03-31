@@ -10,6 +10,7 @@
 
 #include "processor_motion.h"
 #include "constraint_odom_2D.h"
+#include "rotations.h"
 
 
 namespace wolf {
@@ -128,7 +129,7 @@ inline void ProcessorOdom2D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
 //    std::cout << "_x_plus_delta: " << _x_plus_delta.transpose() << std::endl;
 
     _x_plus_delta.head<2>() = _x.head<2>() + Eigen::Rotation2Ds(_x(2)).matrix() * _delta.head<2>();
-    _x_plus_delta(2) = _x(2) + _delta(2);
+    _x_plus_delta(2) = pi2pi(_x(2) + _delta(2));
 
 //    std::cout << "-----------------------------------------------" << std::endl;
 //    std::cout << "_x_plus_delta: " << _x_plus_delta.transpose() << std::endl;
@@ -149,7 +150,7 @@ inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
 //    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
 
     _delta1_plus_delta2.head<2>() = _delta1.head<2>() + Eigen::Rotation2Ds(_delta1(2)).matrix() * _delta2.head<2>();
-    _delta1_plus_delta2(2) = _delta1(2) + _delta2(2);
+    _delta1_plus_delta2(2) = pi2pi(_delta1(2) + _delta2(2));
 
 //    std::cout << "-----------------------------------------------" << std::endl;
 //    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
@@ -175,7 +176,7 @@ inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
 //    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
 
     _delta1_plus_delta2.head<2>() = _delta1.head<2>() + Eigen::Rotation2Ds(_delta1(2)).matrix() * _delta2.head<2>();
-    _delta1_plus_delta2(2) = _delta1(2) + _delta2(2);
+    _delta1_plus_delta2(2) = pi2pi(_delta1(2) + _delta2(2));
 
     _jacobian1 = Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
     _jacobian1(0,2) = -sin(_delta1(2))*_delta2(0) - cos(_delta1(2))*_delta2(1);
