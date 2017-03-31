@@ -33,8 +33,8 @@ TEST(ProcessorMotion, Motion2D)
     using namespace wolf;
 
     // time
-    TimeStamp t0, t;
-    t0.setToNow();
+    TimeStamp t_now, t0, t;
+    t0 = TimeStamp(0.0);
     t = t0;
     Scalar dt = .01;
 
@@ -44,7 +44,7 @@ TEST(ProcessorMotion, Motion2D)
     Eigen::Vector1s o0(Eigen::Vector1s::Constant(M_PI_4));
     Eigen::Vector3s x0;
     x0 << p0, o0;
-    Eigen::Matrix3s init_cov = Eigen::Matrix3s::Identity() * 0.1;
+    Eigen::Matrix3s x0_cov = Eigen::Matrix3s::Identity() * 0.1;
 
     // motion data
     Eigen::VectorXs data(2);
@@ -72,15 +72,15 @@ TEST(ProcessorMotion, Motion2D)
 
 
     // Origin Key Frame
-    FrameBasePtr origin_frame = problem_ptr->emplaceFrame(KEY_FRAME, x0, t0);
-
-    // Prior covariance
-    CaptureFixPtr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensor_fix_ptr, x0, init_cov);
-    origin_frame->addCapture(initial_covariance);
-    initial_covariance->process();
+    //    FrameBasePtr origin_frame = problem_ptr->emplaceFrame(KEY_FRAME, x0, t0);
+    //    // Prior covariance
+    //    CaptureFixPtr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensor_fix_ptr, x0, init_cov);
+    //    origin_frame->addCapture(initial_covariance);
+    //    initial_covariance->emplaceFeatureAndConstraint();
+    FrameBasePtr origin_frame = problem_ptr->setPrior(x0, x0_cov, t0);
 
     // Initialize processor motion
-    odom2d_ptr->setOrigin(origin_frame);
+//    odom2d_ptr->setOrigin(origin_frame);
 
     std::cout << "Initial pose : " << problem_ptr->getCurrentState().transpose() << std::endl;
     std::cout << "Initial covariance : " << std::endl << problem_ptr->getCurrentState().transpose() << std::endl;
@@ -96,7 +96,7 @@ TEST(ProcessorMotion, Motion2D)
     // Check covariance values
     Eigen::Vector3s integrated_x = x0;
     Eigen::Vector3s integrated_delta = Eigen::Vector3s::Zero();
-    Eigen::Matrix3s integrated_covariance = init_cov;
+    Eigen::Matrix3s integrated_covariance = x0_cov;
     Eigen::Matrix3s integrated_delta_covariance = Eigen::Matrix3s::Zero();
     Eigen::MatrixXs Ju(3, 2);
     Eigen::Matrix3s Jx = Eigen::Matrix3s::Identity();
@@ -105,9 +105,9 @@ TEST(ProcessorMotion, Motion2D)
 
     for (int i = 0; i <= 20; i++)
     {
-        WOLF_TRACE("");
+        WOLF_TRACE("Iteration: " , i);
         // Processor
-        odom2d_ptr->process(cap_ptr);
+        sensor_odom_ptr->process(cap_ptr);
 
         // Delta Reference
         Ju(0, 0) = cos(integrated_delta(2) + data(1) / 2);
@@ -124,7 +124,7 @@ TEST(ProcessorMotion, Motion2D)
 
         integrated_delta(0) = integrated_delta(0) + cos(integrated_delta(2) + data(1) / 2) * data(0);
         integrated_delta(1) = integrated_delta(1) + sin(integrated_delta(2) + data(1) / 2) * data(0);
-        integrated_delta(2) = integrated_delta(2) + data(1);
+        integrated_delta(2) = pi2pi(integrated_delta(2) + data(1));
 
         // Absolute Reference
         Ju(0, 0) = cos(integrated_x(2) + data(1) / 2);
@@ -141,7 +141,7 @@ TEST(ProcessorMotion, Motion2D)
 
         integrated_x(0) = integrated_x(0) + cos(integrated_x(2) + data(1) / 2) * data(0);
         integrated_x(1) = integrated_x(1) + sin(integrated_x(2) + data(1) / 2) * data(0);
-        integrated_x(2) = integrated_x(2) + data(1);
+        integrated_x(2) = pi2pi(integrated_x(2) + data(1));
 
         integrated_x_vector.push_back(integrated_x);
         integrated_covariance_vector.push_back(integrated_covariance);
@@ -162,7 +162,8 @@ TEST(ProcessorMotion, Motion2D)
 //
 //            std::cout << "TEST DELTA CHECK ------> ERROR: Integrated state different from reference." << std::endl;
 //        }
-        EXPECT_TRUE((odom2d_ptr->getCurrentState() - integrated_x).isMuchSmallerThan(1.0,Constants::EPS));
+//        EXPECT_TRUE((odom2d_ptr->getCurrentState() - integrated_x).isMuchSmallerThan(1.0,Constants::EPS));
+        ASSERT_EIGEN_APPROX(odom2d_ptr->getCurrentState(), integrated_x);
 
 //        if ((odom2d_ptr->getBuffer().get().back().delta_integr_cov_ - integrated_delta_covariance).array().abs().maxCoeff() > Constants::EPS)
 //        {
@@ -193,6 +194,8 @@ TEST(ProcessorMotion, Motion2D)
     dt = 0.0045; // new dt
     for (int i = 1; i <= 25; i++)
     {
+        WOLF_TRACE("Iteration: " , i);
+
         std::cout << "State(" << (t - t0) << ") = " << odom2d_ptr->getState(t).transpose() << std::endl;
         //std::cout << "Covariance(" << (t - t0) << ") : " << std::endl
         //        << odom2d_ptr->getBufferPtr()->getMotion(t).delta_integr_cov_ << std::endl;
@@ -230,7 +233,7 @@ TEST(ProcessorMotion, Motion2D)
     std::cout << "Delta: " << new_keyframe_ptr->getCaptureList().front()->getFeatureList().front()->getMeasurement().transpose() << std::endl;
     std::cout << "Covariance: " << std::endl << new_keyframe_ptr->getCaptureList().front()->getFeatureList().front()->getMeasurementCovariance() << std::endl;
 
-    std::cout << "getState with TS previous than the last keyframe: " << t_split-0.5 << std::endl;
+    std::cout << "getState with TS previous than the last keyframe: " << (t_split-t0)-0.5 << std::endl;
     std::cout << odom2d_ptr->getState(t_split-0.5) << std::endl;
 
     // Solve
@@ -248,7 +251,8 @@ TEST(ProcessorMotion, Motion2D)
 //        std::cout << "1st TEST COVARIANCE CHECK ------> ERROR!: Integrated covariance different from reference." << std::endl;
 //
 //    }
-    EXPECT_TRUE((problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[12]).isMuchSmallerThan(1.0, Constants::EPS));
+//    EXPECT_TRUE((problem_ptr->getFrameCovariance(new_keyframe_ptr) - integrated_covariance_vector[12]).isMuchSmallerThan(1.0, Constants::EPS));
+    EXPECT_EIGEN_APPROX(problem_ptr->getFrameCovariance(new_keyframe_ptr) , integrated_covariance_vector[12]);
 
 
     // second split as non-exact timestamp
