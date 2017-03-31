@@ -55,6 +55,11 @@ public:
 
 #define TEST_COUT testing::internal::TestCout()
 
+#define EXPECT_EIGEN_APPROX(C_expect, C_actual) EXPECT_PRED2([](const MatrixXs lhs, const MatrixXs rhs) { \
+                  return (lhs - rhs).isMuchSmallerThan(1, wolf::Constants::EPS); \
+               }, \
+               C_expect, C_actual);
+
 #define ASSERT_EIGEN_APPROX(C_expect, C_actual) ASSERT_PRED2([](const MatrixXs lhs, const MatrixXs rhs) { \
                   return (lhs - rhs).isMuchSmallerThan(1, wolf::Constants::EPS); \
                }, \
