@@ -44,16 +44,14 @@ FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeS
 // Capture, feature and constraint
 CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>(0, nullptr, pose7));
 FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("ODOM 3D", pose7, data_cov));
-ConstraintFix3DPtr ctr0(std::make_shared<ConstraintFix3D>(fea0));
+ConstraintFix3DPtr ctr0 = std::static_pointer_cast<ConstraintFix3D>(fea0->addConstraint(std::make_shared<ConstraintFix3D>(fea0)));
+ConstraintBasePtr dummy = frm0->addConstrainedBy(ctr0);
 
 
 ////////////////////////////////////////////////////////
 
 TEST(ConstraintFix3D, check_tree)
 {
-    fea0->addConstraint(ctr0);
-    frm0->addConstrainedBy(ctr0);
-
     ASSERT_TRUE(problem->check(0));
 }
 
