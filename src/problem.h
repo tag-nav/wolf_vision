@@ -142,7 +142,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         // Trajectory branch ----------------------------------
         TrajectoryBasePtr getTrajectoryPtr();
-        virtual void setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov,
+        virtual FrameBasePtr setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov,
                                const TimeStamp& _ts);
 
         /** \brief Emplace Frame of the correct size

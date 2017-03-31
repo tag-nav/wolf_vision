@@ -558,7 +558,7 @@ StateBlockList& Problem::getStateBlockList()
 
 
 
-void Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov, const TimeStamp& _ts)
+FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov, const TimeStamp& _ts)
 {
     if (!origin_is_set_)
     {
@@ -586,6 +586,8 @@ void Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixX
                     (std::static_pointer_cast<ProcessorMotion>(processor_ptr))->setOrigin(origin_frame_ptr);
 
         origin_is_set_ = true;
+
+        return origin_frame_ptr;
     }
     else
         throw std::runtime_error("Origin already set!");
