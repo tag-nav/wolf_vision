@@ -71,9 +71,9 @@ class CaptureMotion : public CaptureBase
 
         // member data:
     private:
-        Eigen::VectorXs data_;        ///< Motion data in form of vector mandatory
-        Eigen::MatrixXs data_cov_;    ///< Motion data covariance
-        MotionBuffer buffer_;         ///< Buffer of motions between this Capture and the next one.
+        Eigen::VectorXs data_;          ///< Motion data in form of vector mandatory
+        Eigen::MatrixXs data_cov_;      ///< Motion data covariance
+        MotionBuffer buffer_;           ///< Buffer of motions between this Capture and the next one.
         FrameBasePtr origin_frame_ptr_; ///< Pointer to the origin frame of the motion
 };
 
@@ -86,23 +86,7 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_
         origin_frame_ptr_(_origin_frame_ptr)
 {
     //
-//    std::cout << "constructed    +C-Mot" << id() << std::endl;
 }
-
-//inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
-//                                    const Eigen::VectorXs& _data_sigmas, FrameBasePtr _origin_frame_ptr) :
-//        CaptureBase("MOTION", _ts, _sensor_ptr),
-//        data_(_data),
-//        data_cov_(_data_sigmas.size(), _data_sigmas.size()),
-//        buffer_(),
-//        origin_frame_ptr_(_origin_frame_ptr)
-//{
-//    data_cov_.setZero();
-//    for (int i = 0; i < _data_sigmas.size(); i++)
-//        data_cov_(i,i) = _data_sigmas(i) * _data_sigmas(i);
-//
-////    std::cout << "constructed    +C-Mot" << id() << std::endl;
-//}
 
 inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
                                     const Eigen::MatrixXs& _data_cov, FrameBasePtr _origin_frame_ptr) :
@@ -113,12 +97,10 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_
         origin_frame_ptr_(_origin_frame_ptr)
 {
     //
-//    std::cout << "constructed    +C-Mot" << id() << std::endl;
 }
 
 inline CaptureMotion::~CaptureMotion()
 {
-//    std::cout << "destructed     -C-Mot" << id() << std::endl;
     //
 }
 

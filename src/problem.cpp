@@ -565,13 +565,6 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
         // Create origin frame
         FrameBasePtr origin_frame_ptr = emplaceFrame(KEY_FRAME, _prior_state, _ts);
 
-        // create origin capture with just pose
-        //        Size pose_size, pose_cov_size;
-        //        getFrameStructureSize(pose_size, pose_cov_size);
-        //        VectorXs pose     = _origin_state.head(pose_size);
-        //        MatrixXs pose_cov = _origin_state_cov.topLeftCorner(pose_cov_size,pose_cov_size);
-        //        CaptureFixPtr init_capture = std::make_shared<CaptureFix>(_ts, nullptr, pose, pose_cov);
-
         // create origin capture with the given state as data
         CaptureFixPtr init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state, _prior_cov);
         origin_frame_ptr->addCapture(init_capture);
@@ -579,7 +572,7 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
         // emplace feature and constraint
         init_capture->emplaceFeatureAndConstraint();
 
-        // notify processors about the new keyframe
+        // notify all motion processors about the origin keyframe
         for (auto sensor_ptr : hardware_ptr_->getSensorList())
             for (auto processor_ptr : sensor_ptr->getProcessorList())
                 if (processor_ptr->isMotion())
