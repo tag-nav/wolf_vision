@@ -282,8 +282,8 @@ int main(int argc, char** argv)
     CaptureFix* initial_covariance_analytic = new CaptureFix(TimeStamp(0), new SensorBase("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0), first_frame_analytic->getState(), Eigen::Matrix3s::Identity() * 0.01);
     first_frame_autodiff->addCapture(initial_covariance_autodiff);
     first_frame_analytic->addCapture(initial_covariance_analytic);
-    initial_covariance_autodiff->process();
-    initial_covariance_analytic->process();
+    initial_covariance_autodiff->emplaceFeatureAndConstraint();
+    initial_covariance_analytic->emplaceFeatureAndConstraint();
 
     // SOLVING PROBLEMS
     std::cout << "solving..." << std::endl;

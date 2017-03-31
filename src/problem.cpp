@@ -576,8 +576,8 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
         CaptureFixPtr init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state, _prior_cov);
         origin_frame_ptr->addCapture(init_capture);
 
-        // create feature and constraint
-        init_capture->process();
+        // emplace feature and constraint
+        init_capture->emplaceFeatureAndConstraint();
 
         // notify processors about the new keyframe
         for (auto sensor_ptr : hardware_ptr_->getSensorList())

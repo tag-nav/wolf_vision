@@ -15,7 +15,7 @@ CaptureFix::~CaptureFix()
 	//
 }
 
-void CaptureFix::process()
+void CaptureFix::emplaceFeatureAndConstraint()
 {
     // Emplace feature
     FeatureFixPtr feature_fix = std::make_shared<FeatureFix>(data_,data_covariance_);
