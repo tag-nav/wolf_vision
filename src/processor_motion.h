@@ -97,6 +97,7 @@ class ProcessorMotion : public ProcessorBase
         virtual void resetDerived();
 
         // Queries to the processor:
+        virtual bool isMotion();
 
         virtual bool voteForKeyFrame();
 
@@ -176,7 +177,7 @@ class ProcessorMotion : public ProcessorBase
         MotionBuffer& getBuffer();
         const MotionBuffer& getBuffer() const;
 
-        virtual bool isMotion();
+        Eigen::MatrixXs integrateBufferCovariance(const MotionBuffer& _motion_buffer);
 
         // Helper functions:
     protected:
@@ -187,7 +188,6 @@ class ProcessorMotion : public ProcessorBase
         void updateDt();
         void integrateOneStep();
         void reintegrateBuffer(CaptureMotionPtr _capture_ptr);
-        Eigen::MatrixXs integrateBufferCovariance(const MotionBuffer& _motion_buffer);
 
         /** Pre-process incoming Capture
          *
