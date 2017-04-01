@@ -16,7 +16,7 @@
 namespace wolf {
     
 WOLF_PTR_TYPEDEFS(ProcessorOdom2D);
-   
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsOdom2D);
 
 struct ProcessorParamsOdom2D : public ProcessorParamsBase
 {
