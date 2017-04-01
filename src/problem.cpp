@@ -511,6 +511,12 @@ Eigen::MatrixXs Problem::getFrameCovariance(FrameBasePtr _frame_ptr)
     return covariance;
 }
 
+Eigen::MatrixXs Problem::getLastKeyFrameCovariance()
+{
+    FrameBasePtr frm = getLastKeyFramePtr();
+    return getFrameCovariance(frm);
+}
+
 bool Problem::getLandmarkCovariance(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& _covariance)
 {
     return getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), _covariance, 0, 0) &&

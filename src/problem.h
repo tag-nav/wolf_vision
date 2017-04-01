@@ -231,6 +231,7 @@ class Problem : public std::enable_shared_from_this<Problem>
                                 const int _col=0);
         bool getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance);
         Eigen::MatrixXs getFrameCovariance(FrameBasePtr _frame_ptr);
+        Eigen::MatrixXs getLastKeyFrameCovariance();
         bool getLandmarkCovariance(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& _covariance);
         Eigen::MatrixXs getLandmarkCovariance(LandmarkBasePtr _landmark_ptr);
 
