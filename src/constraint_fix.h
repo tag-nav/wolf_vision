@@ -5,6 +5,7 @@
 //Wolf includes
 #include "constraint_sparse.h"
 #include "frame_base.h"
+#include "rotations.h"
 
 
 namespace wolf {
@@ -46,23 +47,23 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
 template<typename T>
 inline bool ConstraintFix::operator ()(const T* const _p, const T* const _o, T* _residuals) const
 {
-    //std::cout << "computing constraint odom ..." << std::endl;
-    _residuals[0] = (T(getMeasurement()(0)) - _p[0]) / T(sqrt(getMeasurementCovariance()(0, 0)));
-    _residuals[1] = (T(getMeasurement()(1)) - _p[1]) / T(sqrt(getMeasurementCovariance()(1, 1)));
-    _residuals[2] = T(getMeasurement()(2)) - _o[0];
-    //            std::cout << "+++++++  fix constraint +++++++" << std::endl;
-    //            std::cout << "orientation:   " << _o[0] << std::endl;
-    //            std::cout << "measurement:   " << T(getMeasurement()(2)) << std::endl;
-    //            std::cout << "residual:      " << _residuals[2] << std::endl;
-    //            std::cout << "is > PI        " << bool(_residuals[2] > T(2*M_PI)) << std::endl;
-    //            std::cout << "is >= PI       " << bool(_residuals[2] <= T(-2*M_PI)) << std::endl;
-    while (_residuals[2] > T(M_PI))
-        _residuals[2] = _residuals[2] - T(2 * M_PI);
-    while (_residuals[2] <= T(-M_PI))
-        _residuals[2] = _residuals[2] + T(2 * M_PI);
-    //            std::cout << "residual:      " << _residuals[2] << std::endl << std::endl;
-    _residuals[2] = _residuals[2] / T(sqrt(getMeasurementCovariance()(2, 2)));
-    //std::cout << "constraint fix computed!" << std::endl;
+    // measurement
+    Eigen::Matrix<T,3,1> meas =  getMeasurement().cast<T>();
+
+    // error
+    Eigen::Matrix<T,3,1> er;
+    er(0) = meas(0) - _p[0];
+    er(1) = meas(1) - _p[1];
+    er(2) = meas(2) - _o[0];
+    while (er[2] > T(M_PI))
+        er(2) = er(2) - T(M_2_PI);
+    while (er(2) <= T(-M_PI))
+        er(2) = er(2) + T(M_2_PI);
+
+    // residual
+    Eigen::Map<Eigen::Matrix<T,3,1>> res(_residuals);
+    res = getFeaturePtr()->getMeasurementSquareRootInformation().cast<T>() * er;
+
     return true;
 }
 
