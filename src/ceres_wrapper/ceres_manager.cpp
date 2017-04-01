@@ -267,10 +267,10 @@ void CeresManager::update()
         }
         wolf_problem_->getConstraintNotificationList().pop_front();
     }
-    //std::cout << "all constraints added" << std::endl;
-//	  std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
-//    std::cout << "wrapper residual blocks: " << id_2_residual_idx_.size() << std::endl;
-//    std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
+	std::cout << "all constraints added" << std::endl;
+	std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
+	std::cout << "wrapper residual blocks: " << id_2_residual_idx_.size() << std::endl;
+	std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
 
 	assert(ceres_problem_->NumResidualBlocks() == id_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
