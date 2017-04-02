@@ -4,11 +4,22 @@ namespace wolf
 
 ProcessorMotion::ProcessorMotion(const std::string& _type, Size _state_size, Size _delta_size,
                                  Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance) :
-        ProcessorBase(_type, _time_tolerance), x_size_(_state_size), delta_size_(_delta_size), delta_cov_size_(
-                _delta_cov_size), data_size_(_data_size), origin_ptr_(), last_ptr_(), incoming_ptr_(), dt_(0.0), x_(
-                _state_size), delta_(_delta_size), delta_cov_(_delta_cov_size, _delta_cov_size), delta_integrated_(
-                _delta_size), delta_integrated_cov_(_delta_cov_size, _delta_cov_size), data_(_data_size), jacobian_delta_preint_(
-                delta_cov_size_, delta_cov_size_), jacobian_delta_(delta_cov_size_, delta_cov_size_)
+        ProcessorBase(_type, _time_tolerance),
+        x_size_(_state_size),
+        delta_size_(_delta_size),
+        delta_cov_size_(_delta_cov_size),
+        data_size_(_data_size),
+        origin_ptr_(),
+        last_ptr_(),
+        incoming_ptr_(),
+        dt_(0.0), x_(_state_size),
+        delta_(_delta_size),
+        delta_cov_(_delta_cov_size, _delta_cov_size),
+        delta_integrated_(_delta_size),
+        delta_integrated_cov_(_delta_cov_size, _delta_cov_size),
+        data_(_data_size),
+        jacobian_delta_preint_(delta_cov_size_, delta_cov_size_),
+        jacobian_delta_(delta_cov_size_, delta_cov_size_)
 {
     status_ = IDLE;
     //
@@ -25,6 +36,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
     if (status_ == IDLE)
     {
+        std::cout << "PM: IDLE" << std::endl;
         TimeStamp t0 = _incoming_ptr->getTimeStamp();
 
         if (origin_ptr_ == nullptr)
@@ -32,17 +44,20 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             FrameBasePtr frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t0);
             if (frm && fabs(frm->getTimeStamp() - t0) < time_tolerance_)
             {
+                std::cout << "PM: join KF" << std::endl;
                 // Join existing KF
                 setOrigin(frm);
             }
             else
             {
                 // Create new KF for origin
+                std::cout << "PM: make KF" << std::endl;
                 VectorXs x0 = getProblem()->zeroState();
                 setOrigin(x0, t0);
             }
         }
         status_ = RUNNING;
+        std::cout << "PM: RUNNING" << std::endl;
     }
 
 
@@ -60,43 +75,28 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
     if (voteForKeyFrame() && permittedKeyFrame())
     {
-        // key_capture
-        //        CaptureMotionPtr key_capture_ptr = last_ptr_;
-        //        FrameBasePtr key_frame_ptr = key_capture_ptr->getFramePtr();
+        // Set the frame of last_ptr as key
         FrameBasePtr key_frame_ptr = last_ptr_->getFramePtr();
-
-        // Set the frame of key_capture as key
         key_frame_ptr->setState(getCurrentState());
         key_frame_ptr->setTimeStamp(getCurrentTimeStamp());
         key_frame_ptr->setKey();
 
         // create motion feature and add it to the key_capture
         delta_integrated_cov_ = integrateBufferCovariance(last_ptr_->getBuffer());
-
-
-        FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
-                "MOTION",
-                last_ptr_->getBuffer().get().back().delta_integr_,
-                delta_integrated_cov_); // avoid a strict zero in the covariance
+        FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>("MOTION", last_ptr_->getBuffer().get().back().delta_integr_, delta_integrated_cov_);
         last_ptr_->addFeature(key_feature_ptr);
 
         // create motion constraint and link it to parent feature and other frame (which is origin's frame)
-        auto ctr_ptr    =  emplaceConstraint(key_feature_ptr, origin_ptr_->getFramePtr());
-//        key_feature_ptr -> addConstraint(ctr_ptr);
-//        origin_ptr_->getFramePtr() -> addConstrainedBy(ctr_ptr);
+        auto ctr_ptr = emplaceConstraint(key_feature_ptr, origin_ptr_->getFramePtr());
 
-        // new last capture
+        // new capture
         CaptureMotionPtr new_capture_ptr = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(),
                                                     getSensorPtr(),
                                                     Eigen::VectorXs::Zero(data_size_),
                                                     Eigen::MatrixXs::Zero(data_size_, data_size_),
                                                     key_frame_ptr);
         // reset the new buffer
-        new_capture_ptr->getBuffer().get().push_back(Motion( {key_frame_ptr->getTimeStamp(), deltaZero(), deltaZero(),
-                                             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
-                                             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
-                                             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_) } ) ) ;
-
+        new_capture_ptr->getBuffer().get().push_back( motionZero(key_frame_ptr->getTimeStamp()) ) ;
 
         // create a new frame
         FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME, key_frame_ptr->getState(), new_capture_ptr->getTimeStamp());
