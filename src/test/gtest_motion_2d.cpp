@@ -81,7 +81,7 @@ TEST(ProcessorMotion2D, Odom2D)
     Scalar dt = .01;
     // Origin frame:
     Vector3s x0(.5, -.5 -sqrt(.5), M_PI_4);
-    Eigen::Matrix3s x0_cov = Eigen::Matrix3s::Identity() * 0.0000001;
+    Eigen::Matrix3s x0_cov = Eigen::Matrix3s::Identity() * 0.1;
     // motion data
     VectorXs data(Vector2s(1, M_PI_4) ); // advance 1m turn pi/4 rad (45 deg). Need 8 steps for a complete turn
     Eigen::MatrixXs data_cov = Eigen::MatrixXs::Identity(2, 2) * 0.01;
@@ -90,24 +90,19 @@ TEST(ProcessorMotion2D, Odom2D)
     ProblemPtr problem_ptr = Problem::create(FRM_PO_2D);
     SensorBasePtr sensor_odom_ptr = problem_ptr->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
-    params->dist_traveled_th_   = 1.5; // force KF at the second process()
+    params->dist_traveled_th_   = 1.5; // force KF at every second process()
     params->elapsed_time_th_    = 100;
     params->cov_det_th_         = 100;
     ProcessorBasePtr prc = problem_ptr->installProcessor("ODOM 2D", "odom", sensor_odom_ptr, params);
     ProcessorOdom2DPtr odom2d_ptr = std::static_pointer_cast<ProcessorOdom2D>(prc);
 
     // Ceres wrapper
-    ceres::Solver::Options ceres_options;
-//    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
-//    ceres_options.max_line_search_step_contraction = 1e-3;
-//    ceres_options.max_num_iterations = 100;
-    CeresManager* ceres_manager_ptr = new CeresManager(problem_ptr, ceres_options);
-
+    CeresManager ceres_manager(problem_ptr);
 
     // Origin Key Frame
     FrameBasePtr origin_frame = problem_ptr->setPrior(x0, x0_cov, t0);
-    ceres_manager_ptr->solve();
-    ceres_manager_ptr->computeCovariances(ALL_MARGINALS);
+    ceres_manager.solve();
+    ceres_manager.computeCovariances(ALL_MARGINALS);
 
     std::cout << "Initial pose : " << problem_ptr->getCurrentState().transpose() << std::endl;
     std::cout << "Initial covariance : " << std::endl << problem_ptr->getLastKeyFrameCovariance() << std::endl;
@@ -132,17 +127,15 @@ TEST(ProcessorMotion2D, Odom2D)
     int N = 4;
     for (int i=0; i<N; i++)
     {
-        std::cout << "-------------------\nStep " << i << " at time " << t << "\n-------------------" << std::endl;
+        std::cout << "-------------------\nStep " << i << " at time " << t << std::endl;
         // re-use capture with updated timestamp
         cap_ptr->setTimeStamp(t);
 
         // Processor
-        //        problem_ptr->print(4,1,1,0);
         sensor_odom_ptr->process(cap_ptr);
-        //        problem_ptr->print(4,1,1,0);
-        Matrix3s prc_cov = odom2d_ptr->integrateBufferCovariance(odom2d_ptr->getBuffer());
+        Matrix3s odom2d_delta_cov = odom2d_ptr->integrateBufferCovariance(odom2d_ptr->getBuffer());
         std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
-        std::cout << "PRC  cov: \n" << prc_cov << std::endl;
+        std::cout << "PRC  cov: \n" << odom2d_delta_cov << std::endl;
 
         // Integrate Delta
         Ju = plus_jac_u(integrated_delta, data);
@@ -156,7 +149,7 @@ TEST(ProcessorMotion2D, Odom2D)
         }
         std::cout << "TEST cov: \n" << integrated_delta_covariance << std::endl;
 
-        ASSERT_EIGEN_APPROX(prc_cov, integrated_delta_covariance);
+        ASSERT_EIGEN_APPROX(odom2d_delta_cov, integrated_delta_covariance);
 
         // Integrate pose
         Ju = plus_jac_u(integrated_x, data);
@@ -173,24 +166,14 @@ TEST(ProcessorMotion2D, Odom2D)
     }
 
     // Solve
-    ceres::Solver::Summary summary = ceres_manager_ptr->solve();
-    ceres_manager_ptr->computeCovariances(ALL_MARGINALS);
+    ceres::Solver::Summary summary = ceres_manager.solve();
+    ceres_manager.computeCovariances(ALL_MARGINALS);
 
-    std::cout << "After solving the problem, covariance of new keyframe:" << std::endl;
+    std::cout << "After solving the problem, covariance of the last keyframe:" << std::endl;
     std::cout << "WOLF:\n"      << problem_ptr->getLastKeyFrameCovariance() << std::endl;
     std::cout << "REFERENCE:\n" << integrated_covariance_vector[N-1] << std::endl;
-    if ((problem_ptr->getLastKeyFrameCovariance() - integrated_covariance_vector[N-1]).array().abs().maxCoeff() > 1e-8)
-    {
-        std::cout << "1st TEST COVARIANCE CHECK ------> ERROR!: Integrated covariance different from reference." << std::endl;
-    }
 
     ASSERT_EIGEN_APPROX(problem_ptr->getLastKeyFrameCovariance() , integrated_covariance_vector[N-1]);
-
-
-
-    // Free allocated memory
-    delete ceres_manager_ptr;
-    problem_ptr.reset();
 }
 
 //TEST(ProcessorMotion2D, Motion2D)
