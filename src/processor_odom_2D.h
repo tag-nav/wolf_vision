@@ -51,8 +51,8 @@ class ProcessorOdom2D : public ProcessorMotion
                         const Scalar _Dt,
                         Eigen::VectorXs& _x_plus_delta);
         Eigen::VectorXs deltaZero() const;
-        Motion interpolate(const Motion& _motion_ref,
-                           Motion& _motion,
+        Motion interpolate(const Motion& _ref,
+                           Motion& _second,
                            TimeStamp& _ts);
 
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
@@ -221,16 +221,19 @@ inline ConstraintBasePtr ProcessorOdom2D::emplaceConstraint(FeatureBasePtr _feat
     return ctr_odom;
 }
 
-inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
+inline Motion ProcessorOdom2D::interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts)
 {
     // TODO: Implement actual interpolation
     // Implementation: motion ref keeps the same
-    Motion tmp(_motion_ref);
-    tmp.ts_ = _ts;
-    tmp.delta_ = deltaZero();
-    tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-//    tmp.delta_integr_cov_ += Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-    return tmp;
+    //
+    Motion _interpolated(_ref);
+    _interpolated.ts_                   = _ts;
+    _interpolated.delta_                = deltaZero();
+    _interpolated.delta_cov_            = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
+    _interpolated.delta_integr_         = _ref.delta_integr_;
+    _interpolated.jacobian_delta_integr_. setIdentity();
+    _interpolated.jacobian_delta_       . setZero();
+    return _interpolated;
 }
 
 inline bool ProcessorOdom2D::voteForKeyFrame()
