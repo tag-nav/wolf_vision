@@ -73,7 +73,7 @@ MatrixXs plus_jac_x(const VectorXs& _pose, const Vector2s& _data)
     return Jx;
 }
 
-TEST(ProcessorMotion2D, Odom2D)
+TEST(ProcessorMotion2D, VoteForKfAndSolve)
 {
     std::cout << std::setprecision(3);
     // time
@@ -85,82 +85,93 @@ TEST(ProcessorMotion2D, Odom2D)
     // motion data
     VectorXs data(Vector2s(1, M_PI_4) ); // advance 1m turn pi/4 rad (45 deg). Need 8 steps for a complete turn
     Eigen::MatrixXs data_cov = Eigen::MatrixXs::Identity(2, 2) * 0.01;
+    int N = 7; // number of process() steps
 
     // Create Wolf tree nodes
-    ProblemPtr problem_ptr = Problem::create(FRM_PO_2D);
-    SensorBasePtr sensor_odom_ptr = problem_ptr->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
+    ProblemPtr problem = Problem::create(FRM_PO_2D);
+    SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
-    params->dist_traveled_th_   = 1.5; // force KF at every second process()
-    params->elapsed_time_th_    = 100;
+    params->dist_traveled_th_   = 100;
+    params->elapsed_time_th_    = 2.5*dt; // force KF at every third process()
     params->cov_det_th_         = 100;
-    ProcessorBasePtr prc = problem_ptr->installProcessor("ODOM 2D", "odom", sensor_odom_ptr, params);
-    ProcessorOdom2DPtr odom2d_ptr = std::static_pointer_cast<ProcessorOdom2D>(prc);
+    ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
+    ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
+
+    // NOTE: We integrate and create KFs as follows:
+    // i=    0    1    2    3    4    5    6
+    // KF -- * -- * -- KF - * -- * -- KF - *
 
     // Ceres wrapper
-    CeresManager ceres_manager(problem_ptr);
+    CeresManager ceres_manager(problem);
 
     // Origin Key Frame
-    FrameBasePtr origin_frame = problem_ptr->setPrior(x0, x0_cov, t0);
+    FrameBasePtr origin_frame = problem->setPrior(x0, x0_cov, t0);
     ceres_manager.solve();
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
-    std::cout << "Initial pose : " << problem_ptr->getCurrentState().transpose() << std::endl;
-    std::cout << "Initial covariance : " << std::endl << problem_ptr->getLastKeyFrameCovariance() << std::endl;
+    std::cout << "Initial pose : " << problem->getCurrentState().transpose() << std::endl;
+    std::cout << "Initial covariance : " << std::endl << problem->getLastKeyFrameCovariance() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
     // Check covariance values
-    Eigen::Vector3s integrated_x = x0;
-    Eigen::Matrix3s integrated_covariance = x0_cov;
+    Eigen::Vector3s integrated_pose = x0;
+    Eigen::Matrix3s integrated_cov = x0_cov;
     Eigen::Vector3s integrated_delta = Eigen::Vector3s::Zero();
-    Eigen::Matrix3s integrated_delta_covariance = Eigen::Matrix3s::Zero();
+    Eigen::Matrix3s integrated_delta_cov = Eigen::Matrix3s::Zero();
     Eigen::MatrixXs Ju(3, 2);
     Eigen::Matrix3s Jx;
-    std::vector<Eigen::VectorXs> integrated_x_vector;
-    std::vector<Eigen::MatrixXs> integrated_covariance_vector;
+    std::vector<Eigen::VectorXs> integrated_pose_vector;
+    std::vector<Eigen::MatrixXs> integrated_cov_vector;
 
     std::cout << "\nIntegrating data..." << std::endl;
 
     t += dt;
     // Capture to use as container for all incoming data
-    CaptureMotionPtr cap_ptr = std::make_shared<CaptureMotion>(t, sensor_odom_ptr, data, data_cov, nullptr);
+    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, nullptr);
 
-    int N = 4;
     for (int i=0; i<N; i++)
     {
         std::cout << "-------------------\nStep " << i << " at time " << t << std::endl;
         // re-use capture with updated timestamp
-        cap_ptr->setTimeStamp(t);
+        capture->setTimeStamp(t);
 
         // Processor
-        sensor_odom_ptr->process(cap_ptr);
-        Matrix3s odom2d_delta_cov = odom2d_ptr->integrateBufferCovariance(odom2d_ptr->getBuffer());
-        std::cout << "State(" << (t - t0) << ") : " << odom2d_ptr->getCurrentState().transpose() << std::endl;
+        sensor_odom2d->process(capture);
+        Matrix3s odom2d_delta_cov = processor_odom2d->integrateBufferCovariance(processor_odom2d->getBuffer());
+        std::cout << "State(" << (t - t0) << ") : " << processor_odom2d->getCurrentState().transpose() << std::endl;
         std::cout << "PRC  cov: \n" << odom2d_delta_cov << std::endl;
 
         // Integrate Delta
-        Ju = plus_jac_u(integrated_delta, data);
-        Jx = plus_jac_x(integrated_delta, data);
-        integrated_delta = plus(integrated_delta, data);
-        integrated_delta_covariance = Jx * integrated_delta_covariance * Jx.transpose() + Ju * data_cov * Ju.transpose();
-        if (i==1 || i==3 || i==5) // keyframes at times 1, 3, 5, etc
+        if (i==2 || i==5) // keyframes
         {
             integrated_delta.setZero();
-            integrated_delta_covariance.setZero();
+            integrated_delta_cov.setZero();
         }
-        std::cout << "TEST cov: \n" << integrated_delta_covariance << std::endl;
+        else
+        {
+            Ju = plus_jac_u(integrated_delta, data);
+            Jx = plus_jac_x(integrated_delta, data);
+            integrated_delta = plus(integrated_delta, data);
+            integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
+        }
+        std::cout << "TEST cov: \n" << integrated_delta_cov << std::endl;
 
-        ASSERT_EIGEN_APPROX(odom2d_delta_cov, integrated_delta_covariance);
+//        ASSERT_EIGEN_APPROX(processor_odom2d->getMotion().delta_, integrated_delta);
+        ASSERT_EIGEN_APPROX(odom2d_delta_cov, integrated_delta_cov);
 
         // Integrate pose
-        Ju = plus_jac_u(integrated_x, data);
-        Jx = plus_jac_x(integrated_x, data);
-        integrated_x = plus(integrated_x, data);
-        integrated_covariance = Jx * integrated_covariance * Jx.transpose() + Ju * data_cov * Ju.transpose();
+        Ju = plus_jac_u(integrated_pose, data);
+        Jx = plus_jac_x(integrated_pose, data);
+        integrated_pose = plus(integrated_pose, data);
+        integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
 
-        ASSERT_EIGEN_APPROX(odom2d_ptr->getCurrentState(), integrated_x);
+        // Pose error -- fix spurious error from pi to -pi
+        Vector3s error_pose = processor_odom2d->getCurrentState() - integrated_pose;
+        error_pose(2) = pi2pi(error_pose(2));
+        ASSERT_EIGEN_APPROX(error_pose, Vector3s::Zero());
 
-        integrated_x_vector.push_back(integrated_x);
-        integrated_covariance_vector.push_back(integrated_covariance);
+        integrated_pose_vector.push_back(integrated_pose);
+        integrated_cov_vector.push_back(integrated_cov);
 
         t += dt;
     }
@@ -170,10 +181,143 @@ TEST(ProcessorMotion2D, Odom2D)
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
     std::cout << "After solving the problem, covariance of the last keyframe:" << std::endl;
-    std::cout << "WOLF:\n"      << problem_ptr->getLastKeyFrameCovariance() << std::endl;
-    std::cout << "REFERENCE:\n" << integrated_covariance_vector[N-1] << std::endl;
+    std::cout << "WOLF:\n"      << problem->getLastKeyFrameCovariance() << std::endl;
+    std::cout << "REFERENCE:\n" << integrated_cov_vector[5] << std::endl;
 
-    ASSERT_EIGEN_APPROX(problem_ptr->getLastKeyFrameCovariance() , integrated_covariance_vector[N-1]);
+    ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance() , integrated_cov_vector[5]);
+}
+
+TEST(ProcessorMotion2D, SplitAndSolve)
+{
+    std::cout << std::setprecision(3);
+    // time
+    TimeStamp t0(0.0), t = t0;
+    Scalar dt = .01;
+    // Origin frame:
+    Vector3s x0(.5, -.5 -sqrt(.5), M_PI_4);
+    Eigen::Matrix3s x0_cov = Eigen::Matrix3s::Identity() * 0.1;
+    // motion data
+    VectorXs data(Vector2s(1, M_PI_4) ); // advance 1m turn pi/4 rad (45 deg). Need 8 steps for a complete turn
+    Eigen::MatrixXs data_cov = Eigen::MatrixXs::Identity(2, 2) * 0.01;
+    int N = 8; // number of process() steps
+
+    // NOTE: We integrate and create KFs as follows:
+    // i=    0    1    2    3    4    5    6
+    // KF -- * -- * -- * -- * -- * -- * -- * : no keyframes during integration
+    // And we split as follows
+    //                           s          : exact time stamp t_split     = 5*dt
+    //              s                       : fractional time stamp t_split = 2.2*dt
+
+
+    // Create Wolf tree nodes
+    ProblemPtr problem = Problem::create(FRM_PO_2D);
+    SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
+    ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
+    params->dist_traveled_th_   = 100; // don't make keyframes
+    params->elapsed_time_th_    = 100;
+    params->cov_det_th_         = 100;
+    ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
+    ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
+
+    // Ceres wrapper
+    CeresManager ceres_manager(problem);
+
+    // Origin Key Frame
+    FrameBasePtr origin_frame = problem->setPrior(x0, x0_cov, t0);
+    ceres_manager.solve();
+    ceres_manager.computeCovariances(ALL_MARGINALS);
+
+    std::cout << "Initial pose : " << problem->getCurrentState().transpose() << std::endl;
+    std::cout << "Initial covariance : " << std::endl << problem->getLastKeyFrameCovariance() << std::endl;
+    std::cout << "Motion data  : " << data.transpose() << std::endl;
+
+    // Check covariance values
+    Eigen::Vector3s integrated_pose = x0;
+    Eigen::Matrix3s integrated_cov = x0_cov;
+    Eigen::Vector3s integrated_delta = Eigen::Vector3s::Zero();
+    Eigen::Matrix3s integrated_delta_cov = Eigen::Matrix3s::Zero();
+    Eigen::MatrixXs Ju(3, 2);
+    Eigen::Matrix3s Jx;
+    std::vector<Eigen::VectorXs> integrated_pose_vector;
+    std::vector<Eigen::MatrixXs> integrated_cov_vector;
+
+    std::cout << "\nIntegrating data..." << std::endl;
+
+    t += dt;
+    // Capture to use as container for all incoming data
+    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, nullptr);
+
+    for (int i=0; i<N; i++)
+    {
+        std::cout << "-------------------\nStep " << i << " at time " << t << std::endl;
+        // re-use capture with updated timestamp
+        capture->setTimeStamp(t);
+
+        // Processor
+        sensor_odom2d->process(capture);
+        Matrix3s odom2d_delta_cov = processor_odom2d->integrateBufferCovariance(processor_odom2d->getBuffer());
+        std::cout << "State(" << (t - t0) << ") : " << processor_odom2d->getCurrentState().transpose() << std::endl;
+        std::cout << "PRC  cov: \n" << odom2d_delta_cov << std::endl;
+
+        // Integrate Delta
+        if (false) // don't make keyframes
+        {
+            integrated_delta.setZero();
+            integrated_delta_cov.setZero();
+        }
+        else
+        {
+            Ju = plus_jac_u(integrated_delta, data);
+            Jx = plus_jac_x(integrated_delta, data);
+            integrated_delta = plus(integrated_delta, data);
+            integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
+        }
+        std::cout << "TEST cov: \n" << integrated_delta_cov << std::endl;
+
+//        ASSERT_EIGEN_APPROX(odom2d_delta_cov, integrated_delta_cov);
+
+        // Integrate pose
+        Ju = plus_jac_u(integrated_pose, data);
+        Jx = plus_jac_x(integrated_pose, data);
+        integrated_pose = plus(integrated_pose, data);
+        integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
+
+//        ASSERT_EIGEN_APPROX(processor_odom2d->getCurrentState(), integrated_pose);
+
+        integrated_pose_vector.push_back(integrated_pose);
+        integrated_cov_vector.push_back(integrated_cov);
+
+        t += dt;
+    }
+
+    // Solve
+    ceres::Solver::Summary summary = ceres_manager.solve();
+    ceres_manager.computeCovariances(ALL_MARGINALS);
+
+    std::cout << "After solving the problem, covariance of the last keyframe:" << std::endl;
+    std::cout << "WOLF:\n"      << problem->getLastKeyFrameCovariance() << std::endl;
+    std::cout << "REFERENCE:\n" << integrated_cov_vector[N-1] << std::endl;
+
+    // Split at an exact timestamp, t_split = n_split*dt;
+    int n_split = 5;
+    TimeStamp t_split (t0 + n_split*dt);
+
+    showBuffer(processor_odom2d->getBuffer(), "Original buffer:", t0);
+
+    std::cout << "Split time:                  " << t_split - t0 << std::endl;
+
+    FrameBasePtr keyframe_split = problem->emplaceFrame(KEY_FRAME, processor_odom2d->getState(t_split), t_split);
+
+    processor_odom2d->keyFrameCallback(keyframe_split, 0);
+    //    problem_ptr->print(4,1,1,1);
+
+    showBuffer((std::static_pointer_cast<CaptureMotion>(keyframe_split->getCaptureList().front()))->getBuffer(), "New buffer: oldest part: ", t0);
+    showBuffer(processor_odom2d->getBuffer(), "Original keeps the newest: ", t0);
+
+    ceres_manager.solve();
+    ceres_manager.computeCovariances();
+
+    ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance() , integrated_cov_vector[n_split - 1]);
 }
 
 //TEST(ProcessorMotion2D, Motion2D)
