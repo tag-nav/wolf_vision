@@ -224,11 +224,7 @@ TEST(ProcessorMotion2D, SplitAndSolve)
 
     // Origin Key Frame
     FrameBasePtr origin_frame = problem->setPrior(x0, x0_cov, t0);
-    ceres_manager.solve();
-    ceres_manager.computeCovariances(ALL_MARGINALS);
-
     std::cout << "Initial pose : " << problem->getCurrentState().transpose() << std::endl;
-    std::cout << "Initial covariance : " << std::endl << problem->getLastKeyFrameCovariance() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
 
     // Check covariance values
@@ -249,32 +245,17 @@ TEST(ProcessorMotion2D, SplitAndSolve)
 
     for (int i=0; i<N; i++)
     {
-        std::cout << "-------------------\nStep " << i << " at time " << t << std::endl;
         // re-use capture with updated timestamp
         capture->setTimeStamp(t);
 
         // Processor
         sensor_odom2d->process(capture);
-        Matrix3s odom2d_delta_cov = processor_odom2d->integrateBufferCovariance(processor_odom2d->getBuffer());
-        std::cout << "State(" << (t - t0) << ") : " << processor_odom2d->getCurrentState().transpose() << std::endl;
-        std::cout << "PRC  cov: \n" << odom2d_delta_cov << std::endl;
 
         // Integrate Delta
-        if (false) // don't make keyframes
-        {
-            integrated_delta.setZero();
-            integrated_delta_cov.setZero();
-        }
-        else
-        {
-            Ju = plus_jac_u(integrated_delta, data);
-            Jx = plus_jac_x(integrated_delta, data);
-            integrated_delta = plus(integrated_delta, data);
-            integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
-        }
-        std::cout << "TEST cov: \n" << integrated_delta_cov << std::endl;
-
-//        ASSERT_EIGEN_APPROX(odom2d_delta_cov, integrated_delta_cov);
+        Ju = plus_jac_u(integrated_delta, data);
+        Jx = plus_jac_x(integrated_delta, data);
+        integrated_delta = plus(integrated_delta, data);
+        integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
 
         // Integrate pose
         Ju = plus_jac_u(integrated_pose, data);
@@ -282,7 +263,12 @@ TEST(ProcessorMotion2D, SplitAndSolve)
         integrated_pose = plus(integrated_pose, data);
         integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
 
-//        ASSERT_EIGEN_APPROX(processor_odom2d->getCurrentState(), integrated_pose);
+//        if (t - t0 == 0.05){
+//            std::cout << "State(" << (t - t0) << ") : " << processor_odom2d->getCurrentState().transpose() << std::endl;
+//            std::cout << "WOLF delta cov: \n" << odom2d_delta_cov << std::endl;
+//            std::cout << "REF delta cov: \n" << integrated_delta_cov << std::endl;
+//            std::cout << "REF cov: \n" << integrated_cov << std::endl;
+//        }
 
         integrated_pose_vector.push_back(integrated_pose);
         integrated_cov_vector.push_back(integrated_cov);
@@ -290,34 +276,32 @@ TEST(ProcessorMotion2D, SplitAndSolve)
         t += dt;
     }
 
-    // Solve
-    ceres::Solver::Summary summary = ceres_manager.solve();
-    ceres_manager.computeCovariances(ALL_MARGINALS);
-
-    std::cout << "After solving the problem, covariance of the last keyframe:" << std::endl;
-    std::cout << "WOLF:\n"      << problem->getLastKeyFrameCovariance() << std::endl;
-    std::cout << "REFERENCE:\n" << integrated_cov_vector[N-1] << std::endl;
-
     // Split at an exact timestamp, t_split = n_split*dt;
+    showBuffer(processor_odom2d->getBuffer(), "Original buffer:", t0);
+
     int n_split = 5;
     TimeStamp t_split (t0 + n_split*dt);
 
-    showBuffer(processor_odom2d->getBuffer(), "Original buffer:", t0);
-
     std::cout << "Split time:                  " << t_split - t0 << std::endl;
 
-    FrameBasePtr keyframe_split = problem->emplaceFrame(KEY_FRAME, processor_odom2d->getState(t_split), t_split);
+    Vector3s x_split = processor_odom2d->getState(t_split);
+    FrameBasePtr keyframe_split = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
 
     processor_odom2d->keyFrameCallback(keyframe_split, 0);
-    //    problem_ptr->print(4,1,1,1);
+//    problem->print();
 
-    showBuffer((std::static_pointer_cast<CaptureMotion>(keyframe_split->getCaptureList().front()))->getBuffer(), "New buffer: oldest part: ", t0);
-    showBuffer(processor_odom2d->getBuffer(), "Original keeps the newest: ", t0);
+    MotionBuffer key_buffer = (std::static_pointer_cast<CaptureMotion>(keyframe_split->getCaptureList().front()))->getBuffer();
+
+    showBuffer(key_buffer, "New keyframe's capture buffer: ", t0);
+    showBuffer(processor_odom2d->getBuffer(), "Current processor buffer: ", t0);
+//    std::cout << "Ref    cov: \n" << integrated_cov_vector[n_split-1] << std::endl;
+//    std::cout << "Buffer cov: \n" << processor_odom2d->integrateBufferCovariance(key_buffer) << std::endl;
 
     ceres_manager.solve();
     ceres_manager.computeCovariances();
 
-    ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance() , integrated_cov_vector[n_split - 1]);
+    ASSERT_EIGEN_APPROX(problem->getLastKeyFramePtr()->getState(), integrated_pose_vector[n_split - 1]);
+    ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance()     , integrated_cov_vector [n_split - 1]);
 }
 
 //TEST(ProcessorMotion2D, Motion2D)
