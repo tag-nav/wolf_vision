@@ -73,7 +73,7 @@ void MotionBuffer::getMotion(const TimeStamp& _ts, Motion& _motion) const
     _motion = *previous;
 }
 
-void MotionBuffer::split(const TimeStamp& _ts, MotionBuffer& _oldest_buffer)
+void MotionBuffer::split(const TimeStamp& _ts, MotionBuffer& _buffer_part_before_ts)
 {
     assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
     auto previous = std::find_if(container_.rbegin(), container_.rend(), [&](const Motion& m)
@@ -84,12 +84,12 @@ void MotionBuffer::split(const TimeStamp& _ts, MotionBuffer& _oldest_buffer)
     {
         // The time stamp is more recent than the buffer's most recent data:
         // return an empty buffer as the _oldest_buffer
-        _oldest_buffer.get().clear();
+        _buffer_part_before_ts.get().clear();
     }
     else
     {
         // Transfer part of the buffer
-        _oldest_buffer.container_.splice(_oldest_buffer.container_.begin(), container_, container_.begin(),
+        _buffer_part_before_ts.container_.splice(_buffer_part_before_ts.container_.begin(), container_, container_.begin(),
                                          (previous--).base());
     }
 }
