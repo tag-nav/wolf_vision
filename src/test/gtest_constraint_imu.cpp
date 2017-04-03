@@ -1150,6 +1150,242 @@ class ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst : public testing::Test
     virtual void TearDown(){}
 };
 
+class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
+{
+    public:
+        wolf::TimeStamp t;
+        SensorIMUPtr sen_imu;
+        ProblemPtr wolf_problem_ptr_;
+        CeresManager* ceres_manager_wolf_diff;
+        ProcessorBasePtr processor_ptr_;
+        ProcessorIMUPtr processor_ptr_imu;
+        FrameIMUPtr origin_KF;
+        FrameIMUPtr last_KF;
+        Eigen::Vector6s origin_bias;
+        Eigen::VectorXs expected_final_state;
+        Eigen::VectorXs x_origin;
+
+    virtual void SetUp()
+    {
+        using std::shared_ptr;
+        using std::make_shared;
+        using std::static_pointer_cast;
+
+        std::string wolf_root = _WOLF_ROOT_DIR;
+
+        //===================================================== INPUT FILES
+
+        char* imu_filepath;
+
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_move_AbxNonNull_RotCst.txt");
+
+        imu_filepath = new char[imu_filepath_string.length() + 1];
+
+        std::strcpy(imu_filepath, imu_filepath_string.c_str());
+        std::ifstream imu_data_input;
+
+        imu_data_input.open(imu_filepath);
+        if(!imu_data_input.is_open()){
+            std::cerr << "Failed to open data files... Exiting" << std::endl;
+            ADD_FAILURE();
+        }
+        //===================================================== END{INPUT FILES}
+        
+        //===================================================== SETTING PROBLEM
+        // WOLF PROBLEM
+        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+
+        // CERES WRAPPER
+        ceres::Solver::Options ceres_options;
+        ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
+        ceres_options.max_line_search_step_contraction = 1e-3;
+        ceres_options.max_num_iterations = 1e4;
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+
+        // SENSOR + PROCESSOR IMU
+        SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+        processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_t6.yaml");
+        sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
+        processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
+    
+        //===================================================== END{SETTING PROBLEM}
+
+        //===================================================== INITIALIZATION
+
+        expected_final_state.resize(16);
+        x_origin.resize(16);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        t.set(0);
+
+        imu_data_input >> x_origin[0] >> x_origin[1] >> x_origin[2] >> x_origin[6] >> x_origin[3] >> x_origin[4] >> x_origin[5] >> x_origin[7] >> x_origin[8] >> x_origin[9];
+        imu_data_input >> origin_bias[0] >> origin_bias[1] >> origin_bias[2] >> origin_bias[3] >> origin_bias[4] >> origin_bias[5];
+        imu_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
+                    expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
+        expected_final_state.tail(6) = origin_bias;
+        x_origin.tail(6) = origin_bias;
+
+        //set origin of the problem
+        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+
+        //===================================================== END{INITIALIZATION}
+
+
+        //===================================================== PROCESS DATA
+        // PROCESS DATA
+
+        Eigen::Vector6s data_imu;
+        data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
+
+        Scalar input_clock;
+        TimeStamp ts(0);
+        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
+
+        while( !imu_data_input.eof())
+        {
+            // PROCESS IMU DATA
+            // Time and data variables
+            imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
+
+            ts.set(input_clock);
+            imu_ptr->setTimeStamp(ts);
+            imu_ptr->setData(data_imu);
+
+            // process data in capture
+            sen_imu->process(imu_ptr);
+        }
+
+        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+        last_KF->setState(expected_final_state);
+
+        //closing file
+        imu_data_input.close();
+
+    //===================================================== END{PROCESS DATA}
+    origin_KF->unfix();
+    last_KF->unfix();
+    }
+
+    virtual void TearDown(){}
+};
+
+class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
+{
+    public:
+        wolf::TimeStamp t;
+        SensorIMUPtr sen_imu;
+        ProblemPtr wolf_problem_ptr_;
+        CeresManager* ceres_manager_wolf_diff;
+        ProcessorBasePtr processor_ptr_;
+        ProcessorIMUPtr processor_ptr_imu;
+        FrameIMUPtr origin_KF;
+        FrameIMUPtr last_KF;
+        Eigen::Vector6s origin_bias;
+        Eigen::VectorXs expected_final_state;
+        Eigen::VectorXs x_origin;
+
+    virtual void SetUp()
+    {
+        using std::shared_ptr;
+        using std::make_shared;
+        using std::static_pointer_cast;
+
+        std::string wolf_root = _WOLF_ROOT_DIR;
+
+        //===================================================== INPUT FILES
+
+        char* imu_filepath;
+
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_move_BiasNonNull_RotVCst.txt");
+
+        imu_filepath = new char[imu_filepath_string.length() + 1];
+
+        std::strcpy(imu_filepath, imu_filepath_string.c_str());
+        std::ifstream imu_data_input;
+
+        imu_data_input.open(imu_filepath);
+        if(!imu_data_input.is_open()){
+            std::cerr << "Failed to open data files... Exiting" << std::endl;
+            ADD_FAILURE();
+        }
+        //===================================================== END{INPUT FILES}
+        
+        //===================================================== SETTING PROBLEM
+        // WOLF PROBLEM
+        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+
+        // CERES WRAPPER
+        ceres::Solver::Options ceres_options;
+        ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
+        ceres_options.max_line_search_step_contraction = 1e-3;
+        ceres_options.max_num_iterations = 1e4;
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+
+        // SENSOR + PROCESSOR IMU
+        SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+        processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_t6.yaml");
+        sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
+        processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
+    
+        //===================================================== END{SETTING PROBLEM}
+
+        //===================================================== INITIALIZATION
+
+        expected_final_state.resize(16);
+        x_origin.resize(16);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        t.set(0);
+
+        imu_data_input >> x_origin[0] >> x_origin[1] >> x_origin[2] >> x_origin[6] >> x_origin[3] >> x_origin[4] >> x_origin[5] >> x_origin[7] >> x_origin[8] >> x_origin[9];
+        imu_data_input >> origin_bias[0] >> origin_bias[1] >> origin_bias[2] >> origin_bias[3] >> origin_bias[4] >> origin_bias[5];
+        imu_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
+                    expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
+        expected_final_state.tail(6) = origin_bias;
+        x_origin.tail(6) = origin_bias;
+
+        //set origin of the problem
+        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+
+        //===================================================== END{INITIALIZATION}
+
+
+        //===================================================== PROCESS DATA
+        // PROCESS DATA
+
+        Eigen::Vector6s data_imu;
+        data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
+
+        Scalar input_clock;
+        TimeStamp ts(0);
+        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
+
+        while( !imu_data_input.eof())
+        {
+            // PROCESS IMU DATA
+            // Time and data variables
+            imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
+
+            ts.set(input_clock);
+            imu_ptr->setTimeStamp(ts);
+            imu_ptr->setData(data_imu);
+
+            // process data in capture
+            sen_imu->process(imu_ptr);
+        }
+
+        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+        last_KF->setState(expected_final_state);
+
+        //closing file
+        imu_data_input.close();
+
+    //===================================================== END{PROCESS DATA}
+    origin_KF->unfix();
+    last_KF->unfix();
+    }
+
+    virtual void TearDown(){}
+};
+
 class ConstraintIMU_testBase : public testing::Test
 {
     public:
@@ -3469,10 +3705,74 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst, VarB1B2_InvarP1Q1V1P2Q2V
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 }
 
+TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
+{
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    wolf_problem_ptr_->print(4,1,1,1); 
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+    last_KF->getVPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    //Only biases are unfixed
+    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+}
+
+TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
+{
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    wolf_problem_ptr_->print(4,1,1,1); 
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+    last_KF->getVPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    //Only biases are unfixed
+    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst*";
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBias.VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias";
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_accBiasObservation_2KF.acc_gyro_bias_observation";
   return RUN_ALL_TESTS();
