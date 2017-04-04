@@ -348,34 +348,41 @@ TEST(Odom2D, SplitAndSolve)
 
 TEST(Odom2D, dummy)
 {
+    // Note: we build this (a is `absolute`, m is `motion`):
+    // KF0 -- m -- KF1 -- m -- KF2
+    //  |
+    //  a
+    //  |
+    // GND
     std::cout << std::setprecision(3);
 
-    TimeStamp t0(0.0), t = t0;
-    Scalar dt = .01;
-    Vector3s x0(0,0,0);
-    Eigen::Matrix3s x0_cov = Eigen::Matrix3s::Identity() * 0.1;
-
-    Vector3s delta(2,0,0);
-    //    Matrix3s delta_cov; delta_cov << 1.0, 0.0, 0.0, 0.0, 0.25, 0.5, 0.0, 0.5, 1.0; delta_cov /= 100; delta_cov += Matrix3s::Identity()*0.0000001;
+    TimeStamp t0(0.0),  t = t0;
+    Scalar              dt = .01;
+    Vector3s            x0   (0,0,0);
+    Eigen::Matrix3s     x0_cov = Eigen::Matrix3s::Identity() * 0.1;
+    Vector3s            delta (2,0,0);
     Matrix3s delta_cov; delta_cov << .02, 0, 0, 0, .025, .02, 0, .02, .02;
 
-    ProblemPtr problem = Problem::create(FRM_PO_2D);
-    FrameBasePtr F0 = problem->setPrior(x0, x0_cov,t0);
-    SensorBasePtr sensor = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
-    CeresManager ceres_manager(problem);
+    ProblemPtr          Pr = Problem::create(FRM_PO_2D);
+    CeresManager ceres_manager(Pr);
 
+    // KF0 and absolute prior
+    FrameBasePtr        F0 = Pr->setPrior(x0, x0_cov,t0);
+
+    // KF1 and motion from KF0
     t += dt;
-    FrameBasePtr F1 = problem->emplaceFrame(KEY_FRAME, 0*delta, t);
-    CaptureBasePtr C1 = F1->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t, sensor));
-    FeatureBasePtr f1 = C1->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
-    ConstraintBasePtr c1 = f1->addConstraint(std::make_shared<ConstraintOdom2D>(f1, F0));
+    FrameBasePtr        F1 = Pr->emplaceFrame(KEY_FRAME, 0*delta, t);
+    CaptureBasePtr      C1 = F1->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
+    FeatureBasePtr      f1 = C1->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
+    ConstraintBasePtr   c1 = f1->addConstraint(std::make_shared<ConstraintOdom2D>(f1, F0));
     F0->addConstrainedBy(c1);
 
+    // KF2 and motion from KF1
     t += dt;
-    FrameBasePtr F2 = problem->emplaceFrame(KEY_FRAME, 0*delta, t);
-    CaptureBasePtr C2 = F2->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t, sensor));
-    FeatureBasePtr f2 = C2->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
-    ConstraintBasePtr c2 = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1));
+    FrameBasePtr        F2 = Pr->emplaceFrame(KEY_FRAME, 0*delta, t);
+    CaptureBasePtr      C2 = F2->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
+    FeatureBasePtr      f2 = C2->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
+    ConstraintBasePtr   c2 = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1));
     F1->addConstrainedBy(c2);
 
     ceres::Solver::Summary summary = ceres_manager.solve();
@@ -384,7 +391,7 @@ TEST(Odom2D, dummy)
 
 //    problem->print(4,1,1,1);
 //    problem->check(1);
-    show(problem);
+    show(Pr);
 
 }
 
