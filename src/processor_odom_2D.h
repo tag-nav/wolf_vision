@@ -110,7 +110,7 @@ inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eige
     //std::cout << "data      :" << _data.transpose() << std::endl;
     //std::cout << "data cov  :" << std::endl << _data_cov << std::endl;
     //std::cout << "delta     :" << delta_.transpose() << std::endl;
-    //std::cout << "delta cov :" << std::endl << delta_cov << std::endl;
+    //std::cout << "delta cov :" << std::endl << delta_cov_ << std::endl;
 }
 
 inline void ProcessorOdom2D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta)
@@ -178,9 +178,12 @@ inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     _delta1_plus_delta2.head<2>() = _delta1.head<2>() + Eigen::Rotation2Ds(_delta1(2)).matrix() * _delta2.head<2>();
     _delta1_plus_delta2(2) = pi2pi(_delta1(2) + _delta2(2));
 
+    // Jac wrt delta_integrated
     _jacobian1 = Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
     _jacobian1(0,2) = -sin(_delta1(2))*_delta2(0) - cos(_delta1(2))*_delta2(1);
     _jacobian1(1,2) =  cos(_delta1(2))*_delta2(0) - sin(_delta1(2))*_delta2(1);
+
+    // jac wrt delta
     _jacobian2 = Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
     _jacobian2.topLeftCorner<2,2>() = Eigen::Rotation2Ds(_delta1(2)).matrix();
 
