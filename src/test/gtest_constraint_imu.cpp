@@ -2139,6 +2139,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     if(debug_results)
         debug_results   << "%%introduced_error\t"
                         << "exp_KF0_Abx\t" << "exp_KF0_Aby\t" << "exp_KF0_Abz\t" << "exp_KF0_Wbx\t" << "exp_KF0_Wby\t" << "exp_KF0_Wbz\t"
+                        << "init_KF0_Abx\t" << "init_KF0_Aby\t" << "init_KF0_Abz\t" << "init_KF0_Wbx\t" << "init_KF0_Wby\t" << "init_KF0_Wbz\t"
                         << "res_KF0_Abx\t" << "res_KF0_Aby\t" << "res_KF0_Abz\t" << "res_KF0_Wbx\t" << "res_KF0_Wby\t" << "res_KF0_Wbz\t"
                         << "res_KF1_Abx\t" << "res_KF1_Aby\t" << "res_KF1_Abz\t" << "res_KF1_Wbx\t" << "res_KF1_Wby\t" << "res_KF1_Wbz\t" << std::endl;
     #endif
@@ -2155,7 +2156,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     //==============================================================
     WOLF_INFO("Starting error bias 1e-7")
 
-    for(int i = 1; i<9; i++)
+    for(int i = 0; i<9; i++)
     {
         perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
@@ -2174,6 +2175,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2215,6 +2217,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2256,6 +2259,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2297,6 +2301,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2338,6 +2343,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2379,6 +2385,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2401,7 +2408,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
-    for(int i = 1; i<9; i++)
+    for(int i = 1; i<90; i++)
     {
         perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
@@ -2420,47 +2427,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e0")
-    epsilon_bias = 1;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2517,6 +2484,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     if(debug_results)
         debug_results   << "%%introduced_error\t"
                         << "exp_KF0_Abx\t" << "exp_KF0_Aby\t" << "exp_KF0_Abz\t" << "exp_KF0_Wbx\t" << "exp_KF0_Wby\t" << "exp_KF0_Wbz\t"
+                        << "init_KF0_Abx\t" << "init_KF0_Aby\t" << "init_KF0_Abz\t" << "init_KF0_Wbx\t" << "init_KF0_Wby\t" << "init_KF0_Wbz\t"
                         << "res_KF0_Abx\t" << "res_KF0_Aby\t" << "res_KF0_Abz\t" << "res_KF0_Wbx\t" << "res_KF0_Wby\t" << "res_KF0_Wbz\t"
                         << "res_KF1_Abx\t" << "res_KF1_Aby\t" << "res_KF1_Abz\t" << "res_KF1_Wbx\t" << "res_KF1_Wby\t" << "res_KF1_Wbz\t" << std::endl;
     #endif
@@ -2533,7 +2501,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     //==============================================================
     WOLF_INFO("Starting error bias 1e-7")
 
-    for(int i = 1; i<9; i++)
+    for(int i = 0; i<9; i++)
     {
         perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
@@ -2552,6 +2520,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2593,6 +2562,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2634,6 +2604,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2675,6 +2646,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2716,6 +2688,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2757,6 +2730,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2779,7 +2753,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
-    for(int i = 1; i<9; i++)
+    for(int i = 1; i<90; i++)
     {
         perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
@@ -2798,47 +2772,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e0")
-    epsilon_bias = 1;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2895,6 +2829,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     if(debug_results)
         debug_results   << "%%introduced_error\t"
                         << "exp_KF0_Abx\t" << "exp_KF0_Aby\t" << "exp_KF0_Abz\t" << "exp_KF0_Wbx\t" << "exp_KF0_Wby\t" << "exp_KF0_Wbz\t"
+                        << "init_KF0_Abx\t" << "init_KF0_Aby\t" << "init_KF0_Abz\t" << "init_KF0_Wbx\t" << "init_KF0_Wby\t" << "init_KF0_Wbz\t"
                         << "res_KF0_Abx\t" << "res_KF0_Aby\t" << "res_KF0_Abz\t" << "res_KF0_Wbx\t" << "res_KF0_Wby\t" << "res_KF0_Wbz\t"
                         << "res_KF1_Abx\t" << "res_KF1_Aby\t" << "res_KF1_Abz\t" << "res_KF1_Wbx\t" << "res_KF1_Wby\t" << "res_KF1_Wbz\t" << std::endl;
     #endif
@@ -2911,7 +2846,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     //==============================================================
     WOLF_INFO("Starting error bias 1e-7")
 
-    for(int i = 1; i<9; i++)
+    for(int i = 0; i<9; i++)
     {
         perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
@@ -2930,6 +2865,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -2971,6 +2907,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3012,6 +2949,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3053,6 +2991,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3094,6 +3033,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3135,6 +3075,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3157,7 +3098,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
-    for(int i = 1; i<9; i++)
+    for(int i = 1; i<90; i++)
     {
         perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
@@ -3176,47 +3117,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e0")
-    epsilon_bias = 1;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3300,6 +3201,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     if(debug_results)
         debug_results   << "%%introduced_error\t"
                         << "exp_KF0_Abx\t" << "exp_KF0_Aby\t" << "exp_KF0_Abz\t" << "exp_KF0_Wbx\t" << "exp_KF0_Wby\t" << "exp_KF0_Wbz\t"
+                        << "init_KF0_Abx\t" << "init_KF0_Aby\t" << "init_KF0_Abz\t" << "init_KF0_Wbx\t" << "init_KF0_Wby\t" << "init_KF0_Wbz\t"
                         << "res_KF0_Abx\t" << "res_KF0_Aby\t" << "res_KF0_Abz\t" << "res_KF0_Wbx\t" << "res_KF0_Wby\t" << "res_KF0_Wbz\t"
                         << "res_KF1_Abx\t" << "res_KF1_Aby\t" << "res_KF1_Abz\t" << "res_KF1_Wbx\t" << "res_KF1_Wby\t" << "res_KF1_Wbz\t" << std::endl;
     #endif
@@ -3316,7 +3218,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     //==============================================================
     WOLF_INFO("Starting error bias 1e-7")
 
-    for(int i = 1; i<9; i++)
+    for(int i = 0; i<9; i++)
     {
         perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
@@ -3335,6 +3237,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3376,6 +3279,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3417,6 +3321,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3458,6 +3363,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3499,6 +3405,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3540,6 +3447,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3562,7 +3470,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
-    for(int i = 1; i<9; i++)
+    for(int i = 1; i<90; i++)
     {
         perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
@@ -3581,47 +3489,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e0")
-    epsilon_bias = 1;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -3682,6 +3550,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
     if(debug_results)
         debug_results   << "%%introduced_error\t"
                         << "exp_KF0_Abx\t" << "exp_KF0_Aby\t" << "exp_KF0_Abz\t" << "exp_KF0_Wbx\t" << "exp_KF0_Wby\t" << "exp_KF0_Wbz\t"
+                        << "init_KF0_Abx\t" << "init_KF0_Aby\t" << "init_KF0_Abz\t" << "init_KF0_Wbx\t" << "init_KF0_Wby\t" << "init_KF0_Wbz\t"
                         << "res_KF0_Abx\t" << "res_KF0_Aby\t" << "res_KF0_Abz\t" << "res_KF0_Wbx\t" << "res_KF0_Wby\t" << "res_KF0_Wbz\t"
                         << "res_KF1_Abx\t" << "res_KF1_Aby\t" << "res_KF1_Abz\t" << "res_KF1_Wbx\t" << "res_KF1_Wby\t" << "res_KF1_Wbz\t" << std::endl;
     #endif
@@ -3700,8 +3569,1055 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
 
     for(int i = 0; i<9; i++)
     {
-        origin_KF->setState(perturbated_origin_state);
         perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-6")
+    epsilon_bias = 0.000001;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-5")
+    epsilon_bias = 0.00001;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-4")
+    epsilon_bias = 0.0001;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-3")
+    epsilon_bias = 0.001;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-2")
+    epsilon_bias = 0.01;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-1")
+    epsilon_bias = 0.1;
+
+    for(int i = 1; i<90; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+}
+
+TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
+{
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    wolf_problem_ptr_->print(4,1,1,1); 
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+    last_KF->getVPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    //Only biases are unfixed
+    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+}
+
+TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
+{
+
+    #ifdef DEBUG_RESULTS_BIAS
+    std::ofstream debug_results;
+    debug_results.open("save_gtest_CTRIMU_bias_NonNullBiasAccCst_VarB1B2.dat");
+    if(debug_results)
+        debug_results   << "%%introduced_error\t"
+                        << "exp_KF0_Abx\t" << "exp_KF0_Aby\t" << "exp_KF0_Abz\t" << "exp_KF0_Wbx\t" << "exp_KF0_Wby\t" << "exp_KF0_Wbz\t"
+                        << "init_KF0_Abx\t" << "init_KF0_Aby\t" << "init_KF0_Abz\t" << "init_KF0_Wbx\t" << "init_KF0_Wby\t" << "init_KF0_Wbz\t"
+                        << "res_KF0_Abx\t" << "res_KF0_Aby\t" << "res_KF0_Abz\t" << "res_KF0_Wbx\t" << "res_KF0_Wby\t" << "res_KF0_Wbz\t"
+                        << "res_KF1_Abx\t" << "res_KF1_Aby\t" << "res_KF1_Abz\t" << "res_KF1_Wbx\t" << "res_KF1_Wby\t" << "res_KF1_Wbz\t" << std::endl;
+    #endif
+
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    wolf::Scalar epsilon_bias = 0.0000001;
+    Eigen::VectorXs perturbated_origin_state(x_origin);
+    ceres::Solver::Summary summary;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-7")
+
+    for(int i = 0; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-6")
+    epsilon_bias = 0.000001;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-5")
+    epsilon_bias = 0.00001;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-4")
+    epsilon_bias = 0.0001;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-3")
+    epsilon_bias = 0.001;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-2")
+    epsilon_bias = 0.01;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-1")
+    epsilon_bias = 0.1;
+
+    for(int i = 1; i<90; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+}
+
+TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
+{
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    wolf_problem_ptr_->print(4,1,1,1); 
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+    last_KF->getVPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    //Only biases are unfixed
+    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+}
+
+TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
+{
+
+    #ifdef DEBUG_RESULTS_BIAS
+    std::ofstream debug_results;
+    debug_results.open("save_gtest_CTRIMU_bias_TRNonNullBiasRotCst_VarB1B2.dat");
+    if(debug_results)
+        debug_results   << "%%introduced_error\t"
+                        << "exp_KF0_Abx\t" << "exp_KF0_Aby\t" << "exp_KF0_Abz\t" << "exp_KF0_Wbx\t" << "exp_KF0_Wby\t" << "exp_KF0_Wbz\t"
+                        << "init_KF0_Abx\t" << "init_KF0_Aby\t" << "init_KF0_Abz\t" << "init_KF0_Wbx\t" << "init_KF0_Wby\t" << "init_KF0_Wbz\t"
+                        << "res_KF0_Abx\t" << "res_KF0_Aby\t" << "res_KF0_Abz\t" << "res_KF0_Wbx\t" << "res_KF0_Wby\t" << "res_KF0_Wbz\t"
+                        << "res_KF1_Abx\t" << "res_KF1_Aby\t" << "res_KF1_Abz\t" << "res_KF1_Wbx\t" << "res_KF1_Wby\t" << "res_KF1_Wbz\t" << std::endl;
+    #endif
+
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    wolf::Scalar epsilon_bias = 0.0000001;
+    Eigen::VectorXs perturbated_origin_state(x_origin);
+    ceres::Solver::Summary summary;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-7")
+
+    for(int i = 0; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-6")
+    epsilon_bias = 0.000001;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-5")
+    epsilon_bias = 0.00001;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-4")
+    epsilon_bias = 0.0001;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-3")
+    epsilon_bias = 0.001;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-2")
+    epsilon_bias = 0.01;
+
+    for(int i = 1; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-1")
+    epsilon_bias = 0.1;
+
+    for(int i = 1; i<90; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
+        last_KF->setState(expected_final_state);
+
+        last_KF->getPPtr()->fix();
+        last_KF->getOPtr()->fix();
+        last_KF->getVPtr()->fix();
+
+        summary = ceres_manager_wolf_diff->solve();
+        std::cout << summary.BriefReport() << std::endl;
+
+        #ifdef DEBUG_RESULTS_BIAS
+            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
+            KF0_frm_state = origin_KF->getState();
+            KF1_frm_state = last_KF->getState();
+
+            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
+            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
+                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
+        #else
+
+            //Only biases are unfixed
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+        #endif
+    }
+    //std::cout << summary.FullReport() << std::endl;
+}
+
+TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
+{
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    wolf_problem_ptr_->print(4,1,1,1); 
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+    last_KF->getVPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.FullReport() << std::endl;
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    //Only biases are unfixed
+    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+}
+
+TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
+{
+
+    #ifdef DEBUG_RESULTS_BIAS
+    std::ofstream debug_results;
+    debug_results.open("save_gtest_CTRIMU_bias_TRNonNullBiasRotVCst_VarB1B2.dat");
+    if(debug_results)
+        debug_results   << "%%introduced_error\t"
+                        << "exp_KF0_Abx\t" << "exp_KF0_Aby\t" << "exp_KF0_Abz\t" << "exp_KF0_Wbx\t" << "exp_KF0_Wby\t" << "exp_KF0_Wbz\t"
+                        << "init_KF0_Abx\t" << "init_KF0_Aby\t" << "init_KF0_Abz\t" << "init_KF0_Wbx\t" << "init_KF0_Wby\t" << "init_KF0_Wbz\t"
+                        << "res_KF0_Abx\t" << "res_KF0_Aby\t" << "res_KF0_Abz\t" << "res_KF0_Wbx\t" << "res_KF0_Wby\t" << "res_KF0_Wbz\t"
+                        << "res_KF1_Abx\t" << "res_KF1_Aby\t" << "res_KF1_Abz\t" << "res_KF1_Wbx\t" << "res_KF1_Wby\t" << "res_KF1_Wbz\t" << std::endl;
+    #endif
+
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    wolf::Scalar epsilon_bias = 0.0000001;
+    Eigen::VectorXs perturbated_origin_state(x_origin);
+    ceres::Solver::Summary summary;
+
+    //==============================================================
+    WOLF_INFO("Starting error bias 1e-7")
+
+    for(int i = 0; i<9; i++)
+    {
+        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
+        origin_KF->setState(perturbated_origin_state);
         last_KF->setState(expected_final_state);
 
         last_KF->getPPtr()->fix();
@@ -3945,1152 +4861,6 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
     epsilon_bias = 0.1;
 
     for(int i = 1; i<90; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-}
-
-TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
-{
-    //prepare problem for solving
-    origin_KF->getPPtr()->fix();
-    origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->fix();
-
-    wolf_problem_ptr_->print(4,1,1,1); 
-
-    last_KF->setState(expected_final_state);
-
-    last_KF->getPPtr()->fix();
-    last_KF->getOPtr()->fix();
-    last_KF->getVPtr()->fix();
-
-    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
-
-    wolf_problem_ptr_->print(4,1,1,1);
-
-    //Only biases are unfixed
-    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-}
-
-TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
-{
-
-    #ifdef DEBUG_RESULTS_BIAS
-    std::ofstream debug_results;
-    debug_results.open("save_gtest_CTRIMU_bias_NonNullBiasAccCst_VarB1B2.dat");
-    if(debug_results)
-        debug_results   << "%%introduced_error\t"
-                        << "exp_KF0_Abx\t" << "exp_KF0_Aby\t" << "exp_KF0_Abz\t" << "exp_KF0_Wbx\t" << "exp_KF0_Wby\t" << "exp_KF0_Wbz\t"
-                        << "res_KF0_Abx\t" << "res_KF0_Aby\t" << "res_KF0_Abz\t" << "res_KF0_Wbx\t" << "res_KF0_Wby\t" << "res_KF0_Wbz\t"
-                        << "res_KF1_Abx\t" << "res_KF1_Aby\t" << "res_KF1_Abz\t" << "res_KF1_Wbx\t" << "res_KF1_Wby\t" << "res_KF1_Wbz\t" << std::endl;
-    #endif
-
-    //prepare problem for solving
-    origin_KF->getPPtr()->fix();
-    origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->fix();
-
-    wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbated_origin_state(x_origin);
-    ceres::Solver::Summary summary;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-7")
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-6")
-    epsilon_bias = 0.000001;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-5")
-    epsilon_bias = 0.00001;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
-    epsilon_bias = 0.0001;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
-    epsilon_bias = 0.001;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
-    epsilon_bias = 0.01;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-1")
-    epsilon_bias = 0.1;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e0")
-    epsilon_bias = 1;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-}
-
-TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
-{
-    //prepare problem for solving
-    origin_KF->getPPtr()->fix();
-    origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->fix();
-
-    wolf_problem_ptr_->print(4,1,1,1); 
-
-    last_KF->setState(expected_final_state);
-
-    last_KF->getPPtr()->fix();
-    last_KF->getOPtr()->fix();
-    last_KF->getVPtr()->fix();
-
-    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
-
-    wolf_problem_ptr_->print(4,1,1,1);
-
-    //Only biases are unfixed
-    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-}
-
-TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
-{
-
-    #ifdef DEBUG_RESULTS_BIAS
-    std::ofstream debug_results;
-    debug_results.open("save_gtest_CTRIMU_bias_TRNonNullBiasRotCst_VarB1B2.dat");
-    if(debug_results)
-        debug_results   << "%%introduced_error\t"
-                        << "exp_KF0_Abx\t" << "exp_KF0_Aby\t" << "exp_KF0_Abz\t" << "exp_KF0_Wbx\t" << "exp_KF0_Wby\t" << "exp_KF0_Wbz\t"
-                        << "res_KF0_Abx\t" << "res_KF0_Aby\t" << "res_KF0_Abz\t" << "res_KF0_Wbx\t" << "res_KF0_Wby\t" << "res_KF0_Wbz\t"
-                        << "res_KF1_Abx\t" << "res_KF1_Aby\t" << "res_KF1_Abz\t" << "res_KF1_Wbx\t" << "res_KF1_Wby\t" << "res_KF1_Wbz\t" << std::endl;
-    #endif
-
-    //prepare problem for solving
-    origin_KF->getPPtr()->fix();
-    origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->fix();
-
-    wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbated_origin_state(x_origin);
-    ceres::Solver::Summary summary;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-7")
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-6")
-    epsilon_bias = 0.000001;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-5")
-    epsilon_bias = 0.00001;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
-    epsilon_bias = 0.0001;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
-    epsilon_bias = 0.001;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
-    epsilon_bias = 0.01;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-1")
-    epsilon_bias = 0.1;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e0")
-    epsilon_bias = 1;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-}
-
-TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
-{
-    //prepare problem for solving
-    origin_KF->getPPtr()->fix();
-    origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->fix();
-
-    wolf_problem_ptr_->print(4,1,1,1); 
-
-    last_KF->setState(expected_final_state);
-
-    last_KF->getPPtr()->fix();
-    last_KF->getOPtr()->fix();
-    last_KF->getVPtr()->fix();
-
-    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
-
-    wolf_problem_ptr_->print(4,1,1,1);
-
-    //Only biases are unfixed
-    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-}
-
-TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
-{
-
-    #ifdef DEBUG_RESULTS_BIAS
-    std::ofstream debug_results;
-    debug_results.open("save_gtest_CTRIMU_bias_TRNonNullBiasRotVCst_VarB1B2.dat");
-    if(debug_results)
-        debug_results   << "%%introduced_error\t"
-                        << "exp_KF0_Abx\t" << "exp_KF0_Aby\t" << "exp_KF0_Abz\t" << "exp_KF0_Wbx\t" << "exp_KF0_Wby\t" << "exp_KF0_Wbz\t"
-                        << "res_KF0_Abx\t" << "res_KF0_Aby\t" << "res_KF0_Abz\t" << "res_KF0_Wbx\t" << "res_KF0_Wby\t" << "res_KF0_Wbz\t"
-                        << "res_KF1_Abx\t" << "res_KF1_Aby\t" << "res_KF1_Abz\t" << "res_KF1_Wbx\t" << "res_KF1_Wby\t" << "res_KF1_Wbz\t" << std::endl;
-    #endif
-
-    //prepare problem for solving
-    origin_KF->getPPtr()->fix();
-    origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->fix();
-
-    wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbated_origin_state(x_origin);
-    ceres::Solver::Summary summary;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-7")
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-6")
-    epsilon_bias = 0.000001;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-5")
-    epsilon_bias = 0.00001;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
-    epsilon_bias = 0.0001;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
-    epsilon_bias = 0.001;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
-    epsilon_bias = 0.01;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-1")
-    epsilon_bias = 0.1;
-
-    for(int i = 1; i<9; i++)
-    {
-        perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
-
-        last_KF->getPPtr()->fix();
-        last_KF->getOPtr()->fix();
-        last_KF->getVPtr()->fix();
-
-        summary = ceres_manager_wolf_diff->solve();
-        std::cout << summary.BriefReport() << std::endl;
-
-        #ifdef DEBUG_RESULTS_BIAS
-            Eigen::VectorXs KF0_frm_state(16), KF1_frm_state(16);
-            KF0_frm_state = origin_KF->getState();
-            KF1_frm_state = last_KF->getState();
-
-            debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
-            << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
-                << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
-        #else
-
-            //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
-            "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
-            "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-        #endif
-    }
-    //std::cout << summary.FullReport() << std::endl;
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e0")
-    epsilon_bias = 1;
-
-    for(int i = 1; i<9; i++)
     {
         perturbated_origin_state[10] = x_origin(10) + i * epsilon_bias;
         origin_KF->setState(perturbated_origin_state);
