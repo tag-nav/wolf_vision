@@ -206,87 +206,95 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
     resetDerived();
 }
 
-bool ProcessorMotion::keyFrameCallback(FrameBasePtr _key_frame, const Scalar& _time_tol_other)
+bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar& _time_tol_other)
 {
-    std::cout << "PM: KF" << _key_frame->id() << " callback received at ts= " << _key_frame->getTimeStamp().get() << std::endl;
+    std::cout << "PM: KF" << _new_keyframe->id() << " callback received at ts= " << _new_keyframe->getTimeStamp().get() << std::endl;
     std::cout << "    while last ts= " << last_ptr_->getTimeStamp().get() << std::endl;
-    std::cout << "    while last's frame ts= " << last_ptr_->getFramePtr()->getTimeStamp().get() << std::endl;
 
-    assert(_key_frame->getTrajectoryPtr() != nullptr
+    assert(_new_keyframe->getTrajectoryPtr() != nullptr
             && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");
 
     // get keyframe's time stamp
-    TimeStamp key_ts = _key_frame->getTimeStamp();
+    TimeStamp new_ts = _new_keyframe->getTimeStamp();
 
     // find capture whose buffer is affected by the new keyframe
-    CaptureMotionPtr new_capture = findCaptureContainingTimeStamp(key_ts);
-    assert(new_capture != nullptr
+    CaptureMotionPtr existing_capture = findCaptureContainingTimeStamp(new_ts);
+    assert(existing_capture != nullptr
             && "ProcessorMotion::keyFrameCallback: no motion capture containing the required TimeStamp found");
 
     // Find the frame acting as the capture's origin
-    FrameBasePtr key_frame_origin = new_capture->getOriginFramePtr();
+    FrameBasePtr new_keyframe_origin = existing_capture->getOriginFramePtr();
 
     // create motion capture
-    CaptureMotionPtr key_capture_ptr = std::make_shared<CaptureMotion>(key_ts, getSensorPtr(),
+    CaptureMotionPtr new_capture = std::make_shared<CaptureMotion>(new_ts, getSensorPtr(),
                                                                          Eigen::VectorXs::Zero(data_size_),
                                                                          Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                                         key_frame_origin);
+                                                                         new_keyframe_origin);
     // add motion capture to keyframe
-    _key_frame->addCapture(key_capture_ptr);
+    _new_keyframe->addCapture(new_capture);
 
     // split the buffer
     // and give the old buffer to the key_capture
-    new_capture->getBuffer().split(key_ts, key_capture_ptr->getBuffer());
+    existing_capture->getBuffer().split(new_ts, new_capture->getBuffer());
 
     // interpolate individual delta
-    if (!new_capture->getBuffer().get().empty() && key_capture_ptr->getBuffer().get().back().ts_ != key_ts)
+    if (!existing_capture->getBuffer().get().empty() && new_capture->getBuffer().get().back().ts_ != new_ts)
     {
         // interpolate Motion at the new time stamp
-        Motion mot = interpolate(key_capture_ptr->getBuffer().get().back(), // last Motion of old buffer
-                                 new_capture->getBuffer().get().front(), // first motion of new buffer
-                                 key_ts);
+        Motion motion_interpolated = interpolate(new_capture->getBuffer().get().back(), // last Motion of old buffer
+                                 existing_capture->getBuffer().get().front(), // first motion of new buffer
+                                 new_ts);
         // add to old buffer
-        key_capture_ptr->getBuffer().get().push_back(mot);
+        new_capture->getBuffer().get().push_back(motion_interpolated);
     }
 
-    Eigen::MatrixXs key_covariance = integrateBufferCovariance(key_capture_ptr->getBuffer());
+    Eigen::MatrixXs new_covariance = integrateBufferCovariance(new_capture->getBuffer());
 //    std::cout << "PM: callback covariance: \n" << key_covariance << std::endl;
 
     // create motion feature and add it to the capture
-    FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
+    FeatureBasePtr new_feature = std::make_shared<FeatureBase>(
             "ODOM 2D",
-            key_capture_ptr->getBuffer().get().back().delta_integr_,
-            key_covariance);
+            new_capture->getBuffer().get().back().delta_integr_,
+            new_covariance);
 
-    key_capture_ptr->addFeature(key_feature_ptr);
+    new_capture->addFeature(new_feature);
 
     // create motion constraint and add it to the feature, and link it to the other frame (origin)
-    emplaceConstraint(key_feature_ptr, key_frame_origin);
+    emplaceConstraint(new_feature, new_keyframe_origin);
 
-    // Update the remaining capture
-    if (new_capture == last_ptr_)
+    std::cout << "new delta: " << new_capture->getBuffer().get().back().delta_integr_.transpose() << std::endl;
+    std::cout << "new delta cov:\n " << integrateBufferCovariance(new_capture->getBuffer()) << std::endl;
+
+
+
+    /////////////////////////////////////////////////////////
+    // Update the existing capture
+    if (existing_capture == last_ptr_)
         // reset processor origin
-        origin_ptr_ = key_capture_ptr;
+        origin_ptr_ = new_capture;
 
-    new_capture->setOriginFramePtr(_key_frame);
+    existing_capture->setOriginFramePtr(_new_keyframe);
 
-    // reintegrate own buffer // JS: where is the result of re-integration stored? JS: in the same buffer!
-    reintegrateBuffer(new_capture);
+    // reintegrate existing buffer -- note: the result of re-integration is stored in the same buffer!
+    reintegrateBuffer(existing_capture);
 
-    // modify feature and constraint (if they exist in the capture)
-    if (!new_capture->getFeatureList().empty())
+    // modify existing feature and constraint (if they exist in the existing capture)
+    if (!existing_capture->getFeatureList().empty())
     {
-        FeatureBasePtr feature_ptr = new_capture->getFeatureList().back(); // there is only one feature!
+        FeatureBasePtr existing_feature = existing_capture->getFeatureList().back(); // there is only one feature!
 
-        // Modify feature --------
-        feature_ptr->setMeasurement(new_capture->getBuffer().get().back().delta_integr_);
-        key_covariance = integrateBufferCovariance(new_capture->getBuffer());
-        feature_ptr->setMeasurementCovariance(key_covariance);
+        // Modify existing feature --------
+        existing_feature->setMeasurement(existing_capture->getBuffer().get().back().delta_integr_);
+        MatrixXs existing_covariance = integrateBufferCovariance(existing_capture->getBuffer());
+        existing_feature->setMeasurementCovariance(existing_covariance);
 
-        // Modify constraint --------
+        std::cout << "existing delta: " << existing_capture->getBuffer().get().back().delta_integr_.transpose() << std::endl;
+        std::cout << "existing delta cov:\n " << integrateBufferCovariance(existing_capture->getBuffer()) << std::endl;
+
+        // Modify existing constraint --------
         // Instead of modifying, we remove one ctr, and create a new one.
-        auto ctr_to_remove = feature_ptr->getConstraintList().back(); // there is only one constraint!
-        auto new_ctr = emplaceConstraint(feature_ptr, _key_frame);
+        auto ctr_to_remove = existing_feature->getConstraintList().back(); // there is only one constraint!
+        auto new_ctr = emplaceConstraint(existing_feature, _new_keyframe);
         ctr_to_remove->remove();  // remove old constraint now (otherwise c->remove() gets propagated to f, C, F, etc.)
     }
 
