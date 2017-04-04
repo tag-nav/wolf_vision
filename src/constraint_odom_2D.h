@@ -48,31 +48,6 @@ template<typename T>
 inline bool ConstraintOdom2D::operator ()(const T* const _p1, const T* const _o1, const T* const _p2,
                                           const T* const _o2, T* _residuals) const
 {
-    //std::cout << "computing constraint odom ..." << std::endl;
-    //            std::cout << "_p1: ";
-    //            for (int i=0; i < 2; i++)
-    //                std::cout << "\n\t" << _p1[i];
-    //            std::cout << std::endl;
-    //            std::cout << "_o1: ";
-    //            for (int i=0; i < 1; i++)
-    //                std::cout << "\n\t" << _o1[i];
-    //            std::cout << std::endl;
-    //            std::cout << "_p2: ";
-    //            for (int i=0; i < 2; i++)
-    //                std::cout << "\n\t" << _p2[i];
-    //            std::cout << std::endl;
-    //            std::cout << "_o2: ";
-    //            for (int i=0; i < 1; i++)
-    //                std::cout << "\n\t" << _o2[i];
-    //            std::cout << std::endl;
-    //            std::cout << "getMeasurement(): ";
-    //            for (int i=0; i < 3; i++)
-    //                std::cout << "\n\t" << getMeasurement()(i);
-    //            std::cout << std::endl;
-    //            std::cout << "getMeasurementCovariance(): ";
-    //            for (int i=0; i < 3; i++)
-    //                std::cout << "\n\t" << getMeasurementCovariance()(i,i);
-    //            std::cout << std::endl;
 
     // MAPS
     Eigen::Map<Eigen::Matrix<T,3,1> > residuals_map(_residuals);
