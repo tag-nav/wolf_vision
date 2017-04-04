@@ -56,9 +56,9 @@ inline bool ConstraintFix::operator ()(const T* const _p, const T* const _o, T* 
     er(1) = meas(1) - _p[1];
     er(2) = meas(2) - _o[0];
     while (er[2] > T(M_PI))
-        er(2) = er(2) - T(M_2_PI);
+        er(2) = er(2) - T(2*M_PI);
     while (er(2) <= T(-M_PI))
-        er(2) = er(2) + T(M_2_PI);
+        er(2) = er(2) + T(2*M_PI);
 
     // residual
     Eigen::Map<Eigen::Matrix<T,3,1>> res(_residuals);
