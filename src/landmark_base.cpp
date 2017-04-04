@@ -13,8 +13,9 @@ LandmarkBase::LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, State
             NodeBase("LANDMARK", _type),
             map_ptr_(),
             state_block_vec_(2), // allow for 2 state blocks by default. Resize in derived constructors if needed.
+            is_removing_(false),
             landmark_id_(++landmark_id_count_),
-            status_(LANDMARK_CANDIDATE)
+            status_(LANDMARK_ESTIMATED)
 {
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;

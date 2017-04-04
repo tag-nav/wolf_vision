@@ -9,6 +9,7 @@ unsigned int ConstraintBase::constraint_id_count_ = 0;
 ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT", "Base"),
     feature_ptr_(), // nullptr
+    is_removing_(false),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     status_(_status),
@@ -23,6 +24,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
 ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr, FeatureBasePtr _feature_other_ptr, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT", "Base"),
     feature_ptr_(),
+    is_removing_(false),
     constraint_id_(++constraint_id_count_),
     type_id_(_tp),
     status_(_status),

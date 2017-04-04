@@ -14,7 +14,7 @@ namespace wolf {
  *  - A unique ID. The class implements the ID factory.
  *
  *  - A unique class name, strictly within this range of possibilities:
- *    - "UNDEFINED" -- used for NodeTerminus
+ *    - "BASE" -- should not be used
  *    - "PROBLEM"
  *    - "HARDWARE"
  *    - "SENSOR"
@@ -58,7 +58,6 @@ class NodeBase
 
     protected:
         ProblemWPtr problem_ptr_;
-        bool is_removing_;
 
         unsigned int node_id_;   ///< Node id. It is unique over the whole Wolf Tree
         std::string node_class_; ///< Text label identifying the class of node ("SENSOR", "FEATURE", etc)
@@ -91,7 +90,6 @@ namespace wolf{
 
 inline NodeBase::NodeBase(const std::string& _class, const std::string& _type, const std::string& _name) :
         problem_ptr_(), // nullptr
-        is_removing_(false),
         node_id_(++node_id_count_),
         node_class_(_class),
         node_type_(_type),

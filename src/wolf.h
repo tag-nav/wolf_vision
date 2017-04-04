@@ -230,24 +230,24 @@ typedef enum
 } JacobianMethod;
 
 
-/** \brief Enumeration of all possible state status
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    ST_ESTIMATED = 0,   ///< State in estimation (default)
-    ST_FIXED = 1,       ///< State fixed, estimated enough or fixed infrastructure.
-} StateStatus;
+///** \brief Enumeration of all possible state status
+// *
+// * You may add items to this list as needed. Be concise with names, and document your entries.
+// */
+//typedef enum
+//{
+//    ST_ESTIMATED = 0,   ///< State in estimation (default)
+//    ST_FIXED = 1,       ///< State fixed, estimated enough or fixed infrastructure.
+//} StateStatus;
 
 
-typedef enum
-{
-    LANDMARK_CANDIDATE = 1,   ///< A landmark, just created. Association with it allowed, but not yet establish an actual constraint for the solver
-    LANDMARK_ESTIMATED,   ///< A landmark being estimated. Association with it allowed, establishing actual constraints for the solver where both vehicle and landmark states are being estimated
-    LANDMARK_FIXED,       ///< A landmark estimated. Association with it allowed, establishing actual constraints for the solver, but its value remains static, no longer optimized
-} LandmarkStatus;
-
+//typedef enum
+//{
+//    LANDMARK_CANDIDATE = 1,   ///< A landmark, just created. Association with it allowed, but not yet establish an actual constraint for the solver
+//    LANDMARK_ESTIMATED,   ///< A landmark being estimated. Association with it allowed, establishing actual constraints for the solver where both vehicle and landmark states are being estimated
+//    LANDMARK_FIXED,       ///< A landmark estimated. Association with it allowed, establishing actual constraints for the solver, but its value remains static, no longer optimized
+//} LandmarkStatus;
+//
 
 /////////////////////////////////////////////////////////////////////////
 //      TYPEDEFS FOR POINTERS, LISTS AND ITERATORS IN THE WOLF TREE

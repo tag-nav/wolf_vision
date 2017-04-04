@@ -67,7 +67,7 @@ TEST(ProcessorMotion, Motion2D)
     ceres::Solver::Options ceres_options;
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
-    ceres_options.max_num_iterations = 1e4;
+    ceres_options.max_num_iterations = 100;
     CeresManager* ceres_manager_ptr = new CeresManager(problem_ptr, ceres_options);
 
 
