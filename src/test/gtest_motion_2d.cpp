@@ -190,12 +190,9 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     // time
     TimeStamp t0(0.0), t = t0;
     Scalar dt = .01;
-    // Origin frame:
-//    Vector3s x0(.5, -.5 -sqrt(.5), M_PI_4);
     Vector3s x0(0,0,0);
     Eigen::Matrix3s x0_cov = Eigen::Matrix3s::Identity() * 0.1;
-    // motion data
-    VectorXs data(Vector2s(1, M_PI_4) ); // advance 1m turn pi/4 rad (45 deg). Need 8 steps for a complete turn
+    VectorXs data(Vector2s(1, 0) ); // advance 1m
     Eigen::MatrixXs data_cov = Eigen::MatrixXs::Identity(2, 2) * 0.01;
     int N = 8; // number of process() steps
 
@@ -203,8 +200,8 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     // i=    0    1    2    3    4    5    6    7
     // KF -- * -- * -- * -- * -- * -- * -- * -- *   : no keyframes during integration
     // And we split as follows
-    //                                     s        : time stamp t_split = 4*dt
-    //                      s                       : time stamp t_split = 2*dt
+    //                           s
+    //                 s
 
 
     // Create Wolf tree nodes
@@ -224,6 +221,8 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     FrameBasePtr origin_frame = problem->setPrior(x0, x0_cov, t0);
     std::cout << "Initial pose : " << problem->getCurrentState().transpose() << std::endl;
     std::cout << "Motion data  : " << data.transpose() << std::endl;
+
+    problem->print();
 
     // Check covariance values
     Eigen::Vector3s integrated_pose = x0;
@@ -272,8 +271,8 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     showBuffer(processor_odom2d->getBuffer(), "Original buffer:", t0);
 
     ////////////////////////////////////////////////////////////////
-    // Split after the last keyframe, t_split = n_split*dt;
-    int n_split = 5;
+    // Split after the last keyframe,
+    int n_split = 4;
     TimeStamp t_split (t0 + n_split*dt);
 
     std::cout << "-----------------------------\nSplit after last KF; time: " << t_split - t0 << std::endl;
@@ -298,7 +297,7 @@ TEST(ProcessorMotion2D, SplitAndSolve)
 
     ////////////////////////////////////////////////////////////////
     // Split between keyframes
-    int m_split = 3; // now we have KF at n=0 and n=5
+    int m_split = 2;
     t_split = t0 + m_split*dt;
     std::cout << "-----------------------------\nSplit between KFs; time: " << t_split - t0 << std::endl;
 
@@ -321,6 +320,8 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     std::cout << "delta:\n" << processor_odom2d->getBuffer().get().back().delta_integr_.transpose() << std::endl;
     std::cout << "cov:\n" << processor_odom2d->integrateBufferCovariance(processor_odom2d->getBuffer()) << std::endl;
 
+    keyframe_split_n->setState(Vector3s(3,2,1));
+    keyframe_split_m->setState(Vector3s(1,2,3));
     ceres::Solver::Summary summary = ceres_manager.solve();
     std::cout << summary.BriefReport() << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
@@ -343,14 +344,70 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     //    std::cout << "Split KF -> P: " << keyframe_previous.get() << " - V: " << keyframe_split_m.get() << std::endl;
 
     // check the split KF
-    ASSERT_POSE2D_APPROX(keyframe_split_m->getState()                  , integrated_pose_vector[m_split - 1]);
+    ASSERT_POSE2D_APPROX(keyframe_split_m->getState()                 , integrated_pose_vector[m_split - 1]);
     ASSERT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_m) , integrated_cov_vector [m_split - 1]);
 
     // check other KF in the future of the split KF
-    ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState()     , integrated_pose_vector[n_split - 1]);
+    ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState()    , integrated_pose_vector[n_split - 1]);
     EXPECT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_n) , integrated_cov_vector [n_split - 1]);
 
+    std::cout << problem->check() << std::endl;
     problem->print(4,1,1,1);
+
+}
+
+TEST(motion, dummy)
+{
+    std::cout << std::setprecision(3);
+
+    TimeStamp t0(0.0), t = t0;
+    Scalar dt = .01;
+    Vector3s x0(0,0,0);
+    Eigen::Matrix3s x0_cov = Eigen::Matrix3s::Identity() * 0.1;
+
+    Vector3s delta(2,0,0);
+    //    Matrix3s delta_cov; delta_cov << 1.0, 0.0, 0.0, 0.0, 0.25, 0.5, 0.0, 0.5, 1.0; delta_cov /= 100; delta_cov += Matrix3s::Identity()*0.0000001;
+    Matrix3s delta_cov; delta_cov << .02, 0, 0, 0, .025, .02, 0, .02, .02;
+
+    ProblemPtr problem = Problem::create(FRM_PO_2D);
+    FrameBasePtr F0 = problem->setPrior(x0, x0_cov,t0);
+    SensorBasePtr sensor = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
+    CeresManager ceres_manager(problem);
+
+    t += dt;
+    FrameBasePtr F1 = problem->emplaceFrame(KEY_FRAME, 0*delta, t);
+    CaptureBasePtr C1 = F1->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t, sensor));
+    FeatureBasePtr f1 = C1->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
+    ConstraintBasePtr c1 = f1->addConstraint(std::make_shared<ConstraintOdom2D>(f1, F0));
+    F0->addConstrainedBy(c1);
+
+    t += dt;
+    FrameBasePtr F2 = problem->emplaceFrame(KEY_FRAME, 0*delta, t);
+    CaptureBasePtr C2 = F2->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t, sensor));
+    FeatureBasePtr f2 = C2->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
+    ConstraintBasePtr c2 = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1));
+    F1->addConstrainedBy(c2);
+
+    ceres::Solver::Summary summary = ceres_manager.solve();
+    std::cout << summary.BriefReport() << std::endl;
+    ceres_manager.computeCovariances(ALL_MARGINALS);
+
+    std::cout << problem->check() << std::endl;
+    problem->print(4,1,1,1);
+
+    for (FrameBasePtr frm : problem->getTrajectoryPtr()->getFrameList())
+    {
+        if (frm->isKey())
+        {
+            std::cout << "===== Key Frame " << frm->id() << " ======" << std::endl;
+            std::cout << "  feature measure: \n"    << frm->getCaptureList().front()->getFeatureList().front()->getMeasurement().transpose() << std::endl;
+            std::cout << "  feature covariance: \n" << frm->getCaptureList().front()->getFeatureList().front()->getMeasurementCovariance() << std::endl;
+            std::cout << "  state: \n"              << frm->getState().transpose() << std::endl;
+            std::cout << "  covariance: \n"         << problem->getFrameCovariance(frm) << std::endl;
+        }
+    }
+
+
 
 }
 
