@@ -65,6 +65,20 @@ public:
                }, \
                C_expect, C_actual);
 
+#define EXPECT_POSE2D_APPROX(C_expect, C_actual) EXPECT_PRED2([](const MatrixXs lhs, const MatrixXs rhs) { \
+                   MatrixXs er = lhs - rhs; \
+                   er(2) = pi2pi((Scalar)er(2)); \
+                   return er.isMuchSmallerThan(1, wolf::Constants::EPS); \
+               }, \
+               C_expect, C_actual);
+
+#define ASSERT_POSE2D_APPROX(C_expect, C_actual) EXPECT_PRED2([](const MatrixXs lhs, const MatrixXs rhs) { \
+                   MatrixXs er = lhs - rhs; \
+                   er(2) = pi2pi((Scalar)er(2)); \
+                   return er.isMuchSmallerThan(1, wolf::Constants::EPS); \
+               }, \
+               C_expect, C_actual);
+
 } // namespace internal
 } // namespace testing
 
