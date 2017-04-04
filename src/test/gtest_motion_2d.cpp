@@ -91,7 +91,8 @@ void show(const ProblemPtr& problem)
         }
     }
 }
-TEST(ProcessorMotion2D, VoteForKfAndSolve)
+
+TEST(Odom2D, VoteForKfAndSolve)
 {
     std::cout << std::setprecision(3);
     // time
@@ -172,9 +173,8 @@ TEST(ProcessorMotion2D, VoteForKfAndSolve)
             integrated_delta = plus(integrated_delta, data);
             integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
         }
-        //        std::cout << "TEST cov: \n" << integrated_delta_cov << std::endl;
 
-//        ASSERT_EIGEN_APPROX(processor_odom2d->getMotion().delta_, integrated_delta);
+        ASSERT_POSE2D_APPROX(processor_odom2d->getMotion().delta_integr_, integrated_delta);
         ASSERT_EIGEN_APPROX(odom2d_delta_cov, integrated_delta_cov);
 
         // Integrate pose
@@ -195,14 +195,10 @@ TEST(ProcessorMotion2D, VoteForKfAndSolve)
     ceres::Solver::Summary summary = ceres_manager.solve();
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
-    //    std::cout << "After solving the problem, covariance of the last keyframe:" << std::endl;
-    //    std::cout << "WOLF:\n"      << problem->getLastKeyFrameCovariance() << std::endl;
-    //    std::cout << "REFERENCE:\n" << integrated_cov_vector[5] << std::endl;
-
     ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance() , integrated_cov_vector[5]);
 }
 
-TEST(ProcessorMotion2D, SplitAndSolve)
+TEST(Odom2D, SplitAndSolve)
 {
     std::cout << std::setprecision(3);
     // time
@@ -237,8 +233,6 @@ TEST(ProcessorMotion2D, SplitAndSolve)
 
     // Origin Key Frame
     FrameBasePtr origin_frame = problem->setPrior(x0, x0_cov, t0);
-    //    std::cout << "Initial pose : " << problem->getCurrentState().transpose() << std::endl;
-    //    std::cout << "Motion data  : " << data.transpose() << std::endl;
 
     // Check covariance values
     Eigen::Vector3s integrated_pose = x0;
@@ -326,18 +320,11 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     CaptureMotionPtr key_capture_m = std::static_pointer_cast<CaptureMotion>(keyframe_split_m->getCaptureList().front());
     MotionBuffer key_buffer_m = key_capture_m->getBuffer();
 
-    //    showBuffer(key_buffer_m,                  "New keyframe's capture buffer: ", t0);
-    //    std::cout << "delta:\n" << key_buffer_m.get().back().delta_integr_.transpose() << std::endl;
-    //    std::cout << "cov:\n" << processor_odom2d->integrateBufferCovariance(key_buffer_m) << std::endl;
-    //    showBuffer(key_capture_n->getBuffer(),    "Last KF's buffer             : ", t0);
-    //    std::cout << "delta:\n" << key_capture_n->getBuffer().get().back().delta_integr_.transpose() << std::endl;
-    //    std::cout << "cov:\n" << processor_odom2d->integrateBufferCovariance(key_capture_n->getBuffer()) << std::endl;
-    //    showBuffer(processor_odom2d->getBuffer(), "Current processor buffer     : ", t0);
-    //    std::cout << "delta:\n" << processor_odom2d->getBuffer().get().back().delta_integr_.transpose() << std::endl;
-    //    std::cout << "cov:\n" << processor_odom2d->integrateBufferCovariance(processor_odom2d->getBuffer()) << std::endl;
-
+    // Perturb states
     keyframe_split_n->setState(Vector3s(3,2,1));
     keyframe_split_m->setState(Vector3s(1,2,3));
+
+    // solve
     ceres::Solver::Summary summary = ceres_manager.solve();
     std::cout << summary.BriefReport() << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
@@ -352,14 +339,14 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     EXPECT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_n) , integrated_cov_vector [n_split - 1]);
 
 //    problem->print(4,1,1,1);
-    std::cout << problem->check(1) << std::endl;
-//    show(problem);
+//    problem->check(1);
+    show(problem);
 
 }
 
 
 
-TEST(motion, dummy)
+TEST(Odom2D, dummy)
 {
     std::cout << std::setprecision(3);
 
@@ -396,8 +383,8 @@ TEST(motion, dummy)
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
 //    problem->print(4,1,1,1);
-    std::cout << problem->check(1) << std::endl;
-//    show(problem);
+//    problem->check(1);
+    show(problem);
 
 }
 
