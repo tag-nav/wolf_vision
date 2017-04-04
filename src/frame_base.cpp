@@ -4,6 +4,7 @@
 #include "trajectory_base.h"
 #include "capture_base.h"
 #include "state_block.h"
+#include "state_angle.h"
 #include "state_quaternion.h"
 
 namespace wolf {
@@ -258,7 +259,7 @@ FrameBasePtr FrameBase::create_PO_2D(const FrameType & _tp,
 {
     assert(_x.size() == 3 && "Wrong state vector size. Should be 3 for 2D!");
     StateBlockPtr p_ptr ( std::make_shared<StateBlock>    (_x.head    <2> ( ) ) );
-    StateBlockPtr o_ptr ( std::make_shared<StateBlock>    (_x.tail    <1> ( ) ) );
+    StateBlockPtr o_ptr ( std::make_shared<StateAngle>    ((Scalar) _x(2) ) );
     StateBlockPtr v_ptr ( nullptr );
     FrameBasePtr f ( std::make_shared<FrameBase>(_tp, _ts, p_ptr, o_ptr, v_ptr) );
     f->setType("PO 2D");
