@@ -276,32 +276,72 @@ TEST(ProcessorMotion2D, SplitAndSolve)
         t += dt;
     }
 
-    // Split at an exact timestamp, t_split = n_split*dt;
+
     showBuffer(processor_odom2d->getBuffer(), "Original buffer:", t0);
 
+    ////////////////////////////////////////////////////////////////
+    // Split after the last keyframe, t_split = n_split*dt;
     int n_split = 5;
     TimeStamp t_split (t0 + n_split*dt);
 
-    std::cout << "Split time:                  " << t_split - t0 << std::endl;
+    std::cout << "### Split after last KF; time: " << t_split - t0 << std::endl;
 
     Vector3s x_split = processor_odom2d->getState(t_split);
-    FrameBasePtr keyframe_split = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
+    FrameBasePtr keyframe_split_n = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
 
-    processor_odom2d->keyFrameCallback(keyframe_split, 0);
-//    problem->print();
+    processor_odom2d->keyFrameCallback(keyframe_split_n, 0);
 
-    MotionBuffer key_buffer = (std::static_pointer_cast<CaptureMotion>(keyframe_split->getCaptureList().front()))->getBuffer();
+    CaptureMotionPtr key_capture_n = std::static_pointer_cast<CaptureMotion>(keyframe_split_n->getCaptureList().front());
 
-    showBuffer(key_buffer, "New keyframe's capture buffer: ", t0);
-    showBuffer(processor_odom2d->getBuffer(), "Current processor buffer: ", t0);
-//    std::cout << "Ref    cov: \n" << integrated_cov_vector[n_split-1] << std::endl;
-//    std::cout << "Buffer cov: \n" << processor_odom2d->integrateBufferCovariance(key_buffer) << std::endl;
+    MotionBuffer key_buffer_n = key_capture_n->getBuffer();
+
+    showBuffer(key_buffer_n,                  "New keyframe's capture buffer: ", t0);
+    showBuffer(processor_odom2d->getBuffer(), "Current processor buffer     : ", t0);
 
     ceres_manager.solve();
     ceres_manager.computeCovariances();
 
     ASSERT_EIGEN_APPROX(problem->getLastKeyFramePtr()->getState(), integrated_pose_vector[n_split - 1]);
     ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance()     , integrated_cov_vector [n_split - 1]);
+
+    ////////////////////////////////////////////////////////////////
+    // Split between keyframes
+    int m_split = 3; // now we have KF at n=0 and n=5
+    t_split = t0 + m_split*dt;
+    std::cout << "### Split between KFs; time: " << t_split - t0 << std::endl;
+
+
+    x_split = processor_odom2d->getState(t_split);
+    FrameBasePtr keyframe_split_m = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
+
+    processor_odom2d->keyFrameCallback(keyframe_split_m, 0);
+
+    CaptureMotionPtr key_capture_m = std::static_pointer_cast<CaptureMotion>(keyframe_split_m->getCaptureList().front());
+    MotionBuffer key_buffer_m = key_capture_m->getBuffer();
+
+    showBuffer(key_buffer_m,                  "New keyframe's capture buffer: ", t0);
+    std::cout << "cov:\n" << processor_odom2d->integrateBufferCovariance(key_buffer_m) << std::endl;
+    showBuffer(key_capture_n->getBuffer(),    "Last KF's buffer             : ", t0);
+    std::cout << "cov:\n" << processor_odom2d->integrateBufferCovariance(key_capture_n->getBuffer()) << std::endl;
+    showBuffer(processor_odom2d->getBuffer(), "Current processor buffer     : ", t0);
+    std::cout << "cov:\n" << processor_odom2d->integrateBufferCovariance(processor_odom2d->getBuffer()) << std::endl;
+
+    ceres_manager.solve();
+    ceres_manager.computeCovariances(ALL_MARGINALS);
+    problem->print();
+
+    FrameBasePtr keyframe_last = problem->getLastKeyFramePtr();
+    FrameBasePtr keyframe_previous = keyframe_last->getPreviousFrame();
+    std::cout << "Last  KF -> P: " << keyframe_last.get()     << " - V: " << keyframe_split_n.get() << std::endl;
+    std::cout << "Split KF -> P: " << keyframe_previous.get() << " - V: " << keyframe_split_m.get() << std::endl;
+
+    // check the split KF
+    EXPECT_EIGEN_APPROX(keyframe_split_m->getState(), integrated_pose_vector[m_split - 1]);
+    EXPECT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_m) , integrated_cov_vector [m_split - 1]);
+
+    // check other KF in the future of the split KF
+    EXPECT_EIGEN_APPROX(problem->getLastKeyFramePtr()->getState(), integrated_pose_vector[n_split - 1]);
+    EXPECT_EIGEN_APPROX(problem->getLastKeyFrameCovariance()     , integrated_cov_vector [n_split - 1]);
 }
 
 //TEST(ProcessorMotion2D, Motion2D)
