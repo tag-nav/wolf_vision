@@ -188,26 +188,6 @@ inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     //std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
 }
 
-//inline void ProcessorOdom2D::deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-//                                             Eigen::VectorXs& _delta2_minus_delta1)
-//{
-//    //std::cout << "ProcessorOdom2d::deltaMinusDelta" << std::endl;
-//    assert(_delta1.size() == 3 && "Wrong _delta1 vector size");
-//    assert(_delta2.size() == 3 && "Wrong _delta2 vector size");
-//    assert(_delta2_minus_delta1.size() == delta_size_ && "Wrong _delta2_minus_delta1 vector size");
-//
-////    std::cout << "deltaMinusDelta ------------------------------------" << std::endl;
-////    std::cout << "_delta1: " << _delta1.transpose() << std::endl;
-////    std::cout << "_delta2: " << _delta2.transpose() << std::endl;
-////    std::cout << "_delta2_minus_delta1: " << _delta2_minus_delta1.transpose() << std::endl;
-//
-//    _delta2_minus_delta1.head<2>() =  Eigen::Rotation2Ds(-_delta1(2)).matrix() * (_delta2.head<2>() - _delta1.head<2>());
-//    _delta2_minus_delta1(2) = _delta2(2) - _delta1(2);
-//
-////    std::cout << "-----------------------------------------------" << std::endl;
-////    std::cout << "_delta2_minus_delta1: " << _delta2_minus_delta1.transpose() << std::endl;
-//}
-
 inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const
 {
     return Eigen::VectorXs::Zero(delta_size_);
