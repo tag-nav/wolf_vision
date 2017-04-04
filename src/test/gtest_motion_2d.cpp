@@ -165,10 +165,7 @@ TEST(ProcessorMotion2D, VoteForKfAndSolve)
         integrated_pose = plus(integrated_pose, data);
         integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
 
-        // Pose error -- fix spurious error from pi to -pi
-        Vector3s error_pose = processor_odom2d->getCurrentState() - integrated_pose;
-        error_pose(2) = pi2pi(error_pose(2));
-        ASSERT_EIGEN_APPROX(error_pose, Vector3s::Zero());
+        ASSERT_POSE2D_APPROX(processor_odom2d->getCurrentState(), integrated_pose)
 
         integrated_pose_vector.push_back(integrated_pose);
         integrated_cov_vector.push_back(integrated_cov);
@@ -194,7 +191,8 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     TimeStamp t0(0.0), t = t0;
     Scalar dt = .01;
     // Origin frame:
-    Vector3s x0(.5, -.5 -sqrt(.5), M_PI_4);
+//    Vector3s x0(.5, -.5 -sqrt(.5), M_PI_4);
+    Vector3s x0(0,0,0);
     Eigen::Matrix3s x0_cov = Eigen::Matrix3s::Identity() * 0.1;
     // motion data
     VectorXs data(Vector2s(1, M_PI_4) ); // advance 1m turn pi/4 rad (45 deg). Need 8 steps for a complete turn
@@ -202,11 +200,11 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     int N = 8; // number of process() steps
 
     // NOTE: We integrate and create KFs as follows:
-    // i=    0    1    2    3    4    5    6
-    // KF -- * -- * -- * -- * -- * -- * -- * : no keyframes during integration
+    // i=    0    1    2    3    4    5    6    7
+    // KF -- * -- * -- * -- * -- * -- * -- * -- *   : no keyframes during integration
     // And we split as follows
-    //                           s          : exact time stamp t_split     = 5*dt
-    //              s                       : fractional time stamp t_split = 2.2*dt
+    //                                     s        : time stamp t_split = 4*dt
+    //                      s                       : time stamp t_split = 2*dt
 
 
     // Create Wolf tree nodes
@@ -263,20 +261,14 @@ TEST(ProcessorMotion2D, SplitAndSolve)
         integrated_pose = plus(integrated_pose, data);
         integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
 
-//        if (t - t0 == 0.05){
-//            std::cout << "State(" << (t - t0) << ") : " << processor_odom2d->getCurrentState().transpose() << std::endl;
-//            std::cout << "WOLF delta cov: \n" << odom2d_delta_cov << std::endl;
-//            std::cout << "REF delta cov: \n" << integrated_delta_cov << std::endl;
-//            std::cout << "REF cov: \n" << integrated_cov << std::endl;
-//        }
-
+        // Store integrals
         integrated_pose_vector.push_back(integrated_pose);
         integrated_cov_vector.push_back(integrated_cov);
 
         t += dt;
     }
 
-
+    std::cout << "=============================" << std::endl;
     showBuffer(processor_odom2d->getBuffer(), "Original buffer:", t0);
 
     ////////////////////////////////////////////////////////////////
@@ -284,7 +276,7 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     int n_split = 5;
     TimeStamp t_split (t0 + n_split*dt);
 
-    std::cout << "### Split after last KF; time: " << t_split - t0 << std::endl;
+    std::cout << "-----------------------------\nSplit after last KF; time: " << t_split - t0 << std::endl;
 
     Vector3s x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_split_n = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
@@ -301,14 +293,14 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     ceres_manager.solve();
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
-    ASSERT_EIGEN_APPROX(problem->getLastKeyFramePtr()->getState(), integrated_pose_vector[n_split - 1]);
+    ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState(), integrated_pose_vector[n_split - 1]);
     ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance()     , integrated_cov_vector [n_split - 1]);
 
     ////////////////////////////////////////////////////////////////
     // Split between keyframes
     int m_split = 3; // now we have KF at n=0 and n=5
     t_split = t0 + m_split*dt;
-    std::cout << "### Split between KFs; time: " << t_split - t0 << std::endl;
+    std::cout << "-----------------------------\nSplit between KFs; time: " << t_split - t0 << std::endl;
 
 
     x_split = processor_odom2d->getState(t_split);
@@ -320,15 +312,30 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     MotionBuffer key_buffer_m = key_capture_m->getBuffer();
 
     showBuffer(key_buffer_m,                  "New keyframe's capture buffer: ", t0);
+    std::cout << "delta:\n" << key_buffer_m.get().back().delta_integr_.transpose() << std::endl;
     std::cout << "cov:\n" << processor_odom2d->integrateBufferCovariance(key_buffer_m) << std::endl;
     showBuffer(key_capture_n->getBuffer(),    "Last KF's buffer             : ", t0);
+    std::cout << "delta:\n" << key_capture_n->getBuffer().get().back().delta_integr_.transpose() << std::endl;
     std::cout << "cov:\n" << processor_odom2d->integrateBufferCovariance(key_capture_n->getBuffer()) << std::endl;
     showBuffer(processor_odom2d->getBuffer(), "Current processor buffer     : ", t0);
+    std::cout << "delta:\n" << processor_odom2d->getBuffer().get().back().delta_integr_.transpose() << std::endl;
     std::cout << "cov:\n" << processor_odom2d->integrateBufferCovariance(processor_odom2d->getBuffer()) << std::endl;
 
-    ceres_manager.solve();
+    ceres::Solver::Summary summary = ceres_manager.solve();
+    std::cout << summary.BriefReport() << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
-    problem->print();
+
+    for (FrameBasePtr frm : problem->getTrajectoryPtr()->getFrameList())
+    {
+        if (frm->isKey())
+        {
+            std::cout << "===== Key Frame " << frm->id() << " ======" << std::endl;
+            std::cout << "  feature measure: \n"    << frm->getCaptureList().front()->getFeatureList().front()->getMeasurement().transpose() << std::endl;
+            std::cout << "  feature covariance: \n" << frm->getCaptureList().front()->getFeatureList().front()->getMeasurementCovariance() << std::endl;
+            std::cout << "  state: \n"              << frm->getState().transpose() << std::endl;
+            std::cout << "  covariance: \n"         << problem->getFrameCovariance(frm) << std::endl;
+        }
+    }
 
     //    FrameBasePtr keyframe_last = problem->getLastKeyFramePtr();
     //    FrameBasePtr keyframe_previous = keyframe_last->getPreviousFrame();
@@ -336,12 +343,14 @@ TEST(ProcessorMotion2D, SplitAndSolve)
     //    std::cout << "Split KF -> P: " << keyframe_previous.get() << " - V: " << keyframe_split_m.get() << std::endl;
 
     // check the split KF
-    EXPECT_EIGEN_APPROX(keyframe_split_m->getState(), integrated_pose_vector[m_split - 1]);
-    EXPECT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_m) , integrated_cov_vector [m_split - 1]);
+    ASSERT_POSE2D_APPROX(keyframe_split_m->getState()                  , integrated_pose_vector[m_split - 1]);
+    ASSERT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_m) , integrated_cov_vector [m_split - 1]);
 
     // check other KF in the future of the split KF
-    EXPECT_EIGEN_APPROX(problem->getLastKeyFramePtr()->getState(), integrated_pose_vector[n_split - 1]);
-    EXPECT_EIGEN_APPROX(problem->getLastKeyFrameCovariance()     , integrated_cov_vector [n_split - 1]);
+    ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState()     , integrated_pose_vector[n_split - 1]);
+    EXPECT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_n) , integrated_cov_vector [n_split - 1]);
+
+    problem->print(4,1,1,1);
 
 }
 
