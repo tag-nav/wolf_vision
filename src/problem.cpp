@@ -841,7 +841,10 @@ bool Problem::check(int verbose_level)
         {
             if (verbose_level > 0)
             {
-                std::cout << "    C" << C->id() << " @" << C.get() << " -> S" << C->getSensorPtr()->id() << std::endl;
+                std::cout << "    C" << C->id() << " @" << C.get() << " -> S";
+                if (C->getSensorPtr()) std::cout << C->getSensorPtr()->id();
+                else std::cout << "-";
+                std::cout << std::endl;
                 std::cout << "      -> P  @ " << C->getProblem().get() << std::endl;
                 std::cout << "      -> F" << C->getFramePtr()->id() << " @ " << C->getFramePtr().get() << std::endl;
             }
