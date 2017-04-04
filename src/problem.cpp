@@ -615,6 +615,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
     cout << "Hardware" << ((depth < 1) ? ("   -- " + std::to_string(getHardwarePtr()->getSensorList().size()) + "S") : "")  << endl;
     if (depth >= 1)
     {
+        // Sensors
         for (auto S : getHardwarePtr()->getSensorList())
         {
             cout << "  S" << S->id();
@@ -631,6 +632,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             }
             if (depth >= 2)
             {
+                // Processors
                 for (auto p : S->getProcessorList())
                 {
                     if (p->isMotion())
@@ -674,6 +676,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
     cout << "Trajectory" << ((depth < 1) ? (" -- " + std::to_string(getTrajectoryPtr()->getFrameList().size()) + "F") : "")  << endl;
     if (depth >= 1)
     {
+        // Frames
         for (auto F : getTrajectoryPtr()->getFrameList())
         {
             cout << (F->isKey() ? "  KF" : "  F") << F->id() << ((depth < 2) ? " -- " + std::to_string(F->getCaptureList().size()) + "C  " : "");
@@ -701,6 +704,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             }
             if (depth >= 2)
             {
+                // Captures
                 for (auto C : F->getCaptureList())
                 {
                     cout << "    C" << C->id();
@@ -709,6 +713,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     cout << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "") << endl;
                     if (depth >= 3)
                     {
+                        // Features
                         for (auto f : C->getFeatureList())
                         {
                             cout << "      f" << f->id() << ((depth < 4) ? " -- " + std::to_string(f->getConstraintList().size()) + "c  " : "");
@@ -724,10 +729,11 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                                         << ")" << endl;
                             if (depth >= 4)
                             {
+                                // Constraints
                                 for (auto c : f->getConstraintList())
                                 {
                                     cout << "        c" << c->id() << " -->";
-                                    if (c->getFrameOtherPtr() != nullptr && c->getFeatureOtherPtr() != nullptr && c->getLandmarkOtherPtr() != nullptr)
+                                    if (c->getFrameOtherPtr() == nullptr && c->getFeatureOtherPtr() == nullptr && c->getLandmarkOtherPtr() == nullptr)
                                         cout << " A";
                                     if (c->getFrameOtherPtr() != nullptr)
                                         cout << " F" << c->getFrameOtherPtr()->id();
@@ -747,6 +753,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
     cout << "Map" << ((depth < 1) ? ("        -- " + std::to_string(getMapPtr()->getLandmarkList().size()) + "L") : "") << endl;
     if (depth >= 1)
     {
+        // Landmarks
         for (auto L : getMapPtr()->getLandmarkList())
         {
             cout << "  L" << L->id();
