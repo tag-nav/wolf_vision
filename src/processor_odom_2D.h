@@ -225,8 +225,8 @@ inline bool ProcessorOdom2D::voteForKeyFrame()
     //std::cout << "ProcessorOdom2D::voteForKeyFrame: traveled distance " << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
     if (getBuffer().get().back().delta_integr_.head<2>().norm() > dist_traveled_th_)
     {
-        std::cout << "ProcessorOdom2D:: " << id() << " -  VOTE FOR KEY FRAME traveled distance "
-                << getBuffer().get().back().delta_integr_.head<2>().norm() << std::endl;
+//        std::cout << "ProcessorOdom2D:: " << id() << " -  VOTE FOR KEY FRAME traveled distance "
+//                << getBuffer().get().back().delta_integr_.head<2>().norm() << std::endl;
         return true;
     }
 
@@ -234,17 +234,17 @@ inline bool ProcessorOdom2D::voteForKeyFrame()
     delta_integrated_cov_ = getBuffer().get().back().jacobian_delta_integr_ * delta_integrated_cov_ * getBuffer().get().back().jacobian_delta_integr_.transpose() + getBuffer().get().back().jacobian_delta_ * getBuffer().get().back().delta_cov_ * getBuffer().get().back().jacobian_delta_.transpose();
     if (delta_integrated_cov_.determinant() > cov_det_th_)
     {
-        std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME covariance det "
-                << delta_integrated_cov_.determinant() << std::endl;
+//        std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME covariance det "
+//                << delta_integrated_cov_.determinant() << std::endl;
         return true;
     }
 
     // Time criterion
     if (getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() > elapsed_time_th_)
     {
-        std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME elapsed time "
-                << getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get()
-                << std::endl;
+//        std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME elapsed time "
+//                << getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get()
+//                << std::endl;
         return true;
     }
     return false;
