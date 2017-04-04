@@ -36,7 +36,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
     if (status_ == IDLE)
     {
-        std::cout << "PM: IDLE" << std::endl;
+//        std::cout << "PM: IDLE" << std::endl;
         TimeStamp t0 = _incoming_ptr->getTimeStamp();
 
         if (origin_ptr_ == nullptr)
@@ -57,7 +57,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             }
         }
         status_ = RUNNING;
-        std::cout << "PM: RUNNING" << std::endl;
+//        std::cout << "PM: RUNNING" << std::endl;
     }
 
 
