@@ -210,7 +210,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _key_frame, const Scalar& _t
 {
     std::cout << "PM: KF" << _key_frame->id() << " callback received at ts= " << _key_frame->getTimeStamp().get() << std::endl;
     std::cout << "    while last ts= " << last_ptr_->getTimeStamp().get() << std::endl;
-//    std::cout << "    while last's frame ts= " << last_ptr_->getFramePtr()->getTimeStamp().get() << std::endl;
+    std::cout << "    while last's frame ts= " << last_ptr_->getFramePtr()->getTimeStamp().get() << std::endl;
 
     assert(_key_frame->getTrajectoryPtr() != nullptr
             && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");
@@ -222,6 +222,8 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _key_frame, const Scalar& _t
     CaptureMotionPtr new_capture = findCaptureContainingTimeStamp(key_ts);
     assert(new_capture != nullptr
             && "ProcessorMotion::keyFrameCallback: no motion capture containing the required TimeStamp found");
+
+    // Find the frame acting as the capture's origin
     FrameBasePtr key_frame_origin = new_capture->getOriginFramePtr();
 
     // create motion capture
