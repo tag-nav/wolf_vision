@@ -76,6 +76,7 @@ MatrixXs plus_jac_x(const VectorXs& _pose, const Vector2s& _data)
 
 void show(const ProblemPtr& problem)
 {
+    std::cout << std::setprecision(4);
     for (FrameBasePtr frm : problem->getTrajectoryPtr()->getFrameList())
     {
         if (frm->isKey())
@@ -94,7 +95,7 @@ void show(const ProblemPtr& problem)
 
 TEST(Odom2D, VoteForKfAndSolve)
 {
-    std::cout << std::setprecision(3);
+    std::cout << std::setprecision(4);
     // time
     TimeStamp t0(0.0), t = t0;
     Scalar dt = .01;
@@ -200,7 +201,7 @@ TEST(Odom2D, VoteForKfAndSolve)
 
 TEST(Odom2D, SplitAndSolve)
 {
-    std::cout << std::setprecision(3);
+    std::cout << std::setprecision(4);
     // time
     TimeStamp t0(0.0), t = t0;
     Scalar dt = .01;
@@ -354,7 +355,7 @@ TEST(Odom2D, dummy)
     //  a
     //  |
     // GND
-    std::cout << std::setprecision(3);
+    std::cout << std::setprecision(4);
 
     TimeStamp t0(0.0),  t = t0;
     Scalar              dt = .01;
