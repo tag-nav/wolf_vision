@@ -104,4 +104,81 @@ void MotionBuffer::split(const TimeStamp& _ts, MotionBuffer& _buffer_part_before
     }
 }
 
+MatrixXs MotionBuffer::integrateCovariance() const
+{
+    Eigen::MatrixXs cov(cov_size_, cov_size_);
+    cov.setZero();
+    for (Motion mot : container_)
+    {
+        cov = mot.jacobian_delta_integr_ * cov * mot.jacobian_delta_integr_.transpose()
+                + mot.jacobian_delta_ * mot.delta_cov_ * mot.jacobian_delta_.transpose();
+    }
+    return cov;
 }
+
+MatrixXs MotionBuffer::integrateCovariance(const TimeStamp& _ts) const
+{
+    Eigen::MatrixXs cov(cov_size_, cov_size_);
+    cov.setZero();
+    for (Motion mot : container_)
+    {
+        if (mot.ts_ > _ts)
+            break;
+
+        cov = mot.jacobian_delta_integr_ * cov * mot.jacobian_delta_integr_.transpose()
+                + mot.jacobian_delta_ * mot.delta_cov_ * mot.jacobian_delta_.transpose();
+    }
+    return cov;
+}
+
+MatrixXs MotionBuffer::integrateCovariance(const TimeStamp& _ts_1, const TimeStamp _ts_2) const
+{
+    Eigen::MatrixXs cov(cov_size_, cov_size_);
+    cov.setZero();
+    for (Motion mot : container_)
+    {
+        if (mot.ts_ > _ts_2)
+            break;
+
+        if (mot.ts_ >= _ts_1)
+            cov = mot.jacobian_delta_integr_ * cov * mot.jacobian_delta_integr_.transpose()
+                + mot.jacobian_delta_ * mot.delta_cov_ * mot.jacobian_delta_.transpose();
+    }
+    return cov;
+}
+
+void MotionBuffer::print(bool show_delta, bool show_delta_cov, bool show_delta_int, bool show_delta_int_cov)
+{
+    using std::cout;
+    using std::endl;
+
+    if (!show_delta && !show_delta_cov && !show_delta_int && !show_delta_int_cov)
+    {
+        cout << "Buffer state [" << container_.size() << "] : <";
+        for (Motion mot : container_)
+            cout << " " << mot.ts_;
+        cout << " >" << endl;
+    }
+    else
+    {
+        print(0,0,0,0);
+        for (Motion mot : container_)
+        {
+            cout << "-- Motion (" << mot.ts_ << ")" << endl;
+//            if (show_ts)
+//                cout << "   ts: " << mot.ts_ << endl;
+            if (show_delta)
+                cout << "   delta: " << mot.delta_.transpose() << endl;
+            if (show_delta_cov)
+                cout << "   delta cov: \n" << mot.delta_cov_ << endl;
+            if (show_delta_int)
+                cout << "   delta integrated: " << mot.delta_integr_.transpose() << endl;
+            if (show_delta_int_cov)
+                cout << "   delta integrated cov: \n" << integrateCovariance(mot.ts_) << endl;
+        }
+    }
+}
+
+
+}
+

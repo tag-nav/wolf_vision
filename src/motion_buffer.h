@@ -73,6 +73,10 @@ class MotionBuffer{
         const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const;
         void getDelta(const TimeStamp& _ts, Eigen::VectorXs& _delta_integr) const;
         void split(const TimeStamp& _ts, MotionBuffer& _oldest_buffer);
+        MatrixXs integrateCovariance() const; // Integrate all buffer
+        MatrixXs integrateCovariance(const TimeStamp& _ts) const; // Integrate up to time stamp (included)
+        MatrixXs integrateCovariance(const TimeStamp& _ts_1, const TimeStamp _ts_2) const; // integrate between time stamps (both included)
+        void print(bool show_delta = 0, bool show_delta_cov = 0, bool show_delta_int = 0, bool show_delta_int_cov = 0);
 
     private:
         std::list<Motion> container_;

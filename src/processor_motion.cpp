@@ -348,20 +348,7 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
 
 Eigen::MatrixXs ProcessorMotion::integrateBufferCovariance(const MotionBuffer& _motion_buffer)
 {
-
-    Eigen::MatrixXs cov(delta_cov_size_,delta_cov_size_);
-    cov.setZero();
-
-    for (Motion mot : _motion_buffer.get())
-    {
-        cov = mot.jacobian_delta_integr_ * cov * mot.jacobian_delta_integr_.transpose() + mot.jacobian_delta_ * mot.delta_cov_ * mot.jacobian_delta_.transpose();
-    }
-
-    // TODO Remove this by ensuring that mot.delta_cov_ is never zero
-//    if (cov.determinant() <= Constants::EPS_SMALL)
-//        cov = Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-4;
-
-    return cov;
+    return _motion_buffer.integrateCovariance();
 }
 
 
