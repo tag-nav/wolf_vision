@@ -17,30 +17,29 @@ using namespace Eigen;
 using namespace std;
 using namespace wolf;
 
-Motion newMotion(TimeStamp t, Scalar d, Scalar D, Scalar c, Scalar C)
+Motion newMotion(TimeStamp t, Scalar d, Scalar D, Scalar C, Scalar J_d, Scalar J_D)
 {
-    Motion m(t, 1);
+    Motion m(t, 1, 1);
     m.delta_(0) = d;
     m.delta_integr_(0) = D;
-    m.delta_cov_(0) = c;
-//    m.delta_integr_cov_(0) = C;
+    m.delta_cov_(0) = C;
+    m.jacobian_delta_(0,0) = J_d;
+    m.jacobian_delta_integr_(0,0) = J_D;
     return m;
 }
 
 namespace{
 TimeStamp t0(0), t1(1), t2(2), t3(3), t4(4);
-Motion m0 = newMotion(t0,0,0,0,0);
-Motion m1 = newMotion(t1,1,1,1,1);
-Motion m2 = newMotion(t2,2,3,1,2);
-Motion m3 = newMotion(t3,3,6,1,3);
-Motion m4 = newMotion(t4,4,10,1,4);
-
-
+Motion m0 = newMotion(t0, 0, 0 , 0, .1, 1); // ts, delta, Delta, delta_cov, J_delta, J_Delta
+Motion m1 = newMotion(t1, 1, 1 , 1, .1, 1);
+Motion m2 = newMotion(t2, 2, 3 , 1, .1, 1);
+Motion m3 = newMotion(t3, 3, 6 , 1, .1, 1);
+Motion m4 = newMotion(t4, 4, 10, 1, .1, 1);
 }
 
 TEST(MotionBuffer, QueryTimeStamps)
 {
-    MotionBuffer MB;
+    MotionBuffer MB(1,1);
 
     MB.get().push_back(m0);
     MB.get().push_back(m1);
@@ -64,7 +63,7 @@ TEST(MotionBuffer, QueryTimeStamps)
 
 TEST(MotionBuffer, getMotion)
 {
-    MotionBuffer MB;
+    MotionBuffer MB(1,1);
 
     MB.get().push_back(m0);
     ASSERT_EQ(MB.getMotion(t0).delta_, m0.delta_);
@@ -78,7 +77,7 @@ TEST(MotionBuffer, getMotion)
 
 TEST(MotionBuffer, getDelta)
 {
-    MotionBuffer MB;
+    MotionBuffer MB(1,1);
 
     MB.get().push_back(m0);
 
@@ -92,7 +91,7 @@ TEST(MotionBuffer, getDelta)
 
 TEST(MotionBuffer, Split)
 {
-    MotionBuffer MB;
+    MotionBuffer MB(1,1);
 
     MB.get().push_back(m0);
     MB.get().push_back(m1);
@@ -100,7 +99,7 @@ TEST(MotionBuffer, Split)
     MB.get().push_back(m3);
     MB.get().push_back(m4); // put 5 motions
 
-    MotionBuffer MB_old;
+    MotionBuffer MB_old(1,1);
 
     TimeStamp t;
 

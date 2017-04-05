@@ -147,7 +147,7 @@ TEST(Odom2D, VoteForKfAndSolve)
 
     t += dt;
     // Capture to use as container for all incoming data
-    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, nullptr);
+    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 7, 6, nullptr);
 
     for (int i=0; i<N; i++)
     {
@@ -249,7 +249,7 @@ TEST(Odom2D, SplitAndSolve)
 
     t += dt;
     // Capture to use as container for all incoming data
-    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, nullptr);
+    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 7, 6, nullptr);
 
     for (int i=0; i<N; i++)
     {

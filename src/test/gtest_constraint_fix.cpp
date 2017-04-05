@@ -35,7 +35,7 @@ CeresManager ceres_mgr(problem);
 FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeStamp(0));
 
 // Capture, feature and constraint from frm1 to frm0
-CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>(0, nullptr, pose6));
+CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>(0, nullptr, pose6, 7, 6));
 FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("ODOM 3D", pose6, data_cov));
 ConstraintFixPtr ctr0 = std::static_pointer_cast<ConstraintFix>(fea0->addConstraint(std::make_shared<ConstraintFix>(fea0)));
 ConstraintBasePtr dummy = frm0->addConstrainedBy(ctr0);

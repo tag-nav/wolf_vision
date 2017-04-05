@@ -9,6 +9,8 @@ Motion::Motion():
 }
 
 Motion::Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, const MatrixXs& _jac_delta, const MatrixXs& _jac_delta_int, const MatrixXs& _delta_cov) :
+        delta_size_(_delta.size()),
+        cov_size_(_delta_cov.size()),
         ts_(_ts),
         delta_(_delta),
         delta_integr_(_delta_int),
@@ -41,6 +43,14 @@ void Motion::resize(Size ds, Size dcs)
     jacobian_delta_integr_.resize(dcs, dcs);
     delta_cov_.resize(dcs, dcs);
 //    delta_integr_cov_.resize(dcs, dcs);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////
+
+MotionBuffer::MotionBuffer(Size _delta_size, Size _cov_size) :
+        delta_size_(_delta_size), cov_size_(_cov_size)
+{
 }
 
 const Motion& MotionBuffer::getMotion(const TimeStamp& _ts) const

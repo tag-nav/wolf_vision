@@ -21,6 +21,7 @@ using namespace Eigen;
 struct Motion
 {
     public:
+        Size delta_size_, cov_size_;
         TimeStamp ts_;                          ///< Time stamp
         Eigen::VectorXs delta_;                 ///< instantaneous motion delta
         Eigen::VectorXs delta_integr_;          ///< the integrated motion or delta-integral
@@ -31,11 +32,12 @@ struct Motion
     public:
         Motion();
         Motion(const TimeStamp& _ts, Size _delta_size = 0, Size _cov_size = 0);
-        Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, Size _cov_size);
+//        Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, Size _cov_size);
         Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, const MatrixXs& _jac_delta, const MatrixXs& _jac_delta_int, const MatrixXs& _delta_cov);
         ~Motion();
         void resize(Size ds, Size dcs);
         void resize(Size ds);
+
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.
 
 
@@ -62,6 +64,8 @@ struct Motion
  */
 class MotionBuffer{
     public:
+        Size delta_size_, cov_size_;
+        MotionBuffer(Size _delta_size, Size _cov_size);
         std::list<Motion>& get();
         const std::list<Motion>& get() const;
         const Motion& getMotion(const TimeStamp& _ts) const;
