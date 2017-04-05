@@ -30,14 +30,6 @@ using namespace wolf;
 using namespace Eigen;
 
 
-void showBuffer(const MotionBuffer& _buffer, std::string _label = "", const TimeStamp _t0 = TimeStamp(0.0))
-{
-    std::cout << _label << " <";
-    for (const auto &s : _buffer.get())
-        std::cout << s.ts_ - _t0 << ' ';
-    std::cout << ">" << std::endl;
-}
-
 VectorXs plus(const VectorXs& _pose, const Vector2s& _data)
 {
     VectorXs _pose_plus_data(3);
@@ -279,7 +271,8 @@ TEST(Odom2D, SplitAndSolve)
     }
 
     std::cout << "=============================" << std::endl;
-    showBuffer(processor_odom2d->getBuffer(), "Original buffer:", t0);
+    std::cout << "Original buffer:" << std::endl;
+    processor_odom2d->getBuffer().print(0,0,0,1);
 
     ////////////////////////////////////////////////////////////////
     // Split after the last keyframe,
@@ -297,8 +290,10 @@ TEST(Odom2D, SplitAndSolve)
 
     MotionBuffer key_buffer_n = key_capture_n->getBuffer();
 
-    showBuffer(key_buffer_n,                  "New keyframe's capture buffer: ", t0);
-    showBuffer(processor_odom2d->getBuffer(), "Current processor buffer     : ", t0);
+    std::cout << "New keyframe's capture buffer: " << std::endl;
+    key_buffer_n.print();
+    std::cout << "Current processor buffer: " << std::endl;
+    processor_odom2d->getBuffer().print();
 
     ceres_manager.solve();
     ceres_manager.computeCovariances(ALL_MARGINALS);
@@ -321,6 +316,14 @@ TEST(Odom2D, SplitAndSolve)
     CaptureMotionPtr key_capture_m = std::static_pointer_cast<CaptureMotion>(keyframe_split_m->getCaptureList().front());
     MotionBuffer key_buffer_m = key_capture_m->getBuffer();
 
+    // Show buffers
+    std::cout << "New keyframe's capture buffer: " << std::endl;
+    key_buffer_m.print(0,0,0,1);
+    std::cout << "Existing keyframe's capture buffer: " << std::endl;
+    key_capture_n->getBuffer().print(0,0,0,1);
+    std::cout << "Current processor buffer: " << std::endl;
+    processor_odom2d->getBuffer().print();
+
     // Perturb states
     keyframe_split_n->setState(Vector3s(3,2,1));
     keyframe_split_m->setState(Vector3s(1,2,3));
@@ -341,7 +344,7 @@ TEST(Odom2D, SplitAndSolve)
 
 //    problem->print(4,1,1,1);
 //    problem->check(1);
-    show(problem);
+//    show(problem);
 
 }
 
@@ -392,7 +395,7 @@ TEST(Odom2D, dummy)
 
 //    problem->print(4,1,1,1);
 //    problem->check(1);
-    show(Pr);
+//    show(Pr);
 
 }
 

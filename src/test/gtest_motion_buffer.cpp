@@ -11,6 +11,8 @@
 
 #include "../motion_buffer.h"
 
+#include "wolf.h"
+
 #include <iostream>
 
 using namespace Eigen;
@@ -101,9 +103,7 @@ TEST(MotionBuffer, Split)
 
     MotionBuffer MB_old(1,1);
 
-    TimeStamp t;
-
-    t = 1.5; // between m1 and m2
+    TimeStamp t = 1.5; // between m1 and m2
     MB.split(t, MB_old);
 
     ASSERT_EQ(MB_old.get().size(),      2);
@@ -113,6 +113,69 @@ TEST(MotionBuffer, Split)
     ASSERT_EQ(MB_old.getMotion(t2).ts_, t1); // last  ts is t1
     ASSERT_EQ(MB    .getMotion(t1).ts_, t2); // first ts is t2
     ASSERT_EQ(MB    .getMotion(t2).ts_, t2);
+}
+
+TEST(MotionBuffer, integrateCovariance)
+{
+    MotionBuffer MB(1,1);
+
+    MB.get().push_back(m0);
+    MB.get().push_back(m1);
+    MB.get().push_back(m2);
+    MB.get().push_back(m3);
+    MB.get().push_back(m4); // put 5 motions
+
+    Eigen::MatrixXs cov = MB.integrateCovariance();
+    ASSERT_NEAR(cov(0), 0.04, 1e-8);
+
+}
+
+TEST(MotionBuffer, integrateCovariance_ts)
+{
+    MotionBuffer MB(1,1);
+
+    MB.get().push_back(m0);
+    MB.get().push_back(m1);
+    MB.get().push_back(m2);
+    MB.get().push_back(m3);
+    MB.get().push_back(m4); // put 5 motions
+
+    Eigen::MatrixXs cov = MB.integrateCovariance(t2);
+    ASSERT_NEAR(cov(0), 0.02, 1e-8);
+}
+
+TEST(MotionBuffer, integrateCovariance_ti_tf)
+{
+    MotionBuffer MB(1,1);
+
+    MB.get().push_back(m0);
+    MB.get().push_back(m1);
+    MB.get().push_back(m2);
+    MB.get().push_back(m3);
+    MB.get().push_back(m4); // put 5 motions
+
+    Eigen::MatrixXs cov = MB.integrateCovariance(t1, t3);
+    ASSERT_NEAR(cov(0), 0.03, 1e-8);
+
+    cov = MB.integrateCovariance(t0, t3); // first delta_cov is zero so it does not integate
+    ASSERT_NEAR(cov(0), 0.03, 1e-8);
+}
+
+TEST(MotionBuffer, print)
+{
+    MotionBuffer MB(1,1);
+
+    MB.get().push_back(m0);
+    MB.get().push_back(m1);
+    MB.get().push_back(m2);
+
+    MB.print();
+    MB.print(0,0,0,0);
+    MB.print(1,0,0,0);
+    MB.print(0,1,0,0);
+    MB.print(0,0,1,0);
+    MB.print(0,0,0,1);
+    MB.print(1,1,1,1);
 }
 
 int main(int argc, char **argv)
