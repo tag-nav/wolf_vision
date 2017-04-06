@@ -149,6 +149,7 @@ TEST(Odom2D, VoteForKfAndSolve)
 
         // Processor
         sensor_odom2d->process(capture);
+        ASSERT_TRUE(problem->check(0));
         Matrix3s odom2d_delta_cov = processor_odom2d->integrateBufferCovariance(processor_odom2d->getBuffer());
         //        std::cout << "State(" << (t - t0) << ") : " << processor_odom2d->getCurrentState().transpose() << std::endl;
         //        std::cout << "PRC  cov: \n" << odom2d_delta_cov << std::endl;
@@ -167,8 +168,8 @@ TEST(Odom2D, VoteForKfAndSolve)
             integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
         }
 
-        ASSERT_POSE2D_APPROX(processor_odom2d->getMotion().delta_integr_, integrated_delta);
-        ASSERT_EIGEN_APPROX(odom2d_delta_cov, integrated_delta_cov);
+        ASSERT_POSE2D_APPROX(processor_odom2d->getMotion().delta_integr_, integrated_delta, 1e-6);
+        ASSERT_EIGEN_APPROX(odom2d_delta_cov, integrated_delta_cov, 1e-6);
 
         // Integrate pose
         Ju = plus_jac_u(integrated_pose, data);
@@ -176,7 +177,7 @@ TEST(Odom2D, VoteForKfAndSolve)
         integrated_pose = plus(integrated_pose, data);
         integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
 
-        ASSERT_POSE2D_APPROX(processor_odom2d->getCurrentState(), integrated_pose)
+        ASSERT_POSE2D_APPROX(processor_odom2d->getCurrentState(), integrated_pose, 1e-6);
 
         integrated_pose_vector.push_back(integrated_pose);
         integrated_cov_vector.push_back(integrated_cov);
@@ -188,7 +189,7 @@ TEST(Odom2D, VoteForKfAndSolve)
     ceres::Solver::Summary summary = ceres_manager.solve();
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
-    ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance() , integrated_cov_vector[5]);
+    ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance() , integrated_cov_vector[5], 1e-6);
 }
 
 TEST(Odom2D, SplitAndSolve)
@@ -252,6 +253,7 @@ TEST(Odom2D, SplitAndSolve)
 
         // Processor
         sensor_odom2d->process(capture);
+        ASSERT_TRUE(problem->check(0));
 
         // Integrate Delta
         Ju = plus_jac_u(integrated_delta, data);
@@ -286,7 +288,9 @@ TEST(Odom2D, SplitAndSolve)
     Vector3s x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_split_n = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
 
+    ASSERT_TRUE(problem->check(0));
     processor_odom2d->keyFrameCallback(keyframe_split_n, 0);
+    ASSERT_TRUE(problem->check(0));
 
     CaptureMotionPtr key_capture_n = std::static_pointer_cast<CaptureMotion>(keyframe_split_n->getCaptureList().front());
 
@@ -301,8 +305,8 @@ TEST(Odom2D, SplitAndSolve)
     ceres_manager.solve();
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
-    ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState(), integrated_pose_vector[n_split - 1]);
-    ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance()     , integrated_cov_vector [n_split - 1]);
+    ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState(), integrated_pose_vector[n_split - 1], 1e-6);
+    ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance()     , integrated_cov_vector [n_split - 1], 1e-6);
 
     ////////////////////////////////////////////////////////////////
     // Split between keyframes
@@ -314,7 +318,9 @@ TEST(Odom2D, SplitAndSolve)
     x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_split_m = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
 
+    ASSERT_TRUE(problem->check(0));
     processor_odom2d->keyFrameCallback(keyframe_split_m, 0);
+    ASSERT_TRUE(problem->check(0));
 
     CaptureMotionPtr key_capture_m = std::static_pointer_cast<CaptureMotion>(keyframe_split_m->getCaptureList().front());
     MotionBuffer key_buffer_m = key_capture_m->getBuffer();
@@ -338,16 +344,16 @@ TEST(Odom2D, SplitAndSolve)
 
 
     // check the split KF
-    ASSERT_POSE2D_APPROX(keyframe_split_m->getState()                 , integrated_pose_vector[m_split - 1]);
-    ASSERT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_m) , integrated_cov_vector [m_split - 1]);
+    ASSERT_POSE2D_APPROX(keyframe_split_m->getState()                 , integrated_pose_vector[m_split - 1], 1e-6);
+    ASSERT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_m) , integrated_cov_vector [m_split - 1], 1e-6);
 
     // check other KF in the future of the split KF
-    ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState()    , integrated_pose_vector[n_split - 1]);
-    EXPECT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_n) , integrated_cov_vector [n_split - 1]);
+    ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState()    , integrated_pose_vector[n_split - 1], 1e-6);
+    EXPECT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_n) , integrated_cov_vector [n_split - 1], 1e-6);
 
 //    problem->print(4,1,1,1);
-    problem->check(0);
-    show(problem);
+//    problem->check(1);
+//    show(problem);
 
 }
 
@@ -396,13 +402,15 @@ TEST(Odom2D, dummy)
     ConstraintBasePtr   c2 = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1));
     F1->addConstrainedBy(c2);
 
+    ASSERT_TRUE(Pr->check(0));
+
     ceres::Solver::Summary summary = ceres_manager.solve();
     std::cout << summary.BriefReport() << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
 //    Pr->print(4,1,1,1);
-    Pr->check(0);
-    show(Pr);
+//    Pr->check(1);
+//    show(Pr);
 
 }
 
