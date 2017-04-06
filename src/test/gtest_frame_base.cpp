@@ -83,8 +83,14 @@ TEST(FrameBase, LinksToTree)
     // c-by link F2 -> c not yet established
     ASSERT_TRUE(F2->getConstrainedByList().empty());
 
-    // establish link F2 -> c
+    // tree is inconsistent since we are missing the constrained_by link
+    ASSERT_FALSE(P->check(0));
+
+    // establish constrained_by link F2 -> c
     F2->addConstrainedBy(c);
+
+    // tree is now consistent
+    ASSERT_TRUE(P->check(0));
 
     // F1 has one capture and no constraints-by
     ASSERT_FALSE(F1->getCaptureList().empty());
