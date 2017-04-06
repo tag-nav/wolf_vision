@@ -205,12 +205,9 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     Eigen::Quaternion<T> dq_predict = q1.conjugate() * q2;
 
     // Correct measured delta: delta_corr = delta + J_bias * (bias - bias_measured)
-    //Eigen::Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>() * (ab1 - acc_bias_preint_.cast<T>()) + dDp_dwb_.cast<T>() * (wb1 - gyro_bias_preint_.cast<T>());
-    //Eigen::Matrix<T,3,1> dv_correct = dv_preint_.cast<T>() + dDv_dab_.cast<T>() * (ab1 - acc_bias_preint_.cast<T>()) + dDv_dwb_.cast<T>() * (wb1 - gyro_bias_preint_.cast<T>());
-    //Eigen::Matrix<T,3,1> do_step    = dDq_dwb_  .cast<T>() * (wb1 - gyro_bias_preint_.cast<T>());
-    Eigen::Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>() * (ab1 - ab2) + dDp_dwb_.cast<T>() * (wb1 - wb2);
-    Eigen::Matrix<T,3,1> dv_correct = dv_preint_.cast<T>() + dDv_dab_.cast<T>() * (ab1 - ab2) + dDv_dwb_.cast<T>() * (wb1 - wb2);
-    Eigen::Matrix<T,3,1> do_step    = dDq_dwb_  .cast<T>() * (wb1 - wb2);
+    Eigen::Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>() * (ab1 - acc_bias_preint_.cast<T>()) + dDp_dwb_.cast<T>() * (wb1 - gyro_bias_preint_.cast<T>());
+    Eigen::Matrix<T,3,1> dv_correct = dv_preint_.cast<T>() + dDv_dab_.cast<T>() * (ab1 - acc_bias_preint_.cast<T>()) + dDv_dwb_.cast<T>() * (wb1 - gyro_bias_preint_.cast<T>());
+    Eigen::Matrix<T,3,1> do_step    = dDq_dwb_  .cast<T>() * (wb1 - gyro_bias_preint_.cast<T>());
     Eigen::Quaternion<T> dq_correct = dq_preint_.cast<T>() * v2q(do_step);
 
     // Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
@@ -251,9 +248,6 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const
     Eigen::Matrix<DataType,3,1> dp_correct = dp_preint_.cast<DataType>() + dDp_dab_.cast<DataType>() * (ab1 - acc_bias_preint_.cast<DataType>()) + dDp_dwb_.cast<DataType>() * (wb1 - gyro_bias_preint_.cast<DataType>());
     Eigen::Matrix<DataType,3,1> dv_correct = dv_preint_.cast<DataType>() + dDv_dab_.cast<DataType>() * (ab1 - acc_bias_preint_.cast<DataType>()) + dDv_dwb_.cast<DataType>() * (wb1 - gyro_bias_preint_.cast<DataType>());
     Eigen::Matrix<DataType,3,1> do_step    = dDq_dwb_  .cast<DataType>() * (wb1 - gyro_bias_preint_.cast<DataType>());
-    //Eigen::Matrix<DataType,3,1> dp_correct = dp_preint_.cast<DataType>() + dDp_dab_.cast<DataType>() * (ab1 - ab2) + dDp_dwb_.cast<DataType>() * (wb1 - wb2);
-    //Eigen::Matrix<DataType,3,1> dv_correct = dv_preint_.cast<DataType>() + dDv_dab_.cast<DataType>() * (ab1 - ab2) + dDv_dwb_.cast<DataType>() * (wb1 - wb2);
-    //Eigen::Matrix<DataType,3,1> do_step    = dDq_dwb_  .cast<DataType>() * (wb1 - wb2);
     Eigen::Quaternion<DataType> dq_correct = dq_preint_.cast<DataType>() * v2q(do_step);
 
     // Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
