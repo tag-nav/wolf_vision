@@ -226,6 +226,8 @@ TEST(Odom2D, SplitAndSolve)
 
     // Origin Key Frame
     FrameBasePtr origin_frame = problem->setPrior(x0, x0_cov, t0);
+    origin_frame->fix();
+    x0_cov.setZero();
 
     // Check covariance values
     Eigen::Vector3s integrated_pose = x0;
@@ -271,8 +273,8 @@ TEST(Odom2D, SplitAndSolve)
     }
 
     std::cout << "=============================" << std::endl;
-    std::cout << "Original buffer:" << std::endl;
-    processor_odom2d->getBuffer().print(0,0,0,1);
+//    std::cout << "Original buffer:" << std::endl;
+//    processor_odom2d->getBuffer().print(0,0,0,1);
 
     ////////////////////////////////////////////////////////////////
     // Split after the last keyframe,
@@ -290,10 +292,11 @@ TEST(Odom2D, SplitAndSolve)
 
     MotionBuffer key_buffer_n = key_capture_n->getBuffer();
 
-    std::cout << "New keyframe's capture buffer: " << std::endl;
-    key_buffer_n.print();
-    std::cout << "Current processor buffer: " << std::endl;
-    processor_odom2d->getBuffer().print();
+    // Show buffers
+//    std::cout << "New keyframe's capture buffer: " << std::endl;
+//    key_buffer_n.print();
+//    std::cout << "Current processor buffer: " << std::endl;
+//    processor_odom2d->getBuffer().print();
 
     ceres_manager.solve();
     ceres_manager.computeCovariances(ALL_MARGINALS);
@@ -317,12 +320,12 @@ TEST(Odom2D, SplitAndSolve)
     MotionBuffer key_buffer_m = key_capture_m->getBuffer();
 
     // Show buffers
-    std::cout << "New keyframe's capture buffer: " << std::endl;
-    key_buffer_m.print(0,0,0,1);
-    std::cout << "Existing keyframe's capture buffer: " << std::endl;
-    key_capture_n->getBuffer().print(0,0,0,1);
-    std::cout << "Current processor buffer: " << std::endl;
-    processor_odom2d->getBuffer().print();
+//    std::cout << "New keyframe's capture buffer: " << std::endl;
+//    key_buffer_m.print(0,0,0,1);
+//    std::cout << "Existing keyframe's capture buffer: " << std::endl;
+//    key_capture_n->getBuffer().print(0,0,0,1);
+//    std::cout << "Current processor buffer: " << std::endl;
+//    processor_odom2d->getBuffer().print();
 
     // Perturb states
     keyframe_split_n->setState(Vector3s(3,2,1));
@@ -343,8 +346,8 @@ TEST(Odom2D, SplitAndSolve)
     EXPECT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_n) , integrated_cov_vector [n_split - 1]);
 
 //    problem->print(4,1,1,1);
-//    problem->check(1);
-//    show(problem);
+    problem->check(0);
+    show(problem);
 
 }
 
@@ -372,10 +375,13 @@ TEST(Odom2D, dummy)
 
     // KF0 and absolute prior
     FrameBasePtr        F0 = Pr->setPrior(x0, x0_cov,t0);
+    F0->fix();
+    x0_cov.setZero();
 
     // KF1 and motion from KF0
     t += dt;
-    FrameBasePtr        F1 = Pr->emplaceFrame(KEY_FRAME, 0*delta, t);
+    t += dt;
+    FrameBasePtr        F1 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
     CaptureBasePtr      C1 = F1->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
     FeatureBasePtr      f1 = C1->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
     ConstraintBasePtr   c1 = f1->addConstraint(std::make_shared<ConstraintOdom2D>(f1, F0));
@@ -383,7 +389,8 @@ TEST(Odom2D, dummy)
 
     // KF2 and motion from KF1
     t += dt;
-    FrameBasePtr        F2 = Pr->emplaceFrame(KEY_FRAME, 0*delta, t);
+    t += dt;
+    FrameBasePtr        F2 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
     CaptureBasePtr      C2 = F2->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
     FeatureBasePtr      f2 = C2->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
     ConstraintBasePtr   c2 = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1));
@@ -393,9 +400,9 @@ TEST(Odom2D, dummy)
     std::cout << summary.BriefReport() << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
-//    problem->print(4,1,1,1);
-//    problem->check(1);
-//    show(Pr);
+//    Pr->print(4,1,1,1);
+    Pr->check(0);
+    show(Pr);
 
 }
 

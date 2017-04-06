@@ -21,7 +21,7 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
                                           _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("FIX");
-            //std::cout << "creating ConstraintFix " << std::endl;
+            std::cout << "created ConstraintFix " << std::endl;
         }
 
         virtual ~ConstraintFix()

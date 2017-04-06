@@ -15,6 +15,8 @@
 #include "processor_factory.h"
 #include "frame_imu.h"
 
+#include <algorithm>
+
 namespace wolf
 {
 
@@ -780,6 +782,9 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
 
 bool Problem::check(int verbose_level)
 {
+    using std::cout;
+    using std::endl;
+
     bool is_consistent = true;
     if (verbose_level) std::cout << std::endl;
     if (verbose_level) std::cout << "Wolf tree integrity ---------------------" << std::endl;
@@ -798,6 +803,8 @@ bool Problem::check(int verbose_level)
             std::cout << "  S" << S->id() << " @ " << S.get() << std::endl;
             std::cout << "    -> P @ " << S->getProblem().get() << std::endl;
             std::cout << "    -> H @ " << S->getHardwarePtr().get() << std::endl;
+            for (auto sb : S->getStateBlockVec())
+                cout <<  "    sb @ " << sb.get() << endl;
         }
         is_consistent = is_consistent && (S->getProblem().get() == P_raw);
         is_consistent = is_consistent && (S->getHardwarePtr() == H);
@@ -826,6 +833,8 @@ bool Problem::check(int verbose_level)
             std::cout << (F->isKey() ? "  KF" : "  F") << F->id() << " @ " << F.get() << std::endl;
             std::cout << "    -> P @ " << F->getProblem().get() << std::endl;
             std::cout << "    -> T @ " << F->getTrajectoryPtr().get() << std::endl;
+            for (auto sb : F->getStateBlockVec())
+                cout <<  "    sb @ " << sb.get() << endl;
         }
         is_consistent = is_consistent && (F->getProblem().get() == P_raw);
         is_consistent = is_consistent && (F->getTrajectoryPtr() == T);
@@ -836,6 +845,13 @@ bool Problem::check(int verbose_level)
                 std::cout << "    <- c" << cby->id() << " -> F" << cby->getFrameOtherPtr()->id() << std::endl;
             }
             is_consistent = is_consistent && (cby->getFrameOtherPtr() == F);
+            for (auto sb : cby->getStatePtrVector())
+            {
+                if (verbose_level > 0)
+                {
+                    cout << "      sb @ " << sb.get() << endl;
+                }
+            }
         }
         for (auto C : F->getCaptureList())
         {
@@ -939,6 +955,44 @@ bool Problem::check(int verbose_level)
                     }
                     is_consistent = is_consistent && (c->getProblem().get() == P_raw);
                     is_consistent = is_consistent && (c->getFeaturePtr() == f);
+
+                    // find state block pointers
+                    SensorBasePtr S = c->getFeaturePtr()->getCapturePtr()->getSensorPtr(); // get own sensor to check sb
+                    for (auto sb : c->getStatePtrVector())
+                    {
+                        bool found = false;
+                        if (verbose_level > 0)
+                            cout <<  "          sb @ " << sb.get();
+                        // find in own Frame
+                        found = found || (std::find(F->getStateBlockVec().begin(), F->getStateBlockVec().end(), sb) != F->getStateBlockVec().end());
+                        // find in own Sensor
+                        if (S)
+                            found = found || (std::find(S->getStateBlockVec().begin(), S->getStateBlockVec().end(), sb) != S->getStateBlockVec().end());
+                        // find in constrained Frame
+                        if (Fo)
+                            found = found || (std::find(Fo->getStateBlockVec().begin(), Fo->getStateBlockVec().end(), sb) != Fo->getStateBlockVec().end());
+                        if (fo)
+                        {
+                            // find in constrained feature's Frame
+                            FrameBasePtr foF = fo->getFramePtr();
+                            found = found || (std::find(foF->getStateBlockVec().begin(), foF->getStateBlockVec().end(), sb) != foF->getStateBlockVec().end());
+                            // find in constrained feature's Sensor
+                            SensorBasePtr foS = fo->getCapturePtr()->getSensorPtr();
+                            found = found || (std::find(foS->getStateBlockVec().begin(), foS->getStateBlockVec().end(), sb) != foS->getStateBlockVec().end());
+                        }
+                        if (Lo)
+                            // find in constrained landmark
+                            found = found || (std::find(Lo->getStateBlockVec().begin(), Lo->getStateBlockVec().end(), sb) != Lo->getStateBlockVec().end());
+                        if (verbose_level > 0)
+                        {
+                            if (found)
+                                cout << " found";
+                            else
+                                cout << " NOT FOUND !";
+                        }
+                        cout << endl;
+                        is_consistent = is_consistent && found;
+                    }
                 }
             }
         }
@@ -950,7 +1004,13 @@ bool Problem::check(int verbose_level)
     for (auto L : M->getLandmarkList())
     {
         if (verbose_level > 0)
+        {
             std::cout << "  L" << L->id() << " @" << L.get() << std::endl;
+            std::cout << "  -> P @ " << L->getProblem().get() << std::endl;
+            std::cout << "  -> M @ " << L->getMapPtr().get() << std::endl;
+            for (auto sb : L->getStateBlockVec())
+                cout <<  "  sb @ " << sb.get() << endl;
+        }
         is_consistent = is_consistent && (L->getProblem().get() == P_raw);
         is_consistent = is_consistent && (L->getMapPtr() == M);
         for (auto cby : L->getConstrainedByList())
@@ -958,6 +1018,14 @@ bool Problem::check(int verbose_level)
             if (verbose_level > 0)
                 std::cout << "      <- c" << cby->id() << " -> L" << cby->getLandmarkOtherPtr()->id() << std::endl;
             is_consistent = is_consistent && (cby->getLandmarkOtherPtr() && L->id() == cby->getLandmarkOtherPtr()->id());
+            for (auto sb : cby->getStatePtrVector())
+            {
+                if (verbose_level > 0)
+                {
+                    cout << "      sb @ " << sb.get() << endl;
+                }
+//                is_consistent = is_consistent && (std::find(L->getStateBlockVec().begin(), L->getStateBlockVec().end(), sb) != L->getStateBlockVec().end());
+            }
         }
     }
 
