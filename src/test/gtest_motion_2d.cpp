@@ -9,8 +9,10 @@
 
 // Classes under test
 #include "../processor_odom_2D.h"
+#include "../constraint_odom_2D.h"
 
 // Wolf includes
+#include "../sensor_odom_2D.h"
 #include "../capture_fix.h"
 #include "../state_block.h"
 #include "../wolf.h"
@@ -336,6 +338,10 @@ TEST(Odom2D, SplitAndSolve)
     // Perturb states
     keyframe_split_n->setState(Vector3s(3,2,1));
     keyframe_split_m->setState(Vector3s(1,2,3));
+
+    // Remove sensor non-keyframe before solving just in case...
+    sensor_odom2d->remove();
+    problem->getLastFramePtr()->remove();
 
     // solve
     ceres::Solver::Summary summary = ceres_manager.solve();
