@@ -156,7 +156,7 @@ class ConstraintIMU_accBiasObservation : public testing::Test
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 0.0049;
+        prc_odom3D_params->max_time_span = 0.9999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
         prc_odom3D_params->angle_turned = 1000000000;
@@ -171,9 +171,9 @@ class ConstraintIMU_accBiasObservation : public testing::Test
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check2.txt");
-        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check2.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check2_Khz.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check.txt");
+        //std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check2_Khz.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -823,7 +823,7 @@ class ConstraintIMU_biasTest_Move_NonNullBias : public testing::Test
 
         char* imu_filepath;
 
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_move_AbxNonNull.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_move_BiasNonNull.txt");
 
         imu_filepath = new char[imu_filepath_string.length() + 1];
 
@@ -1295,7 +1295,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
 
         char* imu_filepath;
 
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_move_AbxNonNull_RotVCst.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_move_BiasNonNull_RotVCst.txt");
 
         imu_filepath = new char[imu_filepath_string.length() + 1];
 
@@ -2098,6 +2098,9 @@ TEST_F(ConstraintIMU_accBiasObservation, acc_gyro_bias_observation)
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getVPtr(), last_KF->getVPtr(), cov3);
     std::cout << "\n last_KF velocity covariance : \n" << cov3 << std::endl;
 }*/
+
+// tests with following conditions :
+//  var(b1,b2),        invar(p1,q1,v1,p2,q2,v2),    factor : imu(p,q,v)
 
 TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
 {
@@ -4858,6 +4861,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -4899,6 +4903,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -4940,6 +4945,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -4981,6 +4987,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -5022,6 +5029,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -5063,6 +5071,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -5104,6 +5113,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
             KF1_frm_state = last_KF->getState();
 
             debug_results << std::setprecision(16) << i * epsilon_bias << "\t" << origin_bias(0) << "\t"  << origin_bias(1) << "\t"  << origin_bias(2) << "\t"  << origin_bias(3) << "\t"  << origin_bias(4) << "\t"  << origin_bias(5) << "\t"  
+            << perturbated_origin_state(10) << "\t" << perturbated_origin_state(11) << "\t" << perturbated_origin_state(12) << "\t" << perturbated_origin_state(13) << "\t" << perturbated_origin_state(14) << "\t" << perturbated_origin_state(15) << "\t" 
             << KF0_frm_state(10) << "\t" << KF0_frm_state(11) << "\t" << KF0_frm_state(12) << "\t" << KF0_frm_state(13) << "\t" << KF0_frm_state(14) << "\t" << KF0_frm_state(15) << "\t" 
                 << KF1_frm_state(10) << "\t" << KF1_frm_state(11) << "\t" << KF1_frm_state(12) << "\t" << KF1_frm_state(13) << "\t" << KF1_frm_state(14) << "\t" << KF1_frm_state(15) << std::endl;
         #else
@@ -5126,8 +5136,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRotCst*";
-  //::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst*";
-  //::testing::GTEST_FLAG(filter) = "ConstraintIMU_accBiasObservation_2KF.acc_gyro_bias_observation";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_accBiasObservation.*";
   return RUN_ALL_TESTS();
 }
