@@ -17,7 +17,7 @@
 
 //#define DEBUG_RESULTS
 //#define DEBUG_RESULTS_BIAS
-//#define GET_RESIDUALS
+#define GET_RESIDUALS
 
 using namespace Eigen;
 using namespace std;
@@ -129,7 +129,7 @@ class ConstraintIMU_accBiasObservation : public testing::Test
         // WOLF PROBLEM
         wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
         Eigen::VectorXs x0(16);
-        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
+        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0;      //0.06; 0.025; -0.0033; 0.045; -0.027; 0.08
         t.set(0);
 
         // CERES WRAPPER
@@ -156,7 +156,7 @@ class ConstraintIMU_accBiasObservation : public testing::Test
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 0.9999;
+        prc_odom3D_params->max_time_span = 5.9999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
         prc_odom3D_params->angle_turned = 1000000000;
@@ -200,6 +200,8 @@ class ConstraintIMU_accBiasObservation : public testing::Test
         imu_data_input >> x_origin[0] >> x_origin[1] >> x_origin[2] >> x_origin[6] >> x_origin[3] >> x_origin[4] >> x_origin[5] >> x_origin[7] >> x_origin[8] >> x_origin[9];
         imu_data_input >> origin_bias[0] >> origin_bias[1] >> origin_bias[2] >> origin_bias[3] >> origin_bias[4] >> origin_bias[5];
 
+        //give the right initial guess
+        x_origin.tail(6) = origin_bias;
         t.set(0);
         origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
         processor_ptr_odom3D->setOrigin(origin_KF);
@@ -1952,6 +1954,58 @@ TEST_F(ConstraintIMU_accBiasObservation, acc_gyro_bias_observation)
     origin_KF->unfix();
     origin_KF->getPPtr()->fix();
     origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+    last_KF->getVPtr()->fix();
+
+    #ifdef GET_RESIDUALS
+        wolf::FrameBaseList frame_list = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
+
+        //trials to print all constraintIMUs' residuals
+        Eigen::Matrix<wolf::Scalar,15,1> IMU_residuals;
+        Eigen::Vector3s p1(Eigen::Vector3s::Zero());
+        Eigen::Vector4s q1_vec(Eigen::Vector4s::Zero());
+        Eigen::Map<Quaternions> q1(q1_vec.data());
+        Eigen::Vector3s v1(Eigen::Vector3s::Zero());
+        Eigen::Vector3s ab1(Eigen::Vector3s::Zero());
+        Eigen::Vector3s wb1(Eigen::Vector3s::Zero());
+        Eigen::Vector3s p2(Eigen::Vector3s::Zero());
+        Eigen::Vector4s q2_vec(Eigen::Vector4s::Zero());
+        Eigen::Map<Quaternions> q2(q2_vec.data());
+        Eigen::Vector3s v2(Eigen::Vector3s::Zero());
+        Eigen::Vector3s ab2(Eigen::Vector3s::Zero());
+        Eigen::Vector3s wb2(Eigen::Vector3s::Zero());
+
+        for(FrameBasePtr frm_ptr : frame_list)
+        {
+            if(frm_ptr->isKey())
+            {
+                ConstraintBaseList ctr_list =  frm_ptr->getConstrainedByList();
+                for(ConstraintBasePtr ctr_ptr : ctr_list)
+                {
+                    if(ctr_ptr->getTypeId() == CTR_IMU)
+                    {
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+
+                        std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
+                        std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
+                    }
+                }
+            }
+        }
+
+    #endif
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.BriefReport() << std::endl;
@@ -1980,57 +2034,38 @@ TEST_F(ConstraintIMU_accBiasObservation, acc_gyro_bias_observation)
     ConstraintBaseList KF2_constraints = KF2->getConstrainedByList();
     Eigen::Matrix<wolf::Scalar,15,1> residuals;
 
-    Eigen::Vector3s p1(origin_KF->getPPtr()->getVector());
-    Eigen::Vector4s q1_vec(origin_KF->getOPtr()->getVector());
-    Eigen::Map<Quaternions> q1(q1_vec.data());
-    Eigen::Vector3s v1(origin_KF->getVPtr()->getVector());
-    Eigen::Vector3s ab1(origin_KF->getAccBiasPtr()->getVector());
-    Eigen::Vector3s wb1(origin_KF->getGyroBiasPtr()->getVector());
-    Eigen::Vector3s p2(KF1->getPPtr()->getVector());
-    Eigen::Vector4s q2_vec(KF1->getOPtr()->getVector());
-    Eigen::Map<Quaternions> q2(q2_vec.data());
-    Eigen::Vector3s v2(KF1->getVPtr()->getVector());
-    Eigen::Vector3s ab2(KF1->getAccBiasPtr()->getVector());
-    Eigen::Vector3s wb2(KF1->getGyroBiasPtr()->getVector());
-    Eigen::Vector3s p3(KF1->getPPtr()->getVector());
-    Eigen::Vector4s q3_vec(KF1->getOPtr()->getVector());
-    Eigen::Map<Quaternions> q3(q3_vec.data());
-    Eigen::Vector3s v3(KF1->getVPtr()->getVector());
-    Eigen::Vector3s ab3(KF1->getAccBiasPtr()->getVector());
-    Eigen::Vector3s wb3(KF1->getGyroBiasPtr()->getVector());
-    Eigen::Vector3s p4(last_KF->getPPtr()->getVector());
-    Eigen::Vector4s q4_vec(last_KF->getOPtr()->getVector());
-    Eigen::Map<Quaternions> q4(q4_vec.data());
-    Eigen::Vector3s v4(last_KF->getVPtr()->getVector());
-    Eigen::Vector3s ab4(last_KF->getAccBiasPtr()->getVector());
-    Eigen::Vector3s wb4(last_KF->getGyroBiasPtr()->getVector());
+    #ifdef GET_RESIDUALS
+        frame_list = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
 
-    for(auto ctr_ptr : origin_KF_constraints)
-    {
-        if (ctr_ptr->getTypeId() == wolf::CTR_IMU)
+        for(FrameBasePtr frm_ptr : frame_list)
+        {
+            if(frm_ptr->isKey())
             {
-                std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, residuals);
-                WOLF_DEBUG("KF0 ConstraintIMU residuals : \n", residuals.transpose()) 
-            }
-    }
+                ConstraintBaseList ctr_list =  frm_ptr->getConstrainedByList();
+                for(ConstraintBasePtr ctr_ptr : ctr_list)
+                {
+                    if(ctr_ptr->getTypeId() == CTR_IMU)
+                    {
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
 
-    for(auto ctr_ptr : KF1_constraints)
-    {
-        if (ctr_ptr->getTypeId() == wolf::CTR_IMU)
-            {
-                std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p2, q2, v2, ab2, wb2, p3, q3, v3, ab3, wb3, residuals);
-                WOLF_DEBUG("KF1 ConstraintIMU residuals : \n", residuals.transpose()) 
-            }
-    }
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
 
-    for(auto ctr_ptr : KF2_constraints)
-    {
-        if (ctr_ptr->getTypeId() == wolf::CTR_IMU)
-            {
-                std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p3, q3, v3, ab3, wb3, p4, q4, v4, ab4, wb4, residuals);
-                WOLF_DEBUG("KF2 ConstraintIMU residuals : \n", residuals.transpose()) 
+                        std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
+                        std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
+                    }
+                }
             }
-    }
+        }
+
+    #endif
 
     Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getVPtr(), last_KF->getVPtr(), cov3);
@@ -5136,7 +5171,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling.*";
   ::testing::GTEST_FLAG(filter) = "ConstraintIMU_accBiasObservation.*";
   return RUN_ALL_TESTS();
 }
