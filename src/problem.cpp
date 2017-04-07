@@ -734,7 +734,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                                 // Constraints
                                 for (auto c : f->getConstraintList())
                                 {
-                                    cout << "        c" << c->id() << " -->";
+                                    cout << "        c" << c->id() << " " << c->getType() << " -->";
                                     if (c->getFrameOtherPtr() == nullptr && c->getFeatureOtherPtr() == nullptr && c->getLandmarkOtherPtr() == nullptr)
                                         cout << " A";
                                     if (c->getFrameOtherPtr() != nullptr)
