@@ -454,7 +454,7 @@ void Problem::removeConstraintPtr(ConstraintBasePtr _constraint_ptr)
     }
     // Remove addition notification
     if (ctr_found_it != constraint_notification_list_.end())
-        constraint_notification_list_.erase(ctr_found_it);
+        constraint_notification_list_.erase(ctr_found_it); // FIXME see if the shared_ptr is still active and messing up
     // Add remove notification
     else
         constraint_notification_list_.push_back(ConstraintNotification({REMOVE, nullptr, _constraint_ptr->id()}));
@@ -503,15 +503,43 @@ bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, E
 
 bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance)
 {
-    return getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getPPtr(), _covariance, 0, 0) &&
-    getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _covariance, 0,_frame_ptr->getPPtr()->getSize()) &&
-    getCovarianceBlock(_frame_ptr->getOPtr(), _frame_ptr->getPPtr(), _covariance, _frame_ptr->getPPtr()->getSize(), 0) &&
-    getCovarianceBlock(_frame_ptr->getOPtr(), _frame_ptr->getOPtr(), _covariance, _frame_ptr->getPPtr()->getSize() ,_frame_ptr->getPPtr()->getSize());
+//    return getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getPPtr(), _covariance, 0,                                0                               ) &&
+//           getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _covariance, 0,                                _frame_ptr->getPPtr()->getSize()) &&
+//           getCovarianceBlock(_frame_ptr->getOPtr(), _frame_ptr->getPPtr(), _covariance, _frame_ptr->getPPtr()->getSize(), 0                               ) &&
+//           getCovarianceBlock(_frame_ptr->getOPtr(), _frame_ptr->getOPtr(), _covariance, _frame_ptr->getPPtr()->getSize(), _frame_ptr->getPPtr()->getSize());
+
+
+    bool success(true);
+    int i = 0, j = 0;
+
+    for (auto sb_i : _frame_ptr->getStateBlockVec())
+    {
+        if (sb_i)
+        {
+            j = 0;
+            for (auto sb_j : _frame_ptr->getStateBlockVec())
+            {
+                if (sb_j)
+                {
+                    success = success && getCovarianceBlock(sb_i, sb_j, _covariance, i, j);
+                    j += sb_j->getSize();
+                }
+            }
+            i += sb_i->getSize();
+        }
+    }
+    return success;
 }
 
 Eigen::MatrixXs Problem::getFrameCovariance(FrameBasePtr _frame_ptr)
 {
-    Eigen::MatrixXs covariance = Eigen::MatrixXs::Zero(_frame_ptr->getPPtr()->getSize()+_frame_ptr->getOPtr()->getSize(), _frame_ptr->getPPtr()->getSize()+_frame_ptr->getOPtr()->getSize());
+    Size sz = 0;
+    for (auto sb : _frame_ptr->getStateBlockVec())
+        if (sb)
+            sz += sb->getSize();
+    Eigen::MatrixXs covariance(sz, sz);
+
+//    Eigen::MatrixXs covariance = Eigen::MatrixXs::Zero(_frame_ptr->getPPtr()->getSize()+_frame_ptr->getOPtr()->getSize(), _frame_ptr->getPPtr()->getSize()+_frame_ptr->getOPtr()->getSize());
     getFrameCovariance(_frame_ptr, covariance);
     return covariance;
 }
