@@ -70,19 +70,32 @@ MatrixXs plus_jac_x(const VectorXs& _pose, const Vector2s& _data)
 
 void show(const ProblemPtr& problem)
 {
-    std::cout << std::setprecision(4);
-    for (FrameBasePtr frm : problem->getTrajectoryPtr()->getFrameList())
+    using std::cout;
+    using std::endl;
+    cout << std::setprecision(4);
+
+    for (FrameBasePtr F : problem->getTrajectoryPtr()->getFrameList())
     {
-        if (frm->isKey())
+        if (F->isKey())
         {
-            std::cout << "===== Key Frame " << frm->id() << " ======" << std::endl;
-            std::cout << "  feature measure: \n"
-                    << frm->getCaptureList().front()->getFeatureList().front()->getMeasurement().transpose()
-                    << std::endl;
-            std::cout << "  feature covariance: \n"
-                    << frm->getCaptureList().front()->getFeatureList().front()->getMeasurementCovariance() << std::endl;
-            std::cout << "  state: \n" << frm->getState().transpose() << std::endl;
-            std::cout << "  covariance: \n" << problem->getFrameCovariance(frm) << std::endl;
+            cout << "----- Key Frame " << F->id() << " -----" << endl;
+            if (!F->getCaptureList().empty())
+            {
+                auto C = F->getCaptureList().front();
+                if (!C->getFeatureList().empty())
+                {
+                    auto f = C->getFeatureList().front();
+                    cout << "  feature measure: \n"
+                            << F->getCaptureList().front()->getFeatureList().front()->getMeasurement().transpose()
+                            << endl;
+                    cout << "  feature covariance: \n"
+                            << F->getCaptureList().front()->getFeatureList().front()->getMeasurementCovariance() << endl;
+//                    cout << "  feature sqrt information: \n"
+//                            << frm->getCaptureList().front()->getFeatureList().front()->getMeasurementSquareRootInformationTransposed() << endl;
+                }
+            }
+            cout << "  state: \n" << F->getState().transpose() << endl;
+            cout << "  covariance: \n" << problem->getFrameCovariance(F) << endl;
         }
     }
 }
@@ -196,6 +209,9 @@ TEST(Odom2D, VoteForKfAndSolve)
 
 TEST(Odom2D, SplitAndSolve)
 {
+    using std::cout;
+    using std::endl;
+
     std::cout << std::setprecision(4);
     // time
     TimeStamp t0(0.0), t = t0;
@@ -226,11 +242,10 @@ TEST(Odom2D, SplitAndSolve)
 
     // Ceres wrapper
     CeresManager ceres_manager(problem);
+    ceres::Solver::Summary summary;
 
     // Origin Key Frame
-    FrameBasePtr origin_frame = problem->setPrior(x0, x0_cov, t0);
-    origin_frame->fix();
-    x0_cov.setZero();
+    FrameBasePtr keyframe_0 = problem->setPrior(x0, x0_cov, t0);
 
     // Check covariance values
     Eigen::Vector3s integrated_pose = x0;
@@ -277,8 +292,6 @@ TEST(Odom2D, SplitAndSolve)
     }
 
     std::cout << "=============================" << std::endl;
-//    std::cout << "Original buffer:" << std::endl;
-//    processor_odom2d->getBuffer().print(0,0,0,1);
 
     ////////////////////////////////////////////////////////////////
     // Split after the last keyframe,
@@ -288,21 +301,15 @@ TEST(Odom2D, SplitAndSolve)
     std::cout << "-----------------------------\nSplit after last KF; time: " << t_split - t0 << std::endl;
 
     Vector3s x_split = processor_odom2d->getState(t_split);
-    FrameBasePtr keyframe_split_n = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
+    FrameBasePtr keyframe_2 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
 
     ASSERT_TRUE(problem->check(0));
-    processor_odom2d->keyFrameCallback(keyframe_split_n, 0);
+    processor_odom2d->keyFrameCallback(keyframe_2, 0);
     ASSERT_TRUE(problem->check(0));
 
-    CaptureMotionPtr key_capture_n = std::static_pointer_cast<CaptureMotion>(keyframe_split_n->getCaptureList().front());
+    CaptureMotionPtr key_capture_n = std::static_pointer_cast<CaptureMotion>(keyframe_2->getCaptureList().front());
 
     MotionBuffer key_buffer_n = key_capture_n->getBuffer();
-
-    // Show buffers
-//    std::cout << "New keyframe's capture buffer: " << std::endl;
-//    key_buffer_n.print();
-//    std::cout << "Current processor buffer: " << std::endl;
-//    processor_odom2d->getBuffer().print();
 
     ceres_manager.solve();
     ceres_manager.computeCovariances(ALL_MARGINALS);
@@ -318,48 +325,38 @@ TEST(Odom2D, SplitAndSolve)
 
 
     x_split = processor_odom2d->getState(t_split);
-    FrameBasePtr keyframe_split_m = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
+    FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
 
     ASSERT_TRUE(problem->check(0));
-    processor_odom2d->keyFrameCallback(keyframe_split_m, 0);
+    processor_odom2d->keyFrameCallback(keyframe_1, 0);
     ASSERT_TRUE(problem->check(0));
 
-    CaptureMotionPtr key_capture_m = std::static_pointer_cast<CaptureMotion>(keyframe_split_m->getCaptureList().front());
+    CaptureMotionPtr key_capture_m = std::static_pointer_cast<CaptureMotion>(keyframe_1->getCaptureList().front());
     MotionBuffer key_buffer_m = key_capture_m->getBuffer();
 
-    // Show buffers
-//    std::cout << "New keyframe's capture buffer: " << std::endl;
-//    key_buffer_m.print(0,0,0,1);
-//    std::cout << "Existing keyframe's capture buffer: " << std::endl;
-//    key_capture_n->getBuffer().print(0,0,0,1);
-//    std::cout << "Current processor buffer: " << std::endl;
-//    processor_odom2d->getBuffer().print();
-
-    // Perturb states
-    keyframe_split_n->setState(Vector3s(3,2,1));
-    keyframe_split_m->setState(Vector3s(1,2,3));
-
-    // Remove sensor non-keyframe before solving just in case...
-    sensor_odom2d->remove();
-    problem->getLastFramePtr()->remove();
+    ////////////////////////////////////////////////////////////////
 
     // solve
-    ceres::Solver::Summary summary = ceres_manager.solve();
+//    cout << "===== full ====" << endl;
+    keyframe_0->setState(Vector3s(1,2,3));
+    keyframe_1->setState(Vector3s(2,3,1));
+    keyframe_2->setState(Vector3s(3,1,2));
+    summary = ceres_manager.solve();
     std::cout << summary.BriefReport() << std::endl;
+//    std::cout << summary.FullReport() << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
+    show(problem);
+//    problem->print(4,1,0,0);
 
 
     // check the split KF
-    ASSERT_POSE2D_APPROX(keyframe_split_m->getState()                 , integrated_pose_vector[m_split - 1], 1e-6);
-    ASSERT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_m) , integrated_cov_vector [m_split - 1], 1e-6);
+    ASSERT_POSE2D_APPROX(keyframe_1->getState()                 , integrated_pose_vector[m_split - 1], 1e-6);
+    ASSERT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_1) , integrated_cov_vector [m_split - 1], 1e-6);
 
     // check other KF in the future of the split KF
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState()    , integrated_pose_vector[n_split - 1], 1e-6);
-    EXPECT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_split_n) , integrated_cov_vector [n_split - 1], 1e-6);
+    EXPECT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_2) , integrated_cov_vector [n_split - 1], 1e-6);
 
-//    problem->print(4,1,1,1);
-//    problem->check(1);
-//    show(problem);
 
 }
 
@@ -367,6 +364,9 @@ TEST(Odom2D, SplitAndSolve)
 
 TEST(Odom2D, dummy)
 {
+    using std::cout;
+    using std::endl;
+
     // Note: we build this (a is `absolute`, m is `motion`):
     // KF0 -- m -- KF1 -- m -- KF2
     //  |
@@ -384,11 +384,10 @@ TEST(Odom2D, dummy)
 
     ProblemPtr          Pr = Problem::create(FRM_PO_2D);
     CeresManager ceres_manager(Pr);
+    ceres::Solver::Summary summary;
 
     // KF0 and absolute prior
     FrameBasePtr        F0 = Pr->setPrior(x0, x0_cov,t0);
-    F0->fix();
-    x0_cov.setZero();
 
     // KF1 and motion from KF0
     t += dt;
@@ -410,9 +409,55 @@ TEST(Odom2D, dummy)
 
     ASSERT_TRUE(Pr->check(0));
 
-    ceres::Solver::Summary summary = ceres_manager.solve();
+//    cout << "===== full ====" << endl;
+    F0->setState(Vector3s(1,2,3));
+    F1->setState(Vector3s(2,3,1));
+    F2->setState(Vector3s(3,1,2));
+    summary = ceres_manager.solve();
     std::cout << summary.BriefReport() << std::endl;
+//    std::cout << summary.FullReport() << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
+//    show(Pr);
+
+//    // fix 1st KF and re-solve
+//    cout << "===== fix 0 ====" << endl;
+//    F0->fix();
+//    summary = ceres_manager.solve();
+//    std::cout << summary.BriefReport() << std::endl;
+//    ceres_manager.computeCovariances(ALL_MARGINALS);
+//    show(Pr);
+
+//    // remove 1st KF and re-solve
+//    cout << "===== remove 0, fix 1 ====" << endl;
+//    F0->remove();
+//    F1->fix();
+//    summary = ceres_manager.solve();
+//    std::cout << summary.BriefReport() << std::endl;
+//    ceres_manager.computeCovariances(ALL_MARGINALS);
+//    show(Pr);
+
+//    // replace constraint c1 and re-solve
+//    cout << "===== replace constraint F1 ====" << endl;
+//    ConstraintBasePtr   c1_rep = f1->addConstraint(std::make_shared<ConstraintOdom2D>(f1, F0));
+//    F0->addConstrainedBy(c1_rep);
+//    c1->remove();
+//    F0->setState(Vector3s(1,2,3));
+//    summary = ceres_manager.solve();
+//    std::cout << summary.BriefReport() << std::endl;
+//    ceres_manager.computeCovariances(ALL_MARGINALS);
+//    show(Pr);
+
+//    // replace constraint c2 and re-solve
+//    cout << "===== replace constraint F2 ====" << endl;
+//    ConstraintBasePtr   c2_rep = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1));
+//    F1->addConstrainedBy(c2_rep);
+//    c2->remove();
+//    F0->setState(Vector3s(1,2,3));
+//    summary = ceres_manager.solve();
+//    std::cout << summary.BriefReport() << std::endl;
+//    ceres_manager.computeCovariances(ALL_MARGINALS);
+//    show(Pr);
+
 
 //    Pr->print(4,1,1,1);
 //    Pr->check(1);
