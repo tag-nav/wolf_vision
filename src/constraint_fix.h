@@ -7,6 +7,8 @@
 #include "frame_base.h"
 #include "rotations.h"
 
+//#include "ceres/jet.h"
+
 
 namespace wolf {
     
@@ -21,11 +23,12 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
                                           _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("FIX");
-            std::cout << "created ConstraintFix " << std::endl;
+//            std::cout << "created ConstraintFix " << std::endl;
         }
 
         virtual ~ConstraintFix()
         {
+//            std::cout << "destructed ConstraintFix " << std::endl;
             //
         }
 
@@ -62,7 +65,25 @@ inline bool ConstraintFix::operator ()(const T* const _p, const T* const _o, T* 
 
     // residual
     Eigen::Map<Eigen::Matrix<T,3,1>> res(_residuals);
-    res = getFeaturePtr()->getMeasurementSquareRootInformation().cast<T>() * er;
+    res = getFeaturePtr()->getMeasurementSquareRootInformationTransposed().cast<T>() * er;
+
+    ////////////////////////////////////////////////////////
+    // print Jacobian. Uncomment this as you wish (remember to uncomment #include "ceres/jet.h" above):
+//    using ceres::Jet;
+//    Eigen::MatrixXs J(3,3);
+//    J.row(0) = ((Jet<Scalar, 3>)(er(0))).v;
+//    J.row(1) = ((Jet<Scalar, 3>)(er(1))).v;
+//    J.row(2) = ((Jet<Scalar, 3>)(er(2))).v;
+//    J.row(0) = ((Jet<Scalar, 3>)(res(0))).v;
+//    J.row(1) = ((Jet<Scalar, 3>)(res(1))).v;
+//    J.row(2) = ((Jet<Scalar, 3>)(res(2))).v;
+//    if (sizeof(er(0)) != sizeof(double))
+//    {
+//        std::cout << "ConstraintFix::Jacobian(c" << id() << ") = \n " << J << std::endl;
+//        std::cout << "ConstraintFix::Weighted Jacobian(c" << id() << ") = \n " << J << std::endl;
+//        std::cout << "Sqrt Info(c" << id() << ") = \n " << getMeasurementSquareRootInformationTransposed() << std::endl;
+//    }
+    ////////////////////////////////////////////////////////
 
     return true;
 }

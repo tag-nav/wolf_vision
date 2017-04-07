@@ -33,7 +33,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         unsigned int landmark_id_; // ID of the landmark
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
-        Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix
+        Eigen::MatrixXs measurement_sqrt_information_transposed_;        ///<  the squared root information matrix
         Eigen::VectorXs expectation_;                   ///<  expectation
         
     public:
@@ -70,7 +70,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         void setMeasurement(const Eigen::VectorXs& _meas);
         void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
         const Eigen::MatrixXs& getMeasurementCovariance() const;
-        const Eigen::MatrixXs& getMeasurementSquareRootInformation() const;
+        const Eigen::MatrixXs& getMeasurementSquareRootInformationTransposed() const;
 
         const Eigen::VectorXs& getExpectation() const;
         void setExpectation(const Eigen::VectorXs& expectation);
@@ -162,9 +162,9 @@ inline const Eigen::MatrixXs& FeatureBase::getMeasurementCovariance() const
     return measurement_covariance_;
 }
 
-inline const Eigen::MatrixXs& FeatureBase::getMeasurementSquareRootInformation() const
+inline const Eigen::MatrixXs& FeatureBase::getMeasurementSquareRootInformationTransposed() const
 {
-    return measurement_sqrt_information_;
+    return measurement_sqrt_information_transposed_;
 }
 
 inline void FeatureBase::setMeasurement(const Eigen::VectorXs& _meas)

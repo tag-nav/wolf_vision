@@ -5,6 +5,8 @@
 #include "constraint_sparse.h"
 #include "frame_base.h"
 
+//#include "ceres/jet.h"
+
 namespace wolf {
     
 WOLF_PTR_TYPEDEFS(ConstraintOdom2D);
@@ -17,12 +19,12 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
                 ConstraintSparse<3, 2, 1, 2, 1>(CTR_ODOM_2D, _frame_ptr, nullptr, nullptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("ODOM 2D");
-            std::cout << "created ConstraintOdom2D " << std::endl;
+//            std::cout << "created ConstraintOdom2D " << std::endl;
         }
 
         virtual ~ConstraintOdom2D()
         {
-            std::cout << "destructed ConstraintOdom2D " << std::endl;
+//            std::cout << "destructed ConstraintOdom2D " << std::endl;
             //
         }
 
@@ -52,26 +54,47 @@ inline bool ConstraintOdom2D::operator ()(const T* const _p1, const T* const _o1
 {
 
     // MAPS
-    Eigen::Map<Eigen::Matrix<T,3,1> > residuals_map(_residuals);
-    Eigen::Map<const Eigen::Matrix<T,2,1> > p1_map(_p1);
-    Eigen::Map<const Eigen::Matrix<T,2,1> > p2_map(_p2);
+    Eigen::Map<Eigen::Matrix<T,3,1> > res(_residuals);
+    Eigen::Map<const Eigen::Matrix<T,2,1> > p1(_p1);
+    Eigen::Map<const Eigen::Matrix<T,2,1> > p2(_p2);
+    T o1 = _o1[0];
+    T o2 = _o2[0];
     Eigen::Matrix<T, 3, 1> expected_measurement;
+    Eigen::Matrix<T, 3, 1> er; // error
 
     // Expected measurement
-    expected_measurement.head(2) = Eigen::Rotation2D<T>(-_o1[0]) * (p2_map - p1_map);
-    expected_measurement(2) = _o2[0] - _o1[0];
+    expected_measurement.head(2) = Eigen::Rotation2D<T>(-o1) * (p2 - p1);
+    expected_measurement(2) = o2 - o1;
 
     // Error
-    residuals_map = expected_measurement - getMeasurement().cast<T>();
-    // pi2pi - cannot use wolf::pi2pi() because of template T
-    while (residuals_map(2) > T(M_PI))
-        residuals_map(2) = residuals_map(2) - T(2 * M_PI);
-    while (residuals_map(2) <= T(-M_PI))
-        residuals_map(2) = residuals_map(2) + T(2 * M_PI);
+    er = expected_measurement - getMeasurement().cast<T>();
+    while (er(2) > T( M_PI ))
+        er(2) -=   T( 2 * M_PI );
+    while (er(2) < T( -M_PI ))
+        er(2) +=   T( 2 * M_PI );
 
     // Residuals
-    residuals_map = getMeasurementSquareRootInformation().cast<T>() * residuals_map;
-    // std::cout << "constraint odom computed!" << std::endl;
+    res = getMeasurementSquareRootInformationTransposed().cast<T>() * er;
+
+
+    ////////////////////////////////////////////////////////
+    // print Jacobian. Uncomment this as you wish (remember to uncomment #include "ceres/jet.h" above):
+//    using ceres::Jet;
+//    Eigen::MatrixXs J(3,6);
+//    J.row(0) = ((Jet<Scalar, 6>)(er(0))).v;
+//    J.row(1) = ((Jet<Scalar, 6>)(er(1))).v;
+//    J.row(2) = ((Jet<Scalar, 6>)(er(2))).v;
+//    J.row(0) = ((Jet<Scalar, 6>)(res(0))).v;
+//    J.row(1) = ((Jet<Scalar, 6>)(res(1))).v;
+//    J.row(2) = ((Jet<Scalar, 6>)(res(2))).v;
+//    if (sizeof(er(0)) != sizeof(double))
+//    {
+//        std::cout << "ConstraintOdom2D::Jacobian(c" << id() << ") = \n " << J << std::endl;
+//        std::cout << "ConstraintOdom2D::Weighted Jacobian(c" << id() << ") = \n " << J << std::endl;
+//        std::cout << "ConstraintOdom2D::Sqrt Info(c" << id() << ") = \n" << getMeasurementSquareRootInformationTransposed() << std::endl;
+//    }
+    ////////////////////////////////////////////////////////
+
 
     return true;
 }

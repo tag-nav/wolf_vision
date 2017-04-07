@@ -32,7 +32,7 @@ FeatureBase::FeatureBase(const std::string& _type, const Eigen::VectorXs& _measu
     assert(_meas_covariance.determinant() > 0 && "Not positive definite measurement covariance");
     Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
     Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
-    measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
+    measurement_sqrt_information_transposed_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
 
 //    std::cout << "constructed      +f" << id() << std::endl;
 }
@@ -103,7 +103,7 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 	measurement_covariance_ = _meas_cov;
 	Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
     Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
-    measurement_sqrt_information_ = measurement_sqrt_covariance.inverse(); // retrieve factor U  in the decomposition
+    measurement_sqrt_information_transposed_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
 }
 
 } // namespace wolf

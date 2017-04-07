@@ -100,7 +100,7 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
 
         /** \brief Returns a reference to the feature measurement square root information
          **/
-        virtual const Eigen::MatrixXs& getMeasurementSquareRootInformation() const
+        virtual const Eigen::MatrixXs& getMeasurementSquareRootInformationTransposed() const
         {
             return measurement_sqrt_information_;
         }

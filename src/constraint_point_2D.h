@@ -89,7 +89,7 @@ class ConstraintPoint2D: public ConstraintSparse<2,2,1,2,1,2>
 
         /** \brief Returns a reference to the feature measurement square root information
          **/
-        virtual const Eigen::MatrixXs& getMeasurementSquareRootInformation() const
+        virtual const Eigen::MatrixXs& getMeasurementSquareRootInformationTransposed() const
         {
             return measurement_sqrt_information_;
         }
@@ -118,7 +118,7 @@ inline bool ConstraintPoint2D::operator ()(const T* const _robotP, const T* cons
     Eigen::Matrix<T,2,1> expected_measurement_position = inverse_R_sensor * (inverse_R_robot * (landmark_point - robot_position_map) - sensor_position);
 
     // Residuals
-    residuals_map = getMeasurementSquareRootInformation().cast<T>() * (expected_measurement_position - getMeasurement().head<2>().cast<T>());
+    residuals_map = getMeasurementSquareRootInformationTransposed().cast<T>() * (expected_measurement_position - getMeasurement().head<2>().cast<T>());
 
 	//std::cout << "residuals_map" << residuals_map[0] << std::endl;
     return true;

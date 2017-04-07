@@ -76,7 +76,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
                 _residuals[2] = _residuals[2] + T(2*M_PI);
 
             // Residuals
-            residuals_map = getMeasurementSquareRootInformation().cast<T>() * residuals_map;
+            residuals_map = getMeasurementSquareRootInformationTransposed().cast<T>() * residuals_map;
 
             //std::cout << "\nCONSTRAINT: " << id() << std::endl;
             //std::cout << "Feature: " << getFeaturePtr()->id() << std::endl;
