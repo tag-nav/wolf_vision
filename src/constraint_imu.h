@@ -16,7 +16,7 @@ namespace wolf {
 WOLF_PTR_TYPEDEFS(ConstraintIMU);
 
 //class
-class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
+class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
 {
     public:
         ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_ptr, bool _apply_loss_function = false,
@@ -142,7 +142,7 @@ class ConstraintIMU : public ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
 
 inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_ptr, bool _apply_loss_function,
                                     ConstraintStatus _status) :
-        ConstraintSparse<9, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, _apply_loss_function, _status,
+        ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, _apply_loss_function, _status,
                                                     _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _frame_ptr->getVPtr(),
                                                     _frame_ptr->getAccBiasPtr(), _frame_ptr->getGyroBiasPtr(),
                                                     _ftr_ptr->getFramePtr()->getPPtr(),
@@ -166,7 +166,7 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_p
         ab_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getAbStdev()),
         wb_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getWbStdev()),
         sqrt_A_r_dt_inv((Eigen::Matrix3s::Identity() * ab_stdev_ * sqrt(dt_)).inverse()),
-        sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_stdev_ * sqrt(dt_)).inverse()) // * sqrt(dt_)
+        sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_stdev_ * sqrt(dt_)).inverse())
 
 {
     setType("IMU");
@@ -196,7 +196,7 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     Eigen::Map<const Eigen::Matrix<T,3,1> > ab2(_ab2);
     Eigen::Map<const Eigen::Matrix<T,3,1> > wb2(_wb2);
 
-    Eigen::Map<Eigen::Matrix<T,9,1> > residuals(_residuals);
+    Eigen::Map<Eigen::Matrix<T,15,1> > residuals(_residuals);
 
 
     // Predict delta: d_pred = x2 (-) x1
@@ -219,11 +219,11 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     Eigen::Matrix<T,3,1> wb_error(wb1 - wb2);
 
     // Assign to residuals vector
-    residuals.head(3)       = dp_error;
-    residuals.segment(3,3)  = do_error;
-    residuals.segment(6,3)  = dv_error;
-    //residuals.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error; // ab_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * ab_error;
-    //residuals.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error; // wb_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * wb_error;      
+    residuals.head(3)       = getMeasurementSquareRootInformation().topLeftCorner(3,3).cast<T>()    * dp_error;
+    residuals.segment(3,3)  = getMeasurementSquareRootInformation().block(3,3,3,3).cast<T>()        * do_error;
+    residuals.segment(6,3)  = getMeasurementSquareRootInformation().bottomLeftCorner(3,3).cast<T>() * dv_error;
+    residuals.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error; // ab_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * ab_error;
+    residuals.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error; // wb_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * wb_error;      
 
     return true;
 }
@@ -260,11 +260,11 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const
     Eigen::Matrix<DataType,3,1> wb_error(wb1 - wb2);
 
     // Assign to residuals vector
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).head(3)       = dp_error;
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(3,3)  = do_error;
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(6,3)  = dv_error;
-    //const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(9,3)  = sqrt_A_r_dt_inv.cast<DataType>() * ab_error; //will do dt_ * A_r.inverse() * ab_error
-    //const_cast< Eigen::MatrixBase<D3>& > (_residuals).tail(3)       = sqrt_A_r_dt_inv.cast<DataType>() * wb_error; //will do dt_ * W_r.inverse() * wb_error
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).head(3)       = getMeasurementSquareRootInformation().topLeftCorner(3,3).cast<DataType>()    * dp_error;
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(3,3)  = getMeasurementSquareRootInformation().block(3,3,3,3).cast<DataType>()        * do_error;
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(6,3)  = getMeasurementSquareRootInformation().bottomLeftCorner(3,3).cast<DataType>() * dv_error;
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(9,3)  = sqrt_A_r_dt_inv.cast<DataType>() * ab_error;
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).tail(3)       = sqrt_A_r_dt_inv.cast<DataType>() * wb_error;
 
     return true;
 }
