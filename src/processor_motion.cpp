@@ -243,18 +243,17 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     existing_capture->getBuffer().split(new_ts, new_capture->getBuffer());
 
     // interpolate individual delta
-//    if (!existing_capture->getBuffer().get().empty() && new_capture->getBuffer().get().back().ts_ != new_ts)
-//    {
-//        // interpolate Motion at the new time stamp
-//        Motion motion_interpolated = interpolate(new_capture->getBuffer().get().back(), // last Motion of old buffer
-//                                 existing_capture->getBuffer().get().front(), // first motion of new buffer
-//                                 new_ts);
-//        // add to old buffer
-//        new_capture->getBuffer().get().push_back(motion_interpolated);
-//    }
+    if (!existing_capture->getBuffer().get().empty() && new_capture->getBuffer().get().back().ts_ != new_ts)
+    {
+        // interpolate Motion at the new time stamp
+        Motion motion_interpolated = interpolate(new_capture->getBuffer().get().back(), // last Motion of old buffer
+                                 existing_capture->getBuffer().get().front(), // first motion of new buffer
+                                 new_ts);
+        // add to old buffer
+        new_capture->getBuffer().get().push_back(motion_interpolated);
+    }
 
     Eigen::MatrixXs new_covariance = integrateBufferCovariance(new_capture->getBuffer());
-//    std::cout << "PM: callback covariance: \n" << key_covariance << std::endl;
 
     // create motion feature and add it to the capture
     FeatureBasePtr new_feature = std::make_shared<FeatureBase>(
@@ -266,9 +265,6 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
 
     // create motion constraint and add it to the feature, and link it to the other frame (origin)
     emplaceConstraint(new_feature, new_keyframe_origin);
-
-//    std::cout << "new delta: " << new_capture->getBuffer().get().back().delta_integr_.transpose() << std::endl;
-//    std::cout << "new delta cov:\n " << integrateBufferCovariance(new_capture->getBuffer()) << std::endl;
 
 
 
@@ -292,9 +288,6 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
         existing_feature->setMeasurement(existing_capture->getBuffer().get().back().delta_integr_);
         MatrixXs existing_covariance = integrateBufferCovariance(existing_capture->getBuffer());
         existing_feature->setMeasurementCovariance(existing_covariance);
-
-//        std::cout << "existing delta: " << existing_capture->getBuffer().get().back().delta_integr_.transpose() << std::endl;
-//        std::cout << "existing delta cov:\n " << integrateBufferCovariance(existing_capture->getBuffer()) << std::endl;
 
         // Modify existing constraint --------
         // Instead of modifying, we remove one ctr, and create a new one.
