@@ -226,13 +226,13 @@ TEST(Odom2D, VoteForKfAndSolve)
     std::vector<Eigen::VectorXs> integrated_pose_vector;
     std::vector<Eigen::MatrixXs> integrated_cov_vector;
 
-    std::cout << "\nIntegrating data..." << std::endl;
+//    std::cout << "\nIntegrating data..." << std::endl;
 
     t += dt;
     // Capture to use as container for all incoming data
     CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 7, 6, nullptr);
 
-    for (int i=0; i<N; i++)
+    for (int n=1; n<=N; n++)
     {
         //        std::cout << "-------------------\nStep " << i << " at time " << t << std::endl;
         // re-use capture with updated timestamp
@@ -246,7 +246,7 @@ TEST(Odom2D, VoteForKfAndSolve)
         //        std::cout << "PRC  cov: \n" << odom2d_delta_cov << std::endl;
 
         // Integrate Delta
-        if (i==2 || i==5) // keyframes
+        if (n==3 || n==6) // keyframes
         {
             integrated_delta.setZero();
             integrated_delta_cov.setZero();
@@ -299,12 +299,12 @@ TEST(Odom2D, SplitAndSolve)
     int N = 16; // number of process() steps
 
     // NOTE: We integrate and create KFs as follows:
-    //  n=    1    2    3    4    5    6    7    8
-    //  t=    dt  2dt  3dt  4dt  5dt  6dt  7dt  8dt
-    // KF8 -- * -- * -- * -- * -- * -- * -- * -- *   : no keyframes during integration
+    //  n =   0    1    2    3    4    5    6    7    8
+    //  t =   0    dt  2dt  3dt  4dt  5dt  6dt  7dt  8dt
+    //       KF8-- * -- * -- * -- * -- * -- * -- * -- * -->  : no keyframes during integration
     // And we create KFs as follows:
-    //                                          KF10
-    //                      KF11
+    //                                              KF10
+    //                          KF11
 
 
     // Create Wolf tree nodes
@@ -338,7 +338,7 @@ TEST(Odom2D, SplitAndSolve)
     integrated_pose_vector.push_back(integrated_pose);
     integrated_cov_vector.push_back(integrated_cov);
 
-    std::cout << "\nIntegrating data..." << std::endl;
+//    std::cout << "\nIntegrating data..." << std::endl;
 
     // Capture to use as container for all incoming data
     CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 7, 6, nullptr);
@@ -372,14 +372,14 @@ TEST(Odom2D, SplitAndSolve)
 
     }
 
-    std::cout << "=============================" << std::endl;
+//    std::cout << "=============================" << std::endl;
 
     ////////////////////////////////////////////////////////////////
     // Split after the last keyframe, exact timestamp
     int n_split = 8;
     TimeStamp t_split (t0 + n_split*dt);
 
-    std::cout << "-----------------------------\nSplit after last KF; time: " << t_split - t0 << std::endl;
+//    std::cout << "-----------------------------\nSplit after last KF; time: " << t_split - t0 << std::endl;
 
     Vector3s x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_2 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
@@ -402,7 +402,7 @@ TEST(Odom2D, SplitAndSolve)
     // Split between keyframes, exact timestamp
     int m_split = 4;
     t_split = t0 + m_split*dt;
-    std::cout << "-----------------------------\nSplit between KFs; time: " << t_split - t0 << std::endl;
+//    std::cout << "-----------------------------\nSplit between KFs; time: " << t_split - t0 << std::endl;
 
 
     x_split = processor_odom2d->getState(t_split);
@@ -415,20 +415,15 @@ TEST(Odom2D, SplitAndSolve)
     CaptureMotionPtr key_capture_m = std::static_pointer_cast<CaptureMotion>(keyframe_1->getCaptureList().front());
     MotionBuffer key_buffer_m = key_capture_m->getBuffer();
 
-    ////////////////////////////////////////////////////////////////
-
     // solve
 //    cout << "===== full ====" << endl;
     keyframe_0->setState(Vector3s(1,2,3));
     keyframe_1->setState(Vector3s(2,3,1));
     keyframe_2->setState(Vector3s(3,1,2));
     summary = ceres_manager.solve();
-    std::cout << summary.BriefReport() << std::endl;
-//    std::cout << summary.FullReport() << std::endl;
+//    std::cout << summary.BriefReport() << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
-    show(problem);
-//    problem->print(4,1,0,0);
-
+//    show(problem);
 
     // check the split KF
     ASSERT_POSE2D_APPROX(keyframe_1->getState()                 , integrated_pose_vector[m_split], 1e-6);
@@ -437,8 +432,6 @@ TEST(Odom2D, SplitAndSolve)
     // check other KF in the future of the split KF
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
     ASSERT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_2)    , integrated_cov_vector [n_split], 1e-6);
-
-
 }
 
 

@@ -26,13 +26,13 @@ CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Option
 
 CeresManager::~CeresManager()
 {
-	std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
-	std::cout << "ceres parameter blocks:  " << ceres_problem_->NumParameterBlocks() << std::endl;
+//	std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
+//	std::cout << "ceres parameter blocks:  " << ceres_problem_->NumParameterBlocks() << std::endl;
     while (!id_2_residual_idx_.empty())
         removeConstraint(id_2_residual_idx_.begin()->first);
-	std::cout << "all residuals removed! \n";
+//	std::cout << "all residuals removed! \n";
     removeAllStateBlocks();
-    std::cout << "all parameter blocks removed! \n";
+//    std::cout << "all parameter blocks removed! \n";
 
 	delete covariance_;
     //std::cout << "covariance deleted! \n";
@@ -139,7 +139,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
 
                 for (auto sb : l_ptr->getUsedStateBlockVec())
                 {
-                    std::cout << "CeresManager::computeCovariances(): State block @ " << sb.get() << std::endl;
+//                    std::cout << "CeresManager::computeCovariances(): State block @ " << sb.get() << std::endl;
 //                    all_state_blocks.push_back(sb);
                     for(auto sb2 : l_ptr->getUsedStateBlockVec())
                     {
