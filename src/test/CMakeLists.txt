@@ -75,8 +75,8 @@ wolf_add_gtest(gtest_processor_imu gtest_processor_imu.cpp)
 target_link_libraries(gtest_processor_imu ${PROJECT_NAME})
 
 # ProcessorMotion in 2D
-wolf_add_gtest(gtest_motion_2d gtest_motion_2d.cpp)
-target_link_libraries(gtest_motion_2d ${PROJECT_NAME})
+wolf_add_gtest(gtest_odom_2D gtest_odom_2D.cpp)
+target_link_libraries(gtest_odom_2D ${PROJECT_NAME})
 
 # ProcessorOdom3D class test
 wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)

@@ -1,5 +1,5 @@
 /**
- * \file test_motion_2d.cpp
+ * \file test_odom_2D.cpp
  *
  *  Created on: Mar 15, 2016
  *      \author: jsola
@@ -90,14 +90,90 @@ void show(const ProblemPtr& problem)
                             << endl;
                     cout << "  feature covariance: \n"
                             << F->getCaptureList().front()->getFeatureList().front()->getMeasurementCovariance() << endl;
-//                    cout << "  feature sqrt information: \n"
-//                            << frm->getCaptureList().front()->getFeatureList().front()->getMeasurementSquareRootInformationTransposed() << endl;
                 }
             }
             cout << "  state: \n" << F->getState().transpose() << endl;
             cout << "  covariance: \n" << problem->getFrameCovariance(F) << endl;
         }
     }
+}
+
+
+TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
+{
+    using std::cout;
+    using std::endl;
+
+    // RATIONALE:
+    // We build this tree (a is `absolute`, m is `motion`):
+    // KF0 -- m -- KF1 -- m -- KF2
+    //  |
+    //  a
+    //  |
+    // GND
+    // `absolute` is made with ConstraintFix
+    // `motion`   is made with ConstraintOdom2D
+
+    std::cout << std::setprecision(4);
+
+    TimeStamp t0(0.0),  t = t0;
+    Scalar              dt = .01;
+    Vector3s            x0   (0,0,0);
+    Eigen::Matrix3s     P0 = Eigen::Matrix3s::Identity() * 0.1;
+    Vector3s            delta (2,0,0);
+    Matrix3s delta_cov; delta_cov << .02, 0, 0, 0, .025, .02, 0, .02, .02;
+
+    ProblemPtr          Pr = Problem::create(FRM_PO_2D);
+    CeresManager ceres_manager(Pr);
+    ceres::Solver::Summary summary;
+
+    // KF0 and absolute prior
+    FrameBasePtr        F0 = Pr->setPrior(x0, P0,t0);
+
+    // KF1 and motion from KF0
+    t += dt;
+    t += dt;
+    FrameBasePtr        F1 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
+    CaptureBasePtr      C1 = F1->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
+    FeatureBasePtr      f1 = C1->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
+    ConstraintBasePtr   c1 = f1->addConstraint(std::make_shared<ConstraintOdom2D>(f1, F0));
+    F0->addConstrainedBy(c1);
+
+    // KF2 and motion from KF1
+    t += dt;
+    t += dt;
+    FrameBasePtr        F2 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
+    CaptureBasePtr      C2 = F2->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
+    FeatureBasePtr      f2 = C2->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
+    ConstraintBasePtr   c2 = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1));
+    F1->addConstrainedBy(c2);
+
+    ASSERT_TRUE(Pr->check(0));
+
+//    cout << "===== full ====" << endl;
+    F0->setState(Vector3s(1,2,3));
+    F1->setState(Vector3s(2,3,1));
+    F2->setState(Vector3s(3,1,2));
+    summary = ceres_manager.solve();
+//    std::cout << summary.BriefReport() << std::endl;
+//    std::cout << summary.FullReport() << std::endl;
+    ceres_manager.computeCovariances(ALL_MARGINALS);
+//    show(Pr);
+
+    Matrix3s P1, P2;
+    P1 << 0.12, 0,     0,
+          0,    0.525, 0.22,
+          0,    0.22,  0.12;
+    P2 << 0.14, 0,    0,
+          0,    1.91, 0.48,
+          0,    0.48, 0.14;
+
+    ASSERT_POSE2D_APPROX(F0->getState(), Vector3s(0,0,0), 1e-6);
+    ASSERT_EIGEN_APPROX(Pr->getFrameCovariance(F0), P0, 1e-6);
+    ASSERT_POSE2D_APPROX(F1->getState(), Vector3s(2,0,0), 1e-6);
+    ASSERT_EIGEN_APPROX(Pr->getFrameCovariance(F1), P1, 1e-6);
+    ASSERT_POSE2D_APPROX(F2->getState(), Vector3s(4,0,0), 1e-6);
+    ASSERT_EIGEN_APPROX(Pr->getFrameCovariance(F2), P2, 1e-6);
 }
 
 TEST(Odom2D, VoteForKfAndSolve)
@@ -355,115 +431,12 @@ TEST(Odom2D, SplitAndSolve)
 
     // check other KF in the future of the split KF
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState()    , integrated_pose_vector[n_split - 1], 1e-6);
-    EXPECT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_2) , integrated_cov_vector [n_split - 1], 1e-6);
+    ASSERT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_2) , integrated_cov_vector [n_split - 1], 1e-6);
 
 
 }
 
 
-
-TEST(Odom2D, dummy)
-{
-    using std::cout;
-    using std::endl;
-
-    // Note: we build this (a is `absolute`, m is `motion`):
-    // KF0 -- m -- KF1 -- m -- KF2
-    //  |
-    //  a
-    //  |
-    // GND
-    std::cout << std::setprecision(4);
-
-    TimeStamp t0(0.0),  t = t0;
-    Scalar              dt = .01;
-    Vector3s            x0   (0,0,0);
-    Eigen::Matrix3s     x0_cov = Eigen::Matrix3s::Identity() * 0.1;
-    Vector3s            delta (2,0,0);
-    Matrix3s delta_cov; delta_cov << .02, 0, 0, 0, .025, .02, 0, .02, .02;
-
-    ProblemPtr          Pr = Problem::create(FRM_PO_2D);
-    CeresManager ceres_manager(Pr);
-    ceres::Solver::Summary summary;
-
-    // KF0 and absolute prior
-    FrameBasePtr        F0 = Pr->setPrior(x0, x0_cov,t0);
-
-    // KF1 and motion from KF0
-    t += dt;
-    t += dt;
-    FrameBasePtr        F1 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
-    CaptureBasePtr      C1 = F1->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
-    FeatureBasePtr      f1 = C1->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
-    ConstraintBasePtr   c1 = f1->addConstraint(std::make_shared<ConstraintOdom2D>(f1, F0));
-    F0->addConstrainedBy(c1);
-
-    // KF2 and motion from KF1
-    t += dt;
-    t += dt;
-    FrameBasePtr        F2 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
-    CaptureBasePtr      C2 = F2->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
-    FeatureBasePtr      f2 = C2->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
-    ConstraintBasePtr   c2 = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1));
-    F1->addConstrainedBy(c2);
-
-    ASSERT_TRUE(Pr->check(0));
-
-//    cout << "===== full ====" << endl;
-    F0->setState(Vector3s(1,2,3));
-    F1->setState(Vector3s(2,3,1));
-    F2->setState(Vector3s(3,1,2));
-    summary = ceres_manager.solve();
-    std::cout << summary.BriefReport() << std::endl;
-//    std::cout << summary.FullReport() << std::endl;
-    ceres_manager.computeCovariances(ALL_MARGINALS);
-//    show(Pr);
-
-//    // fix 1st KF and re-solve
-//    cout << "===== fix 0 ====" << endl;
-//    F0->fix();
-//    summary = ceres_manager.solve();
-//    std::cout << summary.BriefReport() << std::endl;
-//    ceres_manager.computeCovariances(ALL_MARGINALS);
-//    show(Pr);
-
-//    // remove 1st KF and re-solve
-//    cout << "===== remove 0, fix 1 ====" << endl;
-//    F0->remove();
-//    F1->fix();
-//    summary = ceres_manager.solve();
-//    std::cout << summary.BriefReport() << std::endl;
-//    ceres_manager.computeCovariances(ALL_MARGINALS);
-//    show(Pr);
-
-//    // replace constraint c1 and re-solve
-//    cout << "===== replace constraint F1 ====" << endl;
-//    ConstraintBasePtr   c1_rep = f1->addConstraint(std::make_shared<ConstraintOdom2D>(f1, F0));
-//    F0->addConstrainedBy(c1_rep);
-//    c1->remove();
-//    F0->setState(Vector3s(1,2,3));
-//    summary = ceres_manager.solve();
-//    std::cout << summary.BriefReport() << std::endl;
-//    ceres_manager.computeCovariances(ALL_MARGINALS);
-//    show(Pr);
-
-//    // replace constraint c2 and re-solve
-//    cout << "===== replace constraint F2 ====" << endl;
-//    ConstraintBasePtr   c2_rep = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1));
-//    F1->addConstrainedBy(c2_rep);
-//    c2->remove();
-//    F0->setState(Vector3s(1,2,3));
-//    summary = ceres_manager.solve();
-//    std::cout << summary.BriefReport() << std::endl;
-//    ceres_manager.computeCovariances(ALL_MARGINALS);
-//    show(Pr);
-
-
-//    Pr->print(4,1,1,1);
-//    Pr->check(1);
-//    show(Pr);
-
-}
 
 int main(int argc, char **argv)
 {
