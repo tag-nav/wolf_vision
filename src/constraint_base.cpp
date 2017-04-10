@@ -99,7 +99,7 @@ const Eigen::MatrixXs& ConstraintBase::getMeasurementCovariance() const
 
 const Eigen::MatrixXs& ConstraintBase::getMeasurementSquareRootInformationTransposed() const
 {
-    return getFeaturePtr()->getMeasurementSquareRootInformationTransposed();
+    return getFeaturePtr()->getMeasurementSquareRootInformationUpper();
 }
 
 CaptureBasePtr ConstraintBase::getCapturePtr() const

@@ -65,7 +65,7 @@ inline bool ConstraintFix::operator ()(const T* const _p, const T* const _o, T* 
 
     // residual
     Eigen::Map<Eigen::Matrix<T,3,1>> res(_residuals);
-    res = getFeaturePtr()->getMeasurementSquareRootInformationTransposed().cast<T>() * er;
+    res = getFeaturePtr()->getMeasurementSquareRootInformationUpper().cast<T>() * er;
 
     ////////////////////////////////////////////////////////
     // print Jacobian. Uncomment this as you wish (remember to uncomment #include "ceres/jet.h" above):
