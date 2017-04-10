@@ -283,7 +283,7 @@ TEST(Odom2D, VoteForKfAndSolve)
     ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance() , integrated_cov_vector[5], 1e-6);
 }
 
-TEST(Odom2D, SplitAndSolve)
+TEST(Odom2D, KF_callback)
 {
     using std::cout;
     using std::endl;
