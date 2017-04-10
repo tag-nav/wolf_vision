@@ -13,9 +13,13 @@ FeatureBase::FeatureBase(const std::string& _type, unsigned int _dim_measurement
     feature_id_(++feature_id_count_),
     track_id_(0),
     landmark_id_(0),
-    measurement_(_dim_measurement)
+    measurement_(_dim_measurement),
+    measurement_covariance_(_dim_measurement, _dim_measurement),
+    measurement_sqrt_information_upper_(_dim_measurement,_dim_measurement)
 {
-    //
+    measurement_covariance_.setZero();
+    measurement_sqrt_information_upper_.setIdentity();
+    measurement_sqrt_information_upper_ *= 1e8;
 //    std::cout << "constructed      +f" << id() << std::endl;
 }
 
@@ -30,9 +34,7 @@ FeatureBase::FeatureBase(const std::string& _type, const Eigen::VectorXs& _measu
 	measurement_covariance_(_meas_covariance)
 {
     assert(_meas_covariance.determinant() > 0 && "Not positive definite measurement covariance");
-    Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
-    Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
-    measurement_sqrt_information_transposed_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
+    measurement_sqrt_information_upper_ = computeSqrtInformationUpper(measurement_covariance_);
 
 //    std::cout << "constructed      +f" << id() << std::endl;
 }
@@ -93,17 +95,21 @@ ConstraintBaseList& FeatureBase::getConstraintList()
 void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {
     _ctr_list.insert(_ctr_list.end(), constraint_list_.begin(), constraint_list_.end());
-//	for(ConstraintBasePtr c_ptr : constraint_list_)
-//		_ctr_list.push_back(c_ptr);
 }
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 {
     assert(_meas_cov.determinant() > 0 && "Not positive definite measurement covariance");
-	measurement_covariance_ = _meas_cov;
-	Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
-    Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
-    measurement_sqrt_information_transposed_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
+
+    measurement_covariance_ = _meas_cov;
+	measurement_sqrt_information_upper_ = computeSqrtInformationUpper(_meas_cov);
+}
+
+Eigen::MatrixXs FeatureBase::computeSqrtInformationUpper(const Eigen::MatrixXs & covariance) const
+{
+    assert(covariance.determinant() > 0 && "Covariance is not positive definite!");
+    Eigen::LLT<Eigen::MatrixXs> llt_of_info(covariance.inverse());
+    return llt_of_info.matrixU();
 }
 
 } // namespace wolf
