@@ -221,7 +221,7 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     // Assign to residuals vector
     residuals.head(3)       = getMeasurementSquareRootInformation().topLeftCorner(3,3).cast<T>()    * dp_error;
     residuals.segment(3,3)  = getMeasurementSquareRootInformation().block(3,3,3,3).cast<T>()        * do_error;
-    residuals.segment(6,3)  = getMeasurementSquareRootInformation().bottomLeftCorner(3,3).cast<T>() * dv_error;
+    residuals.segment(6,3)  = getMeasurementSquareRootInformation().bottomRightCorner(3,3).cast<T>() * dv_error;
     residuals.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error; // ab_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * ab_error;
     residuals.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error; // wb_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * wb_error;      
 
@@ -262,7 +262,7 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const
     // Assign to residuals vector
     const_cast< Eigen::MatrixBase<D3>& > (_residuals).head(3)       = getMeasurementSquareRootInformation().topLeftCorner(3,3).cast<DataType>()    * dp_error;
     const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(3,3)  = getMeasurementSquareRootInformation().block(3,3,3,3).cast<DataType>()        * do_error;
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(6,3)  = getMeasurementSquareRootInformation().bottomLeftCorner(3,3).cast<DataType>() * dv_error;
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(6,3)  = getMeasurementSquareRootInformation().bottomRightCorner(3,3).cast<DataType>() * dv_error;
     const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(9,3)  = sqrt_A_r_dt_inv.cast<DataType>() * ab_error;
     const_cast< Eigen::MatrixBase<D3>& > (_residuals).tail(3)       = sqrt_A_r_dt_inv.cast<DataType>() * wb_error;
 
