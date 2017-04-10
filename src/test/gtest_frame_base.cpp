@@ -75,7 +75,7 @@ TEST(FrameBase, LinksToTree)
     T->addFrame(F2);
     CaptureMotionPtr C = make_shared<CaptureMotion>(1, S, Vector3s::Zero(), 3, 3);
     F1->addCapture(C);
-    FeatureBasePtr f = make_shared<FeatureBase>("f", 1);
+    FeatureBasePtr f = make_shared<FeatureBase>("f", Vector1s(1), Matrix<Scalar,1,1>::Identity()*.01);
     C->addFeature(f);
     ConstraintOdom2DPtr c = make_shared<ConstraintOdom2D>(f, F2);
     f->addConstraint(c);

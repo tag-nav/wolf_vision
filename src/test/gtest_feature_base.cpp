@@ -13,18 +13,7 @@
 using namespace wolf;
 using namespace Eigen;
 
-TEST(FeatureBase, ConstructorFromSize)
-{
-    FeatureBasePtr f(std::make_shared<FeatureBase>("DUMMY", 3));
-
-    ASSERT_EQ(f->getMeasurement().size() , 3);
-    ASSERT_EQ(f->getMeasurementCovariance().rows() , 3);
-    ASSERT_EQ(f->getMeasurementCovariance().cols() , 3);
-    ASSERT_EQ(f->getMeasurementSquareRootInformationUpper().rows() , 3);
-    ASSERT_EQ(f->getMeasurementSquareRootInformationUpper().cols() , 3);
-}
-
-TEST(FeatureBase, ConstructorFromMeasurementAndCovariance)
+TEST(FeatureBase, Constructor)
 {
     Vector3s m; m << 1,2,3;
     Matrix3s M; M.setRandom(); M = M*M.transpose();
@@ -50,7 +39,7 @@ TEST(FeatureBase, SetMeasurement)
     Eigen::MatrixXs U = llt_of_info.matrixU();
     Eigen::MatrixXs L = llt_of_info.matrixL();
 
-    FeatureBasePtr f(std::make_shared<FeatureBase>("DUMMY", 3));
+    FeatureBasePtr f(std::make_shared<FeatureBase>("DUMMY", Vector3s::Zero(), Matrix3s::Identity()));
 
     f->setMeasurement(m);
 
@@ -66,7 +55,7 @@ TEST(FeatureBase, SetMeasurementCovariance)
     Eigen::MatrixXs U = llt_of_info.matrixU();
     Eigen::MatrixXs L = llt_of_info.matrixL();
 
-    FeatureBasePtr f(std::make_shared<FeatureBase>("DUMMY", 3));
+    FeatureBasePtr f(std::make_shared<FeatureBase>("DUMMY", Vector3s::Zero(), Matrix3s::Identity()));
 
     f->setMeasurementCovariance(M);
 

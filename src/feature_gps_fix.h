@@ -15,12 +15,6 @@ WOLF_PTR_TYPEDEFS(FeatureGPSFix);
 class FeatureGPSFix : public FeatureBase
 {
     public:
-        /** \brief Constructor from capture pointer and measure dim
-         * 
-         * \param _dim_measurement the dimension of the measurement space
-         * 
-         */
-        FeatureGPSFix(unsigned int _dim_measurement);
 
         /** \brief Constructor from capture pointer and measure
          *

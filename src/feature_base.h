@@ -37,11 +37,6 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         Eigen::VectorXs expectation_;                   ///<  expectation
         
     public:
-        /** \brief Constructor from capture pointer and measure dim
-         * \param _tp type of feature -- see wolf.h
-         * \param _dim_measurement the dimension of the measurement space
-         */
-        FeatureBase(const std::string& _type, unsigned int _dim_measurement);
 
         /** \brief Constructor from capture pointer and measure
          * \param _tp type of feature -- see wolf.h
