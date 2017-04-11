@@ -67,14 +67,14 @@ inline bool ConstraintCorner2D::operator ()(const T* const _robotP, const T* con
     //std::cout << "atan2: " << atan2(getCapturePtr()->getSensorPtr()->getSensorRotation()->transpose()(0,1),getCapturePtr()->getSensorPtr()->getSensorRotation()->transpose()(0,0)) << std::endl;
 
     // sensor transformation
-    Eigen::Matrix<T, 2, 1> sensor_position = getCapturePtr()->getSensorPtr()->getPPtr()->getVector().head(2).cast<T>();
-    Eigen::Matrix<T,2,2> inverse_R_sensor = Eigen::Rotation2D<T>(T(-getCapturePtr()->getSensorOPtr()->getVector()(0))).matrix();
+    Eigen::Matrix<T, 2, 1> sensor_position = getCapturePtr()->getSensorPtr()->getPPtr()->getState().head(2).cast<T>();
+    Eigen::Matrix<T,2,2> inverse_R_sensor = Eigen::Rotation2D<T>(T(-getCapturePtr()->getSensorOPtr()->getState()(0))).matrix();
     // robot transformation
     Eigen::Matrix<T,2,2> inverse_R_robot = Eigen::Rotation2D<T>(-_robotO[0]).matrix();
 
     // Expected measurement
     Eigen::Matrix<T, 2, 1> expected_measurement_position = inverse_R_sensor * (inverse_R_robot * (landmark_position_map - robot_position_map) - sensor_position);
-    T expected_measurement_orientation = _landmarkO[0] - _robotO[0] - T(getCapturePtr()->getSensorPtr()->getOPtr()->getVector()(0));
+    T expected_measurement_orientation = _landmarkO[0] - _robotO[0] - T(getCapturePtr()->getSensorPtr()->getOPtr()->getState()(0));
 
     // Error
     residuals_map.head(2) = expected_measurement_position - getMeasurement().head<2>().cast<T>();
@@ -87,7 +87,7 @@ inline bool ConstraintCorner2D::operator ()(const T* const _robotP, const T* con
         _residuals[2] = _residuals[2] + T(2*M_PI);
 
     // Residuals
-    residuals_map = getMeasurementSquareRootInformation().topLeftCorner<3,3>().cast<T>() * residuals_map;
+    residuals_map = getMeasurementSquareRootInformationTransposed().topLeftCorner<3,3>().cast<T>() * residuals_map;
 
     //std::cout << "\nCONSTRAINT: " << id() << std::endl;
     //std::cout << "Feature: " << getFeaturePtr()->id() << std::endl;

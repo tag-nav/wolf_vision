@@ -38,6 +38,16 @@ target_link_libraries(gtest_example ${PROJECT_NAME})      #
 #           ==== IN ALPHABETICAL ORDER! ====              #
 #                                                         #
 
+# ------- First Core classes ----------
+
+# CaptureBase class test
+wolf_add_gtest(gtest_capture_base gtest_capture_base.cpp)
+target_link_libraries(gtest_capture_base ${PROJECT_NAME})
+
+# FeatureBase classes test
+wolf_add_gtest(gtest_feature_base gtest_feature_base.cpp)
+target_link_libraries(gtest_feature_base ${PROJECT_NAME})
+
 # FrameBase classes test
 wolf_add_gtest(gtest_frame_base gtest_frame_base.cpp)
 target_link_libraries(gtest_frame_base ${PROJECT_NAME})
@@ -50,29 +60,9 @@ target_link_libraries(gtest_local_param ${PROJECT_NAME})
 wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
 target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
 
-# Pinhole test
-wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
-target_link_libraries(gtest_pinhole ${PROJECT_NAME})
-
 # Problem class test
 wolf_add_gtest(gtest_problem gtest_problem.cpp)
 target_link_libraries(gtest_problem ${PROJECT_NAME})
-
-# ProcessorIMU class test
-wolf_add_gtest(gtest_processor_imu gtest_processor_imu.cpp)
-target_link_libraries(gtest_processor_imu ${PROJECT_NAME})
-
-# ProcessorMotion in 2D
-wolf_add_gtest(gtest_motion_2d gtest_motion_2d.cpp)
-target_link_libraries(gtest_motion_2d ${PROJECT_NAME})
-
-# ProcessorOdom3D class test
-wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
-target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
-
-# ROI test
-wolf_add_gtest(gtest_roi_ORB gtest_roi_ORB.cpp)
-target_link_libraries(gtest_roi_ORB ${PROJECT_NAME})
 
 # Rotation test
 wolf_add_gtest(gtest_rotation gtest_rotation.cpp)
@@ -85,4 +75,38 @@ target_link_libraries(gtest_time_stamp ${PROJECT_NAME})
 # TrajectoryBase class test
 wolf_add_gtest(gtest_trajectory gtest_trajectory.cpp)
 target_link_libraries(gtest_trajectory ${PROJECT_NAME})
+
+# ------- Now Derived classes ----------
+
+# ConstraintFix3D class test
+wolf_add_gtest(gtest_constraint_fix_3D gtest_constraint_fix_3D.cpp)
+target_link_libraries(gtest_constraint_fix_3D ${PROJECT_NAME})
+
+# ConstraintFix class test
+wolf_add_gtest(gtest_constraint_fix gtest_constraint_fix.cpp)
+target_link_libraries(gtest_constraint_fix ${PROJECT_NAME})
+
+# ConstraintOdom3D class test
+wolf_add_gtest(gtest_constraint_odom_3D gtest_constraint_odom_3D.cpp)
+target_link_libraries(gtest_constraint_odom_3D ${PROJECT_NAME})
+
+# Pinhole test
+wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
+target_link_libraries(gtest_pinhole ${PROJECT_NAME})
+
+# ProcessorIMU class test
+wolf_add_gtest(gtest_processor_imu gtest_processor_imu.cpp)
+target_link_libraries(gtest_processor_imu ${PROJECT_NAME})
+
+# ProcessorMotion in 2D
+wolf_add_gtest(gtest_odom_2D gtest_odom_2D.cpp)
+target_link_libraries(gtest_odom_2D ${PROJECT_NAME})
+
+# ProcessorOdom3D class test
+wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
+target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
+
+# ROI test
+wolf_add_gtest(gtest_roi_ORB gtest_roi_ORB.cpp)
+target_link_libraries(gtest_roi_ORB ${PROJECT_NAME})
 

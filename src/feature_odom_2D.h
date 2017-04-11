@@ -17,12 +17,6 @@ WOLF_PTR_TYPEDEFS(FeatureOdom2D);
 class FeatureOdom2D : public FeatureBase
 {
     public:
-        /** \brief Constructor from capture pointer and measure dim
-         * 
-         * \param _dim_measurement the dimension of the measurement space
-         * 
-         */
-        FeatureOdom2D(unsigned int _dim_measurement);
 
         /** \brief Constructor from capture pointer and measure
          *

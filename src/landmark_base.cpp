@@ -113,12 +113,12 @@ YAML::Node LandmarkBase::saveToYaml() const
     node["type"] = node_type_;
     if (getPPtr() != nullptr)
     {
-        node["position"] = getPPtr()->getVector();
+        node["position"] = getPPtr()->getState();
         node["position fixed"] = getPPtr()->isFixed();
     }
     if (getOPtr() != nullptr)
     {
-        node["orientation"] = getOPtr()->getVector();
+        node["orientation"] = getOPtr()->getState();
         node["orientation fixed"] = getOPtr()->isFixed();
     }
     return node;

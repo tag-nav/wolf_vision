@@ -169,7 +169,7 @@ int main(int argc, char** argv)
     odom_trajectory.head(3) = ground_truth_pose;
 
     // Origin Key Frame with covariance
-    problem.setOrigin(ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1, ts);
+    problem.setPrior(ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1, ts);
 
     // Ceres wrapper
     ceres::Solver::Options ceres_options;

@@ -182,7 +182,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
      *     - We use D or Delta (with uppercase D) to refer to the preintegrated delta.
      *     - We use d or delta (with lowercase d) to refer to the recent delta.
      *     - We use p, q, v, (as in Dp, Dq, Dv) to refer to the deltas of position, quaternion, and velocity
-     *     - We use f, (as in Do, do) to refer to deltas of the orientation vector equivalent to the quaternion deltas,
+     *     - We use o, (as in Do, do) to refer to deltas of the orientation vector equivalent to the quaternion deltas,
      *
      *          that is,    Dq = Exp(Do), dq = Exp(do), Do = Log(Dq), do = Log(dq)
      *          and / or    DR = Exp(Do), dR = Exp(do), etc.
@@ -193,7 +193,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
      *     Dv' = Dv + Dq*dv
      *     Dq' = Dq * dq
      *
-     * where d = (dp, dq, dv) needs to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
+     * where d = (dp, dq, dv) needs to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq.conj.
      */
 
     /*/////////////////////////////////////////////////////////
@@ -277,10 +277,6 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
     assert(_delta.size() == 10 && "Wrong _delta vector size");
     assert(_delta_preint_plus_delta.size() == 10 && "Wrong _delta_preint_plus_delta vector size");
 
-    remapPQV(_delta_preint, _delta, _delta_preint_plus_delta);
-    // _delta_preint             is *_1_
-    // _delta                    is *_2_
-    // _delta_preint_plus_delta  is *_out_
 
     /* MATHS according to Sola-16
      * Dp' = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp   if  dp = 1/2*(a-a_b)*dt^2
@@ -298,6 +294,10 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
     //     deltaPlusDelta(delta_integrated_, delta_, dt_, delta_integrated_);
     // that is, _delta1 and _delta1_plus_delta2 point to the same memory locations.
     // Therefore, to avoid aliasing, we proceed in the order p -> v -> q
+    remapPQV(_delta_preint, _delta, _delta_preint_plus_delta);
+    // _delta_preint             is D*_
+    // _delta                    is d*_
+    // _delta_preint_plus_delta  is D*_out_
     Dp_out_ = Dp_ + Dv_ * _dt + Dq_ * dp_;
     Dv_out_ = Dv_ + Dq_ * dv_;
     Dq_out_ = Dq_ * dq_;
@@ -313,14 +313,14 @@ inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x,
     assert(_x_plus_delta.size() == 16 && "Wrong _x_plus_delta vector size");
     assert(_dt >= 0 && "Time interval _Dt is negative!");
 
-    remapPQV(_x, _delta, _x_plus_delta);
-    // _x               is _1_
-    // _delta           is _2_
-    // _x_plus_delta    is _out_
 
     Eigen::Vector3s gdt = gravity_ * _dt;
 
     // state updates
+    remapPQV(_x, _delta, _x_plus_delta);
+    // _x               is D*_
+    // _delta           is d*_
+    // _x_plus_delta    is D*_out_
     Dp_out_ = Dq_ * dp_ + Dp_ + Dv_ * _dt + gdt * _dt / 2 ;
     Dv_out_ = Dq_ * dv_ + Dv_ + gdt;
     Dq_out_ = Dq_ * dq_;
@@ -352,8 +352,8 @@ inline void ProcessorIMU::resetDerived()
     frame_imu_ptr_ = std::static_pointer_cast<FrameIMU>(origin_ptr_->getFramePtr());
 
     // Assign biases for the integration at the origin frame's biases
-    acc_bias_  = frame_imu_ptr_->getAccBiasPtr()->getVector(); // acc  bias
-    gyro_bias_ = frame_imu_ptr_->getGyroBiasPtr()->getVector(); // gyro bias
+    acc_bias_  = frame_imu_ptr_->getAccBiasPtr()->getState(); // acc  bias
+    gyro_bias_ = frame_imu_ptr_->getGyroBiasPtr()->getState(); // gyro bias
 
     // reset jacobians wrt bias
     dDp_dab_.setZero();

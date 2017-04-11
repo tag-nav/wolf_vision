@@ -76,9 +76,9 @@ inline ConstraintAHP::ConstraintAHP(FeatureBasePtr   _ftr_ptr,
                                            _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(),
                                            _landmark_ptr->getAnchorFrame()->getPPtr(),
                                            _landmark_ptr->getAnchorFrame()->getOPtr(), _landmark_ptr->getPPtr()),
-        anchor_sensor_extrinsics_p_(_ftr_ptr->getCapturePtr()->getSensorPPtr()->getVector()),
-        anchor_sensor_extrinsics_o_(_ftr_ptr->getCapturePtr()->getSensorOPtr()->getVector()),
-        intrinsic_(_ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr()->getVector())
+        anchor_sensor_extrinsics_p_(_ftr_ptr->getCapturePtr()->getSensorPPtr()->getState()),
+        anchor_sensor_extrinsics_o_(_ftr_ptr->getCapturePtr()->getSensorOPtr()->getState()),
+        intrinsic_(_ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr()->getState())
 {
     setType("AHP");
 
@@ -142,7 +142,7 @@ inline void ConstraintAHP::expectation(const T* const _current_frame_p,
 
     // current robot to current camera transform
     CaptureBasePtr      current_capture = this->getFeaturePtr()->getCapturePtr();
-    Translation<T, 3>   t_r1_c1  (current_capture->getSensorPPtr()->getVector().cast<T>());
+    Translation<T, 3>   t_r1_c1  (current_capture->getSensorPPtr()->getState().cast<T>());
     Quaternions         q_r1_c1_s(current_capture->getSensorOPtr()->getPtr());
     Quaternion<T>       q_r1_c1 = q_r1_c1_s.cast<T>();
     TransformType       T_R1_C1 = t_r1_c1 * q_r1_c1;
@@ -184,7 +184,7 @@ inline bool ConstraintAHP::operator ()(const T* const _current_frame_p,
 
     // residual
     Eigen::Map<Eigen::Matrix<T, 2, 1> > residuals(_residuals);
-    residuals = getMeasurementSquareRootInformation().cast<T>() * (expected - measured);
+    residuals = getMeasurementSquareRootInformationTransposed().cast<T>() * (expected - measured);
     return true;
 }
 

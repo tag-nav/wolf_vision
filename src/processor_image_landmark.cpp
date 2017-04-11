@@ -119,7 +119,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
     cv::Mat candidate_descriptors;
     std::vector<cv::DMatch> cv_matches;
 
-    Eigen::VectorXs current_state = getProblem()->getStateAtTimeStamp(incoming_ptr_->getTimeStamp());
+    Eigen::VectorXs current_state = getProblem()->getState(incoming_ptr_->getTimeStamp());
 
     for (auto landmark_in_ptr : _landmark_list_in)
     {
@@ -132,7 +132,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
         landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
 
-        pixel = pinhole::projectPoint(camera->getIntrinsicPtr()->getVector(),
+        pixel = pinhole::projectPoint(camera->getIntrinsicPtr()->getState(),
                                       camera->getDistortionVector(),
                                       point3D_hmg.head<3>());
 
@@ -261,7 +261,7 @@ LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_p
     Scalar distance = params_.algorithm.distance; // arbitrary value
     Eigen::Vector4s vec_homogeneous;
 
-    point2D = pinhole::depixellizePoint(getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
+    point2D = pinhole::depixellizePoint(getSensorPtr()->getIntrinsicPtr()->getState(),point2D);
     point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(getSensorPtr()))->getCorrectionVector(),point2D);
 
     Eigen::Vector3s point3D;
@@ -337,7 +337,7 @@ void ProcessorImageLandmark::landmarkInCurrentCamera(const Eigen::VectorXs& _cur
     Transform<Scalar,3,Eigen::Affine> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
 
     // world to anchor robot frame
-    Translation<Scalar,3>  t_w_r0(_landmark->getAnchorFrame()->getPPtr()->getVector()); // sadly we cannot put a Map over a translation
+    Translation<Scalar,3>  t_w_r0(_landmark->getAnchorFrame()->getPPtr()->getState()); // sadly we cannot put a Map over a translation
     Map<const Quaternions> q_w_r0(_landmark->getAnchorFrame()->getOPtr()->getPtr());
     T_W_R0 = t_w_r0 * q_w_r0;
 
@@ -347,17 +347,17 @@ void ProcessorImageLandmark::landmarkInCurrentCamera(const Eigen::VectorXs& _cur
     T_W_R1 = t_w_r1 * q_w_r1;
 
     // anchor robot to anchor camera
-    Translation<Scalar,3>  t_r0_c0(_landmark->getAnchorSensor()->getPPtr()->getVector());
+    Translation<Scalar,3>  t_r0_c0(_landmark->getAnchorSensor()->getPPtr()->getState());
     Map<const Quaternions> q_r0_c0(_landmark->getAnchorSensor()->getOPtr()->getPtr());
     T_R0_C0 = t_r0_c0 * q_r0_c0;
 
     // current robot to current camera
-    Translation<Scalar,3>  t_r1_c1(this->getSensorPtr()->getPPtr()->getVector());
+    Translation<Scalar,3>  t_r1_c1(this->getSensorPtr()->getPPtr()->getState());
     Map<const Quaternions> q_r1_c1(this->getSensorPtr()->getOPtr()->getPtr());
     T_R1_C1 = t_r1_c1 * q_r1_c1;
 
     // Transform lmk from c0 to c1 and exit
-    Vector4s landmark_hmg_c0 = _landmark->getPPtr()->getVector(); // lmk in anchor frame
+    Vector4s landmark_hmg_c0 = _landmark->getPPtr()->getState(); // lmk in anchor frame
     _point3D_hmg = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
 }
 
@@ -480,7 +480,7 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
         Eigen::Vector4s point3D_hmg;
         landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
 
-        Eigen::Vector2s point2D = pinhole::projectPoint(camera->getIntrinsicPtr()->getVector(), // k
+        Eigen::Vector2s point2D = pinhole::projectPoint(camera->getIntrinsicPtr()->getState(), // k
                                         camera->getDistortionVector(),          // d
                                         point3D_hmg.head(3));                   // v
 

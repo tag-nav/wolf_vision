@@ -55,7 +55,7 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 //                residual(2) = residual(2) - 2*M_PI;
 //            while (residual(2) <= -M_PI)
 //                residual(2) = residual(2) + 2*M_PI;
-//            residual = getMeasurementSquareRootInformation() * residual;
+//            residual = getMeasurementSquareRootInformationTransposed() * residual;
 //
 //            return residual;
 //        }
@@ -75,20 +75,20 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 //            jacobians[0] << -cos(_st_vector[1](0)), -sin(_st_vector[1](0)),
 //                             sin(_st_vector[1](0)), -cos(_st_vector[1](0)),
 //                             0,                     0;
-//            jacobians[0] = getMeasurementSquareRootInformation() * jacobians[0];
+//            jacobians[0] = getMeasurementSquareRootInformationTransposed() * jacobians[0];
 //
 //            jacobians[1] << -(_st_vector[2](0) - _st_vector[0](0)) * sin(_st_vector[1](0)) + (_st_vector[2](1) - _st_vector[0](1)) * cos(_st_vector[1](0)),
 //                            -(_st_vector[2](0) - _st_vector[0](0)) * cos(_st_vector[1](0)) - (_st_vector[2](1) - _st_vector[0](1)) * sin(_st_vector[1](0)),
 //                            -1;
-//            jacobians[1] = getMeasurementSquareRootInformation() * jacobians[0];
+//            jacobians[1] = getMeasurementSquareRootInformationTransposed() * jacobians[0];
 //
 //            jacobians[2] << cos(_st_vector[1](0)), sin(_st_vector[1](0)),
 //                            -sin(_st_vector[1](0)),cos(_st_vector[1](0)),
 //                            0,                     0;
-//            jacobians[2] = getMeasurementSquareRootInformation() * jacobians[0];
+//            jacobians[2] = getMeasurementSquareRootInformationTransposed() * jacobians[0];
 //
 //            jacobians[3] << 0, 0, 1;
-//            jacobians[3] = getMeasurementSquareRootInformation() * jacobians[0];
+//            jacobians[3] = getMeasurementSquareRootInformationTransposed() * jacobians[0];
 //        }
 //
 //        /** \brief Returns the jacobians computation method

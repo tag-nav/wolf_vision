@@ -118,6 +118,7 @@ class TimeStamp
          * Comparison operator
          * 
          */
+        bool operator !=(const TimeStamp& ts) const;
         bool operator ==(const TimeStamp& ts) const;
         bool operator <(const TimeStamp& ts) const;
         bool operator >(const TimeStamp& ts) const;
@@ -211,6 +212,11 @@ inline void TimeStamp::operator =(const Scalar& ts)
 inline bool TimeStamp::operator ==(const TimeStamp& ts) const
 {
     return (time_stamp_ == ts.get());
+}
+
+inline bool TimeStamp::operator !=(const TimeStamp& ts) const
+{
+    return (time_stamp_ != ts.get());
 }
 
 inline bool TimeStamp::operator <(const TimeStamp& ts) const

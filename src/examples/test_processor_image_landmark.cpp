@@ -133,7 +133,7 @@ int main(int argc, char** argv)
     // running CAPTURES preallocated
     CaptureImagePtr image_ptr;
     Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
-    CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>(t, sen_odo_ptr, data);
+    CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>(t, sen_odo_ptr, data, 7, 6);
     //=====================================================
 
 
@@ -186,12 +186,9 @@ int main(int argc, char** argv)
         cap_odo->setTimeStamp(t);
 
         // previous state and TS
-        TimeStamp t_prev_prev;
+        Eigen::Vector7s x_prev = wolf_problem_ptr_->getCurrentState();
         Vector7s x_prev_prev;
-        Eigen::VectorXs x_prev(7);
-        TimeStamp t_prev;
         Vector7s dx;
-        wolf_problem_ptr_->getCurrentState(x_prev, t_prev);
 
         // before the previous state
         FrameBasePtr prev_key_fr_ptr = wolf_problem_ptr_->getLastKeyFramePtr();
@@ -215,16 +212,15 @@ int main(int argc, char** argv)
         }
         else
         {
-            t_prev_prev = prev_prev_key_fr_ptr->getTimeStamp();
             x_prev_prev = prev_prev_key_fr_ptr->getState();
 
-            // some maps to avoid local variables
-            Eigen::Map<Eigen::Vector3s>     p_prev_prev(x_prev_prev.data());
-            Eigen::Map<Eigen::Quaternions>  q_prev_prev(x_prev_prev.data() + 3);
-            Eigen::Map<Eigen::Vector3s>     p_prev(x_prev.data());
-            Eigen::Map<Eigen::Quaternions>  q_prev(x_prev.data() + 3);
-            Eigen::Map<Eigen::Vector3s>     dp(dx.data());
-            Eigen::Map<Eigen::Quaternions>  dq(dx.data() + 3);
+            // define local variables on top of existing vectors to avoid memory allocation
+            Eigen::Vector3s     p_prev_prev(x_prev_prev.data());
+            Eigen::Quaternions  q_prev_prev(x_prev_prev.data() + 3);
+            Eigen::Vector3s     p_prev(x_prev.data());
+            Eigen::Quaternions  q_prev(x_prev.data() + 3);
+            Eigen::Vector3s     dp(dx.data());
+            Eigen::Quaternions  dq(dx.data() + 3);
 
             // delta state PQ
 //            Eigen::Vector3s dp = q_prev_prev.conjugate() * (p_prev - p_prev_prev);

@@ -185,8 +185,8 @@ int main(int argc, char** argv)
     << problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose() << std::endl;
     std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
     << problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(16).transpose() << std::endl;
-    std::cout << "Integrated std  : " << std::fixed << std::setprecision(3) << std::setw(8)
-    << (problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_.diagonal().transpose()).array().sqrt() << std::endl;
+//    std::cout << "Integrated std  : " << std::fixed << std::setprecision(3) << std::setw(8)
+//    << (problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_.diagonal().transpose()).array().sqrt() << std::endl;
 
 
     // Print statistics

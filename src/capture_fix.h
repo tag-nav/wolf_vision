@@ -27,7 +27,7 @@ class CaptureFix : public CaptureBase
 
         virtual ~CaptureFix();
 
-        virtual void process();
+        virtual void emplaceFeatureAndConstraint();
 
 };
 

@@ -46,11 +46,18 @@ class CaptureMotion : public CaptureBase
         // public interface:
 
     public:
-        CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
+        CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr,
+                      const Eigen::VectorXs& _data,
+                      Size _delta_size, Size _delta_cov_size,
                       FrameBasePtr _origin_frame_ptr = nullptr);
 
-        CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
-                      const Eigen::MatrixXs& _data_cov, FrameBasePtr _origin_frame_ptr = nullptr);
+//        CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
+//                      const Eigen::VectorXs& _data_sigmas, FrameBasePtr _origin_frame_ptr = nullptr);
+
+        CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr,
+                      const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov,
+                      Size _delta_size, Size _delta_cov_size,
+                      FrameBasePtr _origin_frame_ptr = nullptr);
 
         virtual ~CaptureMotion();
 
@@ -68,39 +75,40 @@ class CaptureMotion : public CaptureBase
 
         // member data:
     private:
-        Eigen::VectorXs data_;        ///< Motion data in form of vector mandatory
-        Eigen::MatrixXs data_cov_;    ///< Motion data covariance
-        MotionBuffer buffer_;         ///< Buffer of motions between this Capture and the next one.
+        Eigen::VectorXs data_;          ///< Motion data in form of vector mandatory
+        Eigen::MatrixXs data_cov_;      ///< Motion data covariance
+        MotionBuffer buffer_;           ///< Buffer of motions between this Capture and the next one.
         FrameBasePtr origin_frame_ptr_; ///< Pointer to the origin frame of the motion
 };
 
-inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
+inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr,
+                                    const Eigen::VectorXs& _data,
+                                    Size _delta_size, Size _delta_cov_size,
                                     FrameBasePtr _origin_frame_ptr) :
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),
         data_cov_(Eigen::MatrixXs::Identity(_data.rows(), _data.rows())),
-        buffer_(),
+        buffer_(_delta_size,_delta_cov_size),
         origin_frame_ptr_(_origin_frame_ptr)
 {
     //
-//    std::cout << "constructed    +C-Mot" << id() << std::endl;
 }
 
-inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data,
-                                    const Eigen::MatrixXs& _data_cov, FrameBasePtr _origin_frame_ptr) :
+inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr,
+                                    const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov,
+                                    Size _delta_size, Size _delta_cov_size,
+                                    FrameBasePtr _origin_frame_ptr) :
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),
         data_cov_(_data_cov),
-        buffer_(),
+        buffer_(_delta_size,_delta_cov_size),
         origin_frame_ptr_(_origin_frame_ptr)
 {
     //
-//    std::cout << "constructed    +C-Mot" << id() << std::endl;
 }
 
 inline CaptureMotion::~CaptureMotion()
 {
-//    std::cout << "destructed     -C-Mot" << id() << std::endl;
     //
 }
 
