@@ -961,7 +961,7 @@ bool Problem::check(int verbose_level)
                 for (auto c : f->getConstraintList())
                 {
                     if (verbose_level > 0)
-                        cout << "        c" << c->id() << " @ " << C.get();
+                        cout << "        c" << c->id() << " @ " << c.get();
 
                     auto Fo = c->getFrameOtherPtr();
                     auto fo = c->getFeatureOtherPtr();
