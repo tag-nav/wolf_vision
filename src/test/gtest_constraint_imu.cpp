@@ -2108,8 +2108,8 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK : public testin
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check_Complex2.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check_Complex2.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check_Complex.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check_Complex.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -7068,6 +7068,122 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2_Invar
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->fix();
 
+    last_KF->setState(expected_final_state);
+
+    //wolf_problem_ptr_->print(4,1,1,1); 
+
+    #ifdef GET_RESIDUALS
+        wolf::FrameBaseList frame_list = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
+
+        //trials to print all constraintIMUs' residuals
+        Eigen::Matrix<wolf::Scalar,15,1> IMU_residuals;
+        Eigen::Vector3s p1(Eigen::Vector3s::Zero());
+        Eigen::Vector4s q1_vec(Eigen::Vector4s::Zero());
+        Eigen::Map<Quaternions> q1(q1_vec.data());
+        Eigen::Vector3s v1(Eigen::Vector3s::Zero());
+        Eigen::Vector3s ab1(Eigen::Vector3s::Zero());
+        Eigen::Vector3s wb1(Eigen::Vector3s::Zero());
+        Eigen::Vector3s p2(Eigen::Vector3s::Zero());
+        Eigen::Vector4s q2_vec(Eigen::Vector4s::Zero());
+        Eigen::Map<Quaternions> q2(q2_vec.data());
+        Eigen::Vector3s v2(Eigen::Vector3s::Zero());
+        Eigen::Vector3s ab2(Eigen::Vector3s::Zero());
+        Eigen::Vector3s wb2(Eigen::Vector3s::Zero());
+
+        for(FrameBasePtr frm_ptr : frame_list)
+        {
+            if(frm_ptr->isKey())
+            {
+                ConstraintBaseList ctr_list =  frm_ptr->getConstrainedByList();
+                for(ConstraintBasePtr ctr_ptr : ctr_list)
+                {
+                    if(ctr_ptr->getTypeId() == CTR_IMU)
+                    {
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+
+                        std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
+                        std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
+                    }
+                }
+            }
+        }
+
+    #endif
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    std::cout << summary.BriefReport() << std::endl;
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    //Only biases are unfixed
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    WOLF_WARN("test precision for gyro bias assertions :", 0.001)
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+    EXPECT_TRUE((last_KF->getPPtr()->getVector() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getVector().transpose() << 
+    "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
+    EXPECT_TRUE((last_KF->getOPtr()->getVector() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getVector().transpose() << 
+    "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
+    EXPECT_TRUE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
+    "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
+
+    #ifdef GET_RESIDUALS
+        frame_list = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
+        for(FrameBasePtr frm_ptr : frame_list)
+        {
+            if(frm_ptr->isKey())
+            {
+                ConstraintBaseList ctr_list =  frm_ptr->getConstrainedByList();
+                for(ConstraintBasePtr ctr_ptr : ctr_list)
+                {
+                    if(ctr_ptr->getTypeId() == CTR_IMU)
+                    {
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+
+                        std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
+                        std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
+                    }
+                }
+            }
+        }
+
+    #endif
+}
+
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2_InvarP1Q1V1V2)
+{
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+    last_KF->getVPtr()->fix();
+
     //wolf_problem_ptr_->print(4,1,1,1); 
 
     #ifdef GET_RESIDUALS
@@ -7173,15 +7289,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2_Invar
     #endif
 }
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2_InvarP1Q1V1V2)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2V2_InvarP1Q1V1)
 {
     //prepare problem for solving
     origin_KF->getPPtr()->fix();
     origin_KF->getOPtr()->fix();
     origin_KF->getVPtr()->fix();
-    last_KF->getVPtr()->fix();
 
-    wolf_problem_ptr_->print(4,1,1,1); 
+    //wolf_problem_ptr_->print(4,1,1,1); 
 
     #ifdef GET_RESIDUALS
         wolf::FrameBaseList frame_list = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
@@ -7234,7 +7349,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2_I
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.BriefReport() << std::endl;
 
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
     EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
@@ -7250,7 +7365,8 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2_I
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
     EXPECT_TRUE((last_KF->getOPtr()->getVector() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getVector().transpose() << 
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
+    WOLF_WARN("LAST_KF V assertion precision : ", wolf::Constants::EPS*1000)
+    EXPECT_TRUE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
     "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -7286,15 +7402,8 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2_I
     #endif
 }
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2V2_InvarP1Q1V1)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarAll)
 {
-    //prepare problem for solving
-    origin_KF->getPPtr()->fix();
-    origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->fix();
-
-    wolf_problem_ptr_->print(4,1,1,1); 
-
     #ifdef GET_RESIDUALS
         wolf::FrameBaseList frame_list = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
 
@@ -7346,7 +7455,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2V2
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.BriefReport() << std::endl;
 
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
     EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
@@ -7620,7 +7729,6 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarAll_initBiasZero)
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK.VarB1B2_InvarP1Q1V1P2Q2V2:";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK.VarB1B2_InvarP1Q1V1P2Q2V2";
   return RUN_ALL_TESTS();
 }
