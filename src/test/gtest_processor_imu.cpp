@@ -451,6 +451,100 @@ TEST_F(ProcessorIMUt, gyro_x)
     "\n current x is : \n" << x.transpose() << std::endl;
 }
 
+TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
+{
+    wolf::Scalar dt(0.001);
+    t.set(0); // clock in 0,1 ms ticks
+    wolf::Scalar abx(0.002);
+    Eigen::Vector3s acc_bias((Eigen::Vector3s()<<abx,0,0).finished());
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  abx,0,0,  0,0,0; // Try some non-zero biases
+
+    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+
+    wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
+    data << 0+abx, 0, 9.8, rate_of_turn, 0, 0; // measure gravity
+
+    cap_imu_ptr->setData(data);
+    cap_imu_ptr->setTimeStamp(0.001);
+    sensor_ptr->process(cap_imu_ptr);
+
+    // Expected state after one integration
+    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
+
+    Eigen::VectorXs x(16);
+    x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, abx,0,0, 0,0,0; // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180
+
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "expected state : " << problem->getCurrentState().transpose() 
+    << "\n estimated state : " << x.transpose();
+
+    //do so for 5s
+    const unsigned int iter = 5000; //how many ms 
+    for(int i = 1; i < iter; i++) //already did one integration above
+    {
+        // quaternion composition
+        quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
+
+        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        data.head(3) =  rot.conjugate() * (- wolf::gravity()) + acc_bias;
+
+        cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 5.000
+        cap_imu_ptr->setData(data);
+        sensor_ptr->process(cap_imu_ptr);
+    }
+
+    x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, abx,0,0, 0,0,0;
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "estimated state is : \n" << problem->getCurrentState().transpose() <<
+    "\n expected state is : \n" << x.transpose() << std::endl;
+}
+
+TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
+{
+    wolf::Scalar dt(0.001);
+    t.set(0); // clock in 0,1 ms ticks
+    wolf::Scalar abx(0.002), aby(0.01);
+    Eigen::Vector3s acc_bias((Eigen::Vector3s()<<abx,aby,0).finished());
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  abx,aby,0,  0,0,0; // Try some non-zero biases
+
+    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+
+    wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
+    data << 0+abx, 0+aby, 9.8, rate_of_turn, rate_of_turn*1.5, 0; // measure gravity
+
+    cap_imu_ptr->setData(data);
+    cap_imu_ptr->setTimeStamp(0.001);
+    sensor_ptr->process(cap_imu_ptr);
+
+    // Expected state after one integration
+    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
+
+    Eigen::VectorXs x(16);
+    x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, abx,aby,0, 0,0,0;
+
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "expected state : " << problem->getCurrentState().transpose() 
+    << "\n estimated state : " << x.transpose();
+
+    //do so for 5s
+    const unsigned int iter = 5000; //how many ms 
+    for(int i = 1; i < iter; i++) //already did one integration above
+    {
+        // quaternion composition
+        quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
+
+        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        data.head(3) =  rot.conjugate() * (- wolf::gravity()) + acc_bias;
+
+        cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 5.000
+        cap_imu_ptr->setData(data);
+        sensor_ptr->process(cap_imu_ptr);
+    }
+
+    x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, abx,aby,0, 0,0,0;
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "estimated state is : \n" << problem->getCurrentState().transpose() <<
+    "\n expected state is : \n" << x.transpose() << std::endl;
+}
+
 TEST_F(ProcessorIMUt, gyro_z)
 {
     wolf::Scalar dt(0.001);
@@ -588,7 +682,7 @@ TEST_F(ProcessorIMUt, gyro_xyz)
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMUt.gyro_xyz";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMUt.gyro_xy_biasedAbx";
   return RUN_ALL_TESTS();
 }
 
