@@ -100,40 +100,40 @@ int main(int argc, char** argv)
 
     //=====================================================
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
+    ProblemPtr problem = Problem::create(FRM_PO_3D);
 
     // ODOM SENSOR AND PROCESSOR
-    SensorBasePtr sen_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
-    ProcessorBasePtr prc_ptr = wolf_problem_ptr_->installProcessor("ODOM 3D", "odometry integrator", "odom",            wolf_root + "/src/examples/processor_odom_3D.yaml");
-    SensorOdom3DPtr sen_odo_ptr = std::static_pointer_cast<SensorOdom3D>(sen_ptr);
+    SensorBasePtr sensor_base        = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
+    SensorOdom3DPtr sensor_odom      = std::static_pointer_cast<SensorOdom3D>(sensor_base);
+    ProcessorBasePtr prcocessor_base = problem->installProcessor("ODOM 3D", "odometry integrator", "odom",               wolf_root + "/src/examples/processor_odom_3D.yaml");
 
     // CAMERA SENSOR AND PROCESSOR
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
-    SensorCameraPtr camera_ptr = std::static_pointer_cast<SensorCamera>(sensor_ptr);
-    camera_ptr->setImgWidth(img_width);
-    camera_ptr->setImgHeight(img_height);
-    wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_ORB.yaml");
+    sensor_base            = problem->installSensor("CAMERA", "PinHole", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
+    SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sensor_base);
+    camera->setImgWidth(img_width);
+    camera->setImgHeight(img_height);
+    problem->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_ORB.yaml");
 
     //=====================================================
 
 
     //=====================================================
-    // Origin Key Frame
+    // Origin Key Frame is fixed
     TimeStamp t = 0;
-    FrameBasePtr origin_frame = wolf_problem_ptr_->emplaceFrame(KEY_FRAME, (Vector7s()<<1,0,0,0,0,0,1).finished(), t);
-    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(origin_frame);
+    FrameBasePtr origin_frame = problem->emplaceFrame(KEY_FRAME, (Vector7s()<<1,0,0,0,0,0,1).finished(), t);
+    problem->getProcessorMotionPtr()->setOrigin(origin_frame);
     origin_frame->fix();
 
-    std::cout << "t: " << 0 << "  \t\t\t x = ( " << wolf_problem_ptr_->getCurrentState().transpose() << ")" << std::endl;
+    std::cout << "t: " << 0 << "  \t\t\t x = ( " << problem->getCurrentState().transpose() << ")" << std::endl;
     std::cout << "--------------------------------------------------------------" << std::endl;
     //=====================================================
 
 
     //=====================================================
     // running CAPTURES preallocated
-    CaptureImagePtr image_ptr;
+    CaptureImagePtr image;
     Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
-    CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>(t, sen_odo_ptr, data, 7, 6);
+    CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>(t, sensor_odom, data, 7, 6);
     //=====================================================
 
 
@@ -141,14 +141,14 @@ int main(int argc, char** argv)
     //=====================================================
     // Ceres wrapper
     ceres::Solver::Options ceres_options;
-    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
-    ceres_options.max_line_search_step_contraction = 1e-3;
+    //    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
+    //    ceres_options.max_line_search_step_contraction = 1e-3;
     //    ceres_options.minimizer_progress_to_stdout = false;
     //    ceres_options.line_search_direction_type = ceres::LBFGS;
     //    ceres_options.max_num_iterations = 100;
     google::InitGoogleLogging(argv[0]);
 
-    CeresManager ceres_manager(wolf_problem_ptr_, ceres_options);
+    CeresManager ceres_manager(problem, ceres_options);
     //=====================================================
 
 
@@ -161,12 +161,12 @@ int main(int argc, char** argv)
 
     //=====================================================
     // main loop
-    unsigned int f  = 1;
-    capture >> frame[f % buffer_size];
+    unsigned int frame_count  = 1;
+    capture >> frame[frame_count % buffer_size];
 
     Scalar dt = 0.04;
 
-    while(!(frame[f % buffer_size].empty()))
+    while(!(frame[frame_count % buffer_size].empty()))
     {
 
         t += dt;
@@ -174,10 +174,10 @@ int main(int argc, char** argv)
         // Image ---------------------------------------------
 
         // Preferred method with factory objects:
-        image_ptr = std::make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
+        image = std::make_shared<CaptureImage>(t, camera, frame[frame_count % buffer_size]);
 
         /* process */
-        camera_ptr->process(image_ptr);
+        camera->process(image);
 
 
 
@@ -186,18 +186,18 @@ int main(int argc, char** argv)
         cap_odo->setTimeStamp(t);
 
         // previous state and TS
-        Eigen::Vector7s x_prev = wolf_problem_ptr_->getCurrentState();
+        Eigen::Vector7s x_prev = problem->getCurrentState();
         Vector7s x_prev_prev;
         Vector7s dx;
 
         // before the previous state
-        FrameBasePtr prev_key_fr_ptr = wolf_problem_ptr_->getLastKeyFramePtr();
+        FrameBasePtr prev_key_fr_ptr = problem->getLastKeyFramePtr();
         FrameBasePtr prev_prev_key_fr_ptr = nullptr;
-        for (auto f_it = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().rbegin(); f_it != wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().rend(); f_it++)
+        for (auto f_it = problem->getTrajectoryPtr()->getFrameList().rbegin(); f_it != problem->getTrajectoryPtr()->getFrameList().rend(); f_it++)
             if ((*f_it) == prev_key_fr_ptr)
             {
                 f_it++;
-                if (f_it != wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().rend())
+                if (f_it != problem->getTrajectoryPtr()->getFrameList().rend())
                 {
                     prev_prev_key_fr_ptr = (*f_it);
                 }
@@ -240,9 +240,9 @@ int main(int argc, char** argv)
 
         cap_odo->setData(data);
 
-        sen_odo_ptr->process(cap_odo);
+        sensor_odom->process(cap_odo);
 
-//        wolf_problem_ptr_->print(2,1,0,0);
+//        problem->print(2,1,0,0);
 
 //        std::cout << "prev prev ts: " << t_prev_prev.get() << "; x: " << x_prev_prev.transpose() << std::endl;
 //        std::cout << "prev      ts: " << t_prev.get() << "; x: " << x_prev.transpose() << std::endl;
@@ -252,7 +252,7 @@ int main(int argc, char** argv)
 
         // Cleanup map ---------------------------------------
 
-        cleanupMap(wolf_problem_ptr_, t, 2, 5); // dt, min_ctr
+        cleanupMap(problem, t, 2, 5); // dt, min_ctr
 
 
         // Solve -----------------------------------------------
@@ -268,12 +268,12 @@ int main(int argc, char** argv)
 
         std::cout << "=================================================================================================" << std::endl;
 
-        f++;
-        capture >> frame[f % buffer_size];
+        frame_count++;
+        capture >> frame[frame_count % buffer_size];
     }
 
-    // wolf_problem_ptr_->print(2);
-    wolf_problem_ptr_.reset();
+    // problem->print(2);
+    problem.reset();
 
     return 0;
 }
