@@ -25,25 +25,21 @@ using Eigen::Vector7s;
 
 using namespace wolf;
 
-void cleanupMap(const ProblemPtr& wolf_problem_ptr_, const TimeStamp& t, Scalar dt_max,
-                                      Size min_constraints)
+void cleanupMap(const ProblemPtr& _problem, const TimeStamp& _t, Scalar _dt_max,
+                                      Size _min_constraints)
 {
     std::list<LandmarkBasePtr> lmks_to_remove;
-    for (auto lmk : wolf_problem_ptr_->getMapPtr()->getLandmarkList())
+    for (auto lmk : _problem->getMapPtr()->getLandmarkList())
     {
         TimeStamp t0 = std::static_pointer_cast<LandmarkAHP>(lmk)->getAnchorFrame()->getTimeStamp();
-        if (t - t0 > dt_max)
-        {
-            unsigned int nbr_ctr = lmk->getConstrainedByList().size();
-            if (nbr_ctr <= min_constraints)
-            {
+        if (_t - t0 > _dt_max)
+            if (lmk->getConstrainedByList().size() <= _min_constraints)
                 lmks_to_remove.push_back(lmk);
-            }
-        }
     }
+
     for (auto lmk : lmks_to_remove)
     {
-        std::cout << "clean up L" << lmk->id() << std::endl;
+        WOLF_DEBUG("Clean up L" , lmk->id() );
         lmk->remove();
     }
 }
@@ -145,7 +141,7 @@ int main(int argc, char** argv)
     //    ceres_options.max_line_search_step_contraction = 1e-3;
     //    ceres_options.minimizer_progress_to_stdout = false;
     //    ceres_options.line_search_direction_type = ceres::LBFGS;
-    //    ceres_options.max_num_iterations = 100;
+    ceres_options.max_num_iterations = 5;
     google::InitGoogleLogging(argv[0]);
 
     CeresManager ceres_manager(problem, ceres_options);
@@ -163,6 +159,7 @@ int main(int argc, char** argv)
     // main loop
     unsigned int frame_count  = 1;
     capture >> frame[frame_count % buffer_size];
+    unsigned int number_of_KFs = 0;
 
     Scalar dt = 0.04;
 
@@ -223,12 +220,6 @@ int main(int argc, char** argv)
             Eigen::Quaternions  dq(dx.data() + 3);
 
             // delta state PQ
-//            Eigen::Vector3s dp = q_prev_prev.conjugate() * (p_prev - p_prev_prev);
-//            Eigen::Quaternions dq = q_prev_prev.conjugate() * q_prev;
-//
-//            dx.head<3>() = dp;
-//            dx.tail<4>() = dq.coeffs();
-
             dp = q_prev_prev.conjugate() * (p_prev - p_prev_prev);
             dq = q_prev_prev.conjugate() * q_prev;
 
@@ -256,10 +247,13 @@ int main(int argc, char** argv)
 
 
         // Solve -----------------------------------------------
-
-        ceres::Solver::Summary summary = ceres_manager.solve();
-        std::cout << summary.BriefReport() << std::endl;
-
+        // solve only when new KFs are added
+        if (problem->getTrajectoryPtr()->getFrameList().size() > number_of_KFs)
+        {
+            number_of_KFs = problem->getTrajectoryPtr()->getFrameList().size();
+            ceres::Solver::Summary summary = ceres_manager.solve();
+            std::cout << summary.BriefReport() << std::endl;
+        }
 
 
         // Finish loop -----------------------------------------
