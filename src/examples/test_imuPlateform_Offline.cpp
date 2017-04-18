@@ -126,7 +126,7 @@ int main(int argc, char** argv)
     Scalar input_clock;
     TimeStamp ts(0);
     wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
-    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6);
 
     //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
     t = ts;
@@ -176,7 +176,7 @@ int main(int argc, char** argv)
     std::cout << "Integrated state: " << std::fixed << std::setprecision(3) << std::setw(8)
     << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(16).transpose() << std::endl;
     std::cout << "Integrated std  : " << std::fixed << std::setprecision(3) << std::setw(8)
-    << (wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_.diagonal().transpose()).array().sqrt() << std::endl;
+    << (wolf_problem_ptr_->getProcessorMotionPtr()->integrateBufferCovariance(wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer()).diagonal().transpose()).array().sqrt() << std::endl;
 
 
     // Print statistics

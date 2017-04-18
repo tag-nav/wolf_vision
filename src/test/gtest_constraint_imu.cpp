@@ -222,7 +222,7 @@ class ConstraintIMU_accBiasObservation : public testing::Test
         TimeStamp ts(0);
         TimeStamp t_odom(0);
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
-        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
+        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6);
     
         //read first odom data from file
         odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
@@ -1532,7 +1532,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         TimeStamp ts(0);
         TimeStamp t_odom(0);
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
-        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
+        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6);
     
         //read first odom data from file
         odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
@@ -1697,7 +1697,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK : public testing::Te
         TimeStamp ts(0);
         TimeStamp t_odom(0);
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
-        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
+        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6);
     
         //read first odom data from file
         odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
@@ -1862,7 +1862,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex : public testing::Test
         TimeStamp ts(0);
         TimeStamp t_odom(0);
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
-        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
+        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6);
     
         //read first odom data from file
         odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
@@ -2022,7 +2022,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK : public testin
         TimeStamp ts(0);
         TimeStamp t_odom(0);
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
-        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
+        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6);
     
         //read first odom data from file
         odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
@@ -2181,7 +2181,7 @@ class ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK : public te
         TimeStamp ts(0);
         TimeStamp t_odom(0);
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
-        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
+        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6);
     
         //read first odom data from file
         odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
@@ -2340,7 +2340,7 @@ class ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK : public testin
         TimeStamp ts(0);
         TimeStamp t_odom(0);
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
-        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D);
+        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6);
     
         //read first odom data from file
         odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
@@ -2441,7 +2441,7 @@ TEST_F(ConstraintIMU_PrcImuOdom, gyro_biased_static)
             // PROCESS ODOM 3D DATA
             Eigen::Vector6s data_odom3D;
             data_odom3D << 0,0,0, 0,0,0;
-            mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
+            mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D, 6, 6);
             sen_odom3D->process(mot_ptr);
         }
 
@@ -2546,7 +2546,7 @@ TEST_F(ConstraintIMU_PrcImuOdom, gyroZ_biased_static)
     Eigen::Vector6s data_odom3D;
     data_odom3D << 0,0,0, 0,0,0;
     
-    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D, 6, 6);
     sen_odom3D->process(mot_ptr);
 
     FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
@@ -2629,7 +2629,7 @@ TEST_F(ConstraintIMU_PrcImuOdom, gyroX_biased_static)
     Eigen::Vector6s data_odom3D;
     data_odom3D << 0,0,0, 0,0,0;
     
-    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D, 6, 6);
     sen_odom3D->process(mot_ptr);
 
     FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
@@ -2716,7 +2716,7 @@ TEST_F(ConstraintIMU_PrcImuOdom, acc_biased_static)
             // PROCESS ODOM 3D DATA
             Eigen::Vector6s data_odom3D;
             data_odom3D << 0,0,0, 0,0,0;
-            mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
+            mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D, 6, 6);
             sen_odom3D->process(mot_ptr);
         }
     }
@@ -2820,7 +2820,7 @@ TEST_F(ConstraintIMU_PrcImuOdom, acc_gyro_biased_static)
     Eigen::Vector6s data_odom3D;
     data_odom3D << 0,0,0, 0,0,0;
     
-    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D);
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D, 6, 6);
     sen_odom3D->process(mot_ptr);
 
     FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));

@@ -401,14 +401,14 @@ inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref,
     assert(_motion_ref.delta_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
     assert(_motion_ref.delta_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
     assert(_motion_ref.delta_integr_.size() == delta_size_ && "Wrong delta size");
-    assert(_motion_ref.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
-    assert(_motion_ref.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+    //assert(_motion_ref.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+    //assert(_motion_ref.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
     assert(_motion_second.delta_.size() == delta_size_ && "Wrong delta size");
     assert(_motion_second.delta_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
     assert(_motion_second.delta_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
     assert(_motion_second.delta_integr_.size() == delta_size_ && "Wrong delta size");
-    assert(_motion_second.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
-    assert(_motion_second.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+    //assert(_motion_second.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+    //assert(_motion_second.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
 
     // Interpolate between motion_ref and motion, as in:
     //
@@ -455,7 +455,7 @@ inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref,
 
     // interpolate covariances
     motion_int.delta_cov_           = tau * _motion_second.delta_cov_;
-    motion_int.delta_integr_cov_    = J_ref * _motion_ref.delta_integr_cov_ * J_ref.transpose() + J_int * _motion_second.delta_cov_ * J_int.transpose();
+    //motion_int.delta_integr_cov_    = J_ref * _motion_ref.delta_integr_cov_ * J_ref.transpose() + J_int * _motion_second.delta_cov_ * J_int.transpose();
 
     // update second delta ( in place update )
     dp_sec          = dq_int.conjugate() * ((1 - tau) * dp_sec);
@@ -504,11 +504,11 @@ inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureBasePtr _capture_motio
     CaptureIMUPtr capt_imu = std::static_pointer_cast<CaptureIMU>(_capture_motion);
     FrameIMUPtr key_frame_ptr = std::static_pointer_cast<FrameIMU>(_related_frame);
     // create motion feature and add it to the key_capture
+    Eigen::MatrixXs delta_integr_cov(integrateBufferCovariance(getBuffer()));
     FeatureIMUPtr key_feature_ptr = std::make_shared<FeatureIMU>(
             capt_imu->getBuffer().get().back().delta_integr_,
-            capt_imu->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
-                    capt_imu->getBuffer().get().back().delta_integr_cov_ :
-                    Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-4, // avoid a strict zero in the covariance
+            delta_integr_cov.determinant() > 0 ?
+            delta_integr_cov : Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-4, // avoid a strict zero in the covariance
             key_frame_ptr->getAccBiasPtr()->getVector(),
             key_frame_ptr->getGyroBiasPtr()->getVector(),
             this->getJacobians()); 
