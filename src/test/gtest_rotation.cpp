@@ -666,6 +666,5 @@ int main(int argc, char **argv)
      */
 
      testing::InitGoogleTest(&argc, argv);
-     ::testing::GTEST_FLAG(filter) = "*Quat_compos_var_rateOfTurn_diff";
      return RUN_ALL_TESTS();
 }
