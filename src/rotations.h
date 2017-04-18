@@ -61,7 +61,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> vee(const Eigen::MatrixBase
 // Rotation conversions
 
 template<typename Derived>
-inline Eigen::Quaternion<typename Derived::Scalar> q2v_original(const Eigen::MatrixBase<Derived>& _v)
+inline Eigen::Quaternion<typename Derived::Scalar> v2q_original(const Eigen::MatrixBase<Derived>& _v)
 {
 
     MatrixSizeCheck<3, 1>::check(_v);
