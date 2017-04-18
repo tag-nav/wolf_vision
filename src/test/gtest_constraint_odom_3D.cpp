@@ -1,87 +1,91 @@
 /**
  * \file gtest_constraint_odom_3D.cpp
  *
- *  Created on: Jan 06, 2016
- *      \author: Dinesh
+ *  Created on: Mar 30, 2017
+ *      \author: jsola
  */
 
-#include "wolf.h"
-#include "problem.h"
-#include "sensor_odom_3D.h"
-#include "capture_motion.h"
-#include "state_block.h"
-#include "state_quaternion.h"
-#include "processor_odom_3D.h"
 
 #include "utils_gtest.h"
-#include "../src/logging.h"
 
-TEST(ConstraintOdom3D, constructors)
+#include "constraint_odom_3D.h"
+#include "capture_motion.h"
+
+#include "ceres_wrapper/ceres_manager.h"
+
+
+using namespace Eigen;
+using namespace wolf;
+using std::cout;
+using std::endl;
+
+Vector7s data2delta(Vector6s _data)
 {
-    using namespace wolf;
-    using std::shared_ptr;
-    using std::make_shared;
-    using std::static_pointer_cast;
+    return (Vector7s() << _data.head<3>() , v2q(_data.tail<3>()).coeffs()).finished();
+}
 
-    // Wolf problem
-    wolf::ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
+// Input odometry data and covariance
+Vector6s data(Vector6s::Random());
+Vector7s delta = data2delta(data);
+Vector6s data_var((Vector6s() << 0.2,0.2,0.2,0.2,0.2,0.2).finished());
+Matrix6s data_cov = data_var.asDiagonal();
 
-    //just to make it work
-    Eigen::VectorXs extrinsics(7);
-    extrinsics << 0,0,0, 0,0,0,1; // pose in the robot
-    IntrinsicsOdom3DPtr intrinsics = std::make_shared<IntrinsicsOdom3D>();
-    SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "Main ODOM_3D", extrinsics, intrinsics);
-    wolf_problem_ptr_->installProcessor("ODOM 3D", "ODOM_3D integrator", "Main ODOM_3D", "");
+// perturbated priors
+Vector7s x0 = data2delta(Vector6s::Random()*0.25);
+Vector7s x1 = data2delta(data + Vector6s::Random()*0.25);
 
-    Motion ref(0,7,6), final(0,7,6);
-    Eigen::VectorXs origin_state(7);
-    TimeStamp t_o, ts;
+// Problem and solver
+ProblemPtr problem = Problem::create(FRM_PO_3D);
+CeresManager ceres_mgr(problem);
 
-    // set ref
-    ref.ts_ = 0;
-    ref.delta_          << 0,0,0, 0,0,0,1;
-    ref.delta_integr_   << 0,0,0, 0,0,0,1;
+// Two frames
+FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeStamp(0));
+FrameBasePtr frm1 = problem->emplaceFrame(KEY_FRAME, delta, TimeStamp(1));
 
-    // set final
-    final.ts_ = 10;
-    final.delta_        << 1,5,0.5, 0,0,0,1;
-    final.delta_integr_ << 0,0,0, 0,0,0,1;
+// Capture, feature and constraint from frm1 to frm0
+CaptureBasePtr cap1 = frm1->addCapture(std::make_shared<CaptureMotion>(1, nullptr, delta, 7, 6));
+FeatureBasePtr fea1 = cap1->addFeature(std::make_shared<FeatureBase>("ODOM 3D", delta, data_cov));
+ConstraintOdom3DPtr ctr1 = std::static_pointer_cast<ConstraintOdom3D>(fea1->addConstraint(std::make_shared<ConstraintOdom3D>(fea1, frm0))); // create and add
+ConstraintBasePtr dummy = frm0->addConstrainedBy(ctr1);
 
-    //set origin state
-    origin_state << 0,0,0, 0,0,0,1;
-    t_o.set(0);
+////////////////////////////////////////////////////////
 
-    //create a keyframe at origin
-    StateBlockPtr o_p = std::make_shared<StateBlock>(origin_state.head<3>());
-    StateBlockPtr o_q = std::make_shared<StateBlock>(origin_state.tail<4>());
-    wolf::FrameBasePtr origin_frame = std::make_shared<FrameBase>(t_o, o_p, o_q);
-    wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
+TEST(ConstraintOdom3D, check_tree)
+{
+    ASSERT_TRUE(problem->check(0));
+}
 
-    wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(origin_state, t_o);
+TEST(ConstraintOdom3D, expectation)
+{
+    ASSERT_EIGEN_APPROX(ctr1->expectation() , delta, 1e-6);
+}
 
-    Eigen::Vector6s data;
-    data << 10.06,42,2.4, 0,0,0;
+TEST(ConstraintOdom3D, fix_0_solve)
+{
 
-    CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>((final.ts_ - ref.ts_), sensor_ptr, data);
-    mot_ptr->setFramePtr(origin_frame);
+    // Fix frame 0, perturb frm1
+    frm0->fix();
+    frm1->unfix();
+    frm1->setState(x1);
 
-    wolf_problem_ptr_->getProcessorMotionPtr()->process(mot_ptr);
+    // solve for frm1
+    ceres::Solver::Summary summary = ceres_mgr.solve();
 
-    //create a keyframe at final state
-    ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
-    Eigen::VectorXs final_state;
-    final_state = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(7);
-    StateBlockPtr f_p = std::make_shared<StateBlock>(final_state.head<3>());
-    StateBlockPtr f_q = std::make_shared<StateBlock>(final_state.tail<4>());
-    wolf::FrameBasePtr final_frame = std::make_shared<FrameBase>(KEY_FRAME, ts, f_p, f_q);
-    wolf_problem_ptr_->getTrajectoryPtr()->addFrame(final_frame);
-    
-    //create a feature
-    FeatureBasePtr last_feature = std::make_shared<FeatureBase>("ODOM 3D", final_state.head(7),Eigen::Matrix7s::Identity()); //TODO : use true covariance
-    last_feature->setCapturePtr(mot_ptr);
+    ASSERT_EIGEN_APPROX(frm1->getState(), delta, 1e-6);
 
-    //create the constraint
-    ConstraintOdom3D constraint_odom(last_feature,final_frame);
+}
+
+TEST(ConstraintOdom3D, fix_1_solve)
+{
+    // Fix frame 1, perturb frm0
+    frm0->unfix();
+    frm1->fix();
+    frm0->setState(x0);
+
+    // solve for frm0
+    ceres::Solver::Summary summary = ceres_mgr.solve();
+
+    ASSERT_EIGEN_APPROX(frm0->getState(), problem->zeroState(), 1e-6);
 }
 
 int main(int argc, char **argv)

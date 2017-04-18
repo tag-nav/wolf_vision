@@ -136,7 +136,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void unlinkCapture(CaptureBasePtr _cap_ptr);
 
         void getConstraintList(ConstraintBaseList& _ctr_list);
-        virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        virtual ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
         ConstraintBaseList& getConstrainedByList();
 
@@ -330,10 +330,11 @@ inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
 }
 
 
-inline void FrameBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+inline ConstraintBasePtr FrameBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
     constrained_by_list_.push_back(_ctr_ptr);
     _ctr_ptr->setFrameOtherPtr( shared_from_this() );
+    return _ctr_ptr;
 }
 
 inline unsigned int FrameBase::getHits() const

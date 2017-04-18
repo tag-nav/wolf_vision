@@ -37,7 +37,7 @@ YAML::Node LandmarkAHP::saveToYaml() const
 
 Eigen::Vector3s LandmarkAHP::getPointInAnchorSensor() const
 {
-    Eigen::Map<const Eigen::Vector4s> hmg_point(getPPtr()->getVector().data());
+    Eigen::Map<const Eigen::Vector4s> hmg_point(getPPtr()->getState().data());
     return hmg_point.head<3>()/hmg_point(3);
 }
 
@@ -45,12 +45,12 @@ Eigen::Vector3s LandmarkAHP::point() const
 {
     using namespace Eigen;
     Transform<Scalar,3,Affine> T_w_r
-        = Translation<Scalar,3>(getAnchorFrame()->getPPtr()->getVector())
-        * Quaternions(getAnchorFrame()->getOPtr()->getVector().data());
+        = Translation<Scalar,3>(getAnchorFrame()->getPPtr()->getState())
+        * Quaternions(getAnchorFrame()->getOPtr()->getState().data());
     Transform<Scalar,3,Affine> T_r_c
-        = Translation<Scalar,3>(getAnchorSensor()->getPPtr()->getVector())
-        * Quaternions(getAnchorSensor()->getOPtr()->getVector().data());
-    Vector4s point_hmg_c = getPPtr()->getVector();
+        = Translation<Scalar,3>(getAnchorSensor()->getPPtr()->getState())
+        * Quaternions(getAnchorSensor()->getOPtr()->getState().data());
+    Vector4s point_hmg_c = getPPtr()->getState();
     Vector4s point_hmg = T_w_r * T_r_c * point_hmg_c;
     return point_hmg.head<3>()/point_hmg(3);
 }

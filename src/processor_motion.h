@@ -99,6 +99,13 @@ namespace wolf
  */
 class ProcessorMotion : public ProcessorBase
 {
+    private:
+        enum
+        {
+            IDLE,
+            RUNNING
+        } status_;
+
     // This is the main public interface
     public:
         ProcessorMotion(const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance = 0.1);
@@ -110,63 +117,64 @@ class ProcessorMotion : public ProcessorBase
         virtual void resetDerived();
 
         // Queries to the processor:
+        virtual bool isMotion();
 
         virtual bool voteForKeyFrame();
 
-        /** \brief Fills a reference to the state integrated so far
+        /** \brief Fill a reference to the state integrated so far
          * \param _x the returned state vector
          */
         void getCurrentState(Eigen::VectorXs& _x);
 
-        /** \brief Fills a reference to the state integrated so far and its stamp
+        /** \brief Get a constant reference to the state integrated so far
+         * \return the state vector
+         */
+        Eigen::VectorXs getCurrentState();
+
+        /** \brief Fill a reference to the state integrated so far and its stamp
          * \param _x the returned state vector
          * \param _ts the returned stamp
          */
-        void getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts);
+        void getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts);
 
-        /** \brief Gets a constant reference to the state integrated so far
-         * \return the state vector
-         */
-        const Eigen::VectorXs& getCurrentState();
-
-        /** \brief Gets a constant reference to the state integrated so far and its stamp
+        /** \brief Get the state integrated so far and its stamp
          * \param _ts the returned stamp
          * return the state vector
          */
-        const Eigen::VectorXs& getCurrentState(TimeStamp& _ts);
+        Eigen::VectorXs getCurrentStateAndStamp(TimeStamp& _ts);
 
-        /** \brief Fills the state corresponding to the provided time-stamp
+        /** \brief Fill the state corresponding to the provided time-stamp
          * \param _ts the time stamp
          * \param _x the returned state
          */
         void getState(const TimeStamp& _ts, Eigen::VectorXs& _x);
 
-        /** \brief Gets the state corresponding to the provided time-stamp
+        /** \brief Get the state corresponding to the provided time-stamp
          * \param _ts the time stamp
          * \return the state vector
          */
-        Eigen::VectorXs& getState(const TimeStamp& _ts);
+        Eigen::VectorXs getState(const TimeStamp& _ts);
 
         /** \brief Gets a constant reference delta preintegrated covariance from all integrations so far
          * \return the delta preintegrated covariance matrix
          */
         const Eigen::MatrixXs getCurrentDeltaPreintCov();
 
-        /** \brief Provides the motion integrated so far
-         * \return a const reference to the integrated delta state
+        /** \brief Provide the motion integrated so far
+         * \return the integrated delta state
          */
-         
-        const Motion& getMotion() const;
+        Motion getMotion() const;
+
         void getMotion(Motion& _motion) const;
 
-        /** \brief Provides the motion integrated until a given timestamp
-         * \return a reference to the integrated delta state
+        /** \brief Provide the motion integrated until a given timestamp
+         * \return the integrated delta state
          */
-        const Motion& getMotion(const TimeStamp& _ts) const;
+        Motion getMotion(const TimeStamp& _ts) const;
         void getMotion(const TimeStamp& _ts, Motion& _motion) const;
 
         /** \brief Finds the capture that contains the closest previous motion of _ts
-         * \return a pointer to the capture (if it exist) or a nullptr (otherwise)
+         * \return a pointer to the capture (if it exists) or a nullptr (otherwise)
          */
         CaptureMotionPtr findCaptureContainingTimeStamp(const TimeStamp& _ts) const;
 
@@ -180,7 +188,7 @@ class ProcessorMotion : public ProcessorBase
                        Eigen::VectorXs& _delta1_plus_delta2);
 
         /** Set the origin of all motion for this processor
-         * \param _origin_frame the key frame to be the origin
+         * \param _origin_frame the keyframe to be the origin
          */
         void setOrigin(FrameBasePtr _origin_frame);
 
@@ -195,7 +203,7 @@ class ProcessorMotion : public ProcessorBase
         MotionBuffer& getBuffer();
         const MotionBuffer& getBuffer() const;
 
-        virtual bool isMotion();
+        Eigen::MatrixXs integrateBufferCovariance(const MotionBuffer& _motion_buffer);
 
         // Helper functions:
     protected:
@@ -204,8 +212,8 @@ class ProcessorMotion : public ProcessorBase
 
     protected:
         void updateDt();
-        void integrate();
-        void reintegrate(CaptureMotionPtr _capture_ptr);
+        void integrateOneStep();
+        void reintegrateBuffer(CaptureMotionPtr _capture_ptr);
 
         /** Pre-process incoming Capture
          *
@@ -651,16 +659,6 @@ class ProcessorMotion : public ProcessorBase
 
 namespace wolf{
 
-inline FrameBasePtr ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
-{
-    // make a new key frame
-    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(KEY_FRAME, _x_origin, _ts_origin);
-    // set the key frame as origin
-    setOrigin(key_frame_ptr);
-
-    return key_frame_ptr ;
-}
-
 inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part)
 {
     last_ptr_->getBuffer().split(_t_split, _oldest_part);
@@ -677,7 +675,7 @@ inline bool ProcessorMotion::voteForKeyFrame()
     return false;
 }
 
-inline Eigen::VectorXs& ProcessorMotion::getState(const TimeStamp& _ts)
+inline Eigen::VectorXs ProcessorMotion::getState(const TimeStamp& _ts)
 {
     getState(_ts, x_);
     return x_;
@@ -693,15 +691,15 @@ inline wolf::TimeStamp ProcessorMotion::getCurrentTimeStamp()
     return getBuffer().get().back().ts_;
 }
 
-inline const Eigen::VectorXs& ProcessorMotion::getCurrentState()
+inline Eigen::VectorXs ProcessorMotion::getCurrentState()
 {
     getCurrentState(x_);
     return x_;
 }
 
-inline const Eigen::VectorXs& ProcessorMotion::getCurrentState(TimeStamp& _ts)
+inline Eigen::VectorXs ProcessorMotion::getCurrentStateAndStamp(TimeStamp& _ts)
 {
-    getCurrentState(x_, _ts);
+    getCurrentStateAndStamp(x_, _ts);
     return x_;
 }
 
@@ -711,7 +709,7 @@ inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
     xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().get().back().delta_integr_, Dt, _x);
 }
 
-inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts)
+inline void ProcessorMotion::getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts)
 {
     getCurrentState(_x);
     _ts = getCurrentTimeStamp();
@@ -722,12 +720,12 @@ inline const Eigen::MatrixXs ProcessorMotion::getCurrentDeltaPreintCov()
     return delta_integrated_cov_;
 }
 
-inline const Motion& ProcessorMotion::getMotion() const
+inline Motion ProcessorMotion::getMotion() const
 {
     return getBuffer().get().back();
 }
 
-inline const Motion& ProcessorMotion::getMotion(const TimeStamp& _ts) const
+inline Motion ProcessorMotion::getMotion(const TimeStamp& _ts) const
 {
     auto capture_ptr = findCaptureContainingTimeStamp(_ts);
     assert(capture_ptr != nullptr && "ProcessorMotion::getMotion: timestamp older than first motion");
@@ -781,8 +779,9 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
             {_ts,
              deltaZero(),
              deltaZero(),
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)  // Cov
              });
 }
 

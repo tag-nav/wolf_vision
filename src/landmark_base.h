@@ -94,7 +94,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
 
         // Navigate wolf tree
-        void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
         ConstraintBaseList& getConstrainedByList();
 
@@ -159,10 +159,11 @@ inline void LandmarkBase::unfix()
     this->setStatus(LANDMARK_ESTIMATED);
 }
 
-inline void LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+inline ConstraintBasePtr LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
     constrained_by_list_.push_back(_ctr_ptr);
     _ctr_ptr->setLandmarkOtherPtr( shared_from_this() );
+    return _ctr_ptr;
 }
 
 inline unsigned int LandmarkBase::getHits() const

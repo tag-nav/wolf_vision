@@ -14,12 +14,12 @@ namespace wolf
 {
 
 //////////////////////////////////////////////////////////////
-// Simple angular functions
 template<typename T>
-inline T pi2pi(const T& angle)
+inline T pi2pi(T angle)
 {
-    return (angle > (T)0 ? fmod(angle + (T)M_PI, (T)(2 * M_PI)) - (T)M_PI :
-            fmod(angle - (T)M_PI, (T)(2 * M_PI)) + (T)M_PI);
+    return (angle > (T)0 ?
+            fmod(angle + (T)M_PI, (T)(2*M_PI)) - (T)M_PI :
+            fmod(angle - (T)M_PI, (T)(2*M_PI)) + (T)M_PI);
 }
 
 template<typename T>

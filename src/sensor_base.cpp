@@ -49,11 +49,10 @@ SensorBase::~SensorBase()
 {
     // Remove State Blocks
     removeStateBlocks();
-
-//    std::cout << "destructed   -S" << id() << std::endl;
+    //    std::cout << "destructed   -S" << id() << std::endl;
 }
 
-inline void SensorBase::remove()
+void SensorBase::remove()
 {
     if (!is_removing_)
     {

@@ -100,7 +100,7 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
 
         /** \brief Returns a reference to the feature measurement square root information
          **/
-        virtual const Eigen::MatrixXs& getMeasurementSquareRootInformation() const
+        virtual const Eigen::MatrixXs& getMeasurementSquareRootInformationTransposed() const
         {
             return measurement_sqrt_information_;
         }
@@ -120,8 +120,8 @@ inline bool ConstraintPointToLine2D::operator ()(const T* const _robotP, const T
     Eigen::Matrix<T,2,1> landmark_point_aux = landmark_origin_position_map + Eigen::Rotation2D<T>(*_landmarkOriginOrientation) * landmark_aux_position_map;
 
     // sensor transformation
-    Eigen::Matrix<T,2,1> sensor_position = getCapturePtr()->getSensorPtr()->getPPtr()->getVector().head(2).cast<T>();
-    Eigen::Matrix<T,2,2> inverse_R_sensor = Eigen::Rotation2D<T>(T(-getCapturePtr()->getSensorOPtr()->getVector()(0))).matrix();
+    Eigen::Matrix<T,2,1> sensor_position = getCapturePtr()->getSensorPtr()->getPPtr()->getState().head(2).cast<T>();
+    Eigen::Matrix<T,2,2> inverse_R_sensor = Eigen::Rotation2D<T>(T(-getCapturePtr()->getSensorOPtr()->getState()(0))).matrix();
     // robot transformation
     Eigen::Matrix<T,2,2> inverse_R_robot = Eigen::Rotation2D<T>(-_robotO[0]).matrix();
 

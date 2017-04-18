@@ -132,7 +132,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Set the processor motion
          *
-         * Set the processor motion. It will provide the state.
+         * Set the processor motion.
          */
         void setProcessorMotion(ProcessorMotionPtr _processor_motion_ptr);
         ProcessorMotionPtr setProcessorMotion(const std::string& _unique_processor_name);
@@ -142,7 +142,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         // Trajectory branch ----------------------------------
         TrajectoryBasePtr getTrajectoryPtr();
-        virtual void setOrigin(const Eigen::VectorXs& _origin_pose, const Eigen::MatrixXs& _origin_cov,
+        virtual FrameBasePtr setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov,
                                const TimeStamp& _ts);
 
         /** \brief Emplace Frame of the correct size
@@ -183,13 +183,15 @@ class Problem : public std::enable_shared_from_this<Problem>
         FrameBasePtr emplaceFrame(const std::string& _frame_structure, FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
                                const TimeStamp& _time_stamp);
 
+        // State getters
         Eigen::VectorXs getCurrentState();
-        Eigen::VectorXs getCurrentState(TimeStamp& _ts);
         void getCurrentState(Eigen::VectorXs& state);
-        void getCurrentState(Eigen::VectorXs& state, TimeStamp& _ts);
-        Eigen::VectorXs getStateAtTimeStamp(const TimeStamp& _ts);
-        void getStateAtTimeStamp(const TimeStamp& _ts, Eigen::VectorXs& state);
+        Eigen::VectorXs getCurrentStateAndStamp(TimeStamp& _ts);
+        void getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& _ts);
+        Eigen::VectorXs getState(const TimeStamp& _ts);
+        void getState(const TimeStamp& _ts, Eigen::VectorXs& state);
 
+        // Zero state provider
         Eigen::VectorXs zeroState();
 
         /** \brief Give the permission to a processor to create a new keyFrame
@@ -229,6 +231,7 @@ class Problem : public std::enable_shared_from_this<Problem>
                                 const int _col=0);
         bool getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance);
         Eigen::MatrixXs getFrameCovariance(FrameBasePtr _frame_ptr);
+        Eigen::MatrixXs getLastKeyFrameCovariance();
         bool getLandmarkCovariance(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& _covariance);
         Eigen::MatrixXs getLandmarkCovariance(LandmarkBasePtr _landmark_ptr);
 

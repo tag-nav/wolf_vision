@@ -4,6 +4,7 @@
 #include "trajectory_base.h"
 #include "capture_base.h"
 #include "state_block.h"
+#include "state_angle.h"
 #include "state_quaternion.h"
 
 namespace wolf {
@@ -14,6 +15,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
             NodeBase("FRAME", "BASE"),
             trajectory_ptr_(),
             state_block_vec_(3), // allow for 6 state blocks by default. Resize in derived constructors if needed.
+            is_removing_(false),
             frame_id_(++frame_id_count_),
             type_(NON_KEY_FRAME),
 			status_(ST_ESTIMATED),
@@ -33,6 +35,7 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
             NodeBase("FRAME", "BASE"),
             trajectory_ptr_(),
             state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
+            is_removing_(false),
             frame_id_(++frame_id_count_),
             type_(_tp),
 			status_(ST_ESTIMATED),
@@ -88,7 +91,7 @@ void FrameBase::registerNewStateBlocks()
 {
     if (getProblem() != nullptr)
     {
-        for (auto sbp : getStateBlockVec())
+        for (StateBlockPtr sbp : getStateBlockVec())
             if (sbp != nullptr)
                 getProblem()->addStateBlock(sbp);
     }
@@ -98,7 +101,7 @@ void FrameBase::removeStateBlocks()
 {
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        StateBlockPtr sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
         {
             if (getProblem() != nullptr && type_ == KEY_FRAME)
@@ -142,7 +145,7 @@ void FrameBase::setState(const Eigen::VectorXs& _st)
     for (StateBlockPtr sb : state_block_vec_)
         if (sb && (index < _st_size))
         {
-            sb->setVector(_st.segment(index, sb->getSize()));
+            sb->setState(_st.segment(index, sb->getSize()));
             index += sb->getSize();
         }
 }
@@ -150,7 +153,7 @@ void FrameBase::setState(const Eigen::VectorXs& _st)
 Eigen::VectorXs FrameBase::getState() const
 {
     Size size = 0;
-    for (auto sb : state_block_vec_)
+    for (StateBlockPtr sb : state_block_vec_)
         if (sb)
             size += sb->getSize();
     Eigen::VectorXs state(size);
@@ -163,7 +166,7 @@ Eigen::VectorXs FrameBase::getState() const
 void FrameBase::getState(Eigen::VectorXs& state) const
 {
     Size size = 0;
-    for (auto sb : state_block_vec_)
+    for (StateBlockPtr sb : state_block_vec_)
         if (sb)
             size += sb->getSize();
 
@@ -171,10 +174,10 @@ void FrameBase::getState(Eigen::VectorXs& state) const
 
     unsigned int index = 0;
 
-    for (auto sb : state_block_vec_)
+    for (StateBlockPtr sb : state_block_vec_)
         if (sb)
         {
-            state.segment(index,sb->getSize()) = sb->getVector();
+            state.segment(index,sb->getSize()) = sb->getState();
             index += sb->getSize();
         }
 }
@@ -236,7 +239,7 @@ void FrameBase::setStatus(StateStatus _st)
 
     if (status_ == ST_FIXED)
     {
-        for (auto sb : state_block_vec_)
+        for (StateBlockPtr sb : state_block_vec_)
             if (sb != nullptr)
             {
                 sb->fix();
@@ -246,7 +249,7 @@ void FrameBase::setStatus(StateStatus _st)
     }
     else if (status_ == ST_ESTIMATED)
     {
-        for (auto sb : state_block_vec_)
+        for (StateBlockPtr sb : state_block_vec_)
             if (sb != nullptr)
             {
                 sb->unfix();
@@ -262,7 +265,7 @@ FrameBasePtr FrameBase::create_PO_2D(const FrameType & _tp,
 {
     assert(_x.size() == 3 && "Wrong state vector size. Should be 3 for 2D!");
     StateBlockPtr p_ptr ( std::make_shared<StateBlock>    (_x.head    <2> ( ) ) );
-    StateBlockPtr o_ptr ( std::make_shared<StateBlock>    (_x.tail    <1> ( ) ) );
+    StateBlockPtr o_ptr ( std::make_shared<StateAngle>    ((Scalar) _x(2) ) );
     StateBlockPtr v_ptr ( nullptr );
     FrameBasePtr f ( std::make_shared<FrameBase>(_tp, _ts, p_ptr, o_ptr, v_ptr) );
     f->setType("PO 2D");

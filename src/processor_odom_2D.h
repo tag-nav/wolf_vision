@@ -10,12 +10,13 @@
 
 #include "processor_motion.h"
 #include "constraint_odom_2D.h"
+#include "rotations.h"
 
 
 namespace wolf {
     
 WOLF_PTR_TYPEDEFS(ProcessorOdom2D);
-   
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsOdom2D);
 
 struct ProcessorParamsOdom2D : public ProcessorParamsBase
 {
@@ -50,12 +51,14 @@ class ProcessorOdom2D : public ProcessorMotion
                         const Scalar _Dt,
                         Eigen::VectorXs& _x_plus_delta);
         Eigen::VectorXs deltaZero() const;
-        Motion interpolate(const Motion& _motion_ref,
-                           Motion& _motion,
+        Motion interpolate(const Motion& _ref,
+                           Motion& _second,
                            TimeStamp& _ts);
 
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
         virtual FeatureBasePtr emplaceFeature(CaptureBasePtr _capture_motion, FrameBasePtr _related_frame); 
+
+        virtual void resetDerived();
 
     protected:
         Scalar dist_traveled_th_;
@@ -108,7 +111,7 @@ inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eige
     //std::cout << "data      :" << _data.transpose() << std::endl;
     //std::cout << "data cov  :" << std::endl << _data_cov << std::endl;
     //std::cout << "delta     :" << delta_.transpose() << std::endl;
-    //std::cout << "delta cov :" << std::endl << delta_cov << std::endl;
+    //std::cout << "delta cov :" << std::endl << delta_cov_ << std::endl;
 }
 
 inline void ProcessorOdom2D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta)
@@ -127,7 +130,7 @@ inline void ProcessorOdom2D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::
 //    std::cout << "_x_plus_delta: " << _x_plus_delta.transpose() << std::endl;
 
     _x_plus_delta.head<2>() = _x.head<2>() + Eigen::Rotation2Ds(_x(2)).matrix() * _delta.head<2>();
-    _x_plus_delta(2) = _x(2) + _delta(2);
+    _x_plus_delta(2) = pi2pi(_x(2) + _delta(2));
 
 //    std::cout << "-----------------------------------------------" << std::endl;
 //    std::cout << "_x_plus_delta: " << _x_plus_delta.transpose() << std::endl;
@@ -148,7 +151,7 @@ inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
 //    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
 
     _delta1_plus_delta2.head<2>() = _delta1.head<2>() + Eigen::Rotation2Ds(_delta1(2)).matrix() * _delta2.head<2>();
-    _delta1_plus_delta2(2) = _delta1(2) + _delta2(2);
+    _delta1_plus_delta2(2) = pi2pi(_delta1(2) + _delta2(2));
 
 //    std::cout << "-----------------------------------------------" << std::endl;
 //    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
@@ -174,37 +177,20 @@ inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
 //    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
 
     _delta1_plus_delta2.head<2>() = _delta1.head<2>() + Eigen::Rotation2Ds(_delta1(2)).matrix() * _delta2.head<2>();
-    _delta1_plus_delta2(2) = _delta1(2) + _delta2(2);
+    _delta1_plus_delta2(2) = pi2pi(_delta1(2) + _delta2(2));
 
+    // Jac wrt delta_integrated
     _jacobian1 = Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
     _jacobian1(0,2) = -sin(_delta1(2))*_delta2(0) - cos(_delta1(2))*_delta2(1);
     _jacobian1(1,2) =  cos(_delta1(2))*_delta2(0) - sin(_delta1(2))*_delta2(1);
+
+    // jac wrt delta
     _jacobian2 = Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
     _jacobian2.topLeftCorner<2,2>() = Eigen::Rotation2Ds(_delta1(2)).matrix();
 
     //std::cout << "-----------------------------------------------" << std::endl;
     //std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
 }
-
-//inline void ProcessorOdom2D::deltaMinusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
-//                                             Eigen::VectorXs& _delta2_minus_delta1)
-//{
-//    //std::cout << "ProcessorOdom2d::deltaMinusDelta" << std::endl;
-//    assert(_delta1.size() == 3 && "Wrong _delta1 vector size");
-//    assert(_delta2.size() == 3 && "Wrong _delta2 vector size");
-//    assert(_delta2_minus_delta1.size() == delta_size_ && "Wrong _delta2_minus_delta1 vector size");
-//
-////    std::cout << "deltaMinusDelta ------------------------------------" << std::endl;
-////    std::cout << "_delta1: " << _delta1.transpose() << std::endl;
-////    std::cout << "_delta2: " << _delta2.transpose() << std::endl;
-////    std::cout << "_delta2_minus_delta1: " << _delta2_minus_delta1.transpose() << std::endl;
-//
-//    _delta2_minus_delta1.head<2>() =  Eigen::Rotation2Ds(-_delta1(2)).matrix() * (_delta2.head<2>() - _delta1.head<2>());
-//    _delta2_minus_delta1(2) = _delta2(2) - _delta1(2);
-//
-////    std::cout << "-----------------------------------------------" << std::endl;
-////    std::cout << "_delta2_minus_delta1: " << _delta2_minus_delta1.transpose() << std::endl;
-//}
 
 inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const
 {
@@ -224,52 +210,68 @@ inline FeatureBasePtr ProcessorOdom2D::emplaceFeature(CaptureBasePtr _capture_mo
     CaptureMotionPtr key_capture_ptr = std::static_pointer_cast<CaptureMotion>(_capture_motion);
     FrameBasePtr key_frame_ptr = std::static_pointer_cast<FrameBase>(_related_frame);
     // create motion feature and add it to the key_capture
+    Eigen::MatrixXs delta_integr_cov(integrateBufferCovariance(getBuffer()));
     FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
             "MOTION",
             key_capture_ptr->getBuffer().get().back().delta_integr_,
-            key_capture_ptr->getBuffer().get().back().delta_integr_cov_.determinant() > 0 ?
-                    key_capture_ptr->getBuffer().get().back().delta_integr_cov_ :
-                    Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-8);
+            delta_integr_cov.determinant() > 0 ?
+            delta_integr_cov : Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-8);
     key_capture_ptr->addFeature(key_feature_ptr);
 
     return key_feature_ptr;
 }
 
-inline Motion ProcessorOdom2D::interpolate(const Motion& _motion_ref, Motion& _motion, TimeStamp& _ts)
+inline Motion ProcessorOdom2D::interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts)
+
 {
     // TODO: Implement actual interpolation
     // Implementation: motion ref keeps the same
-    Motion tmp(_motion_ref);
-    tmp.ts_ = _ts;
-    tmp.delta_ = deltaZero();
-    tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-    tmp.delta_integr_cov_ += Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-    return tmp;
+    //
+    Motion _interpolated(_ref);
+    _interpolated.ts_                   = _ts;
+    _interpolated.delta_                = deltaZero();
+    _interpolated.delta_cov_            = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
+    _interpolated.delta_integr_         = _ref.delta_integr_;
+    _interpolated.jacobian_delta_integr_. setIdentity();
+    _interpolated.jacobian_delta_       . setZero();
+    return _interpolated;
 }
 
 inline bool ProcessorOdom2D::voteForKeyFrame()
 {
+    // Distance criterion
     //std::cout << "ProcessorOdom2D::voteForKeyFrame: traveled distance " << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
     if (getBuffer().get().back().delta_integr_.head<2>().norm() > dist_traveled_th_)
     {
-        std::cout << "ProcessorOdom2D:: " << id() << " -  VOTE FOR KEY FRAME traveled distance "
-                << getBuffer().get().back().delta_integr_.head<2>().norm() << std::endl;
+//        std::cout << "ProcessorOdom2D:: " << id() << " -  VOTE FOR KEY FRAME traveled distance "
+//                << getBuffer().get().back().delta_integr_.head<2>().norm() << std::endl;
         return true;
     }
-    if (getBuffer().get().back().delta_integr_cov_.determinant() > cov_det_th_)
+
+    // Uncertainty criterion
+    delta_integrated_cov_ = getBuffer().get().back().jacobian_delta_integr_ * delta_integrated_cov_ * getBuffer().get().back().jacobian_delta_integr_.transpose() + getBuffer().get().back().jacobian_delta_ * getBuffer().get().back().delta_cov_ * getBuffer().get().back().jacobian_delta_.transpose();
+    if (delta_integrated_cov_.determinant() > cov_det_th_)
     {
-        std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME covariance det "
-                << getBuffer().get().back().delta_integr_cov_.determinant() << std::endl;
+//        std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME covariance det "
+//                << delta_integrated_cov_.determinant() << std::endl;
         return true;
     }
+
+    // Time criterion
     if (getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() > elapsed_time_th_)
     {
-        std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME elapsed time "
-                << getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get()
-                << std::endl;
+//        std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME elapsed time "
+//                << getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get()
+//                << std::endl;
         return true;
     }
     return false;
+}
+
+inline void ProcessorOdom2D::resetDerived()
+{
+    // We want this covariance up-to-date because we use it in vote_for_keyframe().
+    delta_integrated_cov_ = integrateBufferCovariance(getBuffer());
 }
 
 } // namespace wolf

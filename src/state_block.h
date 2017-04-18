@@ -63,11 +63,11 @@ class StateBlock
         
         /** \brief Returns the state vector
          **/
-        const Eigen::VectorXs& getVector() const;
+        const Eigen::VectorXs& getState() const;
 
         /** \brief Sets the state vector
          **/
-        void setVector(const Eigen::VectorXs& _state);
+        void setState(const Eigen::VectorXs& _state);
 
         /** \brief Returns the state size
          **/
@@ -136,12 +136,12 @@ inline Scalar* StateBlock::getPtr()
     return state_.data();
 }
 
-inline const Eigen::VectorXs& StateBlock::getVector() const
+inline const Eigen::VectorXs& StateBlock::getState() const
 {
     return state_;
 }
 
-inline void StateBlock::setVector(const Eigen::VectorXs& _state)
+inline void StateBlock::setState(const Eigen::VectorXs& _state)
 {
     assert(_state.size() == state_.size());
     state_ = _state;

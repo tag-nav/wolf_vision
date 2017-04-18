@@ -5,6 +5,9 @@
 //Wolf includes
 #include "constraint_sparse.h"
 #include "frame_base.h"
+#include "rotations.h"
+
+//#include "ceres/jet.h"
 
 
 namespace wolf {
@@ -20,11 +23,12 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
                                           _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("FIX");
-            //std::cout << "creating ConstraintFix " << std::endl;
+//            std::cout << "created ConstraintFix " << std::endl;
         }
 
         virtual ~ConstraintFix()
         {
+//            std::cout << "destructed ConstraintFix " << std::endl;
             //
         }
 
@@ -46,23 +50,41 @@ class ConstraintFix: public ConstraintSparse<3,2,1>
 template<typename T>
 inline bool ConstraintFix::operator ()(const T* const _p, const T* const _o, T* _residuals) const
 {
-    //std::cout << "computing constraint odom ..." << std::endl;
-    _residuals[0] = (T(getMeasurement()(0)) - _p[0]) / T(sqrt(getMeasurementCovariance()(0, 0)));
-    _residuals[1] = (T(getMeasurement()(1)) - _p[1]) / T(sqrt(getMeasurementCovariance()(1, 1)));
-    _residuals[2] = T(getMeasurement()(2)) - _o[0];
-    //            std::cout << "+++++++  fix constraint +++++++" << std::endl;
-    //            std::cout << "orientation:   " << _o[0] << std::endl;
-    //            std::cout << "measurement:   " << T(getMeasurement()(2)) << std::endl;
-    //            std::cout << "residual:      " << _residuals[2] << std::endl;
-    //            std::cout << "is > PI        " << bool(_residuals[2] > T(2*M_PI)) << std::endl;
-    //            std::cout << "is >= PI       " << bool(_residuals[2] <= T(-2*M_PI)) << std::endl;
-    while (_residuals[2] > T(M_PI))
-        _residuals[2] = _residuals[2] - T(2 * M_PI);
-    while (_residuals[2] <= T(-M_PI))
-        _residuals[2] = _residuals[2] + T(2 * M_PI);
-    //            std::cout << "residual:      " << _residuals[2] << std::endl << std::endl;
-    _residuals[2] = _residuals[2] / T(sqrt(getMeasurementCovariance()(2, 2)));
-    //std::cout << "constraint fix computed!" << std::endl;
+    // measurement
+    Eigen::Matrix<T,3,1> meas =  getMeasurement().cast<T>();
+
+    // error
+    Eigen::Matrix<T,3,1> er;
+    er(0) = meas(0) - _p[0];
+    er(1) = meas(1) - _p[1];
+    er(2) = meas(2) - _o[0];
+    while (er[2] > T(M_PI))
+        er(2) = er(2) - T(2*M_PI);
+    while (er(2) <= T(-M_PI))
+        er(2) = er(2) + T(2*M_PI);
+
+    // residual
+    Eigen::Map<Eigen::Matrix<T,3,1>> res(_residuals);
+    res = getFeaturePtr()->getMeasurementSquareRootInformationUpper().cast<T>() * er;
+
+    ////////////////////////////////////////////////////////
+    // print Jacobian. Uncomment this as you wish (remember to uncomment #include "ceres/jet.h" above):
+//    using ceres::Jet;
+//    Eigen::MatrixXs J(3,3);
+//    J.row(0) = ((Jet<Scalar, 3>)(er(0))).v;
+//    J.row(1) = ((Jet<Scalar, 3>)(er(1))).v;
+//    J.row(2) = ((Jet<Scalar, 3>)(er(2))).v;
+//    J.row(0) = ((Jet<Scalar, 3>)(res(0))).v;
+//    J.row(1) = ((Jet<Scalar, 3>)(res(1))).v;
+//    J.row(2) = ((Jet<Scalar, 3>)(res(2))).v;
+//    if (sizeof(er(0)) != sizeof(double))
+//    {
+//        std::cout << "ConstraintFix::Jacobian(c" << id() << ") = \n " << J << std::endl;
+//        std::cout << "ConstraintFix::Weighted Jacobian(c" << id() << ") = \n " << J << std::endl;
+//        std::cout << "Sqrt Info(c" << id() << ") = \n " << getMeasurementSquareRootInformationTransposed() << std::endl;
+//    }
+    ////////////////////////////////////////////////////////
+
     return true;
 }
 

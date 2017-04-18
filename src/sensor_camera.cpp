@@ -23,7 +23,7 @@ SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const std::shared
 {
     assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3D");
     K_ = setIntrinsicMatrix(_intrinsics_ptr->pinhole_model);
-    pinhole::computeCorrectionModel(getIntrinsicPtr()->getVector(), distortion_, correction_);
+    pinhole::computeCorrectionModel(getIntrinsicPtr()->getState(), distortion_, correction_);
 }
 
 

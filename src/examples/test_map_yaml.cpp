@@ -25,20 +25,20 @@ void print(MapBase& _map)
         if (lmk_ptr->getType() == "POLYLINE 2D")
         {
             LandmarkPolyline2DPtr poly_ptr = std::static_pointer_cast<LandmarkPolyline2D>(lmk_ptr);
-            std::cout << "\npos:       " << poly_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getPPtr()->isFixed();
-            std::cout << "\nori:       " << poly_ptr->getOPtr()->getVector().transpose() << " -- fixed: " << poly_ptr->getOPtr()->isFixed();
+            std::cout << "\npos:       " << poly_ptr->getPPtr()->getState().transpose() << " -- fixed: " << poly_ptr->getPPtr()->isFixed();
+            std::cout << "\nori:       " << poly_ptr->getOPtr()->getState().transpose() << " -- fixed: " << poly_ptr->getOPtr()->isFixed();
             std::cout << "\nn points:  " << poly_ptr->getNPoints();
             std::cout << "\nFirst idx: " << poly_ptr->getFirstId();
             std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
             std::cout << "\nLast  def: " << poly_ptr->isLastDefined();
             for (int idx = poly_ptr->getFirstId(); idx <= poly_ptr->getLastId(); idx++)
-                std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getVector().transpose();
+                std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getState().transpose();
             break;
         }
         else if (lmk_ptr->getType() == "AHP")
         {
             LandmarkAHPPtr ahp_ptr = std::static_pointer_cast<LandmarkAHP>(lmk_ptr);
-            std::cout << "\npos:       " << ahp_ptr->getPPtr()->getVector().transpose() << " -- fixed: " << ahp_ptr->getPPtr()->isFixed();
+            std::cout << "\npos:       " << ahp_ptr->getPPtr()->getState().transpose() << " -- fixed: " << ahp_ptr->getPPtr()->isFixed();
             std::cout << "\ndescript:  " << ahp_ptr->getCvDescriptor().t();
             break;
         }
@@ -58,7 +58,7 @@ int main()
     v << 1, 2, 3, 4;
     cv::Mat d = (cv::Mat_<int>(8,1) << 1, 2, 3, 4, 5, 6, 7, 8);
     LandmarkAHP lmk_1(v, nullptr, nullptr, d);
-    std::cout << "Pos 1 = " << lmk_1.getPPtr()->getVector().transpose() << std::endl;
+    std::cout << "Pos 1 = " << lmk_1.getPPtr()->getState().transpose() << std::endl;
     std::cout << "Des 1 = " << lmk_1.getCvDescriptor().t() << std::endl;
 
     YAML::Node n = lmk_1.saveToYaml();
@@ -66,7 +66,7 @@ int main()
     std::cout << "Des n = " << n["descriptor"].as<VectorXs>().transpose() << std::endl;
 
     LandmarkAHP lmk_2 = *(std::static_pointer_cast<LandmarkAHP>(LandmarkAHP::create(n)));
-    std::cout << "Pos 2 = " << lmk_2.getPPtr()->getVector().transpose() << std::endl;
+    std::cout << "Pos 2 = " << lmk_2.getPPtr()->getState().transpose() << std::endl;
     std::cout << "Des 2 = " << lmk_2.getCvDescriptor().t() << std::endl;
 
     std::string filename;

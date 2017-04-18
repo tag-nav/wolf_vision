@@ -24,6 +24,8 @@
 
 // THESE ARE UNITARY TESTS FOR METHODS IN ROTATION.H
 
+using namespace wolf;
+
 namespace wolf
 {
 //these are initial rotation methods
@@ -199,6 +201,17 @@ TEST(rotations, v2q_o_VS_v2q_new) //this test will use functions defined above
     EXPECT_FALSE((qvec_o1 - rot_vector0).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_o1 : " << qvec_o1.transpose() << "\n rot_vector0 : " << rot_vector0.transpose() << std::endl;
     EXPECT_FALSE((qvec_o - rot_vector1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_o : " << qvec_o.transpose() << "\n rot_vector1 : " << rot_vector1.transpose() << std::endl;
     }
+}
+
+TEST(rotations, pi2pi)
+{
+    ASSERT_NEAR(M_PI_2, pi2pi((Scalar)M_PI_2), 1e-10);
+    ASSERT_NEAR(-M_PI_2, pi2pi(3.0*M_PI_2), 1e-10);
+    ASSERT_NEAR(-M_PI_2, pi2pi(-M_PI_2), 1e-10);
+    ASSERT_NEAR(M_PI_2, pi2pi(-3.0*M_PI_2), 1e-10);
+    //    ASSERT_NEAR(M_PI, pi2pi(M_PI), 1e-10); // Exact PI is not safely testable because of numeric issues.
+    ASSERT_NEAR(M_PI-.01, pi2pi(M_PI-.01), 1e-10);
+    ASSERT_NEAR(-M_PI+.01, pi2pi(M_PI+.01), 1e-10);
 }
 
 TEST(rotations, Skew_vee)
