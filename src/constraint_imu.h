@@ -218,10 +218,10 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     Eigen::Matrix<T,3,1> ab_error(ab1 - ab2); //bias used for preintegration - bias in KeyFrame
     Eigen::Matrix<T,3,1> wb_error(wb1 - wb2);
 
+    Eigen::Matrix<T,9,1> dpov_error((Eigen::Matrix<T,9,1>() << dp_error, dv_error, do_error).finished());
+
     // Assign to residuals vector
-    residuals.head(3)       = getMeasurementSquareRootInformation().topLeftCorner(3,3).cast<T>()    * dp_error;
-    residuals.segment(3,3)  = getMeasurementSquareRootInformation().block(3,3,3,3).cast<T>()        * do_error;
-    residuals.segment(6,3)  = getMeasurementSquareRootInformation().bottomRightCorner(3,3).cast<T>() * dv_error;
+    residuals.head(9)       = getMeasurementSquareRootInformation().cast<T>() * dpov_error;
     residuals.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error; // ab_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * ab_error;
     residuals.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error; // wb_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * wb_error;      
 
@@ -259,10 +259,13 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const
     Eigen::Matrix<DataType,3,1> ab_error(ab1 - ab2); // KF1.bias - KF2.bias
     Eigen::Matrix<DataType,3,1> wb_error(wb1 - wb2);
 
+    Eigen::Matrix<DataType,9,1> dpov_error((Eigen::Matrix<DataType,9,1>() << dp_error, dv_error, do_error).finished());
+    Eigen::Matrix<DataType,9,1> dpov_error_w(getMeasurementSquareRootInformation().cast<DataType>()  * dpov_error);
+
     // Assign to residuals vector
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).head(3)       = getMeasurementSquareRootInformation().topLeftCorner(3,3).cast<DataType>()    * dp_error;
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(3,3)  = getMeasurementSquareRootInformation().block(3,3,3,3).cast<DataType>()        * do_error;
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(6,3)  = getMeasurementSquareRootInformation().bottomRightCorner(3,3).cast<DataType>() * dv_error;
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).head(3)       = dpov_error_w.head(3);
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(3,3)  = dpov_error_w.segment(3,3);
+    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(6,3)  = dpov_error_w.tail(3);
     const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(9,3)  = sqrt_A_r_dt_inv.cast<DataType>() * ab_error;
     const_cast< Eigen::MatrixBase<D3>& > (_residuals).tail(3)       = sqrt_A_r_dt_inv.cast<DataType>() * wb_error;
 
