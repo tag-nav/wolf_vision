@@ -21,7 +21,7 @@
 #include <list>
 #include <map>
 #include <memory> // shared_ptr and weak_ptr
-#include "internal/config.h.in"
+#include "internal/config.h"
 
 namespace wolf {
 
