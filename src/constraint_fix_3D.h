@@ -41,57 +41,24 @@ class ConstraintFix3D: public ConstraintSparse<6,3,4>
 template<typename T>
 inline bool ConstraintFix3D::operator ()(const T* const _p, const T* const _o, T* _residuals) const
 {
-    //std::cout << "computing constraint odom ..." << std::endl;
 
-    // Position
-    _residuals[0] = (T(getMeasurement()(0)) - _p[0]) / T(sqrt(getMeasurementCovariance()(0, 0)));
-    _residuals[1] = (T(getMeasurement()(1)) - _p[1]) / T(sqrt(getMeasurementCovariance()(1, 1)));
-    _residuals[2] = (T(getMeasurement()(2)) - _p[2]) / T(sqrt(getMeasurementCovariance()(2, 2)));
+    // states
+    Eigen::Matrix<T, 3, 1>  p(_p);
+    Eigen::Quaternion<T>    q(_o);
 
-    // Orientation
-//    Eigen::Map<Eigen::Quaternion<T> > q(_o);
-//    Eigen::Map<Eigen::Quaternions> expected_q(getMeasurement().data()+3);
+    // measurements
+    Eigen::Vector3s     p_measured(getMeasurement().data() + 0);
+    Eigen::Quaternions  q_measured(getMeasurement().data() + 3);
 
-//    Eigen::Quaternion<T> dq = q.conjugate() * expected_q.cast<T>();
-//    Eigen::Matrix<T,3,1> dtheta = q2v(dq);
+    // error
+    Eigen::Matrix<T, 6, 1> er;
+    er.head(3)        = p_measured.cast<T>() - p;
+    er.tail(3)        = q2v(q.conjugate() * q_measured.cast<T>());
 
-    Eigen::Quaternion<T> q(_o);
-    Eigen::Quaternions expected_q(getMeasurement().data()+3);
+    // residual
+    Eigen::Map<Eigen::Matrix<T, 6, 1>> res(_residuals);
+    res               = getFeaturePtr()->getMeasurementSquareRootInformationUpper().cast<T>() * er;
 
-    Eigen::Quaternion<T> dq = q.conjugate() * expected_q.cast<T>();
-    Eigen::Matrix<T,3,1> dtheta = q2v(dq);
-
-    _residuals[3] = dtheta(0);
-    _residuals[4] = dtheta(1);
-    _residuals[5] = dtheta(2);
-
-    //            std::cout << "+++++++  fix constraint +++++++" << std::endl;
-    //            std::cout << "orientation:   " << _o[0] << std::endl;
-    //            std::cout << "measurement:   " << T(getMeasurement()(2)) << std::endl;
-    //            std::cout << "residual:      " << _residuals[2] << std::endl;
-    //            std::cout << "is > PI        " << bool(_residuals[2] > T(2*M_PI)) << std::endl;
-    //            std::cout << "is >= PI       " << bool(_residuals[2] <= T(-2*M_PI)) << std::endl;
-
-    while (_residuals[3] > T(M_PI))
-        _residuals[3] = _residuals[3] - T(2 * M_PI);
-    while (_residuals[3] <= T(-M_PI))
-        _residuals[3] = _residuals[3] + T(2 * M_PI);
-
-    while (_residuals[4] > T(M_PI))
-        _residuals[4] = _residuals[4] - T(2 * M_PI);
-    while (_residuals[4] <= T(-M_PI))
-        _residuals[4] = _residuals[4] + T(2 * M_PI);
-
-    while (_residuals[5] > T(M_PI))
-        _residuals[5] = _residuals[5] - T(2 * M_PI);
-    while (_residuals[5] <= T(-M_PI))
-        _residuals[5] = _residuals[5] + T(2 * M_PI);
-
-    //            std::cout << "residual:      " << _residuals[2] << std::endl << std::endl;
-    _residuals[3] = _residuals[3] / T(sqrt(getMeasurementCovariance()(3, 3)));
-    _residuals[4] = _residuals[4] / T(sqrt(getMeasurementCovariance()(4, 4)));
-    _residuals[5] = _residuals[5] / T(sqrt(getMeasurementCovariance()(5, 5)));
-    //std::cout << "constraint fix computed!" << std::endl;
     return true;
 }
 

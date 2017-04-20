@@ -105,7 +105,7 @@ inline Eigen::VectorXs ConstraintRelative2DAnalytic::evaluateResiduals(
         residual(2) = residual(2) - 2 * M_PI;
     while (residual(2) <= -M_PI)
         residual(2) = residual(2) + 2 * M_PI;
-    residual = getMeasurementSquareRootInformation() * residual;
+    residual = getMeasurementSquareRootInformationTransposed() * residual;
     return residual;
 }
 
@@ -114,36 +114,36 @@ inline void ConstraintRelative2DAnalytic::evaluateJacobians(
         std::vector<Eigen::Map<Eigen::MatrixXs> >& jacobians, const std::vector<bool>& _compute_jacobian) const
 {
     jacobians[0] << -cos(_st_vector[1](0)), -sin(_st_vector[1](0)), sin(_st_vector[1](0)), -cos(_st_vector[1](0)), 0, 0;
-    jacobians[0] = getMeasurementSquareRootInformation() * jacobians[0];
+    jacobians[0] = getMeasurementSquareRootInformationTransposed() * jacobians[0];
     jacobians[1]
             << -(_st_vector[2](0) - _st_vector[0](0)) * sin(_st_vector[1](0))
                     + (_st_vector[2](1) - _st_vector[0](1)) * cos(_st_vector[1](0)), -(_st_vector[2](0)
             - _st_vector[0](0)) * cos(_st_vector[1](0)) - (_st_vector[2](1) - _st_vector[0](1)) * sin(_st_vector[1](0)), -1;
-    jacobians[1] = getMeasurementSquareRootInformation() * jacobians[0];
+    jacobians[1] = getMeasurementSquareRootInformationTransposed() * jacobians[0];
     jacobians[2] << cos(_st_vector[1](0)), sin(_st_vector[1](0)), -sin(_st_vector[1](0)), cos(_st_vector[1](0)), 0, 0;
-    jacobians[2] = getMeasurementSquareRootInformation() * jacobians[0];
+    jacobians[2] = getMeasurementSquareRootInformationTransposed() * jacobians[0];
     jacobians[3] << 0, 0, 1;
-    jacobians[3] = getMeasurementSquareRootInformation() * jacobians[0];
+    jacobians[3] = getMeasurementSquareRootInformationTransposed() * jacobians[0];
 }
 
 inline void ConstraintRelative2DAnalytic::evaluatePureJacobians(std::vector<Eigen::MatrixXs>& jacobians) const
 {
     jacobians[0]
-              << -cos(getStatePtrVector()[1]->getVector()(0)), -sin(getStatePtrVector()[1]->getVector()(0)), sin(
-            getStatePtrVector()[1]->getVector()(0)), -cos(getStatePtrVector()[1]->getVector()(0)), 0, 0;
+              << -cos(getStatePtrVector()[1]->getState()(0)), -sin(getStatePtrVector()[1]->getState()(0)), sin(
+            getStatePtrVector()[1]->getState()(0)), -cos(getStatePtrVector()[1]->getState()(0)), 0, 0;
 
     jacobians[1]
-              << -(getStatePtrVector()[2]->getVector()(0) - getStatePtrVector()[0]->getVector()(0))
-                    * sin(getStatePtrVector()[1]->getVector()(0))
-                    + (getStatePtrVector()[2]->getVector()(1) - getStatePtrVector()[0]->getVector()(1))
-                            * cos(getStatePtrVector()[1]->getVector()(0)), -(getStatePtrVector()[2]->getVector()(0)
-            - getStatePtrVector()[0]->getVector()(0)) * cos(getStatePtrVector()[1]->getVector()(0))
-            - (getStatePtrVector()[2]->getVector()(1) - getStatePtrVector()[0]->getVector()(1))
-                    * sin(getStatePtrVector()[1]->getVector()(0)), -1;
+              << -(getStatePtrVector()[2]->getState()(0) - getStatePtrVector()[0]->getState()(0))
+                    * sin(getStatePtrVector()[1]->getState()(0))
+                    + (getStatePtrVector()[2]->getState()(1) - getStatePtrVector()[0]->getState()(1))
+                            * cos(getStatePtrVector()[1]->getState()(0)), -(getStatePtrVector()[2]->getState()(0)
+            - getStatePtrVector()[0]->getState()(0)) * cos(getStatePtrVector()[1]->getState()(0))
+            - (getStatePtrVector()[2]->getState()(1) - getStatePtrVector()[0]->getState()(1))
+                    * sin(getStatePtrVector()[1]->getState()(0)), -1;
 
     jacobians[2]
-              << cos(getStatePtrVector()[1]->getVector()(0)), sin(getStatePtrVector()[1]->getVector()(0)), -sin(
-            getStatePtrVector()[1]->getVector()(0)), cos(getStatePtrVector()[1]->getVector()(0)), 0, 0;
+              << cos(getStatePtrVector()[1]->getState()(0)), sin(getStatePtrVector()[1]->getState()(0)), -sin(
+            getStatePtrVector()[1]->getState()(0)), cos(getStatePtrVector()[1]->getState()(0)), 0, 0;
 
     jacobians[3]
               << 0, 0, 1;

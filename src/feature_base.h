@@ -25,6 +25,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         ConstraintBaseList constrained_by_list_;
 
         static unsigned int feature_id_count_;
+        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
 
     protected:
         unsigned int feature_id_;
@@ -32,15 +33,10 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         unsigned int landmark_id_; // ID of the landmark
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
-        Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix
+        Eigen::MatrixXs measurement_sqrt_information_upper_;  ///<  the squared root information matrix
         Eigen::VectorXs expectation_;                   ///<  expectation
         
     public:
-        /** \brief Constructor from capture pointer and measure dim
-         * \param _tp type of feature -- see wolf.h
-         * \param _dim_measurement the dimension of the measurement space
-         */
-        FeatureBase(const std::string& _type, unsigned int _dim_measurement);
 
         /** \brief Constructor from capture pointer and measure
          * \param _tp type of feature -- see wolf.h
@@ -69,7 +65,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         void setMeasurement(const Eigen::VectorXs& _meas);
         void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
         const Eigen::MatrixXs& getMeasurementCovariance() const;
-        const Eigen::MatrixXs& getMeasurementSquareRootInformation() const;
+        const Eigen::MatrixXs& getMeasurementSquareRootInformationUpper() const;
 
         const Eigen::VectorXs& getExpectation() const;
         void setExpectation(const Eigen::VectorXs& expectation);
@@ -85,16 +81,17 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         ConstraintBasePtr addConstraint(ConstraintBasePtr _co_ptr);
         ConstraintBaseList& getConstraintList();
 
-        virtual void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        virtual ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
         ConstraintBaseList& getConstrainedByList();
 
         // all constraints
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
+    private:
+        Eigen::MatrixXs computeSqrtInformationUpper(const Eigen::MatrixXs& covariance) const;
+
 };
-
-
 
 }
 
@@ -104,10 +101,11 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
 
 namespace wolf{
 
-inline void FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+inline ConstraintBasePtr FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
     constrained_by_list_.push_back(_ctr_ptr);
     _ctr_ptr->setFeatureOtherPtr( shared_from_this() );
+    return _ctr_ptr;
 }
 
 inline unsigned int FeatureBase::getHits() const
@@ -160,9 +158,9 @@ inline const Eigen::MatrixXs& FeatureBase::getMeasurementCovariance() const
     return measurement_covariance_;
 }
 
-inline const Eigen::MatrixXs& FeatureBase::getMeasurementSquareRootInformation() const
+inline const Eigen::MatrixXs& FeatureBase::getMeasurementSquareRootInformationUpper() const
 {
-    return measurement_sqrt_information_;
+    return measurement_sqrt_information_upper_;
 }
 
 inline void FeatureBase::setMeasurement(const Eigen::VectorXs& _meas)

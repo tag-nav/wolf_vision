@@ -24,7 +24,31 @@ namespace wolf
  * This processor integrates motion data into vehicle states.
  *
  * The motion data is provided by the sensor owning this processor.
- * This data is, in the general case, in the reference frame of the sensor, while the integrated motion refers to the robot frame.
+ *
+ * This data is, in the general case, in the reference frame of the sensor:
+ *
+ *   - Beware of the frame transformations Map to Robot, and Robot to Sensor, so that your produced
+ *   motion Constraints are correctly expressed.
+ *     - The robot state R is expressed in a global or 'Map' reference frame, named M.
+ *     - The sensor frame S is expressed in the robot frame R.
+ *     - The motion data data_ is expressed in the sensor frame S.
+ *   - You can use three basic methods for this:
+ *     - The trivial: make the sensor frame and the robot frame the same frame, that is, S = Id.
+ *     - Transform incoming data from sensor frame to robot frame, and then integrate motion in robot frame.
+ *     - Integrate motion directly in sensor frame, and transform to robot frame at the time of:
+ *       - Publishing the robot state (see getCurrentState() and similar functions)
+ *       - Creating Keyframes and Constraints (see emplaceConstraint() ).
+ *
+ * Should you need extra functionality for your derived types, you can overload these two methods,
+ *
+ *   -  preProcess() { }
+ *   -  postProcess() { }
+ *
+ * which are called at the beginning and at the end of process(). See the doc of these functions for more info.
+ */
+ /* // TODO: JS: review these instructions from here onwards:
+ *
+ * while the integrated motion refers to the robot frame.
  *
  * The reference frame convention used are specified as follows.
  *   - The robot state R is expressed in a global or 'Map' reference frame, named M.
@@ -57,13 +81,6 @@ namespace wolf
  *
  *     \code    xPlusDelta(R_old, delta_R, R_new) \endcode
  *
- * Should you need extra functionality for your derived types, you can overload these two methods,
- *
- *   -  preProcess() { }
- *   -  postProcess() { }
- *
- * which are called at the beginning and at the end of process(). See the doc of these functions for more info.
- *
  *
  * ### Defining (or not) the fromSensorFrame():
  *
@@ -76,9 +93,19 @@ namespace wolf
  *   - In cases where this identification is not possible, or not desired,
  * classes deriving from this class will have to implement fromSensorFrame(),
  * and call it within data2delta(), or write the frame transformation code directly in data2delta().
+ *
+ * // TODO: JS: review instructions up to here
+ *
  */
 class ProcessorMotion : public ProcessorBase
 {
+    private:
+        enum
+        {
+            IDLE,
+            RUNNING
+        } status_;
+
     // This is the main public interface
     public:
         ProcessorMotion(const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance = 0.1);
@@ -90,57 +117,58 @@ class ProcessorMotion : public ProcessorBase
         virtual void resetDerived();
 
         // Queries to the processor:
+        virtual bool isMotion();
 
         virtual bool voteForKeyFrame();
 
-        /** \brief Fills a reference to the state integrated so far
+        /** \brief Fill a reference to the state integrated so far
          * \param _x the returned state vector
          */
         void getCurrentState(Eigen::VectorXs& _x);
 
-        /** \brief Fills a reference to the state integrated so far and its stamp
+        /** \brief Get a constant reference to the state integrated so far
+         * \return the state vector
+         */
+        Eigen::VectorXs getCurrentState();
+
+        /** \brief Fill a reference to the state integrated so far and its stamp
          * \param _x the returned state vector
          * \param _ts the returned stamp
          */
-        void getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts);
+        void getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts);
 
-        /** \brief Gets a constant reference to the state integrated so far
-         * \return the state vector
-         */
-        const Eigen::VectorXs& getCurrentState();
-
-        /** \brief Gets a constant reference to the state integrated so far and its stamp
+        /** \brief Get the state integrated so far and its stamp
          * \param _ts the returned stamp
          * return the state vector
          */
-        const Eigen::VectorXs& getCurrentState(TimeStamp& _ts);
+        Eigen::VectorXs getCurrentStateAndStamp(TimeStamp& _ts);
 
-        /** \brief Fills the state corresponding to the provided time-stamp
+        /** \brief Fill the state corresponding to the provided time-stamp
          * \param _ts the time stamp
          * \param _x the returned state
          */
         void getState(const TimeStamp& _ts, Eigen::VectorXs& _x);
 
-        /** \brief Gets the state corresponding to the provided time-stamp
+        /** \brief Get the state corresponding to the provided time-stamp
          * \param _ts the time stamp
          * \return the state vector
          */
-        Eigen::VectorXs& getState(const TimeStamp& _ts);
+        Eigen::VectorXs getState(const TimeStamp& _ts);
 
-        /** \brief Provides the motion integrated so far
-         * \return a const reference to the integrated delta state
+        /** \brief Provide the motion integrated so far
+         * \return the integrated delta state
          */
-        const Motion& getMotion() const;
+        Motion getMotion() const;
         void getMotion(Motion& _motion) const;
 
-        /** \brief Provides the motion integrated until a given timestamp
-         * \return a reference to the integrated delta state
+        /** \brief Provide the motion integrated until a given timestamp
+         * \return the integrated delta state
          */
-        const Motion& getMotion(const TimeStamp& _ts) const;
+        Motion getMotion(const TimeStamp& _ts) const;
         void getMotion(const TimeStamp& _ts, Motion& _motion) const;
 
         /** \brief Finds the capture that contains the closest previous motion of _ts
-         * \return a pointer to the capture (if it exist) or a nullptr (otherwise)
+         * \return a pointer to the capture (if it exists) or a nullptr (otherwise)
          */
         CaptureMotionPtr findCaptureContainingTimeStamp(const TimeStamp& _ts) const;
 
@@ -154,7 +182,7 @@ class ProcessorMotion : public ProcessorBase
                        Eigen::VectorXs& _delta1_plus_delta2);
 
         /** Set the origin of all motion for this processor
-         * \param _origin_frame the key frame to be the origin
+         * \param _origin_frame the keyframe to be the origin
          */
         void setOrigin(FrameBasePtr _origin_frame);
 
@@ -169,7 +197,7 @@ class ProcessorMotion : public ProcessorBase
         MotionBuffer& getBuffer();
         const MotionBuffer& getBuffer() const;
 
-        virtual bool isMotion();
+        Eigen::MatrixXs integrateBufferCovariance(const MotionBuffer& _motion_buffer);
 
         // Helper functions:
     protected:
@@ -178,8 +206,8 @@ class ProcessorMotion : public ProcessorBase
 
     protected:
         void updateDt();
-        void integrate();
-        void reintegrate(CaptureMotionPtr _capture_ptr);
+        void integrateOneStep();
+        void reintegrateBuffer(CaptureMotionPtr _capture_ptr);
 
         /** Pre-process incoming Capture
          *
@@ -472,7 +500,14 @@ class ProcessorMotion : public ProcessorBase
          * But this needs to be taken carefully, since (+) is not commutative in the general case.
          * therefore, we must define this inverse in the following way:
          *
-         *     C = B (-) A  <==> A (+) C = B        (4)
+         *     C = A (+) B  <==> B = C (-) A        (4)
+         *
+         *           A
+         *         o--->o
+         *          \   |
+         *         C \  | B
+         *            \ v
+         *              o
          *
          * ### Computing `d_S`
          *
@@ -508,23 +543,7 @@ class ProcessorMotion : public ProcessorBase
          *     D_I = D_R (+) d_I
          *         = deltaPlusDelta(D_R, d_I)         // This form provides an easy implementation.
          * ```
-         * ### Covariances
          *
-         * The Motion structure adds local and global covariances, that we rename as,
-         *
-         *     dC: delta_cov_
-         *     DC: delta_integr_cov_
-         *
-         * and which are integrated as follows
-         * ```
-         *     dC_I = tau * dC_F
-         *     DC_I = (1-tau) * DC_R + tau * dC_F = DC_R + dC_I
-         * ```
-         * and
-         * ```
-         *     dC_S = (1-tau) * dC_F
-         *     DC_S = DC_F
-         * ```
          * ### Examples
          *
          * #### Example 1: For 2D poses
@@ -559,6 +578,26 @@ class ProcessorMotion : public ProcessorBase
          *     dq_S = dq_I.conj * dq_F
          *
          *     D_S  = D_F
+         * ```
+         */
+        /* //TODO: JS: Remove these instructions since we will remove covariances from Motion.
+         *
+         * ### Covariances
+         *
+         * The Motion structure adds local and global covariances, that we rename as,
+         *
+         *     dC: delta_cov_
+         *     DC: delta_integr_cov_
+         *
+         * and which are integrated as follows
+         * ```
+         *     dC_I = tau * dC_F
+         *     DC_I = (1-tau) * DC_R + tau * dC_F = DC_R + dC_I
+         * ```
+         * and
+         * ```
+         *     dC_S = (1-tau) * dC_F
+         *     DC_S = DC_F
          * ```
          */
         virtual Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts) = 0;
@@ -609,14 +648,6 @@ class ProcessorMotion : public ProcessorBase
 
 namespace wolf{
 
-inline void ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
-{
-    // make a new key frame
-    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(KEY_FRAME, _x_origin, _ts_origin);
-    // set the key frame as origin
-    setOrigin(key_frame_ptr);
-}
-
 inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part)
 {
     last_ptr_->getBuffer().split(_t_split, _oldest_part);
@@ -633,7 +664,7 @@ inline bool ProcessorMotion::voteForKeyFrame()
     return false;
 }
 
-inline Eigen::VectorXs& ProcessorMotion::getState(const TimeStamp& _ts)
+inline Eigen::VectorXs ProcessorMotion::getState(const TimeStamp& _ts)
 {
     getState(_ts, x_);
     return x_;
@@ -649,15 +680,15 @@ inline wolf::TimeStamp ProcessorMotion::getCurrentTimeStamp()
     return getBuffer().get().back().ts_;
 }
 
-inline const Eigen::VectorXs& ProcessorMotion::getCurrentState()
+inline Eigen::VectorXs ProcessorMotion::getCurrentState()
 {
     getCurrentState(x_);
     return x_;
 }
 
-inline const Eigen::VectorXs& ProcessorMotion::getCurrentState(TimeStamp& _ts)
+inline Eigen::VectorXs ProcessorMotion::getCurrentStateAndStamp(TimeStamp& _ts)
 {
-    getCurrentState(x_, _ts);
+    getCurrentStateAndStamp(x_, _ts);
     return x_;
 }
 
@@ -667,18 +698,18 @@ inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
     xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().get().back().delta_integr_, Dt, _x);
 }
 
-inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x, TimeStamp& _ts)
+inline void ProcessorMotion::getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts)
 {
     getCurrentState(_x);
     _ts = getCurrentTimeStamp();
 }
 
-inline const Motion& ProcessorMotion::getMotion() const
+inline Motion ProcessorMotion::getMotion() const
 {
     return getBuffer().get().back();
 }
 
-inline const Motion& ProcessorMotion::getMotion(const TimeStamp& _ts) const
+inline Motion ProcessorMotion::getMotion(const TimeStamp& _ts) const
 {
     auto capture_ptr = findCaptureContainingTimeStamp(_ts);
     assert(capture_ptr != nullptr && "ProcessorMotion::getMotion: timestamp older than first motion");
@@ -732,8 +763,9 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
             {_ts,
              deltaZero(),
              deltaZero(),
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_),
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)  // Cov
              });
 }
 

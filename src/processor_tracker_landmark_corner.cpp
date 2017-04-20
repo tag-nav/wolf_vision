@@ -10,7 +10,7 @@ void ProcessorTrackerLandmarkCorner::preProcess()
     extractCorners(std::static_pointer_cast<CaptureLaser2D>(incoming_ptr_), corners_incoming_);
 
     // compute transformations
-    t_world_robot_ = getProblem()->getStateAtTimeStamp(incoming_ptr_->getTimeStamp());
+    t_world_robot_ = getProblem()->getState(incoming_ptr_->getTimeStamp());
 
     // world_robot
     Eigen::Matrix3s R_world_robot = Eigen::Matrix3s::Identity();
@@ -20,8 +20,8 @@ void ProcessorTrackerLandmarkCorner::preProcess()
     if (getSensorPtr()->isExtrinsicDynamic() || !getSensorPtr()->getPPtr()->isFixed()
             || !getSensorPtr()->getOPtr()->isFixed() || !extrinsics_transformation_computed_)
     {
-        t_robot_sensor_.head<2>() = getSensorPtr()->getPPtr()->getVector();
-        t_robot_sensor_(2) = getSensorPtr()->getOPtr()->getVector()(0);
+        t_robot_sensor_.head<2>() = getSensorPtr()->getPPtr()->getState();
+        t_robot_sensor_(2) = getSensorPtr()->getOPtr()->getState()(0);
         R_robot_sensor_.topLeftCorner<2, 2>() = Eigen::Rotation2Ds(t_robot_sensor_(2)).matrix();
         extrinsics_transformation_computed_ = true;
     }
@@ -287,8 +287,8 @@ void ProcessorTrackerLandmarkCorner::expectedFeature(LandmarkBasePtr _landmark_p
     //std::cout << "Sensor global pose: " << t_world_sensor_.transpose() << std::endl;
 
     // ------------ expected feature measurement
-    expected_feature_.head<2>() = R_sensor_world_.topLeftCorner<2,2>() * (_landmark_ptr->getPPtr()->getVector() - t_world_sensor_.head<2>());
-    expected_feature_(2) = _landmark_ptr->getOPtr()->getVector()(0) - t_world_sensor_(2);
+    expected_feature_.head<2>() = R_sensor_world_.topLeftCorner<2,2>() * (_landmark_ptr->getPPtr()->getState() - t_world_sensor_.head<2>());
+    expected_feature_(2) = _landmark_ptr->getOPtr()->getState()(0) - t_world_sensor_(2);
     expected_feature_(3) = (std::static_pointer_cast<LandmarkCorner2D>(_landmark_ptr))->getAperture();
     //std::cout << "Expected feature pose: " << expected_feature_.head<3>().transpose() << std::endl;
 
@@ -313,7 +313,7 @@ void ProcessorTrackerLandmarkCorner::expectedFeature(LandmarkBasePtr _landmark_p
         getProblem()->getCovarianceBlock(_landmark_ptr->getOPtr(), key_frame_ptr->getOPtr(), Sigma, 2, 5) )
     {
         // Jacobian
-        Eigen::Vector2s p_robot_landmark = t_world_robot_.head<2>() - _landmark_ptr->getPPtr()->getVector();
+        Eigen::Vector2s p_robot_landmark = t_world_robot_.head<2>() - _landmark_ptr->getPPtr()->getState();
         Eigen::Matrix<Scalar, 3, 6> Jlr = Eigen::Matrix<Scalar, 3, 6>::Zero();
         Jlr.block<3, 3>(0, 3) = -R_world_sensor_.transpose();
         Jlr.block<3, 3>(0, 3) = R_world_sensor_.transpose();

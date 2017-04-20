@@ -19,6 +19,15 @@ class StateBlock;
 
 namespace wolf {
 
+typedef enum
+{
+//    LANDMARK_CANDIDATE = 1,   ///< A landmark, just created. Association with it allowed, but not yet establish an actual constraint for the solver
+    LANDMARK_ESTIMATED,   ///< A landmark being estimated. Association with it allowed, establishing actual constraints for the solver where both vehicle and landmark states are being estimated
+    LANDMARK_FIXED,       ///< A landmark estimated. Association with it allowed, establishing actual constraints for the solver, but its value remains static, no longer optimized
+} LandmarkStatus;
+
+
+
 
 //class LandmarkBase
 class LandmarkBase : public NodeBase, public std::enable_shared_from_this<LandmarkBase>
@@ -29,7 +38,8 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O.
 
         static unsigned int landmark_id_count_;
-        
+        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
+
     protected:
         unsigned int landmark_id_; ///< landmark unique id
         LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)
@@ -84,7 +94,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
 
         // Navigate wolf tree
-        void addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
         ConstraintBaseList& getConstrainedByList();
 
@@ -149,10 +159,11 @@ inline void LandmarkBase::unfix()
     this->setStatus(LANDMARK_ESTIMATED);
 }
 
-inline void LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+inline ConstraintBasePtr LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
     constrained_by_list_.push_back(_ctr_ptr);
     _ctr_ptr->setLandmarkOtherPtr( shared_from_this() );
+    return _ctr_ptr;
 }
 
 inline unsigned int LandmarkBase::getHits() const

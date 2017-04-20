@@ -42,8 +42,8 @@ TEST(FrameBase, StateBlocks)
     FrameBasePtr F = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
 
     ASSERT_EQ(F->getStateBlockVec().size(), 3);
-    ASSERT_EQ(F->getPPtr()->getVector().size(), 2);
-    ASSERT_EQ(F->getOPtr()->getVector().size(), 1);
+    ASSERT_EQ(F->getPPtr()->getState().size(), 2);
+    ASSERT_EQ(F->getOPtr()->getState().size(), 1);
     ASSERT_EQ(F->getVPtr(), nullptr);
 }
 
@@ -73,9 +73,9 @@ TEST(FrameBase, LinksToTree)
     T->addFrame(F1);
     FrameBasePtr F2 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
     T->addFrame(F2);
-    CaptureMotionPtr C = make_shared<CaptureMotion>(1, S, Vector3s::Zero());
+    CaptureMotionPtr C = make_shared<CaptureMotion>(1, S, Vector3s::Zero(), 3, 3);
     F1->addCapture(C);
-    FeatureBasePtr f = make_shared<FeatureBase>("f", 1);
+    FeatureBasePtr f = make_shared<FeatureBase>("f", Vector1s(1), Matrix<Scalar,1,1>::Identity()*.01);
     C->addFeature(f);
     ConstraintOdom2DPtr c = make_shared<ConstraintOdom2D>(f, F2);
     f->addConstraint(c);
@@ -83,8 +83,14 @@ TEST(FrameBase, LinksToTree)
     // c-by link F2 -> c not yet established
     ASSERT_TRUE(F2->getConstrainedByList().empty());
 
-    // establish link F2 -> c
+    // tree is inconsistent since we are missing the constrained_by link
+    ASSERT_FALSE(P->check(0));
+
+    // establish constrained_by link F2 -> c
     F2->addConstrainedBy(c);
+
+    // tree is now consistent
+    ASSERT_TRUE(P->check(0));
 
     // F1 has one capture and no constraints-by
     ASSERT_FALSE(F1->getCaptureList().empty());
@@ -133,9 +139,9 @@ TEST(FrameBase, GetSetState)
 
     // Set the state, check that state blocks hold the current states
     F.setState(x);
-    ASSERT_TRUE((p - F.getPPtr()->getVector()).isMuchSmallerThan(1, Constants::EPS_SMALL));
-    ASSERT_TRUE((q - F.getOPtr()->getVector()).isMuchSmallerThan(1, Constants::EPS_SMALL));
-    ASSERT_TRUE((v - F.getVPtr()->getVector()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((p - F.getPPtr()->getState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((q - F.getOPtr()->getState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((v - F.getVPtr()->getState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
 
     // Get the state, form 1 by reference
     F.getState(x1);

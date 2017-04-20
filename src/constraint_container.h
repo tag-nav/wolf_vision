@@ -54,8 +54,8 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
             //std::cout << "atan2: " << atan2(getCapturePtr()->getSensorPtr()->getSensorRotation()->transpose()(0,1),getCapturePtr()->getSensorPtr()->getSensorRotation()->transpose()(0,0)) << std::endl;
 
 			// sensor transformation
-            Eigen::Matrix<T,2,1> sensor_position = getCapturePtr()->getSensorPtr()->getPPtr()->getVector().head(2).cast<T>();
-            Eigen::Matrix<T,2,2> inverse_R_sensor = Eigen::Rotation2D<T>(T(-getCapturePtr()->getSensorOPtr()->getVector()(0))).matrix();
+            Eigen::Matrix<T,2,1> sensor_position = getCapturePtr()->getSensorPtr()->getPPtr()->getState().head(2).cast<T>();
+            Eigen::Matrix<T,2,2> inverse_R_sensor = Eigen::Rotation2D<T>(T(-getCapturePtr()->getSensorOPtr()->getState()(0))).matrix();
             // robot information
             Eigen::Matrix<T,2,2> inverse_R_robot = Eigen::Rotation2D<T>(-_robotO[0]).matrix();
             Eigen::Matrix<T,2,2> R_landmark = Eigen::Rotation2D<T>(_landmarkO[0]).matrix();
@@ -63,7 +63,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 
             // Expected measurement
             Eigen::Matrix<T,2,1> expected_measurement_position = inverse_R_sensor * (inverse_R_robot * (landmark_position_map - robot_position_map + R_landmark * corner_position) - sensor_position);
-            T expected_measurement_orientation = _landmarkO[0] - _robotO[0] - T(getCapturePtr()->getSensorPtr()->getOPtr()->getVector()(0)) + T(lmk_ptr_.lock()->getCorner(corner_)(2));
+            T expected_measurement_orientation = _landmarkO[0] - _robotO[0] - T(getCapturePtr()->getSensorPtr()->getOPtr()->getState()(0)) + T(lmk_ptr_.lock()->getCorner(corner_)(2));
 
             // Error
             residuals_map.head(2) = expected_measurement_position - getMeasurement().head<2>().cast<T>();
@@ -76,7 +76,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
                 _residuals[2] = _residuals[2] + T(2*M_PI);
 
             // Residuals
-            residuals_map = getMeasurementSquareRootInformation().cast<T>() * residuals_map;
+            residuals_map = getMeasurementSquareRootInformationTransposed().cast<T>() * residuals_map;
 
             //std::cout << "\nCONSTRAINT: " << id() << std::endl;
             //std::cout << "Feature: " << getFeaturePtr()->id() << std::endl;

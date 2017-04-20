@@ -96,7 +96,7 @@ int main()
     Eigen::VectorXs correction_vec = (std::static_pointer_cast<SensorCamera>(image_ptr->getSensorPtr()))->getCorrectionVector();
     std::cout << "correction vector: " << correction_vec << std::endl;
     std::cout << "distortion vector: " << (std::static_pointer_cast<SensorCamera>(image_ptr->getSensorPtr()))->getDistortionVector() << std::endl;
-    point2D = pinhole::depixellizePoint(image_ptr->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D);
+    point2D = pinhole::depixellizePoint(image_ptr->getSensorPtr()->getIntrinsicPtr()->getState(),point2D);
     std::cout << "point2D depixellized: " << point2D.transpose() << std::endl;
     point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(image_ptr->getSensorPtr()))->getCorrectionVector(),point2D);
     std::cout << "point2D undistorted: " << point2D.transpose() << std::endl;
@@ -131,15 +131,15 @@ int main()
     std::cout << "point2D distorted: " << point2D_dist.transpose() << std::endl;
 
     Eigen::Vector2s point2D_pix;
-    point2D_pix = pinhole::pixellizePoint(image_ptr->getSensorPtr()->getIntrinsicPtr()->getVector(),point2D_dist);
+    point2D_pix = pinhole::pixellizePoint(image_ptr->getSensorPtr()->getIntrinsicPtr()->getState(),point2D_dist);
     std::cout << "point2D pixellized: " << point2D_pix.transpose() << std::endl;
 
     Eigen::Vector2s expectation;
-    Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getVector();
-    Eigen::Vector4s current_frame_o = last_frame->getOPtr()->getVector();
-    Eigen::Vector3s anchor_frame_p = landmark->getAnchorFrame()->getPPtr()->getVector();
-    Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getOPtr()->getVector();
-    Eigen::Vector4s landmark_ = landmark->getPPtr()->getVector();
+    Eigen::Vector3s current_frame_p = last_frame->getPPtr()->getState();
+    Eigen::Vector4s current_frame_o = last_frame->getOPtr()->getState();
+    Eigen::Vector3s anchor_frame_p = landmark->getAnchorFrame()->getPPtr()->getState();
+    Eigen::Vector4s anchor_frame_o = landmark->getAnchorFrame()->getOPtr()->getState();
+    Eigen::Vector4s landmark_ = landmark->getPPtr()->getState();
 
     constraint_ptr ->expectation(current_frame_p.data(), current_frame_o.data(),
             anchor_frame_p.data(), anchor_frame_o.data(),

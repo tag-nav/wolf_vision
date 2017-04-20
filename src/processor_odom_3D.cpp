@@ -185,14 +185,14 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion_s
     assert(_motion_ref.delta_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
     assert(_motion_ref.delta_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
     assert(_motion_ref.delta_integr_.size() == delta_size_ && "Wrong delta size");
-    assert(_motion_ref.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
-    assert(_motion_ref.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+//    assert(_motion_ref.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+//    assert(_motion_ref.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
     assert(_motion_second.delta_.size() == delta_size_ && "Wrong delta size");
     assert(_motion_second.delta_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
     assert(_motion_second.delta_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
     assert(_motion_second.delta_integr_.size() == delta_size_ && "Wrong delta size");
-    assert(_motion_second.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
-    assert(_motion_second.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
+//    assert(_motion_second.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
+//    assert(_motion_second.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
 
 
     using namespace Eigen;
@@ -237,7 +237,7 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion_s
 
     // interpolate covariances
     motion_int.delta_cov_           = tau * _motion_second.delta_cov_;
-    motion_int.delta_integr_cov_    = J_ref * _motion_ref.delta_integr_cov_ * J_ref.transpose() + J_int * _motion_second.delta_cov_ * J_int.transpose();
+//    motion_int.delta_integr_cov_    = J_ref * _motion_ref.delta_integr_cov_ * J_ref.transpose() + J_int * _motion_second.delta_cov_ * J_int.transpose();
 
     // update second delta ( in place update )
     dp_sec          = dq_int.conjugate() * ((1 - tau) * dp_sec);
@@ -268,10 +268,10 @@ ProcessorBasePtr ProcessorOdom3D::create(const std::string& _unique_name, const 
 
 bool ProcessorOdom3D::voteForKeyFrame()
 {
-    WOLF_DEBUG( "Time span   : " , getBuffer().get().back().ts_ - getBuffer().get().front().ts_ );
-    WOLF_DEBUG( "BufferLength: " , getBuffer().get().size() );
-    WOLF_DEBUG( "DistTraveled: " , delta_integrated_.head(3).norm() );
-    WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
+//    WOLF_DEBUG( "Time span   : " , getBuffer().get().back().ts_ - getBuffer().get().front().ts_ );
+//    WOLF_DEBUG( "BufferLength: " , getBuffer().get().size() );
+//    WOLF_DEBUG( "DistTraveled: " , delta_integrated_.head(3).norm() );
+//    WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
     // time span
     if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)
     {

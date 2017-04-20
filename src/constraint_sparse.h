@@ -71,57 +71,6 @@ class ConstraintSparse: public ConstraintBase
                          StateBlockPtr _state8Ptr = nullptr,
                          StateBlockPtr _state9Ptr = nullptr );
 
-//        /** \brief Constructor of category CTR_FRAME
-//         *
-//         * Constructor of category CTR_FRAME
-//         *
-//         **/
-//        ConstraintSparse(ConstraintType _tp, FrameBasePtr _frame_other_ptr, bool _apply_loss_function, ConstraintStatus _status,
-//                         StateBlockPtr _state0Ptr,
-//                         StateBlockPtr _state1Ptr = nullptr,
-//                         StateBlockPtr _state2Ptr = nullptr,
-//                         StateBlockPtr _state3Ptr = nullptr,
-//                         StateBlockPtr _state4Ptr = nullptr,
-//                         StateBlockPtr _state5Ptr = nullptr,
-//                         StateBlockPtr _state6Ptr = nullptr,
-//                         StateBlockPtr _state7Ptr = nullptr,
-//                         StateBlockPtr _state8Ptr = nullptr,
-//                         StateBlockPtr _state9Ptr = nullptr );
-//
-//        /** \brief Constructor of category CTR_FEATURE
-//         *
-//         * Constructor of category CTR_FEATURE
-//         *
-//         **/
-//        ConstraintSparse(ConstraintType _tp, FeatureBasePtr _feature_other_ptr, bool _apply_loss_function, ConstraintStatus _status,
-//                         StateBlockPtr _state0Ptr,
-//                         StateBlockPtr _state1Ptr = nullptr,
-//                         StateBlockPtr _state2Ptr = nullptr,
-//                         StateBlockPtr _state3Ptr = nullptr,
-//                         StateBlockPtr _state4Ptr = nullptr,
-//                         StateBlockPtr _state5Ptr = nullptr,
-//                         StateBlockPtr _state6Ptr = nullptr,
-//                         StateBlockPtr _state7Ptr = nullptr,
-//                         StateBlockPtr _state8Ptr = nullptr,
-//                         StateBlockPtr _state9Ptr = nullptr ) ;
-//
-//        /** \brief Constructor of category CTR_LANDMARK
-//         *
-//         * Constructor of category CTR_LANDMARK
-//         *
-//         **/
-//        ConstraintSparse(ConstraintType _tp, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status,
-//                         StateBlockPtr _state0Ptr,
-//                         StateBlockPtr _state1Ptr = nullptr,
-//                         StateBlockPtr _state2Ptr = nullptr,
-//                         StateBlockPtr _state3Ptr = nullptr,
-//                         StateBlockPtr _state4Ptr = nullptr,
-//                         StateBlockPtr _state5Ptr = nullptr,
-//                         StateBlockPtr _state6Ptr = nullptr,
-//                         StateBlockPtr _state7Ptr = nullptr,
-//                         StateBlockPtr _state8Ptr = nullptr,
-//                         StateBlockPtr _state9Ptr = nullptr ) ;
-
         virtual ~ConstraintSparse();
 
         /** \brief Returns a vector of pointers to the state blocks

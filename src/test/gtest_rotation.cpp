@@ -24,6 +24,19 @@
 
 // THESE ARE UNITARY TESTS FOR METHODS IN ROTATION.H
 
+using namespace wolf;
+
+TEST(rotations, pi2pi)
+{
+    ASSERT_NEAR(M_PI_2, pi2pi((Scalar)M_PI_2), 1e-10);
+    ASSERT_NEAR(-M_PI_2, pi2pi(3.0*M_PI_2), 1e-10);
+    ASSERT_NEAR(-M_PI_2, pi2pi(-M_PI_2), 1e-10);
+    ASSERT_NEAR(M_PI_2, pi2pi(-3.0*M_PI_2), 1e-10);
+    //    ASSERT_NEAR(M_PI, pi2pi(M_PI), 1e-10); // Exact PI is not safely testable because of numeric issues.
+    ASSERT_NEAR(M_PI-.01, pi2pi(M_PI-.01), 1e-10);
+    ASSERT_NEAR(-M_PI+.01, pi2pi(M_PI+.01), 1e-10);
+}
+
 TEST(rotations, Skew_vee)
 {
     using namespace wolf;
