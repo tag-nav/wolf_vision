@@ -38,14 +38,6 @@ LandmarkPolyline2D::LandmarkPolyline2D(StateBlockPtr _p_ptr, StateBlockPtr _o_pt
 LandmarkPolyline2D::~LandmarkPolyline2D()
 {
     removeStateBlocks();
-//    while (!point_state_ptr_vector_.empty())
-//    {
-//        if (getProblem() != nullptr)
-//            getProblem()->removeStateBlockPtr(point_state_ptr_vector_.front());
-//
-//        point_state_ptr_vector_.pop_front();
-//    }
-//    std::cout << "destructed    L-poly" << id() << std::endl;
 }
 
 void LandmarkPolyline2D::setFirst(const Eigen::VectorXs& _point, bool _defined)
