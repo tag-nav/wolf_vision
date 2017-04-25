@@ -58,11 +58,11 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 
         /** \brief Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint
          **/
-        virtual const std::vector<Scalar*> getStateBlockPtrVector() = 0;
+        virtual const std::vector<Scalar*> getStateScalarPtrVector() = 0;
 
         /** \brief Returns a vector of pointers to the states in which this constraint depends
          **/
-        virtual const std::vector<StateBlockPtr> getStatePtrVector() const = 0;
+        virtual const std::vector<StateBlockPtr> getStateBlockPtrVector() const = 0;
 
         /** \brief Returns a reference to the feature measurement
          **/

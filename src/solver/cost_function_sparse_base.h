@@ -290,34 +290,34 @@ const unsigned int MEASUREMENT_SIZE,
 {
     // JET 0
     for (int i = 0; i < BLOCK_0_SIZE; i++)
-        jets_0_[i].a = *(constraint_ptr_->getStateBlockPtrVector().at(0)+i);
+        jets_0_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(0)+i);
     // JET 1
     for (int i = 0; i < BLOCK_1_SIZE; i++)
-        jets_1_[i].a = *(constraint_ptr_->getStateBlockPtrVector().at(1)+i);
+        jets_1_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(1)+i);
     // JET 2
     for (int i = 0; i < BLOCK_2_SIZE; i++)
-        jets_2_[i].a = *(constraint_ptr_->getStateBlockPtrVector().at(2)+i);
+        jets_2_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(2)+i);
     // JET 3
     for (int i = 0; i < BLOCK_3_SIZE; i++)
-        jets_3_[i].a = *(constraint_ptr_->getStateBlockPtrVector().at(3)+i);
+        jets_3_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(3)+i);
     // JET 4
     for (int i = 0; i < BLOCK_4_SIZE; i++)
-        jets_4_[i].a = *(constraint_ptr_->getStateBlockPtrVector().at(4)+i);
+        jets_4_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(4)+i);
     // JET 5
     for (int i = 0; i < BLOCK_5_SIZE; i++)
-        jets_5_[i].a = *(constraint_ptr_->getStateBlockPtrVector().at(5)+i);
+        jets_5_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(5)+i);
     // JET 6
     for (int i = 0; i < BLOCK_6_SIZE; i++)
-        jets_6_[i].a = *(constraint_ptr_->getStateBlockPtrVector().at(6)+i);
+        jets_6_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(6)+i);
     // JET 7
     for (int i = 0; i < BLOCK_7_SIZE; i++)
-        jets_7_[i].a = *(constraint_ptr_->getStateBlockPtrVector().at(7)+i);
+        jets_7_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(7)+i);
     // JET 8
     for (int i = 0; i < BLOCK_8_SIZE; i++)
-        jets_8_[i].a = *(constraint_ptr_->getStateBlockPtrVector().at(8)+i);
+        jets_8_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(8)+i);
     // JET 9
     for (int i = 0; i < BLOCK_9_SIZE; i++)
-        jets_9_[i].a = *(constraint_ptr_->getStateBlockPtrVector().at(9)+i);
+        jets_9_[i].a = *(constraint_ptr_->getStateScalarPtrVector().at(9)+i);
 }
 
 } // wolf namespace

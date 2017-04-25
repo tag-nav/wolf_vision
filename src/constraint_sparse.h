@@ -10,7 +10,7 @@ namespace wolf {
 
 //TODO: change class name (and file name!->includes) to ConstraintNumericalAutoDiff 
 //template class ConstraintSparse
-template <const unsigned int MEASUREMENT_SIZE,
+template <const unsigned int RESIDUAL_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE = 0,
                 unsigned int BLOCK_2_SIZE = 0,
@@ -28,7 +28,7 @@ class ConstraintSparse: public ConstraintBase
         std::vector<unsigned int> state_block_sizes_vector_;
 
     public:
-        static const unsigned int measurementSize = MEASUREMENT_SIZE;
+        static const unsigned int residualSize = RESIDUAL_SIZE;
         static const unsigned int block0Size = BLOCK_0_SIZE;
         static const unsigned int block1Size = BLOCK_1_SIZE;
         static const unsigned int block2Size = BLOCK_2_SIZE;
@@ -40,9 +40,9 @@ class ConstraintSparse: public ConstraintBase
         static const unsigned int block8Size = BLOCK_8_SIZE;
         static const unsigned int block9Size = BLOCK_9_SIZE;
 
-        /** \brief Constructor of category CTR_ABSOLUTE
+        /** \brief Constructor of category ABSOLUTE
          *
-         * Constructor of category CTR_ABSOLUTE
+         * Constructor of category ABSOLUTE
          *
          **/
         ConstraintSparse(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
@@ -78,18 +78,18 @@ class ConstraintSparse: public ConstraintBase
          * Returns a vector of pointers to the state blocks in which this constraint depends
          *
          **/
-        virtual const std::vector<Scalar*> getStateBlockPtrVector();
+        virtual const std::vector<Scalar*> getStateScalarPtrVector();
 
         /** \brief Returns a vector of pointers to the states
          *
          * Returns a vector of pointers to the state in which this constraint depends
          *
          **/
-        virtual const std::vector<StateBlockPtr> getStatePtrVector() const;
+        virtual const std::vector<StateBlockPtr> getStateBlockPtrVector() const;
 
-        /** \brief Returns the constraint residual size
+        /** \brief Returns the residual size
          *
-         * Returns the constraint residual size
+         * Returns the residual size
          *
          **/
         virtual unsigned int getSize() const;
@@ -102,7 +102,7 @@ class ConstraintSparse: public ConstraintBase
 //////////////////////////////////////////
 //          IMPLEMENTATION
 //////////////////////////////////////////
-template <const unsigned int MEASUREMENT_SIZE,
+template <const unsigned int RESIDUAL_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
                 unsigned int BLOCK_2_SIZE,
@@ -113,7 +113,7 @@ template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-ConstraintSparse<MEASUREMENT_SIZE,
+ConstraintSparse<RESIDUAL_SIZE,
                  BLOCK_0_SIZE,
                  BLOCK_1_SIZE,
                  BLOCK_2_SIZE,
@@ -143,7 +143,7 @@ ConstraintSparse<MEASUREMENT_SIZE,
             resizeVectors();
         }
 
-template <const unsigned int MEASUREMENT_SIZE,
+template <const unsigned int RESIDUAL_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
                 unsigned int BLOCK_2_SIZE,
@@ -154,7 +154,7 @@ template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-ConstraintSparse<MEASUREMENT_SIZE,
+ConstraintSparse<RESIDUAL_SIZE,
                  BLOCK_0_SIZE,
                  BLOCK_1_SIZE,
                  BLOCK_2_SIZE,
@@ -184,27 +184,11 @@ ConstraintSparse<MEASUREMENT_SIZE,
             state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
-            //            std::cout << "before resizing c" << this->id();
-            //            Size id;
-            //            id = getFrameOtherPtr()    ? getFrameOtherPtr()   ->id() : 0;
-            //            std::cout << " with F" << id;
-            //            id = getFeatureOtherPtr()  ? getFeatureOtherPtr() ->id() : 0;
-            //            std::cout << " - f" << id;
-            //            id = getLandmarkOtherPtr() ? getLandmarkOtherPtr()->id() : 0;
-            //            std::cout << " - L" << id;
-            //            std::cout << std::endl;
-            //            std::cout << "sb0[" << BLOCK_0_SIZE << "] @ " << _state0Ptr.get() << std::endl;
-            //            std::cout << "sb1[" << BLOCK_1_SIZE << "] @ " << _state1Ptr.get() << std::endl;
-            //            std::cout << "sb2[" << BLOCK_2_SIZE << "] @ " << _state2Ptr.get() << std::endl;
-            //            std::cout << "sb3[" << BLOCK_3_SIZE << "] @ " << _state3Ptr.get() << std::endl;
-            //            std::cout << "sb4[" << BLOCK_4_SIZE << "] @ " << _state4Ptr.get() << std::endl;
-            //            std::cout << "sb5[" << BLOCK_5_SIZE << "] @ " << _state5Ptr.get() << std::endl;
-
             resizeVectors();
         }
 
 
-template <const unsigned int MEASUREMENT_SIZE,
+template <const unsigned int RESIDUAL_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
                 unsigned int BLOCK_2_SIZE,
@@ -215,7 +199,7 @@ template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-ConstraintSparse<MEASUREMENT_SIZE,
+ConstraintSparse<RESIDUAL_SIZE,
                  BLOCK_0_SIZE,
                  BLOCK_1_SIZE,
                  BLOCK_2_SIZE,
@@ -230,7 +214,7 @@ ConstraintSparse<MEASUREMENT_SIZE,
     //
 }
 
-template <const unsigned int MEASUREMENT_SIZE,
+template <const unsigned int RESIDUAL_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
                 unsigned int BLOCK_2_SIZE,
@@ -241,7 +225,7 @@ template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-const std::vector<Scalar*> ConstraintSparse<MEASUREMENT_SIZE,
+const std::vector<Scalar*> ConstraintSparse<RESIDUAL_SIZE,
                                                 BLOCK_0_SIZE,
                                                 BLOCK_1_SIZE,
                                                 BLOCK_2_SIZE,
@@ -251,7 +235,7 @@ const std::vector<Scalar*> ConstraintSparse<MEASUREMENT_SIZE,
                                                 BLOCK_6_SIZE,
                                                 BLOCK_7_SIZE,
                                                 BLOCK_8_SIZE,
-                                                BLOCK_9_SIZE>::getStateBlockPtrVector()
+                                                BLOCK_9_SIZE>::getStateScalarPtrVector()
 {
     assert(state_ptr_vector_.size() > 0 && state_ptr_vector_.size() <= 10 && "Wrong state vector size in constraint, it should be between 1 and 10");
 
@@ -347,7 +331,7 @@ const std::vector<Scalar*> ConstraintSparse<MEASUREMENT_SIZE,
     return std::vector<Scalar*>(0); //Not going to happen
 }
 
-template <const unsigned int MEASUREMENT_SIZE,
+template <const unsigned int RESIDUAL_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
                 unsigned int BLOCK_2_SIZE,
@@ -358,7 +342,7 @@ template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-const std::vector<StateBlockPtr> ConstraintSparse<MEASUREMENT_SIZE,
+const std::vector<StateBlockPtr> ConstraintSparse<RESIDUAL_SIZE,
                                                 BLOCK_0_SIZE,
                                                 BLOCK_1_SIZE,
                                                 BLOCK_2_SIZE,
@@ -368,12 +352,12 @@ const std::vector<StateBlockPtr> ConstraintSparse<MEASUREMENT_SIZE,
                                                 BLOCK_6_SIZE,
                                                 BLOCK_7_SIZE,
                                                 BLOCK_8_SIZE,
-                                                BLOCK_9_SIZE>::getStatePtrVector() const
+                                                BLOCK_9_SIZE>::getStateBlockPtrVector() const
 {
     return state_ptr_vector_;
 }
 
-template <const unsigned int MEASUREMENT_SIZE,
+template <const unsigned int RESIDUAL_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
                 unsigned int BLOCK_2_SIZE,
@@ -384,7 +368,7 @@ template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-unsigned int ConstraintSparse<MEASUREMENT_SIZE,
+unsigned int ConstraintSparse<RESIDUAL_SIZE,
                               BLOCK_0_SIZE,
                               BLOCK_1_SIZE,
                               BLOCK_2_SIZE,
@@ -396,11 +380,11 @@ unsigned int ConstraintSparse<MEASUREMENT_SIZE,
                               BLOCK_8_SIZE,
                               BLOCK_9_SIZE>::getSize() const
 {
-    return MEASUREMENT_SIZE;
+    return RESIDUAL_SIZE;
 }
 
 
-template <const unsigned int MEASUREMENT_SIZE,
+template <const unsigned int RESIDUAL_SIZE,
                 unsigned int BLOCK_0_SIZE,
                 unsigned int BLOCK_1_SIZE,
                 unsigned int BLOCK_2_SIZE,
@@ -411,7 +395,7 @@ template <const unsigned int MEASUREMENT_SIZE,
                 unsigned int BLOCK_7_SIZE,
                 unsigned int BLOCK_8_SIZE,
                 unsigned int BLOCK_9_SIZE>
-void ConstraintSparse<MEASUREMENT_SIZE,
+void ConstraintSparse<RESIDUAL_SIZE,
                       BLOCK_0_SIZE,
                       BLOCK_1_SIZE,
                       BLOCK_2_SIZE,

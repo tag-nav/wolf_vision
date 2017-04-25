@@ -187,7 +187,7 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
 
     // remove and add all constraints to the point
     for (auto ctr_ptr : getConstrainedByList())
-        for (auto st_ptr : ctr_ptr->getStatePtrVector())
+        for (auto st_ptr : ctr_ptr->getStateBlockPtrVector())
             if (st_ptr == state && getProblem() != nullptr)
             {
                 getProblem()->removeConstraintPtr(ctr_ptr);

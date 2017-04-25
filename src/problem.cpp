@@ -907,7 +907,7 @@ bool Problem::check(int verbose_level)
             }
             // check constrained_by pointer to this frame
             is_consistent = is_consistent && (cby->getFrameOtherPtr() == F);
-            for (auto sb : cby->getStatePtrVector())
+            for (auto sb : cby->getStateBlockPtrVector())
             {
                 if (verbose_level > 0)
                 {
@@ -1037,7 +1037,7 @@ bool Problem::check(int verbose_level)
 
                     // find state block pointers in all constrained nodes
                     SensorBasePtr S = c->getFeaturePtr()->getCapturePtr()->getSensorPtr(); // get own sensor to check sb
-                    for (auto sb : c->getStatePtrVector())
+                    for (auto sb : c->getStateBlockPtrVector())
                     {
                         bool found = false;
                         if (verbose_level > 0)
@@ -1121,7 +1121,7 @@ bool Problem::check(int verbose_level)
                 cout << "      <- c" << cby->id() << " -> L" << cby->getLandmarkOtherPtr()->id() << endl;
             // check constrained_by pointer to this landmark
             is_consistent = is_consistent && (cby->getLandmarkOtherPtr() && L->id() == cby->getLandmarkOtherPtr()->id());
-            for (auto sb : cby->getStatePtrVector())
+            for (auto sb : cby->getStateBlockPtrVector())
             {
                 if (verbose_level > 0)
                 {

@@ -309,9 +309,9 @@ void CeresManager::addConstraint(ConstraintBasePtr _ctr_ptr, unsigned int _id)
 //    std::cout << "residual pointer " << _ctr_ptr << std::endl;
 
     if (_ctr_ptr->getApplyLossFunction())
-        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _ctr_ptr->getStateBlockPtrVector());
+        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _ctr_ptr->getStateScalarPtrVector());
     else
-        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], NULL, _ctr_ptr->getStateBlockPtrVector());
+        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], NULL, _ctr_ptr->getStateScalarPtrVector());
 }
 
 void CeresManager::removeConstraint(const unsigned int& _corr_id)

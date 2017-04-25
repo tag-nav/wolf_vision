@@ -26,7 +26,7 @@ class CostFunctionWrapper : public ceres::CostFunction
             constraint_ptr_(_constraint_ptr),
             state_blocks_sizes_(constraint_ptr_->getStateSizes())
         {
-            for (unsigned int i = 0; i < constraint_ptr_->getStatePtrVector().size(); i++)
+            for (unsigned int i = 0; i < constraint_ptr_->getStateBlockPtrVector().size(); i++)
                 mutable_parameter_block_sizes()->push_back(state_blocks_sizes_[i]);
 
             set_num_residuals(constraint_ptr_->getSize());
