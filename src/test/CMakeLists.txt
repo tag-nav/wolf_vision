@@ -44,6 +44,10 @@ target_link_libraries(gtest_example ${PROJECT_NAME})      #
 wolf_add_gtest(gtest_capture_base gtest_capture_base.cpp)
 target_link_libraries(gtest_capture_base ${PROJECT_NAME})
 
+# CaptureBase class test
+wolf_add_gtest(gtest_constraint_sparse gtest_constraint_sparse.cpp)
+target_link_libraries(gtest_constraint_sparse ${PROJECT_NAME})
+
 # FeatureBase classes test
 wolf_add_gtest(gtest_feature_base gtest_feature_base.cpp)
 target_link_libraries(gtest_feature_base ${PROJECT_NAME})
