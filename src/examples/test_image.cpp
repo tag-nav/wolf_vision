@@ -22,7 +22,7 @@
 //std includes
 #include <ctime>
 #include <iostream>
-
+#include <string>
 
 int main(int argc, char** argv)
 {
@@ -35,12 +35,13 @@ int main(int argc, char** argv)
     std::cout << std::endl << " ========= ProcessorImageFeature test ===========" << std::endl << std::endl;
 
     cv::VideoCapture capture;
-    const char * filename;
+
+    std::string filename;
     if (argc == 1)
     {
-//        filename = "/home/jtarraso/Videos/House_interior.mp4";
-        filename = "/home/jtarraso/Vídeos/gray.mp4";
-        capture.open(filename);
+        std::cout << "Please enter a valid GLOBAL path for the video sequence (without spaces):\n>";
+        std::getline(std::cin, filename);
+        capture.open(filename.c_str());
     }
     else if (std::string(argv[1]) == "0")
     {
@@ -51,7 +52,7 @@ int main(int argc, char** argv)
     else
     {
         filename = argv[1];
-        capture.open(filename);
+        capture.open(filename.c_str());
     }
     std::cout << "Input video file: " << filename << std::endl;
     if(!capture.isOpened()) std::cout << "failed" << std::endl; else std::cout << "succeded" << std::endl;

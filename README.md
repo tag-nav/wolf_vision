@@ -129,6 +129,23 @@ Wolf uses YAML files for configuration and for saving and loading workspaces. To
         
 We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it at `[wolf]/cmake_modules/FindYamlCpp.cmake`
 
+#### spdlog
+
+Wolf used spdlog macros. To install it:
+
+-   Git clone the source:
+
+        $ git clone https://github.com/gabime/spdlog.git
+        
+-   Build and install with:
+
+        $ cd spdlog
+        $ mkdir build
+        $ cd build
+        $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" ..
+        $ make
+        $ sudo make install 
+
 #### Optional: Laser Scan Utils (Install only if you want to use IRI's laser scan utils)
 
 **(1)** Git clone the source:
