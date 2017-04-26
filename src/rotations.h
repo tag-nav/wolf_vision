@@ -151,6 +151,18 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> R2v(const Eigen::MatrixBase
     return log_R(_R);
 }
 
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> q2R(const Eigen::QuaternionBase<Derived>& _q)
+{
+    return _q.matrix();
+}
+
+template<typename Derived>
+inline Eigen::Quaternion<typename Derived::Scalar> R2q(const Eigen::MatrixBase<Derived>& _R)
+{
+    return Eigen::Quaternion<typename Derived::Scalar>(_R);
+}
+
 /////////////////////////////////////////////////////////////////
 // Jacobians of SO(3)
 

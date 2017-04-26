@@ -8,7 +8,7 @@
 //Eigen
 #include <eigen3/Eigen/Geometry>
 
- //Wolf
+//Wolf
 #include "wolf.h"
 #include "../rotations.h"
 
@@ -44,7 +44,7 @@ TEST(rotations, Skew_vee)
     Eigen::Matrix3s skew_mat;
     skew_mat = skew(vec3);
 
-        // vee
+    // vee
     Eigen::Vector3s vec3_bis;
     vec3_bis = vee(skew_mat);
 
@@ -59,7 +59,7 @@ TEST(rotations, v2q_q2v)
 
     Eigen::Vector4s vec0, vec1;
 
-        //v2q
+    //v2q
     Eigen::Vector3s rot_vector0, rot_vector1;
     rot_vector0 = Eigen::Vector3s::Random();
     rot_vector1 = rot_vector0 * 100 *deg_to_rad; //far from origin
@@ -69,7 +69,7 @@ TEST(rotations, v2q_q2v)
     quat0 = v2q(rot_vector0);
     quat1 = v2q(rot_vector1);
 
-        //q2v
+    //q2v
     Eigen::Vector3s quat_to_v0, quat_to_v1;
     Eigen::VectorXs quat_to_v0x, quat_to_v1x;
 
@@ -78,16 +78,10 @@ TEST(rotations, v2q_q2v)
     quat_to_v0x = q2v(quat0);
     quat_to_v1x = q2v(quat1);
 
-        //now we do the checking
-     vec0 << quat0.w(), quat0.x(), quat0.y(), quat0.z();
-     vec1 << quat1.w(), quat1.x(), quat1.y(), quat1.z();
-
-    //std::cout << "\n quaternion near origin : \n" << vec0 << "\n quaternion far from origin : \n" << vec1 << std::endl;
-
-     ASSERT_EIGEN_APPROX(rot_vector0, quat_to_v0, wolf::Constants::EPS);
-     ASSERT_EIGEN_APPROX(rot_vector1, quat_to_v1, wolf::Constants::EPS);
-     ASSERT_EIGEN_APPROX(rot_vector0, quat_to_v0x, wolf::Constants::EPS);
-     ASSERT_EIGEN_APPROX(rot_vector1, quat_to_v1x, wolf::Constants::EPS);
+    ASSERT_EIGEN_APPROX(rot_vector0, quat_to_v0, wolf::Constants::EPS);
+    ASSERT_EIGEN_APPROX(rot_vector1, quat_to_v1, wolf::Constants::EPS);
+    ASSERT_EIGEN_APPROX(rot_vector0, quat_to_v0x, wolf::Constants::EPS);
+    ASSERT_EIGEN_APPROX(rot_vector1, quat_to_v1x, wolf::Constants::EPS);
 }
 
 TEST(rotations, v2R_R2v)
@@ -108,14 +102,14 @@ TEST(rotations, v2R_R2v)
     rot0 = v2R(rot_vector0);
     rot1 = v2R(rot_vector1);
 
-        //R2v
+    //R2v
     Eigen::Vector3s rot0_vec, rot1_vec;
     rot0_vec = R2v(rot0);
     rot1_vec = R2v(rot1);
 
-        //check now
-    ASSERT_TRUE(rot0_vec.isApprox(rot_vector0, wolf::Constants::EPS));
-    ASSERT_TRUE(rot1_vec.isApprox(rot_vector1, wolf::Constants::EPS));
+    //check now
+    ASSERT_EIGEN_APPROX(rot0_vec, rot_vector0, wolf::Constants::EPS);
+    ASSERT_EIGEN_APPROX(rot1_vec, rot_vector1, wolf::Constants::EPS);
 }
 
 TEST(rotations, R2v_v2R_limits)
@@ -134,7 +128,6 @@ TEST(rotations, R2v_v2R_limits)
         v_to_R = v2R(R_to_v);
 
         ASSERT_EIGEN_APPROX(v_to_R, initial_matrix, wolf::Constants::EPS);
-//        EXPECT_TRUE((v_to_R-initial_matrix).isMuchSmallerThan(1,wolf::Constants::EPS)); //<< "R2v_v2R_limits : reached at scale " << scale << std::endl;
         scale = scale*0.1;
     }
 }
@@ -157,7 +150,7 @@ TEST(rotations, R2v_v2R_AAlimits)
         Eigen::AngleAxis<wolf::Scalar> aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
         rv = aa0.axis() * aa0.angle();
         //std::cout << "aa0.axis : " << aa0.axis().transpose() << ",\t aa0.angles :" << aa0.angle() <<std::endl;
-        
+
         EXPECT_FALSE(rv == Eigen::Vector3s::Zero());
         scale = scale*0.1;
     }
@@ -170,16 +163,13 @@ TEST(rotations, v2q2R2v)
     // testing new path : vector -> quaternion -> matrix -> vector
 
     for(int i = 0; i< 8; i++){
-    Eigen::Vector3s vector_ = Eigen::Vector3s::Random()*scale;
-    Eigen::Quaternions quat_ = v2q(vector_);
-    Eigen::Matrix3s mat_ = quat_.matrix();
-    Eigen::Vector3s vector_bis = R2v(mat_);
+        Eigen::Vector3s vector_ = Eigen::Vector3s::Random()*scale;
+        Eigen::Quaternions quat_ = v2q(vector_);
+        Eigen::Matrix3s mat_ = quat_.matrix();
+        Eigen::Vector3s vector_bis = R2v(mat_);
 
-    ASSERT_EIGEN_APPROX(vector_, vector_bis, wolf::Constants::EPS);// <<
-//            "problem in vector -> quaternion -> matrix -> vector at scale " << scale << "\t Diff (returned_vector - input vector) = \n" << vector_bis - vector_ << std::endl;
-//    EXPECT_TRUE((vector_-vector_bis).isMuchSmallerThan(1, wolf::Constants::EPS)) <<
-//    "problem in vector -> quaternion -> matrix -> vector at scale " << scale << "\t Diff (returned_vector - input vector) = \n" << vector_bis - vector_ << std::endl;
-    scale = scale*0.1;
+        ASSERT_EIGEN_APPROX(vector_, vector_bis, wolf::Constants::EPS);
+        scale = scale*0.1;
     }
 }
 
@@ -203,15 +193,15 @@ TEST(rotations, AngleAxis_limits)
         rv = aa0.axis() * aa0.angle();
         //std::cout << "aa0.axis : " << aa0.axis().transpose() << ",\t aa0.angles :" << aa0.angle() <<std::endl;
         res = aa0.toRotationMatrix();
-        
+
         // now we set the diagonal to identity
         Eigen::AngleAxis<wolf::Scalar> aa1 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
         rv = aa1.axis() * aa1.angle();
         //std::cout << "aa1.axis : " << aa0.axis().transpose() << ",\t aa1.angles :" << aa0.angle() <<std::endl;
         res_i = aa1.toRotationMatrix();
 
-        EXPECT_TRUE(res.isApprox(rotation_mat,wolf::Constants::EPS)) << "limit reached at scale " << scale << std::endl;
-        EXPECT_TRUE(res_i.isApprox(rotation_mati,wolf::Constants::EPS)) << "res_i : limit reached at scale " << scale << std::endl;
+        ASSERT_EIGEN_APPROX(res, rotation_mat, wolf::Constants::EPS);
+        ASSERT_EIGEN_APPROX(res_i, rotation_mati, wolf::Constants::EPS);
         scale = scale*0.1;
     }
 }
@@ -265,7 +255,7 @@ TEST(rotations, Quat_compos_const_rateOfTurn)
 {
     using namespace wolf;
 
-                                // ********* constant rate of turn *********
+    // ********* constant rate of turn *********
     wolf::Scalar deg_to_rad = M_PI/180.0;
     Eigen::Quaternions q0;
     q0.setIdentity();
@@ -301,7 +291,7 @@ TEST(rotations, Quat_compos_const_rateOfTurn)
         oz(n) = pi2pi(v0(2)*n*dt);*/
         t_vec(n) = n*dt;
     }
-    
+
     for(wolf::Scalar n=0; n<N/dt; n++){
         if(n!=0)
             q0 = q0 * v2q(v0*dt); //succesive composition of quaternions : q = q * dq(w*dt) <=> q = q * dq(w*dt) * q' (mathematically)
@@ -322,20 +312,20 @@ TEST(rotations, Quat_compos_const_rateOfTurn)
     cdoz_abs = const_diff_oz.array().abs();
 
     EXPECT_TRUE((ox - qox).isMuchSmallerThan(1,0.000001) && (oy - qoy).isMuchSmallerThan(1,0.000001) && (oz - qoz).isMuchSmallerThan(1,0.000001)) << 
-    "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
+            "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
 
-    #ifdef write_results
-        std::ofstream const_rot;
-        const_rot.open("const_rot.dat");
-        if(const_rot){
-            const_rot << "%%timestamp\t" << "ox\t" << "oy\t" << "oz\t" << "qox\t" << "qoy\t" << "qoz\t" << "\n";
-            for(int i = 0; i<N/dt; i++)
-                const_rot << t_vec(i) << "\t" << ox(i) << "\t" << oy(i) << "\t" << oz(i) << "\t" << qox(i) << "\t" << qoy(i) << "\t" << qoz(i) << "\n";
-            const_rot.close();
-        }
-        else
+#ifdef write_results
+    std::ofstream const_rot;
+    const_rot.open("const_rot.dat");
+    if(const_rot){
+        const_rot << "%%timestamp\t" << "ox\t" << "oy\t" << "oz\t" << "qox\t" << "qoy\t" << "qoz\t" << "\n";
+        for(int i = 0; i<N/dt; i++)
+            const_rot << t_vec(i) << "\t" << ox(i) << "\t" << oy(i) << "\t" << oz(i) << "\t" << qox(i) << "\t" << qoy(i) << "\t" << qoz(i) << "\n";
+        const_rot.close();
+    }
+    else
         PRINTF("could not open file const_rot");
-    #endif
+#endif
 
 }
 
@@ -343,7 +333,7 @@ TEST(rotations, Quat_compos_var_rateOfTurn)
 {
     using namespace wolf;
 
-                                //********* changing rate of turn - same freq for all axis *********
+    //********* changing rate of turn - same freq for all axis *********
     wolf::Scalar deg_to_rad = M_PI/180.0;
     Eigen::Quaternions q0;
     q0.setIdentity();
@@ -408,20 +398,20 @@ TEST(rotations, Quat_compos_var_rateOfTurn)
     cdoz_abs = const_diff_oz.array().abs();
 
     EXPECT_FALSE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)) << 
-    "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
+            "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
 
-    #ifdef write_results
-        std::ofstream sin_rot0;
-        sin_rot0.open("sin_rot0.dat");
-        if(sin_rot0){
-            sin_rot0 << "%%timestamp\t" << "ox\t" << "oy\t" << "oz\t" << "qox\t" << "qoy\t" << "qoz\t" << "\n";
-            for(int i = 0; i<N/dt; i++)
-                sin_rot0 << t_vec(i) << "\t" << ox(i) << "\t" << oy(i) << "\t" << oz(i) << "\t" << qox(i) << "\t" << qoy(i) << "\t" << qoz(i) << "\n";
-            sin_rot0.close();
-        }
-        else
+#ifdef write_results
+    std::ofstream sin_rot0;
+    sin_rot0.open("sin_rot0.dat");
+    if(sin_rot0){
+        sin_rot0 << "%%timestamp\t" << "ox\t" << "oy\t" << "oz\t" << "qox\t" << "qoy\t" << "qoz\t" << "\n";
+        for(int i = 0; i<N/dt; i++)
+            sin_rot0 << t_vec(i) << "\t" << ox(i) << "\t" << oy(i) << "\t" << oz(i) << "\t" << qox(i) << "\t" << qoy(i) << "\t" << qoz(i) << "\n";
+        sin_rot0.close();
+    }
+    else
         PRINTF("could not open file sin_rot0");
-    #endif
+#endif
 }
 
 TEST(rotations, Quat_compos_var_rateOfTurn_diff)
@@ -493,27 +483,46 @@ TEST(rotations, Quat_compos_var_rateOfTurn_diff)
     cdoz_abs = const_diff_oz.array().abs();
 
     EXPECT_FALSE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)) << 
-    "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
-        //std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
-        //std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
-    #ifdef write_results
-        std::ofstream sin_rot;
-        sin_rot.open("sin_rot.dat");
-        if(sin_rot){
-            sin_rot << "%%timestamp\t" << "ox\t" << "oy\t" << "oz\t" << "qox\t" << "qoy\t" << "qoz\t" << "\n";
-            for(int i = 0; i<N/dt; i++)
-                sin_rot << t_vec(i) << "\t" << ox(i) << "\t" << oy(i) << "\t" << oz(i) << "\t" << qox(i) << "\t" << qoy(i) << "\t" << qoz(i) << "\n";
-            sin_rot.close();
-        }
-        else
-            PRINTF("could not open file sin_rot");
-    #endif
+            "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
+    //std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
+    //std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
+#ifdef write_results
+    std::ofstream sin_rot;
+    sin_rot.open("sin_rot.dat");
+    if(sin_rot){
+        sin_rot << "%%timestamp\t" << "ox\t" << "oy\t" << "oz\t" << "qox\t" << "qoy\t" << "qoz\t" << "\n";
+        for(int i = 0; i<N/dt; i++)
+            sin_rot << t_vec(i) << "\t" << ox(i) << "\t" << oy(i) << "\t" << oz(i) << "\t" << qox(i) << "\t" << qoy(i) << "\t" << qoz(i) << "\n";
+        sin_rot.close();
+    }
+    else
+        PRINTF("could not open file sin_rot");
+#endif
+}
+
+TEST(rotations, q2R_R2q)
+{
+    Eigen::Vector3s v; v.setRandom();
+    Eigen::Quaternions q = v2q(v);
+    Eigen::Matrix3s R = v2R(v);
+
+    Eigen::Quaternions q_R = R2q(R);
+    Eigen::Quaternions qq_R(R);
+
+    EXPECT_NEAR(q.norm(),    1, wolf::Constants::EPS_SMALL);
+    EXPECT_NEAR(q_R.norm(),  1, wolf::Constants::EPS_SMALL);
+    EXPECT_NEAR(qq_R.norm(), 1, wolf::Constants::EPS_SMALL);
+
+    EXPECT_EIGEN_APPROX(q.coeffs(), R2q(R).coeffs(), wolf::Constants::EPS_SMALL);
+    EXPECT_EIGEN_APPROX(q.coeffs(), qq_R.coeffs(),   wolf::Constants::EPS_SMALL);
+    EXPECT_EIGEN_APPROX(R,          q2R(q),          wolf::Constants::EPS);
+    EXPECT_EIGEN_APPROX(R,          qq_R.matrix(),   wolf::Constants::EPS);
 }
 
 int main(int argc, char **argv)
 {
     using namespace wolf;
-                        
+
 
     /*
         LIST OF FUNCTIONS : 
@@ -532,6 +541,6 @@ int main(int argc, char **argv)
         - quaternion composition
      */
 
-     testing::InitGoogleTest(&argc, argv);
-     return RUN_ALL_TESTS();
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }
