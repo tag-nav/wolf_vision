@@ -88,10 +88,6 @@ TEST(rotations, v2q_q2v)
      ASSERT_EIGEN_APPROX(rot_vector1, quat_to_v1, wolf::Constants::EPS);
      ASSERT_EIGEN_APPROX(rot_vector0, quat_to_v0x, wolf::Constants::EPS);
      ASSERT_EIGEN_APPROX(rot_vector1, quat_to_v1x, wolf::Constants::EPS);
-//    ASSERT_TRUE(rot_vector0.isApprox(quat_to_v0, wolf::Constants::EPS));
-//    ASSERT_TRUE(rot_vector1.isApprox(quat_to_v1, wolf::Constants::EPS));
-//    ASSERT_TRUE(rot_vector0.isApprox(quat_to_v0x, wolf::Constants::EPS));
-//    ASSERT_TRUE(rot_vector1.isApprox(quat_to_v1x, wolf::Constants::EPS));
 }
 
 TEST(rotations, v2R_R2v)
@@ -137,7 +133,8 @@ TEST(rotations, R2v_v2R_limits)
         R_to_v = R2v(initial_matrix);     
         v_to_R = v2R(R_to_v);
 
-        EXPECT_TRUE((v_to_R-initial_matrix).isMuchSmallerThan(1,wolf::Constants::EPS)); //<< "R2v_v2R_limits : reached at scale " << scale << std::endl;
+        ASSERT_EIGEN_APPROX(v_to_R, initial_matrix, wolf::Constants::EPS);
+//        EXPECT_TRUE((v_to_R-initial_matrix).isMuchSmallerThan(1,wolf::Constants::EPS)); //<< "R2v_v2R_limits : reached at scale " << scale << std::endl;
         scale = scale*0.1;
     }
 }
@@ -178,8 +175,10 @@ TEST(rotations, v2q2R2v)
     Eigen::Matrix3s mat_ = quat_.matrix();
     Eigen::Vector3s vector_bis = R2v(mat_);
 
-    EXPECT_TRUE((vector_-vector_bis).isMuchSmallerThan(1, wolf::Constants::EPS)) << 
-    "problem in vector -> quaternion -> matrix -> vector at scale " << scale << "\t Diff (returned_vector - input vector) = \n" << vector_bis - vector_ << std::endl;
+    ASSERT_EIGEN_APPROX(vector_, vector_bis, wolf::Constants::EPS);// <<
+//            "problem in vector -> quaternion -> matrix -> vector at scale " << scale << "\t Diff (returned_vector - input vector) = \n" << vector_bis - vector_ << std::endl;
+//    EXPECT_TRUE((vector_-vector_bis).isMuchSmallerThan(1, wolf::Constants::EPS)) <<
+//    "problem in vector -> quaternion -> matrix -> vector at scale " << scale << "\t Diff (returned_vector - input vector) = \n" << vector_bis - vector_ << std::endl;
     scale = scale*0.1;
     }
 }
