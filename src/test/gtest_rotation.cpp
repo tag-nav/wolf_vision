@@ -84,10 +84,14 @@ TEST(rotations, v2q_q2v)
 
     //std::cout << "\n quaternion near origin : \n" << vec0 << "\n quaternion far from origin : \n" << vec1 << std::endl;
 
-    ASSERT_TRUE(rot_vector0.isApprox(quat_to_v0, wolf::Constants::EPS));
-    ASSERT_TRUE(rot_vector1.isApprox(quat_to_v1, wolf::Constants::EPS));
-    ASSERT_TRUE(rot_vector0.isApprox(quat_to_v0x, wolf::Constants::EPS));
-    ASSERT_TRUE(rot_vector1.isApprox(quat_to_v1x, wolf::Constants::EPS));
+     ASSERT_EIGEN_APPROX(rot_vector0, quat_to_v0, wolf::Constants::EPS);
+     ASSERT_EIGEN_APPROX(rot_vector1, quat_to_v1, wolf::Constants::EPS);
+     ASSERT_EIGEN_APPROX(rot_vector0, quat_to_v0x, wolf::Constants::EPS);
+     ASSERT_EIGEN_APPROX(rot_vector1, quat_to_v1x, wolf::Constants::EPS);
+//    ASSERT_TRUE(rot_vector0.isApprox(quat_to_v0, wolf::Constants::EPS));
+//    ASSERT_TRUE(rot_vector1.isApprox(quat_to_v1, wolf::Constants::EPS));
+//    ASSERT_TRUE(rot_vector0.isApprox(quat_to_v0x, wolf::Constants::EPS));
+//    ASSERT_TRUE(rot_vector1.isApprox(quat_to_v1x, wolf::Constants::EPS));
 }
 
 TEST(rotations, v2R_R2v)
