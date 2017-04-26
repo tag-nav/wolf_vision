@@ -85,13 +85,6 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
 }
 
 template<typename Derived>
-inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<Derived>& _v)
-{
-    return exp_q(_v);
-}
-
-
-template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::QuaternionBase<Derived>& _q)
 {
     typedef typename Derived::Scalar T;
@@ -110,12 +103,6 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::Quaterni
 }
 
 template<typename Derived>
-inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v(const Eigen::QuaternionBase<Derived>& _q)
-{
-    return log_q(_q);
-}
-
-template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBase<Derived>& _v)
 {
 
@@ -130,12 +117,6 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBa
 }
 
 template<typename Derived>
-inline Eigen::Matrix<typename Derived::Scalar, 3, 3> v2R(const Eigen::MatrixBase<Derived>& _v)
-{
-    return exp_R(_v);
-}
-
-template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_R(const Eigen::MatrixBase<Derived>& _R)
 {
 
@@ -144,6 +125,24 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_R(const Eigen::MatrixBa
 
     Eigen::AngleAxis<T> aa = Eigen::AngleAxis<T>(_R);
     return aa.axis() * aa.angle();
+}
+
+template<typename Derived>
+inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<Derived>& _v)
+{
+    return exp_q(_v);
+}
+
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v(const Eigen::QuaternionBase<Derived>& _q)
+{
+    return log_q(_q);
+}
+
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> v2R(const Eigen::MatrixBase<Derived>& _v)
+{
+    return exp_R(_v);
 }
 
 template<typename Derived>
@@ -158,8 +157,11 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> R2v(const Eigen::MatrixBase
 /** \brief Compute Jr (Right Jacobian)
  * Right Jacobian for exp map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
+ *
  *      expmap( omega + d_omega ) \approx expmap(omega) * expmap(Jr * d_omega)
+ *
  *  where Jr = expMapDerivative(omega);
+ *
  *  This maps a perturbation in the tangent space (d_omega) to a perturbation on the manifold (expmap(Jr * d_omega))
  *  so that:
  *
@@ -187,7 +189,9 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right(const Eigen::
 /** \brief Compute Jrinv (inverse of Right Jacobian which corresponds to the jacobian of log)
  *  Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
+ *
  *      logmap( Rhat * expmap(d_omega) ) \approx logmap( Rhat ) + Jrinv * d_omega
+ *
  *  where Jrinv = logMapDerivative(omega);
  *
  *  This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega) so that
@@ -218,8 +222,11 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eig
 /** \brief Compute Jl (Left Jacobian)
  * Left Jacobian for exp map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
+ *
  *      expmap( omega + d_omega ) \approx expmap(Jl * d_omega) * expmap(omega)
+ *
  *  where Jl = jac_SO3_left(omega);
+ *
  *  This maps a perturbation in the tangent space (d_omega) to a perturbation on the manifold (expmap(Jl * d_omega))
  *  so that:
  *
@@ -246,7 +253,9 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::M
 /** \brief Compute Jl_inv (inverse of Left Jacobian which corresponds to the jacobian of log)
  *  Left Jacobian for Log map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
+ *
  *      logmap( expmap(d_omega) * Rhat ) \approx logmap( Rhat ) + Jlinv * d_omega
+ *
  *  where Jlinv = jac_SO3_left_inv(omega);
  *
  *  This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jlinv * omega) so that
