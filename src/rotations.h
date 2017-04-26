@@ -58,10 +58,10 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> vee(const Eigen::MatrixBase
 }
 
 ///////////////////////////////////////////////////////////////
-// Rotation conversions
+// Rotation conversions - exp and log maps
 
 template<typename Derived>
-inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<Derived>& _v)
+inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase<Derived>& _v)
 {
 
     MatrixSizeCheck<3, 1>::check(_v);
@@ -85,14 +85,21 @@ inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<D
 }
 
 template<typename Derived>
-inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v(const Eigen::QuaternionBase<Derived>& _q)
+inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<Derived>& _v)
+{
+    return exp_q(_v);
+}
+
+
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::QuaternionBase<Derived>& _q)
 {
     typedef typename Derived::Scalar T;
     Eigen::Matrix<T, 3, 1> vec = _q.vec();
     T vecnorm = vec.norm();
     if (vecnorm > wolf::Constants::EPS_SMALL)
     { // regular angle-axis conversion
-        T angle = atan2(vecnorm, _q.w());
+        T angle = (T)2.0 * atan2(vecnorm, _q.w());
         return vec * angle / vecnorm;
     }
     else
@@ -102,14 +109,14 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v(const Eigen::Quaternion
     }
 }
 
-inline Eigen::VectorXs q2v(const Eigen::Quaternions& _q)
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v(const Eigen::QuaternionBase<Derived>& _q)
 {
-    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
-    return aa.axis() * aa.angle();
+    return log_q(_q);
 }
 
 template<typename Derived>
-inline Eigen::Matrix<typename Derived::Scalar, 3, 3> v2R(const Eigen::MatrixBase<Derived>& _v)
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBase<Derived>& _v)
 {
 
     MatrixSizeCheck<3, 1>::check(_v);
@@ -123,7 +130,13 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> v2R(const Eigen::MatrixBase
 }
 
 template<typename Derived>
-inline Eigen::Matrix<typename Derived::Scalar, 3, 1> R2v(const Eigen::MatrixBase<Derived>& _R)
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> v2R(const Eigen::MatrixBase<Derived>& _v)
+{
+    return exp_R(_v);
+}
+
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_R(const Eigen::MatrixBase<Derived>& _R)
 {
 
     MatrixSizeCheck<3, 3>::check(_R);
@@ -131,6 +144,12 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> R2v(const Eigen::MatrixBase
 
     Eigen::AngleAxis<T> aa = Eigen::AngleAxis<T>(_R);
     return aa.axis() * aa.angle();
+}
+
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 1> R2v(const Eigen::MatrixBase<Derived>& _R)
+{
+    return log_R(_R);
 }
 
 /////////////////////////////////////////////////////////////////
@@ -159,10 +178,10 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right(const Eigen::
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W; // Small angle approximation
     T theta = sqrt(theta2);  // rotation angle
-    Eigen::Matrix<T, 3, 3> m1, m2;
-    m1.noalias() = ((T)1 - cos(theta)) / theta2 * W;
-    m2.noalias() = (theta - sin(theta)) / (theta2 * theta) * (W * W);
-    return Eigen::Matrix<T, 3, 3>::Identity() - m1 + m2;
+    Eigen::Matrix<T, 3, 3> M1, M2;
+    M1.noalias() = ((T)1 - cos(theta)) / theta2 * W;
+    M2.noalias() = (theta - sin(theta)) / (theta2 * theta) * (W * W);
+    return Eigen::Matrix<T, 3, 3>::Identity() - M1 + M2;
 }
 
 /** \brief Compute Jrinv (inverse of Right Jacobian which corresponds to the jacobian of log)
@@ -191,9 +210,9 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eig
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
     T theta = std::sqrt(theta2);  // rotation angle
-    Eigen::Matrix<T, 3, 3> m2;
-    m2.noalias() = ((T)1 / theta2 - (1 + cos(theta)) / ((T)2 * theta * sin(theta))) * (W * W);
-    return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W + m2; //is this really more optimized?
+    Eigen::Matrix<T, 3, 3> M;
+    M.noalias() = ((T)1 / theta2 - (1 + cos(theta)) / ((T)2 * theta * sin(theta))) * (W * W);
+    return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W + M; //is this really more optimized?
 }
 
 /** \brief Compute Jl (Left Jacobian)
@@ -218,10 +237,10 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::M
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W; // Small angle approximation
     T theta = sqrt(theta2);  // rotation angle
-    Eigen::Matrix<T, 3, 3> m1, m2;
-    m1.noalias() = ((T)1 - cos(theta)) / theta2 * W;
-    m2.noalias() = (theta - sin(theta)) / (theta2 * theta) * (W * W);
-    return Eigen::Matrix<T, 3, 3>::Identity() + m1 + m2;
+    Eigen::Matrix<T, 3, 3> M1, M2;
+    M1.noalias() = ((T)1 - cos(theta)) / theta2 * W;
+    M2.noalias() = (theta - sin(theta)) / (theta2 * theta) * (W * W);
+    return Eigen::Matrix<T, 3, 3>::Identity() + M1 + M2;
 }
 
 /** \brief Compute Jl_inv (inverse of Left Jacobian which corresponds to the jacobian of log)
@@ -250,9 +269,9 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left_inv(const Eige
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
     T theta = std::sqrt(theta2);  // rotation angle
-    Eigen::Matrix<T, 3, 3> m2;
-    m2.noalias() = ((T)1 / theta2 - (1 + cos(theta)) / ((T)2 * theta * sin(theta))) * (W * W);
-    return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W + m2; //is this really more optimized?
+    Eigen::Matrix<T, 3, 3> M;
+    M.noalias() = ((T)1 / theta2 - (1 + cos(theta)) / ((T)2 * theta * sin(theta))) * (W * W);
+    return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W + M; //is this really more optimized?
 }
 
 } // namespace wolf
