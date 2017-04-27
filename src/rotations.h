@@ -170,25 +170,25 @@ inline Eigen::Quaternion<typename Derived::Scalar> R2q(const Eigen::MatrixBase<D
  * Right Jacobian for exp map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
  *
- *      expmap( omega + d_omega ) \approx expmap(omega) * expmap(Jr * d_omega)
+ *      expmap( theta + d_theta ) \approx expmap(theta) * expmap(Jr * d_theta)
  *
- *  where Jr = expMapDerivative(omega);
+ *  where Jr = jac_SO3_right(theta);
  *
- *  This maps a perturbation in the tangent space (d_omega) to a perturbation on the manifold (expmap(Jr * d_omega))
+ *  This maps a perturbation in the tangent space (d_theta) to a perturbation on the manifold (expmap(Jr * d_theta))
  *  so that:
  *
- *      exp(omega+d_omega) = exp(omega)*exp(Jr(omega)*d_omega)
+ *      exp(theta+d_theta) = exp(theta)*exp(Jr(theta)*d_theta)
  */
 
 template<typename Derived>
-inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right(const Eigen::MatrixBase<Derived>& _omega)
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right(const Eigen::MatrixBase<Derived>& _theta)
 {
 
-    MatrixSizeCheck<3, 1>::check(_omega);
+    MatrixSizeCheck<3, 1>::check(_theta);
     typedef typename Derived::Scalar T;
 
-    T theta2 = _omega.dot(_omega);
-    Eigen::Matrix<T, 3, 3> W(skew(_omega));
+    T theta2 = _theta.dot(_theta);
+    Eigen::Matrix<T, 3, 3> W(skew(_theta));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W; // Small angle approximation
     T theta = sqrt(theta2);  // rotation angle
@@ -202,28 +202,28 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right(const Eigen::
  *  Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
  *
- *      logmap( R * expmap(d_omega) ) \approx logmap( R ) + Jrinv * d_omega
- *      logmap( q * expmap(d_omega) ) \approx logmap( q ) + Jrinv * d_omega
+ *      logmap( R * expmap(d_theta) ) \approx logmap( R ) + Jrinv * d_theta
+ *      logmap( q * expmap(d_theta) ) \approx logmap( q ) + Jrinv * d_theta
  *
- *  where Jrinv = logMapDerivative(omega);
+ *  where Jrinv = jac_SO3_right_inv(theta);
  *
- *  This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jrinv * omega) so that
+ *  This maps a perturbation on the manifold (expmap(theta)) to a perturbation in the tangent space (Jrinv * theta) so that
  *
- *      log( exp(omega) * exp(d_omega) ) = omega + Jrinv(omega) * d_omega
+ *      log( exp(theta) * exp(d_theta) ) = theta + Jrinv(theta) * d_theta
  *
- *  or, having R = exp(omega),
+ *  or, having R = exp(theta),
  *
- *      log( R * exp(d_omega) ) = log(R) + Jrinv(omega) * d_omega
+ *      log( R * exp(d_theta) ) = log(R) + Jrinv(theta) * d_theta
  */
 template<typename Derived>
-inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eigen::MatrixBase<Derived>& _omega)
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eigen::MatrixBase<Derived>& _theta)
 {
 
-    MatrixSizeCheck<3, 1>::check(_omega);
+    MatrixSizeCheck<3, 1>::check(_theta);
     typedef typename Derived::Scalar T;
 
-    T theta2 = _omega.dot(_omega);
-    Eigen::Matrix<T, 3, 3> W(skew(_omega));
+    T theta2 = _theta.dot(_theta);
+    Eigen::Matrix<T, 3, 3> W(skew(_theta));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
     T theta = std::sqrt(theta2);  // rotation angle
@@ -236,24 +236,24 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eig
  * Left Jacobian for exp map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
  *
- *      expmap( omega + d_omega ) \approx expmap(Jl * d_omega) * expmap(omega)
+ *      expmap( theta + d_theta ) \approx expmap(Jl * d_theta) * expmap(theta)
  *
- *  where Jl = jac_SO3_left(omega);
+ *  where Jl = jac_SO3_left(theta);
  *
- *  This maps a perturbation in the tangent space (d_omega) to a perturbation on the manifold (expmap(Jl * d_omega))
+ *  This maps a perturbation in the tangent space (d_theta) to a perturbation on the manifold (expmap(Jl * d_theta))
  *  so that:
  *
- *      exp(omega+d_omega) = exp(Jr(omega)*d_omega)*exp(omega)
+ *      exp(theta+d_theta) = exp(Jr(theta)*d_theta)*exp(theta)
  */
 template<typename Derived>
-inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::MatrixBase<Derived>& _omega)
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::MatrixBase<Derived>& _theta)
 {
 
-    MatrixSizeCheck<3, 1>::check(_omega);
+    MatrixSizeCheck<3, 1>::check(_theta);
     typedef typename Derived::Scalar T;
 
-    T theta2 = _omega.dot(_omega);
-    Eigen::Matrix<T, 3, 3> W(skew(_omega));
+    T theta2 = _theta.dot(_theta);
+    Eigen::Matrix<T, 3, 3> W(skew(_theta));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W; // Small angle approximation
     T theta = sqrt(theta2);  // rotation angle
@@ -267,27 +267,27 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::M
  *  Left Jacobian for Log map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
  *
- *      logmap( expmap(d_omega) * R ) \approx logmap( R ) + Jlinv * d_omega
+ *      logmap( expmap(d_theta) * R ) \approx logmap( R ) + Jlinv * d_theta
  *
- *  where Jlinv = jac_SO3_left_inv(omega);
+ *  where Jlinv = jac_SO3_left_inv(theta);
  *
- *  This maps a perturbation on the manifold (expmap(omega)) to a perturbation in the tangent space (Jlinv * omega) so that
+ *  This maps a perturbation on the manifold (expmap(theta)) to a perturbation in the tangent space (Jlinv * theta) so that
  *
- *      log( exp(d_omega) * exp(omega) ) = omega + Jlinv(omega) * d_omega
+ *      log( exp(d_theta) * exp(theta) ) = theta + Jlinv(theta) * d_theta
  *
- *  or, having R = exp(omega),
+ *  or, having R = exp(theta),
  *
- *      log( exp(d_omega) * R ) = log(R) + Jlinv(omega) * d_omega
+ *      log( exp(d_theta) * R ) = log(R) + Jlinv(theta) * d_theta
  */
 template<typename Derived>
-inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left_inv(const Eigen::MatrixBase<Derived>& _omega)
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left_inv(const Eigen::MatrixBase<Derived>& _theta)
 {
 
-    MatrixSizeCheck<3, 1>::check(_omega);
+    MatrixSizeCheck<3, 1>::check(_theta);
     typedef typename Derived::Scalar T;
 
-    T theta2 = _omega.dot(_omega);
-    Eigen::Matrix<T, 3, 3> W(skew(_omega));
+    T theta2 = _theta.dot(_theta);
+    Eigen::Matrix<T, 3, 3> W(skew(_theta));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
     T theta = std::sqrt(theta2);  // rotation angle
