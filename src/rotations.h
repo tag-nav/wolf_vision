@@ -202,7 +202,8 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right(const Eigen::
  *  Right Jacobian for Log map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
  *
- *      logmap( Rhat * expmap(d_omega) ) \approx logmap( Rhat ) + Jrinv * d_omega
+ *      logmap( R * expmap(d_omega) ) \approx logmap( R ) + Jrinv * d_omega
+ *      logmap( q * expmap(d_omega) ) \approx logmap( q ) + Jrinv * d_omega
  *
  *  where Jrinv = logMapDerivative(omega);
  *
@@ -266,7 +267,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::M
  *  Left Jacobian for Log map in SO(3) - equation (10.86) and following equations in
  *  G.S. Chirikjian, "Stochastic Models, Information Theory, and Lie Groups", Volume 2, 2008.
  *
- *      logmap( expmap(d_omega) * Rhat ) \approx logmap( Rhat ) + Jlinv * d_omega
+ *      logmap( expmap(d_omega) * R ) \approx logmap( R ) + Jlinv * d_omega
  *
  *  where Jlinv = jac_SO3_left_inv(omega);
  *
