@@ -57,7 +57,7 @@ TEST(ConstraintOdom3D, check_tree)
 
 TEST(ConstraintOdom3D, expectation)
 {
-    ASSERT_EIGEN_APPROX(ctr1->expectation() , delta, 1e-6);
+    ASSERT_MATRIX_APPROX(ctr1->expectation() , delta, 1e-6);
 }
 
 TEST(ConstraintOdom3D, fix_0_solve)
@@ -71,7 +71,7 @@ TEST(ConstraintOdom3D, fix_0_solve)
     // solve for frm1
     ceres::Solver::Summary summary = ceres_mgr.solve();
 
-    ASSERT_EIGEN_APPROX(frm1->getState(), delta, 1e-6);
+    ASSERT_MATRIX_APPROX(frm1->getState(), delta, 1e-6);
 
 }
 
@@ -85,7 +85,7 @@ TEST(ConstraintOdom3D, fix_1_solve)
     // solve for frm0
     ceres::Solver::Summary summary = ceres_mgr.solve();
 
-    ASSERT_EIGEN_APPROX(frm0->getState(), problem->zeroState(), 1e-6);
+    ASSERT_MATRIX_APPROX(frm0->getState(), problem->zeroState(), 1e-6);
 }
 
 int main(int argc, char **argv)

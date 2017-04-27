@@ -79,10 +79,10 @@ TEST(rotations, v2q_q2v)
     quat_to_v0x = q2v(quat0);
     quat_to_v1x = q2v(quat1);
 
-    ASSERT_EIGEN_APPROX(rot_vector0, quat_to_v0, wolf::Constants::EPS);
-    ASSERT_EIGEN_APPROX(rot_vector1, quat_to_v1, wolf::Constants::EPS);
-    ASSERT_EIGEN_APPROX(rot_vector0, quat_to_v0x, wolf::Constants::EPS);
-    ASSERT_EIGEN_APPROX(rot_vector1, quat_to_v1x, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(rot_vector0, quat_to_v0, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(rot_vector1, quat_to_v1, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(rot_vector0, quat_to_v0x, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(rot_vector1, quat_to_v1x, wolf::Constants::EPS);
 }
 
 TEST(rotations, v2R_R2v)
@@ -109,8 +109,8 @@ TEST(rotations, v2R_R2v)
     rot1_vec = R2v(rot1);
 
     //check now
-    ASSERT_EIGEN_APPROX(rot0_vec, rot_vector0, wolf::Constants::EPS);
-    ASSERT_EIGEN_APPROX(rot1_vec, rot_vector1, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(rot0_vec, rot_vector0, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(rot1_vec, rot_vector1, wolf::Constants::EPS);
 }
 
 TEST(rotations, R2v_v2R_limits)
@@ -128,7 +128,7 @@ TEST(rotations, R2v_v2R_limits)
         R_to_v = R2v(initial_matrix);     
         v_to_R = v2R(R_to_v);
 
-        ASSERT_EIGEN_APPROX(v_to_R, initial_matrix, wolf::Constants::EPS);
+        ASSERT_MATRIX_APPROX(v_to_R, initial_matrix, wolf::Constants::EPS);
         scale = scale*0.1;
     }
 }
@@ -152,7 +152,7 @@ TEST(rotations, R2v_v2R_AAlimits)
         rv = aa0.axis() * aa0.angle();
         //std::cout << "aa0.axis : " << aa0.axis().transpose() << ",\t aa0.angles :" << aa0.angle() <<std::endl;
 
-        EXPECT_FALSE(rv == Vector3s::Zero());
+        ASSERT_FALSE(rv == Vector3s::Zero());
         scale = scale*0.1;
     }
 }
@@ -169,7 +169,7 @@ TEST(rotations, v2q2R2v)
         Matrix3s mat_ = quat_.matrix();
         Vector3s vector_bis = R2v(mat_);
 
-        ASSERT_EIGEN_APPROX(vector_, vector_bis, wolf::Constants::EPS);
+        ASSERT_MATRIX_APPROX(vector_, vector_bis, wolf::Constants::EPS);
         scale = scale*0.1;
     }
 }
@@ -201,8 +201,8 @@ TEST(rotations, AngleAxis_limits)
         //std::cout << "aa1.axis : " << aa0.axis().transpose() << ",\t aa1.angles :" << aa0.angle() <<std::endl;
         res_i = aa1.toRotationMatrix();
 
-        ASSERT_EIGEN_APPROX(res, rotation_mat, wolf::Constants::EPS);
-        ASSERT_EIGEN_APPROX(res_i, rotation_mati, wolf::Constants::EPS);
+        ASSERT_MATRIX_APPROX(res, rotation_mat, wolf::Constants::EPS);
+        ASSERT_MATRIX_APPROX(res_i, rotation_mati, wolf::Constants::EPS);
         scale = scale*0.1;
     }
 }
@@ -224,7 +224,7 @@ TEST(rotations, AngleAxis_limits2)
     aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
     rv = aa0.axis() * aa0.angle();
     //checking if rv is 0 vector
-    EXPECT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 
     rotation_mat(0,0) = 1.0;
     rotation_mat(1,1) = 1.0;
@@ -232,7 +232,7 @@ TEST(rotations, AngleAxis_limits2)
     aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
     rv = aa0.axis() * aa0.angle();
     //checking if rv is 0 vector
-    EXPECT_TRUE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_TRUE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 
     rotation_mat = skew(Vector3s::Random()) *0.1;
     rotation_mat(0,0) = 1;
@@ -241,7 +241,7 @@ TEST(rotations, AngleAxis_limits2)
     aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
     rv = aa0.axis() * aa0.angle();
     //checking if rv is 0 vector
-    EXPECT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 
     rotation_mat(0,0) = 1.0;
     rotation_mat(1,1) = 1.0;
@@ -249,7 +249,7 @@ TEST(rotations, AngleAxis_limits2)
     aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
     rv = aa0.axis() * aa0.angle();
     //checking if rv is 0 vector
-    EXPECT_TRUE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_TRUE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 }
 
 TEST(rotations, Quat_compos_const_rateOfTurn)
@@ -312,7 +312,7 @@ TEST(rotations, Quat_compos_const_rateOfTurn)
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    EXPECT_TRUE((ox - qox).isMuchSmallerThan(1,0.000001) && (oy - qoy).isMuchSmallerThan(1,0.000001) && (oz - qoz).isMuchSmallerThan(1,0.000001)) << 
+    ASSERT_TRUE((ox - qox).isMuchSmallerThan(1,0.000001) && (oy - qoy).isMuchSmallerThan(1,0.000001) && (oz - qoz).isMuchSmallerThan(1,0.000001)) <<
             "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
 
 #ifdef write_results
@@ -398,7 +398,7 @@ TEST(rotations, Quat_compos_var_rateOfTurn)
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    EXPECT_FALSE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)) << 
+    ASSERT_FALSE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)) <<
             "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
 
 #ifdef write_results
@@ -483,7 +483,7 @@ TEST(rotations, Quat_compos_var_rateOfTurn_diff)
     cdoy_abs = const_diff_oy.array().abs();
     cdoz_abs = const_diff_oz.array().abs();
 
-    EXPECT_FALSE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)) << 
+    ASSERT_FALSE(cdox_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoy_abs.isMuchSmallerThan(1,wolf::Constants::EPS) && cdoz_abs.isMuchSmallerThan(1,wolf::Constants::EPS)) <<
             "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
     //std::cout << "\t quaternion composition with constant rate of turn is NOT OK\n" << std::endl;
     //std::cout << "max orientation error in abs value (x, y, z) : " << cdox_abs.maxCoeff() << "\t" << cdoy_abs.maxCoeff() << "\t" << cdoz_abs.maxCoeff() << std::endl;
@@ -510,14 +510,14 @@ TEST(rotations, q2R_R2q)
     Quaternions q_R = R2q(R);
     Quaternions qq_R(R);
 
-    EXPECT_NEAR(q.norm(),    1, wolf::Constants::EPS);
-    EXPECT_NEAR(q_R.norm(),  1, wolf::Constants::EPS);
-    EXPECT_NEAR(qq_R.norm(), 1, wolf::Constants::EPS);
+    ASSERT_NEAR(q.norm(),    1, wolf::Constants::EPS);
+    ASSERT_NEAR(q_R.norm(),  1, wolf::Constants::EPS);
+    ASSERT_NEAR(qq_R.norm(), 1, wolf::Constants::EPS);
 
-    EXPECT_EIGEN_APPROX(q.coeffs(), R2q(R).coeffs(), wolf::Constants::EPS);
-    EXPECT_EIGEN_APPROX(q.coeffs(), qq_R.coeffs(),   wolf::Constants::EPS);
-    EXPECT_EIGEN_APPROX(R,          q2R(q),          wolf::Constants::EPS);
-    EXPECT_EIGEN_APPROX(R,          qq_R.matrix(),   wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(q.coeffs(), R2q(R).coeffs(), wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(q.coeffs(), qq_R.coeffs(),   wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(R,          q2R(q),          wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(R,          qq_R.matrix(),   wolf::Constants::EPS);
 }
 
 TEST(rotations, Jr)
@@ -528,7 +528,7 @@ TEST(rotations, Jr)
     // exp( theta + d_theta ) \approx exp(theta) * exp(Jr * d_theta)
     Matrix3s Jr = jac_SO3_right(theta);
     ASSERT_QUATERNION_APPROX(exp_q(theta+dtheta), exp_q(theta) * exp_q(Jr*dtheta), 1e-7);
-    ASSERT_EIGEN_APPROX(exp_R(theta+dtheta), (exp_R(theta) * exp_R(Jr*dtheta)), 1e-7);
+    ASSERT_MATRIX_APPROX(exp_R(theta+dtheta), (exp_R(theta) * exp_R(Jr*dtheta)), 1e-7);
 }
 
 TEST(rotations, Jl)
@@ -539,7 +539,7 @@ TEST(rotations, Jl)
     // exp( theta + d_theta ) \approx exp(Jl * d_theta) * exp(theta)
     Matrix3s Jl = jac_SO3_left(theta);
     ASSERT_QUATERNION_APPROX(exp_q(theta+dtheta), exp_q(Jl*dtheta) * exp_q(theta), 1e-7);
-    ASSERT_EIGEN_APPROX(exp_R(theta+dtheta), (exp_R(Jl*dtheta) * exp_R(theta)), 1e-7);
+    ASSERT_MATRIX_APPROX(exp_R(theta+dtheta), (exp_R(Jl*dtheta) * exp_R(theta)), 1e-7);
 }
 
 TEST(rotations, Jr_inv)
@@ -551,8 +551,8 @@ TEST(rotations, Jr_inv)
 
     // log( R * exp(d_theta) ) \approx log( R ) + Jrinv * d_theta
     Matrix3s Jr_inv = jac_SO3_right_inv(theta);
-    ASSERT_EIGEN_APPROX(log_q(q * exp_q(dtheta)), log_q(q) + Jr_inv*dtheta, 1e-7);
-    ASSERT_EIGEN_APPROX(log_R(R * exp_R(dtheta)), log_R(R) + Jr_inv*dtheta, 1e-7);
+    ASSERT_MATRIX_APPROX(log_q(q * exp_q(dtheta)), log_q(q) + Jr_inv*dtheta, 1e-7);
+    ASSERT_MATRIX_APPROX(log_R(R * exp_R(dtheta)), log_R(R) + Jr_inv*dtheta, 1e-7);
 }
 
 TEST(rotations, Jl_inv)
@@ -564,8 +564,8 @@ TEST(rotations, Jl_inv)
 
     // log( exp(d_theta) * R ) \approx log( R ) + Jlinv * d_theta
     Matrix3s Jl_inv = jac_SO3_left_inv(theta);
-    ASSERT_EIGEN_APPROX(log_q(exp_q(dtheta) * q), log_q(q) + Jl_inv*dtheta, 1e-7);
-    ASSERT_EIGEN_APPROX(log_R(exp_R(dtheta) * R), log_R(R) + Jl_inv*dtheta, 1e-7);
+    ASSERT_MATRIX_APPROX(log_q(exp_q(dtheta) * q), log_q(q) + Jl_inv*dtheta, 1e-7);
+    ASSERT_MATRIX_APPROX(log_R(exp_R(dtheta) * R), log_R(R) + Jl_inv*dtheta, 1e-7);
 }
 
 int main(int argc, char **argv)

@@ -55,19 +55,19 @@ public:
 
 #define TEST_COUT testing::internal::TestCout()
 
-#define EXPECT_EIGEN_APPROX(C_expect, C_actual, precision) EXPECT_PRED2([](const Eigen::MatrixXs lhs, const Eigen::MatrixXs rhs) { \
+#define EXPECT_MATRIX_APPROX(C_expect, C_actual, precision) EXPECT_PRED2([](const Eigen::MatrixXs lhs, const Eigen::MatrixXs rhs) { \
                   return (lhs - rhs).isMuchSmallerThan(1, precision); \
                }, \
                C_expect, C_actual);
 
-#define ASSERT_EIGEN_APPROX(C_expect, C_actual, precision) ASSERT_PRED2([](const Eigen::MatrixXs lhs, const Eigen::MatrixXs rhs) { \
+#define ASSERT_MATRIX_APPROX(C_expect, C_actual, precision) ASSERT_PRED2([](const Eigen::MatrixXs lhs, const Eigen::MatrixXs rhs) { \
                   return (lhs - rhs).isMuchSmallerThan(1, precision); \
                }, \
                C_expect, C_actual);
 
-#define EXPECT_QUATERNION_APPROX(C_expect, C_actual, precision) EXPECT_EIGEN_APPROX((C_expect).coeffs(), (C_actual).coeffs(), precision)
+#define EXPECT_QUATERNION_APPROX(C_expect, C_actual, precision) EXPECT_MATRIX_APPROX((C_expect).coeffs(), (C_actual).coeffs(), precision)
 
-#define ASSERT_QUATERNION_APPROX(C_expect, C_actual, precision) ASSERT_EIGEN_APPROX((C_expect).coeffs(), (C_actual).coeffs(), precision)
+#define ASSERT_QUATERNION_APPROX(C_expect, C_actual, precision) ASSERT_MATRIX_APPROX((C_expect).coeffs(), (C_actual).coeffs(), precision)
 
 #define EXPECT_POSE2D_APPROX(C_expect, C_actual, precision) EXPECT_PRED2([](const Eigen::MatrixXs lhs, const Eigen::MatrixXs rhs) { \
                    MatrixXs er = lhs - rhs; \
