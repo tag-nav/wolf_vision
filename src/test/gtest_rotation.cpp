@@ -510,12 +510,12 @@ TEST(rotations, q2R_R2q)
     Quaternions q_R = R2q(R);
     Quaternions qq_R(R);
 
-    EXPECT_NEAR(q.norm(),    1, wolf::Constants::EPS_SMALL);
-    EXPECT_NEAR(q_R.norm(),  1, wolf::Constants::EPS_SMALL);
-    EXPECT_NEAR(qq_R.norm(), 1, wolf::Constants::EPS_SMALL);
+    EXPECT_NEAR(q.norm(),    1, wolf::Constants::EPS);
+    EXPECT_NEAR(q_R.norm(),  1, wolf::Constants::EPS);
+    EXPECT_NEAR(qq_R.norm(), 1, wolf::Constants::EPS);
 
-    EXPECT_EIGEN_APPROX(q.coeffs(), R2q(R).coeffs(), wolf::Constants::EPS_SMALL);
-    EXPECT_EIGEN_APPROX(q.coeffs(), qq_R.coeffs(),   wolf::Constants::EPS_SMALL);
+    EXPECT_EIGEN_APPROX(q.coeffs(), R2q(R).coeffs(), wolf::Constants::EPS);
+    EXPECT_EIGEN_APPROX(q.coeffs(), qq_R.coeffs(),   wolf::Constants::EPS);
     EXPECT_EIGEN_APPROX(R,          q2R(q),          wolf::Constants::EPS);
     EXPECT_EIGEN_APPROX(R,          qq_R.matrix(),   wolf::Constants::EPS);
 }
@@ -525,9 +525,9 @@ TEST(rotations, Jr)
     Vector3s theta; theta.setRandom();
     Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-8;
 
-    // exp( omega + d_omega ) \approx exp(omega) * exp(Jr * d_omega)
+    // exp( theta + d_theta ) \approx exp(theta) * exp(Jr * d_theta)
     Matrix3s Jr = jac_SO3_right(theta);
-    ASSERT_EIGEN_APPROX(exp_q(theta+dtheta).coeffs(), (exp_q(theta) * exp_q(Jr*dtheta)).coeffs(), 1e-7);
+    ASSERT_QUATERNION_APPROX(exp_q(theta+dtheta), exp_q(theta) * exp_q(Jr*dtheta), 1e-7);
     ASSERT_EIGEN_APPROX(exp_R(theta+dtheta), (exp_R(theta) * exp_R(Jr*dtheta)), 1e-7);
 }
 
@@ -536,9 +536,9 @@ TEST(rotations, Jl)
     Vector3s theta; theta.setRandom();
     Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-8;
 
-    // exp( omega + d_omega ) \approx exp(Jl * d_omega) * exp(omega)
+    // exp( theta + d_theta ) \approx exp(Jl * d_theta) * exp(theta)
     Matrix3s Jl = jac_SO3_left(theta);
-    ASSERT_EIGEN_APPROX(exp_q(theta+dtheta).coeffs(), (exp_q(Jl*dtheta) * exp_q(theta)).coeffs(), 1e-7);
+    ASSERT_QUATERNION_APPROX(exp_q(theta+dtheta), exp_q(Jl*dtheta) * exp_q(theta), 1e-7);
     ASSERT_EIGEN_APPROX(exp_R(theta+dtheta), (exp_R(Jl*dtheta) * exp_R(theta)), 1e-7);
 }
 
@@ -549,7 +549,7 @@ TEST(rotations, Jr_inv)
     Quaternions q = v2q(theta);
     Matrix3s    R = v2R(theta);
 
-    // log( R * exp(d_omega) ) \approx log( R ) + Jrinv * d_omega
+    // log( R * exp(d_theta) ) \approx log( R ) + Jrinv * d_theta
     Matrix3s Jr_inv = jac_SO3_right_inv(theta);
     ASSERT_EIGEN_APPROX(log_q(q * exp_q(dtheta)), log_q(q) + Jr_inv*dtheta, 1e-7);
     ASSERT_EIGEN_APPROX(log_R(R * exp_R(dtheta)), log_R(R) + Jr_inv*dtheta, 1e-7);
@@ -562,7 +562,7 @@ TEST(rotations, Jl_inv)
     Quaternions q = v2q(theta);
     Matrix3s    R = v2R(theta);
 
-    // log( exp(d_omega) * R ) \approx log( R ) + Jlinv * d_omega
+    // log( exp(d_theta) * R ) \approx log( R ) + Jlinv * d_theta
     Matrix3s Jl_inv = jac_SO3_left_inv(theta);
     ASSERT_EIGEN_APPROX(log_q(exp_q(dtheta) * q), log_q(q) + Jl_inv*dtheta, 1e-7);
     ASSERT_EIGEN_APPROX(log_R(exp_R(dtheta) * R), log_R(R) + Jl_inv*dtheta, 1e-7);
