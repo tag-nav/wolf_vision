@@ -523,49 +523,53 @@ TEST(rotations, q2R_R2q)
 TEST(rotations, Jr)
 {
     Vector3s theta; theta.setRandom();
-    Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-8;
+    Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
 
+    // Check the main Jr property for q and R
     // exp( theta + d_theta ) \approx exp(theta) * exp(Jr * d_theta)
     Matrix3s Jr = jac_SO3_right(theta);
-    ASSERT_QUATERNION_APPROX(exp_q(theta+dtheta), exp_q(theta) * exp_q(Jr*dtheta), 1e-7);
-    ASSERT_MATRIX_APPROX(exp_R(theta+dtheta), (exp_R(theta) * exp_R(Jr*dtheta)), 1e-7);
+    ASSERT_QUATERNION_APPROX(exp_q(theta+dtheta), exp_q(theta) * exp_q(Jr*dtheta), 1e-8);
+    ASSERT_MATRIX_APPROX(exp_R(theta+dtheta), (exp_R(theta) * exp_R(Jr*dtheta)), 1e-8);
 }
 
 TEST(rotations, Jl)
 {
     Vector3s theta; theta.setRandom();
-    Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-8;
+    Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
 
+    // Check the main Jl property for q and R
     // exp( theta + d_theta ) \approx exp(Jl * d_theta) * exp(theta)
     Matrix3s Jl = jac_SO3_left(theta);
-    ASSERT_QUATERNION_APPROX(exp_q(theta+dtheta), exp_q(Jl*dtheta) * exp_q(theta), 1e-7);
-    ASSERT_MATRIX_APPROX(exp_R(theta+dtheta), (exp_R(Jl*dtheta) * exp_R(theta)), 1e-7);
+    ASSERT_QUATERNION_APPROX(exp_q(theta+dtheta), exp_q(Jl*dtheta) * exp_q(theta), 1e-8);
+    ASSERT_MATRIX_APPROX(exp_R(theta+dtheta), (exp_R(Jl*dtheta) * exp_R(theta)), 1e-8);
 }
 
 TEST(rotations, Jr_inv)
 {
     Vector3s theta; theta.setRandom();
-    Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-8;
+    Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
     Quaternions q = v2q(theta);
     Matrix3s    R = v2R(theta);
 
+    // Check the main Jr_inv property for q and R
     // log( R * exp(d_theta) ) \approx log( R ) + Jrinv * d_theta
     Matrix3s Jr_inv = jac_SO3_right_inv(theta);
-    ASSERT_MATRIX_APPROX(log_q(q * exp_q(dtheta)), log_q(q) + Jr_inv*dtheta, 1e-7);
-    ASSERT_MATRIX_APPROX(log_R(R * exp_R(dtheta)), log_R(R) + Jr_inv*dtheta, 1e-7);
+    ASSERT_MATRIX_APPROX(log_q(q * exp_q(dtheta)), log_q(q) + Jr_inv*dtheta, 1e-8);
+    ASSERT_MATRIX_APPROX(log_R(R * exp_R(dtheta)), log_R(R) + Jr_inv*dtheta, 1e-8);
 }
 
 TEST(rotations, Jl_inv)
 {
     Vector3s theta; theta.setRandom();
-    Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-8;
+    Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
     Quaternions q = v2q(theta);
     Matrix3s    R = v2R(theta);
 
+    // Check the main Jl_inv property for q and R
     // log( exp(d_theta) * R ) \approx log( R ) + Jlinv * d_theta
     Matrix3s Jl_inv = jac_SO3_left_inv(theta);
-    ASSERT_MATRIX_APPROX(log_q(exp_q(dtheta) * q), log_q(q) + Jl_inv*dtheta, 1e-7);
-    ASSERT_MATRIX_APPROX(log_R(exp_R(dtheta) * R), log_R(R) + Jl_inv*dtheta, 1e-7);
+    ASSERT_MATRIX_APPROX(log_q(exp_q(dtheta) * q), log_q(q) + Jl_inv*dtheta, 1e-8);
+    ASSERT_MATRIX_APPROX(log_R(exp_R(dtheta) * R), log_R(R) + Jl_inv*dtheta, 1e-8);
 }
 
 TEST(rotations, assert_sizes)
