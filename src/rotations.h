@@ -14,6 +14,12 @@ namespace wolf
 {
 
 //////////////////////////////////////////////////////////////
+
+/** \brief Return angle between -pi and pi
+ *
+ * @param angle
+ * @return formatted angle
+ */
 template<typename T>
 inline T pi2pi(T angle)
 {
@@ -22,12 +28,22 @@ inline T pi2pi(T angle)
             fmod(angle - (T)M_PI, (T)(2*M_PI)) + (T)M_PI);
 }
 
+/** \brief Conversion to radians
+ *
+ * @param deg angle in degrees
+ * @return angle in radians
+ */
 template<typename T>
 inline T toRad(const T& deg)
 {
     return (T)M_TORAD * deg;
 }
 
+/** \brief Conversion to degrees
+ *
+ * @param rad angle in radians
+ * @return angle in degrees
+ */
 template<typename T>
 inline T toDeg(const T& rad)
 {
@@ -35,23 +51,32 @@ inline T toDeg(const T& rad)
 }
 
 //////////////////////////////////////////////////////////////////
-// Operators
+// Operators skew and vee
 
+/** \brief Skew symmetric matrix
+ *
+ * @param _v a 3D vector
+ * @return the skew-symmetric matrix V so that V*u = _v.cross(u), for u in R^3
+ */
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> skew(const Eigen::MatrixBase<Derived>& _v)
 {
-
-    MatrixSizeCheck<3, 1>::check(_v);
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
     typedef typename Derived::Scalar T;
 
     return (Eigen::Matrix<T, 3, 3>() << 0.0, -_v(2), +_v(1), +_v(2), 0.0, -_v(0), -_v(1), +_v(0), 0.0).finished();
 }
 
+/** \brief Inverse of skew symmetric matrix
+ *
+ * @param _m A skew-symmetric matrix
+ * @return a 3-vector v such that skew(v) = _m
+ */
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> vee(const Eigen::MatrixBase<Derived>& _m)
 {
+    EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(Derived, 3, 3);
 
-    MatrixSizeCheck<3, 3>::check(_m);
     typedef typename Derived::Scalar T;
 
     return (Eigen::Matrix<T, 3, 1>() << _m(2, 1), _m(0, 2), _m(1, 0)).finished();
@@ -60,11 +85,17 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> vee(const Eigen::MatrixBase
 ///////////////////////////////////////////////////////////////
 // Rotation conversions - exp and log maps
 
+/** \brief Quaternion exponential map
+ *
+ * @param _v a rotation vector with _v.norm() the rotated angle and _v.normalized() the rotation axis.
+ * @return the right-handed unit quaternion performing the rotation encoded by _v
+ */
 template<typename Derived>
 inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase<Derived>& _v)
 {
 
-    MatrixSizeCheck<3, 1>::check(_v);
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
+
     typedef typename Derived::Scalar T;
 
     Eigen::Quaternion<T> q;
@@ -84,6 +115,11 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
     }
 }
 
+/** \brief Quaternion logarithmic map
+ *
+ * @param _q a unit right-handed quaternion
+ * @return a rotation vector v such that _q = exp_q(v)
+ */
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::QuaternionBase<Derived>& _q)
 {
@@ -102,6 +138,11 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::Quaterni
     }
 }
 
+/** \brief Rotation matrix exponential map
+ *
+ * @param _v a rotation vector
+ * @return the rotation matrix performing the rotation encoded by _v
+ */
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBase<Derived>& _v)
 {
@@ -116,6 +157,11 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBa
         return Eigen::AngleAxis<T>(angle, _v / angle).matrix();
 }
 
+/** \brief Rotation matrix logarithmic map
+ *
+ * @param _R a 3D rotation matrix
+ * @return the rotation vector v such that _R = exp_R(v)
+ */
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_R(const Eigen::MatrixBase<Derived>& _R)
 {
@@ -127,36 +173,66 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_R(const Eigen::MatrixBa
     return aa.axis() * aa.angle();
 }
 
+/** \brief Rotation vector to quaternion conversion
+ *
+ * @param _v a rotation vector
+ * @return que equivalent right-handed unit quaternion
+ */
 template<typename Derived>
 inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<Derived>& _v)
 {
     return exp_q(_v);
 }
 
+/** \brief Quaternion to rotation vector conversion
+ *
+ * @param _q a right-handed unit quaternion
+ * @return the equivalent rotation vector
+ */
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v(const Eigen::QuaternionBase<Derived>& _q)
 {
     return log_q(_q);
 }
 
+/** \brief Rotation vector to rotation matrix conversion
+ *
+ * @param _v a rotation vector
+ * @return the equivalent rotation matrix
+ */
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> v2R(const Eigen::MatrixBase<Derived>& _v)
 {
     return exp_R(_v);
 }
 
+/** \brief Rotation matrix to rotation vector conversion
+ *
+ * @param _R a rotation matrix
+ * @return the equivalent rotation vector
+ */
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> R2v(const Eigen::MatrixBase<Derived>& _R)
 {
     return log_R(_R);
 }
 
+/** \brief quaternion to rotation matrix conversion
+ *
+ * @param _q a right-handed unit quaternion
+ * @return the equivalent rotation matrix
+ */
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> q2R(const Eigen::QuaternionBase<Derived>& _q)
 {
     return _q.matrix();
 }
 
+/** \brief rotation matrix to quaternion conversion
+ *
+ * @param _R a rotation matrix
+ * @return the equivalent right-handed unit quaternion
+ */
 template<typename Derived>
 inline Eigen::Quaternion<typename Derived::Scalar> R2q(const Eigen::MatrixBase<Derived>& _R)
 {
