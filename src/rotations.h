@@ -177,7 +177,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_R(const Eigen::MatrixBa
 /** \brief Rotation vector to quaternion conversion
  *
  * @param _v a rotation vector
- * @return que equivalent right-handed unit quaternion
+ * @return the equivalent right-handed unit quaternion
  */
 template<typename Derived>
 inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<Derived>& _v)
