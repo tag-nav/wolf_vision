@@ -106,18 +106,29 @@ typedef Rotation2D<wolf::Scalar> Rotation2Ds;               ///< Rotation2D of r
 
 namespace wolf {
 
-/*/////////////////////////////////////////////////////////
- * Check Matrix sizes, both statically and dynamically
+//////////////////////////////////////////////////////////
+/** Check Eigen Matrix sizes, both statically and dynamically
  *
  * Help:
  *
- * The rotations.h file implements many template functions using Eigen Matrix and Quaternions, in different versions
- * (Static, Dynamic, Map). In order to achieve full templatization, we use extensively a prototype of this kind:
+ * The WOLF project implements many template functions using Eigen Matrix and Quaternions, in different versions
+ * (Static size, Dynamic size, Map, Matrix expression).
+ *
+ * Eigen provides some macros for STATIC assert of matrix sizes, the most common of them are (see Eigen's StaticAssert.h):
+ *
+ *      EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE
+ *      EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE
+ *      EIGEN_STATIC_ASSERT_VECTOR_ONLY
+ *
+ * but they do not work if the evaluated types are of dynamic size.
+ *
+ * In order to achieve full templatization over both dynamic and static sizes, we use extensively a prototype of this kind:
  *
  * template<typename Derived>
  * inline Eigen::Matrix<typename Derived::Scalar, 3, 3> function(const Eigen::MatrixBase<Derived>& _v){
  *
- *     MatrixSizeCheck<3,1>::check(_v);
+ *     MatrixSizeCheck<3,1>::check(_v); /// We check here the size of the input parameter
+ *
  *     typedef typename Derived::Scalar T;
  *
  *     ... code ...
@@ -125,7 +136,7 @@ namespace wolf {
  *     return M;
  *     }
  *
- * The function :  MatrixSizeCheck <Rows, Cols>::check(M)   checks that the Matrix M is size Rows x Cols.
+ * The function :  MatrixSizeCheck <Rows, Cols>::check(M)   checks that the Matrix M is of size ( Rows x Cols ).
  * This check is performed statically or dynamically, depending on the type of argument provided.
  */
 template<int Size, int DesiredSize>
@@ -151,6 +162,14 @@ struct StaticSizeCheck<Eigen::Dynamic, DesiredSize>
 template<int DesiredR, int DesiredC>
 struct MatrixSizeCheck
 {
+        /** \brief Assert matrix size dynamically or statically
+         *
+         * @param t the variable for which we wish to assert the size.
+         *
+         * Usage: to assert that t is size (Rows x Cols)
+         *
+         *  MatrixSizeCheck<Rows, Cols>::check(t);
+         */
         template<typename T>
         static void check(const T& t)
         {
