@@ -572,36 +572,6 @@ TEST(rotations, Jl_inv)
     ASSERT_MATRIX_APPROX(log_R(exp_R(dtheta) * R), log_R(R) + Jl_inv*dtheta, 1e-8);
 }
 
-TEST(rotations, assert_sizes)
-{
-    typedef Matrix<Scalar, 3, 3> SS;
-    typedef Matrix<Scalar, 3, Dynamic> SD;
-    typedef Matrix<Scalar, Dynamic, Dynamic> DD;
-
-    SS ss;
-    SD sd(3,3);
-    DD dd(3,3);
-
-    MatrixSizeCheck<3,3>::check(ss);
-    MatrixSizeCheck<3,3>::check(sd);
-    MatrixSizeCheck<3,3>::check(dd);
-
-    EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(SS, 3, 3);
-    //    EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(DS, 3, 3); // static check fails
-    //    EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(DD, 3, 3); // static check fails
-
-
-    VectorXs v(6); // A 6-vector of dynamic size
-
-    MatrixSizeCheck<3,1>::check(v.head<3>());
-    //    MatrixSizeCheck<3,1>::check(v.head<2>()); // static check fails
-    MatrixSizeCheck<3,1>::check(v.head<3>() + v.tail(3)); // static and dynamic check pass
-    //    MatrixSizeCheck<3,1>::check(v.head<3>() + v.tail(2)); // dynamic check should fail
-
-    Quaternions q = v2q(v.head<3>());
-    q = v2q(v.tail(3));
-
-}
 
 int main(int argc, char **argv)
 {
