@@ -61,7 +61,8 @@ inline T toDeg(const T& rad)
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> skew(const Eigen::MatrixBase<Derived>& _v)
 {
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
+    MatrixSizeCheck<3,1>::check(_v);
+
     typedef typename Derived::Scalar T;
 
     return (Eigen::Matrix<T, 3, 3>() << 0.0, -_v(2), +_v(1), +_v(2), 0.0, -_v(0), -_v(1), +_v(0), 0.0).finished();
@@ -75,7 +76,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> skew(const Eigen::MatrixBas
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> vee(const Eigen::MatrixBase<Derived>& _m)
 {
-    EIGEN_STATIC_ASSERT_MATRIX_SPECIFIC_SIZE(Derived, 3, 3);
+    MatrixSizeCheck<3,3>::check(_m);
 
     typedef typename Derived::Scalar T;
 
@@ -93,8 +94,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> vee(const Eigen::MatrixBase
 template<typename Derived>
 inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase<Derived>& _v)
 {
-
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(Derived, 3);
+    MatrixSizeCheck<3,1>::check(_v);
 
     typedef typename Derived::Scalar T;
 
@@ -124,6 +124,7 @@ template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::QuaternionBase<Derived>& _q)
 {
     typedef typename Derived::Scalar T;
+
     Eigen::Matrix<T, 3, 1> vec = _q.vec();
     T vecnorm = vec.norm();
     if (vecnorm > wolf::Constants::EPS_SMALL)
@@ -146,8 +147,8 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::Quaterni
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBase<Derived>& _v)
 {
-
     MatrixSizeCheck<3, 1>::check(_v);
+
     typedef typename Derived::Scalar T;
 
     T angle = _v.norm();
@@ -165,8 +166,8 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBa
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_R(const Eigen::MatrixBase<Derived>& _R)
 {
-
     MatrixSizeCheck<3, 3>::check(_R);
+
     typedef typename Derived::Scalar T;
 
     Eigen::AngleAxis<T> aa = Eigen::AngleAxis<T>(_R);
@@ -236,6 +237,8 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> q2R(const Eigen::Quaternion
 template<typename Derived>
 inline Eigen::Quaternion<typename Derived::Scalar> R2q(const Eigen::MatrixBase<Derived>& _R)
 {
+    MatrixSizeCheck<3,3>::check(_R);
+
     return Eigen::Quaternion<typename Derived::Scalar>(_R);
 }
 
@@ -259,8 +262,8 @@ inline Eigen::Quaternion<typename Derived::Scalar> R2q(const Eigen::MatrixBase<D
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right(const Eigen::MatrixBase<Derived>& _theta)
 {
-
     MatrixSizeCheck<3, 1>::check(_theta);
+
     typedef typename Derived::Scalar T;
 
     T theta2 = _theta.dot(_theta);
@@ -294,8 +297,8 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right(const Eigen::
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eigen::MatrixBase<Derived>& _theta)
 {
-
     MatrixSizeCheck<3, 1>::check(_theta);
+
     typedef typename Derived::Scalar T;
 
     T theta2 = _theta.dot(_theta);
@@ -324,8 +327,8 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eig
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::MatrixBase<Derived>& _theta)
 {
-
     MatrixSizeCheck<3, 1>::check(_theta);
+
     typedef typename Derived::Scalar T;
 
     T theta2 = _theta.dot(_theta);
@@ -358,8 +361,8 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::M
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left_inv(const Eigen::MatrixBase<Derived>& _theta)
 {
-
     MatrixSizeCheck<3, 1>::check(_theta);
+
     typedef typename Derived::Scalar T;
 
     T theta2 = _theta.dot(_theta);
