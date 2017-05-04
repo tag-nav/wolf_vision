@@ -18,7 +18,7 @@
 #include <ctime>
 #include <cmath>
 
-//#define DEBUG_RESULTS
+#define DEBUG_RESULTS
 
 int _kbhit();
 
@@ -247,6 +247,8 @@ int main(int argc, char** argv)
             << "\t" << cov_stdev(10) << "\t" << cov_stdev(11) << "\t" << cov_stdev(12) << "\t" << cov_stdev(13) << "\t" << cov_stdev(14) << "\t" << cov_stdev(15) << std::endl;
         }
     }
+
+    debug_results.close();
     WOLF_WARN("WARNING : DEBUG_RESULTS ACTIVATED - slows the process (writing results to result_debugs.dat file)")
 
     #endif
