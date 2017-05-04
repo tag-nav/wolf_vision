@@ -396,7 +396,7 @@ TEST_F(ProcessorIMUt, check_Covariance)
     Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov = problem->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
 
     ASSERT_FALSE(delta_preint.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
-    ASSERT_FALSE(delta_preint_cov.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_TRUE(delta_preint_cov.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "delta_preint_cov :\n" << delta_preint_cov; //covariances computed only at keyframe creation
 }
 
 TEST_F(ProcessorIMUt, Covariances)
@@ -682,7 +682,7 @@ TEST_F(ProcessorIMUt, gyro_xyz)
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMUt.gyro_xy_biasedAbx";
+  //::testing::GTEST_FLAG(filter) = "ProcessorIMUt.check_Covariance";
   return RUN_ALL_TESTS();
 }
 
