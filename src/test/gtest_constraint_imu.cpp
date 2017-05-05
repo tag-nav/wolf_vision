@@ -2173,14 +2173,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
     //Only biases are unfixed
-    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 }
 
@@ -2235,14 +2235,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2276,14 +2276,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2317,14 +2317,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2358,14 +2358,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2399,14 +2399,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2440,14 +2440,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2481,14 +2481,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2510,14 +2510,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initO
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
     //Only biases are unfixed
-    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 }
 
@@ -2572,14 +2572,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2613,14 +2613,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2655,14 +2655,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2696,14 +2696,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2738,14 +2738,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2780,14 +2780,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2822,14 +2822,14 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -2851,14 +2851,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
     //Only biases are unfixed
-    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -2888,17 +2888,17 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -2961,14 +2961,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3003,14 +3003,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3045,14 +3045,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3087,14 +3087,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3129,14 +3129,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3170,14 +3170,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3211,14 +3211,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3266,14 +3266,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
     #else
 
         //Only biases are unfixed
-        ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+        ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
         "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-        ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+        ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
         "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-        ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+        ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
         "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-        ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+        ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
         "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
     #endif
 }
@@ -3329,14 +3329,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3371,14 +3371,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3413,14 +3413,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3455,14 +3455,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3497,14 +3497,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3539,14 +3539,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3581,14 +3581,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3611,14 +3611,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling, VarB1B2_InvarP1Q1V1P2
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -3648,17 +3648,17 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling, VarB1B2_InvarP1Q1V1P2
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -3721,14 +3721,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3763,14 +3763,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3805,14 +3805,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3847,14 +3847,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3889,14 +3889,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3931,14 +3931,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -3973,14 +3973,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4003,14 +4003,14 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst, VarB1B2_InvarP1Q1V1P2Q2V
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
     //Only biases are unfixed
-    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 }
 
@@ -4064,14 +4064,14 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4106,14 +4106,14 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4148,14 +4148,14 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4190,14 +4190,14 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4232,14 +4232,14 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4274,14 +4274,14 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4316,14 +4316,14 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4370,17 +4370,17 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst, VarB1B2_InvarP1Q1V1P2Q2V2_
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals before CERES : " << IMU_residuals.transpose() << std::endl;
@@ -4397,14 +4397,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst, VarB1B2_InvarP1Q1V1P2Q2V2_
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -4419,17 +4419,17 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst, VarB1B2_InvarP1Q1V1P2Q2V2_
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals after CERES: " << IMU_residuals.transpose() << std::endl;
@@ -4491,14 +4491,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4533,14 +4533,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4575,14 +4575,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, 0.0001 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, 0.0001 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, 0.0001 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, 0.0001 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, 0.0001 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, 0.0001 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, 0.0001 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, 0.0001 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4617,14 +4617,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, 0.00001 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, 0.00001 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, 0.00001 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, 0.00001 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, 0.00001 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, 0.00001 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, 0.00001 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, 0.00001 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4659,14 +4659,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, 0.00001 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, 0.00001 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, 0.00001 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, 0.00001 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, 0.00001 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, 0.00001 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, 0.00001 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, 0.00001 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4701,14 +4701,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4743,14 +4743,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4776,14 +4776,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst, VarB1B2_InvarP1Q1V1P2Q
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -4813,17 +4813,17 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst, VarB1B2_InvarP1Q1V1P2Q
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -4886,14 +4886,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4928,14 +4928,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -4970,14 +4970,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -5012,14 +5012,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -5054,14 +5054,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -5096,14 +5096,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -5138,14 +5138,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -5171,14 +5171,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst, VarB1B2V1P2V2_InvarP1Q
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -5208,17 +5208,17 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst, VarB1B2V1P2V2_InvarP1Q
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5246,14 +5246,14 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q2_ini
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -5283,17 +5283,17 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q2_ini
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5324,14 +5324,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2_InvarP1Q1V1P2Q2V
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -5361,17 +5361,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2_InvarP1Q1V1P2Q2V
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5403,14 +5403,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V2_InvarP1Q1V1P2Q
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -5440,17 +5440,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V2_InvarP1Q1V1P2Q
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5482,14 +5482,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1V2_InvarP1Q1P2Q
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -5519,17 +5519,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1V2_InvarP1Q1P2Q
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5559,14 +5559,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1Q2V2_InvarP1Q1P
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -5596,17 +5596,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1Q2V2_InvarP1Q1P
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5657,17 +5657,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5684,14 +5684,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -5705,17 +5705,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5764,17 +5764,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2Q2V2_InvarP1Q
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5791,14 +5791,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2Q2V2_InvarP1Q
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -5812,17 +5812,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2Q2V2_InvarP1Q
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5872,17 +5872,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5899,14 +5899,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -5920,17 +5920,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5972,17 +5972,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarAll_initOK)
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -5999,14 +5999,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarAll_initOK)
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -6020,17 +6020,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarAll_initOK)
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6081,17 +6081,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK, VarB1B2_InvarP1Q1V
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6108,20 +6108,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK, VarB1B2_InvarP1Q1V
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getVector() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getOPtr()->getVector() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getVPtr()->getState() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getState().transpose() <<
     "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -6135,17 +6135,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK, VarB1B2_InvarP1Q1V
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6188,17 +6188,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK, VarAll)
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6215,20 +6215,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK, VarAll)
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getVector() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getOPtr()->getVector() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getVPtr()->getState() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getState().transpose() <<
     "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -6242,17 +6242,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK, VarAll)
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6305,17 +6305,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2_Invar
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6332,20 +6332,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2_Invar
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getVector() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getOPtr()->getVector() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getVPtr()->getState() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getState().transpose() <<
     "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -6359,17 +6359,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2_Invar
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6418,17 +6418,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2_I
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6445,20 +6445,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2_I
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getVector() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getOPtr()->getVector() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getVPtr()->getState() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getState().transpose() <<
     "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -6472,17 +6472,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2_I
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6530,17 +6530,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2V2
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6557,21 +6557,21 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2V2
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getVector() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getOPtr()->getVector() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
     WOLF_WARN("LAST_KF V assertion precision : ", wolf::Constants::EPS*1000)
-    EXPECT_TRUE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getVPtr()->getState() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF V : " << last_KF->getVPtr()->getState().transpose() <<
     "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -6585,17 +6585,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2V2
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6636,17 +6636,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarAll)
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6663,20 +6663,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarAll)
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getVector() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getOPtr()->getVector() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getVPtr()->getState() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getState().transpose() <<
     "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -6690,17 +6690,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarAll)
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6752,17 +6752,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarB1B2_InvarP1Q1V1P
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6779,20 +6779,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarB1B2_InvarP1Q1V1P
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Fallin in local minimum
-    EXPECT_FALSE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_FALSE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getVector() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getOPtr()->getVector() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getVPtr()->getState() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getState().transpose() <<
     "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -6806,17 +6806,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarB1B2_InvarP1Q1V1P
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6864,17 +6864,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarB1B2P2Q2V2_InvarP
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6891,20 +6891,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarB1B2P2Q2V2_InvarP
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Falling in local minimum
-    EXPECT_FALSE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_FALSE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getVector() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getOPtr()->getVector() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
-    EXPECT_FALSE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getVPtr()->getState() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getState().transpose() <<
     "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -6918,17 +6918,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarB1B2P2Q2V2_InvarP
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -6975,17 +6975,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarAll_initBiasZero)
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -7003,14 +7003,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarAll_initBiasZero)
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Falling in local minimum
-    EXPECT_FALSE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, 0.0001 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, 0.0001 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_FALSE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, 0.0001 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, 0.0001 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -7024,17 +7024,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarAll_initBiasZero)
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -7097,14 +7097,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -7139,14 +7139,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -7181,14 +7181,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
         #else
 
             //Only biases are unfixed
-            EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            EXPECT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            EXPECT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            EXPECT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            EXPECT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            EXPECT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -7223,14 +7223,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -7265,14 +7265,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -7307,14 +7307,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -7349,14 +7349,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
         #else
 
             //Only biases are unfixed
-            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-            ASSERT_TRUE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
             "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+            ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
             "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
         #endif
     }
@@ -7397,17 +7397,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varV1B1P2
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -7425,20 +7425,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varV1B1P2
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Noisy data, this will certainly be false excepted for position and orientation due to precise odometry
-    EXPECT_FALSE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_FALSE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getVector() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getOPtr()->getVector() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
-    EXPECT_FALSE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getVPtr()->getState() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getState().transpose() <<
     "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -7452,17 +7452,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varV1B1P2
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -7552,17 +7552,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varV1B1P2Q2V2
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
@@ -7580,21 +7580,21 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varV1B1P2Q2V2
    // wolf_problem_ptr_->print(4,1,1,1);
 
     //Noisy data, this will certainly be false excepted for position and orientation due to precise odometry
-    EXPECT_FALSE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((origin_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
 
-    EXPECT_FALSE((last_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((last_KF->getGyroBiasPtr()->getVector() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
     WOLF_WARN("position precision in expactation test : ", 0.0001)
-    EXPECT_TRUE((last_KF->getPPtr()->getVector() - expected_final_state.head(3)).isMuchSmallerThan(1, 0.0001 )) << "last_KF P : " << last_KF->getPPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, 0.0001 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getOPtr()->getVector() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Q : " << last_KF->getOPtr()->getVector().transpose() << 
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
-    EXPECT_FALSE((last_KF->getVPtr()->getVector() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getVector().transpose() << 
+    EXPECT_FALSE((last_KF->getVPtr()->getState() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getState().transpose() <<
     "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
 
     #ifdef GET_RESIDUALS
@@ -7608,17 +7608,17 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varV1B1P2Q2V2
                 {
                     if(ctr_ptr->getTypeId() == CTR_IMU)
                     {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                         std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                         std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;

@@ -339,17 +339,17 @@ int main(int argc, char** argv)
                 {
                     //Eigen::VectorXs prev_KF_state(ctr_ptr->getFrameOtherPtr()->getState());
                     //Eigen::VectorXs curr_KF_state(ctr_ptr->getFeaturePtr()->getFramePtr()->getState());
-                    p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getVector();
-                    q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getVector();
-                    v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getVector();
-                    ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getVector();
-                    wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getVector();
+                    p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
+                    q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
+                    v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
+                    ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
+                    wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                    p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getVector();
-                    q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getVector();
-                    v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getVector();
-                    ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getVector();
-                    wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getVector();
+                    p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
+                    q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
+                    v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
+                    ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
+                    wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
                     std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                     std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;

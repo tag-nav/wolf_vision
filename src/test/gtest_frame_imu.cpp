@@ -24,8 +24,8 @@ TEST(FrameIMU, Getters)
     state0 << 0,0,0,  0,0,0,  0,0,0,1,  0,0,.001,  0,0,.002;
     FrameIMUPtr F = make_shared<FrameIMU>(KEY_FRAME, ts, state0);
 
-    Eigen::Vector3s acc_b = F->getAccBiasPtr()->getVector();
-    Eigen::Vector3s gyro_b = F->getGyroBiasPtr()->getVector();
+    Eigen::Vector3s acc_b = F->getAccBiasPtr()->getState();
+    Eigen::Vector3s gyro_b = F->getGyroBiasPtr()->getState();
 
     ASSERT_TRUE((state0.segment(10,3) - acc_b).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
     ASSERT_TRUE((state0.tail(3) - gyro_b).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));

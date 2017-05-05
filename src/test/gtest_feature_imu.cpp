@@ -128,9 +128,9 @@ TEST_F(FeatureIMU_test, check_frame)
     left_optr = left_frame->getOPtr();
     left_vptr = left_frame->getVPtr();
 
-    ASSERT_TRUE((origin_pptr->getVector() - left_pptr->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
-    ASSERT_TRUE((origin_optr->getVector() - left_optr->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
-    ASSERT_TRUE((origin_vptr->getVector() - left_vptr->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_TRUE((origin_pptr->getState() - left_pptr->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_TRUE((origin_optr->getState() - left_optr->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_TRUE((origin_vptr->getState() - left_vptr->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 
     ASSERT_EQ(origin_frame->id(), left_frame->id());
 }

@@ -64,7 +64,6 @@ class StateBlock
         /** \brief Returns the state vector
          **/
         const Eigen::VectorXs& getState() const;
-        const Eigen::VectorXs& getVector() const;
 
         /** \brief Sets the state vector
          **/
@@ -138,11 +137,6 @@ inline Scalar* StateBlock::getPtr()
 }
 
 inline const Eigen::VectorXs& StateBlock::getState() const
-{
-    return state_;
-}
-
-inline const Eigen::VectorXs& StateBlock::getVector() const
 {
     return state_;
 }

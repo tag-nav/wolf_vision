@@ -509,8 +509,8 @@ inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureBasePtr _capture_motio
             capt_imu->getBuffer().get().back().delta_integr_,
             delta_integr_cov.determinant() > 0 ?
             delta_integr_cov : Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-4, // avoid a strict zero in the covariance
-            key_frame_ptr->getAccBiasPtr()->getVector(),
-            key_frame_ptr->getGyroBiasPtr()->getVector(),
+            key_frame_ptr->getAccBiasPtr()->getState(),
+            key_frame_ptr->getGyroBiasPtr()->getState(),
             this->getJacobians()); 
         capt_imu->addFeature(key_feature_ptr);
 

@@ -30,8 +30,8 @@ FeatureBase("IMU", _delta_preintegrated, _delta_preintegrated_covariance)
     dv_preint_ = _delta_preintegrated.tail<3>();
     dq_preint_ = _delta_preintegrated.segment<4>(3);
 
-    acc_bias_preint_ = std::static_pointer_cast<wolf::FrameIMU>(_cap_imu_ptr->getFramePtr())->getAccBiasPtr()->getVector();
-    gyro_bias_preint_ = std::static_pointer_cast<wolf::FrameIMU>(_cap_imu_ptr->getFramePtr())->getGyroBiasPtr()->getVector();
+    acc_bias_preint_ = std::static_pointer_cast<wolf::FrameIMU>(_cap_imu_ptr->getFramePtr())->getAccBiasPtr()->getState();
+    gyro_bias_preint_ = std::static_pointer_cast<wolf::FrameIMU>(_cap_imu_ptr->getFramePtr())->getGyroBiasPtr()->getState();
 
     dDp_dab_ = _dD_db_jacobians.block(0,0,3,3);
     dDv_dab_ = _dD_db_jacobians.block(6,0,3,3);

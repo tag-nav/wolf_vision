@@ -31,8 +31,8 @@ TEST(SensorIMU, Constructors)
     StateBlockPtr q_ptr = std::make_shared<StateQuaternion>(pos_ori.tail<4>());
     
     SensorIMUPtr sen0 = std::make_shared<SensorIMU>(p_ptr, q_ptr);
-    Eigen::Vector3s get_p = sen0->getPPtr()->getVector();
-    Eigen::Vector4s get_o = sen0->getOPtr()->getVector();
+    Eigen::Vector3s get_p = sen0->getPPtr()->getState();
+    Eigen::Vector4s get_o = sen0->getOPtr()->getState();
 
     ASSERT_TRUE((pos_ori.head<3>() - get_p).isMuchSmallerThan(1.0, Constants::EPS_SMALL));
     ASSERT_TRUE((pos_ori.tail<4>() - get_o).isMuchSmallerThan(1.0, Constants::EPS_SMALL));

@@ -87,9 +87,9 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
             const Eigen::Vector3s frame_current_vel  = dv_preint_;
             const Eigen::Vector3s frame_current_ab  = acc_bias_preint_;
             const Eigen::Vector3s frame_current_wb  = gyro_bias_preint_;
-            const Eigen::Vector3s frame_imu_pos   = (frm_imu->getPPtr()->getVector());
-            const Eigen::Vector4s frame_imu_ori   = (frm_imu->getOPtr()->getVector());
-            const Eigen::Vector3s frame_imu_vel  = (frm_imu->getVPtr()->getVector());
+            const Eigen::Vector3s frame_imu_pos   = (frm_imu->getPPtr()->getState());
+            const Eigen::Vector4s frame_imu_ori   = (frm_imu->getOPtr()->getState());
+            const Eigen::Vector3s frame_imu_vel  = (frm_imu->getVPtr()->getState());
 
             Eigen::Quaternions frame_imu_ori_q(frame_imu_ori);
             

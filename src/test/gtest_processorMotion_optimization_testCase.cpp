@@ -654,9 +654,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_Odom_PO)
      ASSERT_EQ(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().size(),3);
      
      //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different" << std::endl;
-     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+     ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different" << std::endl;
      EXPECT_TRUE(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->isFixed()) << "origin_frame is not fixed" << std::endl;
 }
@@ -728,9 +728,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
 
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different" << std::endl;
     
 
@@ -743,9 +743,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Px is changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Px is changed" << std::endl;
 
 
@@ -758,9 +758,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Py is changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Py is changed" << std::endl;
 
 
@@ -773,9 +773,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Pz is changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Pz is changed" << std::endl;
 
 
@@ -788,9 +788,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Px, Py and Pz are changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Px, Py and Pz are changed" << std::endl;
 
 
@@ -807,9 +807,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Ox is changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Ox is changed" << std::endl;
 
 
@@ -823,9 +823,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Oy is changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Oy is changed" << std::endl;
 
 
@@ -839,9 +839,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Oz is changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Oz is changed" << std::endl;
 
 
@@ -855,9 +855,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Ox, Oy and Oz changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back()->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Ox, Oy and Oz changed" << std::endl;
 }
 
@@ -934,9 +934,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
 
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - last_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - last_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different" << std::endl;
     
 
@@ -948,9 +948,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - last_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
                 "origin and final frame position are different - problem when Px is changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - last_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Px is changed" << std::endl;
 
 
@@ -963,9 +963,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - last_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
                 "origin and final frame position are different - problem when Py is changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - last_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Py is changed" << std::endl;
 
 
@@ -978,9 +978,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - last_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
                 "origin and final frame position are different - problem when Pz is changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - last_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Pz is changed" << std::endl;
 
 
@@ -993,9 +993,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - last_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
                 "origin and final frame position are different - problem when Px, Py and Pz are changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - last_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame orientation are different - problem when Px, Py and Pz are changed" << std::endl;
 
 
@@ -1012,9 +1012,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - last_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Ox is changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - last_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
                 "origin and final frame orientation are different - problem when Ox is changed" << std::endl;
 
 
@@ -1028,9 +1028,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - last_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Oy is changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - last_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
                 "origin and final frame orientation are different - problem when Oy is changed" << std::endl;
 
 
@@ -1044,9 +1044,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - last_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Oz is changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - last_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
                 "origin and final frame orientation are different - problem when Oz is changed" << std::endl;
 
 
@@ -1060,9 +1060,9 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     summary = ceres_manager_wolf_diff->solve();
 
     //This is a static test so we are not supposed to have moved from origin to last KeyFrame
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getVector() - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getPPtr()->getState() - last_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL) ) <<
                 "origin and final frame position are different - problem when Ox, Oy and Oz changed" << std::endl;
-    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getVector() - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
+    ASSERT_TRUE( (wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front()->getOPtr()->getState() - last_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS) ) <<
                 "origin and final frame orientation are different - problem when Ox, Oy and Oz changed" << std::endl;
 }
 
@@ -1147,9 +1147,9 @@ TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
      //We check with assertions if Final KeyFrame has the same state as origin_KF
      FrameBasePtr origin_KF = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front();
      FrameBasePtr last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
-     ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-     ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-     ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+     ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+     ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+     ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 }
 
 //_______________________________________________________________________________________________________________
@@ -1197,17 +1197,17 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
             summary = ceres_manager_wolf_diff->solve();
             //std::cout << summary.BriefReport() << std::endl;
 
-            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-            "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << 
-            "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-            "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
-            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+            ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+            "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+            ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+            "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+            ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+            ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+            "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+            ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
         }
 
         for(int i = 1; i<finalStateBlock_vec.size(); i++)
@@ -1228,16 +1228,16 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
             summary = ceres_manager_wolf_diff->solve();
             //std::cout << summary.BriefReport() << std::endl;
 
-            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-            "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ));
-            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-            "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
-            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+            ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+            "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+            ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+            ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+            "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+            ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
         }
     }
 }
@@ -1280,16 +1280,16 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
                 summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
             }
 
             for(int i = 1; i<finalStateBlock_vec.size(); i++)
@@ -1310,16 +1310,16 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
                 summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
             }
         }
     }
@@ -1359,17 +1359,17 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
         summary = ceres_manager_wolf_diff->solve();
         //std::cout << summary.BriefReport() << std::endl;
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000)) <<
-        "last velocity : " << last_KF->getOPtr()->getVector().transpose() << "\n origin velocity : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000)) <<
+        "last velocity : " << last_KF->getOPtr()->getState().transpose() << "\n origin velocity : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
     }
 
     for(int i = 1; i<finalStateBlock_vec.size(); i++)
@@ -1390,16 +1390,16 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
         summary = ceres_manager_wolf_diff->solve();
         //std::cout << summary.BriefReport() << std::endl;
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
     }
 }
 
@@ -1438,16 +1438,16 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
         summary = ceres_manager_wolf_diff->solve();
         //std::cout << summary.BriefReport() << std::endl;
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
     }
 
     for(int i = 1; i<finalStateBlock_vec.size(); i++)
@@ -1473,12 +1473,12 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
          * otherwise, one of the conditions wil not be met.
          */
 
-        EXPECT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
+        EXPECT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
     }
 }
 
@@ -1507,11 +1507,11 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 }
 
 TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_positionLast3_UnfixAll)
@@ -1539,11 +1539,11 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 }
 
 TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_positionOrigin3_FixLast)
@@ -1571,11 +1571,11 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS)) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_positionlast3_FixOrigin)
@@ -1603,13 +1603,13 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_posi
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS )) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS )) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 }
 
 
@@ -1645,13 +1645,13 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
             summary = ceres_manager_wolf_diff->solve();
             //std::cout << summary.BriefReport() << std::endl;
 
-            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-            "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-            "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+            ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+            "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+            ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+            "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+            ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
         }
 
         for(int i = 0; i<finalStateBlock_vec.size(); i++)
@@ -1671,12 +1671,12 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
             summary = ceres_manager_wolf_diff->solve();
             //std::cout << summary.BriefReport() << std::endl;
 
-            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS )) << 
-            "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+            ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS )) <<
+            "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+            ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
         }
     }
 }
@@ -1717,14 +1717,14 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
                 summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS )) <<
-                "origin orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n last orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS )) <<
-                "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS )) <<
+                "origin orientation : " << last_KF->getOPtr()->getState().transpose() << "\n last orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS )) <<
+                "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
             }
 
             for(int i = 1; i<finalStateBlock_vec.size(); i++)
@@ -1744,12 +1744,12 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
                 summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
             }
         }
     }
@@ -1786,16 +1786,16 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
         summary = ceres_manager_wolf_diff->solve();
         //std::cout << summary.BriefReport() << std::endl;
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
     }
 
     for(int i = 1; i<finalStateBlock_vec.size(); i++)
@@ -1815,16 +1815,16 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
         summary = ceres_manager_wolf_diff->solve();
         //std::cout << summary.BriefReport() << std::endl;
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
     }
 }
 
@@ -1860,17 +1860,17 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
         summary = ceres_manager_wolf_diff->solve();
         //std::cout << summary.BriefReport() << std::endl;
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) << 
-        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 )) <<
+        "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
     }
 
     for(int i = 1; i<finalStateBlock_vec.size(); i++)
@@ -1890,13 +1890,13 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
         summary = ceres_manager_wolf_diff->solve();
         //std::cout << summary.BriefReport() << std::endl;
 
-        EXPECT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-        EXPECT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) <<
-        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+        EXPECT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+        EXPECT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 )) <<
+        "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
     }
 }
 
@@ -1923,14 +1923,14 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    EXPECT_FALSE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    EXPECT_FALSE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 )) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
 
     /* Here we gave an initial velocity and a final velocity. Everything is unfixed. We did not move between both KF according to
      * odometry constraint. There is no reason for the origin KF to impose its values to last in an optimization point of view.
@@ -1963,14 +1963,14 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    EXPECT_FALSE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    EXPECT_FALSE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 )) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
 
     /* Here we gave an initial velocity and final velocity. Everything is unfixed. We did not move between both KF according to
      * odometry constraint. But we perturbated the final velocities before optimization.
@@ -2008,13 +2008,13 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS)) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 }
 
 TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velocityLast3_FixOrigin)
@@ -2039,13 +2039,13 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS )) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS )) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 }
 
 TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velocityLast3_FixAccBiaseS)
@@ -2075,14 +2075,14 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_velo
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    EXPECT_FALSE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS*100 )) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    EXPECT_FALSE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS*100 )) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
 
     // As expected, both velocity StateBlocks converge to 0. The error is in 1e-6
 }   
@@ -2124,12 +2124,12 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
             summary = ceres_manager_wolf_diff->solve();
             //std::cout << summary.BriefReport() << std::endl;
 
-            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-            "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+            ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+            "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+            ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
         }
 
         for(int i = 0; i<finalStateBlock_vec.size(); i++)
@@ -2149,16 +2149,16 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
             summary = ceres_manager_wolf_diff->solve();
             //std::cout << summary.BriefReport() << std::endl;
 
-            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-            "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-            ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-            "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+            ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+            "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+            ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+            ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+            ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+            ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+            "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
             // ifgyro bias stateBlock is the only one unfixed. it will be changed so that conditions can be met on orientation.
-            ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+            ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
         }
     }
 }
@@ -2206,14 +2206,14 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
                 summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) <<
-                "origin orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n last orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) <<
-                "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1,  0.00000001 )) <<
+                "origin orientation : " << last_KF->getOPtr()->getState().transpose() << "\n last orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 )) <<
+                "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
             }
 
             for(int i = 0; i<finalStateBlock_vec.size(); i++)
@@ -2233,19 +2233,19 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
                 summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
                 
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
                 if(i != 1) //if we do not fix origin_KF Quaternion StateBlock we cannot expect to have unit Quaternion here
-                    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
-                    "last orientation state : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+                    ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+                    "last orientation state : " << last_KF->getOPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
             }
         }
     }
@@ -2289,17 +2289,17 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
         summary = ceres_manager_wolf_diff->solve();
         //std::cout << summary.BriefReport() << std::endl;
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
-        "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
-        "last orientation state : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+        "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+        "last orientation state : " << last_KF->getOPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
     }
 
     for(int i = 0; i<finalStateBlock_vec.size(); i++)
@@ -2319,17 +2319,17 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
         summary = ceres_manager_wolf_diff->solve();
         //std::cout << summary.BriefReport() << std::endl;
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )); //because we simulate a perfect IMU
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
         if(i != 1) //if orientation block is the only one unfixed it will be changed
-            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+            ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
     }
 }
 
@@ -2371,21 +2371,21 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
         summary = ceres_manager_wolf_diff->solve();
         //std::cout << summary.BriefReport() << std::endl;
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) << 
-        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 )) <<
+        "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
         // if only orientation stateblocks are unfixed. We can hardly expect the final orienation to converge toward the one in origin_KF.
         // Both are likely to be changed to an intermediate orientation state.
         // but in the other cases, if origin orientation is fixed to identity quaternion and the robot did not move we expect the final orientation to converge to identity quaternion too
         if(i != 1) 
-            ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 )) << "last orientation state : " << last_KF->getOPtr()->getVector().transpose() ;
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
+            ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, 0.0000001 )) << "last orientation state : " << last_KF->getOPtr()->getState().transpose() ;
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, 0.0000001 ));
     }
 
     for(int i = 1; i<finalStateBlock_vec.size(); i++)
@@ -2405,13 +2405,13 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
         summary = ceres_manager_wolf_diff->solve();
         //std::cout << summary.BriefReport() << std::endl;
 
-        EXPECT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-        EXPECT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) <<
-        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+        EXPECT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+        EXPECT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 )) <<
+        "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
     }
 }
 
@@ -2445,15 +2445,15 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-    "last KF orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin KF orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
-    EXPECT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last KF orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin KF orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 )) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
 
     /* Here we gave an initial orientation and a final orientation. Everything is unfixed. We did not move between both KF according to
      * odometry constraint. There is no reason for the origin KF to impose its values to last in an optimization point of view.
@@ -2493,14 +2493,14 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS));
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 )) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
-    EXPECT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS));
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 )) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
 
     /* Here we gave an initial orientation and final orientation. Everything is unfixed. We did not move between both KF according to
      * odometry constraint. But we perturbated the final orientation before optimization.
@@ -2539,14 +2539,14 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    EXPECT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-    "last KF orientation : " << last_KF->getOPtr()->getVector().transpose() << "\norigin KF orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-    EXPECT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    EXPECT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last KF orientation : " << last_KF->getOPtr()->getState().transpose() << "\norigin KF orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS)) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    EXPECT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 }
 
 TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orientation3Last_FixOrigin)
@@ -2577,13 +2577,13 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS));
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS )) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*0.001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS));
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS )) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 }
 
 TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orientation3Last_FixGyroBiaseS)
@@ -2612,14 +2612,14 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS));
-    EXPECT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS*100 )) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 ));
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS));
+    EXPECT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS*100 )) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
 
     // As expected, both velocity StateBlocks converge to 0. The error is in 1e-6
 }
@@ -2649,15 +2649,15 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_AccB
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-    "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS)) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 }
 
 TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_AccBiasLast_FixedOrigin)
@@ -2686,16 +2686,16 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_AccB
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-    "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS)) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
     //See description above to understand why we assert this to be false
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 }
 
 TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_GyroBiasOrigin_FixedLast)
@@ -2722,16 +2722,16 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_Gyro
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-    "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;  
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS)) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_GyroBiaslast_FixedOrigin)
@@ -2761,17 +2761,17 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_Gyro
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-    "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
-    "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS)) <<
+    "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
     //See description to understand why we assert this to false
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
 }
 
 
@@ -2850,11 +2850,11 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF)
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
 
     // COMPUTE COVARIANCES
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
@@ -2888,20 +2888,20 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF)
 
         summary = ceres_manager_wolf_diff->solve();
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
         
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-        "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
         
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
-        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS)) <<
+        "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
             
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
             
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
     }  
 }
 
@@ -2923,20 +2923,20 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF)
 
         summary = ceres_manager_wolf_diff->solve();
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
         
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-        "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
 
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
-        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS)) <<
+        "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
             
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
             
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;  
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
     }
 }
 
@@ -2970,20 +2970,20 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF)
 
         summary = ceres_manager_wolf_diff->solve();
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
         
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-        "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
         
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
-        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS)) <<
+        "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
             
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl; 
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
 
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;  
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
     }
 }
 
@@ -3016,16 +3016,16 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_2KF)
 
         summary = ceres_manager_wolf_diff->solve();
 
-        ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-        ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-        "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS)) << 
-        "last velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;  
-        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-        "last gyro bias : " << last_KF->getGyroBiasPtr()->getVector().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;  
+        ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+        ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS)) <<
+        "last velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << "\n origin acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+        ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+        "last gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() << "\n origin gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
     }
 }
 
@@ -3064,12 +3064,12 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
 
     summary = ceres_manager_wolf_diff->solve();
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
-    "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+    "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
 
     // Now we reach PI, and it will not work 
     orientation_perturbation(2) = M_PI+0.0001;
@@ -3089,12 +3089,12 @@ TEST_F(ProcessorIMU_Odom_tests_details, static_Optim_IMUOdom_2KF_perturbate_orie
 
     summary = ceres_manager_wolf_diff->solve();
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-    EXPECT_FALSE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
-    "last orientation : " << last_KF->getOPtr()->getVector().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  0.00000001 ));
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00000001 )); 
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, 0.00000001 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+    EXPECT_FALSE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+    "last orientation : " << last_KF->getOPtr()->getState().transpose() << "\n origin orientation : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  0.00000001 ));
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00000001 ));
 }
 
 //_______________________________________________________________________________________________________________
@@ -3149,31 +3149,31 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbatePositi
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //test last against origin
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
                 //test middle against origin
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
 
-                /*EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() <<
+                /*EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getState().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
                 "\n perturbation index : " << pert_index0 << "." << pert_index1 << "." << pert_index2 << std::endl;*/
-                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
             }
         }
@@ -3212,31 +3212,31 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbatePositi
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //test last against origin
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
                 //test middle against origin
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
 
-                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() <<
+                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getState().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
                 "\n perturbation index : " << pert_index0 << "." << pert_index1 << "." << pert_index2 << std::endl;
-                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
             }
         }
@@ -3273,30 +3273,30 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbateVeloci
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //test last against origin
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
                 //test middle against origin
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() <<
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getState().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
                 "\n perturbation index : " << pert_index0 << "." << pert_index1 << "." << pert_index2 << std::endl;
-                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
             }
         }
     }
@@ -3338,30 +3338,30 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbateOrient
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //test last against origin
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
                 //test middle against origin
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() <<
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getState().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
                 "\n perturbation index : " << pert_index0 << "." << pert_index1 << "." << pert_index2 << std::endl;
-                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
             }
         }
     }
@@ -3397,29 +3397,29 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbateAccBia
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //test last against origin
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
                 //test middle against origin
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getState().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
             }
         }
     }
@@ -3455,29 +3455,29 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbateGyroBi
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //test last against origin
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
                 //test middle against origin
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getState().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
             }
         }
     }
@@ -3513,31 +3513,31 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbatePositi
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //test last against origin
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
                 //test middle against origin
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
 
-                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() <<
+                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getState().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
                 "\n perturbation index : " << pert_index0 << "." << pert_index1 << "." << pert_index2 << std::endl;
-                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
             }
         }
@@ -3574,30 +3574,30 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbateVeloci
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //test last against origin
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
                 //test middle against origin
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() <<
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getState().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
                 "\n perturbation index : " << pert_index0 << "." << pert_index1 << "." << pert_index2 << std::endl;
-                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
             }
         }
     }
@@ -3639,29 +3639,29 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbateOrient
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //test last against origin
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
                 //test middle against origin
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getState().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
             }
         }
     }
@@ -3700,31 +3700,31 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbateAccBia
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //test last against origin
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
 
                 //See description above to understand why we expect this test in ac bias to be false.
-                EXPECT_FALSE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                EXPECT_FALSE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
                 //test middle against origin
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                EXPECT_TRUE( (middle_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getState().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
             }
         }
     }
@@ -3763,31 +3763,31 @@ TEST_F(ProcessorIMU_Odom_tests_details3KF, static_optim_IMUOdom_perturbateGyroBi
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //test last against origin
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
                 // See description to understand why this we expect the gyroscope bias test below to be false
-                EXPECT_FALSE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                EXPECT_FALSE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
                 //test middle against origin
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getVector().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getPPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "middle position state : " << middle_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (middle_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-                ASSERT_TRUE( (middle_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*1000 ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle_KF acc bias : " << middle_KF->getAccBiasPtr()->getState().transpose() << "\n origin_KF acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getPPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "middle position state : " << middle_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (middle_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+                ASSERT_TRUE( (middle_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
             }
         }
     }
@@ -3936,12 +3936,12 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move)
     std::cout << summary.BriefReport() << std::endl;
 
     //test last against origin
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
-    //ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
-    //EXPECT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
+    //ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
+    //EXPECT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
     
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -4055,12 +4055,12 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_5s_move)
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //test last against origin
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
-    //ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
-    //EXPECT_TRUE( (last_KF->getVPtr()->getVector() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
+    //ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1,  wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
+    //EXPECT_TRUE( (last_KF->getVPtr()->getState() - (Eigen::Vector3s()<<0,0,0).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
     // COMPUTE COVARIANCES
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
@@ -4178,10 +4178,10 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_fixLastPosition)
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ));
     
 
     // COMPUTE COVARIANCES
@@ -4300,10 +4300,10 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_fixLastPQV)
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - (Eigen::Vector4s()<<0,0,0,1).finished()).isMuchSmallerThan(1, wolf::Constants::EPS ));
     
 
     // COMPUTE COVARIANCES
@@ -4409,12 +4409,12 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbatePositionOrigin_fixLas
     origin_state_afterCeres = origin_KF->getState();
 
     // velocity is modified : due to bias non initialized and noises. And due to motion constraint and fixing KF1's Position, velocity is used to satisfy conditions
-    EXPECT_FALSE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ) ) <<
-    "last_KF velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10)) << 
-    "last_KF position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100)) <<
-    "last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+    EXPECT_FALSE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ) ) <<
+    "last_KF velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10)) <<
+    "last_KF position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100)) <<
+    "last_KF quaternion : " << last_KF->getOPtr()->getState().transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
 
     //===================================================== END{PROCESS DATA}
 
@@ -4440,10 +4440,10 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbatePositionOrigin_fixLas
                 summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
-                "origin_state_afterCeres quaternion : " << origin_state_afterCeres.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "origin_state_afterCeres quaternion : " << origin_state_afterCeres.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -4549,12 +4549,12 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateVelocityOrigin_fixLas
     origin_state_afterCeres = origin_KF->getState();
 
     // velocity is modified : due to bias non initialized and noises. And due to motion constraint and fixing KF1's Position, velocity is used to satisfy conditions
-    EXPECT_FALSE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ) ) <<
-    "last_KF velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10)) << 
-    "last_KF position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100)) <<
-    "last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+    EXPECT_FALSE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ) ) <<
+    "last_KF velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10)) <<
+    "last_KF position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100)) <<
+    "last_KF quaternion : " << last_KF->getOPtr()->getState().transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
 
     //===================================================== END{PROCESS DATA}
 
@@ -4581,12 +4581,12 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateVelocityOrigin_fixLas
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //Velocity estimation depends on bias estimation.
-                //EXPECT_TRUE( (origin_state_afterCeres.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ) ) <<
-                //"origin_state_afterCeres velocity state : " << origin_state_afterCeres.segment(7,3).transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
-                "origin_state_afterCeres quaternion : " << origin_state_afterCeres.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+                //EXPECT_TRUE( (origin_state_afterCeres.segment(7,3) - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ) ) <<
+                //"origin_state_afterCeres velocity state : " << origin_state_afterCeres.segment(7,3).transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "origin_state_afterCeres quaternion : " << origin_state_afterCeres.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -4699,12 +4699,12 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_fix
     origin_state_afterCeres = origin_KF->getState();
 
     // velocity is modified : due to bias non initialized and noises. And due to motion constraint and fixing KF1's Position, velocity is used to satisfy conditions
-    EXPECT_FALSE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ) ) <<
-    "last_KF velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10)) << 
-    "last_KF position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100)) <<
-    "last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+    EXPECT_FALSE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ) ) <<
+    "last_KF velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10)) <<
+    "last_KF position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100)) <<
+    "last_KF quaternion : " << last_KF->getOPtr()->getState().transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
 
     //===================================================== END{PROCESS DATA}
 
@@ -4736,12 +4736,12 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_fix
                 //std::cout << summary.BriefReport() << std::endl;
 
                 //depends on other estimations, ex: bias
-                //EXPECT_TRUE( (origin_state_afterCeres.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ) ) << "iteration " << i<<"."<<j<<"."<<k <<
-                //"\norigin_state_afterCeres velocity state : " << origin_state_afterCeres.segment(7,3).transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
-                "origin_state_afterCeres quaternion : " << origin_state_afterCeres.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+                //EXPECT_TRUE( (origin_state_afterCeres.segment(7,3) - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ) ) << "iteration " << i<<"."<<j<<"."<<k <<
+                //"\norigin_state_afterCeres velocity state : " << origin_state_afterCeres.segment(7,3).transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "origin_state_afterCeres quaternion : " << origin_state_afterCeres.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -4848,12 +4848,12 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_fix
     origin_state_afterCeres = origin_KF->getState();
 
     // velocity is modified : due to bias non initialized and noises. And due to motion constraint and fixing KF1's Position, velocity is used to satisfy conditions
-    EXPECT_FALSE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ) ) <<
-    "last_KF velocity state : " << last_KF->getVPtr()->getVector().transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10)) << 
-    "last_KF position state : " << last_KF->getPPtr()->getVector().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100)) <<
-    "last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+    EXPECT_FALSE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ) ) <<
+    "last_KF velocity state : " << last_KF->getVPtr()->getState().transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10)) <<
+    "last_KF position state : " << last_KF->getPPtr()->getState().transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100)) <<
+    "last_KF quaternion : " << last_KF->getOPtr()->getState().transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
 
     //===================================================== END{PROCESS DATA}
 
@@ -4880,14 +4880,14 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_fix
                 //std::cout << summary.BriefReport() << std::endl;
 
                 // this will depend on bias estimation
-                //EXPECT_TRUE( (origin_state_afterCeres.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ) ) <<
-                //"origin_state_afterCeres velocity state : " << origin_state_afterCeres.segment(7,3).transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
-                "origin_state_afterCeres quaternion : " << origin_state_afterCeres.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (origin_state_afterCeres.segment(10,3) - origin_imuKF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00001 )) <<
-                "origin_state_afterCeres acc bias : " << origin_state_afterCeres.segment(10,3).transpose() << "\n origin acc bias state : " << origin_imuKF->getAccBiasPtr()->getVector().transpose() << std::endl;
+                //EXPECT_TRUE( (origin_state_afterCeres.segment(7,3) - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 ) ) <<
+                //"origin_state_afterCeres velocity state : " << origin_state_afterCeres.segment(7,3).transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "origin_state_afterCeres quaternion : " << origin_state_afterCeres.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (origin_state_afterCeres.segment(10,3) - origin_imuKF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, 0.00001 )) <<
+                "origin_state_afterCeres acc bias : " << origin_state_afterCeres.segment(10,3).transpose() << "\n origin acc bias state : " << origin_imuKF->getAccBiasPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -5020,8 +5020,8 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbatePositionOrigin_UnfixP
                 summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                ASSERT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << 
-                "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
+                ASSERT_TRUE( (origin_state_afterCeres.head(3) - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+                "origin_state_afterCeres position state : " << origin_state_afterCeres.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -5151,8 +5151,8 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateVelocityOrigin_UnfixP
                 summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (origin_state_afterCeres.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, 0.001 ) ) <<
-                "origin_state_afterCeres velocity state : " << origin_state_afterCeres.segment(7,3).transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (origin_state_afterCeres.segment(7,3) - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, 0.001 ) ) <<
+                "origin_state_afterCeres velocity state : " << origin_state_afterCeres.segment(7,3).transpose() << "\n origin velocity : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -5290,8 +5290,8 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_Unf
                 summary = ceres_manager_wolf_diff->solve();
                 std::cout << summary.BriefReport() << std::endl;
 
-                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, 0.0001 )) <<
-                "origin_state_afterCeres quaternion : " << origin_state_afterCeres.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+                ASSERT_TRUE( (origin_state_afterCeres.segment(3,4) - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, 0.0001 )) <<
+                "origin_state_afterCeres quaternion : " << origin_state_afterCeres.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -5414,8 +5414,8 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateAccBiasOrigin_UnfixPe
                 summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (origin_state_afterCeres.segment(10,3) - origin_imuKF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1,0.001 ) ) <<
-                "origin_state_afterCeres acc_bias state : " << origin_state_afterCeres.segment(10,3).transpose() << "\n origin acc_bias : " << origin_imuKF->getAccBiasPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (origin_state_afterCeres.segment(10,3) - origin_imuKF->getAccBiasPtr()->getState()).isMuchSmallerThan(1,0.001 ) ) <<
+                "origin_state_afterCeres acc_bias state : " << origin_state_afterCeres.segment(10,3).transpose() << "\n origin acc_bias : " << origin_imuKF->getAccBiasPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -5536,8 +5536,8 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateGyroBiasOrigin_UnfixP
                 summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (origin_state_afterCeres.segment(13,3) - origin_imuKF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, 0.00001 ) ) <<
-                "origin_state_afterCeres gyro_bias state : " << origin_state_afterCeres.segment(13,3).transpose() << "\n origin gyro_bias : " << origin_imuKF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (origin_state_afterCeres.segment(13,3) - origin_imuKF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, 0.00001 ) ) <<
+                "origin_state_afterCeres gyro_bias state : " << origin_state_afterCeres.segment(13,3).transpose() << "\n origin gyro_bias : " << origin_imuKF->getGyroBiasPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -5663,9 +5663,9 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_10s_move_fixOriginPQ)
 
     data_odom3D << 0,-0.06,0, 0,0,0;
     //test last against origin
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << 
-    "last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ));
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - data_odom3D.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+    "last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 ));
 
     // COMPUTE COVARIANCES
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
@@ -5686,12 +5686,12 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, No_Perturbation)
     
     //wolf_problem_ptr_->print(4,1,1,1);
 
-    ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10 ) ) <<
-    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
-    "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*10) ) <<
-    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS*10 ) ) <<
+    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
+    "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS*10) ) <<
+    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getState().transpose() << std::endl;
 
     last_KF->unfix();
     last_KF->getAccBiasPtr()->fix();
@@ -5749,8 +5749,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginPosition_Unfix
                 ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -5798,8 +5798,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginVelocity_Unfix
                 ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << 
-                "initial_origin_state position state : " << initial_origin_state.segment(7,3).transpose() << "\n origin position state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+                "initial_origin_state position state : " << initial_origin_state.segment(7,3).transpose() << "\n origin position state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -5848,8 +5848,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginOrientation_Un
                 ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                ASSERT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
+                ASSERT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -5894,8 +5894,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginAccBias_UnfixP
                 ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << 
-                "initial_origin_state position state : " << initial_origin_state.segment(10,3).transpose() << "\n origin position state : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+                "initial_origin_state position state : " << initial_origin_state.segment(10,3).transpose() << "\n origin position state : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -5940,8 +5940,8 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginGyroBias_Unfix
                 ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << 
-                "initial_origin_state position state : " << initial_origin_state.tail(3).transpose() << "\n origin position state : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+                "initial_origin_state position state : " << initial_origin_state.tail(3).transpose() << "\n origin position state : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -5979,16 +5979,16 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginPosition_Unfix
                 ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
-                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -6028,16 +6028,16 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginVelocity_Unfix
                 ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << 
-                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
-                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << 
-                "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << 
-                "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+                "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+                "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -6082,16 +6082,16 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginOrientation_Un
                 ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
-                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -6131,16 +6131,16 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginAccBias_UnfixO
                 ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
-                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -6180,16 +6180,16 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginGyroBias_Unfix
                 ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
                 //std::cout << summary.BriefReport() << std::endl;
 
-                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
-                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-                "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-                EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-                "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+                "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+                "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+                EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+                "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
             }
         }
     }
@@ -6239,16 +6239,16 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbOriginAll_UnfixOrigi
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-    "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
-    "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-    "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-    "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (initial_origin_state.head(3) - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+    "initial_origin_state position state : " << initial_origin_state.head(3).transpose() << "\n origin position state : " << origin_KF->getPPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (initial_origin_state.segment(3,4) - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+    "initial_origin_state quaternion : " << initial_origin_state.segment(3,4).transpose() << "\n origin quaternion state : " << origin_KF->getOPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (initial_origin_state.segment(7,3) - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+    "initial_origin_state velocity state : " << initial_origin_state.segment(7,3).transpose() << "\n origin velocity state : " << origin_KF->getVPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (initial_origin_state.segment(10,3) - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+    "initial_origin_state acc bias state : " << initial_origin_state.segment(10,3).transpose() << "\n origin acc bias state : " << origin_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (initial_origin_state.tail(3) - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "initial_origin_state gyro bias state : " << initial_origin_state.tail(3).transpose() << "\n origin gyro bias state : " << origin_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 }
@@ -6263,12 +6263,12 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, FixOriginPQV_UnfixLast)
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
-    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
-    "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*1000) ) <<
-    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
+    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
+    "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS*1000) ) <<
+    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getState().transpose() << std::endl;
     //wolf_problem_ptr_->print(4,1,1,1);
 }
 
@@ -6283,12 +6283,12 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, FixOriginPQV_UnfixLast_fixl
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    //ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
-    //"expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
-    "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*1000) ) <<
-    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+    //ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
+    //"expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
+    "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS*1000) ) <<
+    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getState().transpose() << std::endl;
     //wolf_problem_ptr_->print(4,1,1,1);
 }
 
@@ -6303,10 +6303,10 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, FixOriginPQV_UnfixLast_fixl
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
-    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS) ) <<
-    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS ) ) <<
+    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS) ) <<
+    "expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getState().transpose() << std::endl;
     //wolf_problem_ptr_->print(4,1,1,1);
 }
 
@@ -6321,12 +6321,12 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, FixOriginPQV_UnfixLast_fixl
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
-    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
-    "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-    //ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1,wolf::Constants::EPS*1000) ) <<
-    //"expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.head(3) - last_KF->getPPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
+    "expected_final_state position : " << expected_final_state.head(3).transpose() << "\n last_KF position : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (expected_final_state.segment(3,4) - last_KF->getOPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS*100 ) ) <<
+    "expected_final_state quaternion : " << expected_final_state.segment(3,4).transpose() << "\n last_KF quaternion : " << last_KF->getOPtr()->getState().transpose() << std::endl;
+    //ASSERT_TRUE( (expected_final_state.tail(3) - last_KF->getVPtr()->getState()).isMuchSmallerThan(1,wolf::Constants::EPS*1000) ) <<
+    //"expected_final_state velocity : " << expected_final_state.tail(3).transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getState().transpose() << std::endl;
     //wolf_problem_ptr_->print(4,1,1,1);
 }
 
@@ -6369,16 +6369,16 @@ TEST_F(ProcessorIMU_Odom_tests_plateform_simulation, PerturbLastAll_UnfixLast_fi
     summary = ceres_manager_wolf_diff->solve();
     //std::cout << summary.BriefReport() << std::endl;
 
-    EXPECT_TRUE( (initial_final_state.head(3) - last_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-    "initial_final_state position state : " << initial_final_state.head(3).transpose() << "\n last position state : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (initial_final_state.segment(3,4) - last_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
-    "initial_final_state quaternion : " << initial_final_state.segment(3,4).transpose() << "\n last quaternion state : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (initial_final_state.segment(7,3) - last_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-    "initial_final_state velocity state : " << initial_final_state.segment(7,3).transpose() << "\n last velocity state : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (initial_final_state.segment(10,3) - last_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << 
-    "initial_final_state acc bias state : " << initial_final_state.segment(10,3).transpose() << "\n last acc bias state : " << last_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (initial_final_state.tail(3) - last_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "initial_final_state gyro bias state : " << initial_final_state.tail(3).transpose() << "\n last gyro bias state : " << last_KF->getGyroBiasPtr()->getVector().transpose() << std::endl;
+    EXPECT_TRUE( (initial_final_state.head(3) - last_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+    "initial_final_state position state : " << initial_final_state.head(3).transpose() << "\n last position state : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (initial_final_state.segment(3,4) - last_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) <<
+    "initial_final_state quaternion : " << initial_final_state.segment(3,4).transpose() << "\n last quaternion state : " << last_KF->getOPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (initial_final_state.segment(7,3) - last_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+    "initial_final_state velocity state : " << initial_final_state.segment(7,3).transpose() << "\n last velocity state : " << last_KF->getVPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (initial_final_state.segment(10,3) - last_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) <<
+    "initial_final_state acc bias state : " << initial_final_state.segment(10,3).transpose() << "\n last acc bias state : " << last_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (initial_final_state.tail(3) - last_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "initial_final_state gyro bias state : " << initial_final_state.tail(3).transpose() << "\n last gyro bias state : " << last_KF->getGyroBiasPtr()->getState().transpose() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 }
@@ -6465,16 +6465,16 @@ TEST_F(ProcessorIMU_Odom_tests, IMU_Biased)
     std::cout << summary.BriefReport() << std::endl;
 
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "origin_KF position : " << origin_KF->getPPtr()->getVector().transpose() << "\n last_KF position : " << last_KF->getPPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "origin_KF orientation : " << origin_KF->getOPtr()->getVector().transpose() << "\n last_KF orientation : " << last_KF->getOPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) << 
-    "origin_KF velocity : " << origin_KF->getVPtr()->getVector().transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getVector().transpose() << std::endl;
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - imuBias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS )); 
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - imuBias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "origin_KF position : " << origin_KF->getPPtr()->getState().transpose() << "\n last_KF position : " << last_KF->getPPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "origin_KF orientation : " << origin_KF->getOPtr()->getState().transpose() << "\n last_KF orientation : " << last_KF->getOPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "origin_KF velocity : " << origin_KF->getVPtr()->getState().transpose() << "\n last_KF velocity : " << last_KF->getVPtr()->getState().transpose() << std::endl;
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - imuBias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - imuBias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
     //===================================================== END{SOLVER PART}
 }
@@ -6559,12 +6559,12 @@ TEST_F(ProcessorIMU_Odom_tests, IMU_Biased_perturbData)
     std::cout << summary.BriefReport() << std::endl;
     
     // IMU data was perturbed. We expect the bias of last_KF to have changed due to this perturbation
-    EXPECT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-    "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << "\n last_KF Acc bias : " << last_KF->getAccBiasPtr()->getVector().transpose() << std::endl;
-    EXPECT_TRUE( (last_KF->getAccBiasPtr()->getVector() - (imuBias.head(3) + imuBias_perturb.head(3))).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
-    "last_KF Acc bias :" << last_KF->getAccBiasPtr()->getVector().transpose() << "\n  expected Acc bias : " << (imuBias.head(3) + imuBias_perturb.head(3)).transpose() << std::endl; 
-    EXPECT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    EXPECT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - (imuBias.tail(3) + imuBias_perturb.tail(3))).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    EXPECT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() << "\n last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getAccBiasPtr()->getState() - (imuBias.head(3) + imuBias_perturb.head(3))).isMuchSmallerThan(1, wolf::Constants::EPS )) <<
+    "last_KF Acc bias :" << last_KF->getAccBiasPtr()->getState().transpose() << "\n  expected Acc bias : " << (imuBias.head(3) + imuBias_perturb.head(3)).transpose() << std::endl;
+    EXPECT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    EXPECT_TRUE( (last_KF->getGyroBiasPtr()->getState() - (imuBias.tail(3) + imuBias_perturb.tail(3))).isMuchSmallerThan(1, wolf::Constants::EPS ));
 
     // COMPUTE COVARIANCES
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
@@ -6650,11 +6650,11 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_nKFs_biasUnfixed)
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
 
     // COMPUTE COVARIANCES
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
@@ -6742,11 +6742,11 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_nKFs_biasFixed)
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
 
     // COMPUTE COVARIANCES
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
@@ -6843,11 +6843,11 @@ TEST_F(ProcessorIMU_Odom_tests, static_Optim_IMUOdom_SeveralKFs)
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     std::cout << summary.BriefReport() << std::endl;
 
-    ASSERT_TRUE( (last_KF->getPPtr()->getVector() - origin_KF->getPPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getOPtr()->getVector() - origin_KF->getOPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getVPtr()->getVector() - origin_KF->getVPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS ));
-    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getVector() - origin_KF->getAccBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
-    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getVector() - origin_KF->getGyroBiasPtr()->getVector()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
+    ASSERT_TRUE( (last_KF->getPPtr()->getState() - origin_KF->getPPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getOPtr()->getState() - origin_KF->getOPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getVPtr()->getState() - origin_KF->getVPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS ));
+    ASSERT_TRUE( (last_KF->getAccBiasPtr()->getState() - origin_KF->getAccBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
+    ASSERT_TRUE( (last_KF->getGyroBiasPtr()->getState() - origin_KF->getGyroBiasPtr()->getState()).isMuchSmallerThan(1, wolf::Constants::EPS )); //because we simulate a perfect IMU
 
     // COMPUTE COVARIANCES
     ceres_manager_wolf_diff->computeCovariances(ALL);//ALL_MARGINALS, ALL
