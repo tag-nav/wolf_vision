@@ -1212,7 +1212,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
 
         imu_data_input.open(imu_filepath);
         odom_data_input.open(odom_filepath);
-        WOLF_INFO("imu file: ", imu_filepath)
+        //WOLF_INFO("imu file: ", imu_filepath)
         if(!imu_data_input.is_open() | !odom_data_input.is_open()){
             std::cerr << "Failed to open data files... Exiting" << std::endl;
             ADD_FAILURE();
@@ -1264,11 +1264,6 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
                     expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
         expected_final_state.tail(6) = origin_bias;
         x_origin.tail(6) = origin_bias;
-
-        /*std::cout << "x_origin : " << x_origin.transpose() << std::endl;
-        std::cout << "origin_bias : " << origin_bias.transpose() << std::endl;
-        std::cout << "expected_final_state : " << expected_final_state.transpose() << std::endl;*/
-        
 
         //set origin of the problem
         origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
@@ -1377,7 +1372,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK : public testing::Te
 
         imu_data_input.open(imu_filepath);
         odom_data_input.open(odom_filepath);
-        WOLF_INFO("imu file: ", imu_filepath)
+        //WOLF_INFO("imu file: ", imu_filepath)
         if(!imu_data_input.is_open() | !odom_data_input.is_open()){
             std::cerr << "Failed to open data files... Exiting" << std::endl;
             ADD_FAILURE();
@@ -1429,11 +1424,6 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK : public testing::Te
                     expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
         expected_final_state.tail(6) = origin_bias;
         x_origin.tail(6) = origin_bias;
-
-        /*std::cout << "x_origin : " << x_origin.transpose() << std::endl;
-        std::cout << "origin_bias : " << origin_bias.transpose() << std::endl;
-        std::cout << "expected_final_state : " << expected_final_state.transpose() << std::endl;*/
-        
 
         //set origin of the problem
         origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
@@ -1542,7 +1532,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex : public testing::Test
 
         imu_data_input.open(imu_filepath);
         odom_data_input.open(odom_filepath);
-        WOLF_INFO("imu file: ", imu_filepath)
+        //WOLF_INFO("imu file: ", imu_filepath)
         if(!imu_data_input.is_open() | !odom_data_input.is_open()){
             std::cerr << "Failed to open data files... Exiting" << std::endl;
             ADD_FAILURE();
@@ -1707,7 +1697,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK : public testin
 
         imu_data_input.open(imu_filepath);
         odom_data_input.open(odom_filepath);
-        WOLF_INFO("imu file: ", imu_filepath)
+        //WOLF_INFO("imu file: ", imu_filepath)
         if(!imu_data_input.is_open() | !odom_data_input.is_open()){
             std::cerr << "Failed to open data files... Exiting" << std::endl;
             ADD_FAILURE();
@@ -1866,7 +1856,7 @@ class ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK : public te
 
         imu_data_input.open(imu_filepath);
         odom_data_input.open(odom_filepath);
-        WOLF_INFO("imu file: ", imu_filepath)
+        //WOLF_INFO("imu file: ", imu_filepath)
         if(!imu_data_input.is_open() | !odom_data_input.is_open()){
             std::cerr << "Failed to open data files... Exiting" << std::endl;
             ADD_FAILURE();
@@ -2025,7 +2015,7 @@ class ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK : public testin
 
         imu_data_input.open(imu_filepath);
         odom_data_input.open(odom_filepath);
-        WOLF_INFO("imu file: ", imu_filepath)
+        //WOLF_INFO("imu file: ", imu_filepath)
         if(!imu_data_input.is_open() | !odom_data_input.is_open()){
             std::cerr << "Failed to open data files... Exiting" << std::endl;
             ADD_FAILURE();
@@ -2181,7 +2171,6 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
     //wolf_problem_ptr_->print(4,1,1,1);
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
 
     //Only biases are unfixed
     ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
@@ -2219,7 +2208,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     ceres::Solver::Summary summary;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-7")
+    //WOLF_INFO("Starting error bias 1e-7")
 
     for(int i = 0; i<9; i++)
     {
@@ -2259,7 +2248,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     }
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-6")
+    //WOLF_INFO("Starting error bias 1e-6")
     epsilon_bias = 0.000001;
 
     for(int i = 1; i<9; i++)
@@ -2300,7 +2289,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     }
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-5")
+    //WOLF_INFO("Starting error bias 1e-5")
     epsilon_bias = 0.00001;
 
     for(int i = 1; i<9; i++)
@@ -2341,7 +2330,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     }
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
+    //WOLF_INFO("Starting error bias 1e-4")
     epsilon_bias = 0.0001;
 
     for(int i = 1; i<9; i++)
@@ -2382,7 +2371,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     }
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
+    //WOLF_INFO("Starting error bias 1e-3")
     epsilon_bias = 0.001;
 
     for(int i = 1; i<9; i++)
@@ -2423,7 +2412,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     }
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
+    //WOLF_INFO("Starting error bias 1e-2")
     epsilon_bias = 0.01;
 
     for(int i = 1; i<9; i++)
@@ -2464,7 +2453,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     }
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-1")
+    //WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
     for(int i = 1; i<90; i++)
@@ -2519,7 +2508,6 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initO
     last_KF->getVPtr()->fix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
 
     //Only biases are unfixed
     ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
@@ -2557,7 +2545,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     ceres::Solver::Summary summary;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-7")
+    //WOLF_INFO("Starting error bias 1e-7")
 
     for(int i = 0; i<9; i++)
     {
@@ -2597,7 +2585,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     }
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-6")
+    //WOLF_INFO("Starting error bias 1e-6")
     epsilon_bias = 0.000001;
 
     for(int i = 1; i<9; i++)
@@ -2639,7 +2627,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-5")
+    //WOLF_INFO("Starting error bias 1e-5")
     epsilon_bias = 0.00001;
 
     for(int i = 1; i<9; i++)
@@ -2680,7 +2668,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     }
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
+    //WOLF_INFO("Starting error bias 1e-4")
     epsilon_bias = 0.0001;
 
     for(int i = 1; i<9; i++)
@@ -2722,7 +2710,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
+    //WOLF_INFO("Starting error bias 1e-3")
     epsilon_bias = 0.001;
 
     for(int i = 1; i<9; i++)
@@ -2764,7 +2752,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
+    //WOLF_INFO("Starting error bias 1e-2")
     epsilon_bias = 0.01;
 
     for(int i = 1; i<9; i++)
@@ -2806,7 +2794,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-1")
+    //WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
     for(int i = 1; i<90; i++)
@@ -2861,7 +2849,6 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
     last_KF->getVPtr()->fix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
 
     //Only biases are unfixed
     ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
@@ -2947,7 +2934,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     ceres::Solver::Summary summary;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-7")
+    //WOLF_INFO("Starting error bias 1e-7")
 
     for(int i = 0; i<9; i++)
     {
@@ -2988,7 +2975,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-6")
+    //WOLF_INFO("Starting error bias 1e-6")
     epsilon_bias = 0.000001;
 
     for(int i = 1; i<9; i++)
@@ -3030,7 +3017,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-5")
+    //WOLF_INFO("Starting error bias 1e-5")
     epsilon_bias = 0.00001;
 
     for(int i = 1; i<9; i++)
@@ -3072,7 +3059,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
+    //WOLF_INFO("Starting error bias 1e-4")
     epsilon_bias = 0.0001;
 
     for(int i = 1; i<9; i++)
@@ -3114,7 +3101,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
+    //WOLF_INFO("Starting error bias 1e-3")
     epsilon_bias = 0.001;
 
     for(int i = 1; i<9; i++)
@@ -3155,7 +3142,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     }
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
+    //WOLF_INFO("Starting error bias 1e-2")
     epsilon_bias = 0.01;
 
     for(int i = 1; i<9; i++)
@@ -3196,7 +3183,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     }
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-1")
+    //WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
     for(int i = 1; i<90; i++)
@@ -3255,7 +3242,6 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
     //wolf_problem_ptr_->print(4,1,1,1);
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -3316,7 +3302,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     ceres::Solver::Summary summary;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-7")
+    //WOLF_INFO("Starting error bias 1e-7")
 
     for(int i = 0; i<9; i++)
     {
@@ -3357,7 +3343,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-6")
+    //WOLF_INFO("Starting error bias 1e-6")
     epsilon_bias = 0.000001;
 
     for(int i = 1; i<9; i++)
@@ -3399,7 +3385,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-5")
+    //WOLF_INFO("Starting error bias 1e-5")
     epsilon_bias = 0.00001;
 
     for(int i = 1; i<9; i++)
@@ -3441,7 +3427,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
+    //WOLF_INFO("Starting error bias 1e-4")
     epsilon_bias = 0.0001;
 
     for(int i = 1; i<9; i++)
@@ -3483,7 +3469,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
+    //WOLF_INFO("Starting error bias 1e-3")
     epsilon_bias = 0.001;
 
     for(int i = 1; i<9; i++)
@@ -3525,7 +3511,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
+    //WOLF_INFO("Starting error bias 1e-2")
     epsilon_bias = 0.01;
 
     for(int i = 1; i<9; i++)
@@ -3567,7 +3553,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-1")
+    //WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
     for(int i = 1; i<90; i++)
@@ -3616,8 +3602,6 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling, VarB1B2_InvarP1Q1V1P2
     origin_KF->getOPtr()->fix();
     origin_KF->getVPtr()->fix();
 
-    //wolf_problem_ptr_->print(4,1,1,1); 
-
     last_KF->setState(expected_final_state);
 
     last_KF->getPPtr()->fix();
@@ -3625,9 +3609,6 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling, VarB1B2_InvarP1Q1V1P2
     last_KF->getVPtr()->fix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
-
-    //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
     EXPECT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
@@ -3713,7 +3694,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
     ceres::Solver::Summary summary;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-7")
+    //WOLF_INFO("Starting error bias 1e-7")
 
     for(int i = 0; i<9; i++)
     {
@@ -3754,7 +3735,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-6")
+    //WOLF_INFO("Starting error bias 1e-6")
     epsilon_bias = 0.000001;
 
     for(int i = 1; i<9; i++)
@@ -3796,7 +3777,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-5")
+    //WOLF_INFO("Starting error bias 1e-5")
     epsilon_bias = 0.00001;
 
     for(int i = 1; i<9; i++)
@@ -3838,7 +3819,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
+    //WOLF_INFO("Starting error bias 1e-4")
     epsilon_bias = 0.0001;
 
     for(int i = 1; i<9; i++)
@@ -3880,7 +3861,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
+    //WOLF_INFO("Starting error bias 1e-3")
     epsilon_bias = 0.001;
 
     for(int i = 1; i<9; i++)
@@ -3922,7 +3903,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
+    //WOLF_INFO("Starting error bias 1e-2")
     epsilon_bias = 0.01;
 
     for(int i = 1; i<9; i++)
@@ -3964,7 +3945,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling,VarB1B2_InvarP1Q1V1P2Q
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-1")
+    //WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
     for(int i = 1; i<90; i++)
@@ -4013,8 +3994,6 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst, VarB1B2_InvarP1Q1V1P2Q2V
     origin_KF->getOPtr()->fix();
     origin_KF->getVPtr()->fix();
 
-    //wolf_problem_ptr_->print(4,1,1,1); 
-
     last_KF->setState(expected_final_state);
 
     last_KF->getPPtr()->fix();
@@ -4022,9 +4001,6 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst, VarB1B2_InvarP1Q1V1P2Q2V
     last_KF->getVPtr()->fix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
-
-    //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
     ASSERT_TRUE((origin_KF->getAccBiasPtr()->getVector() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getVector().transpose() << 
@@ -4061,7 +4037,7 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
     ceres::Solver::Summary summary;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-7")
+    //WOLF_INFO("Starting error bias 1e-7")
 
     for(int i = 0; i<9; i++)
     {
@@ -4102,7 +4078,7 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-6")
+    //WOLF_INFO("Starting error bias 1e-6")
     epsilon_bias = 0.000001;
 
     for(int i = 1; i<9; i++)
@@ -4144,7 +4120,7 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-5")
+    //WOLF_INFO("Starting error bias 1e-5")
     epsilon_bias = 0.00001;
 
     for(int i = 1; i<9; i++)
@@ -4186,7 +4162,7 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
+    //WOLF_INFO("Starting error bias 1e-4")
     epsilon_bias = 0.0001;
 
     for(int i = 1; i<9; i++)
@@ -4228,7 +4204,7 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
+    //WOLF_INFO("Starting error bias 1e-3")
     epsilon_bias = 0.001;
 
     for(int i = 1; i<9; i++)
@@ -4270,7 +4246,7 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
+    //WOLF_INFO("Starting error bias 1e-2")
     epsilon_bias = 0.01;
 
     for(int i = 1; i<9; i++)
@@ -4312,7 +4288,7 @@ TEST_F(ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst,VarB1B2_InvarP1Q1V1P2Q2V2
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-1")
+    //WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
     for(int i = 1; i<90; i++)
@@ -4416,7 +4392,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst, VarB1B2_InvarP1Q1V1P2Q2V2_
     #endif
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -4488,7 +4464,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     ceres::Solver::Summary summary;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-7")
+    //WOLF_INFO("Starting error bias 1e-7")
 
     for(int i = 0; i<9; i++)
     {
@@ -4529,7 +4505,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-6")
+    //WOLF_INFO("Starting error bias 1e-6")
     epsilon_bias = 0.000001;
 
     for(int i = 1; i<9; i++)
@@ -4571,7 +4547,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-5")
+    //WOLF_INFO("Starting error bias 1e-5")
     epsilon_bias = 0.00001;
 
     for(int i = 1; i<9; i++)
@@ -4613,7 +4589,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
+    //WOLF_INFO("Starting error bias 1e-4")
     epsilon_bias = 0.0001;
 
     for(int i = 1; i<9; i++)
@@ -4655,7 +4631,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
+    //WOLF_INFO("Starting error bias 1e-3")
     epsilon_bias = 0.001;
 
     for(int i = 1; i<9; i++)
@@ -4697,7 +4673,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
+    //WOLF_INFO("Starting error bias 1e-2")
     epsilon_bias = 0.01;
 
     for(int i = 1; i<9; i++)
@@ -4739,7 +4715,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-1")
+    //WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
     for(int i = 1; i<90; i++)
@@ -4795,7 +4771,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst, VarB1B2_InvarP1Q1V1P2Q
     last_KF->getVPtr()->fix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -4883,7 +4859,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     ceres::Solver::Summary summary;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-7")
+    //WOLF_INFO("Starting error bias 1e-7")
 
     for(int i = 0; i<9; i++)
     {
@@ -4924,7 +4900,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-6")
+    //WOLF_INFO("Starting error bias 1e-6")
     epsilon_bias = 0.000001;
 
     for(int i = 1; i<9; i++)
@@ -4966,7 +4942,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-5")
+    //WOLF_INFO("Starting error bias 1e-5")
     epsilon_bias = 0.00001;
 
     for(int i = 1; i<9; i++)
@@ -5008,7 +4984,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
+    //WOLF_INFO("Starting error bias 1e-4")
     epsilon_bias = 0.0001;
 
     for(int i = 1; i<9; i++)
@@ -5050,7 +5026,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
+    //WOLF_INFO("Starting error bias 1e-3")
     epsilon_bias = 0.001;
 
     for(int i = 1; i<9; i++)
@@ -5092,7 +5068,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
+    //WOLF_INFO("Starting error bias 1e-2")
     epsilon_bias = 0.01;
 
     for(int i = 1; i<9; i++)
@@ -5134,7 +5110,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-1")
+    //WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
     for(int i = 1; i<90; i++)
@@ -5190,7 +5166,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst, VarB1B2V1P2V2_InvarP1Q
     //last_KF->getVPtr()->fix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -5265,7 +5241,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q2_ini
     last_KF->getOPtr()->fix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -5343,7 +5319,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2_InvarP1Q1V1P2Q2V
     last_KF->getVPtr()->fix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -5422,7 +5398,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V2_InvarP1Q1V1P2Q
     last_KF->getOPtr()->fix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -5501,7 +5477,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1V2_InvarP1Q1P2Q
     last_KF->getOPtr()->fix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -5578,7 +5554,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1Q2V2_InvarP1Q1P
     //last_KF->setState(expected_final_state);
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -5703,7 +5679,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q
     #endif
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -5810,7 +5786,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2Q2V2_InvarP1Q
     #endif
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -5918,7 +5894,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
     #endif
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -6018,7 +5994,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarAll_initOK)
     #endif
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -6127,7 +6103,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK, VarB1B2_InvarP1Q1V
     #endif
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -6234,7 +6210,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK, VarAll)
     #endif
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -6351,7 +6327,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2_Invar
     #endif
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -6464,7 +6440,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2_I
     #endif
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -6576,7 +6552,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2V2
     #endif
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -6682,7 +6658,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarAll)
     #endif
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    //std::cout << summary.BriefReport() << std::endl;
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -7094,7 +7070,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
     ceres::Solver::Summary summary;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-7")
+    //WOLF_INFO("Starting error bias 1e-7")
 
     for(int i = 0; i<9; i++)
     {
@@ -7135,7 +7111,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-6")
+    //WOLF_INFO("Starting error bias 1e-6")
     epsilon_bias = 0.000001;
 
     for(int i = 1; i<9; i++)
@@ -7177,7 +7153,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-5")
+    //WOLF_INFO("Starting error bias 1e-5")
     epsilon_bias = 0.00001;
 
     for(int i = 1; i<9; i++)
@@ -7219,7 +7195,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
+    //WOLF_INFO("Starting error bias 1e-4")
     epsilon_bias = 0.0001;
 
     for(int i = 1; i<9; i++)
@@ -7261,7 +7237,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
+    //WOLF_INFO("Starting error bias 1e-3")
     epsilon_bias = 0.001;
 
     for(int i = 1; i<9; i++)
@@ -7303,7 +7279,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
+    //WOLF_INFO("Starting error bias 1e-2")
     epsilon_bias = 0.01;
 
     for(int i = 1; i<9; i++)
@@ -7345,7 +7321,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
     //std::cout << summary.FullReport() << std::endl;
 
     //==============================================================
-    WOLF_INFO("Starting error bias 1e-1")
+    //WOLF_INFO("Starting error bias 1e-1")
     epsilon_bias = 0.1;
 
     for(int i = 1; i<90; i++)
@@ -7495,9 +7471,6 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varV1B1P2
             }
         }
 
-    #endif
-
-
     std::ofstream framesCov;
     framesCov.open("framesCovariances.dat");
     if(framesCov)
@@ -7543,6 +7516,8 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varV1B1P2
         }
     }
     framesCov.close();
+
+    #endif
 }
 
 TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varV1B1P2Q2V2B2_invarP1Q1)
@@ -7652,8 +7627,6 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varV1B1P2Q2V2
             }
         }
 
-    #endif
-
     std::ofstream framesCov;
     framesCov.open("framesCovariances121kf_new.dat");
     if(framesCov)
@@ -7699,11 +7672,13 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varV1B1P2Q2V2
         }
     }
     framesCov.close();
+
+    #endif
 }
 
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  //::testing::GTEST_FLAG(filter) = "ConstraintIMU_testBase.*";
+  //::testing::GTEST_FLAG(filter) = "";
   return RUN_ALL_TESTS();
 }
