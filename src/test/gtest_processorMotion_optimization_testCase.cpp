@@ -506,8 +506,8 @@ class ProcessorIMU_Odom_tests_plateform_simulation : public testing::Test
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/data_trajectory_full.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_trajectory_full.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_trajectory_full.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_trajectory_full.txt");
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
         std::strcpy(imu_filepath, imu_filepath_string.c_str());
@@ -3841,7 +3841,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move)
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_2s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_2s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -3959,7 +3959,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_5s_move)
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_5s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_5s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -4082,7 +4082,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_fixLastPosition)
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_2s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_2s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -4205,7 +4205,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_fixLastPQV)
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_2s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_2s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -4327,7 +4327,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbatePositionOrigin_fixLas
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_2s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_2s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -4466,7 +4466,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateVelocityOrigin_fixLas
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_2s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_2s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -4615,7 +4615,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_fix
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_2s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_2s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -4765,7 +4765,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_fix
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_2s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_2s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -4909,7 +4909,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbatePositionOrigin_UnfixP
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_2s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_2s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -5044,7 +5044,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateVelocityOrigin_UnfixP
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_2s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_2s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -5173,7 +5173,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateOrientationOrigin_Unf
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_2s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_2s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -5307,7 +5307,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateAccBiasOrigin_UnfixPe
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_2s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_2s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -5429,7 +5429,7 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_2s_move_PerturbateGyroBiasOrigin_UnfixP
     
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
-    std::string filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateform_2s.txt");
+    std::string filepath_string(wolf_root + "/src/test/data/IMU/imu_plateform_2s.txt");
     imu_filepath   = new char[filepath_string.length() + 1];
     std::strcpy(imu_filepath, filepath_string.c_str());
     std::ifstream imu_data_input;
@@ -5552,8 +5552,8 @@ TEST_F(ProcessorIMU_Odom_tests,Plateform_10s_move_fixOriginPQ)
     std::string wolf_root = _WOLF_ROOT_DIR;
     char* imu_filepath;
     char* odom_filepath;
-    std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/imu_plateforme_10s.txt");
-    std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Test_plateforme/odom_plateforme_10s.txt");
+    std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_plateforme_10s.txt");
+    std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_plateforme_10s.txt");
     imu_filepath   = new char[imu_filepath_string.length() + 1];
     odom_filepath   = new char[odom_filepath_string.length() + 1];
     std::strcpy(imu_filepath, imu_filepath_string.c_str());

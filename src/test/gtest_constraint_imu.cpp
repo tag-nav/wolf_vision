@@ -58,7 +58,7 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
 
         char* imu_filepath;
 
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_static_biasNull.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_static_biasNull.txt");
 
         imu_filepath = new char[imu_filepath_string.length() + 1];
 
@@ -176,7 +176,7 @@ class ConstraintIMU_biasTest_Static_NonNullBias : public testing::Test
 
         char* imu_filepath;
 
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_static_biasNonNull.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_static_biasNonNull.txt");
 
         imu_filepath = new char[imu_filepath_string.length() + 1];
 
@@ -294,7 +294,7 @@ class ConstraintIMU_biasTest_Move_NullBias : public testing::Test
 
         char* imu_filepath;
 
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_move_biasNull.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_move_biasNull.txt");
 
         imu_filepath = new char[imu_filepath_string.length() + 1];
 
@@ -412,7 +412,7 @@ class ConstraintIMU_biasTest_Move_NonNullBias : public testing::Test
 
         char* imu_filepath;
 
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_move_BiasNonNull.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_move_BiasNonNull.txt");
 
         imu_filepath = new char[imu_filepath_string.length() + 1];
 
@@ -530,7 +530,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasFreeFalling : public testing::Test
 
         char* imu_filepath;
 
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_move_AbxNonNull_FreeFalling.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_move_AbxNonNull_FreeFalling.txt");
 
         imu_filepath = new char[imu_filepath_string.length() + 1];
 
@@ -648,7 +648,7 @@ class ConstraintIMU_biasTest_MoveTR_NonNullBiasAccCst : public testing::Test
 
         char* imu_filepath;
 
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_moveTR_AbxNonNull_AccCst.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_moveTR_AbxNonNull_AccCst.txt");
 
         imu_filepath = new char[imu_filepath_string.length() + 1];
 
@@ -766,7 +766,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
 
         char* imu_filepath;
 
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_move_AbxNonNull_RotCst.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_move_AbxNonNull_RotCst.txt");
 
         imu_filepath = new char[imu_filepath_string.length() + 1];
 
@@ -884,7 +884,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
 
         char* imu_filepath;
 
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/imu_move_BiasNonNull_RotVCst.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_move_BiasNonNull_RotVCst.txt");
 
         imu_filepath = new char[imu_filepath_string.length() + 1];
 
@@ -1002,7 +1002,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
 
         char* imu_filepath;
 
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check_Rot.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_bias_check_Rot.txt");
 
         imu_filepath = new char[imu_filepath_string.length() + 1];
 
@@ -1200,8 +1200,8 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check_Rot.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check_Rot.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_bias_check_Rot.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_bias_check_Rot.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -1360,8 +1360,8 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasTr_initOK : public testing::Te
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check_Tr.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check_Tr.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_bias_check_Tr.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_bias_check_Tr.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -1520,8 +1520,8 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex : public testing::Test
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check_Complex.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check_Complex.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_bias_check_Complex.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_bias_check_Complex.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -1685,8 +1685,8 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK : public testin
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check_Complex.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check_Complex.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_bias_check_Complex.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_bias_check_Complex.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -1844,8 +1844,8 @@ class ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK : public te
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_bias_check_StaticNullBiasNoisy.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_bias_check_StaticNullBiasNoisy.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_bias_check_StaticNullBiasNoisy.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_bias_check_StaticNullBiasNoisy.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -2003,8 +2003,8 @@ class ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK : public testin
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/data_check_BiasedNoisyComplex.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/Static_and_odom/odom_check_BiasedNoisyComplex.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_check_BiasedNoisyComplex.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_check_BiasedNoisyComplex.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
