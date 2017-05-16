@@ -1,3 +1,10 @@
+/**
+ * \file gtest_constraint_imu.cpp
+ *
+ *  Created on: Jan 01, 2017
+ *      \author: Dinesh Atchuthan
+ */
+
 //Wolf
 #include "wolf.h"
 #include "problem.h"

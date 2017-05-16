@@ -1,5 +1,5 @@
 /**
- * \file gtest_ceres.cpp
+ * \file gtest_processorMotion_optimisation_testCase.cpp
  *
  *  Created on: Jan 18, 2017
  *      \author: Dinesh Atchuthan
