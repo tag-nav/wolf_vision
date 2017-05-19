@@ -20,7 +20,7 @@
 #include "../constraint_point_2D.h"
 #include "../constraint_point_to_line_2D.h"
 #include "../constraint_container.h"
-#include "../constraint_AHP.h"
+//#include "../constraint_AHP.h"
 #include "../constraint_imu.h"
 
 // Wolf and ceres auto_diff creators
@@ -99,17 +99,17 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBasePtr _ctr_ptr, bool
             else
                 return createAutoDiffCostFunctionCeres<ConstraintPointToLine2D>(_ctr_ptr);
 
-        case CTR_EPIPOLAR:
-            if (_use_wolf_autodiff)
-                return createAutoDiffCostFunctionWrapper<ConstraintAHP>(_ctr_ptr);
-            else
-                return createAutoDiffCostFunctionCeres<ConstraintAHP>(_ctr_ptr);
-
-        case CTR_AHP:
-            if (_use_wolf_autodiff)
-                return createAutoDiffCostFunctionWrapper<ConstraintAHP>(_ctr_ptr);
-            else
-                return createAutoDiffCostFunctionCeres<ConstraintAHP>(_ctr_ptr);
+//        case CTR_EPIPOLAR:
+//            if (_use_wolf_autodiff)
+//                return createAutoDiffCostFunctionWrapper<ConstraintAHP>(_ctr_ptr);
+//            else
+//                return createAutoDiffCostFunctionCeres<ConstraintAHP>(_ctr_ptr);
+//
+//        case CTR_AHP:
+//            if (_use_wolf_autodiff)
+//                return createAutoDiffCostFunctionWrapper<ConstraintAHP>(_ctr_ptr);
+//            else
+//                return createAutoDiffCostFunctionCeres<ConstraintAHP>(_ctr_ptr);
 
         case CTR_IMU:
             if (_use_wolf_autodiff)

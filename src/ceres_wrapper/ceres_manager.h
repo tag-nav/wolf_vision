@@ -30,6 +30,8 @@ typedef enum
     ROBOT_LANDMARKS ///< marginals of landmarks and current robot pose plus cross covariances of current robot and all landmarks
 } CovarianceBlocksToBeComputed;
 
+WOLF_PTR_TYPEDEFS(CeresManager);
+
 /** \brief Ceres manager for WOLF
  *
  */
