@@ -194,7 +194,7 @@ int main(int argc, char** argv)
     ceres::Solver::Options ceres_options;
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
-    ceres_options.max_num_iterations = 1;
+    ceres_options.max_num_iterations = 10;
     CeresManagerPtr bl_ceres_manager = std::make_shared<CeresManager>(bl_problem_ptr, ceres_options);
 
     // load graph from .txt
@@ -211,6 +211,7 @@ int main(int argc, char** argv)
 	unsigned int edge_from, edge_to;
 	Eigen::Vector3s meas;
 	Eigen::Matrix3s meas_cov;
+	Eigen::Matrix3s R = Eigen::Matrix3s::Identity();
 	//clock_t t1;
 
 	// ------------------------ START EXPERIMENT ------------------------
@@ -234,7 +235,9 @@ int main(int argc, char** argv)
 				frame_from_ptr = last_frame_ptr;
 
 				// NEW KEYFRAME
-				Eigen::Vector3s new_frame_pose = Eigen::Vector3s::Zero(); // TODO: compute new frame pose
+				Eigen::Vector3s from_pose = frame_from_ptr->getState();
+				R.topLeftCorner(2,2) = Eigen::Rotation2Ds(from_pose(2)).matrix();
+				Eigen::Vector3s new_frame_pose = from_pose + R*meas;
 				last_frame_ptr = bl_problem_ptr->emplaceFrame(KEY_FRAME, new_frame_pose, TimeStamp(double(edge_to)));
 
 				frame_to_ptr = last_frame_ptr;
@@ -289,6 +292,8 @@ int main(int argc, char** argv)
 			// SOLVE
 			// solution
 			bl_summary = bl_ceres_manager->solve();
+		    std::cout << bl_summary.BriefReport() << std::endl;
+
 			// covariance
 		    bl_ceres_manager->computeCovariances(ALL);//ALL_MARGINALS
 
@@ -300,7 +305,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	bl_problem_ptr->print(4, true, false, true);
+	//bl_problem_ptr->print(4, true, false, true);
 
     //End message
     std::cout << " =========================== END ===============================" << std::endl << std::endl;
