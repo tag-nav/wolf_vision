@@ -60,6 +60,8 @@ class CeresManager
 
         void setUseWolfAutoDiff(bool _use_wolf_auto_diff);
 
+        std::vector<Eigen::MatrixXs> computeJacobian(const unsigned int& _ctr_id, const std::vector<Scalar*>& _states) const;
+
 	private:
 
 		void update();
