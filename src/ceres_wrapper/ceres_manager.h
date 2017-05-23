@@ -62,9 +62,9 @@ class CeresManager
 
         std::vector<Eigen::MatrixXs> computeJacobian(const unsigned int& _ctr_id, const std::vector<Scalar*>& _states) const;
 
-	private:
+        void update();
 
-		void update();
+	private:
 
 		void addConstraint(ConstraintBasePtr _corr_ptr, unsigned int _id);
 
