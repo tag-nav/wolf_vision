@@ -227,6 +227,10 @@ class ConstraintAutodiff: public ConstraintBase
 
         void computeJacobian(const std::vector<Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
         {
+            jacobians_.clear();
+
+
+
             // init sizes
             assert(_states_ptr.size() == n_blocks);
 
@@ -236,24 +240,19 @@ class ConstraintAutodiff: public ConstraintBase
 
             // init raw pointers jacobian
             double** jacobians = new double*[n_blocks];
-            for(int i = 0; i < n_blocks; ++i)
-                jacobians[i] = new double[residualSize*state_block_sizes_[i]];
+            for(auto i = 0; i < n_blocks; ++i)
+            {
+                Eigen::MatrixXs Ji = Eigen::MatrixXs(residualSize, state_block_sizes_[i]);
+                jacobians_.push_back(Ji);
+                jacobians[i] = Ji.data();
+            }
 
             // evaluate
             Evaluate(parameters, residuals, jacobians);
 
-            // fill jacobian matrices
-            for (auto i = 0; i < n_blocks; i++)
-            {
-                Eigen::MatrixXs Ji = Eigen::Map<Eigen::MatrixXs>(jacobians[i], residualSize, state_block_sizes_[i]);
-
-                jacobians_.push_back(Ji);
-
-                // delete
-                delete [] jacobians[i];
-
+            // print jacobian matrices
+            //for (auto i = 0; i < n_blocks; i++)
                 //std::cout << J[i] << std::endl << std::endl;
-            }
 
             // delete
             delete residuals;
