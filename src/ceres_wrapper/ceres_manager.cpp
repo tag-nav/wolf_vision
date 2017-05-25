@@ -1,4 +1,5 @@
 #include "ceres_manager.h"
+#include "create_numeric_diff_cost_function.h"
 #include "../trajectory_base.h"
 #include "../map_base.h"
 #include "../landmark_base.h"
@@ -303,7 +304,7 @@ void CeresManager::update()
 
 void CeresManager::addConstraint(ConstraintBasePtr _ctr_ptr, unsigned int _id)
 {
-    id_2_costfunction_[_id] = new CostFunctionWrapper(_ctr_ptr);
+    id_2_costfunction_[_id] = createCostFunction(_ctr_ptr);
 
 //    std::cout << "adding residual " << _ctr_ptr->id() << std::endl;
 //    std::cout << "residual pointer " << _ctr_ptr << std::endl;
@@ -372,26 +373,26 @@ void CeresManager::updateStateBlockStatus(StateBlockPtr _st_ptr)
 		ceres_problem_->SetParameterBlockVariable(_st_ptr->getPtr());
 }
 
-//ceres::CostFunction* CeresManager::createCostFunction(ConstraintBasePtr _corrPtr)
-//{
-//	assert(_corrPtr != nullptr);
-//	//std::cout << "creating cost function for constraint " << _corrPtr->id() << std::endl;
-//
-//    // analitic jacobian
-//    if (_corrPtr->getJacobianMethod() == JAC_ANALYTIC)
-//        return new CostFunctionWrapper((ConstraintAnalytic*)(_corrPtr.get())); // TODO revise pointer types
-//
-//    // auto jacobian
-//    else if (_corrPtr->getJacobianMethod() == JAC_AUTO)
-//        return createAutoDiffCostFunction(_corrPtr, use_wolf_auto_diff_);
-//
-//    // numeric jacobian
-//    else if (_corrPtr->getJacobianMethod() == JAC_NUMERIC)
-//        return createNumericDiffCostFunction(_corrPtr, use_wolf_auto_diff_);
-//
-//    else
-//        throw std::invalid_argument( "Bad Jacobian Method!" );
-//}
+ceres::CostFunction* CeresManager::createCostFunction(ConstraintBasePtr _ctr_ptr)
+{
+	assert(_ctr_ptr != nullptr);
+	//std::cout << "creating cost function for constraint " << _ctr_ptr->id() << std::endl;
+
+    // analitic jacobian
+    if (_ctr_ptr->getJacobianMethod() == JAC_ANALYTIC)
+        return new CostFunctionWrapper(_ctr_ptr);
+
+    // auto jacobian
+    else if (_ctr_ptr->getJacobianMethod() == JAC_AUTO)
+        return new CostFunctionWrapper(_ctr_ptr);
+
+    // numeric jacobian
+    else if (_ctr_ptr->getJacobianMethod() == JAC_NUMERIC)
+        return createNumericDiffCostFunction(_ctr_ptr);
+
+    else
+        throw std::invalid_argument( "Bad Jacobian Method!" );
+}
 
 } // namespace wolf
 

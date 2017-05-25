@@ -225,6 +225,41 @@ class ConstraintAutodiff: public ConstraintBase
             return true;
         }
 
+        void computeJacobian(const std::vector<Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+        {
+            // init sizes
+            assert(_states_ptr.size() == n_blocks);
+
+            // build raw pointers
+            double const* const* parameters = _states_ptr.data();
+            double* residuals = new double[residualSize];
+
+            // init raw pointers jacobian
+            double** jacobians = new double*[n_blocks];
+            for(int i = 0; i < n_blocks; ++i)
+                jacobians[i] = new double[residualSize*state_block_sizes_[i]];
+
+            // evaluate
+            Evaluate(parameters, residuals, jacobians);
+
+            // fill jacobian matrices
+            for (auto i = 0; i < n_blocks; i++)
+            {
+                Eigen::MatrixXs Ji = Eigen::Map<Eigen::MatrixXs>(jacobians[i], residualSize, state_block_sizes_[i]);
+
+                jacobians_.push_back(Ji);
+
+                // delete
+                delete [] jacobians[i];
+
+                //std::cout << J[i] << std::endl << std::endl;
+            }
+
+            // delete
+            delete residuals;
+            delete [] jacobians;
+        }
+
         /** \brief Returns a vector of pointers to the state blocks
          *
          * Returns a vector of pointers to the state blocks in which this constraint depends
@@ -292,6 +327,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
        static const unsigned int block6Size = B6;
        static const unsigned int block7Size = B7;
        static const unsigned int block8Size = B8;
+       static const unsigned int block9Size = 0;
        static const unsigned int n_blocks = 9;
 
        static const std::vector<unsigned int> state_block_sizes_;
@@ -511,6 +547,8 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
        static const unsigned int block5Size = B5;
        static const unsigned int block6Size = B6;
        static const unsigned int block7Size = B7;
+       static const unsigned int block8Size = 0;
+       static const unsigned int block9Size = 0;
        static const unsigned int n_blocks = 8;
 
        static const std::vector<unsigned int> state_block_sizes_;
@@ -717,6 +755,9 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
        static const unsigned int block4Size = B4;
        static const unsigned int block5Size = B5;
        static const unsigned int block6Size = B6;
+       static const unsigned int block7Size = 0;
+       static const unsigned int block8Size = 0;
+       static const unsigned int block9Size = 0;
        static const unsigned int n_blocks = 7;
 
        static const std::vector<unsigned int> state_block_sizes_;
@@ -910,6 +951,10 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
        static const unsigned int block3Size = B3;
        static const unsigned int block4Size = B4;
        static const unsigned int block5Size = B5;
+       static const unsigned int block6Size = 0;
+       static const unsigned int block7Size = 0;
+       static const unsigned int block8Size = 0;
+       static const unsigned int block9Size = 0;
        static const unsigned int n_blocks = 6;
 
        static const std::vector<unsigned int> state_block_sizes_;
@@ -1090,6 +1135,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
        static const unsigned int block2Size = B2;
        static const unsigned int block3Size = B3;
        static const unsigned int block4Size = B4;
+       static const unsigned int block5Size = 0;
+       static const unsigned int block6Size = 0;
+       static const unsigned int block7Size = 0;
+       static const unsigned int block8Size = 0;
+       static const unsigned int block9Size = 0;
        static const unsigned int n_blocks = 5;
 
        static const std::vector<unsigned int> state_block_sizes_;
@@ -1256,6 +1306,12 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
        static const unsigned int block1Size = B1;
        static const unsigned int block2Size = B2;
        static const unsigned int block3Size = B3;
+       static const unsigned int block4Size = 0;
+       static const unsigned int block5Size = 0;
+       static const unsigned int block6Size = 0;
+       static const unsigned int block7Size = 0;
+       static const unsigned int block8Size = 0;
+       static const unsigned int block9Size = 0;
        static const unsigned int n_blocks = 4;
 
        static const std::vector<unsigned int> state_block_sizes_;
@@ -1409,6 +1465,13 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
        static const unsigned int block0Size = B0;
        static const unsigned int block1Size = B1;
        static const unsigned int block2Size = B2;
+       static const unsigned int block3Size = 0;
+       static const unsigned int block4Size = 0;
+       static const unsigned int block5Size = 0;
+       static const unsigned int block6Size = 0;
+       static const unsigned int block7Size = 0;
+       static const unsigned int block8Size = 0;
+       static const unsigned int block9Size = 0;
        static const unsigned int n_blocks = 3;
 
        static const std::vector<unsigned int> state_block_sizes_;
@@ -1549,6 +1612,14 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
        static const unsigned int residualSize = RES;
        static const unsigned int block0Size = B0;
        static const unsigned int block1Size = B1;
+       static const unsigned int block2Size = 0;
+       static const unsigned int block3Size = 0;
+       static const unsigned int block4Size = 0;
+       static const unsigned int block5Size = 0;
+       static const unsigned int block6Size = 0;
+       static const unsigned int block7Size = 0;
+       static const unsigned int block8Size = 0;
+       static const unsigned int block9Size = 0;
        static const unsigned int n_blocks = 2;
 
        static const std::vector<unsigned int> state_block_sizes_;
@@ -1676,6 +1747,15 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
 
        static const unsigned int residualSize = RES;
        static const unsigned int block0Size = B0;
+       static const unsigned int block1Size = 0;
+       static const unsigned int block2Size = 0;
+       static const unsigned int block3Size = 0;
+       static const unsigned int block4Size = 0;
+       static const unsigned int block5Size = 0;
+       static const unsigned int block6Size = 0;
+       static const unsigned int block7Size = 0;
+       static const unsigned int block8Size = 0;
+       static const unsigned int block9Size = 0;
        static const unsigned int n_blocks = 1;
 
        static const std::vector<unsigned int> state_block_sizes_;

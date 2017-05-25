@@ -39,9 +39,6 @@ ceres::NumericDiffCostFunction<CtrType, ceres::CENTRAL,
                                               CtrType::block5Size,CtrType::block6Size,CtrType::block7Size,CtrType::block8Size,CtrType::block9Size>(std::static_pointer_cast<CtrType>(_constraint_ptr).get()); // TODO revise pointer type
 };
 
-
-
-
 } // namespace wolf
 
 #endif /* SRC_CERES_WRAPPER_CREATE_NUMERIC_DIFF_COST_FUNCTION_CERES_H_ */
