@@ -104,7 +104,7 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBasePtr _ctr_ptr, bool
 //                return createAutoDiffCostFunctionWrapper<ConstraintAHP>(_ctr_ptr);
 //            else
 //                return createAutoDiffCostFunctionCeres<ConstraintAHP>(_ctr_ptr);
-//
+
 //        case CTR_AHP:
 //            if (_use_wolf_autodiff)
 //                return createAutoDiffCostFunctionWrapper<ConstraintAHP>(_ctr_ptr);

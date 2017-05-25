@@ -157,6 +157,7 @@ SET(HDRS_BASE
     constraint_analytic.h
     constraint_base.h
     constraint_sparse.h
+    constraint_autodiff.h
     feature_base.h
     feature_match.h
     frame_base.h
@@ -198,7 +199,7 @@ SET(HDRS
     capture_void.h
     constraint_container.h
     constraint_corner_2D.h
-    constraint_epipolar.h
+    #constraint_epipolar.h
     constraint_AHP.h
     constraint_imu.h
     constraint_fix.h
@@ -317,20 +318,20 @@ SET(SRCS_DTASSC
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
-        ceres_wrapper/auto_diff_cost_function_wrapper.h
+        #ceres_wrapper/auto_diff_cost_function_wrapper.h
         ceres_wrapper/ceres_manager.h
         ceres_wrapper/cost_function_wrapper.h
-        ceres_wrapper/create_auto_diff_cost_function.h
-        ceres_wrapper/create_auto_diff_cost_function_ceres.h
-        ceres_wrapper/create_auto_diff_cost_function_wrapper.h
-        ceres_wrapper/create_numeric_diff_cost_function.h
-        ceres_wrapper/create_numeric_diff_cost_function_ceres.h
+        #ceres_wrapper/create_auto_diff_cost_function.h
+        #ceres_wrapper/create_auto_diff_cost_function_ceres.h
+        #ceres_wrapper/create_auto_diff_cost_function_wrapper.h
+        #ceres_wrapper/create_numeric_diff_cost_function.h
+        #ceres_wrapper/create_numeric_diff_cost_function_ceres.h
         ceres_wrapper/local_parametrization_wrapper.h 
         )
     SET(SRCS_WRAPPER
         ceres_wrapper/ceres_manager.cpp
-        ceres_wrapper/create_auto_diff_cost_function.cpp
-        ceres_wrapper/create_numeric_diff_cost_function.cpp
+        #ceres_wrapper/create_auto_diff_cost_function.cpp
+        #ceres_wrapper/create_numeric_diff_cost_function.cpp
         ceres_wrapper/local_parametrization_wrapper.cpp 
         )
 ELSE(Ceres_FOUND)
@@ -413,9 +414,9 @@ IF(YAMLCPP_FOUND)
             )
     ENDIF(laser_scan_utils_FOUND)
     IF(OpenCV_FOUND)
-    	SET(SRCS ${SRCS}
-    		yaml/processor_image_yaml.cpp
-    		)
+        SET(SRCS ${SRCS}
+        	yaml/processor_image_yaml.cpp
+            )
     ENDIF(OpenCV_FOUND)
 ENDIF(YAMLCPP_FOUND)
 

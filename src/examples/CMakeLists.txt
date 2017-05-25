@@ -114,6 +114,11 @@ IF(OpenCV_FOUND)
         # Processor Image Landmark test
         ADD_EXECUTABLE(test_processor_image_landmark test_processor_image_landmark.cpp)
         TARGET_LINK_LIBRARIES(test_processor_image_landmark ${PROJECT_NAME})
+
+	    # Simple AHP test
+	    ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
+	    TARGET_LINK_LIBRARIES(test_simple_AHP ${PROJECT_NAME})
+
     ENDIF(Ceres_FOUND)
 
     # Testing opencv matching and fundamental matrix with ransac

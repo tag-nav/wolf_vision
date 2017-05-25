@@ -78,7 +78,7 @@ class CeresManager
 
 		void updateStateBlockStatus(StateBlockPtr _st_ptr);
 
-		ceres::CostFunction* createCostFunction(ConstraintBasePtr _corrPtr);
+		//ceres::CostFunction* createCostFunction(ConstraintBasePtr _corrPtr);
 };
 
 inline ceres::Solver::Options& CeresManager::getSolverOptions()

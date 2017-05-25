@@ -6,7 +6,7 @@
 //Wolf includes
 #include "sensor_gps.h"
 #include "feature_gps_pseudorange.h"
-#include "constraint_sparse.h"
+#include "constraint_autodiff.h"
 
 //std
 #include <string>
@@ -24,13 +24,13 @@ WOLF_PTR_TYPEDEFS(ConstraintGPSPseudorange2D);
  *
  * TODO maybe is no more true
  */
-class ConstraintGPSPseudorange2D : public ConstraintSparse<1, 2, 1, 3, 1, 3, 1>
+class ConstraintGPSPseudorange2D : public ConstraintAutodiff<ConstraintGPSPseudorange2D, 1, 2, 1, 3, 1, 3, 1>
 {
     public:
         ConstraintGPSPseudorange2D(FeatureBasePtr _ftr_ptr, 
                                    bool _apply_loss_function = false, 
                                    ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintSparse<1, 2, 1, 3, 1, 3, 1>(CTR_GPS_PR_2D,
+           ConstraintAutodiff<ConstraintGPSPseudorange2D, 1, 2, 1, 3, 1, 3, 1>(CTR_GPS_PR_2D,
                                                   _apply_loss_function,
                                                   _status,
                                                   _ftr_ptr->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to the initial pos frame

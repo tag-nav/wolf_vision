@@ -8,7 +8,7 @@
 #ifndef CONSTRAINT_ODOM_3D_H_
 #define CONSTRAINT_ODOM_3D_H_
 
-#include "constraint_sparse.h"
+#include "constraint_autodiff.h"
 #include "rotations.h"
 
 namespace wolf
@@ -17,7 +17,7 @@ namespace wolf
 WOLF_PTR_TYPEDEFS(ConstraintOdom3D);
     
 //class
-class ConstraintOdom3D : public ConstraintSparse<6,3,4,3,4>
+class ConstraintOdom3D : public ConstraintAutodiff<ConstraintOdom3D,6,3,4,3,4>
 {
     public:
         ConstraintOdom3D(FeatureBasePtr _ftr_current_ptr, FrameBasePtr _frame_past_ptr, bool _apply_loss_function = false,
@@ -71,7 +71,7 @@ inline void ConstraintOdom3D::printRes (const  Eigen::Matrix<Scalar,6,1> & r) co
 
 inline ConstraintOdom3D::ConstraintOdom3D(FeatureBasePtr _ftr_current_ptr, FrameBasePtr _frame_past_ptr, bool _apply_loss_function,
                                           ConstraintStatus _status) :
-        ConstraintSparse<6, 3, 4, 3, 4>(CTR_ODOM_3D,        // type
+        ConstraintAutodiff<ConstraintOdom3D, 6, 3, 4, 3, 4>(CTR_ODOM_3D,        // type
                                         _frame_past_ptr,    // frame other
                                         nullptr,            // feature other
                                         nullptr,            // landmark other

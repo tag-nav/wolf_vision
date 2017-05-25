@@ -152,7 +152,7 @@ const std::vector<StateBlockPtr> ConstraintAnalytic::getStateBlockPtrVector() co
     return state_ptr_vector_;
 }
 
-std::vector<unsigned int> ConstraintAnalytic::getStateSizes() const
+const std::vector<unsigned int> ConstraintAnalytic::getStateSizes() const
 {
     return state_block_sizes_vector_;
 }
