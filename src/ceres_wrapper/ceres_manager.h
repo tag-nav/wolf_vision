@@ -11,7 +11,6 @@
 #include "local_parametrization_wrapper.h"
 #include "../wolf.h"
 #include "../state_block.h"
-#include "create_auto_diff_cost_function.h"
 #include "create_numeric_diff_cost_function.h"
 
 namespace wolf {
