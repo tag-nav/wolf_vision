@@ -256,7 +256,7 @@ class ConstraintAutodiff: public ConstraintBase
             }
 
             // delete
-            delete residuals;
+            delete [] residuals;
             delete [] jacobians;
         }
 
