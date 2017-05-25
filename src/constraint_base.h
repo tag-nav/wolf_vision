@@ -52,6 +52,10 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
          **/
         ConstraintType getTypeId() const;
 
+        /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
+        **/
+        virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const = 0;
+
         /** \brief Returns the jacobians computation method
          **/
         virtual JacobianMethod getJacobianMethod() const = 0;
@@ -63,6 +67,10 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         /** \brief Returns a vector of pointers to the states in which this constraint depends
          **/
         virtual const std::vector<StateBlockPtr> getStateBlockPtrVector() const = 0;
+
+        /** \brief Returns a vector of the states sizes
+         **/
+        virtual const std::vector<unsigned int> getStateSizes() const = 0;
 
         /** \brief Returns a reference to the feature measurement
          **/

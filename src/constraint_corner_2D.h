@@ -2,19 +2,19 @@
 #define CONSTRAINT_CORNER_2D_THETA_H_
 
 //Wolf includes
-#include "constraint_sparse.h"
+#include "constraint_autodiff.h"
 #include "landmark_corner_2D.h"
 
 namespace wolf {
 
 WOLF_PTR_TYPEDEFS(ConstraintCorner2D);
     
-class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
+class ConstraintCorner2D: public ConstraintAutodiff<ConstraintCorner2D, 3,2,1,2,1>
 {
 	public:
 
 		ConstraintCorner2D(FeatureBasePtr _ftr_ptr, LandmarkCorner2DPtr _lmk_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-			ConstraintSparse<3,2,1,2,1>(CTR_CORNER_2D, nullptr, nullptr, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
+		    ConstraintAutodiff<ConstraintCorner2D,3,2,1,2,1>(CTR_CORNER_2D, nullptr, nullptr, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
 		{
             setType("CORNER 2D");
 		}

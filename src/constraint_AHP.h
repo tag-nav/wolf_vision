@@ -2,7 +2,7 @@
 #define CONSTRAINT_AHP_H
 
 //Wolf includes
-#include "constraint_sparse.h"
+#include "constraint_autodiff.h"
 #include "landmark_AHP.h"
 #include "sensor_camera.h"
 #include "pinholeTools.h"
@@ -15,7 +15,7 @@ namespace wolf {
 WOLF_PTR_TYPEDEFS(ConstraintAHP);
     
 //class    
-class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
+class ConstraintAHP : public ConstraintAutodiff<ConstraintAHP, 2, 3, 4, 3, 4, 4>
 {
     protected:
         Eigen::Vector3s anchor_sensor_extrinsics_p_;
@@ -67,7 +67,7 @@ inline ConstraintAHP::ConstraintAHP(FeatureBasePtr   _ftr_ptr,
                                     LandmarkAHPPtr   _landmark_ptr,
                                     bool             _apply_loss_function,
                                     ConstraintStatus _status) :
-        ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP,
+        ConstraintAutodiff<ConstraintAHP, 2, 3, 4, 3, 4, 4>(CTR_AHP,
                                            _landmark_ptr->getAnchorFrame(),
                                            nullptr,
                                            _landmark_ptr,

@@ -157,6 +157,7 @@ SET(HDRS_BASE
     constraint_analytic.h
     constraint_base.h
     constraint_sparse.h
+    constraint_autodiff.h
     feature_base.h
     feature_match.h
     frame_base.h
@@ -198,7 +199,7 @@ SET(HDRS
     capture_void.h
     constraint_container.h
     constraint_corner_2D.h
-    constraint_epipolar.h
+    #constraint_epipolar.h
     constraint_AHP.h
     constraint_imu.h
     constraint_fix.h
@@ -222,7 +223,6 @@ SET(HDRS
     frame_imu.h
     landmark_corner_2D.h
     landmark_container.h
-    landmark_point_3d.h
     landmark_line_2D.h
     landmark_polyline_2D.h
     local_parametrization_polyline_extreme.h
@@ -291,7 +291,6 @@ SET(SRCS
     frame_imu.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
-    landmark_point_3d.cpp
     landmark_line_2D.cpp
     landmark_polyline_2D.cpp
     local_parametrization_polyline_extreme.cpp
@@ -319,20 +318,20 @@ SET(SRCS_DTASSC
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
-        ceres_wrapper/auto_diff_cost_function_wrapper.h
+        #ceres_wrapper/auto_diff_cost_function_wrapper.h
         ceres_wrapper/ceres_manager.h
         ceres_wrapper/cost_function_wrapper.h
-        ceres_wrapper/create_auto_diff_cost_function.h
-        ceres_wrapper/create_auto_diff_cost_function_ceres.h
-        ceres_wrapper/create_auto_diff_cost_function_wrapper.h
-        ceres_wrapper/create_numeric_diff_cost_function.h
-        ceres_wrapper/create_numeric_diff_cost_function_ceres.h
+        #ceres_wrapper/create_auto_diff_cost_function.h
+        #ceres_wrapper/create_auto_diff_cost_function_ceres.h
+        #ceres_wrapper/create_auto_diff_cost_function_wrapper.h
+        #ceres_wrapper/create_numeric_diff_cost_function.h
+        #ceres_wrapper/create_numeric_diff_cost_function_ceres.h
         ceres_wrapper/local_parametrization_wrapper.h 
         )
     SET(SRCS_WRAPPER
         ceres_wrapper/ceres_manager.cpp
-        ceres_wrapper/create_auto_diff_cost_function.cpp
-        ceres_wrapper/create_numeric_diff_cost_function.cpp
+        #ceres_wrapper/create_auto_diff_cost_function.cpp
+        #ceres_wrapper/create_numeric_diff_cost_function.cpp
         ceres_wrapper/local_parametrization_wrapper.cpp 
         )
 ELSE(Ceres_FOUND)
@@ -375,6 +374,7 @@ IF (OpenCV_FOUND)
         capture_image.h
         feature_point_image.h
         landmark_AHP.h
+    	landmark_point_3d.h
         processor_image_feature.h
         processor_image_landmark.h
         )
@@ -383,6 +383,7 @@ IF (OpenCV_FOUND)
         capture_image.cpp
         feature_point_image.cpp
         landmark_AHP.cpp
+    	landmark_point_3d.cpp
         processor_image_feature.cpp
         processor_image_landmark.cpp
         )
@@ -401,7 +402,6 @@ IF(YAMLCPP_FOUND)
 
     # sources
     SET(SRCS ${SRCS}
-        yaml/processor_image_yaml.cpp
         yaml/processor_odom_3D_yaml.cpp
         yaml/sensor_camera_yaml.cpp
         yaml/sensor_odom_3D_yaml.cpp
@@ -411,6 +411,11 @@ IF(YAMLCPP_FOUND)
             yaml/sensor_laser_2D_yaml.cpp
             )
     ENDIF(laser_scan_utils_FOUND)
+    IF(OpenCV_FOUND)
+        SET(SRCS ${SRCS}
+        	yaml/processor_image_yaml.cpp
+            )
+    ENDIF(OpenCV_FOUND)
 ENDIF(YAMLCPP_FOUND)
 
 # create the shared library
