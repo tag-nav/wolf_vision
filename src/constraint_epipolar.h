@@ -39,6 +39,10 @@ class ConstraintEpipolar : public ConstraintBase
          **/
         virtual unsigned int getSize() const{return 0;}
 
+        /** \brief Returns the constraint states sizes
+         **/
+        virtual const std::vector<unsigned int> getStateSizes() const{return std::vector<unsigned int>({1});}
+
     public:
         static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
                 NodeBasePtr _correspondant_ptr);

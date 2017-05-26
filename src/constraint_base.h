@@ -56,6 +56,10 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         **/
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const = 0;
 
+        /** Returns a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
+         **/
+        virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const = 0;
+
         /** \brief Returns the jacobians computation method
          **/
         virtual JacobianMethod getJacobianMethod() const = 0;

@@ -44,7 +44,6 @@ class ConstraintAutodiff: public ConstraintBase
 
         static const std::vector<unsigned int> jacobian_locations_;
         std::array<WolfJet, RES>* residuals_jets_;
-
         std::array<WolfJet, B0>* jets_0_;
         std::array<WolfJet, B1>* jets_1_;
         std::array<WolfJet, B2>* jets_2_;
@@ -57,7 +56,7 @@ class ConstraintAutodiff: public ConstraintBase
         std::array<WolfJet, B9>* jets_9_;
 
     public:
-        /** \brief Constructor valid for all categories (FRAME, FEATURE, LANDMARK)
+        /** \brief Constructor valid for all categories (ABSOLUTE, FRAME, FEATURE, LANDMARK)
          **/
         ConstraintAutodiff(ConstraintType _tp, FrameBasePtr _frame_other_ptr, FeatureBasePtr _feature_other_ptr, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status,
                            StateBlockPtr _state0Ptr,
@@ -106,27 +105,6 @@ class ConstraintAutodiff: public ConstraintBase
                (*jets_8_)[i] = WolfJet(0, last_jet_idx++);
             for (auto i = 0; i < B9; i++)
                 (*jets_9_)[i] = WolfJet(0, last_jet_idx++);
-        }
-
-        /** \brief Constructor of category ABSOLUTE
-         *
-         * Constructor of category ABSOLUTE
-         *
-         **/
-        ConstraintAutodiff(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                           StateBlockPtr _state0Ptr,
-                           StateBlockPtr _state1Ptr,
-                           StateBlockPtr _state2Ptr,
-                           StateBlockPtr _state3Ptr,
-                           StateBlockPtr _state4Ptr,
-                           StateBlockPtr _state5Ptr,
-                           StateBlockPtr _state6Ptr,
-                           StateBlockPtr _state7Ptr,
-                           StateBlockPtr _state8Ptr,
-                           StateBlockPtr _state9Ptr ) :
-             ConstraintAutodiff(_tp, nullptr, nullptr, nullptr, _apply_loss_function, _status, _state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr, _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr)
-        {
-            //
         }
 
         virtual ~ConstraintAutodiff()
@@ -238,7 +216,7 @@ class ConstraintAutodiff: public ConstraintBase
         /** \brief Returns a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
          *
          **/
-        void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+        virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
         {
             jacobians_.clear();
 
@@ -419,21 +397,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
            state_ptrs_.resize(n_blocks);
        }
 
-       ConstraintAutodiff(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                          StateBlockPtr _state0Ptr,
-                          StateBlockPtr _state1Ptr,
-                          StateBlockPtr _state2Ptr,
-                          StateBlockPtr _state3Ptr,
-                          StateBlockPtr _state4Ptr,
-                          StateBlockPtr _state5Ptr,
-                          StateBlockPtr _state6Ptr,
-                          StateBlockPtr _state7Ptr,
-                          StateBlockPtr _state8Ptr) :
-            ConstraintAutodiff(_tp, nullptr, nullptr, nullptr, _apply_loss_function, _status, _state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr, _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr)
-       {
-           //
-       }
-
        virtual ~ConstraintAutodiff()
        {
            delete jets_0_;
@@ -527,7 +490,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
                (*jets_8_)[i].a = parameters[8][i];
        }
 
-       void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
            jacobians_.clear();
 
@@ -682,20 +645,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
            state_ptrs_.resize(n_blocks);
        }
 
-       ConstraintAutodiff(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                          StateBlockPtr _state0Ptr,
-                          StateBlockPtr _state1Ptr,
-                          StateBlockPtr _state2Ptr,
-                          StateBlockPtr _state3Ptr,
-                          StateBlockPtr _state4Ptr,
-                          StateBlockPtr _state5Ptr,
-                          StateBlockPtr _state6Ptr,
-                          StateBlockPtr _state7Ptr) :
-            ConstraintAutodiff(_tp, nullptr, nullptr, nullptr, _apply_loss_function, _status, _state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr, _state5Ptr, _state6Ptr, _state7Ptr)
-       {
-           //
-       }
-
        virtual ~ConstraintAutodiff()
        {
            delete jets_0_;
@@ -784,7 +733,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
                (*jets_7_)[i].a = parameters[7][i];
        }
 
-       void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
            jacobians_.clear();
 
@@ -932,19 +881,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
            state_ptrs_.resize(n_blocks);
        }
 
-       ConstraintAutodiff(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                          StateBlockPtr _state0Ptr,
-                          StateBlockPtr _state1Ptr,
-                          StateBlockPtr _state2Ptr,
-                          StateBlockPtr _state3Ptr,
-                          StateBlockPtr _state4Ptr,
-                          StateBlockPtr _state5Ptr,
-                          StateBlockPtr _state6Ptr) :
-            ConstraintAutodiff(_tp, nullptr, nullptr, nullptr, _apply_loss_function, _status, _state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr, _state5Ptr, _state6Ptr)
-       {
-           //
-       }
-
        virtual ~ConstraintAutodiff()
        {
            delete jets_0_;
@@ -1028,7 +964,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
                (*jets_6_)[i].a = parameters[6][i];
        }
 
-       void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
            jacobians_.clear();
 
@@ -1169,18 +1105,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
            state_ptrs_.resize(n_blocks);
        }
 
-       ConstraintAutodiff(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                          StateBlockPtr _state0Ptr,
-                          StateBlockPtr _state1Ptr,
-                          StateBlockPtr _state2Ptr,
-                          StateBlockPtr _state3Ptr,
-                          StateBlockPtr _state4Ptr,
-                          StateBlockPtr _state5Ptr) :
-            ConstraintAutodiff(_tp, nullptr, nullptr, nullptr, _apply_loss_function, _status, _state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr, _state5Ptr)
-       {
-           //
-       }
-
        virtual ~ConstraintAutodiff()
        {
            delete jets_0_;
@@ -1259,7 +1183,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
                (*jets_5_)[i].a = parameters[5][i];
        }
 
-       void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
            jacobians_.clear();
 
@@ -1392,17 +1316,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
            state_ptrs_.resize(n_blocks);
        }
 
-       ConstraintAutodiff(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                          StateBlockPtr _state0Ptr,
-                          StateBlockPtr _state1Ptr,
-                          StateBlockPtr _state2Ptr,
-                          StateBlockPtr _state3Ptr,
-                          StateBlockPtr _state4Ptr) :
-            ConstraintAutodiff(_tp, nullptr, nullptr, nullptr, _apply_loss_function, _status, _state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr)
-       {
-           //
-       }
-
        virtual ~ConstraintAutodiff()
        {
            delete jets_0_;
@@ -1476,7 +1389,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
                (*jets_4_)[i].a = parameters[4][i];
        }
 
-       void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
            jacobians_.clear();
 
@@ -1602,16 +1515,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
            state_ptrs_.resize(n_blocks);
        }
 
-       ConstraintAutodiff(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                          StateBlockPtr _state0Ptr,
-                          StateBlockPtr _state1Ptr,
-                          StateBlockPtr _state2Ptr,
-                          StateBlockPtr _state3Ptr) :
-            ConstraintAutodiff(_tp, nullptr, nullptr, nullptr, _apply_loss_function, _status, _state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr)
-       {
-           //
-       }
-
        virtual ~ConstraintAutodiff()
        {
            delete jets_0_;
@@ -1680,7 +1583,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
                (*jets_3_)[i].a = parameters[3][i];
        }
 
-       void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
            jacobians_.clear();
 
@@ -1799,15 +1702,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
            state_ptrs_.resize(n_blocks);
        }
 
-       ConstraintAutodiff(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                          StateBlockPtr _state0Ptr,
-                          StateBlockPtr _state1Ptr,
-                          StateBlockPtr _state2Ptr) :
-            ConstraintAutodiff(_tp, nullptr, nullptr, nullptr, _apply_loss_function, _status, _state0Ptr, _state1Ptr, _state2Ptr)
-       {
-           //
-       }
-
        virtual ~ConstraintAutodiff()
        {
            delete jets_0_;
@@ -1871,7 +1765,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
                (*jets_2_)[i].a = parameters[2][i];
        }
 
-       void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
            jacobians_.clear();
 
@@ -1983,14 +1877,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            state_ptrs_.resize(n_blocks);
        }
 
-       ConstraintAutodiff(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                          StateBlockPtr _state0Ptr,
-                          StateBlockPtr _state1Ptr) :
-            ConstraintAutodiff(_tp, nullptr, nullptr, nullptr, _apply_loss_function, _status, _state0Ptr, _state1Ptr)
-       {
-           //
-       }
-
        virtual ~ConstraintAutodiff()
        {
            delete jets_0_;
@@ -2049,7 +1935,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
                (*jets_1_)[i].a = parameters[1][i];
        }
 
-       void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
            jacobians_.clear();
 
@@ -2154,13 +2040,6 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            state_ptrs_.resize(n_blocks);
        }
 
-       ConstraintAutodiff(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                          StateBlockPtr _state0Ptr) :
-            ConstraintAutodiff(_tp, nullptr, nullptr, nullptr, _apply_loss_function, _status, _state0Ptr)
-       {
-           //
-       }
-
        virtual ~ConstraintAutodiff()
        {
            delete jets_0_;
@@ -2214,7 +2093,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
                (*jets_0_)[i].a = parameters[0][i];
        }
 
-       void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
            jacobians_.clear();
 

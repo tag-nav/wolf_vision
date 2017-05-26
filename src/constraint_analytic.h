@@ -153,6 +153,13 @@ class ConstraintAnalytic: public ConstraintBase
             return true;
         };
 
+        /** Returns a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
+         **/
+        // TODO
+        virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+        {
+        };
+
         /** \brief Returns the residual evaluated in the states provided
          *
          * Returns the residual evaluated in the states provided in std::vector of mapped Eigen::VectorXs
