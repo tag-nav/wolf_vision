@@ -11,7 +11,6 @@
 #include "local_parametrization_wrapper.h"
 #include "../wolf.h"
 #include "../state_block.h"
-#include "create_auto_diff_cost_function.h"
 #include "create_numeric_diff_cost_function.h"
 
 namespace wolf {
@@ -78,7 +77,7 @@ class CeresManager
 
 		void updateStateBlockStatus(StateBlockPtr _st_ptr);
 
-		//ceres::CostFunction* createCostFunction(ConstraintBasePtr _corrPtr);
+		ceres::CostFunction* createCostFunction(ConstraintBasePtr _corrPtr);
 };
 
 inline ceres::Solver::Options& CeresManager::getSolverOptions()
