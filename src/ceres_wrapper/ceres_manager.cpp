@@ -223,52 +223,6 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
 }
 
-std::vector<Eigen::MatrixXs> CeresManager::computeJacobian(const unsigned int& _ctr_id, const std::vector<Scalar*>& _states_ptr) const
-{
-    // find costfunction pair
-    auto cost_function_pair = id_2_costfunction_.find(_ctr_id);
-	assert(cost_function_pair != id_2_costfunction_.end());
-	auto cost_function_ptr = cost_function_pair->second;
-
-	// init sizes
-	const std::vector<int>& parameter_block_sizes = cost_function_ptr->parameter_block_sizes();
-	int residual_size = cost_function_ptr->num_residuals();
-	int N_parameters = parameter_block_sizes.size();
-	assert(_states_ptr.size() == N_parameters);
-
-	// build raw pointers
-	double const* const* parameters = _states_ptr.data();
-	double* residuals = new double[residual_size];
-
-	// init raw pointers jacobian
-    double** jacobians = new double*[N_parameters];
-    for(int i = 0; i < N_parameters; ++i)
-        jacobians[i] = new double[residual_size*parameter_block_sizes[i]];
-
-    // evaluate
-	cost_function_ptr->Evaluate(parameters, residuals, jacobians);
-
-	// fill jacobian matrices
-    std::vector<Eigen::MatrixXs> J;
-    for (auto i = 0; i < N_parameters; i++)
-    {
-        Eigen::MatrixXs Ji = Eigen::Map<Eigen::MatrixXs>(jacobians[i], residual_size, parameter_block_sizes[i]);
-
-        J.push_back(Ji);
-
-        //std::cout << J[i] << std::endl << std::endl;
-    }
-
-	// delete
-	delete residuals;
-	for(int i = 0; i < N_parameters; ++i)
-	    delete [] jacobians[i];
-	delete [] jacobians;
-
-	// return
-	return J;
-}
-
 void CeresManager::update()
 {
 	//std::cout << "CeresManager: updating... " << std::endl;
