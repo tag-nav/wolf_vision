@@ -143,11 +143,6 @@ IF(OpenCV_FOUND)
 #    ADD_EXECUTABLE(test_ROI_ORB test_ROI_ORB.cpp)
 #    TARGET_LINK_LIBRARIES(test_ROI_ORB ${PROJECT_NAME})
 
-	IF(Ceres_FOUND)
-	    # Simple AHP test
-	    ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
-	    TARGET_LINK_LIBRARIES(test_simple_AHP ${PROJECT_NAME})
-	ENDIF(Ceres_FOUND)
 ENDIF(OpenCV_FOUND)
 
 
