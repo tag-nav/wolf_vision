@@ -1912,7 +1912,7 @@ TEST_F(ProcessorIMU_Bias,Set11)
 
 }
 
-TEST_F(ProcessorIMU_Real,M1_VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
+TEST_F(ProcessorIMU_Real,M1_VarB1V2B2_InvarP1Q1V1P2Q2_initOK)
 {
         //prepare problem for solving
     origin_KF->getPPtr()->fix();
@@ -1923,22 +1923,38 @@ TEST_F(ProcessorIMU_Real,M1_VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
 
     last_KF->getPPtr()->fix();
     last_KF->getOPtr()->fix();
-    last_KF->getVPtr()->fix();
+    //last_KF->getVPtr()->fix();
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    //Only biases are unfixed
-    /*ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
-    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
-    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+}
 
-    ASSERT_TRUE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
-    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    ASSERT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
-    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;*/
+TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_initError)
+{
+    //change initial guess to a wrong value
+    Eigen::VectorXs originState(origin_KF->getState());
+    Eigen::VectorXs perturbed_OriginState(originState);
+    perturbed_OriginState.head(3) = originState.head(3) + (Eigen::Vector3s() << 0.15, 0.5, 1).finished();
+    origin_KF->setState(perturbed_OriginState);
+
+    //prepare problem for solving
+    origin_KF->getVPtr()->fix();
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    ASSERT_TRUE((origin_KF->getPPtr()->getState() - originState.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Pos : " << origin_KF->getPPtr()->getState().transpose() <<
+    "\n expected Pos : " << originState.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getOPtr()->getState() - originState.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Ori : " << origin_KF->getOPtr()->getState().transpose() <<
+    "\n expected Ori : " << originState.segment(3,4).transpose() << std::endl;
 }
 
 int main(int argc, char **argv)
