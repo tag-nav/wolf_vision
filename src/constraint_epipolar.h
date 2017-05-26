@@ -15,6 +15,14 @@ class ConstraintEpipolar : public ConstraintBase
 
         virtual ~ConstraintEpipolar();
 
+
+        /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
+        **/
+        virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const{return true;};
+
+        /** Returns a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
+         **/
+        virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const{};
         /** \brief Returns the jacobians computation method
          **/
         virtual JacobianMethod getJacobianMethod() const{return JAC_ANALYTIC;}
