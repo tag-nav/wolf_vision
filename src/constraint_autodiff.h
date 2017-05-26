@@ -247,7 +247,7 @@ class ConstraintAutodiff: public ConstraintBase
             // init jacobian
             for(auto i = 0; i < n_blocks; ++i)
             {
-               Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);//FIXME: why is not compiling if RES instead of getSize()?!
+               Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
                jacobians_.push_back(Ji);
             }
 
@@ -536,7 +536,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);//FIXME: why is not compiling if RES instead of getSize()?!
+              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -793,7 +793,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);//FIXME: why is not compiling if RES instead of getSize()?!
+              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -1037,7 +1037,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);//FIXME: why is not compiling if RES instead of getSize()?!
+              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -1268,7 +1268,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);//FIXME: why is not compiling if RES instead of getSize()?!
+              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -1485,7 +1485,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);//FIXME: why is not compiling if RES instead of getSize()?!
+              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -1689,7 +1689,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);//FIXME: why is not compiling if RES instead of getSize()?!
+              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -1880,7 +1880,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);//FIXME: why is not compiling if RES instead of getSize()?!
+              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -2058,7 +2058,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);//FIXME: why is not compiling if RES instead of getSize()?!
+              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -2223,7 +2223,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);//FIXME: why is not compiling if RES instead of getSize()?!
+              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
