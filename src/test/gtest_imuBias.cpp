@@ -1931,12 +1931,47 @@ TEST_F(ProcessorIMU_Real,M1_VarB1V2B2_InvarP1Q1V1P2Q2_initOK)
 
 }
 
-TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_initError)
+TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_PosinitError)
 {
     //change initial guess to a wrong value
     Eigen::VectorXs originState(origin_KF->getState());
     Eigen::VectorXs perturbed_OriginState(originState);
     perturbed_OriginState.head(3) = originState.head(3) + (Eigen::Vector3s() << 0.15, 0.5, 1).finished();
+    origin_KF->setState(perturbed_OriginState);
+
+    //prepare problem for solving
+    origin_KF->getVPtr()->fix();
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    ASSERT_TRUE((origin_KF->getPPtr()->getState() - originState.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Pos : " << origin_KF->getPPtr()->getState().transpose() <<
+    "\n expected Pos : " << originState.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getOPtr()->getState() - originState.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Ori : " << origin_KF->getOPtr()->getState().transpose() <<
+    "\n expected Ori : " << originState.segment(3,4).transpose() << std::endl;
+}
+
+TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_QuatinitError)
+{
+    //change initial guess to a wrong value
+    Eigen::VectorXs originState(origin_KF->getState());
+    Eigen::VectorXs perturbed_OriginState(originState);
+
+    Eigen::Vector3s orientation_perturbation((Eigen::Vector3s()<<0,0,0).finished());
+    Eigen::Map<Eigen::Quaternions> quat_map(perturbed_OriginState.data() + 3);
+
+    orientation_perturbation(0) = 1.02;
+    orientation_perturbation(1) = 0.53;
+    orientation_perturbation(2) = 2.09;
+
+    //introduce the perturbation directly in the quaternion StateBlock
+    quat_map = quat_map * v2q(orientation_perturbation);
     origin_KF->setState(perturbed_OriginState);
 
     //prepare problem for solving
