@@ -2104,10 +2104,371 @@ TEST_F(ProcessorIMU_Real,M1_VarP2Q2B1V2B2_InvarV1P1Q1_initOK_ConstrO_KF0)
     wolf_problem_ptr_->print(4,1,1,1);
 }
 
+TEST_F(ProcessorIMU_Bias,M1_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
+{
+    std::string wolf_root = _WOLF_ROOT_DIR;
+
+    //===================================================== END{SETTING PROBLEM}
+
+    char* imu_filepath;
+    std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/M1.txt");
+    imu_filepath   = new char[imu_filepath_string.length() + 1];
+    std::strcpy(imu_filepath, imu_filepath_string.c_str());
+    std::ifstream imu_data_input;
+
+    imu_data_input.open(imu_filepath);
+    //WOLF_INFO("imu file: ", imu_filepath)
+    if(!imu_data_input.is_open()){
+        std::cerr << "Failed to open data files... Exiting" << std::endl;
+        ADD_FAILURE();
+    }
+
+    //===================================================== SETTING PROBLEM
+
+    // reset origin of problem
+    Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
+
+    t.set(0);
+    origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+    processor_ptr_odom3D->setOrigin(origin_KF);
+    
+    //===================================================== END{SETTING PROBLEM}
+
+    //===================================================== PROCESS DATA
+    // PROCESS DATA
+
+    Eigen::Vector6s data_imu, data_odom3D;
+    data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
+    data_odom3D << 0,-0.06,0, 0,0,0;
+    Eigen::VectorXs expected_final_state(16);
+    expected_final_state << 0,-0.06,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+
+    Scalar input_clock;
+    TimeStamp ts(0);
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D, 6, 6);
+
+    // process all IMu data and then finish with the odom measurement that will create a new constraint
+
+    while( !imu_data_input.eof())
+    {
+        // PROCESS IMU DATA
+        // Time and data variables
+        imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
+
+        ts.set(input_clock);
+        imu_ptr->setTimeStamp(ts);
+        imu_ptr->setData(data_imu);
+
+        // process data in capture
+        imu_ptr->getTimeStamp();
+        sen_imu->process(imu_ptr);
+    }
+
+    // PROCESS ODOM 3D DATA
+    mot_ptr->setTimeStamp(ts);
+    mot_ptr->setData(data_odom3D);
+    sen_odom3D->process(mot_ptr);
+
+    last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+
+    //closing file
+    imu_data_input.close();
+
+    //===================================================== END{PROCESS DATA}
+    
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    ceres_manager_wolf_diff->computeCovariances(ALL);
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
+    "\n expected P : " << expected_final_state.head(3).transpose() << std::endl;
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getOPtr()->getState().transpose() <<
+    "\n expected O : " << expected_final_state.segment(3,4).transpose() << std::endl;
+
+}
+
+TEST_F(ProcessorIMU_Bias,M2_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
+{
+    std::string wolf_root = _WOLF_ROOT_DIR;
+
+    //===================================================== END{SETTING PROBLEM}
+
+    char* imu_filepath;
+    std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/M2.txt");
+    imu_filepath   = new char[imu_filepath_string.length() + 1];
+    std::strcpy(imu_filepath, imu_filepath_string.c_str());
+    std::ifstream imu_data_input;
+
+    imu_data_input.open(imu_filepath);
+    //WOLF_INFO("imu file: ", imu_filepath)
+    if(!imu_data_input.is_open()){
+        std::cerr << "Failed to open data files... Exiting" << std::endl;
+        ADD_FAILURE();
+    }
+
+    //===================================================== SETTING PROBLEM
+
+    // reset origin of problem
+    Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
+
+    t.set(0);
+    origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+    processor_ptr_odom3D->setOrigin(origin_KF);
+    
+    //===================================================== END{SETTING PROBLEM}
+
+    //===================================================== PROCESS DATA
+    // PROCESS DATA
+
+    Eigen::Vector6s data_imu, data_odom3D;
+    data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
+    data_odom3D << 0,-0.06,0, 0,0,0;
+    Eigen::VectorXs expected_final_state(16);
+    expected_final_state << 0,-0.06,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+
+    Scalar input_clock;
+    TimeStamp ts(0);
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D, 6, 6);
+
+    // process all IMu data and then finish with the odom measurement that will create a new constraint
+
+    while( !imu_data_input.eof())
+    {
+        // PROCESS IMU DATA
+        // Time and data variables
+        imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
+
+        ts.set(input_clock);
+        imu_ptr->setTimeStamp(ts);
+        imu_ptr->setData(data_imu);
+
+        // process data in capture
+        imu_ptr->getTimeStamp();
+        sen_imu->process(imu_ptr);
+    }
+
+    // PROCESS ODOM 3D DATA
+    mot_ptr->setTimeStamp(ts);
+    mot_ptr->setData(data_odom3D);
+    sen_odom3D->process(mot_ptr);
+
+    last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+
+    //closing file
+    imu_data_input.close();
+
+    //===================================================== END{PROCESS DATA}
+    
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    ceres_manager_wolf_diff->computeCovariances(ALL);
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
+    "\n expected P : " << expected_final_state.head(3).transpose() << std::endl;
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getOPtr()->getState().transpose() <<
+    "\n expected O : " << expected_final_state.segment(3,4).transpose() << std::endl;
+
+}
+
+TEST_F(ProcessorIMU_Bias,M3_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
+{
+    std::string wolf_root = _WOLF_ROOT_DIR;
+
+    //===================================================== END{SETTING PROBLEM}
+
+    char* imu_filepath;
+    std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/M3.txt");
+    imu_filepath   = new char[imu_filepath_string.length() + 1];
+    std::strcpy(imu_filepath, imu_filepath_string.c_str());
+    std::ifstream imu_data_input;
+
+    imu_data_input.open(imu_filepath);
+    //WOLF_INFO("imu file: ", imu_filepath)
+    if(!imu_data_input.is_open()){
+        std::cerr << "Failed to open data files... Exiting" << std::endl;
+        ADD_FAILURE();
+    }
+
+    //===================================================== SETTING PROBLEM
+
+    // reset origin of problem
+    Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
+
+    t.set(0);
+    origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+    processor_ptr_odom3D->setOrigin(origin_KF);
+    
+    //===================================================== END{SETTING PROBLEM}
+
+    //===================================================== PROCESS DATA
+    // PROCESS DATA
+
+    Eigen::Vector6s data_imu, data_odom3D;
+    data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
+    data_odom3D << 0,-0.06,0, 0,0,0;
+    Eigen::VectorXs expected_final_state(16);
+    expected_final_state << 0,-0.06,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+
+    Scalar input_clock;
+    TimeStamp ts(0);
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D, 6, 6);
+
+    // process all IMu data and then finish with the odom measurement that will create a new constraint
+
+    while( !imu_data_input.eof())
+    {
+        // PROCESS IMU DATA
+        // Time and data variables
+        imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
+
+        ts.set(input_clock);
+        imu_ptr->setTimeStamp(ts);
+        imu_ptr->setData(data_imu);
+
+        // process data in capture
+        imu_ptr->getTimeStamp();
+        sen_imu->process(imu_ptr);
+    }
+
+    // PROCESS ODOM 3D DATA
+    mot_ptr->setTimeStamp(ts);
+    mot_ptr->setData(data_odom3D);
+    sen_odom3D->process(mot_ptr);
+
+    last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+
+    //closing file
+    imu_data_input.close();
+
+    //===================================================== END{PROCESS DATA}
+    
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    ceres_manager_wolf_diff->computeCovariances(ALL);
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
+    "\n expected P : " << expected_final_state.head(3).transpose() << std::endl;
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getOPtr()->getState().transpose() <<
+    "\n expected O : " << expected_final_state.segment(3,4).transpose() << std::endl;
+
+}
+
+TEST_F(ProcessorIMU_Bias,M4_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
+{
+    std::string wolf_root = _WOLF_ROOT_DIR;
+
+    //===================================================== END{SETTING PROBLEM}
+
+    char* imu_filepath;
+    std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/M4.txt");
+    imu_filepath   = new char[imu_filepath_string.length() + 1];
+    std::strcpy(imu_filepath, imu_filepath_string.c_str());
+    std::ifstream imu_data_input;
+
+    imu_data_input.open(imu_filepath);
+    //WOLF_INFO("imu file: ", imu_filepath)
+    if(!imu_data_input.is_open()){
+        std::cerr << "Failed to open data files... Exiting" << std::endl;
+        ADD_FAILURE();
+    }
+
+    //===================================================== SETTING PROBLEM
+
+    // reset origin of problem
+    Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
+
+    t.set(0);
+    origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+    processor_ptr_odom3D->setOrigin(origin_KF);
+    
+    //===================================================== END{SETTING PROBLEM}
+
+    //===================================================== PROCESS DATA
+    // PROCESS DATA
+
+    Eigen::Vector6s data_imu, data_odom3D;
+    data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
+    data_odom3D << 0,-0.06,0, 0,0,0;
+    Eigen::VectorXs expected_final_state(16);
+    expected_final_state << 0,-0.06,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+
+    Scalar input_clock;
+    TimeStamp ts(0);
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D, 6, 6);
+
+    // process all IMu data and then finish with the odom measurement that will create a new constraint
+
+    while( !imu_data_input.eof())
+    {
+        // PROCESS IMU DATA
+        // Time and data variables
+        imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
+
+        ts.set(input_clock);
+        imu_ptr->setTimeStamp(ts);
+        imu_ptr->setData(data_imu);
+
+        // process data in capture
+        imu_ptr->getTimeStamp();
+        sen_imu->process(imu_ptr);
+    }
+
+    // PROCESS ODOM 3D DATA
+    mot_ptr->setTimeStamp(ts);
+    mot_ptr->setData(data_odom3D);
+    sen_odom3D->process(mot_ptr);
+
+    last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+
+    //closing file
+    imu_data_input.close();
+
+    //===================================================== END{PROCESS DATA}
+    
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    ceres_manager_wolf_diff->computeCovariances(ALL);
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
+    "\n expected P : " << expected_final_state.head(3).transpose() << std::endl;
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Gyro bias : " << last_KF->getOPtr()->getState().transpose() <<
+    "\n expected O : " << expected_final_state.segment(3,4).transpose() << std::endl;
+
+}
+
+
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real.M1_VarB1V2B2_InvarP1Q1V1P2Q2_initOK:ProcessorIMU_Real.M1_VarP1Q1B1V2B2_InvarV1P2Q2_initOK_ConstrP_KF0:ProcessorIMU_Real.M1_VarP2Q2B1V2B2_InvarV1P1Q1_initOK_ConstrP_KF0:ProcessorIMU_Real.M1_VarP1Q1B1V2B2_InvarV1P2Q2_initOK_ConstrO_KF0:ProcessorIMU_Real.M1_VarP2Q2B1V2B2_InvarV1P1Q1_initOK_ConstrO_KF0";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Bias.M1_VarP2Q2B1V2B2_InvarV1P1Q1_initOK:ProcessorIMU_Bias.M2_VarP2Q2B1V2B2_InvarV1P1Q1_initOK:ProcessorIMU_Bias.M3_VarP2Q2B1V2B2_InvarV1P1Q1_initOK:ProcessorIMU_Bias.M4_VarP2Q2B1V2B2_InvarV1P1Q1_initOK";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
