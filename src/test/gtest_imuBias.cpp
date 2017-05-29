@@ -1925,10 +1925,8 @@ TEST_F(ProcessorIMU_Real,M1_VarB1V2B2_InvarP1Q1V1P2Q2_initOK)
     last_KF->getOPtr()->fix();
     //last_KF->getVPtr()->fix();
 
-    //wolf_problem_ptr_->print(4,1,1,1);
-
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-
+    wolf_problem_ptr_->print(4,1,1,1);
 }
 
 TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_PosinitError)
@@ -1957,7 +1955,7 @@ TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_PosinitError)
     "\n expected Ori : " << originState.segment(3,4).transpose() << std::endl;
 }
 
-TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_QuatinitError)
+TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_QuatInitError)
 {
     //change initial guess to a wrong value
     Eigen::VectorXs originState(origin_KF->getState());
@@ -1973,7 +1971,26 @@ TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_QuatinitError)
     //introduce the perturbation directly in the quaternion StateBlock
     quat_map = quat_map * v2q(orientation_perturbation);
     origin_KF->setState(perturbed_OriginState);
+    
+    //prepare problem for solving
+    origin_KF->getVPtr()->fix();
 
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ASSERT_TRUE((origin_KF->getPPtr()->getState() - originState.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Pos : " << origin_KF->getPPtr()->getState().transpose() <<
+    "\n expected Pos : " << originState.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getOPtr()->getState() - originState.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Ori : " << origin_KF->getOPtr()->getState().transpose() <<
+    "\n expected Ori : " << originState.segment(3,4).transpose() << std::endl;
+}
+
+TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_initOK_ConstrP_KF0)
+{
     //prepare problem for solving
     origin_KF->getVPtr()->fix();
 
@@ -1983,19 +2000,58 @@ TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_QuatinitError)
     last_KF->getOPtr()->fix();
 
     //wolf_problem_ptr_->print(4,1,1,1);
-
+    ConstraintBaseList ctr_list = origin_KF->getConstrainedByList();
+    //std::cout << "ctr_list size : " << ctr_list.size() << std::endl;
+    for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
+    {
+        //std::cout << "ctr ID : " << (*ctr_it)->getTypeId() << std::endl;
+        if ((*ctr_it)->getTypeId() == CTR_ODOM_3D) //change covariances in features to constraint only position
+        {
+            Eigen::MatrixXs meas_cov((*ctr_it)->getMeasurementCovariance());
+            //std::cout << "meas_cov : \n" << meas_cov << std::endl;
+            meas_cov.bottomRightCorner(3,3) = Eigen::Matrix3s::Identity()*50;
+            (*ctr_it)->getFeaturePtr()->setMeasurementCovariance(meas_cov);
+            //std::cout << "new meas_cov : \n" << (*ctr_it)->getMeasurementCovariance() << std::endl;
+        }
+    }
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    ASSERT_TRUE((origin_KF->getPPtr()->getState() - originState.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Pos : " << origin_KF->getPPtr()->getState().transpose() <<
-    "\n expected Pos : " << originState.head(3).transpose() << std::endl;
-    ASSERT_TRUE((origin_KF->getOPtr()->getState() - originState.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Ori : " << origin_KF->getOPtr()->getState().transpose() <<
-    "\n expected Ori : " << originState.segment(3,4).transpose() << std::endl;
+    wolf_problem_ptr_->print(4,1,1,1);
+}
+
+TEST_F(ProcessorIMU_Real,M1_VarP2Q2B1V2B2_InvarV1P1Q1_initOK_ConstrP_KF0)
+{
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    last_KF->setState(expected_final_state);
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+    ConstraintBaseList ctr_list = origin_KF->getConstrainedByList();
+    //std::cout << "ctr_list size : " << ctr_list.size() << std::endl;
+    for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
+    {
+        //std::cout << "ctr ID : " << (*ctr_it)->getTypeId() << std::endl;
+        if ((*ctr_it)->getTypeId() == CTR_ODOM_3D) //change covariances in features to constraint only position
+        {
+            Eigen::MatrixXs meas_cov((*ctr_it)->getMeasurementCovariance());
+            //std::cout << "meas_cov : \n" << meas_cov << std::endl;
+            meas_cov.bottomRightCorner(3,3) = (Eigen::Matrix3s() << 50, 20, 10, 20, 50, 20, 10, 20, 50).finished();
+            (*ctr_it)->getFeaturePtr()->setMeasurementCovariance(meas_cov);
+            //std::cout << "new meas_cov : \n" << (*ctr_it)->getMeasurementCovariance() << std::endl;
+        }
+    }
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    wolf_problem_ptr_->print(4,1,1,1);
 }
 
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real.*";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real.M1_VarB1V2B2_InvarP1Q1V1P2Q2_initOK:ProcessorIMU_Real.M1_VarP1Q1B1V2B2_InvarV1P2Q2_initOK_ConstrP_KF0:ProcessorIMU_Real.M1_VarP2Q2B1V2B2_InvarV1P1Q1_initOK_ConstrP_KF0";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
