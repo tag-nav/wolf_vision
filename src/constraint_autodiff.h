@@ -225,7 +225,7 @@ class ConstraintAutodiff: public ConstraintBase
             // init jacobian
             for(auto i = 0; i < n_blocks; ++i)
             {
-               Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
+               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
                jacobians_.push_back(Ji);
             }
 
@@ -247,10 +247,11 @@ class ConstraintAutodiff: public ConstraintBase
 
             // fill the jacobian matrices
             for (auto i = 0; i<n_blocks; i++)
-                for (unsigned int row = 0; row < RES; row++)
-                std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
-                          (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
-                          jacobians_[i].data() + row * state_block_sizes_.at(i));
+                if (!state_ptrs_[i]->isFixed())
+                    for (unsigned int row = 0; row < RES; row++)
+                        std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                  (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
+                                  jacobians_[i].data() + row * state_block_sizes_.at(i));
 
            // print jacobian matrices
 //           for (auto i = 0; i < n_blocks; i++)
@@ -499,7 +500,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
+              Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -520,10 +521,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
-               for (unsigned int row = 0; row < RES; row++)
-               std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
-                         (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
-                         jacobians_[i].data() + row * state_block_sizes_.at(i));
+               if (!state_ptrs_[i]->isFixed())
+                   for (unsigned int row = 0; row < RES; row++)
+                       std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                 (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
+                                 jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
 //           for (auto i = 0; i < n_blocks; i++)
@@ -742,7 +744,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
+              Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -762,10 +764,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
-               for (unsigned int row = 0; row < RES; row++)
-               std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
-                         (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
-                         jacobians_[i].data() + row * state_block_sizes_.at(i));
+               if (!state_ptrs_[i]->isFixed())
+                   for (unsigned int row = 0; row < RES; row++)
+                       std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                 (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
+                                 jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
 //           for (auto i = 0; i < n_blocks; i++)
@@ -973,7 +976,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
+              Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -992,10 +995,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
-               for (unsigned int row = 0; row < RES; row++)
-               std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
-                         (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
-                         jacobians_[i].data() + row * state_block_sizes_.at(i));
+               if (!state_ptrs_[i]->isFixed())
+                   for (unsigned int row = 0; row < RES; row++)
+                       std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                 (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
+                                 jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
 //           for (auto i = 0; i < n_blocks; i++)
@@ -1192,7 +1196,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
+              Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -1210,10 +1214,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
-               for (unsigned int row = 0; row < RES; row++)
-               std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
-                         (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
-                         jacobians_[i].data() + row * state_block_sizes_.at(i));
+               if (!state_ptrs_[i]->isFixed())
+                   for (unsigned int row = 0; row < RES; row++)
+                       std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                 (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
+                                 jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
 //           for (auto i = 0; i < n_blocks; i++)
@@ -1398,7 +1403,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
+              Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -1415,10 +1420,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
-               for (unsigned int row = 0; row < RES; row++)
-               std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
-                         (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
-                         jacobians_[i].data() + row * state_block_sizes_.at(i));
+               if (!state_ptrs_[i]->isFixed())
+                   for (unsigned int row = 0; row < RES; row++)
+                       std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                 (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
+                                 jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
 //           for (auto i = 0; i < n_blocks; i++)
@@ -1592,7 +1598,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
+              Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -1608,10 +1614,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
-               for (unsigned int row = 0; row < RES; row++)
-               std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
-                         (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
-                         jacobians_[i].data() + row * state_block_sizes_.at(i));
+               if (!state_ptrs_[i]->isFixed())
+                   for (unsigned int row = 0; row < RES; row++)
+                       std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                 (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
+                                 jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
 //           for (auto i = 0; i < n_blocks; i++)
@@ -1774,7 +1781,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
+              Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -1789,10 +1796,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
-               for (unsigned int row = 0; row < RES; row++)
-               std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
-                         (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
-                         jacobians_[i].data() + row * state_block_sizes_.at(i));
+               if (!state_ptrs_[i]->isFixed())
+                   for (unsigned int row = 0; row < RES; row++)
+                       std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                 (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
+                                 jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
 //           for (auto i = 0; i < n_blocks; i++)
@@ -1944,7 +1952,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
+              Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -1958,10 +1966,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
-               for (unsigned int row = 0; row < RES; row++)
-               std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
-                         (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
-                         jacobians_[i].data() + row * state_block_sizes_.at(i));
+               if (!state_ptrs_[i]->isFixed())
+                   for (unsigned int row = 0; row < RES; row++)
+                       std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                 (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
+                                 jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
 //           for (auto i = 0; i < n_blocks; i++)
@@ -2102,7 +2111,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            // init jacobian
            for(auto i = 0; i < n_blocks; ++i)
            {
-              Eigen::MatrixXs Ji = Eigen::MatrixXs(RES, state_block_sizes_[i]);
+              Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
            }
 
@@ -2115,10 +2124,11 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
-               for (unsigned int row = 0; row < RES; row++)
-               std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
-                         (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
-                         jacobians_[i].data() + row * state_block_sizes_.at(i));
+               if (!state_ptrs_[i]->isFixed())
+                   for (unsigned int row = 0; row < RES; row++)
+                       std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
+                                 (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
+                                 jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
 //           for (auto i = 0; i < n_blocks; i++)
