@@ -501,6 +501,48 @@ bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, E
     return true;
 }
 
+bool Problem::getCovarianceBlock(StateBlockList _st_list, Eigen::MatrixXs& _cov, const int _row, const int _col)
+{
+
+    std::map<StateBlockPtr, unsigned int> sb_2_idx;
+    unsigned int next_idx = 0;
+    for (auto st_it1 = _st_list.begin(); st_it1 != _st_list.end(); st_it1++)
+        for (auto st_it2 = st_it1; st_it2 != _st_list.end(); st_it2++)
+        {
+            // add new key to map
+            if (sb_2_idx.find(*st_it2) == sb_2_idx.end())
+            {
+                sb_2_idx[*st_it2] = next_idx;
+                next_idx += (*st_it2)->getSize();
+            }
+            // search st1 & st2
+            if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(*st_it1, *st_it2)) != covariances_.end())
+            {
+                assert(_row + sb_2_idx[*st_it1] + (*st_it1)->getSize() <= _cov.rows() &&
+                       _col + sb_2_idx[*st_it2] + (*st_it2)->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+                assert(_row + sb_2_idx[*st_it2] + (*st_it2)->getSize() <= _cov.rows() &&
+                       _col + sb_2_idx[*st_it1] + (*st_it1)->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+
+                _cov.block(_row + sb_2_idx[*st_it1], _col + sb_2_idx[*st_it2], (*st_it1)->getSize(), (*st_it2)->getSize()) = covariances_[std::pair<StateBlockPtr, StateBlockPtr>(*st_it1, *st_it2)];
+                _cov.block(_row + sb_2_idx[*st_it2], _col + sb_2_idx[*st_it1], (*st_it2)->getSize(), (*st_it1)->getSize()) = covariances_[std::pair<StateBlockPtr, StateBlockPtr>(*st_it1, *st_it2)].transpose();
+            }
+            else if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(*st_it2, *st_it1)) != covariances_.end())
+            {
+                assert(_row + sb_2_idx[*st_it1] + (*st_it1)->getSize() <= _cov.rows() &&
+                       _col + sb_2_idx[*st_it2] + (*st_it2)->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+                assert(_row + sb_2_idx[*st_it2] + (*st_it2)->getSize() <= _cov.rows() &&
+                       _col + sb_2_idx[*st_it1] + (*st_it1)->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+
+                _cov.block(_row + sb_2_idx[*st_it1], _col + sb_2_idx[*st_it2], (*st_it1)->getSize(), (*st_it2)->getSize()) = covariances_[std::pair<StateBlockPtr, StateBlockPtr>(*st_it2, *st_it1)].transpose();
+                _cov.block(_row + sb_2_idx[*st_it2], _col + sb_2_idx[*st_it1], (*st_it2)->getSize(), (*st_it1)->getSize()) = covariances_[std::pair<StateBlockPtr, StateBlockPtr>(*st_it2, *st_it1)];
+            }
+            else
+                return false;
+        }
+
+    return true;
+}
+
 bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance)
 {
 //    return getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getPPtr(), _covariance, 0,                                0                               ) &&

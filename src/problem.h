@@ -227,14 +227,13 @@ class Problem : public std::enable_shared_from_this<Problem>
         // Covariances -------------------------------------------
         void clearCovariance();
         void addCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, const Eigen::MatrixXs& _cov);
-        bool getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, Eigen::MatrixXs& _cov, const int _row = 0,
-                                const int _col=0);
+        bool getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, Eigen::MatrixXs& _cov, const int _row = 0, const int _col=0);
+        bool getCovarianceBlock(StateBlockList _st_list, Eigen::MatrixXs& _cov, const int _row = 0, const int _col=0);
         bool getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance);
         Eigen::MatrixXs getFrameCovariance(FrameBasePtr _frame_ptr);
         Eigen::MatrixXs getLastKeyFrameCovariance();
         bool getLandmarkCovariance(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& _covariance);
         Eigen::MatrixXs getLandmarkCovariance(LandmarkBasePtr _landmark_ptr);
-
 
         // Solver management ----------------------------------------
 
