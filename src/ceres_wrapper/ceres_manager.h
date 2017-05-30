@@ -55,6 +55,8 @@ class CeresManager
 
 		void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS);
 
+        void computeCovariances(const StateBlockList& st_list);
+
         ceres::Solver::Options& getSolverOptions();
 
         void setUseWolfAutoDiff(bool _use_wolf_auto_diff);

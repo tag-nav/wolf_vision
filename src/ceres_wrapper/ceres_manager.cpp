@@ -223,6 +223,44 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
 }
 
+void CeresManager::computeCovariances(const StateBlockList& st_list)
+{
+    //std::cout << "CeresManager: computing covariances..." << std::endl;
+
+    // update problem
+    update();
+
+    // CLEAR STORED COVARIANCE BLOCKS IN WOLF PROBLEM
+    wolf_problem_->clearCovariance();
+
+    // CREATE DESIRED COVARIANCES LIST
+    std::vector<std::pair<StateBlockPtr, StateBlockPtr>> state_block_pairs;
+    std::vector<std::pair<const double*, const double*>> double_pairs;
+
+    // double loop all against all (without repetitions)
+    for (auto st_it1 = st_list.begin(); st_it1 != st_list.end(); st_it1++)
+        for (auto st_it2 = st_it1; st_it2 != st_list.end(); st_it2++)
+        {
+            state_block_pairs.push_back(std::pair<StateBlockPtr, StateBlockPtr>(*st_it1,*st_it2));
+            double_pairs.push_back(std::pair<const double*, const double*>((*st_it1)->getPtr(),(*st_it2)->getPtr()));
+        }
+
+    //std::cout << "pairs... " << double_pairs.size() << std::endl;
+
+    // COMPUTE DESIRED COVARIANCES
+    if (covariance_->Compute(double_pairs, ceres_problem_))
+        // STORE DESIRED COVARIANCES
+        for (unsigned int i = 0; i < double_pairs.size(); i++)
+        {
+            Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> cov(state_block_pairs[i].first->getSize(),state_block_pairs[i].second->getSize());
+            covariance_->GetCovarianceBlock(double_pairs[i].first, double_pairs[i].second, cov.data());
+            wolf_problem_->addCovarianceBlock(state_block_pairs[i].first, state_block_pairs[i].second, cov);
+            //std::cout << "getted covariance " << std::endl << cov << std::endl;
+        }
+    else
+        std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
+}
+
 void CeresManager::update()
 {
 	//std::cout << "CeresManager: updating... " << std::endl;
