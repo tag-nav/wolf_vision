@@ -36,7 +36,7 @@ class CostFunctionWrapper : public ceres::CostFunction
 
         virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
         {
-            return constraint_ptr_->Evaluate(parameters, residuals, jacobians);
+            return constraint_ptr_->evaluate(parameters, residuals, jacobians);
         }
 };
 

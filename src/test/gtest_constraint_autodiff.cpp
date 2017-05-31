@@ -76,7 +76,7 @@ TEST(CaptureAutodiff, ResidualOdom2d)
     std::vector<Scalar*> states_ptr({fr1_ptr->getPPtr()->getPtr(), fr1_ptr->getOPtr()->getPtr(), fr2_ptr->getPPtr()->getPtr(), fr2_ptr->getOPtr()->getPtr()});
     double const* const* parameters = states_ptr.data();
     Eigen::VectorXs residuals(constraint_ptr->getSize());
-    constraint_ptr->Evaluate(parameters, residuals.data(), nullptr);
+    constraint_ptr->evaluate(parameters, residuals.data(), nullptr);
 
     ASSERT_TRUE(residuals.maxCoeff() < 1e-9);
     ASSERT_TRUE(residuals.minCoeff() > -1e-9);
@@ -112,7 +112,8 @@ TEST(CaptureAutodiff, JacobianOdom2d)
     // COMPUTE JACOBIANS
     std::vector<const Scalar*> states_ptr({fr1_ptr->getPPtr()->getPtr(), fr1_ptr->getOPtr()->getPtr(), fr2_ptr->getPPtr()->getPtr(), fr2_ptr->getOPtr()->getPtr()});
     std::vector<Eigen::MatrixXs> Jauto;
-    constraint_ptr->computeJacobian(states_ptr, Jauto);
+    Eigen::VectorXs residuals(constraint_ptr->getSize());
+    constraint_ptr->evaluate(states_ptr, residuals, Jauto);
 
     std::cout << Jauto.size() << std::endl;
 

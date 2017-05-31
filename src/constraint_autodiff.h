@@ -132,7 +132,7 @@ class ConstraintAutodiff: public ConstraintBase
          * Returns the residual and jacobians given the state values
          *
          **/
-        virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+        virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
         {
             // only residuals
             if (jacobians == nullptr)
@@ -216,8 +216,9 @@ class ConstraintAutodiff: public ConstraintBase
         /** \brief Returns a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
          *
          **/
-        virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+        virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const
         {
+            assert(residual_.size() == RES);
             jacobians_.clear();
 
             assert(_states_ptr.size() == n_blocks);
@@ -244,6 +245,10 @@ class ConstraintAutodiff: public ConstraintBase
                                               jets_8_->data(),
                                               jets_9_->data(),
                                               residuals_jets_->data());
+
+            // fill the residual vector
+            for (auto i = 0; i < RES; i++)
+                residual_(i) = (*residuals_jets_)[i].a;
 
             // fill the jacobian matrices
             for (auto i = 0; i<n_blocks; i++)
@@ -417,7 +422,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
            return JAC_AUTO;
        }
 
-       virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -491,8 +496,9 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
                (*jets_8_)[i].a = parameters[8][i];
        }
 
-       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
+           assert(residual_.size() == RES);
            jacobians_.clear();
 
            assert(_states_ptr.size() == n_blocks);
@@ -518,6 +524,10 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
                                              jets_7_->data(),
                                              jets_8_->data(),
                                              residuals_jets_->data());
+
+           // fill the residual vector
+           for (auto i = 0; i < RES; i++)
+               residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
@@ -665,7 +675,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
            return JAC_AUTO;
        }
 
-       virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -735,8 +745,9 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
                (*jets_7_)[i].a = parameters[7][i];
        }
 
-       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
+           assert(residual_.size() == RES);
            jacobians_.clear();
 
            assert(_states_ptr.size() == n_blocks);
@@ -761,6 +772,10 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
                                              jets_6_->data(),
                                              jets_7_->data(),
                                              residuals_jets_->data());
+
+           // fill the residual vector
+           for (auto i = 0; i < RES; i++)
+               residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
@@ -901,7 +916,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
            return JAC_AUTO;
        }
 
-       virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -967,8 +982,9 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
                (*jets_6_)[i].a = parameters[6][i];
        }
 
-       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
+           assert(residual_.size() == RES);
            jacobians_.clear();
 
            assert(_states_ptr.size() == n_blocks);
@@ -992,6 +1008,10 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
                                              jets_5_->data(),
                                              jets_6_->data(),
                                              residuals_jets_->data());
+
+           // fill the residual vector
+           for (auto i = 0; i < RES; i++)
+               residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
@@ -1125,7 +1145,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
            return JAC_AUTO;
        }
 
-       virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1187,8 +1207,9 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
                (*jets_5_)[i].a = parameters[5][i];
        }
 
-       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
+           assert(residual_.size() == RES);
            jacobians_.clear();
 
            assert(_states_ptr.size() == n_blocks);
@@ -1211,6 +1232,10 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
                                              jets_4_->data(),
                                              jets_5_->data(),
                                              residuals_jets_->data());
+
+           // fill the residual vector
+           for (auto i = 0; i < RES; i++)
+               residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
@@ -1336,7 +1361,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
            return JAC_AUTO;
        }
 
-       virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1394,8 +1419,9 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
                (*jets_4_)[i].a = parameters[4][i];
        }
 
-       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
+           assert(residual_.size() == RES);
            jacobians_.clear();
 
            assert(_states_ptr.size() == n_blocks);
@@ -1417,6 +1443,10 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
                                              jets_3_->data(),
                                              jets_4_->data(),
                                              residuals_jets_->data());
+
+           // fill the residual vector
+           for (auto i = 0; i < RES; i++)
+               residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
@@ -1535,7 +1565,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
            return JAC_AUTO;
        }
 
-       virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1589,8 +1619,9 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
                (*jets_3_)[i].a = parameters[3][i];
        }
 
-       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
+           assert(residual_.size() == RES);
            jacobians_.clear();
 
            assert(_states_ptr.size() == n_blocks);
@@ -1611,6 +1642,10 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
                                              jets_2_->data(),
                                              jets_3_->data(),
                                              residuals_jets_->data());
+
+           // fill the residual vector
+           for (auto i = 0; i < RES; i++)
+               residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
@@ -1722,7 +1757,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
            return JAC_AUTO;
        }
 
-       virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1772,8 +1807,9 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
                (*jets_2_)[i].a = parameters[2][i];
        }
 
-       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
+           assert(residual_.size() == RES);
            jacobians_.clear();
 
            assert(_states_ptr.size() == n_blocks);
@@ -1793,6 +1829,10 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
                                              jets_1_->data(),
                                              jets_2_->data(),
                                              residuals_jets_->data());
+
+           // fill the residual vector
+           for (auto i = 0; i < RES; i++)
+               residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
@@ -1897,7 +1937,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            return JAC_AUTO;
        }
 
-       virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1943,8 +1983,9 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
                (*jets_1_)[i].a = parameters[1][i];
        }
 
-       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
+           assert(residual_.size() == RES);
            jacobians_.clear();
 
            assert(_states_ptr.size() == n_blocks);
@@ -1963,6 +2004,10 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            (*static_cast<CtrT const*>(this))(jets_0_->data(),
                                              jets_1_->data(),
                                              residuals_jets_->data());
+
+           // fill the residual vector
+           for (auto i = 0; i < RES; i++)
+               residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
@@ -2060,7 +2105,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            return JAC_AUTO;
        }
 
-       virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -2102,8 +2147,9 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
                (*jets_0_)[i].a = parameters[0][i];
        }
 
-       virtual void computeJacobian(const std::vector<const Scalar*>& _states_ptr, std::vector<Eigen::MatrixXs>& jacobians_) const
+       virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const
        {
+           assert(residual_.size() == RES);
            jacobians_.clear();
 
            assert(_states_ptr.size() == n_blocks);
@@ -2121,6 +2167,10 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            // call functor
            (*static_cast<CtrT const*>(this))(jets_0_->data(),
                                              residuals_jets_->data());
+
+           // fill the residual vector
+           for (auto i = 0; i < RES; i++)
+               residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
            for (auto i = 0; i<n_blocks; i++)
