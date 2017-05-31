@@ -2,7 +2,6 @@
 #define CONSTRAINT_ODOM_2D_THETA_H_
 
 //Wolf includes
-#include "constraint_sparse.h"
 #include "constraint_autodiff.h"
 #include "frame_base.h"
 
