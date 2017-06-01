@@ -2064,6 +2064,115 @@ TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_QuatInitError)
     "\n expected Ori : " << originState.segment(3,4).transpose() << std::endl;
 }
 
+TEST_F(ProcessorIMU_Real,M1_VarP1Q1V1B1V2B2_InvarP2Q2_PosinitError)
+{
+    //change initial guess to a wrong value
+    Eigen::VectorXs originState(origin_KF->getState());
+    Eigen::VectorXs perturbed_OriginState(originState);
+    perturbed_OriginState.head(3) = originState.head(3) + (Eigen::Vector3s() << 0.15, 0.5, 1).finished();
+    origin_KF->setState(perturbed_OriginState);
+
+    //prepare problem for solving
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    ASSERT_TRUE((origin_KF->getPPtr()->getState() - originState.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Pos : " << origin_KF->getPPtr()->getState().transpose() <<
+    "\n expected Pos : " << originState.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getOPtr()->getState() - originState.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Ori : " << origin_KF->getOPtr()->getState().transpose() <<
+    "\n expected Ori : " << originState.segment(3,4).transpose() << std::endl;
+}
+
+TEST_F(ProcessorIMU_Real,M1_VarP1Q1V1B1V2B2_InvarP2Q2_QuatInitError)
+{
+    //change initial guess to a wrong value
+    Eigen::VectorXs originState(origin_KF->getState());
+    Eigen::VectorXs perturbed_OriginState(originState);
+
+    Eigen::Vector3s orientation_perturbation((Eigen::Vector3s()<<0,0,0).finished());
+    Eigen::Map<Eigen::Quaternions> quat_map(perturbed_OriginState.data() + 3);
+
+    orientation_perturbation(0) = 1.02;
+    orientation_perturbation(1) = 0.53;
+    orientation_perturbation(2) = 2.09;
+
+    //introduce the perturbation directly in the quaternion StateBlock
+    quat_map = quat_map * v2q(orientation_perturbation);
+    origin_KF->setState(perturbed_OriginState);
+    
+    //prepare problem for solving
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ASSERT_TRUE((origin_KF->getPPtr()->getState() - originState.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Pos : " << origin_KF->getPPtr()->getState().transpose() <<
+    "\n expected Pos : " << originState.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getOPtr()->getState() - originState.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Ori : " << origin_KF->getOPtr()->getState().transpose() <<
+    "\n expected Ori : " << originState.segment(3,4).transpose() << std::endl;
+}
+
+TEST_F(ProcessorIMU_Real,M1_VarV1B1P2Q2V2B2_InvarP1Q1_PosinitError)
+{
+    //change initial guess to a wrong value
+    Eigen::VectorXs perturbed_FinalState(expected_final_state);
+    perturbed_FinalState.head(3) = expected_final_state.head(3) + (Eigen::Vector3s() << 0.15, 0.5, 1).finished();
+
+    //prepare problem for solving
+    last_KF->setState(perturbed_FinalState);
+
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    ASSERT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Pos : " << last_KF->getPPtr()->getState().transpose() <<
+    "\n expected Pos : " << expected_final_state.head(3).transpose() << std::endl;
+    ASSERT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Ori : " << last_KF->getOPtr()->getState().transpose() <<
+    "\n expected Ori : " << expected_final_state.segment(3,4).transpose() << std::endl;
+}
+
+TEST_F(ProcessorIMU_Real,M1_VarV1B1P2Q2V2B2_InvarP1Q1_QuatInitError)
+{
+    //change initial guess to a wrong value
+    Eigen::VectorXs perturbed_FinalState(expected_final_state);
+    Eigen::Vector3s orientation_perturbation((Eigen::Vector3s()<<0,0,0).finished());
+    Eigen::Map<Eigen::Quaternions> quat_map(perturbed_FinalState.data() + 3);
+
+    orientation_perturbation(0) = 1.02;
+    orientation_perturbation(1) = 0.53;
+    orientation_perturbation(2) = 2.09;
+
+    //introduce the perturbation directly in the quaternion StateBlock
+    quat_map = quat_map * v2q(orientation_perturbation);
+    last_KF->setState(perturbed_FinalState);
+    
+    //prepare problem for solving
+
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ASSERT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Pos : " << last_KF->getPPtr()->getState().transpose() <<
+    "\n expected Pos : " << expected_final_state.head(3).transpose() << std::endl;
+    ASSERT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Ori : " << last_KF->getOPtr()->getState().transpose() <<
+    "\n expected Ori : " << expected_final_state.segment(3,4).transpose() << std::endl;
+}
+
 TEST_F(ProcessorIMU_Real,M1_VarP1Q1B1V2B2_InvarV1P2Q2_initOK_ConstrP_KF0)
 {
     //prepare problem for solving
@@ -2737,8 +2846,8 @@ TEST_F(ProcessorIMU_Bias_LowQualityOdom,Foot_VarQ1P2Q2B1V2B2_InvarV1P1_initOK)
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
-  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Bias.M1_VarP2Q2B1V2B2_InvarV1P1Q1_initOK:ProcessorIMU_Bias.M2_VarP2Q2B1V2B2_InvarV1P1Q1_initOK:ProcessorIMU_Bias.M3_VarP2Q2B1V2B2_InvarV1P1Q1_initOK:ProcessorIMU_Bias.M4_VarP2Q2B1V2B2_InvarV1P1Q1_initOK";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Bias_LowQualityOdom.Foot_VarQ1P2Q2B1V2B2_InvarV1P1_initOK";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real.M1_VarV1B1P2Q2V2B2_InvarP1Q1_*";
+  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Bias_LowQualityOdom.Foot_VarQ1P2Q2B1V2B2_InvarV1P1_initOK";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
