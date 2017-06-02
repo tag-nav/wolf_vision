@@ -2298,17 +2298,51 @@ TEST_F(ProcessorIMU_Real,M1_VarP2Q2B1V2B2_InvarV1P1Q1_initOK_ConstrO_KF0)
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     //wolf_problem_ptr_->print(4,1,1,1);
 
-    ASSERT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Pos : " << origin_KF->getPPtr()->getState().transpose() <<
+    ASSERT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Pos : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Pos : " << expected_final_state.head(3).transpose() << std::endl;
-    ASSERT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Ori : " << origin_KF->getOPtr()->getState().transpose() <<
+    ASSERT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Ori : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected Ori : " << expected_final_state.segment(3,4).transpose() << std::endl;
 }
 
-TEST_F(ProcessorIMU_Real,M1_VarQ1P2Q2B1V2B2_InvarV1P1_initOK_ConstrO_KF0)
+TEST_F(ProcessorIMU_Real,M1_VarQ1P2B1V2B2_InvarV1P1Q2_initOK_ConstrO_KF0)
 {
     //prepare problem for solving
     origin_KF->getPPtr()->fix();
     origin_KF->getVPtr()->fix();
+
+    last_KF->setState(expected_final_state);
+    last_KF->getOPtr()->fix();
+
+    ConstraintBaseList ctr_list = origin_KF->getConstrainedByList();
+    //std::cout << "ctr_list size : " << ctr_list.size() << std::endl;
+    for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
+    {
+        //std::cout << "ctr ID : " << (*ctr_it)->getTypeId() << std::endl;
+        if ((*ctr_it)->getTypeId() == CTR_ODOM_3D) //change covariances in features to constraint only position
+        {
+            Eigen::MatrixXs meas_cov((*ctr_it)->getMeasurementCovariance());
+            //std::cout << "meas_cov : \n" << meas_cov << std::endl;
+            meas_cov.topLeftCorner(3,3) = (Eigen::Matrix3s() << 50, 20, 10, 20, 50, 20, 10, 20, 50).finished();
+            (*ctr_it)->getFeaturePtr()->setMeasurementCovariance(meas_cov);
+            //std::cout << "new meas_cov : \n" << (*ctr_it)->getMeasurementCovariance() << std::endl;
+        }
+    }
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ASSERT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Pos : " << last_KF->getPPtr()->getState().transpose() <<
+    "\n expected Pos : " << expected_final_state.head(3).transpose() << std::endl;
+    ASSERT_TRUE((origin_KF->getOPtr()->getState() - expected_origin_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Ori : " << origin_KF->getOPtr()->getState().transpose() <<
+    "\n expected Ori : " << expected_origin_state.segment(3,4).transpose() << std::endl;
+}
+
+TEST_F(ProcessorIMU_Real,M1_VarQ1P2Q2B1V2B2_InvarV1P1V2_initOK_ConstrO_KF0)
+{
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getVPtr()->fix();
+    last_KF->getVPtr()->fix();
 
     last_KF->setState(expected_final_state);
 
@@ -2327,8 +2361,14 @@ TEST_F(ProcessorIMU_Real,M1_VarQ1P2Q2B1V2B2_InvarV1P1_initOK_ConstrO_KF0)
         }
     }
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    ceres_manager_wolf_diff->computeCovariances(ALL);
 
     wolf_problem_ptr_->print(4,1,1,1);
+
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Pos : " << last_KF->getPPtr()->getState().transpose() <<
+    "\n expected Pos : " << expected_final_state.head(3).transpose() << std::endl;
+    ASSERT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Ori : " << last_KF->getOPtr()->getState().transpose() <<
+    "\n expected Ori : " << expected_final_state.segment(3,4).transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMU_Bias,M1_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
@@ -2846,7 +2886,7 @@ TEST_F(ProcessorIMU_Bias_LowQualityOdom,Foot_VarQ1P2Q2B1V2B2_InvarV1P1_initOK)
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real.M1_VarV1B1P2Q2V2B2_InvarP1Q1_*";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real.M*";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Bias_LowQualityOdom.Foot_VarQ1P2Q2B1V2B2_InvarV1P1_initOK";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
