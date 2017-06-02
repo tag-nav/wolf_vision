@@ -19,8 +19,8 @@ CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Option
     covariance_ = new ceres::Covariance(covariance_options);
 
     ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;//ceres::DO_NOT_TAKE_OWNERSHIP;
+    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
     problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
     ceres_problem_ = new ceres::Problem(problem_options);
 }
@@ -95,75 +95,38 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             }
             // double loop all against all (without repetitions)
             for (unsigned int i = 0; i < all_state_blocks.size(); i++)
-            {
                 for  (unsigned int j = i; j < all_state_blocks.size(); j++)
                 {
                     state_block_pairs.push_back(std::make_pair(all_state_blocks[i],all_state_blocks[j]));
                     double_pairs.push_back(std::make_pair(all_state_blocks[i]->getPtr(),all_state_blocks[j]->getPtr()));
                 }
-            }
             break;
         }
         case ALL_MARGINALS:
         {
             // first create a vector containing all state blocks
-//            std::vector<StateBlockPtr> all_state_blocks, landmark_state_blocks;
-            //frame state blocks
             for(auto fr_ptr : wolf_problem_->getTrajectoryPtr()->getFrameList())
-            {
                 if (fr_ptr->isKey())
                     for (auto sb : fr_ptr->getStateBlockVec())
                         if (sb)
-                        {
-//                            std::cout << "CeresManager::computeCovariances(): State block @ " << sb.get() << std::endl;
-//                            all_state_blocks.push_back(sb);
                             for(auto sb2 : fr_ptr->getStateBlockVec())
-                            {
                                 if (sb)
                                 {
                                     state_block_pairs.push_back(std::make_pair(sb, sb2));
                                     double_pairs.push_back(std::make_pair(sb->getPtr(), sb2->getPtr()));
-                                    if (sb == sb2) break;
+                                    if (sb == sb2)
+                                        break;
                                 }
-                            }
-                        }
-            }
 
             // landmark state blocks
             for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
-            {
-//                landmark_state_blocks = l_ptr->getUsedStateBlockVec();
-//                all_state_blocks.insert(all_state_blocks.end(), landmark_state_blocks.begin(), landmark_state_blocks.end());
-                //all_state_blocks.push_back(l_ptr->getPPtr());
-                //all_state_blocks.push_back(l_ptr->getOPtr());
-
-
                 for (auto sb : l_ptr->getUsedStateBlockVec())
-                {
-//                    std::cout << "CeresManager::computeCovariances(): State block @ " << sb.get() << std::endl;
-//                    all_state_blocks.push_back(sb);
                     for(auto sb2 : l_ptr->getUsedStateBlockVec())
                     {
                         state_block_pairs.push_back(std::make_pair(sb, sb2));
                         double_pairs.push_back(std::make_pair(sb->getPtr(), sb2->getPtr()));
                         if (sb == sb2) break;
                     }
-                }
-
-
-
-            }
-//            // loop all marginals (PO marginals)
-//            for (unsigned int i = 0; 2*i+1 < all_state_blocks.size(); i++)
-//            {
-//                state_block_pairs.push_back(std::make_pair(all_state_blocks[2*i],all_state_blocks[2*i]));
-//                state_block_pairs.push_back(std::make_pair(all_state_blocks[2*i],all_state_blocks[2*i+1]));
-//                state_block_pairs.push_back(std::make_pair(all_state_blocks[2*i+1],all_state_blocks[2*i+1]));
-//
-//                double_pairs.push_back(std::make_pair(all_state_blocks[2*i]->getPtr(),all_state_blocks[2*i]->getPtr()));
-//                double_pairs.push_back(std::make_pair(all_state_blocks[2*i]->getPtr(),all_state_blocks[2*i+1]->getPtr()));
-//                double_pairs.push_back(std::make_pair(all_state_blocks[2*i+1]->getPtr(),all_state_blocks[2*i+1]->getPtr()));
-//            }
             break;
         }
         case ROBOT_LANDMARKS:
@@ -270,7 +233,6 @@ void CeresManager::update()
 	// REMOVE CONSTRAINTS
 	auto ctr_notification_it = wolf_problem_->getConstraintNotificationList().begin();
 	while ( ctr_notification_it != wolf_problem_->getConstraintNotificationList().end() )
-	{
 		if (ctr_notification_it->notification_ == REMOVE)
 		{
 			removeConstraint(ctr_notification_it->id_);
@@ -278,12 +240,10 @@ void CeresManager::update()
 		}
 		else
 			ctr_notification_it++;
-	}
 
 	// REMOVE STATE BLOCKS
 	auto state_notification_it = wolf_problem_->getStateBlockNotificationList().begin();
 	while ( state_notification_it != wolf_problem_->getStateBlockNotificationList().end() )
-	{
 		if (state_notification_it->notification_ == REMOVE)
 		{
 			removeStateBlock((double *)(state_notification_it->scalar_ptr_));
@@ -291,7 +251,6 @@ void CeresManager::update()
 		}
 		else
 			state_notification_it++;
-	}
 
     // ADD/UPDATE STATE BLOCKS
     while (!wolf_problem_->getStateBlockNotificationList().empty())
@@ -320,15 +279,13 @@ void CeresManager::update()
         {
             case ADD:
             {
-//                std::cout << "adding constraint" << std::endl;
                 addConstraint(wolf_problem_->getConstraintNotificationList().front().constraint_ptr_,wolf_problem_->getConstraintNotificationList().front().id_);
-                //std::cout << "added" << std::endl;
                 break;
             }
             default:
                 throw std::runtime_error("CeresManager::update: Constraint notification must be ADD or REMOVE.");
         }
-        wolf_problem_->getConstraintNotificationList().pop_front();
+        wolf_problem_->getConstraintNotificationList().pop_front(); // CHECKED: it destroys the shared pointer
     }
 //	std::cout << "all constraints added" << std::endl;
 //	std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
@@ -359,6 +316,7 @@ void CeresManager::removeConstraint(const unsigned int& _corr_id)
 
     assert(id_2_residual_idx_.find(_corr_id) != id_2_residual_idx_.end());
 	ceres_problem_->RemoveResidualBlock(id_2_residual_idx_[_corr_id]);
+	delete id_2_costfunction_[_corr_id];
 	id_2_residual_idx_.erase(_corr_id);
 
 //	std::cout << "removingremoved!" << std::endl;
