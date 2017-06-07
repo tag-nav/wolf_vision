@@ -17,7 +17,7 @@ FeatureBase::FeatureBase(const std::string& _type, const Eigen::VectorXs& _measu
 	measurement_covariance_(_meas_covariance)
 {
     assert(_meas_covariance.determinant() > 0 && "Not positive definite measurement covariance");
-    measurement_sqrt_information_upper_ = computeSqrtInformationUpper(measurement_covariance_);
+    measurement_sqrt_information_upper_ = computeSqrtUpper(measurement_covariance_);
 
 //    std::cout << "constructed      +f" << id() << std::endl;
 }
@@ -85,13 +85,21 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
     assert(_meas_cov.determinant() > 0 && "Not positive definite measurement covariance");
 
     measurement_covariance_ = _meas_cov;
-	measurement_sqrt_information_upper_ = computeSqrtInformationUpper(_meas_cov);
+	measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_cov.inverse());
 }
 
-Eigen::MatrixXs FeatureBase::computeSqrtInformationUpper(const Eigen::MatrixXs & _covariance) const
+void FeatureBase::setMeasurementInfo(const Eigen::MatrixXs & _meas_info)
 {
-    assert(_covariance.determinant() > 0 && "Covariance is not positive definite!");
-    Eigen::LLT<Eigen::MatrixXs> llt_of_info(_covariance.inverse());
+    assert(_meas_info.determinant() > 0 && "Not positive definite measurement information");
+
+    measurement_covariance_ = _meas_info.inverse();
+    measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_info);
+}
+
+Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _M) const
+{
+    assert(_M.determinant() > 0 && "Matrix is not positive definite!");
+    Eigen::LLT<Eigen::MatrixXs> llt_of_info(_M);
     return llt_of_info.matrixU();
 }
 
