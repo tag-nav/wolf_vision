@@ -102,6 +102,9 @@ typedef Matrix<wolf::Scalar, 1, Dynamic> RowVectorXs;       ///< variable size r
 typedef Quaternion<wolf::Scalar> Quaternions;               ///< Quaternion of real Scalar type
 typedef AngleAxis<wolf::Scalar> AngleAxiss;                 ///< Angle-Axis of real Scalar type
 typedef Rotation2D<wolf::Scalar> Rotation2Ds;               ///< Rotation2D of real Scalar type
+
+// 3. Sparse matrix
+typedef SparseMatrix<wolf::Scalar> SparseMatrixs;
 }
 
 namespace wolf {
