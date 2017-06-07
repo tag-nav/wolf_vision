@@ -6,10 +6,9 @@
 
 namespace wolf {
 
-CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Options& _ceres_options, const bool _use_wolf_auto_diff) :
-    ceres_options_(_ceres_options),
-    wolf_problem_(_wolf_problem),
-    use_wolf_auto_diff_(_use_wolf_auto_diff)
+CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Options& _ceres_options) :
+    SolverManager(_wolf_problem),
+    ceres_options_(_ceres_options)
 {
     ceres::Covariance::Options covariance_options;
     covariance_options.algorithm_type = ceres::SPARSE_QR;//ceres::DENSE_SVD;
@@ -29,11 +28,9 @@ CeresManager::~CeresManager()
 {
 //	std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
 //	std::cout << "ceres parameter blocks:  " << ceres_problem_->NumParameterBlocks() << std::endl;
-    while (!id_2_residual_idx_.empty())
-        removeConstraint(id_2_residual_idx_.begin()->first);
+    while (!ctr_2_residual_idx_.empty())
+        removeConstraint(ctr_2_residual_idx_.begin()->first);
 //	std::cout << "all residuals removed! \n";
-    removeAllStateBlocks();
-//    std::cout << "all parameter blocks removed! \n";
 
 	delete covariance_;
     //std::cout << "covariance deleted! \n";
@@ -41,7 +38,7 @@ CeresManager::~CeresManager()
     //std::cout << "ceres problem deleted! \n";
 }
 
-ceres::Solver::Summary CeresManager::solve()
+std::string CeresManager::solve(const unsigned int& _report_level)
 {
 	//std::cout << "Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
 
@@ -50,14 +47,19 @@ ceres::Solver::Summary CeresManager::solve()
 
     //std::cout << "After Update: Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
 
-	// create summary
-	ceres::Solver::Summary ceres_summary_;
-
 	// run Ceres Solver
-	ceres::Solve(ceres_options_, ceres_problem_, &ceres_summary_);
+	ceres::Solve(ceres_options_, ceres_problem_, &summary_);
 	//std::cout << "solved" << std::endl;
-	//return results
-	return ceres_summary_;
+
+	//return report
+	if (_report_level == 0)
+	    return std::string();
+    else if (_report_level == 1)
+        return summary_.BriefReport();
+    else if (_report_level == 1)
+        return summary_.FullReport();
+    else
+        throw std::invalid_argument( "Report level should be 0, 1 or 2!" );
 }
 
 void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
@@ -224,103 +226,32 @@ void CeresManager::computeCovariances(const StateBlockList& st_list)
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
 }
 
-void CeresManager::update()
+void CeresManager::addConstraint(ConstraintBasePtr _ctr_ptr)
 {
-	//std::cout << "CeresManager: updating... " << std::endl;
-	//std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
-	//std::cout << wolf_problem_->getConstraintNotificationList().size() << " constraint notifications" << std::endl;
+    ctr_2_costfunction_[_ctr_ptr] = createCostFunction(_ctr_ptr);
 
-	// REMOVE CONSTRAINTS
-	auto ctr_notification_it = wolf_problem_->getConstraintNotificationList().begin();
-	while ( ctr_notification_it != wolf_problem_->getConstraintNotificationList().end() )
-		if (ctr_notification_it->notification_ == REMOVE)
-		{
-			removeConstraint(ctr_notification_it->id_);
-			ctr_notification_it = wolf_problem_->getConstraintNotificationList().erase(ctr_notification_it);
-		}
-		else
-			ctr_notification_it++;
-
-	// REMOVE STATE BLOCKS
-	auto state_notification_it = wolf_problem_->getStateBlockNotificationList().begin();
-	while ( state_notification_it != wolf_problem_->getStateBlockNotificationList().end() )
-		if (state_notification_it->notification_ == REMOVE)
-		{
-			removeStateBlock((double *)(state_notification_it->scalar_ptr_));
-			state_notification_it = wolf_problem_->getStateBlockNotificationList().erase(state_notification_it);
-		}
-		else
-			state_notification_it++;
-
-    // ADD/UPDATE STATE BLOCKS
-    while (!wolf_problem_->getStateBlockNotificationList().empty())
-    {
-        switch (wolf_problem_->getStateBlockNotificationList().front().notification_)
-        {
-            case ADD:
-            {
-                addStateBlock(wolf_problem_->getStateBlockNotificationList().front().state_block_ptr_);
-                break;
-            }
-            case UPDATE:
-            {
-                updateStateBlockStatus(wolf_problem_->getStateBlockNotificationList().front().state_block_ptr_);
-                break;
-            }
-            default:
-                throw std::runtime_error("CeresManager::update: State Block notification must be ADD, UPATE or REMOVE.");
-        }
-        wolf_problem_->getStateBlockNotificationList().pop_front();
-    }
-    // ADD CONSTRAINTS
-    while (!wolf_problem_->getConstraintNotificationList().empty())
-    {
-        switch (wolf_problem_->getConstraintNotificationList().front().notification_)
-        {
-            case ADD:
-            {
-                addConstraint(wolf_problem_->getConstraintNotificationList().front().constraint_ptr_,wolf_problem_->getConstraintNotificationList().front().id_);
-                break;
-            }
-            default:
-                throw std::runtime_error("CeresManager::update: Constraint notification must be ADD or REMOVE.");
-        }
-        wolf_problem_->getConstraintNotificationList().pop_front(); // CHECKED: it destroys the shared pointer
-    }
-//	std::cout << "all constraints added" << std::endl;
-//	std::cout << "ceres residual blocks:   " << ceres_problem_->NumResidualBlocks() << std::endl;
-//	std::cout << "wrapper residual blocks: " << id_2_residual_idx_.size() << std::endl;
-//	std::cout << "parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
-
-    assert(ceres_problem_->NumResidualBlocks() == id_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
-    assert(wolf_problem_->getConstraintNotificationList().empty() && "wolf problem's constraints notification list not empty after update");
-    assert(wolf_problem_->getStateBlockNotificationList().empty() && "wolf problem's state_blocks notification list not empty after update");
-}
-
-void CeresManager::addConstraint(ConstraintBasePtr _ctr_ptr, unsigned int _id)
-{
-    id_2_costfunction_[_id] = createCostFunction(_ctr_ptr);
-
-//    std::cout << "adding residual " << _ctr_ptr->id() << std::endl;
-//    std::cout << "residual pointer " << _ctr_ptr << std::endl;
+//    std::cout << "adding constraint " << _ctr_ptr->id() << std::endl;
+//    std::cout << "constraint pointer " << _ctr_ptr << std::endl;
 
     if (_ctr_ptr->getApplyLossFunction())
-        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _ctr_ptr->getStateScalarPtrVector());
+        ctr_2_residual_idx_[_ctr_ptr] = ceres_problem_->AddResidualBlock(ctr_2_costfunction_[_ctr_ptr].get(), new ceres::CauchyLoss(0.5), _ctr_ptr->getStateScalarPtrVector());
     else
-        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], NULL, _ctr_ptr->getStateScalarPtrVector());
+        ctr_2_residual_idx_[_ctr_ptr] = ceres_problem_->AddResidualBlock(ctr_2_costfunction_[_ctr_ptr].get(), NULL, _ctr_ptr->getStateScalarPtrVector());
+
+    assert(ceres_problem_->NumResidualBlocks() == ctr_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
-void CeresManager::removeConstraint(const unsigned int& _corr_id)
+void CeresManager::removeConstraint(ConstraintBasePtr _ctr_ptr)
 {
-//    std::cout << "removing constraint " << _corr_id << std::endl;
+//  std::cout << "removing constraint " << _ctr_ptr->id() << std::endl;
 
-    assert(id_2_residual_idx_.find(_corr_id) != id_2_residual_idx_.end());
-	ceres_problem_->RemoveResidualBlock(id_2_residual_idx_[_corr_id]);
-	delete id_2_costfunction_[_corr_id];
-	id_2_residual_idx_.erase(_corr_id);
+    assert(ctr_2_residual_idx_.find(_ctr_ptr) != ctr_2_residual_idx_.end());
+	ceres_problem_->RemoveResidualBlock(ctr_2_residual_idx_[_ctr_ptr]);
+	ctr_2_residual_idx_.erase(_ctr_ptr);
+	ctr_2_costfunction_.erase(_ctr_ptr);
 
 //	std::cout << "removingremoved!" << std::endl;
-	// The cost functions will be deleted by ceres_problem destructor (IT MUST HAVE THE OWNERSHIP)
+	assert(ceres_problem_->NumResidualBlocks() == ctr_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
 void CeresManager::addStateBlock(StateBlockPtr _st_ptr)
@@ -343,21 +274,11 @@ void CeresManager::addStateBlock(StateBlockPtr _st_ptr)
         updateStateBlockStatus(_st_ptr);
 }
 
-void CeresManager::removeStateBlock(double* _st_ptr)
+void CeresManager::removeStateBlock(StateBlockPtr _st_ptr)
 {
     //std::cout << "Removing State Block " << _st_ptr << std::endl;
-	assert(_st_ptr != nullptr);
-    ceres_problem_->RemoveParameterBlock(_st_ptr);
-}
-
-void CeresManager::removeAllStateBlocks()
-{
-	std::vector<double*> parameter_blocks;
-
-	ceres_problem_->GetParameterBlocks(&parameter_blocks);
-
-	for (unsigned int i = 0; i< parameter_blocks.size(); i++)
-		ceres_problem_->RemoveParameterBlock(parameter_blocks[i]);
+	assert(_st_ptr);
+    ceres_problem_->RemoveParameterBlock(_st_ptr->getPtr());
 }
 
 void CeresManager::updateStateBlockStatus(StateBlockPtr _st_ptr)
@@ -369,18 +290,14 @@ void CeresManager::updateStateBlockStatus(StateBlockPtr _st_ptr)
 		ceres_problem_->SetParameterBlockVariable(_st_ptr->getPtr());
 }
 
-ceres::CostFunction* CeresManager::createCostFunction(ConstraintBasePtr _ctr_ptr)
+ceres::CostFunctionPtr CeresManager::createCostFunction(ConstraintBasePtr _ctr_ptr)
 {
 	assert(_ctr_ptr != nullptr);
 	//std::cout << "creating cost function for constraint " << _ctr_ptr->id() << std::endl;
 
     // analitic jacobian
-    if (_ctr_ptr->getJacobianMethod() == JAC_ANALYTIC)
-        return new CostFunctionWrapper(_ctr_ptr);
-
-    // auto jacobian
-    else if (_ctr_ptr->getJacobianMethod() == JAC_AUTO)
-        return new CostFunctionWrapper(_ctr_ptr);
+    if (_ctr_ptr->getJacobianMethod() == JAC_ANALYTIC || _ctr_ptr->getJacobianMethod() == JAC_AUTO)
+        return std::make_shared<CostFunctionWrapper>(_ctr_ptr);
 
     // numeric jacobian
     else if (_ctr_ptr->getJacobianMethod() == JAC_NUMERIC)

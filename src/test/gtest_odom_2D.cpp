@@ -125,7 +125,6 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
 
     ProblemPtr          Pr = Problem::create(FRM_PO_2D);
     CeresManager ceres_manager(Pr);
-    ceres::Solver::Summary summary;
 
     // KF0 and absolute prior
     FrameBasePtr        F0 = Pr->setPrior(x0, P0,t0);
@@ -154,9 +153,9 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     F0->setState(Vector3s(1,2,3));
     F1->setState(Vector3s(2,3,1));
     F2->setState(Vector3s(3,1,2));
-    summary = ceres_manager.solve();
-//    std::cout << summary.BriefReport() << std::endl;
-//    std::cout << summary.FullReport() << std::endl;
+    std::string report = ceres_manager.solve(1);
+//    std::cout << report << std::endl;
+
     ceres_manager.computeCovariances(ALL_MARGINALS);
 //    show(Pr);
 
@@ -209,7 +208,7 @@ TEST(Odom2D, VoteForKfAndSolve)
 
     // Origin Key Frame
     FrameBasePtr origin_frame = problem->setPrior(x0, P0, t0);
-    ceres_manager.solve();
+    ceres_manager.solve(0);
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
     //    std::cout << "Initial pose : " << problem->getCurrentState().transpose() << std::endl;
@@ -277,7 +276,8 @@ TEST(Odom2D, VoteForKfAndSolve)
     }
 
     // Solve
-    ceres::Solver::Summary summary = ceres_manager.solve();
+    std::string report = ceres_manager.solve(1);
+//    std::cout << report << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
     ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance() , integrated_cov_vector[5], 1e-6);
@@ -319,7 +319,6 @@ TEST(Odom2D, KF_callback)
 
     // Ceres wrapper
     CeresManager ceres_manager(problem);
-    ceres::Solver::Summary summary;
 
     // Origin Key Frame
     FrameBasePtr keyframe_0 = problem->setPrior(x0, x0_cov, t0);
@@ -392,7 +391,8 @@ TEST(Odom2D, KF_callback)
 
     MotionBuffer key_buffer_n = key_capture_n->getBuffer();
 
-    ceres_manager.solve();
+    std::string report = ceres_manager.solve(1);
+//    std::cout << report << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
@@ -420,8 +420,9 @@ TEST(Odom2D, KF_callback)
     keyframe_0->setState(Vector3s(1,2,3));
     keyframe_1->setState(Vector3s(2,3,1));
     keyframe_2->setState(Vector3s(3,1,2));
-    summary = ceres_manager.solve();
-//    std::cout << summary.BriefReport() << std::endl;
+
+    report = ceres_manager.solve(1);
+//    std::cout << report << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
 //    show(problem);
 

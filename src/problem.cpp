@@ -396,14 +396,14 @@ StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
     // add the state unit to the list
     state_block_list_.push_back(_state_ptr);
     // queue for solver manager
-    state_block_notification_list_.push_back(StateBlockNotification({ADD,_state_ptr,_state_ptr->getPtr()}));
+    state_block_notification_list_.push_back(StateBlockNotification({ADD,_state_ptr}));
     return _state_ptr;
 }
 
 void Problem::updateStateBlockPtr(StateBlockPtr _state_ptr)
 {
     // queue for solver manager
-    state_block_notification_list_.push_back(StateBlockNotification({UPDATE,_state_ptr,_state_ptr->getPtr()}));
+    state_block_notification_list_.push_back(StateBlockNotification({UPDATE,_state_ptr}));
 }
 
 void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
@@ -422,7 +422,7 @@ void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
     	state_block_notification_list_.erase(state_notif_it);
     // Add remove notification
     else
-    	state_block_notification_list_.push_back(StateBlockNotification({REMOVE, nullptr, _state_ptr->getPtr()}));
+    	state_block_notification_list_.push_back(StateBlockNotification({REMOVE, _state_ptr}));
 
 }
 
@@ -430,7 +430,7 @@ ConstraintBasePtr Problem::addConstraintPtr(ConstraintBasePtr _constraint_ptr)
 {
     //std::cout << "addConstraintPtr" << std::endl;
     // queue for solver manager
-    constraint_notification_list_.push_back(ConstraintNotification({ADD, _constraint_ptr, _constraint_ptr->id()}));
+    constraint_notification_list_.push_back(ConstraintNotification({ADD, _constraint_ptr}));
 
     return _constraint_ptr;
 }
@@ -449,7 +449,7 @@ void Problem::removeConstraintPtr(ConstraintBasePtr _constraint_ptr)
 
     // Add remove notification
     else
-        constraint_notification_list_.push_back(ConstraintNotification({REMOVE, nullptr, _constraint_ptr->id()}));
+        constraint_notification_list_.push_back(ConstraintNotification({REMOVE, _constraint_ptr}));
 }
 
 void Problem::clearCovariance()

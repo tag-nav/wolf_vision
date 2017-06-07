@@ -68,7 +68,7 @@ TEST(ConstraintFix3D, solve)
     frm0->setState(x0);
 
     // solve for frm0
-    ceres::Solver::Summary summary = ceres_mgr.solve();
+    std::string brief_report = ceres_mgr.solve(1);
 
     ASSERT_MATRIX_APPROX(frm0->getState(), pose7, 1e-6);
 

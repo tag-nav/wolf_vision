@@ -13,6 +13,8 @@
 
 namespace wolf {
 
+WOLF_PTR_TYPEDEFS(CostFunctionWrapper);
+
 class CostFunctionWrapper : public ceres::CostFunction
 {
     protected:

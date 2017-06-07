@@ -190,7 +190,7 @@ int main(int argc, char** argv)
     SensorBasePtr sensor_ptr = bl_problem_ptr->installSensor("ODOM 2D", "Odometry", Eigen::VectorXs::Zero(3), IntrinsicsBasePtr());
 
     // Ceres wrapper
-    ceres::Solver::Summary bl_summary, sp_summary;
+    std::string bl_summary, sp_summary;
     ceres::Solver::Options ceres_options;
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
@@ -291,8 +291,8 @@ int main(int argc, char** argv)
 
 			// SOLVE
 			// solution
-			bl_summary = bl_ceres_manager->solve();
-		    std::cout << bl_summary.BriefReport() << std::endl;
+			bl_summary = bl_ceres_manager->solve(1);
+		    std::cout << bl_summary << std::endl;
 
 			// covariance
 		    bl_ceres_manager->computeCovariances(ALL);//ALL_MARGINALS

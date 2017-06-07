@@ -30,15 +30,13 @@ enum Notification
 };
 struct StateBlockNotification
 {
-        Notification notification_;
-        StateBlockPtr state_block_ptr_;
-        Scalar* scalar_ptr_;
+    Notification notification_;
+    StateBlockPtr state_block_ptr_;
 };
 struct ConstraintNotification
 {
-        Notification notification_;
-        ConstraintBasePtr constraint_ptr_; // TODO check pointer type
-        unsigned int id_;
+    Notification notification_;
+    ConstraintBasePtr constraint_ptr_;
 };
 
 

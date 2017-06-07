@@ -20,17 +20,17 @@ namespace wolf {
 
 // Wolf ceres auto_diff creator
 template <class T>
-ceres::NumericDiffCostFunction<T, ceres::CENTRAL, T::residualSize,
-                               T::block0Size,T::block1Size,T::block2Size,T::block3Size,T::block4Size,
-                               T::block5Size,T::block6Size,T::block7Size,T::block8Size,T::block9Size>* createNumericDiffCostFunctionCeres(ConstraintBasePtr _constraint_ptr)
+std::shared_ptr<ceres::NumericDiffCostFunction<T, ceres::CENTRAL, T::residualSize,
+                                               T::block0Size,T::block1Size,T::block2Size,T::block3Size,T::block4Size,
+                                               T::block5Size,T::block6Size,T::block7Size,T::block8Size,T::block9Size> > createNumericDiffCostFunctionCeres(ConstraintBasePtr _constraint_ptr)
 {
-    return new ceres::NumericDiffCostFunction<T, ceres::CENTRAL, T::residualSize,
-                                              T::block0Size,T::block1Size,T::block2Size,T::block3Size,T::block4Size,
-                                              T::block5Size,T::block6Size,T::block7Size,T::block8Size,T::block9Size>(std::static_pointer_cast<T>(_constraint_ptr).get());
+    return std::make_shared<ceres::NumericDiffCostFunction<T, ceres::CENTRAL, T::residualSize,
+                                                           T::block0Size,T::block1Size,T::block2Size,T::block3Size,T::block4Size,
+                                                           T::block5Size,T::block6Size,T::block7Size,T::block8Size,T::block9Size> >(std::static_pointer_cast<T>(_constraint_ptr).get());
 };
 
 
-ceres::CostFunction* createNumericDiffCostFunction(ConstraintBasePtr _ctr_ptr)
+std::shared_ptr<ceres::CostFunction> createNumericDiffCostFunction(ConstraintBasePtr _ctr_ptr)
 {
     switch (_ctr_ptr->getTypeId())
     {

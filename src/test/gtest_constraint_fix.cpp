@@ -60,7 +60,7 @@ TEST(ConstraintFix, solve)
     frm0->setState(x0);
 
     // solve for frm0
-    ceres::Solver::Summary summary = ceres_mgr.solve();
+    std::string report = ceres_mgr.solve();
 
     ASSERT_MATRIX_APPROX(frm0->getState(), pose6, 1e-6);
 
