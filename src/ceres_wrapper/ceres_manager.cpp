@@ -270,8 +270,6 @@ void CeresManager::addStateBlock(StateBlockPtr _st_ptr)
 //        std::cout << "No Local Parametrization to be added" << std::endl;
         ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), _st_ptr->getSize(), nullptr);
     }
-    if (_st_ptr->isFixed())
-        updateStateBlockStatus(_st_ptr);
 }
 
 void CeresManager::removeStateBlock(StateBlockPtr _st_ptr)

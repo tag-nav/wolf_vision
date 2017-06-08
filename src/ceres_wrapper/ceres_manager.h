@@ -10,8 +10,6 @@
 #include "solver_manager.h"
 #include "cost_function_wrapper.h"
 #include "local_parametrization_wrapper.h"
-#include "../wolf.h"
-#include "../state_block.h"
 #include "create_numeric_diff_cost_function.h"
 
 namespace ceres {

@@ -19,6 +19,7 @@ class QRManager : public SolverManager
     protected:
         Eigen::SparseQR<Eigen::SparseMatrixs, Eigen::NaturalOrdering<int>> solver_;
         Eigen::SparseMatrixs A_;
+        Eigen::VectorXs b_;
         std::map<StateBlockPtr, unsigned int> sb_2_col_;
         std::map<ConstraintBasePtr, unsigned int> ctr_2_row_;
 
@@ -45,6 +46,8 @@ class QRManager : public SolverManager
         virtual void removeStateBlock(StateBlockPtr _st_ptr);
 
         virtual void updateStateBlockStatus(StateBlockPtr _st_ptr);
+
+        void relinearizeConstraint(ConstraintBasePtr _ctr_ptr);
 };
 
 } /* namespace wolf */

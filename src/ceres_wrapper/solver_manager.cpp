@@ -16,9 +16,9 @@ SolverManager::~SolverManager()
 
 void SolverManager::update()
 {
-	//std::cout << "SolverManager: updating... " << std::endl;
-	//std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
-	//std::cout << wolf_problem_->getConstraintNotificationList().size() << " constraint notifications" << std::endl;
+    //std::cout << "SolverManager: updating... " << std::endl;
+    //std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
+    //std::cout << wolf_problem_->getConstraintNotificationList().size() << " constraint notifications" << std::endl;
 
 	// REMOVE CONSTRAINTS
 	auto ctr_notification_it = wolf_problem_->getConstraintNotificationList().begin();
@@ -50,6 +50,8 @@ void SolverManager::update()
             case ADD:
             {
                 addStateBlock(wolf_problem_->getStateBlockNotificationList().front().state_block_ptr_);
+                if (wolf_problem_->getStateBlockNotificationList().front().state_block_ptr_->isFixed())
+                    updateStateBlockStatus(wolf_problem_->getStateBlockNotificationList().front().state_block_ptr_);
                 break;
             }
             case UPDATE:

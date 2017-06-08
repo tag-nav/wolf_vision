@@ -9,19 +9,29 @@
 #define SPARSE_UTILS_H_
 
 // eigen includes
-#include <eigen3/Eigen/Sparse>
+//#include <eigen3/Eigen/Sparse>
 
 namespace wolf
 {
 
-void eraseBlockRow(Eigen::SparseMatrixs& A, const unsigned int& _row, const unsigned int& _n_rows)
+void eraseBlockRow(Eigen::SparseMatrix<Scalar, Eigen::RowMajor>& A, const unsigned int& _row, const unsigned int& _n_rows)
 {
-    A.prune([](int i, int, Scalar) { return i >= _row && i < _row + _n_rows; });
+    A.middleRows(_row,_n_rows) = Eigen::SparseMatrixs(_n_rows,A.cols());
 }
 
-void eraseBlockCol(Eigen::SparseMatrixs& A, const unsigned int& _col, const unsigned int& _n_cols)
+void eraseBlockRow(Eigen::SparseMatrix<Scalar, Eigen::ColMajor>& A, const unsigned int& _row, const unsigned int& _n_rows)
 {
-    A.prune([](int, int j, Scalar) { return j >= _col && j < _col + _n_cols; });
+    A.prune([&](int i, int, Scalar) { return i >= _row && i < _row + _n_rows; });
+}
+
+void eraseBlockCol(Eigen::SparseMatrix<Scalar, Eigen::ColMajor>& A, const unsigned int& _col, const unsigned int& _n_cols)
+{
+    A.middleCols(_col,_n_cols) = Eigen::SparseMatrixs(A.rows(),_n_cols);
+}
+
+void eraseBlockCol(Eigen::SparseMatrix<Scalar, Eigen::RowMajor>& A, const unsigned int& _col, const unsigned int& _n_cols)
+{
+    A.prune([&](int, int j, Scalar) { return j >= _col && j < _col + _n_cols; });
 }
 
 void addSparseBlock(const Eigen::MatrixXs& ins, Eigen::SparseMatrixs& original, const unsigned int& row, const unsigned int& col)

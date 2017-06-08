@@ -392,7 +392,8 @@ void Problem::addLandmarkList(LandmarkBaseList& _lmk_list)
 
 StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 {
-    //std::cout << "addStateBlockPtr" << std::endl;
+    //std::cout << "Problem::addStateBlockPtr " << _state_ptr.get() << std::endl;
+
     // add the state unit to the list
     state_block_list_.push_back(_state_ptr);
     // queue for solver manager
@@ -402,12 +403,16 @@ StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 
 void Problem::updateStateBlockPtr(StateBlockPtr _state_ptr)
 {
+    //std::cout << "Problem::updateStateBlockPtr " << _state_ptr.get() << std::endl;
+
     // queue for solver manager
     state_block_notification_list_.push_back(StateBlockNotification({UPDATE,_state_ptr}));
 }
 
 void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
 {
+    //std::cout << "Problem::removeStateBlockPtr " << _state_ptr.get() << std::endl;
+
     // add the state unit to the list
     state_block_list_.remove(_state_ptr);
 
@@ -428,7 +433,7 @@ void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
 
 ConstraintBasePtr Problem::addConstraintPtr(ConstraintBasePtr _constraint_ptr)
 {
-    //std::cout << "addConstraintPtr" << std::endl;
+    //std::cout << "Problem::addConstraintPtr " << _constraint_ptr->id() << std::endl;
     // queue for solver manager
     constraint_notification_list_.push_back(ConstraintNotification({ADD, _constraint_ptr}));
 
@@ -437,6 +442,8 @@ ConstraintBasePtr Problem::addConstraintPtr(ConstraintBasePtr _constraint_ptr)
 
 void Problem::removeConstraintPtr(ConstraintBasePtr _constraint_ptr)
 {
+    //std::cout << "Problem::removeConstraintPtr " << _constraint_ptr->id() << std::endl;
+
     // Check if the constraint addition is still as a notification
     auto ctr_notif_it = constraint_notification_list_.begin();
     for (; ctr_notif_it != constraint_notification_list_.end(); ctr_notif_it++)

@@ -4,6 +4,7 @@
 //wolf includes
 #include "../wolf.h"
 #include "../state_block.h"
+#include "../constraint_base.h"
 
 namespace wolf {
 
