@@ -59,14 +59,15 @@ void QRManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
 
 void QRManager::computeCovariances(const StateBlockList& _sb_list)
 {
-    std::cout << "computing covariances.." << std::endl;
+    //std::cout << "computing covariances.." << std::endl;
     update();
-    std::cout << "updated. A is " << A_.rows() << "x" << A_.cols() << std::endl;
+    //std::cout << "updated. A is " << A_.rows() << "x" << A_.cols() << std::endl;
     computeDecomposition();
-    std::cout << "decomposition computed" << std::endl;
+    //std::cout << "decomposition computed" << std::endl;
 
     Eigen::SparseMatrixs R = solver_.matrixR();
-    std::cout << "R is " << R.rows() << "x" << R.cols() << std::endl;
+//    std::cout << "R is " << R.rows() << "x" << R.cols() << std::endl;
+//    std::cout << Eigen::MatrixXs(R) << std::endl;
 
     Eigen::SparseQR<Eigen::SparseMatrixs, Eigen::NaturalOrdering<int>> solver_aux;
     solver_aux.compute(R.topRows(R.cols()));
@@ -74,12 +75,26 @@ void QRManager::computeCovariances(const StateBlockList& _sb_list)
     Eigen::SparseMatrix<Scalar, Eigen::ColMajor> I(A_.cols(),A_.cols());
     I.setIdentity();
     Eigen::SparseMatrix<Scalar, Eigen::ColMajor> iR = solver_aux.solve(I);
-    Eigen::MatrixXs Sigma_full = iR.transpose() * iR;
+    Eigen::MatrixXs P = solver_.colsPermutation();
+    Eigen::MatrixXs Sigma_full = P * iR * iR.transpose() * P.transpose();
+
+//    Eigen::MatrixXs id2 = (A_.transpose() * A_) * Sigma_full;
+//    std::cout << "A' A = \n" << Eigen::MatrixXs(A_.transpose() * A_)<< std::endl;
+//    std::cout << "iP' R' R iP = \n" << Eigen::MatrixXs(P.inverse().transpose() * R.transpose() * R * P.inverse() ) << std::endl;
+//    std::cout << "P iR iR' P' = \n" << Eigen::MatrixXs(P * iR * iR.transpose() * P.transpose()) << std::endl;
+//    std::cout << "Sigma * Lambda = \n" << Eigen::MatrixXs(Sigma_full * A_.transpose() * A_) << std::endl;
+//    std::cout << "Permutation: \n" << P << std::endl;
+//    std::cout << "Sigma = \n" << Sigma_full << std::endl;
 
     // STORE DESIRED COVARIANCES
-    for (auto sb_row : _sb_list)
-        for (auto sb_col : _sb_list)
-            wolf_problem_->addCovarianceBlock(sb_row, sb_col, Sigma_full.block(sb_2_col_[sb_row], sb_2_col_[sb_col], sb_row->getSize(), sb_col->getSize()));
+    for (auto sb_row = _sb_list.begin(); sb_row != _sb_list.end(); sb_row++)
+        for (auto sb_col = sb_row; sb_col!=_sb_list.end(); sb_col++)
+        {
+            //std::cout << "cov state block " << sb_col->get() << std::endl;
+            assert(sb_2_col_.find(*sb_col) != sb_2_col_.end() && "state block not found");
+            //std::cout << "block: " << sb_2_col_[*sb_row] << "," << sb_2_col_[*sb_col] << std::endl << Sigma_full.block(sb_2_col_[*sb_row], sb_2_col_[*sb_col], (*sb_row)->getSize(), (*sb_col)->getSize()) << std::endl;
+            wolf_problem_->addCovarianceBlock(*sb_row, *sb_col, Sigma_full.block(sb_2_col_[*sb_row], sb_2_col_[*sb_col], (*sb_row)->getSize(), (*sb_col)->getSize()));
+        }
 }
 
 bool QRManager::computeDecomposition()
