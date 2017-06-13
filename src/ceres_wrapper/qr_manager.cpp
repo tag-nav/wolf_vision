@@ -9,10 +9,14 @@
 
 namespace wolf {
 
-QRManager::QRManager(ProblemPtr _wolf_problem) :
+QRManager::QRManager(ProblemPtr _wolf_problem, const unsigned int& _N_batch) :
         SolverManager(_wolf_problem),
         A_(), // empty matrix
-        b_()
+        b_(),
+        any_state_block_removed_(false),
+        new_state_blocks_(0),
+        N_batch_(_N_batch),
+        pending_changes_(false)
 {
     //
 }
@@ -25,32 +29,11 @@ QRManager::~QRManager()
 
 std::string QRManager::solve(const unsigned int& _report_level)
 {
+    // check for update notifications
     update();
 
-    // Rebuild problem
-    unsigned int state_size = 0;
-    for (auto sb_pair : sb_2_col_)
-    {
-        sb_2_col_[sb_pair.first] = state_size;
-        state_size += sb_pair.first->getSize();
-    }
-
-    unsigned int meas_size = 0;
-    for (auto ctr_pair : ctr_2_row_)
-    {
-        ctr_2_row_[ctr_pair.first] = meas_size;
-        meas_size += ctr_pair.first->getSize();
-    }
-
-    A_.resize(meas_size,state_size);
-    b_.resize(meas_size);
-
-    for (auto ctr_pair : ctr_2_row_)
-        relinearizeConstraint(ctr_pair.first);
-
     // Decomposition
-    solver_.compute(A_);
-    if (solver_.info() != Eigen::Success)
+    if (!computeDecomposition())
         return std::string("decomposition failed\n");
 
     // Solve
@@ -61,36 +44,90 @@ std::string QRManager::solve(const unsigned int& _report_level)
     for (auto sb_pair : sb_2_col_)
         sb_pair.first->setState(sb_pair.first->getState() + x_incr.segment(sb_pair.second, sb_pair.first->getSize()));
 
-    if (_report_level == 0)
-        return std::string();
-    else if (_report_level == 1)
+    if (_report_level == 1)
         return std::string("Success!\n");
     else if (_report_level == 2)
         return std::string("Success!\n");
-    else
-        throw std::runtime_error("bad report level value.");
+
+    return std::string();
 }
 
 void QRManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
 {
     // TODO
-    /*Eigen::SparseMatrixs Lambda_bl = wolf_bl->computeInfoMatrix();
-    Eigen::SimplicialLDLT<Eigen::SparseMatrix<Scalar> > solver;
-    solver.compute(Lambda_bl.transpose());
-    Eigen::SparseMatrix<Scalar> I(Lambda_bl.rows(),Lambda_bl.rows());
-    I.setIdentity();
-    Eigen::MatrixXs Sigma_bl_full = solver.solve(I);
-    Eigen::MatrixXs Sigma_bl2(state_size,state_size);
-
-    for (auto sb_row : sb_remaining)
-        for (auto sb_col : sb_remaining)
-            Sigma_bl2.block(sb_2_idx_prun[sb_row], sb_2_idx_prun[sb_col], sb_row->getSize(), sb_col->getSize()) = Sigma_bl_full.block(sb_2_idx_full[sb_row], sb_2_idx_full[sb_col], sb_row->getSize(), sb_col->getSize());
-    */
 }
 
-void QRManager::computeCovariances(const StateBlockList& st_list)
+void QRManager::computeCovariances(const StateBlockList& _sb_list)
 {
-    //TODO
+    std::cout << "computing covariances.." << std::endl;
+    update();
+    std::cout << "updated. A is " << A_.rows() << "x" << A_.cols() << std::endl;
+    computeDecomposition();
+    std::cout << "decomposition computed" << std::endl;
+
+    Eigen::SparseMatrixs R = solver_.matrixR();
+    std::cout << "R is " << R.rows() << "x" << R.cols() << std::endl;
+
+    Eigen::SparseQR<Eigen::SparseMatrixs, Eigen::NaturalOrdering<int>> solver_aux;
+    solver_aux.compute(R.topRows(R.cols()));
+
+    Eigen::SparseMatrix<Scalar, Eigen::ColMajor> I(A_.cols(),A_.cols());
+    I.setIdentity();
+    Eigen::SparseMatrix<Scalar, Eigen::ColMajor> iR = solver_aux.solve(I);
+    Eigen::MatrixXs Sigma_full = iR.transpose() * iR;
+
+    // STORE DESIRED COVARIANCES
+    for (auto sb_row : _sb_list)
+        for (auto sb_col : _sb_list)
+            wolf_problem_->addCovarianceBlock(sb_row, sb_col, Sigma_full.block(sb_2_col_[sb_row], sb_2_col_[sb_col], sb_row->getSize(), sb_col->getSize()));
+}
+
+bool QRManager::computeDecomposition()
+{
+    if (pending_changes_)
+    {
+        // Rebuild problem
+        if (any_state_block_removed_)
+        {
+            // rebuild maps
+            unsigned int state_size = 0;
+            for (auto sb_pair : sb_2_col_)
+            {
+                sb_2_col_[sb_pair.first] = state_size;
+                state_size += sb_pair.first->getSize();
+            }
+
+            unsigned int meas_size = 0;
+            for (auto ctr_pair : ctr_2_row_)
+            {
+                ctr_2_row_[ctr_pair.first] = meas_size;
+                meas_size += ctr_pair.first->getSize();
+            }
+
+            // resize and setZero A, b
+            A_.resize(meas_size,state_size);
+            b_.resize(meas_size);
+        }
+
+        if (any_state_block_removed_ || new_state_blocks_ >= N_batch_)
+        {
+            // relinearize all constraints
+            for (auto ctr_pair : ctr_2_row_)
+                relinearizeConstraint(ctr_pair.first);
+
+            any_state_block_removed_ = false;
+            new_state_blocks_ = 0;
+        }
+
+        // Decomposition
+        solver_.compute(A_);
+        if (solver_.info() != Eigen::Success)
+            return false;
+    }
+
+    pending_changes_ = false;
+
+    return true;
 }
 
 void QRManager::addConstraint(ConstraintBasePtr _ctr_ptr)
@@ -105,6 +142,8 @@ void QRManager::addConstraint(ConstraintBasePtr _ctr_ptr)
     assert(b_.rows() >= ctr_2_row_[_ctr_ptr] + _ctr_ptr->getSize() - 1 && "bad b number of rows");
 
     relinearizeConstraint(_ctr_ptr);
+
+    pending_changes_ = true;
 }
 
 
@@ -115,6 +154,7 @@ void QRManager::removeConstraint(ConstraintBasePtr _ctr_ptr)
     eraseBlockRow(A_, ctr_2_row_[_ctr_ptr], _ctr_ptr->getSize());
     b_.segment(ctr_2_row_[_ctr_ptr], _ctr_ptr->getSize()).setZero();
     ctr_2_row_.erase(_ctr_ptr);
+    pending_changes_ = true;
 }
 
 void QRManager::addStateBlock(StateBlockPtr _st_ptr)
@@ -123,7 +163,9 @@ void QRManager::addStateBlock(StateBlockPtr _st_ptr)
     assert(sb_2_col_.find(_st_ptr) == sb_2_col_.end() && "adding existing state block");
     sb_2_col_[_st_ptr] = A_.cols();
     A_.conservativeResize(A_.rows(), A_.cols() + _st_ptr->getSize());
-    b_.conservativeResize(b_.size() + _st_ptr->getSize());
+
+    new_state_blocks_++;
+    pending_changes_ = true;
 }
 
 void QRManager::removeStateBlock(StateBlockPtr _st_ptr)
@@ -131,8 +173,13 @@ void QRManager::removeStateBlock(StateBlockPtr _st_ptr)
     //std::cout << "remove state block " << _st_ptr.get() << std::endl;
     assert(sb_2_col_.find(_st_ptr) != sb_2_col_.end() && "removing unknown state block");
     eraseBlockCol(A_, sb_2_col_[_st_ptr], _st_ptr->getSize());
+
+    // flag to rebuild problem
+    any_state_block_removed_ = true;
     // TODO: insert identity while problem is not re-built?
-    sb_2_col_.erase(_st_ptr); // to be erased when problem rebuild?
+
+    sb_2_col_.erase(_st_ptr);
+    pending_changes_ = true;
 }
 
 void QRManager::updateStateBlockStatus(StateBlockPtr _st_ptr)
@@ -159,14 +206,16 @@ void QRManager::relinearizeConstraint(ConstraintBasePtr _ctr_ptr)
     _ctr_ptr->evaluate(ctr_states_ptr,residual,jacobians);
 
     // Fill jacobians
+    Eigen::SparseMatrixs A_block_row(_ctr_ptr->getSize(), A_.cols());
     for (auto i = 0; i < jacobians.size(); i++)
         if (!_ctr_ptr->getStateBlockPtrVector()[i]->isFixed())
         {
             assert(sb_2_col_.find(_ctr_ptr->getStateBlockPtrVector()[i]) != sb_2_col_.end() && "constraint involving a state block not added");
             assert(A_.cols() >= sb_2_col_[_ctr_ptr->getStateBlockPtrVector()[i]] + jacobians[i].cols() - 1 && "bad A number of cols");
-            // insert since this row have been created few lines before and it's empty for sure
-            insertSparseBlock(jacobians[i], A_, ctr_2_row_[_ctr_ptr], sb_2_col_[_ctr_ptr->getStateBlockPtrVector()[i]]);
+            // insert since A_block_row has just been created so it's empty for sure
+            insertSparseBlock(jacobians[i], A_block_row, 0, sb_2_col_[_ctr_ptr->getStateBlockPtrVector()[i]]);
         }
+    assignBlockRow(A_, A_block_row, ctr_2_row_[_ctr_ptr]);
 
     // Fill residual
     b_.segment(ctr_2_row_[_ctr_ptr], _ctr_ptr->getSize()) = residual;

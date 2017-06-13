@@ -17,15 +17,19 @@ namespace wolf
 class QRManager : public SolverManager
 {
     protected:
-        Eigen::SparseQR<Eigen::SparseMatrixs, Eigen::NaturalOrdering<int>> solver_;
+        Eigen::SparseQR<Eigen::SparseMatrixs, Eigen::COLAMDOrdering<int>> solver_;//Eigen::NaturalOrdering<int>
         Eigen::SparseMatrixs A_;
         Eigen::VectorXs b_;
         std::map<StateBlockPtr, unsigned int> sb_2_col_;
         std::map<ConstraintBasePtr, unsigned int> ctr_2_row_;
+        bool any_state_block_removed_;
+        unsigned int new_state_blocks_;
+        unsigned int N_batch_;
+        bool pending_changes_;
 
     public:
 
-        QRManager(ProblemPtr _wolf_problem);
+        QRManager(ProblemPtr _wolf_problem, const unsigned int& _N_batch);
 
         virtual ~QRManager();
 
@@ -33,9 +37,11 @@ class QRManager : public SolverManager
 
         virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS);
 
-        virtual void computeCovariances(const StateBlockList& st_list);
+        virtual void computeCovariances(const StateBlockList& _sb_list);
 
     private:
+
+        bool computeDecomposition();
 
         virtual void addConstraint(ConstraintBasePtr _ctr_ptr);
 

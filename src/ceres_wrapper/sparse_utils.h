@@ -52,5 +52,11 @@ void insertSparseBlock(const Eigen::MatrixXs& ins, Eigen::SparseMatrixs& origina
     original.makeCompressed();
 }
 
+void assignBlockRow(Eigen::SparseMatrix<Scalar, Eigen::RowMajor>& A, const Eigen::SparseMatrix<Scalar, Eigen::RowMajor>& ins, const unsigned int& _row)
+{
+    assert(A.rows() >= _row + ins.rows() && A.cols() == ins.cols());
+    A.middleRows(_row, ins.rows()) = ins;
 }
+
+} // namespace wolf
 #endif /* SPARSE_UTILS_H_ */
