@@ -13,12 +13,9 @@ FeatureBase::FeatureBase(const std::string& _type, const Eigen::VectorXs& _measu
     feature_id_(++feature_id_count_),
     track_id_(0),
     landmark_id_(0),
-	measurement_(_measurement),
-	measurement_covariance_(_meas_covariance)
+	measurement_(_measurement)
 {
-    assert(_meas_covariance.determinant() > 0 && "Not positive definite measurement covariance");
-    measurement_sqrt_information_upper_ = computeSqrtUpper(measurement_covariance_);
-
+    setMeasurementCovariance(_meas_covariance);
 //    std::cout << "constructed      +f" << id() << std::endl;
 }
 
