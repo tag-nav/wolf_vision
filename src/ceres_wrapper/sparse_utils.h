@@ -34,7 +34,8 @@ void eraseBlockCol(Eigen::SparseMatrix<Scalar, Eigen::RowMajor>& A, const unsign
     A.prune([&](int, int j, Scalar) { return j >= _col && j < _col + _n_cols; });
 }
 
-void addSparseBlock(const Eigen::MatrixXs& ins, Eigen::SparseMatrixs& original, const unsigned int& row, const unsigned int& col)
+template<int _Options, typename _StorageIndex>
+void addSparseBlock(const Eigen::MatrixXs& ins, Eigen::SparseMatrix<Scalar,_Options,_StorageIndex>& original, const unsigned int& row, const unsigned int& col)
 {
     for (auto ins_row = 0; ins_row < ins.rows(); ins_row++)
         for (auto ins_col = 0; ins_col < ins.cols(); ins_col++)
@@ -43,7 +44,8 @@ void addSparseBlock(const Eigen::MatrixXs& ins, Eigen::SparseMatrixs& original, 
     original.makeCompressed();
 }
 
-void insertSparseBlock(const Eigen::MatrixXs& ins, Eigen::SparseMatrixs& original, const unsigned int& row, const unsigned int& col)
+template<int _Options, typename _StorageIndex>
+void insertSparseBlock(const Eigen::MatrixXs& ins, Eigen::SparseMatrix<Scalar,_Options,_StorageIndex>& original, const unsigned int& row, const unsigned int& col)
 {
     for (auto ins_row = 0; ins_row < ins.rows(); ins_row++)
         for (auto ins_col = 0; ins_col < ins.cols(); ins_col++)
@@ -56,6 +58,32 @@ void assignBlockRow(Eigen::SparseMatrix<Scalar, Eigen::RowMajor>& A, const Eigen
 {
     assert(A.rows() >= _row + ins.rows() && A.cols() == ins.cols());
     A.middleRows(_row, ins.rows()) = ins;
+}
+
+Eigen::SparseMatrixs createBlockDiagonal(const std::vector<Eigen::MatrixXs>& _diag_blocs)
+{
+    unsigned int dim = _diag_blocs.front().rows();
+    unsigned int size = dim * _diag_blocs.size();
+
+    Eigen::SparseMatrixs M(size,size);
+
+    unsigned int pos = 0;
+    for (const Eigen::MatrixXs& omega_k : _diag_blocs)
+    {
+        insertSparseBlock(omega_k, M, pos, pos);
+        pos += dim;
+    }
+
+    return M;
+}
+
+template<int _Options, typename _StorageIndex>
+void getDiagonalBlocks(const Eigen::SparseMatrix<Scalar,_Options,_StorageIndex>& _M, std::vector<Eigen::MatrixXs>& diag_, const unsigned int& dim)
+{
+    assert(_M.rows() % dim == 0 && "number of rows must be multiple of dimension");
+    diag_.clear();
+    for (auto i = 0; i < _M.rows(); i += dim)
+        diag_.push_back(Eigen::MatrixXs(_M.block(i,i,dim,dim)));
 }
 
 } // namespace wolf

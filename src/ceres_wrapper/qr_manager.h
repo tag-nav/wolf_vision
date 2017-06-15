@@ -17,7 +17,8 @@ namespace wolf
 class QRManager : public SolverManager
 {
     protected:
-        Eigen::SparseQR<Eigen::SparseMatrixs, Eigen::COLAMDOrdering<int>> solver_;//Eigen::NaturalOrdering<int>
+        Eigen::SparseQR<Eigen::SparseMatrixs, Eigen::COLAMDOrdering<int>> solver_;
+        Eigen::SparseQR<Eigen::SparseMatrixs, Eigen::NaturalOrdering<int>> covariance_solver_;
         Eigen::SparseMatrixs A_;
         Eigen::VectorXs b_;
         std::map<StateBlockPtr, unsigned int> sb_2_col_;

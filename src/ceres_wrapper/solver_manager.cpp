@@ -84,5 +84,10 @@ void SolverManager::update()
     assert(wolf_problem_->getStateBlockNotificationList().empty() && "wolf problem's state_blocks notification list not empty after update");
 }
 
+wolf::ProblemPtr SolverManager::getProblemPtr()
+{
+    return wolf_problem_;
+}
+
 } // namespace wolf
 

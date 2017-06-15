@@ -104,7 +104,7 @@ typedef AngleAxis<wolf::Scalar> AngleAxiss;                 ///< Angle-Axis of r
 typedef Rotation2D<wolf::Scalar> Rotation2Ds;               ///< Rotation2D of real Scalar type
 
 // 3. Sparse matrix
-typedef SparseMatrix<wolf::Scalar, RowMajor> SparseMatrixs;
+typedef SparseMatrix<wolf::Scalar, RowMajor, int> SparseMatrixs;
 }
 
 namespace wolf {

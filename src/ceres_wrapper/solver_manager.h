@@ -44,6 +44,8 @@ class SolverManager
 
 		virtual void update();
 
+        virtual ProblemPtr getProblemPtr();
+
 	private:
 
 		virtual void addConstraint(ConstraintBasePtr _ctr_ptr) = 0;

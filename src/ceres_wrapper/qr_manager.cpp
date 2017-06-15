@@ -61,29 +61,22 @@ void QRManager::computeCovariances(const StateBlockList& _sb_list)
 {
     //std::cout << "computing covariances.." << std::endl;
     update();
-    //std::cout << "updated. A is " << A_.rows() << "x" << A_.cols() << std::endl;
     computeDecomposition();
-    //std::cout << "decomposition computed" << std::endl;
 
-    Eigen::SparseMatrixs R = solver_.matrixR();
-//    std::cout << "R is " << R.rows() << "x" << R.cols() << std::endl;
-//    std::cout << Eigen::MatrixXs(R) << std::endl;
+//    std::cout << "R is " << solver_.matrixR().rows() << "x" << solver_.matrixR().cols() << std::endl;
+//    std::cout << Eigen::MatrixXs(solver_.matrixR()) << std::endl;
 
-    Eigen::SparseQR<Eigen::SparseMatrixs, Eigen::NaturalOrdering<int>> solver_aux;
-    solver_aux.compute(R.topRows(R.cols()));
+    covariance_solver_.compute(solver_.matrixR().topRows(solver_.matrixR().cols()));
 
     Eigen::SparseMatrix<Scalar, Eigen::ColMajor> I(A_.cols(),A_.cols());
     I.setIdentity();
-    Eigen::SparseMatrix<Scalar, Eigen::ColMajor> iR = solver_aux.solve(I);
-    Eigen::MatrixXs P = solver_.colsPermutation();
-    Eigen::MatrixXs Sigma_full = P * iR * iR.transpose() * P.transpose();
+    Eigen::SparseMatrix<Scalar, Eigen::ColMajor> iR = covariance_solver_.solve(I);
+    Eigen::MatrixXs Sigma_full = solver_.colsPermutation() * iR * iR.transpose() * solver_.colsPermutation().transpose();
 
-//    Eigen::MatrixXs id2 = (A_.transpose() * A_) * Sigma_full;
 //    std::cout << "A' A = \n" << Eigen::MatrixXs(A_.transpose() * A_)<< std::endl;
-//    std::cout << "iP' R' R iP = \n" << Eigen::MatrixXs(P.inverse().transpose() * R.transpose() * R * P.inverse() ) << std::endl;
 //    std::cout << "P iR iR' P' = \n" << Eigen::MatrixXs(P * iR * iR.transpose() * P.transpose()) << std::endl;
 //    std::cout << "Sigma * Lambda = \n" << Eigen::MatrixXs(Sigma_full * A_.transpose() * A_) << std::endl;
-//    std::cout << "Permutation: \n" << P << std::endl;
+//    std::cout << "Permutation: \n" << solver_.colsPermutation() << std::endl;
 //    std::cout << "Sigma = \n" << Sigma_full << std::endl;
 
     // STORE DESIRED COVARIANCES
