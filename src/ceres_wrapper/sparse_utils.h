@@ -17,21 +17,35 @@ namespace wolf
 void eraseBlockRow(Eigen::SparseMatrix<Scalar, Eigen::RowMajor>& A, const unsigned int& _row, const unsigned int& _n_rows)
 {
     A.middleRows(_row,_n_rows) = Eigen::SparseMatrixs(_n_rows,A.cols());
+    A.makeCompressed();
 }
 
 void eraseBlockRow(Eigen::SparseMatrix<Scalar, Eigen::ColMajor>& A, const unsigned int& _row, const unsigned int& _n_rows)
 {
     A.prune([&](int i, int, Scalar) { return i >= _row && i < _row + _n_rows; });
+    A.makeCompressed();
 }
 
 void eraseBlockCol(Eigen::SparseMatrix<Scalar, Eigen::ColMajor>& A, const unsigned int& _col, const unsigned int& _n_cols)
 {
     A.middleCols(_col,_n_cols) = Eigen::SparseMatrixs(A.rows(),_n_cols);
+    A.makeCompressed();
 }
 
 void eraseBlockCol(Eigen::SparseMatrix<Scalar, Eigen::RowMajor>& A, const unsigned int& _col, const unsigned int& _n_cols)
 {
     A.prune([&](int, int j, Scalar) { return j >= _col && j < _col + _n_cols; });
+    A.makeCompressed();
+}
+
+template<int _Options, typename _StorageIndex>
+void assignSparseBlock(const Eigen::MatrixXs& ins, Eigen::SparseMatrix<Scalar,_Options,_StorageIndex>& original, const unsigned int& row, const unsigned int& col)
+{
+    for (auto ins_row = 0; ins_row < ins.rows(); ins_row++)
+        for (auto ins_col = 0; ins_col < ins.cols(); ins_col++)
+            original.coeffRef(row+ins_row, col+ins_col) = ins(ins_row,ins_col);
+
+    original.makeCompressed();
 }
 
 template<int _Options, typename _StorageIndex>
@@ -58,6 +72,7 @@ void assignBlockRow(Eigen::SparseMatrix<Scalar, Eigen::RowMajor>& A, const Eigen
 {
     assert(A.rows() >= _row + ins.rows() && A.cols() == ins.cols());
     A.middleRows(_row, ins.rows()) = ins;
+    A.makeCompressed();
 }
 
 Eigen::SparseMatrixs createBlockDiagonal(const std::vector<Eigen::MatrixXs>& _diag_blocs)
@@ -73,6 +88,8 @@ Eigen::SparseMatrixs createBlockDiagonal(const std::vector<Eigen::MatrixXs>& _di
         insertSparseBlock(omega_k, M, pos, pos);
         pos += dim;
     }
+
+    M.makeCompressed();
 
     return M;
 }
