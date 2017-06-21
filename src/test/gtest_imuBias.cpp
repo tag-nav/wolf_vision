@@ -397,7 +397,8 @@ class ProcessorIMU_Real_CaptureFix : public testing::Test
     //===================================================== END{SETTING PROBLEM}
 
         char* imu_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/M1.txt");
+        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/M1.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/bias_plateformRotateX.txt");
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         std::strcpy(imu_filepath, imu_filepath_string.c_str());
         std::ifstream imu_data_input;
@@ -469,6 +470,170 @@ class ProcessorIMU_Real_CaptureFix : public testing::Test
         imu_data_input.close();
 
     //===================================================== END{PROCESS DATA}
+    }
+
+    virtual void TearDown(){}
+};
+
+class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
+{
+    public:
+        wolf::TimeStamp t;
+        wolf::Scalar dt;
+        SensorIMUPtr sen_imu;
+        SensorOdom3DPtr sen_odom3D;
+        ProblemPtr wolf_problem_ptr_;
+        CeresManager* ceres_manager_wolf_diff;
+        ProcessorBasePtr processor_ptr_;
+        ProcessorIMUPtr processor_ptr_imu;
+        ProcessorOdom3DPtr processor_ptr_odom3D;
+        FrameIMUPtr origin_KF;
+        FrameIMUPtr last_KF;
+        Eigen::VectorXs expected_final_state;
+        Eigen::VectorXs expected_origin_state;
+        std::ofstream debug_results;
+
+    virtual void SetUp()
+    {
+        using std::shared_ptr;
+        using std::make_shared;
+        using std::static_pointer_cast;
+
+        //===================================================== SETTING PROBLEM
+        std::string wolf_root = _WOLF_ROOT_DIR;
+
+        // WOLF PROBLEM
+        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        Eigen::VectorXs x0(16);
+        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
+        t.set(0);
+
+        // CERES WRAPPER
+        ceres::Solver::Options ceres_options;
+        ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
+        ceres_options.max_line_search_step_contraction = 1e-3;
+        ceres_options.max_num_iterations = 1e4;
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+
+
+        // SENSOR + PROCESSOR IMU
+        //We want a processorIMU with a specific max_time_span (1s) forour test
+        SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+        ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
+        prc_imu_params->max_time_span = 10;
+        prc_imu_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
+        prc_imu_params->dist_traveled = 1000000000;
+        prc_imu_params->angle_turned = 1000000000;
+
+        processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", sen0_ptr, prc_imu_params);
+        sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
+        processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
+
+
+        // SENSOR + PROCESSOR ODOM 3D
+        SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
+        ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
+        prc_odom3D_params->max_time_span = 1.59999;
+        prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
+        prc_odom3D_params->dist_traveled = 1000000000;
+        prc_odom3D_params->angle_turned = 1000000000;
+
+        ProcessorBasePtr processor_ptr_odom = wolf_problem_ptr_->installProcessor("ODOM 3D", "odom", sen1_ptr, prc_odom3D_params);
+        sen_odom3D = std::static_pointer_cast<SensorOdom3D>(sen1_ptr);
+        processor_ptr_odom3D = std::static_pointer_cast<ProcessorOdom3D>(processor_ptr_odom);
+
+        SensorBasePtr sen2_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "fix", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
+
+    //===================================================== END{SETTING PROBLEM}
+
+        char* imu_filepath;
+        char * odom_filepath;
+        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/M1.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_Bias_zy.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_Bias_zy.txt");
+        imu_filepath   = new char[imu_filepath_string.length() + 1];
+        odom_filepath   = new char[odom_filepath_string.length() + 1];
+        std::strcpy(imu_filepath, imu_filepath_string.c_str());
+        std::strcpy(odom_filepath, odom_filepath_string.c_str());
+        std::ifstream imu_data_input;
+        std::ifstream odom_data_input;
+
+        imu_data_input.open(imu_filepath);
+        //WOLF_INFO("imu file: ", imu_filepath)
+        if(!imu_data_input.is_open()){
+            std::cerr << "Failed to open data files... Exiting" << std::endl;
+            ADD_FAILURE();
+        }
+
+        #ifdef OUTPUT_DATA
+        //std::ofstream debug_results;
+        debug_results.open("KFO_cfix3D_odom.dat", ios::out | ios::app );
+        #endif
+
+        //===================================================== SETTING PROBLEM
+
+        // reset origin of problem
+        Eigen::VectorXs x_origin((Eigen::Matrix<wolf::Scalar,16,1>()<<0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0).finished());
+
+        t.set(0);
+        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        processor_ptr_odom3D->setOrigin(origin_KF);
+    
+    //===================================================== END{SETTING PROBLEM}
+
+    //===================================================== PROCESS DATA
+    // PROCESS DATA
+
+        Eigen::Vector6s data_imu, data_odom3D;
+        data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
+        data_odom3D << 0,-0.06,0, 0,0,0;
+
+        expected_final_state.resize(16);
+        expected_final_state << 0,-0.06,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_origin_state.resize(16);
+        expected_origin_state << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+
+        Scalar input_clock;
+        TimeStamp ts(0);
+        TimeStamp t_odom(0);
+        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
+        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sen_odom3D, data_odom3D, 6, 6);
+
+        // process all IMu data and then finish with the odom measurement that will create a new constraint
+        //read first odom data from file
+        odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
+        t_odom.set(input_clock);
+
+        while( !imu_data_input.eof() && !odom_data_input.eof() )
+        {
+            // PROCESS IMU DATA
+            // Time and data variables
+            imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
+
+            ts.set(input_clock);
+            imu_ptr->setTimeStamp(ts);
+            imu_ptr->setData(data_imu);
+
+            // process data in capture
+            imu_ptr->getTimeStamp();
+            sen_imu->process(imu_ptr);
+
+            if(ts.get() == t_odom.get())
+            {
+                // PROCESS ODOM 3D DATA
+                mot_ptr->setTimeStamp(t_odom);
+                mot_ptr->setData(data_odom3D);
+                sen_odom3D->process(mot_ptr);
+
+                //prepare next odometry measurement if there is any
+                odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
+                t_odom.set(input_clock);
+            }
+        }
+
+        //closing files
+        imu_data_input.close();
+        odom_data_input.close();
     }
 
     virtual void TearDown(){}
@@ -891,7 +1056,7 @@ TEST_F(ProcessorIMU_Real,M1_VarB1P2Q2B2_InvarP1Q1V1V2_initOK_ConstrO_KF0)
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getAccBiasPtr(), origin_KF->getAccBiasPtr(), cov_B1);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
     std::cout << "cov_B1 : \n" << 2*sqrt(cov_B1(0,0)) << ", " << 2*sqrt(cov_B1(1,1)) << ", " << 2*sqrt(cov_B1(2,2)) 
-            <<  "\n cov_P2 : \n" << 2*sqrt(cov_P2(0,0)) << ", " << 2*sqrt(cov_P2(1,1)) << ", " << 2*sqrt(cov_P2(2,2)) << std::endl;
+            <<  "\n cov_P2 : \n" << sqrt(cov_P2(0,0)) << ", " << sqrt(cov_P2(1,1)) << ", " << sqrt(cov_P2(2,2)) << std::endl;
 
     wolf_problem_ptr_->print(4,1,1,1);
 
@@ -918,22 +1083,26 @@ TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_
 
     last_KF->setState(expected_final_state);
 
-    ConstraintBaseList ctr_list = origin_KF->getConstrainedByList();
-    //std::cout << "ctr_list size : " << ctr_list.size() << std::endl;
-
+    FrameBaseList frameList = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
     wolf::Scalar p_var = 0.000001;
-    for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
+
+    for(auto frame : frameList)
     {
-        //std::cout << "ctr ID : " << (*ctr_it)->getTypeId() << std::endl;
-        if ((*ctr_it)->getTypeId() == CTR_ODOM_3D) //change covariances in features to constraint only position
+        ConstraintBaseList ctr_list = frame->getConstrainedByList();
+        //std::cout << "ctr_list size : " << ctr_list.size() << std::endl;
+
+        for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
         {
-            Eigen::MatrixXs meas_cov((*ctr_it)->getMeasurementCovariance());
-            //std::cout << "meas_cov : \n" << meas_cov << std::endl;
-            meas_cov.topLeftCorner(3,3) = (Eigen::Matrix3s() << p_var, 0, 0, 0, p_var, 0, 0, 0, p_var).finished();
-            (*ctr_it)->getFeaturePtr()->setMeasurementCovariance(meas_cov);
-            //std::cout << "new meas_cov : \n" << (*ctr_it)->getMeasurementCovariance() << std::endl;
+            //std::cout << "ctr ID : " << (*ctr_it)->getTypeId() << std::endl;
+            if ((*ctr_it)->getTypeId() == CTR_ODOM_3D) //change covariances in features to constraint only position
+            {
+                Eigen::MatrixXs meas_cov((*ctr_it)->getMeasurementCovariance());
+                meas_cov.topLeftCorner(3,3) = (Eigen::Matrix3s() << p_var, 0, 0, 0, p_var, 0, 0, 0, p_var).finished();
+                (*ctr_it)->getFeaturePtr()->setMeasurementCovariance(meas_cov);
+            }
         }
     }
+
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     ceres_manager_wolf_diff->computeCovariances(ALL);
 
@@ -942,16 +1111,16 @@ TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_Q2);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) 
-            <<  "\n cov_P2 : \n" << 2*sqrt(cov_P2(0,0)) << ", " << 2*sqrt(cov_P2(1,1)) << ", " << 2*sqrt(cov_P2(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) 
+            <<  "\n cov_P2 : \n" << sqrt(cov_P2(0,0)) << ", " << sqrt(cov_P2(1,1)) << ", " << sqrt(cov_P2(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
-    debug_results << p_var << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
-                << 2*sqrt(cov_P2(0,0)) << "\t" << 2*sqrt(cov_P2(1,1)) << "\t" << 2*sqrt(cov_P2(2,2)) << "\t" 
-                << 2*sqrt(cov_Q2(0,0)) << "\t" << 2*sqrt(cov_Q2(1,1)) << "\t" << 2*sqrt(cov_Q2(2,2)) << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
+                << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1003,16 +1172,16 @@ TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_Q2);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) 
-            <<  "\n cov_P2 : \n" << 2*sqrt(cov_P2(0,0)) << ", " << 2*sqrt(cov_P2(1,1)) << ", " << 2*sqrt(cov_P2(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) 
+            <<  "\n cov_P2 : \n" << sqrt(cov_P2(0,0)) << ", " << sqrt(cov_P2(1,1)) << ", " << sqrt(cov_P2(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
-    debug_results << p_var << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
-                << 2*sqrt(cov_P2(0,0)) << "\t" << 2*sqrt(cov_P2(1,1)) << "\t" << 2*sqrt(cov_P2(2,2)) << "\t" 
-                << 2*sqrt(cov_Q2(0,0)) << "\t" << 2*sqrt(cov_Q2(1,1)) << "\t" << 2*sqrt(cov_Q2(2,2)) << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
+                << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1064,16 +1233,16 @@ TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_Q2);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) 
-            <<  "\n cov_P2 : \n" << 2*sqrt(cov_P2(0,0)) << ", " << 2*sqrt(cov_P2(1,1)) << ", " << 2*sqrt(cov_P2(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) 
+            <<  "\n cov_P2 : \n" << sqrt(cov_P2(0,0)) << ", " << sqrt(cov_P2(1,1)) << ", " << sqrt(cov_P2(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
-    debug_results << p_var << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
-                << 2*sqrt(cov_P2(0,0)) << "\t" << 2*sqrt(cov_P2(1,1)) << "\t" << 2*sqrt(cov_P2(2,2)) << "\t" 
-                << 2*sqrt(cov_Q2(0,0)) << "\t" << 2*sqrt(cov_Q2(1,1)) << "\t" << 2*sqrt(cov_Q2(2,2)) << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
+                << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1125,16 +1294,16 @@ TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_Q2);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) 
-            <<  "\n cov_P2 : \n" << 2*sqrt(cov_P2(0,0)) << ", " << 2*sqrt(cov_P2(1,1)) << ", " << 2*sqrt(cov_P2(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) 
+            <<  "\n cov_P2 : \n" << sqrt(cov_P2(0,0)) << ", " << sqrt(cov_P2(1,1)) << ", " << sqrt(cov_P2(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
-    debug_results << p_var << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
-                << 2*sqrt(cov_P2(0,0)) << "\t" << 2*sqrt(cov_P2(1,1)) << "\t" << 2*sqrt(cov_P2(2,2)) << "\t" 
-                << 2*sqrt(cov_Q2(0,0)) << "\t" << 2*sqrt(cov_Q2(1,1)) << "\t" << 2*sqrt(cov_Q2(2,2)) << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
+                << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1186,16 +1355,16 @@ TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_Q2);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) 
-            <<  "\n cov_P2 : \n" << 2*sqrt(cov_P2(0,0)) << ", " << 2*sqrt(cov_P2(1,1)) << ", " << 2*sqrt(cov_P2(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) 
+            <<  "\n cov_P2 : \n" << sqrt(cov_P2(0,0)) << ", " << sqrt(cov_P2(1,1)) << ", " << sqrt(cov_P2(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
-    debug_results << p_var << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
-                << 2*sqrt(cov_P2(0,0)) << "\t" << 2*sqrt(cov_P2(1,1)) << "\t" << 2*sqrt(cov_P2(2,2)) << "\t" 
-                << 2*sqrt(cov_Q2(0,0)) << "\t" << 2*sqrt(cov_Q2(1,1)) << "\t" << 2*sqrt(cov_Q2(2,2)) << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
+                << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1247,16 +1416,16 @@ TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_Q2);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) 
-            <<  "\n cov_P2 : \n" << 2*sqrt(cov_P2(0,0)) << ", " << 2*sqrt(cov_P2(1,1)) << ", " << 2*sqrt(cov_P2(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) 
+            <<  "\n cov_P2 : \n" << sqrt(cov_P2(0,0)) << ", " << sqrt(cov_P2(1,1)) << ", " << sqrt(cov_P2(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
-    debug_results << p_var << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
-                << 2*sqrt(cov_P2(0,0)) << "\t" << 2*sqrt(cov_P2(1,1)) << "\t" << 2*sqrt(cov_P2(2,2)) << "\t" 
-                << 2*sqrt(cov_Q2(0,0)) << "\t" << 2*sqrt(cov_Q2(1,1)) << "\t" << 2*sqrt(cov_Q2(2,2)) << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
+                << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1308,16 +1477,16 @@ TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_Q2);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) 
-            <<  "\n cov_P2 : \n" << 2*sqrt(cov_P2(0,0)) << ", " << 2*sqrt(cov_P2(1,1)) << ", " << 2*sqrt(cov_P2(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) 
+            <<  "\n cov_P2 : \n" << sqrt(cov_P2(0,0)) << ", " << sqrt(cov_P2(1,1)) << ", " << sqrt(cov_P2(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
-    debug_results << p_var << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
-                << 2*sqrt(cov_P2(0,0)) << "\t" << 2*sqrt(cov_P2(1,1)) << "\t" << 2*sqrt(cov_P2(2,2)) << "\t" 
-                << 2*sqrt(cov_Q2(0,0)) << "\t" << 2*sqrt(cov_Q2(1,1)) << "\t" << 2*sqrt(cov_Q2(2,2)) << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
+                << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1369,16 +1538,16 @@ TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_Q2);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) 
-            <<  "\n cov_P2 : \n" << 2*sqrt(cov_P2(0,0)) << ", " << 2*sqrt(cov_P2(1,1)) << ", " << 2*sqrt(cov_P2(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) 
+            <<  "\n cov_P2 : \n" << sqrt(cov_P2(0,0)) << ", " << sqrt(cov_P2(1,1)) << ", " << sqrt(cov_P2(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
-    debug_results << p_var << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
-                << 2*sqrt(cov_P2(0,0)) << "\t" << 2*sqrt(cov_P2(1,1)) << "\t" << 2*sqrt(cov_P2(2,2)) << "\t" 
-                << 2*sqrt(cov_Q2(0,0)) << "\t" << 2*sqrt(cov_Q2(1,1)) << "\t" << 2*sqrt(cov_Q2(2,2)) << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
+                << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1430,16 +1599,16 @@ TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_Q2);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) 
-            <<  "\n cov_P2 : \n" << 2*sqrt(cov_P2(0,0)) << ", " << 2*sqrt(cov_P2(1,1)) << ", " << 2*sqrt(cov_P2(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) 
+            <<  "\n cov_P2 : \n" << sqrt(cov_P2(0,0)) << ", " << sqrt(cov_P2(1,1)) << ", " << sqrt(cov_P2(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
-    debug_results << p_var << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
-                << 2*sqrt(cov_P2(0,0)) << "\t" << 2*sqrt(cov_P2(1,1)) << "\t" << 2*sqrt(cov_P2(2,2)) << "\t" 
-                << 2*sqrt(cov_Q2(0,0)) << "\t" << 2*sqrt(cov_Q2(1,1)) << "\t" << 2*sqrt(cov_Q2(2,2)) << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
+                << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1491,16 +1660,16 @@ TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
     wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_Q2);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) 
-            <<  "\n cov_P2 : \n" << 2*sqrt(cov_P2(0,0)) << ", " << 2*sqrt(cov_P2(1,1)) << ", " << 2*sqrt(cov_P2(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) 
+            <<  "\n cov_P2 : \n" << sqrt(cov_P2(0,0)) << ", " << sqrt(cov_P2(1,1)) << ", " << sqrt(cov_P2(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
-    debug_results << p_var << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
-                << 2*sqrt(cov_P2(0,0)) << "\t" << 2*sqrt(cov_P2(1,1)) << "\t" << 2*sqrt(cov_P2(2,2)) << "\t" 
-                << 2*sqrt(cov_Q2(0,0)) << "\t" << 2*sqrt(cov_Q2(1,1)) << "\t" << 2*sqrt(cov_Q2(2,2)) << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
+                << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1595,13 +1764,13 @@ TEST_F(ProcessorIMU_Bias,M1_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
     Eigen::MatrixXs cov_AB1(3,3), cov_GB1(3,3), cov_P2(3,3), cov_Q2(3,3);
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getAccBiasPtr(), origin_KF->getAccBiasPtr(), cov_AB1);
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
     debug_results << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1697,13 +1866,13 @@ TEST_F(ProcessorIMU_Bias,M2_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
     Eigen::MatrixXs cov_AB1(3,3), cov_GB1(3,3), cov_P2(3,3), cov_Q2(3,3);
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getAccBiasPtr(), origin_KF->getAccBiasPtr(), cov_AB1);
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
     debug_results << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1801,13 +1970,13 @@ TEST_F(ProcessorIMU_Bias,M3_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
     Eigen::MatrixXs cov_AB1(3,3), cov_GB1(3,3), cov_P2(3,3), cov_Q2(3,3);
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getAccBiasPtr(), origin_KF->getAccBiasPtr(), cov_AB1);
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
     debug_results << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -1905,13 +2074,13 @@ TEST_F(ProcessorIMU_Bias,M4_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
     Eigen::MatrixXs cov_AB1(3,3), cov_GB1(3,3), cov_P2(3,3), cov_Q2(3,3);
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getAccBiasPtr(), origin_KF->getAccBiasPtr(), cov_AB1);
     wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
-    std::cout << "cov_AB1 : \n" << 2*sqrt(cov_AB1(0,0)) << ", " << 2*sqrt(cov_AB1(1,1)) << ", " << 2*sqrt(cov_AB1(2,2))
-            << "\n cov_GB1 : \n" << 2*sqrt(cov_GB1(0,0)) << ", " << 2*sqrt(cov_GB1(1,1)) << ", " << 2*sqrt(cov_GB1(2,2)) << std::endl;
+    std::cout << "cov_AB1 : \n" << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+            << "\n cov_GB1 : \n" << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2)) << std::endl;
 
     #ifdef OUTPUT_DATA
     debug_results << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t" 
-                << 2*sqrt(cov_AB1(0,0)) << "\t" << 2*sqrt(cov_AB1(1,1)) << "\t" << 2*sqrt(cov_AB1(2,2)) << "\t" 
-                << 2*sqrt(cov_GB1(0,0)) << "\t" << 2*sqrt(cov_GB1(1,1)) << "\t" << 2*sqrt(cov_GB1(2,2)) << std::endl;
+                << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
     #endif
 
     wolf_problem_ptr_->print(4,1,1,1);
@@ -2075,8 +2244,8 @@ int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real.M*";
-  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real_CaptureFix.*";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Bias.*";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real_CaptureFix.*";
+  //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Bias.*";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
 }
