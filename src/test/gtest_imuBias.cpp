@@ -2239,12 +2239,77 @@ TEST_F(ProcessorIMU_Bias_LowQualityOdom,Foot_VarQ1P2Q2B1V2B2_InvarV1P1_initOK)
     framesCov.close();
 }
 
+TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_KF0_cfixem6To100)
+{
+
+    Eigen::MatrixXs featureFix_cov(6,6);
+    featureFix_cov = Eigen::MatrixXs::Identity(6,6); 
+    featureFix_cov(5,5) = 0.0001;
+    CaptureBasePtr capfix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6));
+    FeatureBasePtr ffix = capfix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
+    ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(ffix->addConstraint(std::make_shared<ConstraintFix3D>(ffix)));
+    ConstraintBasePtr ctr_fixdummy = origin_KF->addConstrainedBy(ctr_fix);
+
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getVPtr()->fix();
+
+    last_KF->setState(expected_final_state);
+
+    FrameBaseList frameList = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
+
+    for (wolf::Scalar p_var = 0.000001; p_var < 200; p_var=p_var*1.5)
+    {
+        for(auto frame : frameList)
+        {
+            ConstraintBaseList ctr_list = frame->getConstrainedByList();
+            //std::cout << "ctr_list size : " << ctr_list.size() << std::endl;
+
+            for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
+            {
+                //std::cout << "ctr ID : " << (*ctr_it)->getTypeId() << std::endl;
+                if ((*ctr_it)->getTypeId() == CTR_ODOM_3D) //change covariances in features to constraint only position
+                {
+                    Eigen::MatrixXs meas_cov((*ctr_it)->getMeasurementCovariance());
+                    meas_cov.topLeftCorner(3,3) = (Eigen::Matrix3s() << p_var, 0, 0, 0, p_var, 0, 0, 0, p_var).finished();
+                    (*ctr_it)->getFeaturePtr()->setMeasurementCovariance(meas_cov);
+                }
+            }
+        }
+   
+        ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+        ceres_manager_wolf_diff->computeCovariances(ALL);
+
+        Eigen::MatrixXs cov_AB1(3,3), cov_GB1(3,3), cov_P2(3,3), cov_Q2(3,3);
+        wolf_problem_ptr_->getCovarianceBlock(origin_KF->getAccBiasPtr(), origin_KF->getAccBiasPtr(), cov_AB1);
+        wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
+        wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
+        wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_Q2);
+        std::cout << p_var << "\n\tcov_AB1 : " << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
+                << "\n\t cov_GB1 : " << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2))<< std::endl;
+
+        #ifdef OUTPUT_DATA
+        debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                    << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
+                    << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
+                    << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                    << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
+        #endif
+     }
+
+    wolf_problem_ptr_->print(4,1,1,1);
+
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Pos : " << last_KF->getPPtr()->getState().transpose() <<
+    "\n expected Pos : " << expected_final_state.head(3).transpose() << std::endl;
+    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Ori : " << last_KF->getOPtr()->getState().transpose() <<
+    "\n expected Ori : " << expected_final_state.segment(3,4).transpose() << std::endl;
+}
 
 int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real.M*";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real_CaptureFix.*";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real_CaptureFix.M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_KF0_cfixem6To100";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Bias.*";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
