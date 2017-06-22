@@ -392,8 +392,6 @@ class ProcessorIMU_Real_CaptureFix : public testing::Test
         sen_odom3D = std::static_pointer_cast<SensorOdom3D>(sen1_ptr);
         processor_ptr_odom3D = std::static_pointer_cast<ProcessorOdom3D>(processor_ptr_odom);
 
-        SensorBasePtr sen2_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "fix", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
-
     //===================================================== END{SETTING PROBLEM}
 
         char* imu_filepath;
@@ -533,7 +531,7 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 1.59999;
+        prc_odom3D_params->max_time_span = 2.99999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
         prc_odom3D_params->angle_turned = 1000000000;
@@ -542,15 +540,13 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         sen_odom3D = std::static_pointer_cast<SensorOdom3D>(sen1_ptr);
         processor_ptr_odom3D = std::static_pointer_cast<ProcessorOdom3D>(processor_ptr_odom);
 
-        SensorBasePtr sen2_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "fix", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
-
     //===================================================== END{SETTING PROBLEM}
 
         char* imu_filepath;
         char * odom_filepath;
         //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/M1.txt");
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_Bias_zy.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_Bias_zy.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_Bias_all15s.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_Bias_all15s.txt");
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
         std::strcpy(imu_filepath, imu_filepath_string.c_str());
@@ -559,8 +555,9 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         std::ifstream odom_data_input;
 
         imu_data_input.open(imu_filepath);
+        odom_data_input.open(odom_filepath);
         //WOLF_INFO("imu file: ", imu_filepath)
-        if(!imu_data_input.is_open()){
+        if(!imu_data_input.is_open() || !odom_data_input.is_open()){
             std::cerr << "Failed to open data files... Exiting" << std::endl;
             ADD_FAILURE();
         }
@@ -593,7 +590,7 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         expected_origin_state.resize(16);
         expected_origin_state << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
 
-        Scalar input_clock;
+        wolf::Scalar input_clock;
         TimeStamp ts(0);
         TimeStamp t_odom(0);
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
@@ -604,7 +601,7 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
         t_odom.set(input_clock);
 
-        while( !imu_data_input.eof() && !odom_data_input.eof() )
+        while( !imu_data_input.eof())
         {
             // PROCESS IMU DATA
             // Time and data variables
@@ -630,6 +627,8 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
                 t_odom.set(input_clock);
             }
         }
+
+        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
 
         //closing files
         imu_data_input.close();
@@ -1625,7 +1624,7 @@ TEST_F(ProcessorIMU_Bias_LowQualityOdom,Foot_VarQ1P2Q2B1V2B2_InvarV1P1_initOK)
     framesCov.close();
 }
 
-TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_KF0_cfixem6To100)
+TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_KF0_cfixem6To100)
 {
 
     Eigen::MatrixXs featureFix_cov(6,6);
@@ -1640,7 +1639,7 @@ TEST_F(ProcessorIMU_Real_CaptureFix,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_
     origin_KF->getPPtr()->fix();
     origin_KF->getVPtr()->fix();
 
-    last_KF->setState(expected_final_state);
+    //last_KF->setState(expected_final_state);
 
     FrameBaseList frameList = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
 
@@ -1695,7 +1694,7 @@ int main(int argc, char **argv)
 {
   ::testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real.M*";
-  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real_CaptureFix.M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_KF0_cfixem6To100";
+  ::testing::GTEST_FLAG(filter) = "ProcessorIMU_Real_CaptureFix*";
   //::testing::GTEST_FLAG(filter) = "ProcessorIMU_Bias.*";
   //google::InitGoogleLogging(argv[0]);
   return RUN_ALL_TESTS();
