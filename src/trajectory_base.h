@@ -24,15 +24,15 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
         std::list<FrameBasePtr> frame_list_;
 
     protected:
-        FrameStructure frame_structure_;  // Defines the structure of the Frames in the Trajectory.
+        std::string frame_structure_;  // Defines the structure of the Frames in the Trajectory.
         FrameBasePtr last_key_frame_ptr_; // keeps pointer to the last key frame
         
     public:
-        TrajectoryBase(FrameStructure _frame_sturcture);
+        TrajectoryBase(const std::string& _frame_sturcture);
         virtual ~TrajectoryBase();
         
         // Properties
-        FrameStructure getFrameStructure() const;
+        std::string getFrameStructure() const;
 
         // Frames
         FrameBasePtr addFrame(FrameBasePtr _frame_ptr);
@@ -83,7 +83,7 @@ inline void TrajectoryBase::setLastKeyFramePtr(FrameBasePtr _key_frame_ptr)
 }
 
 
-inline FrameStructure TrajectoryBase::getFrameStructure() const
+inline std::string TrajectoryBase::getFrameStructure() const
 {
     return frame_structure_;
 }

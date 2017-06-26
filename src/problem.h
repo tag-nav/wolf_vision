@@ -59,11 +59,11 @@ class Problem : public std::enable_shared_from_this<Problem>
         bool origin_is_set_;
 
     private: // CAUTION: THESE METHODS ARE PRIVATE, DO NOT MAKE THEM PUBLIC !!
-        Problem(FrameStructure _frame_structure); // USE create() below !!
+        Problem(const std::string& _frame_structure); // USE create() below !!
         void setup();
 
     public:
-        static ProblemPtr create(FrameStructure _frame_structure); // USE THIS AS A CONSTRUCTOR!
+        static ProblemPtr create(const std::string& _frame_structure); // USE THIS AS A CONSTRUCTOR!
         virtual ~Problem();
 
         // Properties -----------------------------------------

@@ -27,7 +27,7 @@ std::string uppercase(std::string s) {for (auto & c: s) c = std::toupper(c); ret
 }
 
 
-Problem::Problem(FrameStructure _frame_structure) :
+Problem::Problem(const std::string& _frame_structure) :
         hardware_ptr_(std::make_shared<HardwareBase>()),
         trajectory_ptr_(std::make_shared<TrajectoryBase>(_frame_structure)),
         map_ptr_(std::make_shared<MapBase>()),
@@ -44,7 +44,7 @@ void Problem::setup()
     map_ptr_->setProblem(shared_from_this());
 }
 
-ProblemPtr Problem::create(FrameStructure _frame_structure)
+ProblemPtr Problem::create(const std::string& _frame_structure)
 {
     ProblemPtr p(new Problem(_frame_structure)); // We use `new` and not `make_shared` since the Problem constructor is private and cannot be passes to `make_shared`.
     p->setup();

@@ -189,8 +189,6 @@ typedef enum
     KEY_FRAME = 1       ///< key frame. It will stay in the frames window and play at optimizations.
 } FrameType;
 
-typedef std::string FrameStructure;
-
 /** \brief Enumeration of all possible constraints
  *
  * You may add items to this list as needed. Be concise with names, and document your entries.
