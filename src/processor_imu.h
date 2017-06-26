@@ -65,7 +65,7 @@ class ProcessorIMU : public ProcessorMotion{
         virtual bool voteForKeyFrame();
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
                                                    FrameBasePtr _frame_origin);
-        virtual FeatureBasePtr emplaceFeature(CaptureBasePtr _capture_motion, 
+        virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, 
                                                     FrameBasePtr _related_frame);
         void resetDerived();
 
@@ -499,20 +499,19 @@ inline ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature
     return ctr_imu;
 }
 
-inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureBasePtr _capture_motion, FrameBasePtr _related_frame)
+inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame)
 {
-    CaptureIMUPtr capt_imu = std::static_pointer_cast<CaptureIMU>(_capture_motion);
+    // CaptureIMUPtr capt_imu = std::static_pointer_cast<CaptureIMU>(_capture_motion);
     FrameIMUPtr key_frame_ptr = std::static_pointer_cast<FrameIMU>(_related_frame);
     // create motion feature and add it to the key_capture
-    Eigen::MatrixXs delta_integr_cov(integrateBufferCovariance(getBuffer()));
+    Eigen::MatrixXs delta_integr_cov(integrateBufferCovariance(_capture_motion->getBuffer()));
     FeatureIMUPtr key_feature_ptr = std::make_shared<FeatureIMU>(
-            capt_imu->getBuffer().get().back().delta_integr_,
-            delta_integr_cov.determinant() > 0 ?
-            delta_integr_cov : Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-4, // avoid a strict zero in the covariance
+            _capture_motion->getBuffer().get().back().delta_integr_,
+            delta_integr_cov,
             key_frame_ptr->getAccBiasPtr()->getState(),
             key_frame_ptr->getGyroBiasPtr()->getState(),
             this->getJacobians()); 
-        capt_imu->addFeature(key_feature_ptr);
+        _capture_motion->addFeature(key_feature_ptr);
 
     return key_feature_ptr;
 }

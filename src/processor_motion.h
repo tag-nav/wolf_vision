@@ -617,7 +617,7 @@ class ProcessorMotion : public ProcessorBase
         /** \brief create a feature corresponding to given capture and add the feature to this capture
          * \param _capture_motion: the parent capture
          */
-        virtual FeatureBasePtr emplaceFeature(CaptureBasePtr _capture_motion, FrameBasePtr _related_frame) = 0;
+        virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame) = 0;
 
         Motion motionZero(const TimeStamp& _ts);
 
