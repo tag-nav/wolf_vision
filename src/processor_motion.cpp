@@ -114,7 +114,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
         // callback to other processors
         getProblem()->keyFrameCallback(key_frame_ptr, shared_from_this(), time_tolerance_);
-
     }
 
 
@@ -257,10 +256,14 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     Eigen::MatrixXs new_covariance = integrateBufferCovariance(new_capture->getBuffer());
 
     // check for very small covariances and fix
-    // FIXME: This situation means no motion. Therefore, two KFs have been created at the same TS: the motion KF, and the other KF. Making a factor with nearly no cov is OK, but an overkill for a situation that should not have appeared.
+    // FIXME: This situation means no motion. Therefore,
+    //    two KFs have been created at the same TS: the motion KF, and the other KF.
+    //    Making a factor with nearly no cov is OK, but an overkill for a situation that should not have appeared.
     if (new_covariance.determinant() < Constants::EPS_SMALL)
     {
         WOLF_DEBUG("Bad motion covariance determinant: ", new_covariance.determinant());
+        WOLF_DEBUG("Concerned Capture : ", new_capture->getSensorPtr()->getType());
+        WOLF_DEBUG("covariance : ", new_covariance.diagonal().transpose())
         new_covariance += MatrixXs::Identity(delta_cov_size_, delta_cov_size_)*1e-4;
         WOLF_DEBUG("Fixed motion covariance determinant: ", new_covariance.determinant());
     }
