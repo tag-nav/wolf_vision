@@ -149,7 +149,7 @@ inline FeatureBasePtr ProcessorOdom3D::emplaceFeature(CaptureMotionPtr _capture_
     FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
             "MOTION",
             _capture_motion->getBuffer().get().back().delta_integr_,
-            delta_integr_cov;
+            delta_integr_cov);
     _capture_motion->addFeature(key_feature_ptr);
 
     return key_feature_ptr;

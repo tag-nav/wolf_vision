@@ -70,9 +70,9 @@ class ProcessorIMU_Bias : public testing::Test
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
-        ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
-        ceres_options.max_line_search_step_contraction = 1e-3;
-        ceres_options.max_num_iterations = 1e4;
+//        ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
+//        ceres_options.max_line_search_step_contraction = 1e-3;
+//        ceres_options.max_num_iterations = 1e4;
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
 
 

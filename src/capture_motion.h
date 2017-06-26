@@ -81,22 +81,27 @@ class CaptureMotion : public CaptureBase
         FrameBasePtr origin_frame_ptr_; ///< Pointer to the origin frame of the motion
 };
 
-inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr,
+inline CaptureMotion::CaptureMotion(const TimeStamp& _ts,
+                                    SensorBasePtr _sensor_ptr,
                                     const Eigen::VectorXs& _data,
-                                    Size _delta_size, Size _delta_cov_size,
+                                    Size _delta_size,
+                                    Size _delta_cov_size,
                                     FrameBasePtr _origin_frame_ptr) :
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),
-        data_cov_(Eigen::MatrixXs::Identity(_data.rows(), _data.rows())),
+        data_cov_(Eigen::MatrixXs::Zero(_data.rows(), _data.rows())), // Someone should test this zero and do something smart accordingly
         buffer_(_delta_size,_delta_cov_size),
         origin_frame_ptr_(_origin_frame_ptr)
 {
     //
 }
 
-inline CaptureMotion::CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr,
-                                    const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov,
-                                    Size _delta_size, Size _delta_cov_size,
+inline CaptureMotion::CaptureMotion(const TimeStamp& _ts,
+                                    SensorBasePtr _sensor_ptr,
+                                    const Eigen::VectorXs& _data,
+                                    const Eigen::MatrixXs& _data_cov,
+                                    Size _delta_size,
+                                    Size _delta_cov_size,
                                     FrameBasePtr _origin_frame_ptr) :
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),

@@ -259,7 +259,8 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     // FIXME: This situation means no motion. Therefore,
     //    two KFs have been created at the same TS: the motion KF, and the other KF.
     //    Making a factor with nearly no cov is OK, but an overkill for a situation that should not have appeared.
-    if (new_covariance.determinant() < Constants::EPS_SMALL)
+//    if (new_covariance.determinant() < Constants::EPS_SMALL)
+        if (new_covariance.diagonal().minCoeff() < Constants::EPS_SMALL)
     {
         WOLF_DEBUG("Bad motion covariance determinant: ", new_covariance.determinant());
         WOLF_DEBUG("Concerned Capture : ", new_capture->getSensorPtr()->getType());
