@@ -501,8 +501,6 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
 
         // WOLF PROBLEM
         wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
-        Eigen::VectorXs x0(16);
-        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
         t.set(0);
 
         // CERES WRAPPER
@@ -580,8 +578,6 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
     // PROCESS DATA
 
         Eigen::Vector6s data_imu, data_odom3D;
-        data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
-        data_odom3D << 0,-0.06,0, 0,0,0;
 
         expected_final_state.resize(16);
         expected_final_state << 0,-0.06,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
@@ -636,6 +632,7 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
 
     virtual void TearDown(){}
 };
+
 
 TEST_F(ProcessorIMU_Real,M1_VarB1V2B2_InvarP1Q1V1P2Q2_initOK)
 {
