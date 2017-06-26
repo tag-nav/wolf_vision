@@ -25,7 +25,6 @@
 #include <iostream>
 #include <fstream>
 
-//#define DEBUG_RESULTS
 //#define DEBUG_RESULTS_BIAS
 //#define GET_RESIDUALS
 #define OUTPUT_DATA
@@ -531,7 +530,7 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 2.99999;
+        prc_odom3D_params->max_time_span = 0.79999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
         prc_odom3D_params->angle_turned = 1000000000;
@@ -545,8 +544,8 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         char* imu_filepath;
         char * odom_filepath;
         //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/M1.txt");
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_Bias_all15s.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_Bias_all15s.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_static15s.txt");  //imu_Bias_all15s.txt, imu_15sAll, imu_static15s
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_static15s.txt");
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
         std::strcpy(imu_filepath, imu_filepath_string.c_str());
@@ -563,7 +562,6 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         }
 
         #ifdef OUTPUT_DATA
-        //std::ofstream debug_results;
         debug_results.open("KFO_cfix3D_odom.dat");
         #endif
 
@@ -612,11 +610,12 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
             imu_ptr->setData(data_imu);
 
             // process data in capture
-            imu_ptr->getTimeStamp();
+            //imu_ptr->getTimeStamp();
             sen_imu->process(imu_ptr);
 
             if(ts.get() == t_odom.get())
             {
+                WOLF_DEBUG("ts : ", ts.get())
                 // PROCESS ODOM 3D DATA
                 mot_ptr->setTimeStamp(t_odom);
                 mot_ptr->setData(data_odom3D);
@@ -1659,17 +1658,26 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_Con
                     meas_cov.topLeftCorner(3,3) = (Eigen::Matrix3s() << p_var, 0, 0, 0, p_var, 0, 0, 0, p_var).finished();
                     (*ctr_it)->getFeaturePtr()->setMeasurementCovariance(meas_cov);
                 }
+
+                else if ((*ctr_it)->getTypeId() == CTR_IMU)
+                {
+                    Eigen::MatrixXs IMUmeas_cov((*ctr_it)->getMeasurementCovariance());
+                    std::cout << "\n imu meas cov : " << IMUmeas_cov(0,0) << "\t" << IMUmeas_cov(1,1) << "\t" << IMUmeas_cov(2,2) << std::endl;
+                }
             }
         }
+
+        origin_KF->setState(expected_origin_state);
    
         ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
         ceres_manager_wolf_diff->computeCovariances(ALL);
 
-        Eigen::MatrixXs cov_AB1(3,3), cov_GB1(3,3), cov_P2(3,3), cov_Q2(3,3);
+        Eigen::MatrixXs cov_AB1(3,3), cov_GB1(3,3), cov_P2(3,3);
+        Eigen::MatrixXs cov_Q2(4,4);
         wolf_problem_ptr_->getCovarianceBlock(origin_KF->getAccBiasPtr(), origin_KF->getAccBiasPtr(), cov_AB1);
         wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
         wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
-        wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_Q2);
+        wolf_problem_ptr_->getCovarianceBlock(last_KF->getOPtr(), last_KF->getOPtr(), cov_Q2);
         std::cout << p_var << "\n\tcov_AB1 : " << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
                 << "\n\t cov_GB1 : " << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2))<< std::endl;
 
