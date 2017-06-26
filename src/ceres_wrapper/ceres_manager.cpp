@@ -22,11 +22,6 @@ CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Option
     covariance_ = new ceres::Covariance(covariance_options);
 
     ceres::Problem::Options problem_options;
-    #ifdef SUITESPARSE_VERSION
-    ceres_options_.sparse_linear_algebra_library_type = ceres::SUITE_SPARSE;
-    #else
-    ceres_options_.sparse_linear_algebra_library_type = ceres::EIGEN_SPARSE;
-    #endif
 
     problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
     problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
