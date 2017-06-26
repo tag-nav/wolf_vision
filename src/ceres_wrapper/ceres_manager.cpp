@@ -11,15 +11,25 @@ CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Option
     use_wolf_auto_diff_(_use_wolf_auto_diff)
 {
     ceres::Covariance::Options covariance_options;
+    #if CERES_VERSION_MINOR >= 10
     covariance_options.algorithm_type = ceres::SPARSE_QR;//ceres::DENSE_SVD;
-    covariance_options.num_threads = 8;//ceres::DENSE_SVD;
+    #else
+    covariance_options.algorithm_type = ceres::SUITE_SPARSE_QR;//ceres::DENSE_SVD;
+    #endif
+    covariance_options.num_threads = 8;
     covariance_options.apply_loss_function = false;
     //covariance_options.null_space_rank = -1;
     covariance_ = new ceres::Covariance(covariance_options);
 
     ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;//ceres::DO_NOT_TAKE_OWNERSHIP;
+    #ifdef SUITESPARSE_VERSION
+    ceres_options_.sparse_linear_algebra_library_type = ceres::SUITE_SPARSE;
+    #else
+    ceres_options_.sparse_linear_algebra_library_type = ceres::EIGEN_SPARSE;
+    #endif
+
+    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
     problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
     ceres_problem_ = new ceres::Problem(problem_options);
 }
