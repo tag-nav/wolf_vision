@@ -371,36 +371,36 @@ class ProcessorMotion : public ProcessorBase
          *
          * Let us name
          *
-         * ```
+         *
          *     R = _ref      // initial motion where interpolation starts
          *     F = _second   // final motion where interpolation ends
-         * ```
+         *
          * and let us define
          *
-         * ```
+         *
          *     t_R            // timestamp at R
          *     t_F            // timestamp at F
          *     t_I = _ts      // time stamp where interpolation is queried.
-         * ```
+         *
          * We can introduce the results of the interpolation as
          *
-         * ```
+         *
          *     I = motion_interpolated // from t_R to t_I
          *     S = motion_second       // from t_I to t_F
-         * ```
+         *
          * The Motion structure in wolf has the following members (among others; see below):
          *
-         * ```
+         *
          *     ts_           // time stamp
          *     delta_        // relative motion between the previous motion and this one. It might be seen as a local motion.
          *     delta_integr_ // integration of relative deltas, since some origin. It might be seen as a globally defined motion.
-         * ```
+         *
          * In this documentation, we differentiate these deltas with lower-case d and upper-case D:
          *
-         * ```
+         *
          *     d = any_motion.delta_            // local delta, from previous to this
          *     D = any_motion.delta_integr_     // global Delta, from origin to this
-         * ```
+         *
          * so that `D_(i+1) = D_(i) (+) d_(i+1)`, where (i) is in {R, I, S} and (i+1) is in {I, S, F}
          *
          * NOTE: the operator (+) is implemented as `deltaPlusDelta()` in each class deriving from this.
@@ -427,15 +427,15 @@ class ProcessorMotion : public ProcessorBase
          * where '`origin`' exists somewhere, but it is irrelevant for the operation of the interpolation.
          * According to the schematic, and assuming a generic composition operator (+), the motion composition satisfies
          *
-         * ```
+         *
          *   d_I (+) d_S = d_F      (1)
-         * ```
+         *
          * from where `d_I` and `d_S` are first derived. Then, the integrated deltas satisfy
          *
-         * ```
+         *
          *   D_I = D_R (+) d_I      (2)
          *   D_S = D_F              (3)
-         * ```
+         *
          * from where `D_I` and `D_S` can be derived.
          *
          * ### Interpolating `d_I`
@@ -449,16 +449,16 @@ class ProcessorMotion : public ProcessorBase
          * Therefore, we consider a linear interpolation.
          * The linear interpolation factor `tau` is defined from the time stamps,
          *
-         * ```
+         *
          *     tau = (t_I - t_R) / (t_F - t_R)
-         * ```
+         *
          * such that for `tau=0` we are at `R`, and for `tau=1` we are at `F`.
          *
          * Conceptually, we want an interpolation such that the local motion 'd' takes the fraction,
          *
-         * ```
+         *
          *   d_I = tau (*) d_F       // the fraction of the local delta
-         * ```
+         *
          * where again the operator (*) needs to be defined properly.
          *
          * ### Defining the operators (*), (+), and (-)
@@ -477,17 +477,17 @@ class ProcessorMotion : public ProcessorBase
          * #### Operator (*)
          *
          *   - for linear magnitudes, (*) is the regular product *:
-         * ```
+         *
          *         dv_I = tau * dv_F
-         * ```
+         *
          *   - for simple angles, (*) is the regular product:
-         * ```
+         *
          *         da_I = tau * da_F
-         * ```
+         *
          *   - for quaternions, we use slerp():
-         * ```
+         *
          *     dq_I = 1.slerp(tau, dq_F) // '1' is the unit quaternion
-         * ```
+         *
          *
          * #### Operator (+)
          *
@@ -526,35 +526,35 @@ class ProcessorMotion : public ProcessorBase
          * For simple pose increments, we can use a local implementation:
          *
          *   - for 2D
-         * ```
+         *
          *     dp_S = dR_I.tr * (1-tau)*dp_F      // dR is the rotation matrix of the angle delta 'da'; 'tr' is transposed
          *     da_S = dR_I.tr * (1-tau)*da_F
-         * ```
+         *
          *   - for 3D
-         * ```
+         *
          *     dp_S = dq_I.conj * (1-tau)*dp_F    // dq is a quaternion; 'conj' is the conjugate quaternion.
          *     dq_S = dq_I.conj * dq_F
-         * ```
+         *
          *
          * Please refer to the examples at the end of this documentation for the computation of `d_S`.
          *
          * ### Computing `D_I`
          *
          * Conceptually, the global motion 'D' is interpolated, that is:
-         * ```
+         *
          *     D_I = (1-tau) (*) D_R (+) tau (*) D_F  // the interpolation of the global Delta
-         * ```
+         *
          * However, we better make use of (2) and write
-         * ```
+         *
          *     D_I = D_R (+) d_I
          *         = deltaPlusDelta(D_R, d_I)         // This form provides an easy implementation.
-         * ```
+         *
          *
          * ### Examples
          *
          * #### Example 1: For 2D poses
          *
-         * ```
+         *
          *     t_I  = _ts                         // time stamp of the interpolated motion
          *     tau = (t_I - t_R) / (t_F - t_R)    // interpolation factor
          *
@@ -567,11 +567,11 @@ class ProcessorMotion : public ProcessorBase
          *     da_S = dR_I.tr * (1-tau)*da_F
          *
          *     D_S  = D_F
-         * ```
+         *
          * #### Example 2: For 3D poses
          *
          * Orientation is in quaternion form, which is the best for interpolation using `slerp()` :
-         * ```
+         *
          *     t_I  = _ts                         // time stamp of the interpolated motion
          *     tau = (t_I - t_R) / (t_F - t_R)    // interpolation factor
          *
@@ -584,7 +584,7 @@ class ProcessorMotion : public ProcessorBase
          *     dq_S = dq_I.conj * dq_F
          *
          *     D_S  = D_F
-         * ```
+         *
          */
         /* //TODO: JS: Remove these instructions since we will remove covariances from Motion.
          *
@@ -596,15 +596,15 @@ class ProcessorMotion : public ProcessorBase
          *     DC: delta_integr_cov_
          *
          * and which are integrated as follows
-         * ```
+         *
          *     dC_I = tau * dC_F
          *     DC_I = (1-tau) * DC_R + tau * dC_F = DC_R + dC_I
-         * ```
+         *
          * and
-         * ```
+         *
          *     dC_S = (1-tau) * dC_F
          *     DC_S = DC_F
-         * ```
+         *
          */
         virtual Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts) = 0;
 

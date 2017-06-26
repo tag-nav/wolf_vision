@@ -11,7 +11,7 @@ CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Option
     use_wolf_auto_diff_(_use_wolf_auto_diff)
 {
     ceres::Covariance::Options covariance_options;
-    covariance_options.algorithm_type = ceres::SUITE_SPARSE_QR;//ceres::DENSE_SVD;
+    covariance_options.algorithm_type = ceres::SPARSE_QR;//ceres::DENSE_SVD;
     covariance_options.num_threads = 8;//ceres::DENSE_SVD;
     covariance_options.apply_loss_function = false;
     //covariance_options.null_space_rank = -1;
