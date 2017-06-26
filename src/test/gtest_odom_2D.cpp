@@ -123,7 +123,7 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     Vector3s            delta (2,0,0);
     Matrix3s delta_cov; delta_cov << .02, 0, 0, 0, .025, .02, 0, .02, .02;
 
-    ProblemPtr          Pr = Problem::create(FRM_PO_2D);
+    ProblemPtr          Pr = Problem::create("PO 2D");
     CeresManager ceres_manager(Pr);
     ceres::Solver::Summary summary;
 
@@ -191,7 +191,7 @@ TEST(Odom2D, VoteForKfAndSolve)
     int N = 7; // number of process() steps
 
     // Create Wolf tree nodes
-    ProblemPtr problem = Problem::create(FRM_PO_2D);
+    ProblemPtr problem = Problem::create("PO 2D");
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
     params->dist_traveled_th_   = 100;
@@ -308,7 +308,7 @@ TEST(Odom2D, KF_callback)
 
 
     // Create Wolf tree nodes
-    ProblemPtr problem = Problem::create(FRM_PO_2D);
+    ProblemPtr problem = Problem::create("PO 2D");
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
     params->dist_traveled_th_   = 100; // don't make keyframes

@@ -189,17 +189,7 @@ typedef enum
     KEY_FRAME = 1       ///< key frame. It will stay in the frames window and play at optimizations.
 } FrameType;
 
-/** \brief Enumeration of all possible frames
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    FRM_PO_2D = 1,  ///< 2D frame containing position (x,y) and orientation angle.
-    FRM_PO_3D,      ///< 3D frame containing position (x,y,z) and orientation quaternion (qx,qy,qz,qw).
-    FRM_POV_3D,     ///< 3D frame with position, orientation quaternion, and linear velocity (vx,vy,vz)
-    FRM_PQVBB_3D    ///< 3D frame with pos, orient quat, velocity, acc bias (abx,aby,abz), and gyro bias (wbx,wby,wbz).
-} FrameStructure;
+typedef std::string FrameStructure;
 
 /** \brief Enumeration of all possible constraints
  *

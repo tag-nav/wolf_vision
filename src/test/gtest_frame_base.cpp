@@ -65,7 +65,7 @@ TEST(FrameBase, LinksBasic)
 TEST(FrameBase, LinksToTree)
 {
     // Problem with 2 frames and one motion constraint between them
-    ProblemPtr P = Problem::create(FRM_PO_2D);
+    ProblemPtr P = Problem::create("PO 2D");
     TrajectoryBasePtr T = P->getTrajectoryPtr();
     SensorOdom2DPtr S = make_shared<SensorOdom2D>(make_shared<StateBlock>(2), make_shared<StateBlock>(1), 1,1);
     P->getHardwarePtr()->addSensor(S);

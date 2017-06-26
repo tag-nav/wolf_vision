@@ -6,7 +6,8 @@ namespace wolf {
 
 TrajectoryBase::TrajectoryBase(FrameStructure _frame_structure) :
     NodeBase("TRAJECTORY"),
-    frame_structure_(_frame_structure), last_key_frame_ptr_(nullptr)
+    frame_structure_(_frame_structure),
+    last_key_frame_ptr_(nullptr)
 {
 //    WOLF_DEBUG("constructed T");
 }

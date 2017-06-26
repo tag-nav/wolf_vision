@@ -18,7 +18,7 @@ int main()
     using namespace Eigen;
     using namespace std;
 
-    ProblemPtr problem = Problem::create(FRM_PO_2D);
+    ProblemPtr problem = Problem::create("PO 2D");
 
     SensorBasePtr sen_odo    = problem->installSensor   ("ODOM 2D", "main odometer", (Vector3s()<<0,0,0).finished(),"");
     ProcessorBasePtr prc_odo = problem->installProcessor("ODOM 2D", "odometry integrator", "main odometer", "");

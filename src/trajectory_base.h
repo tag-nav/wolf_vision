@@ -15,7 +15,6 @@ class TimeStamp;
 
 //std includes
 
-
 namespace wolf {
 
 //class TrajectoryBase
