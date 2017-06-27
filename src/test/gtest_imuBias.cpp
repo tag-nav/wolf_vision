@@ -64,8 +64,6 @@ class ProcessorIMU_Bias : public testing::Test
 
         // WOLF PROBLEM
         wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
-        Eigen::VectorXs x0(16);
-        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
         t.set(0);
 
         // CERES WRAPPER
@@ -139,9 +137,6 @@ class ProcessorIMU_Bias_LowQualityOdom : public testing::Test
 
         // WOLF PROBLEM
         wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
-        Eigen::VectorXs x0(16);
-        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
-        t.set(0);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -211,9 +206,6 @@ class ProcessorIMU_Real : public testing::Test
 
         // WOLF PROBLEM
         wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
-        Eigen::VectorXs x0(16);
-        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
-        t.set(0);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -353,9 +345,6 @@ class ProcessorIMU_Real_CaptureFix : public testing::Test
 
         // WOLF PROBLEM
         wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
-        Eigen::VectorXs x0(16);
-        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
-        t.set(0);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -501,7 +490,6 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
 
         // WOLF PROBLEM
         wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
-        t.set(0);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -541,7 +529,6 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
 
         char* imu_filepath;
         char * odom_filepath;
-        //std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/M1.txt");
         std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_static15s.txt");  //imu_Bias_all15s.txt, imu_15sAll, imu_static15s
         std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_static15s.txt");
         imu_filepath   = new char[imu_filepath_string.length() + 1];
@@ -1655,12 +1642,6 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_Con
                     meas_cov.topLeftCorner(3,3) = (Eigen::Matrix3s() << p_var, 0, 0, 0, p_var, 0, 0, 0, p_var).finished();
                     (*ctr_it)->getFeaturePtr()->setMeasurementCovariance(meas_cov);
                 }
-
-                else if ((*ctr_it)->getTypeId() == CTR_IMU)
-                {
-                    Eigen::MatrixXs IMUmeas_cov((*ctr_it)->getMeasurementCovariance());
-                    std::cout << "\n imu meas cov : " << IMUmeas_cov(0,0) << "\t" << IMUmeas_cov(1,1) << "\t" << IMUmeas_cov(2,2) << std::endl;
-                }
             }
         }
 
@@ -1686,6 +1667,23 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_Con
                     << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
         #endif
      }
+
+     //just print measurement covariances of IMU and odometry :
+    ConstraintBaseList ctr_list = origin_KF->getConstrainedByList();
+    for (auto ctr_it = ctr_list.begin(); ctr_it != ctr_list.end(); ctr_it++)
+    {
+        if ((*ctr_it)->getTypeId() == CTR_ODOM_3D) //change covariances in features to constraint only position
+            {
+                Eigen::MatrixXs meas_cov((*ctr_it)->getMeasurementCovariance());
+                std::cout << "\n Odom3D meas cov : " << meas_cov.diagonal().transpose() << std::endl;
+            }
+
+            else if ((*ctr_it)->getTypeId() == CTR_IMU)
+            {
+                Eigen::MatrixXs IMUmeas_cov((*ctr_it)->getMeasurementCovariance());
+                std::cout << "\n imu meas cov : " << IMUmeas_cov.diagonal().transpose() << std::endl;
+            }
+    }
 
     wolf_problem_ptr_->print(4,1,1,1);
 
