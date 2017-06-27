@@ -43,32 +43,10 @@ TEST(SensorIMU, Constructors)
     IntrinsicsIMUPtr params = std::make_shared<IntrinsicsIMU>();
     SensorIMUPtr sen2 = std::make_shared<SensorIMU>(p_ptr, q_ptr, params);
 
-    ASSERT_EQ(params->gyro_noise, sen2->getGyroNoise());
-    ASSERT_EQ(params->accel_noise, sen2->getAccelNoise());
+    ASSERT_EQ(params->w_noise, sen2->getGyroNoise());
+    ASSERT_EQ(params->a_noise, sen2->getAccelNoise());
     ASSERT_EQ(params->ab_stdev, sen2->getAbStdev());
     ASSERT_EQ(params->wb_stdev, sen2->getWbStdev());
-
-                                                        //FACTORY SENSOR CONSTRUCTOR using YAML
-    std::string wolf_root = _WOLF_ROOT_DIR;
-    // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
-    Eigen::VectorXs IMU_extrinsics(7);
-    IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-    SensorBasePtr sen4 = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, wolf_root + "/src/examples/sensor_imu.yaml");
-    SensorIMUPtr sensor_ptr = std::static_pointer_cast<SensorIMU>(sen4);
-    ASSERT_EQ(0.02, sensor_ptr->getGyroNoise()) << "please check gyro_noise value in yaml, sensor got " << sensor_ptr->getGyroNoise() <<std::endl;
-    ASSERT_EQ(0.02, sensor_ptr->getAccelNoise()) << "please check accel_noise value in yaml, sensor got " << sensor_ptr->getAccelNoise() <<std::endl;
-    ASSERT_EQ(0.001, sensor_ptr->getAbStdev()) << "please check ab_stdev value in yaml, sensor got " << sensor_ptr->getAbStdev() <<std::endl;
-    ASSERT_EQ(0.001, sensor_ptr->getWbStdev()) << "please check wb_stdev value in yaml, sensor got " << sensor_ptr->getWbStdev() <<std::endl;
-
-                                                      //FACTORY SENSOR CONSTRUCTOR without YAML
-    // Wolf problem
-    SensorBasePtr sensor_sec_ptr = wolf_problem_ptr_->installSensor("IMU", "Sec IMU", IMU_extrinsics, std::make_shared<IntrinsicsIMU>());
-    ASSERT_EQ(0.02, sensor_ptr->getGyroNoise()) << "please check gyro_noise value in yaml, sensor got " << sensor_ptr->getGyroNoise() <<std::endl;
-    ASSERT_EQ(0.02, sensor_ptr->getAccelNoise()) << "please check accel_noise value in yaml, sensor got " << sensor_ptr->getAccelNoise() <<std::endl;
-    ASSERT_EQ(0.001, sensor_ptr->getAbStdev()) << "please check ab_stdev value in yaml, sensor got " << sensor_ptr->getAbStdev() <<std::endl;
-    ASSERT_EQ(0.001, sensor_ptr->getWbStdev()) << "please check wb_stdev value in yaml, sensor got " << sensor_ptr->getWbStdev() <<std::endl;
-   
 }
 
 
