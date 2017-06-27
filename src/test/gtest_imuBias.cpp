@@ -1639,7 +1639,7 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_Con
 
     FrameBaseList frameList = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
 
-    for (wolf::Scalar p_var = 0.000001; p_var < 200; p_var=p_var*1.5)
+    for (wolf::Scalar p_var = 0.000001; p_var <= 1; p_var=p_var*10)
     {
         for(auto frame : frameList)
         {
