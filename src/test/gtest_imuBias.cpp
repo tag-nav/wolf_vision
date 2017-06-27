@@ -1607,7 +1607,7 @@ TEST_F(ProcessorIMU_Bias_LowQualityOdom,Foot_VarQ1P2Q2B1V2B2_InvarV1P1_initOK)
     framesCov.close();
 }
 
-TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_ConstrO_KF0_cfixem6To100)
+TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_ConstrO_KF0_cfixem6To100)
 {
 
     Eigen::MatrixXs featureFix_cov(6,6);
@@ -1623,8 +1623,14 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2V2B2_InvarP1V1_initOK_Con
     origin_KF->getVPtr()->fix();
 
     //last_KF->setState(expected_final_state);
-
     FrameBaseList frameList = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
+
+    //Fix velocity to [0 0 0]
+    for(auto frame : frameList)
+    {
+        frame->getVPtr()->setState((Eigen::Vector3s()<<0,0,0).finished());
+        frame->getVPtr()->fix();
+    }
 
     for (wolf::Scalar p_var = 0.000001; p_var <= 1; p_var=p_var*10)
     {
