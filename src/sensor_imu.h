@@ -15,16 +15,16 @@ WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsIMU);
 struct IntrinsicsIMU : public IntrinsicsBase
 {
         //noise
-        wolf::Scalar gyro_noise; //Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
-        wolf::Scalar accel_noise; //Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
+        wolf::Scalar w_noise; //standard deviation of Gyroscope noise (same for all the axis) in rad/sec/ sqrt(s)
+        wolf::Scalar a_noise; //standard deviation of Acceleration noise (same for all the axis) in m/s2/sqrt(s)
 
         //This is a trial to constraint how much can the bias change in 1 sec at most
         wolf::Scalar ab_stdev; //accelerometer micro_g/sec
         wolf::Scalar wb_stdev; //gyroscope rad/sec
 
         IntrinsicsIMU() :
-            gyro_noise(0),
-            accel_noise(0),
+            w_noise(0),
+            a_noise(0),
             ab_stdev(0),
             wb_stdev(0)
         {}
@@ -36,8 +36,8 @@ class SensorIMU : public SensorBase
 {
 
     protected:
-        wolf::Scalar gyro_noise; //Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
-        wolf::Scalar accel_noise; //Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
+        wolf::Scalar w_noise; //Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
+        wolf::Scalar a_noise; //Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
 
         //This is a trial to constraint how much can the bias change in 1 sec at most
         wolf::Scalar ab_stdev; //accelerometer micro_g/sec
@@ -79,12 +79,12 @@ class SensorIMU : public SensorBase
 
 inline Scalar SensorIMU::getGyroNoise() const
 {
-    return gyro_noise;
+    return w_noise;
 }
 
 inline Scalar SensorIMU::getAccelNoise() const
 {
-    return accel_noise;
+    return a_noise;
 }
 
 inline Scalar SensorIMU::getWbStdev() const

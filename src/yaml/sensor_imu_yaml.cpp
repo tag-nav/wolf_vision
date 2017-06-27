@@ -38,8 +38,8 @@ static IntrinsicsBasePtr createIntrinsicsIMU(const std::string & _filename_dot_y
 
         IntrinsicsIMUPtr params = std::make_shared<IntrinsicsIMU>();
 
-        params->accel_noise     = variances["accel_noise"]  .as<Scalar>();
-        params->gyro_noise      = variances["gyro_noise"]   .as<Scalar>();
+        params->a_noise     = variances["a_noise"]  .as<Scalar>();
+        params->w_noise      = variances["w_noise"]   .as<Scalar>();
         params->ab_stdev        = variances["ab_stdev"]     .as<Scalar>();
         params->wb_stdev        = variances["wb_stdev"]     .as<Scalar>();
 
