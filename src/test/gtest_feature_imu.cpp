@@ -40,7 +40,8 @@ class FeatureIMU_test : public testing::Test
         wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
         Eigen::VectorXs IMU_extrinsics(7);
         IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
-        SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, shared_ptr<IntrinsicsBase>());
+        IntrinsicsIMUPtr sen_imu_params = std::make_shared<IntrinsicsIMU>();
+        SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, sen_imu_params);
         wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Time and data variables
@@ -81,13 +82,12 @@ class FeatureIMU_test : public testing::Test
    	    last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
         wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
         
-
     //create a feature
-        delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
+        Eigen::MatrixXs delta_integr_cov(wolf_problem_ptr_->getProcessorMotionPtr()->integrateBufferCovariance(wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer()));
         delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
         //feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
         std::static_pointer_cast<wolf::ProcessorIMU>(wolf_problem_ptr_->getProcessorMotionPtr())->getJacobians(dD_db_jacobians);
-        feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov, imu_ptr, dD_db_jacobians);
+        feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_integr_cov, imu_ptr, dD_db_jacobians);
         feat_imu->setCapturePtr(imu_ptr); //associate the feature to a capture
 
     }
@@ -144,7 +144,7 @@ TEST_F(FeatureIMU_test, access_members)
     delta << 0.01,0,0.049, 0,0,0,1, 0.2,0,0.98;
     ASSERT_TRUE((feat_imu->dp_preint_ - delta.head<3>()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "feat_imu->dp_preint_ : " << feat_imu->dp_preint_.transpose() << ",\t delta.head<3>() :" << delta.head<3>().transpose() << 
     ",\n delta_preint : " << delta_preint.transpose() << std::endl;
-    EXPECT_TRUE((feat_imu->dv_preint_ - delta.tail<3>()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "feat_imu->dv_preint_ : " << feat_imu->dv_preint_.transpose() << ",\t delta.tail<3>() :" << delta.tail<3>().transpose() << 
+    EXPECT_TRUE((feat_imu->dv_preint_ - delta.tail<3>()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10)) << "feat_imu->dv_preint_ : " << feat_imu->dv_preint_.transpose() << ",\t delta.tail<3>() :" << delta.tail<3>().transpose() << 
     ",\n (feat_imu->dv_preint_ - delta.tail<3>() : " << (feat_imu->dv_preint_ - delta.tail<3>()).transpose() << std::endl;
     ASSERT_TRUE((feat_imu->dv_preint_ - delta.tail<3>()).isMuchSmallerThan(1, wolf::Constants::EPS)) << "feat_imu->dv_preint_ : " << feat_imu->dv_preint_.transpose() << ",\t delta.tail<3>() :" << delta.tail<3>().transpose() << 
     ",\n delta_preint : " << delta_preint.transpose() << std::endl;

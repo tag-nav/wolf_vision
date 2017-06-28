@@ -23,10 +23,10 @@ struct IntrinsicsIMU : public IntrinsicsBase
         wolf::Scalar wb_stdev; //gyroscope rad/sec
 
         IntrinsicsIMU() :
-            w_noise(0),
-            a_noise(0),
-            ab_stdev(0),
-            wb_stdev(0)
+            w_noise(0.001),
+            a_noise(0.001),
+            ab_stdev(0.00001),
+            wb_stdev(0.00001)
         {}
 };
 

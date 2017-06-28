@@ -19,10 +19,10 @@ struct ProcessorIMUParams : public ProcessorParamsBase
 
 
         ProcessorIMUParams() :
-            max_time_span(0),
-            max_buff_length(0),
-            dist_traveled(0),
-            angle_turned(0),
+            max_time_span(0.5),
+            max_buff_length(10),
+            dist_traveled(5),
+            angle_turned(.5),
             voting_active(false)
         {
             type = "IMU";
