@@ -51,7 +51,7 @@ ConstraintAnalytic::~ConstraintAnalytic()
 }
 
 
-const std::vector<Scalar*> ConstraintAnalytic::getStateBlockPtrVector()
+const std::vector<Scalar*> ConstraintAnalytic::getStateScalarPtrVector()
 {
     assert(state_ptr_vector_.size() > 0 && state_ptr_vector_.size() <= 10 && "Wrong state vector size in constraint, it should be between 1 and 10");
 
@@ -147,7 +147,7 @@ const std::vector<Scalar*> ConstraintAnalytic::getStateBlockPtrVector()
     return std::vector<Scalar*>(0); //Not going to happen
 }
 
-const std::vector<StateBlockPtr> ConstraintAnalytic::getStatePtrVector() const
+const std::vector<StateBlockPtr> ConstraintAnalytic::getStateBlockPtrVector() const
 {
     return state_ptr_vector_;
 }

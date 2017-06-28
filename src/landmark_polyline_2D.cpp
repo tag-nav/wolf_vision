@@ -38,14 +38,6 @@ LandmarkPolyline2D::LandmarkPolyline2D(StateBlockPtr _p_ptr, StateBlockPtr _o_pt
 LandmarkPolyline2D::~LandmarkPolyline2D()
 {
     removeStateBlocks();
-//    while (!point_state_ptr_vector_.empty())
-//    {
-//        if (getProblem() != nullptr)
-//            getProblem()->removeStateBlockPtr(point_state_ptr_vector_.front());
-//
-//        point_state_ptr_vector_.pop_front();
-//    }
-//    std::cout << "destructed    L-poly" << id() << std::endl;
 }
 
 void LandmarkPolyline2D::setFirst(const Eigen::VectorXs& _point, bool _defined)
@@ -187,7 +179,7 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
 
     // remove and add all constraints to the point
     for (auto ctr_ptr : getConstrainedByList())
-        for (auto st_ptr : ctr_ptr->getStatePtrVector())
+        for (auto st_ptr : ctr_ptr->getStateBlockPtrVector())
             if (st_ptr == state && getProblem() != nullptr)
             {
                 getProblem()->removeConstraintPtr(ctr_ptr);

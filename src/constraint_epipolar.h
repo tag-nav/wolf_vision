@@ -21,11 +21,11 @@ class ConstraintEpipolar : public ConstraintBase
 
         /** \brief Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint
          **/
-        virtual const std::vector<Scalar*> getStateBlockPtrVector(){return std::vector<Scalar*>(0);}
+        virtual const std::vector<Scalar*> getStateScalarPtrVector(){return std::vector<Scalar*>(0);}
 
         /** \brief Returns a vector of pointers to the states in which this constraint depends
          **/
-        virtual const std::vector<StateBlockPtr> getStatePtrVector() const{return std::vector<StateBlockPtr>(0);}
+        virtual const std::vector<StateBlockPtr> getStateBlockPtrVector() const{return std::vector<StateBlockPtr>(0);}
 
         /** \brief Returns the constraint residual size
          **/

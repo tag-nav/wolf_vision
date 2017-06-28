@@ -93,14 +93,14 @@ class ConstraintAnalytic: public ConstraintBase
          * Returns a vector of pointers to the state blocks in which this constraint depends
          *
          **/
-        virtual const std::vector<Scalar*> getStateBlockPtrVector();
+        virtual const std::vector<Scalar*> getStateScalarPtrVector();
 
         /** \brief Returns a vector of pointers to the states
          *
          * Returns a vector of pointers to the state in which this constraint depends
          *
          **/
-        virtual const std::vector<StateBlockPtr> getStatePtrVector() const;
+        virtual const std::vector<StateBlockPtr> getStateBlockPtrVector() const;
 
         /** \brief Returns a vector of sizes of the state blocks
          *

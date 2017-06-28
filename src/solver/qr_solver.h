@@ -164,7 +164,7 @@ class SolverQR
 
             unsigned int meas_dim = _constraint_ptr->getSize();
 
-            std::vector<Eigen::MatrixXs> jacobians(_constraint_ptr->getStatePtrVector().size());
+            std::vector<Eigen::MatrixXs> jacobians(_constraint_ptr->getStateBlockPtrVector().size());
             Eigen::VectorXs error(meas_dim);
 
             cost_functions_.back()->evaluateResidualJacobians();
@@ -172,9 +172,9 @@ class SolverQR
             cost_functions_.back()->getJacobians(jacobians);
 
             std::vector<unsigned int> idxs;
-            for (unsigned int i = 0; i < _constraint_ptr->getStatePtrVector().size(); i++)
-                if (!_constraint_ptr->getStatePtrVector().at(i)->isFixed())
-                    idxs.push_back(id_2_idx_[_constraint_ptr->getStatePtrVector().at(i)->getPtr()]);
+            for (unsigned int i = 0; i < _constraint_ptr->getStateBlockPtrVector().size(); i++)
+                if (!_constraint_ptr->getStateBlockPtrVector().at(i)->isFixed())
+                    idxs.push_back(id_2_idx_[_constraint_ptr->getStateBlockPtrVector().at(i)->getPtr()]);
 
             n_new_constraints_++;
             constraint_locations_.push_back(A_.rows());
@@ -285,11 +285,11 @@ class SolverQR
                 ConstraintBasePtr ct_ptr = constraints_.at(constraints_.size() - 1 - i);
                 std::cout << "constraint: " << i << " id: " << constraints_.at(constraints_.size() - 1 - i)->id()
                         << std::endl;
-                for (unsigned int j = 0; j < ct_ptr->getStatePtrVector().size(); j++)
+                for (unsigned int j = 0; j < ct_ptr->getStateBlockPtrVector().size(); j++)
                 {
-                    if (!ct_ptr->getStatePtrVector().at(j)->isFixed())
+                    if (!ct_ptr->getStateBlockPtrVector().at(j)->isFixed())
                     {
-                        unsigned int idx = id_2_idx_[ct_ptr->getStatePtrVector().at(j)->getPtr()];
+                        unsigned int idx = id_2_idx_[ct_ptr->getStateBlockPtrVector().at(j)->getPtr()];
                         //std::cout << "estimated idx " << idx << std::endl;
                         //std::cout << "node_order(idx) " << node_order(idx) << std::endl;
                         //std::cout << "first_ordered_node " << first_ordered_node << std::endl;
@@ -540,7 +540,7 @@ class SolverQR
                 case CTR_GPS_FIX_2D:
                 {
                     ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr);
-                    return (CostFunctionBasePtr)(new CostFunctionSparse<ConstraintGPS2D, specific_ptr->measurementSize,
+                    return (CostFunctionBasePtr)(new CostFunctionSparse<ConstraintGPS2D, specific_ptr->residualSize,
                             specific_ptr->block0Size, specific_ptr->block1Size, specific_ptr->block2Size,
                             specific_ptr->block3Size, specific_ptr->block4Size, specific_ptr->block5Size,
                             specific_ptr->block6Size, specific_ptr->block7Size, specific_ptr->block8Size,
@@ -550,7 +550,7 @@ class SolverQR
                 case CTR_ODOM_2D:
                 {
                     ConstraintOdom2D* specific_ptr = (ConstraintOdom2D*)(_corrPtr);
-                    return (CostFunctionBasePtr)new CostFunctionSparse<ConstraintOdom2D, specific_ptr->measurementSize,
+                    return (CostFunctionBasePtr)new CostFunctionSparse<ConstraintOdom2D, specific_ptr->residualSize,
                             specific_ptr->block0Size, specific_ptr->block1Size, specific_ptr->block2Size,
                             specific_ptr->block3Size, specific_ptr->block4Size, specific_ptr->block5Size,
                             specific_ptr->block6Size, specific_ptr->block7Size, specific_ptr->block8Size,
@@ -560,7 +560,7 @@ class SolverQR
                 case CTR_CORNER_2D:
                 {
                     ConstraintCorner2D* specific_ptr = (ConstraintCorner2D*)(_corrPtr);
-                    return (CostFunctionBasePtr)new CostFunctionSparse<ConstraintCorner2D, specific_ptr->measurementSize,
+                    return (CostFunctionBasePtr)new CostFunctionSparse<ConstraintCorner2D, specific_ptr->residualSize,
                             specific_ptr->block0Size, specific_ptr->block1Size, specific_ptr->block2Size,
                             specific_ptr->block3Size, specific_ptr->block4Size, specific_ptr->block5Size,
                             specific_ptr->block6Size, specific_ptr->block7Size, specific_ptr->block8Size,

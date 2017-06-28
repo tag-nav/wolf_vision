@@ -21,3 +21,4 @@ src/examples/map_polyline_example_write.yaml
 .DS_Store
 
 *.graffle
+/Default/

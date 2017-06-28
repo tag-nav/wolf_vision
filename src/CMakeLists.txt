@@ -62,7 +62,7 @@ IF(OpenCV_FOUND)
 ENDIF(OpenCV_FOUND)
 
 # YAML with yaml-cpp
-FIND_PACKAGE(YamlCpp)
+INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindYamlCpp.cmake)
 IF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library FOUND: yaml-cpp related sources will be built.")
     MESSAGE(STATUS ${YAMLCPP_INCLUDE_DIR})
@@ -83,7 +83,7 @@ IF(Suitesparse_INCLUDE_DIRS)
    MESSAGE("Suitesparse FOUND: wolf_solver will be built.")
 ELSE (Suitesparse_INCLUDE_DIRS)
    SET(Suitesparse_FOUND FALSE)
-   MESSAGE("Suitesparse NOT FOUND: wolf_solver won't be built.")
+   MESSAGE(FATAL_ERROR "Suitesparse NOT FOUND")
 ENDIF (Suitesparse_INCLUDE_DIRS)
 
 # Define the directory where will be the configured config.h
@@ -111,10 +111,15 @@ include_directories("${PROJECT_BINARY_DIR}/conf")
 
 INCLUDE_DIRECTORIES(.)
 
-# include spdlog (logging) third_party
-INCLUDE_DIRECTORIES(../third_party/spdlog/include)
-set(SPDLOG_INCLUDE_DIRS "../third_party/spdlog/include/")
-
+# include spdlog (logging library)
+FIND_PATH(SPDLOG_INCLUDE_DIR spdlog.h /usr/local/include/spdlog /usr/include/spdlog)
+IF (SPDLOG_INCLUDE_DIR)
+  INCLUDE_DIRECTORIES(${SPDLOG_INCLUDE_DIR})
+  MESSAGE(STATUS "Found spdlog: ${SPDLOG_INCLUDE_DIR}")
+ELSE (SPDLOG_INCLUDE_DIR)
+ MESSAGE(FATAL_ERROR "Could not find spdlog")
+ENDIF (SPDLOG_INCLUDE_DIR)  
+  
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 
 IF(Ceres_FOUND)

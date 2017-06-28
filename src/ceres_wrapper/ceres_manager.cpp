@@ -11,15 +11,20 @@ CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Option
     use_wolf_auto_diff_(_use_wolf_auto_diff)
 {
     ceres::Covariance::Options covariance_options;
+    #if CERES_VERSION_MINOR >= 10
     covariance_options.algorithm_type = ceres::SPARSE_QR;//ceres::DENSE_SVD;
-    covariance_options.num_threads = 8;//ceres::DENSE_SVD;
+    #else
+    covariance_options.algorithm_type = ceres::SUITE_SPARSE_QR;//ceres::DENSE_SVD;
+    #endif
+    covariance_options.num_threads = 8;
     covariance_options.apply_loss_function = false;
     //covariance_options.null_space_rank = -1;
     covariance_ = new ceres::Covariance(covariance_options);
 
     ceres::Problem::Options problem_options;
-    problem_options.cost_function_ownership = ceres::TAKE_OWNERSHIP;
-    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;//ceres::DO_NOT_TAKE_OWNERSHIP;
+
+    problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
+    problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
     problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
     ceres_problem_ = new ceres::Problem(problem_options);
 }
@@ -309,9 +314,9 @@ void CeresManager::addConstraint(ConstraintBasePtr _ctr_ptr, unsigned int _id)
 //    std::cout << "residual pointer " << _ctr_ptr << std::endl;
 
     if (_ctr_ptr->getApplyLossFunction())
-        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _ctr_ptr->getStateBlockPtrVector());
+        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], new ceres::CauchyLoss(0.5), _ctr_ptr->getStateScalarPtrVector());
     else
-        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], NULL, _ctr_ptr->getStateBlockPtrVector());
+        id_2_residual_idx_[_id] = ceres_problem_->AddResidualBlock(id_2_costfunction_[_id], NULL, _ctr_ptr->getStateScalarPtrVector());
 }
 
 void CeresManager::removeConstraint(const unsigned int& _corr_id)

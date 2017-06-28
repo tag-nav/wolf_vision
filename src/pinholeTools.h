@@ -197,7 +197,7 @@ template<typename Derived, typename T>
 T distortionFactor(const MatrixBase<Derived> &  d,
                    T                            r2)
 {
-    StaticSizeCheck<Derived::ColsAtCompileTime, 1>(d.cols());
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
 
     if (d.size() == 0)
         return (T)1.0;
@@ -232,7 +232,7 @@ template<typename Derived, typename T>
 T correctionFactor(const MatrixBase<Derived> &  c,
                    T                            r2)
 {
-    StaticSizeCheck<Derived::ColsAtCompileTime, 1>(c.cols());
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived);
 
     /*
      * Since we use the same polynomial kernel as for the distortion factor, we just call distortionFactor()
@@ -250,7 +250,7 @@ template<typename Derived1, typename Derived2>
 Matrix<typename Derived2::Scalar, 2, 1> distortPoint(const MatrixBase<Derived1> & d,
                                                      const MatrixBase<Derived2> & up)
 {
-    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(d.cols());
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived1);
     MatrixSizeCheck<2,1>::check(up);
 
     Size n = d.size();
@@ -276,7 +276,7 @@ void distortPoint(const MatrixBase<Derived1> &  d,
                   MatrixBase<Derived3> &        ud,
                   MatrixBase<Derived4> &        UD_up)
 {
-    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(d.cols());
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived1);
     MatrixSizeCheck<2,1>::check(up);
     MatrixSizeCheck<2,1>::check(ud);
     MatrixSizeCheck<2,2>::check(UD_up);
@@ -329,7 +329,7 @@ template<typename Derived1, typename Derived2>
 Matrix<typename Derived2::Scalar, 2, 1> undistortPoint(const MatrixBase<Derived1>& c,
                                                        const MatrixBase<Derived2>& ud)
 {
-    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(c.cols());
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived1);
     MatrixSizeCheck<2,1>::check(ud);
 
     Size n = c.size();
@@ -347,7 +347,7 @@ void undistortPoint(const MatrixBase<Derived1>& c,
                     MatrixBase<Derived3>&       up,
                     MatrixBase<Derived4>&       UP_ud)
 {
-    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(c.cols());
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived1);
     MatrixSizeCheck<2,1>::check(ud);
     MatrixSizeCheck<2,1>::check(up);
     MatrixSizeCheck<2,2>::check(UP_ud);
@@ -531,8 +531,8 @@ Matrix<typename Derived3::Scalar, 2, 1> projectPoint(const MatrixBase<Derived1>&
                                                      const MatrixBase<Derived2>& d,
                                                      const MatrixBase<Derived3>& v)
 {
-    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(k.cols());
-    StaticSizeCheck<Derived2::ColsAtCompileTime, 1>(d.cols());
+    MatrixSizeCheck<4,1>::check(k);
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived2);
     MatrixSizeCheck<3,1>::check(v);
 
     return pixellizePoint( k, distortPoint( d, projectPointToNormalizedPlane( v )));
@@ -553,8 +553,7 @@ void projectPoint(const MatrixBase<Derived1>& k,
                   MatrixBase<Derived4>&       u,
                   MatrixBase<Derived5>&       U_v)
 {
-    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(k.cols());
-    StaticSizeCheck<Derived2::ColsAtCompileTime, 1>(d.cols());
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived2);
     MatrixSizeCheck<3,1>::check(v);
     MatrixSizeCheck<2,1>::check(u);
     MatrixSizeCheck<2,3>::check(U_v);
@@ -585,8 +584,8 @@ void projectPoint(const MatrixBase<Derived1>& k,
                   MatrixBase<Derived4>&       u,
                   typename Derived3::Scalar&  dist)
 {
-    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(k.cols());
-    StaticSizeCheck<Derived2::ColsAtCompileTime, 1>(d.cols());
+    MatrixSizeCheck<4,1>::check(k);
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived2);
     MatrixSizeCheck<3,1>::check(v);
     MatrixSizeCheck<2,1>::check(u);
 
@@ -614,8 +613,8 @@ void projectPoint(const MatrixBase<Derived1>& k,
                   typename Derived3::Scalar&  dist,
                   MatrixBase<Derived5>&       U_v)
 {
-    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(k.cols());
-    StaticSizeCheck<Derived2::ColsAtCompileTime, 1>(d.cols());
+    MatrixSizeCheck<4,1>::check(k);
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived2);
     MatrixSizeCheck<3,1>::check(v);
     MatrixSizeCheck<2,1>::check(u);
     MatrixSizeCheck<2,3>::check(U_v);
@@ -646,8 +645,8 @@ Matrix<typename Derived3::Scalar, 3, 1> backprojectPoint(const MatrixBase<Derive
                                                      const MatrixBase<Derived3>&      u,
                                                      const typename Derived3::Scalar& depth = 1.0)
 {
-    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(k.cols());
-    StaticSizeCheck<Derived2::ColsAtCompileTime, 1>(c.cols());
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived2);
+    MatrixSizeCheck<4,1>::check(k);
     MatrixSizeCheck<2,1>::check(u);
 
     return backprojectPointFromNormalizedPlane(undistortPoint(c, depixellizePoint(k, u)), depth);
@@ -672,10 +671,12 @@ void backprojectPoint(const MatrixBase<Derived1>&       k,
                       MatrixBase<Derived5>&             P_u,
                       MatrixBase<Derived6>&             P_depth)
 {
-    StaticSizeCheck<Derived1::ColsAtCompileTime, 1>(k.cols());
-    StaticSizeCheck<Derived2::ColsAtCompileTime, 1>(c.cols());
+    EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived2);
+    MatrixSizeCheck<4,1>::check(k);
     MatrixSizeCheck<2,1>::check(u);
+    MatrixSizeCheck<3,1>::check(p);
     MatrixSizeCheck<3,2>::check(P_u);
+    MatrixSizeCheck<3,1>::check(P_depth);
 
     Matrix<typename Derived3::Scalar, 2, 1> up, ud;
     Matrix<typename Derived5::Scalar, 3, 2> P_up;

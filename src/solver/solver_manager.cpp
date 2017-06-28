@@ -156,7 +156,7 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPt
 		{
 			ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr);
 			return new ceres::AutoDiffCostFunction<ConstraintGPS2D,
-													specific_ptr->measurementSize,
+													specific_ptr->residualSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
 													specific_ptr->block2Size,
@@ -173,7 +173,7 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPt
 		{
 			ConstraintOdom2DComplexAngle* specific_ptr = (ConstraintOdom2DComplexAngle*)(_corrPtr);
 			return new ceres::AutoDiffCostFunction<ConstraintOdom2DComplexAngle,
-													specific_ptr->measurementSize,
+													specific_ptr->residualSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
 													specific_ptr->block2Size,
@@ -190,7 +190,7 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPt
 		{
 			ConstraintOdom2D* specific_ptr = (ConstraintOdom2D*)(_corrPtr);
 			return new ceres::AutoDiffCostFunction<ConstraintOdom2D,
-													specific_ptr->measurementSize,
+													specific_ptr->residualSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
 													specific_ptr->block2Size,
@@ -207,7 +207,7 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPt
 		{
 			ConstraintCorner2D* specific_ptr = (ConstraintCorner2D*)(_corrPtr);
 			return new ceres::AutoDiffCostFunction<ConstraintCorner2D,
-													specific_ptr->measurementSize,
+													specific_ptr->residualSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
 													specific_ptr->block2Size,
@@ -224,7 +224,7 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPt
 		{
 			ConstraintIMU* specific_ptr = (ConstraintIMU*)(_corrPtr);
 			return new ceres::AutoDiffCostFunction<ConstraintIMU,
-													specific_ptr->measurementSize,
+													specific_ptr->residualSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
 													specific_ptr->block2Size,

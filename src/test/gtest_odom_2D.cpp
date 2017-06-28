@@ -169,11 +169,11 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
           0,    0.48, 0.14;
 
     ASSERT_POSE2D_APPROX(F0->getState(), Vector3s(0,0,0), 1e-6);
-    ASSERT_EIGEN_APPROX(Pr->getFrameCovariance(F0), P0, 1e-6);
+    ASSERT_MATRIX_APPROX(Pr->getFrameCovariance(F0), P0, 1e-6);
     ASSERT_POSE2D_APPROX(F1->getState(), Vector3s(2,0,0), 1e-6);
-    ASSERT_EIGEN_APPROX(Pr->getFrameCovariance(F1), P1, 1e-6);
+    ASSERT_MATRIX_APPROX(Pr->getFrameCovariance(F1), P1, 1e-6);
     ASSERT_POSE2D_APPROX(F2->getState(), Vector3s(4,0,0), 1e-6);
-    ASSERT_EIGEN_APPROX(Pr->getFrameCovariance(F2), P2, 1e-6);
+    ASSERT_MATRIX_APPROX(Pr->getFrameCovariance(F2), P2, 1e-6);
 }
 
 TEST(Odom2D, VoteForKfAndSolve)
@@ -260,7 +260,7 @@ TEST(Odom2D, VoteForKfAndSolve)
         }
 
         ASSERT_POSE2D_APPROX(processor_odom2d->getMotion().delta_integr_, integrated_delta, 1e-6);
-        ASSERT_EIGEN_APPROX(odom2d_delta_cov, integrated_delta_cov, 1e-6);
+        ASSERT_MATRIX_APPROX(odom2d_delta_cov, integrated_delta_cov, 1e-6);
 
         // Integrate pose
         Ju = plus_jac_u(integrated_pose, data);
@@ -280,7 +280,7 @@ TEST(Odom2D, VoteForKfAndSolve)
     ceres::Solver::Summary summary = ceres_manager.solve();
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
-    ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance() , integrated_cov_vector[5], 1e-6);
+    ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance() , integrated_cov_vector[5], 1e-6);
 }
 
 TEST(Odom2D, KF_callback)
@@ -396,7 +396,7 @@ TEST(Odom2D, KF_callback)
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
-    ASSERT_EIGEN_APPROX(problem->getLastKeyFrameCovariance()       , integrated_cov_vector [n_split], 1e-6);
+    ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance()       , integrated_cov_vector [n_split], 1e-6);
 
     ////////////////////////////////////////////////////////////////
     // Split between keyframes, exact timestamp
@@ -427,11 +427,11 @@ TEST(Odom2D, KF_callback)
 
     // check the split KF
     ASSERT_POSE2D_APPROX(keyframe_1->getState()                 , integrated_pose_vector[m_split], 1e-6);
-    ASSERT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_1) , integrated_cov_vector [m_split], 1e-6); // FIXME test does not pass
+    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_1) , integrated_cov_vector [m_split], 1e-6);
 
     // check other KF in the future of the split KF
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
-    ASSERT_EIGEN_APPROX(problem->getFrameCovariance(keyframe_2)    , integrated_cov_vector [n_split], 1e-6); // FIXME test does not pass
+    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_2)    , integrated_cov_vector [n_split], 1e-6);
 }
 
 

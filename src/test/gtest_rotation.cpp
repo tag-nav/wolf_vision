@@ -8,7 +8,7 @@
 //Eigen
 #include <eigen3/Eigen/Geometry>
 
- //Wolf
+//Wolf
 #include "wolf.h"
 #include "../rotations.h"
 
@@ -25,6 +25,7 @@
 // THESE ARE UNITARY TESTS FOR METHODS IN ROTATION.H
 
 using namespace wolf;
+using namespace Eigen;
 
 namespace wolf
 {
@@ -217,12 +218,12 @@ TEST(rotations, pi2pi)
 TEST(rotations, Skew_vee)
 {
     using namespace wolf;
-    Eigen::Vector3s vec3 = Eigen::Vector3s::Random();
-    Eigen::Matrix3s skew_mat;
+    Vector3s vec3 = Vector3s::Random();
+    Matrix3s skew_mat;
     skew_mat = skew(vec3);
 
-        // vee
-    Eigen::Vector3s vec3_bis;
+    // vee
+    Vector3s vec3_bis;
     vec3_bis = vee(skew_mat);
 
     ASSERT_TRUE(vec3_bis == vec3);
@@ -234,37 +235,31 @@ TEST(rotations, v2q_q2v)
     //defines scalars
     wolf::Scalar deg_to_rad = M_PI/180.0;
 
-    Eigen::Vector4s vec0, vec1;
+    Vector4s vec0, vec1;
 
-        //v2q
-    Eigen::Vector3s rot_vector0, rot_vector1;
-    rot_vector0 = Eigen::Vector3s::Random();
+    //v2q
+    Vector3s rot_vector0, rot_vector1;
+    rot_vector0 = Vector3s::Random();
     rot_vector1 = rot_vector0 * 100 *deg_to_rad; //far from origin
     rot_vector0 = rot_vector0*deg_to_rad;
 
-    Eigen::Quaternions quat0, quat1;
+    Quaternions quat0, quat1;
     quat0 = v2q(rot_vector0);
     quat1 = v2q(rot_vector1);
 
-        //q2v
-    Eigen::Vector3s quat_to_v0, quat_to_v1;
-    Eigen::VectorXs quat_to_v0x, quat_to_v1x;
+    //q2v
+    Vector3s quat_to_v0, quat_to_v1;
+    VectorXs quat_to_v0x, quat_to_v1x;
 
     quat_to_v0 = q2v(quat0);
     quat_to_v1 = q2v(quat1);
     quat_to_v0x = q2v(quat0);
     quat_to_v1x = q2v(quat1);
 
-        //now we do the checking
-     vec0 << quat0.w(), quat0.x(), quat0.y(), quat0.z();
-     vec1 << quat1.w(), quat1.x(), quat1.y(), quat1.z();
-
-    //std::cout << "\n quaternion near origin : \n" << vec0 << "\n quaternion far from origin : \n" << vec1 << std::endl;
-
-    ASSERT_TRUE((rot_vector0 - quat_to_v0).isMuchSmallerThan(1,wolf::Constants::EPS));
-    ASSERT_TRUE(rot_vector1.isApprox(quat_to_v1, wolf::Constants::EPS));
-    ASSERT_TRUE(rot_vector0.isApprox(quat_to_v0x, wolf::Constants::EPS));
-    ASSERT_TRUE(rot_vector1.isApprox(quat_to_v1x, wolf::Constants::EPS));
+    ASSERT_MATRIX_APPROX(rot_vector0, quat_to_v0, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(rot_vector1, quat_to_v1, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(rot_vector0, quat_to_v0x, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(rot_vector1, quat_to_v1x, wolf::Constants::EPS);
 }
 
 TEST(rotations, v2R_R2v)
@@ -275,24 +270,24 @@ TEST(rotations, v2R_R2v)
 
     //definition
     wolf::Scalar deg_to_rad = M_PI/180.0;
-    Eigen::Vector3s rot_vector0, rot_vector1;
+    Vector3s rot_vector0, rot_vector1;
 
-    rot_vector0 = Eigen::Vector3s::Random();
+    rot_vector0 = Vector3s::Random();
     rot_vector1 = rot_vector0 * 100 *deg_to_rad; //far from origin
     rot_vector0 = rot_vector0*deg_to_rad;
 
-    Eigen::Matrix3s rot0, rot1;
+    Matrix3s rot0, rot1;
     rot0 = v2R(rot_vector0);
     rot1 = v2R(rot_vector1);
 
-        //R2v
-    Eigen::Vector3s rot0_vec, rot1_vec;
+    //R2v
+    Vector3s rot0_vec, rot1_vec;
     rot0_vec = R2v(rot0);
     rot1_vec = R2v(rot1);
 
-        //check now
-    ASSERT_TRUE(rot0_vec.isApprox(rot_vector0, wolf::Constants::EPS));
-    ASSERT_TRUE(rot1_vec.isApprox(rot_vector1, wolf::Constants::EPS));
+    //check now
+    ASSERT_MATRIX_APPROX(rot0_vec, rot_vector0, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(rot1_vec, rot_vector1, wolf::Constants::EPS);
 }
 
 TEST(rotations, R2v_v2R_limits)
@@ -300,17 +295,17 @@ TEST(rotations, R2v_v2R_limits)
     using namespace wolf;
     //test 2 : how small can angles in rotation vector be ?
     wolf::Scalar scale = 1;
-    Eigen::Matrix3s v_to_R, initial_matrix;
-    Eigen::Vector3s  R_to_v;
+    Matrix3s v_to_R, initial_matrix;
+    Vector3s  R_to_v;
 
-    //Eigen::Vector3s rv;
+    //Vector3s rv;
     for(int i = 0; i<8; i++){
-        initial_matrix = v2R(Eigen::Vector3s::Random() * scale);
+        initial_matrix = v2R(Vector3s::Random() * scale);
 
         R_to_v = R2v(initial_matrix);     
         v_to_R = v2R(R_to_v);
 
-        EXPECT_TRUE((v_to_R-initial_matrix).isMuchSmallerThan(1,wolf::Constants::EPS)); //<< "R2v_v2R_limits : reached at scale " << scale << std::endl;
+        ASSERT_MATRIX_APPROX(v_to_R, initial_matrix, wolf::Constants::EPS);
         scale = scale*0.1;
     }
 }
@@ -320,21 +315,21 @@ TEST(rotations, R2v_v2R_AAlimits)
     using namespace wolf;
     //let's see how small the angles can be here : limit reached at scale/10 =  1e-16
     wolf::Scalar scale = 1;
-    Eigen::Matrix3s rotation_mat;
-    Eigen::Vector3s rv;
+    Matrix3s rotation_mat;
+    Vector3s rv;
 
     for(int i = 0; i<8; i++){
-        rotation_mat = v2R(Eigen::Vector3s::Random() * scale);
+        rotation_mat = v2R(Vector3s::Random() * scale);
         //rotation_mat(0,0) = 1.0;
         //rotation_mat(1,1) = 1.0;
         //rotation_mat(2,2) = 1.0;
 
         //rv = R2v(rotation_mat); //decomposing R2v below
-        Eigen::AngleAxis<wolf::Scalar> aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
+        AngleAxis<wolf::Scalar> aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
         rv = aa0.axis() * aa0.angle();
         //std::cout << "aa0.axis : " << aa0.axis().transpose() << ",\t aa0.angles :" << aa0.angle() <<std::endl;
-        
-        EXPECT_FALSE(rv == Eigen::Vector3s::Zero());
+
+        ASSERT_FALSE(rv == Vector3s::Zero());
         scale = scale*0.1;
     }
 }
@@ -346,14 +341,13 @@ TEST(rotations, v2q2R2v)
     // testing new path : vector -> quaternion -> matrix -> vector
 
     for(int i = 0; i< 8; i++){
-    Eigen::Vector3s vector_ = Eigen::Vector3s::Random()*scale;
-    Eigen::Quaternions quat_ = v2q(vector_);
-    Eigen::Matrix3s mat_ = quat_.matrix();
-    Eigen::Vector3s vector_bis = R2v(mat_);
+        Vector3s vector_ = Vector3s::Random()*scale;
+        Quaternions quat_ = v2q(vector_);
+        Matrix3s mat_ = quat_.matrix();
+        Vector3s vector_bis = R2v(mat_);
 
-    EXPECT_TRUE((vector_-vector_bis).isMuchSmallerThan(1, wolf::Constants::EPS)) << 
-    "problem in vector -> quaternion -> matrix -> vector at scale " << scale << "\t Diff (returned_vector - input vector) = \n" << vector_bis - vector_ << std::endl;
-    scale = scale*0.1;
+        ASSERT_MATRIX_APPROX(vector_, vector_bis, wolf::Constants::EPS);
+        scale = scale*0.1;
     }
 }
 
@@ -362,30 +356,30 @@ TEST(rotations, AngleAxis_limits)
     using namespace wolf;
     //Hypothesis : problem with construction of AngleAxis objects.
     // Example : if R = I + [delta t]_x (happenning in the IMU case with delta t = 0.001). Then angle mays be evaluated as 0 (due to cosinus definition ?) 
-    // Here we try to get the AngleAxis object from a random rotation matrix, then get back to the rotation matrix using Eigen::AngleAxis::toRotationMatrix()
+    // Here we try to get the AngleAxis object from a random rotation matrix, then get back to the rotation matrix using AngleAxis::toRotationMatrix()
 
     wolf::Scalar scale = 1;
-    Eigen::Matrix3s res, res_i, rotation_mati, rotation_mat;
-    Eigen::Vector3s rv;
+    Matrix3s res, res_i, rotation_mati, rotation_mat;
+    Vector3s rv;
 
     for(int i = 0; i<8; i++){ //FIX ME : Random() will not create a rotation matrix. Then, R2v(Random_matrix()) makes no sense at all.
-        rotation_mat = v2R(Eigen::Vector3s::Random() * scale);
+        rotation_mat = v2R(Vector3s::Random() * scale);
         rotation_mati = rotation_mat;
 
         //rv = R2v(rotation_mat); //decomposing R2v below
-        Eigen::AngleAxis<wolf::Scalar> aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
+        AngleAxis<wolf::Scalar> aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
         rv = aa0.axis() * aa0.angle();
         //std::cout << "aa0.axis : " << aa0.axis().transpose() << ",\t aa0.angles :" << aa0.angle() <<std::endl;
         res = aa0.toRotationMatrix();
-        
+
         // now we set the diagonal to identity
-        Eigen::AngleAxis<wolf::Scalar> aa1 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
+        AngleAxis<wolf::Scalar> aa1 = AngleAxis<wolf::Scalar>(rotation_mat);
         rv = aa1.axis() * aa1.angle();
         //std::cout << "aa1.axis : " << aa0.axis().transpose() << ",\t aa1.angles :" << aa0.angle() <<std::endl;
         res_i = aa1.toRotationMatrix();
 
-        EXPECT_TRUE(res.isApprox(rotation_mat,wolf::Constants::EPS)) << "limit reached at scale " << scale << std::endl;
-        EXPECT_TRUE(res_i.isApprox(rotation_mati,wolf::Constants::EPS)) << "res_i : limit reached at scale " << scale << std::endl;
+        ASSERT_MATRIX_APPROX(res, rotation_mat, wolf::Constants::EPS);
+        ASSERT_MATRIX_APPROX(res_i, rotation_mati, wolf::Constants::EPS);
         scale = scale*0.1;
     }
 }
@@ -394,45 +388,45 @@ TEST(rotations, AngleAxis_limits2)
 {
     using namespace wolf;
 
-    Eigen::Matrix3s rotation_mat;
-    Eigen::Vector3s rv;
-    Eigen::AngleAxis<wolf::Scalar> aa0;
+    Matrix3s rotation_mat;
+    Vector3s rv;
+    AngleAxis<wolf::Scalar> aa0;
 
     //FIX ME : 5. Building a rot mat doing this is not safe; You cannot guarantee that R is valid.
-    // Highlight limitation of Eigen::AngleAxis
-    rotation_mat = skew(Eigen::Vector3s::Random()) *0.0001;
+    // Highlight limitation of AngleAxis
+    rotation_mat = skew(Vector3s::Random()) *0.0001;
     rotation_mat(0,0) = 1;
     rotation_mat(1,1) = 0.999999;
     rotation_mat(2,2) = 1;
-    aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
+    aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
     rv = aa0.axis() * aa0.angle();
     //checking if rv is 0 vector
-    EXPECT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 
     rotation_mat(0,0) = 1.0;
     rotation_mat(1,1) = 1.0;
     rotation_mat(2,2) = 1.0;
-    aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
+    aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
     rv = aa0.axis() * aa0.angle();
     //checking if rv is 0 vector
-    EXPECT_TRUE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_TRUE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 
-    rotation_mat = skew(Eigen::Vector3s::Random()) *0.1;
+    rotation_mat = skew(Vector3s::Random()) *0.1;
     rotation_mat(0,0) = 1;
     rotation_mat(1,1) = 0.9999999;
     rotation_mat(2,2) = 1;
-    aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
+    aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
     rv = aa0.axis() * aa0.angle();
     //checking if rv is 0 vector
-    EXPECT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 
     rotation_mat(0,0) = 1.0;
     rotation_mat(1,1) = 1.0;
     rotation_mat(2,2) = 1.0;
-    aa0 = Eigen::AngleAxis<wolf::Scalar>(rotation_mat);
+    aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
     rv = aa0.axis() * aa0.angle();
     //checking if rv is 0 vector
-    EXPECT_TRUE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_TRUE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 }
 
 TEST(rotations, Quat_compos_const_rateOfTurn)
@@ -656,19 +650,91 @@ TEST(rotations, Quat_compos_var_rateOfTurn_diff)
     "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
 }
 
+TEST(rotations, q2R_R2q)
+{
+    Vector3s v; v.setRandom();
+    Quaternions q = v2q(v);
+    Matrix3s R = v2R(v);
+
+    Quaternions q_R = R2q(R);
+    Quaternions qq_R(R);
+
+    ASSERT_NEAR(q.norm(),    1, wolf::Constants::EPS);
+    ASSERT_NEAR(q_R.norm(),  1, wolf::Constants::EPS);
+    ASSERT_NEAR(qq_R.norm(), 1, wolf::Constants::EPS);
+
+    ASSERT_MATRIX_APPROX(q.coeffs(), R2q(R).coeffs(), wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(q.coeffs(), qq_R.coeffs(),   wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(R,          q2R(q),          wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(R,          qq_R.matrix(),   wolf::Constants::EPS);
+}
+
+TEST(rotations, Jr)
+{
+    Vector3s theta; theta.setRandom();
+    Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
+
+    // Check the main Jr property for q and R
+    // exp( theta + d_theta ) \approx exp(theta) * exp(Jr * d_theta)
+    Matrix3s Jr = jac_SO3_right(theta);
+    ASSERT_QUATERNION_APPROX(exp_q(theta+dtheta), exp_q(theta) * exp_q(Jr*dtheta), 1e-8);
+    ASSERT_MATRIX_APPROX(exp_R(theta+dtheta), (exp_R(theta) * exp_R(Jr*dtheta)), 1e-8);
+}
+
+TEST(rotations, Jl)
+{
+    Vector3s theta; theta.setRandom();
+    Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
+
+    // Check the main Jl property for q and R
+    // exp( theta + d_theta ) \approx exp(Jl * d_theta) * exp(theta)
+    Matrix3s Jl = jac_SO3_left(theta);
+    ASSERT_QUATERNION_APPROX(exp_q(theta+dtheta), exp_q(Jl*dtheta) * exp_q(theta), 1e-8);
+    ASSERT_MATRIX_APPROX(exp_R(theta+dtheta), (exp_R(Jl*dtheta) * exp_R(theta)), 1e-8);
+}
+
+TEST(rotations, Jr_inv)
+{
+    Vector3s theta; theta.setRandom();
+    Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
+    Quaternions q = v2q(theta);
+    Matrix3s    R = v2R(theta);
+
+    // Check the main Jr_inv property for q and R
+    // log( R * exp(d_theta) ) \approx log( R ) + Jrinv * d_theta
+    Matrix3s Jr_inv = jac_SO3_right_inv(theta);
+    ASSERT_MATRIX_APPROX(log_q(q * exp_q(dtheta)), log_q(q) + Jr_inv*dtheta, 1e-8);
+    ASSERT_MATRIX_APPROX(log_R(R * exp_R(dtheta)), log_R(R) + Jr_inv*dtheta, 1e-8);
+}
+
+TEST(rotations, Jl_inv)
+{
+    Vector3s theta; theta.setRandom();
+    Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
+    Quaternions q = v2q(theta);
+    Matrix3s    R = v2R(theta);
+
+    // Check the main Jl_inv property for q and R
+    // log( exp(d_theta) * R ) \approx log( R ) + Jlinv * d_theta
+    Matrix3s Jl_inv = jac_SO3_left_inv(theta);
+    ASSERT_MATRIX_APPROX(log_q(exp_q(dtheta) * q), log_q(q) + Jl_inv*dtheta, 1e-8);
+    ASSERT_MATRIX_APPROX(log_R(exp_R(dtheta) * R), log_R(R) + Jl_inv*dtheta, 1e-8);
+}
+
+
 int main(int argc, char **argv)
 {
     using namespace wolf;
-                        
+
 
     /*
         LIST OF FUNCTIONS : 
         - pi2pi                                                            
-        - skew -> Skew_vee                                                            OK
-        - vee  -> Skew_vee                                                            OK
-        - v2q                                                              v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
-        - Eigen::Matrix<T, 3, 1> q2v(const Eigen::Quaternion<T>& _q)       v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
-        - Eigen::VectorXs q2v(const Eigen::Quaternions& _q)                v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
+        - skew -> Skew_vee                                                        OK
+        - vee  -> Skew_vee                                                        OK
+        - v2q                                                v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
+        - Matrix<T, 3, 1> q2v(const Quaternion<T>& _q)       v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
+        - VectorXs q2v(const Quaternions& _q)                v -> v2q -> q2v -> v OK (precision wolf::Constants::EPS)
         - v2R
         - R2v
         - jac_SO3_right
@@ -678,6 +744,6 @@ int main(int argc, char **argv)
         - quaternion composition
      */
 
-     testing::InitGoogleTest(&argc, argv);
-     return RUN_ALL_TESTS();
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

@@ -44,6 +44,15 @@ void cleanupMap(const ProblemPtr& _problem, const TimeStamp& _t, Scalar _dt_max,
     }
 }
 
+Eigen::MatrixXs computeDataCovariance(const VectorXs& _data)
+{
+    Scalar k = 0.5;
+    Scalar dist = _data.head<3>().norm();
+    if ( dist == 0 ) dist = 1.0;
+    WOLF_DEBUG("dist: ", dist, "; sigma: ", sqrt(k* (dist + 0.1)) );
+    return k * (dist + 0.1) * Matrix6s::Identity();
+}
+
 int main(int argc, char** argv)
 {
     std::cout << std::endl << "==================== processor image landmark test ======================" << std::endl;
@@ -141,7 +150,7 @@ int main(int argc, char** argv)
     //    ceres_options.max_line_search_step_contraction = 1e-3;
     //    ceres_options.minimizer_progress_to_stdout = false;
     //    ceres_options.line_search_direction_type = ceres::LBFGS;
-    ceres_options.max_num_iterations = 5;
+    ceres_options.max_num_iterations = 10;
     google::InitGoogleLogging(argv[0]);
 
     CeresManager ceres_manager(problem, ceres_options);
@@ -182,14 +191,15 @@ int main(int argc, char** argv)
 
         cap_odo->setTimeStamp(t);
 
-        // previous state and TS
-        Eigen::Vector7s x_prev = problem->getCurrentState();
-        Vector7s x_prev_prev;
-        Vector7s dx;
+        // previous state
+        FrameBasePtr prev_key_fr_ptr = problem->getLastKeyFramePtr();
+//        Eigen::Vector7s x_prev = problem->getCurrentState();
+        Eigen::Vector7s x_prev = prev_key_fr_ptr->getState();
 
         // before the previous state
-        FrameBasePtr prev_key_fr_ptr = problem->getLastKeyFramePtr();
         FrameBasePtr prev_prev_key_fr_ptr = nullptr;
+        Vector7s x_prev_prev;
+        Vector7s dx;
         for (auto f_it = problem->getTrajectoryPtr()->getFrameList().rbegin(); f_it != problem->getTrajectoryPtr()->getFrameList().rend(); f_it++)
             if ((*f_it) == prev_key_fr_ptr)
             {
@@ -228,8 +238,11 @@ int main(int argc, char** argv)
             data.tail<3>() = q2v(dq);
         }
 
+        Matrix6s data_cov = computeDataCovariance(data);
+
 
         cap_odo->setData(data);
+        cap_odo->setDataCovariance(data_cov);
 
         sensor_odom->process(cap_odo);
 

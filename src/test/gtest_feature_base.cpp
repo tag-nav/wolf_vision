@@ -24,10 +24,10 @@ TEST(FeatureBase, Constructor)
 
     FeatureBasePtr f(std::make_shared<FeatureBase>("DUMMY", m, M));
 
-    ASSERT_EIGEN_APPROX(f->getMeasurement(), m, 1e-6);
-    ASSERT_EIGEN_APPROX(f->getMeasurementCovariance(), M, 1e-6);
-    ASSERT_EIGEN_APPROX(f->getMeasurementSquareRootInformationUpper().transpose() * f->getMeasurementSquareRootInformationUpper(), U.transpose()*U, 1e-6);
-    ASSERT_EIGEN_APPROX(f->getMeasurementSquareRootInformationUpper(), U, 1e-6);
+    ASSERT_MATRIX_APPROX(f->getMeasurement(), m, 1e-6);
+    ASSERT_MATRIX_APPROX(f->getMeasurementCovariance(), M, 1e-6);
+    ASSERT_MATRIX_APPROX(f->getMeasurementSquareRootInformationUpper().transpose() * f->getMeasurementSquareRootInformationUpper(), U.transpose()*U, 1e-6);
+    ASSERT_MATRIX_APPROX(f->getMeasurementSquareRootInformationUpper(), U, 1e-6);
 }
 
 TEST(FeatureBase, SetMeasurement)
@@ -43,7 +43,7 @@ TEST(FeatureBase, SetMeasurement)
 
     f->setMeasurement(m);
 
-    ASSERT_EIGEN_APPROX(f->getMeasurement(), m, 1e-6);
+    ASSERT_MATRIX_APPROX(f->getMeasurement(), m, 1e-6);
 }
 
 TEST(FeatureBase, SetMeasurementCovariance)
@@ -59,9 +59,9 @@ TEST(FeatureBase, SetMeasurementCovariance)
 
     f->setMeasurementCovariance(M);
 
-    ASSERT_EIGEN_APPROX(f->getMeasurementCovariance(), M, 1e-6);
-    ASSERT_EIGEN_APPROX(f->getMeasurementSquareRootInformationUpper().transpose() * f->getMeasurementSquareRootInformationUpper(), U.transpose()*U, 1e-6);
-    ASSERT_EIGEN_APPROX(f->getMeasurementSquareRootInformationUpper(), U, 1e-6);
+    ASSERT_MATRIX_APPROX(f->getMeasurementCovariance(), M, 1e-6);
+    ASSERT_MATRIX_APPROX(f->getMeasurementSquareRootInformationUpper().transpose() * f->getMeasurementSquareRootInformationUpper(), U.transpose()*U, 1e-6);
+    ASSERT_MATRIX_APPROX(f->getMeasurementSquareRootInformationUpper(), U, 1e-6);
 }
 
 int main(int argc, char **argv)
