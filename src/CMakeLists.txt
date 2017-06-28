@@ -202,6 +202,7 @@ SET(HDRS
     constraint_AHP.h
     constraint_imu.h
     constraint_fix.h
+    constraint_fix_bias.h
     constraint_fix_3D.h
     constraint_gps_2D.h
     constraint_gps_pseudorange_3D.h
