@@ -1609,7 +1609,9 @@ TEST_F(ProcessorIMU_Bias_LowQualityOdom,Foot_VarQ1P2Q2B1V2B2_InvarV1P1_initOK)
 
 TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_ConstrO_KF0_cfixem6To100)
 {
-
+    // Create a ConstraintFix that will constraint the initial pose
+    // give it a big small covariance on yaw and big on the other parts of the diagonal.
+    // This is needed to make the problem observable, otherwise the jacobian would be rank deficient -> cannot compute covariances
     Eigen::MatrixXs featureFix_cov(6,6);
     featureFix_cov = Eigen::MatrixXs::Identity(6,6); 
     featureFix_cov(5,5) = 0.0001;
