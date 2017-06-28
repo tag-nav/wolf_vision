@@ -210,7 +210,7 @@ inline FeatureBasePtr ProcessorOdom2D::emplaceFeature(CaptureMotionPtr _capture_
     //CaptureMotionPtr key_capture_ptr = std::static_pointer_cast<CaptureMotion>(_capture_motion);
     FrameBasePtr key_frame_ptr = std::static_pointer_cast<FrameBase>(_related_frame);
     // create motion feature and add it to the key_capture
-    Eigen::MatrixXs delta_integr_cov(integrateBufferCovariance(getBuffer()));
+    Eigen::MatrixXs delta_integr_cov(integrateBufferCovariance(_capture_motion->getBuffer()));
     FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
             "MOTION",
             _capture_motion->getBuffer().get().back().delta_integr_,
