@@ -59,11 +59,11 @@ class Problem : public std::enable_shared_from_this<Problem>
         bool origin_is_set_;
 
     private: // CAUTION: THESE METHODS ARE PRIVATE, DO NOT MAKE THEM PUBLIC !!
-        Problem(FrameStructure _frame_structure); // USE create() below !!
+        Problem(const std::string& _frame_structure); // USE create() below !!
         void setup();
 
     public:
-        static ProblemPtr create(FrameStructure _frame_structure); // USE THIS AS A CONSTRUCTOR!
+        static ProblemPtr create(const std::string& _frame_structure); // USE THIS AS A CONSTRUCTOR!
         virtual ~Problem();
 
         // Properties -----------------------------------------
@@ -145,31 +145,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         virtual FrameBasePtr setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov,
                                const TimeStamp& _ts);
 
-        /** \brief Emplace Frame of the correct size
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
-         * \param _time_stamp Time stamp of the frame
-         *
-         * This acts as a Frame factory, but also takes care to update related lists in WolfProblem:
-         *   - Create a Frame
-         *   - Add it to Trajectory
-         *   - If it is key-frame, update state-block lists in Problem
-         */
-        FrameBasePtr emplaceFrame(FrameType _frame_key_type, const TimeStamp& _time_stamp);
-
-        /** \brief Emplace Frame from vector
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
-         * \param _frame_state State vector; must match the size and format of the chosen frame structure
-         * \param _time_stamp Time stamp of the frame
-         *
-         * This acts as a Frame factory, but also takes care to update related lists in WolfProblem
-         *   - Create a Frame
-         *   - Add it to Trajectory
-         *   - If it is key-frame, update state-block lists in Problem
-         */
-        FrameBasePtr emplaceFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
-                               const TimeStamp& _time_stamp);
-
-        /** \brief Emplace frame fron string frame_structure
+        /** \brief Emplace frame from string frame_structure
          * \param _frame_structure String indicating the frame structure.
          * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
          * \param _frame_state State vector; must match the size and format of the chosen frame structure
@@ -180,8 +156,50 @@ class Problem : public std::enable_shared_from_this<Problem>
          *   - Add it to Trajectory
          *   - If it is key-frame, update state-block lists in Problem
          */
-        FrameBasePtr emplaceFrame(const std::string& _frame_structure, FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
-                               const TimeStamp& _time_stamp);
+        FrameBasePtr emplaceFrame(const std::string& _frame_structure,
+                                  FrameType _frame_key_type,
+                                  const Eigen::VectorXs& _frame_state,
+                                  const TimeStamp& _time_stamp);
+
+        /** \brief Emplace frame from string frame_structure without state
+         * \param _frame_structure String indicating the frame structure.
+         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _time_stamp Time stamp of the frame
+         *
+         * This acts as a Frame factory, but also takes care to update related lists in WolfProblem:
+         *   - Create a Frame
+         *   - Add it to Trajectory
+         *   - If it is key-frame, update state-block lists in Problem
+         */
+        FrameBasePtr emplaceFrame(const std::string& _frame_structure,
+                                  FrameType _frame_key_type,
+                                  const TimeStamp& _time_stamp);
+
+        /** \brief Emplace frame from string frame_structure without structure
+         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _frame_state State vector; must match the size and format of the chosen frame structure
+         * \param _time_stamp Time stamp of the frame
+         *
+         * This acts as a Frame factory, but also takes care to update related lists in WolfProblem:
+         *   - Create a Frame
+         *   - Add it to Trajectory
+         *   - If it is key-frame, update state-block lists in Problem
+         */
+        FrameBasePtr emplaceFrame(FrameType _frame_key_type,
+                                  const Eigen::VectorXs& _frame_state,
+                                  const TimeStamp& _time_stamp);
+
+        /** \brief Emplace frame from string frame_structure without structure nor state
+         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _time_stamp Time stamp of the frame
+         *
+         * This acts as a Frame factory, but also takes care to update related lists in WolfProblem:
+         *   - Create a Frame
+         *   - Add it to Trajectory
+         *   - If it is key-frame, update state-block lists in Problem
+         */
+        FrameBasePtr emplaceFrame(FrameType _frame_key_type,
+                                  const TimeStamp& _time_stamp);
 
         // State getters
         Eigen::VectorXs getCurrentState();
