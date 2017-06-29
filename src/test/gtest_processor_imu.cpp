@@ -153,12 +153,13 @@ TEST(ProcessorIMU, voteForKeyFrame)
     Scalar dt = std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan() + 0.1;
     Eigen::Vector6s data;
     data << 1,0,0, 0,0,0;
-    Eigen::Matrix6s data_cov(Matrix6s::Zero());
+    Eigen::Matrix6s data_cov(Matrix6s::Identity()*0.001);
     data_cov(0,0) = 0.5;
     t.set(dt);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    std::shared_ptr<wolf::CaptureIMU> cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data);
+    // since we integrate only once, give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
+    std::shared_ptr<wolf::CaptureIMU> cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data, Eigen::Matrix6s::Identity());
     sensor_ptr->process(cap_imu_ptr);
 
     /*There should be 3 frames :

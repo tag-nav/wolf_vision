@@ -24,7 +24,7 @@ struct IntrinsicsIMU : public IntrinsicsBase
 
         IntrinsicsIMU() :
             w_noise(0.001),
-            a_noise(0.001),
+            a_noise(0.04),
             ab_stdev(0.00001),
             wb_stdev(0.00001)
         {}
