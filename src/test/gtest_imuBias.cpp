@@ -252,10 +252,7 @@ class ProcessorIMU_Real : public testing::Test
 
         imu_data_input.open(imu_filepath);
         //WOLF_INFO("imu file: ", imu_filepath)
-        if(!imu_data_input.is_open()){
-            std::cerr << "Failed to open data files... Exiting" << std::endl;
-            ADD_FAILURE();
-        }
+        ASSERT_TRUE(imu_data_input.is_open()) << "Failed to open data files... Exiting";
 
         //===================================================== SETTING PROBLEM
 
@@ -392,10 +389,7 @@ class ProcessorIMU_Real_CaptureFix : public testing::Test
 
         imu_data_input.open(imu_filepath);
         //WOLF_INFO("imu file: ", imu_filepath)
-        if(!imu_data_input.is_open()){
-            std::cerr << "Failed to open data files... Exiting" << std::endl;
-            ADD_FAILURE();
-        }
+        ASSERT_TRUE(imu_data_input.is_open()) << "Failed to open data files... Exiting";
 
         #ifdef OUTPUT_DATA
         //std::ofstream debug_results;
@@ -542,10 +536,7 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         imu_data_input.open(imu_filepath);
         odom_data_input.open(odom_filepath);
         //WOLF_INFO("imu file: ", imu_filepath)
-        if(!imu_data_input.is_open() || !odom_data_input.is_open()){
-            std::cerr << "Failed to open data files... Exiting" << std::endl;
-            ADD_FAILURE();
-        }
+        ASSERT_TRUE(imu_data_input.is_open() && odom_data_input.is_open()) << "Failed to open data files... Exiting";
 
         #ifdef OUTPUT_DATA
         debug_results.open("KFO_cfix3D_odom.dat");
@@ -1063,10 +1054,7 @@ TEST_F(ProcessorIMU_Bias,M1_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
 
     imu_data_input.open(imu_filepath);
     //WOLF_INFO("imu file: ", imu_filepath)
-    if(!imu_data_input.is_open()){
-        std::cerr << "Failed to open data files... Exiting" << std::endl;
-        ADD_FAILURE();
-    }
+    ASSERT_TRUE(imu_data_input.is_open() ) << "Failed to open data files... Exiting";
 
     //===================================================== SETTING PROBLEM
 
@@ -1165,10 +1153,7 @@ TEST_F(ProcessorIMU_Bias,M2_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
 
     imu_data_input.open(imu_filepath);
     //WOLF_INFO("imu file: ", imu_filepath)
-    if(!imu_data_input.is_open()){
-        std::cerr << "Failed to open data files... Exiting" << std::endl;
-        ADD_FAILURE();
-    }
+    ASSERT_TRUE(imu_data_input.is_open() ) << "Failed to open data files... Exiting";
 
     //===================================================== SETTING PROBLEM
 
@@ -1269,10 +1254,7 @@ TEST_F(ProcessorIMU_Bias,M3_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
 
     imu_data_input.open(imu_filepath);
     //WOLF_INFO("imu file: ", imu_filepath)
-    if(!imu_data_input.is_open()){
-        std::cerr << "Failed to open data files... Exiting" << std::endl;
-        ADD_FAILURE();
-    }
+    ASSERT_TRUE(imu_data_input.is_open()) << "Failed to open data files... Exiting";
 
     //===================================================== SETTING PROBLEM
 
@@ -1373,10 +1355,7 @@ TEST_F(ProcessorIMU_Bias,M4_VarP2Q2B1V2B2_InvarV1P1Q1_initOK)
 
     imu_data_input.open(imu_filepath);
     //WOLF_INFO("imu file: ", imu_filepath)
-    if(!imu_data_input.is_open()){
-        std::cerr << "Failed to open data files... Exiting" << std::endl;
-        ADD_FAILURE();
-    }
+    ASSERT_TRUE(imu_data_input.is_open()) << "Failed to open data files... Exiting";
 
     //===================================================== SETTING PROBLEM
 
@@ -1482,10 +1461,7 @@ TEST_F(ProcessorIMU_Bias_LowQualityOdom,Foot_VarQ1P2Q2B1V2B2_InvarV1P1_initOK)
     imu_data_input.open(imu_filepath);
     odom_data_input.open(odom_filepath);
     //WOLF_INFO("imu file: ", imu_filepath)
-    if(!imu_data_input.is_open() | !odom_data_input.is_open()){
-        std::cerr << "Failed to open data files... Exiting" << std::endl;
-        ADD_FAILURE();
-    }
+    ASSERT_TRUE(imu_data_input.is_open() && odom_data_input.is_open()) << "Failed to open data files... Exiting";
 
     //===================================================== SETTING PROBLEM
 

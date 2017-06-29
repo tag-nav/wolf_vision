@@ -93,18 +93,14 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> vee(const Eigen::MatrixBase
  */
 template<typename Derived>
 inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase<Derived>& _v)
-
 {
     MatrixSizeCheck<3,1>::check(_v);
 
     typedef typename Derived::Scalar T;
 
     Eigen::Quaternion<T> q;
-    const T& a0 = _v[0];
-    const T& a1 = _v[1];
-    const T& a2 = _v[2];
-    const T angle0 = a0 * a0 + a1 * a1 + a2 * a2;
-    T angle = _v.norm();
+    T angle = //_v.norm();
+            sqrt(_v.dot(_v));
     T angle_half = angle / (T)2.0;
     if (angle > wolf::Constants::EPS)
     {
