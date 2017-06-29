@@ -616,6 +616,7 @@ class ProcessorMotion : public ProcessorBase
 
         /** \brief create a feature corresponding to given capture and add the feature to this capture
          * \param _capture_motion: the parent capture
+         * \param _related_frame: frame of the last_ptr set as KEYFRAME. (used only in processor_imu.h for now...)
          */
         virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame) = 0;
 
