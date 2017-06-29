@@ -10,6 +10,7 @@
 #include "problem.h"
 #include "feature_fix.h"
 #include "constraint_fix_3D.h"
+#include "constraint_fix_bias.h"
 #include "sensor_imu.h"
 #include "capture_imu.h"
 #include "capture_fix.h"
@@ -1619,6 +1620,17 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
     FeatureBasePtr ffix = capfix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
     ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(ffix->addConstraint(std::make_shared<ConstraintFix3D>(ffix)));
     ConstraintBasePtr ctr_fixdummy = origin_KF->addConstrainedBy(ctr_fix);
+
+    /*// Create a ConstraintFixBias for origin KeyFrame
+    Eigen::MatrixXs featureFixBias_cov(6,6);
+    featureFixBias_cov = Eigen::MatrixXs::Identity(6,6); 
+    featureFixBias_cov.topLeftCorner(3,3) *= 0.07;
+    featureFixBias_cov.bottomRightCorner(3,3) *= 0.08;
+    CaptureBasePtr capfixbias = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), 6, 6));
+    //create a FeatureBase to constraint biases
+    FeatureBasePtr ffixbias = capfixbias->addFeature(std::make_shared<FeatureBase>("FIX BIAS", (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), featureFixBias_cov));
+    ConstraintFixBiasPtr ctr_fixBias = std::static_pointer_cast<ConstraintFixBias>(ffixbias->addConstraint(std::make_shared<ConstraintFixBias>(ffixbias)));
+    origin_KF->addConstrainedBy(ctr_fixBias);*/
 
     //prepare problem for solving
     origin_KF->getPPtr()->fix();

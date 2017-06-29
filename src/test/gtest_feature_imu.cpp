@@ -62,7 +62,7 @@ class FeatureIMU_test : public testing::Test
         wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    // give the capture a big covariance, otherwise it will be so small that it won't pass following assertions'
+    // give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
         imu_ptr = std::make_shared<CaptureIMU>(t, sensor_ptr, data_, Eigen::Matrix6s::Identity()); 
         imu_ptr->setFramePtr(origin_frame);
 
