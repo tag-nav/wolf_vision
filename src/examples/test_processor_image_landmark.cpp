@@ -105,7 +105,7 @@ int main(int argc, char** argv)
 
     //=====================================================
     // Wolf problem
-    ProblemPtr problem = Problem::create(FRM_PO_3D);
+    ProblemPtr problem = Problem::create("PO 3D");
 
     // ODOM SENSOR AND PROCESSOR
     SensorBasePtr sensor_base        = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
@@ -264,8 +264,8 @@ int main(int argc, char** argv)
         if (problem->getTrajectoryPtr()->getFrameList().size() > number_of_KFs)
         {
             number_of_KFs = problem->getTrajectoryPtr()->getFrameList().size();
-            ceres::Solver::Summary summary = ceres_manager.solve();
-            std::cout << summary.BriefReport() << std::endl;
+            std::string summary = ceres_manager.solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+            std::cout << summary << std::endl;
         }
 
 

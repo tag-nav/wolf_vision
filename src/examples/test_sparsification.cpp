@@ -186,7 +186,7 @@ int main(int argc, char** argv)
 
     // Wolf problem
     FrameBasePtr last_frame_ptr, frame_from_ptr, frame_to_ptr;
-    ProblemPtr bl_problem_ptr = Problem::create(FRM_PO_2D);
+    ProblemPtr bl_problem_ptr = Problem::create("PO_2D");
     SensorBasePtr sensor_ptr = bl_problem_ptr->installSensor("ODOM 2D", "Odometry", Eigen::VectorXs::Zero(3), IntrinsicsBasePtr());
 
     // Ceres wrapper

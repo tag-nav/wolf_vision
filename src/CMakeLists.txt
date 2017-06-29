@@ -83,7 +83,7 @@ IF(Suitesparse_INCLUDE_DIRS)
    MESSAGE("Suitesparse FOUND: wolf_solver will be built.")
 ELSE (Suitesparse_INCLUDE_DIRS)
    SET(Suitesparse_FOUND FALSE)
-   MESSAGE("Suitesparse NOT FOUND: wolf_solver won't be built.")
+   MESSAGE(FATAL_ERROR "Suitesparse NOT FOUND")
 ENDIF (Suitesparse_INCLUDE_DIRS)
 
 # Define the directory where will be the configured config.h

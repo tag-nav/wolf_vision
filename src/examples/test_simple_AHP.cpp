@@ -94,7 +94,7 @@ int main(int argc, char** argv)
 
     // ============================================================================================================
     /* 1 */
-    ProblemPtr problem = Problem::create(FRM_PO_3D);
+    ProblemPtr problem = Problem::create("PO 3D");
     // One anchor frame to define the lmk, and a copy to make a constraint
     FrameBasePtr kf_1 = problem->emplaceFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
     FrameBasePtr kf_2 = problem->emplaceFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
@@ -244,8 +244,8 @@ int main(int argc, char** argv)
     CeresManager ceres_manager(problem, ceres_options);
 
 
-    ceres::Solver::Summary summary = ceres_manager.solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::string summary = ceres_manager.solve(2);// 0: nothing, 1: BriefReport, 2: FullReport
+    std::cout << summary << std::endl;
 
     // Test of convergence over the lmk params
     bool pass = (lmk_2->point() - lmk_1->point()).isMuchSmallerThan(1,Constants::EPS);

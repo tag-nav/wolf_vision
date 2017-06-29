@@ -23,7 +23,7 @@ bool debug = false;
 TEST(TrajectoryBase, ClosestKeyFrame)
 {
 
-    ProblemPtr P = Problem::create(FRM_PO_2D);
+    ProblemPtr P = Problem::create("PO 2D");
     TrajectoryBasePtr T = P->getTrajectoryPtr();
 
     // Trajectory status:
@@ -60,7 +60,7 @@ TEST(TrajectoryBase, Add_Remove_Frame)
 {
     using std::make_shared;
 
-    ProblemPtr P = Problem::create(FRM_PO_2D);
+    ProblemPtr P = Problem::create("PO 2D");
     TrajectoryBasePtr T = P->getTrajectoryPtr();
 
     // Trajectory status:
@@ -124,7 +124,7 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
 {
     using std::make_shared;
 
-    ProblemPtr P = Problem::create(FRM_PO_2D);
+    ProblemPtr P = Problem::create("PO 2D");
     TrajectoryBasePtr T = P->getTrajectoryPtr();
 
     // Trajectory status:

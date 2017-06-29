@@ -43,7 +43,7 @@ int main (int argc, char** argv)
     }
     cout << "Final timestamp tf = " << tf.get() << " s" << endl;
 
-    ProblemPtr problem = Problem::create(FRM_PO_3D);
+    ProblemPtr problem = Problem::create("PO 3D");
     ceres::Solver::Options ceres_options;
 //    ceres_options.max_num_iterations = 1000;
 //    ceres_options.function_tolerance = 1e-10;

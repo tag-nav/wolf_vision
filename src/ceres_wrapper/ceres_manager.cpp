@@ -11,8 +11,12 @@ CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Option
     ceres_options_(_ceres_options)
 {
     ceres::Covariance::Options covariance_options;
+    #if CERES_VERSION_MINOR >= 10
     covariance_options.algorithm_type = ceres::SPARSE_QR;//ceres::DENSE_SVD;
-    covariance_options.num_threads = 8;//ceres::DENSE_SVD;
+    #else
+    covariance_options.algorithm_type = ceres::SUITE_SPARSE_QR;//ceres::DENSE_SVD;
+    #endif
+    covariance_options.num_threads = 8;
     covariance_options.apply_loss_function = false;
     //covariance_options.null_space_rank = -1;
     covariance_ = new ceres::Covariance(covariance_options);
@@ -40,23 +44,23 @@ CeresManager::~CeresManager()
 
 std::string CeresManager::solve(const unsigned int& _report_level)
 {
-	//std::cout << "Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
+    //std::cout << "Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
 
     // update problem
-    update();
+        update();
 
     //std::cout << "After Update: Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
 
-	// run Ceres Solver
-	ceres::Solve(ceres_options_, ceres_problem_, &summary_);
-	//std::cout << "solved" << std::endl;
+        // run Ceres Solver
+    ceres::Solve(ceres_options_, ceres_problem_, &summary_);
+    //std::cout << "solved" << std::endl;
 
 	//return report
 	if (_report_level == 0)
 	    return std::string();
     else if (_report_level == 1)
         return summary_.BriefReport();
-    else if (_report_level == 1)
+    else if (_report_level == 2)
         return summary_.FullReport();
     else
         throw std::invalid_argument( "Report level should be 0, 1 or 2!" );

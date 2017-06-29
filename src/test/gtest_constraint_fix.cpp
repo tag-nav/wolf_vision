@@ -28,7 +28,7 @@ Matrix3s data_cov = data_var.asDiagonal();
 Vector3s x0 = pose6 + Vector3s::Random()*0.25;
 
 // Problem and solver
-ProblemPtr problem = Problem::create(FRM_PO_2D);
+ProblemPtr problem = Problem::create("PO 2D");
 CeresManager ceres_mgr(problem);
 
 // Two frames
@@ -60,7 +60,7 @@ TEST(ConstraintFix, solve)
     frm0->setState(x0);
 
     // solve for frm0
-    std::string report = ceres_mgr.solve();
+    std::string report = ceres_mgr.solve(0); // 0: nothing, 1: BriefReport, 2: FullReport
 
     ASSERT_MATRIX_APPROX(frm0->getState(), pose6, 1e-6);
 

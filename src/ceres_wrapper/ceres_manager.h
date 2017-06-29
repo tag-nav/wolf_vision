@@ -39,7 +39,7 @@ class CeresManager : public SolverManager
 
 		~CeresManager();
 
-		virtual std::string solve(const unsigned int& _report_level = 0);
+		virtual std::string solve(const unsigned int& _report_level);
 
         ceres::Solver::Summary getSummary();
 
