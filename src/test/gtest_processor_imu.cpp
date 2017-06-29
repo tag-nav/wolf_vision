@@ -149,17 +149,26 @@ TEST(ProcessorIMU, voteForKeyFrame)
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.000,  0,0,.000; // Try some non-zero biases
     problem->getProcessorMotionPtr()->setOrigin(x0, t); //this also creates a keyframe at origin
 
-    // Time and data variables
-    Scalar dt = std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan() + 0.1;
+    //data variable and covariance matrix
+    // since we integrate only a few times, give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
     Eigen::Vector6s data;
     data << 1,0,0, 0,0,0;
-    Eigen::Matrix6s data_cov(Matrix6s::Identity()*0.001);
+    Eigen::Matrix6s data_cov(Matrix6s::Identity());
     data_cov(0,0) = 0.5;
-    t.set(dt);
 
-    // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    // since we integrate only once, give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
-    std::shared_ptr<wolf::CaptureIMU> cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data, Eigen::Matrix6s::Identity());
+    // Create the captureIMU to store the IMU data arriving from (sensor / callback / file / etc.)
+    std::shared_ptr<wolf::CaptureIMU> cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data, data_cov);
+
+    //  Time  
+    // we want more than one data to integrate otherwise covariance will be 0
+    Scalar dt = std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan() - 0.1;
+    t.set(dt);
+    cap_imu_ptr->setTimeStamp(t);
+    sensor_ptr->process(cap_imu_ptr);
+
+    dt = std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan() + 0.1;
+    t.set(dt);
+    cap_imu_ptr->setTimeStamp(t);
     sensor_ptr->process(cap_imu_ptr);
 
     /*There should be 3 frames :
