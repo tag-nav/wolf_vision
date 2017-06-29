@@ -5,7 +5,9 @@
 //Wolf includes
 #include "constraint_sparse.h"
 #include "frame_base.h"
+#include "frame_imu.h"
 #include "rotations.h"
+#include "feature_imu.h"
 
 //#include "ceres/jet.h"
 
@@ -15,11 +17,11 @@ namespace wolf {
 WOLF_PTR_TYPEDEFS(ConstraintFixBias);
 
 //class
-class ConstraintFixBias: public ConstraintSparse<3,2,1>
+class ConstraintFixBias: public ConstraintSparse<6,3,3>
 {
     public:
-        ConstraintFixBias(FeatureIMUPtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-                ConstraintSparse<6, 3, 3>(CTR_FIX_BIAS, _apply_loss_function, _status, std::static_pointer_cast<FrameIMU>(ftr_ptr->getFramePtr())->getAccBiasPtr(),
+        ConstraintFixBias(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+                ConstraintSparse<6, 3, 3>(CTR_FIX_BIAS, _apply_loss_function, _status, std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getAccBiasPtr(),
                                           std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getGyroBiasPtr())
         {
             setType("FIX_BIAS");
@@ -52,12 +54,13 @@ inline bool ConstraintFixBias::operator ()(const T* const _ab, const T* const _w
 {
     // measurement
     Eigen::Matrix<T,6,1> meas =  getMeasurement().cast<T>();
-    Eigen::Matrix<T,6,1> bias;
-    bias << _ab, _wb;
+    Eigen::Matrix<T,3,1> ab(_ab);
+    Eigen::Matrix<T,3,1> wb(_wb);
 
     // error
     Eigen::Matrix<T,6,1> er;
-    er = meas - bias;
+    er.head(3) = meas.head(3) - ab;
+    er.tail(3) = meas.tail(3) - ab;
 
     // residual
     Eigen::Map<Eigen::Matrix<T,6,1>> res(_residuals);
