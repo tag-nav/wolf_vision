@@ -223,7 +223,13 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     // Assign to residuals vector
     residuals.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * dpov_error;
     residuals.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error; // ab_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * ab_error;
-    residuals.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error; // wb_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * wb_error;      
+    residuals.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error; // wb_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * wb_error;   
+
+    /*std::cout << *_p2 << std::endl;
+    std::cout << *_ab1 << "\t" << *_wb1 << std::endl;
+    std::cout << *_ab2 << "\t" << *_wb2 << std::endl;
+    std::cout << getMeasurementSquareRootInformationTransposed() << std::endl;
+    std::cout << *_residuals << std::endl;*/
 
     return true;
 }

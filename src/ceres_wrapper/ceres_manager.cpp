@@ -47,12 +47,12 @@ CeresManager::~CeresManager()
 
 ceres::Solver::Summary CeresManager::solve()
 {
-	//std::cout << "Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
+	std::cout << "Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
 
     // update problem
     update();
 
-    //std::cout << "After Update: Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
+    std::cout << "After Update: Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
 
 	// create summary
 	ceres::Solver::Summary ceres_summary_;
@@ -229,9 +229,9 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
 
 void CeresManager::update()
 {
-	//std::cout << "CeresManager: updating... " << std::endl;
-	//std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
-	//std::cout << wolf_problem_->getConstraintNotificationList().size() << " constraint notifications" << std::endl;
+	std::cout << "CeresManager: updating... " << std::endl;
+	std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
+	std::cout << wolf_problem_->getConstraintNotificationList().size() << " constraint notifications" << std::endl;
 
 	// REMOVE CONSTRAINTS
 	auto ctr_notification_it = wolf_problem_->getConstraintNotificationList().begin();
