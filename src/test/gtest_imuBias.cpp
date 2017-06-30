@@ -524,8 +524,8 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
 
         char* imu_filepath;
         char * odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_static15s.txt");  //imu_Bias_all15s.txt, imu_15sAll, imu_static15s
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_static15s.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu1Rotation.txt");  //imu_Bias_all15s.txt, imu_15sAll, imu_static15s; imuTest1Complex
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom1Rotation.txt");
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
         std::strcpy(imu_filepath, imu_filepath_string.c_str());
@@ -559,7 +559,7 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         Eigen::Vector6s data_imu, data_odom3D;
 
         expected_final_state.resize(16);
-        expected_final_state << 0,-0.06,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_final_state << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
         expected_origin_state.resize(16);
         expected_origin_state << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
 
@@ -1597,16 +1597,16 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
     ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(ffix->addConstraint(std::make_shared<ConstraintFix3D>(ffix)));
     ConstraintBasePtr ctr_fixdummy = origin_KF->addConstrainedBy(ctr_fix);
 
-    /*// Create a ConstraintFixBias for origin KeyFrame
+    // Create a ConstraintFixBias for origin KeyFrame
     Eigen::MatrixXs featureFixBias_cov(6,6);
     featureFixBias_cov = Eigen::MatrixXs::Identity(6,6); 
-    featureFixBias_cov.topLeftCorner(3,3) *= 0.07;
-    featureFixBias_cov.bottomRightCorner(3,3) *= 0.08;
+    featureFixBias_cov.topLeftCorner(3,3) *= 0.000025;
+    featureFixBias_cov.bottomRightCorner(3,3) *= 0.000025;
     CaptureBasePtr capfixbias = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), 6, 6));
     //create a FeatureBase to constraint biases
     FeatureBasePtr ffixbias = capfixbias->addFeature(std::make_shared<FeatureBase>("FIX BIAS", (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), featureFixBias_cov));
     ConstraintFixBiasPtr ctr_fixBias = std::static_pointer_cast<ConstraintFixBias>(ffixbias->addConstraint(std::make_shared<ConstraintFixBias>(ffixbias)));
-    origin_KF->addConstrainedBy(ctr_fixBias);*/
+    origin_KF->addConstrainedBy(ctr_fixBias);
 
     //prepare problem for solving
     origin_KF->getPPtr()->fix();
@@ -1645,22 +1645,41 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
    
         ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
         ceres_manager_wolf_diff->computeCovariances(ALL);
-
-        Eigen::MatrixXs cov_AB1(3,3), cov_GB1(3,3), cov_P2(3,3);
-        Eigen::MatrixXs cov_Q2(4,4);
+        
+        Eigen::MatrixXs cov_AB1(3,3), cov_GB1(3,3), cov_P1(3,3);
+        Eigen::MatrixXs cov_Q1(4,4);
         wolf_problem_ptr_->getCovarianceBlock(origin_KF->getAccBiasPtr(), origin_KF->getAccBiasPtr(), cov_AB1);
         wolf_problem_ptr_->getCovarianceBlock(origin_KF->getGyroBiasPtr(), origin_KF->getGyroBiasPtr(), cov_GB1);
+        wolf_problem_ptr_->getCovarianceBlock(origin_KF->getPPtr(), origin_KF->getPPtr(), cov_P1);
+        wolf_problem_ptr_->getCovarianceBlock(origin_KF->getOPtr(), origin_KF->getOPtr(), cov_Q1);
+
+        Eigen::MatrixXs cov_AB2(3,3), cov_GB2(3,3), cov_P2(3,3);
+        Eigen::MatrixXs cov_Q2(4,4);
+        wolf_problem_ptr_->getCovarianceBlock(last_KF->getAccBiasPtr(), last_KF->getAccBiasPtr(), cov_AB2);
+        wolf_problem_ptr_->getCovarianceBlock(last_KF->getGyroBiasPtr(), last_KF->getGyroBiasPtr(), cov_GB2);
         wolf_problem_ptr_->getCovarianceBlock(last_KF->getPPtr(), last_KF->getPPtr(), cov_P2);
         wolf_problem_ptr_->getCovarianceBlock(last_KF->getOPtr(), last_KF->getOPtr(), cov_Q2);
         std::cout << p_var << "\n\tcov_AB1 : " << sqrt(cov_AB1(0,0)) << ", " << sqrt(cov_AB1(1,1)) << ", " << sqrt(cov_AB1(2,2))
                 << "\n\t cov_GB1 : " << sqrt(cov_GB1(0,0)) << ", " << sqrt(cov_GB1(1,1)) << ", " << sqrt(cov_GB1(2,2))<< std::endl;
 
         #ifdef OUTPUT_DATA
-        debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+
+        debug_results << sqrt(p_var) << "\t" << origin_KF->getPPtr()->getState().transpose() << "\t" << origin_KF->getOPtr()->getState().transpose() << "\t" << origin_KF->getAccBiasPtr()->getState().transpose() << "\t" << origin_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                    << sqrt(cov_P1(0,0)) << "\t" << sqrt(cov_P1(1,1)) << "\t" << sqrt(cov_P1(2,2)) << "\t" 
+                    << sqrt(cov_Q1(0,0)) << "\t" << sqrt(cov_Q1(1,1)) << "\t" << sqrt(cov_Q1(2,2)) << "\t" 
+                    << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
+                    << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << "\t"
+                    << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << last_KF->getAccBiasPtr()->getState().transpose() << "\t" << last_KF->getGyroBiasPtr()->getState().transpose() << "\t"
                     << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
                     << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
-                    << sqrt(cov_AB1(0,0)) << "\t" << sqrt(cov_AB1(1,1)) << "\t" << sqrt(cov_AB1(2,2)) << "\t" 
-                    << sqrt(cov_GB1(0,0)) << "\t" << sqrt(cov_GB1(1,1)) << "\t" << sqrt(cov_GB1(2,2)) << std::endl;
+                    << sqrt(cov_AB2(0,0)) << "\t" << sqrt(cov_AB2(1,1)) << "\t" << sqrt(cov_AB2(2,2)) << "\t" 
+                    << sqrt(cov_GB2(0,0)) << "\t" << sqrt(cov_GB2(1,1)) << "\t" << sqrt(cov_GB2(2,2)) << std::endl;
+
+        /*debug_results << sqrt(p_var) << "\t" << last_KF->getPPtr()->getState().transpose() << "\t" << last_KF->getOPtr()->getState().transpose() << "\t" << last_KF->getAccBiasPtr()->getState().transpose() << "\t" << last_KF->getGyroBiasPtr()->getState().transpose() << "\t"
+                    << sqrt(cov_P2(0,0)) << "\t" << sqrt(cov_P2(1,1)) << "\t" << sqrt(cov_P2(2,2)) << "\t" 
+                    << sqrt(cov_Q2(0,0)) << "\t" << sqrt(cov_Q2(1,1)) << "\t" << sqrt(cov_Q2(2,2)) << "\t" 
+                    << sqrt(cov_AB2(0,0)) << "\t" << sqrt(cov_AB2(1,1)) << "\t" << sqrt(cov_AB2(2,2)) << "\t" 
+                    << sqrt(cov_GB2(0,0)) << "\t" << sqrt(cov_GB2(1,1)) << "\t" << sqrt(cov_GB2(2,2)) << std::endl;*/
         #endif
      }
 
