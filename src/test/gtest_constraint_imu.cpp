@@ -7686,7 +7686,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varV1B1P2Q2V2
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  //::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK.*:ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex*:";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Static_NullBias.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK.*:ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex*:";
+  //::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Static_NullBias.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
   return RUN_ALL_TESTS();
 }
