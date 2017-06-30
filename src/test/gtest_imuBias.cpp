@@ -539,7 +539,9 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         ASSERT_TRUE(imu_data_input.is_open() && odom_data_input.is_open()) << "Failed to open data files... Exiting";
 
         #ifdef OUTPUT_DATA
-        debug_results.open("KFO_cfix3D_odom.dat");
+        debug_results.open(wolf_root + "/KFO_cfix3D_odom.dat");
+        if (debug_results.is_open()) std::cout << "debug results file opened!" << wolf_root + "KFO_cfix3D_odom.dat" << std::endl;
+        else std::cout << "debug results file open failed!" << wolf_root + "KFO_cfix3D_odom.dat" << std::endl;
         #endif
 
         //===================================================== SETTING PROBLEM
@@ -1591,26 +1593,23 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
     // This is needed to make the problem observable, otherwise the jacobian would be rank deficient -> cannot compute covariances
     Eigen::MatrixXs featureFix_cov(6,6);
     featureFix_cov = Eigen::MatrixXs::Identity(6,6); 
-    featureFix_cov(5,5) = 0.0001;
+    featureFix_cov(5,5) = 0.1;
     CaptureBasePtr capfix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6));
     FeatureBasePtr ffix = capfix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
     ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(ffix->addConstraint(std::make_shared<ConstraintFix3D>(ffix)));
-    ConstraintBasePtr ctr_fixdummy = origin_KF->addConstrainedBy(ctr_fix);
 
     // Create a ConstraintFixBias for origin KeyFrame
     Eigen::MatrixXs featureFixBias_cov(6,6);
     featureFixBias_cov = Eigen::MatrixXs::Identity(6,6); 
-    featureFixBias_cov.topLeftCorner(3,3) *= 0.000025; // sqrt(0.000025) = 0.005
+    featureFixBias_cov.topLeftCorner(3,3) *= 0.000025; // sqrt(0.000025) = 0.005 m/s2 or rad/s
     featureFixBias_cov.bottomRightCorner(3,3) *= 0.000025;
-    CaptureBasePtr capfixbias = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), 6, 6));
+    CaptureBasePtr capfixbias = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), featureFixBias_cov, 6, 6));
     //create a FeatureBase to constraint biases
     FeatureBasePtr ffixbias = capfixbias->addFeature(std::make_shared<FeatureBase>("FIX BIAS", (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), featureFixBias_cov));
     ConstraintFixBiasPtr ctr_fixBias = std::static_pointer_cast<ConstraintFixBias>(ffixbias->addConstraint(std::make_shared<ConstraintFixBias>(ffixbias)));
-    origin_KF->addConstrainedBy(ctr_fixBias);
 
     //prepare problem for solving
     origin_KF->getPPtr()->fix();
-    origin_KF->getVPtr()->fix();
 
     //last_KF->setState(expected_final_state);
     FrameBaseList frameList = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
@@ -1623,21 +1622,22 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
     }
 
     //vary the covariance in odometry position displacement + solve + output result
-    for (wolf::Scalar p_var = 0.000001; p_var <= 1; p_var=p_var*10)
+    for (wolf::Scalar p_var = 0.000001; p_var <= 0.04; p_var=p_var*10)
+//        for (wolf::Scalar p_var = 0.0001; p_var <= 0.0001; p_var=p_var*10)
     {
         for(auto frame : frameList)
         {
             ConstraintBaseList ctr_list = frame->getConstrainedByList();
             //std::cout << "ctr_list size : " << ctr_list.size() << std::endl;
 
-            for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
+            for(auto ctr : ctr_list)
             {
                 //std::cout << "ctr ID : " << (*ctr_it)->getTypeId() << std::endl;
-                if ((*ctr_it)->getTypeId() == CTR_ODOM_3D) //change covariances in features to constraint only position
+                if (ctr->getTypeId() == CTR_ODOM_3D) //change covariances in features to constraint only position
                 {
-                    Eigen::MatrixXs meas_cov((*ctr_it)->getMeasurementCovariance());
+                    Eigen::MatrixXs meas_cov(ctr->getMeasurementCovariance());
                     meas_cov.topLeftCorner(3,3) = (Eigen::Matrix3s() << p_var, 0, 0, 0, p_var, 0, 0, 0, p_var).finished();
-                    (*ctr_it)->getFeaturePtr()->setMeasurementCovariance(meas_cov);
+                    ctr->getFeaturePtr()->setMeasurementCovariance(meas_cov);
                 }
             }
         }
@@ -1645,10 +1645,14 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
         //reset origin to its initial value (value it had before solving any problem) for the new solve
         origin_KF->setState(expected_origin_state);
         
+        wolf_problem_ptr_->print(4,0,1,0);
+
         //solve + compute covariance
         ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
         ceres_manager_wolf_diff->computeCovariances(ALL);
-        
+
+        wolf_problem_ptr_->print(4,0,1,0);
+
         //format output : get states + associated covariances
         Eigen::MatrixXs cov_AB1(3,3), cov_GB1(3,3), cov_P1(3,3);
         Eigen::MatrixXs cov_Q1(4,4);
@@ -1687,6 +1691,10 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
         #endif
      }
 
+#ifdef OUTPUT_DATA
+    debug_results.close();
+#endif
+
      //just print measurement covariances of IMU and odometry :
     ConstraintBaseList ctr_list = origin_KF->getConstrainedByList();
     for (auto ctr_it = ctr_list.begin(); ctr_it != ctr_list.end(); ctr_it++)
@@ -1703,8 +1711,6 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
                 std::cout << "\n imu meas cov : " << IMUmeas_cov.diagonal().transpose() << std::endl;
             }
     }
-
-    wolf_problem_ptr_->print(4,1,1,1);
 
     //Assertions : estimations we expect in the ideal case
     EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Pos : " << last_KF->getPPtr()->getState().transpose() <<
