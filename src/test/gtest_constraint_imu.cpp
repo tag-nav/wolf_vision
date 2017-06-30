@@ -2168,16 +2168,22 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
     origin_KF->getPPtr()->fix();
     origin_KF->getOPtr()->fix();
     origin_KF->getVPtr()->fix();
+    origin_KF->getAccBiasPtr()->setState((Vector3s()<<1,2,3).finished());
+    origin_KF->getGyroBiasPtr()->setState((Vector3s()<<1,2,3).finished());
 
     last_KF->setState(expected_final_state);
 
     last_KF->getPPtr()->fix();
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->fix();
+    last_KF->getAccBiasPtr()->setState((Vector3s()<<-1,-2,-3).finished());
+    last_KF->getGyroBiasPtr()->setState((Vector3s()<<-1,-2,-3).finished());
 
-    //wolf_problem_ptr_->print(4,1,1,1);
+    wolf_problem_ptr_->print(4,1,1,1);
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+
+    wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
     ASSERT_TRUE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
