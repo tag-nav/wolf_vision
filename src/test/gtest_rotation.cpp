@@ -1,5 +1,5 @@
 /**
- * \file test_rotation.cpp
+ * \file gtest_rotation.cpp
  *
  *  Created on: Oct 13, 2016
  *      \author: AtDinesh
@@ -29,49 +29,6 @@ using namespace Eigen;
 
 namespace wolf
 {
-//these are initial rotation methods
-//A problem has been detected when using jets : computing the norm results in NaNs
-template<typename Derived>
-inline Eigen::Quaternion<typename Derived::Scalar> v2q_o(const Eigen::MatrixBase<Derived>& _v)
-{
-
-    MatrixSizeCheck<3, 1>::check(_v);
-    typedef typename Derived::Scalar T;
-
-    Eigen::Quaternion<T> q;
-    T angle = _v.norm();
-    T angle_half = angle / (T)2.0;
-    if (angle > wolf::Constants::EPS)
-    {
-        q.w() = cos(angle_half);
-        q.vec() = _v / angle * sin(angle_half);
-        return q;
-    }
-    else
-    {
-        q.w() = cos(angle_half);
-        q.vec() = _v * ((T)0.5 - angle_half * angle_half / (T)12.0); // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
-        return q;
-    }
-}
-
-template<typename Derived>
-inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v_o(const Eigen::QuaternionBase<Derived>& _q)
-{
-    typedef typename Derived::Scalar T;
-    Eigen::Matrix<T, 3, 1> vec = _q.vec();
-    T vecnorm = vec.norm();
-    if (vecnorm > wolf::Constants::EPS_SMALL)
-    { // regular angle-axis conversion
-        T angle = atan2(vecnorm, _q.w());
-        return vec * angle / vecnorm;
-    }
-    else
-    { // small-angle approximation using truncated Taylor series
-        T r2 = vec.squaredNorm() / (_q.w() *_q.w());
-        return vec * ( (T)2.0 -  r2 / (T)1.5 ) / _q.w(); // log = 2 * vec * ( 1 - norm(vec)^2 / 3*w^2 ) / w.
-    }
-}
 
 inline Eigen::VectorXs q2v_aa(const Eigen::Quaternions& _q)
 {
@@ -79,7 +36,7 @@ inline Eigen::VectorXs q2v_aa(const Eigen::Quaternions& _q)
     return aa.axis() * aa.angle();
 }
 
-//here is an alternative version to be tested
+// 'New' version (alternative version also used by ceres)
 template<typename Derived>
 inline Eigen::Quaternion<typename Derived::Scalar> v2q_new(const Eigen::MatrixBase<Derived>& _v)
 {
@@ -113,6 +70,7 @@ inline Eigen::Quaternion<typename Derived::Scalar> v2q_new(const Eigen::MatrixBa
     }
 }
 
+// 'New' version (alternative version also used by ceres)
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v_new(const Eigen::QuaternionBase<Derived>& _q)
 {
@@ -148,7 +106,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v_new(const Eigen::Quater
     
 }
 
-TEST(rotations, v2q_o_VS_v2q_new) //this test will use functions defined above
+TEST(rotations, v2q_VS_v2q_new) //this test will use functions defined above
 {
     using namespace wolf;
     //defines scalars
@@ -165,42 +123,42 @@ TEST(rotations, v2q_o_VS_v2q_new) //this test will use functions defined above
     {
         rot_vector0 = Eigen::Vector3s::Random();
         rot_vector1 = rot_vector0 * 100 *deg_to_rad; //far from origin
-        rot_vector0 = rot_vector0 *0.001*deg_to_rad; //close to origin
+        rot_vector0 = rot_vector0 *0.0001*deg_to_rad; //close to origin
 
-        quat_o = v2q_o(rot_vector0);
+        quat_o = v2q(rot_vector0);
         quat_new = v2q_new(rot_vector0);
-        quat_o1 = v2q_o(rot_vector1);
+        quat_o1 = v2q(rot_vector1);
         quat_new1 = v2q_new(rot_vector1);
 
         //now we do the checking
-     vec_o << quat_o.w(), quat_o.x(), quat_o.y(), quat_o.z();
-     vec_new << quat_new.w(), quat_new.x(), quat_new.y(), quat_new.z();
-     vec_o1 << quat_o1.w(), quat_o1.x(), quat_o1.y(), quat_o1.z();
-     vec_new1 << quat_new1.w(), quat_new1.x(), quat_new1.y(), quat_new1.z();
+        vec_o << quat_o.w(), quat_o.x(), quat_o.y(), quat_o.z();
+        vec_new << quat_new.w(), quat_new.x(), quat_new.y(), quat_new.z();
+        vec_o1 << quat_o1.w(), quat_o1.x(), quat_o1.y(), quat_o1.z();
+        vec_new1 << quat_new1.w(), quat_new1.x(), quat_new1.y(), quat_new1.z();
 
-     ASSERT_TRUE((vec_o - vec_new).isMuchSmallerThan(1,wolf::Constants::EPS));
-     ASSERT_TRUE((vec_o1 - vec_new1).isMuchSmallerThan(1,wolf::Constants::EPS));
+        ASSERT_TRUE((vec_o - vec_new).isMuchSmallerThan(1,wolf::Constants::EPS));
+        ASSERT_TRUE((vec_o1 - vec_new1).isMuchSmallerThan(1,wolf::Constants::EPS));
     
 
         //q2v
-    qvec_o     = q2v_o(quat_o);
-    qvec_o1    = q2v_o(quat_o1);
-    qvec_aao   = q2v_aa(quat_o);
-    qvec_aa1   = q2v_aa(quat_o1);
-    qvec_new   = q2v_new(quat_new);
-    qvec_new1  = q2v_new(quat_new1);
+        qvec_o     = q2v(quat_o);
+        qvec_o1    = q2v(quat_o1);
+        qvec_aao   = q2v_aa(quat_o);
+        qvec_aa1   = q2v_aa(quat_o1);
+        qvec_new   = q2v_new(quat_new);
+        qvec_new1  = q2v_new(quat_new1);
 
-    // 'New' version of q2v is working, result with template version gives the same that the regular version with Eigen::Quaternions argument
-    ASSERT_TRUE((qvec_aao - qvec_new).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_aao : " << qvec_aao.transpose() << "\n qvec_new : " << qvec_new.transpose() << std::endl;
-    ASSERT_TRUE((qvec_aa1 - qvec_new1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_aa1 : " << qvec_aa1.transpose() << "\n qvec_new1 : " << qvec_new1.transpose() << std::endl;
-    EXPECT_TRUE((qvec_new - rot_vector0).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_new : " << qvec_new.transpose() << "\n rot_vector0 : " << rot_vector0.transpose() << std::endl;
-    EXPECT_TRUE((qvec_new1 - rot_vector1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_new1 : " << qvec_new1.transpose() << "\n rot_vector1 : " << rot_vector1.transpose() << std::endl;
+        // 'New' version (alternative version also used by ceres) of q2v is working, result with template version gives the same that the regular version with Eigen::Quaternions argument
+        ASSERT_TRUE((qvec_aao - qvec_new).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_aao : " << qvec_aao.transpose() << "\n qvec_new : " << qvec_new.transpose() << std::endl;
+        ASSERT_TRUE((qvec_aa1 - qvec_new1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_aa1 : " << qvec_aa1.transpose() << "\n qvec_new1 : " << qvec_new1.transpose() << std::endl;
+        EXPECT_TRUE((qvec_new - rot_vector0).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_new : " << qvec_new.transpose() << "\n rot_vector0 : " << rot_vector0.transpose() << std::endl;
+        EXPECT_TRUE((qvec_new1 - rot_vector1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_new1 : " << qvec_new1.transpose() << "\n rot_vector1 : " << rot_vector1.transpose() << std::endl;
 
-    //Something went wrong with old version of 'q2v' : values in vector are twice that expected.
-    EXPECT_FALSE((qvec_o1 - qvec_new1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_o1 : " << qvec_o1.transpose() << "\n qvec_new1 : " << qvec_new1.transpose() << std::endl;
-    EXPECT_FALSE((qvec_o - qvec_new).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_o : " << qvec_o.transpose() << "\n qvec_new : " << qvec_new.transpose() << std::endl;
-    EXPECT_FALSE((qvec_o1 - rot_vector0).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_o1 : " << qvec_o1.transpose() << "\n rot_vector0 : " << rot_vector0.transpose() << std::endl;
-    EXPECT_FALSE((qvec_o - rot_vector1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_o : " << qvec_o.transpose() << "\n rot_vector1 : " << rot_vector1.transpose() << std::endl;
+        // checking current q2v
+        ASSERT_TRUE((qvec_aao - qvec_o).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_aao : " << qvec_aao.transpose() << "\n qvec_new : " << qvec_new.transpose() << std::endl;
+        ASSERT_TRUE((qvec_aa1 - qvec_o1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_aa1 : " << qvec_aa1.transpose() << "\n qvec_new1 : " << qvec_new1.transpose() << std::endl;
+        EXPECT_TRUE((qvec_o - rot_vector0).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_new : " << qvec_new.transpose() << "\n rot_vector0 : " << rot_vector0.transpose() << std::endl;
+        EXPECT_TRUE((qvec_o1 - rot_vector1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_new1 : " << qvec_new1.transpose() << "\n rot_vector1 : " << rot_vector1.transpose() << std::endl;
     }
 }
 
