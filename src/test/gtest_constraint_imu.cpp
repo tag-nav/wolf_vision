@@ -6461,7 +6461,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2_I
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
     EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
     EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
@@ -6573,7 +6573,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2V2
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
     EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
     EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
@@ -6679,7 +6679,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarAll)
     "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
     EXPECT_TRUE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
     "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
+    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
     EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
     "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
