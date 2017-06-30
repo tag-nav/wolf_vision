@@ -14,19 +14,25 @@ WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsIMU);
 
 struct IntrinsicsIMU : public IntrinsicsBase
 {
-        //noise
+        //noise std dev
         wolf::Scalar w_noise; //standard deviation of Gyroscope noise (same for all the axis) in rad/sec/ sqrt(s)
         wolf::Scalar a_noise; //standard deviation of Acceleration noise (same for all the axis) in m/s2/sqrt(s)
 
-        //This is a trial to constraint how much can the bias change in 1 sec at most
-        wolf::Scalar ab_stdev; //accelerometer micro_g/sec
-        wolf::Scalar wb_stdev; //gyroscope rad/sec
+        //Initial biases std dev
+        wolf::Scalar ab_initial_stdev; //accelerometer micro_g/sec
+        wolf::Scalar wb_initial_stdev; //gyroscope rad/sec
+
+        // bias rate of change std dev
+        Scalar ab_rate_stdev;
+        Scalar wb_rate_stdev;
 
         IntrinsicsIMU() :
             w_noise(0.001),
             a_noise(0.04),
-            ab_stdev(0.00001),
-            wb_stdev(0.00001)
+            ab_initial_stdev(0.00001),
+            wb_initial_stdev(0.00001),
+            ab_rate_stdev(0.00001),
+            wb_rate_stdev(0.00001)
         {}
 };
 
@@ -42,6 +48,8 @@ class SensorIMU : public SensorBase
         //This is a trial to constraint how much can the bias change in 1 sec at most
         wolf::Scalar ab_stdev; //accelerometer micro_g/sec
         wolf::Scalar wb_stdev; //gyroscope rad/sec
+        wolf::Scalar ab_rate_stdev; //accelerometer micro_g/sec
+        wolf::Scalar wb_rate_stdev; //gyroscope rad/sec
 
     public:
         /** \brief Constructor with arguments
@@ -69,6 +77,8 @@ class SensorIMU : public SensorBase
         Scalar getAccelNoise() const;
         Scalar getWbStdev() const;
         Scalar getAbStdev() const;
+        Scalar getWbRateStdev() const;
+        Scalar getAbRateStdev() const;
 
         virtual ~SensorIMU();
 
@@ -93,6 +103,16 @@ inline Scalar SensorIMU::getWbStdev() const
 }
 
 inline Scalar SensorIMU::getAbStdev() const
+{
+    return ab_stdev;
+}
+
+inline Scalar SensorIMU::getWbRateStdev() const
+{
+    return wb_stdev;
+}
+
+inline Scalar SensorIMU::getAbRateStdev() const
 {
     return ab_stdev;
 }
