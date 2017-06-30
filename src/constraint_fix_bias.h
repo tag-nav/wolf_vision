@@ -60,7 +60,7 @@ inline bool ConstraintFixBias::operator ()(const T* const _ab, const T* const _w
     // error
     Eigen::Matrix<T,6,1> er;
     er.head(3) = meas.head(3) - ab;
-    er.tail(3) = meas.tail(3) - ab;
+    er.tail(3) = meas.tail(3) - wb;
 
     // residual
     Eigen::Map<Eigen::Matrix<T,6,1>> res(_residuals);
