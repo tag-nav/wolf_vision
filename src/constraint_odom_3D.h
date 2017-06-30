@@ -82,6 +82,7 @@ inline ConstraintOdom3D::ConstraintOdom3D(FeatureBasePtr _ftr_current_ptr, Frame
                                         _frame_past_ptr->getPPtr(), // past frame P
                                         _frame_past_ptr->getOPtr()) // past frame Q
 {
+    setType("ODOM 3D");
     //
 }
 
