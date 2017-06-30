@@ -45,8 +45,8 @@ TEST(SensorIMU, Constructors)
 
     ASSERT_EQ(params->w_noise, sen2->getGyroNoise());
     ASSERT_EQ(params->a_noise, sen2->getAccelNoise());
-    ASSERT_EQ(params->ab_stdev, sen2->getAbStdev());
-    ASSERT_EQ(params->wb_stdev, sen2->getWbStdev());
+    ASSERT_EQ(params->ab_initial_stdev, sen2->getAbStdev());
+    ASSERT_EQ(params->wb_initial_stdev, sen2->getWbStdev());
 }
 
 
