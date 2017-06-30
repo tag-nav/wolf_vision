@@ -97,8 +97,6 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
             return exp;
         }
 
-        Eigen::Matrix3s get_SqrtArDtInv() const;
-
     public:
         static wolf::ConstraintBasePtr create(FeatureIMUPtr _feature_ptr, NodeBasePtr _correspondant_ptr);
 
@@ -122,7 +120,7 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
         /// Metrics
         const wolf::Scalar dt_, dt_2_; ///< delta-time and delta-time-squared between keyframes
         const Eigen::Vector3s g_; ///< acceleration of gravity in World frame
-        const wolf::Scalar ab_stdev_, wb_stdev_; //stdev for standard_deviation (= sqrt(variance))
+        const wolf::Scalar ab_rate_stdev_, wb_rate_stdev_; //stdev for standard_deviation (= sqrt(variance))
         
         /* bias covariance and bias residuals
          *
@@ -163,10 +161,10 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_p
         dt_(_ftr_ptr->getFramePtr()->getTimeStamp() - _frame_ptr->getTimeStamp()),
         dt_2_(dt_*dt_),
         g_(wolf::gravity()),
-        ab_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getAbStdev()),
-        wb_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getWbStdev()),
-        sqrt_A_r_dt_inv((Eigen::Matrix3s::Identity() * ab_stdev_ * sqrt(dt_)).inverse()),
-        sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_stdev_ * sqrt(dt_)).inverse())
+        ab_rate_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getAbRateStdev()),
+        wb_rate_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getWbRateStdev()),
+        sqrt_A_r_dt_inv((Eigen::Matrix3s::Identity() * ab_rate_stdev_ * sqrt(dt_)).inverse()),
+        sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_rate_stdev_ * sqrt(dt_)).inverse())
 
 {
     setType("IMU");
@@ -313,10 +311,6 @@ inline wolf::ConstraintBasePtr ConstraintIMU::create(FeatureIMUPtr _feature_ptr,
     return std::make_shared<ConstraintIMU>(_feature_ptr, std::static_pointer_cast<FrameIMU>(_correspondant_ptr));
 }
 
-inline Eigen::Matrix3s ConstraintIMU::get_SqrtArDtInv() const
-{
-    return sqrt_A_r_dt_inv;
-}
 
 } // namespace wolf
 
