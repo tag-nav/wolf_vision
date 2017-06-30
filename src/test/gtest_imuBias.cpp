@@ -1600,7 +1600,7 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
     // Create a ConstraintFixBias for origin KeyFrame
     Eigen::MatrixXs featureFixBias_cov(6,6);
     featureFixBias_cov = Eigen::MatrixXs::Identity(6,6); 
-    featureFixBias_cov.topLeftCorner(3,3) *= 0.000025;
+    featureFixBias_cov.topLeftCorner(3,3) *= 0.000025; // sqrt(0.000025) = 0.005
     featureFixBias_cov.bottomRightCorner(3,3) *= 0.000025;
     CaptureBasePtr capfixbias = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), 6, 6));
     //create a FeatureBase to constraint biases
@@ -1615,13 +1615,14 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
     //last_KF->setState(expected_final_state);
     FrameBaseList frameList = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
 
-    //Fix velocity to [0 0 0]
+    //Fix velocity to [0 0 0] in all frames
     for(auto frame : frameList)
     {
         frame->getVPtr()->setState((Eigen::Vector3s()<<0,0,0).finished());
         frame->getVPtr()->fix();
     }
 
+    //vary the covariance in odometry position displacement + solve + output result
     for (wolf::Scalar p_var = 0.000001; p_var <= 1; p_var=p_var*10)
     {
         for(auto frame : frameList)
@@ -1641,11 +1642,14 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
             }
         }
 
+        //reset origin to its initial value (value it had before solving any problem) for the new solve
         origin_KF->setState(expected_origin_state);
-   
+        
+        //solve + compute covariance
         ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
         ceres_manager_wolf_diff->computeCovariances(ALL);
         
+        //format output : get states + associated covariances
         Eigen::MatrixXs cov_AB1(3,3), cov_GB1(3,3), cov_P1(3,3);
         Eigen::MatrixXs cov_Q1(4,4);
         wolf_problem_ptr_->getCovarianceBlock(origin_KF->getAccBiasPtr(), origin_KF->getAccBiasPtr(), cov_AB1);
@@ -1702,6 +1706,7 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
 
     wolf_problem_ptr_->print(4,1,1,1);
 
+    //Assertions : estimations we expect in the ideal case
     EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Pos : " << last_KF->getPPtr()->getState().transpose() <<
     "\n expected Pos : " << expected_final_state.head(3).transpose() << std::endl;
     EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*10 )) << "last_KF Ori : " << last_KF->getOPtr()->getState().transpose() <<
