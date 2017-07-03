@@ -727,6 +727,144 @@ TEST_F(ProcessorIMUt, gyro_z_ConstVelocity)
     "\n current x is : \n" << x.transpose() << std::endl;
 }
 
+TEST_F(ProcessorIMUt, gyro_x_ConstVelocity)
+{
+    wolf::Scalar dt(0.001);
+    t.set(0); // clock in 0,1 ms ticks
+    x0 << 0,0,0,  0,0,0,1,  2,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+
+    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+
+    wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
+    data << 0, 0, 9.8, rate_of_turn, 0, 0; // measure gravity
+
+    cap_imu_ptr->setData(data);
+    cap_imu_ptr->setTimeStamp(0.001);
+    sensor_ptr->process(cap_imu_ptr);
+
+    // Expected state after one integration
+    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
+
+    Eigen::VectorXs x(16);
+    // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180, 2m/s * 0.001s = 0.002
+    x << 0.002,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 2,0,0, 0,0,0, 0,0,0;
+
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+
+    //do so for 5s
+    const unsigned int iter = 1000; //how many ms 
+    for(int i = 1; i < iter; i++) //already did one integration above
+    {
+        // quaternion composition
+        quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
+
+        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        data.head(3) =  rot.conjugate() * (- wolf::gravity());
+
+        cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 1.000
+        cap_imu_ptr->setData(data);
+        sensor_ptr->process(cap_imu_ptr);
+    }
+
+    x << 2,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 2,0,0, 0,0,0, 0,0,0; //2m/s * 1s = 2m
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
+    "\n current x is : \n" << x.transpose() << std::endl;
+}
+
+TEST_F(ProcessorIMUt, gyro_xyz_ConstVelocity)
+{
+    t.set(0); // clock in 0,1 ms ticks
+    x0 << 0,0,0,  0,0,0,1,  2,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+
+    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+
+    Eigen::Vector3s tmp_vec; //will be used to store rate of turn data
+    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Eigen::Matrix3s R0(Eigen::Matrix3s::Identity());
+    wolf::Scalar time = 0;
+    const unsigned int x_rot_vel = 5;
+    const unsigned int y_rot_vel = 6;
+    const unsigned int z_rot_vel = 13;
+
+    wolf::Scalar tmpx, tmpy, tmpz;
+    
+    /*
+        ox oy oz evolution in degrees (for understanding) --> converted in rad
+        with * pi/180
+        ox = pi*sin(alpha*t*pi/180); %express angle in rad before using sinus
+        oy = pi*sin(beta*t*pi/180);
+        oz = pi*sin(gamma*t*pi/180);
+
+        corresponding rate of turn
+        %rate of turn expressed in radians/s
+        wx = pi*alpha*cos(alpha*t*pi/180)*pi/180;
+        wy = pi*beta*cos(beta*t*pi/180)*pi/180;
+        wz = pi*gamma*cos(gamma*t*pi/180)*pi/180;
+     */
+
+     const wolf::Scalar dt = 0.001;
+
+    for(unsigned int data_iter = 0; data_iter < 1000; data_iter ++)
+    {   
+        time += dt;
+
+        tmpx = M_PI*x_rot_vel*cos((M_PI/180) * x_rot_vel * time)*M_PI/180;
+        tmpy = M_PI*y_rot_vel*cos((M_PI/180) * y_rot_vel * time)*M_PI/180;
+        tmpz = M_PI*z_rot_vel*cos((M_PI/180) * z_rot_vel * time)*M_PI/180;
+        tmp_vec << tmpx, tmpy, tmpz;
+
+        // quaternion composition
+        quat_comp = quat_comp * wolf::v2q(tmp_vec*dt);
+        R0 = R0 * wolf::v2R(tmp_vec*dt);
+        // use processorIMU
+        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        data.head(3) =  rot.conjugate() * (- wolf::gravity()); //gravity measured
+        data.tail(3) = tmp_vec;
+
+        cap_imu_ptr->setData(data);
+        cap_imu_ptr->setTimeStamp(time);
+        sensor_ptr->process(cap_imu_ptr);
+    }
+
+    /* We focus on orientation here. position is supposed not to have moved
+     * we integrated using 2 ways : 
+        - a direct quaternion composition q = q (x) q(w*dt)
+        - using methods implemented in processorIMU
+
+        We check one against the other
+     */
+
+     // validating that the quaternion composition and rotation matrix composition actually describe the same rotation.
+    Eigen::Quaternions R2quat(wolf::v2q(wolf::R2v(R0)));
+    Eigen::Vector4s quat_comp_vec((Eigen::Vector4s() <<quat_comp.x(), quat_comp.y(), quat_comp.z(), quat_comp.w()).finished() );
+    Eigen::Vector4s R2quat_vec((Eigen::Vector4s() <<R2quat.x(), R2quat.y(), R2quat.z(), R2quat.w()).finished() );
+
+    ASSERT_TRUE((quat_comp_vec - R2quat_vec).isMuchSmallerThan(1, wolf::Constants::EPS)) << "quat_comp_vec : " << quat_comp_vec.transpose() << "\n R2quat_vec : " << R2quat_vec.transpose() << std::endl;
+
+    Eigen::VectorXs x(16);
+    //rotation + translation due to initial velocity
+    x << 2,0,0, quat_comp.x(), quat_comp.y(), quat_comp.z(), quat_comp.w(), 2,0,0, 0,0,0, 0,0,0;
+
+    Eigen::Quaternions result_quat(problem->getCurrentState().data() + 3);
+    //std::cout << "final orientation : " << wolf::q2v(result_quat).transpose() << std::endl;
+
+    //check position part
+    ASSERT_TRUE((problem->getCurrentState().head(3) - x.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current position is : \n" << problem->getCurrentState().head(3).transpose() <<
+    "\n expected is : \n" << x.head(3).transpose() << std::endl;
+
+    //check velocity and bias parts
+    ASSERT_TRUE((problem->getCurrentState().tail(9) - x.tail(9)).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current VBB is : \n" << problem->getCurrentState().tail(9).transpose() <<
+    "\n expected is : \n" << x.tail(9).transpose() << std::endl;
+
+    //check orientation part
+    EXPECT_TRUE((problem->getCurrentState().segment(3,4) - x.segment(3,4) ).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
+    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
+    // expect above fails, look for the actual precision that works
+    ASSERT_TRUE((problem->getCurrentState().segment(3,4) - x.segment(3,4) ).isMuchSmallerThan(1, 0.001)) << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
+    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
