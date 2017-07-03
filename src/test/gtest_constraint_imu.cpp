@@ -553,12 +553,6 @@ class ConstraintIMU_biasTest_Move_NonNullBias : public testing::Test
     virtual void TearDown(){}
 };
 
-/* FIX ME :
- * No initial velocity
- * imu data : constant rate of turn, integration during  second
- * Bias : trying with null and non null
- * result :Estimation is ok when we rotated around Z axis. Estimation fails when rotation is on another axis. (biased seems not to be removed correctly)
- */
 class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
 {
     public:
@@ -607,11 +601,11 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
         x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
         t.set(0);
 
-        Eigen::Vector6s data_imu;
+        Eigen::Vector6s data_imu, data_imu_initial;
         origin_bias = Eigen::Vector6s::Random();
-        origin_bias << 0,0,0, 0,0,0;
         wolf::Scalar rate_of_turn = 5 * M_PI/180.0; // rad/s
         data_imu << -wolf::gravity(), rate_of_turn,0,0; //rotation only
+        data_imu_initial = data_imu;
 
         // Expected state after one second integration
         Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
@@ -626,13 +620,16 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
 
         //===================================================== END{INITIALIZATION}
         //===================================================== PROCESS DATA
-        // PROCESS DATA
 
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu);
 
         for(unsigned int i = 0; i < 1000; i++) //integrate during 1 second
         {
+            //gravity measure depends on current IMU orientation + bias
+            //use data_imu_initial to measure gravity from real orientation of IMU then add biases
+            data_imu.head(3) = (v2q(data_imu_initial.tail(3) * t.get()).conjugate() * data_imu_initial.head(3)) + origin_bias.head(3);
             t.set(t.get() + 0.001); //increment of 1 ms
+            imu_ptr->setData(data_imu);
             imu_ptr->setTimeStamp(t);
 
             // process data in capture
@@ -1692,7 +1689,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
 
     last_KF->getPPtr()->fix();
     last_KF->getOPtr()->fix();
-    last_KF->getVPtr()->unfix();
+    last_KF->getVPtr()->fix();
     last_KF->getAccBiasPtr()->setState((Vector3s()<<-1,-2,-3).finished());
     last_KF->getGyroBiasPtr()->setState((Vector3s()<<-1,-2,-3).finished());
 
@@ -2365,11 +2362,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_i
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->fix();
 
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -3420,6 +3417,6 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK.*:ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex*:";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRotCst.*";
   return RUN_ALL_TESTS();
 }
