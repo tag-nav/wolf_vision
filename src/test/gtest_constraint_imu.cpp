@@ -553,6 +553,12 @@ class ConstraintIMU_biasTest_Move_NonNullBias : public testing::Test
     virtual void TearDown(){}
 };
 
+/* FIX ME :
+ * No initial velocity
+ * imu data : constant rate of turn, integration during  second
+ * Bias : trying with null and non null
+ * result :Estimation is ok when we rotated around Z axis. Estimation fails when rotation is on another axis. (biased seems not to be removed correctly)
+ */
 class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
 {
     public:
