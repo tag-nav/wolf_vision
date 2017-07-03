@@ -644,6 +644,16 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
     virtual void TearDown(){}
 };
 
+/* FIX ME :
+ * Motion with initial velocity set in origin KeyFrame.
+ * imu data : constant rate of turn, integration during  second
+ * Bias : trying with null and non null
+ * result : it is easy to know which values we expect the final KeyFrame to have in its state since we do not have any acceleration data,
+ *          Last position = intial_velocity * dt, last_orientation = integration of constant rate of turn during 1s. We can then fix P1Q1V1P2Q2V2
+ *          Solving the problem results in wrong estimates for the biases (even when tests is done with null biases.)
+ *          Estimation of final velocity with null biases shows that estimations on last position do not give exactly the values we expected.
+ *
+ */
 class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
 {
     public:
@@ -666,24 +676,6 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
         using std::static_pointer_cast;
 
         std::string wolf_root = _WOLF_ROOT_DIR;
-
-        //===================================================== INPUT FILES
-
-        char* imu_filepath;
-
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_move_BiasNonNull_RotVCst.txt");
-
-        imu_filepath = new char[imu_filepath_string.length() + 1];
-
-        std::strcpy(imu_filepath, imu_filepath_string.c_str());
-        std::ifstream imu_data_input;
-
-        imu_data_input.open(imu_filepath);
-        if(!imu_data_input.is_open()){
-            std::cerr << "Failed to open data files... Exiting" << std::endl;
-            ADD_FAILURE();
-        }
-        //===================================================== END{INPUT FILES}
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
@@ -698,65 +690,60 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
-        processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_t6.yaml");
+        processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_t1.yaml");
         sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
         processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
     
         //===================================================== END{SETTING PROBLEM}
-
         //===================================================== INITIALIZATION
 
         expected_final_state.resize(16);
         x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        x_origin << 0,0,0, 0,0,0,1, 10,-3,4, 0,0,0, 0,0,0;
         t.set(0);
 
-        imu_data_input >> x_origin[0] >> x_origin[1] >> x_origin[2] >> x_origin[6] >> x_origin[3] >> x_origin[4] >> x_origin[5] >> x_origin[7] >> x_origin[8] >> x_origin[9];
-        imu_data_input >> origin_bias[0] >> origin_bias[1] >> origin_bias[2] >> origin_bias[3] >> origin_bias[4] >> origin_bias[5];
-        imu_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
-                    expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
-        expected_final_state.tail(6) = origin_bias;
+        Eigen::Vector6s data_imu;
+        origin_bias = Eigen::Vector6s::Random();
+        origin_bias << 0,0,0, 0,0,0;
+        wolf::Scalar rate_of_turn = 5 * M_PI/180.0; // rad/s
+        data_imu << -wolf::gravity(), rate_of_turn,0,0; //rotation only
+
+        // Expected state after one second integration
+        Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+        quat_comp = quat_comp * wolf::v2q(data_imu.tail(3)*1);
+
+        // rotated at 5 deg/s for 1s = 5 deg => 5 * M_PI/180
+        // no other acceleration : we should still be moving at initial velocity
+        // position = V*dt, dt = 1s
+        expected_final_state << 10,-3,4, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 10,-3,4, 0,0,0, 0,0,0;
+
+        data_imu = data_imu + origin_bias; // bias measurements
         x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
         origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
 
         //===================================================== END{INITIALIZATION}
-
-
         //===================================================== PROCESS DATA
         // PROCESS DATA
 
-        Eigen::Vector6s data_imu;
-        data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
+        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu);
 
-        Scalar input_clock;
-        TimeStamp ts(0);
-        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
-
-        while( !imu_data_input.eof())
+        for(unsigned int i = 0; i < 1000; i++) //integrate during 1 second
         {
-            // PROCESS IMU DATA
-            // Time and data variables
-            imu_data_input >> input_clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5]; //Ax, Ay, Az, Gx, Gy, Gz
-
-            ts.set(input_clock);
-            imu_ptr->setTimeStamp(ts);
-            imu_ptr->setData(data_imu);
+            t.set(t.get() + 0.001); //increment of 1 ms
+            imu_ptr->setTimeStamp(t);
 
             // process data in capture
             sen_imu->process(imu_ptr);
         }
 
-        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t));
         last_KF->setState(expected_final_state);
 
-        //closing file
-        imu_data_input.close();
-
-    //===================================================== END{PROCESS DATA}
-    origin_KF->unfix();
-    last_KF->unfix();
+        //===================================================== END{PROCESS DATA}
+        origin_KF->unfix();
+        last_KF->unfix();
     }
 
     virtual void TearDown(){}
@@ -2727,11 +2714,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->fix();
 
-    //wolf_problem_ptr_->print(4,1,1,1);
+    wolf_problem_ptr_->print(4,1,1,1);
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    //wolf_problem_ptr_->print(4,1,1,1);
+    wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2845,11 +2832,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst, VarB1B2V1P2V2_InvarP1Q
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->unfix();
 
-    //wolf_problem_ptr_->print(4,1,1,1);
+    wolf_problem_ptr_->print(4,1,1,1);
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    //wolf_problem_ptr_->print(4,1,1,1);
+    wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -5309,6 +5296,6 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK.*:ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex*:";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
   return RUN_ALL_TESTS();
 }
