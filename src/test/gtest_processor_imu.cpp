@@ -247,15 +247,15 @@ TEST_F(ProcessorIMUt, acc_y)
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 
     //do so for 5s
-    const unsigned int iter = 5000; //how many ms 
+    const unsigned int iter = 1000; //how many ms 
     for(int i = 1; i < iter; i++) //already did one integration above
     {
         cap_imu_ptr->setTimeStamp(i*0.001 + 0.001); //first one will be 0.002 and last will be 5.000
         sensor_ptr->process(cap_imu_ptr);
     }
 
-    // advanced at a=20m/s2 during 5s ==> dx = 0.5*20*5^2 = 250; dvx = 20*5 = 100
-    x << 0,250,0, 0,0,0,1, 0,100,0, 0,0,0, 0,0,0;
+    // advanced at a=20m/s2 during 1s ==> dx = 0.5*20*1^2 = 10; dvx = 20*1 = 20
+    x << 0,10,0, 0,0,0,1, 0,20,0, 0,0,0, 0,0,0;
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is " << problem->getCurrentState().transpose() << std::endl;
 }
 
@@ -334,7 +334,7 @@ TEST_F(ProcessorIMUt, acc_xyz)
     // This test is for pure translation -> no rotation ==> constant rate of turn vector = [0,0,0]
     data.tail(3) = w_vec;
 
-    for(unsigned int data_iter = 0; data_iter <= 10000; data_iter ++)
+    for(unsigned int data_iter = 0; data_iter <= 1000; data_iter ++)
     {   
         tmp_ax = - (x_freq * x_freq) * sin(x_freq * time);
         tmp_ay = - (y_freq * y_freq) * sin(y_freq * time);
@@ -442,7 +442,7 @@ TEST_F(ProcessorIMUt, gyro_x)
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 
     //do so for 5s
-    const unsigned int iter = 5000; //how many ms 
+    const unsigned int iter = 1000; //how many ms 
     for(int i = 1; i < iter; i++) //already did one integration above
     {
         // quaternion composition
@@ -451,7 +451,7 @@ TEST_F(ProcessorIMUt, gyro_x)
         Eigen::Quaternions rot(problem->getCurrentState().data()+3);
         data.head(3) =  rot.conjugate() * (- wolf::gravity());
 
-        cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 5.000
+        cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 1.000
         cap_imu_ptr->setData(data);
         sensor_ptr->process(cap_imu_ptr);
     }
@@ -489,7 +489,7 @@ TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
     << "\n estimated state : " << x.transpose();
 
     //do so for 5s
-    const unsigned int iter = 5000; //how many ms 
+    const unsigned int iter = 1000; //how many ms 
     for(int i = 1; i < iter; i++) //already did one integration above
     {
         // quaternion composition
@@ -498,7 +498,7 @@ TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
         Eigen::Quaternions rot(problem->getCurrentState().data()+3);
         data.head(3) =  rot.conjugate() * (- wolf::gravity()) + acc_bias;
 
-        cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 5.000
+        cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 1.000
         cap_imu_ptr->setData(data);
         sensor_ptr->process(cap_imu_ptr);
     }
@@ -536,7 +536,7 @@ TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
     << "\n estimated state : " << x.transpose();
 
     //do so for 5s
-    const unsigned int iter = 5000; //how many ms 
+    const unsigned int iter = 1000; //how many ms 
     for(int i = 1; i < iter; i++) //already did one integration above
     {
         // quaternion composition
@@ -545,7 +545,7 @@ TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
         Eigen::Quaternions rot(problem->getCurrentState().data()+3);
         data.head(3) =  rot.conjugate() * (- wolf::gravity()) + acc_bias;
 
-        cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 5.000
+        cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 1.000
         cap_imu_ptr->setData(data);
         sensor_ptr->process(cap_imu_ptr);
     }
@@ -559,7 +559,7 @@ TEST_F(ProcessorIMUt, gyro_z)
 {
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -580,13 +580,13 @@ TEST_F(ProcessorIMUt, gyro_z)
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 
     //do so for 5s
-    const unsigned int iter = 5000; //how many ms 
+    const unsigned int iter = 1000; //how many ms 
     for(int i = 1; i < iter; i++) //already did one integration above
     {
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-        cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 5.000
+        cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 1.000
         sensor_ptr->process(cap_imu_ptr);
     }
 
@@ -594,7 +594,6 @@ TEST_F(ProcessorIMUt, gyro_z)
     ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
     "\n current x is : \n" << x.transpose() << std::endl;
 }
-
 
 TEST_F(ProcessorIMUt, gyro_xyz)
 {
@@ -688,6 +687,45 @@ TEST_F(ProcessorIMUt, gyro_xyz)
     "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
 }
 
+TEST_F(ProcessorIMUt, gyro_z_ConstVelocity)
+{
+    wolf::Scalar dt(0.001);
+    t.set(0); // clock in 0,1 ms ticks
+    x0 << 0,0,0,  0,0,0,1,  2,0,0,  0,0,0,  0,0,0;
+
+    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+
+    wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
+    data << -wolf::gravity(), 0, 0, rate_of_turn; // measure gravity!
+
+    cap_imu_ptr->setData(data);
+    cap_imu_ptr->setTimeStamp(0.001);
+    sensor_ptr->process(cap_imu_ptr);
+
+    // Expected state after one integration
+    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
+
+    Eigen::VectorXs x(16);
+    x << 0.002,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 2,0,0, 0,0,0, 0,0,0; // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180, 2m/s * 0.001s = 0.002m
+
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+
+    //do so for 5s
+    const unsigned int iter = 1000; //how many ms 
+    for(int i = 1; i < iter; i++) //already did one integration above
+    {
+        // quaternion composition
+        quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
+
+        cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 5.000
+        sensor_ptr->process(cap_imu_ptr);
+    }
+
+    x << 2,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 2,0,0, 0,0,0, 0,0,0; //2m/s * 1s = 2m
+    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
+    "\n current x is : \n" << x.transpose() << std::endl;
+}
 
 int main(int argc, char **argv)
 {
