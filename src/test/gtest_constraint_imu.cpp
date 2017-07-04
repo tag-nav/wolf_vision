@@ -1055,8 +1055,8 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex : public testing::Test
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_bias_check_Complex.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_bias_check_Complex.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_ComplexBiased.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_Complex.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -1095,7 +1095,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex : public testing::Test
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 5.999;
+        prc_odom3D_params->max_time_span = 1.9999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
         prc_odom3D_params->angle_turned = 1000000000;
@@ -1118,12 +1118,6 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex : public testing::Test
         imu_data_input >> expected_final_state[0] >> expected_final_state[1] >> expected_final_state[2] >> expected_final_state[6] >> expected_final_state[3] >>
                     expected_final_state[4] >> expected_final_state[5] >> expected_final_state[7] >> expected_final_state[8] >> expected_final_state[9];
         expected_final_state.tail(6) = origin_bias;
-        //x_origin.tail(6) = origin_bias;
-
-        /*std::cout << "x_origin : " << x_origin.transpose() << std::endl;
-        std::cout << "origin_bias : " << origin_bias.transpose() << std::endl;
-        std::cout << "expected_final_state : " << expected_final_state.transpose() << std::endl;*/
-        
 
         //set origin of the problem
         origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
@@ -1220,8 +1214,8 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK : public testin
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_bias_check_Complex.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_bias_check_Complex.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_ComplexBiased.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_Complex.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -1260,7 +1254,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK : public testin
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 5.9999;
+        prc_odom3D_params->max_time_span = 1.9999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
         prc_odom3D_params->angle_turned = 1000000000;
@@ -1296,7 +1290,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK : public testin
         // PROCESS DATA
 
         Eigen::Vector6s data_imu, data_odom3D;
-        data_imu << 0,0,-wolf::gravity()(2), 0,0,0;
+        data_imu << -wolf::gravity(), 0,0,0;
 
         Scalar input_clock;
         TimeStamp ts(0);
@@ -1322,7 +1316,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK : public testin
             imu_ptr->getTimeStamp();
             sen_imu->process(imu_ptr);
 
-            if(ts.get() == t_odom.get()) //every 100 ms
+            if(ts.get() == t_odom.get())
             {
                 // PROCESS ODOM 3D DATA
                 mot_ptr->setTimeStamp(t_odom);
@@ -1379,8 +1373,8 @@ class ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK : public te
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_bias_check_StaticNullBiasNoisy.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_bias_check_StaticNullBiasNoisy.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_ComplexNoisy.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_Complex.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -1419,7 +1413,7 @@ class ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK : public te
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 2.9999;
+        prc_odom3D_params->max_time_span = 1.9999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
         prc_odom3D_params->angle_turned = 1000000000;
@@ -1538,8 +1532,8 @@ class ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK : public testin
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_check_BiasedNoisyComplex.txt");
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_check_BiasedNoisyComplex.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_ComplexBiasedNoisy.txt");
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_Complex.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
@@ -1578,7 +1572,7 @@ class ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK : public testin
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 0.04999;
+        prc_odom3D_params->max_time_span = 1.99999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
         prc_odom3D_params->angle_turned = 1000000000;
@@ -2853,11 +2847,12 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2_Invar
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    WOLF_WARN("Precision set to ", 0.001)
+    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.001)
+    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.001)
     
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.001)
+    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.001)
 }
 
 TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2_InvarP1Q1V1V2)
@@ -2875,14 +2870,15 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2_I
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    WOLF_WARN("Precision set to ", 0.001)
+    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.001)
+    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.001)
     
-    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), wolf::Constants::EPS*1000)
+    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), 0.001) //biased + noisy imu, consider an error of 1mm
     Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
-    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, 0.00001)
+    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.001)
+    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.001)
 }
 
 TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2V2_InvarP1Q1V1)
@@ -2900,14 +2896,16 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarB1B2P2Q2V2
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
+    WOLF_WARN("Precision set to ", 0.0001)
+
+    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.0001)
     ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
     
-    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), wolf::Constants::EPS*1000)
+    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), 0.0001)
     Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
     ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), 0.0001)
+    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.0001)
     ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
 }
 
@@ -2926,20 +2924,22 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK, VarAll)
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getPPtr()->getState(), x_origin.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    WOLF_WARN("Precision set to ", 0.0001)
+
+    ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), 0.0001)
+    ASSERT_MATRIX_APPROX(origin_KF->getPPtr()->getState(), x_origin.head(3), 0.0001)
+    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.0001)
+    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.0001)
     
-    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), 0.0001)
+    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), 0.0001)
     Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
-    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, 0.0001)
+    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.0001)
+    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.0001)
 }
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarB1B2_InvarP1Q1V1P2Q2V2_initZero) //falling in local minimum
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarB1B2_InvarP1Q1V1P2Q2V2_initZero) //Falling in local minimum
 {
     //prepare problem for solving
     origin_KF->getPPtr()->fix();
@@ -2961,7 +2961,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarB1B2_InvarP1Q1V1P
     ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
 }
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarB1B2P2Q2V2_InvarP1Q1V1_initZero) //falling in local minimum
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarB1B2P2Q2V2_InvarP1Q1V1_initZero) //Falling in local minimum
 {
     //prepare problem for solving
     origin_KF->getPPtr()->fix();
@@ -2976,36 +2976,6 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarB1B2P2Q2V2_InvarP
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
 
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
-    
-    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), wolf::Constants::EPS*100)
-    Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
-    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
-}
-
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex, VarAll_initBiasZero) //falling in local minimum
-{
-    //prepare problem for solving
-    origin_KF->getPPtr()->fix();
-    origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->fix();
-
-    last_KF->setState(expected_final_state);
-
-    last_KF->getPPtr()->fix();
-    last_KF->getOPtr()->fix();
-    last_KF->getVPtr()->fix();
-
-    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-
-    ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getPPtr()->getState(), x_origin.head(3), wolf::Constants::EPS*100)
-    Eigen::Map<const Eigen::Quaternions> estimatedOriginQuat(origin_KF->getOPtr()->getState().data()), expectedOriginQuat(x_origin.segment(3,4).data());
-    ASSERT_QUATERNION_APPROX(estimatedOriginQuat, expectedOriginQuat, wolf::Constants::EPS*100)
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
     ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
     
@@ -3042,13 +3012,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
     last_KF->setState(expected_final_state);
 
     summary = ceres_manager_wolf_diff->solve();
+    WOLF_WARN("Precision set to ", 0.001)
 
     //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.001)
+    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.001)
 
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.001)
+    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.001)
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-4")
@@ -3062,11 +3033,11 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
     summary = ceres_manager_wolf_diff->solve();
 
     //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.001)
+    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.001)
 
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.001)
+    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.001)
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-2")
@@ -3080,11 +3051,11 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
     summary = ceres_manager_wolf_diff->solve();
 
     //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.001)
+    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.001)
 
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.001)
+    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.001)
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-1")
@@ -3100,323 +3071,175 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK,VarB1B2_InvarP
         summary = ceres_manager_wolf_diff->solve();
 
         //Only biases are unfixed
-        ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-        ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+        ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.001)
+        ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.001)
 
-        ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-        ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+        ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.001)
+        ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.001)
     }
 }
 
 //Tests related to noise
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varV1B1P2Q2V2B2_invarP1Q1)
+TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varB1P2Q2V2B2_invarP1Q1V1) //Falling in local minimum ?
 {
-    origin_KF->getOPtr()->fix();
+    //prepare problem for solving
     origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
 
-    #ifdef GET_RESIDUALS
-        wolf::FrameBaseList frame_list = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
+    last_KF->setState(expected_final_state);
 
-        //trials to print all constraintIMUs' residuals
-        Eigen::Matrix<wolf::Scalar,15,1> IMU_residuals;
-        Eigen::Vector3s p1(Eigen::Vector3s::Zero());
-        Eigen::Vector4s q1_vec(Eigen::Vector4s::Zero());
-        Eigen::Map<Quaternions> q1(q1_vec.data());
-        Eigen::Vector3s v1(Eigen::Vector3s::Zero());
-        Eigen::Vector3s ab1(Eigen::Vector3s::Zero());
-        Eigen::Vector3s wb1(Eigen::Vector3s::Zero());
-        Eigen::Vector3s p2(Eigen::Vector3s::Zero());
-        Eigen::Vector4s q2_vec(Eigen::Vector4s::Zero());
-        Eigen::Map<Quaternions> q2(q2_vec.data());
-        Eigen::Vector3s v2(Eigen::Vector3s::Zero());
-        Eigen::Vector3s ab2(Eigen::Vector3s::Zero());
-        Eigen::Vector3s wb2(Eigen::Vector3s::Zero());
-
-        for(FrameBasePtr frm_ptr : frame_list)
-        {
-            if(frm_ptr->isKey())
-            {
-                ConstraintBaseList ctr_list =  frm_ptr->getConstrainedByList();
-                for(ConstraintBasePtr ctr_ptr : ctr_list)
-                {
-                    if(ctr_ptr->getTypeId() == CTR_IMU)
-                    {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
-
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
-
-                        std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
-                        std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
-                    }
-                }
-            }
-        }
-
-    #endif
+    last_KF->getPPtr()->unfix();
+    last_KF->getOPtr()->unfix();
+    last_KF->getVPtr()->unfix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
     ceres_manager_wolf_diff->computeCovariances(ALL);
     std::cout << summary.BriefReport() << std::endl;
 
-    //wolf_problem_ptr_->print(4,1,1,1);
+    WOLF_WARN("Precision set to ", 0.01)
 
-    //Noisy data, this will certainly be false excepted for position and orientation due to precise odometry
-    EXPECT_FALSE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
-    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
-    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*1000)
+    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*1000)
 
-    EXPECT_FALSE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
-    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
-    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
-    "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
-    "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
-    EXPECT_FALSE((last_KF->getVPtr()->getState() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getState().transpose() <<
-    "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), 0.0001)
+    Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
+    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*1000)
+    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*1000)
+    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*1000)
+
 
     #ifdef GET_RESIDUALS
         frame_list = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
-        for(FrameBasePtr frm_ptr : frame_list)
+
+        std::ofstream framesCov;
+        framesCov.open("framesCovariances.dat");
+        if(framesCov)
+            framesCov   << "%%TimeStamp\t"
+                            << "X_x\t" << "X_y\t" << "X_z\t" << "Xq_x\t" << "Xq_y\t" << "Xq_z\t" << "Xq_w\t" << "Xv_x\t" << "Xv_y\t" << "Xv_z\t"
+                            << "Cov_X\t" << "Cov_Y\t" << "Cov_Z\t" << "Cov_Qx\t" << "Cov_Qy\t" << "Cov_Qz\t" << "Cov_Qw" << "Cov_Vx\t" << "Cov_Vy\t" << "Cov_Vz\t" << std::endl;
+
+        Eigen::VectorXs frm_state(16);
+        Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev;
+        Eigen::MatrixXs covX(16,16);
+        Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
+        
+        wolf::FrameBaseList frame_listCov = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
+        for(FrameBasePtr frm_ptr : frame_listCov)
         {
             if(frm_ptr->isKey())
-            {
-                ConstraintBaseList ctr_list =  frm_ptr->getConstrainedByList();
-                for(ConstraintBasePtr ctr_ptr : ctr_list)
-                {
-                    if(ctr_ptr->getTypeId() == CTR_IMU)
-                    {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
+            {   
+                //prepare needed variables
+                FrameIMUPtr frmIMU_ptr = std::static_pointer_cast<FrameIMU>(frm_ptr);
+                frm_state = frmIMU_ptr->getState();
+                TimeStamp ts = frmIMU_ptr->getTimeStamp();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
+                //get data from covariance blocks
+                wolf_problem_ptr_->getFrameCovariance(frmIMU_ptr, covX);
+                wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getVPtr(), frmIMU_ptr->getVPtr(), cov3);
+                covX.block(7,7,3,3) = cov3;
+                wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getAccBiasPtr(), frmIMU_ptr->getAccBiasPtr(), cov3);
+                covX.block(10,10,3,3) = cov3;
+                wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getGyroBiasPtr(), frmIMU_ptr->getGyroBiasPtr(), cov3);
+                covX.block(13,13,3,3) = cov3;
+                for(int i = 0; i<16; i++)
+                    cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
 
-                        std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
-                        std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
-                    }
-                }
+
+                framesCov << std::setprecision(16) << ts.get() << "\t" << frm_state(0) << "\t" << frm_state(1) << "\t" << frm_state(2)
+                << "|\t" << frm_state(3) << "\t" << frm_state(4) << "\t" << frm_state(5) << "\t" << frm_state(6)
+                << "|\t" << frm_state(7) << "\t" << frm_state(8) << "\t" << frm_state(9)
+                << "|\t" << frm_state(10) << "\t" << frm_state(11) << "\t" << frm_state(12) << "|\t" << frm_state(13) << "\t" << frm_state(14) << "\t" << frm_state(15)
+                << "||\t" << cov_stdev(0) << "\t" << cov_stdev(1) << "\t" << cov_stdev(2)
+                << "|\t" << cov_stdev(3) << "\t" << cov_stdev(4) << "\t" << cov_stdev(5) << "\t" << cov_stdev(6)
+                << "|\t" << cov_stdev(7) << "\t" << cov_stdev(8) << "\t" << cov_stdev(9)
+                << "|\t" << cov_stdev(10) << "\t" << cov_stdev(11) << "\t" << cov_stdev(12) << "|\t" << cov_stdev(13) << "\t" << cov_stdev(14) << "\t" << cov_stdev(15) << std::endl;
             }
         }
-
-    std::ofstream framesCov;
-    framesCov.open("framesCovariances.dat");
-    if(framesCov)
-        framesCov   << "%%TimeStamp\t"
-                        << "X_x\t" << "X_y\t" << "X_z\t" << "Xq_x\t" << "Xq_y\t" << "Xq_z\t" << "Xq_w\t" << "Xv_x\t" << "Xv_y\t" << "Xv_z\t"
-                        << "Cov_X\t" << "Cov_Y\t" << "Cov_Z\t" << "Cov_Qx\t" << "Cov_Qy\t" << "Cov_Qz\t" << "Cov_Qw" << "Cov_Vx\t" << "Cov_Vy\t" << "Cov_Vz\t" << std::endl;
-
-    Eigen::VectorXs frm_state(16);
-    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev;
-    Eigen::MatrixXs covX(16,16);
-    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
-    
-    wolf::FrameBaseList frame_listCov = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
-    for(FrameBasePtr frm_ptr : frame_listCov)
-    {
-        if(frm_ptr->isKey())
-        {   
-            //prepare needed variables
-            FrameIMUPtr frmIMU_ptr = std::static_pointer_cast<FrameIMU>(frm_ptr);
-            frm_state = frmIMU_ptr->getState();
-            TimeStamp ts = frmIMU_ptr->getTimeStamp();
-
-            //get data from covariance blocks
-            wolf_problem_ptr_->getFrameCovariance(frmIMU_ptr, covX);
-            wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getVPtr(), frmIMU_ptr->getVPtr(), cov3);
-            covX.block(7,7,3,3) = cov3;
-            wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getAccBiasPtr(), frmIMU_ptr->getAccBiasPtr(), cov3);
-            covX.block(10,10,3,3) = cov3;
-            wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getGyroBiasPtr(), frmIMU_ptr->getGyroBiasPtr(), cov3);
-            covX.block(13,13,3,3) = cov3;
-            for(int i = 0; i<16; i++)
-                cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
-
-
-            framesCov << std::setprecision(16) << ts.get() << "\t" << frm_state(0) << "\t" << frm_state(1) << "\t" << frm_state(2)
-            << "|\t" << frm_state(3) << "\t" << frm_state(4) << "\t" << frm_state(5) << "\t" << frm_state(6)
-            << "|\t" << frm_state(7) << "\t" << frm_state(8) << "\t" << frm_state(9)
-            << "|\t" << frm_state(10) << "\t" << frm_state(11) << "\t" << frm_state(12) << "|\t" << frm_state(13) << "\t" << frm_state(14) << "\t" << frm_state(15)
-            << "||\t" << cov_stdev(0) << "\t" << cov_stdev(1) << "\t" << cov_stdev(2)
-            << "|\t" << cov_stdev(3) << "\t" << cov_stdev(4) << "\t" << cov_stdev(5) << "\t" << cov_stdev(6)
-            << "|\t" << cov_stdev(7) << "\t" << cov_stdev(8) << "\t" << cov_stdev(9)
-            << "|\t" << cov_stdev(10) << "\t" << cov_stdev(11) << "\t" << cov_stdev(12) << "|\t" << cov_stdev(13) << "\t" << cov_stdev(14) << "\t" << cov_stdev(15) << std::endl;
-        }
-    }
-    framesCov.close();
+        framesCov.close();
 
     #endif
 }
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varV1B1P2Q2V2B2_invarP1Q1)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varB1P2Q2V2B2_invarP1Q1V1)
 {
-    origin_KF->getOPtr()->fix();
+    //prepare problem for solving
     origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
 
-    #ifdef GET_RESIDUALS
-        wolf::FrameBaseList frame_list = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
+    last_KF->setState(expected_final_state);
 
-        //trials to print all constraintIMUs' residuals
-        Eigen::Matrix<wolf::Scalar,15,1> IMU_residuals;
-        Eigen::Vector3s p1(Eigen::Vector3s::Zero());
-        Eigen::Vector4s q1_vec(Eigen::Vector4s::Zero());
-        Eigen::Map<Quaternions> q1(q1_vec.data());
-        Eigen::Vector3s v1(Eigen::Vector3s::Zero());
-        Eigen::Vector3s ab1(Eigen::Vector3s::Zero());
-        Eigen::Vector3s wb1(Eigen::Vector3s::Zero());
-        Eigen::Vector3s p2(Eigen::Vector3s::Zero());
-        Eigen::Vector4s q2_vec(Eigen::Vector4s::Zero());
-        Eigen::Map<Quaternions> q2(q2_vec.data());
-        Eigen::Vector3s v2(Eigen::Vector3s::Zero());
-        Eigen::Vector3s ab2(Eigen::Vector3s::Zero());
-        Eigen::Vector3s wb2(Eigen::Vector3s::Zero());
-
-        for(FrameBasePtr frm_ptr : frame_list)
-        {
-            if(frm_ptr->isKey())
-            {
-                ConstraintBaseList ctr_list =  frm_ptr->getConstrainedByList();
-                for(ConstraintBasePtr ctr_ptr : ctr_list)
-                {
-                    if(ctr_ptr->getTypeId() == CTR_IMU)
-                    {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
-
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
-
-                        std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
-                        std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
-                    }
-                }
-            }
-        }
-
-    #endif
+    last_KF->getPPtr()->unfix();
+    last_KF->getOPtr()->unfix();
+    last_KF->getVPtr()->unfix();
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    ceres_manager_wolf_diff->computeCovariances(ALL);
-    std::cout << summary.BriefReport() << std::endl;
+     ceres_manager_wolf_diff->computeCovariances(ALL);
+     std::cout << summary.BriefReport() << std::endl;
 
-   // wolf_problem_ptr_->print(4,1,1,1);
+    WOLF_WARN("Precision set to ", 0.01)
 
-    //Noisy data, this will certainly be false excepted for position and orientation due to precise odometry
-    EXPECT_FALSE((origin_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Acc bias : " << origin_KF->getAccBiasPtr()->getState().transpose() <<
-    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((origin_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "origin_KF Gyro bias : " << origin_KF->getGyroBiasPtr()->getState().transpose() <<
-    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.01)
+    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.01)
 
-    EXPECT_FALSE((last_KF->getAccBiasPtr()->getState() - origin_bias.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Acc bias : " << last_KF->getAccBiasPtr()->getState().transpose() <<
-    "\n expected Acc bias : " << origin_bias.head(3).transpose() << std::endl;
-    EXPECT_FALSE((last_KF->getGyroBiasPtr()->getState() - origin_bias.tail(3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF Gyro bias : " << last_KF->getGyroBiasPtr()->getState().transpose() <<
-    "\n expected Gyro bias : " << origin_bias.tail(3).transpose() << std::endl;
-    WOLF_WARN("position precision in expactation test : ", 0.0001)
-    EXPECT_TRUE((last_KF->getPPtr()->getState() - expected_final_state.head(3)).isMuchSmallerThan(1, 0.0001 )) << "last_KF P : " << last_KF->getPPtr()->getState().transpose() <<
-    "\n expected Position : " << expected_final_state.head(3).transpose() << std::endl;
-    EXPECT_TRUE((last_KF->getOPtr()->getState() - expected_final_state.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS*1000 )) << "last_KF Q : " << last_KF->getOPtr()->getState().transpose() <<
-    "\n expected orientation : " << expected_final_state.segment(3,4).transpose() << std::endl;
-    EXPECT_FALSE((last_KF->getVPtr()->getState() - expected_final_state.segment(7,3)).isMuchSmallerThan(1, wolf::Constants::EPS*100 )) << "last_KF V : " << last_KF->getVPtr()->getState().transpose() <<
-    "\n expected velocity : " << expected_final_state.segment(7,3).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), 0.0001)
+    Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
+    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), 0.01)
+    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.01)
+    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.01)
 
     #ifdef GET_RESIDUALS
         frame_list = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
-        for(FrameBasePtr frm_ptr : frame_list)
-        {
-            if(frm_ptr->isKey())
-            {
-                ConstraintBaseList ctr_list =  frm_ptr->getConstrainedByList();
-                for(ConstraintBasePtr ctr_ptr : ctr_list)
-                {
-                    if(ctr_ptr->getTypeId() == CTR_IMU)
-                    {
-                        p1      = ctr_ptr->getFrameOtherPtr()->getPPtr()->getState();
-                        q1_vec  = ctr_ptr->getFrameOtherPtr()->getOPtr()->getState();
-                        v1      = ctr_ptr->getFrameOtherPtr()->getVPtr()->getState();
-                        ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getAccBiasPtr()->getState();
-                        wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOtherPtr())->getGyroBiasPtr()->getState();
 
-                        p2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getPPtr()->getState();
-                        q2_vec  = ctr_ptr->getFeaturePtr()->getFramePtr()->getOPtr()->getState();
-                        v2      = ctr_ptr->getFeaturePtr()->getFramePtr()->getVPtr()->getState();
-                        ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
-                        wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
-
-                        std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
-                        std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
-                    }
-                }
-            }
-        }
-
-    std::ofstream framesCov;
-    framesCov.open("framesCovariances121kf_new.dat");
-    if(framesCov)
-        framesCov   << "%%TimeStamp\t"
+        std::ofstream framesCov;
+        framesCov.open("framesCovariances121kf_new.dat");
+        if(framesCov)
+            framesCov   << "%%TimeStamp\t"
                         << "X_x\t" << "X_y\t" << "X_z\t" << "Xq_x\t" << "Xq_y\t" << "Xq_z\t" << "Xq_w\t" << "Xv_x\t" << "Xv_y\t" << "Xv_z\t"
                         << "Cov_X\t" << "Cov_Y\t" << "Cov_Z\t" << "Cov_Qx\t" << "Cov_Qy\t" << "Cov_Qz\t" << "Cov_Qw" << "Cov_Vx\t" << "Cov_Vy\t" << "Cov_Vz\t" << std::endl;
 
-    Eigen::VectorXs frm_state(16);
-    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev;
-    Eigen::MatrixXs covX(16,16);
-    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
+        Eigen::VectorXs frm_state(16);
+        Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev;
+        Eigen::MatrixXs covX(16,16);
+        Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero());
 
-    wolf::FrameBaseList frame_listCov = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
-    for(FrameBasePtr frm_ptr : frame_listCov)
-    {
-        if(frm_ptr->isKey())
-        {   
-            //prepare needed variables
-            FrameIMUPtr frmIMU_ptr = std::static_pointer_cast<FrameIMU>(frm_ptr);
-            frm_state = frmIMU_ptr->getState();
-            TimeStamp ts = frmIMU_ptr->getTimeStamp();
+        wolf::FrameBaseList frame_listCov = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
+        for(FrameBasePtr frm_ptr : frame_listCov)
+        {
+            if(frm_ptr->isKey())
+            {   
+                //prepare needed variables
+                FrameIMUPtr frmIMU_ptr = std::static_pointer_cast<FrameIMU>(frm_ptr);
+                frm_state = frmIMU_ptr->getState();
+                TimeStamp ts = frmIMU_ptr->getTimeStamp();
 
-            //get data from covariance blocks
-            wolf_problem_ptr_->getFrameCovariance(frmIMU_ptr, covX);
-            wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getVPtr(), frmIMU_ptr->getVPtr(), cov3);
-            covX.block(7,7,3,3) = cov3;
-            wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getAccBiasPtr(), frmIMU_ptr->getAccBiasPtr(), cov3);
-            covX.block(10,10,3,3) = cov3;
-            wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getGyroBiasPtr(), frmIMU_ptr->getGyroBiasPtr(), cov3);
-            covX.block(13,13,3,3) = cov3;
-            for(int i = 0; i<16; i++)
-                cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
+                //get data from covariance blocks
+                wolf_problem_ptr_->getFrameCovariance(frmIMU_ptr, covX);
+                wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getVPtr(), frmIMU_ptr->getVPtr(), cov3);
+                covX.block(7,7,3,3) = cov3;
+                wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getAccBiasPtr(), frmIMU_ptr->getAccBiasPtr(), cov3);
+                covX.block(10,10,3,3) = cov3;
+                wolf_problem_ptr_->getCovarianceBlock(frmIMU_ptr->getGyroBiasPtr(), frmIMU_ptr->getGyroBiasPtr(), cov3);
+                covX.block(13,13,3,3) = cov3;
+                for(int i = 0; i<16; i++)
+                    cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
 
 
-            framesCov << std::setprecision(16) << ts.get() << "\t" << frm_state(0) << "\t" << frm_state(1) << "\t" << frm_state(2)
-            << "|\t" << frm_state(3) << "\t" << frm_state(4) << "\t" << frm_state(5) << "\t" << frm_state(6)
-            << "|\t" << frm_state(7) << "\t" << frm_state(8) << "\t" << frm_state(9)
-            << "|\t" << frm_state(10) << "\t" << frm_state(11) << "\t" << frm_state(12) << "|\t" << frm_state(13) << "\t" << frm_state(14) << "\t" << frm_state(15)
-            << "||\t" << cov_stdev(0) << "\t" << cov_stdev(1) << "\t" << cov_stdev(2)
-            << "|\t" << cov_stdev(3) << "\t" << cov_stdev(4) << "\t" << cov_stdev(5) << "\t" << cov_stdev(6)
-            << "|\t" << cov_stdev(7) << "\t" << cov_stdev(8) << "\t" << cov_stdev(9)
-            << "|\t" << cov_stdev(10) << "\t" << cov_stdev(11) << "\t" << cov_stdev(12) << "|\t" << cov_stdev(13) << "\t" << cov_stdev(14) << "\t" << cov_stdev(15) << std::endl;
+                framesCov << std::setprecision(16) << ts.get() << "\t" << frm_state(0) << "\t" << frm_state(1) << "\t" << frm_state(2)
+                << "|\t" << frm_state(3) << "\t" << frm_state(4) << "\t" << frm_state(5) << "\t" << frm_state(6)
+                << "|\t" << frm_state(7) << "\t" << frm_state(8) << "\t" << frm_state(9)
+                << "|\t" << frm_state(10) << "\t" << frm_state(11) << "\t" << frm_state(12) << "|\t" << frm_state(13) << "\t" << frm_state(14) << "\t" << frm_state(15)
+                << "||\t" << cov_stdev(0) << "\t" << cov_stdev(1) << "\t" << cov_stdev(2)
+                << "|\t" << cov_stdev(3) << "\t" << cov_stdev(4) << "\t" << cov_stdev(5) << "\t" << cov_stdev(6)
+                << "|\t" << cov_stdev(7) << "\t" << cov_stdev(8) << "\t" << cov_stdev(9)
+                << "|\t" << cov_stdev(10) << "\t" << cov_stdev(11) << "\t" << cov_stdev(12) << "|\t" << cov_stdev(13) << "\t" << cov_stdev(14) << "\t" << cov_stdev(15) << std::endl;
+            }
         }
-    }
-    framesCov.close();
+        framesCov.close();
 
     #endif
 }
@@ -3424,7 +3247,6 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varV1B1P2Q2V2
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  //::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK.*:ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex*:";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK.*";
   return RUN_ALL_TESTS();
 }
