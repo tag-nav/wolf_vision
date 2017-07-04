@@ -895,7 +895,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
 
         char* imu_filepath;
         char* odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/data_bias_check_Rot.txt");
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_bias_check_Rot.txt");
         std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_bias_check_Rot.txt");
 
         imu_filepath   = new char[imu_filepath_string.length() + 1];
@@ -935,7 +935,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 5.9999;
+        prc_odom3D_params->max_time_span = 1.9999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
         prc_odom3D_params->angle_turned = 1000000000;
@@ -3408,6 +3408,6 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK.*:ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex*:";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.*";
   return RUN_ALL_TESTS();
 }
