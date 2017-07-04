@@ -10,6 +10,8 @@
 
 #include "wolf.h"
 
+#include "iostream"
+
 namespace wolf
 {
 
@@ -99,9 +101,11 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
     typedef typename Derived::Scalar T;
 
     Eigen::Quaternion<T> q;
-    T angle = _v.norm();
+    T angle_squared = _v.squaredNorm();
+    T angle = sqrt(angle_squared);
     T angle_half = angle / (T)2.0;
-    if (angle > wolf::Constants::EPS)
+
+    if (angle > (T)(wolf::Constants::EPS))
     {
         q.w() = cos(angle_half);
         q.vec() = _v / angle * sin(angle_half);
@@ -109,8 +113,8 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
     }
     else
     {
-        q.w() = cos(angle_half);
-        q.vec() = _v * ((T)0.5 - angle_half * angle_half / (T)12.0); // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
+        q.w()   = (T)1.0 - angle_squared/(T)2; // Taylor expansion of cos(x) = 1 - x^2/2!;
+        q.vec() = _v * ((T)2.0 - angle_squared / (T)48.0); // Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
         return q;
     }
 }
@@ -126,15 +130,16 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::Quaterni
     typedef typename Derived::Scalar T;
 
     Eigen::Matrix<T, 3, 1> vec = _q.vec();
-    T vecnorm = vec.norm();
-    if (vecnorm > wolf::Constants::EPS_SMALL)
+    T vecnorm_squared = vec.squaredNorm();
+    T vecnorm = sqrt(vecnorm_squared); // vec.norm();
+    if (vecnorm > (T)wolf::Constants::EPS_SMALL)
     { // regular angle-axis conversion
         T angle = (T)2.0 * atan2(vecnorm, _q.w());
         return vec * angle / vecnorm;
     }
     else
     { // small-angle approximation using truncated Taylor series
-        T r2 = vec.squaredNorm() / (_q.w() *_q.w());
+        T r2 = vecnorm_squared / (_q.w() *_q.w());
         return vec * ( (T)2.0 -  r2 / (T)1.5 ) / _q.w(); // log = 2 * vec * ( 1 - norm(vec)^2 / 3*w^2 ) / w.
     }
 }
@@ -151,11 +156,12 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBa
 
     typedef typename Derived::Scalar T;
 
-    T angle = _v.norm();
-    if (angle < wolf::Constants::EPS)
-        return Eigen::Matrix<T, 3, 3>::Identity() + skew(_v);
-    else
+    T angle_squared = _v.squaredNorm();
+    T angle = sqrt(angle_squared);
+    if (angle > wolf::Constants::EPS)
         return Eigen::AngleAxis<T>(angle, _v / angle).matrix();
+    else
+        return Eigen::Matrix<T, 3, 3>::Identity() + skew(_v);
 }
 
 /** \brief Rotation matrix logarithmic map
@@ -266,7 +272,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right(const Eigen::
 
     typedef typename Derived::Scalar T;
 
-    T theta2 = _theta.dot(_theta);
+    T theta2 = _theta.squaredNorm();
     Eigen::Matrix<T, 3, 3> W(skew(_theta));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W; // Small angle approximation
@@ -301,7 +307,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eig
 
     typedef typename Derived::Scalar T;
 
-    T theta2 = _theta.dot(_theta);
+    T theta2 = _theta.squaredNorm();
     Eigen::Matrix<T, 3, 3> W(skew(_theta));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
@@ -331,7 +337,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::M
 
     typedef typename Derived::Scalar T;
 
-    T theta2 = _theta.dot(_theta);
+    T theta2 = _theta.squaredNorm();
     Eigen::Matrix<T, 3, 3> W(skew(_theta));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W; // Small angle approximation
@@ -365,7 +371,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left_inv(const Eige
 
     typedef typename Derived::Scalar T;
 
-    T theta2 = _theta.dot(_theta);
+    T theta2 = _theta.squaredNorm();
     Eigen::Matrix<T, 3, 3> W(skew(_theta));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
