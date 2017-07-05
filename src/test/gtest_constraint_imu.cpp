@@ -3099,7 +3099,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varB1B2P2
     ceres_manager_wolf_diff->computeCovariances(ALL);
     std::cout << summary.BriefReport() << std::endl;
 
-    wolf_problem_ptr_->print(4,1,1,1);
+    //wolf_problem_ptr_->print(4,1,1,1);
 
     //ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*1000)
     //ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*1000)
@@ -3285,6 +3285,53 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varQ1B1P2
         assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
 }
 
+TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varB1B2_invarP1Q1V1P2Q2V2)
+{
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->fix();
+    origin_KF->getVPtr()->fix();
+    origin_KF->getAccBiasPtr()->unfix();
+    origin_KF->getGyroBiasPtr()->unfix();
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+    last_KF->getVPtr()->fix();
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    ceres_manager_wolf_diff->computeCovariances(ALL);
+    std::cout << summary.BriefReport() << std::endl;
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.01)
+    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.01)
+
+    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.01)
+    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), 0.01)
+
+    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev, actual_state(last_KF->getState());
+    Eigen::MatrixXs covX(16,16);
+    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero()), cov4(Eigen::Matrix4s::Zero());
+        
+    //get data from covariance blocks
+    wolf_problem_ptr_->getFrameCovariance(last_KF, covX);
+
+    for(int i = 0; i<16; i++)
+        cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
+    
+    TEST_COUT << "2*std : " << cov_stdev.transpose();
+    TEST_COUT << "expect : " << expected_final_state.transpose(); //expected final state
+    TEST_COUT << "estim : " << last_KF->getState().transpose(); //estimnated final state
+
+    for(unsigned int i = 0; i<16; i++)
+        assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
+}
+
 TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varB1P2Q2V2B2_invarP1Q1V1)
 {
     //prepare problem for solving
@@ -3386,6 +3433,6 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varB1P2Q2V2B2
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK.*";
   return RUN_ALL_TESTS();
 }
