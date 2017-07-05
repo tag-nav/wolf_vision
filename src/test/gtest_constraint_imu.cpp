@@ -3302,6 +3302,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varB1P2Q2V2B2
      ceres_manager_wolf_diff->computeCovariances(ALL);
      std::cout << summary.BriefReport() << std::endl;
 
+    //These ASSERTS can be removed since we are more interested in using covariances to make sure that expected values are inside estimated +/- 2*std
     WOLF_WARN("Precision set to ", 0.01)
 
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), 0.01)
@@ -3362,13 +3363,29 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varB1P2Q2V2B2
             }
         }
         framesCov.close();
-
     #endif
+
+    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev, actual_state(last_KF->getState());
+    Eigen::MatrixXs covX(16,16);
+    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero()), cov4(Eigen::Matrix4s::Zero());
+        
+    //get data from covariance blocks
+    wolf_problem_ptr_->getFrameCovariance(last_KF, covX);
+
+    for(int i = 0; i<16; i++)
+        cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
+    
+    TEST_COUT << "2*std : " << cov_stdev.transpose();
+    TEST_COUT << "expect : " << expected_final_state.transpose(); //expected final state
+    TEST_COUT << "estim : " << last_KF->getState().transpose(); //estimnated final state
+
+    for(unsigned int i = 0; i<16; i++)
+        assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
 }
 
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK.*";
   return RUN_ALL_TESTS();
 }
