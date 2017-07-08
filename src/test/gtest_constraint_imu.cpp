@@ -892,7 +892,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 1.9999;
+        prc_odom3D_params->max_time_span = 0.9999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
         prc_odom3D_params->angle_turned = 1000000000;
@@ -926,25 +926,25 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         Eigen::Vector6s data_imu(Eigen::Vector6s::Zero()), data_odom3D(Eigen::Vector6s::Zero());
         Eigen::Vector3s rateOfTurn(Eigen::Vector3s::Zero()); //deg/s
 
-        Scalar dt(0.001), dt_odom(0.1);
-        TimeStamp ts(0);
-        TimeStamp t_odom(0);
+        Scalar dt(0.0010), dt_odom(1.0);
+        TimeStamp ts(0.0), t_odom(0.0);
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
         wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6);
-        
+        sen_odom3D->process(mot_ptr);
         //first odometry data will be processed at this timestamp
         t_odom.set(t_odom.get() + dt_odom);
+
         //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
 
-        while( ts.get() < 2 )
+        for(unsigned int i = 1; i<=1000; i++)
         {
             // PROCESS IMU DATA
             // Time and data variables
-            ts.set(ts.get() + dt);
+            ts.set(i*dt);
             
-            rateOfTurn = Eigen::Vector3s::Random()*10; //to have rate of turn > 0 deg/s
-            data_imu.tail(3) = rateOfTurn* M_PI/180.0;
-            data_imu.head(3) =  current_quatState.conjugate() * (- wolf::gravity()); //gravity measured, we have no other translation movement
+            rateOfTurn = Eigen::Vector3s::Random()*10; //to have rate of turn > 0.99 deg/s
+            data_imu.tail<3>() = rateOfTurn* M_PI/180.0;
+            data_imu.head<3>() =  current_quatState.conjugate() * (- wolf::gravity()); //gravity measured, we have no other translation movement
 
             //compute odometry + current orientaton taking this measure into account
             odom_quat = odom_quat * wolf::v2q(data_imu.tail(3)*dt);
@@ -956,11 +956,11 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
             imu_ptr->setData(data_imu);
             sen_imu->process(imu_ptr);
 
-            if(ts.get() == t_odom.get()) //every 100 ms
+            if(ts.get() >= t_odom.get())
             {
                 // PROCESS ODOM 3D DATA
                 data_odom3D.head(3) << 0,0,0;
-                data_odom3D.tail(6) = q2v(odom_quat);
+                data_odom3D.tail(3) = q2v(odom_quat);
                 mot_ptr->setTimeStamp(t_odom);
                 mot_ptr->setData(data_odom3D);
                 sen_odom3D->process(mot_ptr);
@@ -2594,18 +2594,26 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2_InvarP1Q1V1P2Q2V
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->fix();
 
+    //perturbation of origin bias
+    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.00001);
+    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
+    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
+    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
+    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+
     //wolf_problem_ptr_->print(4,1,1,1);
 
     ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    ceres_manager_wolf_diff->computeCovariances(ALL);
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
     //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*1000)
+    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*1000)
 
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*1000)
+    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*1000)
 }
 
 TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V2_InvarP1Q1V1P2Q2_initOK)
