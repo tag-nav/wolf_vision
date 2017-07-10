@@ -433,13 +433,13 @@ inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref,
     TimeStamp           t_sec       = _motion_second.ts_;
     Map<VectorXs>       dp_sec(_motion_second.delta_.data(), 3);
     Map<Quaternions>    dq_sec(_motion_second.delta_.data() + 3);
-    Map<VectorXs>       dv_sec(_motion_second.delta_.data(), 7);
+    Map<VectorXs>       dv_sec(_motion_second.delta_.data() + 7, 3);
 
     // interpolated
     Motion              motion_int  = motionZero(_ts);
     Map<VectorXs>       dp_int(motion_int.delta_.data(), 3);
     Map<Quaternions>    dq_int(motion_int.delta_.data() + 3);
-    Map<VectorXs>       dv_int(motion_int.delta_.data(), 7);
+    Map<VectorXs>       dv_int(motion_int.delta_.data() + 7, 3);
 
     // Jacobians for covariance propagation
     MatrixXs            J_ref(delta_cov_size_, delta_cov_size_);
