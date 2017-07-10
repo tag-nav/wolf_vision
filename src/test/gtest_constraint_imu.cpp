@@ -4527,6 +4527,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varQ1B1P2
 
     for(unsigned int i = 0; i<16; i++)
         assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
+
+    if(cov_stdev.tail(6).maxCoeff()>=1)
+        WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
 }
 
 TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varB1B2_invarP1Q1V1P2Q2V2)
@@ -4582,6 +4585,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK, varB1B2_i
 
     for(unsigned int i = 0; i<16; i++)
         assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
+
+    if(cov_stdev.tail(6).maxCoeff()>=1)
+        WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
 }
 
 TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varB1P2Q2V2B2_invarP1Q1V1)
@@ -4637,11 +4643,74 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varB1P2Q2V2B2
 
     for(unsigned int i = 0; i<16; i++)
         assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
+
+    if(cov_stdev.tail(6).maxCoeff()>=1)
+        WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
+}
+
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varQ1B1P2Q2B2_invarP1V1V2) // added a Fix3D constraint on 1st KF
+{
+    Eigen::MatrixXs featureFix_cov(6,6);
+    featureFix_cov = Eigen::MatrixXs::Identity(6,6); 
+    featureFix_cov(5,5) = 0.1;
+    CaptureBasePtr capfix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6));
+    FeatureBasePtr ffix = capfix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
+    ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(ffix->addConstraint(std::make_shared<ConstraintFix3D>(ffix)));
+
+    //prepare problem for solving
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->unfix();
+    origin_KF->getVPtr()->fix();
+
+    last_KF->getPPtr()->unfix();
+    last_KF->getOPtr()->unfix();
+    last_KF->getVPtr()->fix();
+
+    //perturbatte a little the bias of origin state
+    Eigen::VectorXs perturbated_origin_state(x_origin);
+    wolf::Scalar epsilon_bias = 0.0001;
+    Eigen::Vector6s err;
+
+    err = Eigen::Vector6s::Random() * epsilon_bias*10;
+    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
+    origin_KF->setState(perturbated_origin_state);
+    last_KF->setState(expected_final_state);
+
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+    ceres_manager_wolf_diff->computeCovariances(ALL);
+    std::cout << summary.BriefReport() << std::endl;
+
+    //wolf_problem_ptr_->print(4,1,1,1);
+
+    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), 0.005)
+    Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
+    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, 0.001)
+    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*1000)
+
+    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev, actual_state(last_KF->getState());
+    Eigen::MatrixXs covX(16,16);
+    Eigen::MatrixXs cov3(Eigen::Matrix3s::Zero()), cov4(Eigen::Matrix4s::Zero());
+        
+    //get data from covariance blocks
+    wolf_problem_ptr_->getFrameCovariance(last_KF, covX);
+
+    for(int i = 0; i<16; i++)
+        cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
+    
+    /*TEST_COUT << "2*std : " << cov_stdev.transpose();
+    TEST_COUT << "expect : " << expected_final_state.transpose(); //expected final state
+    TEST_COUT << "estim : " << last_KF->getState().transpose(); //estimated final state*/
+
+    for(unsigned int i = 0; i<16; i++)
+        assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
+
+    if(cov_stdev.tail(6).maxCoeff()>=1)
+        WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
 }
 
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot2.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK.varQ1B1P2Q2B2_invarP1V1V2";
   return RUN_ALL_TESTS();
 }
