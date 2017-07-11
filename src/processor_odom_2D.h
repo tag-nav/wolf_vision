@@ -105,7 +105,10 @@ inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eige
     J(1,1) =   _data(0) * cos(_data(1) / 2) / 2;
     J(2,1) =   1;
 
-    delta_cov_ = J * _data_cov * J.transpose();
+    if (getBuffer().get().size() > 2)
+      delta_cov_ = J * _data_cov * J.transpose();
+    else
+      delta_cov_ = J * _data_cov * J.transpose() + std::abs(0.0001*_data(0))*Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
 
     //std::cout << "data      :" << _data.transpose() << std::endl;
     //std::cout << "data cov  :" << std::endl << _data_cov << std::endl;
