@@ -91,6 +91,13 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
                                          SensorBasePtr _corresponding_sensor_ptr, //
                                          ProcessorParamsBasePtr _prc_params)
 {
+    if (_corresponding_sensor_ptr == nullptr)
+    {
+      WOLF_ERROR("Cannot install processor '", _unique_processor_name,
+                 "' since the associated sensor does not exist !");
+      return ProcessorBasePtr();
+    }
+
     ProcessorBasePtr prc_ptr = ProcessorFactory::get().create(uppercase(_prc_type), _unique_processor_name, _prc_params, _corresponding_sensor_ptr);
     _corresponding_sensor_ptr->addProcessor(prc_ptr);
 
