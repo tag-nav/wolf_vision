@@ -20,32 +20,6 @@
 namespace wolf {
 namespace internal {
 
-constexpr auto repeated_brace = std::make_tuple("{}",
-                                                "{}{}",
-                                                "{}{}{}",
-                                                "{}{}{}{}",
-                                                "{}{}{}{}{}",
-                                                "{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}",
-                                                "{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}{}"); // up to 25 args.
-
 class Logger : public Singleton<Logger>
 {
   friend class Singleton<Logger>;
@@ -63,19 +37,19 @@ public:
   void operator=(Logger&) = delete;
 
   template<typename... Args>
-  void info(Args&&... args);
+  void info(const Args&... args);
 
   template<typename... Args>
-  void warn(Args&&... args);
+  void warn(const Args&... args);
 
   template<typename... Args>
-  void error(Args&&... args);
+  void error(const Args&... args);
 
   template<typename... Args>
-  void debug(Args&&... args);
+  void debug(const Args&... args);
 
   template<typename... Args>
-  void trace(Args&&... args);
+  void trace(const Args&... args);
 
   bool set_async_queue(const std::size_t q_size);
 
@@ -84,6 +58,29 @@ protected:
   const std::string log_name_ = "wolf_main_console";
 
   std::shared_ptr<spdlog::logger> console_;
+
+  std::string repeat_string(const std::string &str, std::size_t n)
+  {
+    if (n == 0) return {};
+
+    if (n == 1 || str.empty()) return str;
+
+    const auto n_char = str.size();
+
+    if (n_char == 1) return std::string(n, str[0]);
+
+    std::string res(str);
+    res.reserve(n_char * n);
+
+    std::size_t m = 2;
+    for (; m <= n; m *= 2) res += res;
+
+    n -= m*.5;
+
+    res.append(res.c_str(), n * n_char);
+
+    return res;
+  }
 };
 
 inline Logger::Logger()
@@ -110,33 +107,33 @@ inline Logger::~Logger()
 }
 
 template<typename... Args>
-void Logger::info(Args&&... args)
+void Logger::info(const Args&... args)
 {
-  console_->info(std::get<sizeof...(args)-1>(repeated_brace), std::forward<Args>(args)...);
+  console_->info(repeat_string("{}", sizeof...(args)).c_str(), args...);
 }
 
 template<typename... Args>
-void Logger::warn(Args&&... args)
+void Logger::warn(const Args&... args)
 {
-  console_->warn(std::get<sizeof...(args)-1>(repeated_brace), std::forward<Args>(args)...);
+  console_->warn(repeat_string("{}", sizeof...(args)).c_str(), args...);
 }
 
 template<typename... Args>
-void Logger::error(Args&&... args)
+void Logger::error(const Args&... args)
 {
-  console_->error(std::get<sizeof...(args)-1>(repeated_brace), std::forward<Args>(args)...);
+  console_->error(repeat_string("{}", sizeof...(args)).c_str(), args...);
 }
 
 template<typename... Args>
-void Logger::debug(Args&&... args)
+void Logger::debug(const Args&... args)
 {
-  console_->debug(std::get<sizeof...(args)-1>(repeated_brace), std::forward<Args>(args)...);
+  console_->debug(repeat_string("{}", sizeof...(args)).c_str(), args...);
 }
 
 template<typename... Args>
-void Logger::trace(Args&&... args)
+void Logger::trace(const Args&... args)
 {
-  console_->trace(std::get<sizeof...(args)-1>(repeated_brace), std::forward<Args>(args)...);
+  console_->trace(repeat_string("{}", sizeof...(args)).c_str(), args...);
 }
 
 inline bool Logger::set_async_queue(const std::size_t q_size)
