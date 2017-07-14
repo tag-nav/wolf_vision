@@ -21,6 +21,7 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsOdom2D);
 struct ProcessorParamsOdom2D : public ProcessorParamsBase
 {
     Scalar dist_traveled_th_;
+    Scalar theta_traveled_th_;
     Scalar cov_det_th_;
     Scalar elapsed_time_th_;
 };
@@ -28,7 +29,8 @@ struct ProcessorParamsOdom2D : public ProcessorParamsBase
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:
-        ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th);
+        ProcessorOdom2D(const Scalar& _dist_traveled_th, const Scalar& _theta_traveled_th,
+                        const Scalar& _cov_det_th, const Scalar& _elapsed_time_th);
         virtual ~ProcessorOdom2D();
         virtual bool voteForKeyFrame();
 
@@ -61,6 +63,7 @@ class ProcessorOdom2D : public ProcessorMotion
 
     protected:
         Scalar dist_traveled_th_;
+        Scalar theta_traveled_th_;
         Scalar cov_det_th_;
         Scalar elapsed_time_th_;
 
@@ -69,9 +72,11 @@ class ProcessorOdom2D : public ProcessorMotion
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 };
 
-inline ProcessorOdom2D::ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th) :
+inline ProcessorOdom2D::ProcessorOdom2D(const Scalar& _dist_traveled_th, const Scalar& _theta_traveled_th,
+                                        const Scalar& _cov_det_th, const Scalar& _elapsed_time_th) :
         ProcessorMotion("ODOM 2D", 3, 3, 3, 2),
-        dist_traveled_th_(_traveled_dist_th),
+        dist_traveled_th_(_dist_traveled_th),
+        theta_traveled_th_(_theta_traveled_th),
         cov_det_th_(_cov_det_th),
         elapsed_time_th_(_elapsed_time_th)
 {
@@ -224,6 +229,13 @@ inline bool ProcessorOdom2D::voteForKeyFrame()
     // Distance criterion
     //std::cout << "ProcessorOdom2D::voteForKeyFrame: traveled distance " << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
     if (getBuffer().get().back().delta_integr_.head<2>().norm() > dist_traveled_th_)
+    {
+//        std::cout << "ProcessorOdom2D:: " << id() << " -  VOTE FOR KEY FRAME traveled distance "
+//                << getBuffer().get().back().delta_integr_.head<2>().norm() << std::endl;
+        return true;
+    }
+
+    if (/*std::abs*/(getBuffer().get().back().delta_integr_.tail<1>().norm()) > theta_traveled_th_)
     {
 //        std::cout << "ProcessorOdom2D:: " << id() << " -  VOTE FOR KEY FRAME traveled distance "
 //                << getBuffer().get().back().delta_integr_.head<2>().norm() << std::endl;
