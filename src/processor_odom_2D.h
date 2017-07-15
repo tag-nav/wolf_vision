@@ -23,12 +23,13 @@ struct ProcessorParamsOdom2D : public ProcessorParamsBase
     Scalar dist_traveled_th_;
     Scalar cov_det_th_;
     Scalar elapsed_time_th_;
+    Scalar unmeasured_perturbation_std_;
 };
 
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:
-        ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th);
+        ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th, const Scalar& _unmeasured_perturbation_std);
         virtual ~ProcessorOdom2D();
         virtual bool voteForKeyFrame();
 
@@ -63,17 +64,19 @@ class ProcessorOdom2D : public ProcessorMotion
         Scalar dist_traveled_th_;
         Scalar cov_det_th_;
         Scalar elapsed_time_th_;
+        Scalar unmeasured_perturbation_var_; ///< Variance to be added to the unmeasured perturbation
 
         // Factory method
     public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 };
 
-inline ProcessorOdom2D::ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th) :
+inline ProcessorOdom2D::ProcessorOdom2D(const Scalar& _traveled_dist_th, const Scalar& _cov_det_th, const Scalar& _elapsed_time_th, const Scalar& _unmeasured_perturbation_std) :
         ProcessorMotion("ODOM 2D", 3, 3, 3, 2),
         dist_traveled_th_(_traveled_dist_th),
         cov_det_th_(_cov_det_th),
-        elapsed_time_th_(_elapsed_time_th)
+        elapsed_time_th_(_elapsed_time_th),
+        unmeasured_perturbation_var_(_unmeasured_perturbation_std*_unmeasured_perturbation_std)
 {
     //
 }
@@ -105,10 +108,15 @@ inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eige
     J(1,1) =   _data(0) * cos(_data(1) / 2) / 2;
     J(2,1) =   1;
 
-    if (getBuffer().get().size() > 2)
-      delta_cov_ = J * _data_cov * J.transpose();
-    else
-      delta_cov_ = J * _data_cov * J.transpose() + std::abs(0.0001*_data(0))*Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
+//    if (getBuffer().get().size() > 2)
+//      delta_cov_ = J * _data_cov * J.transpose();
+//    else
+//      delta_cov_ = J * _data_cov * J.transpose() + std::abs(unmeasured_perturbation_var_*_data(0))*Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
+
+    // Since input data is size 2, and delta is size 3, the noise model must be given by:
+    // 1. Covariance of the input data:  J*Q*J.tr
+    // 2. Fix variance term to be added: var*Id
+    delta_cov_ = J * _data_cov * J.transpose() + unmeasured_perturbation_var_*Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
 
     //std::cout << "data      :" << _data.transpose() << std::endl;
     //std::cout << "data cov  :" << std::endl << _data_cov << std::endl;
