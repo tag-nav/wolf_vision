@@ -199,7 +199,6 @@ SET(HDRS
     constraint_container.h
     constraint_corner_2D.h
     constraint_epipolar.h
-    constraint_AHP.h
     constraint_imu.h
     constraint_fix.h
     constraint_fix_3D.h
@@ -222,7 +221,6 @@ SET(HDRS
     frame_imu.h
     landmark_corner_2D.h
     landmark_container.h
-    landmark_point_3d.h
     landmark_line_2D.h
     landmark_polyline_2D.h
     local_parametrization_polyline_extreme.h
@@ -291,7 +289,6 @@ SET(SRCS
     frame_imu.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
-    landmark_point_3d.cpp
     landmark_line_2D.cpp
     landmark_polyline_2D.cpp
     local_parametrization_polyline_extreme.cpp
@@ -373,8 +370,10 @@ IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         active_search.h
         capture_image.h
+        constraint_AHP.h
         feature_point_image.h
         landmark_AHP.h
+        landmark_point_3d.h
         processor_image_feature.h
         processor_image_landmark.h
         )
@@ -383,6 +382,7 @@ IF (OpenCV_FOUND)
         capture_image.cpp
         feature_point_image.cpp
         landmark_AHP.cpp
+        landmark_point_3d.cpp
         processor_image_feature.cpp
         processor_image_landmark.cpp
         )
@@ -401,7 +401,6 @@ IF(YAMLCPP_FOUND)
 
     # sources
     SET(SRCS ${SRCS}
-        yaml/processor_image_yaml.cpp
         yaml/processor_odom_3D_yaml.cpp
         yaml/sensor_camera_yaml.cpp
         yaml/sensor_odom_3D_yaml.cpp
@@ -411,6 +410,11 @@ IF(YAMLCPP_FOUND)
             yaml/sensor_laser_2D_yaml.cpp
             )
     ENDIF(laser_scan_utils_FOUND)
+    IF(OpenCV_FOUND)
+        SET(SRCS ${SRCS}
+            yaml/processor_image_yaml.cpp
+            )
+    ENDIF(OpenCV_FOUND)
 ENDIF(YAMLCPP_FOUND)
 
 # create the shared library
