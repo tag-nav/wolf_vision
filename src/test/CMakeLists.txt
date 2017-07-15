@@ -111,6 +111,7 @@ wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
 target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
 
 # ROI test
-wolf_add_gtest(gtest_roi_ORB gtest_roi_ORB.cpp)
-target_link_libraries(gtest_roi_ORB ${PROJECT_NAME})
-
+IF(OpenCV_FOUND)
+  wolf_add_gtest(gtest_roi_ORB gtest_roi_ORB.cpp)
+  target_link_libraries(gtest_roi_ORB ${PROJECT_NAME})
+ENDIF(OpenCV_FOUND)

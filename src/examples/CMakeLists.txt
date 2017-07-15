@@ -137,8 +137,10 @@ ENDIF(OpenCV_FOUND)
 
 IF(Ceres_FOUND)
     # Simple AHP test
-    ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
-    TARGET_LINK_LIBRARIES(test_simple_AHP ${PROJECT_NAME})
+    IF(OpenCV_FOUND)
+      ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
+      TARGET_LINK_LIBRARIES(test_simple_AHP ${PROJECT_NAME})
+    ENDIF(OpenCV_FOUND)
 ENDIF(Ceres_FOUND)
 
 # Processor Tracker Feature test
