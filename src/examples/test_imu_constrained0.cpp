@@ -85,7 +85,7 @@ int main(int argc, char** argv)
     std::string wolf_root = _WOLF_ROOT_DIR;
         
     // WOLF PROBLEM
-    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+    ProblemPtr wolf_problem_ptr_ = Problem::create("PQVBB 3D");
     Eigen::VectorXs x_origin(16);
     Eigen::Vector6s origin_bias;
     x_origin << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; //INITIAL CONDITIONS    0.05,0.03,.00,  0.2,-0.05,.00;

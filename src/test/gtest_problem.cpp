@@ -20,7 +20,7 @@ using namespace Eigen;
 
 TEST(Problem, create)
 {
-    ProblemPtr P = Problem::create(FRM_PQVBB_3D);
+    ProblemPtr P = Problem::create("PQVBB 3D");
 
     // check double ointers to branches
     ASSERT_EQ(P, P->getHardwarePtr()->getProblem());
@@ -33,7 +33,7 @@ TEST(Problem, create)
 
 TEST(Problem, Sensors)
 {
-    ProblemPtr P = Problem::create(FRM_PQVBB_3D);
+    ProblemPtr P = Problem::create("PQVBB 3D");
 
     // add a dummy sensor
     SensorBasePtr S = std::make_shared<SensorBase>("Dummy", nullptr, nullptr, nullptr, 2, false);
@@ -47,7 +47,7 @@ TEST(Problem, Sensors)
 
 TEST(Problem, Processor)
 {
-    ProblemPtr P = Problem::create(FRM_PO_3D);
+    ProblemPtr P = Problem::create("PO 3D");
 
     // check motion processor is null
     ASSERT_FALSE(P->getProcessorMotionPtr());
@@ -72,7 +72,7 @@ TEST(Problem, Processor)
 TEST(Problem, Installers)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
-    ProblemPtr P = Problem::create(FRM_PO_3D);
+    ProblemPtr P = Problem::create("PO 3D");
     Eigen::Vector7s xs;
 
     SensorBasePtr    S = P->installSensor   ("ODOM 3D", "odometer",        xs,         wolf_root + "/src/examples/sensor_odom_3D.yaml");
@@ -95,7 +95,7 @@ TEST(Problem, Installers)
 
 TEST(Problem, SetOrigin_PO_2D)
 {
-    ProblemPtr P = Problem::create(FRM_PO_2D);
+    ProblemPtr P = Problem::create("PO 2D");
     TimeStamp       t0(0);
     Eigen::VectorXs x0(3); x0 << 1,2,3;
     Eigen::MatrixXs P0(3,3); P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
@@ -134,7 +134,7 @@ TEST(Problem, SetOrigin_PO_2D)
 
 TEST(Problem, SetOrigin_PO_3D)
 {
-    ProblemPtr P = Problem::create(FRM_PO_3D);
+    ProblemPtr P = Problem::create("PO 3D");
     TimeStamp       t0(0);
     Eigen::VectorXs x0(7); x0 << 1,2,3,4,5,6,7;
     Eigen::MatrixXs P0(6,6); P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
@@ -174,7 +174,7 @@ TEST(Problem, SetOrigin_PO_3D)
 
 TEST(Problem, emplaceFrame_factory)
 {
-    ProblemPtr P = Problem::create(FRM_PO_2D);
+    ProblemPtr P = Problem::create("PO 2D");
 
     FrameBasePtr f0 = P->emplaceFrame("PO 2D",    KEY_FRAME, VectorXs(3),  TimeStamp(0.0));
     FrameBasePtr f1 = P->emplaceFrame("PO 3D",    KEY_FRAME, VectorXs(7),  TimeStamp(1.0));
@@ -210,7 +210,7 @@ TEST(Problem, StateBlocks)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
 
-    ProblemPtr P = Problem::create(FRM_PO_3D);
+    ProblemPtr P = Problem::create("PO 3D");
     Eigen::Vector7s xs;
 
     // 2 state blocks, fixed
@@ -246,7 +246,7 @@ TEST(Problem, Covariances)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
 
-    ProblemPtr P = Problem::create(FRM_PO_3D);
+    ProblemPtr P = Problem::create("PO 3D");
     Eigen::Vector7s xs;
 
     SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");

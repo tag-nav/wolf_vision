@@ -27,7 +27,7 @@ std::string uppercase(std::string s) {for (auto & c: s) c = std::toupper(c); ret
 }
 
 
-Problem::Problem(FrameStructure _frame_structure) :
+Problem::Problem(const std::string& _frame_structure) :
         hardware_ptr_(std::make_shared<HardwareBase>()),
         trajectory_ptr_(std::make_shared<TrajectoryBase>(_frame_structure)),
         map_ptr_(std::make_shared<MapBase>()),
@@ -44,7 +44,7 @@ void Problem::setup()
     map_ptr_->setProblem(shared_from_this());
 }
 
-ProblemPtr Problem::create(FrameStructure _frame_structure)
+ProblemPtr Problem::create(const std::string& _frame_structure)
 {
     ProblemPtr p(new Problem(_frame_structure)); // We use `new` and not `make_shared` since the Problem constructor is private and cannot be passes to `make_shared`.
     p->setup();
@@ -178,53 +178,6 @@ void Problem::clearProcessorMotion()
     processor_motion_ptr_.reset();
 }
 
-FrameBasePtr Problem::emplaceFrame(FrameType _frame_type, const TimeStamp& _time_stamp)
-{
-    return emplaceFrame(_frame_type, getState(_time_stamp), _time_stamp);
-}
-
-FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state,
-                                const TimeStamp& _time_stamp)
-{
-    assert(_frame_state.size() == getFrameStructureSize() && "Wrong state vector size");
-
-    //std::cout << "Problem::createFrame" << std::endl;
-    // ---------------------- CREATE NEW FRAME ---------------------
-    // Create frame
-    switch (trajectory_ptr_->getFrameStructure())
-    {
-        case FRM_PO_2D:
-        {
-            assert(_frame_state.size() == 3 && "Wrong state vector size. Use 3 for 2D pose.");
-            return trajectory_ptr_->addFrame(FrameBase::create_PO_2D(_frame_key_type, _time_stamp, _frame_state));
-//            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, std::make_shared<StateBlock>(_frame_state.head(2)),
-//                                  std::make_shared<StateBlock>(_frame_state.tail(1))));
-        }
-        case FRM_PO_3D:
-        {
-            assert(_frame_state.size() == 7 && "Wrong state vector size. Use 7 for 3D pose.");
-            return trajectory_ptr_->addFrame(FrameBase::create_PO_3D(_frame_key_type, _time_stamp, _frame_state));
-//           return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, std::make_shared<StateBlock>(_frame_state.head(3)),
-//                                  std::make_shared<StateQuaternion>(_frame_state.tail(4))));
-        }
-        case FRM_POV_3D:
-        {
-            assert(_frame_state.size() == 10 && "Wrong state vector size. Use 10 for 3D pose and velocity.");
-            return trajectory_ptr_->addFrame(FrameBase::create_POV_3D(_frame_key_type, _time_stamp, _frame_state));
-//            return trajectory_ptr_->addFrame(std::make_shared<FrameBase>(_frame_key_type, _time_stamp, std::make_shared<StateBlock>(_frame_state.head(3)),
-//                                  std::make_shared<StateQuaternion>(_frame_state.segment<4>(3)),
-//                                  std::make_shared<StateBlock>(_frame_state.tail(3))));
-        }
-        case FRM_PQVBB_3D:
-        {
-            assert(_frame_state.size() == 16 && "Wrong state vector size. Use 16 for 3D pose, velocity, and IMU biases.");
-            return trajectory_ptr_->addFrame(std::make_shared<FrameIMU>(_frame_key_type, _time_stamp, _frame_state));
-        }
-        default:
-            throw std::runtime_error(
-                    "Unknown frame structure. Add appropriate frame structure to the switch statement.");
-    }
-}
 
 FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, FrameType _frame_key_type,
                                    const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
@@ -234,6 +187,20 @@ FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, FrameTyp
     return frm;
 }
 
+FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, FrameType _frame_key_type, const TimeStamp& _time_stamp)
+{
+    return emplaceFrame(_frame_structure, _frame_key_type, getState(_time_stamp), _time_stamp);
+}
+
+FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
+{
+    return emplaceFrame(trajectory_ptr_->getFrameStructure(), _frame_key_type, _frame_state, _time_stamp);
+}
+
+FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, const TimeStamp& _time_stamp)
+{
+    return emplaceFrame(trajectory_ptr_->getFrameStructure(), _frame_key_type, _time_stamp);
+}
 
 Eigen::VectorXs Problem::getCurrentState()
 {
@@ -306,42 +273,43 @@ Eigen::VectorXs Problem::getState(const TimeStamp& _ts)
 
 Size Problem::getFrameStructureSize() const
 {
-    switch (trajectory_ptr_->getFrameStructure())
-    {
-        case FRM_PO_2D:
-            return 3;
-        case FRM_PO_3D:
-            return 7;
-        case FRM_POV_3D:
-            return 10;
-        case FRM_PQVBB_3D:
-            return 16;
-        default:
-            throw std::runtime_error(
-                    "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
-    }
+    if (trajectory_ptr_->getFrameStructure() == "PO 2D")
+        return 3;
+    if (trajectory_ptr_->getFrameStructure() == "PO 3D")
+        return 7;
+    if (trajectory_ptr_->getFrameStructure() == "POV 3D")
+        return 10;
+    if (trajectory_ptr_->getFrameStructure() == "PQVBB 3D")
+        return 16;
+    throw std::runtime_error(
+            "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
 }
 
 void Problem::getFrameStructureSize(Size& _x_size, Size& _cov_size) const
 {
-    switch (trajectory_ptr_->getFrameStructure())
+    if (trajectory_ptr_->getFrameStructure() == "PO 2D")
     {
-        case FRM_PO_2D:
-            _x_size = 3; _cov_size = 3;
-            break;
-        case FRM_PO_3D:
-            _x_size = 7; _cov_size = 6;
-            break;
-        case FRM_POV_3D:
-            _x_size = 10; _cov_size = 10;
-            break;
-        case FRM_PQVBB_3D:
-            _x_size = 16; _cov_size = 15;
-            break;
-        default:
-            throw std::runtime_error(
-                    "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
+        _x_size = 3;
+        _cov_size = 3;
     }
+    else if (trajectory_ptr_->getFrameStructure() == "PO 3D")
+    {
+        _x_size = 7;
+        _cov_size = 6;
+    }
+    else if (trajectory_ptr_->getFrameStructure() == "POV 3D")
+    {
+        _x_size = 10;
+        _cov_size = 10;
+    }
+    else if (trajectory_ptr_->getFrameStructure() == "PQVBB 3D")
+    {
+        _x_size = 16;
+        _cov_size = 15;
+    }
+    else
+        throw std::runtime_error(
+                    "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
 }
 
 Eigen::VectorXs Problem::zeroState()
@@ -349,18 +317,10 @@ Eigen::VectorXs Problem::zeroState()
     Eigen::VectorXs state = Eigen::VectorXs::Zero(getFrameStructureSize());
 
     // Set the quaternion identity for 3D states. Set only the real part to 1:
-    switch (trajectory_ptr_->getFrameStructure())
-    {
-        case FRM_PO_2D:
-            break;
-        case FRM_PO_3D:
-        case FRM_POV_3D:
-        case FRM_PQVBB_3D:
-            state(6) = 1.0;
-            break;
-        default:
-            break;
-    }
+    if (trajectory_ptr_->getFrameStructure() == "PO 3D" ||
+        trajectory_ptr_->getFrameStructure() == "POV 3D"||
+        trajectory_ptr_->getFrameStructure() == "PQVBB 3D")
+        state(6) = 1.0;
 
     return state;
 }
@@ -607,7 +567,7 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
         // create origin capture with the given state as data
         // Capture fix only takes 3D position and Quaternion orientation
         CaptureFixPtr init_capture;
-        if ((trajectory_ptr_->getFrameStructure() == FRM_PQVBB_3D) || (trajectory_ptr_->getFrameStructure() == FRM_POV_3D) )
+        if ((trajectory_ptr_->getFrameStructure() == "PQVBB 3D") || (trajectory_ptr_->getFrameStructure() == "POV 3D") )
             init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state.head(7), _prior_cov);
         else
             init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state, _prior_cov);

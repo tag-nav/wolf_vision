@@ -46,7 +46,7 @@ class ProcessorIMUt : public testing::Test
         std::string wolf_root = _WOLF_ROOT_DIR;
 
         // Wolf problem
-        problem = Problem::create(FRM_PQVBB_3D);
+        problem = Problem::create("PQVBB 3D");
         Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
         sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
         ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
@@ -103,7 +103,7 @@ TEST(ProcessorIMU_constructors, ALL)
 
     //Factory constructor without yaml
     std::string wolf_root = _WOLF_ROOT_DIR;
-    ProblemPtr problem = Problem::create(FRM_PQVBB_3D);
+    ProblemPtr problem = Problem::create("PQVBB 3D");
     Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
     SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics, wolf_root + "/src/examples/sensor_imu.yaml");
     ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
@@ -132,7 +132,7 @@ TEST(ProcessorIMU, voteForKeyFrame)
     std::string wolf_root = _WOLF_ROOT_DIR;
 
     // Wolf problem
-    ProblemPtr problem = Problem::create(FRM_PQVBB_3D);
+    ProblemPtr problem = Problem::create("PQVBB 3D");
     Eigen::Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
     SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
     ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();

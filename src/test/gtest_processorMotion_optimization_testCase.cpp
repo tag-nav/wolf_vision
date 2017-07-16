@@ -65,7 +65,7 @@ class ProcessorIMU_Odom_tests : public testing::Test
         ASSERT_TRUE(number_of_KF>0) << "number_of_KF (number of Keyframe created) must be int >0";
 
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
         Eigen::VectorXs x0(16);
         x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
         t.set(0);
@@ -159,7 +159,7 @@ class ProcessorIMU_Odom_tests_details : public testing::Test
         ASSERT_TRUE(number_of_KF>0) << "number_of_KF (number of Keyframe created) must be int >0";
 
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
         Eigen::VectorXs x0(16);
         x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
         TimeStamp t(0);
@@ -310,7 +310,7 @@ class ProcessorIMU_Odom_tests_details3KF : public testing::Test
         ASSERT_TRUE(number_of_KF>0) << "number_of_KF (number of Keyframe created) must be int >0";
 
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
         Eigen::VectorXs x0(16);
         x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
         TimeStamp t(0);
@@ -461,7 +461,7 @@ class ProcessorIMU_Odom_tests_plateform_simulation : public testing::Test
         ASSERT_TRUE(number_of_KF>0) << "number_of_KF (number of Keyframe created) must be int >0";
 
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
         Eigen::VectorXs x0(16);
         x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.00,  0,0,.00;
         t.set(0);
@@ -615,7 +615,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_Odom_PO)
     std::string wolf_root = _WOLF_ROOT_DIR;
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
+    ProblemPtr wolf_problem_ptr_ = Problem::create("PO 3D");
 
     SensorBasePtr sen = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
 
@@ -683,7 +683,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_PO)
     std::string wolf_root = _WOLF_ROOT_DIR;
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PO_3D);
+    ProblemPtr wolf_problem_ptr_ = Problem::create("PO 3D");
 
     SensorBasePtr sen = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
 
@@ -885,7 +885,7 @@ TEST(ProcessorOdom3D, static_ceresOptimisation_convergenceOdom_POV)
     std::string wolf_root = _WOLF_ROOT_DIR;
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_POV_3D);
+    ProblemPtr wolf_problem_ptr_ = Problem::create("POV 3D");
     Eigen::VectorXs x0(10);
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
     TimeStamp t(0);
@@ -1089,7 +1089,7 @@ TEST(ProcessorIMU, static_ceresOptimisation_fixBias)
     std::string wolf_root = _WOLF_ROOT_DIR;
 
     // Wolf problem
-    ProblemPtr wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+    ProblemPtr wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
     SensorBasePtr sen_imu = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
 

@@ -62,7 +62,7 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
 
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -147,7 +147,7 @@ class ConstraintIMU_biasTest_Static_NonNullAccBias : public testing::Test
 
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -232,7 +232,7 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
 
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -318,7 +318,7 @@ class ConstraintIMU_biasTest_Static_NonNullBias : public testing::Test
 
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -403,7 +403,7 @@ class ConstraintIMU_biasTest_Move_NullBias : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -492,7 +492,7 @@ class ConstraintIMU_biasTest_Move_NonNullBias : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -577,7 +577,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -671,7 +671,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -773,7 +773,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -874,7 +874,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -1010,7 +1010,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot2 : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -1149,7 +1149,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -1284,7 +1284,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -1484,7 +1484,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -1643,7 +1643,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK : public testin
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -1802,7 +1802,7 @@ class ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK : public te
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -1961,7 +1961,7 @@ class ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK : public testin
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;

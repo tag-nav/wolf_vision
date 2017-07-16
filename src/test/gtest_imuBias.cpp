@@ -64,7 +64,7 @@ class ProcessorIMU_Bias : public testing::Test
         std::string wolf_root = _WOLF_ROOT_DIR;
 
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
         t.set(0);
 
         // CERES WRAPPER
@@ -137,7 +137,7 @@ class ProcessorIMU_Bias_LowQualityOdom : public testing::Test
         std::string wolf_root = _WOLF_ROOT_DIR;
 
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -206,7 +206,7 @@ class ProcessorIMU_Real : public testing::Test
         std::string wolf_root = _WOLF_ROOT_DIR;
 
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -342,7 +342,7 @@ class ProcessorIMU_Real_CaptureFix : public testing::Test
         std::string wolf_root = _WOLF_ROOT_DIR;
 
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -485,7 +485,7 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         std::string wolf_root = _WOLF_ROOT_DIR;
 
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create(FRM_PQVBB_3D);
+        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;

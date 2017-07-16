@@ -11,10 +11,13 @@ CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Option
     use_wolf_auto_diff_(_use_wolf_auto_diff)
 {
     ceres::Covariance::Options covariance_options;
-    #if CERES_VERSION_MINOR >= 10
+    #if CERES_VERSION_MINOR >= 13
     covariance_options.algorithm_type = ceres::SPARSE_QR;//ceres::DENSE_SVD;
-    #else
+    covariance_options.sparse_linear_algebra_library_type = ceres::SUITE_SPARSE;
+    #elif CERES_VERSION_MINOR >= 10
     covariance_options.algorithm_type = ceres::SUITE_SPARSE_QR;//ceres::DENSE_SVD;
+    #else
+    covariance_options.algorithm_type = ceres::SPARSE_QR;//ceres::DENSE_SVD;
     #endif
     covariance_options.num_threads = 8;
     covariance_options.apply_loss_function = false;

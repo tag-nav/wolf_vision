@@ -28,7 +28,7 @@ Matrix3s data_cov = data_var.asDiagonal();
 Vector3s x0 = pose + Vector3s::Random()*0.25;
 
 // Problem and solver
-ProblemPtr problem = Problem::create(FRM_PO_2D);
+ProblemPtr problem = Problem::create("PO 2D");
 CeresManager ceres_mgr(problem);
 
 // Two frames
