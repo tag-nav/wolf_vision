@@ -512,7 +512,7 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 1.99999;
+        prc_odom3D_params->max_time_span = 0.49999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
         prc_odom3D_params->angle_turned = 1000000000;
@@ -525,8 +525,8 @@ class ProcessorIMU_Real_CaptureFix_odom : public testing::Test
 
         char* imu_filepath;
         char * odom_filepath;
-        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_testPattern3.txt");  //imu_Bias_all15s.txt, imu_15sAll, imu_static15s; imuTest1Complex; imu1Rotation
-        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_testPattern3.txt"); //odom_testPattern3_biased
+        std::string imu_filepath_string(wolf_root + "/src/test/data/IMU/imu_testPatternRot.txt");  //imu_testPattern3, imu_testPattern3_biased
+        std::string odom_filepath_string(wolf_root + "/src/test/data/IMU/odom_testPatternRot.txt"); //odom_testPattern3_biased,
         imu_filepath   = new char[imu_filepath_string.length() + 1];
         odom_filepath   = new char[odom_filepath_string.length() + 1];
         std::strcpy(imu_filepath, imu_filepath_string.c_str());
@@ -1598,7 +1598,7 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
     // give it a big small covariance on yaw and big on the other parts of the diagonal.
     // This is needed to make the problem observable, otherwise the jacobian would be rank deficient -> cannot compute covariances
 
-    //expected_origin_state.tail(6) << 0,0,0, 0,0,0;
+    expected_origin_state.tail(6) << 0,0,0, 0,0,0;
 
     Eigen::MatrixXs featureFix_cov(6,6);
     featureFix_cov = Eigen::MatrixXs::Identity(6,6); 
@@ -1611,7 +1611,7 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
     Eigen::MatrixXs featureFixBias_cov(6,6);
     featureFixBias_cov = Eigen::MatrixXs::Identity(6,6); 
     featureFixBias_cov.topLeftCorner(3,3) *= 0.0007;        // sqrt(0.0007) = 0.0265 m/s2
-    featureFixBias_cov.bottomRightCorner(3,3) *= 0.000025;  // sart(0.0007) = 0.005 rad/s
+    featureFixBias_cov.bottomRightCorner(3,3) *= 0.0007;  // sart(0.0007) = 0.005 rad/s
     CaptureBasePtr capfixbias = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), featureFixBias_cov, 6, 6));
     //create a FeatureBase to constraint biases
     FeatureBasePtr ffixbias = capfixbias->addFeature(std::make_shared<FeatureBase>("FIX BIAS", (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), featureFixBias_cov));
@@ -1621,7 +1621,7 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
     origin_KF->getPPtr()->fix();
     origin_KF->getVPtr()->fix();
     origin_KF->getOPtr()->unfix();
-    origin_KF->getAccBiasPtr()->fix();
+    origin_KF->getAccBiasPtr()->unfix();
     last_KF->getPPtr()->unfix();
     last_KF->getOPtr()->unfix();
     last_KF->getVPtr()->fix();
@@ -1630,11 +1630,11 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
     FrameBaseList frameList = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList();
 
     //Fix velocity to [0 0 0] in all frames
-    /*for(auto frame : frameList)
+    for(auto frame : frameList)
     {
         frame->getVPtr()->setState((Eigen::Vector3s()<<0,0,0).finished());
         frame->getVPtr()->fix();
-    }*/
+    }
 
     //vary the covariance in odometry position displacement + solve + output result
     for (wolf::Scalar p_var = 0.000001; p_var <= 0.04; p_var=p_var*10)
@@ -1660,9 +1660,9 @@ TEST_F(ProcessorIMU_Real_CaptureFix_odom,M1_VarQ1B1P2Q2B2_InvarP1V1V2_initOK_Con
         //reset origin to its initial value (value it had before solving any problem) for the new solve + perturbate
         Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.0001);
         origin_KF->setState(expected_origin_state);
-        //Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
+        Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
         Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-        //origin_KF->getAccBiasPtr()->setState(accBias + random_err);
+        origin_KF->getAccBiasPtr()->setState(accBias + random_err);
         origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
         
         wolf_problem_ptr_->print(4,0,1,0);
