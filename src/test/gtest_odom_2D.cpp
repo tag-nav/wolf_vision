@@ -198,7 +198,7 @@ TEST(Odom2D, VoteForKfAndSolve)
     params->theta_traveled_th_  = 6.28;
     params->elapsed_time_th_    = 2.5*dt; // force KF at every third process()
     params->cov_det_th_         = 100;
-    params->unmeasured_perturbation_std_ = 0.01;
+    params->unmeasured_perturbation_std_ = 0.001;
     Matrix3s unmeasured_cov = params->unmeasured_perturbation_std_*params->unmeasured_perturbation_std_*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
@@ -318,7 +318,7 @@ TEST(Odom2D, KF_callback)
     params->theta_traveled_th_  = 6.28;
     params->elapsed_time_th_    = 100;
     params->cov_det_th_         = 100;
-    params->unmeasured_perturbation_std_ = 0.01;
+    params->unmeasured_perturbation_std_ = 0.001;
     Matrix3s unmeasured_cov = params->unmeasured_perturbation_std_*params->unmeasured_perturbation_std_*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);

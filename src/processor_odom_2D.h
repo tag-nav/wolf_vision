@@ -30,11 +30,11 @@ struct ProcessorParamsOdom2D : public ProcessorParamsBase
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:
-        ProcessorOdom2D(const Scalar& _traveled_dist_th = 1.0,
-                        const Scalar& _theta_traveled_th = 0.17,
-                        const Scalar& _cov_det_th = 1.0,
-                        const Scalar& _elapsed_time_th = 1.0,
-                        const Scalar& _unmeasured_perturbation_std = 1e-2);
+        ProcessorOdom2D(const Scalar& _traveled_dist_th             = 1.0,
+                        const Scalar& _theta_traveled_th            = 0.17,
+                        const Scalar& _cov_det_th                   = 1.0,
+                        const Scalar& _elapsed_time_th              = 1.0,
+                        const Scalar& _unmeasured_perturbation_std  = 0.001);
         virtual ~ProcessorOdom2D();
         virtual bool voteForKeyFrame();
 
