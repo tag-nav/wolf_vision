@@ -64,7 +64,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
         Scalar closest_dm2 = 1e3;
         for (auto landmark_it = not_matched_landmarks.begin(); landmark_it != not_matched_landmarks.end(); landmark_it++)
         {
-            if ((*landmark_it)->getType() == "CORNER" &&
+            if ((*landmark_it)->getType() == "CORNER 2D" &&
                 fabs(pi2pi((std::static_pointer_cast<FeatureCorner2D>(*feature_it))->getAperture() - (*landmark_it)->getDescriptor(0))) < aperture_error_th_)
             {
                 dm2 = computeSquaredMahalanobisDistances((*feature_it), expected_features[*landmark_it],
@@ -128,7 +128,7 @@ unsigned int ProcessorTrackerLandmarkCorner::findLandmarks(const LandmarkBaseLis
             for (auto landmark_it = _landmarks_corner_searched.begin(); landmark_it != _landmarks_corner_searched.end();
                     landmark_it++, jj++)
             {
-                if ((*landmark_it)->getType() == "CORNER")
+                if ((*landmark_it)->getType() == "CORNER 2D")
                 {
                     landmarks_map[jj] = landmark_it;
                     landmarks_index_map[jj] = 0;

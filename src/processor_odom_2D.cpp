@@ -4,25 +4,28 @@ namespace wolf
 
 ProcessorBasePtr ProcessorOdom2D::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr)
 {
-    Scalar dist_traveled_th ;
-    Scalar cov_det_th       ;
-    Scalar elapsed_time_th  ;
+
+    ProcessorOdom2DPtr prc_ptr;
+
     if (_params)
     {
         std::shared_ptr<ProcessorParamsOdom2D> params = std::static_pointer_cast<ProcessorParamsOdom2D>(_params);
-        dist_traveled_th = params->dist_traveled_th_;
-        cov_det_th       = params->cov_det_th_;
-        elapsed_time_th  = params->elapsed_time_th_;
+
+        prc_ptr = std::make_shared<ProcessorOdom2D>(params->dist_traveled_th_,
+                                                    params->theta_traveled_th_,
+                                                    params->cov_det_th_,
+                                                    params->elapsed_time_th_,
+                                                    params->unmeasured_perturbation_std_);
     }
     else
     {
-        std::cout << __FILE__ << ":" << __FUNCTION__ << "() : No parameters provided. Using dummy set." << std::endl;
-        dist_traveled_th = 1;
-        cov_det_th       = 1;
-        elapsed_time_th  = 1;
+        std::cout << __FILE__ << ":" << __FUNCTION__ << "() : No parameters provided. Using default set." << std::endl;
+
+        prc_ptr = std::make_shared<ProcessorOdom2D>();
     }
-    ProcessorOdom2DPtr prc_ptr = std::make_shared<ProcessorOdom2D>(dist_traveled_th, cov_det_th, elapsed_time_th);
+
     prc_ptr->setName(_unique_name);
+
     return prc_ptr;
 }
 

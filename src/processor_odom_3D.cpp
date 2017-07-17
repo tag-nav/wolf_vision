@@ -139,7 +139,7 @@ void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen
     q_out_ = q1_ * q2_;
 }
 
-void ProcessorOdom3D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
+void ProcessorOdom3D::statePlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
                                  Eigen::VectorXs& _x_plus_delta)
 {   
     assert(_x.size() >= x_size_ && "Wrong _x vector size"); //we need a state vector which size is at least x_size_

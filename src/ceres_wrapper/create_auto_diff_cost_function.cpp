@@ -21,7 +21,11 @@
 #include "../constraint_point_2D.h"
 #include "../constraint_point_to_line_2D.h"
 #include "../constraint_container.h"
-#include "../constraint_AHP.h"
+
+#ifdef CV_VERSION
+  #include "../constraint_AHP.h"
+#endif
+
 #include "../constraint_imu.h"
 
 // Wolf and ceres auto_diff creators
@@ -105,7 +109,7 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBasePtr _ctr_ptr, bool
             	return createAutoDiffCostFunctionWrapper<ConstraintPointToLine2D>(_ctr_ptr);
             else
                 return createAutoDiffCostFunctionCeres<ConstraintPointToLine2D>(_ctr_ptr);
-
+#ifdef CV_VERSION
         case CTR_EPIPOLAR:
             if (_use_wolf_autodiff)
                 return createAutoDiffCostFunctionWrapper<ConstraintAHP>(_ctr_ptr);
@@ -117,7 +121,7 @@ ceres::CostFunction* createAutoDiffCostFunction(ConstraintBasePtr _ctr_ptr, bool
                 return createAutoDiffCostFunctionWrapper<ConstraintAHP>(_ctr_ptr);
             else
                 return createAutoDiffCostFunctionCeres<ConstraintAHP>(_ctr_ptr);
-
+#endif
         case CTR_IMU:
             if (_use_wolf_autodiff)
                 return createAutoDiffCostFunctionWrapper<ConstraintIMU>(_ctr_ptr);

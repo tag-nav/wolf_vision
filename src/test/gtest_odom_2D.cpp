@@ -195,8 +195,11 @@ TEST(Odom2D, VoteForKfAndSolve)
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
     params->dist_traveled_th_   = 100;
+    params->theta_traveled_th_  = 6.28;
     params->elapsed_time_th_    = 2.5*dt; // force KF at every third process()
     params->cov_det_th_         = 100;
+    params->unmeasured_perturbation_std_ = 0.001;
+    Matrix3s unmeasured_cov = params->unmeasured_perturbation_std_*params->unmeasured_perturbation_std_*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
 
@@ -256,7 +259,7 @@ TEST(Odom2D, VoteForKfAndSolve)
             Ju = plus_jac_u(integrated_delta, data);
             Jx = plus_jac_x(integrated_delta, data);
             integrated_delta = plus(integrated_delta, data);
-            integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
+            integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose() + unmeasured_cov;
         }
 
         ASSERT_POSE2D_APPROX(processor_odom2d->getMotion().delta_integr_, integrated_delta, 1e-6);
@@ -266,7 +269,7 @@ TEST(Odom2D, VoteForKfAndSolve)
         Ju = plus_jac_u(integrated_pose, data);
         Jx = plus_jac_x(integrated_pose, data);
         integrated_pose = plus(integrated_pose, data);
-        integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
+        integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose() + unmeasured_cov;
 
         ASSERT_POSE2D_APPROX(processor_odom2d->getCurrentState(), integrated_pose, 1e-6);
 
@@ -311,9 +314,12 @@ TEST(Odom2D, KF_callback)
     ProblemPtr problem = Problem::create("PO 2D");
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
-    params->dist_traveled_th_   = 100; // don't make keyframes
+    params->dist_traveled_th_   = 100;
+    params->theta_traveled_th_  = 6.28;
     params->elapsed_time_th_    = 100;
     params->cov_det_th_         = 100;
+    params->unmeasured_perturbation_std_ = 0.001;
+    Matrix3s unmeasured_cov = params->unmeasured_perturbation_std_*params->unmeasured_perturbation_std_*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
 
@@ -358,13 +364,13 @@ TEST(Odom2D, KF_callback)
         Ju = plus_jac_u(integrated_delta, data);
         Jx = plus_jac_x(integrated_delta, data);
         integrated_delta = plus(integrated_delta, data);
-        integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
+        integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose() + unmeasured_cov;
 
         // Integrate pose
         Ju = plus_jac_u(integrated_pose, data);
         Jx = plus_jac_x(integrated_pose, data);
         integrated_pose = plus(integrated_pose, data);
-        integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
+        integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose() + unmeasured_cov;
 
         // Store integrals
         integrated_pose_vector.push_back(integrated_pose);
