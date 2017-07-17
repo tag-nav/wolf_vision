@@ -89,9 +89,8 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 
 Eigen::MatrixXs FeatureBase::computeSqrtInformationUpper(const Eigen::MatrixXs & _covariance) const
 {
-//    WOLF_TRACE("\nFeature covariance: \n", _covariance, "\nWith determinant = ", _covariance.determinant());
-
     assert(_covariance.determinant() > Constants::EPS_SMALL && "Covariance is not positive definite!");
+
     Eigen::LLT<Eigen::MatrixXs> llt_of_info(_covariance.inverse());
     return llt_of_info.matrixU();
 }
