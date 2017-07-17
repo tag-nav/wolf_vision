@@ -139,7 +139,3 @@ IF(OpenCV_FOUND)
   wolf_add_gtest(gtest_roi_ORB gtest_roi_ORB.cpp)
   target_link_libraries(gtest_roi_ORB ${PROJECT_NAME})
 ENDIF(OpenCV_FOUND)
-
-# SensorIMU test
-wolf_add_gtest(gtest_sensor_imu gtest_sensor_imu.cpp)
-target_link_libraries(gtest_sensor_imu ${PROJECT_NAME})

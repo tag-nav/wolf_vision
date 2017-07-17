@@ -46,8 +46,8 @@ class SensorIMU : public SensorBase
         wolf::Scalar a_noise; //Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
 
         //This is a trial to constraint how much can the bias change in 1 sec at most
-        wolf::Scalar ab_stdev; //accelerometer micro_g/sec
-        wolf::Scalar wb_stdev; //gyroscope rad/sec
+        wolf::Scalar ab_initial_stdev; //accelerometer micro_g/sec
+        wolf::Scalar wb_initial_stdev; //gyroscope rad/sec
         wolf::Scalar ab_rate_stdev; //accelerometer micro_g/sec
         wolf::Scalar wb_rate_stdev; //gyroscope rad/sec
 
@@ -75,8 +75,8 @@ class SensorIMU : public SensorBase
 
         Scalar getGyroNoise() const;
         Scalar getAccelNoise() const;
-        Scalar getWbStdev() const;
-        Scalar getAbStdev() const;
+        Scalar getWbInitialStdev() const;
+        Scalar getAbInitialStdev() const;
         Scalar getWbRateStdev() const;
         Scalar getAbRateStdev() const;
 
@@ -97,24 +97,24 @@ inline Scalar SensorIMU::getAccelNoise() const
     return a_noise;
 }
 
-inline Scalar SensorIMU::getWbStdev() const
+inline Scalar SensorIMU::getWbInitialStdev() const
 {
-    return wb_stdev;
+    return wb_initial_stdev;
 }
 
-inline Scalar SensorIMU::getAbStdev() const
+inline Scalar SensorIMU::getAbInitialStdev() const
 {
-    return ab_stdev;
+    return ab_initial_stdev;
 }
 
 inline Scalar SensorIMU::getWbRateStdev() const
 {
-    return wb_stdev;
+    return wb_rate_stdev;
 }
 
 inline Scalar SensorIMU::getAbRateStdev() const
 {
-    return ab_stdev;
+    return ab_rate_stdev;
 }
 
 } // namespace wolf

@@ -1,12 +1,9 @@
 sensor type: "IMU"             # This must match the KEY used in the SensorFactory. Otherwise it is an error.
 sensor name: "Main IMU"        # This is ignored. The name provided to the SensorFactory prevails
 motion variances: 
-    a_noise:        0.04     # standard deviation of Acceleration noise (same for all the axis) in m/s2
-    w_noise:        0.001    # standard deviation of Gyroscope noise (same for all the axis) in rad/sec
-    ab_stdev:       0.001     # m/s2    - initial bias 
-    wb_stdev:       0.001     # rad/sec - initial bias 
-    ab_rate_stdev:  0.00001    # m/s2/sqrt(s)           
-    wb_rate_stdev:  0.00001    # rad/s/sqrt(s)          
-    acc_bandwidth:  260      # Hz
-    gyro_bandwidth: 260      # Hz
-    
+    a_noise:                0.0539     # standard deviation of Acceleration noise (same for all the axis) in m/s2
+    w_noise:                0.0011    # standard deviation of Gyroscope noise (same for all the axis) in rad/sec
+    ab_initial_stdev:       0.8291     # m/s2    - initial bias 
+    wb_initial_stdev:       0.1875     # rad/sec - initial bias 
+    ab_rate_stdev:          0.0539    # m/s2/sqrt(s)           
+    wb_rate_stdev:          0.0242    # rad/s/sqrt(s)
