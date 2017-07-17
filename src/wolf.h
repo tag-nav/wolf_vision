@@ -9,6 +9,7 @@
 #define WOLF_H_
 
 // Enable project-specific definitions and macros
+#include "internal/config.h"
 #include "logging.h"
 
 //includes from Eigen lib
@@ -21,7 +22,6 @@
 #include <list>
 #include <map>
 #include <memory> // shared_ptr and weak_ptr
-#include "internal/config.h"
 
 namespace wolf {
 
