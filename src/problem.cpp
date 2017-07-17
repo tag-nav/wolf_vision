@@ -468,6 +468,11 @@ bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, E
     return true;
 }
 
+bool Problem::getCovarianceBlock(StateBlockPtr _state, Eigen::MatrixXs& _cov, const int _row_and_col)
+{
+    return getCovarianceBlock(_state, _state, _cov, _row_and_col, _row_and_col);
+}
+
 bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance)
 {
 //    return getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getPPtr(), _covariance, 0,                                0                               ) &&

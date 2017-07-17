@@ -89,7 +89,7 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 
 Eigen::MatrixXs FeatureBase::computeSqrtInformationUpper(const Eigen::MatrixXs & _covariance) const
 {
-    if (_covariance.determinant() > Constants::EPS_SMALL)
+    if (_covariance.determinant() < Constants::EPS_SMALL)
     {
         // Avoid singular covariances matrix
         Eigen::MatrixXs cov = _covariance + 1e-8 * Eigen::MatrixXs::Identity(_covariance.rows(), _covariance.cols());
