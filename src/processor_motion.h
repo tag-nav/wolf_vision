@@ -79,7 +79,7 @@ namespace wolf
  * Only when the motion delta is expressed in the robot frame R, we can integrate it
  * on top of the current Robot frame: R <-- R (+) delta_R
  *
- *     \code    xPlusDelta(R_old, delta_R, R_new) \endcode
+ *     \code    statePlusDelta(R_old, delta_R, R_new) \endcode
  *
  *
  * ### Defining (or not) the fromSensorFrame():
@@ -251,7 +251,7 @@ class ProcessorMotion : public ProcessorBase
          * Rationale:
          *
          * The delta-state format must be compatible for integration using
-         * the composition functions doing the math in this class: xPlusDelta() and deltaPlusDelta().
+         * the composition functions doing the math in this class: statePlusDelta() and deltaPlusDelta().
          * See the class documentation for some Eigen::VectorXs suggestions.
          *
          * The data format is generally not the same as the delta format,
@@ -328,7 +328,7 @@ class ProcessorMotion : public ProcessorBase
          *
          * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
          */
-        virtual void xPlusDelta(const Eigen::VectorXs& _x,
+        virtual void statePlusDelta(const Eigen::VectorXs& _x,
                                 const Eigen::VectorXs& _delta,
                                 const Scalar _dt,
                                 Eigen::VectorXs& _x_plus_delta) = 0;
@@ -672,7 +672,7 @@ inline Eigen::VectorXs ProcessorMotion::getState(const TimeStamp& _ts)
 
 inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 {
-    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().getDelta(_ts), _ts - origin_ptr_->getTimeStamp(), _x);
+    statePlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().getDelta(_ts), _ts - origin_ptr_->getTimeStamp(), _x);
 }
 
 inline wolf::TimeStamp ProcessorMotion::getCurrentTimeStamp()
@@ -695,7 +695,7 @@ inline Eigen::VectorXs ProcessorMotion::getCurrentStateAndStamp(TimeStamp& _ts)
 inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
 {
     Scalar Dt = getBuffer().get().back().ts_ - origin_ptr_->getTimeStamp();
-    xPlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().get().back().delta_integr_, Dt, _x);
+    statePlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().get().back().delta_integr_, Dt, _x);
 }
 
 inline void ProcessorMotion::getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts)

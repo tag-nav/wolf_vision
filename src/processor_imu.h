@@ -32,7 +32,7 @@ class ProcessorIMU : public ProcessorMotion{
                                     Eigen::VectorXs& _delta_preint_plus_delta,
                                     Eigen::MatrixXs& _jacobian_delta_preint,
                                     Eigen::MatrixXs& _jacobian_delta);
-        virtual void xPlusDelta(const Eigen::VectorXs& _x,
+        virtual void statePlusDelta(const Eigen::VectorXs& _x,
                                 const Eigen::VectorXs& _delta,
                                 const Scalar _dt,
                                 Eigen::VectorXs& _x_plus_delta );
@@ -303,7 +303,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
     Dq_out_ = Dq_ * dq_;
 }
 
-inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x,
+inline void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x,
                                      const Eigen::VectorXs& _delta,
                                      const Scalar _dt,
                                      Eigen::VectorXs& _x_plus_delta)

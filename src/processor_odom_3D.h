@@ -84,7 +84,7 @@ class ProcessorOdom3D : public ProcessorMotion
                             Eigen::VectorXs& _delta1_plus_delta2,
                             Eigen::MatrixXs& _jacobian1,
                             Eigen::MatrixXs& _jacobian2);
-        void xPlusDelta(const Eigen::VectorXs& _x,
+        void statePlusDelta(const Eigen::VectorXs& _x,
                         const Eigen::VectorXs& _delta,
                         const Scalar _Dt,
                         Eigen::VectorXs& _x_plus_delta);

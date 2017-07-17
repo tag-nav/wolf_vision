@@ -42,24 +42,24 @@ class ProcessorOdom2D : public ProcessorMotion
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
                                 const Scalar _dt);
-        void deltaPlusDelta(const Eigen::VectorXs& _delta1,
-                            const Eigen::VectorXs& _delta2,
-                            const Scalar _Dt2,
-                            Eigen::VectorXs& _delta1_plus_delta2);
-        void deltaPlusDelta(const Eigen::VectorXs& _delta1,
-                            const Eigen::VectorXs& _delta2,
-                            const Scalar _Dt2,
-                            Eigen::VectorXs& _delta1_plus_delta2,
-                            Eigen::MatrixXs& _jacobian1,
-                            Eigen::MatrixXs& _jacobian2);
-        void xPlusDelta(const Eigen::VectorXs& _x,
-                        const Eigen::VectorXs& _delta,
-                        const Scalar _Dt,
-                        Eigen::VectorXs& _x_plus_delta);
-        Eigen::VectorXs deltaZero() const;
-        Motion interpolate(const Motion& _ref,
-                           Motion& _second,
-                           TimeStamp& _ts);
+        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1,
+                                    const Eigen::VectorXs& _delta2,
+                                    const Scalar _Dt2,
+                                    Eigen::VectorXs& _delta1_plus_delta2);
+        virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1,
+                                    const Eigen::VectorXs& _delta2,
+                                    const Scalar _Dt2,
+                                    Eigen::VectorXs& _delta1_plus_delta2,
+                                    Eigen::MatrixXs& _jacobian1,
+                                    Eigen::MatrixXs& _jacobian2);
+        virtual void statePlusDelta(const Eigen::VectorXs& _x,
+                                const Eigen::VectorXs& _delta,
+                                const Scalar _Dt,
+                                Eigen::VectorXs& _x_plus_delta);
+        virtual Eigen::VectorXs deltaZero() const;
+        virtual Motion interpolate(const Motion& _ref,
+                                   Motion& _second,
+                                   TimeStamp& _ts);
 
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
 
@@ -134,17 +134,17 @@ inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eige
     //std::cout << "delta cov :" << std::endl << delta_cov_ << std::endl;
 }
 
-inline void ProcessorOdom2D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta)
+inline void ProcessorOdom2D::statePlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta)
 {
 
     // This is just a frame composition in 2D
 
-    //std::cout << "ProcessorOdom2d::xPlusDelta" << std::endl;
+    //std::cout << "ProcessorOdom2d::statePlusDelta" << std::endl;
 
     assert(_x.size() == x_size_ && "Wrong _x vector size");
     assert(_x_plus_delta.size() == x_size_ && "Wrong _x_plus_delta vector size");
 
-//    std::cout << "xPlusDelta ------------------------------------" << std::endl;
+//    std::cout << "statePlusDelta ------------------------------------" << std::endl;
 //    std::cout << "_x:     " << _x.transpose() << std::endl;
 //    std::cout << "_delta: " << _delta.transpose() << std::endl;
 //    std::cout << "_x_plus_delta: " << _x_plus_delta.transpose() << std::endl;
