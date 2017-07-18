@@ -13,6 +13,10 @@
 #include "sensor_odom_3D.h"
 #include "processor_odom_3D.h"
 
+//Constraints headers
+#include "constraint_fix_3D.h"
+#include "constraint_fix_bias.h"
+
 //std
 #include <iostream>
 #include <fstream>
@@ -54,7 +58,7 @@ int main(int argc, char** argv)
 
     // ___Check if the file is correctly opened___
     if(!imu_data_input.is_open()){
-        std::cerr << "Failed to open data file ! Exiting" << std::endl;
+        WOLF_ERROR("Failed to open data file ! Exiting")
         return 1;
     }
 
@@ -65,7 +69,7 @@ int main(int argc, char** argv)
     ProblemPtr problem = Problem::create("PQVBB 3D");
     Eigen::VectorXs problem_origin(16);
     problem_origin << 0,0,0, 0,0,0,1, 0,0,0, 0.8291,0.8291,0.8291, 0.1875,0.1875,0.1875; //using values of initial bias here
-    //CeresManager* ceres_manager_wolf_diff = new CeresManager(problem);
+    CeresManager* ceres_manager = new CeresManager(problem);
 
     // ___Configure Ceres if needed___
 
@@ -118,18 +122,51 @@ int main(int argc, char** argv)
 
     //A KeyFrame should have been created (depending on time_span in processors). get the last KeyFrame
     FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(problem->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
-    
+
     //#################################################### OPTIMIZATION PART
     // ___Create needed constraints___
 
+    //Add Fix3D constraint on first KeyFrame (with large covariance except for yaw)
+    Eigen::MatrixXs featureFix_cov(6,6);
+    featureFix_cov = Eigen::MatrixXs::Identity(6,6); 
+    featureFix_cov(5,5) = 0.1;
+    CaptureBasePtr cap_fix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6));
+    FeatureBasePtr featureFix = cap_fix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
+    ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(featureFix->addConstraint(std::make_shared<ConstraintFix3D>(featureFix)));
+
+    // Add Bias constraint on first KeyFrame
+    Eigen::MatrixXs featureFixBias_cov(6,6);
+    featureFixBias_cov = Eigen::MatrixXs::Identity(6,6); 
+    featureFixBias_cov.topLeftCorner(3,3) *= 0.005;        // sqrt(0.005) = 0.0707 m/s2
+    featureFixBias_cov.bottomRightCorner(3,3) *= 0.003;  // sqrt(0.003) = 0.0548 rad/s
+    CaptureBasePtr cap_fixbias = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), featureFixBias_cov, 6, 6));
+    //create a FeatureBase to constraint biases
+    FeatureBasePtr featureFixBias = cap_fixbias->addFeature(std::make_shared<FeatureBase>("FIX BIAS", (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), featureFixBias_cov));
+    ConstraintFixBiasPtr ctr_fixBias = std::static_pointer_cast<ConstraintFixBias>(featureFixBias->addConstraint(std::make_shared<ConstraintFixBias>(featureFixBias)));
+
     // ___Fix/Unfix stateblocks___
+    origin_KF->getPPtr()->fix();
+    origin_KF->getOPtr()->unfix();
+    origin_KF->getVPtr()->fix();
+    origin_KF->getAccBiasPtr()->unfix();
+    origin_KF->getGyroBiasPtr()->unfix();
+
+    last_KF->getPPtr()->unfix();
+    last_KF->getOPtr()->unfix();
+    last_KF->getVPtr()->fix();
+    last_KF->getAccBiasPtr()->unfix();
+    last_KF->getGyroBiasPtr()->unfix();
 
     // ___Solve + compute covariances___
+    problem->print(4,0,1,0);
+    ceres::Solver::Summary summary = ceres_manager->solve();
+    ceres_manager->computeCovariances(ALL_MARGINALS);
+    problem->print(4,0,1,0);
+
+    //#################################################### RESULTS PART
+    // ___Define expected values___
 
     // ___Get standard deviation from covariances___
 
-    // ___Check results___
-        // ___Define expected values___
-
-        // ___Are expected values in the range of estimated +/- 2*stdev ?___
+    // ___Are expected values in the range of estimated +/- 2*stdev ?___
 }
