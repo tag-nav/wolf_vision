@@ -39,7 +39,7 @@ int main(int argc, char** argv)
     //we expect 1 file giving imu measurements
     std::ifstream imu_data_input;
     const char * filename_imu;
-    if (argc < 02)embed
+    if (argc < 02)
     {
         WOLF_ERROR("Missing 1 imput argument (path to imu data file).")
         return 1; //return with error
@@ -52,33 +52,49 @@ int main(int argc, char** argv)
         WOLF_INFO("imu file : ", filename_imu)
     }
 
-    // Check if the file is correctly opened
+    // ___Check if the file is correctly opened___
+    if(!imu_data_input.is_open()){
+        std::cerr << "Failed to open data file ! Exiting" << std::endl;
+        return 1;
+    }
 
     //#################################################### SETTING PROBLEM
     std::string wolf_root = _WOLF_ROOT_DIR;
 
-    // Create the WOLF Problem + set origin of the problem
+    // ___Create the WOLF Problem + define origin of the problem___
+    ProblemPtr problem = Problem::create("PQVBB 3D");
+    Eigen::VectorXs problem_origin(16);
+    problem_origin << 0,0,0, 0,0,0,1, 0,0,0, 0.8291,0.8291,0.8291, 0.1875,0.1875,0.1875; //using values of initial bias here
+    //CeresManager* ceres_manager_wolf_diff = new CeresManager(problem);
 
-    // Configure Ceres
+    // ___Configure Ceres if needed___
 
-    // Create sensors + processors
+    // ___Create sensors + processors___
+    SensorIMUPtr sensorIMU = std::static_pointer_cast<SensorIMU>(problem->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml"));
+    ProcessorIMUPtr processorIMU = std::static_pointer_cast<ProcessorIMU>(problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "/src/examples/processor_imu.yaml"));
 
-    //
+    SensorOdom3DPtr sensorOdom = std::static_pointer_cast<SensorOdom3D>(problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml"));
+    ProcessorOdom3DPtr processorOdom = std::static_pointer_cast<ProcessorOdom3D>(problem->installProcessor("ODOM 3D", "odom", "odom", "/src/examples/processor_odom_3D.yaml"));
+    
+    // ___set origin of processors to the problem's origin___
+    TimeStamp ts(0);
+    FrameIMUPtr origin_KF = std::static_pointer_cast<FrameIMU>(processorIMU->setOrigin(problem_origin, ts));
+    processorOdom->setOrigin(origin_KF);
 
     //#################################################### PROCESS DATA
-    // process IMU and odometry
+    // ___process IMU and odometry___
 
     //#################################################### OPTIMIZATION PART
-    // Create needed constraints
+    // ___Create needed constraints___
 
-    // Fix/Unfix stateblocks
+    // ___Fix/Unfix stateblocks___
 
-    // Solve + compute covariances
+    // ___Solve + compute covariances___
 
-    // Get standard deviation from covariances
+    // ___Get standard deviation from covariances___
 
-    // Check results
-        // Define expected values
+    // ___Check results___
+        // ___Define expected values___
 
-        // Are expected values in the range of estimated +/- 2*stdev ?
+        // ___Are expected values in the range of estimated +/- 2*stdev ?___
 }
