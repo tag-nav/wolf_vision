@@ -123,8 +123,8 @@ wolf_add_gtest(gtest_processorIMU_jacobians gtest_processorIMU_jacobians.cpp)
 target_link_libraries(gtest_processorIMU_jacobians ${PROJECT_NAME})
 
 # Ceres ProcessorMotion solver tests
-wolf_add_gtest(gtest_processorMotion_optimization_testCase gtest_processorMotion_optimization_testCase.cpp)
-target_link_libraries(gtest_processorMotion_optimization_testCase ${PROJECT_NAME})
+#wolf_add_gtest(gtest_processorMotion_optimization_testCase gtest_processorMotion_optimization_testCase.cpp)
+#target_link_libraries(gtest_processorMotion_optimization_testCase ${PROJECT_NAME})
 
 # ProcessorMotion in 2D
 wolf_add_gtest(gtest_odom_2D gtest_odom_2D.cpp)
