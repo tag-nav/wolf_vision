@@ -672,7 +672,41 @@ inline Eigen::VectorXs ProcessorMotion::getState(const TimeStamp& _ts)
 
 inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 {
-    statePlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().getDelta(_ts), _ts - origin_ptr_->getTimeStamp(), _x);
+    if (_ts > origin_ptr_->getTimeStamp())
+        // timestamp found in the current processor buffer
+        statePlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().getDelta(_ts), _ts - origin_ptr_->getTimeStamp(), _x);
+    else
+    {
+        // We need to search the capture containing a motion buffer in previous keyframes
+        FrameBasePtr frame;
+        CaptureBasePtr capture;
+        for (auto frame_iter = getProblem()->getTrajectoryPtr()->getFrameList().rbegin(); frame_iter != getProblem()->getTrajectoryPtr()->getFrameList().rend(); ++frame_iter)
+        {
+            if ((*frame_iter)->getTimeStamp() < _ts)
+            {
+                frame = *frame_iter;
+                capture = frame->getCaptureOf(getSensorPtr());
+                if (capture != nullptr)
+                {
+                    break;
+                }
+            }
+        }
+        if (capture)
+        {
+            // We found a Capture whose buffer contains the time stamp
+            CaptureMotionPtr capture_motion = std::static_pointer_cast<CaptureMotion>(capture);
+            VectorXs         delta          = capture_motion->getBuffer().getDelta(_ts);
+            VectorXs         state_0        = frame->getState();
+            Scalar           dt             = _ts - frame->getTimeStamp();
+            statePlusDelta(state_0, delta, dt, _x);
+        }
+        else
+        {
+            // We could not find any Capture for the time stamp requested
+            std::runtime_error("Could not find any Capture for the time stamp requested");
+        }
+    }
 }
 
 inline wolf::TimeStamp ProcessorMotion::getCurrentTimeStamp()
