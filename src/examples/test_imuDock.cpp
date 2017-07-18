@@ -84,6 +84,41 @@ int main(int argc, char** argv)
     //#################################################### PROCESS DATA
     // ___process IMU and odometry___
 
+    //Create vectors to store data and time
+    Eigen::Vector6s data_imu, data_odom;
+    Scalar clock;
+
+    //Create captures
+    CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sensorIMU, data_imu); //ts is set at 0
+    CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(ts, sensorOdom, data_odom, 6, 6);
+
+    //while we do not reach the end of file, read IMU input (ts, Ax, Ay, Az, Wx, Wy, Wz) and process data through capture
+    while(!imu_data_input.eof())
+    {
+        //read
+        imu_data_input >> clock >> data_imu[0] >> data_imu[1] >> data_imu[2] >> data_imu[3] >> data_imu[4] >> data_imu[5];
+
+        //set capture
+        ts.set(clock);
+        imu_ptr->setTimeStamp(ts);
+        imu_ptr->setData(data_imu);
+
+        //process
+        sensorIMU->process(imu_ptr);
+    }
+
+    //All IMU data have been processed, close the file
+    imu_data_input.close();
+
+    //now impose final odometry using last timestamp of imu
+    data_odom << 0,-0.06,0, 0,0,0;
+    mot_ptr->setTimeStamp(ts);
+    mot_ptr->setData(data_odom);
+    sensorOdom->process(mot_ptr);
+
+    //A KeyFrame should have been created (depending on time_span in processors). get the last KeyFrame
+    FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(problem->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+    
     //#################################################### OPTIMIZATION PART
     // ___Create needed constraints___
 
