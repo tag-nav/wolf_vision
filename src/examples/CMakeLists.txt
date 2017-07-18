@@ -163,6 +163,10 @@ TARGET_LINK_LIBRARIES(test_processor_imu ${PROJECT_NAME})
 #ADD_EXECUTABLE(test_processor_imu_jacobians test_processor_imu_jacobians.cpp)
 #TARGET_LINK_LIBRARIES(test_processor_imu_jacobians ${PROJECT_NAME})
 
+# Test IMU using printed Dock
+ADD_EXECUTABLE(test_imuDock test_imuDock.cpp)
+TARGET_LINK_LIBRARIES(test_imuDock ${PROJECT_NAME})
+
 # ConstraintIMU - factors test
 ADD_EXECUTABLE(test_imu_constrained0 test_imu_constrained0.cpp)
 TARGET_LINK_LIBRARIES(test_imu_constrained0 ${PROJECT_NAME})
