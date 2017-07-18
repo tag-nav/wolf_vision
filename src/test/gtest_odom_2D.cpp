@@ -410,7 +410,7 @@ TEST(Odom2D, KF_callback)
     t_split = t0 + m_split*dt;
     std::cout << "-----------------------------\nSplit between KFs; time: " << t_split - t0 << std::endl;
 
-    problem->print(2,0,1,0);
+    problem->print(4,1,1,0);
 
     x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
