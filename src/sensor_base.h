@@ -256,6 +256,8 @@ inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
 
 inline bool SensorBase::process(const CaptureBasePtr capture_ptr)
 {
+  if (capture_ptr == nullptr) return false;
+
   capture_ptr->setSensorPtr(shared_from_this());
 
   for (const auto processor : processor_list_)
