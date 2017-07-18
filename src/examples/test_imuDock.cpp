@@ -176,8 +176,21 @@ int main(int argc, char** argv)
     Eigen::Vector7s expected_initial_pose, expected_final_pose;
     expected_initial_pose << 0,0,0,0,0,0,1;
     expected_final_pose << 0,-0.06,0,0,0,0,1;
-    // ___Get standard deviation from covariances___
 
+    // ___Get standard deviation from covariances___
+    Eigen::MatrixXs cov_KF1(16,16), cov_KF2(16,16);
+
+    problem->getFrameCovariance(origin_KF, cov_KF1);
+    problem->getFrameCovariance(last_KF, cov_KF2);
+
+    Eigen::Matrix<wolf::Scalar, 16, 1> stdev_KF1, stdev_KF2;
+
+    stdev_KF1 = 2*(cov_KF1.diagonal().array().sqrt());
+    stdev_KF2 = 2*(cov_KF2.diagonal().array().sqrt());
+
+    WOLF_DEBUG("stdev KF1 : ", stdev_KF1.transpose());
+    WOLF_DEBUG("stdev KF2 : ", stdev_KF2.transpose());
+    
     // ___Are expected values in the range of estimated +/- 2*stdev ?___
 
     return 0;
