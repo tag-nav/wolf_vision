@@ -35,6 +35,15 @@
 
     What we expect  : Estimate biases (this will strongly depend on the actual trajectory of the IMU)
                       Estimate the position and orienttion of the IMU (check with the standard deviation using covariance matrix)
+
+    Representation of the application:
+
+                        KF1----------◼----------KF2
+                   /----P1----------\ /----------P2             invar       : P1, V1, V2
+        Abs|------◼                 ◼                           var         : Q1,B1,P2,Q2,B2
+                   \----Q1----------/ \----------Q2
+                        V1
+        Abs|------◼-----B1
 */
 int main(int argc, char** argv)
 {
