@@ -445,8 +445,8 @@ TEST(Odom2D, KF_callback)
     for (int n=1; n<=N; n++)
     {
         t += dt;
-        WOLF_DEBUG(" x(", t, ") = ", problem->getState(t).transpose());
-        WOLF_DEBUG("gt(", t, ") = ", integrated_pose_vector[n].transpose());
+        WOLF_DEBUG("   estimated(", t, ") = ", problem->getState(t).transpose());
+        WOLF_DEBUG("ground truth(", t, ") = ", integrated_pose_vector[n].transpose());
         ASSERT_MATRIX_APPROX(problem->getState(t), integrated_pose_vector[n], 1e-6);
     }
 }
