@@ -307,7 +307,7 @@ void Problem::getFrameStructureSize(Size& _x_size, Size& _cov_size) const
     else if (trajectory_ptr_->getFrameStructure() == "POV 3D")
     {
         _x_size = 10;
-        _cov_size = 10;
+        _cov_size = 9;
     }
     else if (trajectory_ptr_->getFrameStructure() == "PQVBB 3D")
     {
