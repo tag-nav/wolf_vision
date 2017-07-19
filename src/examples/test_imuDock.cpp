@@ -77,20 +77,22 @@ int main(int argc, char** argv)
     // ___Create the WOLF Problem + define origin of the problem___
     ProblemPtr problem = Problem::create("PQVBB 3D");
     Eigen::VectorXs problem_origin(16);
+    // XXX JS: Use zeros as biases below. the initial biases are std values for noise, not for mean.
     problem_origin << 0,0,0, 0,0,0,1, 0,0,0, 0.8291,0.8291,0.8291, 0.1875,0.1875,0.1875; //using values of initial bias here
     CeresManager* ceres_manager = new CeresManager(problem);
 
     // ___Configure Ceres if needed___
 
     // ___Create sensors + processors___
-    SensorIMUPtr sensorIMU = std::static_pointer_cast<SensorIMU>(problem->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml"));
+    SensorIMUPtr sensorIMU = std::static_pointer_cast<SensorIMU>(problem->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml")); // XXX JS: Use variables to set the initial vectors, like imu_pose = 0,0,0,0,0,0,1;
     ProcessorIMUPtr processorIMU = std::static_pointer_cast<ProcessorIMU>(problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu.yaml"));
     
-    SensorOdom3DPtr sensorOdom = std::static_pointer_cast<SensorOdom3D>(problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml"));
+    SensorOdom3DPtr sensorOdom = std::static_pointer_cast<SensorOdom3D>(problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml"));// XXX JS: Use variables to set the initial vectors, like odom_pose = 0,0,0,0,0,0,1;
     ProcessorOdom3DPtr processorOdom = std::static_pointer_cast<ProcessorOdom3D>(problem->installProcessor("ODOM 3D", "odom", "odom", wolf_root + "/src/examples/processor_odom_3D.yaml"));
     // ___set origin of processors to the problem's origin___
     TimeStamp ts(0);
-    FrameIMUPtr origin_KF = std::static_pointer_cast<FrameIMU>(processorIMU->setOrigin(problem_origin, ts));
+    // XXX JS: Use KF1 and KF2 names for 'origin' and 'last' as in the drawing above.
+    FrameIMUPtr origin_KF = std::static_pointer_cast<FrameIMU>(processorIMU->setOrigin(problem_origin, ts)); // XXX JS: setting ts to zero, and then reading clock from data, is inconsistent.
     processorOdom->setOrigin(origin_KF);
 
     //#################################################### PROCESS DATA
@@ -123,12 +125,13 @@ int main(int argc, char** argv)
     imu_data_input.close();
 
     //now impose final odometry using last timestamp of imu
-    data_odom << 0,-0.06,0, 0,0,0;
+    data_odom << 0,-0.06,0, 0,0,0; // XXX JS: Is it sure on the Y axis?
     mot_ptr->setTimeStamp(ts);
     mot_ptr->setData(data_odom);
     sensorOdom->process(mot_ptr);
 
     //A KeyFrame should have been created (depending on time_span in processors). get the last KeyFrame
+    // XXX JS: in my  opinion, we should control the KF creation better, not using time span. Is it possible?
     FrameIMUPtr last_KF = std::static_pointer_cast<FrameIMU>(problem->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
 
     //#################################################### OPTIMIZATION PART
@@ -137,12 +140,12 @@ int main(int argc, char** argv)
     //Add Fix3D constraint on first KeyFrame (with large covariance except for yaw)
     Eigen::MatrixXs featureFix_cov(6,6);
     featureFix_cov = Eigen::MatrixXs::Identity(6,6); 
-    featureFix_cov(5,5) = 0.1;
-    CaptureBasePtr cap_fix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6));
-    FeatureBasePtr featureFix = cap_fix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
+    featureFix_cov(5,5) = 0.1; // XXX JS: I guess this should be smaller, like 0.01, because it's a squared value
+    CaptureBasePtr cap_fix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6)); // XXX JS: Use variables to set the initial vectors, like x0 = 0,0,0,0,0,0,1;
+    FeatureBasePtr featureFix = cap_fix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov)); // XXX JS: Use variables to set the initial vectors, like x0 = 0,0,0,0,0,0,1;
     ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(featureFix->addConstraint(std::make_shared<ConstraintFix3D>(featureFix)));
 
-    // Add Bias constraint on first KeyFrame
+    // Add Bias constraint on first KeyFrame // XXX JS: Use values in 'initial_bias_std' from the YAML file, now available through the sensor
     Eigen::MatrixXs featureFixBias_cov(6,6);
     featureFixBias_cov = Eigen::MatrixXs::Identity(6,6); 
     featureFixBias_cov.topLeftCorner(3,3) *= 0.005;        // sqrt(0.005) = 0.0707 m/s2
@@ -174,8 +177,8 @@ int main(int argc, char** argv)
     //#################################################### RESULTS PART
     // ___Define expected values___
     Eigen::Vector7s expected_initial_pose, expected_final_pose;
-    expected_initial_pose << 0,0,0,0,0,0,1;
-    expected_final_pose << 0,-0.06,0,0,0,0,1;
+    expected_initial_pose << 0,0,0,0,0,0,1; //XXX JS: Use '1' and '2' for identifying 'initial' and 'final', matching KF1 and KF2
+    expected_final_pose << 0,-0.06,0,0,0,0,1; //XXX JS: These variables should have been set on top of file and used throughout the code to initialize everything.
 
     // ___Get standard deviation from covariances___
     Eigen::MatrixXs cov_KF1(16,16), cov_KF2(16,16);
