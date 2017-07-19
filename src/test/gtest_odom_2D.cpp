@@ -378,14 +378,14 @@ TEST(Odom2D, KF_callback)
 
     }
 
-    std::cout << "=============================" << std::endl;
+//    std::cout << "=============================" << std::endl;
 
     ////////////////////////////////////////////////////////////////
     // Split after the last keyframe, exact timestamp
     int n_split = 8;
     TimeStamp t_split (t0 + n_split*dt);
 
-    std::cout << "-----------------------------\nSplit after last KF; time: " << t_split - t0 << std::endl;
+//    std::cout << "-----------------------------\nSplit after last KF; time: " << t_split - t0 << std::endl;
 
     Vector3s x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_2 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
@@ -408,9 +408,9 @@ TEST(Odom2D, KF_callback)
     // Split between keyframes, exact timestamp
     int m_split = 4;
     t_split = t0 + m_split*dt;
-    std::cout << "-----------------------------\nSplit between KFs; time: " << t_split - t0 << std::endl;
+//    std::cout << "-----------------------------\nSplit between KFs; time: " << t_split - t0 << std::endl;
 
-    problem->print(4,1,1,0);
+//    problem->print(4,1,1,0);
 
     x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
@@ -423,7 +423,7 @@ TEST(Odom2D, KF_callback)
     MotionBuffer key_buffer_m = key_capture_m->getBuffer();
 
     // solve
-    cout << "===== full ====" << endl;
+//    cout << "===== full ====" << endl;
     keyframe_0->setState(Vector3s(1,2,3));
     keyframe_1->setState(Vector3s(2,3,1));
     keyframe_2->setState(Vector3s(3,1,2));
@@ -439,6 +439,16 @@ TEST(Odom2D, KF_callback)
     // check other KF in the future of the split KF
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
     ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_2)    , integrated_cov_vector [n_split], 1e-6);
+
+    // Check full trajectory
+    t = t0;
+    for (int n=1; n<=N; n++)
+    {
+        t += dt;
+        WOLF_DEBUG(" x(", t, ") = ", problem->getState(t).transpose());
+        WOLF_DEBUG("gt(", t, ") = ", integrated_pose_vector[n].transpose());
+        ASSERT_MATRIX_APPROX(problem->getState(t), integrated_pose_vector[n], 1e-6);
+    }
 }
 
 
