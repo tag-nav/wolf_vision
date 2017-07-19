@@ -339,6 +339,19 @@ class ProcessorMotion : public ProcessorBase
                                 const Scalar _dt,
                                 Eigen::VectorXs& _x_plus_delta) = 0;
 
+        /** \brief Correct delta according to new initial values
+         *
+         * Since delta_integr_ may depend linearly on some parameters,
+         * at the time these params change, the delta must be corrected.
+         * This is implemented here with a trivial function,
+         * and can be overloaded in derived classes.
+         * @return the corrected delta.
+         */
+        virtual VectorXs correctDelta(const VectorXs & _delta, const CaptureMotionPtr _capture)
+        {
+            return _delta;
+        }
+
 
         /** \brief Delta zero
          * \return a delta state equivalent to the null motion.
@@ -717,7 +730,10 @@ inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
             VectorXs         state_0        = capture_motion->getOriginFramePtr()->getState();
             VectorXs         delta          = capture_motion->getBuffer().getDelta(_ts);
             Scalar           dt             = _ts - capture_motion->getBuffer().get().front().ts_;
-            statePlusDelta(state_0, delta, dt, _x);
+
+            VectorXs delta_corrected = correctDelta(delta, capture_motion);
+
+            statePlusDelta(state_0, delta_corrected, dt, _x);
         }
         else
         {
