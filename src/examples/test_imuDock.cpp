@@ -149,8 +149,8 @@ int main(int argc, char** argv)
     // Add Bias constraint on first KeyFrame // XXX JS: Use values in 'initial_bias_std' from the YAML file, now available through the sensor
     Eigen::MatrixXs featureFixBias_cov(6,6);
     featureFixBias_cov = Eigen::MatrixXs::Identity(6,6); 
-    featureFixBias_cov.topLeftCorner(3,3) *= 0.005;        // sqrt(0.005) = 0.0707 m/s2
-    featureFixBias_cov.bottomRightCorner(3,3) *= 0.003;  // sqrt(0.003) = 0.0548 rad/s
+    featureFixBias_cov.topLeftCorner(3,3) *= 0.00005;       // sqrt(0.00005) = 0.00707 m/s2, then 10x -> 0.0707
+    featureFixBias_cov.bottomRightCorner(3,3) *= 0.00003;   // sqrt(0.00003) = 0.00548 rad/s, then 10x -> 0.0548
     CaptureBasePtr cap_fixbias = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), featureFixBias_cov, 6, 6));
     //create a FeatureBase to constraint biases
     FeatureBasePtr featureFixBias = cap_fixbias->addFeature(std::make_shared<FeatureBase>("FIX BIAS", (Eigen::Vector6s() << 0,0,0, 0,0,0).finished(), featureFixBias_cov));
