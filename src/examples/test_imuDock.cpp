@@ -38,11 +38,12 @@
 
     Representation of the application:
 
+                                    Imu
                         KF1----------◼----------KF2
                    /----P1----------\ /----------P2             invar       : P1, V1, V2
-        Abs|------◼                 ◼                           var         : Q1,B1,P2,Q2,B2
+        Abs|------◼                  ◼                          var         : Q1,B1,P2,Q2,B2
                    \----Q1----------/ \----------Q2
-                        V1
+                        V1          Odom
         Abs|------◼-----B1
 */
 int main(int argc, char** argv)
