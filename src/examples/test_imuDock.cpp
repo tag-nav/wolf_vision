@@ -21,6 +21,8 @@
 #include <iostream>
 #include <fstream>
 
+#define OUTPUT_RESULTS
+
 /*                              OFFLINE VERSION
     In this test, we use the experimental conditions needed for Humanoids 2017.
     IMU data are acquired using the docking station. 
@@ -73,6 +75,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
+    #ifdef OUTPUT_RESULTS
+        //define output file
+        std::ofstream output_results_before, output_results_after;
+        output_results_before.open("imu_dock_beforeOptim.dat");
+        output_results_after.open("imu_dock_afterOptim.dat");
+    #endif
+
     // ___initialize variabes that will be used through the code___
     Eigen::VectorXs problem_origin(16);
     problem_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0.;
@@ -81,7 +90,7 @@ int main(int argc, char** argv)
     //Create vectors to store data and time
     Eigen::Vector6s data_imu, data_odom;
     Scalar clock;
-    TimeStamp ts(0); //will be used to store the data timestamps and set timestamps in captures
+    TimeStamp ts(0), ts_output(0); //will be used to store the data timestamps and set timestamps in captures
 
     // ___Define expected values___
     Eigen::Vector7s expected_KF1_pose((Eigen::Vector7s()<<0,0,0,0,0,0,1).finished()), expected_KF2_pose((Eigen::Vector7s()<<0,-0.06,0,0,0,0,11).finished());
@@ -174,6 +183,23 @@ int main(int argc, char** argv)
     KF2->getAccBiasPtr()->unfix();
     KF2->getGyroBiasPtr()->unfix();
 
+    #ifdef OUTPUT_RESULTS
+        // ___OUTPUT___
+        /* Produce output file for matlab visualization
+         * first output : estimated trajectory BEFORE optimization (getting the states each millisecond)
+         */
+
+        unsigned int time_iter(0);
+        Scalar ms(0.001);
+        ts_output.set(0);
+        while(ts_output.get() < ts.get())
+        {
+            output_results_before << ts_output.get() << "\t" << problem->getState(ts_output).transpose() << std::endl;
+            time_iter++;
+            ts_output.set(time_iter * ms);
+        }
+    #endif
+
     // ___Solve + compute covariances___
     problem->print(4,0,1,0);
     ceres::Solver::Summary summary = ceres_manager->solve();
@@ -181,6 +207,23 @@ int main(int argc, char** argv)
     problem->print(4,0,1,0);
 
     //#################################################### RESULTS PART
+
+    #ifdef OUTPUT_RESULTS
+        // ___OUTPUT___
+        /* Produce output file for matlab visualization
+         * Second output: estimated trajectory AFTER optimization 
+         */
+
+        time_iter = 0;
+        ts_output.set(0);
+        while(ts_output.get() < ts.get())
+        {
+            output_results_after << ts_output.get() << "\t" << problem->getState(ts_output).transpose() << std::endl;
+            time_iter++;
+            ts_output.set(time_iter * ms);
+        }
+    #endif
+
     // ___Get standard deviation from covariances___
     Eigen::MatrixXs cov_KF1(16,16), cov_KF2(16,16);
 
