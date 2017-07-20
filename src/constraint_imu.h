@@ -180,43 +180,49 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
                                        const T* const _p2, const T* const _q2, const T* const _v2, const T* const _ab2, const T* const _wb2,
                                        T* _residuals) const
 {
+    using namespace Eigen;
+
     // MAPS
-    Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
-//    const Eigen::Quaternion<T> q1(_q1);
-    Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
-    Eigen::Map<const Eigen::Matrix<T,3,1> > v1(_v1);
-    Eigen::Map<const Eigen::Matrix<T,3,1> > ab1(_ab1);
-    Eigen::Map<const Eigen::Matrix<T,3,1> > wb1(_wb1);
+    Map<const Matrix<T,3,1> > p1(_p1);
+    Map<const Quaternion<T> > q1(_q1);
+    Map<const Matrix<T,3,1> > v1(_v1);
+    Map<const Matrix<T,3,1> > ab1(_ab1);
+    Map<const Matrix<T,3,1> > wb1(_wb1);
 
-    Eigen::Map<const Eigen::Matrix<T,3,1> > p2(_p2);
-    Eigen::Map<const Eigen::Quaternion<T> > q2(_q2);
-    Eigen::Map<const Eigen::Matrix<T,3,1> > v2(_v2);
-    Eigen::Map<const Eigen::Matrix<T,3,1> > ab2(_ab2);
-    Eigen::Map<const Eigen::Matrix<T,3,1> > wb2(_wb2);
+    Map<const Matrix<T,3,1> > p2(_p2);
+    Map<const Quaternion<T> > q2(_q2);
+    Map<const Matrix<T,3,1> > v2(_v2);
+    Map<const Matrix<T,3,1> > ab2(_ab2);
+    Map<const Matrix<T,3,1> > wb2(_wb2);
 
-    Eigen::Map<Eigen::Matrix<T,15,1> > residuals(_residuals);
+    Map<Matrix<T,15,1> > residuals(_residuals);
 
 
     // Predict delta: d_pred = x2 (-) x1
-    Eigen::Matrix<T,3,1> dp_predict = q1.conjugate() * ( p2 - p1 - v1 * (T)dt_ - (T)0.5 * g_.cast<T>() * (T)dt_2_ );
-    Eigen::Matrix<T,3,1> dv_predict = q1.conjugate() * ( v2 - v1 - g_.cast<T>() * (T)dt_ );
-    Eigen::Quaternion<T> dq_predict = q1.conjugate() * q2;
+    Matrix<T,3,1> dp_predict = q1.conjugate() * ( p2 - p1 - v1 * (T)dt_ - (T)0.5 * g_.cast<T>() * (T)dt_2_ );
+    Matrix<T,3,1> dv_predict = q1.conjugate() * ( v2 - v1 - g_.cast<T>() * (T)dt_ );
+    Quaternion<T> dq_predict = q1.conjugate() * q2;
 
-    // Correct measured delta: delta_corr = delta + J_bias * (bias - bias_measured)
-    Eigen::Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>() * (ab1 - acc_bias_preint_.cast<T>()) + dDp_dwb_.cast<T>() * (wb1 - gyro_bias_preint_.cast<T>());
-    Eigen::Matrix<T,3,1> dv_correct = dv_preint_.cast<T>() + dDv_dab_.cast<T>() * (ab1 - acc_bias_preint_.cast<T>()) + dDv_dwb_.cast<T>() * (wb1 - gyro_bias_preint_.cast<T>());
-    Eigen::Matrix<T,3,1> do_step    = dDq_dwb_  .cast<T>() * (wb1 - gyro_bias_preint_.cast<T>());
-    Eigen::Quaternion<T> dq_correct = dq_preint_.cast<T>() * v2q(do_step);
+    // Bias increments due to optimization updates
+    Matrix<T,3,1> dab1 = ab1 - acc_bias_preint_.cast<T>();
+    Matrix<T,3,1> dwb1 = wb1 - gyro_bias_preint_.cast<T>();
+
+    // Correct measured delta: delta_corr = delta + J_bias * bias_increment
+    Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>() * dab1 + dDp_dwb_.cast<T>() * dwb1;
+    Matrix<T,3,1> dv_correct = dv_preint_.cast<T>() + dDv_dab_.cast<T>() * dab1 + dDv_dwb_.cast<T>() * dwb1;
+    Matrix<T,3,1> do_step    = dDq_dwb_  .cast<T>() * dwb1;
+    Quaternion<T> dq_correct = dq_preint_.cast<T>() * v2q(do_step);
 
     // Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
     // Note the Dt here is zero because it's the delta-time between the same time stamps!
-    Eigen::Matrix<T,3,1> dp_error   = dp_predict - dp_correct;
-    Eigen::Matrix<T,3,1> dv_error   = dv_predict - dv_correct;
-    Eigen::Matrix<T,3,1> do_error   = q2v(dq_correct.conjugate() * dq_predict); // In the name, 'o' of orientation, not 'q'
-    Eigen::Matrix<T,3,1> ab_error(ab1 - ab2); //bias used for preintegration - bias in KeyFrame
-    Eigen::Matrix<T,3,1> wb_error(wb1 - wb2);
+    // Note that we use P and V errors without rotation, since they should be zero anyway.
+    Matrix<T,3,1> dp_error   = dp_predict - dp_correct;
+    Matrix<T,3,1> dv_error   = dv_predict - dv_correct;
+    Matrix<T,3,1> do_error   = q2v(dq_correct.conjugate() * dq_predict); // In the name, 'o' of orientation, not 'q'
+    Matrix<T,3,1> ab_error(ab1 - ab2); //bias used for preintegration - bias in KeyFrame
+    Matrix<T,3,1> wb_error(wb1 - wb2);
 
-    Eigen::Matrix<T,9,1> dpov_error((Eigen::Matrix<T,9,1>() << dp_error, do_error, dv_error).finished());
+    Matrix<T,9,1> dpov_error((Matrix<T,9,1>() << dp_error, do_error, dv_error).finished());
 
     // Assign to residuals vector
     residuals.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * dpov_error;
