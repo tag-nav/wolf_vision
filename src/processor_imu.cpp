@@ -29,9 +29,21 @@ ProcessorIMU::~ProcessorIMU()
 //    std::cout << "destructed     -p-IMU" << id() << std::endl;
 }
 
-VectorXs ProcessorIMU::correctDelta(const VectorXs& _delta, const CaptureMotionPtr _capture)
+VectorXs ProcessorIMU::correctDelta(const VectorXs& _delta, Scalar _dt, const CaptureMotionPtr _capture)
 {
-    // Correct measured delta: delta_corr = delta + J_bias * (bias - bias_measured)
+    // Full delta time interval
+    Scalar Dt = _capture->getTimeStamp() - _capture->getOriginFramePtr()->getTimeStamp();
+    // Linear interpolation factor
+    Scalar alpha = Dt > Constants::EPS_SMALL ? _dt/Dt : 1.0;
+
+    /* Correct measured delta: delta_corr = delta + alpha * J_bias * (bias - bias_preint)
+     * where:
+     *   delta       = pre-integrated delta at time dt
+     *   J_bias      = Jacobian of the preintegrated delta at time Dt
+     *   alpha       = interpolation factor from dt=0 to dt=Dt
+     *   bias        = current bias estimate
+     *   bias_preint = bias estimate when we performed the pre-integration
+     */
 
     // Get current biases
     FrameIMUPtr frame = std::static_pointer_cast<FrameIMU>(_capture->getFramePtr());
@@ -42,14 +54,14 @@ VectorXs ProcessorIMU::correctDelta(const VectorXs& _delta, const CaptureMotionP
     FeatureIMUPtr feature = std::static_pointer_cast<FeatureIMU>(_capture->getFeatureList().front());
     VectorXs delta_correct(10);
     // P
-    delta_correct.head(3)      = _delta.head(3) + feature->dDp_dab_ * (ab1 - feature->acc_bias_preint_) + feature->dDp_dwb_ * (wb1 - feature->gyro_bias_preint_);
+    delta_correct.head(3)      = _delta.head(3) + alpha * feature->dDp_dab_ * (ab1 - feature->acc_bias_preint_) + alpha * feature->dDp_dwb_ * (wb1 - feature->gyro_bias_preint_);
     // Q
-    Eigen::Vector3s do_step    = feature->dDq_dwb_ * (wb1 - feature->gyro_bias_preint_);
+    Eigen::Vector3s do_step    = alpha * feature->dDq_dwb_ * (wb1 - feature->gyro_bias_preint_);
     Map<const Quaternions> dq(_delta.data() + 3);
     Map<Quaternions> dq_correct(delta_correct.data() + 3);
     dq_correct = dq * v2q(do_step);
     // V
-    delta_correct.tail(3)      = _delta.tail(3) + feature->dDv_dab_ * (ab1 - feature->acc_bias_preint_) + feature->dDv_dwb_ * (wb1 - feature->gyro_bias_preint_);
+    delta_correct.tail(3)      = _delta.tail(3) + alpha * feature->dDv_dab_ * (ab1 - feature->acc_bias_preint_) + alpha * feature->dDv_dwb_ * (wb1 - feature->gyro_bias_preint_);
 
     return delta_correct;
 }

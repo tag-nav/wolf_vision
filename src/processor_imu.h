@@ -41,7 +41,7 @@ class ProcessorIMU : public ProcessorMotion{
         //void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
 
     protected:
-        virtual VectorXs correctDelta(const VectorXs& _delta, const CaptureMotionPtr _capture);
+        virtual VectorXs correctDelta(const VectorXs& _delta, Scalar _dt, const CaptureMotionPtr _capture);
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
                                 const Scalar _dt);
