@@ -347,9 +347,9 @@ class ProcessorMotion : public ProcessorBase
          * and can be overloaded in derived classes.
          * @return the corrected delta.
          */
-        virtual VectorXs correctDelta(const VectorXs & _delta, Scalar _dt, const CaptureMotionPtr _capture)
+        virtual VectorXs correctDelta(const Motion & _motion, Scalar _dt, const CaptureMotionPtr _capture)
         {
-            return _delta;
+            return _motion.delta_integr_;
         }
 
 
@@ -728,10 +728,11 @@ inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
         {
             // We found a CaptureMotion whose buffer contains the time stamp
             VectorXs         state_0        = capture_motion->getOriginFramePtr()->getState();
+            Motion           motion         = capture_motion->getBuffer().getMotion(_ts);
             VectorXs         delta          = capture_motion->getBuffer().getDelta(_ts);
             Scalar           dt             = _ts - capture_motion->getBuffer().get().front().ts_;
 
-            VectorXs delta_corrected = correctDelta(delta, dt, capture_motion);
+            VectorXs delta_corrected = correctDelta(motion, dt, capture_motion);
 
             statePlusDelta(state_0, delta_corrected, dt, _x);
         }

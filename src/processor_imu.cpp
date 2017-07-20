@@ -29,8 +29,9 @@ ProcessorIMU::~ProcessorIMU()
 //    std::cout << "destructed     -p-IMU" << id() << std::endl;
 }
 
-VectorXs ProcessorIMU::correctDelta(const VectorXs& _delta, Scalar _dt, const CaptureMotionPtr _capture)
+VectorXs ProcessorIMU::correctDelta(const Motion& _motion, Scalar _dt, const CaptureMotionPtr _capture)
 {
+
     // Full delta time interval
     Scalar Dt = _capture->getTimeStamp() - _capture->getOriginFramePtr()->getTimeStamp();
     // Linear interpolation factor
@@ -47,21 +48,43 @@ VectorXs ProcessorIMU::correctDelta(const VectorXs& _delta, Scalar _dt, const Ca
 
     // Get current biases
     FrameIMUPtr frame = std::static_pointer_cast<FrameIMU>(_capture->getFramePtr());
-    Vector3s ab1 = frame->getAccBiasPtr()->getState();
-    Vector3s wb1 = frame->getGyroBiasPtr()->getState();
+    Vector3s ab = frame->getAccBiasPtr()->getState();
+    Vector3s wb = frame->getGyroBiasPtr()->getState();
 
-    // Get biases at integration time, and Jacobians, from the only feature in the capture, and do the correction
+    // Get the only feature in the capture
     FeatureIMUPtr feature = std::static_pointer_cast<FeatureIMU>(_capture->getFeatureList().front());
+
+    // Compute bias change
+    Vector3s dab = ab - feature->acc_bias_preint_;
+    Vector3s dwb = wb - feature->gyro_bias_preint_;
+//    Vector6s db; db << dab, dwb;
+//
+//    // Get the Jacobian // TODO get it from the Motion
+//    MatrixXs J(9,6);
+//    J.topLeftCorner(3,3) = feature->dDp_dab_;
+//    J.topRightCorner(3,3) = feature->dDp_dwb_;
+//    J.block(3,0,3,3) = Matrix3s::Zero();
+//    J.block(3,3,3,3) = feature->dDq_dwb_;
+//    J.bottomLeftCorner(3,3) = feature->dDv_dab_;
+//    J.bottomRightCorner(3,3) = feature->dDv_dwb_;
+//    J *= alpha; // linear intermpolation
+//
+//    // Do the correction
+//    VectorXs delta_corr_tangent(9);
+//    delta_corr_tangent = delta + J * db;
+
+
+    VectorXs delta = _motion.delta_integr_;
     VectorXs delta_correct(10);
     // P
-    delta_correct.head(3)      = _delta.head(3) + alpha * feature->dDp_dab_ * (ab1 - feature->acc_bias_preint_) + alpha * feature->dDp_dwb_ * (wb1 - feature->gyro_bias_preint_);
+    delta_correct.head(3)      = delta.head(3) + alpha * feature->dDp_dab_ * dab + alpha * feature->dDp_dwb_ * dwb;
     // Q
-    Eigen::Vector3s do_step    = alpha * feature->dDq_dwb_ * (wb1 - feature->gyro_bias_preint_);
-    Map<const Quaternions> dq(_delta.data() + 3);
+    Eigen::Vector3s do_step    = alpha * feature->dDq_dwb_ * dwb;
+    Map<const Quaternions> dq(delta.data() + 3);
     Map<Quaternions> dq_correct(delta_correct.data() + 3);
     dq_correct = dq * v2q(do_step);
     // V
-    delta_correct.tail(3)      = _delta.tail(3) + alpha * feature->dDv_dab_ * (ab1 - feature->acc_bias_preint_) + alpha * feature->dDv_dwb_ * (wb1 - feature->gyro_bias_preint_);
+    delta_correct.tail(3)      = delta.tail(3) + alpha * feature->dDv_dab_ * dab + alpha * feature->dDv_dwb_ * dwb;
 
     return delta_correct;
 }
