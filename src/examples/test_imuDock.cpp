@@ -77,9 +77,10 @@ int main(int argc, char** argv)
 
     #ifdef OUTPUT_RESULTS
         //define output file
-        std::ofstream output_results_before, output_results_after;
+        std::ofstream output_results_before, output_results_after, checking;
         output_results_before.open("imu_dock_beforeOptim.dat");
         output_results_after.open("imu_dock_afterOptim.dat");
+        checking.open("KF2_pose_stdev.dat");
     #endif
 
     // ___initialize variabes that will be used through the code___
@@ -231,7 +232,7 @@ int main(int argc, char** argv)
          */
 
         //KF2 position stdev
-        output_results_after << KF2->getTimeStamp().get() << stdev_KF2.transpose() << std::endl;
+        checking << KF2->getTimeStamp().get() << stdev_KF2.transpose() << std::endl;
 
         //estimated trajectort
         time_iter = 0;
@@ -244,7 +245,7 @@ int main(int argc, char** argv)
         }
 
         //finally, output the timestamp and state associated to KF2
-        output_results_after << KF2->getTimeStamp().get() << "\t" << KF2->getState().transpose() << std::endl;
+        checking << KF2->getTimeStamp().get() << "\t" << KF2->getState().transpose() << std::endl;
     #endif
     
     // ___Are expected values in the range of estimated +/- 2*stdev ?___
@@ -252,6 +253,7 @@ int main(int argc, char** argv)
     #ifdef OUTPUT_RESULTS
         output_results_before.close();
         output_results_after.close();
+        checking.close();
     #endif
 
     return 0;
