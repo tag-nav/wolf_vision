@@ -29,6 +29,31 @@ ProcessorIMU::~ProcessorIMU()
 //    std::cout << "destructed     -p-IMU" << id() << std::endl;
 }
 
+VectorXs ProcessorIMU::correctDelta(const VectorXs& _delta, const CaptureMotionPtr _capture)
+{
+    // Correct measured delta: delta_corr = delta + J_bias * (bias - bias_measured)
+
+    // Get current biases
+    FrameIMUPtr frame = std::static_pointer_cast<FrameIMU>(_capture->getFramePtr());
+    Vector3s ab1 = frame->getAccBiasPtr()->getState();
+    Vector3s wb1 = frame->getGyroBiasPtr()->getState();
+
+    // Get biases at integration time, and Jacobians, from the only feature in the capture, and do the correction
+    FeatureIMUPtr feature = std::static_pointer_cast<FeatureIMU>(_capture->getFeatureList().front());
+    VectorXs delta_correct(10);
+    // P
+    delta_correct.head(3)      = _delta.head(3) + feature->dDp_dab_ * (ab1 - feature->acc_bias_preint_) + feature->dDp_dwb_ * (wb1 - feature->gyro_bias_preint_);
+    // Q
+    Eigen::Vector3s do_step    = feature->dDq_dwb_ * (wb1 - feature->gyro_bias_preint_);
+    Map<const Quaternions> dq(_delta.data() + 3);
+    Map<Quaternions> dq_correct(delta_correct.data() + 3);
+    dq_correct = dq * v2q(do_step);
+    // V
+    delta_correct.tail(3)      = _delta.tail(3) + feature->dDv_dab_ * (ab1 - feature->acc_bias_preint_) + feature->dDv_dwb_ * (wb1 - feature->gyro_bias_preint_);
+
+    return delta_correct;
+}
+
 ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
     // cast inputs to the correct type
