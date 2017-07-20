@@ -41,7 +41,6 @@ class ProcessorIMU : public ProcessorMotion{
         //void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
 
     protected:
-        virtual VectorXs correctDelta(const VectorXs& _delta, Scalar _dt, const CaptureMotionPtr _capture);
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
                                 const Scalar _dt);
@@ -60,6 +59,7 @@ class ProcessorIMU : public ProcessorMotion{
                                 const Scalar _dt,
                                 Eigen::VectorXs& _x_plus_delta );
         virtual Eigen::VectorXs deltaZero() const;
+        virtual VectorXs correctDelta(const VectorXs& _delta, Scalar _dt, const CaptureMotionPtr _capture);
         virtual Motion interpolate(const Motion& _motion_ref,
                                    Motion& _motion,
                                    TimeStamp& _ts);
@@ -298,8 +298,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
     dDv_dab_            -= DR * _dt;
     dDp_dwb_.noalias()  += dDv_dwb_ * _dt - M_tmp * dt2_2;
     dDv_dwb_            -= M_tmp * _dt;
-    //    dDq_dwb_       = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16 -- we'll use small angle aprox below:
-    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Eigen::Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
+    dDq_dwb_       = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16 -- we'll use small angle aprox below:
+    //    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Eigen::Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
 
 
     /*//////////////////////////////////////////////////////////////////////////

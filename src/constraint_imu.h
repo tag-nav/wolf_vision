@@ -182,8 +182,8 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
 {
     // MAPS
     Eigen::Map<const Eigen::Matrix<T,3,1> > p1(_p1);
-    const Eigen::Quaternion<T> q1(_q1);
-    //Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
+//    const Eigen::Quaternion<T> q1(_q1);
+    Eigen::Map<const Eigen::Quaternion<T> > q1(_q1);
     Eigen::Map<const Eigen::Matrix<T,3,1> > v1(_v1);
     Eigen::Map<const Eigen::Matrix<T,3,1> > ab1(_ab1);
     Eigen::Map<const Eigen::Matrix<T,3,1> > wb1(_wb1);
@@ -216,7 +216,7 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
     Eigen::Matrix<T,3,1> ab_error(ab1 - ab2); //bias used for preintegration - bias in KeyFrame
     Eigen::Matrix<T,3,1> wb_error(wb1 - wb2);
 
-    Eigen::Matrix<T,9,1> dpov_error((Eigen::Matrix<T,9,1>() << dp_error, dv_error, do_error).finished());
+    Eigen::Matrix<T,9,1> dpov_error((Eigen::Matrix<T,9,1>() << dp_error, do_error, dv_error).finished());
 
     // Assign to residuals vector
     residuals.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * dpov_error;
@@ -263,7 +263,7 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const
     Eigen::Matrix<DataType,3,1> ab_error(ab1 - ab2); // KF1.bias - KF2.bias
     Eigen::Matrix<DataType,3,1> wb_error(wb1 - wb2);
 
-    Eigen::Matrix<DataType,9,1> dpov_error((Eigen::Matrix<DataType,9,1>() << dp_error, dv_error, do_error).finished());
+    Eigen::Matrix<DataType,9,1> dpov_error((Eigen::Matrix<DataType,9,1>() << dp_error, do_error, dv_error).finished());
     Eigen::Matrix<DataType,9,1> dpov_error_w(getMeasurementSquareRootInformationTransposed().cast<DataType>()  * dpov_error);
 
     // Assign to residuals vector
