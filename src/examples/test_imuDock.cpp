@@ -240,5 +240,10 @@ int main(int argc, char** argv)
     
     // ___Are expected values in the range of estimated +/- 2*stdev ?___
 
+    #ifdef OUTPUT_RESULTS
+        output_results_before.close();
+        output_results_after.close()
+    #endif
+
     return 0;
 }
