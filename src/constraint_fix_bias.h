@@ -24,13 +24,13 @@ class ConstraintFixBias: public ConstraintSparse<6,3,3>
                 ConstraintSparse<6, 3, 3>(CTR_FIX_BIAS, _apply_loss_function, _status, std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getAccBiasPtr(),
                                           std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getGyroBiasPtr())
         {
-            setType("FIX_BIAS");
-//            std::cout << "created ConstraintFixBias " << std::endl;
+            setType("FIX BIAS");
+            // std::cout << "created ConstraintFixBias " << std::endl;
         }
 
         virtual ~ConstraintFixBias()
         {
-//            std::cout << "destructed ConstraintFixBias " << std::endl;
+            // std::cout << "destructed ConstraintFixBias " << std::endl;
             //
         }
 
