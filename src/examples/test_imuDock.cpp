@@ -192,7 +192,7 @@ int main(int argc, char** argv)
         unsigned int time_iter(0);
         Scalar ms(0.001);
         ts_output.set(0);
-        while(ts_output.get() < ts.get())
+        while(ts_output.get() < ts.get() + ms)
         {
             output_results_before << ts_output.get() << "\t" << problem->getState(ts_output).transpose() << std::endl;
             time_iter++;
@@ -208,22 +208,6 @@ int main(int argc, char** argv)
 
     //#################################################### RESULTS PART
 
-    #ifdef OUTPUT_RESULTS
-        // ___OUTPUT___
-        /* Produce output file for matlab visualization
-         * Second output: estimated trajectory AFTER optimization 
-         */
-
-        time_iter = 0;
-        ts_output.set(0);
-        while(ts_output.get() < ts.get())
-        {
-            output_results_after << ts_output.get() << "\t" << problem->getState(ts_output).transpose() << std::endl;
-            time_iter++;
-            ts_output.set(time_iter * ms);
-        }
-    #endif
-
     // ___Get standard deviation from covariances___
     Eigen::MatrixXs cov_KF1(16,16), cov_KF2(16,16);
 
@@ -237,12 +221,37 @@ int main(int argc, char** argv)
 
     WOLF_DEBUG("stdev KF1 : ", stdev_KF1.transpose());
     WOLF_DEBUG("stdev KF2 : ", stdev_KF2.transpose());
+
+    #ifdef OUTPUT_RESULTS
+        // ___OUTPUT___
+        /* Produce output file for matlab visualization
+         * Second output:   KF2 position standard deviation computed
+         *                  estimated trajectory AFTER optimization 
+         *                  + get KF2 timestamp + state just in case the loop is not working as expected
+         */
+
+        //KF2 position stdev
+        output_results_after << KF2->getTimeStamp().get() << stdev_KF2.transpose() << std::endl;
+
+        //estimated trajectort
+        time_iter = 0;
+        ts_output.set(0);
+        while(ts_output.get() < ts.get() + ms)
+        {
+            output_results_after << ts_output.get() << "\t" << problem->getState(ts_output).transpose() << std::endl;
+            time_iter++;
+            ts_output.set(time_iter * ms);
+        }
+
+        //finally, output the timestamp and state associated to KF2
+        output_results_after << KF2->getTimeStamp().get() << "\t" << KF2->getState().transpose() << std::endl;
+    #endif
     
     // ___Are expected values in the range of estimated +/- 2*stdev ?___
 
     #ifdef OUTPUT_RESULTS
         output_results_before.close();
-        output_results_after.close()
+        output_results_after.close();
     #endif
 
     return 0;
