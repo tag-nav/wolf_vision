@@ -146,6 +146,8 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
 {
     assert(_data.size() == data_size_ && "Wrong data size!");
 
+    using namespace Eigen;
+
     // remap
     remapData(_data);
     remapDelta(delta_);
@@ -158,8 +160,8 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
      */
 
     // acc and gyro measurements corrected with the estimated bias
-    Eigen::Vector3s a = acc_measured_  - acc_bias_;
-    Eigen::Vector3s w = gyro_measured_ - gyro_bias_;
+    Vector3s a = acc_measured_  - acc_bias_;
+    Vector3s w = gyro_measured_ - gyro_bias_;
 
     // create delta
     Dv_out_ = a * _dt;
@@ -177,10 +179,10 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
      */
 
     // we go the sparse way:
-    Eigen::Matrix3s ddv_dan = Eigen::Matrix3s::Identity() * _dt;
-    Eigen::Matrix3s ddp_dan = ddv_dan * _dt / 2;
-    //    Eigen::Matrix3s ddo_dwn = jac_SO3_right(w * _dt) * _dt; // Since w*dt is small, we could use here  Jr(wdt) ~ (I - 0.5*[wdt]_x)  and go much faster.
-    Eigen::Matrix3s ddo_dwn = (Eigen::Matrix3s::Identity() - 0.5 * skew(w * _dt) ) * _dt; // voila, the comment above is this
+    Matrix3s ddv_dan = Matrix3s::Identity() * _dt;
+    Matrix3s ddp_dan = ddv_dan * _dt / 2;
+    Matrix3s ddo_dwn = jac_SO3_right(w * _dt) * _dt; // Since w*dt is small, we could use here  Jr(wdt) ~ (I - 0.5*[wdt]_x)  and go much faster.
+    //    Matrix3s ddo_dwn = (Matrix3s::Identity() - 0.5 * skew(w * _dt) ) * _dt; // voila, the comment above is this
 
     /* Covariance is sparse:
      *       [ Cpp   0   Cpv
@@ -256,21 +258,21 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
      */
 
     // Some useful temporaries
-    Eigen::Matrix3s DR = Dq_.matrix(); // First  Delta, DR
-    Eigen::Matrix3s dR = dq_.matrix(); // Second delta, dR
+    Matrix3s DR = Dq_.matrix(); // First  Delta, DR
+    Matrix3s dR = dq_.matrix(); // Second delta, dR
 
     // Jac wrt preintegrated delta, D_D = dD'/dD
-//    _jacobian_delta_preint.block<6,6>(0,0).setIdentity(6,6);                     // dDp'/dDp, dDv'/dDv, Identities
+    _jacobian_delta_preint.block<6,6>(0,0).setIdentity(6,6);                    // dDp'/dDp, dDv'/dDv, Identities
     _jacobian_delta_preint.block<3,3>(0,3).noalias() = - DR * skew(dp_) ;       // dDp'/dDo
-    _jacobian_delta_preint.block<3,3>(0,6) = Eigen::Matrix3s::Identity() * _dt; // dDp'/dDv = I*dt
+    _jacobian_delta_preint.block<3,3>(0,6) = Matrix3s::Identity() * _dt; // dDp'/dDv = I*dt
     _jacobian_delta_preint.block<3,3>(3,3) =   dR.transpose();                  // dDo'/dDo
     _jacobian_delta_preint.block<3,3>(6,3).noalias() = - DR * skew(dv_) ;       // dDv'/dDo
 
     // Jac wrt current delta, D_d = dD'/dd
-//    _jacobian_delta.setIdentity(9,9);                                           //
+    _jacobian_delta.setIdentity(9,9);                                           //
     _jacobian_delta.block<3,3>(0,0) = DR;                                       // dDp'/ddp
     _jacobian_delta.block<3,3>(6,6) = DR;                                       // dDv'/ddv
-//    _jacobian_delta.block<3,3>(3,3) = Eigen::Matrix3s::Identity();        // dDo'/ddo = I
+    _jacobian_delta.block<3,3>(3,3) = Matrix3s::Identity();        // dDo'/ddo = I
 
 
 
@@ -287,19 +289,19 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
       */
 
     // acc and gyro measurements corrected with the estimated bias
-    Eigen::Vector3s a = acc_measured_  - acc_bias_;
-    Eigen::Vector3s w = gyro_measured_ - gyro_bias_;
+    Vector3s a = acc_measured_  - acc_bias_;
+    Vector3s w = gyro_measured_ - gyro_bias_;
 
     // temporaries
     Scalar dt2_2            = 0.5 * _dt * _dt;
-    Eigen::Matrix3s M_tmp   = DR * skew(a) * dDq_dwb_;
+    Matrix3s M_tmp   = DR * skew(a) * dDq_dwb_;
 
     dDp_dab_.noalias()  += dDv_dab_ * _dt -  DR * dt2_2;
     dDv_dab_            -= DR * _dt;
     dDp_dwb_.noalias()  += dDv_dwb_ * _dt - M_tmp * dt2_2;
     dDv_dwb_            -= M_tmp * _dt;
     dDq_dwb_       = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16 -- we'll use small angle aprox below:
-    //    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Eigen::Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
+    //    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
 
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -355,7 +357,7 @@ inline void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x,
     assert(_dt >= 0 && "Time interval _Dt is negative!");
 
 
-    Eigen::Vector3s gdt = gravity_ * _dt;
+    Vector3s gdt = gravity_ * _dt;
 
     // state updates
     remapPQV(_x, _delta, _x_plus_delta);
@@ -505,7 +507,7 @@ inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureMotionPtr _capture_mot
     // CaptureIMUPtr capt_imu = std::static_pointer_cast<CaptureIMU>(_capture_motion);
     FrameIMUPtr key_frame_ptr = std::static_pointer_cast<FrameIMU>(_related_frame);
     // create motion feature and add it to the key_capture
-    Eigen::MatrixXs delta_integr_cov(integrateBufferCovariance(_capture_motion->getBuffer()));
+    MatrixXs delta_integr_cov(integrateBufferCovariance(_capture_motion->getBuffer()));
     FeatureIMUPtr key_feature_ptr = std::make_shared<FeatureIMU>(
             _capture_motion->getBuffer().get().back().delta_integr_,
             delta_integr_cov,
@@ -521,30 +523,30 @@ inline void ProcessorIMU::remapPQV(const Eigen::VectorXs& _delta1,
                                    const Eigen::VectorXs& _delta2,
                                    Eigen::VectorXs& _delta_out)
 {
-    new (&Dp_) Eigen::Map<const Eigen::Vector3s>    (_delta1.data() + 0);
-    new (&Dq_) Eigen::Map<const Eigen::Quaternions> (_delta1.data() + 3);
-    new (&Dv_) Eigen::Map<const Eigen::Vector3s>    (_delta1.data() + 7);
+    new (&Dp_) Map<const Vector3s>    (_delta1.data() + 0);
+    new (&Dq_) Map<const Quaternions> (_delta1.data() + 3);
+    new (&Dv_) Map<const Vector3s>    (_delta1.data() + 7);
 
-    new (&dp_) Eigen::Map<const Eigen::Vector3s>    (_delta2.data() + 0);
-    new (&dq_) Eigen::Map<const Eigen::Quaternions> (_delta2.data() + 3);
-    new (&dv_) Eigen::Map<const Eigen::Vector3s>    (_delta2.data() + 7);
+    new (&dp_) Map<const Vector3s>    (_delta2.data() + 0);
+    new (&dq_) Map<const Quaternions> (_delta2.data() + 3);
+    new (&dv_) Map<const Vector3s>    (_delta2.data() + 7);
 
-    new (&Dp_out_) Eigen::Map<Eigen::Vector3s>      (_delta_out.data() + 0);
-    new (&Dq_out_) Eigen::Map<Eigen::Quaternions>   (_delta_out.data() + 3);
-    new (&Dv_out_) Eigen::Map<Eigen::Vector3s>      (_delta_out.data() + 7);
+    new (&Dp_out_) Map<Vector3s>      (_delta_out.data() + 0);
+    new (&Dq_out_) Map<Quaternions>   (_delta_out.data() + 3);
+    new (&Dv_out_) Map<Vector3s>      (_delta_out.data() + 7);
 }
 
 inline void ProcessorIMU::remapDelta(Eigen::VectorXs& _delta_out)
 {
-    new (&Dp_out_) Eigen::Map<Eigen::Vector3s>      (_delta_out.data() + 0);
-    new (&Dq_out_) Eigen::Map<Eigen::Quaternions>   (_delta_out.data() + 3);
-    new (&Dv_out_) Eigen::Map<Eigen::Vector3s>      (_delta_out.data() + 7);
+    new (&Dp_out_) Map<Vector3s>      (_delta_out.data() + 0);
+    new (&Dq_out_) Map<Quaternions>   (_delta_out.data() + 3);
+    new (&Dv_out_) Map<Vector3s>      (_delta_out.data() + 7);
 }
 
 inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
 {
-    new (&acc_measured_) Eigen::Map<const Eigen::Vector3s>(_data.data());
-    new (&gyro_measured_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
+    new (&acc_measured_) Map<const Vector3s>(_data.data());
+    new (&gyro_measured_) Map<const Vector3s>(_data.data() + 3);
 }
 
 inline void ProcessorIMU::getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb)
@@ -566,7 +568,7 @@ inline void ProcessorIMU::getJacobians(Eigen::Matrix<wolf::Scalar,9,6>& _dD_db)
     */
 
     _dD_db.block(0,0,3,3) = dDp_dab_;
-    _dD_db.block(3,0,3,3) = Eigen::Matrix3s::Zero();
+    _dD_db.block(3,0,3,3) = Matrix3s::Zero();
     _dD_db.block(6,0,3,3) = dDv_dab_;
     _dD_db.block(0,3,3,3) = dDp_dwb_;
     _dD_db.block(3,3,3,3) = dDq_dwb_;
@@ -581,10 +583,10 @@ inline Eigen::Matrix<wolf::Scalar,9,6> ProcessorIMU::getJacobians()
             [ dDq_dab  dDq_dwb ] 
             [ dDv_dab  dDv_dwb ]
     */
-    Eigen::Matrix<wolf::Scalar,9,6> dD_db;
+    Matrix<wolf::Scalar,9,6> dD_db;
 
     dD_db.block(0,0,3,3) = dDp_dab_;
-    dD_db.block(3,0,3,3) = Eigen::Matrix3s::Zero();
+    dD_db.block(3,0,3,3) = Matrix3s::Zero();
     dD_db.block(6,0,3,3) = dDv_dab_;
     dD_db.block(0,3,3,3) = dDp_dwb_;
     dD_db.block(3,3,3,3) = dDq_dwb_;
