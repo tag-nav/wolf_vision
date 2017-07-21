@@ -301,10 +301,10 @@ int main(int argc, char** argv)
 
         //finally, output the timestamp, state and stdev associated to KFs
         #ifdef ADD_KF3
-            checking << KF2->getTimeStamp().get() << "\t" << KF2->getState().transpose() << stdev_KF2.transpose() << std::endl;
-            checking << KF3->getTimeStamp().get() << "\t" << KF3->getState().transpose() << stdev_KF3.transpose() << std::endl;
+            checking << KF2->getTimeStamp().get() << "\t" << KF2->getState().transpose() << "\t" << stdev_KF2.transpose() << std::endl;
+            checking << KF3->getTimeStamp().get() << "\t" << KF3->getState().transpose() << "\t" << stdev_KF3.transpose() << std::endl;
         #else
-            checking << KF2->getTimeStamp().get() << "\t" << KF2->getState().transpose() << stdev_KF2.transpose() << std::endl;
+            checking << KF2->getTimeStamp().get() << "\t" << KF2->getState().transpose() << "\t" << stdev_KF2.transpose() << std::endl;
         #endif
     #endif
     
