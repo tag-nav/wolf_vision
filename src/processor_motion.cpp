@@ -344,6 +344,8 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
         deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, dt, motion_it->delta_integr_,
                        motion_it->jacobian_delta_integr_, motion_it->jacobian_delta_);
 
+        motion_it->jacobian_extra_ = jacobian_extra_;
+
         // advance in buffer
         motion_it++;
         prev_motion_it++;
