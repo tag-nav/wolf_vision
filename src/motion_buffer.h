@@ -33,8 +33,7 @@ struct Motion
     public:
         Motion();
         Motion(const TimeStamp& _ts, Size _delta_size = 0, Size _cov_size = 0);
-//        Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, Size _cov_size);
-        Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, const MatrixXs& _jac_delta, const MatrixXs& _jac_delta_int, const MatrixXs& _delta_cov);
+        Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, const MatrixXs& _jac_delta, const MatrixXs& _jac_delta_int, const MatrixXs& _delta_cov, const MatrixXs& _jacobian_extra = MatrixXs::Zero(1,1));
         ~Motion();
         void resize(Size ds, Size dcs);
         void resize(Size ds);
