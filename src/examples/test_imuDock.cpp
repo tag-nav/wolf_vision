@@ -22,6 +22,7 @@
 #include <fstream>
 
 #define OUTPUT_RESULTS
+#define ADD_KF3
 
 /*                              OFFLINE VERSION
     In this test, we use the experimental conditions needed for Humanoids 2017.
@@ -58,7 +59,7 @@ int main(int argc, char** argv)
     const char * filename_imu;
     if (argc < 02)
     {
-        WOLF_ERROR("Missing 1 imput argument (path to imu data file).")
+        WOLF_ERROR("Missing 1 input argument (path to imu data file).")
         return 1; //return with error
     }
     else
@@ -141,15 +142,35 @@ int main(int argc, char** argv)
     //All IMU data have been processed, close the file
     imu_data_input.close();
 
-    //now impose final odometry using last timestamp of imu
-    data_odom << 0,-0.06,0, 0,0,0;
-    mot_ptr->setTimeStamp(ts);
-    mot_ptr->setData(data_odom);
-    sensorOdom->process(mot_ptr);
-
-    //A KeyFrame should have been created (depending on time_span in processors). get the last KeyFrame
     // XXX JS: in my  opinion, we should control the KF creation better, not using time span. Is it possible?
-    FrameIMUPtr KF2 = std::static_pointer_cast<FrameIMU>(problem->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+    #ifdef ADD_KF3
+        //Add a KeyFrame just before the motion actually starts (we did not move yet)
+        data_odom << 0,0,0, 0,0,0;
+        TimeStamp t_middle(0.307585);
+        mot_ptr->setTimeStamp(t_middle);
+        mot_ptr->setData(data_odom);
+        sensorOdom->process(mot_ptr);
+
+        //Also add a keyframe at the end of the motion
+        data_odom << 0,-0.06,0, 0,0,0;
+        mot_ptr->setTimeStamp(ts);
+        mot_ptr->setData(data_odom);
+        sensorOdom->process(mot_ptr);
+
+        FrameIMUPtr KF2 = std::static_pointer_cast<FrameIMU>(problem->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t_middle));
+        FrameIMUPtr KF3 = std::static_pointer_cast<FrameIMU>(problem->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+    #else
+        //now impose final odometry using last timestamp of imu
+        data_odom << 0,-0.06,0, 0,0,0;
+        mot_ptr->setTimeStamp(ts);
+        mot_ptr->setData(data_odom);
+        sensorOdom->process(mot_ptr);
+
+        FrameIMUPtr KF2 = std::static_pointer_cast<FrameIMU>(problem->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+    #endif
+    //A KeyFrame should have been created (depending on time_span in processors). get the last KeyFrame
+    
+    
 
     //#################################################### OPTIMIZATION PART
     // ___Create needed constraints___
@@ -178,11 +199,25 @@ int main(int argc, char** argv)
     KF1->getAccBiasPtr()->unfix();
     KF1->getGyroBiasPtr()->unfix();
 
-    KF2->getPPtr()->unfix();
-    KF2->getOPtr()->unfix();
-    KF2->getVPtr()->fix();
-    KF2->getAccBiasPtr()->unfix();
-    KF2->getGyroBiasPtr()->unfix();
+    #ifdef ADD_KF3
+        KF2->getPPtr()->fix();
+        KF2->getOPtr()->unfix();
+        KF2->getVPtr()->fix();
+        KF2->getAccBiasPtr()->unfix();
+        KF2->getGyroBiasPtr()->unfix();
+
+        KF3->getPPtr()->unfix();
+        KF3->getOPtr()->unfix();
+        KF3->getVPtr()->fix();
+        KF3->getAccBiasPtr()->unfix();
+        KF3->getGyroBiasPtr()->unfix();
+    #else
+        KF2->getPPtr()->unfix();
+        KF2->getOPtr()->unfix();
+        KF2->getVPtr()->fix();
+        KF2->getAccBiasPtr()->unfix();
+        KF2->getGyroBiasPtr()->unfix();
+    #endif
 
     #ifdef OUTPUT_RESULTS
         // ___OUTPUT___
@@ -210,18 +245,37 @@ int main(int argc, char** argv)
     //#################################################### RESULTS PART
 
     // ___Get standard deviation from covariances___
-    Eigen::MatrixXs cov_KF1(16,16), cov_KF2(16,16);
+    #ifdef ADD_KF3
+        Eigen::MatrixXs cov_KF1(16,16), cov_KF2(16,16), cov_KF3(16,16);
 
-    problem->getFrameCovariance(KF1, cov_KF1);
-    problem->getFrameCovariance(KF2, cov_KF2);
+        problem->getFrameCovariance(KF1, cov_KF1);
+        problem->getFrameCovariance(KF2, cov_KF2);
+        problem->getFrameCovariance(KF3, cov_KF3);
 
-    Eigen::Matrix<wolf::Scalar, 16, 1> stdev_KF1, stdev_KF2;
+        Eigen::Matrix<wolf::Scalar, 16, 1> stdev_KF1, stdev_KF2, stdev_KF3;
 
-    stdev_KF1 = 2*(cov_KF1.diagonal().array().sqrt());
-    stdev_KF2 = 2*(cov_KF2.diagonal().array().sqrt());
+        stdev_KF1 = 2*(cov_KF1.diagonal().array().sqrt());
+        stdev_KF2 = 2*(cov_KF2.diagonal().array().sqrt());
+        stdev_KF3 = 2*(cov_KF3.diagonal().array().sqrt());
 
-    WOLF_DEBUG("stdev KF1 : ", stdev_KF1.transpose());
-    WOLF_DEBUG("stdev KF2 : ", stdev_KF2.transpose());
+        WOLF_DEBUG("stdev KF1 : ", stdev_KF1.transpose());
+        WOLF_DEBUG("stdev KF2 : ", stdev_KF2.transpose());
+        WOLF_DEBUG("stdev KF3 : ", stdev_KF3.transpose());
+    #else
+        Eigen::MatrixXs cov_KF1(16,16), cov_KF2(16,16);
+
+        problem->getFrameCovariance(KF1, cov_KF1);
+        problem->getFrameCovariance(KF2, cov_KF2);
+
+        Eigen::Matrix<wolf::Scalar, 16, 1> stdev_KF1, stdev_KF2;
+
+        stdev_KF1 = 2*(cov_KF1.diagonal().array().sqrt());
+        stdev_KF2 = 2*(cov_KF2.diagonal().array().sqrt());
+
+        WOLF_DEBUG("stdev KF1 : ", stdev_KF1.transpose());
+        WOLF_DEBUG("stdev KF2 : ", stdev_KF2.transpose());
+    #endif
+    
 
     #ifdef OUTPUT_RESULTS
         // ___OUTPUT___
@@ -230,9 +284,6 @@ int main(int argc, char** argv)
          *                  estimated trajectory AFTER optimization 
          *                  + get KF2 timestamp + state just in case the loop is not working as expected
          */
-
-        //KF2 position stdev
-        checking << KF2->getTimeStamp().get() << stdev_KF2.transpose() << std::endl;
 
         //estimated trajectort
         time_iter = 0;
@@ -244,8 +295,13 @@ int main(int argc, char** argv)
             ts_output.set(time_iter * ms);
         }
 
-        //finally, output the timestamp and state associated to KF2
-        checking << KF2->getTimeStamp().get() << "\t" << KF2->getState().transpose() << std::endl;
+        //finally, output the timestamp, state and stdev associated to KFs
+        #ifdef ADD_KF3
+            checking << KF2->getTimeStamp().get() << "\t" << KF2->getState().transpose() << stdev_KF2.transpose() << std::endl;
+            checking << KF3->getTimeStamp().get() << "\t" << KF3->getState().transpose() << stdev_KF3.transpose() << std::endl;
+        #else
+            checking << KF2->getTimeStamp().get() << "\t" << KF2->getState().transpose() << stdev_KF2.transpose() << std::endl;
+        #endif
     #endif
     
     // ___Are expected values in the range of estimated +/- 2*stdev ?___
