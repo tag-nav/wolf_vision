@@ -108,7 +108,13 @@ class ProcessorMotion : public ProcessorBase
 
     // This is the main public interface
     public:
-        ProcessorMotion(const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance = 0.1);
+        ProcessorMotion(const std::string& _type,
+                        Size _state_size,
+                        Size _delta_size,
+                        Size _delta_cov_size,
+                        Size _data_size,
+                        Scalar _time_tolerance = 0.1,
+                        Size _extra_size = 0);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -662,6 +668,8 @@ class ProcessorMotion : public ProcessorBase
         Eigen::VectorXs data_;                  ///< current data
         Eigen::MatrixXs jacobian_delta_preint_; ///< jacobian of delta composition w.r.t previous delta integrated
         Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
+        Size extra_size_;                       ///< size of the extra parameters (TBD in derived classes)
+        Eigen::MatrixXs jacobian_extra_;        ///< jacobian of delta preintegration wrt something (TBD in the derived class)
 
     private:
         wolf::TimeStamp getCurrentTimeStamp();
@@ -839,7 +847,8 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
              deltaZero(),
              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)  // Cov
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Cov
+             Eigen::MatrixXs::Zero(delta_cov_size_, extra_size_)      // extra
              });
 }
 
