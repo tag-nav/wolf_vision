@@ -81,7 +81,7 @@ int main(int argc, char** argv)
         std::ofstream output_results_before, output_results_after, checking;
         output_results_before.open("imu_dock_beforeOptim.dat");
         output_results_after.open("imu_dock_afterOptim.dat");
-        checking.open("KF2_pose_stdev.dat");
+        checking.open("KF_pose_stdev.dat");
     #endif
 
     // ___initialize variabes that will be used through the code___
