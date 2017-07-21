@@ -254,9 +254,9 @@ int main(int argc, char** argv)
 
         Eigen::Matrix<wolf::Scalar, 16, 1> stdev_KF1, stdev_KF2, stdev_KF3;
 
-        stdev_KF1 = 2*(cov_KF1.diagonal().array().sqrt());
-        stdev_KF2 = 2*(cov_KF2.diagonal().array().sqrt());
-        stdev_KF3 = 2*(cov_KF3.diagonal().array().sqrt());
+        stdev_KF1 = cov_KF1.diagonal().array().sqrt();
+        stdev_KF2 = cov_KF2.diagonal().array().sqrt();
+        stdev_KF3 = cov_KF3.diagonal().array().sqrt();
 
         WOLF_DEBUG("stdev KF1 : ", stdev_KF1.transpose());
         WOLF_DEBUG("stdev KF2 : ", stdev_KF2.transpose());
@@ -269,8 +269,8 @@ int main(int argc, char** argv)
 
         Eigen::Matrix<wolf::Scalar, 16, 1> stdev_KF1, stdev_KF2;
 
-        stdev_KF1 = 2*(cov_KF1.diagonal().array().sqrt());
-        stdev_KF2 = 2*(cov_KF2.diagonal().array().sqrt());
+        stdev_KF1 = cov_KF1.diagonal().array().sqrt();
+        stdev_KF2 = cov_KF2.diagonal().array().sqrt();
 
         WOLF_DEBUG("stdev KF1 : ", stdev_KF1.transpose());
         WOLF_DEBUG("stdev KF2 : ", stdev_KF2.transpose());
