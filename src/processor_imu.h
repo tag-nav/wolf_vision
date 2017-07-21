@@ -495,6 +495,8 @@ inline void ProcessorIMU::resetDerived()
     dDp_dwb_.setZero();
     dDv_dwb_.setZero();
     dDq_dwb_.setZero();
+
+    jacobian_extra_.setZero();
 }
 
 inline ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
