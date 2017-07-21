@@ -108,7 +108,13 @@ class ProcessorMotion : public ProcessorBase
 
     // This is the main public interface
     public:
-        ProcessorMotion(const std::string& _type, Size _state_size, Size _delta_size, Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance = 0.1);
+        ProcessorMotion(const std::string& _type,
+                        Size _state_size,
+                        Size _delta_size,
+                        Size _delta_cov_size,
+                        Size _data_size,
+                        Scalar _time_tolerance = 0.1,
+                        Size _extra_size = 0);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -347,9 +353,9 @@ class ProcessorMotion : public ProcessorBase
          * and can be overloaded in derived classes.
          * @return the corrected delta.
          */
-        virtual VectorXs correctDelta(const VectorXs & _delta, Scalar _dt, const CaptureMotionPtr _capture)
+        virtual VectorXs correctDelta(const Motion & _motion, Scalar _dt, const CaptureMotionPtr _capture)
         {
-            return _delta;
+            return _motion.delta_integr_;
         }
 
 
@@ -662,6 +668,8 @@ class ProcessorMotion : public ProcessorBase
         Eigen::VectorXs data_;                  ///< current data
         Eigen::MatrixXs jacobian_delta_preint_; ///< jacobian of delta composition w.r.t previous delta integrated
         Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
+        Size extra_size_;                       ///< size of the extra parameters (TBD in derived classes)
+        Eigen::MatrixXs jacobian_extra_;        ///< jacobian of delta preintegration wrt something (TBD in the derived class)
 
     private:
         wolf::TimeStamp getCurrentTimeStamp();
@@ -728,10 +736,11 @@ inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
         {
             // We found a CaptureMotion whose buffer contains the time stamp
             VectorXs         state_0        = capture_motion->getOriginFramePtr()->getState();
+            Motion           motion         = capture_motion->getBuffer().getMotion(_ts);
             VectorXs         delta          = capture_motion->getBuffer().getDelta(_ts);
             Scalar           dt             = _ts - capture_motion->getBuffer().get().front().ts_;
 
-            VectorXs delta_corrected = correctDelta(delta, dt, capture_motion);
+            VectorXs delta_corrected = correctDelta(motion, dt, capture_motion);
 
             statePlusDelta(state_0, delta_corrected, dt, _x);
         }
@@ -838,7 +847,8 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
              deltaZero(),
              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_)  // Cov
+             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Cov
+             Eigen::MatrixXs::Zero(delta_cov_size_, extra_size_)      // extra
              });
 }
 

@@ -3,7 +3,7 @@ namespace wolf
 {
 
 ProcessorMotion::ProcessorMotion(const std::string& _type, Size _state_size, Size _delta_size,
-                                 Size _delta_cov_size, Size _data_size, const Scalar& _time_tolerance) :
+                                 Size _delta_cov_size, Size _data_size, Scalar _time_tolerance, Size _extra_size) :
         ProcessorBase(_type, _time_tolerance),
         x_size_(_state_size),
         delta_size_(_delta_size),
@@ -19,7 +19,9 @@ ProcessorMotion::ProcessorMotion(const std::string& _type, Size _state_size, Siz
         delta_integrated_cov_(_delta_cov_size, _delta_cov_size),
         data_(_data_size),
         jacobian_delta_preint_(delta_cov_size_, delta_cov_size_),
-        jacobian_delta_(delta_cov_size_, delta_cov_size_)
+        jacobian_delta_(delta_cov_size_, delta_cov_size_),
+        extra_size_(_extra_size),
+        jacobian_extra_(delta_size_, extra_size_)
 {
     status_ = IDLE;
     //
@@ -321,7 +323,7 @@ void ProcessorMotion::integrateOneStep()
 
     // push all into buffer
     getBuffer().get().push_back(Motion( {incoming_ptr_->getTimeStamp(), delta_, delta_integrated_,
-                                         jacobian_delta_, jacobian_delta_preint_, delta_cov_}));
+                                         jacobian_delta_, jacobian_delta_preint_, delta_cov_, jacobian_extra_}));
 
 }
 

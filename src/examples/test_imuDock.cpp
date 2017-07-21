@@ -241,7 +241,7 @@ int main(int argc, char** argv)
     problem->print(4,0,1,0);
     ceres::Solver::Summary summary = ceres_manager->solve();
     ceres_manager->computeCovariances(ALL_MARGINALS);
-    problem->print(4,0,1,0);
+    problem->print(1,0,1,0);
 
     //#################################################### RESULTS PART
 

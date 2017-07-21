@@ -59,7 +59,7 @@ class ProcessorIMU : public ProcessorMotion{
                                 const Scalar _dt,
                                 Eigen::VectorXs& _x_plus_delta );
         virtual Eigen::VectorXs deltaZero() const;
-        virtual VectorXs correctDelta(const VectorXs& _delta, Scalar _dt, const CaptureMotionPtr _capture);
+        virtual VectorXs correctDelta(const Motion& _motion, Scalar _dt, const CaptureMotionPtr _capture);
         virtual Motion interpolate(const Motion& _motion_ref,
                                    Motion& _motion,
                                    TimeStamp& _ts);
@@ -86,8 +86,9 @@ class ProcessorIMU : public ProcessorMotion{
         const Eigen::Vector3s gravity_;
 
         // Biases in the first keyframe's state for pre-integration
-        Eigen::Vector3s acc_bias_;
-        Eigen::Vector3s gyro_bias_;
+        Vector6s bias_;
+        Eigen::Map<Eigen::Vector3s> acc_bias_;
+        Eigen::Map<Eigen::Vector3s> gyro_bias_;
 
         // Maps to the received measurements
         Eigen::Map<Eigen::Vector3s> acc_measured_;
@@ -105,8 +106,8 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Matrix3s dDp_dab_;
         Eigen::Matrix3s dDv_dab_;
         Eigen::Matrix3s dDp_dwb_;
-        Eigen::Matrix3s dDv_dwb_;
         Eigen::Matrix3s dDq_dwb_;
+        Eigen::Matrix3s dDv_dwb_;
 
         // Helper functions to remap several magnitudes
         virtual void remapPQV(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
@@ -302,6 +303,12 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
     dDv_dwb_            -= M_tmp * _dt;
     dDq_dwb_       = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16 -- we'll use small angle aprox below:
     //    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
+
+    jacobian_extra_.block(0,0,3,3) = dDp_dab_;
+    jacobian_extra_.block(0,3,3,3) = dDp_dwb_;
+    jacobian_extra_.block(3,3,3,3) = dDq_dwb_;
+    jacobian_extra_.block(6,0,3,3) = dDv_dab_;
+    jacobian_extra_.block(6,3,3,3) = dDv_dwb_;
 
 
     /*//////////////////////////////////////////////////////////////////////////

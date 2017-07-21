@@ -4,5 +4,5 @@ motion variances:
     disp_to_disp:   0.000001  # m^2   / m
     disp_to_rot:    0.000001  # rad^2 / m
     rot_to_rot:     0.000001  # rad^2 / rad
-    min_disp_var:   0.0000001  # m^2
-    min_rot_var:    0.0000001  # rad^2
+    min_disp_var:   0.00000001  # m^2
+    min_rot_var:    0.00000001  # rad^2
