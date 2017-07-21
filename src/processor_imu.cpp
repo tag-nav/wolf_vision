@@ -50,10 +50,14 @@ VectorXs ProcessorIMU::correctDelta(const Motion& _motion, Scalar _dt, const Cap
     MatrixXs J_bias = _motion.jacobian_extra_;
 
     // Get current biases from the capture's origin frame
-    FrameIMUPtr frame = std::static_pointer_cast<FrameIMU>(_capture->getOriginFramePtr());
+    FrameIMUPtr frame_origin = std::static_pointer_cast<FrameIMU>(_capture->getOriginFramePtr());
+    FrameIMUPtr frame_self = std::static_pointer_cast<FrameIMU>(_capture->getFramePtr());
+
+    WOLF_DEBUG("KF origin: ", frame_origin->id(), "; KF: ", frame_self->id(), "; dt: ", _motion.ts_ - frame_origin->getTimeStamp(), "; J_bias(0,:): ", J_bias.row(0));
+
     Vector6s bias;
-    bias.head<3>() = frame->getAccBiasPtr()->getState();
-    bias.tail<3>() = frame->getGyroBiasPtr()->getState();
+    bias.head<3>() = frame_origin->getAccBiasPtr()->getState();
+    bias.tail<3>() = frame_origin->getGyroBiasPtr()->getState();
 
     // Get preintegrated biases from the capture's feature
     FeatureIMUPtr feature = std::static_pointer_cast<FeatureIMU>(_capture->getFeatureList().front());
