@@ -3,7 +3,7 @@
 namespace wolf {
 
 ProcessorIMU::ProcessorIMU(ProcessorIMUParamsPtr _params) :
-        ProcessorMotion("IMU", 16, 10, 9, 6),
+        ProcessorMotion("IMU", 16, 10, 9, 6, 0.01, 6),
         max_time_span_  (_params ? _params    ->max_time_span   : 1.0  ),
         max_buff_length_(_params ? _params    ->max_buff_length : 10000   ),
         dist_traveled_  (_params ? _params    ->dist_traveled   : 1.0  ),
@@ -11,8 +11,9 @@ ProcessorIMU::ProcessorIMU(ProcessorIMUParamsPtr _params) :
         voting_active_  (_params ? _params    ->voting_active    : false  ),
         frame_imu_ptr_(nullptr),
         gravity_(wolf::gravity()),
-        acc_bias_(Eigen::Vector3s::Zero()),
-        gyro_bias_(Eigen::Vector3s::Zero()),
+        bias_(Vector6s::Zero()),
+        acc_bias_(&bias_(0)),
+        gyro_bias_(&bias_(3)),
         acc_measured_(nullptr),
         gyro_measured_(nullptr),
         Dp_(nullptr), dp_(nullptr), Dp_out_(nullptr),
@@ -22,6 +23,7 @@ ProcessorIMU::ProcessorIMU(ProcessorIMUParamsPtr _params) :
     // Set constant parts of Jacobians
     jacobian_delta_preint_.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
     jacobian_delta_.setIdentity(9,9);                                           //
+    jacobian_extra_.setZero(9,6);
 }
 
 ProcessorIMU::~ProcessorIMU()
@@ -32,12 +34,9 @@ ProcessorIMU::~ProcessorIMU()
 VectorXs ProcessorIMU::correctDelta(const Motion& _motion, Scalar _dt, const CaptureMotionPtr _capture)
 {
 
-    // Full delta time interval
-    Scalar Dt = _capture->getTimeStamp() - _capture->getOriginFramePtr()->getTimeStamp();
-    // Linear interpolation factor
-    Scalar alpha = Dt > Constants::EPS_SMALL ? _dt/Dt : 1.0;
+//    return _motion.delta_integr_;
 
-    /* Correct measured delta: delta_corr = delta + alpha * J_bias * (bias - bias_preint)
+    /* Correct measured delta: delta_corr = delta + J_bias * (bias - bias_preint)
      * where:
      *   delta       = pre-integrated delta at time dt
      *   J_bias      = Jacobian of the preintegrated delta at time Dt
@@ -46,45 +45,32 @@ VectorXs ProcessorIMU::correctDelta(const Motion& _motion, Scalar _dt, const Cap
      *   bias_preint = bias estimate when we performed the pre-integration
      */
 
-    // Get current biases
-    FrameIMUPtr frame = std::static_pointer_cast<FrameIMU>(_capture->getFramePtr());
-    Vector3s ab = frame->getAccBiasPtr()->getState();
-    Vector3s wb = frame->getGyroBiasPtr()->getState();
+    // Get current delta and Jacobian
+    VectorXs delta  = _motion.delta_integr_;
+    MatrixXs J_bias = _motion.jacobian_extra_;
 
-    // Get the only feature in the capture
+    // Get current biases from the capture's origin frame
+    FrameIMUPtr frame = std::static_pointer_cast<FrameIMU>(_capture->getOriginFramePtr());
+    Vector6s bias;
+    bias.head<3>() = frame->getAccBiasPtr()->getState();
+    bias.tail<3>() = frame->getGyroBiasPtr()->getState();
+
+    // Get preintegrated biases from the capture's feature
     FeatureIMUPtr feature = std::static_pointer_cast<FeatureIMU>(_capture->getFeatureList().front());
+    Vector6s bias_preint;
+    bias_preint.head<3>() = feature->acc_bias_preint_;
+    bias_preint.tail<3>() = feature->gyro_bias_preint_;
 
-    // Compute bias change
-    Vector3s dab = ab - feature->acc_bias_preint_;
-    Vector3s dwb = wb - feature->gyro_bias_preint_;
-//    Vector6s db; db << dab, dwb;
-//
-//    // Get the Jacobian // TODO get it from the Motion
-//    MatrixXs J(9,6);
-//    J.topLeftCorner(3,3) = feature->dDp_dab_;
-//    J.topRightCorner(3,3) = feature->dDp_dwb_;
-//    J.block(3,0,3,3) = Matrix3s::Zero();
-//    J.block(3,3,3,3) = feature->dDq_dwb_;
-//    J.bottomLeftCorner(3,3) = feature->dDv_dab_;
-//    J.bottomRightCorner(3,3) = feature->dDv_dwb_;
-//    J *= alpha; // linear intermpolation
-//
-//    // Do the correction
-//    VectorXs delta_corr_tangent(9);
-//    delta_corr_tangent = delta + J * db;
+    // Compute update step
+    VectorXs delta_step = J_bias * (bias - bias_preint);
 
-
-    VectorXs delta = _motion.delta_integr_;
+    // Correct delta
     VectorXs delta_correct(10);
-    // P
-    delta_correct.head(3)      = delta.head(3) + alpha * feature->dDp_dab_ * dab + alpha * feature->dDp_dwb_ * dwb;
-    // Q
-    Eigen::Vector3s do_step    = alpha * feature->dDq_dwb_ * dwb;
-    Map<const Quaternions> dq(delta.data() + 3);
-    Map<Quaternions> dq_correct(delta_correct.data() + 3);
-    dq_correct = dq * v2q(do_step);
-    // V
-    delta_correct.tail(3)      = delta.tail(3) + alpha * feature->dDv_dab_ * dab + alpha * feature->dDv_dwb_ * dwb;
+    delta_correct.head(3) = delta.head(3) + delta_step.head(3);
+    Map<const Quaternions> deltaq(&delta(3));
+    Map<Quaternions> deltaq_correct(&delta_correct(3));
+    deltaq_correct = deltaq * v2q(delta_step.segment(3,3));
+    delta_correct.tail(3) = delta.tail(3) + delta_step.tail(3);
 
     return delta_correct;
 }
