@@ -86,8 +86,8 @@ int main(int argc, char** argv)
 
     // ___initialize variabes that will be used through the code___
     Eigen::VectorXs problem_origin(16);
-    problem_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0.;
     Eigen::Vector7s imu_pose((Eigen::Vector7s()<<0,0,0,0,0,0,1).finished()), odom_pose((Eigen::Vector7s()<<0,0,0,0,0,0,1).finished());
+    problem_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
     
     //Create vectors to store data and time
     Eigen::Vector6s data_imu, data_odom;
@@ -153,6 +153,7 @@ int main(int argc, char** argv)
 
         //Also add a keyframe at the end of the motion
         data_odom << 0,-0.06,0, 0,0,0;
+        ts.set(0.981573); //comment this if you want the last KF to be created at last imu's ts
         mot_ptr->setTimeStamp(ts);
         mot_ptr->setData(data_odom);
         sensorOdom->process(mot_ptr);
