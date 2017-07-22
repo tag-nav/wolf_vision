@@ -53,7 +53,7 @@ VectorXs ProcessorIMU::correctDelta(const Motion& _motion, Scalar _dt, const Cap
     FrameIMUPtr frame_origin = std::static_pointer_cast<FrameIMU>(_capture->getOriginFramePtr());
     FrameIMUPtr frame_self = std::static_pointer_cast<FrameIMU>(_capture->getFramePtr());
 
-    WOLF_DEBUG("KF origin: ", frame_origin->id(), "; KF: ", frame_self->id(), "; dt: ", _motion.ts_ - frame_origin->getTimeStamp(), "; J_bias(0,:): ", J_bias.row(0));
+//    WOLF_DEBUG("KF origin: ", frame_origin->id(), "; KF: ", frame_self->id(), "; dt: ", _motion.ts_ - frame_origin->getTimeStamp(), "; J_bias(0,:): ", J_bias.row(0));
 
     Vector6s bias;
     bias.head<3>() = frame_origin->getAccBiasPtr()->getState();
