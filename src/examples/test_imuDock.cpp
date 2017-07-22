@@ -180,9 +180,9 @@ int main(int argc, char** argv)
     Eigen::MatrixXs featureFix_cov(6,6);
     featureFix_cov = Eigen::MatrixXs::Identity(6,6);
     featureFix_cov.topLeftCorner(3,3) *= 1e-8; // position variances (it's fixed anyway)
-    featureFix_cov(3,3) = pow( .01  , 2); // roll variance
-    featureFix_cov(4,4) = pow( .01  , 2); // pitch variance
-    featureFix_cov(5,5) = pow( .001 , 2); // yaw variance
+    featureFix_cov(3,3) = pow( .02  , 2); // roll variance
+    featureFix_cov(4,4) = pow( .02  , 2); // pitch variance
+    featureFix_cov(5,5) = pow( .01 , 2); // yaw variance
     CaptureBasePtr cap_fix = KF1->addCapture(std::make_shared<CaptureMotion>(0, nullptr, problem_origin.head(7), 7, 6));
     FeatureBasePtr featureFix = cap_fix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", problem_origin.head(7), featureFix_cov));
     ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(featureFix->addConstraint(std::make_shared<ConstraintFix3D>(featureFix)));
