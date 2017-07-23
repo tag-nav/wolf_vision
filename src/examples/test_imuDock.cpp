@@ -142,6 +142,7 @@ int main(int argc, char** argv)
     //All IMU data have been processed, close the file
     imu_data_input.close();
 
+    //A KeyFrame should have been created (depending on time_span in processors). get the last KeyFrame
     // XXX JS: in my  opinion, we should control the KF creation better, not using time span. Is it possible?
     #ifdef ADD_KF3
         //Add a KeyFrame just before the motion actually starts (we did not move yet)
@@ -169,9 +170,6 @@ int main(int argc, char** argv)
 
         FrameIMUPtr KF2 = std::static_pointer_cast<FrameIMU>(problem->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
     #endif
-    //A KeyFrame should have been created (depending on time_span in processors). get the last KeyFrame
-    
-    
 
     //#################################################### OPTIMIZATION PART
     // ___Create needed constraints___
