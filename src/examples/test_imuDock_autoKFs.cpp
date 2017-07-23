@@ -22,7 +22,7 @@
 #include <fstream>
 
 #define OUTPUT_RESULTS
-//#define ADD_KF3
+//#define AUTO_KFS
 
 /*                              OFFLINE VERSION
     In this test, we use the experimental conditions needed for Humanoids 2017.
@@ -103,6 +103,9 @@ int main(int argc, char** argv)
     // ___Define expected values___
     Eigen::Vector7s expected_KF1_pose((Eigen::Vector7s()<<0,0,0,0,0,0,1).finished()), expected_KF2_pose((Eigen::Vector7s()<<0,-0.06,0,0,0,0,11).finished());
 
+    #ifdef AUTO_KFs
+        std::array<Scalar, 50> lastms_imuData;
+    #endif
     //#################################################### SETTING PROBLEM
     std::string wolf_root = _WOLF_ROOT_DIR;
 
@@ -157,8 +160,22 @@ int main(int argc, char** argv)
         mot_ptr->setTimeStamp(ts);
         mot_ptr->setData(data_odom);
 
-        //process
-        sensorOdom->process(mot_ptr);
+        #ifdef AUTO_KFS
+            /* We want the KFs to be generated automatically but not using time span as argument of this generation
+             * For our application, w want the KFs to be generated when an odometry data is given under condition that the IMU is not moving
+             * We check wether the IMU is moving or not by computing the current stdev of the IMU based on data received during 50ms before the odom timestamp
+             * We compare this value to the stdev (noise) of the sensor (see sensor_imu.yaml)
+             * If the current stdev is below a threshold then we process the odometry data !
+             */
+
+             // TODO : get data to compute stdev with directly from the capture
+             //         -> see how these data are stored and change getIMUStdev(..) function defined below main() in this file
+             //         -> then just use the function to get this stdev of corresponding data
+
+        #else
+            //process anyway. KFs will be generated based on the configuration given in processor_odom_3D.yaml
+            sensorOdom->process(mot_ptr);
+        #endif
     }
 
     //All data have been processed, close the files
@@ -278,3 +295,17 @@ int main(int argc, char** argv)
 
     return 0;
 }
+
+/*Scalar getIMUStdev(Eigen::VectorXs _data) //input argument : whatever will contain the data in the capture
+{
+    Eigen::Vector6s mean(Eigen::Vector6s::Zero()), stdev(Eigen::Vector6s::Zero());
+    unsigned int _data_size(_data.size());
+    
+    mean = _data.mean()/_data_size;
+
+    for (unsigned int i = 0; i < _data_size; i++)
+    {
+        stdev += pow(_data()-mean,2); //get the correct data from the container
+    }
+    return (stdev.array().sqrt()).maxCoeff();
+}*/
