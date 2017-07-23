@@ -167,6 +167,10 @@ TARGET_LINK_LIBRARIES(test_processor_imu ${PROJECT_NAME})
 ADD_EXECUTABLE(test_imuDock test_imuDock.cpp)
 TARGET_LINK_LIBRARIES(test_imuDock ${PROJECT_NAME})
 
+# Test IMU with auto KF generation (Humanoids 20017)
+ADD_EXECUTABLE(test_imuDock_autoKFs test_imuDock_autoKFs.cpp)
+TARGET_LINK_LIBRARIES(test_imuDock_autoKFs ${PROJECT_NAME})
+
 # ConstraintIMU - factors test
 ADD_EXECUTABLE(test_imu_constrained0 test_imu_constrained0.cpp)
 TARGET_LINK_LIBRARIES(test_imu_constrained0 ${PROJECT_NAME})
