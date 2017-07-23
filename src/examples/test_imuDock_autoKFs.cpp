@@ -72,6 +72,7 @@ int main(int argc, char** argv)
 
         imu_data_input.open(filename_imu);
         WOLF_INFO("imu file : ", filename_imu)
+        odom_data_input.open(filename_odom);
         WOLF_INFO("odom file : ", filename_odom)
     }
 
@@ -157,7 +158,7 @@ int main(int argc, char** argv)
         mot_ptr->setData(data_odom);
 
         //process
-        sensorOdom->process(imu_ptr);
+        sensorOdom->process(mot_ptr);
     }
 
     //All data have been processed, close the files
@@ -257,7 +258,6 @@ int main(int argc, char** argv)
         /* Produce output file for matlab visualization
          * Second output:   KF position standard deviation computed
          *                  estimated trajectory AFTER optimization 
-         *                  + get KF timestamp + state just in case the loop is not working as expected
          */
 
         //estimated trajectort
