@@ -306,11 +306,11 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
     dDq_dwb_             = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16 -- we'll use small angle aprox below:
     //    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
 
-    jacobian_extra_.block(0,0,3,3) = dDp_dab_;
-    jacobian_extra_.block(0,3,3,3) = dDp_dwb_;
-    jacobian_extra_.block(3,3,3,3) = dDq_dwb_;
-    jacobian_extra_.block(6,0,3,3) = dDv_dab_;
-    jacobian_extra_.block(6,3,3,3) = dDv_dwb_;
+    jacobian_calib_.block(0,0,3,3) = dDp_dab_;
+    jacobian_calib_.block(0,3,3,3) = dDp_dwb_;
+    jacobian_calib_.block(3,3,3,3) = dDq_dwb_;
+    jacobian_calib_.block(6,0,3,3) = dDv_dab_;
+    jacobian_calib_.block(6,3,3,3) = dDv_dwb_;
 
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -498,7 +498,7 @@ inline void ProcessorIMU::resetDerived()
     dDv_dwb_.setZero();
     dDq_dwb_.setZero();
 
-    jacobian_extra_.setZero();
+    jacobian_calib_.setZero();
 }
 
 inline ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)

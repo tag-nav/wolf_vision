@@ -23,7 +23,7 @@ Motion::Motion(const TimeStamp& _ts,
         jacobian_delta_(_jac_delta),
         jacobian_delta_integr_(_jac_delta_int),
         delta_cov_(_delta_cov),
-        jacobian_extra_(_jac_extra)
+        jacobian_calib_(_jac_extra)
 {
 }
 

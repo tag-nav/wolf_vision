@@ -23,7 +23,7 @@ ProcessorIMU::ProcessorIMU(ProcessorIMUParamsPtr _params) :
     // Set constant parts of Jacobians
     jacobian_delta_preint_.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
     jacobian_delta_.setIdentity(9,9);                                           //
-    jacobian_extra_.setZero(9,6);
+    jacobian_calib_.setZero(9,6);
 }
 
 ProcessorIMU::~ProcessorIMU()
@@ -47,7 +47,7 @@ VectorXs ProcessorIMU::correctDelta(const Motion& _motion, Scalar _dt, const Cap
 
     // Get current delta and Jacobian
     VectorXs delta  = _motion.delta_integr_;
-    MatrixXs J_bias = _motion.jacobian_extra_;
+    MatrixXs J_bias = _motion.jacobian_calib_;
 
     // Get current biases from the capture's origin frame
     FrameIMUPtr frame_origin = std::static_pointer_cast<FrameIMU>(_capture->getOriginFramePtr());

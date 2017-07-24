@@ -155,7 +155,7 @@ class ProcessorMotion : public ProcessorBase
          */
         Eigen::VectorXs getState(const TimeStamp& _ts);
 
-        /** \brief Gets a constant reference delta preintegrated covariance from all integrations so far
+        /** \brief Gets the delta preintegrated covariance from all integrations so far
          * \return the delta preintegrated covariance matrix
          */
         const Eigen::MatrixXs getCurrentDeltaPreintCov();
@@ -199,11 +199,9 @@ class ProcessorMotion : public ProcessorBase
         // Helper functions:
     protected:
 
-        void splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part);
-
-    protected:
         void updateDt();
         void integrateOneStep();
+        void splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part);
         void reintegrateBuffer(CaptureMotionPtr _capture_ptr);
 
         /** Pre-process incoming Capture
@@ -635,26 +633,26 @@ class ProcessorMotion : public ProcessorBase
     protected:
         // Attributes
         Size x_size_;           ///< The size of the state vector
+        Size data_size_;        ///< the size of the incoming data
         Size delta_size_;       ///< the size of the deltas
         Size delta_cov_size_;   ///< the size of the delta covariances matrix
-        Size data_size_;        ///< the size of the incoming data
-        CaptureBasePtr origin_ptr_; // TODO check pointer type
-        CaptureMotionPtr last_ptr_; // TODO check pointer type
-        CaptureMotionPtr incoming_ptr_; // TODO check pointer type
+        Size calib_size_;       ///< size of the extra parameters (TBD in derived classes)
+        CaptureBasePtr origin_ptr_;
+        CaptureMotionPtr last_ptr_;
+        CaptureMotionPtr incoming_ptr_;
 
     protected:
         // helpers to avoid allocation
         Scalar dt_;                             ///< Time step
         Eigen::VectorXs x_;                     ///< current state
+        Eigen::VectorXs data_;                  ///< current data
         Eigen::VectorXs delta_;                 ///< current delta
         Eigen::MatrixXs delta_cov_;             ///< current delta covariance
         Eigen::VectorXs delta_integrated_;      ///< integrated delta
         Eigen::MatrixXs delta_integrated_cov_;  ///< integrated delta covariance
-        Eigen::VectorXs data_;                  ///< current data
         Eigen::MatrixXs jacobian_delta_preint_; ///< jacobian of delta composition w.r.t previous delta integrated
         Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
-        Size extra_size_;                       ///< size of the extra parameters (TBD in derived classes)
-        Eigen::MatrixXs jacobian_extra_;        ///< jacobian of delta preintegration wrt something (TBD in the derived class)
+        Eigen::MatrixXs jacobian_calib_;        ///< jacobian of delta preintegration wrt something (TBD in the derived class)
 
     private:
         wolf::TimeStamp getCurrentTimeStamp();
@@ -820,7 +818,7 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
              Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Cov
-             Eigen::MatrixXs::Zero(delta_cov_size_, extra_size_)      // extra
+             Eigen::MatrixXs::Zero(delta_cov_size_, calib_size_)      // extra
              });
 }
 

@@ -6,22 +6,22 @@ ProcessorMotion::ProcessorMotion(const std::string& _type, Size _state_size, Siz
                                  Size _delta_cov_size, Size _data_size, Scalar _time_tolerance, Size _extra_size) :
         ProcessorBase(_type, _time_tolerance),
         x_size_(_state_size),
+        data_size_(_data_size),
         delta_size_(_delta_size),
         delta_cov_size_(_delta_cov_size),
-        data_size_(_data_size),
+        calib_size_(_extra_size),
         origin_ptr_(),
         last_ptr_(),
         incoming_ptr_(),
         dt_(0.0), x_(_state_size),
+        data_(_data_size),
         delta_(_delta_size),
         delta_cov_(_delta_cov_size, _delta_cov_size),
         delta_integrated_(_delta_size),
         delta_integrated_cov_(_delta_cov_size, _delta_cov_size),
-        data_(_data_size),
         jacobian_delta_preint_(delta_cov_size_, delta_cov_size_),
         jacobian_delta_(delta_cov_size_, delta_cov_size_),
-        extra_size_(_extra_size),
-        jacobian_extra_(delta_size_, extra_size_)
+        jacobian_calib_(delta_size_, calib_size_)
 {
     status_ = IDLE;
     //
@@ -323,7 +323,7 @@ void ProcessorMotion::integrateOneStep()
 
     // push all into buffer
     getBuffer().get().push_back(Motion( {incoming_ptr_->getTimeStamp(), delta_, delta_integrated_,
-                                         jacobian_delta_, jacobian_delta_preint_, delta_cov_, jacobian_extra_}));
+                                         jacobian_delta_, jacobian_delta_preint_, delta_cov_, jacobian_calib_}));
 
 }
 
@@ -344,7 +344,7 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
         deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, dt, motion_it->delta_integr_,
                        motion_it->jacobian_delta_integr_, motion_it->jacobian_delta_);
 
-        motion_it->jacobian_extra_ = jacobian_extra_;
+        motion_it->jacobian_calib_ = jacobian_calib_;
 
         // advance in buffer
         motion_it++;

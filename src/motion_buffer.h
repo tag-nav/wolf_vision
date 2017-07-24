@@ -28,7 +28,7 @@ struct Motion
         Eigen::MatrixXs jacobian_delta_;        ///< Jacobian of the integration wrt delta_
         Eigen::MatrixXs jacobian_delta_integr_; ///< Jacobian of the integration wrt delta_integr_
         Eigen::MatrixXs delta_cov_;             ///< covariance of the instantaneous delta
-        Eigen::MatrixXs jacobian_extra_;        ///< Jacobian of delta_integr wrt extra states (TBD by the derived processors)
+        Eigen::MatrixXs jacobian_calib_;        ///< Jacobian of delta_integr wrt extra states (TBD by the derived processors)
 //        Eigen::MatrixXs delta_integr_cov_;      ///< covariance of the integrated delta
     public:
         Motion();
