@@ -211,7 +211,7 @@ TEST_F(ProcessorIMUt, acc_x)
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
-    data << 2, 0, 9.8, 0, 0, 0; // only acc_x, but measure gravity!
+    data << 2, 0, 9.806, 0, 0, 0; // only acc_x, but measure gravity!
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.1);
@@ -266,7 +266,7 @@ TEST_F(ProcessorIMUt, acc_z)
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
-    data << 0, 0, 9.8 + 2.0, 0, 0, 0; // only acc_z, but measure gravity!
+    data << 0, 0, 9.806 + 2.0, 0, 0, 0; // only acc_z, but measure gravity!
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.1);
