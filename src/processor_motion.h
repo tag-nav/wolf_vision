@@ -143,12 +143,6 @@ class ProcessorMotion : public ProcessorBase
          */
         void getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts);
 
-        /** \brief Get the state integrated so far and its stamp
-         * \param _ts the returned stamp
-         * return the state vector
-         */
-        Eigen::VectorXs getCurrentStateAndStamp(TimeStamp& _ts);
-
         /** \brief Fill the state corresponding to the provided time-stamp
          * \param _ts the time stamp
          * \param _x the returned state
@@ -183,15 +177,6 @@ class ProcessorMotion : public ProcessorBase
          * \return a pointer to the capture (if it exists) or a nullptr (otherwise)
          */
         CaptureMotionPtr findCaptureContainingTimeStamp(const TimeStamp& _ts) const;
-
-        /** Composes the deltas in two pre-integrated Captures
-         * \param _cap1_ptr pointer to the first Capture
-         * \param _cap2_ptr pointer to the second Capture. This is local wrt. the first Capture.
-         * \param _delta1_plus_delta2 the concatenation of the deltas of Captures 1 and 2.
-         */
-        void sumDeltas(CaptureMotionPtr _cap1_ptr,
-                       CaptureMotionPtr _cap2_ptr,
-                       Eigen::VectorXs& _delta1_plus_delta2);
 
         /** Set the origin of all motion for this processor
          * \param _origin_frame the keyframe to be the origin
@@ -763,12 +748,6 @@ inline Eigen::VectorXs ProcessorMotion::getCurrentState()
     return x_;
 }
 
-inline Eigen::VectorXs ProcessorMotion::getCurrentStateAndStamp(TimeStamp& _ts)
-{
-    getCurrentStateAndStamp(x_, _ts);
-    return x_;
-}
-
 inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
 {
     Scalar Dt = getBuffer().get().back().ts_ - origin_ptr_->getTimeStamp();
@@ -830,13 +809,6 @@ inline const MotionBuffer& ProcessorMotion::getBuffer() const
 inline MotionBuffer& ProcessorMotion::getBuffer()
 {
     return last_ptr_->getBuffer();
-}
-
-inline void ProcessorMotion::sumDeltas(CaptureMotionPtr _cap1_ptr, CaptureMotionPtr _cap2_ptr,
-                                       Eigen::VectorXs& _delta1_plus_delta2)
-{
-    Scalar dt = _cap2_ptr->getTimeStamp() - _cap1_ptr->getTimeStamp();
-    deltaPlusDelta(_cap1_ptr->getDelta(),_cap2_ptr->getDelta(), dt, _delta1_plus_delta2);
 }
 
 inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
