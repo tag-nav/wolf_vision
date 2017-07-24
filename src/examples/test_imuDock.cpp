@@ -276,8 +276,8 @@ int main(int argc, char** argv)
         stdev_KF1 = cov_KF1.diagonal().array().sqrt();
         stdev_KF2 = cov_KF2.diagonal().array().sqrt();
 
-        WOLF_DEBUG("stdev KF1 : ", stdev_KF1.transpose());
-        WOLF_DEBUG("stdev KF2 : ", stdev_KF2.transpose());
+        WOLF_DEBUG("stdev KF1 : \n", stdev_KF1.transpose());
+        WOLF_DEBUG("stdev KF2 : \n", stdev_KF2.transpose());
     #endif
     
 
