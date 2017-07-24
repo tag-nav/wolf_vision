@@ -323,18 +323,7 @@ WOLF_PTR_TYPEDEFS(LocalParametrizationBase);
 // Some dangling functions
 
 inline const Eigen::Vector3s gravity(void) {
-    return Eigen::Vector3s(0,0,-9.8);
-}
-//===================================================
-
-
-//===================================================
-// Some macros
-
-#define WOLF_DEBUG_HERE \
-{ \
-    char this_file[] = __FILE__; \
-    std::cout << ">> " << basename(this_file) << " : " << __FUNCTION__ << "() : " << __LINE__ << std::endl; \
+    return Eigen::Vector3s(0,0,-9.806);
 }
 //===================================================
 
