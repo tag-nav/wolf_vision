@@ -234,7 +234,7 @@ TEST_F(ProcessorIMUt, acc_y)
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
-    data << 0, 20, 9.8, 0, 0, 0; // only acc_y, but measure gravity!
+    data << 0, 20, 9.806, 0, 0, 0; // only acc_y, but measure gravity!
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.001);
@@ -396,7 +396,7 @@ TEST_F(ProcessorIMUt, check_Covariance)
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
-    data << 2, 0, 9.8, 0, 0, 0; // only acc_x, but measure gravity!
+    data << 2, 0, 9.806, 0, 0, 0; // only acc_x, but measure gravity!
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.1);
@@ -426,7 +426,7 @@ TEST_F(ProcessorIMUt, gyro_x)
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
-    data << 0, 0, 9.8, rate_of_turn, 0, 0; // measure gravity
+    data << 0, 0, 9.806, rate_of_turn, 0, 0; // measure gravity
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.001);
@@ -472,7 +472,7 @@ TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
-    data << 0+abx, 0, 9.8, rate_of_turn, 0, 0; // measure gravity
+    data << 0+abx, 0, 9.806, rate_of_turn, 0, 0; // measure gravity
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.001);
@@ -519,7 +519,7 @@ TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
-    data << 0+abx, 0+aby, 9.8, rate_of_turn, rate_of_turn*1.5, 0; // measure gravity
+    data << 0+abx, 0+aby, 9.806, rate_of_turn, rate_of_turn*1.5, 0; // measure gravity
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.001);
@@ -564,7 +564,7 @@ TEST_F(ProcessorIMUt, gyro_z)
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
-    data << 0, 0, 9.8, 0, 0, rate_of_turn; // measure gravity!
+    data << 0, 0, 9.806, 0, 0, rate_of_turn; // measure gravity!
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.001);
@@ -736,7 +736,7 @@ TEST_F(ProcessorIMUt, gyro_x_ConstVelocity)
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
-    data << 0, 0, 9.8, rate_of_turn, 0, 0; // measure gravity
+    data << 0, 0, 9.806, rate_of_turn, 0, 0; // measure gravity
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.001);
@@ -781,7 +781,7 @@ TEST_F(ProcessorIMUt, gyro_xy_ConstVelocity)
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
-    data << 0, 0, 9.8, 0, rate_of_turn, 0; // measure gravity
+    data << 0, 0, 9.806, 0, rate_of_turn, 0; // measure gravity
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.001);
@@ -826,7 +826,7 @@ TEST_F(ProcessorIMUt, gyro_y_ConstVelocity)
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
-    data << 0, 0, 9.8, 0, rate_of_turn, 0; // measure gravity
+    data << 0, 0, 9.806, 0, rate_of_turn, 0; // measure gravity
 
     cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.001);
