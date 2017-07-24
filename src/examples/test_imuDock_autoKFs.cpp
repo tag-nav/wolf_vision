@@ -1,7 +1,7 @@
 /**
- * \file test_imuDock.cpp
+ * \file test_imuDock_autoKFs.cpp
  *
- *  Created on: July 18, 2017
+ *  Created on: July 22, 2017
  *      \author: Dinesh Atchuthan
  */
 
@@ -22,7 +22,7 @@
 #include <fstream>
 
 #define OUTPUT_RESULTS
-//#define ADD_KF3
+//#define AUTO_KFS
 
 /*                              OFFLINE VERSION
     In this test, we use the experimental conditions needed for Humanoids 2017.
@@ -31,6 +31,8 @@
     Constraints are (supposing to KeyFrames, stateblocks or first Keyframe are noted *1 and second Keyframes's are *2) :
     invar       : P1, V1, V2
     var         : Q1,B1,P2,Q2,B2
+
+    All Keyframes coming after KF2 are constrained just like KF2
     constraints : Odometry constraint between KeyFrames
                   IMU constraint
                   FixBias constraint --> makes the problem observable (adding a big covariance on all part but a smaller one on yaw)
@@ -42,36 +44,40 @@
     Representation of the application:
 
                                     Imu
-                        KF1----------◼----------KF2
-                   /----P1----------\ /----------P2             invar       : P1, V1, V2
+                        KF1----------◼----------KF2--..
+                   /----P1----------\ /----------P2--..             invar       : P1, V1, V2
         Abs|------◼                 ◼                          var         : Q1,B1,P2,Q2,B2
-                   \----Q1----------/ \----------Q2
-                        V1          Odom
-        Abs|------◼-----B1
+                   \----Q1----------/ \----------Q2--..
+                        V1          Odom         v2  ..
+        Abs|------◼-----B1                       B2  ..
 */
 int main(int argc, char** argv)
 {
     //#################################################### INITIALIZATION
     using namespace wolf;
 
-    //___get input file for imu data___
-    std::ifstream imu_data_input;
+    //___get input files for imu and odom data___
+    std::ifstream imu_data_input, odom_data_input;
     const char * filename_imu;
-    if (argc < 02)
+    const char * filename_odom;
+    if (argc < 03)
     {
-        WOLF_ERROR("Missing 1 input argument (path to imu data file).")
+        WOLF_ERROR("Missing input argument : path to imu or/and odom data file(s).")
         return 1; //return with error
     }
     else
     {
         filename_imu = argv[1];
+        filename_odom = argv[2];
 
         imu_data_input.open(filename_imu);
         WOLF_INFO("imu file : ", filename_imu)
+        odom_data_input.open(filename_odom);
+        WOLF_INFO("odom file : ", filename_odom)
     }
 
     // ___Check if the file is correctly opened___
-    if(!imu_data_input.is_open()){
+    if(!imu_data_input.is_open() || !odom_data_input.is_open()){
         WOLF_ERROR("Failed to open data file ! Exiting")
         return 1;
     }
@@ -97,6 +103,9 @@ int main(int argc, char** argv)
     // ___Define expected values___
     Eigen::Vector7s expected_KF1_pose((Eigen::Vector7s()<<0,0,0,0,0,0,1).finished()), expected_KF2_pose((Eigen::Vector7s()<<0,-0.06,0,0,0,0,11).finished());
 
+    #ifdef AUTO_KFs
+        std::array<Scalar, 50> lastms_imuData;
+    #endif
     //#################################################### SETTING PROBLEM
     std::string wolf_root = _WOLF_ROOT_DIR;
 
@@ -139,37 +148,43 @@ int main(int argc, char** argv)
         sensorIMU->process(imu_ptr);
     }
 
-    //All IMU data have been processed, close the file
-    imu_data_input.close();
-
-    //A KeyFrame should have been created (depending on time_span in processors). get the last KeyFrame
+    //Process all the odom data
     // XXX JS: in my  opinion, we should control the KF creation better, not using time span. Is it possible?
-    #ifdef ADD_KF3
-        //Add a KeyFrame just before the motion actually starts (we did not move yet)
-        data_odom << 0,0,0, 0,0,0;
-        TimeStamp t_middle(0.307585);
-        mot_ptr->setTimeStamp(t_middle);
-        mot_ptr->setData(data_odom);
-        sensorOdom->process(mot_ptr);
+    while(!odom_data_input.eof())
+    {
+        //read
+        odom_data_input >> clock >> data_odom[0] >> data_odom[1] >> data_odom[2] >> data_odom[3] >> data_odom[4] >> data_odom[5];
 
-        //Also add a keyframe at the end of the motion
-        data_odom << 0,-0.06,0, 0,0,0;
-        ts.set(0.981573); //comment this if you want the last KF to be created at last imu's ts
+        //set capture
+        ts.set(clock);
         mot_ptr->setTimeStamp(ts);
         mot_ptr->setData(data_odom);
-        sensorOdom->process(mot_ptr);
 
-        FrameIMUPtr KF2 = std::static_pointer_cast<FrameIMU>(problem->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t_middle));
-        FrameIMUPtr KF3 = std::static_pointer_cast<FrameIMU>(problem->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
-    #else
-        //now impose final odometry using last timestamp of imu
-        data_odom << 0,-0.06,0, 0,0,0;
-        mot_ptr->setTimeStamp(ts);
-        mot_ptr->setData(data_odom);
-        sensorOdom->process(mot_ptr);
+        #ifdef AUTO_KFS
+            /* We want the KFs to be generated automatically but not using time span as argument of this generation
+             * For our application, w want the KFs to be generated when an odometry data is given under condition that the IMU is not moving
+             * We check wether the IMU is moving or not by computing the current stdev of the IMU based on data received during 50ms before the odom timestamp
+             * We compare this value to the stdev (noise) of the sensor (see sensor_imu.yaml)
+             * If the current stdev is below a threshold then we process the odometry data !
+             */
 
-        FrameIMUPtr KF2 = std::static_pointer_cast<FrameIMU>(problem->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
-    #endif
+             // TODO : get data to compute stdev with directly from the capture
+             //         -> see how these data are stored and change getIMUStdev(..) function defined below main() in this file
+             //         -> then just use the function to get this stdev of corresponding data
+
+        #else
+            //process anyway. KFs will be generated based on the configuration given in processor_odom_3D.yaml
+            sensorOdom->process(mot_ptr);
+        #endif
+    }
+
+    //All data have been processed, close the files
+    imu_data_input.close();
+    odom_data_input.close();
+    
+    //A KeyFrame should have been created (depending on time_span in processors). get all frames
+    FrameBaseList trajectory = problem->getTrajectoryPtr()->getFrameList();
+    
 
     //#################################################### OPTIMIZATION PART
     // ___Create needed constraints___
@@ -178,9 +193,9 @@ int main(int argc, char** argv)
     Eigen::MatrixXs featureFix_cov(6,6);
     featureFix_cov = Eigen::MatrixXs::Identity(6,6);
     featureFix_cov.topLeftCorner(3,3) *= 1e-8; // position variances (it's fixed anyway)
-    featureFix_cov(3,3) = pow( .02  , 2); // roll variance
-    featureFix_cov(4,4) = pow( .02  , 2); // pitch variance
-    featureFix_cov(5,5) = pow( .01 , 2); // yaw variance
+    featureFix_cov(3,3) = pow( .01  , 2); // roll variance
+    featureFix_cov(4,4) = pow( .01  , 2); // pitch variance
+    featureFix_cov(5,5) = pow( .001 , 2); // yaw variance
     CaptureBasePtr cap_fix = KF1->addCapture(std::make_shared<CaptureMotion>(0, nullptr, problem_origin.head(7), 7, 6));
     FeatureBasePtr featureFix = cap_fix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", problem_origin.head(7), featureFix_cov));
     ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(featureFix->addConstraint(std::make_shared<ConstraintFix3D>(featureFix)));
@@ -195,31 +210,25 @@ int main(int argc, char** argv)
     ConstraintFixBiasPtr ctr_fixBias = std::static_pointer_cast<ConstraintFixBias>(featureFixBias->addConstraint(std::make_shared<ConstraintFixBias>(featureFixBias)));
 
     // ___Fix/Unfix stateblocks___
+    // fix all Keyframes here
+
+    FrameIMUPtr frame_imu;
+    for(auto frame : trajectory)
+    {   
+        frame_imu = std::static_pointer_cast<FrameIMU>(frame);
+        if(frame_imu->isKey())
+        {
+            frame_imu->getPPtr()->fix();
+            frame_imu->getOPtr()->unfix();
+            frame_imu->getVPtr()->setState((Eigen::Vector3s()<<0,0,0).finished()); //fix all velocties to 0 ()
+            frame_imu->getVPtr()->fix();
+            frame_imu->getAccBiasPtr()->unfix();
+            frame_imu->getGyroBiasPtr()->unfix();
+        }
+    }
+    
+    //KF1 (origin) needs to be also fixed in position
     KF1->getPPtr()->fix();
-    KF1->getOPtr()->unfix();
-    KF1->getVPtr()->fix();
-    KF1->getAccBiasPtr()->unfix();
-    KF1->getGyroBiasPtr()->unfix();
-
-    #ifdef ADD_KF3
-        KF2->getPPtr()->fix();
-        KF2->getOPtr()->unfix();
-        KF2->getVPtr()->fix();
-        KF2->getAccBiasPtr()->unfix();
-        KF2->getGyroBiasPtr()->unfix();
-
-        KF3->getPPtr()->unfix();
-        KF3->getOPtr()->unfix();
-        KF3->getVPtr()->fix();
-        KF3->getAccBiasPtr()->unfix();
-        KF3->getGyroBiasPtr()->unfix();
-    #else
-        KF2->getPPtr()->unfix();
-        KF2->getOPtr()->unfix();
-        KF2->getVPtr()->fix();
-        KF2->getAccBiasPtr()->unfix();
-        KF2->getGyroBiasPtr()->unfix();
-    #endif
 
     #ifdef OUTPUT_RESULTS
         // ___OUTPUT___
@@ -246,45 +255,26 @@ int main(int argc, char** argv)
 
     //#################################################### RESULTS PART
 
-    // ___Get standard deviation from covariances___
-    #ifdef ADD_KF3
-        Eigen::MatrixXs cov_KF1(16,16), cov_KF2(16,16), cov_KF3(16,16);
-
-        problem->getFrameCovariance(KF1, cov_KF1);
-        problem->getFrameCovariance(KF2, cov_KF2);
-        problem->getFrameCovariance(KF3, cov_KF3);
-
-        Eigen::Matrix<wolf::Scalar, 16, 1> stdev_KF1, stdev_KF2, stdev_KF3;
-
-        stdev_KF1 = cov_KF1.diagonal().array().sqrt();
-        stdev_KF2 = cov_KF2.diagonal().array().sqrt();
-        stdev_KF3 = cov_KF3.diagonal().array().sqrt();
-
-        WOLF_DEBUG("stdev KF1 : ", stdev_KF1.transpose());
-        WOLF_DEBUG("stdev KF2 : ", stdev_KF2.transpose());
-        WOLF_DEBUG("stdev KF3 : ", stdev_KF3.transpose());
-    #else
-        Eigen::MatrixXs cov_KF1(16,16), cov_KF2(16,16);
-
-        problem->getFrameCovariance(KF1, cov_KF1);
-        problem->getFrameCovariance(KF2, cov_KF2);
-
-        Eigen::Matrix<wolf::Scalar, 16, 1> stdev_KF1, stdev_KF2;
-
-        stdev_KF1 = cov_KF1.diagonal().array().sqrt();
-        stdev_KF2 = cov_KF2.diagonal().array().sqrt();
-
-        WOLF_DEBUG("stdev KF1 : \n", stdev_KF1.transpose());
-        WOLF_DEBUG("stdev KF2 : \n", stdev_KF2.transpose());
-    #endif
-    
+    // ___Get standard deviation from covariances___ and output this in a file
+    Eigen::MatrixXs cov_KF(16,16);
+    Eigen::Matrix<wolf::Scalar, 16, 1> stdev_KF;
+    for(auto frame : trajectory)
+    {
+        if(frame->isKey())
+        {
+            problem->getFrameCovariance(frame, cov_KF);
+            stdev_KF = cov_KF.diagonal().array().sqrt();
+            #ifdef OUTPUT_RESULTS
+                checking << frame->getTimeStamp().get() << "\t" << frame->getState().transpose() << "\t" << stdev_KF.transpose() << std::endl;
+            #endif
+        }
+    }
 
     #ifdef OUTPUT_RESULTS
         // ___OUTPUT___
         /* Produce output file for matlab visualization
-         * Second output:   KF2 position standard deviation computed
+         * Second output:   KF position standard deviation computed
          *                  estimated trajectory AFTER optimization 
-         *                  + get KF2 timestamp + state just in case the loop is not working as expected
          */
 
         //estimated trajectort
@@ -297,18 +287,7 @@ int main(int argc, char** argv)
             ts_output.set(time_iter * ms);
         }
 
-        //finally, output the timestamp, state and stdev associated to KFs
-        #ifdef ADD_KF3
-            checking << KF2->getTimeStamp().get() << "\t" << KF2->getState().transpose() << "\t" << stdev_KF2.transpose() << std::endl;
-            checking << KF3->getTimeStamp().get() << "\t" << KF3->getState().transpose() << "\t" << stdev_KF3.transpose() << std::endl;
-        #else
-            checking << KF2->getTimeStamp().get() << "\t" << KF2->getState().transpose() << "\t" << stdev_KF2.transpose() << std::endl;
-        #endif
-    #endif
-    
-    // ___Are expected values in the range of estimated +/- 2*stdev ?___
-
-    #ifdef OUTPUT_RESULTS
+        //Finished writing in files : close them
         output_results_before.close();
         output_results_after.close();
         checking.close();
@@ -316,3 +295,17 @@ int main(int argc, char** argv)
 
     return 0;
 }
+
+/*Scalar getIMUStdev(Eigen::VectorXs _data) //input argument : whatever will contain the data in the capture
+{
+    Eigen::Vector6s mean(Eigen::Vector6s::Zero()), stdev(Eigen::Vector6s::Zero());
+    unsigned int _data_size(_data.size());
+    
+    mean = _data.mean()/_data_size;
+
+    for (unsigned int i = 0; i < _data_size; i++)
+    {
+        stdev += pow(_data()-mean,2); //get the correct data from the container
+    }
+    return (stdev.array().sqrt()).maxCoeff();
+}*/
