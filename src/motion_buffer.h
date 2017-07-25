@@ -31,7 +31,7 @@ struct Motion
         Eigen::MatrixXs jacobian_calib_;        ///< Jacobian of delta_integr wrt extra states (TBD by the derived processors)
 //        Eigen::MatrixXs delta_integr_cov_;      ///< covariance of the integrated delta
     public:
-        Motion();
+        Motion() = delete; // completely delete unpredictable stuff like this
         Motion(const TimeStamp& _ts, Size _delta_size = 0, Size _cov_size = 0);
         Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, const MatrixXs& _jac_delta, const MatrixXs& _jac_delta_int, const MatrixXs& _delta_cov, const MatrixXs& _jacobian_extra = MatrixXs::Zero(1,1));
         ~Motion();

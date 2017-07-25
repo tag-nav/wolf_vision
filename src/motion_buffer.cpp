@@ -2,12 +2,6 @@
 namespace wolf
 {
 
-Motion::Motion():
-        ts_(0)
-{
-    resize(0);
-}
-
 Motion::Motion(const TimeStamp& _ts,
                const VectorXs& _delta,
                const VectorXs& _delta_int,
