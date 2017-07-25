@@ -10,9 +10,6 @@
 #include "utils_gtest.h"
 #include "../src/logging.h"
 
-//#define DEBUG_RESULTS
-
-
 class FeatureIMU_test : public testing::Test
 {
 
@@ -53,13 +50,7 @@ class FeatureIMU_test : public testing::Test
     // Set the origin
         Eigen::VectorXs x0(16);
         x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
-        wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
-
-    //create a keyframe at origin
-        ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
-        Eigen::VectorXs origin_state = x0;
-        origin_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, origin_state);
-        wolf_problem_ptr_->getTrajectoryPtr()->addFrame(origin_frame);
+        origin_frame = wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);  //create a keyframe at origin
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     // give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
@@ -129,9 +120,10 @@ TEST_F(FeatureIMU_test, check_frame)
     left_optr = left_frame->getOPtr();
     left_vptr = left_frame->getVPtr();
 
-    ASSERT_TRUE((origin_pptr->getState() - left_pptr->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
-    ASSERT_TRUE((origin_optr->getState() - left_optr->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
-    ASSERT_TRUE((origin_vptr->getState() - left_vptr->getState()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_MATRIX_APPROX(origin_pptr->getState(), left_pptr->getState(), wolf::Constants::EPS_SMALL);
+    Eigen::Map<const Eigen::Quaternions> origin_Quat(origin_optr->getState().data()), left_Quat(left_optr->getState().data());
+    ASSERT_QUATERNION_APPROX(origin_Quat, left_Quat, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(origin_vptr->getState(), left_vptr->getState(), wolf::Constants::EPS_SMALL);
 
     ASSERT_EQ(origin_frame->id(), left_frame->id());
 }
@@ -143,17 +135,12 @@ TEST_F(FeatureIMU_test, access_members)
     Eigen::VectorXs delta(10);
     //dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2; dz = 0.5*9.8*0.1^2 = 0.049; dvz = 9.8*0.1 = 0.98
     delta << 0.01,0,0.049, 0,0,0,1, 0.2,0,0.98;
-    ASSERT_TRUE((feat_imu->dp_preint_ - delta.head<3>()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "feat_imu->dp_preint_ : " << feat_imu->dp_preint_.transpose() << ",\t delta.head<3>() :" << delta.head<3>().transpose() << 
-    ",\n delta_preint : " << delta_preint.transpose() << std::endl;
-    EXPECT_TRUE((feat_imu->dv_preint_ - delta.tail<3>()).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10)) << "feat_imu->dv_preint_ : " << feat_imu->dv_preint_.transpose() << ",\t delta.tail<3>() :" << delta.tail<3>().transpose() << 
-    ",\n (feat_imu->dv_preint_ - delta.tail<3>() : " << (feat_imu->dv_preint_ - delta.tail<3>()).transpose() << std::endl;
-    ASSERT_TRUE((feat_imu->dv_preint_ - delta.tail<3>()).isMuchSmallerThan(1, wolf::Constants::EPS)) << "feat_imu->dv_preint_ : " << feat_imu->dv_preint_.transpose() << ",\t delta.tail<3>() :" << delta.tail<3>().transpose() << 
-    ",\n delta_preint : " << delta_preint.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(feat_imu->dp_preint_, delta.head<3>(), wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(feat_imu->dv_preint_, delta.tail<3>(), wolf::Constants::EPS);
+    EXPECT_MATRIX_APPROX(feat_imu->dv_preint_, delta.tail<3>(), wolf::Constants::EPS_SMALL*10)
 
-    Eigen::Vector4s quat;
-    quat << feat_imu->dq_preint_.x(), feat_imu->dq_preint_.y(), feat_imu->dq_preint_.z(), feat_imu->dq_preint_.w();
-    ASSERT_TRUE((quat - delta.segment<4>(3)).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "feat_imu->dq_preint_ : " << quat.transpose() << ",\t delta.segment<4>(3) :" << delta.segment<4>(3).transpose() << 
-    ",\n delta_preint : " << delta_preint.transpose() << std::endl;
+    Eigen::Map<const Eigen::Quaternions> delta_quat(delta.segment<4>(3).data());
+    ASSERT_QUATERNION_APPROX(feat_imu->dq_preint_, delta_quat, wolf::Constants::EPS_SMALL);
 }
 
 TEST_F(FeatureIMU_test, addConstraint)
