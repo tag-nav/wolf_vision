@@ -221,12 +221,12 @@ inline void FrameBase::setTimeStamp(const TimeStamp& _ts)
 
 inline void FrameBase::getTimeStamp(TimeStamp& _ts) const
 {
-    _ts = time_stamp_.get();
+    _ts = time_stamp_;
 }
 
 inline TimeStamp FrameBase::getTimeStamp() const
 {
-    return time_stamp_.get();
+    return time_stamp_;
 }
 
 inline const std::vector<StateBlockPtr>& FrameBase::getStateBlockVec() const
