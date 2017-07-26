@@ -114,7 +114,7 @@ class ProcessorMotion : public ProcessorBase
                         Size _delta_cov_size,
                         Size _data_size,
                         Scalar _time_tolerance = 0.1,
-                        Size _extra_size = 0);
+                        Size _calib_size = 0);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -233,15 +233,50 @@ class ProcessorMotion : public ProcessorBase
         // These are the pure virtual functions doing the mathematics
     protected:
 
+        /** \brief get calibration params
+         *
+         * @param _calib a reference to the calibration params vector
+         */
+        virtual void getCalibration (VectorXs& _calib)
+        {
+            assert(_calib.size() == calib_size_);
+
+            Size i = 0;
+            // Check Capture's intrinsics and extrinsics for the fix() flag
+            for (auto sb : getSensorPtr()->getStateBlockVec()) // FIXME: get from Capture not Sensor!!
+            {
+                if (sb && !( sb->isFixed() ) )
+                {
+                    _calib.segment(i, i+sb->getSize() ) = sb->getState();
+                    i += sb->getSize();
+                }
+            }
+        }
+
+        /** \brief get calibration parameters
+         *
+         * @return a vector with the calibration parameters
+         */
+        VectorXs getCalibration()
+        {
+            VectorXs calib(calib_size_);
+            getCalibration(calib);
+            return calib;
+        }
+
         /** \brief convert raw CaptureMotion data to the delta-state format
          *
          * This function accepts raw data and time step dt,
          * and computes the value of the delta-state and its covariance. Note that these values are
          * held by the members delta_ and delta_cov_.
          *
-         * \param _data the raw motion data
-         * \param _data_cov the raw motion data covariance
-         * \param _dt the time step (not always needed)
+         * @param _data measured motion data
+         * @param _data_cov covariance
+         * @param _dt time step
+         * @param _delta computed delta
+         * @param _delta_cov covariance
+         * @param _calib current state of the calibrated parameters
+         * @param _jacobian_calib Jacobian of the delta wrt calib
          *
          * Rationale:
          *
@@ -283,7 +318,11 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
-                                const Scalar _dt) = 0;
+                                const Scalar _dt,
+                                Eigen::VectorXs& _delta,
+                                Eigen::MatrixXs& _delta_cov,
+                                const Eigen::VectorXs& _calib,
+                                Eigen::MatrixXs& _jacobian_calib) = 0;
 
         /** \brief composes a delta-state on top of another delta-state
          * \param _delta1 the first delta-state
@@ -650,9 +689,11 @@ class ProcessorMotion : public ProcessorBase
         Eigen::MatrixXs delta_cov_;             ///< current delta covariance
         Eigen::VectorXs delta_integrated_;      ///< integrated delta
         Eigen::MatrixXs delta_integrated_cov_;  ///< integrated delta covariance
+        Eigen::VectorXs calib_;                 ///< calibration vector
         Eigen::MatrixXs jacobian_delta_preint_; ///< jacobian of delta composition w.r.t previous delta integrated
         Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
-        Eigen::MatrixXs jacobian_calib_;        ///< jacobian of delta preintegration wrt something (TBD in the derived class)
+        Eigen::MatrixXs jacobian_calib_;        ///< jacobian of delta preintegration wrt calibration params
+        Eigen::MatrixXs jacobian_delta_calib_;  ///< jacobian of delta wrt calib params
 
     private:
         wolf::TimeStamp getCurrentTimeStamp();
@@ -811,15 +852,17 @@ inline MotionBuffer& ProcessorMotion::getBuffer()
 
 inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
 {
-    return Motion(
-            {_ts,
-             deltaZero(),
-             deltaZero(),
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac
-             Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Cov
-             Eigen::MatrixXs::Zero(delta_cov_size_, calib_size_)      // extra
-             });
+    return Motion(_ts,
+                  VectorXs::Zero(data_size_), // data
+                  Eigen::MatrixXs::Zero(data_size_, data_size_), // Cov data
+                  deltaZero(),
+                  Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Cov delta
+                  deltaZero(),
+                  Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Cov delta_integr
+                  Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac delta
+                  Eigen::MatrixXs::Zero(delta_cov_size_, delta_cov_size_), // Jac delta_integr
+                  Eigen::MatrixXs::Zero(delta_cov_size_, calib_size_)      // Jac calib
+    );
 }
 
 inline CaptureBasePtr ProcessorMotion::getOriginPtr()

@@ -43,9 +43,18 @@ class ProcessorIMU : public ProcessorMotion{
         //void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
 
     protected:
+        virtual void getCalibration(VectorXs& _bias)
+        {
+            FrameIMUPtr frame_imu = std::static_pointer_cast<FrameIMU>(getOriginPtr()->getFramePtr());
+            _bias << frame_imu->getAccBiasPtr()->getState() , frame_imu->getGyroBiasPtr()->getState();
+        }
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
-                                const Scalar _dt);
+                                const Scalar _dt,
+                                Eigen::VectorXs& _delta,
+                                Eigen::MatrixXs& _delta_cov,
+                                const Eigen::VectorXs& _calib,
+                                Eigen::MatrixXs& _jacobian_calib);
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
                                     const Eigen::VectorXs& _delta,
                                     const Scalar _dt,
@@ -145,16 +154,28 @@ namespace wolf{
 
 inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
                                      const Eigen::MatrixXs& _data_cov,
-                                     const Scalar _dt)
+                                     const Scalar _dt,
+                                     Eigen::VectorXs& _delta,
+                                     Eigen::MatrixXs& _delta_cov,
+                                     const Eigen::VectorXs& _calib,
+                                     Eigen::MatrixXs& _jacobian_calib)
 {
     assert(_data.size() == data_size_ && "Wrong data size!");
 
     using namespace Eigen;
 
-    // remap
-    remapData(_data);
-    remapDelta(delta_);
-    // delta_ is D*_out_
+    // remap data
+    new (&acc_measured_) Map<const Vector3s>(_data.data());
+    new (&gyro_measured_) Map<const Vector3s>(_data.data() + 3);
+
+    // remap biases for calibration
+    new (&acc_bias_)  Map<const Vector3s>   (_calib.data() + 0);
+    new (&gyro_bias_) Map<const Vector3s>   (_calib.data() + 3);
+
+    // remap delta_ is D*_out_
+    new (&Dp_out_) Map<Vector3s>      (_delta.data() + 0);
+    new (&Dq_out_) Map<Quaternions>   (_delta.data() + 3);
+    new (&Dv_out_) Map<Vector3s>      (_delta.data() + 7);
 
     /* MATHS of delta creation -- Sola-16
      * dp = 1/2 * (a-a_b) * dt^2 = 1/2 * dv * dt
@@ -171,7 +192,8 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
     Dp_out_ = Dv_out_ * _dt / 2;
     Dq_out_ = v2q(w * _dt);
 
-    //Compute jacobian of delta wrt data noise
+
+    //Compute jacobian of delta wrt data
 
     /* MATHS : jacobian dd_dn, of delta wrt noise
      * substituting a and w respectively by (a+a_n) and (w+w_n) (measurement noise is additive)
@@ -194,11 +216,22 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
      *
      * where Cpp, Cpv, Coo and Cvv are computed below
      */
-    delta_cov_.block<3,3>(0,0).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddp_dan.transpose(); // Cpp = ddp_dan * Caa * ddp_dan'
-    delta_cov_.block<3,3>(0,6).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cpv = ddp_dan * Caa * ddv_dan'
-    delta_cov_.block<3,3>(3,3).noalias() = ddo_dwn*_data_cov.block<3,3>(3,3)*ddo_dwn.transpose(); // Coo = ddo_dwn * Cww * ddo_dwn'
-    delta_cov_.block<3,3>(6,0)           = delta_cov_.block<3,3>(0,6).transpose();                // Cvp = Cpv'
-    delta_cov_.block<3,3>(6,6).noalias() = ddv_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cvv = ddv_dan * Caa * ddv_dan'
+    _delta_cov.block<3,3>(0,0).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddp_dan.transpose(); // Cpp = ddp_dan * Caa * ddp_dan'
+    _delta_cov.block<3,3>(0,6).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cpv = ddp_dan * Caa * ddv_dan'
+    _delta_cov.block<3,3>(3,3).noalias() = ddo_dwn*_data_cov.block<3,3>(3,3)*ddo_dwn.transpose(); // Coo = ddo_dwn * Cww * ddo_dwn'
+    _delta_cov.block<3,3>(6,0)           = _delta_cov.block<3,3>(0,6).transpose();                // Cvp = Cpv'
+    _delta_cov.block<3,3>(6,6).noalias() = ddv_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cvv = ddv_dan * Caa * ddv_dan'
+
+
+    /* Jacobians of delta wrt calibration parameters -- bias
+     * We know that d_(meas - bias)/d_bias = -I
+     * so d_delta/d_bias = - d_delta/d_meas
+     * we assign only the non-null ones
+     */
+    _jacobian_calib.setZero(delta_cov_size_,calib_size_); // can be commented usually, more sure this way
+    _jacobian_calib.block(0,0,3,3) = - ddp_dan;
+    _jacobian_calib.block(3,0,3,3) = - ddv_dan;
+    _jacobian_calib.block(6,3,3,3) = - ddo_dwn;
 
 }
 

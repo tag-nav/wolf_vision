@@ -21,22 +21,32 @@ using namespace Eigen;
 struct Motion
 {
     public:
-        Size delta_size_, cov_size_;
+        Size data_size_, delta_size_, cov_size_, calib_size_;
         TimeStamp ts_;                          ///< Time stamp
+        Eigen::VectorXs data_;                  ///< instantaneous motion data
+        Eigen::MatrixXs data_cov_;              ///< covariance of the instantaneous data
         Eigen::VectorXs delta_;                 ///< instantaneous motion delta
+        Eigen::MatrixXs delta_cov_;             ///< covariance of the instantaneous delta
         Eigen::VectorXs delta_integr_;          ///< the integrated motion or delta-integral
+        Eigen::MatrixXs delta_integr_cov_;      ///< covariance of the integrated delta
         Eigen::MatrixXs jacobian_delta_;        ///< Jacobian of the integration wrt delta_
         Eigen::MatrixXs jacobian_delta_integr_; ///< Jacobian of the integration wrt delta_integr_
-        Eigen::MatrixXs delta_cov_;             ///< covariance of the instantaneous delta
         Eigen::MatrixXs jacobian_calib_;        ///< Jacobian of delta_integr wrt extra states (TBD by the derived processors)
-//        Eigen::MatrixXs delta_integr_cov_;      ///< covariance of the integrated delta
     public:
-        Motion();
-        Motion(const TimeStamp& _ts, Size _delta_size = 0, Size _cov_size = 0);
-        Motion(const TimeStamp& _ts, const VectorXs& _delta, const VectorXs& _delta_int, const MatrixXs& _jac_delta, const MatrixXs& _jac_delta_int, const MatrixXs& _delta_cov, const MatrixXs& _jacobian_extra = MatrixXs::Zero(1,1));
+        Motion() = delete; // completely delete unpredictable stuff like this
+        Motion(const TimeStamp& _ts, Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size);
+        Motion(const TimeStamp& _ts,
+               const VectorXs& _data,
+               const MatrixXs& _data_cov,
+               const VectorXs& _delta,
+               const MatrixXs& _delta_cov,
+               const VectorXs& _delta_int,
+               const MatrixXs& _delta_integr_cov,
+               const MatrixXs& _jac_delta,
+               const MatrixXs& _jac_delta_int,
+               const MatrixXs& _jacobian_calib);// = MatrixXs::Zero(0,0));
         ~Motion();
-        void resize(Size ds, Size dcs);
-        void resize(Size ds);
+        void resize(Size _data_s, Size _delta_s, Size _delta_cov_s, Size _calib_s);
 
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.
 

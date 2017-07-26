@@ -41,7 +41,11 @@ class ProcessorOdom2D : public ProcessorMotion
     protected:
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
-                                const Scalar _dt);
+                                const Scalar _dt,
+                                Eigen::VectorXs& _delta,
+                                Eigen::MatrixXs& _delta_cov,
+                                const Eigen::VectorXs& _calib,
+                                Eigen::MatrixXs& _jacobian_calib);
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1,
                                     const Eigen::VectorXs& _delta2,
                                     const Scalar _Dt2,
@@ -95,7 +99,13 @@ inline ProcessorOdom2D::~ProcessorOdom2D()
 {
 }
 
-inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
+inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data,
+                                        const Eigen::MatrixXs& _data_cov,
+                                        const Scalar _dt,
+                                        Eigen::VectorXs& _delta,
+                                        Eigen::MatrixXs& _delta_cov,
+                                        const Eigen::VectorXs& _calib,
+                                        Eigen::MatrixXs& _jacobian_calib)
 {
     //std::cout << "ProcessorOdom2d::data2delta" << std::endl;
 
@@ -106,9 +116,9 @@ inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eige
     // data  is [dtheta, dr]
     // delta is [dx, dy, dtheta]
     // motion model is 1/2 turn + straight + 1/2 turn
-    delta_(0) = cos(_data(1)/2) * _data(0);
-    delta_(1) = sin(_data(1)/2) * _data(0);
-    delta_(2) = _data(1);
+    _delta(0) = cos(_data(1)/2) * _data(0);
+    _delta(1) = sin(_data(1)/2) * _data(0);
+    _delta(2) = _data(1);
 
     // Fill delta covariance
     Eigen::MatrixXs J(delta_cov_size_,data_size_);
@@ -127,12 +137,15 @@ inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data, const Eige
     // Since input data is size 2, and delta is size 3, the noise model must be given by:
     // 1. Covariance of the input data:  J*Q*J.tr
     // 2. Fix variance term to be added: var*Id
-    delta_cov_ = J * _data_cov * J.transpose() + unmeasured_perturbation_cov_;
+    _delta_cov = J * _data_cov * J.transpose() + unmeasured_perturbation_cov_;
 
     //std::cout << "data      :" << _data.transpose() << std::endl;
     //std::cout << "data cov  :" << std::endl << _data_cov << std::endl;
     //std::cout << "delta     :" << delta_.transpose() << std::endl;
     //std::cout << "delta cov :" << std::endl << delta_cov_ << std::endl;
+
+    // jacobian_delta_calib_ not used in this class yet. In any case, set to zero with:
+    //    jacobian_delta_calib_.setZero();
 }
 
 inline void ProcessorOdom2D::statePlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt, Eigen::VectorXs& _x_plus_delta)

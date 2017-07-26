@@ -93,11 +93,16 @@ TEST(ProcessorOdom3D, data2delta)
     Matrix6s data_cov = diag.asDiagonal();
     Matrix6s delta_cov = data_cov;
 
-    // call the function under test
-    prc.data2delta(data, data_cov, dt);
+    // return values for data2delta()
+    VectorXs delta_ret(7);
+    MatrixXs delta_cov_ret(6,6);
+    MatrixXs jac_delta_calib(6,6);
 
-    ASSERT_TRUE((prc.delta() - delta).isMuchSmallerThan(1, Constants::EPS_SMALL));
-    ASSERT_TRUE((prc.deltaCov() - delta_cov).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    // call the function under test
+    prc.data2delta(data, data_cov, dt, delta_ret, delta_cov_ret, VectorXs::Zero(0), jac_delta_calib);
+
+    ASSERT_MATRIX_APPROX(delta_ret , delta, Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(delta_cov_ret , delta_cov, Constants::EPS_SMALL);
 
 }
 
@@ -121,9 +126,9 @@ TEST(ProcessorOdom3D, deltaPlusDelta)
 
     prc.deltaPlusDelta(D, d, dt, D_int);
 
-    ASSERT_TRUE((D_int - D_int_check).isMuchSmallerThan(1, 1e-10))
-        << "\nDpd  : " << D_int.transpose()
-        << "\ncheck: " << D_int_check.transpose();
+    ASSERT_MATRIX_APPROX(D_int , D_int_check, 1e-10);
+//        << "\nDpd  : " << D_int.transpose()
+//        << "\ncheck: " << D_int_check.transpose();
 }
 
 TEST(ProcessorOdom3D, deltaPlusDelta_Jac)
@@ -162,7 +167,7 @@ TEST(ProcessorOdom3D, Interpolate0) // basic test
 
     ProcessorOdom3D prc;
 
-    Motion ref(0,7,6), final(0,7,6), interpolated(0,7,6);
+    Motion ref(0,6,7,6,0), final(0,6,7,6,0), interpolated(0,6,7,6,0);
 
     // set ref
     ref.ts_ = 1;
@@ -193,8 +198,8 @@ TEST(ProcessorOdom3D, Interpolate0) // basic test
     WOLF_DEBUG("interpolated Delta= ", interpolated.delta_integr_.transpose());
 
     // delta
-    ASSERT_TRUE((interpolated.delta_.head<3>() - 0.25 * final.delta_.head<3>()).isMuchSmallerThan(1.0, Constants::EPS));
-    ASSERT_TRUE((second.delta_.head<3>()       - 0.75 * final.delta_.head<3>()).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(interpolated.delta_.head<3>() , 0.25 * final.delta_.head<3>(), Constants::EPS);
+    ASSERT_MATRIX_APPROX(second.delta_.head<3>()       , 0.75 * final.delta_.head<3>(), Constants::EPS);
 
 }
 
@@ -264,7 +269,7 @@ TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
     Vector3s w;
 
     // Motion structures
-    Motion R(0,7,6), I(0,7,6), S(0,7,6), F(0,7,6);
+    Motion R(0,6,7,6,0), I(0,6,7,6,0), S(0,6,7,6,0), F(0,6,7,6,0);
 
 
     /////////// start experiment ///////////////
@@ -311,9 +316,9 @@ TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
     Dq_of = q_o.conjugate() *  q_f;
 
 
-    R.resize(7,6);
-    F.resize(7,6);
-    I.resize(7,6);
+    R.resize(6,7,6,0);
+    F.resize(6,7,6,0);
+    I.resize(6,7,6,0);
 
     // set ref
     R.ts_           = t_r;
@@ -322,11 +327,11 @@ TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
 
     WOLF_DEBUG("* R.d = ", R.delta_.transpose());
     WOLF_DEBUG("  or  = ", dx_or.transpose());
-    ASSERT_TRUE((R.delta_        - dx_or).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(R.delta_        , dx_or, Constants::EPS);
 
     WOLF_DEBUG("  R.D = ", R.delta_integr_.transpose());
     WOLF_DEBUG("  or  = ", Dx_or.transpose());
-    ASSERT_TRUE((R.delta_integr_ - Dx_or).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(R.delta_integr_ , Dx_or, Constants::EPS);
 
     // set final
     F.ts_           = t_f;
@@ -335,20 +340,20 @@ TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
 
     WOLF_DEBUG("* F.d = ", F.delta_.transpose());
     WOLF_DEBUG("  rf  = ", dx_rf.transpose());
-    ASSERT_TRUE((F.delta_        - dx_rf).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(F.delta_        , dx_rf, Constants::EPS);
 
     WOLF_DEBUG("  F.D = ", F.delta_integr_.transpose());
     WOLF_DEBUG("  of  = ", Dx_of.transpose());
-    ASSERT_TRUE((F.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(F.delta_integr_ , Dx_of, Constants::EPS);
 
     S = F; // avoid overwriting final
     WOLF_DEBUG("* S.d = ", S.delta_.transpose());
     WOLF_DEBUG("  rs  = ", dx_rs.transpose());
-    ASSERT_TRUE((S.delta_        - dx_rs).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(S.delta_        , dx_rs, Constants::EPS);
 
     WOLF_DEBUG("  S.D = ", S.delta_integr_.transpose());
     WOLF_DEBUG("  os  = ", Dx_os.transpose());
-    ASSERT_TRUE((S.delta_integr_ - Dx_os).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(S.delta_integr_ , Dx_os, Constants::EPS);
 
     // interpolate!
     WOLF_DEBUG("*** INTERPOLATE *** I has been computed; S has changed.");
@@ -356,19 +361,19 @@ TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
 
     WOLF_DEBUG("* I.d = ", I.delta_.transpose());
     WOLF_DEBUG("  ri  = ", dx_ri.transpose());
-    ASSERT_TRUE((I.delta_        - dx_ri).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(I.delta_        , dx_ri, Constants::EPS);
 
     WOLF_DEBUG("  I.D = ", I.delta_integr_.transpose());
     WOLF_DEBUG("  oi  = ", Dx_oi.transpose());
-    ASSERT_TRUE((I.delta_integr_ - Dx_oi).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(I.delta_integr_ , Dx_oi, Constants::EPS);
 
     WOLF_DEBUG("* S.d = ", S.delta_.transpose());
     WOLF_DEBUG("  is  = ", dx_is.transpose());
-    ASSERT_TRUE((S.delta_        - dx_is).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(S.delta_        , dx_is, Constants::EPS);
 
     WOLF_DEBUG("  S.D = ", S.delta_integr_.transpose());
     WOLF_DEBUG("  os  = ", Dx_os.transpose());
-    ASSERT_TRUE((S.delta_integr_ - Dx_os).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(S.delta_integr_ , Dx_os, Constants::EPS);
 
 }
 
@@ -402,7 +407,7 @@ TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
     WOLF_DEBUG("t_o: ", t_o.get(), "; t_r: ", t_r.get(), "; t_f: ", t_f.get());
 
     // Motion structures
-    Motion R(0,7,6), I(0,7,6), S(0,7,6), F(0,7,6);
+    Motion R(0,6,7,6,0), I(0,6,7,6,0), S(0,6,7,6,0), F(0,6,7,6,0);
 
 
     /////////// start experiment ///////////////
@@ -414,10 +419,10 @@ TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
     prc.deltaPlusDelta(Dx_or, dx_rf, t_f - t_r, Dx_of);
     Dx_os = Dx_of;
 
-    R.resize(7,6);
-    I.resize(7,6);
-    S.resize(7,6);
-    F.resize(7,6);
+    R.resize(6,7,6,0);
+    I.resize(6,7,6,0);
+    S.resize(6,7,6,0);
+    F.resize(6,7,6,0);
 
     // set ref
     R.ts_           = t_r;
@@ -426,11 +431,11 @@ TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
 
     WOLF_DEBUG("* R.d = ", R.delta_.transpose());
     WOLF_DEBUG("  or  = ", dx_or.transpose());
-    ASSERT_TRUE((R.delta_        - dx_or).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(R.delta_        , dx_or, Constants::EPS);
 
     WOLF_DEBUG("  R.D = ", R.delta_integr_.transpose());
     WOLF_DEBUG("  or  = ", Dx_or.transpose());
-    ASSERT_TRUE((R.delta_integr_ - Dx_or).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(R.delta_integr_ , Dx_or, Constants::EPS);
 
     // set final
     F.ts_           = t_f;
@@ -439,20 +444,20 @@ TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
 
     WOLF_DEBUG("* F.d = ", F.delta_.transpose());
     WOLF_DEBUG("  rf  = ", dx_rf.transpose());
-    ASSERT_TRUE((F.delta_        - dx_rf).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(F.delta_        , dx_rf, Constants::EPS);
 
     WOLF_DEBUG("  F.D = ", F.delta_integr_.transpose());
     WOLF_DEBUG("  of  = ", Dx_of.transpose());
-    ASSERT_TRUE((F.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(F.delta_integr_ , Dx_of, Constants::EPS);
 
     S = F; // avoid overwriting final
     WOLF_DEBUG("* S.d = ", S.delta_.transpose());
     WOLF_DEBUG("  rs  = ", dx_rs.transpose());
-    ASSERT_TRUE((S.delta_        - dx_rs).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(S.delta_        , dx_rs, Constants::EPS);
 
     WOLF_DEBUG("  S.D = ", S.delta_integr_.transpose());
     WOLF_DEBUG("  os  = ", Dx_os.transpose());
-    ASSERT_TRUE((S.delta_integr_ - Dx_os).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(S.delta_integr_ , Dx_os, Constants::EPS);
 
     // interpolate!
     t_i = 0.5; /// before ref!
@@ -461,19 +466,19 @@ TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
 
     WOLF_DEBUG("* I.d = ", I.delta_.transpose());
     WOLF_DEBUG("  ri  = ", prc.deltaZero().transpose());
-    ASSERT_TRUE((I.delta_  - prc.deltaZero()).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(I.delta_  , prc.deltaZero(), Constants::EPS);
 
     WOLF_DEBUG("  I.D = ", I.delta_integr_.transpose());
     WOLF_DEBUG("  oi  = ", Dx_or.transpose());
-    ASSERT_TRUE((I.delta_integr_ - Dx_or).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(I.delta_integr_ , Dx_or, Constants::EPS);
 
     WOLF_DEBUG("* S.d = ", S.delta_.transpose());
     WOLF_DEBUG("  is  = ", dx_rf.transpose());
-    ASSERT_TRUE((S.delta_        - dx_rf).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(S.delta_        , dx_rf, Constants::EPS);
 
     WOLF_DEBUG("  S.D = ", S.delta_integr_.transpose());
     WOLF_DEBUG("  os  = ", Dx_of.transpose());
-    ASSERT_TRUE((S.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(S.delta_integr_ , Dx_of, Constants::EPS);
 
     // interpolate!
     t_i = 5.5; /// after ref!
@@ -483,19 +488,19 @@ TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
 
     WOLF_DEBUG("* I.d = ", I.delta_.transpose());
     WOLF_DEBUG("  ri  = ", dx_rf.transpose());
-    ASSERT_TRUE((I.delta_  - dx_rf).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(I.delta_  , dx_rf, Constants::EPS);
 
     WOLF_DEBUG("  I.D = ", I.delta_integr_.transpose());
     WOLF_DEBUG("  oi  = ", Dx_of.transpose());
-    ASSERT_TRUE((I.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(I.delta_integr_ , Dx_of, Constants::EPS);
 
     WOLF_DEBUG("* S.d = ", S.delta_.transpose());
     WOLF_DEBUG("  is  = ", prc.deltaZero().transpose());
-    ASSERT_TRUE((S.delta_ - prc.deltaZero()).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(S.delta_ , prc.deltaZero(), Constants::EPS);
 
     WOLF_DEBUG("  S.D = ", S.delta_integr_.transpose());
     WOLF_DEBUG("  os  = ", Dx_of.transpose());
-    ASSERT_TRUE((S.delta_integr_ - Dx_of).isMuchSmallerThan(1.0, Constants::EPS));
+    ASSERT_MATRIX_APPROX(S.delta_integr_ , Dx_of, Constants::EPS);
 
 }
 

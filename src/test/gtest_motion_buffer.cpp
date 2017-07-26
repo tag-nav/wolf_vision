@@ -21,7 +21,7 @@ using namespace wolf;
 
 Motion newMotion(TimeStamp t, Scalar d, Scalar D, Scalar C, Scalar J_d, Scalar J_D)
 {
-    Motion m(t, 1, 1);
+    Motion m(t, 1, 1, 1, 0);
     m.delta_(0) = d;
     m.delta_integr_(0) = D;
     m.delta_cov_(0) = C;
