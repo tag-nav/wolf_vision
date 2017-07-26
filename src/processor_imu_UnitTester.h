@@ -190,6 +190,8 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
     jacobian_delta = Eigen::MatrixXs::Zero(9,9);
     delta_preint_plus_delta0 << 0,0,0, 0,0,0,1 ,0,0,0; //PQV
 
+    Vector6s bias = Vector6s::Zero();
+
     /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
         place 1 : added da_bx in data         place 2 : added da_by in data       place 3 : added da_bz in data
         place 4 : added dw_bx in data         place 5 : added dw_by in data       place 6 : added dw_bz in data
@@ -198,7 +200,7 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
     Eigen::Matrix3s dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dwb;
 
     //Deltas without use of da_b
-    data2delta(_data, data_cov, _dt);
+    data2delta(_data, data_cov, _dt,delta_,delta_cov_,bias,jacobian_delta_calib_);
     deltaPlusDelta(_delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
     Delta0 = delta_preint_plus_delta0; //this is the first preintegrated delta, not affected by any added bias noise
     dDp_dab = dDp_dab_;
@@ -225,7 +227,7 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
         _data = data0;
         _data(i) = _data(i) - da_b; //- because a = a_m − a_b + a_n, in out case, a = a_m − a_b - da_b + a_n
         //data2delta
-        data2delta(_data, data_cov, _dt);
+        data2delta(_data, data_cov, _dt,delta_,delta_cov_,bias, jacobian_delta_calib_);
         deltaPlusDelta(_delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
         Deltas_noisy_vect(i) = delta_preint_plus_delta0; //preintegrated deltas affected by added bias noise
     }
@@ -265,7 +267,9 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     Eigen::Matrix<Eigen::VectorXs,9,1> Delta_noisy_vect; //this will contain the Deltas affected by noises
     Eigen::Matrix<Eigen::VectorXs,9,1> delta_noisy_vect; //this will contain the deltas affected by noises
 
-    data2delta(_data, data_cov, _dt); //Affects dp_out, dv_out and dq_out
+    Vector6s bias = Vector6s::Zero();
+
+    data2delta(_data, data_cov, _dt,delta_,delta_cov_,bias,jacobian_delta_calib_); //Affects dp_out, dv_out and dq_out
     delta0 = delta_;        //save the delta that is not affected by noise
     deltaPlusDelta(_Delta0, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta); 
     jacobian_delta_preint0 = jacobian_delta_preint;

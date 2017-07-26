@@ -20,6 +20,8 @@
 
 #include <iostream>
 
+using namespace Eigen;
+
 class ProcessorIMUt : public testing::Test
 {
 
@@ -28,9 +30,9 @@ class ProcessorIMUt : public testing::Test
         wolf::SensorBasePtr sensor_ptr;
         wolf::TimeStamp t;
         wolf::Scalar mti_clock, tmp;
-        Eigen::Vector6s data;
-        Eigen::Matrix6s data_cov;
-        Eigen::VectorXs x0;
+        Vector6s data;
+        Matrix6s data_cov;
+        VectorXs x0;
         std::shared_ptr<wolf::CaptureIMU> cap_imu_ptr;
 
     //a new of this will be created for each new test
@@ -133,7 +135,7 @@ TEST(ProcessorIMU, voteForKeyFrame)
 
     // Wolf problem
     ProblemPtr problem = Problem::create("PQVBB 3D");
-    Eigen::Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
+    Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
     SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
     ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
     prc_imu_params->max_time_span = 1;
@@ -144,16 +146,16 @@ TEST(ProcessorIMU, voteForKeyFrame)
     ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", sensor_ptr, prc_imu_params);
     
     //setting origin
-    Eigen::VectorXs x0(16);
+    VectorXs x0(16);
     TimeStamp t(0);
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.000,  0,0,.000; // Try some non-zero biases
     problem->getProcessorMotionPtr()->setOrigin(x0, t); //this also creates a keyframe at origin
 
     //data variable and covariance matrix
     // since we integrate only a few times, give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
-    Eigen::Vector6s data;
+    Vector6s data;
     data << 1,0,0, 0,0,0;
-    Eigen::Matrix6s data_cov(Matrix6s::Identity());
+    Matrix6s data_cov(Matrix6s::Identity());
     data_cov(0,0) = 0.5;
 
     // Create the captureIMU to store the IMU data arriving from (sensor / callback / file / etc.)
@@ -218,10 +220,10 @@ TEST_F(ProcessorIMUt, acc_x)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     x << 0.01,0,0, 0,0,0,1, 0.2,0,0, 0,0,0, 0,0,0; // advanced at a=2m/s2 during 0.1s ==> dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);
 }
 
 TEST_F(ProcessorIMUt, acc_y)
@@ -241,10 +243,10 @@ TEST_F(ProcessorIMUt, acc_y)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     x << 0,0.00001,0, 0,0,0,1, 0,0.02,0, 0,0,0, 0,0,0; // advanced at a=20m/s2 during 0.001s ==> dx = 0.5*20*0.001^2 = 0.00001; dvx = 20*0.001 = 0.02
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);
 
     //do so for 5s
     const unsigned int iter = 1000; //how many ms 
@@ -256,7 +258,7 @@ TEST_F(ProcessorIMUt, acc_y)
 
     // advanced at a=20m/s2 during 1s ==> dx = 0.5*20*1^2 = 10; dvx = 20*1 = 20
     x << 0,10,0, 0,0,0,1, 0,20,0, 0,0,0, 0,0,0;
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is " << problem->getCurrentState().transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS);// << "current state is " << problem->getCurrentState().transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, acc_z)
@@ -273,10 +275,10 @@ TEST_F(ProcessorIMUt, acc_z)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     x << 0,0,0.01, 0,0,0,1, 0,0,0.2, 0,0,0, 0,0,0; // advanced at a=2m/s2 during 0.1s ==> dz = 0.5*2*0.1^2 = 0.01; dvz = 2*0.1 = 0.2
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);
 
     //do so for 5s
     const unsigned int iter = 50; //how 0.1s 
@@ -288,7 +290,7 @@ TEST_F(ProcessorIMUt, acc_z)
 
     // advanced at a=2m/s2 during 5s ==> dz = 0.5*2*5^2 = 25; dvz = 2*5 = 10
     x << 0,0,25, 0,0,0,1, 0,0,10, 0,0,0, 0,0,0;
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is " << problem->getCurrentState().transpose() << "\n x is : " << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS);// << "current state is " << problem->getCurrentState().transpose() << "\n x is : " << x.transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, acc_xyz)
@@ -299,8 +301,8 @@ TEST_F(ProcessorIMUt, acc_xyz)
      * Same conclusion for position
      */
 
-    Eigen::Vector3s tmp_a_vec; //will be used to store IMU acceleration data
-    Eigen::Vector3s w_vec((Eigen::Vector3s()<<0,0,0).finished());
+    Vector3s tmp_a_vec; //will be used to store IMU acceleration data
+    Vector3s w_vec((Vector3s()<<0,0,0).finished());
     wolf::Scalar time = 0;
     const wolf::Scalar x_freq = 2;
     const wolf::Scalar y_freq = 1;
@@ -341,7 +343,7 @@ TEST_F(ProcessorIMUt, acc_xyz)
         tmp_az = - (z_freq * z_freq) * sin(z_freq * time);
         tmp_a_vec << tmp_ax, tmp_ay, tmp_az;
 
-        Eigen::Quaternions rot(problem->getCurrentState().data()+3); //should always be identity quaternion here...
+        Quaternions rot(problem->getCurrentState().data()+3); //should always be identity quaternion here...
         data.head(3) =  tmp_a_vec + rot.conjugate() * (- wolf::gravity()); //gravity measured
 
         cap_imu_ptr->setData(data);
@@ -364,7 +366,7 @@ TEST_F(ProcessorIMUt, acc_xyz)
      * vz = z_freq * cos(z_freq * 1)
      */
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     wolf::Scalar exp_px = sin(x_freq * time);
     wolf::Scalar exp_py = sin(y_freq * time);
     wolf::Scalar exp_pz = sin(z_freq * time);
@@ -376,16 +378,16 @@ TEST_F(ProcessorIMUt, acc_xyz)
     x << exp_px,exp_py,exp_pz, 0,0,0,1, exp_vx,exp_vy,exp_vz, 0,0,0, 0,0,0;
 
     //check velocity and bias parts
-    ASSERT_TRUE((problem->getCurrentState().tail(9) - x.tail(9)).isMuchSmallerThan(1, 0.001)) << "current VBB is : \n" << problem->getCurrentState().tail(9).transpose() <<
-    "\n expected is : \n" << x.tail(9).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().tail(9) , x.tail(9), 0.001);// << "current VBB is : \n" << problem->getCurrentState().tail(9).transpose() <<
+//    "\n expected is : \n" << x.tail(9).transpose() << std::endl;
 
     //check orientation part
-    ASSERT_TRUE((problem->getCurrentState().segment(3,4) - x.segment(3,4)).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL*10)) << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
-    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().segment(3,4) , x.segment(3,4), wolf::Constants::EPS_SMALL*10);// << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
+//    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
 
     //check position part
-    ASSERT_TRUE((problem->getCurrentState().head(3) - x.head(3)).isMuchSmallerThan(1, 0.001)) << "current position is : \n" << problem->getCurrentState().head(3).transpose() <<
-    "\n expected is : \n" << x.head(3).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().head(3) , x.head(3), 0.001);// << "current position is : \n" << problem->getCurrentState().head(3).transpose() <<
+//    "\n expected is : \n" << x.head(3).transpose() << std::endl;
 
 }
 
@@ -402,11 +404,11 @@ TEST_F(ProcessorIMUt, check_Covariance)
     cap_imu_ptr->setTimeStamp(0.1);
     sensor_ptr->process(cap_imu_ptr);
 
-    Eigen::VectorXs delta_preint(problem->getProcessorMotionPtr()->getMotion().delta_integr_);
-    Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov = problem->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
+    VectorXs delta_preint(problem->getProcessorMotionPtr()->getMotion().delta_integr_);
+//    Matrix<wolf::Scalar,9,9> delta_preint_cov = problem->getProcessorMotionPtr()->getCurrentDeltaPreintCov();
 
     ASSERT_FALSE(delta_preint.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
-    ASSERT_TRUE(delta_preint_cov.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "delta_preint_cov :\n" << delta_preint_cov; //covariances computed only at keyframe creation
+//    ASSERT_MATRIX_APPROX(delta_preint_cov, MatrixXs::Zero(9,9), wolf::Constants::EPS_SMALL); // << "delta_preint_cov :\n" << delta_preint_cov; //covariances computed only at keyframe creation
 }
 
 TEST_F(ProcessorIMUt, Covariances)
@@ -433,13 +435,13 @@ TEST_F(ProcessorIMUt, gyro_x)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Quaternions quat_comp(Quaternions::Identity());
     quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, 0,0,0, 0,0,0; // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);
 
     //do so for 5s
     const unsigned int iter = 1000; //how many ms 
@@ -448,7 +450,7 @@ TEST_F(ProcessorIMUt, gyro_x)
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        Quaternions rot(problem->getCurrentState().data()+3);
         data.head(3) =  rot.conjugate() * (- wolf::gravity());
 
         cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 1.000
@@ -457,8 +459,8 @@ TEST_F(ProcessorIMUt, gyro_x)
     }
 
     x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, 0,0,0, 0,0,0;
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS);// << "current state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n current x is : \n" << x.transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
@@ -466,7 +468,7 @@ TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
     wolf::Scalar abx(0.002);
-    Eigen::Vector3s acc_bias((Eigen::Vector3s()<<abx,0,0).finished());
+    Vector3s acc_bias((Vector3s()<<abx,0,0).finished());
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  abx,0,0,  0,0,0; // Try some non-zero biases
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
@@ -479,14 +481,14 @@ TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Quaternions quat_comp(Quaternions::Identity());
     quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, abx,0,0, 0,0,0; // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "expected state : " << problem->getCurrentState().transpose() 
-    << "\n estimated state : " << x.transpose();
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);// << "expected state : " << problem->getCurrentState().transpose()
+//    << "\n estimated state : " << x.transpose();
 
     //do so for 5s
     const unsigned int iter = 1000; //how many ms 
@@ -495,7 +497,7 @@ TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        Quaternions rot(problem->getCurrentState().data()+3);
         data.head(3) =  rot.conjugate() * (- wolf::gravity()) + acc_bias;
 
         cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 1.000
@@ -504,8 +506,8 @@ TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
     }
 
     x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, abx,0,0, 0,0,0;
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "estimated state is : \n" << problem->getCurrentState().transpose() <<
-    "\n expected state is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS);// << "estimated state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n expected state is : \n" << x.transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
@@ -513,7 +515,7 @@ TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
     wolf::Scalar abx(0.002), aby(0.01);
-    Eigen::Vector3s acc_bias((Eigen::Vector3s()<<abx,aby,0).finished());
+    Vector3s acc_bias((Vector3s()<<abx,aby,0).finished());
     x0 << 0,0,0,  0,0,0,1,  0,0,0,  abx,aby,0,  0,0,0; // Try some non-zero biases
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
@@ -526,14 +528,14 @@ TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Quaternions quat_comp(Quaternions::Identity());
     quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, abx,aby,0, 0,0,0;
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL)) << "expected state : " << problem->getCurrentState().transpose() 
-    << "\n estimated state : " << x.transpose();
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);// << "expected state : " << problem->getCurrentState().transpose()
+//    << "\n estimated state : " << x.transpose();
 
     //do so for 5s
     const unsigned int iter = 1000; //how many ms 
@@ -542,7 +544,7 @@ TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        Quaternions rot(problem->getCurrentState().data()+3);
         data.head(3) =  rot.conjugate() * (- wolf::gravity()) + acc_bias;
 
         cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 1.000
@@ -551,8 +553,8 @@ TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
     }
 
     x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, abx,aby,0, 0,0,0;
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "estimated state is : \n" << problem->getCurrentState().transpose() <<
-    "\n expected state is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS);// << "estimated state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n expected state is : \n" << x.transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, gyro_z)
@@ -571,13 +573,13 @@ TEST_F(ProcessorIMUt, gyro_z)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Quaternions quat_comp(Quaternions::Identity());
     quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, 0,0,0, 0,0,0; // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);
 
     //do so for 5s
     const unsigned int iter = 1000; //how many ms 
@@ -591,8 +593,8 @@ TEST_F(ProcessorIMUt, gyro_z)
     }
 
     x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, 0,0,0, 0,0,0;
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS);// << "current state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n current x is : \n" << x.transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, gyro_xyz)
@@ -602,9 +604,9 @@ TEST_F(ProcessorIMUt, gyro_xyz)
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
-    Eigen::Vector3s tmp_vec; //will be used to store rate of turn data
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
-    Eigen::Matrix3s R0(Eigen::Matrix3s::Identity());
+    Vector3s tmp_vec; //will be used to store rate of turn data
+    Quaternions quat_comp(Quaternions::Identity());
+    Matrix3s R0(Matrix3s::Identity());
     wolf::Scalar time = 0;
     const unsigned int x_rot_vel = 5;
     const unsigned int y_rot_vel = 6;
@@ -641,7 +643,7 @@ TEST_F(ProcessorIMUt, gyro_xyz)
         quat_comp = quat_comp * wolf::v2q(tmp_vec*dt);
         R0 = R0 * wolf::v2R(tmp_vec*dt);
         // use processorIMU
-        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        Quaternions rot(problem->getCurrentState().data()+3);
         data.head(3) =  rot.conjugate() * (- wolf::gravity()); //gravity measured
         data.tail(3) = tmp_vec;
 
@@ -659,32 +661,32 @@ TEST_F(ProcessorIMUt, gyro_xyz)
      */
 
      // validating that the quaternion composition and rotation matrix composition actually describe the same rotation.
-    Eigen::Quaternions R2quat(wolf::v2q(wolf::R2v(R0)));
-    Eigen::Vector4s quat_comp_vec((Eigen::Vector4s() <<quat_comp.x(), quat_comp.y(), quat_comp.z(), quat_comp.w()).finished() );
-    Eigen::Vector4s R2quat_vec((Eigen::Vector4s() <<R2quat.x(), R2quat.y(), R2quat.z(), R2quat.w()).finished() );
+    Quaternions R2quat(wolf::v2q(wolf::R2v(R0)));
+    Vector4s quat_comp_vec((Vector4s() <<quat_comp.x(), quat_comp.y(), quat_comp.z(), quat_comp.w()).finished() );
+    Vector4s R2quat_vec((Vector4s() <<R2quat.x(), R2quat.y(), R2quat.z(), R2quat.w()).finished() );
 
-    ASSERT_TRUE((quat_comp_vec - R2quat_vec).isMuchSmallerThan(1, wolf::Constants::EPS)) << "quat_comp_vec : " << quat_comp_vec.transpose() << "\n R2quat_vec : " << R2quat_vec.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(quat_comp_vec , R2quat_vec, wolf::Constants::EPS);// << "quat_comp_vec : " << quat_comp_vec.transpose() << "\n R2quat_vec : " << R2quat_vec.transpose() << std::endl;
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     x << 0,0,0, quat_comp.x(), quat_comp.y(), quat_comp.z(), quat_comp.w(), 0,0,0, 0,0,0, 0,0,0;
 
-    Eigen::Quaternions result_quat(problem->getCurrentState().data() + 3);
+    Quaternions result_quat(problem->getCurrentState().data() + 3);
     //std::cout << "final orientation : " << wolf::q2v(result_quat).transpose() << std::endl;
 
     //check position part
-    ASSERT_TRUE((problem->getCurrentState().head(3) - x.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current position is : \n" << problem->getCurrentState().head(3).transpose() <<
-    "\n expected is : \n" << x.head(3).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().head(3) , x.head(3), wolf::Constants::EPS);// << "current position is : \n" << problem->getCurrentState().head(3).transpose() <<
+//    "\n expected is : \n" << x.head(3).transpose() << std::endl;
 
     //check velocity and bias parts
-    ASSERT_TRUE((problem->getCurrentState().tail(9) - x.tail(9)).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current VBB is : \n" << problem->getCurrentState().tail(9).transpose() <<
-    "\n expected is : \n" << x.tail(9).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().tail(9) , x.tail(9), wolf::Constants::EPS);// << "current VBB is : \n" << problem->getCurrentState().tail(9).transpose() <<
+//    "\n expected is : \n" << x.tail(9).transpose() << std::endl;
 
     //check orientation part
-    EXPECT_TRUE((problem->getCurrentState().segment(3,4) - x.segment(3,4) ).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
-    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
+    EXPECT_MATRIX_APPROX(problem->getCurrentState().segment(3,4) , x.segment(3,4) , wolf::Constants::EPS);// << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
+//    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
     // expect above fails, look for the actual precision that works
-    ASSERT_TRUE((problem->getCurrentState().segment(3,4) - x.segment(3,4) ).isMuchSmallerThan(1, 0.001)) << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
-    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().segment(3,4) , x.segment(3,4) , 0.001);// << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
+//    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, gyro_z_ConstVelocity)
@@ -703,13 +705,13 @@ TEST_F(ProcessorIMUt, gyro_z_ConstVelocity)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Quaternions quat_comp(Quaternions::Identity());
     quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     x << 0.002,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 2,0,0, 0,0,0, 0,0,0; // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180, 2m/s * 0.001s = 0.002m
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
@@ -723,8 +725,8 @@ TEST_F(ProcessorIMUt, gyro_z_ConstVelocity)
     }
 
     x << 2,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 2,0,0, 0,0,0, 0,0,0; //2m/s * 1s = 2m
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS); // << "current state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n current x is : \n" << x.transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, gyro_x_ConstVelocity)
@@ -743,14 +745,14 @@ TEST_F(ProcessorIMUt, gyro_x_ConstVelocity)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Quaternions quat_comp(Quaternions::Identity());
     quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180, 2m/s * 0.001s = 0.002
     x << 0.002,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 2,0,0, 0,0,0, 0,0,0;
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
@@ -759,7 +761,7 @@ TEST_F(ProcessorIMUt, gyro_x_ConstVelocity)
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        Quaternions rot(problem->getCurrentState().data()+3);
         data.head(3) =  rot.conjugate() * (- wolf::gravity());
 
         cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 1.000
@@ -768,8 +770,8 @@ TEST_F(ProcessorIMUt, gyro_x_ConstVelocity)
     }
 
     x << 2,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 2,0,0, 0,0,0, 0,0,0; //2m/s * 1s = 2m
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS); // << "current state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n current x is : \n" << x.transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, gyro_xy_ConstVelocity)
@@ -788,14 +790,14 @@ TEST_F(ProcessorIMUt, gyro_xy_ConstVelocity)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Quaternions quat_comp(Quaternions::Identity());
     quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180, 2m/s * 0.001s = 0.002
     x << 0.002,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 2,0,0, 0,0,0, 0,0,0;
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
@@ -804,7 +806,7 @@ TEST_F(ProcessorIMUt, gyro_xy_ConstVelocity)
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        Quaternions rot(problem->getCurrentState().data()+3);
         data.head(3) =  rot.conjugate() * (- wolf::gravity());
 
         cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 1.000
@@ -813,8 +815,8 @@ TEST_F(ProcessorIMUt, gyro_xy_ConstVelocity)
     }
 
     x << 2,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 2,0,0, 0,0,0, 0,0,0; //2m/s * 1s = 2m
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS); // << "current state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n current x is : \n" << x.transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, gyro_y_ConstVelocity)
@@ -833,14 +835,14 @@ TEST_F(ProcessorIMUt, gyro_y_ConstVelocity)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Quaternions quat_comp(Quaternions::Identity());
     quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180, 2m/s * 0.001s = 0.002
     x << 0.002,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 2,0,0, 0,0,0, 0,0,0;
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
@@ -849,7 +851,7 @@ TEST_F(ProcessorIMUt, gyro_y_ConstVelocity)
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        Quaternions rot(problem->getCurrentState().data()+3);
         data.head(3) =  rot.conjugate() * (- wolf::gravity());
 
         cap_imu_ptr->setTimeStamp(i*dt + dt); //first one will be 0.002 and last will be 1.000
@@ -858,8 +860,8 @@ TEST_F(ProcessorIMUt, gyro_y_ConstVelocity)
     }
 
     x << 2,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 2,0,0, 0,0,0, 0,0,0; //2m/s * 1s = 2m
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS); // << "current state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n current x is : \n" << x.transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, gyro_xyz_ConstVelocity)
@@ -869,9 +871,9 @@ TEST_F(ProcessorIMUt, gyro_xyz_ConstVelocity)
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
-    Eigen::Vector3s tmp_vec; //will be used to store rate of turn data
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
-    Eigen::Matrix3s R0(Eigen::Matrix3s::Identity());
+    Vector3s tmp_vec; //will be used to store rate of turn data
+    Quaternions quat_comp(Quaternions::Identity());
+    Matrix3s R0(Matrix3s::Identity());
     wolf::Scalar time = 0;
     const unsigned int x_rot_vel = 5;
     const unsigned int y_rot_vel = 6;
@@ -908,7 +910,7 @@ TEST_F(ProcessorIMUt, gyro_xyz_ConstVelocity)
         quat_comp = quat_comp * wolf::v2q(tmp_vec*dt);
         R0 = R0 * wolf::v2R(tmp_vec*dt);
         // use processorIMU
-        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
+        Quaternions rot(problem->getCurrentState().data()+3);
         data.head(3) =  rot.conjugate() * (- wolf::gravity()); //gravity measured
         data.tail(3) = tmp_vec;
 
@@ -926,33 +928,33 @@ TEST_F(ProcessorIMUt, gyro_xyz_ConstVelocity)
      */
 
      // validating that the quaternion composition and rotation matrix composition actually describe the same rotation.
-    Eigen::Quaternions R2quat(wolf::v2q(wolf::R2v(R0)));
-    Eigen::Vector4s quat_comp_vec((Eigen::Vector4s() <<quat_comp.x(), quat_comp.y(), quat_comp.z(), quat_comp.w()).finished() );
-    Eigen::Vector4s R2quat_vec((Eigen::Vector4s() <<R2quat.x(), R2quat.y(), R2quat.z(), R2quat.w()).finished() );
+    Quaternions R2quat(wolf::v2q(wolf::R2v(R0)));
+    Vector4s quat_comp_vec((Vector4s() <<quat_comp.x(), quat_comp.y(), quat_comp.z(), quat_comp.w()).finished() );
+    Vector4s R2quat_vec((Vector4s() <<R2quat.x(), R2quat.y(), R2quat.z(), R2quat.w()).finished() );
 
-    ASSERT_TRUE((quat_comp_vec - R2quat_vec).isMuchSmallerThan(1, wolf::Constants::EPS)) << "quat_comp_vec : " << quat_comp_vec.transpose() << "\n R2quat_vec : " << R2quat_vec.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(quat_comp_vec , R2quat_vec, wolf::Constants::EPS); // << "quat_comp_vec : " << quat_comp_vec.transpose() << "\n R2quat_vec : " << R2quat_vec.transpose() << std::endl;
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     //rotation + translation due to initial velocity
     x << 2,0,0, quat_comp.x(), quat_comp.y(), quat_comp.z(), quat_comp.w(), 2,0,0, 0,0,0, 0,0,0;
 
-    Eigen::Quaternions result_quat(problem->getCurrentState().data() + 3);
+    Quaternions result_quat(problem->getCurrentState().data() + 3);
     //std::cout << "final orientation : " << wolf::q2v(result_quat).transpose() << std::endl;
 
     //check position part
-    ASSERT_TRUE((problem->getCurrentState().head(3) - x.head(3)).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current position is : \n" << problem->getCurrentState().head(3).transpose() <<
-    "\n expected is : \n" << x.head(3).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().head(3) , x.head(3), wolf::Constants::EPS); // << "current position is : \n" << problem->getCurrentState().head(3).transpose() <<
+//    "\n expected is : \n" << x.head(3).transpose() << std::endl;
 
     //check velocity and bias parts
-    ASSERT_TRUE((problem->getCurrentState().tail(9) - x.tail(9)).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current VBB is : \n" << problem->getCurrentState().tail(9).transpose() <<
-    "\n expected is : \n" << x.tail(9).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().tail(9) , x.tail(9), wolf::Constants::EPS); // << "current VBB is : \n" << problem->getCurrentState().tail(9).transpose() <<
+//    "\n expected is : \n" << x.tail(9).transpose() << std::endl;
 
     //check orientation part
-    EXPECT_TRUE((problem->getCurrentState().segment(3,4) - x.segment(3,4) ).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
-    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
+    EXPECT_MATRIX_APPROX(problem->getCurrentState().segment(3,4) , x.segment(3,4) , wolf::Constants::EPS); // << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
+//    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
     // expect above fails, look for the actual precision that works
-    ASSERT_TRUE((problem->getCurrentState().segment(3,4) - x.segment(3,4) ).isMuchSmallerThan(1, 0.001)) << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
-    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().segment(3,4) , x.segment(3,4) , 0.001); // << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
+//    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, gyro_x_acc_x)
@@ -971,17 +973,17 @@ TEST_F(ProcessorIMUt, gyro_x_acc_x)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Quaternions quat_comp(Quaternions::Identity());
     quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180 on x axis
     // translation with constant acc : 1 m/s^2 for 0.001 second. Initial velocity : 0, p = 0.5*a*dt^2 + v*dt = 0.5*1*0.001^2 = 0.0000005 on x axis
     // v = a*dt = 0.001
     x << 0.0000005,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0.001,0,0, 0,0,0, 0,0,0; 
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "1. current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS); // << "1. current state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n current x is : \n" << x.transpose() << std::endl;
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
@@ -990,8 +992,8 @@ TEST_F(ProcessorIMUt, gyro_x_acc_x)
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
-        data.head(3) =  rot.conjugate() * (- wolf::gravity()) + (Eigen::Vector3s()<<1,0,0).finished();
+        Quaternions rot(problem->getCurrentState().data()+3);
+        data.head(3) =  rot.conjugate() * (- wolf::gravity()) + (Vector3s()<<1,0,0).finished();
 
         cap_imu_ptr->setTimeStamp(i*dt); //first one will be 0.002 and last will be 1.000
         cap_imu_ptr->setData(data);
@@ -1001,8 +1003,8 @@ TEST_F(ProcessorIMUt, gyro_x_acc_x)
     // translation with constant acc : 1 m/s for 1 second. Initial velocity : 0, p = 0.5*a*dt + v*dt = 0.5 on x axis
     // v = a*dt = 1
     x << 0.5,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 1,0,0, 0,0,0, 0,0,0;
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS); // << "current state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n current x is : \n" << x.transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, gyro_y_acc_y)
@@ -1021,17 +1023,17 @@ TEST_F(ProcessorIMUt, gyro_y_acc_y)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Quaternions quat_comp(Quaternions::Identity());
     quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180 on y axis
     // translation with constant acc : 1 m/s^2 for 0.001 second. Initial velocity : 0, p = 0.5*a*dt^2 + v*dt = 0.5*1*0.001^2 = 0.0000005 on y axis
     // v = a*dt = 0.001
     x << 0,0.0000005,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0.001,0, 0,0,0, 0,0,0; 
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "1. current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS); // << "1. current state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n current x is : \n" << x.transpose() << std::endl;
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
@@ -1040,8 +1042,8 @@ TEST_F(ProcessorIMUt, gyro_y_acc_y)
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
-        data.head(3) =  rot.conjugate() * (- wolf::gravity()) + (Eigen::Vector3s()<<0,1,0).finished();
+        Quaternions rot(problem->getCurrentState().data()+3);
+        data.head(3) =  rot.conjugate() * (- wolf::gravity()) + (Vector3s()<<0,1,0).finished();
 
         cap_imu_ptr->setTimeStamp(i*dt); //first one will be 0.002 and last will be 1.000
         cap_imu_ptr->setData(data);
@@ -1051,8 +1053,8 @@ TEST_F(ProcessorIMUt, gyro_y_acc_y)
     // translation with constant acc : 1 m/s for 1 second. Initial velocity : 0, p = 0.5*a*dt + v*dt = 0.5 on y axis
     // v = a*dt = 1
     x << 0,0.5,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,1,0, 0,0,0, 0,0,0;
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS); // << "current state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n current x is : \n" << x.transpose() << std::endl;
 }
 
 TEST_F(ProcessorIMUt, gyro_z_acc_z)
@@ -1071,17 +1073,17 @@ TEST_F(ProcessorIMUt, gyro_z_acc_z)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
+    Quaternions quat_comp(Quaternions::Identity());
     quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-    Eigen::VectorXs x(16);
+    VectorXs x(16);
     // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180 on z axis
     // translation with constant acc : 1 m/s^2 for 0.001 second. Initial velocity : 0, p = 0.5*a*dt^2 + v*dt = 0.5*1*0.001^2 = 0.0000005 on z axis
     // v = a*dt = 0.001
     x << 0,0,0.0000005, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0.001, 0,0,0, 0,0,0; 
 
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "1. current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS); // << "1. current state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n current x is : \n" << x.transpose() << std::endl;
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
@@ -1090,8 +1092,8 @@ TEST_F(ProcessorIMUt, gyro_z_acc_z)
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
 
-        Eigen::Quaternions rot(problem->getCurrentState().data()+3);
-        data.head(3) =  rot.conjugate() * (- wolf::gravity()) + (Eigen::Vector3s()<<0,0,1).finished();
+        Quaternions rot(problem->getCurrentState().data()+3);
+        data.head(3) =  rot.conjugate() * (- wolf::gravity()) + (Vector3s()<<0,0,1).finished();
 
         cap_imu_ptr->setTimeStamp(i*dt); //first one will be 0.002 and last will be 1.000
         cap_imu_ptr->setData(data);
@@ -1101,8 +1103,8 @@ TEST_F(ProcessorIMUt, gyro_z_acc_z)
     // translation with constant acc : 1 m/s for 1 second. Initial velocity : 0, p = 0.5*a*dt + v*dt = 0.5 on z axis
     // v = a*dt = 1
     x << 0,0,0.5, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,1, 0,0,0, 0,0,0;
-    ASSERT_TRUE((problem->getCurrentState() - x).isMuchSmallerThan(1, wolf::Constants::EPS)) << "current state is : \n" << problem->getCurrentState().transpose() <<
-    "\n current x is : \n" << x.transpose() << std::endl;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS); // << "current state is : \n" << problem->getCurrentState().transpose() <<
+//    "\n current x is : \n" << x.transpose() << std::endl;
 }
 
 int main(int argc, char **argv)
