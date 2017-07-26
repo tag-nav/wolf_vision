@@ -3,47 +3,57 @@ namespace wolf
 {
 
 Motion::Motion(const TimeStamp& _ts,
+               const VectorXs& _data,
+               const MatrixXs& _data_cov,
                const VectorXs& _delta,
-               const VectorXs& _delta_int,
+               const MatrixXs& _delta_cov,
+               const VectorXs& _delta_integr,
+               const MatrixXs& _delta_integr_cov,
                const MatrixXs& _jac_delta,
                const MatrixXs& _jac_delta_int,
-               const MatrixXs& _delta_cov,
-               const MatrixXs& _jac_extra) :
+               const MatrixXs& _jac_calib) :
+        data_size_(_data.size()),
         delta_size_(_delta.size()),
-        cov_size_(_delta_cov.size()),
+        cov_size_(_delta_cov.cols()),
+        calib_size_(_jac_calib.cols()),
         ts_(_ts),
+        data_(_data),
+        data_cov_(_delta_cov),
         delta_(_delta),
-        delta_integr_(_delta_int),
+        delta_cov_(_delta_cov),
+        delta_integr_(_delta_integr),
+        delta_integr_cov_(_delta_cov),
         jacobian_delta_(_jac_delta),
         jacobian_delta_integr_(_jac_delta_int),
-        delta_cov_(_delta_cov),
-        jacobian_calib_(_jac_extra)
+        jacobian_calib_(_jac_calib)
 {
 }
 
-Motion::Motion(const TimeStamp& _ts, Size _delta_size, Size _cov_size) :
+Motion::Motion(const TimeStamp& _ts, Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size) :
+        data_size_(_data_size),
+        delta_size_(_delta_size),
+        cov_size_(_cov_size),
+        calib_size_(_calib_size),
         ts_(_ts)
 {
-    resize(_delta_size, _cov_size == 0 ? _delta_size : _cov_size);
+    resize(_data_size, _delta_size, _cov_size, _calib_size);
 }
 
 Motion::~Motion()
 {
 }
 
-void Motion::resize(Size ds)
+void Motion::resize(Size _data_s, Size _delta_s, Size _delta_cov_s, Size _calib_s)
 {
-    resize(ds, ds);
-}
-
-void Motion::resize(Size ds, Size dcs)
-{
-    delta_.resize(ds);
-    delta_integr_.resize(ds);
-    jacobian_delta_.resize(dcs, dcs);
-    jacobian_delta_integr_.resize(dcs, dcs);
-    delta_cov_.resize(dcs, dcs);
-//    delta_integr_cov_.resize(dcs, dcs);
+    data_.resize(_data_s);
+    data_cov_.resize(_data_s, _data_s);
+    delta_.resize(_delta_s);
+    delta_cov_.resize(_delta_cov_s, _delta_cov_s);
+    delta_integr_.resize(_delta_s);
+    delta_integr_cov_.resize(_delta_cov_s, _delta_cov_s);
+    jacobian_delta_.resize(_delta_cov_s, _delta_cov_s);
+    jacobian_delta_integr_.resize(_delta_cov_s, _delta_cov_s);
+    jacobian_calib_.resize(_delta_cov_s, _calib_s);
 }
 
 
