@@ -206,7 +206,7 @@ class ProcessorMotion : public ProcessorBase
 
             Size i = 0;
             // Check Capture's intrinsics and extrinsics for the fix() flag
-            for (auto sb : getSensorPtr()->getStateBlockVec()) // FIXME: get from Capture not Sensor!!
+            for (auto sb : getSensorPtr()->getStateBlockVec()) // FIXME: get from Capture, not from Sensor!!
             {
                 if (sb && !( sb->isFixed() ) )
                 {
@@ -796,7 +796,8 @@ inline void ProcessorMotion::getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeSt
 
 inline const Eigen::MatrixXs ProcessorMotion::getCurrentDeltaPreintCov()
 {
-    return delta_integrated_cov_;
+    return getBuffer().get().back().delta_integr_cov_;
+//    return delta_integrated_cov_;
 }
 
 inline Motion ProcessorMotion::getMotion() const
