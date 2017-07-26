@@ -378,5 +378,31 @@ Eigen::MatrixXs ProcessorMotion::integrateBufferCovariance(const MotionBuffer& _
     return _motion_buffer.integrateCovariance();
 }
 
+CaptureMotionPtr ProcessorMotion::getCaptureMotionContainingTimeStamp(const TimeStamp& _ts)
+{
+    // We need to search in previous keyframes for the capture containing a motion buffer with the queried time stamp
+    // Note: since the buffer goes from a FK through the past until the previous KF, we need to:
+    //  1. See that the KF contains a CaptureMotion
+    //  2. See that the TS is smaller than the KF's TS
+    //  3. See that the TS is bigger than the KF's first Motion in the CaptureMotion's buffer
+    FrameBasePtr frame = nullptr;
+    CaptureBasePtr capture = nullptr;
+    CaptureMotionPtr capture_motion = nullptr;
+    for (auto frame_iter = getProblem()->getTrajectoryPtr()->getFrameList().rbegin();
+            frame_iter != getProblem()->getTrajectoryPtr()->getFrameList().rend(); ++frame_iter)
+    {
+        frame = *frame_iter;
+        capture = frame->getCaptureOf(getSensorPtr());
+        if (capture != nullptr)
+        {
+            // We found a Capture belonging to this processor's Sensor ==> it is a CaptureMotion
+            capture_motion = std::static_pointer_cast<CaptureMotion>(capture);
+            if (_ts >= capture_motion->getBuffer().get().front().ts_)
+                // Found time stamp satisfying rule 3 above !!
+                break;
+        }
+    }
+    return capture_motion;
+}
 
 }

@@ -392,7 +392,6 @@ class ProcessorMotion : public ProcessorBase
             return _motion.delta_integr_;
         }
 
-
         /** \brief Delta zero
          * \return a delta state equivalent to the null motion.
          *
@@ -674,6 +673,7 @@ class ProcessorMotion : public ProcessorBase
         virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame) = 0;
 
         Motion motionZero(const TimeStamp& _ts);
+        CaptureMotionPtr getCaptureMotionContainingTimeStamp(const TimeStamp& _ts);
 
     public:
         virtual CaptureBasePtr getOriginPtr();
@@ -749,25 +749,8 @@ inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
     else
     {
         // We need to search in previous keyframes for the capture containing a motion buffer with the queried time stamp
-        // Note: since the buffer goes from a FK through the past until the previous KF, we need to:
-        //  1. See that the KF contains a CaptureMotion
-        //  2. See that the TS is smaller than the KF's TS
-        //  3. See that the TS is bigger than the KF's first Motion in the CaptureMotion's buffer
-        FrameBasePtr     frame          = nullptr;
-        CaptureBasePtr   capture        = nullptr;
-        CaptureMotionPtr capture_motion = nullptr;
-        for (auto frame_iter = getProblem()->getTrajectoryPtr()->getFrameList().rbegin(); frame_iter != getProblem()->getTrajectoryPtr()->getFrameList().rend(); ++frame_iter)
-        {
-            frame   = *frame_iter;
-            capture = frame->getCaptureOf(getSensorPtr());
-            if (capture != nullptr)
-            {
-                // We found a CaptureMotion belonging to this processor's Sensor
-                capture_motion = std::static_pointer_cast<CaptureMotion>(capture);
-                if (_ts >= capture_motion->getBuffer().get().front().ts_)            // Found time stamp satisfying rule 3 above !!
-                    break;
-            }
-        }
+        CaptureMotionPtr capture_motion = getCaptureMotionContainingTimeStamp(_ts);
+
         if (capture_motion)
         {
             // We found a CaptureMotion whose buffer contains the time stamp
