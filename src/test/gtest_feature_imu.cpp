@@ -23,7 +23,7 @@ class FeatureIMU_test : public testing::Test
         std::shared_ptr<wolf::FeatureIMU> feat_imu;
         wolf::FrameIMUPtr last_frame;
         wolf::FrameBasePtr origin_frame;
-        Eigen::Matrix<wolf::Scalar,9,6> dD_db_jacobians;
+        Eigen::MatrixXs dD_db_jacobians;
 
     //a new of this will be created for each new test
     virtual void SetUp()
@@ -78,7 +78,7 @@ class FeatureIMU_test : public testing::Test
         Eigen::MatrixXs delta_integr_cov(wolf_problem_ptr_->getProcessorMotionPtr()->integrateBufferCovariance(wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer()));
         delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
         //feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
-        std::static_pointer_cast<wolf::ProcessorIMU>(wolf_problem_ptr_->getProcessorMotionPtr())->getJacobians(dD_db_jacobians);
+        std::static_pointer_cast<wolf::ProcessorIMU>(wolf_problem_ptr_->getProcessorMotionPtr())->getJacobianCalib(dD_db_jacobians);
         feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_integr_cov, imu_ptr, dD_db_jacobians);
         feat_imu->setCapturePtr(imu_ptr); //associate the feature to a capture
 

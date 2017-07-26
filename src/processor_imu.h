@@ -127,9 +127,6 @@ class ProcessorIMU : public ProcessorMotion{
 
     public:
         //getters
-        void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
-        void getJacobians(Eigen::Matrix<wolf::Scalar,9,6>& _dD_db);
-        Eigen::Matrix<wolf::Scalar,9,6> getJacobians();
         Scalar getMaxTimeSpan() const;
         Scalar getMaxBuffLength() const;
         Scalar getDistTraveled() const;
@@ -559,7 +556,7 @@ inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureMotionPtr _capture_mot
             delta_integr_cov,
             key_frame_ptr->getAccBiasPtr()->getState(),
             key_frame_ptr->getGyroBiasPtr()->getState(),
-            this->getJacobians()); 
+            this->getJacobianCalib()); 
         _capture_motion->addFeature(key_feature_ptr);
 
     return key_feature_ptr;
@@ -593,52 +590,6 @@ inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
 {
     new (&acc_measured_) Map<const Vector3s>(_data.data());
     new (&gyro_measured_) Map<const Vector3s>(_data.data() + 3);
-}
-
-inline void ProcessorIMU::getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb)
-{
-    _dDp_dab = dDp_dab_;
-    _dDv_dab = dDv_dab_;
-    _dDp_dwb = dDp_dwb_;
-    _dDv_dwb = dDv_dwb_;
-    _dDq_dwb = dDq_dwb_;
-}
-
-inline void ProcessorIMU::getJacobians(Eigen::Matrix<wolf::Scalar,9,6>& _dD_db)
-{
-    /* structure of dD_db :
-                ab       wb
-            [ dDp_dab  dDp_dwb ]            Each block is 3x3 !! Even dDq_db --> minimal form
-            [ dDq_dab  dDq_dwb ] 
-            [ dDv_dab  dDv_dwb ]
-    */
-
-    _dD_db.block(0,0,3,3) = dDp_dab_;
-    _dD_db.block(3,0,3,3) = Matrix3s::Zero();
-    _dD_db.block(6,0,3,3) = dDv_dab_;
-    _dD_db.block(0,3,3,3) = dDp_dwb_;
-    _dD_db.block(3,3,3,3) = dDq_dwb_;
-    _dD_db.block(6,3,3,3) = dDv_dwb_;
-}
-
-inline Eigen::Matrix<wolf::Scalar,9,6> ProcessorIMU::getJacobians()
-{
-    /* structure of dD_db :
-                ab       wb
-            [ dDp_dab  dDp_dwb ]            Each block is 3x3 !! Even dDq_db --> minimal form
-            [ dDq_dab  dDq_dwb ] 
-            [ dDv_dab  dDv_dwb ]
-    */
-    Matrix<wolf::Scalar,9,6> dD_db;
-
-    dD_db.block(0,0,3,3) = dDp_dab_;
-    dD_db.block(3,0,3,3) = Matrix3s::Zero();
-    dD_db.block(6,0,3,3) = dDv_dab_;
-    dD_db.block(0,3,3,3) = dDp_dwb_;
-    dD_db.block(3,3,3,3) = dDq_dwb_;
-    dD_db.block(6,3,3,3) = dDv_dwb_;
-
-    return dD_db;
 }
 
 inline Scalar ProcessorIMU::getMaxTimeSpan() const

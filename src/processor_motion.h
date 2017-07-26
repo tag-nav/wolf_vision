@@ -196,6 +196,48 @@ class ProcessorMotion : public ProcessorBase
 
         Eigen::MatrixXs integrateBufferCovariance(const MotionBuffer& _motion_buffer);
 
+        /** \brief get calibration params
+         *
+         * @param _calib a reference to the calibration params vector
+         */
+        virtual void getCalibration (VectorXs& _calib)
+        {
+            assert(_calib.size() == calib_size_);
+
+            Size i = 0;
+            // Check Capture's intrinsics and extrinsics for the fix() flag
+            for (auto sb : getSensorPtr()->getStateBlockVec()) // FIXME: get from Capture not Sensor!!
+            {
+                if (sb && !( sb->isFixed() ) )
+                {
+                    _calib.segment(i, i+sb->getSize() ) = sb->getState();
+                    i += sb->getSize();
+                }
+            }
+        }
+
+        /** \brief get calibration parameters
+         *
+         * @return a vector with the calibration parameters
+         */
+        VectorXs getCalibration()
+        {
+            VectorXs calib(calib_size_);
+            getCalibration(calib);
+            return calib;
+        }
+
+        void getJacobianCalib(MatrixXs& _jac_cal)
+        {
+            _jac_cal = getBuffer().get().back().jacobian_calib_;
+        }
+
+        MatrixXs getJacobianCalib()
+        {
+            return getBuffer().get().back().jacobian_calib_;
+        }
+
+
         // Helper functions:
     protected:
 
@@ -233,36 +275,6 @@ class ProcessorMotion : public ProcessorBase
         // These are the pure virtual functions doing the mathematics
     protected:
 
-        /** \brief get calibration params
-         *
-         * @param _calib a reference to the calibration params vector
-         */
-        virtual void getCalibration (VectorXs& _calib)
-        {
-            assert(_calib.size() == calib_size_);
-
-            Size i = 0;
-            // Check Capture's intrinsics and extrinsics for the fix() flag
-            for (auto sb : getSensorPtr()->getStateBlockVec()) // FIXME: get from Capture not Sensor!!
-            {
-                if (sb && !( sb->isFixed() ) )
-                {
-                    _calib.segment(i, i+sb->getSize() ) = sb->getState();
-                    i += sb->getSize();
-                }
-            }
-        }
-
-        /** \brief get calibration parameters
-         *
-         * @return a vector with the calibration parameters
-         */
-        VectorXs getCalibration()
-        {
-            VectorXs calib(calib_size_);
-            getCalibration(calib);
-            return calib;
-        }
 
         /** \brief convert raw CaptureMotion data to the delta-state format
          *
