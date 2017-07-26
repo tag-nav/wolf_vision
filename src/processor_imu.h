@@ -113,13 +113,6 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Map<const Eigen::Quaternions> Dq_, dq_;
         Eigen::Map<Eigen::Quaternions> Dq_out_;
 
-        ///Jacobians of preintegrated delta wrt IMU biases
-        Eigen::Matrix3s dDp_dab_;
-        Eigen::Matrix3s dDv_dab_;
-        Eigen::Matrix3s dDp_dwb_;
-        Eigen::Matrix3s dDq_dwb_;
-        Eigen::Matrix3s dDv_dwb_;
-
         // Helper functions to remap several magnitudes
         virtual void remapPQV(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
         virtual void remapDelta(Eigen::VectorXs& _delta_out);
@@ -522,15 +515,6 @@ inline void ProcessorIMU::resetDerived()
     // Assign biases for the integration at the origin frame's biases
     acc_bias_  = frame_imu_ptr_->getAccBiasPtr()->getState(); // acc  bias
     gyro_bias_ = frame_imu_ptr_->getGyroBiasPtr()->getState(); // gyro bias
-
-    // reset jacobians wrt bias
-    dDp_dab_.setZero();
-    dDv_dab_.setZero();
-    dDp_dwb_.setZero();
-    dDv_dwb_.setZero();
-    dDq_dwb_.setZero();
-
-    jacobian_calib_.setZero();
 }
 
 inline ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)

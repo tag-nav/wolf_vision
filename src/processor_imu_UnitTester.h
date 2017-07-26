@@ -204,26 +204,11 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
     deltaPlusDelta(_delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
     MatrixXs jacobian_bias = jacobian_delta * jacobian_delta_calib_;
     Delta0 = delta_preint_plus_delta0; //this is the first preintegrated delta, not affected by any added bias noise
-//    dDp_dab = dDp_dab_;
-//    dDp_dwb = dDp_dwb_;
-//    dDq_dwb = dDq_dwb_;
-//    dDv_dab = dDv_dab_;
-//    dDv_dwb = dDv_dwb_;
     dDp_dab = jacobian_bias.block(0,0,3,3);
     dDp_dwb = jacobian_bias.block(0,3,3,3);
     dDq_dwb = jacobian_bias.block(3,3,3,3);
     dDv_dab = jacobian_bias.block(6,0,3,3);
     dDv_dwb = jacobian_bias.block(6,3,3,3);
-//    WOLF_TRACE("dDp_dab_\n", dDp_dab_);
-//    WOLF_TRACE("dDp_dab\n", dDp_dab);
-//    WOLF_TRACE("dDp_dwb_\n", dDp_dwb_);
-//    WOLF_TRACE("dDp_dwb\n", dDp_dwb);
-//    WOLF_TRACE("dDq_dwb_\n", dDq_dwb_);
-//    WOLF_TRACE("dDq_dwb\n", dDq_dwb);
-//    WOLF_TRACE("dDv_dab_\n", dDv_dab_);
-//    WOLF_TRACE("dDv_dab\n", dDv_dab);
-//    WOLF_TRACE("dDv_dwb_\n", dDv_dwb_);
-//    WOLF_TRACE("dDv_dwb\n", dDv_dwb);
     
 
     // propagate bias noise
@@ -231,11 +216,6 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
         //need to reset stuff here
         acc_bias_ = Eigen::Vector3s::Zero();
         gyro_bias_ = Eigen::Vector3s::Zero();
-        dDp_dab_.setZero();
-        dDv_dab_.setZero();
-        dDp_dwb_.setZero();
-        dDv_dwb_.setZero();
-        dDq_dwb_.setZero();
         delta_preint_plus_delta0 << 0,0,0, 0,0,0,1 ,0,0,0;  //PQV
         data_cov = Eigen::MatrixXs::Zero(6,6);
 

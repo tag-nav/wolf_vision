@@ -205,6 +205,7 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
     delta_integrated_ = deltaZero();
     delta_cov_.setZero();
     delta_integrated_cov_.setZero();
+    jacobian_calib_.setZero();
 
     // clear and reset buffer
     getBuffer().get().clear();
