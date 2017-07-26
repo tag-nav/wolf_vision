@@ -312,6 +312,8 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
 
 
 
+    // TODO This needs to go out of here, Jac_calib is already taken care of by ProcessorMotion
+
      /*////////////////////////////////////////////////////////
       * 2. Integrate the Jacobians wrt the biases --
       * See Sola 16 -- OK Forster
