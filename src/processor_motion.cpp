@@ -3,13 +3,13 @@ namespace wolf
 {
 
 ProcessorMotion::ProcessorMotion(const std::string& _type, Size _state_size, Size _delta_size,
-                                 Size _delta_cov_size, Size _data_size, Scalar _time_tolerance, Size _extra_size) :
+                                 Size _delta_cov_size, Size _data_size, Scalar _time_tolerance, Size _calib_size) :
         ProcessorBase(_type, _time_tolerance),
         x_size_(_state_size),
         data_size_(_data_size),
         delta_size_(_delta_size),
         delta_cov_size_(_delta_cov_size),
-        calib_size_(_extra_size),
+        calib_size_(_calib_size),
         origin_ptr_(),
         last_ptr_(),
         incoming_ptr_(),
@@ -19,6 +19,7 @@ ProcessorMotion::ProcessorMotion(const std::string& _type, Size _state_size, Siz
         delta_cov_(_delta_cov_size, _delta_cov_size),
         delta_integrated_(_delta_size),
         delta_integrated_cov_(_delta_cov_size, _delta_cov_size),
+        calib_(_calib_size),
         jacobian_delta_preint_(delta_cov_size_, delta_cov_size_),
         jacobian_delta_(delta_cov_size_, delta_cov_size_),
         jacobian_calib_(delta_size_, calib_size_)
@@ -106,6 +107,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         // reset integrals
         delta_integrated_ = deltaZero();
         delta_integrated_cov_.setZero();
+        jacobian_calib_.setZero();
 
         // reset processor origin to the new keyframe's capture
         origin_ptr_ = last_ptr_;
@@ -315,16 +317,34 @@ void ProcessorMotion::integrateOneStep()
     // Set dt
     updateDt();
 
+    // get vector of parameters to calibrate
+    getCalibration(calib_);
+
     // get data and convert it to delta, and obtain also the delta covariance
-    data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_);
+    data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_, delta_, delta_cov_, calib_, jacobian_delta_calib_);
 
     // integrate the current delta to pre-integrated measurements, and get Jacobians
     deltaPlusDelta(getBuffer().get().back().delta_integr_, delta_, dt_, delta_integrated_, jacobian_delta_preint_, jacobian_delta_);
 
-    // push all into buffer
-    getBuffer().get().push_back(Motion( {incoming_ptr_->getTimeStamp(), delta_, delta_integrated_,
-                                         jacobian_delta_, jacobian_delta_preint_, delta_cov_, jacobian_calib_}));
+    // integrate Jacobian wrt calib
+    if (calib_size_ > 0)
+        jacobian_calib_ = jacobian_delta_preint_ * getBuffer().get().back().jacobian_calib_ + jacobian_delta_ * jacobian_delta_calib_;
 
+    // Integrate covariance
+    delta_integrated_cov_ = jacobian_delta_preint_ * getBuffer().get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
+                          + jacobian_delta_        * delta_cov_                                 * jacobian_delta_.transpose();
+
+    // push all into buffer
+    getBuffer().get().push_back(Motion( incoming_ptr_->getTimeStamp(),
+                                        incoming_ptr_->getData(),
+                                        incoming_ptr_->getDataCovariance(),
+                                        delta_,
+                                        delta_cov_,
+                                        delta_integrated_,
+                                        delta_integrated_cov_,
+                                        jacobian_delta_,
+                                        jacobian_delta_preint_,
+                                        jacobian_calib_));
 }
 
 void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)

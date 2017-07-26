@@ -73,7 +73,11 @@ class ProcessorOdom3D : public ProcessorMotion
     public:
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
-                                const Scalar _dt);
+                                const Scalar _dt,
+                                Eigen::VectorXs& _delta,
+                                Eigen::MatrixXs& _delta_cov,
+                                const Eigen::VectorXs& _calib,
+                                Eigen::MatrixXs& _jacobian_calib);
         void deltaPlusDelta(const Eigen::VectorXs& _delta1,
                             const Eigen::VectorXs& _delta2,
                             const Scalar _Dt2,
