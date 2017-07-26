@@ -328,12 +328,7 @@ void ProcessorMotion::integrateOneStep()
 
     // integrate Jacobian wrt calib
     if (calib_size_ > 0)
-    {
-        MatrixXs jacobian_calib = jacobian_calib_;
         jacobian_calib_ = jacobian_delta_preint_ * getBuffer().get().back().jacobian_calib_ + jacobian_delta_ * jacobian_delta_calib_;
-        WOLF_DEBUG("J_bias from ProcMotion:\n", jacobian_calib_);
-        WOLF_DEBUG("J_bias from ProcIMU:\n", jacobian_calib);
-    }
 
     // Integrate covariance
     delta_integrated_cov_ = jacobian_delta_preint_ * getBuffer().get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()

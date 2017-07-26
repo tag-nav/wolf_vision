@@ -312,7 +312,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
 
 
 
-    // TODO This needs to go out of here, Jac_calib is already taken care of by ProcessorMotion
+    // DONE This needs to go out of here, Jac_calib is already taken care of by ProcessorMotion
 
      /*////////////////////////////////////////////////////////
       * 2. Integrate the Jacobians wrt the biases --
@@ -327,25 +327,25 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
       */
 
     // acc and gyro measurements corrected with the estimated bias
-    Vector3s a = acc_measured_  - acc_bias_;
-    Vector3s w = gyro_measured_ - gyro_bias_;
-
-    // temporaries
-    Scalar dt2_2         = 0.5 * _dt * _dt;
-    Matrix3s M_tmp       = DR * skew(a) * dDq_dwb_;
-
-    dDp_dab_.noalias()  += dDv_dab_ * _dt -    DR * dt2_2;
-    dDv_dab_            -=       DR * _dt;
-    dDp_dwb_.noalias()  += dDv_dwb_ * _dt - M_tmp * dt2_2;
-    dDv_dwb_            -=    M_tmp * _dt;
-    dDq_dwb_             = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16 -- we'll use small angle aprox below:
-    //    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
-
-    jacobian_calib_.block(0,0,3,3) = dDp_dab_;
-    jacobian_calib_.block(0,3,3,3) = dDp_dwb_;
-    jacobian_calib_.block(3,3,3,3) = dDq_dwb_;
-    jacobian_calib_.block(6,0,3,3) = dDv_dab_;
-    jacobian_calib_.block(6,3,3,3) = dDv_dwb_;
+//    Vector3s a = acc_measured_  - acc_bias_;
+//    Vector3s w = gyro_measured_ - gyro_bias_;
+//
+//    // temporaries
+//    Scalar dt2_2         = 0.5 * _dt * _dt;
+//    Matrix3s M_tmp       = DR * skew(a) * dDq_dwb_;
+//
+//    dDp_dab_.noalias()  += dDv_dab_ * _dt -    DR * dt2_2;
+//    dDv_dab_            -=       DR * _dt;
+//    dDp_dwb_.noalias()  += dDv_dwb_ * _dt - M_tmp * dt2_2;
+//    dDv_dwb_            -=    M_tmp * _dt;
+//    dDq_dwb_             = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16 -- we'll use small angle aprox below:
+//    //    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
+//
+//    jacobian_calib_.block(0,0,3,3) = dDp_dab_;
+//    jacobian_calib_.block(0,3,3,3) = dDp_dwb_;
+//    jacobian_calib_.block(3,3,3,3) = dDq_dwb_;
+//    jacobian_calib_.block(6,0,3,3) = dDv_dab_;
+//    jacobian_calib_.block(6,3,3,3) = dDv_dwb_;
 
 
     /*//////////////////////////////////////////////////////////////////////////
