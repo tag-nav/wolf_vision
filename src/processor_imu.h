@@ -230,8 +230,8 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
      */
     _jacobian_calib.setZero(delta_cov_size_,calib_size_); // can be commented usually, more sure this way
     _jacobian_calib.block(0,0,3,3) = - ddp_dan;
-    _jacobian_calib.block(3,0,3,3) = - ddv_dan;
-    _jacobian_calib.block(6,3,3,3) = - ddo_dwn;
+    _jacobian_calib.block(3,3,3,3) = - ddo_dwn;
+    _jacobian_calib.block(6,0,3,3) = - ddv_dan;
 
 }
 
