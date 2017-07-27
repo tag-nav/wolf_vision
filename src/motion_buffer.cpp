@@ -59,8 +59,8 @@ void Motion::resize(Size _data_s, Size _delta_s, Size _delta_cov_s, Size _calib_
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-MotionBuffer::MotionBuffer(Size _delta_size, Size _cov_size) :
-        delta_size_(_delta_size), cov_size_(_cov_size)
+MotionBuffer::MotionBuffer(Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size) :
+        data_size_(_data_size), delta_size_(_delta_size), cov_size_(_cov_size), calib_size_(_calib_size)
 {
 }
 

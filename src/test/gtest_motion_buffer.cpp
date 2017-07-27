@@ -41,7 +41,7 @@ Motion m4 = newMotion(t4, 4, 10, 1, .1, 1);
 
 TEST(MotionBuffer, QueryTimeStamps)
 {
-    MotionBuffer MB(1,1);
+    MotionBuffer MB(1,1,1,0);
 
     MB.get().push_back(m0);
     MB.get().push_back(m1);
@@ -65,7 +65,7 @@ TEST(MotionBuffer, QueryTimeStamps)
 
 TEST(MotionBuffer, getMotion)
 {
-    MotionBuffer MB(1,1);
+    MotionBuffer MB(1,1,1,0);
 
     MB.get().push_back(m0);
     ASSERT_EQ(MB.getMotion(t0).delta_, m0.delta_);
@@ -79,7 +79,7 @@ TEST(MotionBuffer, getMotion)
 
 TEST(MotionBuffer, getDelta)
 {
-    MotionBuffer MB(1,1);
+    MotionBuffer MB(1,1,1,0);
 
     MB.get().push_back(m0);
 
@@ -93,7 +93,7 @@ TEST(MotionBuffer, getDelta)
 
 TEST(MotionBuffer, Split)
 {
-    MotionBuffer MB(1,1);
+    MotionBuffer MB(1,1,1,0);
 
     MB.get().push_back(m0);
     MB.get().push_back(m1);
@@ -101,7 +101,7 @@ TEST(MotionBuffer, Split)
     MB.get().push_back(m3);
     MB.get().push_back(m4); // put 5 motions
 
-    MotionBuffer MB_old(1,1);
+    MotionBuffer MB_old(1,1,1,0);
 
     TimeStamp t = 1.5; // between m1 and m2
     MB.split(t, MB_old);
@@ -117,7 +117,7 @@ TEST(MotionBuffer, Split)
 
 TEST(MotionBuffer, integrateCovariance)
 {
-    MotionBuffer MB(1,1);
+    MotionBuffer MB(1,1,1,0);
 
     MB.get().push_back(m0);
     MB.get().push_back(m1);
@@ -132,7 +132,7 @@ TEST(MotionBuffer, integrateCovariance)
 
 TEST(MotionBuffer, integrateCovariance_ts)
 {
-    MotionBuffer MB(1,1);
+    MotionBuffer MB(1,1,1,0);
 
     MB.get().push_back(m0);
     MB.get().push_back(m1);
@@ -146,7 +146,7 @@ TEST(MotionBuffer, integrateCovariance_ts)
 
 TEST(MotionBuffer, integrateCovariance_ti_tf)
 {
-    MotionBuffer MB(1,1);
+    MotionBuffer MB(1,1,1,0);
 
     MB.get().push_back(m0);
     MB.get().push_back(m1);
@@ -163,7 +163,7 @@ TEST(MotionBuffer, integrateCovariance_ti_tf)
 
 TEST(MotionBuffer, print)
 {
-    MotionBuffer MB(1,1);
+    MotionBuffer MB(1,1,1,0);
 
     MB.get().push_back(m0);
     MB.get().push_back(m1);

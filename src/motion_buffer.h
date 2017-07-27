@@ -74,8 +74,9 @@ struct Motion
  */
 class MotionBuffer{
     public:
-        Size delta_size_, cov_size_;
-        MotionBuffer(Size _delta_size, Size _cov_size);
+        Size data_size_, delta_size_, cov_size_, calib_size_;
+        MotionBuffer() = delete;
+        MotionBuffer(Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size);
         std::list<Motion>& get();
         const std::list<Motion>& get() const;
         const Motion& getMotion(const TimeStamp& _ts) const;

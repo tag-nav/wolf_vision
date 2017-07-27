@@ -73,7 +73,7 @@ TEST(FrameBase, LinksToTree)
     T->addFrame(F1);
     FrameBasePtr F2 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
     T->addFrame(F2);
-    CaptureMotionPtr C = make_shared<CaptureMotion>(1, S, Vector3s::Zero(), 3, 3);
+    CaptureMotionPtr C = make_shared<CaptureMotion>(1, S, Vector3s::Zero(), 3, 3, 3, 0);
     F1->addCapture(C);
     FeatureBasePtr f = make_shared<FeatureBase>("f", Vector1s(1), Matrix<Scalar,1,1>::Identity()*.01);
     C->addFeature(f);

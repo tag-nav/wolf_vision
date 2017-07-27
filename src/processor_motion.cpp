@@ -95,7 +95,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
                                                     getSensorPtr(),
                                                     Eigen::VectorXs::Zero(data_size_),
                                                     Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                    delta_size_, delta_cov_size_,
+                                                    data_size_, delta_size_, delta_cov_size_, calib_size_,
                                                     key_frame_ptr);
         // reset the new buffer
         new_capture_ptr->getBuffer().get().push_back( motionZero(key_frame_ptr->getTimeStamp()) ) ;
@@ -176,7 +176,7 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
                                                   getSensorPtr(),
                                                   Eigen::VectorXs::Zero(data_size_),
                                                   Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                  delta_size_, delta_cov_size_,
+                                                  data_size_, delta_size_, delta_cov_size_, calib_size_,
                                                   nullptr);
     // Add origin capture to origin frame
     WOLF_DEBUG("Capture origin timestamp : ", _origin_frame->getTimeStamp().get());
@@ -187,7 +187,7 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
                                                 getSensorPtr(),
                                                 Eigen::VectorXs::Zero(data_size_),
                                                 Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                delta_size_, delta_cov_size_,
+                                                data_size_, delta_size_, delta_cov_size_, calib_size_,
                                                 _origin_frame);
     // Make non-key-frame at last Capture
     FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
@@ -238,7 +238,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     CaptureMotionPtr new_capture = std::make_shared<CaptureMotion>(new_ts, getSensorPtr(),
                                                                          Eigen::VectorXs::Zero(data_size_),
                                                                          Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                                         delta_size_, delta_cov_size_,
+                                                                         data_size_, delta_size_, delta_cov_size_, calib_size_,
                                                                          new_keyframe_origin);
     // add motion capture to keyframe
     _new_keyframe->addCapture(new_capture);
@@ -322,7 +322,7 @@ void ProcessorMotion::integrateOneStep()
     getCalibration(calib_);
 
     // get data and convert it to delta, and obtain also the delta covariance
-    data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_, delta_, delta_cov_, calib_, jacobian_delta_calib_);
+    data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_, delta_, delta_cov_, getCalibration(), jacobian_delta_calib_);
 
     // integrate the current delta to pre-integrated measurements, and get Jacobians
     deltaPlusDelta(getBuffer().get().back().delta_integr_, delta_, dt_, delta_integrated_, jacobian_delta_preint_, jacobian_delta_);
