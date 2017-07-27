@@ -242,13 +242,11 @@ inline ConstraintBasePtr ProcessorOdom2D::emplaceConstraint(FeatureBasePtr _feat
 inline FeatureBasePtr ProcessorOdom2D::emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame)
 {
     // create motion feature and add it to the key_capture
-    Eigen::MatrixXs delta_integr_cov = _capture_motion->getBuffer().get().back().delta_integr_cov_;
-
     FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
-            "MOTION",
+            "ODOM 2D",
             _capture_motion->getBuffer().get().back().delta_integr_,
-            delta_integr_cov.determinant() > 0 ?
-            delta_integr_cov : Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-8);
+            _capture_motion->getBuffer().get().back().delta_integr_cov_);
+
     _capture_motion->addFeature(key_feature_ptr);
 
     return key_feature_ptr;
