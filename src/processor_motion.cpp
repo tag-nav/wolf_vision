@@ -179,7 +179,6 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
                                                   data_size_, delta_size_, delta_cov_size_, calib_size_,
                                                   nullptr);
     // Add origin capture to origin frame
-//    WOLF_DEBUG("Capture origin timestamp : ", _origin_frame->getTimeStamp().get());
     _origin_frame->addCapture(origin_ptr_);
 
     // make (emtpy) last Capture
@@ -350,9 +349,6 @@ void ProcessorMotion::integrateOneStep()
 
 void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
 {
-
-//    _capture_ptr->getBuffer().print(0,0,1,0);
-
     // start with empty motion
     _capture_ptr->getBuffer().get().push_front(motionZero(_capture_ptr->getOriginFramePtr()->getTimeStamp()));
 
@@ -386,9 +382,6 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
         motion_it++;
         prev_motion_it++;
     }
-
-//    _capture_ptr->getBuffer().print(0,0,1,0);
-
 }
 
 Eigen::MatrixXs ProcessorMotion::integrateBufferCovariance(const MotionBuffer& _motion_buffer)

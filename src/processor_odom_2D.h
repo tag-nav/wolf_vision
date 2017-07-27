@@ -129,11 +129,6 @@ inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data,
     J(1,1) =   _data(0) * cos(_data(1) / 2) / 2;
     J(2,1) =   1;
 
-//    if (getBuffer().get().size() > 2)
-//      delta_cov_ = J * _data_cov * J.transpose();
-//    else
-//      delta_cov_ = J * _data_cov * J.transpose() + std::abs(unmeasured_perturbation_var_*_data(0))*Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
-
     // Since input data is size 2, and delta is size 3, the noise model must be given by:
     // 1. Covariance of the input data:  J*Q*J.tr
     // 2. Fix variance term to be added: var*Id
@@ -158,16 +153,8 @@ inline void ProcessorOdom2D::statePlusDelta(const Eigen::VectorXs& _x, const Eig
     assert(_x.size() == x_size_ && "Wrong _x vector size");
     assert(_x_plus_delta.size() == x_size_ && "Wrong _x_plus_delta vector size");
 
-//    std::cout << "statePlusDelta ------------------------------------" << std::endl;
-//    std::cout << "_x:     " << _x.transpose() << std::endl;
-//    std::cout << "_delta: " << _delta.transpose() << std::endl;
-//    std::cout << "_x_plus_delta: " << _x_plus_delta.transpose() << std::endl;
-
     _x_plus_delta.head<2>() = _x.head<2>() + Eigen::Rotation2Ds(_x(2)).matrix() * _delta.head<2>();
     _x_plus_delta(2) = pi2pi(_x(2) + _delta(2));
-
-//    std::cout << "-----------------------------------------------" << std::endl;
-//    std::cout << "_x_plus_delta: " << _x_plus_delta.transpose() << std::endl;
 }
 
 inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, const Scalar _Dt2, Eigen::VectorXs& _delta1_plus_delta2)
@@ -179,16 +166,8 @@ inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     assert(_delta2.size() == delta_size_ && "Wrong _delta2 vector size");
     assert(_delta1_plus_delta2.size() == delta_size_ && "Wrong _delta1_plus_delta2 vector size");
 
-//    std::cout << "deltaPlusDelta ------------------------------------" << std::endl;
-//    std::cout << "_delta1: " << _delta1.transpose() << std::endl;
-//    std::cout << "_delta2: " << _delta2.transpose() << std::endl;
-//    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
-
     _delta1_plus_delta2.head<2>() = _delta1.head<2>() + Eigen::Rotation2Ds(_delta1(2)).matrix() * _delta2.head<2>();
     _delta1_plus_delta2(2) = pi2pi(_delta1(2) + _delta2(2));
-
-//    std::cout << "-----------------------------------------------" << std::endl;
-//    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
 }
 
 inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2,
@@ -205,11 +184,6 @@ inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     assert(_jacobian2.rows() == delta_cov_size_ && "Wrong _jacobian2 size");
     assert(_jacobian2.cols() == delta_cov_size_ && "Wrong _jacobian2 size");
 
-//    std::cout << "deltaPlusDelta ------------------------------------" << std::endl;
-//    std::cout << "_delta1: " << _delta1.transpose() << std::endl;
-//    std::cout << "_delta2: " << _delta2.transpose() << std::endl;
-//    std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
-
     _delta1_plus_delta2.head<2>() = _delta1.head<2>() + Eigen::Rotation2Ds(_delta1(2)).matrix() * _delta2.head<2>();
     _delta1_plus_delta2(2) = pi2pi(_delta1(2) + _delta2(2));
 
@@ -221,9 +195,6 @@ inline void ProcessorOdom2D::deltaPlusDelta(const Eigen::VectorXs& _delta1, cons
     // jac wrt delta
     _jacobian2 = Eigen::MatrixXs::Identity(delta_cov_size_,delta_cov_size_);
     _jacobian2.topLeftCorner<2,2>() = Eigen::Rotation2Ds(_delta1(2)).matrix();
-
-    //std::cout << "-----------------------------------------------" << std::endl;
-    //std::cout << "_delta1_plus_delta2: " << _delta1_plus_delta2.transpose() << std::endl;
 }
 
 inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const
