@@ -259,8 +259,6 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     }
 
 
-    reintegrateBuffer(new_capture);
-
     Eigen::MatrixXs new_covariance = integrateBufferCovariance(new_capture->getBuffer());
 //    Eigen::MatrixXs new_covariance = new_capture->getBuffer().get().back().delta_integr_cov_;
 
