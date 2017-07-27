@@ -540,8 +540,8 @@ inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureMotionPtr _capture_mot
             delta_integr_cov,
             key_frame_ptr->getAccBiasPtr()->getState(),
             key_frame_ptr->getGyroBiasPtr()->getState(),
-            this->getJacobianCalib()); 
-        _capture_motion->addFeature(key_feature_ptr);
+            _capture_motion->getBuffer().get().back().jacobian_calib_);
+    _capture_motion->addFeature(key_feature_ptr);
 
     return key_feature_ptr;
 }
