@@ -258,9 +258,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
         new_capture->getBuffer().get().push_back(motion_interpolated);
     }
 
-
-    Eigen::MatrixXs new_covariance = integrateBufferCovariance(new_capture->getBuffer());
-//    Eigen::MatrixXs new_covariance = new_capture->getBuffer().get().back().delta_integr_cov_;
+    Eigen::MatrixXs new_covariance = new_capture->getBuffer().get().back().delta_integr_cov_;
 
     // check for very small covariances and fix
     // FIXME: This situation means no motion. Therefore,
