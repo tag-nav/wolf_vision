@@ -97,7 +97,6 @@ class ProcessorIMU : public ProcessorMotion{
         const Eigen::Vector3s gravity_;
 
         // Biases in the first keyframe's state for pre-integration
-        Vector6s bias_;
         Eigen::Map<Eigen::Vector3s> acc_bias_;
         Eigen::Map<Eigen::Vector3s> gyro_bias_;
 
@@ -158,10 +157,6 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
     new (&acc_measured_) Map<const Vector3s>(_data.data());
     new (&gyro_measured_) Map<const Vector3s>(_data.data() + 3);
 
-    // remap biases for calibration
-    new (&acc_bias_)  Map<const Vector3s>   (_calib.data() + 0);
-    new (&gyro_bias_) Map<const Vector3s>   (_calib.data() + 3);
-
     // remap delta_ is D*_out_
     new (&Dp_out_) Map<Vector3s>      (_delta.data() + 0);
     new (&Dq_out_) Map<Quaternions>   (_delta.data() + 3);
@@ -174,8 +169,8 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
      */
 
     // acc and gyro measurements corrected with the estimated bias
-    Vector3s a = acc_measured_  - acc_bias_;
-    Vector3s w = gyro_measured_ - gyro_bias_;
+    Vector3s a = acc_measured_  - _calib.head(3);
+    Vector3s w = gyro_measured_ - _calib.tail(3);
 
     // create delta
     Dv_out_ = a * _dt;
