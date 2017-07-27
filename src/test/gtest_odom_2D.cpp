@@ -433,20 +433,20 @@ TEST(Odom2D, KF_callback)
 //    show(problem);
 
     // check the split KF
-    ASSERT_POSE2D_APPROX(keyframe_1->getState()                 , integrated_pose_vector[m_split], 1e-6);
+    ASSERT_POSE2D_APPROX(keyframe_1->getState()                  , integrated_pose_vector[m_split], 1e-6);
     ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_1) , integrated_cov_vector [m_split], 1e-6); // FIXME test does not pass
 
     // check other KF in the future of the split KF
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
-    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_2)    , integrated_cov_vector [n_split], 1e-6);
+    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_2)   , integrated_cov_vector [n_split], 1e-6);
 
     // Check full trajectory
     t = t0;
     for (int n=1; n<=N; n++)
     {
         t += dt;
-        WOLF_DEBUG("   estimated(", t, ") = ", problem->getState(t).transpose());
-        WOLF_DEBUG("ground truth(", t, ") = ", integrated_pose_vector[n].transpose());
+        //        WOLF_DEBUG("   estimated(", t, ") = ", problem->getState(t).transpose());
+        //        WOLF_DEBUG("ground truth(", t, ") = ", integrated_pose_vector[n].transpose());
         ASSERT_MATRIX_APPROX(problem->getState(t), integrated_pose_vector[n], 1e-6);
     }
 }

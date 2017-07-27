@@ -421,7 +421,7 @@ void Problem::removeConstraintPtr(ConstraintBasePtr _constraint_ptr)
     }
     // Remove addition notification
     if (ctr_found_it != constraint_notification_list_.end())
-        constraint_notification_list_.erase(ctr_found_it); // FIXME see if the shared_ptr is still active and messing up
+        constraint_notification_list_.erase(ctr_found_it);
     // Add remove notification
     else
         constraint_notification_list_.push_back(ConstraintNotification({REMOVE, nullptr, _constraint_ptr->id()}));

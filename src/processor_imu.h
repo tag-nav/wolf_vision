@@ -529,10 +529,10 @@ inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureMotionPtr _capture_mot
     // CaptureIMUPtr capt_imu = std::static_pointer_cast<CaptureIMU>(_capture_motion);
     FrameIMUPtr key_frame_ptr = std::static_pointer_cast<FrameIMU>(_related_frame);
     // create motion feature and add it to the key_capture
-    MatrixXs delta_integr_cov(integrateBufferCovariance(_capture_motion->getBuffer()));
+//    MatrixXs delta_integr_cov(integrateBufferCovariance(_capture_motion->getBuffer()));
     FeatureIMUPtr key_feature_ptr = std::make_shared<FeatureIMU>(
             _capture_motion->getBuffer().get().back().delta_integr_,
-            delta_integr_cov,
+            _capture_motion->getBuffer().get().back().delta_integr_cov_,
             key_frame_ptr->getAccBiasPtr()->getState(),
             key_frame_ptr->getGyroBiasPtr()->getState(),
             _capture_motion->getBuffer().get().back().jacobian_calib_);
