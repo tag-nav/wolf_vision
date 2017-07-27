@@ -39,7 +39,7 @@ class FeatureIMU_test : public testing::Test
         IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
         IntrinsicsIMUPtr sen_imu_params = std::make_shared<IntrinsicsIMU>();
         SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, sen_imu_params);
-        wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
+        ProcessorBasePtr processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Time and data variables
         TimeStamp t;
@@ -55,7 +55,7 @@ class FeatureIMU_test : public testing::Test
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     // give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
         imu_ptr = std::make_shared<CaptureIMU>(t, sensor_ptr, data_, Eigen::Matrix6s::Identity()); 
-        imu_ptr->setFramePtr(origin_frame);
+        imu_ptr->setFramePtr(origin_frame); //to get ptr to Frm ni processorIMU and then get biases
 
     //process data
         data_ << 2, 0, 9.8, 0, 0, 0;
@@ -146,13 +146,11 @@ TEST_F(FeatureIMU_test, access_members)
 TEST_F(FeatureIMU_test, addConstraint)
 {
     using namespace wolf;
-
-    feat_imu->getFramePtr()->getTimeStamp();
-    last_frame->getTimeStamp();
     
-    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, last_frame);
+    FrameIMUPtr frm_imu = std::static_pointer_cast<FrameIMU>(last_frame);
+    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, std::static_pointer_cast<FrameIMU>(frm_imu));
     feat_imu->addConstraint(constraint_imu);
-    last_frame->addConstrainedBy(constraint_imu);
+    origin_frame->addConstrainedBy(constraint_imu);
 }
 
 int main(int argc, char **argv)
