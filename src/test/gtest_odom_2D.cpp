@@ -402,7 +402,7 @@ TEST(Odom2D, KF_callback)
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
-    ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance()       , integrated_cov_vector [n_split], 1e-5);
+    ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance()       , integrated_cov_vector [n_split], 1e-6);
 
     ////////////////////////////////////////////////////////////////
     // Split between keyframes, exact timestamp
@@ -434,11 +434,11 @@ TEST(Odom2D, KF_callback)
 
     // check the split KF
     ASSERT_POSE2D_APPROX(keyframe_1->getState()                  , integrated_pose_vector[m_split], 1e-6);
-    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_1) , integrated_cov_vector [m_split], 1e-4); // FIXME test does not pass
+    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_1) , integrated_cov_vector [m_split], 1e-6); // FIXME test does not pass
 
     // check other KF in the future of the split KF
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
-    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_2)   , integrated_cov_vector [n_split], 1e-4);
+    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_2)   , integrated_cov_vector [n_split], 1e-6);
 
     // Check full trajectory
     t = t0;
