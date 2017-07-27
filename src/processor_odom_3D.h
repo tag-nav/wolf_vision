@@ -149,7 +149,7 @@ inline FeatureBasePtr ProcessorOdom3D::emplaceFeature(CaptureMotionPtr _capture_
     // create motion feature and add it to the key_capture
     Eigen::MatrixXs delta_integr_cov(integrateBufferCovariance(_capture_motion->getBuffer()));
     FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
-            "MOTION",
+            "ODOM 3D",
             _capture_motion->getBuffer().get().back().delta_integr_,
             delta_integr_cov);
     _capture_motion->addFeature(key_feature_ptr);
