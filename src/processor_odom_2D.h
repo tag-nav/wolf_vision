@@ -231,11 +231,15 @@ inline Motion ProcessorOdom2D::interpolate(const Motion& _ref, Motion& _second, 
     //
     Motion _interpolated(_ref);
     _interpolated.ts_                   = _ts;
+    _interpolated.data_                 = Vector3s::Zero();
+    _interpolated.data_cov_             = Matrix3s::Zero();
     _interpolated.delta_                = deltaZero();
     _interpolated.delta_cov_            = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
     _interpolated.delta_integr_         = _ref.delta_integr_;
+    _interpolated.delta_integr_cov_     = _ref.delta_integr_cov_;
     _interpolated.jacobian_delta_integr_. setIdentity();
     _interpolated.jacobian_delta_       . setZero();
+    _interpolated.jacobian_calib_       . setZero();
     return _interpolated;
 }
 
