@@ -87,7 +87,7 @@ class MotionBuffer{
         MatrixXs integrateCovariance() const; // Integrate all buffer
         MatrixXs integrateCovariance(const TimeStamp& _ts) const; // Integrate up to time stamp (included)
         MatrixXs integrateCovariance(const TimeStamp& _ts_1, const TimeStamp _ts_2) const; // integrate between time stamps (both included)
-        void print(bool show_delta = 0, bool show_delta_cov = 0, bool show_delta_int = 0, bool show_delta_int_cov = 0);
+        void print(bool show_data = 0, bool show_delta = 0, bool show_delta_int = 0, bool show_jacs = 0);
 
     private:
         std::list<Motion> container_;

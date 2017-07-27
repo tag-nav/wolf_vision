@@ -258,7 +258,11 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
         new_capture->getBuffer().get().push_back(motion_interpolated);
     }
 
+
+    reintegrateBuffer(new_capture);
+
     Eigen::MatrixXs new_covariance = integrateBufferCovariance(new_capture->getBuffer());
+//    Eigen::MatrixXs new_covariance = new_capture->getBuffer().get().back().delta_integr_cov_;
 
     // check for very small covariances and fix
     // FIXME: This situation means no motion. Therefore,
@@ -336,23 +340,27 @@ void ProcessorMotion::integrateOneStep()
                           + jacobian_delta_        * delta_cov_                                 * jacobian_delta_.transpose();
 
     // push all into buffer
-    getBuffer().get().push_back(Motion( incoming_ptr_->getTimeStamp(),
-                                        incoming_ptr_->getData(),
-                                        incoming_ptr_->getDataCovariance(),
-                                        delta_,
-                                        delta_cov_,
-                                        delta_integrated_,
-                                        delta_integrated_cov_,
-                                        jacobian_delta_,
-                                        jacobian_delta_preint_,
-                                        jacobian_calib_));
+    getBuffer().get().push_back(Motion(incoming_ptr_->getTimeStamp(),
+                                   incoming_ptr_->getData(),
+                                   incoming_ptr_->getDataCovariance(),
+                                   delta_,
+                                   delta_cov_,
+                                   delta_integrated_,
+                                   delta_integrated_cov_,
+                                   jacobian_delta_,
+                                   jacobian_delta_preint_,
+                                   jacobian_calib_));
 }
 
 void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
 {
 
+    _capture_ptr->getBuffer().print(0,0,1,0);
+
     // start with empty motion
     _capture_ptr->getBuffer().get().push_front(motionZero(_capture_ptr->getOriginFramePtr()->getTimeStamp()));
+
+    // Iterate all the buffer
     auto motion_it = _capture_ptr->getBuffer().get().begin();
     auto prev_motion_it = motion_it;
     motion_it++;
@@ -361,16 +369,30 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
         // get dt
         const Scalar dt = motion_it->ts_ - prev_motion_it->ts_;
 
+        // re-convert data to delta with the new calibration parameters
+        VectorXs calib = getCalibration();
+
+        data2delta(motion_it->data_, motion_it->data_cov_, dt, motion_it->delta_, motion_it->delta_cov_, calib, jacobian_delta_calib_);
+
         // integrate delta into delta_integr, and rewrite the buffer
         deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, dt, motion_it->delta_integr_,
                        motion_it->jacobian_delta_integr_, motion_it->jacobian_delta_);
 
-        motion_it->jacobian_calib_ = jacobian_calib_;
+        // integrate Jacobian wrt calib
+        if (calib_size_ > 0)
+            motion_it->jacobian_calib_ = motion_it->jacobian_delta_integr_ * prev_motion_it->jacobian_calib_ + motion_it->jacobian_delta_ * jacobian_delta_calib_;
+
+        // Integrate covariance
+        motion_it->delta_integr_cov_ = motion_it->jacobian_delta_integr_ * prev_motion_it->delta_integr_cov_ * motion_it->jacobian_delta_integr_.transpose()
+                                     + motion_it->jacobian_delta_        * motion_it->delta_cov_             * motion_it->jacobian_delta_.transpose();
 
         // advance in buffer
         motion_it++;
         prev_motion_it++;
     }
+
+    _capture_ptr->getBuffer().print(0,0,1,0);
+
 }
 
 Eigen::MatrixXs ProcessorMotion::integrateBufferCovariance(const MotionBuffer& _motion_buffer)

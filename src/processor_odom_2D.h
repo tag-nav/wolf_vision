@@ -243,9 +243,15 @@ inline FeatureBasePtr ProcessorOdom2D::emplaceFeature(CaptureMotionPtr _capture_
 {
     // create motion feature and add it to the key_capture
     Eigen::MatrixXs delta_integr_cov(integrateBufferCovariance(_capture_motion->getBuffer()));
+    Eigen::MatrixXs delta_integr_cov_2 = _capture_motion->getBuffer().get().back().delta_integr_cov_;
+
+    WOLF_TRACE("Cov pre-integrated: \n", delta_integr_cov_2);
+    WOLF_TRACE("Cov  re-integrated: \n", delta_integr_cov);
+
     FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
             "MOTION",
             _capture_motion->getBuffer().get().back().delta_integr_,
+//            _capture_motion->getBuffer().get().back().delta_integr_cov_);
             delta_integr_cov.determinant() > 0 ?
             delta_integr_cov : Eigen::MatrixXs::Identity(delta_cov_size_, delta_cov_size_) * 1e-8);
     _capture_motion->addFeature(key_feature_ptr);

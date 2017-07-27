@@ -18,11 +18,11 @@ Motion::Motion(const TimeStamp& _ts,
         calib_size_(_jac_calib.cols()),
         ts_(_ts),
         data_(_data),
-        data_cov_(_delta_cov),
+        data_cov_(_data_cov),
         delta_(_delta),
         delta_cov_(_delta_cov),
         delta_integr_(_delta_integr),
-        delta_integr_cov_(_delta_cov),
+        delta_integr_cov_(_delta_integr_cov),
         jacobian_delta_(_jac_delta),
         jacobian_delta_integr_(_jac_delta_int),
         jacobian_calib_(_jac_calib)
@@ -117,29 +117,29 @@ void MotionBuffer::split(const TimeStamp& _ts, MotionBuffer& _buffer_part_before
 
 MatrixXs MotionBuffer::integrateCovariance() const
 {
-    Eigen::MatrixXs cov(cov_size_, cov_size_);
-    cov.setZero();
+    Eigen::MatrixXs delta_integr_cov(cov_size_, cov_size_);
+    delta_integr_cov.setZero();
     for (Motion mot : container_)
     {
-        cov = mot.jacobian_delta_integr_ * cov * mot.jacobian_delta_integr_.transpose()
-                + mot.jacobian_delta_ * mot.delta_cov_ * mot.jacobian_delta_.transpose();
+        delta_integr_cov = mot.jacobian_delta_integr_ * delta_integr_cov * mot.jacobian_delta_integr_.transpose()
+                         + mot.jacobian_delta_        * mot.delta_cov_   * mot.jacobian_delta_.transpose();
     }
-    return cov;
+    return delta_integr_cov;
 }
 
 MatrixXs MotionBuffer::integrateCovariance(const TimeStamp& _ts) const
 {
-    Eigen::MatrixXs cov(cov_size_, cov_size_);
-    cov.setZero();
+    Eigen::MatrixXs delta_integr_cov(cov_size_, cov_size_);
+    delta_integr_cov.setZero();
     for (Motion mot : container_)
     {
         if (mot.ts_ > _ts)
             break;
 
-        cov = mot.jacobian_delta_integr_ * cov * mot.jacobian_delta_integr_.transpose()
-                + mot.jacobian_delta_ * mot.delta_cov_ * mot.jacobian_delta_.transpose();
+        delta_integr_cov = mot.jacobian_delta_integr_ * delta_integr_cov * mot.jacobian_delta_integr_.transpose()
+                         + mot.jacobian_delta_        * mot.delta_cov_   * mot.jacobian_delta_.transpose();
     }
-    return cov;
+    return delta_integr_cov;
 }
 
 MatrixXs MotionBuffer::integrateCovariance(const TimeStamp& _ts_1, const TimeStamp _ts_2) const
@@ -158,12 +158,12 @@ MatrixXs MotionBuffer::integrateCovariance(const TimeStamp& _ts_1, const TimeSta
     return cov;
 }
 
-void MotionBuffer::print(bool show_delta, bool show_delta_cov, bool show_delta_int, bool show_delta_int_cov)
+void MotionBuffer::print(bool show_data, bool show_delta, bool show_delta_int, bool show_jacs)
 {
     using std::cout;
     using std::endl;
 
-    if (!show_delta && !show_delta_cov && !show_delta_int && !show_delta_int_cov)
+    if (!show_data && !show_delta && !show_delta_int && !show_jacs)
     {
         cout << "Buffer state [" << container_.size() << "] : <";
         for (Motion mot : container_)
@@ -178,14 +178,28 @@ void MotionBuffer::print(bool show_delta, bool show_delta_cov, bool show_delta_i
             cout << "-- Motion (" << mot.ts_ << ")" << endl;
 //            if (show_ts)
 //                cout << "   ts: " << mot.ts_ << endl;
+            if (show_data)
+            {
+                cout << "   data: " << mot.data_.transpose() << endl;
+                cout << "   data cov: \n" << mot.data_cov_ << endl;
+            }
             if (show_delta)
+            {
                 cout << "   delta: " << mot.delta_.transpose() << endl;
-            if (show_delta_cov)
                 cout << "   delta cov: \n" << mot.delta_cov_ << endl;
+            }
             if (show_delta_int)
+            {
                 cout << "   delta integrated: " << mot.delta_integr_.transpose() << endl;
-            if (show_delta_int_cov)
-                cout << "   delta integrated cov: \n" << integrateCovariance(mot.ts_) << endl;
+                cout << "   delta integrated cov: \n" << mot.delta_integr_cov_ << endl;
+            }
+            if (show_jacs)
+            {
+                cout << "   Jac delta: \n" << mot.jacobian_delta_ << endl;
+                cout << "   Jac delta integr: \n" << mot.jacobian_delta_integr_ << endl;
+                cout << "   Jac calib: \n" << mot.jacobian_calib_ << endl;
+
+            }
         }
     }
 }
