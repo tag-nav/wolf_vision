@@ -345,6 +345,7 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
         const Scalar dt = motion_it->ts_ - prev_motion_it->ts_;
 
         // re-convert data to delta with the new calibration parameters
+        // FIXME: Get calibration params from Capture or capture->Sensor
         VectorXs calib = getCalibration();
 
         data2delta(motion_it->data_, motion_it->data_cov_, dt, motion_it->delta_, motion_it->delta_cov_, calib, jacobian_delta_calib_);
