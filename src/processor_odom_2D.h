@@ -68,8 +68,6 @@ class ProcessorOdom2D : public ProcessorMotion
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
         virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame); 
 
-        virtual void resetDerived();
-
     protected:
         Scalar dist_traveled_th_;
         Scalar theta_traveled_th_;
@@ -262,8 +260,8 @@ inline bool ProcessorOdom2D::voteForKeyFrame()
     }
 
     // Uncertainty criterion
-    delta_integrated_cov_ = getBuffer().get().back().jacobian_delta_integr_ * delta_integrated_cov_ * getBuffer().get().back().jacobian_delta_integr_.transpose() + getBuffer().get().back().jacobian_delta_ * getBuffer().get().back().delta_cov_ * getBuffer().get().back().jacobian_delta_.transpose();
-    if (delta_integrated_cov_.determinant() > cov_det_th_)
+//    delta_integrated_cov_ = getBuffer().get().back().jacobian_delta_integr_ * delta_integrated_cov_ * getBuffer().get().back().jacobian_delta_integr_.transpose() + getBuffer().get().back().jacobian_delta_ * getBuffer().get().back().delta_cov_ * getBuffer().get().back().jacobian_delta_.transpose();
+    if (getBuffer().get().back().delta_integr_cov_.determinant() > cov_det_th_)
     {
 //        std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME covariance det "
 //                << delta_integrated_cov_.determinant() << std::endl;
