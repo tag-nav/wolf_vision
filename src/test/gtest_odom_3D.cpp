@@ -96,7 +96,7 @@ TEST(ProcessorOdom3D, data2delta)
     // return values for data2delta()
     VectorXs delta_ret(7);
     MatrixXs delta_cov_ret(6,6);
-    MatrixXs jac_delta_calib(6,6);
+    MatrixXs jac_delta_calib(6,0);
 
     // call the function under test
     prc.data2delta(data, data_cov, dt, delta_ret, delta_cov_ret, VectorXs::Zero(0), jac_delta_calib);
@@ -221,15 +221,15 @@ TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
     // absolute poses: origin, ref, interp, second=final
     Vector7s    x_o, x_r, x_i, x_s, x_f;
     Map<Vector3s>       p_o(x_o.data(), 3);
-    Map<Quaternions>    q_o(x_o.data()+3);
+    Map<Quaternions>    q_o(x_o.data() +3);
     Map<Vector3s>       p_r(x_r.data(), 3);
-    Map<Quaternions>    q_r(x_r.data()+3);
+    Map<Quaternions>    q_r(x_r.data() +3);
     Map<Vector3s>       p_i(x_i.data(), 3);
-    Map<Quaternions>    q_i(x_i.data()+3);
+    Map<Quaternions>    q_i(x_i.data() +3);
     Map<Vector3s>       p_s(x_s.data(), 3);
-    Map<Quaternions>    q_s(x_s.data()+3);
+    Map<Quaternions>    q_s(x_s.data() +3);
     Map<Vector3s>       p_f(x_f.data(), 3);
-    Map<Quaternions>    q_f(x_f.data()+3);
+    Map<Quaternions>    q_f(x_f.data() +3);
 
     // deltas -- referred to previous delta
     //         o-r    r-i    i-s    s-f
