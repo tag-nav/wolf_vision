@@ -30,50 +30,40 @@ ProcessorIMU::~ProcessorIMU()
 //    std::cout << "destructed     -p-IMU" << id() << std::endl;
 }
 
-VectorXs ProcessorIMU::correctDelta(const Motion& _motion, Scalar _dt, const CaptureMotionPtr _capture)
+VectorXs ProcessorIMU::correctDelta(const Motion& _motion, const CaptureMotionPtr _capture)
 {
 
-//    return _motion.delta_integr_;
-
-    /* Correct measured delta: delta_corr = delta + J_bias * (bias - bias_preint)
+    /* Correct measured delta: delta_corr = delta ++ J_bias * (bias - bias_preint)
      * where:
      *   delta       = pre-integrated delta at time dt
-     *   J_bias      = Jacobian of the preintegrated delta at time Dt
-     *   alpha       = interpolation factor from dt=0 to dt=Dt
+     *   J_bias      = Jacobian of the preintegrated delta at time dt
      *   bias        = current bias estimate
      *   bias_preint = bias estimate when we performed the pre-integration
+     *   ++          = additive composition: x+dx for p and v, q*exp(dv) for the quaternion.
      */
 
     // Get current delta and Jacobian
-    VectorXs delta  = _motion.delta_integr_;
-    MatrixXs J_bias = _motion.jacobian_calib_;
+    VectorXs delta_preint  = _motion.delta_integr_;
+    MatrixXs J_bias        = _motion.jacobian_calib_;
 
     // Get current biases from the capture's origin frame
-    FrameIMUPtr frame_origin = std::static_pointer_cast<FrameIMU>(_capture->getOriginFramePtr());
-    FrameIMUPtr frame_self = std::static_pointer_cast<FrameIMU>(_capture->getFramePtr());
-
-//    WOLF_DEBUG("KF origin: ", frame_origin->id(), "; KF: ", frame_self->id(), "; dt: ", _motion.ts_ - frame_origin->getTimeStamp(), "; J_bias(0,:): ", J_bias.row(0));
-
-    Vector6s bias;
-    bias.head<3>() = frame_origin->getAccBiasPtr()->getState();
-    bias.tail<3>() = frame_origin->getGyroBiasPtr()->getState();
+    FrameIMUPtr frame_origin   = std::static_pointer_cast<FrameIMU>(_capture->getOriginFramePtr());
+    Vector6s bias; bias       << frame_origin->getAccBiasPtr()->getState(), frame_origin->getGyroBiasPtr()->getState();
 
     // Get preintegrated biases from the capture's feature
-    FeatureIMUPtr feature = std::static_pointer_cast<FeatureIMU>(_capture->getFeatureList().front());
-    Vector6s bias_preint;
-    bias_preint.head<3>() = feature->acc_bias_preint_;
-    bias_preint.tail<3>() = feature->gyro_bias_preint_;
+    FeatureIMUPtr feature              = std::static_pointer_cast<FeatureIMU>(_capture->getFeatureList().front());
+    Vector6s bias_preint; bias_preint << feature->acc_bias_preint_, feature->gyro_bias_preint_;
 
     // Compute update step
     VectorXs delta_step = J_bias * (bias - bias_preint);
 
     // Correct delta
     VectorXs delta_correct(10);
-    delta_correct.head(3) = delta.head(3) + delta_step.head(3);
-    Map<const Quaternions> deltaq(&delta(3));
-    Map<Quaternions> deltaq_correct(&delta_correct(3));
-    deltaq_correct = deltaq * v2q(delta_step.segment(3,3));
-    delta_correct.tail(3) = delta.tail(3) + delta_step.tail(3);
+    delta_correct.head(3)           = delta_preint.head(3) + delta_step.head(3);
+    Map<const Quaternions> deltaq   (&delta_preint(3));
+    Map<Quaternions> deltaq_correct (&delta_correct(3));
+    deltaq_correct                  = deltaq * v2q(delta_step.segment(3,3));
+    delta_correct.tail(3)           = delta_preint.tail(3) + delta_step.tail(3);
 
     return delta_correct;
 }

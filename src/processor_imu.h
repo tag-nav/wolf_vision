@@ -70,7 +70,7 @@ class ProcessorIMU : public ProcessorMotion{
                                 const Scalar _dt,
                                 Eigen::VectorXs& _x_plus_delta );
         virtual Eigen::VectorXs deltaZero() const;
-        virtual VectorXs correctDelta(const Motion& _motion, Scalar _dt, const CaptureMotionPtr _capture);
+        virtual VectorXs correctDelta(const Motion& _motion, const CaptureMotionPtr _capture);
         virtual Motion interpolate(const Motion& _motion_ref,
                                    Motion& _motion,
                                    TimeStamp& _ts);
