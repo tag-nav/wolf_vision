@@ -257,22 +257,6 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
         new_capture->getBuffer().get().push_back(motion_interpolated);
     }
 
-    Eigen::MatrixXs new_covariance = new_capture->getBuffer().get().back().delta_integr_cov_;
-
-    // check for very small covariances and fix
-    // FIXME: This situation means no motion. Therefore,
-    //    two KFs have been created at the same TS: the motion KF, and the other KF.
-    //    Making a factor with nearly no cov is OK, but an overkill for a situation that should not have appeared.
-//    if (new_covariance.determinant() < Constants::EPS_SMALL)
-        if (new_covariance.diagonal().minCoeff() < Constants::EPS_SMALL)
-    {
-        WOLF_DEBUG("Bad motion covariance determinant: ", new_covariance.determinant());
-        WOLF_DEBUG("Concerned Capture : ", new_capture->getSensorPtr()->getType());
-        WOLF_DEBUG("covariance : ", new_covariance.diagonal().transpose())
-        new_covariance += MatrixXs::Identity(delta_cov_size_, delta_cov_size_)*1e-4;
-        WOLF_DEBUG("Fixed motion covariance determinant: ", new_covariance.determinant());
-    }
-
     // create motion feature and add it to the capture
     FeatureBasePtr new_feature = emplaceFeature(new_capture, new_keyframe_origin);
 
@@ -295,12 +279,11 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     // modify existing feature and constraint (if they exist in the existing capture)
     if (!existing_capture->getFeatureList().empty())
     {
-        FeatureBasePtr existing_feature = existing_capture->getFeatureList().back(); // there is only one feature!
+        auto existing_feature = existing_capture->getFeatureList().back(); // there is only one feature!
 
         // Modify existing feature --------
-        existing_feature->setMeasurement(existing_capture->getBuffer().get().back().delta_integr_);
-        MatrixXs existing_covariance = integrateBufferCovariance(existing_capture->getBuffer());
-        existing_feature->setMeasurementCovariance(existing_covariance);
+        existing_feature->setMeasurement          (existing_capture->getBuffer().get().back().delta_integr_);
+        existing_feature->setMeasurementCovariance(existing_capture->getBuffer().get().back().delta_integr_cov_);
 
         // Modify existing constraint --------
         // Instead of modifying, we remove one ctr, and create a new one.
