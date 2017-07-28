@@ -279,12 +279,6 @@ inline bool ProcessorOdom2D::voteForKeyFrame()
     return false;
 }
 
-inline void ProcessorOdom2D::resetDerived()
-{
-    // We want this covariance up-to-date because we use it in vote_for_keyframe().
-    delta_integrated_cov_ = integrateBufferCovariance(getBuffer());
-}
-
 } // namespace wolf
 
 #endif /* SRC_PROCESSOR_ODOM_2D_H_ */
