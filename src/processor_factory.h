@@ -178,7 +178,7 @@ inline std::string ProcessorFactory::getClass()
 
 #define WOLF_REGISTER_PROCESSOR(ProcessorType, ProcessorName) \
   namespace{ const bool ProcessorName##Registered = \
-    ProcessorFactory::get().registerCreator(ProcessorType, ProcessorName::create); }\
+    wolf::ProcessorFactory::get().registerCreator(ProcessorType, ProcessorName::create); }\
 
 } /* namespace wolf */
 
