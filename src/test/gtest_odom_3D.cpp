@@ -167,7 +167,7 @@ TEST(ProcessorOdom3D, Interpolate0) // basic test
 
     ProcessorOdom3D prc;
 
-    Motion ref(0,6,7,6,0), final(0,6,7,6,0), interpolated(0,6,7,6,0);
+    Motion ref(0.0,6,7,6,0), final(0.0,6,7,6,0), interpolated(0.0,6,7,6,0);
 
     // set ref
     ref.ts_ = 1;
@@ -269,7 +269,7 @@ TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
     Vector3s w;
 
     // Motion structures
-    Motion R(0,6,7,6,0), I(0,6,7,6,0), S(0,6,7,6,0), F(0,6,7,6,0);
+    Motion R(0.0,6,7,6,0), I(0.0,6,7,6,0), S(0.0,6,7,6,0), F(0.0,6,7,6,0);
 
 
     /////////// start experiment ///////////////
@@ -407,7 +407,7 @@ TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
     WOLF_DEBUG("t_o: ", t_o.get(), "; t_r: ", t_r.get(), "; t_f: ", t_f.get());
 
     // Motion structures
-    Motion R(0,6,7,6,0), I(0,6,7,6,0), S(0,6,7,6,0), F(0,6,7,6,0);
+    Motion R(0.0,6,7,6,0), I(0.0,6,7,6,0), S(0.0,6,7,6,0), F(0.0,6,7,6,0);
 
 
     /////////// start experiment ///////////////
