@@ -367,11 +367,6 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
     }
 }
 
-Eigen::MatrixXs ProcessorMotion::integrateBufferCovariance(const MotionBuffer& _motion_buffer)
-{
-    return _motion_buffer.integrateCovariance();
-}
-
 CaptureMotionPtr ProcessorMotion::getCaptureMotionContainingTimeStamp(const TimeStamp& _ts)
 {
     // We need to search in previous keyframes for the capture containing a motion buffer with the queried time stamp

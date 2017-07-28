@@ -194,8 +194,6 @@ class ProcessorMotion : public ProcessorBase
         MotionBuffer& getBuffer();
         const MotionBuffer& getBuffer() const;
 
-        Eigen::MatrixXs integrateBufferCovariance(const MotionBuffer& _motion_buffer);
-
         /** \brief get calibration params
          *
          * @param _calib a reference to the calibration params vector

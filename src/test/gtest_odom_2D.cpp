@@ -244,7 +244,8 @@ TEST(Odom2D, VoteForKfAndSolve)
         // Processor
         sensor_odom2d->process(capture);
         ASSERT_TRUE(problem->check(0));
-        Matrix3s odom2d_delta_cov = processor_odom2d->integrateBufferCovariance(processor_odom2d->getBuffer());
+//        Matrix3s odom2d_delta_cov = processor_odom2d->integrateBufferCovariance(processor_odom2d->getBuffer());
+        Matrix3s odom2d_delta_cov = processor_odom2d->getMotion().delta_integr_cov_;
         //        std::cout << "State(" << (t - t0) << ") : " << processor_odom2d->getCurrentState().transpose() << std::endl;
         //        std::cout << "PRC  cov: \n" << odom2d_delta_cov << std::endl;
 

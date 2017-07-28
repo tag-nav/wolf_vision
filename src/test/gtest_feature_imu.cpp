@@ -75,11 +75,11 @@ class FeatureIMU_test : public testing::Test
         wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
         
     //create a feature
-        Eigen::MatrixXs delta_integr_cov(wolf_problem_ptr_->getProcessorMotionPtr()->integrateBufferCovariance(wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer()));
         delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
+        delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_;
         //feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
         std::static_pointer_cast<wolf::ProcessorIMU>(wolf_problem_ptr_->getProcessorMotionPtr())->getJacobianCalib(dD_db_jacobians);
-        feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_integr_cov, imu_ptr, dD_db_jacobians);
+        feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov, imu_ptr, dD_db_jacobians);
         feat_imu->setCapturePtr(imu_ptr); //associate the feature to a capture
 
     }
