@@ -217,16 +217,19 @@ TEST_F(ProcessorIMUt, interpolate)
 
     data << 2, 0, 0, 0, 0, 0; // only acc_x, but measure gravity!
 
-    // make two steps with half data, then simulate it was only one step
-    Motion mot_ref = problem->getProcessorMotionPtr()->getMotion();
-    cap_imu_ptr->setData(data/2);
+    // make one step to depart from origin
+    cap_imu_ptr->setData(data);
     cap_imu_ptr->setTimeStamp(0.05);
     sensor_ptr->process(cap_imu_ptr);
+
+    // make two steps, then pretend it's just one
+    Motion mot_ref = problem->getProcessorMotionPtr()->getMotion();
+    cap_imu_ptr->setTimeStamp(0.10);
+    sensor_ptr->process(cap_imu_ptr);
     Motion mot_int_gt = problem->getProcessorMotionPtr()->getMotion();
-    cap_imu_ptr->setTimeStamp(0.1);
+    cap_imu_ptr->setTimeStamp(0.15);
     sensor_ptr->process(cap_imu_ptr);
     Motion mot_final = problem->getProcessorMotionPtr()->getMotion();
-    mot_final.data_ *= 2;
     mot_final.delta_ = mot_final.delta_integr_;
     Motion mot_sec = mot_final;
 
@@ -239,7 +242,7 @@ class P : wolf::ProcessorIMU
         }
 } imu;
 
-Motion mot_int = imu.interp(mot_ref, mot_sec, TimeStamp(0.05));
+Motion mot_int = imu.interp(mot_ref, mot_sec, TimeStamp(0.10));
 
 ASSERT_MATRIX_APPROX(mot_int.data_,  mot_int_gt.data_, 1e-6);
 //ASSERT_MATRIX_APPROX(mot_int.delta_, mot_int_gt.delta_, 1e-6); // FIXME: delta_p not correctly interpolated
