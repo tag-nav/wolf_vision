@@ -120,9 +120,7 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
      * and return the motion at the given time_stamp ts_.
      *
      * DATA:
-     * Data receives linear interpolation
-     *    a_ret = (ts - t_ref) / dt * a_sec
-     *    w_ret = (ts - t_ref) / dt * w_sec
+     * Data receives no change
      *
      * DELTA:
      * The delta's position and velocity receive linear interpolation:
@@ -145,8 +143,8 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
     {
         // return null motion. Second stays the same.
         Motion motion_int     ( _motion_ref );
-        motion_int.data_      . setZero();
-        motion_int.data_cov_  . setZero();
+        motion_int.data_      = _motion_second.data_;
+        motion_int.data_cov_  = _motion_second.data_cov_;
         motion_int.delta_     = deltaZero();
         motion_int.delta_cov_ . setZero();
         return motion_int;
@@ -155,8 +153,6 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
     {
         // return original second motion. Second motion becomes null motion
         Motion motion_int         ( _motion_second );
-        _motion_second.data_      . setZero();
-        _motion_second.data_cov_  . setZero();
         _motion_second.delta_     = deltaZero();
         _motion_second.delta_cov_ . setZero();
         return motion_int;
@@ -195,34 +191,34 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
     MatrixXs J_int(delta_cov_size_, delta_cov_size_);
 
     // interpolation factor
-    Scalar dt  = _ts - t_ref;
-    Scalar tau = dt / (t_sec - t_ref); // interpolation factor (0 to 1)
+    Scalar dt1  = _ts - t_ref;
+    Scalar dt2  = t_sec - _ts;
+    Scalar tau  = dt1 / (t_sec - t_ref); // interpolation factor (0 to 1)
+    Scalar tau2 = tau * tau;
 
-    // interpolate data
-    motion_int.data_     = tau * _motion_second.data_;
-    motion_int.data_cov_ = tau * _motion_second.data_cov_;
+    // copy data
+    motion_int.data_      = _motion_second.data_;
+    motion_int.data_cov_  = _motion_second.data_cov_;
 
     // interpolate delta
     motion_int.ts_        = _ts;
     Map<VectorXs>    motion_int_dp  (motion_int.delta_.data() + 0, 3);
     Map<Quaternions> motion_int_dq  (motion_int.delta_.data() + 3   );
     Map<VectorXs>    motion_int_dv  (motion_int.delta_.data() + 7, 3);
-    motion_int_dp         = tau * motion_sec_dp; // FIXME: delta_p not correctly interpolated
-    motion_int_dq         = Quaternions::Identity().slerp(tau, motion_sec_dq);
+    motion_int_dp         = tau2 * motion_sec_dp; // FIXME: delta_p not correctly interpolated
     motion_int_dv         = tau * motion_sec_dv;
+    motion_int_dq         = Quaternions::Identity().slerp(tau, motion_sec_dq);
     motion_int.delta_cov_ = tau * _motion_second.delta_cov_;
 
     // integrate
-    deltaPlusDelta(_motion_ref.delta_integr_, motion_int.delta_, dt, motion_int.delta_integr_, J_ref, J_int);
+    deltaPlusDelta(_motion_ref.delta_integr_, motion_int.delta_, dt1, motion_int.delta_integr_, J_ref, J_int);
     motion_int.delta_integr_cov_ = J_ref * _motion_ref.delta_integr_cov_ * J_ref.transpose()
                                  + J_int * _motion_second.delta_cov_     * J_int.transpose();
 
     // update second delta ( in place update )
-    _motion_second.data_      *= (1 - tau);
-    _motion_second.data_cov_  *= (1 - tau);
-    motion_sec_dp = motion_int_dq.conjugate() * ((1 - tau) * motion_sec_dp);
-    motion_sec_dq = motion_int_dq.conjugate() * motion_sec_dq;
-    motion_sec_dv = motion_int_dq.conjugate() * ((1 - tau) * motion_sec_dv);
+    motion_sec_dp = motion_int_dq.conjugate() * (motion_sec_dp - motion_int_dp - motion_int_dv * dt2);
+    motion_sec_dv = motion_int_dq.conjugate() * (motion_sec_dv - motion_int_dv);
+    motion_sec_dq = motion_int_dq.conjugate() *  motion_sec_dq;
     _motion_second.delta_cov_ *= (1 - tau); // easy interpolation // TODO check for correctness
     //Dp            = Dp; // trivial, just leave the code commented
     //Dq            = Dq; // trivial, just leave the code commented
