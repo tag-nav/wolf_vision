@@ -191,10 +191,10 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
     MatrixXs J_int(delta_cov_size_, delta_cov_size_);
 
     // interpolation factor
-    Scalar dt1  = _ts - t_ref;
-    Scalar dt2  = t_sec - _ts;
-    Scalar tau  = dt1 / (t_sec - t_ref); // interpolation factor (0 to 1)
-    Scalar tau2 = tau * tau;
+    Scalar dt1    = _ts - t_ref;
+    Scalar dt2    = t_sec - _ts;
+    Scalar tau    = dt1 / (t_sec - t_ref); // interpolation factor (0 to 1)
+    Scalar tau_sq = tau * tau;
 
     // copy data
     motion_int.data_      = _motion_second.data_;
@@ -205,10 +205,10 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
     Map<VectorXs>    motion_int_dp  (motion_int.delta_.data() + 0, 3);
     Map<Quaternions> motion_int_dq  (motion_int.delta_.data() + 3   );
     Map<VectorXs>    motion_int_dv  (motion_int.delta_.data() + 7, 3);
-    motion_int_dp         = tau2 * motion_sec_dp; // FIXME: delta_p not correctly interpolated
-    motion_int_dv         = tau * motion_sec_dv;
+    motion_int_dp         = tau_sq * motion_sec_dp; // FIXME: delta_p not correctly interpolated
+    motion_int_dv         = tau    * motion_sec_dv;
     motion_int_dq         = Quaternions::Identity().slerp(tau, motion_sec_dq);
-    motion_int.delta_cov_ = tau * _motion_second.delta_cov_;
+    motion_int.delta_cov_ = tau    * _motion_second.delta_cov_;
 
     // integrate
     deltaPlusDelta(_motion_ref.delta_integr_, motion_int.delta_, dt1, motion_int.delta_integr_, J_ref, J_int);
