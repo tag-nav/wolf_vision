@@ -19,8 +19,25 @@ TEST(IMU_tools, identity)
     id_true.setZero(10);
     id_true(6) = 1.0;
 
-    VectorXs id = imu::identity();
+    VectorXs id = imu::identity<Scalar>();
     ASSERT_MATRIX_APPROX(id, id_true, 1e-10);
+}
+
+TEST(IMU_tools, inverse)
+{
+    VectorXs d(10), id(10), iid(10), iiid(10);
+    Vector4s qv;
+    Scalar dt = 0.1;
+
+    qv = (Vector4s() << 3, 4, 5, 6).finished().normalized();
+    d << 0, 1, 2, qv, 7, 8, 9;
+
+    id   = imu::inverse(d, dt);
+    imu::inverse(id, -dt, iid); // Observe -dt is reversed !!
+    iiid = imu::inverse(iid, dt);
+
+    ASSERT_MATRIX_APPROX( d,  iid, 1e-10);
+    ASSERT_MATRIX_APPROX(id, iiid, 1e-10);
 }
 
 TEST(IMU_tools, compose_between)
@@ -51,7 +68,6 @@ TEST(IMU_tools, compose_between)
     Matrix<Scalar,10,1> diff;
     imu::between(d1, d3, dt, diff);
     ASSERT_MATRIX_APPROX(diff, d2, 1e-10);
-
 }
 
 TEST(IMU_tools, lift_retract)
