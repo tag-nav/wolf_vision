@@ -25,7 +25,7 @@ TEST(IMU_tools, identity)
 
 TEST(IMU_tools, inverse)
 {
-    VectorXs d(10), id(10), iid(10), iiid(10);
+    VectorXs d(10), id(10), iid(10), iiid(10), I(10);
     Vector4s qv;
     Scalar dt = 0.1;
 
@@ -33,10 +33,15 @@ TEST(IMU_tools, inverse)
     d << 0, 1, 2, qv, 7, 8, 9;
 
     id   = imu::inverse(d, dt);
-    imu::inverse(id, -dt, iid); // Observe -dt is reversed !!
-    iiid = imu::inverse(iid, dt);
 
+    imu::compose(id, d, dt, I);
+    ASSERT_MATRIX_APPROX(I, imu::identity(), 1e-10);
+    imu::compose(d, id, -dt, I); // Observe -dt is reversed !!
+    ASSERT_MATRIX_APPROX(I, imu::identity(), 1e-10);
+
+    imu::inverse(id, -dt, iid); // Observe -dt is reversed !!
     ASSERT_MATRIX_APPROX( d,  iid, 1e-10);
+    iiid = imu::inverse(iid, dt);
     ASSERT_MATRIX_APPROX(id, iiid, 1e-10);
 }
 

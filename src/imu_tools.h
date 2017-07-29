@@ -155,6 +155,16 @@ inline void between(const MatrixBase<D1>& d1,
     diff_v = dq1.conjugate() * ( dv2 - dv1 );
 }
 
+template<typename D1, typename D2>
+inline Matrix<typename D1::Scalar, 10, 1> between(const MatrixBase<D1>& d1,
+                    const MatrixBase<D2>& d2,
+                    Scalar dt)
+{
+    Matrix<typename D1::Scalar, 10, 1> d_bet;
+    between(d1, d2, dt, d_bet);
+    return d_bet;
+}
+
 template<typename Derived>
 Matrix<typename Derived::Scalar, 9, 1> lift(const MatrixBase<Derived>& delta_in)
 {
@@ -202,13 +212,8 @@ inline void compare(const MatrixBase<D1>& d1,
                     const MatrixBase<D2>& d2,
                     MatrixBase<D3>& err)
 {
-    Matrix<typename D3::Scalar, 10, 1> delta_err;
-
-    between(d1, d2, 0.0, delta_err);
-
-    err = lift(delta_err);
+    err = lift( between(d1, d2, 0.0) );
 }
-
 
 
 } // namespace imu
