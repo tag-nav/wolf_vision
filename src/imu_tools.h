@@ -83,6 +83,18 @@ inline void compose(const MatrixBase<D1>& d1,
     sum_q =                dq1*dq2; // dq here to avoid possible aliasing between d1 and sum
 }
 
+template<typename D1, typename D2>
+inline void a() {}
+
+template<typename D1, typename D2>
+inline Matrix<typename D1::Scalar, 10, 1> compose(const MatrixBase<D1>& d1,
+                                                  const MatrixBase<D2>& d2,
+                                                  Scalar dt)
+{
+    Matrix<typename D1::Scalar, 10, 1>  ret;
+    compose(d1, d2, dt, ret);
+    return ret;
+}
 
 template<typename D1, typename D2, typename D3, typename D4, typename D5>
 inline void compose(const MatrixBase<D1>& d1,
@@ -157,8 +169,8 @@ inline void between(const MatrixBase<D1>& d1,
 
 template<typename D1, typename D2>
 inline Matrix<typename D1::Scalar, 10, 1> between(const MatrixBase<D1>& d1,
-                    const MatrixBase<D2>& d2,
-                    Scalar dt)
+                                                  const MatrixBase<D2>& d2,
+                                                  Scalar dt)
 {
     Matrix<typename D1::Scalar, 10, 1> d_bet;
     between(d1, d2, dt, d_bet);
@@ -208,11 +220,19 @@ Matrix<typename Derived::Scalar, 10, 1> retract(const MatrixBase<Derived>& d_in)
 }
 
 template<typename D1, typename D2, typename D3>
-inline void compare(const MatrixBase<D1>& d1,
+inline void diff(const MatrixBase<D1>& d1,
                     const MatrixBase<D2>& d2,
                     MatrixBase<D3>& err)
 {
     err = lift( between(d1, d2, 0.0) );
+}
+
+template<typename D1, typename D2>
+inline Matrix<typename D1::Scalar, 9, 1> diff(const MatrixBase<D1>& d1,
+                    const MatrixBase<D2>& d2)
+{
+
+    return lift( between(d1, d2, 0.0) );
 }
 
 

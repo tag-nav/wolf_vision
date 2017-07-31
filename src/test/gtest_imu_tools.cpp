@@ -65,7 +65,7 @@ TEST(IMU_tools, compose_between)
     ASSERT_MATRIX_APPROX(d3, dx3, 1e-10);
 
     imu::compose(d1, dx2, dt, dx3);
-    imu::compose(dx1, d2, dt, d3);
+    d3 = imu::compose(dx1, d2, dt);
     ASSERT_MATRIX_APPROX(d3, dx3, 1e-10);
 
     // minus(d1, d3) should recover delta_2
@@ -73,6 +73,10 @@ TEST(IMU_tools, compose_between)
     Matrix<Scalar,10,1> diff;
     imu::between(d1, d3, dt, diff);
     ASSERT_MATRIX_APPROX(diff, d2, 1e-10);
+
+    // minus(d3, d1, -dt) should recover inverse(d2, dt)
+    diff = imu::between(d3, d1, -dt);
+    ASSERT_MATRIX_APPROX(diff, imu::inverse(d2, dt), 1e-10);
 }
 
 TEST(IMU_tools, lift_retract)
@@ -98,7 +102,7 @@ TEST(IMU_tools, lift_retract)
     ASSERT_MATRIX_APPROX(delta_from_d, delta, 1e-10);
 }
 
-TEST(IMU_tools, compare)
+TEST(IMU_tools, diff)
 {
     VectorXs d1(10), d2(10);
     Vector4s qv = (Vector4s() << 3, 4, 5, 6).finished().normalized();
@@ -106,8 +110,9 @@ TEST(IMU_tools, compare)
     d2 = d1;
 
     VectorXs err(9);
-    imu::compare(d1, d2, err);
+    imu::diff(d1, d2, err);
     ASSERT_MATRIX_APPROX(err, VectorXs::Zero(9), 1e-10);
+    ASSERT_MATRIX_APPROX(imu::diff(d1, d2), VectorXs::Zero(9), 1e-10);
 }
 
 int main(int argc, char **argv)
