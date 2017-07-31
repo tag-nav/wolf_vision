@@ -318,7 +318,7 @@ void ProcessorMotion::integrateOneStep()
                           + jacobian_delta_        * delta_cov_                                 * jacobian_delta_.transpose();
 
     // push all into buffer
-    getBuffer().get().push_back(Motion(incoming_ptr_->getTimeStamp(),
+    getBuffer().get().emplace_back(incoming_ptr_->getTimeStamp(),
                                    incoming_ptr_->getData(),
                                    incoming_ptr_->getDataCovariance(),
                                    delta_,
@@ -327,7 +327,7 @@ void ProcessorMotion::integrateOneStep()
                                    delta_integrated_cov_,
                                    jacobian_delta_,
                                    jacobian_delta_preint_,
-                                   jacobian_calib_));
+                                   jacobian_calib_);
 }
 
 void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
@@ -345,6 +345,7 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
         const Scalar dt = motion_it->ts_ - prev_motion_it->ts_;
 
         // re-convert data to delta with the new calibration parameters
+        // FIXME: Get calibration params from Capture or capture->Sensor
         VectorXs calib = getCalibration();
 
         data2delta(motion_it->data_, motion_it->data_cov_, dt, motion_it->delta_, motion_it->delta_cov_, calib, jacobian_delta_calib_);

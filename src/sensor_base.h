@@ -41,6 +41,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         unsigned int sensor_id_;   // sensor ID
 
         bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
+        bool intrinsic_dynamic_;// intrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
 
         Eigen::VectorXs noise_std_; // std of sensor noise
         Eigen::MatrixXs noise_cov_; // cov matrix of noise
@@ -57,7 +58,13 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          * \param _extr_dyn Flag indicating if extrinsics are dynamic (moving) or static (not moving)
          *
          **/
-        SensorBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, const unsigned int _noise_size, const bool _extr_dyn = false);
+        SensorBase(const std::string& _type,
+                   StateBlockPtr _p_ptr,
+                   StateBlockPtr _o_ptr,
+                   StateBlockPtr _intr_ptr,
+                   const unsigned int _noise_size,
+                   const bool _extr_dyn = false,
+                   const bool _intr_dyn = false);
 
         /** \brief Constructor with noise std vector
          *
@@ -70,7 +77,14 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          * \param _extr_dyn Flag indicating if extrinsics are dynamic (moving) or static (not moving)
          *
          **/
-        SensorBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, const Eigen::VectorXs & _noise_std, const bool _extr_dyn = false);
+        SensorBase(const std::string& _type,
+                   StateBlockPtr _p_ptr,
+                   StateBlockPtr _o_ptr,
+                   StateBlockPtr _intr_ptr,
+                   const Eigen::VectorXs & _noise_std,
+                   const bool _extr_dyn = false,
+                   const bool _intr_dyn = false);
+
         virtual ~SensorBase();
         void remove();
 

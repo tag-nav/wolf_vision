@@ -56,9 +56,9 @@ target_link_libraries(gtest_feature_base ${PROJECT_NAME})
 wolf_add_gtest(gtest_frame_base gtest_frame_base.cpp)
 target_link_libraries(gtest_frame_base ${PROJECT_NAME})
 
-# FrameIMU class test
-wolf_add_gtest(gtest_frame_imu gtest_frame_imu.cpp)
-target_link_libraries(gtest_frame_imu ${PROJECT_NAME})
+# IMU tools test
+wolf_add_gtest(gtest_imu_tools gtest_imu_tools.cpp)
+# target_link_libraries(gtest_imu_tools ${PROJECT_NAME}) // WOLF library not needed
 
 # LocalParametrizationXxx classes test
 wolf_add_gtest(gtest_local_param gtest_local_param.cpp)
@@ -105,6 +105,10 @@ target_link_libraries(gtest_constraint_odom_3D ${PROJECT_NAME})
 # FeatureIMU test
 wolf_add_gtest(gtest_feature_imu gtest_feature_imu.cpp)
 target_link_libraries(gtest_feature_imu ${PROJECT_NAME})
+
+# FrameIMU class test
+wolf_add_gtest(gtest_frame_imu gtest_frame_imu.cpp)
+target_link_libraries(gtest_frame_imu ${PROJECT_NAME})
 
 # IMU Bias + estimation tests
 #wolf_add_gtest(gtest_imuBias gtest_imuBias.cpp)
