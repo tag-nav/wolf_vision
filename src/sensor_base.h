@@ -101,13 +101,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
         StateBlockPtr getPPtr() const;
         StateBlockPtr getOPtr() const;
-        /** \brief intrinsic parameters.
-         * Use it if desired. By using this StateBlock, WOLF will be able to auto-calibrate these parameters.
-         * To do so, just unfix() it. After the calibration process, you can fix() it again if desired.
-         *
-         * (Note: Many other intrinsic parameters can be stored as members of the classes derived from this.
-         * We recommend you use a struct for this purpose if the number of intrinsic parameters is large.)
-         */
         StateBlockPtr getIntrinsicPtr() const;
         void setPPtr(const StateBlockPtr _p_ptr);
         void setOPtr(const StateBlockPtr _o_ptr);
@@ -132,6 +125,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          * Check if sensor is dynamic
          */
         bool isExtrinsicDynamic();
+        bool isIntrinsicDynamic();
 
         void setNoise(const Eigen::VectorXs & _noise_std);
         Eigen::VectorXs getNoiseStd();
@@ -220,6 +214,11 @@ inline StateBlockPtr SensorBase::getIntrinsicPtr() const
 inline bool SensorBase::isExtrinsicDynamic()
 {
     return extrinsic_dynamic_;
+}
+
+inline bool SensorBase::isIntrinsicDynamic()
+{
+    return intrinsic_dynamic_;
 }
 
 inline Eigen::VectorXs SensorBase::getNoiseStd()
