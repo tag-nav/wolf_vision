@@ -20,8 +20,11 @@ namespace wolf{
 class CaptureBase : public NodeBase, public std::enable_shared_from_this<CaptureBase>
 {
     private:
-        FrameBaseWPtr frame_ptr_;
+        FrameBaseWPtr   frame_ptr_;
         FeatureBaseList feature_list_;
+        SensorBaseWPtr  sensor_ptr_; ///< Pointer to sensor
+        // Deal with sensors with dynamic extrinsics (check dynamic_extrinsic_ in SensorBase)
+        std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, intrinsic.
 
         static unsigned int capture_id_count_;
         bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
@@ -29,15 +32,18 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
     protected:
         unsigned int capture_id_;
         TimeStamp time_stamp_; ///< Time stamp
-        SensorBaseWPtr sensor_ptr_; ///< Pointer to sensor
-
-        // Deal with sensors with dynamic extrinsics (check dynamic_extrinsic_ in SensorBase)
-        StateBlockPtr sensor_p_ptr_;
-        StateBlockPtr sensor_o_ptr_;
 
     public:
 
-        CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr = nullptr);
+        CaptureBase(const std::string& _type,
+                    const TimeStamp& _ts,
+                    SensorBasePtr _sensor_ptr = nullptr);
+        CaptureBase(const std::string& _type,
+                    const TimeStamp& _ts,
+                    SensorBasePtr _sensor_ptr,
+                    StateBlockPtr _p_ptr,
+                    StateBlockPtr _o_ptr,
+                    StateBlockPtr _intr_ptr);
 
         virtual ~CaptureBase();
         void remove();
@@ -60,8 +66,24 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void getConstraintList(ConstraintBaseList& _ctr_list);
 
         SensorBasePtr getSensorPtr() const;
+        // State blocks
+        const std::vector<StateBlockPtr>& getStateBlockVec() const;
+        std::vector<StateBlockPtr>& getStateBlockVec();
+        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
+        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
+
         StateBlockPtr getSensorPPtr() const;
         StateBlockPtr getSensorOPtr() const;
+        StateBlockPtr getSensorIntrinsicPtr() const;
+        void removeStateBlocks();
+        virtual void registerNewStateBlocks();
+
+        void fix();
+        void unfix();
+        void fixExtrinsics();
+        void unfixExtrinsics();
+        void fixIntrinsics();
+        void unfixIntrinsics();
 
         virtual void setSensorPtr(const SensorBasePtr sensor_ptr);
 
@@ -91,20 +113,47 @@ inline ProblemPtr CaptureBase::getProblem()
     return prb;
 }
 
-inline wolf::StateBlockPtr CaptureBase::getSensorPPtr() const
+inline const std::vector<StateBlockPtr>& CaptureBase::getStateBlockVec() const
+{
+    return state_block_vec_;
+}
+inline std::vector<StateBlockPtr>& CaptureBase::getStateBlockVec()
+{
+    return state_block_vec_;
+}
+inline StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
+{
+    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+    return state_block_vec_[_i];
+}
+inline void CaptureBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
+{
+    state_block_vec_[_i] = _sb_ptr;
+}
+
+
+inline StateBlockPtr CaptureBase::getSensorPPtr() const
 {
     if (getSensorPtr()->isExtrinsicDynamic())
-        return sensor_p_ptr_;
+        return getStateBlockPtr(0);
     else
         return getSensorPtr()->getPPtr();
 }
 
-inline wolf::StateBlockPtr CaptureBase::getSensorOPtr() const
+inline StateBlockPtr CaptureBase::getSensorOPtr() const
 {
     if (getSensorPtr()->isExtrinsicDynamic())
-        return sensor_o_ptr_;
+        return getStateBlockPtr(1);
     else
         return getSensorPtr()->getOPtr();
+}
+
+inline StateBlockPtr CaptureBase::getSensorIntrinsicPtr() const
+{
+    if (getSensorPtr()->isExtrinsicDynamic())
+        return getStateBlockPtr(2);
+    else
+        return getSensorPtr()->getIntrinsicPtr();
 }
 
 
