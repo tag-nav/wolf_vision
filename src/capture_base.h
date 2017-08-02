@@ -151,7 +151,7 @@ inline StateBlockPtr CaptureBase::getSensorOPtr() const
 
 inline StateBlockPtr CaptureBase::getSensorIntrinsicPtr() const
 {
-    if (getSensorPtr()->isExtrinsicDynamic())
+    if (getSensorPtr()->isIntrinsicDynamic())
         return getStateBlockPtr(2);
     else
         return getSensorPtr()->getIntrinsicPtr();
