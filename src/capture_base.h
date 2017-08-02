@@ -37,13 +37,11 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
 
         CaptureBase(const std::string& _type,
                     const TimeStamp& _ts,
-                    SensorBasePtr _sensor_ptr = nullptr);
-        CaptureBase(const std::string& _type,
-                    const TimeStamp& _ts,
-                    SensorBasePtr _sensor_ptr,
-                    StateBlockPtr _p_ptr,
-                    StateBlockPtr _o_ptr,
-                    StateBlockPtr _intr_ptr);
+                    SensorBasePtr _sensor_ptr   = nullptr,
+                    StateBlockPtr _p_ptr        = nullptr,
+                    StateBlockPtr _o_ptr        = nullptr,
+                    StateBlockPtr _intr_ptr     = nullptr
+                    );
 
         virtual ~CaptureBase();
         void remove();
