@@ -51,7 +51,7 @@ class StateBlock
          * \param _fixed Indicates this state is not estimated and thus acts as a fixed parameter
          * \param _local_param_ptr pointer to the local parametrization for the block
          **/
-        StateBlock(const Eigen::VectorXs _state, bool _fixed = false, LocalParametrizationBasePtr _local_param_ptr = nullptr);
+        StateBlock(const Eigen::VectorXs& _state, bool _fixed = false, LocalParametrizationBasePtr _local_param_ptr = nullptr);
         
         /** \brief Destructor
          **/
@@ -107,7 +107,7 @@ class StateBlock
 #include "local_parametrization_base.h"
 namespace wolf {
 
-inline StateBlock::StateBlock(const Eigen::VectorXs _state, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
+inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
         node_ptr_(), // nullptr
         fixed_(_fixed),
         state_(_state),
