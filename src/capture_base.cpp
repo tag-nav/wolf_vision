@@ -20,6 +20,7 @@ CaptureBase::CaptureBase(const std::string& _type,
     {
         assert (!_sensor_ptr->isExtrinsicDynamic() && "Sensor EX-trinsics is dynamic. Please use constructor with extrinsics!");
         assert (!_sensor_ptr->isIntrinsicDynamic() && "Sensor IN-trinsics is dynamic. Please use constructor with intrinsics!");
+        getSensorPtr()->setHasCapture();
     }
 //    std::cout << "constructed    +C" << id() << std::endl;
 }
@@ -38,6 +39,8 @@ CaptureBase::CaptureBase(const std::string& _type,
     capture_id_(++capture_id_count_),
     time_stamp_(_ts)
 {
+    getSensorPtr()->setHasCapture();
+
     if (_sensor_ptr->isExtrinsicDynamic())
     {
         assert(_p_ptr && "Pointer to dynamic position params is null!");

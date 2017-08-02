@@ -11,6 +11,7 @@ class StateBlock;
 //Wolf includes
 #include "wolf.h"
 #include "node_base.h"
+#include "time_stamp.h"
 
 //std includes
 
@@ -45,6 +46,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
         bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
         bool intrinsic_dynamic_;// intrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
+        bool has_capture_;      // indicates this sensor took at least one capture
 
         Eigen::VectorXs noise_std_; // std of sensor noise
         Eigen::MatrixXs noise_cov_; // cov matrix of noise
@@ -99,9 +101,12 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         StateBlockPtr getStateBlockPtr(unsigned int _i) const;
         void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
 
-        StateBlockPtr getPPtr() const;
-        StateBlockPtr getOPtr() const;
-        StateBlockPtr getIntrinsicPtr() const;
+        StateBlockPtr getPPtr(const TimeStamp _ts);
+        StateBlockPtr getOPtr(const TimeStamp _ts);
+        StateBlockPtr getIntrinsicPtr(const TimeStamp _ts);
+        StateBlockPtr getPPtr() ;
+        StateBlockPtr getOPtr();
+        StateBlockPtr getIntrinsicPtr();
         void setPPtr(const StateBlockPtr _p_ptr);
         void setOPtr(const StateBlockPtr _o_ptr);
         void setIntrinsicPtr(const StateBlockPtr _intr_ptr);
@@ -126,6 +131,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          */
         bool isExtrinsicDynamic();
         bool isIntrinsicDynamic();
+        bool hasCapture() const {return has_capture_;}
+        void setHasCapture(){has_capture_ = true;}
 
         void setNoise(const Eigen::VectorXs & _noise_std);
         Eigen::VectorXs getNoiseStd();
@@ -136,27 +143,29 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void setHardwarePtr(const HardwareBasePtr _hw_ptr);
 
         bool process(const CaptureBasePtr capture_ptr);
-
+        CaptureBasePtr lastCapture(const TimeStamp& _ts);
 };
 
 }
 
+#include "problem.h"
 #include "hardware_base.h"
 #include "processor_base.h"
 #include "capture_base.h"
 
 namespace wolf{
 
-inline wolf::ProblemPtr SensorBase::getProblem()
+inline ProblemPtr SensorBase::getProblem()
 {
     ProblemPtr prb = problem_ptr_.lock();
-    if (!prb){
-        HardwareBasePtr hw = hardware_ptr_.lock();
-    if (hw)
+    if (!prb)
     {
-        prb = hw->getProblem();
-        problem_ptr_ = prb;
-    }
+        HardwareBasePtr hw = hardware_ptr_.lock();
+        if (hw)
+        {
+            prb = hw->getProblem();
+            problem_ptr_ = prb;
+        }
     }
     return prb;
 }
@@ -183,42 +192,108 @@ inline const std::vector<StateBlockPtr>& SensorBase::getStateBlockVec() const
 {
     return state_block_vec_;
 }
+
 inline std::vector<StateBlockPtr>& SensorBase::getStateBlockVec()
 {
     return state_block_vec_;
 }
+
 inline StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i) const
 {
     assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
     return state_block_vec_[_i];
 }
+
 inline void SensorBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
     state_block_vec_[_i] = _sb_ptr;
 }
-inline StateBlockPtr SensorBase::getPPtr() const
+
+inline CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
 {
+    // we search for the most recent Capture before _ts to get the capture pointer
+    CaptureBasePtr capture = nullptr;
+    FrameBaseList frame_list = getProblem()->getTrajectoryPtr()->getFrameList();
+    FrameBaseList::reverse_iterator frame_it = frame_list.rbegin();
+    while (frame_it != frame_list.rend())
+    {
+        if ((*frame_it)->getTimeStamp() < _ts)
+        {
+            CaptureBasePtr capture = (*frame_it)->getCaptureOf(shared_from_this());
+            if (capture)
+                // found the most recent Capture made by this sensor !
+                break;
+
+            frame_it++;
+        }
+    }
+    return capture;
+}
+
+inline StateBlockPtr SensorBase::getPPtr(const TimeStamp _ts)
+{
+    if (isExtrinsicDynamic())
+    {
+        // we search for the most recent Capture before _ts to get the capture pointer
+        CaptureBasePtr capture = lastCapture(_ts);
+        if (capture)
+            return capture->getSensorPPtr();
+    }
+    // Static sensor, or Capture not found --> return own pointer
     return getStateBlockPtr(0);
 }
 
-inline StateBlockPtr SensorBase::getOPtr() const
+inline StateBlockPtr SensorBase::getOPtr(const TimeStamp _ts)
 {
+    if (isExtrinsicDynamic())
+    {
+        // we search for the most recent Capture before _ts to get the capture pointer
+        CaptureBasePtr capture = lastCapture(_ts);
+        if (capture)
+            return capture->getSensorOPtr();
+    }
+    // Static sensor, or Capture not found --> return own pointer
     return getStateBlockPtr(1);
 }
 
-inline StateBlockPtr SensorBase::getIntrinsicPtr() const
+inline StateBlockPtr SensorBase::getIntrinsicPtr(const TimeStamp _ts)
 {
+    if (isExtrinsicDynamic())
+    {
+        // we search for the most recent Capture before _ts to get the capture pointer
+        CaptureBasePtr capture = lastCapture(_ts);
+        if (capture)
+            return capture->getSensorIntrinsicPtr();
+    }
+    // Static sensor, or Capture not found --> return own pointer
     return getStateBlockPtr(2);
+}
+
+inline StateBlockPtr SensorBase::getPPtr()
+{
+    return getPPtr(getProblem()->getLastKeyFramePtr()->getTimeStamp());
+}
+
+inline StateBlockPtr SensorBase::getOPtr()
+{
+    return getOPtr(getProblem()->getLastKeyFramePtr()->getTimeStamp());
+}
+
+inline StateBlockPtr SensorBase::getIntrinsicPtr()
+{
+    return getIntrinsicPtr(getProblem()->getLastKeyFramePtr()->getTimeStamp());
 }
 
 inline bool SensorBase::isExtrinsicDynamic()
 {
-    return extrinsic_dynamic_;
+    // If this Sensor has no Capture yet, we'll consider it static
+    return has_capture_ && extrinsic_dynamic_;
 }
 
 inline bool SensorBase::isIntrinsicDynamic()
 {
-    return intrinsic_dynamic_;
+    // If this Sensor has no Capture yet, we'll consider it static
+    return has_capture_ && intrinsic_dynamic_;
 }
 
 inline Eigen::VectorXs SensorBase::getNoiseStd()
