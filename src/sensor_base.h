@@ -209,81 +209,6 @@ inline void SensorBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _s
     state_block_vec_[_i] = _sb_ptr;
 }
 
-inline CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
-{
-    // we search for the most recent Capture before _ts to get the capture pointer
-    CaptureBasePtr capture = nullptr;
-    FrameBaseList frame_list = getProblem()->getTrajectoryPtr()->getFrameList();
-    FrameBaseList::reverse_iterator frame_it = frame_list.rbegin();
-    while (frame_it != frame_list.rend())
-    {
-        if ((*frame_it)->getTimeStamp() < _ts)
-        {
-            CaptureBasePtr capture = (*frame_it)->getCaptureOf(shared_from_this());
-            if (capture)
-                // found the most recent Capture made by this sensor !
-                break;
-
-            frame_it++;
-        }
-    }
-    return capture;
-}
-
-inline StateBlockPtr SensorBase::getPPtr(const TimeStamp _ts)
-{
-    if (isExtrinsicDynamic())
-    {
-        // we search for the most recent Capture before _ts to get the capture pointer
-        CaptureBasePtr capture = lastCapture(_ts);
-        if (capture)
-            return capture->getSensorPPtr();
-    }
-    // Static sensor, or Capture not found --> return own pointer
-    return getStateBlockPtr(0);
-}
-
-inline StateBlockPtr SensorBase::getOPtr(const TimeStamp _ts)
-{
-    if (isExtrinsicDynamic())
-    {
-        // we search for the most recent Capture before _ts to get the capture pointer
-        CaptureBasePtr capture = lastCapture(_ts);
-        if (capture)
-            return capture->getSensorOPtr();
-    }
-    // Static sensor, or Capture not found --> return own pointer
-    return getStateBlockPtr(1);
-}
-
-inline StateBlockPtr SensorBase::getIntrinsicPtr(const TimeStamp _ts)
-{
-    if (isExtrinsicDynamic())
-    {
-        // we search for the most recent Capture before _ts to get the capture pointer
-        CaptureBasePtr capture = lastCapture(_ts);
-        if (capture)
-            return capture->getSensorIntrinsicPtr();
-    }
-    // Static sensor, or Capture not found --> return own pointer
-    return getStateBlockPtr(2);
-}
-
-inline StateBlockPtr SensorBase::getPPtr()
-{
-    return getPPtr(getProblem()->getLastKeyFramePtr()->getTimeStamp());
-}
-
-inline StateBlockPtr SensorBase::getOPtr()
-{
-    return getOPtr(getProblem()->getLastKeyFramePtr()->getTimeStamp());
-}
-
-inline StateBlockPtr SensorBase::getIntrinsicPtr()
-{
-    return getIntrinsicPtr(getProblem()->getLastKeyFramePtr()->getTimeStamp());
-}
-
 inline bool SensorBase::isExtrinsicDynamic()
 {
     // If this Sensor has no Capture yet, we'll consider it static
@@ -329,20 +254,6 @@ inline void SensorBase::setIntrinsicPtr(const StateBlockPtr _intr_ptr)
 inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
 {
     hardware_ptr_ = _hw_ptr;
-}
-
-inline bool SensorBase::process(const CaptureBasePtr capture_ptr)
-{
-  if (capture_ptr == nullptr) return false;
-
-  capture_ptr->setSensorPtr(shared_from_this());
-
-  for (const auto& processor : processor_list_)
-  {
-    processor->process(capture_ptr);
-  }
-
-  return true;
 }
 
 } // namespace wolf

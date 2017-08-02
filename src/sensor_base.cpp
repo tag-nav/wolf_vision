@@ -20,6 +20,7 @@ SensorBase::SensorBase(const std::string& _type,
         sensor_id_(++sensor_id_count_), // simple ID factory
         extrinsic_dynamic_(_extr_dyn),
         intrinsic_dynamic_(_intr_dyn),
+        has_capture_(false),
         noise_std_(_noise_size),
         noise_cov_(_noise_size, _noise_size)
 {
@@ -42,6 +43,7 @@ SensorBase::SensorBase(const std::string& _type,
         sensor_id_(++sensor_id_count_), // simple ID factory
         extrinsic_dynamic_(_extr_dyn),
         intrinsic_dynamic_(_intr_dyn),
+        has_capture_(false),
         noise_std_(_noise_std),
         noise_cov_(_noise_std.size(), _noise_std.size())
 {
@@ -196,6 +198,120 @@ void SensorBase::setNoise(const Eigen::VectorXs& _noise_std) {
 	noise_cov_.setZero();
 	for (unsigned int i=0; i<_noise_std.size(); i++)
 		noise_cov_(i,i) = _noise_std(i) * _noise_std(i);
+}
+
+CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
+{
+    // we search for the most recent Capture before _ts to get the capture pointer
+    CaptureBasePtr capture = nullptr;
+    FrameBaseList frame_list = getProblem()->getTrajectoryPtr()->getFrameList();
+    FrameBaseList::reverse_iterator frame_it = frame_list.rbegin();
+    while (frame_it != frame_list.rend())
+    {
+        if ((*frame_it)->getTimeStamp() < _ts)
+        {
+            CaptureBasePtr capture = (*frame_it)->getCaptureOf(shared_from_this());
+            if (capture)
+                // found the most recent Capture made by this sensor !
+                break;
+
+            frame_it++;
+        }
+    }
+    return capture;
+}
+
+StateBlockPtr SensorBase::getPPtr(const TimeStamp _ts)
+{
+    if (isExtrinsicDynamic())
+    {
+        // we search for the most recent Capture before _ts to get the capture pointer
+        CaptureBasePtr capture = lastCapture(_ts);
+        if (capture)
+            return capture->getSensorPPtr();
+    }
+    // Static sensor, or Capture not found --> return own pointer
+    return getStateBlockPtr(0);
+}
+
+StateBlockPtr SensorBase::getOPtr(const TimeStamp _ts)
+{
+    if (isExtrinsicDynamic())
+    {
+        // we search for the most recent Capture before _ts to get the capture pointer
+        CaptureBasePtr capture = lastCapture(_ts);
+        if (capture)
+            return capture->getSensorOPtr();
+    }
+    // Static sensor, or Capture not found --> return own pointer
+    return getStateBlockPtr(1);
+}
+
+StateBlockPtr SensorBase::getIntrinsicPtr(const TimeStamp _ts)
+{
+    if (isExtrinsicDynamic())
+    {
+        // we search for the most recent Capture before _ts to get the capture pointer
+        CaptureBasePtr capture = lastCapture(_ts);
+        if (capture)
+            return capture->getSensorIntrinsicPtr();
+    }
+    // Static sensor, or Capture not found --> return own pointer
+    return getStateBlockPtr(2);
+}
+
+StateBlockPtr SensorBase::getPPtr()
+{
+    ProblemPtr P = getProblem();
+    if (P)
+    {
+        FrameBasePtr KF = P->getLastKeyFramePtr();
+        if (KF)
+        {
+            return getPPtr(KF->getTimeStamp());
+        }
+    }
+    return state_block_vec_[0];
+}
+
+StateBlockPtr SensorBase::getOPtr()
+{
+    ProblemPtr P = getProblem();
+    if (P)
+    {
+        FrameBasePtr KF = P->getLastKeyFramePtr();
+        if (KF)
+        {
+            return getOPtr(KF->getTimeStamp());
+        }
+    }
+    return state_block_vec_[1];
+}
+
+StateBlockPtr SensorBase::getIntrinsicPtr()
+{
+    ProblemPtr P = getProblem();
+    if (P)
+    {
+        FrameBasePtr KF = P->getLastKeyFramePtr();
+        if (KF)
+        {
+            return getIntrinsicPtr(KF->getTimeStamp());
+        }
+    }
+    return state_block_vec_[2];
+}
+
+bool SensorBase::process(const CaptureBasePtr capture_ptr)
+{
+    capture_ptr->setSensorPtr(shared_from_this());
+
+    for (const auto processor : processor_list_)
+    {
+        processor->process(capture_ptr);
+    }
+
+    return true;
 }
 
 } // namespace wolf
