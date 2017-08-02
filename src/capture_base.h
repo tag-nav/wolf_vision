@@ -86,7 +86,6 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void unfixIntrinsics();
 
         virtual void setSensorPtr(const SensorBasePtr sensor_ptr);
-
 };
 
 }
@@ -109,7 +108,6 @@ inline ProblemPtr CaptureBase::getProblem()
             problem_ptr_ = prb;
         }
     }
-
     return prb;
 }
 
@@ -117,15 +115,18 @@ inline const std::vector<StateBlockPtr>& CaptureBase::getStateBlockVec() const
 {
     return state_block_vec_;
 }
+
 inline std::vector<StateBlockPtr>& CaptureBase::getStateBlockVec()
 {
     return state_block_vec_;
 }
+
 inline StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
 {
     assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
     return state_block_vec_[_i];
 }
+
 inline void CaptureBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
     state_block_vec_[_i] = _sb_ptr;
@@ -160,15 +161,6 @@ inline StateBlockPtr CaptureBase::getSensorIntrinsicPtr() const
 inline unsigned int CaptureBase::id()
 {
     return capture_id_;
-}
-
-inline FeatureBasePtr CaptureBase::addFeature(FeatureBasePtr _ft_ptr)
-{
-    //std::cout << "Adding feature" << std::endl;
-    feature_list_.push_back(_ft_ptr);
-    _ft_ptr->setCapturePtr(shared_from_this());
-    _ft_ptr->setProblem(getProblem());
-    return _ft_ptr;
 }
 
 inline FrameBasePtr CaptureBase::getFramePtr() const

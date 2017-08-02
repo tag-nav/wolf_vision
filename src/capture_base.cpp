@@ -5,16 +5,22 @@ namespace wolf{
 
 unsigned int CaptureBase::capture_id_count_ = 0;
 
-CaptureBase::CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr) :
+CaptureBase::CaptureBase(const std::string& _type,
+                         const TimeStamp& _ts,
+                         SensorBasePtr _sensor_ptr) :
         NodeBase("CAPTURE", _type),
         frame_ptr_(), // nullptr
         sensor_ptr_(_sensor_ptr),
+        state_block_vec_(3),
         is_removing_(false),
         capture_id_(++capture_id_count_),
         time_stamp_(_ts)
 {
-    assert (_sensor_ptr->isExtrinsicDynamic() && "Sensor EX-trinsics dynamic. Please use constructor with extrinsics!");
-    assert (_sensor_ptr->isIntrinsicDynamic() && "Sensor IN-trinsics dynamic. Please use constructor with intrinsics!");
+    if (getSensorPtr())
+    {
+        assert (!_sensor_ptr->isExtrinsicDynamic() && "Sensor EX-trinsics is dynamic. Please use constructor with extrinsics!");
+        assert (!_sensor_ptr->isIntrinsicDynamic() && "Sensor IN-trinsics is dynamic. Please use constructor with intrinsics!");
+    }
 //    std::cout << "constructed    +C" << id() << std::endl;
 }
 
@@ -34,15 +40,17 @@ CaptureBase::CaptureBase(const std::string& _type,
 {
     if (_sensor_ptr->isExtrinsicDynamic())
     {
-        assert(_p_ptr && _o_ptr && "At least one provided pointer to dynamic extrinsic params is null");
-        assert((getSensorPtr()->getPPtr() == nullptr) && (getSensorPtr()->getOPtr() == nullptr) && "Sensor extrinsic pointers not null");
+        assert(_p_ptr && "Pointer to dynamic position params is null!");
+        assert(_o_ptr && "Pointer to dynamic orientation params is null!");
+        assert((getSensorPtr()->getPPtr() == nullptr) && "Sensor position pointers should be null, and it's not");
+        assert((getSensorPtr()->getOPtr() == nullptr) && "Sensor orientation pointers should be null, and it's not");
         state_block_vec_[0] = _p_ptr;
         state_block_vec_[1] = _o_ptr;
     }
     if (_sensor_ptr->isIntrinsicDynamic())
     {
-        assert(_intr_ptr && "Provided pointer to dynamic intrinsic params is null");
-        assert(getSensorIntrinsicPtr() == nullptr && "Sensor intrinsic pointer not null");
+        assert(_intr_ptr && "Pointer to dynamic intrinsic params is null!");
+        assert(getSensorIntrinsicPtr() == nullptr && "Sensor intrinsic pointers should be null, and it's not");
         state_block_vec_[2] = _intr_ptr;
     }
     registerNewStateBlocks();
@@ -54,15 +62,12 @@ CaptureBase::CaptureBase(const std::string& _type,
 CaptureBase::~CaptureBase()
 {
     removeStateBlocks();
-//    std::cout << "destructed     -C" << id() << std::endl;
 }
 
 void CaptureBase::remove()
 {
-//    std::cout << "Remove          C" << id() << std::endl;
     if (!is_removing_)
     {
-//        std::cout << "Removing        C" << id() << std::endl;
         is_removing_ = true;
         CaptureBasePtr this_C = shared_from_this();  // keep this alive while removing it
 
@@ -83,9 +88,16 @@ void CaptureBase::remove()
         {
             feature_list_.front()->remove(); // remove downstream
         }
-
-//        std::cout << "Removed         C" << id() << std::endl;
     }
+}
+
+FeatureBasePtr CaptureBase::addFeature(FeatureBasePtr _ft_ptr)
+{
+    //std::cout << "Adding feature" << std::endl;
+    feature_list_.push_back(_ft_ptr);
+    _ft_ptr->setCapturePtr(shared_from_this());
+    _ft_ptr->setProblem(getProblem());
+    return _ft_ptr;
 }
 
 void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
