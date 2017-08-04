@@ -79,6 +79,35 @@ TEST(IMU_tools, compose_between)
     ASSERT_MATRIX_APPROX(diff, imu::inverse(d2, dt), 1e-10);
 }
 
+TEST(IMU_tools, compose_between_with_state)
+{
+    VectorXs x(10), d(10), x2(10), x3(10), d2(10), d3(10);
+    Vector4s qv;
+    Scalar dt = 0.1;
+
+    qv = (Vector4s() << 3, 4, 5, 6).finished().normalized();
+    x << 0, 1, 2, qv, 7, 8, 9;
+    qv = (Vector4s() << 6, 5, 4, 3).finished().normalized();
+    d << 9, 8, 7, qv, 2, 1, 0;
+
+    imu::composeOverState(x, d, dt, x2);
+    x3 = imu::composeOverState(x, d, dt);
+    ASSERT_MATRIX_APPROX(x3, x2, 1e-10);
+
+    // betweenStates(x, x2) should recover d
+    imu::betweenStates(x, x2, dt, d2);
+    d3 = imu::betweenStates(x, x2, dt);
+    ASSERT_MATRIX_APPROX(d2, d, 1e-10);
+    ASSERT_MATRIX_APPROX(d3, d, 1e-10);
+    ASSERT_MATRIX_APPROX(imu::betweenStates(x, x2, dt), d, 1e-10);
+
+    // x + (x2 - x) = x2
+    ASSERT_MATRIX_APPROX(imu::composeOverState(x, imu::betweenStates(x, x2, dt), dt), x2, 1e-10);
+
+    // (x + d) - x = d
+    ASSERT_MATRIX_APPROX(imu::betweenStates(x, imu::composeOverState(x, d, dt), dt), d, 1e-10);
+}
+
 TEST(IMU_tools, lift_retract)
 {
     VectorXs d_min(9); d_min << 0, 1, 2, .3, .4, .5, 6, 7, 8; // use angles in the ball theta < pi

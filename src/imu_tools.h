@@ -84,9 +84,6 @@ inline void compose(const MatrixBase<D1>& d1,
 }
 
 template<typename D1, typename D2>
-inline void a() {}
-
-template<typename D1, typename D2>
 inline Matrix<typename D1::Scalar, 10, 1> compose(const MatrixBase<D1>& d1,
                                                   const MatrixBase<D2>& d2,
                                                   Scalar dt)
@@ -175,6 +172,76 @@ inline Matrix<typename D1::Scalar, 10, 1> between(const MatrixBase<D1>& d1,
     Matrix<typename D1::Scalar, 10, 1> d_bet;
     between(d1, d2, dt, d_bet);
     return d_bet;
+}
+
+template<typename D1, typename D2, typename D3>
+inline void composeOverState(const MatrixBase<D1>& x,
+                             const MatrixBase<D2>& d,
+                             Scalar dt,
+                             MatrixBase<D3>& x_plus_d)
+{
+    MatrixSizeCheck<10, 1>::check(x);
+    MatrixSizeCheck<10, 1>::check(d);
+    MatrixSizeCheck<10, 1>::check(x_plus_d);
+
+    Map<const Matrix<typename D1::Scalar, 3, 1> >   p         ( &x( 0 ) );
+    Map<const Quaternion<typename D1::Scalar> >     q         ( &x( 3 ) );
+    Map<const Matrix<typename D1::Scalar, 3, 1> >   v         ( &x( 7 ) );
+    Map<const Matrix<typename D2::Scalar, 3, 1> >   dp        ( &d( 0 ) );
+    Map<const Quaternion<typename D2::Scalar> >     dq        ( &d( 3 ) );
+    Map<const Matrix<typename D2::Scalar, 3, 1> >   dv        ( &d( 7 ) );
+    Map<Matrix<typename D3::Scalar, 3, 1> >         p_plus_d  ( &x_plus_d( 0 ));
+    Map<Quaternion<typename D3::Scalar> >           q_plus_d  ( &x_plus_d( 3 ));
+    Map<Matrix<typename D3::Scalar, 3, 1> >         v_plus_d  ( &x_plus_d( 7 ));
+
+    p_plus_d = p + v*dt + 0.5*gravity()*dt*dt + q*dp;
+    v_plus_d = v +            gravity()*dt    + q*dv;
+    q_plus_d =                                  q*dq; // dq here to avoid possible aliasing between x and x_plus_d
+}
+
+template<typename D1, typename D2>
+inline Matrix<typename D1::Scalar, 10, 1> composeOverState(const MatrixBase<D1>& x,
+                                                           const MatrixBase<D2>& d,
+                                                           Scalar dt)
+{
+    Matrix<typename D1::Scalar, 10, 1>  ret;
+    composeOverState(x, d, dt, ret);
+    return ret;
+}
+
+template<typename D1, typename D2, typename D3>
+inline void betweenStates(const MatrixBase<D1>& x1,
+                          const MatrixBase<D2>& x2,
+                          Scalar dt,
+                          MatrixBase<D3>& x2_minus_x1)
+{
+    MatrixSizeCheck<10, 1>::check(x1);
+    MatrixSizeCheck<10, 1>::check(x2);
+    MatrixSizeCheck<10, 1>::check(x2_minus_x1);
+
+    Map<const Matrix<typename D1::Scalar, 3, 1> >   p1  ( &x1(0) );
+    Map<const Quaternion<typename D1::Scalar> >     q1  ( &x1(3) );
+    Map<const Matrix<typename D1::Scalar, 3, 1> >   v1  ( &x1(7) );
+    Map<const Matrix<typename D2::Scalar, 3, 1> >   p2  ( &x2(0) );
+    Map<const Quaternion<typename D2::Scalar> >     q2  ( &x2(3) );
+    Map<const Matrix<typename D2::Scalar, 3, 1> >   v2  ( &x2(7) );
+    Map<Matrix<typename D3::Scalar, 3, 1> >         dp  (&x2_minus_x1(0));
+    Map<Quaternion<typename D3::Scalar> >           dq  (&x2_minus_x1(3));
+    Map<Matrix<typename D3::Scalar, 3, 1> >         dv  (&x2_minus_x1(7));
+
+    dp = q1.conjugate() * ( p2 - p1 - v1*dt - 0.5*gravity()*dt*dt );
+    dq = q1.conjugate() *   q2;
+    dv = q1.conjugate() * ( v2 - v1         -     gravity()*dt );
+}
+
+template<typename D1, typename D2>
+inline Matrix<typename D1::Scalar, 10, 1> betweenStates(const MatrixBase<D1>& x1,
+                                                        const MatrixBase<D2>& x2,
+                                                        Scalar dt)
+{
+    Matrix<typename D1::Scalar, 10, 1> ret;
+    betweenStates(x1, x2, dt, ret);
+    return ret;
 }
 
 template<typename Derived>
