@@ -26,9 +26,9 @@ inline Matrix<T, 10, 1> identity()
     return ret;
 }
 
-template<typename D1, typename D2>
+template<typename D1, typename D2, class T>
 inline void inverse(const MatrixBase<D1>& d,
-                    typename D1::Scalar dt,
+                    T dt,
                     MatrixBase<D2>& id)
 {
     MatrixSizeCheck<10, 1>::check(d);
@@ -46,9 +46,9 @@ inline void inverse(const MatrixBase<D1>& d,
     idq =     dq.conjugate();
 }
 
-template<typename D>
+template<typename D, class T>
 inline Matrix<typename D::Scalar, 10, 1> inverse(const MatrixBase<D>& d,
-                                                 typename D::Scalar dt)
+                                                 T dt)
 {
     Matrix<typename D::Scalar, 10, 1> id;
 
@@ -58,10 +58,10 @@ inline Matrix<typename D::Scalar, 10, 1> inverse(const MatrixBase<D>& d,
 }
 
 
-template<typename D1, typename D2, typename D3>
+template<typename D1, typename D2, typename D3, class T>
 inline void compose(const MatrixBase<D1>& d1,
                     const MatrixBase<D2>& d2,
-                    Scalar dt,
+                    T dt,
                     MatrixBase<D3>& sum)
 {
     MatrixSizeCheck<10, 1>::check(d1);
@@ -83,20 +83,20 @@ inline void compose(const MatrixBase<D1>& d1,
     sum_q =                dq1*dq2; // dq here to avoid possible aliasing between d1 and sum
 }
 
-template<typename D1, typename D2>
+template<typename D1, typename D2, class T>
 inline Matrix<typename D1::Scalar, 10, 1> compose(const MatrixBase<D1>& d1,
                                                   const MatrixBase<D2>& d2,
-                                                  Scalar dt)
+                                                  T dt)
 {
     Matrix<typename D1::Scalar, 10, 1>  ret;
     compose(d1, d2, dt, ret);
     return ret;
 }
 
-template<typename D1, typename D2, typename D3, typename D4, typename D5>
+template<typename D1, typename D2, typename D3, typename D4, typename D5, class T>
 inline void compose(const MatrixBase<D1>& d1,
                     const MatrixBase<D2>& d2,
-                    Scalar dt,
+                    T dt,
                     MatrixBase<D3>& sum,
                     MatrixBase<D4>& J_sum_d1,
                     MatrixBase<D5>& J_sum_d2)
@@ -139,10 +139,10 @@ inline void compose(const MatrixBase<D1>& d1,
     compose(d1, d2, dt, sum);
 }
 
-template<typename D1, typename D2, typename D3>
+template<typename D1, typename D2, typename D3, class T>
 inline void between(const MatrixBase<D1>& d1,
                     const MatrixBase<D2>& d2,
-                    Scalar dt,
+                    T dt,
                     MatrixBase<D3>& d2_minus_d1)
 {
     MatrixSizeCheck<10, 1>::check(d1);
@@ -164,20 +164,20 @@ inline void between(const MatrixBase<D1>& d1,
     diff_v = dq1.conjugate() * ( dv2 - dv1 );
 }
 
-template<typename D1, typename D2>
+template<typename D1, typename D2, class T>
 inline Matrix<typename D1::Scalar, 10, 1> between(const MatrixBase<D1>& d1,
                                                   const MatrixBase<D2>& d2,
-                                                  Scalar dt)
+                                                  T dt)
 {
     Matrix<typename D1::Scalar, 10, 1> d_bet;
     between(d1, d2, dt, d_bet);
     return d_bet;
 }
 
-template<typename D1, typename D2, typename D3>
+template<typename D1, typename D2, typename D3, class T>
 inline void composeOverState(const MatrixBase<D1>& x,
                              const MatrixBase<D2>& d,
-                             Scalar dt,
+                             T dt,
                              MatrixBase<D3>& x_plus_d)
 {
     MatrixSizeCheck<10, 1>::check(x);
@@ -199,20 +199,20 @@ inline void composeOverState(const MatrixBase<D1>& x,
     q_plus_d =                                  q*dq; // dq here to avoid possible aliasing between x and x_plus_d
 }
 
-template<typename D1, typename D2>
+template<typename D1, typename D2, class T>
 inline Matrix<typename D1::Scalar, 10, 1> composeOverState(const MatrixBase<D1>& x,
                                                            const MatrixBase<D2>& d,
-                                                           Scalar dt)
+                                                           T dt)
 {
     Matrix<typename D1::Scalar, 10, 1>  ret;
     composeOverState(x, d, dt, ret);
     return ret;
 }
 
-template<typename D1, typename D2, typename D3>
+template<typename D1, typename D2, typename D3, class T>
 inline void betweenStates(const MatrixBase<D1>& x1,
                           const MatrixBase<D2>& x2,
-                          Scalar dt,
+                          T dt,
                           MatrixBase<D3>& x2_minus_x1)
 {
     MatrixSizeCheck<10, 1>::check(x1);
@@ -234,10 +234,10 @@ inline void betweenStates(const MatrixBase<D1>& x1,
     dv = q1.conjugate() * ( v2 - v1         -     gravity()*dt );
 }
 
-template<typename D1, typename D2>
+template<typename D1, typename D2, class T>
 inline Matrix<typename D1::Scalar, 10, 1> betweenStates(const MatrixBase<D1>& x1,
                                                         const MatrixBase<D2>& x2,
-                                                        Scalar dt)
+                                                        T dt)
 {
     Matrix<typename D1::Scalar, 10, 1> ret;
     betweenStates(x1, x2, dt, ret);
@@ -288,17 +288,16 @@ Matrix<typename Derived::Scalar, 10, 1> retract(const MatrixBase<Derived>& d_in)
 
 template<typename D1, typename D2, typename D3>
 inline void diff(const MatrixBase<D1>& d1,
-                    const MatrixBase<D2>& d2,
-                    MatrixBase<D3>& err)
+                 const MatrixBase<D2>& d2,
+                 MatrixBase<D3>& err)
 {
     err = lift( between(d1, d2, 0.0) );
 }
 
 template<typename D1, typename D2>
 inline Matrix<typename D1::Scalar, 9, 1> diff(const MatrixBase<D1>& d1,
-                    const MatrixBase<D2>& d2)
+                                              const MatrixBase<D2>& d2)
 {
-
     return lift( between(d1, d2, 0.0) );
 }
 
