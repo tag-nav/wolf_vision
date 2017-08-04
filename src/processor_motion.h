@@ -198,42 +198,15 @@ class ProcessorMotion : public ProcessorBase
          *
          * @param _calib a reference to the calibration params vector
          */
-        virtual void getCalibration (VectorXs& _calib)
-        {
-            assert(_calib.size() == calib_size_);
-
-            Size i = 0;
-            // Check Capture's intrinsics and extrinsics for the fix() flag
-            for (auto sb : getSensorPtr()->getStateBlockVec()) // FIXME: get from Capture, not from Sensor!!
-            {
-                if (sb && !( sb->isFixed() ) )
-                {
-                    _calib.segment(i, i+sb->getSize() ) = sb->getState();
-                    i += sb->getSize();
-                }
-            }
-        }
+        virtual void getCalibration (VectorXs& _calib);
 
         /** \brief get calibration parameters
          *
          * @return a vector with the calibration parameters
          */
-        VectorXs getCalibration()
-        {
-            VectorXs calib(calib_size_);
-            getCalibration(calib);
-            return calib;
-        }
-
-        void getJacobianCalib(MatrixXs& _jac_cal)
-        {
-            _jac_cal = getBuffer().get().back().jacobian_calib_;
-        }
-
-        MatrixXs getJacobianCalib()
-        {
-            return getBuffer().get().back().jacobian_calib_;
-        }
+        VectorXs getCalibration();
+        void     getJacobianCalib(MatrixXs& _jac_cal);
+        MatrixXs getJacobianCalib();
 
 
         // Helper functions:
@@ -846,6 +819,41 @@ inline const MotionBuffer& ProcessorMotion::getBuffer() const
 {
     return last_ptr_->getBuffer();
 }
+
+inline void ProcessorMotion::getCalibration (VectorXs& _calib)
+{
+    assert(_calib.size() == calib_size_);
+
+    Size i = 0;
+    // Check Capture's intrinsics and extrinsics for the fix() flag
+    for (auto sb : getSensorPtr()->getStateBlockVec()) // FIXME: get from Capture, not from Sensor!!
+    {
+        if (sb && !( sb->isFixed() ) )
+        {
+            _calib.segment(i, i+sb->getSize() ) = sb->getState();
+            i += sb->getSize();
+        }
+    }
+}
+
+inline VectorXs ProcessorMotion::getCalibration()
+{
+    VectorXs calib(calib_size_);
+    getCalibration(calib);
+    return calib;
+}
+
+inline void ProcessorMotion::getJacobianCalib(MatrixXs& _jac_cal)
+{
+    _jac_cal = getBuffer().get().back().jacobian_calib_;
+}
+
+inline MatrixXs ProcessorMotion::getJacobianCalib()
+{
+    return getBuffer().get().back().jacobian_calib_;
+}
+
+
 
 inline MotionBuffer& ProcessorMotion::getBuffer()
 {
