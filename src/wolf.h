@@ -329,6 +329,38 @@ WOLF_PTR_TYPEDEFS(LocalParametrizationBase);
 inline const Eigen::Vector3s gravity(void) {
     return Eigen::Vector3s(0,0,-9.806);
 }
+
+template <typename T, int N>
+bool isSymmetric(const Eigen::Matrix<T, N, N>& M,
+                 const T eps = wolf::Constants::EPS)
+{
+  return M.isApprox(M.transpose(), eps);
+}
+
+template <typename T, int N>
+bool isPositiveSemiDefinite(const Eigen::Matrix<T, N, N>& M)
+{
+  Eigen::SelfAdjointEigenSolver<Eigen::Matrix<T, N, N> > eigensolver(M);
+
+  if (eigensolver.info() == Eigen::Success)
+  {
+    // All eigenvalues must be >= 0:
+    return (eigensolver.eigenvalues().array() >= T(0)).all();
+  }
+
+  return false;
+}
+
+template <typename T, int N>
+bool isCovariance(const Eigen::Matrix<T, N, N>& M)
+{
+  return isSymmetric(M) && isPositiveSemiDefinite(M);
+}
+
+#define WOLF_ASSERT_COVARIANCE_MATRIX(x) \
+  assert(x.determinant() > 0 && "Not positive definite measurement covariance"); \
+  assert(isCovariance(x) && "Not a covariance");
+
 //===================================================
 
 } // namespace wolf
