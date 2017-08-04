@@ -32,8 +32,16 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
             -> weights the result with the covariance of the noise (residual = sqrt_info_matrix * err;)
         */
         template<typename T>
-        bool operator ()(const T* const _p1, const T* const _o1, const T* const _v1, const T* const _b_a1, const T* const _b_g1,
-                         const T* const _p2, const T* const _o2, const T* const _v2, const T* const _b_a2, const T* const _b_g2,
+        bool operator ()(const T* const _p1,
+                         const T* const _o1,
+                         const T* const _v1,
+                         const T* const _b_a1,
+                         const T* const _b_g1,
+                         const T* const _p2,
+                         const T* const _o2,
+                         const T* const _v2,
+                         const T* const _b_a2,
+                         const T* const _b_g2,
                          T* _residuals) const;
         
         /* \brief : compute the residual from the state blocks being iterated by the solver. (same as operator())
@@ -52,8 +60,17 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
          * Matrix<9,1, wolf::Scalar> _residuals : to retrieve residuals (POV) O is rotation vector... NOT A QUATERNION
         */
         template<typename D1, typename D2, typename D3>
-        bool getResiduals(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D2> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab1, const Eigen::MatrixBase<D1> & _wb1,
-                        const Eigen::MatrixBase<D1> & _p2, const Eigen::QuaternionBase<D2> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::MatrixBase<D1> & _ab2, const Eigen::MatrixBase<D1> & _wb2, const Eigen::MatrixBase<D3> & _residuals) const;
+        bool getResiduals(const Eigen::MatrixBase<D1> & _p1,
+                          const Eigen::QuaternionBase<D2> & _q1,
+                          const Eigen::MatrixBase<D1> & _v1,
+                          const Eigen::MatrixBase<D1> & _ab1,
+                          const Eigen::MatrixBase<D1> & _wb1,
+                          const Eigen::MatrixBase<D1> & _p2,
+                          const Eigen::QuaternionBase<D2> & _q2,
+                          const Eigen::MatrixBase<D1> & _v2,
+                          const Eigen::MatrixBase<D1> & _ab2,
+                          const Eigen::MatrixBase<D1> & _wb2,
+                          const Eigen::MatrixBase<D3> & _residuals) const;
 
         virtual JacobianMethod getJacobianMethod() const override;
 
@@ -70,8 +87,15 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
          * Matrix<10,1, wolf::Scalar> _expectation : to retrieve resulting expectation (PVQ)
         */
         template<typename D1, typename D2, typename D3>
-        void expectation(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D2> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab, const Eigen::MatrixBase<D1> & _wb,
-                        const Eigen::MatrixBase<D1> & _p2, const Eigen::QuaternionBase<D2> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::MatrixBase<D3> & _result) const;
+        void expectation(const Eigen::MatrixBase<D1> & _p1,
+                         const Eigen::QuaternionBase<D2> & _q1,
+                         const Eigen::MatrixBase<D1> & _v1,
+                         const Eigen::MatrixBase<D1> & _ab,
+                         const Eigen::MatrixBase<D1> & _wb,
+                         const Eigen::MatrixBase<D1> & _p2,
+                         const Eigen::QuaternionBase<D2> & _q2,
+                         const Eigen::MatrixBase<D1> & _v2,
+                         const Eigen::MatrixBase<D3> & _result) const;
 
         /* \brief : return the expected value given the state blocks in the wolf tree
             current frame data is taken from constraintIMU object.
@@ -95,7 +119,14 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
 
             Eigen::Quaternions frame_imu_ori_q(frame_imu_ori);
             
-            expectation(frame_current_pos, frame_current_ori, frame_current_vel, frame_current_ab, frame_current_wb, frame_imu_pos, frame_imu_ori_q, frame_imu_vel, exp);
+            expectation(frame_current_pos,
+                        frame_current_ori,
+                        frame_current_vel,
+                        frame_current_ab,
+                        frame_current_wb,
+                        frame_imu_pos,
+                        frame_imu_ori_q,
+                        frame_imu_vel, exp);
             return exp;
         }
 
@@ -176,8 +207,16 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr& _ftr_ptr,
 }
 
 template<typename T>
-inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, const T* const _v1, const T* const _ab1, const T* const _wb1,
-                                       const T* const _p2, const T* const _q2, const T* const _v2, const T* const _ab2, const T* const _wb2,
+inline bool ConstraintIMU::operator ()(const T* const _p1,
+                                       const T* const _q1,
+                                       const T* const _v1,
+                                       const T* const _ab1,
+                                       const T* const _wb1,
+                                       const T* const _p2,
+                                       const T* const _q2,
+                                       const T* const _v2,
+                                       const T* const _ab2,
+                                       const T* const _wb2,
                                        T* _residuals) const
 {
     using namespace Eigen;
@@ -239,8 +278,17 @@ inline bool ConstraintIMU::operator ()(const T* const _p1, const T* const _q1, c
 }
 
 template<typename D1, typename D2, typename D3>
-inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D2> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab1, const Eigen::MatrixBase<D1> & _wb1,
-                        const Eigen::MatrixBase<D1> & _p2, const Eigen::QuaternionBase<D2> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::MatrixBase<D1> & _ab2, const Eigen::MatrixBase<D1> & _wb2, const Eigen::MatrixBase<D3> & _residuals) const
+inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1,
+                                        const Eigen::QuaternionBase<D2> & _q1,
+                                        const Eigen::MatrixBase<D1> & _v1,
+                                        const Eigen::MatrixBase<D1> & _ab1,
+                                        const Eigen::MatrixBase<D1> & _wb1,
+                                        const Eigen::MatrixBase<D1> & _p2,
+                                        const Eigen::QuaternionBase<D2> & _q2,
+                                        const Eigen::MatrixBase<D1> & _v2,
+                                        const Eigen::MatrixBase<D1> & _ab2,
+                                        const Eigen::MatrixBase<D1> & _wb2,
+                                        const Eigen::MatrixBase<D3> & _residuals) const
 {
     //needed typedefs
     typedef typename D2::Scalar DataType;
@@ -283,8 +331,15 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1, const
 }
 
 template<typename D1, typename D2, typename D3>
-inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D2> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab, const Eigen::MatrixBase<D1> & _wb,
-                        const Eigen::MatrixBase<D1> & _p2, const Eigen::QuaternionBase<D2> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::MatrixBase<D3> & _result) const
+inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> & _p1,
+                                       const Eigen::QuaternionBase<D2> & _q1,
+                                       const Eigen::MatrixBase<D1> & _v1,
+                                       const Eigen::MatrixBase<D1> & _ab,
+                                       const Eigen::MatrixBase<D1> & _wb,
+                                       const Eigen::MatrixBase<D1> & _p2,
+                                       const Eigen::QuaternionBase<D2> & _q2,
+                                       const Eigen::MatrixBase<D1> & _v2,
+                                       const Eigen::MatrixBase<D3> & _result) const
 {
     //needed typedefs
     typedef typename D2::Vector3 Vector3Map;
