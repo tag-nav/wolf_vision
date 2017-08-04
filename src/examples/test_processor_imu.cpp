@@ -85,8 +85,8 @@ int main(int argc, char** argv)
     Eigen::Vector6s data;
     Eigen::Matrix6s data_cov;
     data_cov.setIdentity();
-//    data_cov.topLeftCorner(3,3)     *= 0.01;
-//    data_cov.bottomRightCorner(3,3) *= 0.01;
+    data_cov.topLeftCorner(3,3)     *= 0.01;
+    data_cov.bottomRightCorner(3,3) *= 0.01;
 
     // Get initial data
     data_file_acc >> mti_clock >> data[0] >> data[1] >> data[2];
@@ -99,8 +99,7 @@ int main(int argc, char** argv)
     problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    CaptureIMUPtr imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data);
-    imu_ptr->setDataCovariance(data_cov);
+    CaptureIMUPtr imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data, data_cov);
 
 //    problem_ptr_->print();
 
