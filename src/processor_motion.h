@@ -750,7 +750,7 @@ inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
     if (_ts >= origin_ptr_->getTimeStamp())
     {
         // timestamp found in the current processor buffer
-        statePlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().getDelta(_ts), _ts - origin_ptr_->getTimeStamp(), _x);
+        statePlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().getMotion(_ts).delta_integr_, _ts - origin_ptr_->getTimeStamp(), _x);
     }
     else
     {
@@ -762,7 +762,7 @@ inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
             // We found a CaptureMotion whose buffer contains the time stamp
             VectorXs         state_0        = capture_motion->getOriginFramePtr()->getState();
             Motion           motion         = capture_motion->getBuffer().getMotion(_ts);
-            VectorXs         delta          = capture_motion->getBuffer().getDelta(_ts);
+            VectorXs         delta          = capture_motion->getBuffer().getMotion(_ts).delta_integr_;
             Scalar           dt             = _ts - capture_motion->getBuffer().get().front().ts_;
 
             VectorXs delta_corrected = correctDelta(motion, capture_motion);
@@ -829,7 +829,7 @@ inline void ProcessorMotion::getMotion(const TimeStamp& _ts, Motion& _motion) co
     auto capture_ptr = findCaptureContainingTimeStamp(_ts);
     assert(capture_ptr != nullptr && "ProcessorMotion::getMotion: timestamp older than first motion");
 
-    capture_ptr->getBuffer().getMotion(_ts, _motion);
+    _motion = capture_ptr->getBuffer().getMotion(_ts);
 }
 
 inline bool ProcessorMotion::isMotion()

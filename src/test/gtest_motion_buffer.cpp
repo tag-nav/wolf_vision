@@ -83,12 +83,12 @@ TEST(MotionBuffer, getDelta)
 
     MB.get().push_back(m0);
 
-    ASSERT_EQ(MB.getDelta(t0), m0.delta_integr_);
+    ASSERT_EQ(MB.getMotion(t0).delta_integr_, m0.delta_integr_);
 
     MB.get().push_back(m1);
 
-    ASSERT_EQ(MB.getDelta(t0), m0.delta_integr_);
-    ASSERT_EQ(MB.getDelta(t1), m1.delta_integr_);
+    ASSERT_EQ(MB.getMotion(t0).delta_integr_, m0.delta_integr_);
+    ASSERT_EQ(MB.getMotion(t1).delta_integr_, m1.delta_integr_);
 }
 
 TEST(MotionBuffer, Split)

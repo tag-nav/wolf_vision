@@ -65,7 +65,6 @@ class CaptureMotion : public CaptureBase
 
         MotionBuffer& getBuffer();
         const MotionBuffer& getBuffer() const;
-        const Eigen::VectorXs& getDelta() const;
 
         FrameBasePtr getOriginFramePtr();
         void setOriginFramePtr(FrameBasePtr _frame_ptr);
@@ -140,11 +139,6 @@ inline const wolf::MotionBuffer& CaptureMotion::getBuffer() const
 inline wolf::MotionBuffer& CaptureMotion::getBuffer()
 {
     return buffer_;
-}
-
-inline const Eigen::VectorXs& CaptureMotion::getDelta() const
-{
-    return buffer_.get().back().delta_integr_;
 }
 
 inline wolf::FrameBasePtr CaptureMotion::getOriginFramePtr()

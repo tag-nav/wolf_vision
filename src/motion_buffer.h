@@ -81,8 +81,6 @@ class MotionBuffer{
         const std::list<Motion>& get() const;
         const Motion& getMotion(const TimeStamp& _ts) const;
         void getMotion(const TimeStamp& _ts, Motion& _motion) const;
-        const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const;
-        void getDelta(const TimeStamp& _ts, Eigen::VectorXs& _delta_integr) const;
         void split(const TimeStamp& _ts, MotionBuffer& _oldest_buffer);
         MatrixXs integrateCovariance() const; // Integrate all buffer
         MatrixXs integrateCovariance(const TimeStamp& _ts) const; // Integrate up to time stamp (included)
@@ -101,16 +99,6 @@ inline std::list<Motion>& MotionBuffer::get()
 inline const std::list<Motion>& MotionBuffer::get() const
 {
     return container_;
-}
-
-inline const Eigen::VectorXs& MotionBuffer::getDelta(const TimeStamp& _ts) const
-{
-    return getMotion(_ts).delta_integr_;
-}
-
-inline void MotionBuffer::getDelta(const TimeStamp& _ts, Eigen::VectorXs& _delta_integr) const
-{
-    _delta_integr = getMotion(_ts).delta_integr_;
 }
 
 } // namespace wolf
