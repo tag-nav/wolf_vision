@@ -5,16 +5,10 @@
 
 namespace wolf {
 
-SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr) :
-        SensorBase("IMU", _p_ptr, _o_ptr, nullptr, 6)
-{
-    //
-}
-
 SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPtr params) :
         SensorBase("IMU", _p_ptr, _o_ptr, nullptr, (Eigen::Vector6s()<<params->a_noise,params->a_noise,params->a_noise,params->w_noise,params->w_noise,params->w_noise).finished()),
-        w_noise(params->w_noise),
         a_noise(params->a_noise),
+        w_noise(params->w_noise),
         ab_initial_stdev(params->ab_initial_stdev),
         wb_initial_stdev(params->wb_initial_stdev),
         ab_rate_stdev(params->ab_rate_stdev),
