@@ -44,8 +44,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
     protected:
         unsigned int sensor_id_;   // sensor ID
 
-        bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
-        bool intrinsic_dynamic_;// intrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
+        bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes.
+        bool intrinsic_dynamic_;// intrinsic parameters vary with time? If so, they will be taken from the Capture nodes.
         bool has_capture_;      // indicates this sensor took at least one capture
 
         Eigen::VectorXs noise_std_; // std of sensor noise
