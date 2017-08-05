@@ -25,12 +25,13 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
     public:
 
-        ConstraintAHP(FeatureBasePtr    _ftr_ptr,
-                      LandmarkAHPPtr    _landmark_ptr,
+        ConstraintAHP(const ProcessorBasePtr& _processor_ptr,
+                      const FeatureBasePtr&   _ftr_ptr,
+                      const LandmarkAHPPtr&   _landmark_ptr,
                       bool              _apply_loss_function = false,
                       ConstraintStatus  _status = CTR_ACTIVE);
 
-        virtual ~ConstraintAHP();
+        virtual ~ConstraintAHP() = default;
 
         template<typename T>
         void expectation(const T* const _current_frame_p,
@@ -52,22 +53,25 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
         /** \brief Returns the jacobians computation method
          **/
-        virtual JacobianMethod getJacobianMethod() const;
+        virtual JacobianMethod getJacobianMethod() const override;
 
 
         // Static creator method
-        static ConstraintAHPPtr create(FeatureBasePtr   _ftr_ptr,
-                                       LandmarkAHPPtr   _lmk_ahp_ptr,
+        static ConstraintAHPPtr create(const ProcessorBasePtr& _processor_ptr,
+                                       const FeatureBasePtr&   _ftr_ptr,
+                                       const LandmarkAHPPtr&   _lmk_ahp_ptr,
                                        bool             _apply_loss_function = false,
                                        ConstraintStatus _status              = CTR_ACTIVE);
 
 };
 
-inline ConstraintAHP::ConstraintAHP(FeatureBasePtr   _ftr_ptr,
-                                    LandmarkAHPPtr   _landmark_ptr,
+inline ConstraintAHP::ConstraintAHP(const ProcessorBasePtr& _processor_ptr,
+                                    const FeatureBasePtr&   _ftr_ptr,
+                                    const LandmarkAHPPtr&   _landmark_ptr,
                                     bool             _apply_loss_function,
                                     ConstraintStatus _status) :
         ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP,
+                                           _processor_ptr,
                                            _landmark_ptr->getAnchorFrame(),
                                            nullptr,
                                            _landmark_ptr,
@@ -84,11 +88,6 @@ inline ConstraintAHP::ConstraintAHP(FeatureBasePtr   _ftr_ptr,
 
     // obtain some intrinsics from provided sensor
     distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
-}
-
-inline ConstraintAHP::~ConstraintAHP()
-{
-    //
 }
 
 inline Eigen::VectorXs ConstraintAHP::expectation() const
@@ -193,13 +192,14 @@ inline wolf::JacobianMethod ConstraintAHP::getJacobianMethod() const
     return JAC_AUTO;
 }
 
-inline wolf::ConstraintAHPPtr ConstraintAHP::create(FeatureBasePtr   _ftr_ptr,
-                                                    LandmarkAHPPtr   _lmk_ahp_ptr,
+inline wolf::ConstraintAHPPtr ConstraintAHP::create(const ProcessorBasePtr& _processor_ptr,
+                                                    const FeatureBasePtr&   _ftr_ptr,
+                                                    const LandmarkAHPPtr&   _lmk_ahp_ptr,
                                                     bool             _apply_loss_function,
                                                     ConstraintStatus _status)
 {
     // construct constraint
-    ConstraintAHPPtr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _lmk_ahp_ptr, _apply_loss_function, _status);
+    ConstraintAHPPtr ctr_ahp = std::make_shared<ConstraintAHP>(_processor_ptr, _ftr_ptr, _lmk_ahp_ptr, _apply_loss_function, _status);
 
     // link it to wolf tree <-- these pointers cannot be set at construction time
     _lmk_ahp_ptr->getAnchorFrame()->addConstrainedBy(ctr_ahp);

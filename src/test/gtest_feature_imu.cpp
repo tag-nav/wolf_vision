@@ -24,6 +24,7 @@ class FeatureIMU_test : public testing::Test
         wolf::FrameIMUPtr last_frame;
         wolf::FrameBasePtr origin_frame;
         Eigen::MatrixXs dD_db_jacobians;
+        wolf::ProcessorBasePtr processor_ptr_;
 
     //a new of this will be created for each new test
     virtual void SetUp()
@@ -39,7 +40,7 @@ class FeatureIMU_test : public testing::Test
         IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
         IntrinsicsIMUPtr sen_imu_params = std::make_shared<IntrinsicsIMU>();
         SensorBasePtr sensor_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", IMU_extrinsics, sen_imu_params);
-        ProcessorBasePtr processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
+        processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
     // Time and data variables
         TimeStamp t;
@@ -148,7 +149,7 @@ TEST_F(FeatureIMU_test, addConstraint)
     using namespace wolf;
     
     FrameIMUPtr frm_imu = std::static_pointer_cast<FrameIMU>(last_frame);
-    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, std::static_pointer_cast<FrameIMU>(frm_imu));
+    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(processor_ptr_, feat_imu, std::static_pointer_cast<FrameIMU>(frm_imu));
     feat_imu->addConstraint(constraint_imu);
     origin_frame->addConstrainedBy(constraint_imu);
 }

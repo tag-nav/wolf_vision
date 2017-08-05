@@ -420,7 +420,7 @@ inline ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature
 {
     FeatureIMUPtr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
     FrameIMUPtr frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
-    ConstraintIMUPtr ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu);
+    ConstraintIMUPtr ctr_imu = std::make_shared<ConstraintIMU>(shared_from_this(), ftr_imu, frm_imu);
 
     _feature_motion->addConstraint(ctr_imu);
     _frame_origin->addConstrainedBy(ctr_imu);

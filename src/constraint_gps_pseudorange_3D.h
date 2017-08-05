@@ -46,12 +46,7 @@ class ConstraintGPSPseudorange3D: public ConstraintSparse<1, 3, 4, 3, 1, 3, 4>
         }
 
 
-        virtual ~ConstraintGPSPseudorange3D()
-        {
-            //std::cout << "deleting ConstraintGPSPseudorange3D " << id() << std::endl;
-        }
-
-
+        virtual ~ConstraintGPSPseudorange3D() = default;
 
         template<typename T>
         bool operator ()(const T* const _vehicle_p, const T* const _vehicle_o, const T* const _sensor_p,
@@ -64,7 +59,7 @@ class ConstraintGPSPseudorange3D: public ConstraintSparse<1, 3, 4, 3, 1, 3, 4>
         * Returns the jacobians computation method
         *
         **/
-        virtual JacobianMethod getJacobianMethod() const
+        virtual JacobianMethod getJacobianMethod() const override
         {
             return JAC_AUTO;
         }

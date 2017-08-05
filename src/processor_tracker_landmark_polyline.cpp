@@ -816,7 +816,7 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
                 if (lmk_next_point_id > polyline_landmark->getLastId())
                     lmk_next_point_id -= polyline_landmark->getNPoints();
                 //std::cout << "point-line: landmark points " << lmk_point_id << ", " << lmk_next_point_id << std::endl;
-                last_feature->addConstraint(std::make_shared<ConstraintPointToLine2D>(polyline_feature, polyline_landmark, ftr_point_id, lmk_point_id, lmk_next_point_id));
+                last_feature->addConstraint(std::make_shared<ConstraintPointToLine2D>(shared_from_this(), polyline_feature, polyline_landmark, ftr_point_id, lmk_point_id, lmk_next_point_id));
                 //std::cout << "constraint added" << std::endl;
             }
 
@@ -828,7 +828,7 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
                 if (lmk_prev_point_id < polyline_landmark->getFirstId())
                     lmk_prev_point_id += polyline_landmark->getNPoints();
                 //std::cout << "point-line: landmark points " << lmk_point_id << ", " << lmk_prev_point_id << std::endl;
-                last_feature->addConstraint(std::make_shared<ConstraintPointToLine2D>(polyline_feature, polyline_landmark, ftr_point_id, lmk_point_id, lmk_prev_point_id));
+                last_feature->addConstraint(std::make_shared<ConstraintPointToLine2D>(shared_from_this(), polyline_feature, polyline_landmark, ftr_point_id, lmk_point_id, lmk_prev_point_id));
                 //std::cout << "constraint added" << std::endl;
             }
 
@@ -840,7 +840,7 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
 				//std::cout << "landmark first id:" << polyline_landmark->getFirstId() << std::endl;
 				//std::cout << "landmark last id:" << polyline_landmark->getLastId() << std::endl;
 				//std::cout << "landmark n points:" << polyline_landmark->getNPoints() << std::endl;
-                last_feature->addConstraint(std::make_shared<ConstraintPoint2D>(polyline_feature, polyline_landmark, ftr_point_id, lmk_point_id));
+                last_feature->addConstraint(std::make_shared<ConstraintPoint2D>(shared_from_this(), polyline_feature, polyline_landmark, ftr_point_id, lmk_point_id));
                 //std::cout << "constraint added" << std::endl;
             }
         }

@@ -13,16 +13,15 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
 {
 	public:
 
-		ConstraintCorner2D(FeatureBasePtr _ftr_ptr, LandmarkCorner2DPtr _lmk_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-			ConstraintSparse<3,2,1,2,1>(CTR_CORNER_2D, nullptr, nullptr, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
+    ConstraintCorner2D(const ProcessorBasePtr& _processor_ptr, const FeatureBasePtr _ftr_ptr,
+                       const LandmarkCorner2DPtr _lmk_ptr, bool _apply_loss_function = false,
+                       ConstraintStatus _status = CTR_ACTIVE) :
+      ConstraintSparse<3,2,1,2,1>(CTR_CORNER_2D, _processor_ptr, nullptr, nullptr, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
 		{
             setType("CORNER 2D");
 		}
 
-        virtual ~ConstraintCorner2D()
-        {
-            //std::cout << "deleting ConstraintCorner2D " << id() << std::endl;
-        }
+        virtual ~ConstraintCorner2D() = default;
 
         LandmarkCorner2DPtr getLandmarkPtr()
 		{
@@ -38,15 +37,15 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
          * Returns the jacobians computation method
          *
          **/
-        virtual JacobianMethod getJacobianMethod() const
+        virtual JacobianMethod getJacobianMethod() const override
         {
             return JAC_AUTO;
         }
 
     public:
-        static ConstraintBasePtr create(FeatureBasePtr _feature_ptr, NodeBasePtr _correspondant_ptr)
+        static ConstraintBasePtr create(const ProcessorBasePtr& _processor_ptr, const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr)
         {
-            return std::make_shared<ConstraintCorner2D>(_feature_ptr, std::static_pointer_cast<LandmarkCorner2D>(_correspondant_ptr) );
+            return std::make_shared<ConstraintCorner2D>(_processor_ptr, _feature_ptr, std::static_pointer_cast<LandmarkCorner2D>(_correspondant_ptr) );
         }
 
 };

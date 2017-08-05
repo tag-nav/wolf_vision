@@ -108,13 +108,13 @@ ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr
                                                           _feature_ptr->getMeasurement()(3));
 
         // Add landmark constraint to the other feature
-        _feature_other_ptr->addConstraint(std::make_shared<ConstraintCorner2D>(_feature_other_ptr, landmark_ptr));
+        _feature_other_ptr->addConstraint(std::make_shared<ConstraintCorner2D>(shared_from_this(), _feature_other_ptr, landmark_ptr));
     }
 
 //    std::cout << "creating constraint: last feature " << _feature_ptr->getMeasurement()
 //              << " with origin feature " << _feature_other_ptr->getMeasurement() << std::endl
 //              << " corresponding to landmark " << landmark_ptr->id() << std::endl;
-    return std::make_shared<ConstraintCorner2D>(_feature_ptr, landmark_ptr);
+    return std::make_shared<ConstraintCorner2D>(shared_from_this(), _feature_ptr, landmark_ptr);
 }
 
 void ProcessorTrackerFeatureCorner::extractCorners(CaptureLaser2DPtr _capture_laser_ptr,

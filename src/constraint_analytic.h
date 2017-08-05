@@ -40,7 +40,8 @@ class ConstraintAnalytic: public ConstraintBase
          * Constructor of category CTR_FRAME
          *
          **/
-        ConstraintAnalytic(ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function, ConstraintStatus _status,
+        ConstraintAnalytic(ConstraintType _tp, const ProcessorBasePtr& _processor_ptr,
+                           const FrameBasePtr& _frame_ptr, bool _apply_loss_function, ConstraintStatus _status,
                          StateBlockPtr _state0Ptr,
                          StateBlockPtr _state1Ptr = nullptr,
                          StateBlockPtr _state2Ptr = nullptr,
@@ -57,7 +58,8 @@ class ConstraintAnalytic: public ConstraintBase
          * Constructor of category CTR_FEATURE
          *
          **/
-        ConstraintAnalytic(ConstraintType _tp, FeatureBasePtr _feature_ptr, bool _apply_loss_function, ConstraintStatus _status,
+        ConstraintAnalytic(ConstraintType _tp, const ProcessorBasePtr& _processor_ptr,
+                           const FeatureBasePtr& _feature_ptr, bool _apply_loss_function, ConstraintStatus _status,
                          StateBlockPtr _state0Ptr,
                          StateBlockPtr _state1Ptr = nullptr,
                          StateBlockPtr _state2Ptr = nullptr,
@@ -74,7 +76,8 @@ class ConstraintAnalytic: public ConstraintBase
          * Constructor of category CTR_LANDMARK
          *
          **/
-        ConstraintAnalytic(ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status,
+        ConstraintAnalytic(ConstraintType _tp, const ProcessorBasePtr& _processor_ptr,
+                           const LandmarkBasePtr& _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status,
                          StateBlockPtr _state0Ptr,
                          StateBlockPtr _state1Ptr = nullptr,
                          StateBlockPtr _state2Ptr = nullptr,
@@ -86,21 +89,21 @@ class ConstraintAnalytic: public ConstraintBase
                          StateBlockPtr _state8Ptr = nullptr,
                          StateBlockPtr _state9Ptr = nullptr ) ;
 
-        virtual ~ConstraintAnalytic();
+        virtual ~ConstraintAnalytic() = default;
 
         /** \brief Returns a vector of pointers to the state blocks
          *
          * Returns a vector of pointers to the state blocks in which this constraint depends
          *
          **/
-        virtual const std::vector<Scalar*> getStateScalarPtrVector();
+        virtual const std::vector<Scalar*> getStateScalarPtrVector() override;
 
         /** \brief Returns a vector of pointers to the states
          *
          * Returns a vector of pointers to the state in which this constraint depends
          *
          **/
-        virtual const std::vector<StateBlockPtr> getStateBlockPtrVector() const;
+        virtual const std::vector<StateBlockPtr> getStateBlockPtrVector() const override;
 
         /** \brief Returns a vector of sizes of the state blocks
          *
@@ -114,7 +117,7 @@ class ConstraintAnalytic: public ConstraintBase
          * Returns the constraint residual size
          *
          **/
-        virtual unsigned int getSize() const = 0;
+//        virtual unsigned int getSize() const = 0;
 
         /** \brief Returns the residual evaluated in the states provided
          *
@@ -150,7 +153,7 @@ class ConstraintAnalytic: public ConstraintBase
          * Returns the jacobians computation method
          *
          **/
-        virtual JacobianMethod getJacobianMethod() const;
+        virtual JacobianMethod getJacobianMethod() const override;
 
     private:
         void resizeVectors();

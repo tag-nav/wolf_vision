@@ -246,7 +246,8 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
 
             // If landmark point constrained -> new constraint
             if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
-                new_ctr_ptr = std::make_shared<ConstraintPoint2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
+                new_ctr_ptr = std::make_shared<ConstraintPoint2D>(ctr_point_ptr->getProcessor(),
+                                                                  std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
                                                                   std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
                                                                   ctr_point_ptr->getFeaturePointId(),
                                                                   _remain_id,
@@ -259,7 +260,8 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
 
             // If landmark point constrained -> new constraint
             if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
-                new_ctr_ptr = std::make_shared<ConstraintPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
+                new_ctr_ptr = std::make_shared<ConstraintPointToLine2D>(ctr_point_ptr->getProcessor(),
+                                                                        std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
                                                                         std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
                                                                         ctr_point_ptr->getFeaturePointId(),
                                                                         _remain_id,
@@ -268,7 +270,8 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
                                                                         ctr_point_ptr->getStatus());
             // If landmark point is aux point -> new constraint
             else if (ctr_point_ptr->getLandmarkPointAuxId() == _remove_id)
-                new_ctr_ptr = std::make_shared<ConstraintPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
+                new_ctr_ptr = std::make_shared<ConstraintPointToLine2D>(ctr_point_ptr->getProcessor(),
+                                                                        std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
                                                                         std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
                                                                         ctr_point_ptr->getFeaturePointId(),
                                                                         ctr_point_ptr->getLandmarkPointId(),

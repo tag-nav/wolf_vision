@@ -18,8 +18,10 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
 
 	public:
 
-	    ConstraintContainer(FeatureBasePtr _ftr_ptr, LandmarkContainerPtr _lmk_ptr, const unsigned int _corner, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-			ConstraintSparse<3,2,1,2,1>(CTR_CONTAINER, nullptr, nullptr, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
+      ConstraintContainer(const ProcessorBasePtr& _processor_ptr, const FeatureBasePtr& _ftr_ptr,
+                          const LandmarkContainerPtr& _lmk_ptr, const unsigned int _corner,
+                          bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+      ConstraintSparse<3,2,1,2,1>(CTR_CONTAINER, _processor_ptr, nullptr, nullptr, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
 			lmk_ptr_(_lmk_ptr),
 			corner_(_corner)
 		{
@@ -29,10 +31,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
             std::cout << "new constraint container: corner idx = " << corner_ << std::endl;
 		}
 
-		virtual ~ConstraintContainer()
-		{
-			//std::cout << "deleting ConstraintContainer " << id() << std::endl;
-		}
+    virtual ~ConstraintContainer() = default;
 
 		LandmarkContainerPtr getLandmarkPtr()
 		{
@@ -120,18 +119,20 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
          * Returns the jacobians computation method
          *
          **/
-        virtual JacobianMethod getJacobianMethod() const
+        virtual JacobianMethod getJacobianMethod() const override
         {
             return JAC_AUTO;
         }
 
 
     public:
-        static ConstraintBasePtr create(FeatureBasePtr _feature_ptr, NodeBasePtr _correspondant_ptr)
+        static ConstraintBasePtr create(const ProcessorBasePtr& _processor_ptr,
+                                        const FeatureBasePtr& _feature_ptr,
+                                        const NodeBasePtr& _correspondant_ptr)
         {
             unsigned int corner = 0; // Hard-coded, but this class is nevertheless deprecated.
 
-            return std::make_shared<ConstraintContainer>(_feature_ptr, std::static_pointer_cast<LandmarkContainer>(_correspondant_ptr), corner);
+            return std::make_shared<ConstraintContainer>(_processor_ptr, _feature_ptr, std::static_pointer_cast<LandmarkContainer>(_correspondant_ptr), corner);
         }
 
 };

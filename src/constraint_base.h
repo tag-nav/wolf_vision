@@ -32,16 +32,19 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         FrameBaseWPtr frame_other_ptr_;                    ///< FrameBase pointer (for category CTR_FRAME)
         FeatureBaseWPtr feature_other_ptr_;                ///< FeatureBase pointer (for category CTR_FEATURE)
         LandmarkBaseWPtr landmark_other_ptr_;              ///< LandmarkBase pointer (for category CTR_LANDMARK)
+        ProcessorBaseWPtr processor_ptr_;
 
     public:
 
         /** \brief Constructor of category CTR_ABSOLUTE
          **/
-        ConstraintBase(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp,  bool _apply_loss_function, ConstraintStatus _status);
 
         /** \brief Constructor valid for all categories (FRAME, FEATURE, LANDMARK)
          **/
-        ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr, FeatureBasePtr _feature_other_ptr, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp, const ProcessorBasePtr& _processor_ptr,
+                       const FrameBasePtr& _frame_other_ptr, const FeatureBasePtr& _feature_other_ptr,
+                       const LandmarkBasePtr& _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
 
         virtual ~ConstraintBase();
         void remove();
@@ -120,6 +123,22 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         LandmarkBasePtr getLandmarkOtherPtr() const;
         void setLandmarkOtherPtr(LandmarkBasePtr _lmk_o){landmark_other_ptr_ = _lmk_o;}
 
+        /**
+         * @brief getProcessor
+         * @return
+         */
+        ProcessorBasePtr getProcessor() const;
+
+        /**
+         * @brief setProcessor
+         * @param _processor_ptr
+         */
+        void setProcessor(const ProcessorBasePtr& _processor_ptr);
+
+        /**
+         * @brief getProblem
+         * @return
+         */
         ProblemPtr getProblem();
 
 };
@@ -210,6 +229,16 @@ inline FeatureBasePtr ConstraintBase::getFeatureOtherPtr() const
 inline LandmarkBasePtr ConstraintBase::getLandmarkOtherPtr() const
 {
     return landmark_other_ptr_.lock();
+}
+
+inline ProcessorBasePtr ConstraintBase::getProcessor() const
+{
+  return processor_ptr_.lock();
+}
+
+inline void ConstraintBase::setProcessor(const ProcessorBasePtr& _processor_ptr)
+{
+  processor_ptr_ = _processor_ptr;
 }
 
 } // namespace wolf

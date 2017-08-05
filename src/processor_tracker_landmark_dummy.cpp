@@ -88,7 +88,7 @@ ConstraintBasePtr ProcessorTrackerLandmarkDummy::createConstraint(FeatureBasePtr
     std::cout << "\tProcessorTrackerLandmarkDummy::createConstraint" << std::endl;
     std::cout << "\t\tfeature " << _feature_ptr->getMeasurement() << std::endl;
     std::cout << "\t\tlandmark "<< _landmark_ptr->getDescriptor() << std::endl;
-    return std::make_shared<ConstraintCorner2D>(_feature_ptr, std::static_pointer_cast<LandmarkCorner2D>(_landmark_ptr) );
+    return std::make_shared<ConstraintCorner2D>(shared_from_this(), _feature_ptr, std::static_pointer_cast<LandmarkCorner2D>(_landmark_ptr) );
 }
 
 } //namespace wolf
