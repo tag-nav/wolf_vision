@@ -19,8 +19,9 @@ WOLF_PTR_TYPEDEFS(ConstraintIMU);
 class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
 {
     public:
-        ConstraintIMU(const ProcessorBasePtr& _processor_ptr, const FeatureIMUPtr& _ftr_ptr,
-                      const FrameIMUPtr& _frame_ptr, bool _apply_loss_function = false,
+        ConstraintIMU(const FeatureIMUPtr& _ftr_ptr, const FrameIMUPtr& _frame_ptr,
+                      const ProcessorBasePtr& _processor_ptr = nullptr,
+                      bool _apply_loss_function = false,
                       ConstraintStatus _status = CTR_ACTIVE);
 
         virtual ~ConstraintIMU() = default;
@@ -99,8 +100,8 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
         }
 
     public:
-        static wolf::ConstraintBasePtr create(const ProcessorBasePtr& _processor_ptr, const FeatureIMUPtr& _feature_ptr,
-                                              const NodeBasePtr& _correspondant_ptr);
+        static wolf::ConstraintBasePtr create(const FeatureIMUPtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr,
+                                              const ProcessorBasePtr& _processor_ptr);
 
     private:
         /// Preintegrated delta
@@ -141,9 +142,9 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
 };
 
 inline ConstraintIMU::ConstraintIMU(const ProcessorBasePtr& _processor_ptr, const FeatureIMUPtr& _ftr_ptr,
-                                    const FrameIMUPtr& _frame_ptr, bool _apply_loss_function,
-                                    ConstraintStatus _status) :
-        ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>(CTR_IMU, _processor_ptr, _frame_ptr, nullptr, nullptr, _apply_loss_function, _status,
+                                    const FrameIMUPtr& _frame_ptr,
+                                    bool _apply_loss_function, ConstraintStatus _status) :
+        ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status,
                                                     _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _frame_ptr->getVPtr(),
                                                     _frame_ptr->getAccBiasPtr(), _frame_ptr->getGyroBiasPtr(),
                                                     _ftr_ptr->getFramePtr()->getPPtr(),
@@ -310,10 +311,9 @@ inline JacobianMethod ConstraintIMU::getJacobianMethod() const
     return JAC_AUTO;
 }
 
-inline wolf::ConstraintBasePtr ConstraintIMU::create(const ProcessorBasePtr& _processor_ptr, const FeatureIMUPtr& _feature_ptr,
-                                                     const NodeBasePtr& _correspondant_ptr)
+inline wolf::ConstraintBasePtr ConstraintIMU::create(const FeatureIMUPtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr, const ProcessorBasePtr& _processor_ptr)
 {
-    return std::make_shared<ConstraintIMU>(_processor_ptr, _feature_ptr, std::static_pointer_cast<FrameIMU>(_correspondant_ptr));
+    return std::make_shared<ConstraintIMU>(_feature_ptr, std::static_pointer_cast<FrameIMU>(_correspondant_ptr), _processor_ptr);
 }
 
 

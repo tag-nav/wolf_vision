@@ -11,8 +11,10 @@ WOLF_PTR_TYPEDEFS(ConstraintEpipolar);
 class ConstraintEpipolar : public ConstraintBase
 {
     public:
-        ConstraintEpipolar(const ProcessorBasePtr& _processor_ptr, const FeatureBasePtr& _feature_ptr,
-                           const FeatureBasePtr& _feature_other_ptr, bool _apply_loss_function = false,
+        ConstraintEpipolar(const FeatureBasePtr& _feature_ptr,
+                           const FeatureBasePtr& _feature_other_ptr,
+                           const ProcessorBasePtr& _processor_ptr = nullptr,
+                           bool _apply_loss_function = false,
                            ConstraintStatus _status = CTR_ACTIVE);
 
         virtual ~ConstraintEpipolar() = default;
@@ -34,24 +36,24 @@ class ConstraintEpipolar : public ConstraintBase
         virtual unsigned int getSize() const override {return 0;}
 
     public:
-        static wolf::ConstraintBasePtr create(const ProcessorBasePtr& _processor_ptr,
-                                              const FeatureBasePtr& _feature_ptr,
-                                              const NodeBasePtr& _correspondant_ptr);
+        static wolf::ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,
+                                              const NodeBasePtr& _correspondant_ptr,
+                                              const ProcessorBasePtr& _processor_ptr = nullptr);
 
 };
 
-inline ConstraintEpipolar::ConstraintEpipolar(const ProcessorBasePtr& _processor_ptr, const FeatureBasePtr& _feature_ptr,
-                                              const FeatureBasePtr& _feature_other_ptr, bool _apply_loss_function, ConstraintStatus _status) :
-        ConstraintBase(CTR_EPIPOLAR, _processor_ptr, nullptr, _feature_other_ptr, nullptr, _apply_loss_function, _status)
+inline ConstraintEpipolar::ConstraintEpipolar(const FeatureBasePtr& /*_feature_ptr*/, const FeatureBasePtr& _feature_other_ptr,
+                                              const ProcessorBasePtr& _processor_ptr,
+                                              bool _apply_loss_function, ConstraintStatus _status) :
+        ConstraintBase(CTR_EPIPOLAR, nullptr, _feature_other_ptr, nullptr, _processor_ptr, _apply_loss_function, _status)
 {
     setType("EPIPOLAR");
 }
 
-inline wolf::ConstraintBasePtr ConstraintEpipolar::create(const ProcessorBasePtr& _processor_ptr,
-                                                          const FeatureBasePtr& _feature_ptr,
-                                                          const NodeBasePtr& _correspondant_ptr)
+inline wolf::ConstraintBasePtr ConstraintEpipolar::create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr,
+                                                          const ProcessorBasePtr& _processor_ptr)
 {
-    return std::make_shared<ConstraintEpipolar>(_processor_ptr, _feature_ptr, std::static_pointer_cast<FeatureBase>(_correspondant_ptr));
+    return std::make_shared<ConstraintEpipolar>(_feature_ptr, std::static_pointer_cast<FeatureBase>(_correspondant_ptr), _processor_ptr);
 }
 
 } // namespace wolf

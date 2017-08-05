@@ -221,7 +221,7 @@ inline ConstraintBasePtr ProcessorTrackerLandmarkCorner::createConstraint(Featur
 {
     assert(_feature_ptr != nullptr && _landmark_ptr != nullptr && "ProcessorTrackerLandmarkCorner::createConstraint: feature and landmark pointers can not be nullptr!");
 
-    return std::make_shared<ConstraintCorner2D>(shared_from_this(), _feature_ptr, std::static_pointer_cast<LandmarkCorner2D>((_landmark_ptr)));
+    return std::make_shared<ConstraintCorner2D>(_feature_ptr, std::static_pointer_cast<LandmarkCorner2D>((_landmark_ptr)), shared_from_this());
 }
 
 } // namespace wolf

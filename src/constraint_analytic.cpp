@@ -13,20 +13,22 @@ ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, bool _apply_loss_func
     resizeVectors();
 }
 
-ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, const ProcessorBasePtr& _processor_ptr, const FrameBasePtr& _frame_ptr, bool _apply_loss_function, ConstraintStatus _status,
+ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, const FrameBasePtr& _frame_ptr, const ProcessorBasePtr& _processor_ptr,
+                                       bool _apply_loss_function, ConstraintStatus _status,
                                        StateBlockPtr _state0Ptr, StateBlockPtr _state1Ptr, StateBlockPtr _state2Ptr, StateBlockPtr _state3Ptr, StateBlockPtr _state4Ptr,
                                        StateBlockPtr _state5Ptr, StateBlockPtr _state6Ptr, StateBlockPtr _state7Ptr, StateBlockPtr _state8Ptr, StateBlockPtr _state9Ptr ) :
-            ConstraintBase(_tp, _processor_ptr, _frame_ptr, nullptr, nullptr, _apply_loss_function, _status),
+            ConstraintBase(_tp, _frame_ptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status),
             state_ptr_vector_({_state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr,
                                _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr})
 {
     resizeVectors();
 }
 
-ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, const ProcessorBasePtr& _processor_ptr, const FeatureBasePtr& _feature_ptr, bool _apply_loss_function, ConstraintStatus _status,
+ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, const FeatureBasePtr& _feature_ptr, const ProcessorBasePtr& _processor_ptr,
+                                       bool _apply_loss_function, ConstraintStatus _status,
                                        StateBlockPtr _state0Ptr, StateBlockPtr _state1Ptr, StateBlockPtr _state2Ptr, StateBlockPtr _state3Ptr, StateBlockPtr _state4Ptr,
                                        StateBlockPtr _state5Ptr, StateBlockPtr _state6Ptr, StateBlockPtr _state7Ptr, StateBlockPtr _state8Ptr, StateBlockPtr _state9Ptr ) :
-            ConstraintBase( _tp, _processor_ptr, nullptr, _feature_ptr, nullptr, _apply_loss_function, _status),
+            ConstraintBase( _tp, nullptr, _feature_ptr, nullptr, _processor_ptr, _apply_loss_function, _status),
             state_ptr_vector_({_state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr,
                                _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr})
 {
@@ -34,10 +36,11 @@ ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, const ProcessorBasePt
 }
 
 
-ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, const ProcessorBasePtr& _processor_ptr, const LandmarkBasePtr& _landmark_ptr, bool _apply_loss_function, ConstraintStatus _status,
+ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, const LandmarkBasePtr& _landmark_ptr, const ProcessorBasePtr& _processor_ptr,
+                                       bool _apply_loss_function, ConstraintStatus _status,
                                        StateBlockPtr _state0Ptr, StateBlockPtr _state1Ptr, StateBlockPtr _state2Ptr, StateBlockPtr _state3Ptr, StateBlockPtr _state4Ptr,
                                        StateBlockPtr _state5Ptr, StateBlockPtr _state6Ptr, StateBlockPtr _state7Ptr, StateBlockPtr _state8Ptr, StateBlockPtr _state9Ptr ) :
-            ConstraintBase( _tp, _processor_ptr, nullptr, nullptr, _landmark_ptr, _apply_loss_function, _status),
+            ConstraintBase( _tp, nullptr, nullptr, _landmark_ptr, _processor_ptr, _apply_loss_function, _status),
             state_ptr_vector_({_state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr,
                                _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr})
 {

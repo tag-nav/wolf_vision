@@ -25,9 +25,9 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
     public:
 
-        ConstraintAHP(const ProcessorBasePtr& _processor_ptr,
-                      const FeatureBasePtr&   _ftr_ptr,
+        ConstraintAHP(const FeatureBasePtr&   _ftr_ptr,
                       const LandmarkAHPPtr&   _landmark_ptr,
+                      const ProcessorBasePtr& _processor_ptr = nullptr,
                       bool              _apply_loss_function = false,
                       ConstraintStatus  _status = CTR_ACTIVE);
 
@@ -57,24 +57,24 @@ class ConstraintAHP : public ConstraintSparse<2, 3, 4, 3, 4, 4>
 
 
         // Static creator method
-        static ConstraintAHPPtr create(const ProcessorBasePtr& _processor_ptr,
-                                       const FeatureBasePtr&   _ftr_ptr,
+        static ConstraintAHPPtr create(const FeatureBasePtr&   _ftr_ptr,
                                        const LandmarkAHPPtr&   _lmk_ahp_ptr,
-                                       bool             _apply_loss_function = false,
-                                       ConstraintStatus _status              = CTR_ACTIVE);
+                                       const ProcessorBasePtr& _processor_ptr = nullptr,
+                                       bool             _apply_loss_function  = false,
+                                       ConstraintStatus _status               = CTR_ACTIVE);
 
 };
 
-inline ConstraintAHP::ConstraintAHP(const ProcessorBasePtr& _processor_ptr,
-                                    const FeatureBasePtr&   _ftr_ptr,
+inline ConstraintAHP::ConstraintAHP(const FeatureBasePtr&   _ftr_ptr,
                                     const LandmarkAHPPtr&   _landmark_ptr,
+                                    const ProcessorBasePtr& _processor_ptr,
                                     bool             _apply_loss_function,
                                     ConstraintStatus _status) :
         ConstraintSparse<2, 3, 4, 3, 4, 4>(CTR_AHP,
-                                           _processor_ptr,
                                            _landmark_ptr->getAnchorFrame(),
                                            nullptr,
                                            _landmark_ptr,
+                                           _processor_ptr,
                                            _apply_loss_function, _status,
                                            _ftr_ptr->getCapturePtr()->getFramePtr()->getPPtr(),
                                            _ftr_ptr->getCapturePtr()->getFramePtr()->getOPtr(),
@@ -192,14 +192,14 @@ inline wolf::JacobianMethod ConstraintAHP::getJacobianMethod() const
     return JAC_AUTO;
 }
 
-inline wolf::ConstraintAHPPtr ConstraintAHP::create(const ProcessorBasePtr& _processor_ptr,
-                                                    const FeatureBasePtr&   _ftr_ptr,
+inline wolf::ConstraintAHPPtr ConstraintAHP::create(const FeatureBasePtr&   _ftr_ptr,
                                                     const LandmarkAHPPtr&   _lmk_ahp_ptr,
+                                                    const ProcessorBasePtr& _processor_ptr,
                                                     bool             _apply_loss_function,
                                                     ConstraintStatus _status)
 {
     // construct constraint
-    ConstraintAHPPtr ctr_ahp = std::make_shared<ConstraintAHP>(_processor_ptr, _ftr_ptr, _lmk_ahp_ptr, _apply_loss_function, _status);
+    ConstraintAHPPtr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _lmk_ahp_ptr, _processor_ptr, _apply_loss_function, _status);
 
     // link it to wolf tree <-- these pointers cannot be set at construction time
     _lmk_ahp_ptr->getAnchorFrame()->addConstrainedBy(ctr_ahp);

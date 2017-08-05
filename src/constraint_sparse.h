@@ -59,9 +59,10 @@ class ConstraintSparse: public ConstraintBase
 
         /** \brief Constructor valid for all categories (FRAME, FEATURE, LANDMARK)
          **/
-        ConstraintSparse(ConstraintType _tp, const ProcessorBasePtr& _processor_ptr,
+        ConstraintSparse(ConstraintType _tp,
                          const FrameBasePtr& _frame_other_ptr, const FeatureBasePtr& _feature_other_ptr,
                          const LandmarkBasePtr& _landmark_other_ptr,
+                         const ProcessorBasePtr& _processor_ptr,
                          bool _apply_loss_function, ConstraintStatus _status,
                          StateBlockPtr _state0Ptr,
                          StateBlockPtr _state1Ptr = nullptr,
@@ -168,10 +169,10 @@ ConstraintSparse<RESIDUAL_SIZE,
                  BLOCK_7_SIZE,
                  BLOCK_8_SIZE,
                  BLOCK_9_SIZE>::ConstraintSparse(ConstraintType          _tp,
-                                                 const ProcessorBasePtr& _processor_ptr,
                                                  const FrameBasePtr&     _frame_other_ptr,
                                                  const FeatureBasePtr&   _feature_other_ptr,
                                                  const LandmarkBasePtr&  _landmark_other_ptr,
+                                                 const ProcessorBasePtr& _processor_ptr,
                                                  bool                    _apply_loss_function,
                                                  ConstraintStatus        _status,
                                                  StateBlockPtr _state0Ptr,

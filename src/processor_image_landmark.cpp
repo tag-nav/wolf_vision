@@ -292,7 +292,7 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
 
         LandmarkAHPPtr landmark_ahp = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
 
-        ConstraintAHPPtr constraint_ptr = ConstraintAHP::create(shared_from_this(), _feature_ptr, landmark_ahp, true);
+        ConstraintAHPPtr constraint_ptr = ConstraintAHP::create(_feature_ptr, landmark_ahp, shared_from_this(), true);
 
         return constraint_ptr;
     }

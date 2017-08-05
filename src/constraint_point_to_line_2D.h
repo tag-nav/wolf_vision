@@ -25,9 +25,12 @@ class ConstraintPointToLine2D: public ConstraintSparse<1,2,1,2,1,2,2>
 
     public:
 
-    ConstraintPointToLine2D(const ProcessorBasePtr& _processor_ptr, const FeaturePolyline2DPtr& _ftr_ptr,
-                            const LandmarkPolyline2DPtr& _lmk_ptr, unsigned int _ftr_point_id, int _lmk_point_id,  int _lmk_point_aux_id, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-      ConstraintSparse<1,2,1,2,1,2,2>(CTR_POINT_TO_LINE_2D, _processor_ptr, nullptr, nullptr, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id), _lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)),
+    ConstraintPointToLine2D(const FeaturePolyline2DPtr& _ftr_ptr,
+                            const LandmarkPolyline2DPtr& _lmk_ptr,
+                            const ProcessorBasePtr& _processor_ptr,
+                            unsigned int _ftr_point_id, int _lmk_point_id,  int _lmk_point_aux_id,
+                            bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+      ConstraintSparse<1,2,1,2,1,2,2>(CTR_POINT_TO_LINE_2D, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id), _lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)),
 			landmark_point_id_(_lmk_point_id), landmark_point_aux_id_(_lmk_point_aux_id), feature_point_id_(_ftr_point_id), point_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_id)), point_aux_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
 		{
 			//std::cout << "ConstraintPointToLine2D" << std::endl;

@@ -20,8 +20,10 @@ WOLF_PTR_TYPEDEFS(ConstraintOdom3D);
 class ConstraintOdom3D : public ConstraintSparse<6,3,4,3,4>
 {
     public:
-        ConstraintOdom3D(const ProcessorBasePtr& _processor_ptr, const FeatureBasePtr& _ftr_current_ptr,
-                         const FrameBasePtr& _frame_past_ptr, bool _apply_loss_function = false,
+        ConstraintOdom3D(const FeatureBasePtr& _ftr_current_ptr,
+                         const FrameBasePtr& _frame_past_ptr,
+                         const ProcessorBasePtr& _processor_ptr = nullptr,
+                         bool _apply_loss_function = false,
                          ConstraintStatus _status = CTR_ACTIVE);
 
         virtual ~ConstraintOdom3D() = default;
@@ -72,14 +74,16 @@ inline void ConstraintOdom3D::printRes (const  Eigen::Matrix<Scalar,6,1> & r) co
 }
 
 
-inline ConstraintOdom3D::ConstraintOdom3D(const ProcessorBasePtr& _processor_ptr, const FeatureBasePtr& _ftr_current_ptr,
-                                          const FrameBasePtr& _frame_past_ptr, bool _apply_loss_function,
+inline ConstraintOdom3D::ConstraintOdom3D(const FeatureBasePtr& _ftr_current_ptr,
+                                          const FrameBasePtr& _frame_past_ptr,
+                                          const ProcessorBasePtr& _processor_ptr,
+                                          bool _apply_loss_function,
                                           ConstraintStatus _status) :
         ConstraintSparse<6, 3, 4, 3, 4>(CTR_ODOM_3D,        // type
-                                        _processor_ptr,     // processor
                                         _frame_past_ptr,    // frame other
                                         nullptr,            // feature other
                                         nullptr,            // landmark other
+                                        _processor_ptr,     // processor
                                         _apply_loss_function,
                                         _status,
                                         _ftr_current_ptr->getFramePtr()->getPPtr(), // current frame P

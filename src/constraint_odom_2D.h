@@ -15,9 +15,11 @@ WOLF_PTR_TYPEDEFS(ConstraintOdom2D);
 class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
 {
     public:
-        ConstraintOdom2D(const ProcessorBasePtr& _processor_ptr, const FeatureBasePtr& _ftr_ptr,
-                         const FrameBasePtr& _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-                ConstraintSparse<3, 2, 1, 2, 1>(CTR_ODOM_2D, _processor_ptr, _frame_ptr, nullptr, nullptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+        ConstraintOdom2D(const FeatureBasePtr& _ftr_ptr,
+                         const FrameBasePtr& _frame_ptr,
+                         const ProcessorBasePtr& _processor_ptr = nullptr,
+                         bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+                ConstraintSparse<3, 2, 1, 2, 1>(CTR_ODOM_2D, _frame_ptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("ODOM 2D");
 //            std::cout << "created ConstraintOdom2D " << std::endl;
@@ -37,10 +39,9 @@ class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
         }
 
     public:
-        static wolf::ConstraintBasePtr create(const ProcessorBasePtr& _processor_ptr, const FeatureBasePtr& _feature_ptr,
-                                              const NodeBasePtr& _correspondant_ptr)
+        static wolf::ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr, const ProcessorBasePtr& _processor_ptr)
         {
-            return std::make_shared<ConstraintOdom2D>(_processor_ptr, _feature_ptr, std::static_pointer_cast<FrameBase>(_correspondant_ptr) );
+            return std::make_shared<ConstraintOdom2D>(_feature_ptr, std::static_pointer_cast<FrameBase>(_correspondant_ptr), _processor_ptr);
         }
 
 };

@@ -45,7 +45,7 @@ FrameBasePtr frm1 = problem->emplaceFrame(KEY_FRAME, delta, TimeStamp(1));
 // Capture, feature and constraint from frm1 to frm0
 CaptureBasePtr cap1 = frm1->addCapture(std::make_shared<CaptureMotion>(1, nullptr, delta, 7, 7, 6, 0));
 FeatureBasePtr fea1 = cap1->addFeature(std::make_shared<FeatureBase>("ODOM 3D", delta, data_cov));
-ConstraintOdom3DPtr ctr1 = std::static_pointer_cast<ConstraintOdom3D>(fea1->addConstraint(std::make_shared<ConstraintOdom3D>(nullptr, fea1, frm0))); // create and add
+ConstraintOdom3DPtr ctr1 = std::static_pointer_cast<ConstraintOdom3D>(fea1->addConstraint(std::make_shared<ConstraintOdom3D>(fea1, frm0, nullptr))); // create and add
 ConstraintBasePtr dummy = frm0->addConstrainedBy(ctr1);
 
 ////////////////////////////////////////////////////////

@@ -149,7 +149,7 @@ TEST_F(FeatureIMU_test, addConstraint)
     using namespace wolf;
     
     FrameIMUPtr frm_imu = std::static_pointer_cast<FrameIMU>(last_frame);
-    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(processor_ptr_, feat_imu, std::static_pointer_cast<FrameIMU>(frm_imu));
+    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, std::static_pointer_cast<FrameIMU>(frm_imu), processor_ptr_);
     feat_imu->addConstraint(constraint_imu);
     origin_frame->addConstrainedBy(constraint_imu);
 }

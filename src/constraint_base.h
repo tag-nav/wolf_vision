@@ -38,15 +38,19 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 
         /** \brief Constructor of category CTR_ABSOLUTE
          **/
-        ConstraintBase(ConstraintType _tp,  bool _apply_loss_function, ConstraintStatus _status);
+        ConstraintBase(ConstraintType _tp,  bool _apply_loss_function = false,
+                       ConstraintStatus _status = CTR_ACTIVE);
 
         /** \brief Constructor valid for all categories (FRAME, FEATURE, LANDMARK)
          **/
-        ConstraintBase(ConstraintType _tp, const ProcessorBasePtr& _processor_ptr,
+        ConstraintBase(ConstraintType _tp,
                        const FrameBasePtr& _frame_other_ptr, const FeatureBasePtr& _feature_other_ptr,
-                       const LandmarkBasePtr& _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status);
+                       const LandmarkBasePtr& _landmark_other_ptr,
+                       const ProcessorBasePtr& _processor_ptr = nullptr,
+                       bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE);
 
-        virtual ~ConstraintBase();
+        virtual ~ConstraintBase() = default;
+
         void remove();
 
         unsigned int id() const;
