@@ -23,6 +23,22 @@ TEST(IMU_tools, identity)
     ASSERT_MATRIX_APPROX(id, id_true, 1e-10);
 }
 
+TEST(IMU_tools, identity_split)
+{
+    VectorXs p(3), qv(4), v(3);
+    Quaternions q;
+
+    imu::identity(p,q,v);
+    ASSERT_MATRIX_APPROX(p, Vector3s::Zero(), 1e-10);
+    ASSERT_QUATERNION_APPROX(q, Quaternions::Identity(), 1e-10);
+    ASSERT_MATRIX_APPROX(v, Vector3s::Zero(), 1e-10);
+
+    imu::identity(p,qv,v);
+    ASSERT_MATRIX_APPROX(p , Vector3s::Zero(), 1e-10);
+    ASSERT_MATRIX_APPROX(qv, (Vector4s()<<0,0,0,1).finished(), 1e-10);
+    ASSERT_MATRIX_APPROX(v , Vector3s::Zero(), 1e-10);
+}
+
 TEST(IMU_tools, inverse)
 {
     VectorXs d(10), id(10), iid(10), iiid(10), I(10);
