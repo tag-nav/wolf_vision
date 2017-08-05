@@ -355,9 +355,27 @@ inline std::string FrameFactory::getClass()
 {
     return "FrameFactory";
 }
+
+//#define UNUSED(x) (void)x;
+//#define UNUSED(x) (void)(sizeof((x), 0));
+
+#ifdef __GNUC__
+    #define WOLF_UNUSED __attribute__((used))
+#elif defined _MSC_VER
+    #pragma warning(disable: Cxxxxx)
+    #define WOLF_UNUSED
+#elif defined(__LCLINT__)
+# define WOLF_UNUSED /*@unused@*/
+#elif defined(__cplusplus)
+# define WOLF_UNUSED
+#else
+# define UNUSED(x) x
+#endif
+
 #define WOLF_REGISTER_FRAME(FrameType, FrameName) \
-  namespace{ const bool FrameName##Registered = \
+  namespace{ const bool WOLF_UNUSED FrameName##Registered = \
     FrameFactory::get().registerCreator(FrameType, FrameName::create); }\
+
 
 } /* namespace wolf */
 

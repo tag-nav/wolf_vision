@@ -51,7 +51,7 @@ static IntrinsicsBasePtr createIntrinsicsOdom3D(const std::string & _filename_do
 }
 
 // Register in the SensorFactory
-const bool registered_odom_3D_intr = IntrinsicsFactory::get().registerCreator("ODOM 3D", createIntrinsicsOdom3D);
+const bool WOLF_UNUSED registered_odom_3D_intr = IntrinsicsFactory::get().registerCreator("ODOM 3D", createIntrinsicsOdom3D);
 
 } // namespace [unnamed]
 

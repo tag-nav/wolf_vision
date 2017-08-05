@@ -43,5 +43,5 @@ FrameBasePtr FrameIMU::create(const FrameType & _tp,
 namespace wolf
 {
 WOLF_REGISTER_FRAME("IMU", FrameIMU);
-namespace{ const bool Frame_PQVBB_3D_Registered = FrameFactory::get().registerCreator("PQVBB 3D", FrameIMU::create); } // alternate name possible
+namespace{ const bool WOLF_UNUSED Frame_PQVBB_3D_Registered = FrameFactory::get().registerCreator("PQVBB 3D", FrameIMU::create); } // alternate name possible
 } // namespace wolf

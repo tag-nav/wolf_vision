@@ -51,7 +51,7 @@ static ProcessorParamsBasePtr createProcessorOdom3DParams(const std::string & _f
 }
 
 // Register in the SensorFactory
-const bool registered_prc_odom_3D = ProcessorParamsFactory::get().registerCreator("ODOM 3D", createProcessorOdom3DParams);
+const bool WOLF_UNUSED registered_prc_odom_3D = ProcessorParamsFactory::get().registerCreator("ODOM 3D", createProcessorOdom3DParams);
 
 } // namespace [unnamed]
 

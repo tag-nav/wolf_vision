@@ -386,7 +386,7 @@ YAML::Node LandmarkPolyline2D::saveToYaml() const
 // Register landmark creator
 namespace
 {
-const bool registered_lmk_polyline_2D = LandmarkFactory::get().registerCreator("POLYLINE 2D", LandmarkPolyline2D::create);
+const bool WOLF_UNUSED registered_lmk_polyline_2D = LandmarkFactory::get().registerCreator("POLYLINE 2D", LandmarkPolyline2D::create);
 }
 
 } /* namespace wolf */
