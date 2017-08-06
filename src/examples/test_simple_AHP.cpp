@@ -155,7 +155,7 @@ int main(int argc, char** argv)
     // Landmark--------------------
     LandmarkAHPPtr lmk_1 = std::make_shared<LandmarkAHP>(lmk_hmg_c, kf_1, camera, desc);
     problem->addLandmark(lmk_1);
-    lmk_1->setStatus(LANDMARK_FIXED);
+    lmk_1->fix();
     std::cout << "Landmark 1: " << lmk_1->point().transpose() << std::endl;
 
     // Constraints------------------

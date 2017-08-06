@@ -19,12 +19,12 @@ class StateBlock;
 
 namespace wolf {
 
-typedef enum
-{
-//    LANDMARK_CANDIDATE = 1,   ///< A landmark, just created. Association with it allowed, but not yet establish an actual constraint for the solver
-    LANDMARK_ESTIMATED,   ///< A landmark being estimated. Association with it allowed, establishing actual constraints for the solver where both vehicle and landmark states are being estimated
-    LANDMARK_FIXED,       ///< A landmark estimated. Association with it allowed, establishing actual constraints for the solver, but its value remains static, no longer optimized
-} LandmarkStatus;
+//typedef enum
+//{
+////    LANDMARK_CANDIDATE = 1,   ///< A landmark, just created. Association with it allowed, but not yet establish an actual constraint for the solver
+//    LANDMARK_ESTIMATED,   ///< A landmark being estimated. Association with it allowed, establishing actual constraints for the solver where both vehicle and landmark states are being estimated
+//    LANDMARK_FIXED,       ///< A landmark estimated. Association with it allowed, establishing actual constraints for the solver, but its value remains static, no longer optimized
+//} LandmarkStatus;
 
 
 
@@ -42,7 +42,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
     protected:
         unsigned int landmark_id_; ///< landmark unique id
-        LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)
+//        LandmarkStatus status_; ///< status of the landmark. (types defined at wolf.h)
         TimeStamp stamp_;       ///< stamp of the creation of the landmark (and stamp of destruction when status is LANDMARK_OLD)
         Eigen::VectorXs descriptor_;    //TODO: agree? JS: No: It is not general enough as descriptor to be in LmkBase.
 
@@ -66,9 +66,10 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         void setId(unsigned int _id);
 
         // Fix / unfix
-        void setStatus(LandmarkStatus _st);
+//        void setStatus(LandmarkStatus _st);
         void fix();
         void unfix();
+        bool isFixed() const;
 
         // State blocks
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
@@ -151,13 +152,46 @@ inline void LandmarkBase::setId(unsigned int _id)
 
 inline void LandmarkBase::fix()
 {
-    this->setStatus(LANDMARK_FIXED);
+    for( auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->fix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
 }
 
 inline void LandmarkBase::unfix()
 {
-    this->setStatus(LANDMARK_ESTIMATED);
+    for( auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->unfix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
 }
+
+inline bool LandmarkBase::isFixed() const
+{
+    bool fixed = true;
+    for (auto sb : getStateBlockVec())
+    {
+        if (sb)
+            fixed &= sb->isFixed();
+    }
+    return fixed;
+}
+
+//inline void LandmarkBase::fix()
+//{
+//    this->setStatus(LANDMARK_FIXED);
+//}
+//
+//inline void LandmarkBase::unfix()
+//{
+//    this->setStatus(LANDMARK_ESTIMATED);
+//}
 
 inline ConstraintBasePtr LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
