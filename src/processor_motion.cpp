@@ -35,7 +35,11 @@ ProcessorMotion::~ProcessorMotion()
 
 void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 {
-
+  if (_incoming_ptr == nullptr)
+  {
+    WOLF_ERROR("Process got a nullptr !");
+    return;
+  }
 
     if (status_ == IDLE)
     {

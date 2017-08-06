@@ -157,6 +157,7 @@ SET(HDRS_BASE
     constraint_analytic.h
     constraint_base.h
     constraint_sparse.h
+    factory.h
     feature_base.h
     feature_match.h
     frame_base.h

@@ -484,12 +484,12 @@ bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _cova
     bool success(true);
     int i = 0, j = 0;
 
-    for (auto sb_i : _frame_ptr->getStateBlockVec())
+    for (const auto& sb_i : _frame_ptr->getStateBlockVec())
     {
         if (sb_i)
         {
             j = 0;
-            for (auto sb_j : _frame_ptr->getStateBlockVec())
+            for (const auto& sb_j : _frame_ptr->getStateBlockVec())
             {
                 if (sb_j)
                 {
@@ -506,7 +506,7 @@ bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _cova
 Eigen::MatrixXs Problem::getFrameCovariance(FrameBasePtr _frame_ptr)
 {
     Size sz = 0;
-    for (auto sb : _frame_ptr->getStateBlockVec())
+    for (const auto& sb : _frame_ptr->getStateBlockVec())
         if (sb)
             sz += sb->getSize();
     Eigen::MatrixXs covariance(sz, sz);
