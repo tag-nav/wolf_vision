@@ -194,16 +194,7 @@ class ProcessorMotion : public ProcessorBase
         MotionBuffer& getBuffer();
         const MotionBuffer& getBuffer() const;
 
-        /** \brief get calibration params
-         *
-         * @param _calib a reference to the calibration params vector
-         */
         virtual void getCalibration (VectorXs& _calib);
-
-        /** \brief get calibration parameters
-         *
-         * @return a vector with the calibration parameters
-         */
         VectorXs getCalibration();
         void     getJacobianCalib(MatrixXs& _jac_cal);
         MatrixXs getJacobianCalib();
