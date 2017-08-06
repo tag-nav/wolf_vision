@@ -69,8 +69,8 @@ class CaptureMotion : public CaptureBase
         const MotionBuffer& getBuffer() const;
 
         // Buffer's initial conditions for pre-integration
+        VectorXs getCalibrationPreint() const;
         VectorXs getCalibration() const;
-        void setCalibration(const VectorXs& _calib);
 
         FrameBasePtr getOriginFramePtr();
         void setOriginFramePtr(FrameBasePtr _frame_ptr);
@@ -79,7 +79,7 @@ class CaptureMotion : public CaptureBase
     private:
         Eigen::VectorXs data_;          ///< Motion data in form of vector mandatory
         Eigen::MatrixXs data_cov_;      ///< Motion data covariance
-        Eigen::VectorXs calib_;         ///< Calibration params used to integrate the buffer
+        Size calib_size_;
         MotionBuffer buffer_;           ///< Buffer of motions between this Capture and the next one.
         FrameBasePtr origin_frame_ptr_; ///< Pointer to the origin frame of the motion
 };
@@ -92,7 +92,7 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts,
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),
         data_cov_(_sensor_ptr ? _sensor_ptr->getNoiseCov() : Eigen::MatrixXs::Zero(_data.rows(), _data.rows())), // Someone should test this zero and do something smart accordingly
-        calib_(_calib_size),
+        calib_size_(_calib_size),
         buffer_(_data_size, _delta_size, _delta_cov_size, _calib_size),
         origin_frame_ptr_(_origin_frame_ptr)
 {
@@ -108,7 +108,7 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts,
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),
         data_cov_(_data_cov),
-        calib_(_calib_size),
+        calib_size_(_calib_size),
         buffer_(_data_size, _delta_size,_delta_cov_size, _calib_size),
         origin_frame_ptr_(_origin_frame_ptr)
 {
@@ -163,15 +163,25 @@ inline void CaptureMotion::setOriginFramePtr(FrameBasePtr _frame_ptr)
     origin_frame_ptr_ = _frame_ptr;
 }
 
-inline VectorXs CaptureMotion::getCalibration() const
+inline VectorXs CaptureMotion::getCalibrationPreint() const
 {
-    return calib_;
+    return getBuffer().getCalibrationPreint();
 }
 
-inline void CaptureMotion::setCalibration(const VectorXs& _calib)
+inline VectorXs CaptureMotion::getCalibration() const
 {
-    assert(_calib.size() == calib_.size() && "Wrong size of calibration vector!");
-    calib_ = _calib;
+    VectorXs calib(calib_size_);
+    Size index = 0;
+    for (Size i = 0; i < getStateBlockVec().size(); i++)
+    {
+        auto sb = getStateBlockPtr(i);
+        if (sb)
+        {
+            calib.segment(index, sb->getSize()) = sb->getState();
+        }
+        index += sb->getSize();
+    }
+    return calib;
 }
 
 
