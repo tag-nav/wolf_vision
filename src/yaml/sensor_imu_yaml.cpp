@@ -53,7 +53,7 @@ static IntrinsicsBasePtr createIntrinsicsIMU(const std::string & _filename_dot_y
 }
 
 // Register in the SensorFactory
-const bool registered_imu_intr = IntrinsicsFactory::get().registerCreator("IMU", createIntrinsicsIMU);
+const bool WOLF_UNUSED registered_imu_intr = IntrinsicsFactory::get().registerCreator("IMU", createIntrinsicsIMU);
 
 } // namespace [unnamed]
 

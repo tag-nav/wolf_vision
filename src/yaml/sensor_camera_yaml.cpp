@@ -91,7 +91,7 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
 }
 
 // Register in the SensorFactory
-const bool registered_camera_intr = IntrinsicsFactory::get().registerCreator("CAMERA", createIntrinsicsCamera);
+const bool WOLF_UNUSED registered_camera_intr = IntrinsicsFactory::get().registerCreator("CAMERA", createIntrinsicsCamera);
 
 } // namespace [unnamed]
 

@@ -52,7 +52,7 @@ static ProcessorParamsBasePtr createProcessorIMUParams(const std::string & _file
 }
 
 // Register in the SensorFactory
-const bool registered_prc_odom_3D = ProcessorParamsFactory::get().registerCreator("IMU", createProcessorIMUParams);
+const bool WOLF_UNUSED registered_prc_odom_3D = ProcessorParamsFactory::get().registerCreator("IMU", createProcessorIMUParams);
 
 } // namespace [unnamed]
 

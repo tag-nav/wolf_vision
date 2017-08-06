@@ -31,7 +31,7 @@ IntrinsicsBasePtr createIntrinsicsLaser2D(const std::string& _filename_dot_yaml)
 
 
 // register into factory
-const bool registered_laser_params = IntrinsicsFactory::get().registerCreator("LASER 2D", createIntrinsicsLaser2D);
+const bool WOLF_UNUSED registered_laser_params = IntrinsicsFactory::get().registerCreator("LASER 2D", createIntrinsicsLaser2D);
 
 } // namespace [void]
 } // namespace wolf
