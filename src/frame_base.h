@@ -18,16 +18,6 @@ class StateBlock;
 
 namespace wolf {
 
-/** \brief Enumeration of all possible state status
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    ST_ESTIMATED = 0,   ///< State in estimation (default)
-    ST_FIXED = 1,       ///< State fixed, estimated enough or fixed infrastructure.
-} StateStatus;
-
 
 //class FrameBase
 class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase>
@@ -44,7 +34,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
     protected:
         unsigned int frame_id_;
         FrameType type_;     ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
-        StateStatus status_;       ///< status of the estimation of the frame state
         TimeStamp time_stamp_;     ///< frame time stamp
         
     public:
@@ -83,11 +72,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         bool isKey() const;
         void setKey();
 
-        // Fixed / Estimated
-        void fix();
-        void unfix();
-        bool isFixed() const;
-
         // Frame values ------------------------------------------------
     public:
         void        setTimeStamp(const TimeStamp& _ts);
@@ -97,7 +81,13 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         // State blocks
     public:
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
-        std::vector<StateBlockPtr>&       getStateBlockVec();
+        std::vector<StateBlockPtr>& getStateBlockVec();
+    protected:
+        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
+        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
+        void resizeStateBlockVec(int _size);
+
+    public:
         StateBlockPtr getPPtr() const;
         StateBlockPtr getOPtr() const;
         StateBlockPtr getVPtr() const;
@@ -105,19 +95,19 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void setOPtr(const StateBlockPtr _o_ptr);
         void setVPtr(const StateBlockPtr _v_ptr);
         void registerNewStateBlocks();
-    private:
         void removeStateBlocks();
 
-    protected:
-        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
-        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
-        void resizeStateBlockVec(int _size);
+        // Fixed / Estimated
+    public:
+        void fix();
+        void unfix();
+        bool isFixed() const;
 
         // States
     public:
-        void setState(const Eigen::VectorXs& _st);
+        void setState(const Eigen::VectorXs& _state);
         Eigen::VectorXs getState() const;
-        void getState(Eigen::VectorXs& state) const;
+        void getState(Eigen::VectorXs& _state) const;
 
 
         // Wolf tree access ---------------------------------------------------
@@ -139,12 +129,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         virtual ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
         ConstraintBaseList& getConstrainedByList();
-
-
-
-    private:
-        StateStatus getStatus() const;
-        void setStatus(StateStatus _st);
 
     public:
         static FrameBasePtr create_PO_2D (const FrameType & _tp,
@@ -198,18 +182,35 @@ inline bool FrameBase::isKey() const
 
 inline void FrameBase::fix()
 {
-    this->setStatus(ST_FIXED);
+    for( auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->fix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
 }
 
 inline void FrameBase::unfix()
 {
-    //std::cout << "Unfixing frame " << id() << std::endl;
-    this->setStatus(ST_ESTIMATED);
+    for( auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->unfix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
 }
 
 inline bool FrameBase::isFixed() const
 {
-    return status_ == ST_FIXED;
+    bool fixed = true;
+    for (auto sb : getStateBlockVec())
+    {
+        if (sb)
+            fixed &= sb->isFixed();
+    }
+    return fixed;
 }
 
 inline void FrameBase::setTimeStamp(const TimeStamp& _ts)
@@ -302,12 +303,6 @@ inline void FrameBase::resizeStateBlockVec(int _size)
     if (_size > state_block_vec_.size())
         state_block_vec_.resize(_size);
 }
-
-inline StateStatus FrameBase::getStatus() const
-{
-    return status_;
-}
-
 
 inline CaptureBasePtr FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr)
 {
