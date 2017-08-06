@@ -100,6 +100,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         std::vector<StateBlockPtr>& getStateBlockVec();
         StateBlockPtr getStateBlockPtr(unsigned int _i) const;
         void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
+        void resizeStateBlockVec(int _size);
 
         StateBlockPtr getPPtr(const TimeStamp _ts);
         StateBlockPtr getOPtr(const TimeStamp _ts);
@@ -207,6 +208,12 @@ inline StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i) const
 inline void SensorBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
     state_block_vec_[_i] = _sb_ptr;
+}
+
+inline void SensorBase::resizeStateBlockVec(int _size)
+{
+    if (_size > state_block_vec_.size())
+        state_block_vec_.resize(_size);
 }
 
 inline bool SensorBase::isExtrinsicDynamic()
