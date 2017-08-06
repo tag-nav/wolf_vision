@@ -23,15 +23,13 @@ class ConstraintFix3D: public ConstraintSparse<6,3,4>
         {
             setType("FIX3D");
         }
-        virtual ~ConstraintFix3D()
-        {
-            //
-        }
+
+        virtual ~ConstraintFix3D() = default;
 
         template<typename T>
         bool operator ()(const T* const _p, const T* const _o, T* _residuals) const;
 
-        virtual JacobianMethod getJacobianMethod() const
+        virtual JacobianMethod getJacobianMethod() const override
         {
             return JAC_AUTO;
         }

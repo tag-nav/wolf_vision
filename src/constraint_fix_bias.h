@@ -28,11 +28,7 @@ class ConstraintFixBias: public ConstraintSparse<6,3,3>
             // std::cout << "created ConstraintFixBias " << std::endl;
         }
 
-        virtual ~ConstraintFixBias()
-        {
-            // std::cout << "destructed ConstraintFixBias " << std::endl;
-            //
-        }
+        virtual ~ConstraintFixBias() = default;
 
         template<typename T>
         bool operator ()(const T* const _ab, const T* const _wb, T* _residuals) const;
@@ -42,7 +38,7 @@ class ConstraintFixBias: public ConstraintSparse<6,3,3>
          * Returns the jacobians computation method
          *
          **/
-        virtual JacobianMethod getJacobianMethod() const
+        virtual JacobianMethod getJacobianMethod() const override
         {
             return JAC_AUTO;
         }

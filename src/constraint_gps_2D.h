@@ -21,10 +21,7 @@ class ConstraintGPS2D : public ConstraintSparse<2, 2>
             setType("GPS FIX 2D");
         }
 
-        virtual ~ConstraintGPS2D()
-        {
-            //
-        }
+        virtual ~ConstraintGPS2D() = default;
 
         template<typename T>
         bool operator ()(const T* const _x, T* _residuals) const;
@@ -34,7 +31,7 @@ class ConstraintGPS2D : public ConstraintSparse<2, 2>
          * Returns the jacobians computation method
          *
          **/
-        virtual JacobianMethod getJacobianMethod() const
+        virtual JacobianMethod getJacobianMethod() const override
         {
             return JAC_AUTO;
         }

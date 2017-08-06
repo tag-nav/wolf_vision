@@ -13,16 +13,17 @@ WOLF_PTR_TYPEDEFS(ConstraintOdom2DAnalytic);
 class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 {
     public:
-        ConstraintOdom2DAnalytic(FeatureBasePtr _ftr_ptr, FrameBasePtr _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintRelative2DAnalytic(_ftr_ptr, CTR_ODOM_2D, _frame_ptr, _apply_loss_function, _status)
+        ConstraintOdom2DAnalytic(const FeatureBasePtr& _ftr_ptr,
+                                 const FrameBasePtr& _frame_ptr,
+                                 const ProcessorBasePtr& _processor_ptr = nullptr,
+                                 bool _apply_loss_function = false,
+                                 ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintRelative2DAnalytic(_ftr_ptr, CTR_ODOM_2D, _frame_ptr, _processor_ptr, _apply_loss_function, _status)
         {
             setType("ODOM 2D ANALYTIC");
         }
 
-        virtual ~ConstraintOdom2DAnalytic()
-        {
-            //
-        }
+        virtual ~ConstraintOdom2DAnalytic() = default;
 
 //        /** \brief Returns the constraint residual size
 //         *
@@ -103,10 +104,11 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 
 
     public:
-        static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
-                                            NodeBasePtr _correspondant_ptr)
+        static wolf::ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,
+                                              const NodeBasePtr& _correspondant_ptr,
+                                              const ProcessorBasePtr& _processor_ptr = nullptr)
         {
-            return std::make_shared<ConstraintOdom2DAnalytic>(_feature_ptr, std::static_pointer_cast<FrameBase>(_correspondant_ptr) );
+            return std::make_shared<ConstraintOdom2DAnalytic>(_feature_ptr, std::static_pointer_cast<FrameBase>(_correspondant_ptr), _processor_ptr);
         }
 
 };

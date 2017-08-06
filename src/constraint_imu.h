@@ -19,10 +19,12 @@ WOLF_PTR_TYPEDEFS(ConstraintIMU);
 class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
 {
     public:
-        ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_ptr, bool _apply_loss_function = false,
+        ConstraintIMU(const FeatureIMUPtr& _ftr_ptr, const FrameIMUPtr& _frame_ptr,
+                      const ProcessorBasePtr& _processor_ptr = nullptr,
+                      bool _apply_loss_function = false,
                       ConstraintStatus _status = CTR_ACTIVE);
 
-        virtual ~ConstraintIMU();
+        virtual ~ConstraintIMU() = default;
 
         /* \brief : compute the residual from the state blocks being iterated by the solver.
             -> computes the expected measurement
@@ -53,7 +55,7 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
         bool getResiduals(const Eigen::MatrixBase<D1> & _p1, const Eigen::QuaternionBase<D2> & _q1, const Eigen::MatrixBase<D1> & _v1, const Eigen::MatrixBase<D1> & _ab1, const Eigen::MatrixBase<D1> & _wb1,
                         const Eigen::MatrixBase<D1> & _p2, const Eigen::QuaternionBase<D2> & _q2, const Eigen::MatrixBase<D1> & _v2, const Eigen::MatrixBase<D1> & _ab2, const Eigen::MatrixBase<D1> & _wb2, const Eigen::MatrixBase<D3> & _residuals) const;
 
-        virtual JacobianMethod getJacobianMethod() const;
+        virtual JacobianMethod getJacobianMethod() const override;
 
         /* Function expectation(...)
          * params :
@@ -98,7 +100,8 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
         }
 
     public:
-        static wolf::ConstraintBasePtr create(FeatureIMUPtr _feature_ptr, NodeBasePtr _correspondant_ptr);
+        static wolf::ConstraintBasePtr create(const FeatureIMUPtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr,
+                                              const ProcessorBasePtr& _processor_ptr);
 
     private:
         /// Preintegrated delta
@@ -138,9 +141,11 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
         const Eigen::Matrix3s sqrt_W_r_dt_inv;
 };
 
-inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_ptr, bool _apply_loss_function,
-                                    ConstraintStatus _status) :
-        ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, _apply_loss_function, _status,
+inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr& _ftr_ptr,
+                                    const FrameIMUPtr& _frame_ptr,
+                                    const ProcessorBasePtr& _processor_ptr,
+                                    bool _apply_loss_function, ConstraintStatus _status) :
+        ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status,
                                                     _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _frame_ptr->getVPtr(),
                                                     _frame_ptr->getAccBiasPtr(), _frame_ptr->getGyroBiasPtr(),
                                                     _ftr_ptr->getFramePtr()->getPPtr(),
@@ -168,11 +173,6 @@ inline ConstraintIMU::ConstraintIMU(FeatureIMUPtr _ftr_ptr, FrameIMUPtr _frame_p
 
 {
     setType("IMU");
-}
-
-inline ConstraintIMU::~ConstraintIMU()
-{
-    //
 }
 
 template<typename T>
@@ -312,9 +312,9 @@ inline JacobianMethod ConstraintIMU::getJacobianMethod() const
     return JAC_AUTO;
 }
 
-inline wolf::ConstraintBasePtr ConstraintIMU::create(FeatureIMUPtr _feature_ptr, NodeBasePtr _correspondant_ptr)
+inline wolf::ConstraintBasePtr ConstraintIMU::create(const FeatureIMUPtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr, const ProcessorBasePtr& _processor_ptr)
 {
-    return std::make_shared<ConstraintIMU>(_feature_ptr, std::static_pointer_cast<FrameIMU>(_correspondant_ptr));
+    return std::make_shared<ConstraintIMU>(_feature_ptr, std::static_pointer_cast<FrameIMU>(_correspondant_ptr), _processor_ptr);
 }
 
 

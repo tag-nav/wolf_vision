@@ -10,7 +10,9 @@ namespace wolf {
     
 WOLF_PTR_TYPEDEFS(ConstraintPoint2D);
     
-//class
+/**
+ * @brief The ConstraintPoint2D class
+ */
 class ConstraintPoint2D: public ConstraintSparse<2,2,1,2,1,2>
 {
     protected:
@@ -19,12 +21,15 @@ class ConstraintPoint2D: public ConstraintSparse<2,2,1,2,1,2>
         StateBlockPtr point_state_ptr_;
         Eigen::VectorXs measurement_;                   ///<  the measurement vector
         Eigen::MatrixXs measurement_covariance_;        ///<  the measurement covariance matrix
-        Eigen::MatrixXs measurement_sqrt_information_;        ///<  the squared root information matrix
+        Eigen::MatrixXs measurement_sqrt_information_;  ///<  the squared root information matrix
 
     public:
 
-		ConstraintPoint2D(FeaturePolyline2DPtr _ftr_ptr, LandmarkPolyline2DPtr _lmk_ptr, unsigned int _ftr_point_id, int _lmk_point_id, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-			ConstraintSparse<2,2,1,2,1,2>(CTR_POINT_2D, nullptr, nullptr, _lmk_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id)),
+    ConstraintPoint2D(const FeaturePolyline2DPtr& _ftr_ptr,
+                      const LandmarkPolyline2DPtr& _lmk_ptr,
+                      const ProcessorBasePtr& _processor_ptr,
+                      unsigned int _ftr_point_id, int _lmk_point_id, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+      ConstraintSparse<2,2,1,2,1,2>(CTR_POINT_2D, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id)),
 			feature_point_id_(_ftr_point_id), landmark_point_id_(_lmk_point_id), point_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
 		{
 			//std::cout << "Constriant point: feature " << _ftr_ptr->id() << " landmark " << _lmk_ptr->id() << "(point " << _lmk_point_id << ")" << std::endl;
@@ -35,64 +40,80 @@ class ConstraintPoint2D: public ConstraintSparse<2,2,1,2,1,2>
             measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
 		}
 
-        virtual ~ConstraintPoint2D()
-        {
-            //std::cout << "deleting ConstraintPoint2D " << id() << std::endl;
-        }
+    virtual ~ConstraintPoint2D() = default;
 
-        LandmarkPolyline2DPtr getLandmarkPtr()
+    /**
+     * @brief getLandmarkPtr
+     * @return
+     */
+    LandmarkPolyline2DPtr getLandmarkPtr()
 		{
 			return std::static_pointer_cast<LandmarkPolyline2D>(landmark_other_ptr_.lock());
 		}
 
-        int getLandmarkPointId()
-        {
-            return landmark_point_id_;
-        }
+    /**
+     * @brief getLandmarkPointId
+     * @return
+     */
+    int getLandmarkPointId()
+    {
+      return landmark_point_id_;
+    }
 
-        unsigned int getFeaturePointId()
-        {
-            return feature_point_id_;
-        }
+    /**
+     * @brief getFeaturePointId
+     * @return
+     */
+    unsigned int getFeaturePointId()
+    {
+      return feature_point_id_;
+    }
 
-        StateBlockPtr getLandmarkPointPtr()
-        {
-            return point_state_ptr_;
-        }
+    /**
+     * @brief getLandmarkPointPtr
+     * @return
+     */
+    StateBlockPtr getLandmarkPointPtr()
+    {
+      return point_state_ptr_;
+    }
 
-		template <typename T>
-        bool operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkOriginP, const T* const _landmarkOriginO, const T* const _landmarkPoint, T* _residuals) const;
+    /**
+     *
+     */
+    template <typename T>
+    bool operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkOriginP, const T* const _landmarkOriginO, const T* const _landmarkPoint, T* _residuals) const;
 
-        /** \brief Returns the jacobians computation method
+    /** \brief Returns the jacobians computation method
          *
          * Returns the jacobians computation method
          *
          **/
-        virtual JacobianMethod getJacobianMethod() const
-        {
-            return JAC_AUTO;
-        }
+    virtual JacobianMethod getJacobianMethod() const override
+    {
+      return JAC_AUTO;
+    }
 
-        /** \brief Returns a reference to the feature measurement
+    /** \brief Returns a reference to the feature measurement
          **/
-        virtual const Eigen::VectorXs& getMeasurement() const
-        {
-            return measurement_;
-        }
+    virtual const Eigen::VectorXs& getMeasurement() const override
+    {
+      return measurement_;
+    }
 
-        /** \brief Returns a reference to the feature measurement covariance
+    /** \brief Returns a reference to the feature measurement covariance
          **/
-        virtual const Eigen::MatrixXs& getMeasurementCovariance() const
-        {
-            return measurement_covariance_;
-        }
+    virtual const Eigen::MatrixXs& getMeasurementCovariance() const override
+    {
+      return measurement_covariance_;
+    }
 
-        /** \brief Returns a reference to the feature measurement square root information
+    /** \brief Returns a reference to the feature measurement square root information
          **/
-        virtual const Eigen::MatrixXs& getMeasurementSquareRootInformationTransposed() const
-        {
-            return measurement_sqrt_information_;
-        }
+    virtual const Eigen::MatrixXs& getMeasurementSquareRootInformationTransposed() const override
+    {
+      return measurement_sqrt_information_;
+    }
 };
 
 template<typename T>
