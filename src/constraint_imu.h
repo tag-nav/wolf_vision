@@ -141,8 +141,9 @@ class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
         const Eigen::Matrix3s sqrt_W_r_dt_inv;
 };
 
-inline ConstraintIMU::ConstraintIMU(const ProcessorBasePtr& _processor_ptr, const FeatureIMUPtr& _ftr_ptr,
+inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr& _ftr_ptr,
                                     const FrameIMUPtr& _frame_ptr,
+                                    const ProcessorBasePtr& _processor_ptr,
                                     bool _apply_loss_function, ConstraintStatus _status) :
         ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status,
                                                     _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _frame_ptr->getVPtr(),

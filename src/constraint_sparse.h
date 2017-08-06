@@ -185,7 +185,7 @@ ConstraintSparse<RESIDUAL_SIZE,
                                                  StateBlockPtr _state7Ptr,
                                                  StateBlockPtr _state8Ptr,
                                                  StateBlockPtr _state9Ptr ) :
-            ConstraintBase(_tp, _processor_ptr, _frame_other_ptr, _feature_other_ptr, _landmark_other_ptr, _apply_loss_function, _status),
+            ConstraintBase(_tp, _frame_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
             state_ptr_vector_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
             state_block_sizes_vector_({BLOCK_0_SIZE,BLOCK_1_SIZE,BLOCK_2_SIZE,BLOCK_3_SIZE,BLOCK_4_SIZE,BLOCK_5_SIZE,BLOCK_6_SIZE,BLOCK_7_SIZE,BLOCK_8_SIZE,BLOCK_9_SIZE})
         {
