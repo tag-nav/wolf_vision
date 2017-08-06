@@ -79,6 +79,8 @@ class MotionBuffer{
         MotionBuffer(Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size);
         std::list<Motion>& get();
         const std::list<Motion>& get() const;
+        const VectorXs& getCalibrationPreint() const;
+        void setCalibrationPreint(const VectorXs& _calib_preint);
         const Motion& getMotion(const TimeStamp& _ts) const;
         void getMotion(const TimeStamp& _ts, Motion& _motion) const;
         void split(const TimeStamp& _ts, MotionBuffer& _oldest_buffer);
@@ -88,6 +90,7 @@ class MotionBuffer{
         void print(bool show_data = 0, bool show_delta = 0, bool show_delta_int = 0, bool show_jacs = 0);
 
     private:
+        VectorXs calib_preint_;         ///< value of the calibration params during pre-integration
         std::list<Motion> container_;
 };
 
@@ -100,6 +103,17 @@ inline const std::list<Motion>& MotionBuffer::get() const
 {
     return container_;
 }
+
+inline const VectorXs& MotionBuffer::getCalibrationPreint() const
+{
+    return calib_preint_;
+}
+
+inline void MotionBuffer::setCalibrationPreint(const VectorXs& _calib_preint)
+{
+    calib_preint_ = _calib_preint;
+}
+
 
 } // namespace wolf
 

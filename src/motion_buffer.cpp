@@ -60,7 +60,7 @@ void Motion::resize(Size _data_s, Size _delta_s, Size _delta_cov_s, Size _calib_
 ////////////////////////////////////////////////////////////////////////////////////////
 
 MotionBuffer::MotionBuffer(Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size) :
-        data_size_(_data_size), delta_size_(_delta_size), cov_size_(_cov_size), calib_size_(_calib_size)
+        data_size_(_data_size), delta_size_(_delta_size), cov_size_(_cov_size), calib_size_(_calib_size), calib_preint_(_calib_size)
 {
 }
 
@@ -97,6 +97,9 @@ void MotionBuffer::getMotion(const TimeStamp& _ts, Motion& _motion) const
 void MotionBuffer::split(const TimeStamp& _ts, MotionBuffer& _buffer_part_before_ts)
 {
     assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
+
+    _buffer_part_before_ts.setCalibrationPreint(calib_preint_);
+
     auto previous = std::find_if(container_.rbegin(), container_.rend(), [&](const Motion& m)
     {
         return m.ts_ <= _ts;
@@ -110,8 +113,10 @@ void MotionBuffer::split(const TimeStamp& _ts, MotionBuffer& _buffer_part_before
     else
     {
         // Transfer part of the buffer
-        _buffer_part_before_ts.container_.splice(_buffer_part_before_ts.container_.begin(), container_, container_.begin(),
-                                         (previous--).base());
+        _buffer_part_before_ts.container_.splice(_buffer_part_before_ts.container_.begin(),
+                                                 container_,
+                                                 container_.begin(),
+                                                 (previous--).base());
     }
 }
 
