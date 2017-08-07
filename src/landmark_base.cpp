@@ -15,8 +15,6 @@ LandmarkBase::LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, State
             state_block_vec_(2), // allow for 2 state blocks by default. Resize in derived constructors if needed.
             is_removing_(false),
             landmark_id_(++landmark_id_count_)
-//,
-//            status_(LANDMARK_ESTIMATED)
 {
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
@@ -51,34 +49,6 @@ void LandmarkBase::remove()
         removeStateBlocks();
     }
 }
-
-
-//void LandmarkBase::setStatus(LandmarkStatus _st)
-//{
-//    status_ = _st;
-//
-//    // State Blocks
-//    if (status_ == LANDMARK_FIXED)
-//    {
-//        for (auto sb : state_block_vec_)
-//            if (sb != nullptr)
-//            {
-//                sb->fix();
-//                if (getProblem() != nullptr)
-//                    getProblem()->updateStateBlockPtr(sb);
-//            }
-//    }
-//    else if(status_ == LANDMARK_ESTIMATED)
-//    {
-//        for (auto sb : state_block_vec_)
-//            if (sb != nullptr)
-//            {
-//                sb->unfix();
-//                if (getProblem() != nullptr)
-//                    getProblem()->updateStateBlockPtr(sb);
-//            }
-//    }
-//}
 
 void LandmarkBase::registerNewStateBlocks()
 {
