@@ -121,8 +121,31 @@ inline std::vector<StateBlockPtr>& CaptureBase::getStateBlockVec()
 
 inline StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
 {
-    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
-    return state_block_vec_[_i];
+    if (getSensorPtr())
+    {
+        if (_i < 2) // _i == 0 is position, 1 is orientation, 2 and onwards are intrinsics
+            if (getSensorPtr()->isExtrinsicDynamic())
+            {
+                assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+                return state_block_vec_[_i];
+            }
+            else
+                return getSensorPtr()->getStateBlockPtr(_i);
+
+        else // 2 and onwards are intrinsics
+            if (getSensorPtr()->isIntrinsicDynamic())
+            {
+                assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+                return state_block_vec_[_i];
+            }
+            else
+                return getSensorPtr()->getStateBlockPtr(_i);
+    }
+    else // No sensor associated: assume sensor params are here
+    {
+        assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+        return state_block_vec_[_i];
+    }
 }
 
 inline void CaptureBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
@@ -133,26 +156,17 @@ inline void CaptureBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _
 
 inline StateBlockPtr CaptureBase::getSensorPPtr() const
 {
-    if (getSensorPtr()->isExtrinsicDynamic())
-        return getStateBlockPtr(0);
-    else
-        return getSensorPtr()->getPPtr();
+    return getStateBlockPtr(0);
 }
 
 inline StateBlockPtr CaptureBase::getSensorOPtr() const
 {
-    if (getSensorPtr()->isExtrinsicDynamic())
-        return getStateBlockPtr(1);
-    else
-        return getSensorPtr()->getOPtr();
+    return getStateBlockPtr(1);
 }
 
 inline StateBlockPtr CaptureBase::getSensorIntrinsicPtr() const
 {
-    if (getSensorPtr()->isIntrinsicDynamic())
-        return getStateBlockPtr(2);
-    else
-        return getSensorPtr()->getIntrinsicPtr();
+    return getStateBlockPtr(2);
 }
 
 
