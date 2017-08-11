@@ -23,8 +23,11 @@ namespace wolf {
  */
 struct ProcessorParamsBase
 {
-        std::string type;
-        std::string name;
+    ProcessorParamsBase()          = default;
+    virtual ~ProcessorParamsBase() = default;
+
+    std::string type;
+    std::string name;
 };
 
 //class ProcessorBase
