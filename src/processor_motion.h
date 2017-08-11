@@ -194,9 +194,9 @@ class ProcessorMotion : public ProcessorBase
         MotionBuffer& getBuffer();
         const MotionBuffer& getBuffer() const;
 
-        virtual void getCalibration (VectorXs& _calib);
-        VectorXs getCalibration();
-        void     getJacobianCalib(MatrixXs& _jac_cal);
+        // Autocalibration
+        virtual VectorXs getCalibration();
+        VectorXs getCalibrationPreint();
         MatrixXs getJacobianCalib();
 
 
@@ -811,34 +811,14 @@ inline const MotionBuffer& ProcessorMotion::getBuffer() const
     return last_ptr_->getBuffer();
 }
 
-inline void ProcessorMotion::getCalibration (VectorXs& _calib)
-{
-
-    assert(_calib.size() == calib_size_);
-
-    _calib = last_ptr_->getCalibration();
-//    Size i = 0;
-//    // Check Capture's intrinsics and extrinsics for the fix() flag
-//    for (auto sb : getSensorPtr()->getStateBlockVec()) // FIXME: get from Capture, not from Sensor!!
-//    {
-//        if (sb && !( sb->isFixed() ) )
-//        {
-//            _calib.segment(i, i+sb->getSize() ) = sb->getState();
-//            i += sb->getSize();
-//        }
-//    }
-}
-
 inline VectorXs ProcessorMotion::getCalibration()
 {
-    VectorXs calib(calib_size_);
-    getCalibration(calib);
-    return calib;
+    return last_ptr_->getCalibration();
 }
 
-inline void ProcessorMotion::getJacobianCalib(MatrixXs& _jac_cal)
+inline VectorXs ProcessorMotion::getCalibrationPreint()
 {
-    _jac_cal = getBuffer().get().back().jacobian_calib_;
+    return getBuffer().getCalibrationPreint();
 }
 
 inline MatrixXs ProcessorMotion::getJacobianCalib()
