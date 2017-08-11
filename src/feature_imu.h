@@ -59,7 +59,7 @@ class FeatureIMU : public FeatureBase
         Eigen::Quaternions dq_preint_;
 
         // Used biases
-        Eigen::Vector3s acc_bias_preint_;       ///< Accleration bias used for delta preintegration
+        Eigen::Vector3s acc_bias_preint_;       ///< Acceleration bias used for delta preintegration
         Eigen::Vector3s gyro_bias_preint_;      ///< Gyrometer bias used for delta preintegration
 
         // Jacobians of preintegrated deltas wrt biases
