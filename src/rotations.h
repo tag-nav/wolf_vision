@@ -381,6 +381,19 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left_inv(const Eige
     return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W + M; //is this really more optimized?
 }
 
+template<typename T>
+inline Eigen::Matrix<T, 3, 3> matrixRollPitchYaw(const T roll,
+                                                 const T pitch,
+                                                 const T yaw)
+{
+  const Eigen::AngleAxis<T> ax = Eigen::AngleAxis<T>(roll,  Eigen::Matrix<T, 3, 1>::UnitX());
+  const Eigen::AngleAxis<T> ay = Eigen::AngleAxis<T>(pitch, Eigen::Matrix<T, 3, 1>::UnitY());
+  const Eigen::AngleAxis<T> az = Eigen::AngleAxis<T>(yaw,   Eigen::Matrix<T, 3, 1>::UnitZ());
+
+  return (az * ay * ax).toRotationMatrix().matrix();
+}
+
+
 } // namespace wolf
 
 #endif /* ROTATIONS_H_ */

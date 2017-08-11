@@ -269,6 +269,14 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual void postProcess() { };
 
+        /**
+         * @brief Get the incoming CaptureBasePtr and returns a CaptureMotionPtr out of it.
+         * If not overloaded, the base class calls
+         * std::static_pointer_cast<CaptureMotion>(_incoming_ptr)
+         * @return CaptureMotionPtr.
+         */
+        virtual CaptureMotionPtr getIncomingCaptureMotion(CaptureBasePtr& _incoming_ptr);
+
 
         // These are the pure virtual functions doing the mathematics
     protected:

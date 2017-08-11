@@ -23,8 +23,11 @@ namespace wolf {
  */
 struct IntrinsicsBase
 {
-        std::string type;
-        std::string name;
+  IntrinsicsBase()          = default;
+  virtual ~IntrinsicsBase() = default;
+
+  std::string type;
+  std::string name;
 };
 
 class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBase>

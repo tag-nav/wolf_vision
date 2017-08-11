@@ -67,8 +67,10 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 //        std::cout << "PM: RUNNING" << std::endl;
     }
 
+    incoming_ptr_ = getIncomingCaptureMotion(_incoming_ptr);
 
-    incoming_ptr_ = std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
+    /// @todo Anything else to do ?
+    if (incoming_ptr_ == nullptr) return;
 
     preProcess();
 
@@ -92,7 +94,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         FeatureBasePtr key_feature_ptr = emplaceFeature(last_ptr_, key_frame_ptr);
 
         // create motion constraint and link it to parent feature and other frame (which is origin's frame)
-        auto ctr_ptr = emplaceConstraint(key_feature_ptr, origin_ptr_->getFramePtr());
+        /*auto ctr_ptr =*/ emplaceConstraint(key_feature_ptr, origin_ptr_->getFramePtr());
 
         // new capture
         CaptureMotionPtr new_capture_ptr = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(),
@@ -370,6 +372,11 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
         motion_it++;
         prev_motion_it++;
     }
+}
+
+CaptureMotionPtr ProcessorMotion::getIncomingCaptureMotion(CaptureBasePtr& _incoming_ptr)
+{
+  return std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
 }
 
 CaptureMotionPtr ProcessorMotion::getCaptureMotionContainingTimeStamp(const TimeStamp& _ts)
