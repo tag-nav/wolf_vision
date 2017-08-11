@@ -234,7 +234,7 @@ TEST_F(ProcessorIMUt, interpolate)
     mot_final.delta_ = mot_final.delta_integr_;
     Motion mot_sec = mot_final;
 
-    problem->getProcessorMotionPtr()->getBuffer().print(0,1,1,0);
+//    problem->getProcessorMotionPtr()->getBuffer().print(0,1,1,0);
 
 class P : wolf::ProcessorIMU
 {
