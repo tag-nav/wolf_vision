@@ -43,10 +43,12 @@ class ProcessorIMU : public ProcessorMotion{
         //void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
 
     protected:
-        virtual void getCalibration(VectorXs& _bias)
+        virtual VectorXs getCalibration()
         {
+            VectorXs bias(6);
             FrameIMUPtr frame_imu = std::static_pointer_cast<FrameIMU>(getOriginPtr()->getFramePtr());
-            _bias << frame_imu->getAccBiasPtr()->getState() , frame_imu->getGyroBiasPtr()->getState();
+            bias << frame_imu->getAccBiasPtr()->getState() , frame_imu->getGyroBiasPtr()->getState();
+            return bias;
         }
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
