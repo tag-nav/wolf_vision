@@ -88,13 +88,13 @@ bool ProcessorIMU::voteForKeyFrame()
     // time span
     if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)
     {
-        WOLF_DEBUG( "PM: vote: time span" );
+//        WOLF_DEBUG( "PM: vote: time span" );
         return true;
     }
     // buffer length
     if (getBuffer().get().size() > max_buff_length_)
     {
-        WOLF_DEBUG( "PM: vote: buffer size" );
+//        WOLF_DEBUG( "PM: vote: buffer size" );
         return true;
     }
     /*// angle turned
