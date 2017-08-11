@@ -270,9 +270,10 @@ class ProcessorMotion : public ProcessorBase
         virtual void postProcess() { };
 
         /**
-         * @brief Process the incoming CaptureBase an return a CaptureMotion.
-         * If not overloaded, the base class calls static_pointer_cast<CaptureMotion>(incoming)
-         * @return CaptureMotion.
+         * @brief Get the incoming CaptureBasePtr and returns a CaptureMotionPtr out of it.
+         * If not overloaded, the base class calls
+         * std::static_pointer_cast<CaptureMotion>(_incoming_ptr)
+         * @return CaptureMotionPtr.
          */
         virtual CaptureMotionPtr getIncomingCaptureMotion(CaptureBasePtr& _incoming_ptr);
 
