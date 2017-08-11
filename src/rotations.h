@@ -386,21 +386,11 @@ inline Eigen::Matrix<T, 3, 3> matrixRollPitchYaw(const T roll,
                                                  const T pitch,
                                                  const T yaw)
 {
-  const T c_yaw (cos(yaw));
-  const T s_yaw (sin(yaw));
+  const Eigen::AngleAxis<T> ax = Eigen::AngleAxis<T>(roll,  Eigen::Matrix<T, 3, 1>::UnitX());
+  const Eigen::AngleAxis<T> ay = Eigen::AngleAxis<T>(pitch, Eigen::Matrix<T, 3, 1>::UnitY());
+  const Eigen::AngleAxis<T> az = Eigen::AngleAxis<T>(yaw,   Eigen::Matrix<T, 3, 1>::UnitZ());
 
-  const T c_pitch (cos(pitch));
-  const T s_pitch (sin(pitch));
-
-  const T c_roll (cos(roll));
-  const T s_roll (sin(roll));
-
-  Eigen::Matrix<T, 3, 3> rot;
-  rot << c_pitch*c_roll                      , -s_roll*c_pitch                     ,       s_pitch,
-         s_pitch*s_yaw*c_roll + s_roll*c_yaw , -s_pitch*s_roll*s_yaw + c_roll*c_yaw, -s_yaw*c_pitch,
-         -s_pitch*c_roll*c_yaw + s_roll*s_yaw,  s_pitch*s_roll*c_yaw + s_yaw*c_roll, c_pitch*c_yaw;
-
-  return rot;
+  return (az * ay * ax).toRotationMatrix().matrix();
 }
 
 
