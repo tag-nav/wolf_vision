@@ -175,11 +175,11 @@ inline VectorXs CaptureMotion::getCalibration() const
     for (Size i = 0; i < getStateBlockVec().size(); i++)
     {
         auto sb = getStateBlockPtr(i);
-        if (sb)
+        if (sb && !sb->isFixed())
         {
             calib.segment(index, sb->getSize()) = sb->getState();
+            index += sb->getSize();
         }
-        index += sb->getSize();
     }
     return calib;
 }
