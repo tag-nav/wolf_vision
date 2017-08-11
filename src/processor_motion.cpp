@@ -307,11 +307,10 @@ void ProcessorMotion::integrateOneStep()
     updateDt();
 
     // get vector of parameters to calibrate
-//    getCalibration(calib_);
     calib_ = getBuffer().getCalibrationPreint();
 
     // get data and convert it to delta, and obtain also the delta covariance
-    data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_, delta_, delta_cov_, getCalibration(), jacobian_delta_calib_);
+    data2delta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_, delta_, delta_cov_, calib_, jacobian_delta_calib_);
 
     // integrate the current delta to pre-integrated measurements, and get Jacobians
     deltaPlusDelta(getBuffer().get().back().delta_integr_, delta_, dt_, delta_integrated_, jacobian_delta_preint_, jacobian_delta_);
