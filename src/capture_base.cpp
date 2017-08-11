@@ -27,13 +27,32 @@ CaptureBase::CaptureBase(const std::string& _type,
         {
             assert(_p_ptr && "Pointer to dynamic position params is null!");
             assert(_o_ptr && "Pointer to dynamic orientation params is null!");
+            // copy fixed status from sensor
+            if (_sensor_ptr->getPPtr())
+                _p_ptr->setFixed(_sensor_ptr->getPPtr()->isFixed());
+            if (_sensor_ptr->getOPtr())
+                _o_ptr->setFixed(_sensor_ptr->getOPtr()->isFixed());
+            // assign to Capture's members
             state_block_vec_[0] = _p_ptr;
             state_block_vec_[1] = _o_ptr;
         }
+        else if (_p_ptr || _o_ptr)
+        {
+            WOLF_ERROR("Provided sensor parameters but the sensor extrinsics are static");
+        }
+
         if (_sensor_ptr->isIntrinsicDynamic())
         {
             assert(_intr_ptr && "Pointer to dynamic intrinsic params is null!");
+            // copy fixed status from sensor
+            if (_sensor_ptr->getIntrinsicPtr())
+                _p_ptr->setFixed(_sensor_ptr->getIntrinsicPtr()->isFixed());
+            // assign to Capture's member
             state_block_vec_[2] = _intr_ptr;
+        }
+        else if (_intr_ptr)
+        {
+            WOLF_ERROR("Provided sensor parameters but the sensor intrinsics are static");
         }
         registerNewStateBlocks();
     }
