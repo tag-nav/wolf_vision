@@ -381,24 +381,24 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left_inv(const Eige
     return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W + M; //is this really more optimized?
 }
 
-//template<typename Derived>
-inline Eigen::Matrix<Scalar, 3, 3> matrixRollPitchYaw(const Scalar roll,
-                                                      const Scalar pitch,
-                                                      const Scalar yaw)
+template<typename T>
+inline Eigen::Matrix<T, 3, 3> matrixRollPitchYaw(const T roll,
+                                                 const T pitch,
+                                                 const T yaw)
 {
-  const Scalar ca ( cos(yaw));
-  const Scalar sa ( sin(yaw));
+  const T c_yaw (cos(yaw));
+  const T s_yaw (sin(yaw));
 
-  const Scalar cb ( cos(pitch));
-  const Scalar sb ( sin(pitch));
+  const T c_pitch (cos(pitch));
+  const T s_pitch (sin(pitch));
 
-  const Scalar cc ( cos(roll));
-  const Scalar sc ( sin(roll));
+  const T c_roll (cos(roll));
+  const T s_roll (sin(roll));
 
-  Eigen::Matrix<Scalar, 3, 3> rot;
-  rot << ca*cb ,   ca*sb*sc - sa*cc ,  ca*sb*cc + sa*sc,
-         sa*cb ,   sa*sb*sc + ca*cc ,  sa*sb*cc - ca*sc,
-         -sb   ,   cb*sc            ,  cb*cc;
+  Eigen::Matrix<T, 3, 3> rot;
+  rot << c_pitch*c_roll                      , -s_roll*c_pitch                     ,       s_pitch,
+         s_pitch*s_yaw*c_roll + s_roll*c_yaw , -s_pitch*s_roll*s_yaw + c_roll*c_yaw, -s_yaw*c_pitch,
+         -s_pitch*c_roll*c_yaw + s_roll*s_yaw,  s_pitch*s_roll*c_yaw + s_yaw*c_roll, c_pitch*c_yaw;
 
   return rot;
 }
