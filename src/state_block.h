@@ -91,6 +91,8 @@ class StateBlock
          **/
         void unfix();
 
+        void setFixed(bool _fixed);
+
         bool hasLocalParametrization();
 
         LocalParametrizationBasePtr getLocalParametrizationPtr();
@@ -172,6 +174,11 @@ inline void StateBlock::fix()
 inline void StateBlock::unfix()
 {
     fixed_ = false;
+}
+
+inline void StateBlock::setFixed(bool _fixed)
+{
+    fixed_ = _fixed;
 }
 
 inline bool StateBlock::hasLocalParametrization()
