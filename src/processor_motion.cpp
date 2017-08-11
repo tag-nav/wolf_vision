@@ -67,7 +67,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 //        std::cout << "PM: RUNNING" << std::endl;
     }
 
-    incoming_ptr_ = processIncomingCapture(_incoming_ptr);
+    incoming_ptr_ = getIncomingCaptureMotion(_incoming_ptr);
 
     /// @todo Anything else to do ?
     if (incoming_ptr_ == nullptr) return;
