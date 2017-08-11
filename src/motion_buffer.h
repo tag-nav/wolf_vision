@@ -84,9 +84,9 @@ class MotionBuffer{
         const Motion& getMotion(const TimeStamp& _ts) const;
         void getMotion(const TimeStamp& _ts, Motion& _motion) const;
         void split(const TimeStamp& _ts, MotionBuffer& _oldest_buffer);
-        MatrixXs integrateCovariance() const; // Integrate all buffer
-        MatrixXs integrateCovariance(const TimeStamp& _ts) const; // Integrate up to time stamp (included)
-        MatrixXs integrateCovariance(const TimeStamp& _ts_1, const TimeStamp _ts_2) const; // integrate between time stamps (both included)
+//        MatrixXs integrateCovariance() const; // Integrate all buffer
+//        MatrixXs integrateCovariance(const TimeStamp& _ts) const; // Integrate up to time stamp (included)
+//        MatrixXs integrateCovariance(const TimeStamp& _ts_1, const TimeStamp _ts_2) const; // integrate between time stamps (both included)
         void print(bool show_data = 0, bool show_delta = 0, bool show_delta_int = 0, bool show_jacs = 0);
 
     private:
