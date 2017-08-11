@@ -67,7 +67,9 @@ class FeatureIMU_test : public testing::Test
         imu_ptr->setData(data_);
         imu_ptr->setTimeStamp(t);
     // process data in capture
+        WOLF_TRACE("D_ini: ", wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose());
         sensor_ptr->process(imu_ptr);
+        WOLF_TRACE("D_pre: ", wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose());
 
     //create FrameIMU
         ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
@@ -79,9 +81,13 @@ class FeatureIMU_test : public testing::Test
         delta_preint = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_;
         delta_preint_cov = wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_;
         //feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
+        WOLF_TRACE("D_pre: ", delta_preint.transpose());
         std::static_pointer_cast<wolf::ProcessorIMU>(wolf_problem_ptr_->getProcessorMotionPtr())->getJacobianCalib(dD_db_jacobians);
         feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov, imu_ptr, dD_db_jacobians);
         feat_imu->setCapturePtr(imu_ptr); //associate the feature to a capture
+        WOLF_TRACE("P_pre: ", feat_imu->dp_preint_.transpose());
+        WOLF_TRACE("Q_pre: ", feat_imu->dq_preint_.coeffs().transpose());
+        WOLF_TRACE("V_pre: ", feat_imu->dv_preint_.transpose());
 
     }
 
