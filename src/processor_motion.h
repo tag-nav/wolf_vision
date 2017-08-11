@@ -274,7 +274,7 @@ class ProcessorMotion : public ProcessorBase
          * If not overloaded, the base class calls static_pointer_cast<CaptureMotion>(incoming)
          * @return CaptureMotion.
          */
-        virtual CaptureMotionPtr processIncomingCapture(CaptureBasePtr& _incoming_ptr);
+        virtual CaptureMotionPtr getIncomingCaptureMotion(CaptureBasePtr& _incoming_ptr);
 
 
         // These are the pure virtual functions doing the mathematics

@@ -374,7 +374,7 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
     }
 }
 
-CaptureMotionPtr ProcessorMotion::processIncomingCapture(CaptureBasePtr& _incoming_ptr)
+CaptureMotionPtr ProcessorMotion::getIncomingCaptureMotion(CaptureBasePtr& _incoming_ptr)
 {
   return std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
 }
