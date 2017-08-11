@@ -813,18 +813,20 @@ inline const MotionBuffer& ProcessorMotion::getBuffer() const
 
 inline void ProcessorMotion::getCalibration (VectorXs& _calib)
 {
+
     assert(_calib.size() == calib_size_);
 
-    Size i = 0;
-    // Check Capture's intrinsics and extrinsics for the fix() flag
-    for (auto sb : getSensorPtr()->getStateBlockVec()) // FIXME: get from Capture, not from Sensor!!
-    {
-        if (sb && !( sb->isFixed() ) )
-        {
-            _calib.segment(i, i+sb->getSize() ) = sb->getState();
-            i += sb->getSize();
-        }
-    }
+    _calib = last_ptr_->getCalibration();
+//    Size i = 0;
+//    // Check Capture's intrinsics and extrinsics for the fix() flag
+//    for (auto sb : getSensorPtr()->getStateBlockVec()) // FIXME: get from Capture, not from Sensor!!
+//    {
+//        if (sb && !( sb->isFixed() ) )
+//        {
+//            _calib.segment(i, i+sb->getSize() ) = sb->getState();
+//            i += sb->getSize();
+//        }
+//    }
 }
 
 inline VectorXs ProcessorMotion::getCalibration()
