@@ -104,7 +104,11 @@ typedef Quaternion<wolf::Scalar> Quaternions;               ///< Quaternion of r
 typedef AngleAxis<wolf::Scalar> AngleAxiss;                 ///< Angle-Axis of real Scalar type
 typedef Rotation2D<wolf::Scalar> Rotation2Ds;               ///< Rotation2D of real Scalar type
 
+typedef Transform<wolf::Scalar,2,Affine> Affine2ds;         ///< Affine2d of real Scalar type
 typedef Transform<wolf::Scalar,3,Affine> Affine3ds;         ///< Affine3d of real Scalar type
+
+typedef Transform<wolf::Scalar,2,Isometry> Isometry2ds;     ///< Isometry2d of real Scalar type
+typedef Transform<wolf::Scalar,3,Isometry> Isometry3ds;     ///< Isometry3d of real Scalar type
 }
 
 namespace wolf {
