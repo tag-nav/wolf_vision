@@ -374,7 +374,7 @@ inline std::string FrameFactory::getClass()
 
 #define WOLF_REGISTER_FRAME(FrameType, FrameName) \
   namespace{ const bool WOLF_UNUSED FrameName##Registered = \
-    FrameFactory::get().registerCreator(FrameType, FrameName::create); }\
+    wolf::FrameFactory::get().registerCreator(FrameType, FrameName::create); }\
 
 
 } /* namespace wolf */
