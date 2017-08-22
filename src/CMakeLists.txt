@@ -56,10 +56,18 @@ IF(raw_gps_utils_FOUND)
 ENDIF(raw_gps_utils_FOUND)
 
 # OpenCV
-FIND_PACKAGE(OpenCV 2 QUIET)
-IF(OpenCV_FOUND)
-    MESSAGE("OpenCV Library FOUND: OpenCV related sources will be built.")
-ENDIF(OpenCV_FOUND)
+FIND_PACKAGE(OpenCV QUIET)
+if (OpenCV_FOUND) 
+  if (${OpenCV_VERSION_MAJOR} GREATER 2)
+    message("-- Found OpenCV ${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}. Related sources will be built.")
+    ADD_DEFINITIONS(-DHAVE_OPENCV3)
+    SET(USE_CV true)
+  else(${OpenCV_VERSION_MAJOR} GREATER 2)
+    message("[WARN] Found OpenCV ${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}. Notice that WOLF is prepared to work with OpenCV 3.0 and higher versions.")
+  endif(${OpenCV_VERSION_MAJOR} GREATER 2)
+else(OpenCV_FOUND)
+    message("[WARN] OpenCV not found. Related sources will NOT be built.")
+endif(OpenCV_FOUND)
 
 # YAML with yaml-cpp
 INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindYamlCpp.cmake)
