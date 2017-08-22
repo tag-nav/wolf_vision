@@ -11,18 +11,21 @@
 #include "constraint_epipolar.h"
 #include "processor_image_params.h"
 
-
 // OpenCV includes
-#include "opencv2/features2d/features2d.hpp"
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/core/core.hpp>
-
+#if defined (HAVE_OPENCV3)
+	#include <opencv2/features2d.hpp>
+	#include <opencv2/highgui.hpp>
+	#include <opencv2/core.hpp>
+	#include <opencv2/imgproc.hpp>
+#else
+	#include <opencv2/features2d/features2d.hpp>
+	#include <opencv2/highgui/highgui.hpp>
+	#include <opencv2/core/core.hpp>
+#endif
 
 // General includes
 #include <cmath>
 #include <complex>      // std::complex, std::norm
-
-
 
 namespace wolf {
     
