@@ -56,9 +56,27 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
     }
 
     // 2. matcher params
-// TODO: FIX this
-    matcher_ptr_ = cv::DescriptorMatcher::create("BruteForce");
-//    matcher_ptr_ = cv::DescriptorMatcher::create(_params.matcher.similarity_norm);
+    // TODO: FIX this. Problems initializing with int (cv::DescriptorMatcher::create(int matcherType)
+    std::string matcherType = "BruteForce-Hamming"; // Default
+    switch (_params.matcher.similarity_norm)
+    {
+        case 1:
+            matcherType = "BruteForce";
+            break;
+        case 2:
+            matcherType = "BruteForce-L1";
+            break;
+        case 3:
+            matcherType = "BruteForce-Hamming";
+            break;
+        case 4:
+            matcherType = "BruteForce-Hamming(2)";
+            break;
+        case 5:
+            matcherType = "FlannBased";
+            break;
+    }
+    matcher_ptr_ = cv::DescriptorMatcher::create(matcherType);
 }
 #else
 
@@ -108,7 +126,6 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
 
     // 2. matcher params
     matcher_ptr_ = std::make_shared<cv::BFMatcher>(_params.matcher.similarity_norm);
-
 }
 
 #endif
