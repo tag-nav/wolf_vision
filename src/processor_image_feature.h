@@ -13,30 +13,36 @@
 
 // OpenCV includes
 #if defined (HAVE_OPENCV3)
-	#include <opencv2/features2d.hpp>
-	#include <opencv2/highgui.hpp>
-	#include <opencv2/core.hpp>
-	#include <opencv2/imgproc.hpp>
+#include <opencv2/features2d.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
 #else
-	#include <opencv2/features2d/features2d.hpp>
-	#include <opencv2/highgui/highgui.hpp>
-	#include <opencv2/core/core.hpp>
+#include <opencv2/features2d/features2d.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/core/core.hpp>
 #endif
 
 // General includes
 #include <cmath>
 #include <complex>      // std::complex, std::norm
 
-namespace wolf {
-    
+namespace wolf
+{
+
 WOLF_PTR_TYPEDEFS(ProcessorImageFeature);
-    
+
 //class
 class ProcessorImageFeature : public ProcessorTrackerFeature
 {
     protected:
+#if defined (HAVE_OPENCV3)
+        cv::Ptr<cv::DescriptorMatcher> matcher_ptr_;
+        cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
+#else
         std::shared_ptr<cv::DescriptorMatcher> matcher_ptr_;
         std::shared_ptr<cv::Feature2D> detector_descriptor_ptr_;
+#endif
 
     protected:
         ProcessorParamsImage params_;           // Struct with parameters of the processors
@@ -46,12 +52,12 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
         {
                 unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
                 unsigned int size_bits_; ///< length of the descriptor vector in bits
-        }detector_descriptor_params_;
+        } detector_descriptor_params_;
         struct
         {
                 unsigned int width_; ///< width of the image
                 unsigned int height_; ///< height of the image
-        }image_;
+        } image_;
 
         // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
@@ -101,7 +107,8 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature);
+        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature,
+                                         FeatureBasePtr _incoming_feature);
 
         /** \brief Vote for KeyFrame generation
          *
@@ -135,7 +142,7 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
          * \return the number of detected features
          */
         virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
-                                         cv::Mat& new_descriptors);
+                                    cv::Mat& new_descriptors);
 
     private:
         /**
@@ -165,8 +172,8 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
          * \param _cv_matches output variable in which the best result will be stored (in the position [0])
          * \return normalized score of similarity (1 - exact match; 0 - complete mismatch)
          */
-        virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches);
-
+        virtual Scalar match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors,
+                             std::vector<cv::DMatch>& _cv_matches);
 
         // These only to debug, will disappear one day
     public:
@@ -176,8 +183,8 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
         virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
 
     public:
-        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
-
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params,
+                                       const SensorBasePtr sensor_ptr = nullptr);
 
 };
 
@@ -186,15 +193,16 @@ inline bool ProcessorImageFeature::voteForKeyFrame()
     return (incoming_ptr_->getFeatureList().size() < params_.algorithm.min_features_for_keyframe);
 }
 
-inline ConstraintBasePtr ProcessorImageFeature::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
+inline ConstraintBasePtr ProcessorImageFeature::createConstraint(FeatureBasePtr _feature_ptr,
+                                                                 FeatureBasePtr _feature_other_ptr)
 {
-    ConstraintEpipolarPtr const_epipolar_ptr = std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr, shared_from_this());
+    ConstraintEpipolarPtr const_epipolar_ptr = std::make_shared < ConstraintEpipolar
+            > (_feature_ptr, _feature_other_ptr, shared_from_this());
 //    _feature_ptr->addConstraint(const_epipolar_ptr);
 //    _feature_other_ptr->addConstrainedBy(const_epipolar_ptr);
     return const_epipolar_ptr;
 }
 
 } // namespace wolf
-
 
 #endif // PROCESSOR_IMAGE_FEATURE_H

@@ -39,8 +39,15 @@ WOLF_PTR_TYPEDEFS(ProcessorImageLandmark);
 class ProcessorImageLandmark : public ProcessorTrackerLandmark
 {
     protected:
+
+#if defined (HAVE_OPENCV3)
+        cv::Ptr<cv::DescriptorMatcher> matcher_ptr_;
+        cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
+#else
         std::shared_ptr<cv::DescriptorMatcher> matcher_ptr_;
         std::shared_ptr<cv::Feature2D> detector_descriptor_ptr_;
+#endif
+
     protected:
         ProcessorParamsImage params_;           // Struct with parameters of the processors
         ActiveSearchGrid active_search_grid_;   // Active Search
