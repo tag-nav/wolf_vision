@@ -37,6 +37,12 @@ Dependencies
 
 ! Please notice that we are detailing two installation procedures below. If you are familiar with `ROS` and more especially the [`catkin_tools`](https://catkin-tools.readthedocs.io/en/latest/index.html) package then you may jump directly to the 'Using the `catkin_tools` package' section.
 
+#### Boost
+
+[Boost](http://www.boost.org/). Free peer-reviewed portable C++ source libraries.
+
+    $ sudo apt-get install libboost-all-dev
+
 #### Eigen
 
 [Eigen](http://eigen.tuxfamily.org). Linear algebra, header library. Eigen 3.2 is also a depencency of ROS-Hydro. In case you don't have ROS in your machine, you can install Eigen by typing:
