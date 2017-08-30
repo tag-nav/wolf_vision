@@ -1,8 +1,12 @@
 //std includes
 #include <iostream>
 
-//opencv includes
-#include "opencv2/features2d/features2d.hpp"
+// OpenCV includes
+#if defined (HAVE_OPENCV3)
+#include <opencv2/features2d.hpp>
+#else
+#include <opencv2/features2d/features2d.hpp>
+#endif
 
 #include "processor_image_landmark.h"
 
@@ -12,32 +16,39 @@ int main(int argc, char** argv)
 
     std::cout << std::endl << "==================== tracker ORB test ======================" << std::endl;
 
-    cv::VideoCapture capture;
-    const char * filename;
-    if (argc == 1)
-    {
-        std::string video_path = "/src/examples/Test_ORB.mp4";
-        filename = (_WOLF_ROOT_DIR + video_path).c_str();
-        capture.open(filename);
-    }
-    else if (std::string(argv[1]) == "0")
-    {
-        //camera
-        filename = "0";
-        capture.open(0);
-    }
-    else
-    {
-        filename = argv[1];
-        capture.open(filename);
-    }
-    std::cout << "Input video file: " << filename << std::endl;
-    if(!capture.isOpened()) std::cout << "failed" << std::endl; else std::cout << "succeded" << std::endl;
-    //capture.set(CV_CAP_PROP_POS_MSEC, 3000);
+    // parsing input params
+     const char * filename;
+     cv::VideoCapture capture;
+     if (argc < 2)
+     {
+         std::cout << "Please use\n\t./test_opencv <arg> "
+                 "\nwith "
+                 "\n\targ = <path/videoname.mp4> for video input "
+                 "\n\targ = 0 for camera input." << std::endl;
+         return 0;
+     }
+     else if (std::string(argv[1]) == "0")
+     {
+         filename = "0"; // camera
+         capture.open(0);
+         std::cout << "Input stream from camera " << std::endl;
+     }
+     else
+     {
+         filename = argv[1]; // provided through argument
+         capture.open(filename);
+         std::cout << "Input video file: " << filename << std::endl;
+     }
+     // Open input stream
+     if (!capture.isOpened())  // check if we succeeded
+         std::cout << "failed" << std::endl;
+     else
+         std::cout << "succeded" << std::endl;
 
-    unsigned int img_width  = capture.get(CV_CAP_PROP_FRAME_WIDTH);
-    unsigned int img_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-    std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
+     // set and print image properties
+     unsigned int img_width = (unsigned int)capture.get(CV_CAP_PROP_FRAME_WIDTH);
+     unsigned int img_height = (unsigned int)capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
 
     //=====================================================
     // Environment variable for configuration files
