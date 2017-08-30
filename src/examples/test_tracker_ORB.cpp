@@ -16,8 +16,8 @@ int main(int argc, char** argv)
     const char * filename;
     if (argc == 1)
     {
-//        filename = "/home/jtarraso/Vídeos/gray.mp4";
-        filename = "/home/jtarraso/Imágenes/Test_ORB.png";
+        std::string video_path = "/src/examples/Test_ORB.mp4";
+        filename = (_WOLF_ROOT_DIR + video_path).c_str();
         capture.open(filename);
     }
     else if (std::string(argv[1]) == "0")
@@ -33,19 +33,24 @@ int main(int argc, char** argv)
     }
     std::cout << "Input video file: " << filename << std::endl;
     if(!capture.isOpened()) std::cout << "failed" << std::endl; else std::cout << "succeded" << std::endl;
-    capture.set(CV_CAP_PROP_POS_MSEC, 3000);
+    //capture.set(CV_CAP_PROP_POS_MSEC, 3000);
 
     unsigned int img_width  = capture.get(CV_CAP_PROP_FRAME_WIDTH);
     unsigned int img_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
 
+    //=====================================================
+    // Environment variable for configuration files
+    std::string wolf_root = _WOLF_ROOT_DIR;
+    //=====================================================
 
-
-    cv::Feature2D* detector_descriptor_ptr_;
-    cv::DescriptorMatcher* matcher_ptr_;
+    //=====================================================
+    // Detector, descriptor and matcher
+    cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
+    cv::Ptr<cv::DescriptorMatcher> matcher_ptr_;
 
     unsigned int nfeatures = 500;
-    float scaleFactor = 1.2;
+    float scaleFactor = 2;
     unsigned int nlevels = 8;
     unsigned int edgeThreshold = 16;
     unsigned int firstLevel = 0;
@@ -58,33 +63,21 @@ int main(int argc, char** argv)
     unsigned int roi_width = 200;
     unsigned int roi_heigth = 200;
 
-    detector_descriptor_ptr_ = new cv::ORB(nfeatures, //
+    detector_descriptor_ptr_ = cv::ORB::create(nfeatures, //
                                            scaleFactor, //
                                            nlevels, //
                                            edgeThreshold, //
                                            firstLevel, //
                                            WTA_K, //
                                            scoreType, //
-                                           patchSize);//,
-//                                           fastThreshold);
+                                           patchSize);//
 
-    //unsigned int nominal_pattern_radius = 0;
-    //unsigned int pattern_radius = (unsigned int)( (nominal_pattern_radius) * pow(scaleFactor, nlevels-1));
-
-//    std::cout << "nominal pattern radius: " << _dd_params->nominal_pattern_radius << std::endl;
-//    std::cout << "scale factor: " << params_orb->scaleFactor << std::endl;
-//    std::cout << "nlevels: " << params_orb->nlevels << std::endl;
+    unsigned int pattern_radius = (unsigned int)(patchSize);
 
     unsigned int size_bits = detector_descriptor_ptr_->descriptorSize() * 8;
 
-    matcher_ptr_ = new cv::BFMatcher(6);
-
-
-
-    // CAPTURES
-//    SensorCamera* camera_ptr_;
-//    CaptureImage* image_ptr;
-    TimeStamp t = 1;
+    matcher_ptr_ = cv::DescriptorMatcher::create("BruteForce-Hamming(2)");
+    //=====================================================
 
     unsigned int buffer_size = 20;
     std::vector<cv::Mat> frame(buffer_size);
@@ -94,10 +87,8 @@ int main(int argc, char** argv)
     cv::namedWindow("Feature tracker");    // Creates a window for display.
     cv::moveWindow("Feature tracker", 0, 0);
 
-//    image_ptr = new CaptureImage(t, camera_ptr_, frame[f % buffer_size]);
-
     cv::imshow("Feature tracker", frame[f % buffer_size]);
-    cv::waitKey(0);
+    cv::waitKey(1);
 
     std::vector<cv::KeyPoint> target_keypoints;
     std::vector<cv::KeyPoint> tracked_keypoints_;
@@ -120,8 +111,6 @@ int main(int argc, char** argv)
 
     detector_descriptor_ptr_->detect(image_original, target_keypoints);
     detector_descriptor_ptr_->compute(image_original, target_keypoints, target_descriptors);
-
-
 
     while(!(frame[f % buffer_size].empty()))
     {
@@ -152,10 +141,10 @@ int main(int argc, char** argv)
             roi_up_left_corner.y = roi.y;
 
             //inflate
-//            roi.x = roi.x - pattern_radius;
-//            roi.y = roi.y - pattern_radius;
-//            roi.width = roi.width + 2*pattern_radius;
-//            roi.height = roi.height + 2*pattern_radius;
+            roi.x = roi.x - pattern_radius;
+            roi.y = roi.y - pattern_radius;
+            roi.width = roi.width + 2*pattern_radius;
+            roi.height = roi.height + 2*pattern_radius;
 
             //trim
             if(roi.x < 0)
@@ -191,8 +180,6 @@ int main(int argc, char** argv)
                 detector_descriptor_ptr_->detect(image_roi, keypoints);
                 detector_descriptor_ptr_->compute(image_roi, keypoints, descriptors);
 
-
-
                 cv::Mat target_descriptor; //B(cv::Rect(0,0,vec_length,1));
                 target_descriptor = target_descriptors(cv::Rect(0,j,target_descriptors.cols,1));
 
@@ -205,25 +192,18 @@ int main(int argc, char** argv)
                     if(normalized_score < 0.8)
                     {
                         std::cout << "not tracked" << std::endl;
-//                        std::cout << "choosen_descriptor:\n" << descriptors.row(cv_matches[0].trainIdx) << std::endl;
                     }
                     else
                     {
                         std::cout << "tracked" << std::endl;
-//                        std::cout << "choosen_descriptor:\n" << descriptors.row(cv_matches[0].trainIdx) << std::endl;
-                        matched = true;
 
+                        matched = true;
 
                         cv::Point2f point,t_point;
                         point.x = keypoints[cv_matches[0].trainIdx].pt.x + roi.x;
                         point.y = keypoints[cv_matches[0].trainIdx].pt.y + roi.y;
                         t_point.x = target_keypoints[j].pt.x;
                         t_point.y = target_keypoints[j].pt.y;
-
-
-
-
-
 
                         cv::circle(image_graphics, t_point, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
                         cv::circle(image_graphics, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
@@ -330,7 +310,7 @@ int main(int argc, char** argv)
 
         tracked_keypoints = 0;
         cv::imshow("Feature tracker", image_graphics);
-        cv::waitKey(0);
+        cv::waitKey(1);
 
 //        f++;
 //        capture >> frame[f % buffer_size];

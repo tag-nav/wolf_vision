@@ -127,8 +127,8 @@ IF(OpenCV_FOUND)
     TARGET_LINK_LIBRARIES(test_constraint_AHP ${PROJECT_NAME})
 
     # ORB tracker test
-#    ADD_EXECUTABLE(test_tracker_ORB test_tracker_ORB.cpp)
-#    TARGET_LINK_LIBRARIES(test_tracker_ORB ${PROJECT_NAME})
+    ADD_EXECUTABLE(test_tracker_ORB test_tracker_ORB.cpp)
+    TARGET_LINK_LIBRARIES(test_tracker_ORB ${PROJECT_NAME})
 
     # ORB tracker test
     ADD_EXECUTABLE(test_ROI_ORB test_ROI_ORB.cpp)
