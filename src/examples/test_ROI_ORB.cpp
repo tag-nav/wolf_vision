@@ -4,6 +4,7 @@
 //opencv includes
 #include "opencv2/features2d/features2d.hpp"
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/core/core.hpp>
 
 int main(int argc, char** argv)
@@ -34,7 +35,7 @@ int main(int argc, char** argv)
     unsigned int img_height = image.rows;
     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
 
-    cv::Feature2D* detector_descriptor_ptr_;
+    cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
 
     unsigned int nfeatures = 20;
     float scaleFactor = 1.2;
@@ -45,7 +46,7 @@ int main(int argc, char** argv)
     unsigned int scoreType = 0;              //#enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
     unsigned int patchSize = 31;
 
-    detector_descriptor_ptr_ = new cv::ORB(nfeatures, //
+    detector_descriptor_ptr_ = cv::ORB::create(nfeatures, //
                                            scaleFactor, //
                                            nlevels, //
                                            edgeThreshold, //
