@@ -30,6 +30,7 @@ int main(int argc, char** argv)
 
     // parsing input params
     const char * filename;
+    cv::VideoCapture capture;
     if (argc < 2)
     {
         std::cout << "Please use\n\t./test_opencv <arg> "
@@ -41,16 +42,17 @@ int main(int argc, char** argv)
     else if (std::string(argv[1]) == "0")
     {
         filename = "0"; // camera
+        capture.open(0);
         std::cout << "Input stream from camera " << std::endl;
     }
     else
     {
         filename = argv[1]; // provided through argument
+        capture.open(filename);
         std::cout << "Input video file: " << filename << std::endl;
     }
 
     // Open input stream
-    cv::VideoCapture capture(filename);
     if (!capture.isOpened())  // check if we succeeded
         std::cout << "failed" << std::endl;
     else
@@ -71,12 +73,8 @@ int main(int argc, char** argv)
     cv::moveWindow("Feature tracker", 0, 0);
 
     // set image processors
-//    cv::BRISK detector(30, 0, 1.0);
-//    cv::BRISK descriptor(30, 0, 1.0);
-    cv::BFMatcher matcher(cv::NORM_HAMMING2);
-    cv::ORB detector(1000,1.2,8,16,0,3,0,31);
-    cv::ORB descriptor(1000,1.2,8,16,0,3,0,31);
-//    cv::FlannBasedMatcher matcher;
+    cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr = cv::ORB::create(1000,2,8,16,0,3,0,31);
+    cv::Ptr<cv::DescriptorMatcher> matcher_ptr = cv::DescriptorMatcher::create("BruteForce-Hamming(2)");
 
     // declare all variables
     std::vector<cv::KeyPoint> keypoints_1, keypoints_2;
@@ -88,7 +86,6 @@ int main(int argc, char** argv)
     std::vector<cv::Point2f> inliers_1, inliers_2;
     cv::Mat img_matches;
     cv::Mat img_scaled;
-//    double scale = 1;//0.875;
 
     unsigned int f = 0;
     capture >> image_buffer[f % buffer_size];
@@ -116,10 +113,10 @@ int main(int argc, char** argv)
                 img_2 = image_buffer[(f - buffer_size + 1) % buffer_size];
 
                 // detect and describe in both images
-                detector.detect(img_1, keypoints_1);
-                detector.detect(img_2, keypoints_2);
-                descriptor.compute(img_1, keypoints_1, descriptors_1);
-                descriptor.compute(img_2, keypoints_2, descriptors_2);
+                detector_descriptor_ptr->detect(img_1, keypoints_1);
+                detector_descriptor_ptr->detect(img_2, keypoints_2);
+                detector_descriptor_ptr->compute(img_1, keypoints_1, descriptors_1);
+                detector_descriptor_ptr->compute(img_2, keypoints_2, descriptors_2);
 
                 unsigned int max_dist = 0;
                 unsigned int min_dist = 512;
@@ -128,7 +125,7 @@ int main(int argc, char** argv)
                 {
                     // match (try flann later)
                     //-- Step 3: Matching descriptor vectors using FLANN matcher
-                    matcher.match(descriptors_1, descriptors_2, matches);
+                    matcher_ptr->match(descriptors_1, descriptors_2, matches);
 
                     //-- Quick calculation of max and min distances between keypoints
                     for (int i = 0; i < descriptors_1.rows; i++)
@@ -180,10 +177,7 @@ int main(int argc, char** argv)
                 // Draw RANSAC inliers
                 cv::drawMatches(img_1, keypoints_1, img_2, keypoints_2, inlier_matches, img_matches,
                                 cv::Scalar::all(-1), cv::Scalar::all(-1), std::vector<char>(), 0); //cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-                //-- Show detected matches
-//                resize(img_matches, img_scaled, cv::Size(), scale, scale, cv::INTER_NEAREST);
-//                imshow("Feature tracker", img_1);
-//                imshow("Feature tracker", img_2);
+                // Show detected matches
                 imshow("Feature tracker", img_matches);
 
                 // pause every X images and wait for key
