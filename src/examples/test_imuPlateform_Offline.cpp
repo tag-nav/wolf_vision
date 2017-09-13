@@ -81,7 +81,6 @@ int main(int argc, char** argv)
     ceres_options.max_num_iterations = 1e4;
     CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
 
-
     // SENSOR + PROCESSOR IMU
     SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
     ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();

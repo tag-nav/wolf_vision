@@ -34,11 +34,11 @@ class ConstraintCorner2D: public ConstraintAutodiff<ConstraintCorner2D, 3,2,1,2,
     bool operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkP,
                      const T* const _landmarkO, T* _residuals) const;
 
-        /** \brief Returns the jacobians computation method
-         *
-         * Returns the jacobians computation method
-         *
-         **/
+    /** \brief Returns the jacobians computation method
+     *
+     * Returns the jacobians computation method
+     *
+     **/
     virtual JacobianMethod getJacobianMethod() const override
     {
       return JAC_AUTO;

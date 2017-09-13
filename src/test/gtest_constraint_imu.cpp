@@ -69,7 +69,11 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -154,7 +158,11 @@ class ConstraintIMU_biasTest_Static_NonNullAccBias : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -239,7 +247,11 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -325,7 +337,11 @@ class ConstraintIMU_biasTest_Static_NonNullBias : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -410,7 +426,11 @@ class ConstraintIMU_biasTest_Move_NullBias : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -499,7 +519,11 @@ class ConstraintIMU_biasTest_Move_NonNullBias : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -584,7 +608,11 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -678,7 +706,11 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -780,7 +812,11 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION;
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -881,7 +917,11 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION;
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -1017,7 +1057,11 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot2 : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION;
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -1156,7 +1200,11 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION;
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -1291,7 +1339,11 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION;
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -1491,7 +1543,11 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -1650,7 +1706,11 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasComplex_initOK : public testin
         ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -1809,7 +1869,11 @@ class ConstraintIMU_ODOM_biasTest_Static_NullBiasNoisyComplex_initOK : public te
         ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -1968,7 +2032,11 @@ class ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK : public testin
         ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
         ceres_options.max_line_search_step_contraction = 1e-3;
         ceres_options.max_num_iterations = 1e4;
+<<<<<<< HEAD
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+=======
+        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
+>>>>>>> master
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -2091,7 +2159,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
 
     //wolf_problem_ptr_->print(1,1,1,1);
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //wolf_problem_ptr_->print(1,1,1,1);
 
@@ -2115,7 +2187,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
 
     wolf::Scalar epsilon_bias = 0.0000001;
     Eigen::VectorXs perturbated_origin_state(x_origin);
+<<<<<<< HEAD
     std::string report;
+=======
+    ceres::Solver::Summary summary;
+>>>>>>> master
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-6")
@@ -2127,7 +2203,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2145,7 +2225,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2163,7 +2247,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2183,7 +2271,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         origin_KF->setState(perturbated_origin_state);
         last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+        summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
         //Only biases are unfixed
         ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2207,7 +2299,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_in
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->fix();
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2229,7 +2325,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
 
     wolf::Scalar epsilon_bias = 0.0000001;
     Eigen::VectorXs perturbated_origin_state(x_origin);
+<<<<<<< HEAD
     std::string report;
+=======
+    ceres::Solver::Summary summary;
+>>>>>>> master
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-6")
@@ -2241,7 +2341,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2259,7 +2363,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2277,7 +2385,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2297,7 +2409,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
         origin_KF->setState(perturbated_origin_state);
         last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+        summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
         //Only biases are unfixed
         ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2321,7 +2437,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_i
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->fix();
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2343,7 +2463,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
 
     wolf::Scalar epsilon_bias = 0.0000001;
     Eigen::VectorXs perturbated_origin_state(x_origin);
+<<<<<<< HEAD
     std::string report;
+=======
+    ceres::Solver::Summary summary;
+>>>>>>> master
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-6")
@@ -2355,7 +2479,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2373,7 +2501,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2391,7 +2523,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2411,7 +2547,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
         origin_KF->setState(perturbated_origin_state);
         last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+        summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
         //Only biases are unfixed
         ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2434,7 +2574,12 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
 
     wolf::Scalar epsilon_bias = 0.0000001;
     Eigen::VectorXs perturbated_origin_state(x_origin);
+<<<<<<< HEAD
     std::string report;
+=======
+    ceres::Solver::Summary summary;
+
+>>>>>>> master
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-6")
     epsilon_bias = 0.000001;
@@ -2445,7 +2590,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2463,7 +2612,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2481,7 +2634,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2501,7 +2658,11 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
         origin_KF->setState(perturbated_origin_state);
         last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
+=======
+        summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
         //Only biases are unfixed
         ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2525,7 +2686,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->fix();
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2547,6 +2712,10 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
 
     wolf::Scalar epsilon_bias = 0.0000001;
     Eigen::VectorXs perturbated_origin_state(x_origin);
+<<<<<<< HEAD
+=======
+    ceres::Solver::Summary summary;
+>>>>>>> master
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-6")
@@ -2558,7 +2727,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2576,7 +2749,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2594,7 +2771,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2614,7 +2795,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         origin_KF->setState(perturbated_origin_state);
         last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
+=======
+        summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
         //Only biases are unfixed
         ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2640,7 +2825,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
    // wolf_problem_ptr_->print(4,1,1,1);
 
@@ -2664,6 +2853,10 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
 
     wolf::Scalar epsilon_bias = 0.0000001;
     Eigen::VectorXs perturbated_origin_state(x_origin);
+<<<<<<< HEAD
+=======
+    ceres::Solver::Summary summary;
+>>>>>>> master
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-6")
@@ -2675,7 +2868,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2693,7 +2890,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2711,7 +2912,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2731,7 +2936,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
         origin_KF->setState(perturbated_origin_state);
         last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
         report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+        summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
         //Only biases are unfixed
         ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2757,7 +2966,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_i
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -2781,6 +2994,10 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
 
     wolf::Scalar epsilon_bias = 0.0000001;
     Eigen::VectorXs perturbated_origin_state(x_origin);
+<<<<<<< HEAD
+=======
+    ceres::Solver::Summary summary;
+>>>>>>> master
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-6")
@@ -2792,7 +3009,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2810,7 +3031,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2828,7 +3053,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2848,7 +3077,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
         origin_KF->setState(perturbated_origin_state);
         last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
         report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+        summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
         //Only biases are unfixed
         ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2874,7 +3107,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -2898,6 +3135,10 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
 
     wolf::Scalar epsilon_bias = 0.0000001;
     Eigen::VectorXs perturbated_origin_state(x_origin);
+<<<<<<< HEAD
+=======
+    ceres::Solver::Summary summary;
+>>>>>>> master
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-6")
@@ -2909,7 +3150,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2927,7 +3172,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2945,7 +3194,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     origin_KF->setState(perturbated_origin_state);
     last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
     report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2965,7 +3218,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
         origin_KF->setState(perturbated_origin_state);
         last_KF->setState(expected_final_state);
 
+<<<<<<< HEAD
         report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+        summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
         //Only biases are unfixed
         ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -2989,7 +3246,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst, VarB1B2V1P2V2_InvarP1Q
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->unfix();
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
@@ -3014,7 +3275,11 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q2_ini
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
@@ -3048,7 +3313,11 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2_InvarP1Q1V1P2Q2
 
     //wolf_problem_ptr_->print(4,1,1,1);
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
     ceres_manager_wolf_diff->computeCovariances(ALL);
 
     //wolf_problem_ptr_->print(4,1,1,1);
@@ -3100,7 +3369,11 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V2_InvarP1Q1V1P2
     origin_KF->getAccBiasPtr()->setState(accBias + random_err);
     origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
 
+<<<<<<< HEAD
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+=======
+    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+>>>>>>> master
     ceres_manager_wolf_diff->computeCovariances(ALL);
 
     ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
