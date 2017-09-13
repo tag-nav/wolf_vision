@@ -219,8 +219,8 @@ inline std::string SensorFactory::getClass()
 }
 
 #define WOLF_REGISTER_SENSOR(SensorType, SensorName) \
-  namespace{ const bool SensorName##Registered = \
-    SensorFactory::get().registerCreator(SensorType, SensorName::create); }\
+  namespace{ const bool WOLF_UNUSED SensorName##Registered = \
+    wolf::SensorFactory::get().registerCreator(SensorType, SensorName::create); }\
 
 } /* namespace wolf */
 

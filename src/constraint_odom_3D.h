@@ -20,10 +20,15 @@ WOLF_PTR_TYPEDEFS(ConstraintOdom3D);
 class ConstraintOdom3D : public ConstraintAutodiff<ConstraintOdom3D,6,3,4,3,4>
 {
     public:
-        ConstraintOdom3D(FeatureBasePtr _ftr_current_ptr, FrameBasePtr _frame_past_ptr, bool _apply_loss_function = false,
+        ConstraintOdom3D(const FeatureBasePtr& _ftr_current_ptr,
+                         const FrameBasePtr& _frame_past_ptr,
+                         const ProcessorBasePtr& _processor_ptr = nullptr,
+                         bool _apply_loss_function = false,
                          ConstraintStatus _status = CTR_ACTIVE);
-        virtual ~ConstraintOdom3D();
-        JacobianMethod getJacobianMethod() const {return JAC_AUTO;}
+
+        virtual ~ConstraintOdom3D() = default;
+
+        JacobianMethod getJacobianMethod() const override {return JAC_AUTO;}
 
         template<typename T>
                 bool operator ()(const T* const _p_current,
@@ -69,12 +74,16 @@ inline void ConstraintOdom3D::printRes (const  Eigen::Matrix<Scalar,6,1> & r) co
 }
 
 
-inline ConstraintOdom3D::ConstraintOdom3D(FeatureBasePtr _ftr_current_ptr, FrameBasePtr _frame_past_ptr, bool _apply_loss_function,
+inline ConstraintOdom3D::ConstraintOdom3D(const FeatureBasePtr& _ftr_current_ptr,
+                                          const FrameBasePtr& _frame_past_ptr,
+                                          const ProcessorBasePtr& _processor_ptr,
+                                          bool _apply_loss_function,
                                           ConstraintStatus _status) :
         ConstraintAutodiff<ConstraintOdom3D, 6, 3, 4, 3, 4>(CTR_ODOM_3D,        // type
                                         _frame_past_ptr,    // frame other
                                         nullptr,            // feature other
                                         nullptr,            // landmark other
+                                        _processor_ptr,     // processor
                                         _apply_loss_function,
                                         _status,
                                         _ftr_current_ptr->getFramePtr()->getPPtr(), // current frame P
@@ -82,11 +91,7 @@ inline ConstraintOdom3D::ConstraintOdom3D(FeatureBasePtr _ftr_current_ptr, Frame
                                         _frame_past_ptr->getPPtr(), // past frame P
                                         _frame_past_ptr->getOPtr()) // past frame Q
 {
-    //
-}
-
-inline ConstraintOdom3D::~ConstraintOdom3D()
-{
+    setType("ODOM 3D");
     //
 }
 

@@ -26,13 +26,13 @@ Vector7s pose6toPose7(Vector6s _pose6)
 
 
 // Input pose6 and covariance
-Vector6s pose6(Vector6s::Random());
-Vector7s pose7 = pose6toPose7(pose6);
+Vector6s pose(Vector6s::Random());
+Vector7s pose7 = pose6toPose7(pose);
 Vector6s data_var((Vector6s() << 0.2,0.2,0.2,0.2,0.2,0.2).finished());
 Matrix6s data_cov = data_var.asDiagonal();
 
 // perturbated priors
-Vector7s x0 = pose6toPose7(pose6 + Vector6s::Random()*0.25);
+Vector7s x0 = pose6toPose7(pose + Vector6s::Random()*0.25);
 
 // Problem and solver
 ProblemPtr problem = Problem::create("PO 3D");
@@ -42,10 +42,9 @@ CeresManager ceres_mgr(problem);
 FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeStamp(0));
 
 // Capture, feature and constraint
-CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>(0, nullptr, pose7, 7, 6));
+CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>(0, nullptr, pose7, 7, 7, 6, 0));
 FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("ODOM 3D", pose7, data_cov));
 ConstraintFix3DPtr ctr0 = std::static_pointer_cast<ConstraintFix3D>(fea0->addConstraint(std::make_shared<ConstraintFix3D>(fea0)));
-ConstraintBasePtr dummy = frm0->addConstrainedBy(ctr0);
 
 
 ////////////////////////////////////////////////////////

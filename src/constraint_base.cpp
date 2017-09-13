@@ -16,12 +16,16 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
     apply_loss_function_(_apply_loss_function),
     frame_other_ptr_(), // nullptr
     feature_other_ptr_(), // nullptr
-    landmark_other_ptr_() // nullptr
+    landmark_other_ptr_(), // nullptr
+    processor_ptr_() // nullptr
 {
 //    std::cout << "constructed        +c" << id() << std::endl;
 }
 
-ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr, FeatureBasePtr _feature_other_ptr, LandmarkBasePtr _landmark_other_ptr, bool _apply_loss_function, ConstraintStatus _status) :
+ConstraintBase::ConstraintBase(ConstraintType _tp,
+                               const FrameBasePtr& _frame_other_ptr, const FeatureBasePtr& _feature_other_ptr,
+                               const LandmarkBasePtr& _landmark_other_ptr, const ProcessorBasePtr& _processor_ptr,
+                               bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT", "Base"),
     feature_ptr_(),
     is_removing_(false),
@@ -31,14 +35,10 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, FrameBasePtr _frame_other_ptr
     apply_loss_function_(_apply_loss_function),
     frame_other_ptr_(_frame_other_ptr),
     feature_other_ptr_(_feature_other_ptr),
-    landmark_other_ptr_(_landmark_other_ptr)
+    landmark_other_ptr_(_landmark_other_ptr),
+    processor_ptr_(_processor_ptr)
 {
 //    std::cout << "constructed        +c" << id() << std::endl;
-}
-
-ConstraintBase::~ConstraintBase()
-{
-//    std::cout << "destructed         -c" << id() << std::endl;
 }
 
 void ConstraintBase::remove()

@@ -43,15 +43,21 @@ void ProcessorOdom3D::setup(SensorOdom3DPtr sen_ptr)
     }
 }
 
-void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov, const Scalar _dt)
+void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data,
+                                 const Eigen::MatrixXs& _data_cov,
+                                 const Scalar _dt,
+                                 Eigen::VectorXs& _delta,
+                                 Eigen::MatrixXs& _delta_cov,
+                                 const Eigen::VectorXs& _calib,
+                                 Eigen::MatrixXs& _jacobian_calib)
 {
     assert((_data.size() == 6 || _data.size() == 7) && "Wrong data size. Must be 6 or 7 for 3D.");
     Scalar disp, rot; // displacement and rotation of this motion step
     if (_data.size() == (long int)6)
     {
         // rotation in vector form
-        delta_.head<3>() = _data.head<3>();
-        new (&q_out_) Eigen::Map<Eigen::Quaternions>(delta_.data() + 3);
+        _delta.head<3>() = _data.head<3>();
+        new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta.data() + 3);
         q_out_ = v2q(_data.tail<3>());
         disp = _data.head<3>().norm();
         rot = _data.tail<3>().norm();
@@ -59,7 +65,7 @@ void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eigen::Matr
     else
     {
         // rotation in quaternion form
-        delta_ = _data;
+        _delta = _data;
         disp = _data.head<3>().norm();
         rot = 2 * acos(_data(3));
     }
@@ -83,7 +89,7 @@ void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data, const Eigen::Matr
     Eigen::Matrix6s data_cov(Eigen::Matrix6s::Identity());
     data_cov(0, 0) = data_cov(1, 1) = data_cov(2, 2) = disp_var;
     data_cov(3, 3) = data_cov(4, 4) = data_cov(5, 5) = rot_var;
-    delta_cov_ = data_cov;
+    _delta_cov = data_cov;
 }
 
 void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, const Scalar _Dt2,
@@ -139,13 +145,13 @@ void ProcessorOdom3D::deltaPlusDelta(const Eigen::VectorXs& _delta1, const Eigen
     q_out_ = q1_ * q2_;
 }
 
-void ProcessorOdom3D::xPlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
+void ProcessorOdom3D::statePlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _Dt,
                                  Eigen::VectorXs& _x_plus_delta)
-{
-    assert(_x.size() == x_size_ && "Wrong _x vector size");
+{   
+    assert(_x.size() >= x_size_ && "Wrong _x vector size"); //we need a state vector which size is at least x_size_
     assert(_delta.size() == delta_size_ && "Wrong _delta vector size");
     assert(_x_plus_delta.size() == x_size_ && "Wrong _x_plus_delta vector size");
-    remap(_x, _delta, _x_plus_delta);
+    remap(_x.head(x_size_), _delta, _x_plus_delta); //we take only the x_sixe_ first elements of the state Vectors (Position + Orientation)
     p_out_ = p1_ + q1_ * p2_;
     q_out_ = q1_ * q2_;
 }
@@ -268,10 +274,12 @@ ProcessorBasePtr ProcessorOdom3D::create(const std::string& _unique_name, const 
 
 bool ProcessorOdom3D::voteForKeyFrame()
 {
-//    WOLF_DEBUG( "Time span   : " , getBuffer().get().back().ts_ - getBuffer().get().front().ts_ );
-//    WOLF_DEBUG( "BufferLength: " , getBuffer().get().size() );
-//    WOLF_DEBUG( "DistTraveled: " , delta_integrated_.head(3).norm() );
-//    WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
+    //WOLF_DEBUG( "Time span   : " , getBuffer().get().back().ts_ - getBuffer().get().front().ts_ );
+    //WOLF_DEBUG( " last ts : ", getBuffer().get().back().ts_);
+    //WOLF_DEBUG( " first ts : ", getBuffer().get().front().ts_);
+    //WOLF_DEBUG( "BufferLength: " , getBuffer().get().size() );
+    //WOLF_DEBUG( "DistTraveled: " , delta_integrated_.head(3).norm() );
+    //WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
     // time span
     if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)
     {
@@ -298,7 +306,7 @@ bool ProcessorOdom3D::voteForKeyFrame()
         WOLF_DEBUG( "PM: vote: angle turned" );
         return true;
     }
-    WOLF_DEBUG( "PM: do not vote" );
+    //WOLF_DEBUG( "PM: do not vote" );
     return false;
 }
 

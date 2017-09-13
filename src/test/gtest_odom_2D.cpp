@@ -135,7 +135,7 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     FrameBasePtr        F1 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
     CaptureBasePtr      C1 = F1->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
     FeatureBasePtr      f1 = C1->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
-    ConstraintBasePtr   c1 = f1->addConstraint(std::make_shared<ConstraintOdom2D>(f1, F0));
+    ConstraintBasePtr   c1 = f1->addConstraint(std::make_shared<ConstraintOdom2D>(f1, F0, nullptr));
     F0->addConstrainedBy(c1);
 
     // KF2 and motion from KF1
@@ -144,7 +144,7 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     FrameBasePtr        F2 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
     CaptureBasePtr      C2 = F2->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
     FeatureBasePtr      f2 = C2->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
-    ConstraintBasePtr   c2 = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1));
+    ConstraintBasePtr   c2 = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1, nullptr));
     F1->addConstrainedBy(c2);
 
     ASSERT_TRUE(Pr->check(0));
@@ -194,8 +194,11 @@ TEST(Odom2D, VoteForKfAndSolve)
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
     params->dist_traveled_th_   = 100;
+    params->theta_traveled_th_  = 6.28;
     params->elapsed_time_th_    = 2.5*dt; // force KF at every third process()
     params->cov_det_th_         = 100;
+    params->unmeasured_perturbation_std_ = 0.001;
+    Matrix3s unmeasured_cov = params->unmeasured_perturbation_std_*params->unmeasured_perturbation_std_*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
 
@@ -229,7 +232,7 @@ TEST(Odom2D, VoteForKfAndSolve)
 
     t += dt;
     // Capture to use as container for all incoming data
-    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 7, 6, nullptr);
+    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 2, 3, 3, 0, nullptr);
 
     for (int n=1; n<=N; n++)
     {
@@ -240,7 +243,8 @@ TEST(Odom2D, VoteForKfAndSolve)
         // Processor
         sensor_odom2d->process(capture);
         ASSERT_TRUE(problem->check(0));
-        Matrix3s odom2d_delta_cov = processor_odom2d->integrateBufferCovariance(processor_odom2d->getBuffer());
+//        Matrix3s odom2d_delta_cov = processor_odom2d->integrateBufferCovariance(processor_odom2d->getBuffer());
+        Matrix3s odom2d_delta_cov = processor_odom2d->getMotion().delta_integr_cov_;
         //        std::cout << "State(" << (t - t0) << ") : " << processor_odom2d->getCurrentState().transpose() << std::endl;
         //        std::cout << "PRC  cov: \n" << odom2d_delta_cov << std::endl;
 
@@ -255,7 +259,7 @@ TEST(Odom2D, VoteForKfAndSolve)
             Ju = plus_jac_u(integrated_delta, data);
             Jx = plus_jac_x(integrated_delta, data);
             integrated_delta = plus(integrated_delta, data);
-            integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
+            integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose() + unmeasured_cov;
         }
 
         ASSERT_POSE2D_APPROX(processor_odom2d->getMotion().delta_integr_, integrated_delta, 1e-6);
@@ -265,7 +269,7 @@ TEST(Odom2D, VoteForKfAndSolve)
         Ju = plus_jac_u(integrated_pose, data);
         Jx = plus_jac_x(integrated_pose, data);
         integrated_pose = plus(integrated_pose, data);
-        integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
+        integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose() + unmeasured_cov;
 
         ASSERT_POSE2D_APPROX(processor_odom2d->getCurrentState(), integrated_pose, 1e-6);
 
@@ -311,9 +315,12 @@ TEST(Odom2D, KF_callback)
     ProblemPtr problem = Problem::create("PO 2D");
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
-    params->dist_traveled_th_   = 100; // don't make keyframes
+    params->dist_traveled_th_   = 100;
+    params->theta_traveled_th_  = 6.28;
     params->elapsed_time_th_    = 100;
     params->cov_det_th_         = 100;
+    params->unmeasured_perturbation_std_ = 0.001;
+    Matrix3s unmeasured_cov = params->unmeasured_perturbation_std_*params->unmeasured_perturbation_std_*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
 
@@ -340,7 +347,7 @@ TEST(Odom2D, KF_callback)
 //    std::cout << "\nIntegrating data..." << std::endl;
 
     // Capture to use as container for all incoming data
-    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 7, 6, nullptr);
+    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 2, 3, 3, 0, nullptr);
 
     for (int n=1; n<=N; n++)
     {
@@ -357,13 +364,13 @@ TEST(Odom2D, KF_callback)
         Ju = plus_jac_u(integrated_delta, data);
         Jx = plus_jac_x(integrated_delta, data);
         integrated_delta = plus(integrated_delta, data);
-        integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
+        integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose() + unmeasured_cov;
 
         // Integrate pose
         Ju = plus_jac_u(integrated_pose, data);
         Jx = plus_jac_x(integrated_pose, data);
         integrated_pose = plus(integrated_pose, data);
-        integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose();
+        integrated_cov = Jx * integrated_cov * Jx.transpose() + Ju * data_cov * Ju.transpose() + unmeasured_cov;
 
         // Store integrals
         integrated_pose_vector.push_back(integrated_pose);
@@ -404,6 +411,7 @@ TEST(Odom2D, KF_callback)
     t_split = t0 + m_split*dt;
 //    std::cout << "-----------------------------\nSplit between KFs; time: " << t_split - t0 << std::endl;
 
+//    problem->print(4,1,1,0);
 
     x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
@@ -427,12 +435,22 @@ TEST(Odom2D, KF_callback)
 //    show(problem);
 
     // check the split KF
-    ASSERT_POSE2D_APPROX(keyframe_1->getState()                 , integrated_pose_vector[m_split], 1e-6);
-    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_1) , integrated_cov_vector [m_split], 1e-6);
+    ASSERT_POSE2D_APPROX(keyframe_1->getState()                  , integrated_pose_vector[m_split], 1e-6);
+    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_1) , integrated_cov_vector [m_split], 1e-6); // FIXME test does not pass
 
     // check other KF in the future of the split KF
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
-    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_2)    , integrated_cov_vector [n_split], 1e-6);
+    ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_2)   , integrated_cov_vector [n_split], 1e-6);
+
+    // Check full trajectory
+    t = t0;
+    for (int n=1; n<=N; n++)
+    {
+        t += dt;
+        //        WOLF_DEBUG("   estimated(", t, ") = ", problem->getState(t).transpose());
+        //        WOLF_DEBUG("ground truth(", t, ") = ", integrated_pose_vector[n].transpose());
+        ASSERT_MATRIX_APPROX(problem->getState(t), integrated_pose_vector[n], 1e-6);
+    }
 }
 
 

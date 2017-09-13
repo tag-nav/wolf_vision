@@ -27,7 +27,7 @@ WOLF_PTR_TYPEDEFS(ConstraintGPSPseudorange2D);
 class ConstraintGPSPseudorange2D : public ConstraintAutodiff<ConstraintGPSPseudorange2D, 1, 2, 1, 3, 1, 3, 1>
 {
     public:
-        ConstraintGPSPseudorange2D(FeatureBasePtr _ftr_ptr, 
+        ConstraintGPSPseudorange2D(const FeatureBasePtr& _ftr_ptr,
                                    bool _apply_loss_function = false, 
                                    ConstraintStatus _status = CTR_ACTIVE) :
            ConstraintAutodiff<ConstraintGPSPseudorange2D, 1, 2, 1, 3, 1, 3, 1>(CTR_GPS_PR_2D,
@@ -47,10 +47,7 @@ class ConstraintGPSPseudorange2D : public ConstraintAutodiff<ConstraintGPSPseudo
             //std::cout << "ConstraintGPSPseudorange2D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
         }
 
-        virtual ~ConstraintGPSPseudorange2D()
-        {
-            //std::cout << "deleting ConstraintGPSPseudorange2D " << id() << std::endl;
-        }
+        virtual ~ConstraintGPSPseudorange2D() = default;
 
         template<typename T>
         bool operator ()(const T* const _vehicle_p, const T* const _vehicle_o, const T* const _sensor_p,
@@ -62,7 +59,7 @@ class ConstraintGPSPseudorange2D : public ConstraintAutodiff<ConstraintGPSPseudo
         * Returns the jacobians computation method
         *
         **/
-        virtual JacobianMethod getJacobianMethod() const
+        virtual JacobianMethod getJacobianMethod() const override
         {
             return JAC_AUTO;
         }

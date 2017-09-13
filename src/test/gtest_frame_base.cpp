@@ -12,6 +12,7 @@
 
 #include "../frame_base.h"
 #include "../sensor_odom_2D.h"
+#include "../processor_odom_2D.h"
 #include "../constraint_odom_2D.h"
 #include "../capture_motion.h"
 
@@ -73,11 +74,13 @@ TEST(FrameBase, LinksToTree)
     T->addFrame(F1);
     FrameBasePtr F2 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
     T->addFrame(F2);
-    CaptureMotionPtr C = make_shared<CaptureMotion>(1, S, Vector3s::Zero(), 3, 3);
+    CaptureMotionPtr C = make_shared<CaptureMotion>(1, S, Vector3s::Zero(), 3, 3, 3, 0);
     F1->addCapture(C);
+    /// @todo link sensor & proccessor
+    ProcessorBasePtr p = std::make_shared<ProcessorOdom2D>();
     FeatureBasePtr f = make_shared<FeatureBase>("f", Vector1s(1), Matrix<Scalar,1,1>::Identity()*.01);
     C->addFeature(f);
-    ConstraintOdom2DPtr c = make_shared<ConstraintOdom2D>(f, F2);
+    ConstraintOdom2DPtr c = make_shared<ConstraintOdom2D>(f, F2, p);
     f->addConstraint(c);
 
     // c-by link F2 -> c not yet established

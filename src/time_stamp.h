@@ -254,6 +254,8 @@ inline TimeStamp TimeStamp::operator +(const Scalar& dt) const
     return TimeStamp(time_stamp_ + dt);
 }
 
+static const TimeStamp InvalidStamp(-1,-1);
+
 } // namespace wolf
 
 #endif

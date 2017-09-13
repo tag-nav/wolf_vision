@@ -4,24 +4,57 @@
 // Wolf
 #include "processor_motion.h"
 #include "frame_imu.h"
+#include "capture_imu.h"
+#include "feature_imu.h"
 
 
 namespace wolf {
-    
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorIMUParams);
+
+struct ProcessorIMUParams : public ProcessorParamsBase
+{
+        Scalar max_time_span;
+        Size   max_buff_length;
+        Scalar dist_traveled;
+        Scalar angle_turned;
+        bool voting_active; //IMU will not vote for key Frames to be created
+
+
+        ProcessorIMUParams() :
+            max_time_span(0.5),
+            max_buff_length(10),
+            dist_traveled(5),
+            angle_turned(.5),
+            voting_active(false)
+        {
+            type = "IMU";
+            name = "";
+        }
+};
+
 WOLF_PTR_TYPEDEFS(ProcessorIMU);
     
 //class
 class ProcessorIMU : public ProcessorMotion{
     public:
-        ProcessorIMU();
+        ProcessorIMU(ProcessorIMUParamsPtr _params = nullptr);
         virtual ~ProcessorIMU();
 
         //void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
 
     protected:
+        virtual void getCalibration(VectorXs& _bias)
+        {
+            FrameIMUPtr frame_imu = std::static_pointer_cast<FrameIMU>(getOriginPtr()->getFramePtr());
+            _bias << frame_imu->getAccBiasPtr()->getState() , frame_imu->getGyroBiasPtr()->getState();
+        }
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
-                                const Scalar _dt);
+                                const Scalar _dt,
+                                Eigen::VectorXs& _delta,
+                                Eigen::MatrixXs& _delta_cov,
+                                const Eigen::VectorXs& _calib,
+                                Eigen::MatrixXs& _jacobian_calib);
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
                                     const Eigen::VectorXs& _delta,
                                     const Scalar _dt,
@@ -32,19 +65,30 @@ class ProcessorIMU : public ProcessorMotion{
                                     Eigen::VectorXs& _delta_preint_plus_delta,
                                     Eigen::MatrixXs& _jacobian_delta_preint,
                                     Eigen::MatrixXs& _jacobian_delta);
-        virtual void xPlusDelta(const Eigen::VectorXs& _x,
+        virtual void statePlusDelta(const Eigen::VectorXs& _x,
                                 const Eigen::VectorXs& _delta,
                                 const Scalar _dt,
                                 Eigen::VectorXs& _x_plus_delta );
         virtual Eigen::VectorXs deltaZero() const;
+        virtual VectorXs correctDelta(const Motion& _motion, const CaptureMotionPtr _capture);
         virtual Motion interpolate(const Motion& _motion_ref,
                                    Motion& _motion,
                                    TimeStamp& _ts);
+        virtual bool voteForKeyFrame();
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
                                                    FrameBasePtr _frame_origin);
+        virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, 
+                                                    FrameBasePtr _related_frame);
         void resetDerived();
 
     protected:
+
+        // keyframe voting parameters
+        Scalar max_time_span_;  // maximum time between keyframes
+        Size   max_buff_length_;// maximum buffer size before keyframe
+        Scalar dist_traveled_;  // maximum linear motion between keyframes
+        Scalar angle_turned_;   // maximum rotation between keyframes
+        bool voting_active_;    // IMU will be voting for KeyFrame only if this is true
 
         // Casted pointer to IMU frame
         FrameIMUPtr frame_imu_ptr_;
@@ -53,8 +97,8 @@ class ProcessorIMU : public ProcessorMotion{
         const Eigen::Vector3s gravity_;
 
         // Biases in the first keyframe's state for pre-integration
-        Eigen::Vector3s acc_bias_;
-        Eigen::Vector3s gyro_bias_;
+        Eigen::Map<Eigen::Vector3s> acc_bias_;
+        Eigen::Map<Eigen::Vector3s> gyro_bias_;
 
         // Maps to the received measurements
         Eigen::Map<Eigen::Vector3s> acc_measured_;
@@ -68,20 +112,18 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Map<const Eigen::Quaternions> Dq_, dq_;
         Eigen::Map<Eigen::Quaternions> Dq_out_;
 
-        ///Jacobians of preintegrated delta wrt IMU biases
-        Eigen::Matrix3s dDp_dab_;
-        Eigen::Matrix3s dDv_dab_;
-        Eigen::Matrix3s dDp_dwb_;
-        Eigen::Matrix3s dDv_dwb_;
-        Eigen::Matrix3s dDq_dwb_;
-
         // Helper functions to remap several magnitudes
         virtual void remapPQV(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
         virtual void remapDelta(Eigen::VectorXs& _delta_out);
         virtual void remapData(const Eigen::VectorXs& _data);
 
-
     public:
+        //getters
+        Scalar getMaxTimeSpan() const;
+        Scalar getMaxBuffLength() const;
+        Scalar getDistTraveled() const;
+        Scalar getAngleTurned() const;
+        //for factory
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 };
 
@@ -101,14 +143,24 @@ namespace wolf{
 
 inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
                                      const Eigen::MatrixXs& _data_cov,
-                                     const Scalar _dt)
+                                     const Scalar _dt,
+                                     Eigen::VectorXs& _delta,
+                                     Eigen::MatrixXs& _delta_cov,
+                                     const Eigen::VectorXs& _calib,
+                                     Eigen::MatrixXs& _jacobian_calib)
 {
     assert(_data.size() == data_size_ && "Wrong data size!");
 
-    // remap
-    remapData(_data);
-    remapDelta(delta_);
-    // delta_ is D*_out_
+    using namespace Eigen;
+
+    // remap data
+    new (&acc_measured_) Map<const Vector3s>(_data.data());
+    new (&gyro_measured_) Map<const Vector3s>(_data.data() + 3);
+
+    // remap delta_ is D*_out_
+    new (&Dp_out_) Map<Vector3s>      (_delta.data() + 0);
+    new (&Dq_out_) Map<Quaternions>   (_delta.data() + 3);
+    new (&Dv_out_) Map<Vector3s>      (_delta.data() + 7);
 
     /* MATHS of delta creation -- Sola-16
      * dp = 1/2 * (a-a_b) * dt^2 = 1/2 * dv * dt
@@ -117,15 +169,16 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
      */
 
     // acc and gyro measurements corrected with the estimated bias
-    Eigen::Vector3s a = acc_measured_  - acc_bias_;
-    Eigen::Vector3s w = gyro_measured_ - gyro_bias_;
+    Vector3s a = acc_measured_  - _calib.head(3);
+    Vector3s w = gyro_measured_ - _calib.tail(3);
 
     // create delta
     Dv_out_ = a * _dt;
     Dp_out_ = Dv_out_ * _dt / 2;
     Dq_out_ = v2q(w * _dt);
 
-    //Compute jacobian of delta wrt data noise
+
+    //Compute jacobian of delta wrt data
 
     /* MATHS : jacobian dd_dn, of delta wrt noise
      * substituting a and w respectively by (a+a_n) and (w+w_n) (measurement noise is additive)
@@ -136,10 +189,10 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
      */
 
     // we go the sparse way:
-    Eigen::Matrix3s ddv_dan = Eigen::Matrix3s::Identity() * _dt;
-    Eigen::Matrix3s ddp_dan = ddv_dan * _dt / 2;
-    //    Eigen::Matrix3s ddo_dwn = jac_SO3_right(w * _dt) * _dt; // Since w*dt is small, we could use here  Jr(wdt) ~ (I - 0.5*[wdt]_x)  and go much faster.
-    Eigen::Matrix3s ddo_dwn = (Eigen::Matrix3s::Identity() - 0.5 * skew(w * _dt) ) * _dt; // voila, the comment above is this
+    Matrix3s ddv_dan = Matrix3s::Identity() * _dt;
+    Matrix3s ddp_dan = ddv_dan * _dt / 2;
+    Matrix3s ddo_dwn = jac_SO3_right(w * _dt) * _dt; // Since w*dt is small, we could use here  Jr(wdt) ~ (I - 0.5*[wdt]_x)  and go much faster.
+    //    Matrix3s ddo_dwn = (Matrix3s::Identity() - 0.5 * skew(w * _dt) ) * _dt; // voila, the comment above is this
 
     /* Covariance is sparse:
      *       [ Cpp   0   Cpv
@@ -148,11 +201,22 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
      *
      * where Cpp, Cpv, Coo and Cvv are computed below
      */
-    delta_cov_.block<3,3>(0,0).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddp_dan.transpose(); // Cpp = ddp_dan * Caa * ddp_dan'
-    delta_cov_.block<3,3>(0,6).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cpv = ddp_dan * Caa * ddv_dan'
-    delta_cov_.block<3,3>(3,3).noalias() = ddo_dwn*_data_cov.block<3,3>(3,3)*ddo_dwn.transpose(); // Coo = ddo_dwn * Cww * ddo_dwn'
-    delta_cov_.block<3,3>(6,0)           = delta_cov_.block<3,3>(0,6).transpose();                // Cvp = Cpv'
-    delta_cov_.block<3,3>(6,6).noalias() = ddv_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cvv = ddv_dan * Caa * ddv_dan'
+    _delta_cov.block<3,3>(0,0).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddp_dan.transpose(); // Cpp = ddp_dan * Caa * ddp_dan'
+    _delta_cov.block<3,3>(0,6).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cpv = ddp_dan * Caa * ddv_dan'
+    _delta_cov.block<3,3>(3,3).noalias() = ddo_dwn*_data_cov.block<3,3>(3,3)*ddo_dwn.transpose(); // Coo = ddo_dwn * Cww * ddo_dwn'
+    _delta_cov.block<3,3>(6,0)           = _delta_cov.block<3,3>(0,6).transpose();                // Cvp = Cpv'
+    _delta_cov.block<3,3>(6,6).noalias() = ddv_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cvv = ddv_dan * Caa * ddv_dan'
+
+
+    /* Jacobians of delta wrt calibration parameters -- bias
+     * We know that d_(meas - bias)/d_bias = -I
+     * so d_delta/d_bias = - d_delta/d_meas
+     * we assign only the non-null ones
+     */
+    _jacobian_calib.setZero(delta_cov_size_,calib_size_); // can be commented usually, more sure this way
+    _jacobian_calib.block(0,0,3,3) = - ddp_dan;
+    _jacobian_calib.block(3,3,3,3) = - ddo_dwn;
+    _jacobian_calib.block(6,0,3,3) = - ddv_dan;
 
 }
 
@@ -215,23 +279,25 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
      */
 
     // Some useful temporaries
-    Eigen::Matrix3s DR = Dq_.matrix(); // First  Delta, DR
-    Eigen::Matrix3s dR = dq_.matrix(); // Second delta, dR
+    Matrix3s DR = Dq_.matrix(); // First  Delta, DR
+    Matrix3s dR = dq_.matrix(); // Second delta, dR
 
     // Jac wrt preintegrated delta, D_D = dD'/dD
-//    _jacobian_delta_preint.block<6,6>(0,0).setIdentity(6,6);                     // dDp'/dDp, dDv'/dDv, Identities
+    _jacobian_delta_preint.block<6,6>(0,0).setIdentity(6,6);                    // dDp'/dDp, dDv'/dDv, Identities
     _jacobian_delta_preint.block<3,3>(0,3).noalias() = - DR * skew(dp_) ;       // dDp'/dDo
-    _jacobian_delta_preint.block<3,3>(0,6) = Eigen::Matrix3s::Identity() * _dt; // dDp'/dDv = I*dt
+    _jacobian_delta_preint.block<3,3>(0,6) = Matrix3s::Identity() * _dt; // dDp'/dDv = I*dt
     _jacobian_delta_preint.block<3,3>(3,3) =   dR.transpose();                  // dDo'/dDo
     _jacobian_delta_preint.block<3,3>(6,3).noalias() = - DR * skew(dv_) ;       // dDv'/dDo
 
     // Jac wrt current delta, D_d = dD'/dd
-//    _jacobian_delta.setIdentity(9,9);                                           //
+    _jacobian_delta.setIdentity(9,9);                                           //
     _jacobian_delta.block<3,3>(0,0) = DR;                                       // dDp'/ddp
     _jacobian_delta.block<3,3>(6,6) = DR;                                       // dDv'/ddv
-//    _jacobian_delta.block<3,3>(3,3) = Eigen::Matrix3s::Identity();        // dDo'/ddo = I
+    _jacobian_delta.block<3,3>(3,3) = Matrix3s::Identity();        // dDo'/ddo = I
 
 
+
+    // DONE This needs to go out of here, Jac_calib is already taken care of by ProcessorMotion
 
      /*////////////////////////////////////////////////////////
       * 2. Integrate the Jacobians wrt the biases --
@@ -246,19 +312,25 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
       */
 
     // acc and gyro measurements corrected with the estimated bias
-    Eigen::Vector3s a = acc_measured_  - acc_bias_;
-    Eigen::Vector3s w = gyro_measured_ - gyro_bias_;
-
-    // temporaries
-    Scalar dt2_2            = 0.5 * _dt * _dt;
-    Eigen::Matrix3s M_tmp   = DR * skew(a) * dDq_dwb_;
-
-    dDp_dab_.noalias()  += dDv_dab_ * _dt -  DR * dt2_2;
-    dDv_dab_            -= DR * _dt;
-    dDp_dwb_.noalias()  += dDv_dwb_ * _dt - M_tmp * dt2_2;
-    dDv_dwb_            -= M_tmp * _dt;
-    //    dDq_dwb_       = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16 -- we'll use small angle aprox below:
-    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Eigen::Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
+//    Vector3s a = acc_measured_  - acc_bias_;
+//    Vector3s w = gyro_measured_ - gyro_bias_;
+//
+//    // temporaries
+//    Scalar dt2_2         = 0.5 * _dt * _dt;
+//    Matrix3s M_tmp       = DR * skew(a) * dDq_dwb_;
+//
+//    dDp_dab_.noalias()  += dDv_dab_ * _dt -    DR * dt2_2;
+//    dDv_dab_            -=       DR * _dt;
+//    dDp_dwb_.noalias()  += dDv_dwb_ * _dt - M_tmp * dt2_2;
+//    dDv_dwb_            -=    M_tmp * _dt;
+//    dDq_dwb_             = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16 -- we'll use small angle aprox below:
+//    //    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
+//
+//    jacobian_calib_.block(0,0,3,3) = dDp_dab_;
+//    jacobian_calib_.block(0,3,3,3) = dDp_dwb_;
+//    jacobian_calib_.block(3,3,3,3) = dDq_dwb_;
+//    jacobian_calib_.block(6,0,3,3) = dDv_dab_;
+//    jacobian_calib_.block(6,3,3,3) = dDv_dwb_;
 
 
     /*//////////////////////////////////////////////////////////////////////////
@@ -303,7 +375,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
     Dq_out_ = Dq_ * dq_;
 }
 
-inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x,
+inline void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x,
                                      const Eigen::VectorXs& _delta,
                                      const Scalar _dt,
                                      Eigen::VectorXs& _x_plus_delta)
@@ -314,7 +386,7 @@ inline void ProcessorIMU::xPlusDelta(const Eigen::VectorXs& _x,
     assert(_dt >= 0 && "Time interval _Dt is negative!");
 
 
-    Eigen::Vector3s gdt = gravity_ * _dt;
+    Vector3s gdt = gravity_ * _dt;
 
     // state updates
     remapPQV(_x, _delta, _x_plus_delta);
@@ -334,18 +406,6 @@ inline Eigen::VectorXs ProcessorIMU::deltaZero() const
     return (Eigen::VectorXs(10) << 0,0,0,  0,0,0,1,  0,0,0 ).finished(); // p, q, v
 }
 
-inline Motion ProcessorIMU::interpolate(const Motion& _motion_ref,
-                                        Motion& _motion,
-                                        TimeStamp& _ts)
-{
-    Motion tmp(_motion_ref);
-    tmp.ts_ = _ts;
-    tmp.delta_ = deltaZero();
-    tmp.delta_cov_ = Eigen::MatrixXs::Zero(delta_size_, delta_size_);
-    return tmp;
-}
-
-
 inline void ProcessorIMU::resetDerived()
 {
     // Cast a pointer to origin IMU frame
@@ -354,20 +414,13 @@ inline void ProcessorIMU::resetDerived()
     // Assign biases for the integration at the origin frame's biases
     acc_bias_  = frame_imu_ptr_->getAccBiasPtr()->getState(); // acc  bias
     gyro_bias_ = frame_imu_ptr_->getGyroBiasPtr()->getState(); // gyro bias
-
-    // reset jacobians wrt bias
-    dDp_dab_.setZero();
-    dDv_dab_.setZero();
-    dDp_dwb_.setZero();
-    dDv_dwb_.setZero();
-    dDq_dwb_.setZero();
 }
 
 inline ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
 {
     FeatureIMUPtr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
     FrameIMUPtr frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
-    ConstraintIMUPtr ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu);
+    ConstraintIMUPtr ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu, shared_from_this());
 
     _feature_motion->addConstraint(ctr_imu);
     _frame_origin->addConstrainedBy(ctr_imu);
@@ -375,44 +428,72 @@ inline ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature
     return ctr_imu;
 }
 
+inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame)
+{
+    // CaptureIMUPtr capt_imu = std::static_pointer_cast<CaptureIMU>(_capture_motion);
+    FrameIMUPtr key_frame_ptr = std::static_pointer_cast<FrameIMU>(_related_frame);
+    // create motion feature and add it to the key_capture
+//    MatrixXs delta_integr_cov(integrateBufferCovariance(_capture_motion->getBuffer()));
+    FeatureIMUPtr key_feature_ptr = std::make_shared<FeatureIMU>(
+            _capture_motion->getBuffer().get().back().delta_integr_,
+            _capture_motion->getBuffer().get().back().delta_integr_cov_,
+            key_frame_ptr->getAccBiasPtr()->getState(),
+            key_frame_ptr->getGyroBiasPtr()->getState(),
+            _capture_motion->getBuffer().get().back().jacobian_calib_);
+    _capture_motion->addFeature(key_feature_ptr);
+
+    return key_feature_ptr;
+}
+
 inline void ProcessorIMU::remapPQV(const Eigen::VectorXs& _delta1,
                                    const Eigen::VectorXs& _delta2,
                                    Eigen::VectorXs& _delta_out)
 {
-    new (&Dp_) Eigen::Map<const Eigen::Vector3s>    (_delta1.data() + 0);
-    new (&Dq_) Eigen::Map<const Eigen::Quaternions> (_delta1.data() + 3);
-    new (&Dv_) Eigen::Map<const Eigen::Vector3s>    (_delta1.data() + 7);
+    new (&Dp_) Map<const Vector3s>    (_delta1.data() + 0);
+    new (&Dq_) Map<const Quaternions> (_delta1.data() + 3);
+    new (&Dv_) Map<const Vector3s>    (_delta1.data() + 7);
 
-    new (&dp_) Eigen::Map<const Eigen::Vector3s>    (_delta2.data() + 0);
-    new (&dq_) Eigen::Map<const Eigen::Quaternions> (_delta2.data() + 3);
-    new (&dv_) Eigen::Map<const Eigen::Vector3s>    (_delta2.data() + 7);
+    new (&dp_) Map<const Vector3s>    (_delta2.data() + 0);
+    new (&dq_) Map<const Quaternions> (_delta2.data() + 3);
+    new (&dv_) Map<const Vector3s>    (_delta2.data() + 7);
 
-    new (&Dp_out_) Eigen::Map<Eigen::Vector3s>      (_delta_out.data() + 0);
-    new (&Dq_out_) Eigen::Map<Eigen::Quaternions>   (_delta_out.data() + 3);
-    new (&Dv_out_) Eigen::Map<Eigen::Vector3s>      (_delta_out.data() + 7);
+    new (&Dp_out_) Map<Vector3s>      (_delta_out.data() + 0);
+    new (&Dq_out_) Map<Quaternions>   (_delta_out.data() + 3);
+    new (&Dv_out_) Map<Vector3s>      (_delta_out.data() + 7);
 }
 
 inline void ProcessorIMU::remapDelta(Eigen::VectorXs& _delta_out)
 {
-    new (&Dp_out_) Eigen::Map<Eigen::Vector3s>      (_delta_out.data() + 0);
-    new (&Dq_out_) Eigen::Map<Eigen::Quaternions>   (_delta_out.data() + 3);
-    new (&Dv_out_) Eigen::Map<Eigen::Vector3s>      (_delta_out.data() + 7);
+    new (&Dp_out_) Map<Vector3s>      (_delta_out.data() + 0);
+    new (&Dq_out_) Map<Quaternions>   (_delta_out.data() + 3);
+    new (&Dv_out_) Map<Vector3s>      (_delta_out.data() + 7);
 }
 
 inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
 {
-    new (&acc_measured_) Eigen::Map<const Eigen::Vector3s>(_data.data());
-    new (&gyro_measured_) Eigen::Map<const Eigen::Vector3s>(_data.data() + 3);
+    new (&acc_measured_) Map<const Vector3s>(_data.data());
+    new (&gyro_measured_) Map<const Vector3s>(_data.data() + 3);
 }
 
-/*void ProcessorIMU::getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb)
+inline Scalar ProcessorIMU::getMaxTimeSpan() const
 {
-    _dDp_dab = dDp_dab_;
-    _dDv_dab = dDv_dab_;
-    _dDp_dwb = dDp_dwb_;
-    _dDv_dwb = dDv_dwb_;
-    _dDq_dwb = dDq_dwb_;
-}*/
+    return max_time_span_;
+}
+
+inline Scalar ProcessorIMU::getMaxBuffLength() const
+{
+    return max_buff_length_;
+}
+
+inline Scalar ProcessorIMU::getDistTraveled() const
+{
+    return dist_traveled_;
+}
+
+inline Scalar ProcessorIMU::getAngleTurned() const
+{
+    return angle_turned_;
+}
 
 } // namespace wolf
 

@@ -248,6 +248,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
             if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
                 new_ctr_ptr = std::make_shared<ConstraintPoint2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
                                                                   std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
+                                                                  ctr_point_ptr->getProcessor(),
                                                                   ctr_point_ptr->getFeaturePointId(),
                                                                   _remain_id,
                                                                   ctr_point_ptr->getApplyLossFunction(),
@@ -261,6 +262,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
             if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
                 new_ctr_ptr = std::make_shared<ConstraintPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
                                                                         std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
+                                                                        ctr_point_ptr->getProcessor(),
                                                                         ctr_point_ptr->getFeaturePointId(),
                                                                         _remain_id,
                                                                         ctr_point_ptr->getLandmarkPointAuxId(),
@@ -270,6 +272,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
             else if (ctr_point_ptr->getLandmarkPointAuxId() == _remove_id)
                 new_ctr_ptr = std::make_shared<ConstraintPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
                                                                         std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
+                                                                        ctr_point_ptr->getProcessor(),
                                                                         ctr_point_ptr->getFeaturePointId(),
                                                                         ctr_point_ptr->getLandmarkPointId(),
                                                                         _remain_id,
@@ -386,7 +389,7 @@ YAML::Node LandmarkPolyline2D::saveToYaml() const
 // Register landmark creator
 namespace
 {
-const bool registered_lmk_polyline_2D = LandmarkFactory::get().registerCreator("POLYLINE 2D", LandmarkPolyline2D::create);
+const bool WOLF_UNUSED registered_lmk_polyline_2D = LandmarkFactory::get().registerCreator("POLYLINE 2D", LandmarkPolyline2D::create);
 }
 
 } /* namespace wolf */

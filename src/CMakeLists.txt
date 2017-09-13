@@ -10,7 +10,7 @@ MESSAGE(STATUS ${CMAKE_MODULE_PATH})
 
 # Some wolf compilation options
 
-IF((CMAKE_BUILD_TYPE MATCHES DEBUG) OR (CMAKE_BUILD_TYPE MATCHES debug))
+IF((CMAKE_BUILD_TYPE MATCHES DEBUG) OR (CMAKE_BUILD_TYPE MATCHES debug) OR (CMAKE_BUILD_TYPE MATCHES Debug))
   set(_WOLF_DEBUG true)
 ENDIF()
 
@@ -155,8 +155,9 @@ ENDIF(YAMLCPP_FOUND)
 SET(HDRS_BASE
     capture_base.h
     constraint_analytic.h
-    constraint_base.h
     constraint_autodiff.h
+    constraint_base.h
+    factory.h
     feature_base.h
     feature_match.h
     frame_base.h
@@ -198,10 +199,11 @@ SET(HDRS
     capture_void.h
     constraint_container.h
     constraint_corner_2D.h
-    #constraint_epipolar.h
     constraint_AHP.h
+    constraint_epipolar.h
     constraint_imu.h
     constraint_fix.h
+    constraint_fix_bias.h
     constraint_fix_3D.h
     constraint_gps_2D.h
     constraint_gps_pseudorange_3D.h
@@ -369,9 +371,10 @@ IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         active_search.h
         capture_image.h
+        constraint_AHP.h
         feature_point_image.h
         landmark_AHP.h
-    	landmark_point_3d.h
+        landmark_point_3d.h
         processor_image_feature.h
         processor_image_landmark.h
         )
@@ -380,7 +383,7 @@ IF (OpenCV_FOUND)
         capture_image.cpp
         feature_point_image.cpp
         landmark_AHP.cpp
-    	landmark_point_3d.cpp
+        landmark_point_3d.cpp
         processor_image_feature.cpp
         processor_image_landmark.cpp
         )
@@ -396,14 +399,14 @@ IF(YAMLCPP_FOUND)
     SET(HDRS ${HDRS}
         yaml/yaml_conversion.h
         )
-        
-    
 
     # sources
     SET(SRCS ${SRCS}
         yaml/processor_odom_3D_yaml.cpp
+        yaml/processor_imu_yaml.cpp
         yaml/sensor_camera_yaml.cpp
         yaml/sensor_odom_3D_yaml.cpp
+        yaml/sensor_imu_yaml.cpp
         )
     IF(laser_scan_utils_FOUND)
         SET(SRCS ${SRCS}

@@ -5,11 +5,24 @@
 
 namespace wolf {
 
-SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _a_w_biases_ptr) :
-        SensorBase("IMU", _p_ptr, _o_ptr, _a_w_biases_ptr, 6)
+SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr) :
+        SensorBase("IMU", _p_ptr, _o_ptr, nullptr, 6)
 {
     //
 }
+
+SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPtr params) :
+        SensorBase("IMU", _p_ptr, _o_ptr, nullptr, (Eigen::Vector6s()<<params->a_noise,params->a_noise,params->a_noise,params->w_noise,params->w_noise,params->w_noise).finished()),
+        w_noise(params->w_noise),
+        a_noise(params->a_noise),
+        ab_initial_stdev(params->ab_initial_stdev),
+        wb_initial_stdev(params->wb_initial_stdev),
+        ab_rate_stdev(params->ab_rate_stdev),
+        wb_rate_stdev(params->wb_rate_stdev)
+{
+    //
+}
+
 
 SensorIMU::~SensorIMU()
 {
@@ -25,9 +38,9 @@ SensorBasePtr SensorIMU::create(const std::string& _unique_name, const Eigen::Ve
 
     StateBlockPtr pos_ptr  = std::make_shared<StateBlock>(_extrinsics_pq.head(3), true);
     StateBlockPtr ori_ptr  = std::make_shared<StateQuaternion>(_extrinsics_pq.tail(4), true);
-    StateBlockPtr bias_ptr = std::make_shared<StateBlock>(6, false); // We'll have the IMU biases here
 
-    SensorIMUPtr sen = std::make_shared<SensorIMU>(pos_ptr, ori_ptr, bias_ptr);
+    IntrinsicsIMUPtr params = std::static_pointer_cast<IntrinsicsIMU>(_intrinsics);
+    SensorIMUPtr sen = std::make_shared<SensorIMU>(pos_ptr, ori_ptr, params);
     sen->setName(_unique_name);
     return sen;
 }

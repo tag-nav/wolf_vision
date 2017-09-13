@@ -8,13 +8,13 @@
 namespace wolf {
 
 FrameIMU::FrameIMU(const FrameType& _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x) :
-        FrameBase(_tp, _ts, std::make_shared<StateBlock>(3), std::make_shared<StateQuaternion>(), std::make_shared<StateBlock>(3))
+        FrameBase(_tp, _ts, std::make_shared<StateBlock>(_x.head(3)), std::make_shared<StateQuaternion>(_x.segment(3,4)), std::make_shared<StateBlock>(_x.segment(7,3)))
 {
     assert(_x.size() == 16 && "Wrong vector size! Must be 16.");
 
     resizeStateBlockVec(5); // could have done push_back, but prefer more explicit locations for the StateBlocks
-    setStateBlockPtr(3, std::make_shared<StateBlock>(3)); // acc bias
-    setStateBlockPtr(4, std::make_shared<StateBlock>(3)); // gyro bias
+    setStateBlockPtr(3, std::make_shared<StateBlock>(_x.segment(10,3))); // acc bias
+    setStateBlockPtr(4, std::make_shared<StateBlock>(_x.tail(3))); // gyro bias
     setState(_x);
     setType("IMU");
 }
@@ -43,5 +43,5 @@ FrameBasePtr FrameIMU::create(const FrameType & _tp,
 namespace wolf
 {
 WOLF_REGISTER_FRAME("IMU", FrameIMU);
-namespace{ const bool Frame_PQVBB_3D_Registered = FrameFactory::get().registerCreator("PQVBB 3D", FrameIMU::create); } // alternate name possible
+namespace{ const bool WOLF_UNUSED Frame_PQVBB_3D_Registered = FrameFactory::get().registerCreator("PQVBB 3D", FrameIMU::create); } // alternate name possible
 } // namespace wolf

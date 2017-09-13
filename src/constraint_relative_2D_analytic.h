@@ -17,36 +17,39 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 
         /** \brief Constructor of category CTR_FRAME
          **/
-        ConstraintRelative2DAnalytic(FeatureBasePtr _ftr_ptr, ConstraintType _tp, FrameBasePtr _frame_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic(_tp, _frame_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+        ConstraintRelative2DAnalytic(const FeatureBasePtr& _ftr_ptr, const ConstraintType& _tp, const FrameBasePtr& _frame_ptr,
+                                     const ProcessorBasePtr& _processor_ptr = nullptr,
+                                     bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintAnalytic(_tp, _frame_ptr, _processor_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
             //
         }
 
         /** \brief Constructor of category CTR_FEATURE
          **/
-        ConstraintRelative2DAnalytic(FeatureBasePtr _ftr_ptr, ConstraintType _tp, FeatureBasePtr _ftr_other_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic(_tp, _ftr_other_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _ftr_other_ptr->getFramePtr()->getPPtr(), _ftr_other_ptr->getFramePtr()->getOPtr() )
+        ConstraintRelative2DAnalytic(const FeatureBasePtr& _ftr_ptr, const ConstraintType& _tp, const FeatureBasePtr& _ftr_other_ptr,
+                                     const ProcessorBasePtr& _processor_ptr = nullptr,
+                                     bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintAnalytic(_tp, _ftr_other_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _ftr_other_ptr->getFramePtr()->getPPtr(), _ftr_other_ptr->getFramePtr()->getOPtr() )
         {
             //
         }
 
         /** \brief Constructor of category CTR_LANDMARK
          **/
-        ConstraintRelative2DAnalytic(FeatureBasePtr _ftr_ptr, ConstraintType _tp, LandmarkBasePtr _landmark_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic(_tp, _landmark_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _landmark_ptr->getPPtr(), _landmark_ptr->getOPtr())
+        ConstraintRelative2DAnalytic(const FeatureBasePtr& _ftr_ptr, const ConstraintType& _tp, const LandmarkBasePtr& _landmark_ptr,
+                                     const ProcessorBasePtr& _processor_ptr = nullptr,
+                                     bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintAnalytic(_tp, _landmark_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _landmark_ptr->getPPtr(), _landmark_ptr->getOPtr())
         {
             //
         }
 
-        virtual ~ConstraintRelative2DAnalytic()
-        {
-            //
-        }
+        virtual ~ConstraintRelative2DAnalytic() = default;
 
         /** \brief Returns the constraint residual size
          **/
-        virtual unsigned int getSize() const
+        virtual unsigned int getSize() const override
         {
             return 3;
         }
@@ -81,7 +84,7 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 
         /** \brief Returns the jacobians computation method
          **/
-        virtual JacobianMethod getJacobianMethod() const
+        virtual JacobianMethod getJacobianMethod() const override
         {
             return JAC_AUTO;
         }

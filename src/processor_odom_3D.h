@@ -73,7 +73,11 @@ class ProcessorOdom3D : public ProcessorMotion
     public:
         virtual void data2delta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
-                                const Scalar _dt);
+                                const Scalar _dt,
+                                Eigen::VectorXs& _delta,
+                                Eigen::MatrixXs& _delta_cov,
+                                const Eigen::VectorXs& _calib,
+                                Eigen::MatrixXs& _jacobian_calib);
         void deltaPlusDelta(const Eigen::VectorXs& _delta1,
                             const Eigen::VectorXs& _delta2,
                             const Scalar _Dt2,
@@ -84,7 +88,7 @@ class ProcessorOdom3D : public ProcessorMotion
                             Eigen::VectorXs& _delta1_plus_delta2,
                             Eigen::MatrixXs& _jacobian1,
                             Eigen::MatrixXs& _jacobian2);
-        void xPlusDelta(const Eigen::VectorXs& _x,
+        void statePlusDelta(const Eigen::VectorXs& _x,
                         const Eigen::VectorXs& _delta,
                         const Scalar _Dt,
                         Eigen::VectorXs& _x_plus_delta);
@@ -93,8 +97,10 @@ class ProcessorOdom3D : public ProcessorMotion
                            Motion& _motion,
                            TimeStamp& _ts);
         bool voteForKeyFrame();
-        ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
+        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
                                            FrameBasePtr _frame_origin);
+        virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, 
+                                            FrameBasePtr _related_frame);        
 
     protected:
         // noise parameters (stolen from owner SensorOdom3D)
@@ -132,10 +138,22 @@ inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
 inline ConstraintBasePtr ProcessorOdom3D::emplaceConstraint(FeatureBasePtr _feature_motion,
                                                            FrameBasePtr _frame_origin)
 {
-    ConstraintOdom3DPtr ctr_odom = std::make_shared<ConstraintOdom3D>(_feature_motion, _frame_origin);
+    ConstraintOdom3DPtr ctr_odom = std::make_shared<ConstraintOdom3D>(_feature_motion, _frame_origin, shared_from_this());
     _feature_motion->addConstraint(ctr_odom);
     _frame_origin->addConstrainedBy(ctr_odom);
     return ctr_odom;
+}
+
+inline FeatureBasePtr ProcessorOdom3D::emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame)
+{
+    // create motion feature and add it to the key_capture
+    FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
+            "ODOM 3D",
+            _capture_motion->getBuffer().get().back().delta_integr_,
+            _capture_motion->getBuffer().get().back().delta_integr_cov_);
+    _capture_motion->addFeature(key_feature_ptr);
+
+    return key_feature_ptr;
 }
 
 inline void ProcessorOdom3D::remap(const Eigen::VectorXs& _x1,

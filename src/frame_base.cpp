@@ -134,12 +134,16 @@ void FrameBase::setState(const Eigen::VectorXs& _st)
         size += (state_block_vec_[i]==nullptr ? 0 : state_block_vec_[i]->getSize());
     }
     
-    assert(_st.size() == size && "In FrameBase::setState wrong state size");
+    //State Vector size must be lower or equal to frame state size :
+    // example : PQVBB -> if we initialize only position and orientation due to use of processorOdom3D
+    assert(_st.size() <= size && "In FrameBase::setState wrong state size");
 
     unsigned int index = 0;
+    const unsigned int _st_size = _st.size();
 
+    //initialize the FrameBase StateBlocks while StateBlocks list's end not reached and input state_size can go further 
     for (StateBlockPtr sb : state_block_vec_)
-        if (sb)
+        if (sb && (index < _st_size))
         {
             sb->setState(_st.segment(index, sb->getSize()));
             index += sb->getSize();
@@ -306,7 +310,7 @@ FrameBasePtr FrameBase::create_POV_3D(const FrameType & _tp,
 #include "factory.h"
 namespace wolf
 {
-namespace{ const bool Frame_PO_2D_Registered  = FrameFactory::get().registerCreator("PO 2D",  FrameBase::create_PO_2D ); }
-namespace{ const bool Frame_PO_3D_Registered  = FrameFactory::get().registerCreator("PO 3D",  FrameBase::create_PO_3D ); }
-namespace{ const bool Frame_POV_3D_Registered = FrameFactory::get().registerCreator("POV 3D", FrameBase::create_POV_3D); }
+namespace{ const bool WOLF_UNUSED Frame_PO_2D_Registered  = FrameFactory::get().registerCreator("PO 2D",  FrameBase::create_PO_2D ); }
+namespace{ const bool WOLF_UNUSED Frame_PO_3D_Registered  = FrameFactory::get().registerCreator("PO 3D",  FrameBase::create_PO_3D ); }
+namespace{ const bool WOLF_UNUSED Frame_POV_3D_Registered = FrameFactory::get().registerCreator("POV 3D", FrameBase::create_POV_3D); }
 } // namespace wolf

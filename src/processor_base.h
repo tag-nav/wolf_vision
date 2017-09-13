@@ -23,8 +23,11 @@ namespace wolf {
  */
 struct ProcessorParamsBase
 {
-        std::string type;
-        std::string name;
+    ProcessorParamsBase()          = default;
+    virtual ~ProcessorParamsBase() = default;
+
+    std::string type;
+    std::string name;
 };
 
 //class ProcessorBase
@@ -33,8 +36,8 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
     private:
         SensorBaseWPtr sensor_ptr_;
 
-        static unsigned int processor_id_count_;
         bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
+        static unsigned int processor_id_count_;
 
     public:
         ProcessorBase(const std::string& _type, const Scalar& _time_tolerance = 0);

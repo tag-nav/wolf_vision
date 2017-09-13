@@ -91,6 +91,13 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
                                          SensorBasePtr _corresponding_sensor_ptr, //
                                          ProcessorParamsBasePtr _prc_params)
 {
+    if (_corresponding_sensor_ptr == nullptr)
+    {
+      WOLF_ERROR("Cannot install processor '", _unique_processor_name,
+                 "' since the associated sensor does not exist !");
+      return ProcessorBasePtr();
+    }
+
     ProcessorBasePtr prc_ptr = ProcessorFactory::get().create(uppercase(_prc_type), _unique_processor_name, _prc_params, _corresponding_sensor_ptr);
     _corresponding_sensor_ptr->addProcessor(prc_ptr);
 
@@ -300,7 +307,7 @@ void Problem::getFrameStructureSize(Size& _x_size, Size& _cov_size) const
     else if (trajectory_ptr_->getFrameStructure() == "POV 3D")
     {
         _x_size = 10;
-        _cov_size = 10;
+        _cov_size = 9;
     }
     else if (trajectory_ptr_->getFrameStructure() == "PQVBB 3D")
     {
@@ -413,7 +420,6 @@ void Problem::removeConstraintPtr(ConstraintBasePtr _constraint_ptr)
     // Remove addition notification
     if (ctr_notif_it != constraint_notification_list_.end())
         constraint_notification_list_.erase(ctr_notif_it); // CHECKED shared_ptr is not active after erase
-
     // Add remove notification
     else
         constraint_notification_list_.push_back(ConstraintNotification({REMOVE, _constraint_ptr}));
@@ -499,6 +505,11 @@ bool Problem::getCovarianceBlock(std::map<StateBlockPtr, unsigned int> _sb_2_idx
     return true;
 }
 
+bool Problem::getCovarianceBlock(StateBlockPtr _state, Eigen::MatrixXs& _cov, const int _row_and_col)
+{
+    return getCovarianceBlock(_state, _state, _cov, _row_and_col, _row_and_col);
+}
+
 bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance)
 {
 //    return getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getPPtr(), _covariance, 0,                                0                               ) &&
@@ -510,12 +521,12 @@ bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _cova
     bool success(true);
     int i = 0, j = 0;
 
-    for (auto sb_i : _frame_ptr->getStateBlockVec())
+    for (const auto& sb_i : _frame_ptr->getStateBlockVec())
     {
         if (sb_i)
         {
             j = 0;
-            for (auto sb_j : _frame_ptr->getStateBlockVec())
+            for (const auto& sb_j : _frame_ptr->getStateBlockVec())
             {
                 if (sb_j)
                 {
@@ -532,7 +543,7 @@ bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _cova
 Eigen::MatrixXs Problem::getFrameCovariance(FrameBasePtr _frame_ptr)
 {
     Size sz = 0;
-    for (auto sb : _frame_ptr->getStateBlockVec())
+    for (const auto& sb : _frame_ptr->getStateBlockVec())
         if (sb)
             sz += sb->getSize();
     Eigen::MatrixXs covariance(sz, sz);
@@ -603,7 +614,13 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
         FrameBasePtr origin_frame_ptr = emplaceFrame(KEY_FRAME, _prior_state, _ts);
 
         // create origin capture with the given state as data
-        CaptureFixPtr init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state, _prior_cov);
+        // Capture fix only takes 3D position and Quaternion orientation
+        CaptureFixPtr init_capture;
+        if ((trajectory_ptr_->getFrameStructure() == "PQVBB 3D") || (trajectory_ptr_->getFrameStructure() == "POV 3D") )
+            init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state.head(7), _prior_cov);
+        else
+            init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state, _prior_cov);
+
         origin_frame_ptr->addCapture(init_capture);
 
         // emplace feature and constraint

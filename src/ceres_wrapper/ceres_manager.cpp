@@ -88,7 +88,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
         case ALL:
         {
             // first create a vector containing all state blocks
-            std::vector<StateBlockPtr> all_state_blocks, landmark_state_blocks;
+            std::vector<StateBlockPtr> all_state_blocks, landmark_state_blocks, Frame_state_blocks;
             //frame state blocks
             for(auto fr_ptr : wolf_problem_->getTrajectoryPtr()->getFrameList())
                 if (fr_ptr->isKey())
@@ -106,8 +106,8 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             for (unsigned int i = 0; i < all_state_blocks.size(); i++)
                 for  (unsigned int j = i; j < all_state_blocks.size(); j++)
                 {
-                    state_block_pairs.push_back(std::make_pair(all_state_blocks[i],all_state_blocks[j]));
-                    double_pairs.push_back(std::make_pair(all_state_blocks[i]->getPtr(),all_state_blocks[j]->getPtr()));
+                    state_block_pairs.emplace_back(all_state_blocks[i],all_state_blocks[j]);
+                    double_pairs.emplace_back(all_state_blocks[i]->getPtr(),all_state_blocks[j]->getPtr());
                 }
             break;
         }
@@ -121,10 +121,9 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
                             for(auto sb2 : fr_ptr->getStateBlockVec())
                                 if (sb)
                                 {
-                                    state_block_pairs.push_back(std::make_pair(sb, sb2));
-                                    double_pairs.push_back(std::make_pair(sb->getPtr(), sb2->getPtr()));
-                                    if (sb == sb2)
-                                        break;
+                                    state_block_pairs.emplace_back(sb, sb2);
+                                    double_pairs.emplace_back(sb->getPtr(), sb2->getPtr());
+                                    if (sb == sb2) break;
                                 }
 
             // landmark state blocks
@@ -132,10 +131,21 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
                 for (auto sb : l_ptr->getUsedStateBlockVec())
                     for(auto sb2 : l_ptr->getUsedStateBlockVec())
                     {
-                        state_block_pairs.push_back(std::make_pair(sb, sb2));
-                        double_pairs.push_back(std::make_pair(sb->getPtr(), sb2->getPtr()));
+                        state_block_pairs.emplace_back(sb, sb2);
+                        double_pairs.emplace_back(sb->getPtr(), sb2->getPtr());
                         if (sb == sb2) break;
                     }
+//            // loop all marginals (PO marginals)
+//            for (unsigned int i = 0; 2*i+1 < all_state_blocks.size(); i++)
+//            {
+//                state_block_pairs.emplace_back(all_state_blocks[2*i],all_state_blocks[2*i]);
+//                state_block_pairs.emplace_back(all_state_blocks[2*i],all_state_blocks[2*i+1]);
+//                state_block_pairs.emplace_back(all_state_blocks[2*i+1],all_state_blocks[2*i+1]);
+//
+//                double_pairs.emplace_back(all_state_blocks[2*i]->getPtr(),all_state_blocks[2*i]->getPtr());
+//                double_pairs.emplace_back(all_state_blocks[2*i]->getPtr(),all_state_blocks[2*i+1]->getPtr());
+//                double_pairs.emplace_back(all_state_blocks[2*i+1]->getPtr(),all_state_blocks[2*i+1]->getPtr());
+//            }
             break;
         }
         case ROBOT_LANDMARKS:
@@ -143,13 +153,13 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
             //robot-robot
             auto last_key_frame = wolf_problem_->getLastKeyFramePtr();
 
-            state_block_pairs.push_back(std::make_pair(last_key_frame->getPPtr(), last_key_frame->getPPtr()));
-            state_block_pairs.push_back(std::make_pair(last_key_frame->getPPtr(), last_key_frame->getOPtr()));
-            state_block_pairs.push_back(std::make_pair(last_key_frame->getOPtr(), last_key_frame->getOPtr()));
+            state_block_pairs.emplace_back(last_key_frame->getPPtr(), last_key_frame->getPPtr());
+            state_block_pairs.emplace_back(last_key_frame->getPPtr(), last_key_frame->getOPtr());
+            state_block_pairs.emplace_back(last_key_frame->getOPtr(), last_key_frame->getOPtr());
 
-            double_pairs.push_back(std::make_pair(last_key_frame->getPPtr()->getPtr(), last_key_frame->getPPtr()->getPtr()));
-            double_pairs.push_back(std::make_pair(last_key_frame->getPPtr()->getPtr(), last_key_frame->getOPtr()->getPtr()));
-            double_pairs.push_back(std::make_pair(last_key_frame->getOPtr()->getPtr(), last_key_frame->getOPtr()->getPtr()));
+            double_pairs.emplace_back(last_key_frame->getPPtr()->getPtr(), last_key_frame->getPPtr()->getPtr());
+            double_pairs.emplace_back(last_key_frame->getPPtr()->getPtr(), last_key_frame->getOPtr()->getPtr());
+            double_pairs.emplace_back(last_key_frame->getOPtr()->getPtr(), last_key_frame->getOPtr()->getPtr());
 
             // landmarks
             std::vector<StateBlockPtr> landmark_state_blocks;
@@ -161,16 +171,16 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
                 for (auto state_it = landmark_state_blocks.begin(); state_it != landmark_state_blocks.end(); state_it++)
                 {
                     // robot - landmark
-                    state_block_pairs.push_back(std::make_pair(last_key_frame->getPPtr(), *state_it));
-                    state_block_pairs.push_back(std::make_pair(last_key_frame->getOPtr(), *state_it));
-                    double_pairs.push_back(std::make_pair(last_key_frame->getPPtr()->getPtr(), (*state_it)->getPtr()));
-                    double_pairs.push_back(std::make_pair(last_key_frame->getOPtr()->getPtr(), (*state_it)->getPtr()));
+                    state_block_pairs.emplace_back(last_key_frame->getPPtr(), *state_it);
+                    state_block_pairs.emplace_back(last_key_frame->getOPtr(), *state_it);
+                    double_pairs.emplace_back(last_key_frame->getPPtr()->getPtr(), (*state_it)->getPtr());
+                    double_pairs.emplace_back(last_key_frame->getOPtr()->getPtr(), (*state_it)->getPtr());
 
                     // landmark marginal
                     for (auto next_state_it = state_it; next_state_it != landmark_state_blocks.end(); next_state_it++)
                     {
-                        state_block_pairs.push_back(std::make_pair(*state_it, *next_state_it));
-                        double_pairs.push_back(std::make_pair((*state_it)->getPtr(), (*next_state_it)->getPtr()));
+                        state_block_pairs.emplace_back(*state_it, *next_state_it);
+                        double_pairs.emplace_back((*state_it)->getPtr(), (*next_state_it)->getPtr());
                     }
                 }
             }
@@ -300,7 +310,7 @@ ceres::CostFunctionPtr CeresManager::createCostFunction(ConstraintBasePtr _ctr_p
 	assert(_ctr_ptr != nullptr);
 	//std::cout << "creating cost function for constraint " << _ctr_ptr->id() << std::endl;
 
-    // analitic jacobian
+    // analitic & autodiff jacobian
     if (_ctr_ptr->getJacobianMethod() == JAC_ANALYTIC || _ctr_ptr->getJacobianMethod() == JAC_AUTO)
         return std::make_shared<CostFunctionWrapper>(_ctr_ptr);
 

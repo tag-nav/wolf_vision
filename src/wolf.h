@@ -9,6 +9,7 @@
 #define WOLF_H_
 
 // Enable project-specific definitions and macros
+#include "internal/config.h"
 #include "logging.h"
 
 //includes from Eigen lib
@@ -21,7 +22,6 @@
 #include <list>
 #include <map>
 #include <memory> // shared_ptr and weak_ptr
-#include "internal/config.h"
 
 namespace wolf {
 
@@ -89,6 +89,7 @@ typedef Matrix<wolf::Scalar, 1, 1> Vector1s;                ///< 1-vector of rea
 typedef Matrix<wolf::Scalar, 2, 1> Vector2s;                ///< 2-vector of real Scalar type
 typedef Matrix<wolf::Scalar, 3, 1> Vector3s;                ///< 3-vector of real Scalar type
 typedef Matrix<wolf::Scalar, 4, 1> Vector4s;                ///< 4-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 5, 1> Vector5s;                ///< 5-vector of real Scalar type
 typedef Matrix<wolf::Scalar, 6, 1> Vector6s;                ///< 6-vector of real Scalar type
 typedef Matrix<wolf::Scalar, 7, 1> Vector7s;                ///< 7-vector of real Scalar type
 typedef Matrix<wolf::Scalar, Dynamic, 1> VectorXs;          ///< variable size vector of real Scalar type
@@ -105,6 +106,11 @@ typedef Rotation2D<wolf::Scalar> Rotation2Ds;               ///< Rotation2D of r
 
 // 3. Sparse matrix
 typedef SparseMatrix<wolf::Scalar, RowMajor, int> SparseMatrixs;
+typedef Transform<wolf::Scalar,2,Affine> Affine2ds;         ///< Affine2d of real Scalar type
+typedef Transform<wolf::Scalar,3,Affine> Affine3ds;         ///< Affine3d of real Scalar type
+
+typedef Transform<wolf::Scalar,2,Isometry> Isometry2ds;     ///< Isometry2d of real Scalar type
+typedef Transform<wolf::Scalar,3,Isometry> Isometry3ds;     ///< Isometry3d of real Scalar type
 }
 
 namespace wolf {
@@ -203,6 +209,7 @@ typedef enum
     CTR_GPS_PR_3D,              ///< 3D GPS Pseudorange constraint.
     CTR_FIX,                    ///< Fix constraint (for priors).
     CTR_FIX_3D,                 ///< Fix constraint (for priors) in 3D.
+    CTR_FIX_BIAS,               ///< Fix constraint (for priors) on bias.
     CTR_ODOM_2D,                ///< 2D Odometry constraint .
     CTR_ODOM_3D,                ///< 3D Odometry constraint .
     CTR_CORNER_2D,              ///< 2D corner constraint .
@@ -326,19 +333,40 @@ WOLF_PTR_TYPEDEFS(LocalParametrizationBase);
 // Some dangling functions
 
 inline const Eigen::Vector3s gravity(void) {
-    return Eigen::Vector3s(0,0,-9.8);
+    return Eigen::Vector3s(0,0,-9.806);
 }
-//===================================================
 
-
-//===================================================
-// Some macros
-
-#define WOLF_DEBUG_HERE \
-{ \
-    char this_file[] = __FILE__; \
-    std::cout << ">> " << basename(this_file) << " : " << __FUNCTION__ << "() : " << __LINE__ << std::endl; \
+template <typename T, int N>
+bool isSymmetric(const Eigen::Matrix<T, N, N>& M,
+                 const T eps = wolf::Constants::EPS)
+{
+  return M.isApprox(M.transpose(), eps);
 }
+
+template <typename T, int N>
+bool isPositiveSemiDefinite(const Eigen::Matrix<T, N, N>& M)
+{
+  Eigen::SelfAdjointEigenSolver<Eigen::Matrix<T, N, N> > eigensolver(M);
+
+  if (eigensolver.info() == Eigen::Success)
+  {
+    // All eigenvalues must be >= 0:
+    return (eigensolver.eigenvalues().array() >= T(0)).all();
+  }
+
+  return false;
+}
+
+template <typename T, int N>
+bool isCovariance(const Eigen::Matrix<T, N, N>& M)
+{
+  return isSymmetric(M) && isPositiveSemiDefinite(M);
+}
+
+#define WOLF_ASSERT_COVARIANCE_MATRIX(x) \
+  assert(x.determinant() > 0 && "Not positive definite measurement covariance"); \
+  assert(isCovariance(x) && "Not a covariance");
+
 //===================================================
 
 } // namespace wolf

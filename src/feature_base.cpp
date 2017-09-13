@@ -82,7 +82,7 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
     assert(_meas_cov.determinant() > 0 && "Not positive definite measurement covariance");
 
     measurement_covariance_ = _meas_cov;
-	measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_cov.inverse());
+	measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_cov);
 }
 
 void FeatureBase::setMeasurementInfo(const Eigen::MatrixXs & _meas_info)
@@ -90,14 +90,24 @@ void FeatureBase::setMeasurementInfo(const Eigen::MatrixXs & _meas_info)
     assert(_meas_info.determinant() > 0 && "Not positive definite measurement information");
 
     measurement_covariance_ = _meas_info.inverse();
-    measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_info);
+    measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_info.inverse());
 }
 
-Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _M) const
+Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _covariance) const
 {
-    assert(_M.determinant() > 0 && "Matrix is not positive definite!");
-    Eigen::LLT<Eigen::MatrixXs> llt_of_info(_M);
-    return llt_of_info.matrixU();
+    if (_covariance.determinant() < Constants::EPS_SMALL)
+    {
+        // Avoid singular covariances matrix
+        Eigen::MatrixXs cov = _covariance + 1e-8 * Eigen::MatrixXs::Identity(_covariance.rows(), _covariance.cols());
+        Eigen::LLT<Eigen::MatrixXs> llt_of_info(cov.inverse());
+        return llt_of_info.matrixU();
+    }
+    else
+    {
+        // Normal operation
+        Eigen::LLT<Eigen::MatrixXs> llt_of_info(_covariance.inverse());
+        return llt_of_info.matrixU();
+    }
 }
 
 } // namespace wolf

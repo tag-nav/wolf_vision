@@ -13,6 +13,31 @@ namespace wolf {
         IMU_jac_bias(Eigen::Matrix<Eigen::VectorXs,6,1> _Deltas_noisy_vect, Eigen::VectorXs _Delta0 , Eigen::Matrix3s _dDp_dab, Eigen::Matrix3s _dDv_dab, 
                     Eigen::Matrix3s _dDp_dwb, Eigen::Matrix3s _dDv_dwb, Eigen::Matrix3s _dDq_dwb) : Deltas_noisy_vect_(_Deltas_noisy_vect), Delta0_(_Delta0) ,
                     dDp_dab_(_dDp_dab), dDv_dab_(_dDv_dab), dDp_dwb_(_dDp_dwb), dDv_dwb_(_dDv_dwb), dDq_dwb_(_dDq_dwb){}
+                
+        IMU_jac_bias(){
+
+            for (int i=0; i<6; i++){
+                Deltas_noisy_vect_(i) = Eigen::VectorXs::Zero(1,1);
+            }
+
+            Delta0_ = Eigen::VectorXs::Zero(1,1);
+            dDp_dab_ = Eigen::Matrix3s::Zero();
+            dDv_dab_ = Eigen::Matrix3s::Zero();
+            dDp_dwb_ = Eigen::Matrix3s::Zero();
+            dDv_dwb_ = Eigen::Matrix3s::Zero();
+            dDq_dwb_ = Eigen::Matrix3s::Zero();
+        }
+
+        IMU_jac_bias(IMU_jac_bias const & toCopy){
+
+            Deltas_noisy_vect_ = toCopy.Deltas_noisy_vect_;
+            Delta0_ = toCopy.Delta0_;
+            dDp_dab_ = toCopy.dDp_dab_;
+            dDv_dab_ = toCopy.dDv_dab_;
+            dDp_dwb_ = toCopy.dDp_dwb_;
+            dDv_dwb_ = toCopy.dDv_dwb_;
+            dDq_dwb_ = toCopy.dDq_dwb_;
+        }
 
         public:
             /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
@@ -26,6 +51,19 @@ namespace wolf {
             Eigen::Matrix3s dDp_dwb_;
             Eigen::Matrix3s dDv_dwb_;
             Eigen::Matrix3s dDq_dwb_;
+
+
+        public:
+            void copyfrom(IMU_jac_bias const& right){
+
+                Deltas_noisy_vect_ = right.Deltas_noisy_vect_;
+                Delta0_ = right.Delta0_;
+                dDp_dab_ = right.dDp_dab_;
+                dDv_dab_ = right.dDv_dab_;
+                dDp_dwb_ = right.dDp_dwb_;
+                dDv_dwb_ = right.dDv_dwb_;
+                dDq_dwb_ = right.dDq_dwb_;
+            }
     };
 
     struct IMU_jac_deltas{
@@ -34,6 +72,29 @@ namespace wolf {
                         Eigen::MatrixXs _jacobian_delta_preint, Eigen::MatrixXs _jacobian_delta ) :
                         Delta0_(_Delta0), delta0_(_delta0), Delta_noisy_vect_(_Delta_noisy_vect), delta_noisy_vect_(_delta_noisy_vect), 
                        jacobian_delta_preint_(_jacobian_delta_preint), jacobian_delta_(_jacobian_delta) {}
+
+        IMU_jac_deltas(){
+            for (int i=0; i<9; i++){
+                Delta_noisy_vect_(i) = Eigen::VectorXs::Zero(1,1);
+                delta_noisy_vect_(i) = Eigen::VectorXs::Zero(1,1);
+            }
+
+            Delta0_ = Eigen::VectorXs::Zero(1,1);
+            delta0_ = Eigen::VectorXs::Zero(1,1);
+            jacobian_delta_preint_ = Eigen::MatrixXs::Zero(9,9);
+            jacobian_delta_ = Eigen::MatrixXs::Zero(9,9);
+        }
+
+        IMU_jac_deltas(IMU_jac_deltas const & toCopy){
+
+            Delta_noisy_vect_ = toCopy.Delta_noisy_vect_;
+            delta_noisy_vect_ = toCopy.delta_noisy_vect_;
+
+            Delta0_ = toCopy.Delta0_;
+            delta0_ = toCopy.delta0_;
+            jacobian_delta_preint_ = toCopy.jacobian_delta_preint_;
+            jacobian_delta_ = toCopy.jacobian_delta_;
+        }
         
         public:
             /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
@@ -41,8 +102,8 @@ namespace wolf {
                             Delta_noisy_vect_                                                                       delta_noisy_vect_
                             0: + 0,                                                                                 0: + 0
                             1: +dPx, 2: +dPy, 3: +dPz                                                               1: + dpx, 2: +dpy, 3: +dpz
-                            4: +dVx, 5: +dVy, 6: +dVz                                                               4: + dvx, 5: +dvy, 6: +dvz
-                            7: +dOx, 8: +dOy, 9: +dOz                                                               7: + dox, 8: +doy, 9: +doz
+                            4: +dOx, 5: +dOy, 6: +dOz                                                               4: + dox, 5: +doy, 6: +doz
+                            7: +dVx, 8: +dVy, 9: +dVz                                                               7: + dvx, 9: +dvy, +: +dvz
              */
             Eigen::VectorXs Delta0_; //this will contain the Delta not affected by noise
             Eigen::VectorXs delta0_; //this will contain the delta not affected by noise
@@ -50,6 +111,17 @@ namespace wolf {
             Eigen::Matrix<Eigen::VectorXs,9,1> delta_noisy_vect_; //this will contain the deltas affected by noises
             Eigen::MatrixXs jacobian_delta_preint_;
             Eigen::MatrixXs jacobian_delta_;
+
+        public:
+            void copyfrom(IMU_jac_deltas const& right){
+
+                Delta_noisy_vect_ = right.Delta_noisy_vect_;
+                delta_noisy_vect_ = right.delta_noisy_vect_;
+                Delta0_ = right.Delta0_;
+                delta0_ = right.delta0_;
+                jacobian_delta_preint_ = right.jacobian_delta_preint_;
+                jacobian_delta_ = right.jacobian_delta_;
+            }
     };
 
     class ProcessorIMU_UnitTester : public ProcessorIMU{
@@ -116,7 +188,9 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
     data_cov = Eigen::MatrixXs::Zero(6,6);
     jacobian_delta_preint = Eigen::MatrixXs::Zero(9,9);
     jacobian_delta = Eigen::MatrixXs::Zero(9,9);
-    delta_preint_plus_delta0 << 0,0,0, 0,0,0, 1,0,0,0;
+    delta_preint_plus_delta0 << 0,0,0, 0,0,0,1 ,0,0,0; //PQV
+
+    Vector6s bias = Vector6s::Zero();
 
     /*The following vectors will contain all the matrices and deltas needed to compute the finite differences.
         place 1 : added da_bx in data         place 2 : added da_by in data       place 3 : added da_bz in data
@@ -126,14 +200,15 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
     Eigen::Matrix3s dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dwb;
 
     //Deltas without use of da_b
-    data2delta(_data, data_cov, _dt);
+    data2delta(_data, data_cov, _dt,delta_,delta_cov_,bias,jacobian_delta_calib_);
     deltaPlusDelta(_delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
+    MatrixXs jacobian_bias = jacobian_delta * jacobian_delta_calib_;
     Delta0 = delta_preint_plus_delta0; //this is the first preintegrated delta, not affected by any added bias noise
-    dDp_dab = dDp_dab_;
-    dDv_dab = dDv_dab_;
-    dDp_dwb = dDp_dwb_;
-    dDv_dwb = dDv_dwb_;
-    dDq_dwb = dDq_dwb_;
+    dDp_dab = jacobian_bias.block(0,0,3,3);
+    dDp_dwb = jacobian_bias.block(0,3,3,3);
+    dDq_dwb = jacobian_bias.block(3,3,3,3);
+    dDv_dab = jacobian_bias.block(6,0,3,3);
+    dDv_dwb = jacobian_bias.block(6,3,3,3);
     
 
     // propagate bias noise
@@ -141,19 +216,14 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
         //need to reset stuff here
         acc_bias_ = Eigen::Vector3s::Zero();
         gyro_bias_ = Eigen::Vector3s::Zero();
-        dDp_dab_.setZero();
-        dDv_dab_.setZero();
-        dDp_dwb_.setZero();
-        dDv_dwb_.setZero();
-        dDq_dwb_.setZero();
-        delta_preint_plus_delta0 << 0,0,0, 0,0,0, 1,0,0,0;
+        delta_preint_plus_delta0 << 0,0,0, 0,0,0,1 ,0,0,0;  //PQV
         data_cov = Eigen::MatrixXs::Zero(6,6);
 
         // add da_b
         _data = data0;
         _data(i) = _data(i) - da_b; //- because a = a_m − a_b + a_n, in out case, a = a_m − a_b - da_b + a_n
         //data2delta
-        data2delta(_data, data_cov, _dt);
+        data2delta(_data, data_cov, _dt,delta_,delta_cov_,bias, jacobian_delta_calib_);
         deltaPlusDelta(_delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
         Deltas_noisy_vect(i) = delta_preint_plus_delta0; //preintegrated deltas affected by added bias noise
     }
@@ -171,7 +241,7 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     Eigen::VectorXs delta_preint_plus_delta;
     delta0.resize(10);
     delta_preint_plus_delta.resize(10);
-    delta_preint_plus_delta << 0,0,0 ,0,0,0, 1,0,0,0;
+    delta_preint_plus_delta << 0,0,0 ,0,0,0,1 ,0,0,0;
 
     Eigen::MatrixXs jacobian_delta_preint;  //will be used as input for deltaPlusDelta
     Eigen::MatrixXs jacobian_delta;         //will be used as input for deltaPlusDelta
@@ -193,23 +263,35 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     Eigen::Matrix<Eigen::VectorXs,9,1> Delta_noisy_vect; //this will contain the Deltas affected by noises
     Eigen::Matrix<Eigen::VectorXs,9,1> delta_noisy_vect; //this will contain the deltas affected by noises
 
-    data2delta(_data, data_cov, _dt); //Affects dp_out, dv_out and dq_out
+    Vector6s bias = Vector6s::Zero();
+
+    data2delta(_data, data_cov, _dt,delta_,delta_cov_,bias,jacobian_delta_calib_); //Affects dp_out, dv_out and dq_out
     delta0 = delta_;        //save the delta that is not affected by noise
     deltaPlusDelta(_Delta0, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta); 
     jacobian_delta_preint0 = jacobian_delta_preint;
     jacobian_delta0 = jacobian_delta;
 
     //We compute all the jacobians wrt deltas and noisy deltas
-    for(int i=0; i<6; i++) //for 6 first component we just add to add noise as vector component since it is in the R^3 space
-    {
-
+    for(int i=0; i<3; i++) //for 3 first and 3 last components we just add to add noise as vector component since it is in the R^3 space
+    {   
+        //PQV formulation
+            //Add perturbation in position
         delta_ = delta0;
         delta_(i) = delta_(i) + _delta_noise(i); //noise has been added
         delta_noisy_vect(i) = delta_;
+
+            //Add perturbation in velocity
+            /*
+            delta_ is size 10 (P Q V),  _delta_noise is size 9 (P O V)
+            */
+        delta_ = delta0;
+        delta_(i+7) = delta_(i+7) + _delta_noise(i+6); //noise has been added
+        delta_noisy_vect(i+6) = delta_;
     }
 
     for(int i=0; i<3; i++) //for noise dtheta, it is in SO3, need to work on quaternions
-    {
+    {   
+        //PQV formulation
         //fist we need to reset some stuff
         Eigen::Matrix3s dqr_tmp;
         Eigen::Vector3s dtheta = Eigen::Vector3s::Zero();
@@ -217,18 +299,28 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         delta_ = delta0;
         remapDelta(delta_); //not sure that we need this
         dqr_tmp = Dq_out_.matrix();
-        dtheta(i) +=  _delta_noise(i+6); //introduce perturbation
+        dtheta(i) +=  _delta_noise(i+3); //introduce perturbation
         dqr_tmp = dqr_tmp * v2R(dtheta); //Apply perturbation : R * exp(dtheta) --> using matrix
         Dq_out_ = v2q(R2v(dqr_tmp)); //orientation noise has been added --> get back to quaternion form
-        delta_noisy_vect(i+6) = delta_;
+        delta_noisy_vect(i+3) = delta_;
     }
 
     //We compute all the jacobians wrt Deltas and noisy Deltas
-    for(int i=0; i<6; i++) //for 6 first component we just add to add noise as vector component since it is in the R^3 space
+    for(int i=0; i<3; i++) //for 3 first and 3 last components we just add to add noise as vector component since it is in the R^3 space
     {
+        //PQV formulation
+            //Add perturbation in position
         Delta_ = _Delta0;
         Delta_(i) = Delta_(i) + _Delta_noise(i); //noise has been added
         Delta_noisy_vect(i) = Delta_;
+
+            //Add perturbation in velocity
+            /*
+            Delta_ is size 10 (P Q V),  _Delta_noise is size 9 (P O V)
+            */
+        Delta_ = _Delta0;
+        Delta_(i+7) = Delta_(i+7) + _Delta_noise(i+6); //noise has been added
+        Delta_noisy_vect(i+6) = Delta_;
     }
 
     for(int i=0; i<3; i++) //for noise dtheta, it is in SO3, need to work on quaternions
@@ -240,10 +332,10 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
         Delta_ = _Delta0;
         remapDelta(Delta_); //this time we need it
         dQr_tmp = Dq_out_.matrix();
-        dtheta(i) += _Delta_noise(i+6); //introduce perturbation
+        dtheta(i) += _Delta_noise(i+3); //introduce perturbation
         dQr_tmp = dQr_tmp * v2R(dtheta); //Apply perturbation : R * exp(dtheta) --> using matrix
         Dq_out_ = v2q(R2v(dQr_tmp)); //orientation noise has been added --> get back to quaternion form
-        Delta_noisy_vect(i+6) = Delta_;
+        Delta_noisy_vect(i+3) = Delta_;
     }
     
     IMU_jac_deltas jac_deltas(_Delta0, delta0, Delta_noisy_vect, delta_noisy_vect, jacobian_delta_preint0, jacobian_delta0);

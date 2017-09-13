@@ -56,6 +56,10 @@ target_link_libraries(gtest_feature_base ${PROJECT_NAME})
 wolf_add_gtest(gtest_frame_base gtest_frame_base.cpp)
 target_link_libraries(gtest_frame_base ${PROJECT_NAME})
 
+# IMU tools test
+wolf_add_gtest(gtest_imu_tools gtest_imu_tools.cpp)
+# target_link_libraries(gtest_imu_tools ${PROJECT_NAME}) // WOLF library not needed
+
 # LocalParametrizationXxx classes test
 wolf_add_gtest(gtest_local_param gtest_local_param.cpp)
 target_link_libraries(gtest_local_param ${PROJECT_NAME})
@@ -63,10 +67,6 @@ target_link_libraries(gtest_local_param ${PROJECT_NAME})
 # MotionBuffer class test
 wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
 target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
-
-# Problem class test
-wolf_add_gtest(gtest_problem gtest_problem.cpp)
-target_link_libraries(gtest_problem ${PROJECT_NAME})
 
 # Rotation test
 wolf_add_gtest(gtest_rotation gtest_rotation.cpp)
@@ -90,9 +90,25 @@ target_link_libraries(gtest_constraint_fix_3D ${PROJECT_NAME})
 wolf_add_gtest(gtest_constraint_fix gtest_constraint_fix.cpp)
 target_link_libraries(gtest_constraint_fix ${PROJECT_NAME})
 
+# ConstraintIMU test
+wolf_add_gtest(gtest_constraint_imu gtest_constraint_imu.cpp)
+target_link_libraries(gtest_constraint_imu ${PROJECT_NAME})
+
 # ConstraintOdom3D class test
 wolf_add_gtest(gtest_constraint_odom_3D gtest_constraint_odom_3D.cpp)
 target_link_libraries(gtest_constraint_odom_3D ${PROJECT_NAME})
+
+# FeatureIMU test
+wolf_add_gtest(gtest_feature_imu gtest_feature_imu.cpp)
+target_link_libraries(gtest_feature_imu ${PROJECT_NAME})
+
+# FrameIMU class test
+wolf_add_gtest(gtest_frame_imu gtest_frame_imu.cpp)
+target_link_libraries(gtest_frame_imu ${PROJECT_NAME})
+
+# IMU Bias + estimation tests
+#wolf_add_gtest(gtest_imuBias gtest_imuBias.cpp)
+#target_link_libraries(gtest_imuBias ${PROJECT_NAME})
 
 # Pinhole test
 wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
@@ -102,6 +118,14 @@ target_link_libraries(gtest_pinhole ${PROJECT_NAME})
 wolf_add_gtest(gtest_processor_imu gtest_processor_imu.cpp)
 target_link_libraries(gtest_processor_imu ${PROJECT_NAME})
 
+# ProcessorIMU_jacobians test
+wolf_add_gtest(gtest_processorIMU_jacobians gtest_processorIMU_jacobians.cpp)
+target_link_libraries(gtest_processorIMU_jacobians ${PROJECT_NAME})
+
+# Ceres ProcessorMotion solver tests
+#wolf_add_gtest(gtest_processorMotion_optimization_testCase gtest_processorMotion_optimization_testCase.cpp)
+#target_link_libraries(gtest_processorMotion_optimization_testCase ${PROJECT_NAME})
+
 # ProcessorMotion in 2D
 wolf_add_gtest(gtest_odom_2D gtest_odom_2D.cpp)
 target_link_libraries(gtest_odom_2D ${PROJECT_NAME})
@@ -110,13 +134,16 @@ target_link_libraries(gtest_odom_2D ${PROJECT_NAME})
 wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
 target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
 
-IF(OpenCV_FOUND)
-	# ROI test
-	wolf_add_gtest(gtest_roi_ORB gtest_roi_ORB.cpp)
-	target_link_libraries(gtest_roi_ORB ${PROJECT_NAME})
-ENDIF(OpenCV_FOUND)
-
 # ConstraintAutodiff class test
 wolf_add_gtest(gtest_constraint_autodiff gtest_constraint_autodiff.cpp)
 target_link_libraries(gtest_constraint_autodiff ${PROJECT_NAME})
 
+# ROI test
+IF(OpenCV_FOUND)
+  # Problem class test
+  wolf_add_gtest(gtest_problem gtest_problem.cpp)
+  target_link_libraries(gtest_problem ${PROJECT_NAME})
+
+  wolf_add_gtest(gtest_roi_ORB gtest_roi_ORB.cpp)
+  target_link_libraries(gtest_roi_ORB ${PROJECT_NAME})
+ENDIF(OpenCV_FOUND)

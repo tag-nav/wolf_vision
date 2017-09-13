@@ -18,20 +18,17 @@ class ConstraintFix3D: public ConstraintAutodiff<ConstraintFix3D,6,3,4>
     public:
 
         ConstraintFix3D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAutodiff<ConstraintFix3D,6,3,4>(CTR_FIX_3D, nullptr, nullptr, nullptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+            ConstraintAutodiff<ConstraintFix3D,6,3,4>(CTR_FIX_3D, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("FIX3D");
         }
 
-        virtual ~ConstraintFix3D()
-        {
-            //
-        }
+        virtual ~ConstraintFix3D() = default;
 
         template<typename T>
         bool operator ()(const T* const _p, const T* const _o, T* _residuals) const;
 
-        virtual JacobianMethod getJacobianMethod() const
+        virtual JacobianMethod getJacobianMethod() const override
         {
             return JAC_AUTO;
         }
