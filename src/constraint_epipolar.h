@@ -33,11 +33,11 @@ class ConstraintEpipolar : public ConstraintBase
 
         /** \brief Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint
          **/
-        virtual const std::vector<Scalar*> getStateScalarPtrVector() override {return std::vector<Scalar*>(0);}
+        virtual std::vector<Scalar*> getStateScalarPtrVector() const override {return std::vector<Scalar*>(0);}
 
         /** \brief Returns a vector of pointers to the states in which this constraint depends
          **/
-        virtual const std::vector<StateBlockPtr> getStateBlockPtrVector() const override {return std::vector<StateBlockPtr>(0);}
+        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const override {return std::vector<StateBlockPtr>(0);}
 
         /** \brief Returns the constraint residual size
          **/
@@ -45,7 +45,7 @@ class ConstraintEpipolar : public ConstraintBase
 
         /** \brief Returns the constraint states sizes
          **/
-        virtual const std::vector<unsigned int> getStateSizes() const{return std::vector<unsigned int>({1});}
+        virtual std::vector<unsigned int> getStateSizes() const{return std::vector<unsigned int>({1});}
 
     public:
         static wolf::ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,

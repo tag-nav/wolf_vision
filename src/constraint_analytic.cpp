@@ -47,108 +47,24 @@ ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, const LandmarkBasePtr
     resizeVectors();
 }
 
-const std::vector<Scalar*> ConstraintAnalytic::getStateScalarPtrVector()
+std::vector<Scalar*> ConstraintAnalytic::getStateScalarPtrVector() const
 {
     assert(state_ptr_vector_.size() > 0 && state_ptr_vector_.size() <= 10 && "Wrong state vector size in constraint, it should be between 1 and 10");
 
-    switch (state_ptr_vector_.size())
-    {
-        case 1:
-        {
-            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr()});
-        }
-        case 2:
-        {
-            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr()});
-        }
-        case 3:
-        {
-            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr()});
-        }
-        case 4:
-        {
-            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr()});
-        }
-        case 5:
-        {
-            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr(),
-                                             state_ptr_vector_[4]->getPtr()});
-        }
-        case 6:
-        {
-            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr(),
-                                             state_ptr_vector_[4]->getPtr(),
-                                             state_ptr_vector_[5]->getPtr()});
-        }
-        case 7:
-        {
-            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr(),
-                                             state_ptr_vector_[4]->getPtr(),
-                                             state_ptr_vector_[5]->getPtr(),
-                                             state_ptr_vector_[6]->getPtr()});
-        }
-        case 8:
-        {
-            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr(),
-                                             state_ptr_vector_[4]->getPtr(),
-                                             state_ptr_vector_[5]->getPtr(),
-                                             state_ptr_vector_[6]->getPtr(),
-                                             state_ptr_vector_[7]->getPtr()});
-        }
-        case 9:
-        {
-            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr(),
-                                             state_ptr_vector_[4]->getPtr(),
-                                             state_ptr_vector_[5]->getPtr(),
-                                             state_ptr_vector_[6]->getPtr(),
-                                             state_ptr_vector_[7]->getPtr(),
-                                             state_ptr_vector_[8]->getPtr()});
-        }
-        case 10:
-        {
-            return std::vector<Scalar*>({state_ptr_vector_[0]->getPtr(),
-                                             state_ptr_vector_[1]->getPtr(),
-                                             state_ptr_vector_[2]->getPtr(),
-                                             state_ptr_vector_[3]->getPtr(),
-                                             state_ptr_vector_[4]->getPtr(),
-                                             state_ptr_vector_[5]->getPtr(),
-                                             state_ptr_vector_[6]->getPtr(),
-                                             state_ptr_vector_[7]->getPtr(),
-                                             state_ptr_vector_[8]->getPtr(),
-                                             state_ptr_vector_[9]->getPtr()});
-        }
-    }
+    std::vector<Scalar*> state_scalar_ptr_vector(state_ptr_vector_.size());
 
-    return std::vector<Scalar*>(0); //Not going to happen
+    for (auto i = 0; i < state_scalar_ptr_vector.size(); i++)
+        state_scalar_ptr_vector[i] = state_ptr_vector_[i]->getPtr();
+
+    return state_scalar_ptr_vector;
 }
 
-const std::vector<StateBlockPtr> ConstraintAnalytic::getStateBlockPtrVector() const
+std::vector<StateBlockPtr> ConstraintAnalytic::getStateBlockPtrVector() const
 {
     return state_ptr_vector_;
 }
 
-const std::vector<unsigned int> ConstraintAnalytic::getStateSizes() const
+std::vector<unsigned int> ConstraintAnalytic::getStateSizes() const
 {
     return state_block_sizes_vector_;
 }

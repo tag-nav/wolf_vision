@@ -103,21 +103,21 @@ class ConstraintAnalytic: public ConstraintBase
          * Returns a vector of pointers to the state blocks in which this constraint depends
          *
          **/
-        virtual const std::vector<Scalar*> getStateScalarPtrVector() override;
+        virtual std::vector<Scalar*> getStateScalarPtrVector() const override;
 
         /** \brief Returns a vector of pointers to the states
          *
          * Returns a vector of pointers to the state in which this constraint depends
          *
          **/
-        virtual const std::vector<StateBlockPtr> getStateBlockPtrVector() const override;
+        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const override;
 
         /** \brief Returns a vector of sizes of the state blocks
          *
          * Returns a vector of sizes of the state blocks
          *
          **/
-        virtual const std::vector<unsigned int> getStateSizes() const;
+        virtual std::vector<unsigned int> getStateSizes() const override;
 
         /** \brief Returns the constraint residual size
          *
