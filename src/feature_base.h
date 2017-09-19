@@ -64,6 +64,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         const Eigen::VectorXs& getMeasurement() const;
         void setMeasurement(const Eigen::VectorXs& _meas);
         void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
+        void setMeasurementInfo(const Eigen::MatrixXs & _meas_info);
         const Eigen::MatrixXs& getMeasurementCovariance() const;
         const Eigen::MatrixXs& getMeasurementSquareRootInformationUpper() const;
 
@@ -89,7 +90,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
     private:
-        Eigen::MatrixXs computeSqrtInformationUpper(const Eigen::MatrixXs& covariance) const;
+        Eigen::MatrixXs computeSqrtUpper(const Eigen::MatrixXs& _M) const;
 
 };
 

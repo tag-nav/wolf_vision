@@ -19,21 +19,33 @@ class ConstraintEpipolar : public ConstraintBase
 
         virtual ~ConstraintEpipolar() = default;
 
+
+        /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
+        **/
+        virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const{return true;};
+
+        /** Returns a residual vector and a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
+         **/
+        virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const{};
         /** \brief Returns the jacobians computation method
          **/
         virtual JacobianMethod getJacobianMethod() const override {return JAC_ANALYTIC;}
 
         /** \brief Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint
          **/
-        virtual const std::vector<Scalar*> getStateScalarPtrVector() override {return std::vector<Scalar*>(0);}
+        virtual std::vector<Scalar*> getStateScalarPtrVector() const override {return std::vector<Scalar*>(0);}
 
         /** \brief Returns a vector of pointers to the states in which this constraint depends
          **/
-        virtual const std::vector<StateBlockPtr> getStateBlockPtrVector() const override {return std::vector<StateBlockPtr>(0);}
+        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const override {return std::vector<StateBlockPtr>(0);}
 
         /** \brief Returns the constraint residual size
          **/
         virtual unsigned int getSize() const override {return 0;}
+
+        /** \brief Returns the constraint states sizes
+         **/
+        virtual std::vector<unsigned int> getStateSizes() const{return std::vector<unsigned int>({1});}
 
     public:
         static wolf::ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,

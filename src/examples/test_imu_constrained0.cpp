@@ -101,8 +101,7 @@ int main(int argc, char** argv)
     ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
     ceres_options.max_line_search_step_contraction = 1e-3;
     ceres_options.max_num_iterations = 1e4;
-    CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options, true);
-
+    CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
 
     // SENSOR + PROCESSOR IMU
     SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
@@ -194,7 +193,7 @@ int main(int argc, char** argv)
         if( (ts.get() - t.get()) >= 0.05 )
         {
             t = ts;
-            //ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
+            //std::string report = ceres_manager_wolf_diff->solve(1); //0: nothing, 1: BriefReport, 2: FullReport
         
         
             Eigen::VectorXs frm_state(16);
@@ -260,15 +259,15 @@ int main(int argc, char** argv)
 
     
     std::cout << "\t\t\t ______solving______" << std::endl;
-    ceres::Solver::Summary summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::string report = ceres_manager_wolf_diff->solve(2); //0: nothing, 1: BriefReport, 2: FullReport
+    std::cout << report << std::endl;
 
     last_KF->getAccBiasPtr()->fix();
     last_KF->getGyroBiasPtr()->fix();
 
     std::cout << "\t\t\t solving after fixBias" << std::endl;
-    summary = ceres_manager_wolf_diff->solve();
-    std::cout << summary.BriefReport() << std::endl;
+    report = ceres_manager_wolf_diff->solve(1); //0: nothing, 1: BriefReport, 2: FullReport
+    std::cout << report << std::endl;
     ceres_manager_wolf_diff->computeCovariances(ALL);
     std::cout << "\t\t\t ______solved______" << std::endl;
 

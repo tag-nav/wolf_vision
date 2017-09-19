@@ -109,6 +109,9 @@ typedef Transform<wolf::Scalar,3,Affine> Affine3ds;         ///< Affine3d of rea
 
 typedef Transform<wolf::Scalar,2,Isometry> Isometry2ds;     ///< Isometry2d of real Scalar type
 typedef Transform<wolf::Scalar,3,Isometry> Isometry3ds;     ///< Isometry3d of real Scalar type
+
+// 3. Sparse matrix
+typedef SparseMatrix<wolf::Scalar, RowMajor, int> SparseMatrixs;
 }
 
 namespace wolf {

@@ -2,7 +2,7 @@
 #define CONSTRAINT_IMU_THETA_H_
 
 //Wolf includes
-#include "constraint_sparse.h"
+#include "constraint_autodiff.h"
 #include "feature_imu.h"
 #include "frame_imu.h"
 #include "sensor_imu.h"
@@ -16,7 +16,7 @@ namespace wolf {
 WOLF_PTR_TYPEDEFS(ConstraintIMU);
 
 //class
-class ConstraintIMU : public ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
+class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
 {
     public:
         ConstraintIMU(const FeatureIMUPtr& _ftr_ptr, const FrameIMUPtr& _frame_ptr,
@@ -145,7 +145,7 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr& _ftr_ptr,
                                     const FrameIMUPtr& _frame_ptr,
                                     const ProcessorBasePtr& _processor_ptr,
                                     bool _apply_loss_function, ConstraintStatus _status) :
-        ConstraintSparse<15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status,
+        ConstraintAutodiff<ConstraintIMU,15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status,
                                                     _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _frame_ptr->getVPtr(),
                                                     _frame_ptr->getAccBiasPtr(), _frame_ptr->getGyroBiasPtr(),
                                                     _ftr_ptr->getFramePtr()->getPPtr(),

@@ -103,21 +103,21 @@ class ConstraintAnalytic: public ConstraintBase
          * Returns a vector of pointers to the state blocks in which this constraint depends
          *
          **/
-        virtual const std::vector<Scalar*> getStateScalarPtrVector() override;
+        virtual std::vector<Scalar*> getStateScalarPtrVector() const override;
 
         /** \brief Returns a vector of pointers to the states
          *
          * Returns a vector of pointers to the state in which this constraint depends
          *
          **/
-        virtual const std::vector<StateBlockPtr> getStateBlockPtrVector() const override;
+        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const override;
 
         /** \brief Returns a vector of sizes of the state blocks
          *
          * Returns a vector of sizes of the state blocks
          *
          **/
-        virtual std::vector<unsigned int> getStateSizes() const;
+        virtual std::vector<unsigned int> getStateSizes() const override;
 
         /** \brief Returns the constraint residual size
          *
@@ -125,6 +125,50 @@ class ConstraintAnalytic: public ConstraintBase
          *
          **/
 //        virtual unsigned int getSize() const = 0;
+
+        /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
+        **/
+        // TODO
+        virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+        {
+            // load parameters evaluation value
+            std::vector<Eigen::Map<const Eigen::VectorXs>> state_blocks_map_;
+            for (unsigned int i = 0; i < state_block_sizes_vector_.size(); i++)
+                state_blocks_map_.push_back(Eigen::Map<const Eigen::VectorXs>((Scalar*)parameters[i], state_block_sizes_vector_[i]));
+
+            // residuals
+            Eigen::Map<Eigen::VectorXs> residuals_map((Scalar*)residuals, getSize());
+            residuals_map = evaluateResiduals(state_blocks_map_);
+
+            // also compute jacobians
+            if (jacobians != nullptr)
+            {
+                std::vector<Eigen::Map<Eigen::MatrixXs>> jacobians_map_;
+                std::vector<bool> compute_jacobians_(state_block_sizes_vector_.size());
+
+                for (unsigned int i = 0; i < state_block_sizes_vector_.size(); i++)
+                {
+                    compute_jacobians_[i] = (jacobians[i] != nullptr);
+                    if (jacobians[i] != nullptr)
+                        jacobians_map_.push_back(Eigen::Map<Eigen::MatrixXs>((Scalar*)jacobians[i], getSize(), state_block_sizes_vector_[i]));
+                    else
+                        jacobians_map_.push_back(Eigen::Map<Eigen::MatrixXs>(nullptr, 0, 0)); //TODO: check if it can be done
+                }
+
+                // evaluate jacobians
+                evaluateJacobians(state_blocks_map_, jacobians_map_, compute_jacobians_);
+            }
+            return true;
+
+            return true;
+        };
+
+        /** Returns the residual vetor and a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
+         **/
+        // TODO
+        virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const
+        {
+        };
 
         /** \brief Returns the residual evaluated in the states provided
          *

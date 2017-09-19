@@ -2,14 +2,14 @@
 #define CONSTRAINT_CORNER_2D_THETA_H_
 
 //Wolf includes
-#include "constraint_sparse.h"
+#include "constraint_autodiff.h"
 #include "landmark_corner_2D.h"
 
 namespace wolf {
 
 WOLF_PTR_TYPEDEFS(ConstraintCorner2D);
     
-class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
+class ConstraintCorner2D: public ConstraintAutodiff<ConstraintCorner2D, 3,2,1,2,1>
 {
 	public:
 
@@ -18,7 +18,7 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
                        const ProcessorBasePtr& _processor_ptr,
                        bool _apply_loss_function = false,
                        ConstraintStatus _status = CTR_ACTIVE) :
-      ConstraintSparse<3,2,1,2,1>(CTR_CORNER_2D, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
+        ConstraintAutodiff<ConstraintCorner2D,3,2,1,2,1>(CTR_CORNER_2D, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
     {
       setType("CORNER 2D");
     }
@@ -35,16 +35,15 @@ class ConstraintCorner2D: public ConstraintSparse<3,2,1,2,1>
                      const T* const _landmarkO, T* _residuals) const;
 
     /** \brief Returns the jacobians computation method
-         *
-         * Returns the jacobians computation method
-         *
-         **/
+     *
+     * Returns the jacobians computation method
+     *
+     **/
     virtual JacobianMethod getJacobianMethod() const override
     {
       return JAC_AUTO;
     }
 
-public:
     static ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr, const ProcessorBasePtr& _processor_ptr = nullptr)
     {
       return std::make_shared<ConstraintCorner2D>(_feature_ptr, std::static_pointer_cast<LandmarkCorner2D>(_correspondant_ptr), _processor_ptr);

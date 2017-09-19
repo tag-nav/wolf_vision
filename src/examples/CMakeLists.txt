@@ -96,6 +96,10 @@ ENDIF(Suitesparse_FOUND)
 #ADD_EXECUTABLE(test_wolf_prunning test_wolf_prunning.cpp)
 #TARGET_LINK_LIBRARIES(test_wolf_prunning ${PROJECT_NAME})
 
+# Sparsification from wolf tree from .graph file (TORO)
+ADD_EXECUTABLE(test_sparsification test_sparsification.cpp)
+TARGET_LINK_LIBRARIES(test_sparsification ${PROJECT_NAME})
+
 # Comparing analytic and autodiff odometry constraints
 #ADD_EXECUTABLE(test_analytic_odom_constraint test_analytic_odom_constraint.cpp)
 #TARGET_LINK_LIBRARIES(test_analytic_odom_constraint ${PROJECT_NAME})
@@ -110,6 +114,11 @@ IF(OpenCV_FOUND)
         # Processor Image Landmark test
         ADD_EXECUTABLE(test_processor_image_landmark test_processor_image_landmark.cpp)
         TARGET_LINK_LIBRARIES(test_processor_image_landmark ${PROJECT_NAME})
+
+	    # Simple AHP test
+	    ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
+	    TARGET_LINK_LIBRARIES(test_simple_AHP ${PROJECT_NAME})
+
     ENDIF(Ceres_FOUND)
 
     # Testing opencv matching and fundamental matrix with ransac
@@ -131,15 +140,8 @@ IF(OpenCV_FOUND)
     # ORB tracker test
     ADD_EXECUTABLE(test_ROI_ORB test_ROI_ORB.cpp)
     TARGET_LINK_LIBRARIES(test_ROI_ORB ${PROJECT_NAME})
-ENDIF(OpenCV_FOUND)
 
-IF(Ceres_FOUND)
-    # Simple AHP test
-    IF(OpenCV_FOUND)
-      ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
-      TARGET_LINK_LIBRARIES(test_simple_AHP ${PROJECT_NAME})
-    ENDIF(OpenCV_FOUND)
-ENDIF(Ceres_FOUND)
+ENDIF(OpenCV_FOUND)
 
 # Processor Tracker Feature test
 ADD_EXECUTABLE(test_processor_tracker_feature test_processor_tracker_feature.cpp)

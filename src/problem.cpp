@@ -359,72 +359,70 @@ void Problem::addLandmarkList(LandmarkBaseList& _lmk_list)
 
 StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 {
-    //std::cout << "addStateBlockPtr" << std::endl;
+    //std::cout << "Problem::addStateBlockPtr " << _state_ptr.get() << std::endl;
+
     // add the state unit to the list
     state_block_list_.push_back(_state_ptr);
     // queue for solver manager
     state_block_notification_list_.push_back(StateBlockNotification({ADD,_state_ptr}));
-
     return _state_ptr;
 }
 
 void Problem::updateStateBlockPtr(StateBlockPtr _state_ptr)
 {
+    //std::cout << "Problem::updateStateBlockPtr " << _state_ptr.get() << std::endl;
+
     // queue for solver manager
     state_block_notification_list_.push_back(StateBlockNotification({UPDATE,_state_ptr}));
 }
 
 void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
 {
+    //std::cout << "Problem::removeStateBlockPtr " << _state_ptr.get() << std::endl;
+
     // add the state unit to the list
     state_block_list_.remove(_state_ptr);
 
     // Check if the state addition is still as a notification
-    auto state_found_it = state_block_notification_list_.end();
-    for (auto state_notif_it = state_block_notification_list_.begin(); state_notif_it != state_block_notification_list_.end(); state_notif_it++)
-    {
+    auto state_notif_it = state_block_notification_list_.begin();
+    for (; state_notif_it != state_block_notification_list_.end(); state_notif_it++)
         if (state_notif_it->notification_ == ADD && state_notif_it->state_block_ptr_ == _state_ptr)
-        {
-            state_found_it = state_notif_it;
             break;
-        }
-    }
+
     // Remove addition notification
-    if (state_found_it != state_block_notification_list_.end())
-    	state_block_notification_list_.erase(state_found_it);
+    if (state_notif_it != state_block_notification_list_.end())
+    	state_block_notification_list_.erase(state_notif_it);
     // Add remove notification
     else
-    	state_block_notification_list_.push_back(StateBlockNotification({REMOVE, nullptr, _state_ptr->getPtr()}));
+    	state_block_notification_list_.push_back(StateBlockNotification({REMOVE, _state_ptr}));
 
 }
 
 ConstraintBasePtr Problem::addConstraintPtr(ConstraintBasePtr _constraint_ptr)
 {
-    //std::cout << "addConstraintPtr" << std::endl;
+    //std::cout << "Problem::addConstraintPtr " << _constraint_ptr->id() << std::endl;
     // queue for solver manager
-    constraint_notification_list_.push_back(ConstraintNotification({ADD, _constraint_ptr, _constraint_ptr->id()}));
+    constraint_notification_list_.push_back(ConstraintNotification({ADD, _constraint_ptr}));
 
     return _constraint_ptr;
 }
 
 void Problem::removeConstraintPtr(ConstraintBasePtr _constraint_ptr)
 {
+    //std::cout << "Problem::removeConstraintPtr " << _constraint_ptr->id() << std::endl;
+
     // Check if the constraint addition is still as a notification
-    auto ctr_found_it = constraint_notification_list_.end();
-    for (auto ctr_notif_it = constraint_notification_list_.begin(); ctr_notif_it != constraint_notification_list_.end(); ctr_notif_it++)
-    {
+    auto ctr_notif_it = constraint_notification_list_.begin();
+    for (; ctr_notif_it != constraint_notification_list_.end(); ctr_notif_it++)
         if (ctr_notif_it->notification_ == ADD && ctr_notif_it->constraint_ptr_ == _constraint_ptr)
-        {
-            ctr_found_it = ctr_notif_it;
             break;
-        }
-    }
+
     // Remove addition notification
-    if (ctr_found_it != constraint_notification_list_.end())
-        constraint_notification_list_.erase(ctr_found_it);
+    if (ctr_notif_it != constraint_notification_list_.end())
+        constraint_notification_list_.erase(ctr_notif_it); // CHECKED shared_ptr is not active after erase
     // Add remove notification
     else
-        constraint_notification_list_.push_back(ConstraintNotification({REMOVE, nullptr, _constraint_ptr->id()}));
+        constraint_notification_list_.push_back(ConstraintNotification({REMOVE, _constraint_ptr}));
 }
 
 void Problem::clearCovariance()
@@ -464,6 +462,45 @@ bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, E
                 covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)].transpose();
     else
         return false;
+
+    return true;
+}
+
+bool Problem::getCovarianceBlock(std::map<StateBlockPtr, unsigned int> _sb_2_idx, Eigen::MatrixXs& _cov)
+{
+    // fill covariance
+    for (auto it1 = _sb_2_idx.begin(); it1 != _sb_2_idx.end(); it1++)
+        for (auto it2 = it1; it2 != _sb_2_idx.end(); it2++)
+        {
+            StateBlockPtr sb1 = it1->first;
+            StateBlockPtr sb2 = it2->first;
+            std::pair<StateBlockPtr, StateBlockPtr> pair_12(sb1, sb2);
+            std::pair<StateBlockPtr, StateBlockPtr> pair_21(sb2, sb1);
+
+            // search st1 & st2
+            if (covariances_.find(pair_12) != covariances_.end())
+            {
+                assert(_sb_2_idx[sb1] + sb1->getSize() <= _cov.rows() &&
+                       _sb_2_idx[sb2] + sb2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+                assert(_sb_2_idx[sb2] + sb2->getSize() <= _cov.rows() &&
+                       _sb_2_idx[sb1] + sb1->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+
+                _cov.block(_sb_2_idx[sb1], _sb_2_idx[sb2], sb1->getSize(), sb2->getSize()) = covariances_[pair_12];
+                _cov.block(_sb_2_idx[sb2], _sb_2_idx[sb1], sb2->getSize(), sb1->getSize()) = covariances_[pair_12].transpose();
+            }
+            else if (covariances_.find(pair_21) != covariances_.end())
+            {
+                assert(_sb_2_idx[sb1] + sb1->getSize() <= _cov.rows() &&
+                       _sb_2_idx[sb2] + sb2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+                assert(_sb_2_idx[sb2] + sb2->getSize() <= _cov.rows() &&
+                       _sb_2_idx[sb1] + sb1->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+
+                _cov.block(_sb_2_idx[sb1], _sb_2_idx[sb2], sb1->getSize(), sb2->getSize()) = covariances_[pair_21].transpose();
+                _cov.block(_sb_2_idx[sb2], _sb_2_idx[sb1], sb2->getSize(), sb1->getSize()) = covariances_[pair_21];
+            }
+            else
+                return false;
+        }
 
     return true;
 }

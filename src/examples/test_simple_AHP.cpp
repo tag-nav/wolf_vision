@@ -244,8 +244,8 @@ int main(int argc, char** argv)
     CeresManager ceres_manager(problem, ceres_options);
 
 
-    ceres::Solver::Summary summary = ceres_manager.solve();
-    std::cout << summary.FullReport() << std::endl;
+    std::string summary = ceres_manager.solve(2);// 0: nothing, 1: BriefReport, 2: FullReport
+    std::cout << summary << std::endl;
 
     // Test of convergence over the lmk params
     bool pass = (lmk_2->point() - lmk_1->point()).isMuchSmallerThan(1,Constants::EPS);

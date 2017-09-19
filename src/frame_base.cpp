@@ -182,6 +182,15 @@ void FrameBase::getState(Eigen::VectorXs& state) const
         }
 }
 
+unsigned int FrameBase::getSize() const
+{
+    unsigned int size = 0;
+    for (auto st : state_block_vec_)
+        if (st)
+            size += st->getSize();
+    return size;
+}
+
 FrameBasePtr FrameBase::getPreviousFrame() const
 {
     //std::cout << "finding previous frame of " << this->frame_id_ << std::endl;

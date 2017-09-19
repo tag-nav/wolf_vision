@@ -7,84 +7,71 @@
 #include "glog/logging.h"
 
 //wolf includes
+#include "solver_manager.h"
 #include "cost_function_wrapper.h"
 #include "local_parametrization_wrapper.h"
-#include "../wolf.h"
-#include "../state_block.h"
-#include "create_auto_diff_cost_function.h"
 #include "create_numeric_diff_cost_function.h"
+
+namespace ceres {
+    typedef std::shared_ptr<CostFunction>  CostFunctionPtr;
+}
 
 namespace wolf {
 
-
-
-/** \brief Enumeration of covariance blocks to be computed
- *
- * Enumeration of covariance blocks to be computed
- *
- */
-typedef enum
-{
-    ALL, ///< All blocks and all cross-covariances
-    ALL_MARGINALS, ///< All marginals
-    ROBOT_LANDMARKS ///< marginals of landmarks and current robot pose plus cross covariances of current robot and all landmarks
-} CovarianceBlocksToBeComputed;
+WOLF_PTR_TYPEDEFS(CeresManager);
 
 /** \brief Ceres manager for WOLF
  *
  */
 
-class CeresManager
+class CeresManager : public SolverManager
 {
 	protected:
-		std::map<unsigned int, ceres::ResidualBlockId> id_2_residual_idx_;
-        std::map<unsigned int, ceres::CostFunction*> id_2_costfunction_;
+		std::map<ConstraintBasePtr, ceres::ResidualBlockId> ctr_2_residual_idx_;
+        std::map<ConstraintBasePtr, ceres::CostFunctionPtr> ctr_2_costfunction_;
 		ceres::Problem* ceres_problem_;
 		ceres::Solver::Options ceres_options_;
 		ceres::Covariance* covariance_;
-		ProblemPtr wolf_problem_;
-		bool use_wolf_auto_diff_;
+		ceres::Solver::Summary summary_;
 
 	public:
-        CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Options& _ceres_options = ceres::Solver::Options(), const bool _use_wolf_auto_diff = true);
+        CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Options& _ceres_options = ceres::Solver::Options());
 
 		~CeresManager();
 
-		ceres::Solver::Summary solve();
+		virtual std::string solve(const unsigned int& _report_level);
 
-		void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS);
+        ceres::Solver::Summary getSummary();
+
+        virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS);
+
+        virtual void computeCovariances(const StateBlockList& st_list);
 
         ceres::Solver::Options& getSolverOptions();
 
-        void setUseWolfAutoDiff(bool _use_wolf_auto_diff);
-
 	private:
 
-		void update();
+        virtual void addConstraint(ConstraintBasePtr _ctr_ptr);
 
-		void addConstraint(ConstraintBasePtr _corr_ptr, unsigned int _id);
+        virtual void removeConstraint(ConstraintBasePtr _ctr_ptr);
 
-		void removeConstraint(const unsigned int& _corr_idx);
+        virtual void addStateBlock(StateBlockPtr _st_ptr);
 
-		void addStateBlock(StateBlockPtr _st_ptr);
+        virtual void removeStateBlock(StateBlockPtr _st_ptr);
 
-		void removeStateBlock(double* _st_ptr);
+		virtual void updateStateBlockStatus(StateBlockPtr _st_ptr);
 
-		void removeAllStateBlocks();
-
-		void updateStateBlockStatus(StateBlockPtr _st_ptr);
-
-		ceres::CostFunction* createCostFunction(ConstraintBasePtr _corrPtr);
+		ceres::CostFunctionPtr createCostFunction(ConstraintBasePtr _ctr_ptr);
 };
+
+inline ceres::Solver::Summary CeresManager::getSummary()
+{
+    return summary_;
+}
 
 inline ceres::Solver::Options& CeresManager::getSolverOptions()
 {
     return ceres_options_;
-}
-
-inline void CeresManager::setUseWolfAutoDiff(bool _use_wolf_auto_diff)
-{
-    use_wolf_auto_diff_ = _use_wolf_auto_diff;
 }
 
 } // namespace wolf
