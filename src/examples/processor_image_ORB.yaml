@@ -14,7 +14,8 @@ detector-descriptor:
 
 matcher:
     minimum normalized score: 0.85
-    similarity norm: 6  # enum { NORM_INF=1, NORM_L1=2, NORM_L2=4, NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, NORM_RELATIVE=8, NORM_MINMAX=32 };
+    similarity norm: 6  # OpenCV 3 enum { BruteForce=1 (it uses L2 ), BruteForce-L1=2, BruteForce-Hamming=3, BruteForce-Hamming(2)=4, FlannBased=5};
+                        # OpenCV 2 enum { NORM_INF=1, NORM_L1=2, NORM_L2=4, NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, NORM_RELATIVE=8, NORM_MINMAX=32 };
     roi:
         width: 20
         height: 20

@@ -10,6 +10,76 @@
 namespace wolf
 {
 
+#if defined (HAVE_OPENCV3)
+
+ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
+    ProcessorTrackerFeature("IMAGE", _params.algorithm.max_new_features),
+    params_(_params),
+    active_search_grid_()
+{
+    // 1. detector-descriptor params
+    DetectorDescriptorParamsBasePtr _dd_params = _params.detector_descriptor_params_ptr;
+    switch (_dd_params->type){
+        case DD_BRISK:
+            {
+            std::shared_ptr<DetectorDescriptorParamsBrisk> params_brisk = std::static_pointer_cast<DetectorDescriptorParamsBrisk>(_dd_params);
+
+            detector_descriptor_ptr_ = cv::BRISK::create(params_brisk->threshold, //
+                                                         params_brisk->octaves, //
+                                                         params_brisk->pattern_scale);
+
+            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((params_brisk->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
+                                                                   (unsigned int)((params_brisk->nominal_pattern_radius)*params_brisk->pattern_scale));
+            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
+
+            break;
+            }
+        case DD_ORB:
+            {
+            std::shared_ptr<DetectorDescriptorParamsOrb> params_orb = std::static_pointer_cast<DetectorDescriptorParamsOrb>(_dd_params);
+            detector_descriptor_ptr_ = cv::ORB::create(params_orb->nfeatures, //
+                                                   params_orb->scaleFactor, //
+                                                   params_orb->nlevels, //
+                                                   params_orb->edgeThreshold, //
+                                                   params_orb->firstLevel, //
+                                                   params_orb->WTA_K, //
+                                                   params_orb->scoreType, //
+                                                   params_orb->patchSize);
+
+            detector_descriptor_params_.pattern_radius_ = params_orb->edgeThreshold;
+            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
+
+            break;
+            }
+        default:
+            throw std::runtime_error("Unknown detector-descriptor type");
+    }
+
+    // 2. matcher params
+    // TODO: FIX this. Problems initializing with int (cv::DescriptorMatcher::create(int matcherType)
+    std::string matcherType = "BruteForce-Hamming"; // Default
+    switch (_params.matcher.similarity_norm)
+    {
+        case 1:
+            matcherType = "BruteForce";
+            break;
+        case 2:
+            matcherType = "BruteForce-L1";
+            break;
+        case 3:
+            matcherType = "BruteForce-Hamming";
+            break;
+        case 4:
+            matcherType = "BruteForce-Hamming(2)";
+            break;
+        case 5:
+            matcherType = "FlannBased";
+            break;
+    }
+    matcher_ptr_ = cv::DescriptorMatcher::create(matcherType);
+}
+#else
+
 ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
     ProcessorTrackerFeature("IMAGE", _params.algorithm.max_new_features),
     matcher_ptr_(nullptr),
@@ -56,8 +126,9 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
 
     // 2. matcher params
     matcher_ptr_ = std::make_shared<cv::BFMatcher>(_params.matcher.similarity_norm);
-
 }
+
+#endif
 
 //Destructor
 ProcessorImageFeature::~ProcessorImageFeature()

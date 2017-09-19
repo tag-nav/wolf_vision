@@ -12,9 +12,16 @@
 #include "logging.h"
 
 //opencv includes
-#include "opencv2/features2d/features2d.hpp"
+#if defined (HAVE_OPENCV3)
+#include <opencv2/features2d.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/core.hpp>
+#include <opencv2/imgproc.hpp>
+#else
+#include <opencv2/features2d/features2d.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/core/core.hpp>
+#endif
 
 // std include
 #include <vector>
@@ -117,14 +124,25 @@ TEST(RoiORB, RoiBounds)
     unsigned int scoreType = 0;              //#enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
     unsigned int patchSize = 31;
 
-    cv::ORB detector(nfeatures, //
-                     scaleFactor, //
-                     nlevels, //
-                     edgeThreshold, //
-                     firstLevel, //
-                     WTA_K, //
-                     scoreType, //
-                     patchSize);
+#if defined (HAVE_OPENCV3)
+    cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create(nfeatures, //
+                                                            scaleFactor, //
+                                                            nlevels, //
+                                                            edgeThreshold, //
+                                                            firstLevel, //
+                                                            WTA_K, //
+                                                            scoreType, //
+                                                            patchSize);
+#else
+    std::shared_ptr<cv::ORB> detector = std::make_shared<cv::ORB>(nfeatures, //
+                                                                  scaleFactor, //
+                                                                  nlevels, //
+                                                                  edgeThreshold, //
+                                                                  firstLevel, //
+                                                                  WTA_K, //
+                                                                  scoreType, //
+                                                                  patchSize);
+#endif
 
     std::vector<cv::KeyPoint> target_keypoints;
     cv::KeyPointsFilter keypoint_filter;
@@ -177,7 +195,7 @@ TEST(RoiORB, RoiBounds)
 
             cv::Mat image_roi = image(roi_inflated);
             target_keypoints.clear();
-            detector.detect(image_roi, target_keypoints);
+            detector->detect(image_roi, target_keypoints);
 
             if (!target_keypoints.empty())
             {

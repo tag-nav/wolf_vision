@@ -74,16 +74,24 @@ libgflags.a will be installed at **/usr/local/lib**
     
 -   Build and install with:
 
-        $ cd glog
-        $ ./configure --with-gflags=/usr/local/
-        $ make
-        $ sudo make install
-    
+        $ ./autogen.sh
+        $ ./configure --with-gflags=/usr/local/
+        $ make
+        $ sudo make install
+
 libglog.so will be installed at **/usr/local/lib**
 
 -   Tourbleshooting:
 
-    If the `make` command fails with the error: `/bin/bash: aclocal-1.14: command not found`, install Glog with the following commands:
+    * ./autogen.sh fails with './autogen.sh: autoreconf: not found'
+
+    In a fresh installation you will probably need to install autoreconf running
+    
+        $ sudo make install dh-autoreconf 
+
+    * `make` command fails with the error: `/bin/bash: aclocal-1.14: command not found`
+    
+    Install Glog with the following commands:
         
         $ cd glog
         $ sudo apt-get install autoconf
@@ -300,6 +308,21 @@ At this point you might need to switch to the `catkin_build` branch of the wolf 
 **(6)**  Run tests:
 
     $ catkin run_tests
+    
+Troubleshooting
+---------------
+
+#### Boost
+
+We have made our best to keep being boost-independent.
+However, in case you run into a boost installation issue at execution time, check that you have boost installed. 
+If needed, install it with:
+
+[Boost](http://www.boost.org/). Free peer-reviewed portable C++ source libraries.
+
+    $ sudo apt-get install libboost-all-dev
+
+
 
 Inspiring Links
 ---------------
