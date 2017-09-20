@@ -74,6 +74,7 @@ int main(int argc, char** argv)
     unsigned int roi_width = 200;
     unsigned int roi_heigth = 200;
 
+#if defined (HAVE_OPENCV3)
     detector_descriptor_ptr_ = cv::ORB::create(nfeatures, //
                                            scaleFactor, //
                                            nlevels, //
@@ -82,12 +83,25 @@ int main(int argc, char** argv)
                                            WTA_K, //
                                            scoreType, //
                                            patchSize);//
+    matcher_ptr_ = cv::DescriptorMatcher::create("BruteForce-Hamming(2)");
+#else
+    detector_descriptor_ptr_ = cv::ORB(nfeatures, //
+                                       scaleFactor, //
+                                       nlevels, //
+                                       edgeThreshold, //
+                                       firstLevel, //
+                                       WTA_K, //
+                                       scoreType, //
+                                       patchSize);//
+    matcher_ptr_ = cv::DescriptorMatcher::create("BruteForce-Hamming(2)");
+    matcher_ptr = cv::BFMatcher();
+#endif
 
     unsigned int pattern_radius = (unsigned int)(patchSize);
 
     unsigned int size_bits = detector_descriptor_ptr_->descriptorSize() * 8;
 
-    matcher_ptr_ = cv::DescriptorMatcher::create("BruteForce-Hamming(2)");
+
     //=====================================================
 
     unsigned int buffer_size = 20;

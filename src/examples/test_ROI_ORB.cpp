@@ -52,6 +52,7 @@ int main(int argc, char** argv)
     unsigned int scoreType = 0;              //#enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
     unsigned int patchSize = 31;
 
+#if defined (HAVE_OPENCV3)
     detector_descriptor_ptr_ = cv::ORB::create(nfeatures, //
                                            scaleFactor, //
                                            nlevels, //
@@ -60,6 +61,16 @@ int main(int argc, char** argv)
                                            WTA_K, //
                                            scoreType, //
                                            patchSize);//,
+#else
+    detector_descriptor_ptr_ = cv::ORB(nfeatures, //
+                                       scaleFactor, //
+                                       nlevels, //
+                                       edgeThreshold, //
+                                       firstLevel, //
+                                       WTA_K, //
+                                       scoreType, //
+                                       patchSize);
+#endif
 
     std::vector<cv::KeyPoint> target_keypoints;
     cv::KeyPointsFilter keypoint_filter;
