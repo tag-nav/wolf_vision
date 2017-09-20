@@ -81,16 +81,8 @@ int main(int argc, char** argv)
     cv::moveWindow("Feature tracker", 0, 0);
 
     // set image processors
-    cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr;
-    cv::Ptr<cv::DescriptorMatcher> matcher_ptr;
-
-#if defined (HAVE_OPENCV3)
-    detector_descriptor_ptr = cv::ORB::create(1000,2,8,16,0,3,0,31);
-    matcher_ptr = cv::DescriptorMatcher::create("BruteForce-Hamming(2)");
-#else
-    detector_descriptor_ptr = cv::ORB(1000,2,8,16,0,3,0,31);
-    matcher_ptr = cv::BFMatcher();
-#endif
+    cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr = cv::ORB::create(1000,2,8,16,0,3,0,31);
+    cv::Ptr<cv::DescriptorMatcher> matcher_ptr = cv::DescriptorMatcher::create("BruteForce-Hamming(2)");
 
     // declare all variables
     std::vector<cv::KeyPoint> keypoints_1, keypoints_2;
