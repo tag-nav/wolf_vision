@@ -55,7 +55,13 @@ IF(raw_gps_utils_FOUND)
     MESSAGE("raw_gps_utils Library FOUND: raw_gps_utils related sources will be built.")
 ENDIF(raw_gps_utils_FOUND)
 
-# OpenCV
+# Vision Utils
+FIND_PACKAGE(vision_utils QUIET)
+IF (vision_utils_FOUND)
+	MESSAGE("vision_utils Library FOUND: vision related sources will be built.")
+ENDIF(vision_utils_FOUND)
+
+# REMOVE OpenCV
 FIND_PACKAGE(OpenCV QUIET)
 if (OpenCV_FOUND) 
   if (${OpenCV_VERSION_MAJOR} GREATER 2)
@@ -73,8 +79,6 @@ endif(OpenCV_FOUND)
 INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindYamlCpp.cmake)
 IF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library FOUND: yaml-cpp related sources will be built.")
-    MESSAGE(STATUS ${YAMLCPP_INCLUDE_DIR})
-    MESSAGE(STATUS ${YAMLCPP_LIBRARY})
 ELSEIF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library NOT FOUND!")
 ENDIF(YAMLCPP_FOUND)
@@ -110,8 +114,6 @@ ENDIF()
 # Configure config.h
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/internal/config.h.in "${WOLF_CONFIG_DIR}/config.h")
 
-
-
 #include directories
 
 # Include config.h directory at first.
@@ -146,7 +148,11 @@ IF(raw_gps_utils_FOUND)
     INCLUDE_DIRECTORIES(${raw_gps_utils_INCLUDE_DIRS})
 ENDIF(raw_gps_utils_FOUND)
 
-# OpenCV
+IF(vision_utils_FOUND)
+	INCLUDE_DIRECTORIES(${vision_utils_INCLUDE_DIR})
+ENDIF(vision_utils_FOUND)
+
+# REMOVE OpenCV
 IF(OpenCV_FOUND)
     INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 ENDIF(OpenCV_FOUND)
@@ -374,7 +380,30 @@ IF (raw_gps_utils_FOUND)
         )
 ENDIF(raw_gps_utils_FOUND)
 
-# OpenCV
+# Vision
+IF (vision_utils_FOUND)
+    SET(HDRS ${HDRS}
+        #active_search.h
+        #capture_image.h
+        constraint_AHP.h
+        feature_point_image.h
+        landmark_AHP.h
+        landmark_point_3d.h
+        processor_image_feature.h
+        processor_image_landmark.h
+        )
+    SET(SRCS ${SRCS}
+        #active_search.cpp
+        #capture_image.cpp
+        feature_point_image.cpp
+        landmark_AHP.cpp
+        landmark_point_3d.cpp
+        processor_image_feature.cpp
+        processor_image_landmark.cpp
+        )
+ENDIF(vision_utils_FOUND)
+
+# REMOVE OpenCV
 IF (OpenCV_FOUND)
     SET(HDRS ${HDRS}
         active_search.h
@@ -453,7 +482,11 @@ IF (raw_gps_utils_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${raw_gps_utils_LIBRARY})
 ENDIF (raw_gps_utils_FOUND)
 
-# OpenCV
+IF (vision_utils_FOUND)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${vision_utils_LIBRARY})
+ENDIF (vision_utils_FOUND)
+
+# REMOVE OpenCV
 IF (OpenCV_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
 ENDIF (OpenCV_FOUND)

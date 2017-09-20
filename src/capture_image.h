@@ -6,7 +6,11 @@
 #include "feature_point_image.h"
 #include "sensor_camera.h"
 
-// opencv includes
+// Vision Utils includes
+#include <vision_utils.h>
+#include <common_class/frame.h>
+
+// REMOVE opencv includes
 #include <opencv2/core/core.hpp>
 
 //std includes
@@ -26,9 +30,12 @@ WOLF_PTR_TYPEDEFS(CaptureImage);
 class CaptureImage : public CaptureBase
 {
     protected:
-        cv::Mat image_;
-        cv::Mat descriptors_;
-        std::vector<cv::KeyPoint> keypoints_;
+        vision_utils::Frame frame_;
+
+//        REMOVE
+//        cv::Mat image_;
+//        cv::Mat descriptors_;
+//        std::vector<cv::KeyPoint> keypoints_;
 
     public:
         CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv::Mat _data_cv);
