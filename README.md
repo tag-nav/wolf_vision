@@ -154,6 +154,19 @@ Wolf used spdlog macros. To install it:
         $ make
         $ sudo make install 
 
+#### Optional: Vision Utils (Install only if you want to use IRI's vision utils)
+
+**(1)** Git clone the source:
+
+        $ git clone https://github.com/angelsantamaria/vision_utils.git
+    
+**(2)** Build and install:
+
+        $ cd vision_utils/trunk/build
+        $ cmake ..
+        $ make
+        $ sudo make install
+        
 #### Optional: Laser Scan Utils (Install only if you want to use IRI's laser scan utils)
 
 **(1)** Git clone the source:
