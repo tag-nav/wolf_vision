@@ -10,19 +10,22 @@
 #include "unistd.h"
 #include <time.h>
 
+// Vision utils
+#include <vision_utils.h>
+// REMOVE
 // OpenCV includes
-#if defined (HAVE_OPENCV3)
-#include <opencv2/features2d.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
-#include "opencv2/calib3d.hpp"
-#else
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/core/core.hpp>
-#include "opencv2/calib3d/calib3d.hpp"
-#endif
+//#if defined (HAVE_OPENCV3)
+//#include <opencv2/features2d.hpp>
+//#include <opencv2/highgui.hpp>
+//#include <opencv2/core.hpp>
+//#include <opencv2/imgproc.hpp>
+//#include "opencv2/calib3d.hpp"
+//#else
+//#include <opencv2/features2d/features2d.hpp>
+//#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/core/core.hpp>
+//#include "opencv2/calib3d/calib3d.hpp"
+//#endif
 
 // General includes
 //#include <math.h>

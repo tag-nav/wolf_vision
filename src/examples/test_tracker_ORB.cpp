@@ -1,12 +1,15 @@
 //std includes
 #include <iostream>
 
+// Vision utils
+#include <vision_utils.h>
+// REMOVE
 // OpenCV includes
-#if defined (HAVE_OPENCV3)
-#include <opencv2/features2d.hpp>
-#else
-#include <opencv2/features2d/features2d.hpp>
-#endif
+//#if defined (HAVE_OPENCV3)
+//#include <opencv2/features2d.hpp>
+//#else
+//#include <opencv2/features2d/features2d.hpp>
+//#endif
 
 #include "processor_image_landmark.h"
 

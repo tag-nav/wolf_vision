@@ -144,46 +144,6 @@ IF(vision_utils_FOUND)
 
 ENDIF(vision_utils_FOUND)
 
-# REMOVE OpenCV
-#IF(OpenCV_FOUND)
-#
-#    IF(Ceres_FOUND)
-        # Testing many things for the 3D image odometry
-#        ADD_EXECUTABLE(test_image test_image.cpp)
-#        TARGET_LINK_LIBRARIES(test_image ${PROJECT_NAME})
-#
-        # Processor Image Landmark test
-#        ADD_EXECUTABLE(test_processor_image_landmark test_processor_image_landmark.cpp)
-#        TARGET_LINK_LIBRARIES(test_processor_image_landmark ${PROJECT_NAME})
-#
-	    # Simple AHP test
-#	    ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
-#	    TARGET_LINK_LIBRARIES(test_simple_AHP ${PROJECT_NAME})
-#
-#    ENDIF(Ceres_FOUND)
-#
-    # Testing opencv matching and fundamental matrix with ransac
-#    ADD_EXECUTABLE(test_opencv test_opencv.cpp)
-#    TARGET_LINK_LIBRARIES(test_opencv ${PROJECT_NAME})
-#
-    # Testing OpenCV functions for projection of points
-#    ADD_EXECUTABLE(test_projection_points test_projection_points.cpp)
-#    TARGET_LINK_LIBRARIES(test_projection_points ${PROJECT_NAME})
-#
-    # Constraint test
-#    ADD_EXECUTABLE(test_constraint_AHP test_constraint_AHP.cpp)
-#    TARGET_LINK_LIBRARIES(test_constraint_AHP ${PROJECT_NAME})
-#
-    # ORB tracker test
-#    ADD_EXECUTABLE(test_tracker_ORB test_tracker_ORB.cpp)
-#    TARGET_LINK_LIBRARIES(test_tracker_ORB ${PROJECT_NAME})
-#
-    # ORB tracker test
-#    ADD_EXECUTABLE(test_ROI_ORB test_ROI_ORB.cpp)
-#    TARGET_LINK_LIBRARIES(test_ROI_ORB ${PROJECT_NAME})
-#
-#ENDIF(OpenCV_FOUND)
-
 # Processor Tracker Feature test
 ADD_EXECUTABLE(test_processor_tracker_feature test_processor_tracker_feature.cpp)
 TARGET_LINK_LIBRARIES(test_processor_tracker_feature ${PROJECT_NAME})

@@ -59,21 +59,11 @@ ENDIF(raw_gps_utils_FOUND)
 FIND_PACKAGE(vision_utils QUIET)
 IF (vision_utils_FOUND)
 	MESSAGE("vision_utils Library FOUND: vision related sources will be built.")
-ENDIF(vision_utils_FOUND)
 
-# REMOVE OpenCV
-FIND_PACKAGE(OpenCV QUIET)
-if (OpenCV_FOUND) 
-  if (${OpenCV_VERSION_MAJOR} GREATER 2)
-    message("-- Found OpenCV ${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}. Related sources will be built.")
-    ADD_DEFINITIONS(-DHAVE_OPENCV3)
-    SET(USE_CV true)
-  else(${OpenCV_VERSION_MAJOR} GREATER 2)
-    message("[WARN] Found OpenCV ${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}. Notice that WOLF is prepared to work with OpenCV 3.0 and higher versions.")
-  endif(${OpenCV_VERSION_MAJOR} GREATER 2)
-else(OpenCV_FOUND)
-    message("[WARN] OpenCV not found. Related sources will NOT be built.")
-endif(OpenCV_FOUND)
+	# REMOVE OpenCV
+	FIND_PACKAGE(OpenCV QUIET)
+
+ENDIF(vision_utils_FOUND)
 
 # YAML with yaml-cpp
 INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindYamlCpp.cmake)
@@ -150,12 +140,11 @@ ENDIF(raw_gps_utils_FOUND)
 
 IF(vision_utils_FOUND)
 	INCLUDE_DIRECTORIES(${vision_utils_INCLUDE_DIR})
-ENDIF(vision_utils_FOUND)
 
-# REMOVE OpenCV
-IF(OpenCV_FOUND)
-    INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
-ENDIF(OpenCV_FOUND)
+	# REMOVE OpenCV
+   	INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+
+ENDIF(vision_utils_FOUND)
 
 IF(Suitesparse_FOUND)
     INCLUDE_DIRECTORIES(${Suitesparse_INCLUDE_DIRS})
@@ -383,29 +372,6 @@ ENDIF(raw_gps_utils_FOUND)
 # Vision
 IF (vision_utils_FOUND)
     SET(HDRS ${HDRS}
-        #active_search.h
-        #capture_image.h
-        constraint_AHP.h
-        feature_point_image.h
-        landmark_AHP.h
-        landmark_point_3d.h
-        processor_image_feature.h
-        processor_image_landmark.h
-        )
-    SET(SRCS ${SRCS}
-        #active_search.cpp
-        #capture_image.cpp
-        feature_point_image.cpp
-        landmark_AHP.cpp
-        landmark_point_3d.cpp
-        processor_image_feature.cpp
-        processor_image_landmark.cpp
-        )
-ENDIF(vision_utils_FOUND)
-
-# REMOVE OpenCV
-IF (OpenCV_FOUND)
-    SET(HDRS ${HDRS}
         active_search.h
         capture_image.h
         constraint_AHP.h
@@ -424,7 +390,7 @@ IF (OpenCV_FOUND)
         processor_image_feature.cpp
         processor_image_landmark.cpp
         )
-ENDIF(OpenCV_FOUND)
+ENDIF(vision_utils_FOUND)
 
 IF (Suitesparse_FOUND)
     ADD_SUBDIRECTORY(solver)
@@ -450,11 +416,11 @@ IF(YAMLCPP_FOUND)
             yaml/sensor_laser_2D_yaml.cpp
             )
     ENDIF(laser_scan_utils_FOUND)
-    IF(OpenCV_FOUND)
+    IF(vision_utils_FOUND)
         SET(SRCS ${SRCS}
         	yaml/processor_image_yaml.cpp
             )
-    ENDIF(OpenCV_FOUND)
+    ENDIF(vision_utils_FOUND)
 ENDIF(YAMLCPP_FOUND)
 
 # create the shared library
@@ -484,12 +450,11 @@ ENDIF (raw_gps_utils_FOUND)
 
 IF (vision_utils_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${vision_utils_LIBRARY})
+    
+    # REMOVE OpenCV
+   	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
+    
 ENDIF (vision_utils_FOUND)
-
-# REMOVE OpenCV
-IF (OpenCV_FOUND)
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
-ENDIF (OpenCV_FOUND)
 
 IF (YAMLCPP_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${YAMLCPP_LIBRARY})

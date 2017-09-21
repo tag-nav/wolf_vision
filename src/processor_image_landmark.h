@@ -13,17 +13,21 @@
 #include "processor_image_params.h"
 #include "constraint_AHP.h"
 
+// Vision utils
+#include <vision_utils.h>
+
+// REMOVE
 // OpenCV includes
-#if defined (HAVE_OPENCV3)
-	#include <opencv2/features2d.hpp>
-	#include <opencv2/highgui.hpp>
-	#include <opencv2/core.hpp>
-	#include <opencv2/imgproc.hpp>
-#else
-	#include <opencv2/features2d/features2d.hpp>
-	#include <opencv2/highgui/highgui.hpp>
-	#include <opencv2/core/core.hpp>
-#endif
+//#if defined (HAVE_OPENCV3)
+//	#include <opencv2/features2d.hpp>
+//	#include <opencv2/highgui.hpp>
+//	#include <opencv2/core.hpp>
+//	#include <opencv2/imgproc.hpp>
+//#else
+//	#include <opencv2/features2d/features2d.hpp>
+//	#include <opencv2/highgui/highgui.hpp>
+//	#include <opencv2/core/core.hpp>
+//#endif
 
 // General includes
 #include <cmath>
@@ -40,13 +44,15 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 {
     protected:
 
-#if defined (HAVE_OPENCV3)
+//#if defined (HAVE_OPENCV3)
         cv::Ptr<cv::DescriptorMatcher> matcher_ptr_;
         cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
-#else
-        std::shared_ptr<cv::DescriptorMatcher> matcher_ptr_;
-        std::shared_ptr<cv::Feature2D> detector_descriptor_ptr_;
-#endif
+
+// REMOVE
+//#else
+//        std::shared_ptr<cv::DescriptorMatcher> matcher_ptr_;
+//        std::shared_ptr<cv::Feature2D> detector_descriptor_ptr_;
+//#endif
 
     protected:
         ProcessorParamsImage params_;           // Struct with parameters of the processors

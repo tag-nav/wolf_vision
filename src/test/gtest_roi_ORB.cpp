@@ -11,17 +11,21 @@
 #include "wolf.h"
 #include "logging.h"
 
+// vision utils includes
+#include <vision_utils.h>
+
+// REMOVE
 //opencv includes
-#if defined (HAVE_OPENCV3)
-#include <opencv2/features2d.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
-#else
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/core/core.hpp>
-#endif
+//#if defined (HAVE_OPENCV3)
+//#include <opencv2/features2d.hpp>
+//#include <opencv2/highgui.hpp>
+//#include <opencv2/core.hpp>
+//#include <opencv2/imgproc.hpp>
+//#else
+//#include <opencv2/features2d/features2d.hpp>
+//#include <opencv2/highgui/highgui.hpp>
+//#include <opencv2/core/core.hpp>
+//#endif
 
 // std include
 #include <vector>
@@ -124,7 +128,7 @@ TEST(RoiORB, RoiBounds)
     unsigned int scoreType = 0;              //#enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
     unsigned int patchSize = 31;
 
-#if defined (HAVE_OPENCV3)
+//#if defined (HAVE_OPENCV3)
     cv::Ptr<cv::FeatureDetector> detector = cv::ORB::create(nfeatures, //
                                                             scaleFactor, //
                                                             nlevels, //
@@ -133,16 +137,17 @@ TEST(RoiORB, RoiBounds)
                                                             WTA_K, //
                                                             scoreType, //
                                                             patchSize);
-#else
-    std::shared_ptr<cv::ORB> detector = std::make_shared<cv::ORB>(nfeatures, //
-                                                                  scaleFactor, //
-                                                                  nlevels, //
-                                                                  edgeThreshold, //
-                                                                  firstLevel, //
-                                                                  WTA_K, //
-                                                                  scoreType, //
-                                                                  patchSize);
-#endif
+//REMOVE
+//#else
+//    std::shared_ptr<cv::ORB> detector = std::make_shared<cv::ORB>(nfeatures, //
+//                                                                  scaleFactor, //
+//                                                                  nlevels, //
+//                                                                  edgeThreshold, //
+//                                                                  firstLevel, //
+//                                                                  WTA_K, //
+//                                                                  scoreType, //
+//                                                                  patchSize);
+//#endif
 
     std::vector<cv::KeyPoint> target_keypoints;
     cv::KeyPointsFilter keypoint_filter;

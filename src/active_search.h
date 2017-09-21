@@ -13,9 +13,11 @@
 // Wolf includes
 #include "wolf.h"
 
+#include <vision_utils.h>
+// REMOVE
 //OpenCV includes
-#include <opencv2/core/core.hpp>
-#include "opencv2/features2d/features2d.hpp"
+//#include <opencv2/core/core.hpp>
+//#include "opencv2/features2d/features2d.hpp"
 
 namespace wolf{
 
