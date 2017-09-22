@@ -132,11 +132,10 @@ TEST(RoiORB, RoiBounds)
         for(roi_x = 0; roi_x < img_width; roi_x += 5)
         {
             cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
+            cv::Rect roi_inflated = roi;
 
             // Detect features in ROI
-            target_keypoints = det_ptr->detect(image, roi);
-
-            cv::Rect roi_inflated = roi;
+            target_keypoints = det_ptr->detect(image, roi_inflated);
 
             // Keep only one KP in ROI
             if (!target_keypoints.empty())
