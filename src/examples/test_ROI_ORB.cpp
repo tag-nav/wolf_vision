@@ -71,10 +71,14 @@ int main(int argc, char** argv)
         {
 
             // Set a candidate ROI
-            cv::Rect roi = vision_utils::setRoi(roi_x, roi_y, roi_width, roi_heigth);
+            cv::Rect roi = cv::Rect(roi_x, roi_y, roi_width, roi_heigth);
+
+            std::cout << "ROI " << roi.x << " " << roi.y << std::endl;
 
             // Detect features in ROI
             target_keypoints = det_ptr->detect(image, roi);
+
+            cv::Rect roi_inflated = roi;
 
             // Keep only one KP in ROI
             if (!target_keypoints.empty())
@@ -88,9 +92,12 @@ int main(int argc, char** argv)
                 std::cout << std::endl;
             }
 
+            std::cout << " inflated " << roi_inflated.x << " " << roi_inflated.y << std::endl;
+
             cv::Mat image_graphics = image.clone();
             cv::drawKeypoints(image_graphics,target_keypoints,image_graphics);
             cv::rectangle(image_graphics, roi, cv::Scalar(255.0, 0.0, 255.0), 1, 8, 0);
+            cv::rectangle(image_graphics, roi_inflated, cv::Scalar(255.0, 255.0, 0.0), 1, 8, 0);
             cv::imshow("test_roi_orb",image_graphics);
             cv::waitKey(5);
         }
