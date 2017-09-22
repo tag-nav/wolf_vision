@@ -1,11 +1,6 @@
 
 // Vision utils
 #include <vision_utils.h>
-// REMOVE
-//#include "opencv2/calib3d/calib3d.hpp"
-//#include "opencv2/features2d/features2d.hpp"
-//#include <opencv2/core/core.hpp>
-//#include <opencv2/highgui/highgui.hpp>
 
 //std includes
 #include <iostream>
@@ -13,48 +8,39 @@
 //wolf includes
 #include "pinholeTools.h"
 
-
 int main(int argc, char** argv)
 {
     using namespace wolf;
 
     std::cout << std::endl << " ========= ProjectPoints test ===========" << std::endl << std::endl;
 
-    cv::Point3f points3D;
-    points3D.x = 2.0;
-    points3D.y = 5.0;
-    points3D.z = 6.0;
-    std::vector<cv::Point3f> point_in_3D;
-    point_in_3D.push_back(points3D);
-    points3D.x = 4.0;
-    points3D.y = 2.0;
-    points3D.z = 1.0;
-    point_in_3D.push_back(points3D);
+    Eigen::MatrixXf points3D(2,3);
+    Eigen::Vector3f point3D;
+    point3D[0] = 2.0;
+    point3D[1] = 5.0;
+    point3D[2] = 6.0;
+    points3D.row(0)= point3D;
+    point3D[0] = 4.0;
+    point3D[1] = 2.0;
+    point3D[2] = 1.0;
+    points3D.row(1)= point3D;
 
-    std::vector<float> rot_mat = {0,0,0};
-    std::vector<float> trans_mat = {1,1,1};
+    Eigen::Vector3f cam_ext_rot_mat = Eigen::Vector3f::Zero();
+    Eigen::Vector3f cam_ext_trans_mat = Eigen::Vector3f::Ones();
 
-    cv::Mat cam_mat(3,3,CV_32F);
-    cam_mat.row(0).col(0).setTo(1);
-    cam_mat.row(0).col(1).setTo(0);
-    cam_mat.row(0).col(2).setTo(2);
-    cam_mat.row(1).col(0).setTo(0);
-    cam_mat.row(1).col(1).setTo(1);
-    cam_mat.row(1).col(2).setTo(2);
-    cam_mat.row(2).col(0).setTo(0);
-    cam_mat.row(2).col(1).setTo(0);
-    cam_mat.row(2).col(2).setTo(1);
+    Eigen::Matrix3f cam_intr_mat;
+    cam_intr_mat = Eigen::Matrix3f::Identity();
+    cam_intr_mat(0,2)=2;
+    cam_intr_mat(1,2)=2;
 
-    std::cout << "cam_mat[1,2]: " << cam_mat.row(1).col(0) << std::endl;
+    Eigen::VectorXf dist_coef(5);
+    dist_coef << 0,0,0,0,0;
 
-    std::vector<float> dist_coef = {0,0,0,0,0};
-    std::vector<cv::Point2f> points2D;
-    cv::projectPoints(point_in_3D,rot_mat,trans_mat,cam_mat,dist_coef,points2D);
+    Eigen::MatrixXf points2D = vision_utils::projectPoints(points3D, cam_ext_rot_mat, cam_ext_trans_mat, cam_intr_mat, dist_coef);
 
-    for (auto it : points2D)
-    {
-        std::cout << "points2D- X: " << it.x << "; Y: " << it.y << std::endl;
-    }
+    for (int ii = 0; ii < points3D.rows(); ++ii)
+        std::cout << "points2D- X: " << points2D(ii,0) << "; Y: " << points2D(ii,1) << std::endl;
+
 
     std::cout << std::endl << " ========= PinholeTools DUALITY TEST ===========" << std::endl << std::endl;
 

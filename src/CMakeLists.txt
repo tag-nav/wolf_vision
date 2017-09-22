@@ -59,7 +59,7 @@ ENDIF(raw_gps_utils_FOUND)
 FIND_PACKAGE(vision_utils QUIET)
 IF (vision_utils_FOUND)
 	MESSAGE("vision_utils Library FOUND: vision related sources will be built.")
-
+	SET(PRINT_INFO_VU false)
 	# REMOVE OpenCV
 	FIND_PACKAGE(OpenCV QUIET)
 
