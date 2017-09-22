@@ -3,14 +3,8 @@
 
 // Vision utils
 #include <vision_utils.h>
-// REMOVE
-// OpenCV includes
-//#if defined (HAVE_OPENCV3)
-//#include <opencv2/features2d.hpp>
-//#else
-//#include <opencv2/features2d/features2d.hpp>
-//#endif
 
+//Wolf
 #include "processor_image_landmark.h"
 
 int main(int argc, char** argv)

@@ -2,25 +2,23 @@
 #include <iostream>
 
 // Vision utils
-#include <vision_utils.h>
-// REMOVE
-// OpenCV includes
-//#if defined (HAVE_OPENCV3)
-//#include <opencv2/features2d.hpp>
-//#include <opencv2/highgui.hpp>
-//#include <opencv2/core.hpp>
-//#include <opencv2/imgproc.hpp>
-//#else
-//#include <opencv2/features2d/features2d.hpp>
-//#include <opencv2/highgui/highgui.hpp>
-//#include <opencv2/core/core.hpp>
-//#endif
+#include <vision_utils/vision_utils.h>
+#include <vision_utils/detectors.h>
+
+//Wolf
+#include "wolf.h"
 
 int main(int argc, char** argv)
 {
+    //=====================================================
+    // Environment variable for configuration files
+    std::string wolf_root = _WOLF_ROOT_DIR;
+    //=====================================================
 
     std::cout << std::endl << "==================== tracker ORB test ======================" << std::endl;
 
+    //=====================================================
+    // Read Image
     cv::Mat image;
     const char * filename;
     if (argc == 1)
@@ -43,31 +41,19 @@ int main(int argc, char** argv)
     unsigned int img_width = image.cols;
     unsigned int img_height = image.rows;
     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
+    //=====================================================
 
-    cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
+    //=====================================================
+    // Define detector
+    std::string yaml_file_params = wolf_root + "/src/examples/yaml/roi_orb.yaml";
+    std::string det_name = vision_utils::readYamlType(yaml_file_params, "detector");
+    vision_utils::DetectorBasePtr det_ptr = vision_utils::setupDetector(det_name, det_name + " detector", yaml_file_params);
+    det_ptr = std::static_pointer_cast<vision_utils::DetectorORB>(det_ptr);
+    //=====================================================
 
-    unsigned int nfeatures = 20;
-    float scaleFactor = 1.2;
-    unsigned int nlevels = 8;
-    unsigned int edgeThreshold = 16;
-    unsigned int firstLevel = 0;
-    unsigned int WTA_K = 2;                  //# See: http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html#a180ae17d3300cf2c619aa240d9b607e5
-    unsigned int scoreType = 0;              //#enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
-    unsigned int patchSize = 31;
-
-    detector_descriptor_ptr_ = cv::ORB::create(nfeatures, //
-                                           scaleFactor, //
-                                           nlevels, //
-                                           edgeThreshold, //
-                                           firstLevel, //
-                                           WTA_K, //
-                                           scoreType, //
-                                           patchSize);//,
-
+    // Loop variables
     std::vector<cv::KeyPoint> target_keypoints;
     cv::KeyPointsFilter keypoint_filter;
-
-
     unsigned int roi_x;
     unsigned int roi_y;
     unsigned int roi_width = 50;
@@ -84,40 +70,13 @@ int main(int argc, char** argv)
         for(roi_x = 0; roi_x < img_width; roi_x += 20)
         {
 
-            cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
-            cv::Rect roi_inflate = roi;
+            // Set a candidate ROI
+            cv::Rect roi = vision_utils::setRoi(roi_x, roi_y, roi_width, roi_heigth);
 
-            roi_inflate.x = roi.x - edgeThreshold;
-            roi_inflate.y = roi.y - edgeThreshold;
-            roi_inflate.width = roi.width + 2*edgeThreshold;
-            roi_inflate.height = roi.height + 2*edgeThreshold;
+            // Detect features in ROI
+            target_keypoints = det_ptr->detect(image, roi);
 
-            if(roi_inflate.x < 0)
-            {
-                int diff_x = -roi_inflate.x;
-                roi_inflate.x = 0;
-                roi_inflate.width = roi_inflate.width - diff_x;
-            }
-            if(roi_inflate.y < 0)
-            {
-                int diff_y = -roi_inflate.y;
-                roi_inflate.y = 0;
-                roi_inflate.height = roi_inflate.height - diff_y;
-            }
-            if((unsigned int)(roi_inflate.x + roi_inflate.width) > img_width)
-            {
-                int diff_width = img_width - (roi_inflate.x + roi_inflate.width);
-                roi_inflate.width = roi_inflate.width + diff_width;
-            }
-            if((unsigned int)(roi_inflate.y + roi_inflate.height) > img_height)
-            {
-                int diff_height = img_height - (roi_inflate.y + roi_inflate.height);
-                roi_inflate.height = roi_inflate.height+diff_height;
-            }
-
-            cv::Mat image_roi = image(roi_inflate);
-            detector_descriptor_ptr_->detect(image_roi, target_keypoints);
-
+            // Keep only one KP in ROI
             if (!target_keypoints.empty())
             {
                 std::cout << "Keypoints detected: " << target_keypoints.size();
@@ -125,22 +84,15 @@ int main(int argc, char** argv)
                 std::cout << " - retained: " << target_keypoints.size();
                 std::cout << "  at: ";
                 for(unsigned int i = 0; i < target_keypoints.size(); i++)
-                {
-                    target_keypoints[i].pt.x += roi_inflate.x;
-                    target_keypoints[i].pt.y += roi_inflate.y;
                     std::cout << "[ " << target_keypoints[i].pt.x << " , " << target_keypoints[i].pt.y << " ] ";
-                }
                 std::cout << std::endl;
             }
 
             cv::Mat image_graphics = image.clone();
             cv::drawKeypoints(image_graphics,target_keypoints,image_graphics);
             cv::rectangle(image_graphics, roi, cv::Scalar(255.0, 0.0, 255.0), 1, 8, 0);
-            cv::rectangle(image_graphics, roi_inflate, cv::Scalar(255.0, 255.0, 0.0), 1, 8, 0);
-
-            cv::imshow("test",image_graphics);
+            cv::imshow("test_roi_orb",image_graphics);
             cv::waitKey(5);
-
         }
     }
 }
