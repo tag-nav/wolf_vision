@@ -83,13 +83,13 @@ libglog.so will be installed at **/usr/local/lib**
 
 -   Tourbleshooting:
 
-    * ./autogen.sh fails with './autogen.sh: autoreconf: not found'
+    * If ./autogen.sh fails with './autogen.sh: autoreconf: not found'
 
     In a fresh installation you will probably need to install autoreconf running
     
-        $ sudo make install dh-autoreconf 
+        $ sudo apt-get install dh-autoreconf 
 
-    * `make` command fails with the error: `/bin/bash: aclocal-1.14: command not found`
+    * If `make` command fails with the error: `/bin/bash: aclocal-1.14: command not found`
     
     Install Glog with the following commands:
         
