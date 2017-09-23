@@ -2,7 +2,7 @@
 #define CONSTRAINT_POINT_2D_THETA_H_
 
 //Wolf includes
-#include "constraint_sparse.h"
+#include "constraint_autodiff.h"
 #include "feature_polyline_2D.h"
 #include "landmark_polyline_2D.h"
 
@@ -13,7 +13,7 @@ WOLF_PTR_TYPEDEFS(ConstraintPoint2D);
 /**
  * @brief The ConstraintPoint2D class
  */
-class ConstraintPoint2D: public ConstraintSparse<2,2,1,2,1,2>
+class ConstraintPoint2D: public ConstraintAutodiff<ConstraintPoint2D, 2,2,1,2,1,2>
 {
     protected:
         unsigned int feature_point_id_;
@@ -29,16 +29,16 @@ class ConstraintPoint2D: public ConstraintSparse<2,2,1,2,1,2>
                       const LandmarkPolyline2DPtr& _lmk_ptr,
                       const ProcessorBasePtr& _processor_ptr,
                       unsigned int _ftr_point_id, int _lmk_point_id, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-      ConstraintSparse<2,2,1,2,1,2>(CTR_POINT_2D, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id)),
-			feature_point_id_(_ftr_point_id), landmark_point_id_(_lmk_point_id), point_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
-		{
-			//std::cout << "Constriant point: feature " << _ftr_ptr->id() << " landmark " << _lmk_ptr->id() << "(point " << _lmk_point_id << ")" << std::endl;
-			//std::cout << "landmark state block " << _lmk_ptr->getPointStateBlockPtr(_lmk_point_id)->getVector().transpose() << std::endl;
-            setType("POINT TO POINT 2D");
-            Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
-            Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
-            measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
-		}
+        ConstraintAutodiff<ConstraintPoint2D,2,2,1,2,1,2>(CTR_POINT_2D, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id)),
+        feature_point_id_(_ftr_point_id), landmark_point_id_(_lmk_point_id), point_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
+    {
+        //std::cout << "Constriant point: feature " << _ftr_ptr->id() << " landmark " << _lmk_ptr->id() << "(point " << _lmk_point_id << ")" << std::endl;
+        //std::cout << "landmark state block " << _lmk_ptr->getPointStateBlockPtr(_lmk_point_id)->getVector().transpose() << std::endl;
+        setType("POINT TO POINT 2D");
+        Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
+        Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
+        measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition
+    }
 
     virtual ~ConstraintPoint2D() = default;
 
@@ -47,9 +47,9 @@ class ConstraintPoint2D: public ConstraintSparse<2,2,1,2,1,2>
      * @return
      */
     LandmarkPolyline2DPtr getLandmarkPtr()
-		{
-			return std::static_pointer_cast<LandmarkPolyline2D>(landmark_other_ptr_.lock());
-		}
+    {
+        return std::static_pointer_cast<LandmarkPolyline2D>(landmark_other_ptr_.lock());
+    }
 
     /**
      * @brief getLandmarkPointId

@@ -89,9 +89,8 @@ int main (int argc, char** argv)
 //        frm->setState(problem->zeroState());
 //    }
 //    problem->print(1,0,1,0);
-    ceres::Solver::Summary summary = ceres_manager.solve();
-    std::cout << summary.BriefReport() << std::endl;
-    summary.FullReport();
+    std::string brief_report = ceres_manager.solve(1);// 0, 1 or 2
+    std::cout << brief_report << std::endl;
     problem->print(1,0,1,0);
 
     problem.reset();

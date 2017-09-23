@@ -59,17 +59,29 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
          **/
         ConstraintType getTypeId() const;
 
+        /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
+        **/
+        virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const = 0;
+
+        /** Returns a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr and the residual vector
+         **/
+        virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const = 0;
+
         /** \brief Returns the jacobians computation method
          **/
         virtual JacobianMethod getJacobianMethod() const = 0;
 
         /** \brief Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint
          **/
-        virtual const std::vector<Scalar*> getStateScalarPtrVector() = 0;
+        virtual std::vector<Scalar*> getStateScalarPtrVector() const = 0;
 
         /** \brief Returns a vector of pointers to the states in which this constraint depends
          **/
-        virtual const std::vector<StateBlockPtr> getStateBlockPtrVector() const = 0;
+        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const = 0;
+
+        /** \brief Returns a vector of the states sizes
+         **/
+        virtual std::vector<unsigned int> getStateSizes() const = 0;
 
         /** \brief Returns a reference to the feature measurement
          **/

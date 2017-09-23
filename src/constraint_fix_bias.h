@@ -3,7 +3,7 @@
 #define CONSTRAINT_FIX_BIAS_H_
 
 //Wolf includes
-#include "constraint_sparse.h"
+#include "constraint_autodiff.h"
 #include "frame_base.h"
 #include "frame_imu.h"
 #include "rotations.h"
@@ -17,11 +17,11 @@ namespace wolf {
 WOLF_PTR_TYPEDEFS(ConstraintFixBias);
 
 //class
-class ConstraintFixBias: public ConstraintSparse<6,3,3>
+class ConstraintFixBias: public ConstraintAutodiff<ConstraintFixBias,6,3,3>
 {
     public:
         ConstraintFixBias(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-                ConstraintSparse<6, 3, 3>(CTR_FIX_BIAS, _apply_loss_function, _status, std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getAccBiasPtr(),
+                ConstraintAutodiff<ConstraintFixBias, 6, 3, 3>(CTR_FIX_BIAS, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getAccBiasPtr(),
                                           std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getGyroBiasPtr())
         {
             setType("FIX BIAS");

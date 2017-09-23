@@ -50,16 +50,24 @@ IF(laser_scan_utils_FOUND)
     MESSAGE("laser_scan_utils Library FOUND: laser_scan_utils related sources will be built.")
 ENDIF(laser_scan_utils_FOUND)
 
-FIND_PACKAGE(raw_gps_utils ) #raw_gps_utils is not required
+FIND_PACKAGE(raw_gps_utils QUIET) #raw_gps_utils is not required
 IF(raw_gps_utils_FOUND)
     MESSAGE("raw_gps_utils Library FOUND: raw_gps_utils related sources will be built.")
 ENDIF(raw_gps_utils_FOUND)
 
 # OpenCV
-FIND_PACKAGE(OpenCV 2 QUIET)
-IF(OpenCV_FOUND)
-    MESSAGE("OpenCV Library FOUND: OpenCV related sources will be built.")
-ENDIF(OpenCV_FOUND)
+FIND_PACKAGE(OpenCV QUIET)
+if (OpenCV_FOUND) 
+  if (${OpenCV_VERSION_MAJOR} GREATER 2)
+    message("-- Found OpenCV ${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}. Related sources will be built.")
+    ADD_DEFINITIONS(-DHAVE_OPENCV3)
+    SET(USE_CV true)
+  else(${OpenCV_VERSION_MAJOR} GREATER 2)
+    message("[WARN] Found OpenCV ${OpenCV_VERSION_MAJOR}.${OpenCV_VERSION_MINOR}. Notice that WOLF is prepared to work with OpenCV 3.0 and higher versions.")
+  endif(${OpenCV_VERSION_MAJOR} GREATER 2)
+else(OpenCV_FOUND)
+    message("[WARN] OpenCV not found. Related sources will NOT be built.")
+endif(OpenCV_FOUND)
 
 # YAML with yaml-cpp
 INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindYamlCpp.cmake)
@@ -155,8 +163,8 @@ ENDIF(YAMLCPP_FOUND)
 SET(HDRS_BASE
     capture_base.h
     constraint_analytic.h
+    constraint_autodiff.h
     constraint_base.h
-    constraint_sparse.h
     factory.h
     feature_base.h
     feature_match.h
@@ -199,6 +207,7 @@ SET(HDRS
     capture_void.h
     constraint_container.h
     constraint_corner_2D.h
+    constraint_AHP.h
     constraint_epipolar.h
     constraint_imu.h
     constraint_fix.h
@@ -318,20 +327,18 @@ SET(SRCS_DTASSC
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
-        ceres_wrapper/auto_diff_cost_function_wrapper.h
+        ceres_wrapper/sparse_utils.h
+        ceres_wrapper/solver_manager.h
         ceres_wrapper/ceres_manager.h
+        #ceres_wrapper/qr_manager.h
         ceres_wrapper/cost_function_wrapper.h
-        ceres_wrapper/create_auto_diff_cost_function.h
-        ceres_wrapper/create_auto_diff_cost_function_ceres.h
-        ceres_wrapper/create_auto_diff_cost_function_wrapper.h
         ceres_wrapper/create_numeric_diff_cost_function.h
-        ceres_wrapper/create_numeric_diff_cost_function_ceres.h
         ceres_wrapper/local_parametrization_wrapper.h 
         )
     SET(SRCS_WRAPPER
+        ceres_wrapper/solver_manager.cpp
         ceres_wrapper/ceres_manager.cpp
-        ceres_wrapper/create_auto_diff_cost_function.cpp
-        ceres_wrapper/create_numeric_diff_cost_function.cpp
+        #ceres_wrapper/qr_manager.cpp
         ceres_wrapper/local_parametrization_wrapper.cpp 
         )
 ELSE(Ceres_FOUND)
@@ -416,7 +423,7 @@ IF(YAMLCPP_FOUND)
     ENDIF(laser_scan_utils_FOUND)
     IF(OpenCV_FOUND)
         SET(SRCS ${SRCS}
-            yaml/processor_image_yaml.cpp
+        	yaml/processor_image_yaml.cpp
             )
     ENDIF(OpenCV_FOUND)
 ENDIF(YAMLCPP_FOUND)

@@ -328,8 +328,8 @@ int main(int argc, char** argv)
         // SOLVE OPTIMIZATION ---------------------------
         std::cout << "SOLVING..." << std::endl;
         t1 = clock();
-        ceres::Solver::Summary summary = ceres_manager.solve();
-        std::cout << summary.FullReport() << std::endl;
+        std::string summary = ceres_manager.solve(2);// 0: nothing, 1: BriefReport, 2: FullReport
+        std::cout << summary << std::endl;
         mean_times(3) += ((double) clock() - t1) / CLOCKS_PER_SEC;
 
         // COMPUTE COVARIANCES ---------------------------

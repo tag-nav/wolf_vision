@@ -2,7 +2,7 @@
 #define CONSTRAINT_ODOM_2D_THETA_H_
 
 //Wolf includes
-#include "constraint_sparse.h"
+#include "constraint_autodiff.h"
 #include "frame_base.h"
 
 //#include "ceres/jet.h"
@@ -10,16 +10,16 @@
 namespace wolf {
     
 WOLF_PTR_TYPEDEFS(ConstraintOdom2D);
-    
+
 //class
-class ConstraintOdom2D : public ConstraintSparse<3, 2, 1, 2, 1>
+class ConstraintOdom2D : public ConstraintAutodiff<ConstraintOdom2D, 3, 2, 1, 2, 1>
 {
     public:
         ConstraintOdom2D(const FeatureBasePtr& _ftr_ptr,
                          const FrameBasePtr& _frame_ptr,
                          const ProcessorBasePtr& _processor_ptr = nullptr,
                          bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-                ConstraintSparse<3, 2, 1, 2, 1>(CTR_ODOM_2D, _frame_ptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+             ConstraintAutodiff<ConstraintOdom2D, 3, 2, 1, 2, 1>(CTR_ODOM_2D, _frame_ptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("ODOM 2D");
 //            std::cout << "created ConstraintOdom2D " << std::endl;

@@ -3,14 +3,14 @@
 
 //Wolf includes
 #include "wolf.h"
-#include "constraint_sparse.h"
+#include "constraint_autodiff.h"
 #include "landmark_container.h"
 
 namespace wolf {
     
 WOLF_PTR_TYPEDEFS(ConstraintContainer);
 
-class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
+class ConstraintContainer: public ConstraintAutodiff<ConstraintContainer,3,2,1,2,1>
 {
 	protected:
 		LandmarkContainerWPtr lmk_ptr_;
@@ -23,7 +23,7 @@ class ConstraintContainer: public ConstraintSparse<3,2,1,2,1>
                           const ProcessorBasePtr& _processor_ptr,
                           const unsigned int _corner,
                           bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-      ConstraintSparse<3,2,1,2,1>(CTR_CONTAINER, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
+            ConstraintAutodiff<ConstraintContainer,3,2,1,2,1>(CTR_CONTAINER, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
 			lmk_ptr_(_lmk_ptr),
 			corner_(_corner)
 		{

@@ -108,7 +108,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void setState(const Eigen::VectorXs& _state);
         Eigen::VectorXs getState() const;
         void getState(Eigen::VectorXs& _state) const;
-
+        unsigned int getSize() const;
 
         // Wolf tree access ---------------------------------------------------
     public:
