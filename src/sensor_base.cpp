@@ -271,7 +271,7 @@ StateBlockPtr SensorBase::getPPtr()
             return getPPtr(KF->getTimeStamp());
         }
     }
-    return state_block_vec_[0];
+    return getStateBlockPtr(0);
 }
 
 StateBlockPtr SensorBase::getOPtr()
@@ -285,7 +285,7 @@ StateBlockPtr SensorBase::getOPtr()
             return getOPtr(KF->getTimeStamp());
         }
     }
-    return state_block_vec_[1];
+    return getStateBlockPtr(1);
 }
 
 StateBlockPtr SensorBase::getIntrinsicPtr()
@@ -299,7 +299,7 @@ StateBlockPtr SensorBase::getIntrinsicPtr()
             return getIntrinsicPtr(KF->getTimeStamp());
         }
     }
-    return state_block_vec_[2];
+    return getStateBlockPtr(2);
 }
 
 bool SensorBase::process(const CaptureBasePtr capture_ptr)
