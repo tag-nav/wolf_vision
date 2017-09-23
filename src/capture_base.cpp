@@ -134,31 +134,37 @@ void CaptureBase::removeStateBlocks()
 
 void CaptureBase::fix()
 {
-    for( auto sbp : state_block_vec_)
+    for (Size i = 0; i<getStateBlockVec().size(); i++)
+    {
+        auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
         {
             sbp->fix();
             if (getProblem() != nullptr)
                 getProblem()->updateStateBlockPtr(sbp);
         }
+    }
 }
 
 void CaptureBase::unfix()
 {
-    for( auto sbp : state_block_vec_)
+    for (Size i = 0; i<getStateBlockVec().size(); i++)
+    {
+        auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
         {
             sbp->unfix();
             if (getProblem() != nullptr)
                 getProblem()->updateStateBlockPtr(sbp);
         }
+    }
 }
 
 void CaptureBase::fixExtrinsics()
 {
     for (unsigned int i = 0; i < 2; i++)
     {
-        auto sbp = state_block_vec_[i];
+        auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
         {
             sbp->fix();
@@ -172,7 +178,7 @@ void CaptureBase::unfixExtrinsics()
 {
     for (unsigned int i = 0; i < 2; i++)
     {
-        auto sbp = state_block_vec_[i];
+        auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
         {
             sbp->unfix();
@@ -184,9 +190,9 @@ void CaptureBase::unfixExtrinsics()
 
 void CaptureBase::fixIntrinsics()
 {
-    for (unsigned int i = 2; i < state_block_vec_.size(); i++)
+    for (unsigned int i = 2; i < getStateBlockVec().size(); i++)
     {
-        auto sbp = state_block_vec_[i];
+        auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
         {
             sbp->fix();
@@ -198,9 +204,9 @@ void CaptureBase::fixIntrinsics()
 
 void CaptureBase::unfixIntrinsics()
 {
-    for (unsigned int i = 2; i < state_block_vec_.size(); i++)
+    for (unsigned int i = 2; i < getStateBlockVec().size(); i++)
     {
-        auto sbp = state_block_vec_[i];
+        auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
         {
             sbp->unfix();
