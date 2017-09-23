@@ -50,7 +50,7 @@ IF(laser_scan_utils_FOUND)
     MESSAGE("laser_scan_utils Library FOUND: laser_scan_utils related sources will be built.")
 ENDIF(laser_scan_utils_FOUND)
 
-FIND_PACKAGE(raw_gps_utils ) #raw_gps_utils is not required
+FIND_PACKAGE(raw_gps_utils QUIET) #raw_gps_utils is not required
 IF(raw_gps_utils_FOUND)
     MESSAGE("raw_gps_utils Library FOUND: raw_gps_utils related sources will be built.")
 ENDIF(raw_gps_utils_FOUND)
