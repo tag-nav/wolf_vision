@@ -22,11 +22,11 @@ class ConstraintEpipolar : public ConstraintBase
 
         /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
         **/
-        virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const{return true;};
+        virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const override {return true;};
 
         /** Returns a residual vector and a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
          **/
-        virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const{};
+        virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const override {};
         /** \brief Returns the jacobians computation method
          **/
         virtual JacobianMethod getJacobianMethod() const override {return JAC_ANALYTIC;}
@@ -45,7 +45,7 @@ class ConstraintEpipolar : public ConstraintBase
 
         /** \brief Returns the constraint states sizes
          **/
-        virtual std::vector<unsigned int> getStateSizes() const{return std::vector<unsigned int>({1});}
+        virtual std::vector<unsigned int> getStateSizes() const override {return std::vector<unsigned int>({1});}
 
     public:
         static wolf::ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,
