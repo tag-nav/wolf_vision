@@ -71,7 +71,7 @@ class ProcessorOdom3D : public ProcessorMotion
         void setup(SensorOdom3DPtr sen_ptr);
 
     public:
-        virtual void data2delta(const Eigen::VectorXs& _data,
+        virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
                                 const Scalar _dt,
                                 Eigen::VectorXs& _delta,

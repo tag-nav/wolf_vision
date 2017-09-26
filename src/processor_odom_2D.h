@@ -39,7 +39,7 @@ class ProcessorOdom2D : public ProcessorMotion
         virtual bool voteForKeyFrame();
 
     protected:
-        virtual void data2delta(const Eigen::VectorXs& _data,
+        virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
                                 const Scalar _dt,
                                 Eigen::VectorXs& _delta,
@@ -97,7 +97,7 @@ inline ProcessorOdom2D::~ProcessorOdom2D()
 {
 }
 
-inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data,
+inline void ProcessorOdom2D::computeCurrentDelta(const Eigen::VectorXs& _data,
                                         const Eigen::MatrixXs& _data_cov,
                                         const Scalar _dt,
                                         Eigen::VectorXs& _delta,

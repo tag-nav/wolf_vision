@@ -298,7 +298,7 @@ class ProcessorMotion : public ProcessorBase
          *
          *  where `F_data = d_f/d_data` is the Jacobian of `f()`.
          */
-        virtual void data2delta(const Eigen::VectorXs& _data,
+        virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
                                 const Scalar _dt,
                                 Eigen::VectorXs& _delta,

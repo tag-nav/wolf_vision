@@ -43,7 +43,7 @@ void ProcessorOdom3D::setup(SensorOdom3DPtr sen_ptr)
     }
 }
 
-void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data,
+void ProcessorOdom3D::computeCurrentDelta(const Eigen::VectorXs& _data,
                                  const Eigen::MatrixXs& _data_cov,
                                  const Scalar _dt,
                                  Eigen::VectorXs& _delta,

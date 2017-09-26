@@ -200,7 +200,7 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
     Eigen::Matrix3s dDp_dab, dDv_dab, dDp_dwb, dDv_dwb, dDq_dwb;
 
     //Deltas without use of da_b
-    data2delta(_data, data_cov, _dt,delta_,delta_cov_,bias,jacobian_delta_calib_);
+    computeCurrentDelta(_data, data_cov, _dt,delta_,delta_cov_,bias,jacobian_delta_calib_);
     deltaPlusDelta(_delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
     MatrixXs jacobian_bias = jacobian_delta * jacobian_delta_calib_;
     Delta0 = delta_preint_plus_delta0; //this is the first preintegrated delta, not affected by any added bias noise
@@ -223,7 +223,7 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
         _data = data0;
         _data(i) = _data(i) - da_b; //- because a = a_m − a_b + a_n, in out case, a = a_m − a_b - da_b + a_n
         //data2delta
-        data2delta(_data, data_cov, _dt,delta_,delta_cov_,bias, jacobian_delta_calib_);
+        computeCurrentDelta(_data, data_cov, _dt,delta_,delta_cov_,bias, jacobian_delta_calib_);
         deltaPlusDelta(_delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
         Deltas_noisy_vect(i) = delta_preint_plus_delta0; //preintegrated deltas affected by added bias noise
     }
@@ -265,7 +265,7 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
 
     Vector6s bias = Vector6s::Zero();
 
-    data2delta(_data, data_cov, _dt,delta_,delta_cov_,bias,jacobian_delta_calib_); //Affects dp_out, dv_out and dq_out
+    computeCurrentDelta(_data, data_cov, _dt,delta_,delta_cov_,bias,jacobian_delta_calib_); //Affects dp_out, dv_out and dq_out
     delta0 = delta_;        //save the delta that is not affected by noise
     deltaPlusDelta(_Delta0, delta0, _dt, delta_preint_plus_delta, jacobian_delta_preint, jacobian_delta); 
     jacobian_delta_preint0 = jacobian_delta_preint;

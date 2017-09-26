@@ -50,7 +50,7 @@ class ProcessorIMU : public ProcessorMotion{
             bias << frame_imu->getAccBiasPtr()->getState() , frame_imu->getGyroBiasPtr()->getState();
             return bias;
         }
-        virtual void data2delta(const Eigen::VectorXs& _data,
+        virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
                                 const Scalar _dt,
                                 Eigen::VectorXs& _delta,
@@ -143,7 +143,7 @@ class ProcessorIMU : public ProcessorMotion{
 
 namespace wolf{
 
-inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
+inline void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
                                      const Eigen::MatrixXs& _data_cov,
                                      const Scalar _dt,
                                      Eigen::VectorXs& _delta,
