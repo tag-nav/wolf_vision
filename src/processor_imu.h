@@ -234,13 +234,11 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
 
     remapPQV(_delta_preint, _delta, _delta_preint_plus_delta);
 
-    /* This function has four stages:
+    /* This function has two stages:
      *
      * 1. Computing the Jacobians of the delta integration wrt noise: this is for the covariance propagation.
      *
-     * 2. Integrating the Jacobians wrt the biases: this is for Delta correction upon bias changes.
-     *
-     * 3. Actually integrating the deltas: this is the regular integration; it is performed at the end to avoid aliasing in the previous sections.
+     * 2. Actually integrating the deltas: this is the regular integration; it is performed at the end to avoid aliasing in the previous sections.
      *
      *
      * MATHS according to Sola-16, proof-checked against Forster-16
@@ -289,7 +287,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
     // Jac wrt preintegrated delta, D_D = dD'/dD
     _jacobian_delta_preint.block<6,6>(0,0).setIdentity(6,6);                    // dDp'/dDp, dDv'/dDv, Identities
     _jacobian_delta_preint.block<3,3>(0,3).noalias() = - DR * skew(dp_) ;       // dDp'/dDo
-    _jacobian_delta_preint.block<3,3>(0,6) = Matrix3s::Identity() * _dt; // dDp'/dDv = I*dt
+    _jacobian_delta_preint.block<3,3>(0,6) = Matrix3s::Identity() * _dt;        // dDp'/dDv = I*dt
     _jacobian_delta_preint.block<3,3>(3,3) =   dR.transpose();                  // dDo'/dDo
     _jacobian_delta_preint.block<3,3>(6,3).noalias() = - DR * skew(dv_) ;       // dDv'/dDo
 
@@ -297,48 +295,12 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
     _jacobian_delta.setIdentity(9,9);                                           //
     _jacobian_delta.block<3,3>(0,0) = DR;                                       // dDp'/ddp
     _jacobian_delta.block<3,3>(6,6) = DR;                                       // dDv'/ddv
-    _jacobian_delta.block<3,3>(3,3) = Matrix3s::Identity();        // dDo'/ddo = I
+    _jacobian_delta.block<3,3>(3,3) = Matrix3s::Identity();                     // dDo'/ddo = I
 
-
-
-    // DONE This needs to go out of here, Jac_calib is already taken care of by ProcessorMotion
-
-     /*////////////////////////////////////////////////////////
-      * 2. Integrate the Jacobians wrt the biases --
-      * See Sola 16 -- OK Forster
-      *
-      * Integration of Jacobian wrt bias
-      * dDp/dab += dDv/dab * dt - 0.5 * DR * dt^2
-      * dDv/dab -= DR * dt
-      * dDp/dwb += dDv/dwb * dt - 0.5 * DR * [a - ab]_x * dDo/dwb * dt^2
-      * dDv/dwb -= DR * [a - ab]_x * dDo/dwb * dt
-      * dDo/dwb  = dR.tr * dDo/dwb - Jr((w - wb)*dt) * dt
-      */
-
-    // acc and gyro measurements corrected with the estimated bias
-//    Vector3s a = acc_measured_  - acc_bias_;
-//    Vector3s w = gyro_measured_ - gyro_bias_;
-//
-//    // temporaries
-//    Scalar dt2_2         = 0.5 * _dt * _dt;
-//    Matrix3s M_tmp       = DR * skew(a) * dDq_dwb_;
-//
-//    dDp_dab_.noalias()  += dDv_dab_ * _dt -    DR * dt2_2;
-//    dDv_dab_            -=       DR * _dt;
-//    dDp_dwb_.noalias()  += dDv_dwb_ * _dt - M_tmp * dt2_2;
-//    dDv_dwb_            -=    M_tmp * _dt;
-//    dDq_dwb_             = dR.transpose() * dDq_dwb_ - jac_SO3_right(w * _dt) * _dt; // See SOLA-16 -- we'll use small angle aprox below:
-//    //    dDq_dwb_             = dR.transpose() * dDq_dwb_ - ( Matrix3s::Identity() - 0.5*skew(w*_dt) )*_dt; // Small angle aprox of right Jacobian above
-//
-//    jacobian_calib_.block(0,0,3,3) = dDp_dab_;
-//    jacobian_calib_.block(0,3,3,3) = dDp_dwb_;
-//    jacobian_calib_.block(3,3,3,3) = dDq_dwb_;
-//    jacobian_calib_.block(6,0,3,3) = dDv_dab_;
-//    jacobian_calib_.block(6,3,3,3) = dDv_dwb_;
 
 
     /*//////////////////////////////////////////////////////////////////////////
-     * 3. Update the deltas down here to avoid aliasing in the Jacobians section
+     * 2. Update the deltas down here to avoid aliasing in the Jacobians section
      */
     deltaPlusDelta(_delta_preint, _delta, _dt, _delta_preint_plus_delta);
 
