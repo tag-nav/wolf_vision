@@ -156,33 +156,33 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
     using namespace Eigen;
 
     // remap data
-    new (&acc_measured_) Map<const Vector3s>(_data.data());
-    new (&gyro_measured_) Map<const Vector3s>(_data.data() + 3);
+    new (&acc_measured_)    Map<const Vector3s>(_data.data());
+    new (&gyro_measured_)   Map<const Vector3s>(_data.data() + 3);
 
     // remap delta_ is D*_out_
     new (&Dp_out_) Map<Vector3s>      (_delta.data() + 0);
     new (&Dq_out_) Map<Quaternions>   (_delta.data() + 3);
     new (&Dv_out_) Map<Vector3s>      (_delta.data() + 7);
 
-    /* MATHS of delta creation -- Sola-16
+    // acc and gyro measurements corrected with the estimated bias, times dt
+    Vector3s a_dt = (acc_measured_  - _calib.head(3)) * _dt;
+    Vector3s w_dt = (gyro_measured_ - _calib.tail(3)) * _dt;
+
+    /* create delta
+     *
+     * MATHS of delta creation -- Sola-16
      * dp = 1/2 * (a-a_b) * dt^2 = 1/2 * dv * dt
      * dv = (a-a_b) * dt
      * dq = exp((w-w_b)*dt)
      */
-
-    // acc and gyro measurements corrected with the estimated bias
-    Vector3s a = acc_measured_  - _calib.head(3);
-    Vector3s w = gyro_measured_ - _calib.tail(3);
-
-    // create delta
-    Dv_out_ = a * _dt;
+    Dv_out_ = a_dt;
     Dp_out_ = Dv_out_ * _dt / 2;
-    Dq_out_ = v2q(w * _dt);
+    Dq_out_ = v2q(w_dt);
 
 
-    //Compute jacobian of delta wrt data
-
-    /* MATHS : jacobian dd_dn, of delta wrt noise
+    /* Compute jacobian of delta wrt data
+     *
+     * MATHS : jacobian dd_dn, of delta wrt noise
      * substituting a and w respectively by (a+a_n) and (w+w_n) (measurement noise is additive)
      *                 an           wn
      *         dp [ 0.5*I*dt*dt     0     ]
@@ -193,10 +193,11 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
     // we go the sparse way:
     Matrix3s ddv_dan = Matrix3s::Identity() * _dt;
     Matrix3s ddp_dan = ddv_dan * _dt / 2;
-    Matrix3s ddo_dwn = jac_SO3_right(w * _dt) * _dt; // Since w*dt is small, we could use here  Jr(wdt) ~ (I - 0.5*[wdt]_x)  and go much faster.
-    //    Matrix3s ddo_dwn = (Matrix3s::Identity() - 0.5 * skew(w * _dt) ) * _dt; // voila, the comment above is this
+    Matrix3s ddo_dwn = jac_SO3_right(w_dt) * _dt;
 
-    /* Covariance is sparse:
+    /* Covariance computation
+     *
+     * Covariance is sparse:
      *       [ Cpp   0   Cpv
      * COV =    0   Coo   0
      *         Cpv'  0   Cvv ]
@@ -211,6 +212,7 @@ inline void ProcessorIMU::data2delta(const Eigen::VectorXs& _data,
 
 
     /* Jacobians of delta wrt calibration parameters -- bias
+     *
      * We know that d_(meas - bias)/d_bias = -I
      * so d_delta/d_bias = - d_delta/d_meas
      * we assign only the non-null ones
