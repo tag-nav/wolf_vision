@@ -2,8 +2,13 @@
 namespace wolf
 {
 
-ProcessorMotion::ProcessorMotion(const std::string& _type, Size _state_size, Size _delta_size,
-                                 Size _delta_cov_size, Size _data_size, Scalar _time_tolerance, Size _calib_size) :
+ProcessorMotion::ProcessorMotion(const std::string& _type,
+                                 Size _state_size,
+                                 Size _delta_size,
+                                 Size _delta_cov_size,
+                                 Size _data_size,
+                                 Scalar _time_tolerance,
+                                 Size _calib_size) :
         ProcessorBase(_type, _time_tolerance),
         x_size_(_state_size),
         data_size_(_data_size),
@@ -98,16 +103,18 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
         // new capture
         CaptureMotionPtr new_capture_ptr = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(),
-                                                    getSensorPtr(),
-                                                    Eigen::VectorXs::Zero(data_size_),
-                                                    Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                    data_size_, delta_size_, delta_cov_size_, calib_size_,
-                                                    key_frame_ptr);
+                                                                           getSensorPtr(),
+                                                                           Eigen::VectorXs::Zero(data_size_),
+                                                                           Eigen::MatrixXs::Zero(data_size_, data_size_),
+                                                                           data_size_, delta_size_, delta_cov_size_, calib_size_,
+                                                                           key_frame_ptr);
         // reset the new buffer
         new_capture_ptr->getBuffer().get().push_back( motionZero(key_frame_ptr->getTimeStamp()) ) ;
 
         // create a new frame
-        FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME, key_frame_ptr->getState(), new_capture_ptr->getTimeStamp());
+        FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
+                                                                key_frame_ptr->getState(),
+                                                                new_capture_ptr->getTimeStamp());
         new_frame_ptr->addCapture(new_capture_ptr); // Add Capture to the new Frame
 
         // reset integrals
@@ -242,10 +249,10 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
 
     // create motion capture
     CaptureMotionPtr new_capture = std::make_shared<CaptureMotion>(new_ts, getSensorPtr(),
-                                                                         Eigen::VectorXs::Zero(data_size_),
-                                                                         Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                                         data_size_, delta_size_, delta_cov_size_, calib_size_,
-                                                                         new_keyframe_origin);
+                                                                   Eigen::VectorXs::Zero(data_size_),
+                                                                   Eigen::MatrixXs::Zero(data_size_, data_size_),
+                                                                   data_size_, delta_size_, delta_cov_size_, calib_size_,
+                                                                   new_keyframe_origin);
     // add motion capture to keyframe
     _new_keyframe->addCapture(new_capture);
 
@@ -259,8 +266,8 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     {
         // interpolate Motion at the new time stamp
         Motion motion_interpolated = interpolate(new_capture->getBuffer().get().back(), // last Motion of old buffer
-                                 existing_capture->getBuffer().get().front(), // first motion of new buffer
-                                 new_ts);
+                                                 existing_capture->getBuffer().get().front(), // first motion of new buffer
+                                                 new_ts);
         // add to old buffer
         new_capture->getBuffer().get().push_back(motion_interpolated);
     }
@@ -312,10 +319,21 @@ void ProcessorMotion::integrateOneStep()
     calib_ = getBuffer().getCalibrationPreint();
 
     // get data and convert it to delta, and obtain also the delta covariance
-    computeCurrentDelta(incoming_ptr_->getData(), incoming_ptr_->getDataCovariance(), dt_, delta_, delta_cov_, calib_, jacobian_delta_calib_);
+    computeCurrentDelta(incoming_ptr_->getData(),
+                        incoming_ptr_->getDataCovariance(),
+                        dt_,
+                        delta_,
+                        delta_cov_,
+                        calib_,
+                        jacobian_delta_calib_);
 
     // integrate the current delta to pre-integrated measurements, and get Jacobians
-    deltaPlusDelta(getBuffer().get().back().delta_integr_, delta_, dt_, delta_integrated_, jacobian_delta_preint_, jacobian_delta_);
+    deltaPlusDelta(getBuffer().get().back().delta_integr_,
+                   delta_,
+                   dt_,
+                   delta_integrated_,
+                   jacobian_delta_preint_,
+                   jacobian_delta_);
 
     // integrate Jacobian wrt calib
     if (calib_size_ > 0)
@@ -355,11 +373,21 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
         // re-convert data to delta with the new calibration parameters
         VectorXs calib = _capture_ptr->getBuffer().getCalibrationPreint();
 
-        computeCurrentDelta(motion_it->data_, motion_it->data_cov_, dt, motion_it->delta_, motion_it->delta_cov_, calib, jacobian_delta_calib_);
+        computeCurrentDelta(motion_it->data_,
+                            motion_it->data_cov_,
+                            dt,
+                            motion_it->delta_,
+                            motion_it->delta_cov_,
+                            calib,
+                            jacobian_delta_calib_);
 
         // integrate delta into delta_integr, and rewrite the buffer
-        deltaPlusDelta(prev_motion_it->delta_integr_, motion_it->delta_, dt, motion_it->delta_integr_,
-                       motion_it->jacobian_delta_integr_, motion_it->jacobian_delta_);
+        deltaPlusDelta(prev_motion_it->delta_integr_,
+                       motion_it->delta_,
+                       dt,
+                       motion_it->delta_integr_,
+                       motion_it->jacobian_delta_integr_,
+                       motion_it->jacobian_delta_);
 
         // integrate Jacobian wrt calib
         if (calib_size_ > 0)
