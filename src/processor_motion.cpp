@@ -214,6 +214,7 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 
     // clear and reset buffer
     getBuffer().get().clear();
+    getBuffer().setCalibrationPreint(getCalibration());
     getBuffer().get().push_back(motionZero(_origin_frame->getTimeStamp()));
 
     // Reset derived things
@@ -251,6 +252,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     // split the buffer
     // and give the old buffer to the key_capture
     existing_capture->getBuffer().split(new_ts, new_capture->getBuffer());
+    new_capture->getBuffer().setCalibrationPreint(new_capture->getCalibration());
 
     // interpolate individual delta
     if (!existing_capture->getBuffer().get().empty() && new_capture->getBuffer().get().back().ts_ != new_ts)
