@@ -68,6 +68,10 @@ target_link_libraries(gtest_local_param ${PROJECT_NAME})
 wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
 target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
 
+# ProcessorMotion class test
+wolf_add_gtest(gtest_processor_motion gtest_processor_motion.cpp)
+target_link_libraries(gtest_processor_motion ${PROJECT_NAME})
+
 # Rotation test
 wolf_add_gtest(gtest_rotation gtest_rotation.cpp)
 target_link_libraries(gtest_rotation ${PROJECT_NAME})
