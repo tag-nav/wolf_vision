@@ -181,7 +181,7 @@ inline void compose(const MatrixBase<D1>& d1,
     J_sum_d2.block(6,6,3,3) = dR1;                              // dDv'/ddv
     // J_sum_d2.block(3,3,3,3) = Matrix3s::Identity();          // dDo'/ddo = I
 
-    // compose deltas -- done here to avoid aliasing when calling with `d1` and `sum` pointing to the same variable
+    // compose deltas -- done here to avoid aliasing when calling with input `d1` and result `sum` referencing the same variable
     compose(d1, d2, dt, sum);
 }
 
