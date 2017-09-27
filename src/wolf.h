@@ -324,6 +324,7 @@ WOLF_LIST_TYPEDEFS(LandmarkBase);
 // - - State blocks
 WOLF_PTR_TYPEDEFS(StateBlock);
 WOLF_LIST_TYPEDEFS(StateBlock);
+WOLF_PTR_TYPEDEFS(StateAngle);
 WOLF_PTR_TYPEDEFS(StateQuaternion);
 
 // - - Local Parametrization
