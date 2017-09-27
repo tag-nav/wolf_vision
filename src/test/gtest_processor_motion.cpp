@@ -25,6 +25,9 @@ class ProcessorMotion_test : public testing::Test{
         ProblemPtr          problem;
         SensorOdom2DPtr     sensor;
         ProcessorOdom2DPtr  processor;
+        CaptureMotionPtr    capture;
+        Vector2s            data;
+        Matrix2s            data_cov;
         Matrix3s            unmeasured_cov;
 
         virtual void SetUp()
@@ -49,8 +52,10 @@ class ProcessorMotion_test : public testing::Test{
 
 TEST_F(ProcessorMotion_test, DummyTestExample)
 {
-    // TODO: Automatically generated TEST stub
-    ASSERT_TRUE(true);
+    TimeStamp t = 0.0;
+    data << 1, 0; // advance straight
+    data_cov.setIdentity();
+    capture = std::make_shared<CaptureMotion>(t, sensor, data, data_cov, 3, 3, 0);
 }
 
 int main(int argc, char **argv)
