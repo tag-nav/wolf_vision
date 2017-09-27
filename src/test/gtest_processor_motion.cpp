@@ -28,7 +28,6 @@ class ProcessorMotion_test : public testing::Test{
         CaptureMotionPtr    capture;
         Vector2s            data;
         Matrix2s            data_cov;
-        Matrix3s            unmeasured_cov;
 
         virtual void SetUp()
         {
@@ -42,7 +41,10 @@ class ProcessorMotion_test : public testing::Test{
             params->unmeasured_perturbation_std_ = 0.001;
             sensor = static_pointer_cast<SensorOdom2D>(problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0)));
             processor = static_pointer_cast<ProcessorOdom2D>(problem->installProcessor("ODOM 2D", "odom", sensor, params));
-            unmeasured_cov = params->unmeasured_perturbation_std_ * params->unmeasured_perturbation_std_ * Matrix3s::Identity();
+            capture = std::make_shared<CaptureMotion>(0.0, sensor, data, data_cov, 3, 3, 0);
+
+            Vector3s x0; x0 << 0, 0, 0;
+            processor->setOrigin(x0, 0.0);
         }
 
         virtual void TearDown(){}
@@ -50,12 +52,21 @@ class ProcessorMotion_test : public testing::Test{
 };
 
 
-TEST_F(ProcessorMotion_test, DummyTestExample)
+TEST_F(ProcessorMotion_test, IntegrateDummy)
 {
-    TimeStamp t = 0.0;
     data << 1, 0; // advance straight
     data_cov.setIdentity();
-    capture = std::make_shared<CaptureMotion>(t, sensor, data, data_cov, 3, 3, 0);
+
+    for (TimeStamp t = dt; t<0.9; t = t + dt)
+    {
+        capture->setTimeStamp(t);
+        capture->setData(data);
+        capture->setDataCovariance(data_cov);
+        processor->process(capture);
+        WOLF_DEBUG("t: ", t, "  x: ", problem->getCurrentState().transpose());
+    }
+
+    ASSERT_MATRIX_APPROX(problem->getCurrentState(), (Vector3s()<<9,0,0).finished(), 1e-8);
 }
 
 int main(int argc, char **argv)
