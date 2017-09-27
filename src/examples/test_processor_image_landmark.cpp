@@ -138,7 +138,7 @@ int main(int argc, char** argv)
     // running CAPTURES preallocated
     CaptureImagePtr image;
     Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
-    CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>(t, sensor_odom, data, 6, 7, 6, 0);
+    CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>(t, sensor_odom, data, 7, 6, 0);
     //=====================================================
 
 

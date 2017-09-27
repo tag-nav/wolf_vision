@@ -48,12 +48,12 @@ class CaptureMotion : public CaptureBase
     public:
         CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr,
                       const Eigen::VectorXs& _data,
-                      Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size,
+                      Size _delta_size, Size _delta_cov_size, Size _calib_size,
                       FrameBasePtr _origin_frame_ptr = nullptr);
 
         CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr,
                       const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov,
-                      Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size,
+                      Size _delta_size, Size _delta_cov_size, Size _calib_size,
                       FrameBasePtr _origin_frame_ptr = nullptr);
 
         virtual ~CaptureMotion();
@@ -87,13 +87,13 @@ class CaptureMotion : public CaptureBase
 inline CaptureMotion::CaptureMotion(const TimeStamp& _ts,
                                     SensorBasePtr _sensor_ptr,
                                     const Eigen::VectorXs& _data,
-                                    Size _data_size, Size _delta_size, Size _delta_cov_size, Size _calib_size,
+                                    Size _delta_size, Size _delta_cov_size, Size _calib_size,
                                     FrameBasePtr _origin_frame_ptr) :
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),
         data_cov_(_sensor_ptr ? _sensor_ptr->getNoiseCov() : Eigen::MatrixXs::Zero(_data.rows(), _data.rows())), // Someone should test this zero and do something smart accordingly
         calib_size_(_calib_size),
-        buffer_(_data_size, _delta_size, _delta_cov_size, _calib_size),
+        buffer_(_data.size(), _delta_size, _delta_cov_size, _calib_size),
         origin_frame_ptr_(_origin_frame_ptr)
 {
     //
@@ -103,13 +103,13 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts,
                                     SensorBasePtr _sensor_ptr,
                                     const Eigen::VectorXs& _data,
                                     const Eigen::MatrixXs& _data_cov,
-                                    Size _data_size, Size _delta_size, Size _delta_cov_size, Size _calib_size,
+                                    Size _delta_size, Size _delta_cov_size, Size _calib_size,
                                     FrameBasePtr _origin_frame_ptr) :
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),
         data_cov_(_data_cov),
         calib_size_(_calib_size),
-        buffer_(_data_size, _delta_size,_delta_cov_size, _calib_size),
+        buffer_(_data.size(), _delta_size,_delta_cov_size, _calib_size),
         origin_frame_ptr_(_origin_frame_ptr)
 {
     //

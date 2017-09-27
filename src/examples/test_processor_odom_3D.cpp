@@ -62,7 +62,7 @@ int main (int argc, char** argv)
 
     Scalar dt = 0.1;
 
-    CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(0), sen, data, 7, 7, 6, 0 );
+    CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(0), sen, data, 7, 6, 0 );
 
     cout << "t: " << std::setprecision(2) << 0 << "  \t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
 
