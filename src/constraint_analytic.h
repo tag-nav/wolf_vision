@@ -129,7 +129,7 @@ class ConstraintAnalytic: public ConstraintBase
         /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
         **/
         // TODO
-        virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+        virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const override
         {
             // load parameters evaluation value
             std::vector<Eigen::Map<const Eigen::VectorXs>> state_blocks_map_;
@@ -166,7 +166,7 @@ class ConstraintAnalytic: public ConstraintBase
         /** Returns the residual vetor and a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
          **/
         // TODO
-        virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const
+        virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const override
         {
         };
 
