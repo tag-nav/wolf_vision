@@ -67,7 +67,13 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> skew(const Eigen::MatrixBas
 
     typedef typename Derived::Scalar T;
 
-    return (Eigen::Matrix<T, 3, 3>() << 0.0, -_v(2), +_v(1), +_v(2), 0.0, -_v(0), -_v(1), +_v(0), 0.0).finished();
+    Eigen::Matrix<T, 3, 3> sk;
+
+    sk <<   0.0 , -_v(2), +_v(1),
+          +_v(2),   0.0 , -_v(0),
+          -_v(1), +_v(0),  0.0;
+
+    return sk;
 }
 
 /** \brief Inverse of skew symmetric matrix
@@ -156,12 +162,17 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBa
 
     typedef typename Derived::Scalar T;
 
+    Eigen::Matrix<typename Derived::Scalar, 3, 3> R;
+
     T angle_squared = _v.squaredNorm();
     T angle = sqrt(angle_squared);
+
     if (angle > wolf::Constants::EPS)
-        return Eigen::AngleAxis<T>(angle, _v / angle).matrix();
+        R = Eigen::AngleAxis<T>(angle, _v.normalized()).toRotationMatrix();
     else
-        return Eigen::Matrix<T, 3, 3>::Identity() + skew(_v);
+        R = Eigen::Matrix<T, 3, 3>::Identity() + skew(_v);
+
+    return R;
 }
 
 /** \brief Rotation matrix logarithmic map
