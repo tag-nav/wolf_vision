@@ -6,18 +6,11 @@
 #include "processor_image_feature.h"
 #include "ceres_wrapper/ceres_manager.h"
 
-//#include "feature_point_image.h"
-//#include "state_block.h"
-//#include "state_quaternion.h"
-//#include "factory.h"
-
-// opencv
-//#include "opencv2/calib3d/calib3d.hpp"
-
-// general includes
-//#include "unistd.h"
-//#include <time.h>
-//#include <uEye.h> //used to use the camera?
+// Vision utils includes
+#include <vision_utils.h>
+#include <vision_utils/sensors.h>
+#include <vision_utils/common_class/buffer.h>
+#include <vision_utils/common_class/frame.h>
 
 //std includes
 #include <ctime>
@@ -34,36 +27,20 @@ int main(int argc, char** argv)
     //ProcessorImageFeature test
     std::cout << std::endl << " ========= ProcessorImageFeature test ===========" << std::endl << std::endl;
 
-    cv::VideoCapture capture;
+    vision_utils::SensorCameraPtr sen_ptr = vision_utils::askUserSource(argc, argv);
 
-    std::string filename;
-    if (argc == 1)
-    {
-        std::cout << "Please enter a valid GLOBAL path for the video sequence (without spaces):\n>";
-        std::getline(std::cin, filename);
-        capture.open(filename.c_str());
-    }
-    else if (std::string(argv[1]) == "0")
-    {
-        //camera
-        filename = "0";
-        capture.open(0);
-    }
-    else
-    {
-        filename = argv[1];
-        capture.open(filename.c_str());
-    }
-    std::cout << "Input video file: " << filename << std::endl;
-    if(!capture.isOpened()) std::cout << "failed" << std::endl; else std::cout << "succeded" << std::endl;
-    capture.set(CV_CAP_PROP_POS_MSEC, 3000);
-
-    unsigned int img_width  = capture.get(CV_CAP_PROP_FRAME_WIDTH);
-    unsigned int img_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-    std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
+    if (sen_ptr==NULL)
+    	return 0;
 
     unsigned int buffer_size = 8;
-    std::vector<cv::Mat> frame(buffer_size);
+    vision_utils::Buffer<vision_utils::FramePtr> frame_buff(buffer_size);
+    frame_buff.add( vision_utils::setFrame(sen_ptr->getImage(), 0) );
+
+    unsigned int img_width  = frame_buff.back()->getImage().cols;
+    unsigned int img_height = frame_buff.back()->getImage().rows;
+    std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
+
+    CaptureImagePtr image_ptr;
 
     TimeStamp t = 1;
 
@@ -76,41 +53,43 @@ int main(int argc, char** argv)
     // Method 1: Use data generated here for sensor and processor
     //=====================================================
 
-    //    // SENSOR
-    //    Eigen::Vector4s k = {320,240,320,320};
-    //    SensorCamera* sen_cam_ = new SensorCamera(std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
-    //                                              std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
-    //                                              std::make_shared<StateBlock>(k,false),img_width,img_height);
-    //
-    //    wolf_problem_->getHardwarePtr()->addSensor(sen_cam_);
-    //
-    //    // PROCESSOR
-    //    ProcessorParamsImage tracker_params;
-    //    tracker_params.image = {img_width,  img_height};
-    //    tracker_params.matcher.min_normalized_score = 0.75;
-    //    tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
-    //    tracker_params.matcher.roi_width = 30;
-    //    tracker_params.matcher.roi_height = 30;
-    //    tracker_params.active_search.grid_width = 12;
-    //    tracker_params.active_search.grid_height = 8;
-    //    tracker_params.active_search.separation = 1;
-    //    tracker_params.algorithm.max_new_features =0;
-    //    tracker_params.algorithm.min_features_for_keyframe = 20;
-    //
-    //    DetectorDescriptorParamsOrb orb_params;
-    //    orb_params.type = DD_ORB;
-    //
-    //    DetectorDescriptorParamsBrisk brisk_params;
-    //    brisk_params.type = DD_BRISK;
-    //
-    //    // select the kind of detector-descriptor parameters
-    //    tracker_params.detector_descriptor_params_ptr = &orb_params; // choose ORB
-    //
-    //    ProcessorImageFeature* prc_image = new ProcessorImageFeature(tracker_params);
-    //
-    //    sen_cam_->addProcessor(prc_image);
+//        // SENSOR
+//        Eigen::Vector4s k = {320,240,320,320};
+//        SensorCameraPtr camera_ptr = std::make_shared<SensorCamera>(std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
+//                                                  std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
+//                                                  std::make_shared<StateBlock>(k,false),img_width,img_height);
+//
+//        wolf_problem_->getHardwarePtr()->addSensor(camera_ptr);
+//
+//        // PROCESSOR
+//        ProcessorParamsImage tracker_params;
+//        tracker_params.matcher.min_normalized_score = 0.75;
+//        tracker_params.matcher.similarity_norm = cv::NORM_HAMMING;
+//        tracker_params.matcher.roi_width = 30;
+//        tracker_params.matcher.roi_height = 30;
+//        tracker_params.active_search.grid_width = 12;
+//        tracker_params.active_search.grid_height = 8;
+//        tracker_params.active_search.separation = 1;
+//        tracker_params.algorithm.max_new_features =0;
+//        tracker_params.algorithm.min_features_for_keyframe = 20;
+//
+//        DetectorDescriptorParamsOrb orb_params;
+//        orb_params.type = DD_ORB;
+//
+//        DetectorDescriptorParamsBrisk brisk_params;
+//        brisk_params.type = DD_BRISK;
+//
+//        // select the kind of detector-descriptor parameters
+//        tracker_params.detector_descriptor_params_ptr = std::make_shared<DetectorDescriptorParamsOrb>(orb_params); // choose ORB
+////        tracker_params.detector_descriptor_params_ptr = std::make_shared<DetectorDescriptorParamsBrisk>(brisk_params); // choose BRISK
+//
+//        std::cout << tracker_params.detector_descriptor_params_ptr->type << std::endl;
+//
+//        ProcessorImageFeaturePtr prc_image = std::make_shared<ProcessorImageFeature>(tracker_params);
+////        camera_ptr->addProcessor(prc_image);
+//        prc_image->setup(camera_ptr);
+//        std::cout << "sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================
-
 
     //=====================================================
     // Method 2: Use factory to create sensor and processor
@@ -143,40 +122,27 @@ int main(int argc, char** argv)
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================
 
-
-
-
 //    // Ceres wrapper
 //    ceres::Solver::Options ceres_options;
 //    ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;LINE_SEARCH
 //    ceres_options.max_line_search_step_contraction = 1e-3;
-//    //    ceres_options.minimizer_progress_to_stdout = false;
-//    //    ceres_options.line_search_direction_type = ceres::LBFGS;
-//    //    ceres_options.max_num_iterations = 100;
+//    // ceres_options.minimizer_progress_to_stdout = false;
+//    // ceres_options.line_search_direction_type = ceres::LBFGS;
+//    // ceres_options.max_num_iterations = 100;
 //    google::InitGoogleLogging(argv[0]);
+//    CeresManager ceres_manager(wolf_problem_, ceres_options);
 
-//    CeresManager ceres_manager(&(*wolf_problem_ptr_), ceres_options);
-
-
-
-    // CAPTURES
-    CaptureImagePtr image_ptr;
-
-    unsigned int f  = 1;
-    capture >> frame[f % buffer_size];
-
-    cv::namedWindow("Feature tracker");    // Creates a window for display.
-    cv::moveWindow("Feature tracker", 0, 0);
-
-    while(!(frame[f % buffer_size].empty()))
+    for(int f = 0; f<10000; ++f)
     {
-        std::cout << "\n=============== Frame #: " << f << " in buffer: " << f%buffer_size << " ===============" << std::endl;
+        frame_buff.add( vision_utils::setFrame(sen_ptr->getImage(), f) );
+
+    	std::cout << "\n=============== Frame #: " << f << " ===============" << std::endl;
 
         t.setToNow();
         clock_t t1 = clock();
 
         // Preferred method with factory objects:
-        image_ptr = make_shared<CaptureImage>(t, camera_ptr, frame[f % buffer_size]);
+        image_ptr = make_shared<CaptureImage>(t, camera_ptr, frame_buff.back()->getImage());
 
         camera_ptr->process(image_ptr);
 
@@ -184,25 +150,19 @@ int main(int argc, char** argv)
 
         wolf_problem_->print();
 
-        cv::waitKey(20);
+        cv::waitKey(1);
 
-//        if((f%buffer_size) == 4)
+//        if((f%100) == 0)
 //        {
-//            ceres::Solver::Summary summary = ceres_manager.solve();
-//            std::cout << summary.FullReport() << std::endl;
-
-
+//            std::string summary = ceres_manager.solve(2);
+//            std::cout << summary << std::endl;
+//
 //            std::cout << "Last key frame pose: "
-//                      << wolf_problem_ptr_->getLastKeyFramePtr()->getPPtr()->getState().transpose() << std::endl;
+//                      << wolf_problem_->getLastKeyFramePtr()->getPPtr()->getState().transpose() << std::endl;
 //            std::cout << "Last key frame orientation: "
-//                      << wolf_problem_ptr_->getLastKeyFramePtr()->getOPtr()->getState().transpose() << std::endl;
-
+//                      << wolf_problem_->getLastKeyFramePtr()->getOPtr()->getState().transpose() << std::endl;
+//
 //            cv::waitKey(0);
 //        }
-
-        f++;
-        capture >> frame[f % buffer_size];
     }
-
-
 }
