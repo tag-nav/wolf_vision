@@ -17,7 +17,7 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
     vision_utils::DescriptorParamsBasePtr _des_params = _params.descriptor_params_ptr;
     vision_utils::MatcherParamsBasePtr _mat_params = _params.matcher_params_ptr;
 
-
+//
 //    // 1. detector-descriptor params
 //    DetectorDescriptorParamsBasePtr _dd_params = _params.detector_descriptor_params_ptr;
 //    switch (_dd_params->type){
