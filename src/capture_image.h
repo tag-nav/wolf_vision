@@ -10,12 +10,6 @@
 #include <vision_utils.h>
 #include <common_class/frame.h>
 
-// REMOVE opencv includes
-#include <opencv2/core/core.hpp>
-
-//std includes
-//
-
 namespace wolf {
 
 // Set ClassPtr, ClassConstPtr and ClassWPtr typedefs;
@@ -31,11 +25,6 @@ class CaptureImage : public CaptureBase
 {
     protected:
         vision_utils::Frame frame_;
-
-//        REMOVE
-//        cv::Mat image_;
-//        cv::Mat descriptors_;
-//        std::vector<cv::KeyPoint> keypoints_;
 
     public:
         CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv::Mat _data_cv);

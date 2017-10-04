@@ -5,9 +5,8 @@
 //Wolf includes
 #include "feature_base.h"
 
-//OpenCV includes
-#include "opencv2/features2d/features2d.hpp"
-
+// Vision Utils includes
+#include <vision_utils.h>
 
 namespace wolf {
 

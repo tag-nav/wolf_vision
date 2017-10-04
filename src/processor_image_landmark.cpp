@@ -14,7 +14,6 @@
 
 namespace wolf
 {
-//#if defined (HAVE_OPENCV3)
 
 ProcessorImageLandmark::ProcessorImageLandmark(const ProcessorParamsImage& _params) :
     ProcessorTrackerLandmark("IMAGE LANDMARK", _params.algorithm.max_new_features, _params.algorithm.time_tolerance),
@@ -85,62 +84,6 @@ ProcessorImageLandmark::ProcessorImageLandmark(const ProcessorParamsImage& _para
 
     matcher_ptr_ = cv::DescriptorMatcher::create(matcherType);
 }
-
-//REMOVE
-//#else
-//
-//ProcessorImageLandmark::ProcessorImageLandmark(const ProcessorParamsImage& _params) :
-//    ProcessorTrackerLandmark("IMAGE LANDMARK", _params.algorithm.max_new_features, _params.algorithm.time_tolerance),
-//    matcher_ptr_(nullptr),
-//    detector_descriptor_ptr_(nullptr),
-//    params_(_params),
-//    active_search_grid_(),
-//    n_feature_(0),
-//    landmark_idx_non_visible_(0)
-//{
-//    // 1. detector-descriptor params
-//    std::shared_ptr<DetectorDescriptorParamsBase> _dd_params = _params.detector_descriptor_params_ptr;
-//    switch (_dd_params->type){
-//        case DD_BRISK:
-//            {
-//                std::shared_ptr<DetectorDescriptorParamsBrisk> params_brisk = std::static_pointer_cast<DetectorDescriptorParamsBrisk>(_dd_params);
-//            detector_descriptor_ptr_ = std::make_shared<cv::BRISK>(params_brisk->threshold, //
-//                                                     params_brisk->octaves, //
-//                                                     params_brisk->pattern_scale);
-//
-//            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((params_brisk->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
-//                                                                   (unsigned int)((params_brisk->nominal_pattern_radius)*params_brisk->pattern_scale));
-//
-//            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
-//
-//            break;
-//            }
-//        case DD_ORB:
-//            {
-//            std::shared_ptr<DetectorDescriptorParamsOrb> params_orb = std::static_pointer_cast<DetectorDescriptorParamsOrb>(_dd_params);
-//            detector_descriptor_ptr_ = std::make_shared<cv::ORB>(params_orb->nfeatures, //
-//                                                   params_orb->scaleFactor, //
-//                                                   params_orb->nlevels, //
-//                                                   params_orb->edgeThreshold, //
-//                                                   params_orb->firstLevel, //
-//                                                   params_orb->WTA_K, //
-//                                                   params_orb->scoreType, //
-//                                                   params_orb->patchSize);
-//
-//            detector_descriptor_params_.pattern_radius_ = params_orb->edgeThreshold;
-//            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
-//
-//            break;
-//            }
-//        default:
-//            throw std::runtime_error("Unknown detector-descriptor type");
-//    }
-//
-//    // 2. matcher params
-//    matcher_ptr_ = std::make_shared<cv::BFMatcher>(_params.matcher.similarity_norm);
-//}
-//
-//#endif
 
 ProcessorImageLandmark::~ProcessorImageLandmark()
 {

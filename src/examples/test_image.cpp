@@ -27,8 +27,8 @@ int main(int argc, char** argv)
     //ProcessorImageFeature test
     std::cout << std::endl << " ========= ProcessorImageFeature test ===========" << std::endl << std::endl;
 
+    // Sensor or sensor recording
     vision_utils::SensorCameraPtr sen_ptr = vision_utils::askUserSource(argc, argv);
-
     if (sen_ptr==NULL)
     	return 0;
 
