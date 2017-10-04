@@ -117,7 +117,7 @@ int main(int argc, char** argv)
 
     // PROCESSOR
     // one-liner API
-    ProcessorImageFeaturePtr prc_img_ptr = std::static_pointer_cast<ProcessorImageFeature>( wolf_problem_->installProcessor("IMAGE FEATURE", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_ORB.yaml") );
+    ProcessorImageFeaturePtr prc_img_ptr = std::static_pointer_cast<ProcessorImageFeature>( wolf_problem_->installProcessor("IMAGE FEATURE", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml") );
     prc_img_ptr->setup(camera_ptr);
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================

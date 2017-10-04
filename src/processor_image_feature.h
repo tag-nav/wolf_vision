@@ -31,18 +31,35 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 {
     protected:
 
+		vision_utils::DetectorBasePtr det_ptr_;
+		vision_utils::DescriptorBasePtr des_ptr_;
+		vision_utils::MatcherBasePtr mat_ptr_;
+
+		//==========================================
+	    //==========================================
+
         cv::Ptr<cv::DescriptorMatcher> matcher_ptr_;
         cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
+
+        //==========================================
+        //==========================================
 
     protected:
         ProcessorParamsImage params_;           // Struct with parameters of the processors
         ActiveSearchGrid active_search_grid_;   // Active Search
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
+
+        //==========================================
+        //==========================================
         struct
         {
                 unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
                 unsigned int size_bits_; ///< length of the descriptor vector in bits
         } detector_descriptor_params_;
+
+        //==========================================
+        //==========================================
+
         struct
         {
                 unsigned int width_; ///< width of the image
@@ -135,25 +152,6 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
                                     cv::Mat& new_descriptors);
 
     private:
-        /**
-         * \brief Trims the roi of a matrix which exceeds the boundaries of the image
-         * \param _roi input/output roi to be trimmed if necessary
-         */
-        virtual void trimRoi(cv::Rect& _roi);
-
-        /**
-         * \brief Augments the designed roi so that the detector and descriptor analize the whole region of interest
-         * \param _roi input/output roi to be inflated the necessary amount
-         */
-        virtual void inflateRoi(cv::Rect& _roi);
-
-        /**
-         * \brief Adapts a certain roi to maximize its performance and assign it to the image. It's composed by inflateRoi and trimRoi.
-         * \param _image_roi output image to be applied the adapted roi
-         * \param _image input image (incoming or last) in which the roi will be applied to obtain \b _image_roi
-         * \param _roi input roi to be adapted
-         */
-        virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
         /**
          * \brief Does the match between a target descriptor and (potentially) multiple candidate descriptors of a Feature.

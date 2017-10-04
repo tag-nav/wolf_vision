@@ -1,6 +1,12 @@
 processor type: "IMAGE ORB"
 processor name: "ORB feature tracker"
 
+vision_utils:
+    YAML file params: /home/asantamaria/Code/cpp/vision_utils/src/examples/yaml/ACTIVESEARCH.yaml
+
+#//===================================
+#//===================================
+
 detector-descriptor:
     type: "ORB"         # This affects the structure below. See processor_image_BRISK.yaml for another example
     nfeatures: 100
@@ -19,6 +25,9 @@ matcher:
     roi:
         width: 20
         height: 20
+
+#//===================================
+#//===================================
 
 active search:
     grid width: 12

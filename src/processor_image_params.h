@@ -9,6 +9,8 @@
 
 namespace wolf
 {
+//=============================
+//=============================
 
 enum DetectorDescriptorType
 {
@@ -47,22 +49,29 @@ struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
         unsigned int scoreType=cv::ORB::HARRIS_SCORE; ///< Type of score to rank the detected points
         unsigned int patchSize=31;
 };
+//=============================
+//=============================
 
 struct ProcessorParamsImage : public ProcessorParamsBase
 {
-        vision_utils::DetectorParamsBasePtr detector_params_ptr;
-        vision_utils::DescriptorParamsBasePtr descriptor_params_ptr;
-        vision_utils::MatcherParamsBasePtr matcher_params_ptr;
+		std::string yaml_file_params_vision_utils;
 
-//        DetectorDescriptorParamsBasePtr detector_descriptor_params_ptr;
-//
-//        struct Matcher
-//        {
-//                Scalar min_normalized_score; ///< [-1..0]: awful match; 1: perfect match; out of [-1,1]: error
-//                int similarity_norm; ///< Norm used to measure the distance between two descriptors
-//                unsigned int roi_width; ///< Width of the roi used in tracking
-//                unsigned int roi_height; ///< Height of the roi used in tracking
-//        }matcher;
+		//=============================
+		//=============================
+
+        DetectorDescriptorParamsBasePtr detector_descriptor_params_ptr;
+
+        struct Matcher
+        {
+                Scalar min_normalized_score; ///< [-1..0]: awful match; 1: perfect match; out of [-1,1]: error
+                int similarity_norm; ///< Norm used to measure the distance between two descriptors
+                unsigned int roi_width; ///< Width of the roi used in tracking
+                unsigned int roi_height; ///< Height of the roi used in tracking
+        }matcher;
+
+        //=============================
+        //=============================
+
         struct Active_search
         {
                 unsigned int grid_width; ///< cells per horizontal dimension of image

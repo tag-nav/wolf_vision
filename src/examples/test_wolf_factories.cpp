@@ -64,7 +64,7 @@ int main(void)
 
     // Use params factory for camera intrinsics
     IntrinsicsBasePtr intr_cam_ptr = IntrinsicsFactory::get().create("CAMERA", wolf_config + "/camera_params_ueye_sim.yaml");
-    ProcessorParamsBasePtr params_ptr = ProcessorParamsFactory::get().create("IMAGE FEATURE", wolf_config + "/processor_image_ORB.yaml");
+    ProcessorParamsBasePtr params_ptr = ProcessorParamsFactory::get().create("IMAGE FEATURE", wolf_config + "/processor_image_feature.yaml");
 
     cout << "CAMERA with intrinsics      : " << (static_pointer_cast<IntrinsicsCamera>(intr_cam_ptr))->pinhole_model.transpose() << endl;
 //    cout << "Processor IMAGE image width : " << (static_pointer_cast<ProcessorParamsImage>(params_ptr))->image.width << endl;
@@ -95,7 +95,7 @@ int main(void)
     problem->installProcessor("ODOM 2D", "main odometry",    "main odometer");
     problem->installProcessor("ODOM 2D", "sec. odometry",    "aux odometer");
     problem->installProcessor("IMU",     "pre-integrated",   "inertial");
-    problem->installProcessor("IMAGE FEATURE",   "ORB",              "front left camera", wolf_config + "/processor_image_ORB.yaml");
+    problem->installProcessor("IMAGE FEATURE",   "ORB",              "front left camera", wolf_config + "/processor_image_feature.yaml");
 //    problem->createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
 
     // print installed processors

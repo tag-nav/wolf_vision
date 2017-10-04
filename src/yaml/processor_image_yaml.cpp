@@ -30,7 +30,12 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
 
     if (!params.IsNull())
     {
-        Node dd_yaml = params["detector-descriptor"];
+    	Node dd_yaml = params["vision_utils"];
+    	p->yaml_file_params_vision_utils = dd_yaml["YAML file params"].as<std::string>();
+
+    	//===================================
+    	//===================================
+        dd_yaml = params["detector-descriptor"];
         if(dd_yaml["type"].as<string>() == "ORB")
         {
             std::shared_ptr<DetectorDescriptorParamsOrb> dd = std::make_shared<DetectorDescriptorParamsOrb>();
@@ -55,6 +60,9 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
         p->matcher.similarity_norm      = m["similarity norm"].as<int>(); // enum { NORM_INF=1, NORM_L1=2, NORM_L2=4, NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, NORM_RELATIVE=8, NORM_MINMAX=32 };
         p->matcher.roi_width            = m["roi"]["width"].as<unsigned int>();
         p->matcher.roi_height           = m["roi"]["height"].as<unsigned int>();
+
+    	//===================================
+    	//===================================
 
         Node as = params["active search"];
         p->active_search.grid_width     = as["grid width"].as<unsigned int>();

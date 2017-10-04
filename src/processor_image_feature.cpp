@@ -13,71 +13,144 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
     params_(_params),
     active_search_grid_()
 {
-    vision_utils::DetectorParamsBasePtr _det_params = _params.detector_params_ptr;
-    vision_utils::DescriptorParamsBasePtr _des_params = _params.descriptor_params_ptr;
-    vision_utils::MatcherParamsBasePtr _mat_params = _params.matcher_params_ptr;
+	// Detector
+    std::string det_name = vision_utils::readYamlType(params_.yaml_file_params_vision_utils, "detector");
+    det_ptr_ = vision_utils::setupDetector(det_name, det_name + " detector", params_.yaml_file_params_vision_utils);
 
-//
-//    // 1. detector-descriptor params
-//    DetectorDescriptorParamsBasePtr _dd_params = _params.detector_descriptor_params_ptr;
-//    switch (_dd_params->type){
-//        case DD_BRISK:
-//            {
-//            std::shared_ptr<DetectorDescriptorParamsBrisk> params_brisk = std::static_pointer_cast<DetectorDescriptorParamsBrisk>(_dd_params);
-//
-//            detector_descriptor_ptr_ = cv::BRISK::create(params_brisk->threshold, //
-//                                                         params_brisk->octaves, //
-//                                                         params_brisk->pattern_scale);
-//
-//            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((params_brisk->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
-//                                                                   (unsigned int)((params_brisk->nominal_pattern_radius)*params_brisk->pattern_scale));
-//            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
-//
-//            break;
-//            }
-//        case DD_ORB:
-//            {
-//            std::shared_ptr<DetectorDescriptorParamsOrb> params_orb = std::static_pointer_cast<DetectorDescriptorParamsOrb>(_dd_params);
-//            detector_descriptor_ptr_ = cv::ORB::create(params_orb->nfeatures, //
-//                                                   params_orb->scaleFactor, //
-//                                                   params_orb->nlevels, //
-//                                                   params_orb->edgeThreshold, //
-//                                                   params_orb->firstLevel, //
-//                                                   params_orb->WTA_K, //
-//                                                   params_orb->scoreType, //
-//                                                   params_orb->patchSize);
-//
-//            detector_descriptor_params_.pattern_radius_ = params_orb->edgeThreshold;
-//            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
-//
-//            break;
-//            }
-//        default:
-//            throw std::runtime_error("Unknown detector-descriptor type");
-//    }
-//
-//    // 2. matcher params
-//    // TODO: FIX this. Problems initializing with int (cv::DescriptorMatcher::create(int matcherType)
-//    std::string matcherType = "BruteForce-Hamming"; // Default
-//    switch (_params.matcher.similarity_norm)
-//    {
-//        case 1:
-//            matcherType = "BruteForce";
-//            break;
-//        case 2:
-//            matcherType = "BruteForce-L1";
-//            break;
-//        case 3:
-//            matcherType = "BruteForce-Hamming";
-//            break;
-//        case 4:
-//            matcherType = "BruteForce-Hamming(2)";
-//            break;
-//        case 5:
-//            matcherType = "FlannBased";
-//            break;
-//    }
-//    matcher_ptr_ = cv::DescriptorMatcher::create(matcherType);
+    if (det_name.compare("ORB") == 0)
+    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorORB>(det_ptr_);
+    else if (det_name.compare("FAST") == 0)
+    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorFAST>(det_ptr_);
+    else if (det_name.compare("SIFT") == 0)
+    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorSIFT>(det_ptr_);
+    else if (det_name.compare("SURF") == 0)
+    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorSURF>(det_ptr_);
+    else if (det_name.compare("BRISK") == 0)
+    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorBRISK>(det_ptr_);
+    else if (det_name.compare("MSER") == 0)
+    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorMSER>(det_ptr_);
+    else if (det_name.compare("GFTT") == 0)
+    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorGFTT>(det_ptr_);
+    else if (det_name.compare("HARRIS") == 0)
+    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorHARRIS>(det_ptr_);
+    else if (det_name.compare("SBD") == 0)
+    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorSBD>(det_ptr_);
+    else if (det_name.compare("KAZE") == 0)
+    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorKAZE>(det_ptr_);
+    else if (det_name.compare("AKAZE") == 0)
+    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorAKAZE>(det_ptr_);
+    else if (det_name.compare("AGAST") == 0)
+    	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorAGAST>(det_ptr_);
+
+    // Descriptor
+    std::string des_name = vision_utils::readYamlType(params_.yaml_file_params_vision_utils, "descriptor");
+    des_ptr_ = vision_utils::setupDescriptor(des_name, des_name + " descriptor", params_.yaml_file_params_vision_utils);
+
+    if (des_name.compare("ORB") == 0)
+    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorORB>(des_ptr_);
+    else if (des_name.compare("SIFT") == 0)
+    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorSIFT>(des_ptr_);
+    else if (des_name.compare("SURF") == 0)
+    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorSURF>(des_ptr_);
+    else if (des_name.compare("BRISK") == 0)
+      	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorBRISK>(des_ptr_);
+    else if (des_name.compare("KAZE") == 0)
+    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorKAZE>(des_ptr_);
+    else if (des_name.compare("AKAZE") == 0)
+    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorAKAZE>(des_ptr_);
+    else if (des_name.compare("LATCH") == 0)
+    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorLATCH>(des_ptr_);
+    else if (des_name.compare("FREAK") == 0)
+    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorFREAK>(des_ptr_);
+    else if (des_name.compare("BRIEF") == 0)
+    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorBRIEF>(des_ptr_);
+    else if (des_name.compare("DAISY") == 0)
+    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorDAISY>(des_ptr_);
+    else if (des_name.compare("LUCID") == 0)
+    	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorLUCID>(des_ptr_);
+
+    // Matcher
+    std::string mat_name = vision_utils::readYamlType(params_.yaml_file_params_vision_utils, "matcher");
+    mat_ptr_ = vision_utils::setupMatcher(mat_name, mat_name + " matcher", params_.yaml_file_params_vision_utils);
+
+    if (mat_name.compare("FLANNBASED") == 0)
+    	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherFLANNBASED>(mat_ptr_);
+    if (mat_name.compare("BRUTEFORCE") == 0)
+    	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE>(mat_ptr_);
+    if (mat_name.compare("BRUTEFORCE_L1") == 0)
+    	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_L1>(mat_ptr_);
+    if (mat_name.compare("BRUTEFORCE_HAMMING") == 0)
+    	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING>(mat_ptr_);
+    if (mat_name.compare("BRUTEFORCE_HAMMING_2") == 0)
+       	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING_2>(mat_ptr_);
+
+
+    //==========================================
+    //==========================================
+
+    // 1. detector-descriptor params
+    DetectorDescriptorParamsBasePtr _dd_params = _params.detector_descriptor_params_ptr;
+    switch (_dd_params->type){
+        case DD_BRISK:
+            {
+            std::shared_ptr<DetectorDescriptorParamsBrisk> params_brisk = std::static_pointer_cast<DetectorDescriptorParamsBrisk>(_dd_params);
+
+            detector_descriptor_ptr_ = cv::BRISK::create(params_brisk->threshold, //
+                                                         params_brisk->octaves, //
+                                                         params_brisk->pattern_scale);
+
+            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((params_brisk->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
+                                                                   (unsigned int)((params_brisk->nominal_pattern_radius)*params_brisk->pattern_scale));
+            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
+
+            break;
+            }
+        case DD_ORB:
+            {
+            std::shared_ptr<DetectorDescriptorParamsOrb> params_orb = std::static_pointer_cast<DetectorDescriptorParamsOrb>(_dd_params);
+            detector_descriptor_ptr_ = cv::ORB::create(params_orb->nfeatures, //
+                                                   params_orb->scaleFactor, //
+                                                   params_orb->nlevels, //
+                                                   params_orb->edgeThreshold, //
+                                                   params_orb->firstLevel, //
+                                                   params_orb->WTA_K, //
+                                                   params_orb->scoreType, //
+                                                   params_orb->patchSize);
+
+            detector_descriptor_params_.pattern_radius_ = params_orb->edgeThreshold;
+            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
+
+            break;
+            }
+        default:
+            throw std::runtime_error("Unknown detector-descriptor type");
+    }
+
+    // 2. matcher params
+    // TODO: FIX this. Problems initializing with int (cv::DescriptorMatcher::create(int matcherType)
+    std::string matcherType = "BruteForce-Hamming"; // Default
+    switch (_params.matcher.similarity_norm)
+    {
+        case 1:
+            matcherType = "BruteForce";
+            break;
+        case 2:
+            matcherType = "BruteForce-L1";
+            break;
+        case 3:
+            matcherType = "BruteForce-Hamming";
+            break;
+        case 4:
+            matcherType = "BruteForce-Hamming(2)";
+            break;
+        case 5:
+            matcherType = "FlannBased";
+            break;
+    }
+    matcher_ptr_ = cv::DescriptorMatcher::create(matcherType);
+
+    //==========================================
+    //==========================================
 }
 
 //Destructor
@@ -305,7 +378,9 @@ unsigned int ProcessorImageFeature::detect(cv::Mat _image, cv::Rect& _roi, std::
                                     cv::Mat& new_descriptors)
 {
     cv::Mat _image_roi;
-    adaptRoi(_image_roi, _image, _roi);
+//    adaptRoi(_image_roi, _image, _roi);
+
+    vision_utils::adaptRoi(det_ptr_->getPatternRadius(), _image, _roi, _image_roi);
 
     detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
     detector_descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
@@ -325,49 +400,6 @@ void ProcessorImageFeature::resetVisualizationFlag(FeatureBaseList& _feature_lis
         FeaturePointImagePtr feature_last_ptr = std::static_pointer_cast<FeaturePointImage>(feature_base_last_ptr);
         feature_last_ptr->setIsKnown(true);
     }
-}
-
-void ProcessorImageFeature::trimRoi(cv::Rect& _roi)
-{
-    if(_roi.x < 0)
-    {
-        int diff_x = -_roi.x;
-        _roi.x = 0;
-        _roi.width = _roi.width - diff_x;
-    }
-    if(_roi.y < 0)
-    {
-        int diff_y = -_roi.y;
-        _roi.y = 0;
-        _roi.height = _roi.height - diff_y;
-    }
-    if((unsigned int)(_roi.x + _roi.width) > image_.width_)
-    {
-        int diff_width = image_.width_ - (_roi.x + _roi.width);
-        _roi.width = _roi.width+diff_width;
-    }
-    if((unsigned int)(_roi.y + _roi.height) > image_.height_)
-    {
-        int diff_height = image_.height_ - (_roi.y + _roi.height);
-        _roi.height = _roi.height+diff_height;
-    }
-}
-
-void ProcessorImageFeature::inflateRoi(cv::Rect& _roi)
-{
-    int inflation_rate = detector_descriptor_params_.pattern_radius_;
-
-    _roi.x = _roi.x - inflation_rate;
-    _roi.y = _roi.y - inflation_rate;
-    _roi.width = _roi.width + 2*inflation_rate;
-    _roi.height = _roi.height + 2*inflation_rate;
-}
-
-void ProcessorImageFeature::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi)
-{
-    inflateRoi(_roi);
-    trimRoi(_roi);
-    _image_roi = _image(_roi);
 }
 
 // draw functions ===================================================================
