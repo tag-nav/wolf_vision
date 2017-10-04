@@ -13,9 +13,6 @@
 
 // Vision utils
 #include <vision_utils.h>
-#include <vision_utils/detectors.h>
-#include <vision_utils/descriptors.h>
-#include <vision_utils/matchers.h>
 
 // General includes
 #include <cmath>

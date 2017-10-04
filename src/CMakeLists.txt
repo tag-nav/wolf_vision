@@ -231,7 +231,6 @@ SET(HDRS
     landmark_line_2D.h
     landmark_polyline_2D.h
     local_parametrization_polyline_extreme.h
-    processor_image_params.h
     processor_imu.h
     processor_imu_UnitTester.h
     processor_odom_2D.h
@@ -379,6 +378,7 @@ IF (vision_utils_FOUND)
         feature_point_image.h
         landmark_AHP.h
         landmark_point_3d.h
+        processor_image_params.h
         processor_image_feature.h
         processor_image_landmark.h
         )

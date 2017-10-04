@@ -1,6 +1,12 @@
 #ifndef PROCESSOR_IMAGE_PARAMS_H
 #define PROCESSOR_IMAGE_PARAMS_H
 
+// Vision utils
+#include <vision_utils.h>
+#include <vision_utils/detectors.h>
+#include <vision_utils/descriptors.h>
+#include <vision_utils/matchers.h>
+
 namespace wolf
 {
 
@@ -44,15 +50,19 @@ struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
 
 struct ProcessorParamsImage : public ProcessorParamsBase
 {
-        DetectorDescriptorParamsBasePtr detector_descriptor_params_ptr;
+        vision_utils::DetectorParamsBasePtr detector_params_ptr;
+        vision_utils::DescriptorParamsBasePtr descriptor_params_ptr;
+        vision_utils::MatcherParamsBasePtr matcher_params_ptr;
 
-        struct Matcher
-        {
-                Scalar min_normalized_score; ///< [-1..0]: awful match; 1: perfect match; out of [-1,1]: error
-                int similarity_norm; ///< Norm used to measure the distance between two descriptors
-                unsigned int roi_width; ///< Width of the roi used in tracking
-                unsigned int roi_height; ///< Height of the roi used in tracking
-        }matcher;
+//        DetectorDescriptorParamsBasePtr detector_descriptor_params_ptr;
+//
+//        struct Matcher
+//        {
+//                Scalar min_normalized_score; ///< [-1..0]: awful match; 1: perfect match; out of [-1,1]: error
+//                int similarity_norm; ///< Norm used to measure the distance between two descriptors
+//                unsigned int roi_width; ///< Width of the roi used in tracking
+//                unsigned int roi_height; ///< Height of the roi used in tracking
+//        }matcher;
         struct Active_search
         {
                 unsigned int grid_width; ///< cells per horizontal dimension of image
