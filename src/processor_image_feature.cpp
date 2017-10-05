@@ -133,9 +133,6 @@ void ProcessorImageFeature::postProcess()
 unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
                                            FeatureMatchMap& _feature_matches)
 {
-//    unsigned int roi_width = params_.matcher.roi_width;
-//    unsigned int roi_heigth = params_.matcher.roi_height;
-
     std::vector<cv::KeyPoint> candidate_keypoints;
     cv::Mat candidate_descriptors;
     std::vector<cv::DMatch> cv_matches;
