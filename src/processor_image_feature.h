@@ -36,8 +36,6 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 		vision_utils::MatcherBasePtr mat_ptr_;
 		vision_utils::AlgorithmACTIVESEARCHPtr active_search_ptr_;  // Active Search
 
-    protected:
-
 		ProcessorParamsImage params_;           // Struct with parameters of the processors
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
 
@@ -47,15 +45,17 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
                 unsigned int height_; ///< height of the image
         } image_;
 
+        unsigned int complete_target_size_ = 1;
+        unsigned int target_size_ = 1;
+
+    public:
+
         // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
         std::list<cv::Rect> tracker_roi_inflated_;
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
-        unsigned int complete_target_size_ = 1;
-        unsigned int target_size_ = 1;
 
-    public:
         ProcessorImageFeature(ProcessorParamsImage _params);
         virtual ~ProcessorImageFeature();
 

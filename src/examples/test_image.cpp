@@ -148,7 +148,13 @@ int main(int argc, char** argv)
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
-        wolf_problem_->print();
+//        wolf_problem_->print();
+
+        cv::Mat image = frame_buff.back()->getImage().clone();
+        prc_img_ptr->drawFeatures(image);
+        prc_img_ptr->drawRoi(image,prc_img_ptr->detector_roi_,cv::Scalar(0.0,255.0, 255.0));   //active search roi
+        prc_img_ptr->drawRoi(image,prc_img_ptr->tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));  //tracker roi
+        prc_img_ptr->drawTarget(image,prc_img_ptr->tracker_target_);
 
         cv::waitKey(1);
 

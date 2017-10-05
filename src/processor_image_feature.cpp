@@ -119,23 +119,14 @@ void ProcessorImageFeature::preProcess()
 
 void ProcessorImageFeature::postProcess()
 {
-    if (last_ptr_!=nullptr)
-    {
-        cv::Mat image = image_last_.clone();
-        if(params_.draw.primary_drawing) drawFeatures(image);
-        if(params_.draw.detector_roi) drawRoi(image,detector_roi_,cv::Scalar(0.0,255.0, 255.0));   //active search roi
-        if(params_.draw.tracker_roi) drawRoi(image,tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));  //tracker roi
-        if(params_.draw.secondary_drawing) drawTarget(image,tracker_target_);
-
-    }
 }
 
 unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
                                            FeatureMatchMap& _feature_matches)
 {
-    std::vector<cv::KeyPoint> candidate_keypoints;
+    KeyPointVector candidate_keypoints;
     cv::Mat candidate_descriptors;
-    std::vector<cv::DMatch> cv_matches;
+    DMatchVector cv_matches;
 
     for (auto feature_base_ptr : _feature_list_in)
     {
@@ -187,14 +178,14 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
 
 bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
 {
-    std::vector<cv::DMatch> matches_mat;
+    DMatchVector matches_mat;
     FeaturePointImagePtr feat_incoming_ptr = std::static_pointer_cast<FeaturePointImage>(_incoming_feature);
     FeaturePointImagePtr feat_origin_ptr = std::static_pointer_cast<FeaturePointImage>(_origin_feature);
 
     cv::Mat origin_descriptor = feat_origin_ptr->getDescriptor();
     cv::Mat incoming_descriptor = feat_incoming_ptr->getDescriptor();
 
-    std::vector<cv::KeyPoint> origin_keypoint;
+    KeyPointVector origin_keypoint;
     origin_keypoint.push_back(feat_origin_ptr->getKeypoint());
 
     Scalar normalized_score = match(origin_descriptor,incoming_descriptor,matches_mat);
@@ -210,9 +201,9 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
         unsigned int roi_x;
         unsigned int roi_y;
 
-        std::vector<cv::KeyPoint> correction_keypoints;
+        KeyPointVector correction_keypoints;
         cv::Mat correction_descriptors;
-        std::vector<cv::DMatch> correction_matches;
+        DMatchVector correction_matches;
 
         FeaturePointImagePtr feat_last_ptr = std::static_pointer_cast<FeaturePointImage>(_last_feature);
 
@@ -243,7 +234,7 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
 unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_new_features)
 {
     cv::Rect roi;
-    std::vector<cv::KeyPoint> new_keypoints;
+    KeyPointVector new_keypoints;
     cv::Mat new_descriptors;
     cv::KeyPointsFilter keypoint_filter;
     unsigned int n_new_features = 0;
@@ -256,7 +247,7 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
             detector_roi_.push_back(roi);
             if (detect(image_last_, roi, new_keypoints, new_descriptors))
             {
-                std::vector<cv::KeyPoint> list_keypoints = new_keypoints;
+                KeyPointVector list_keypoints = new_keypoints;
                 unsigned int index = 0;
                 keypoint_filter.retainBest(new_keypoints,1);
                 for(unsigned int i = 0; i < list_keypoints.size(); i++)
@@ -295,14 +286,14 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
 
 //============================================================
 
-Scalar ProcessorImageFeature::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches)
+Scalar ProcessorImageFeature::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
 {
     mat_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
     Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/(des_ptr_->getSize()*8);
     return normalized_score;
 }
 
-unsigned int ProcessorImageFeature::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
+unsigned int ProcessorImageFeature::detect(cv::Mat _image, cv::Rect& _roi, KeyPointVector& _new_keypoints,
                                     cv::Mat& new_descriptors)
 {
     _new_keypoints = det_ptr_->detect(_image, _roi);
@@ -323,53 +314,62 @@ void ProcessorImageFeature::resetVisualizationFlag(FeatureBaseList& _feature_lis
 
 void ProcessorImageFeature::drawTarget(cv::Mat _image, std::list<cv::Point> _target_list)
 {
-    // draw the target of the tracking
-    for(auto target_point : _target_list)
-        cv::circle(_image, target_point, 7, cv::Scalar(255.0, 0.0, 255.0), 1, 3, 0);
+    if (last_ptr_!=nullptr)
+    {
+        // draw the target of the tracking
+        for(auto target_point : _target_list)
+            cv::circle(_image, target_point, 7, cv::Scalar(255.0, 0.0, 255.0), 1, 3, 0);
 
-    cv::imshow("Feature tracker", _image);
+        cv::imshow("Feature tracker", _image);
+    }
 }
 
 void ProcessorImageFeature::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
 {
-    for (auto roi : _roi_list)
-        cv::rectangle(_image, roi, _color, 1, 8, 0);
+    if (last_ptr_!=nullptr)
+    {
+        for (auto roi : _roi_list)
+            cv::rectangle(_image, roi, _color, 1, 8, 0);
 
-    cv::imshow("Feature tracker", _image);
+        cv::imshow("Feature tracker", _image);
+    }
 }
 
 void ProcessorImageFeature::drawFeatures(cv::Mat _image)
 {
-    unsigned int known_feature_counter = 0;
-    unsigned int new_feature_counter = 0;
-
-    for (auto feature_ptr : last_ptr_->getFeatureList())
+    if (last_ptr_!=nullptr)
     {
-        FeaturePointImagePtr point_ptr = std::static_pointer_cast<FeaturePointImage>(feature_ptr);
-        if (point_ptr->isKnown())
-        {
-            cv::circle(_image, point_ptr->getKeypoint().pt, 4, cv::Scalar(51.0, 255.0, 51.0), -1, 3, 0);
-            known_feature_counter++;
-        }
-        else
-        {
-            cv::circle(_image, point_ptr->getKeypoint().pt, 4, cv::Scalar(0.0, 0.0, 255.0), -1, 3, 0);
-            new_feature_counter++;
-        }
+        unsigned int known_feature_counter = 0;
+        unsigned int new_feature_counter = 0;
 
-        cv::putText(_image, std::to_string(feature_ptr->trackId()), point_ptr->getKeypoint().pt,
-                    cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+        for (auto feature_ptr : last_ptr_->getFeatureList())
+        {
+            FeaturePointImagePtr point_ptr = std::static_pointer_cast<FeaturePointImage>(feature_ptr);
+            if (point_ptr->isKnown())
+            {
+                cv::circle(_image, point_ptr->getKeypoint().pt, 4, cv::Scalar(51.0, 255.0, 51.0), -1, 3, 0);
+                known_feature_counter++;
+            }
+            else
+            {
+                cv::circle(_image, point_ptr->getKeypoint().pt, 4, cv::Scalar(0.0, 0.0, 255.0), -1, 3, 0);
+                new_feature_counter++;
+            }
+
+            cv::putText(_image, std::to_string(feature_ptr->trackId()), point_ptr->getKeypoint().pt,
+                        cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+        }
+        cv::imshow("Feature tracker", _image);
+
+        std::cout << "\nKnown: " << known_feature_counter << "\tNew: " << new_feature_counter << std::endl;
+        std::cout << "Known features tracked: " << known_feature_counter << "/" << target_size_ << std::endl;
+        std::cout << "Percentage known: " << ((float)known_feature_counter/(float)target_size_)*100 << "%" << std::endl;
+        std::cout << "Features tracked: " << (last_ptr_->getFeatureList()).size() << "/" << complete_target_size_ << std::endl;
+        std::cout << "Percentage: " << ((float)(last_ptr_->getFeatureList()).size()/(float)complete_target_size_)*100 << "%" << std::endl;
+
+        target_size_ = (last_ptr_->getFeatureList()).size();
+        complete_target_size_ = 0;
     }
-    cv::imshow("Feature tracker", _image);
-
-    std::cout << "\nKnown: " << known_feature_counter << "\tNew: " << new_feature_counter << std::endl;
-    std::cout << "Known features tracked: " << known_feature_counter << "/" << target_size_ << std::endl;
-    std::cout << "Percentage known: " << ((float)known_feature_counter/(float)target_size_)*100 << "%" << std::endl;
-    std::cout << "Features tracked: " << (last_ptr_->getFeatureList()).size() << "/" << complete_target_size_ << std::endl;
-    std::cout << "Percentage: " << ((float)(last_ptr_->getFeatureList()).size()/(float)complete_target_size_)*100 << "%" << std::endl;
-
-    target_size_ = (last_ptr_->getFeatureList()).size();
-    complete_target_size_ = 0;
 }
 
 
