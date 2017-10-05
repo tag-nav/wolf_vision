@@ -133,11 +133,8 @@ void ProcessorImageFeature::postProcess()
 unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
                                            FeatureMatchMap& _feature_matches)
 {
-
-    unsigned int roi_width = params_.matcher.roi_width;
-    unsigned int roi_heigth = params_.matcher.roi_height;
-//    unsigned int roi_x;
-//    unsigned int roi_y;
+//    unsigned int roi_width = params_.matcher.roi_width;
+//    unsigned int roi_heigth = params_.matcher.roi_height;
 
     std::vector<cv::KeyPoint> candidate_keypoints;
     cv::Mat candidate_descriptors;
@@ -147,11 +144,7 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
     {
         FeaturePointImagePtr feature_ptr = std::static_pointer_cast<FeaturePointImage>(feature_base_ptr);
 
-//        roi_x = (feature_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
-//        roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
-//        cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
-
-        cv::Rect roi = vision_utils::setRoi(feature_ptr->getKeypoint().pt.x, feature_ptr->getKeypoint().pt.y, roi_width, roi_heigth);
+        cv::Rect roi = vision_utils::setRoi(feature_ptr->getKeypoint().pt.x, feature_ptr->getKeypoint().pt.y, mat_ptr_->getParams()->roi_width, mat_ptr_->getParams()->roi_height);
 
         active_search_grid_.hitCell(feature_ptr->getKeypoint());
         complete_target_size_++;
@@ -164,7 +157,7 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
         if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
         {
             Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
-            if (normalized_score > params_.matcher.min_normalized_score)
+            if (normalized_score > mat_ptr_->getParams()->min_norm_score)
             {
                 FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
@@ -208,14 +201,14 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
 
     Scalar normalized_score = match(origin_descriptor,incoming_descriptor,matches_mat);
 
-    if(normalized_score > params_.matcher.min_normalized_score)
+    if(normalized_score > mat_ptr_->getParams()->min_norm_score)
         return true;
     else
     {
         /* CORRECT */
 
-        unsigned int roi_width = params_.matcher.roi_width;
-        unsigned int roi_heigth = params_.matcher.roi_height;
+        unsigned int roi_width = mat_ptr_->getParams()->roi_width;
+        unsigned int roi_heigth = mat_ptr_->getParams()->roi_height;
         unsigned int roi_x;
         unsigned int roi_y;
 
@@ -233,7 +226,7 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
         if (detect(image_incoming_, roi, correction_keypoints, correction_descriptors))
         {
             Scalar normalized_score_correction = match(origin_descriptor,correction_descriptors,correction_matches);
-            if(normalized_score_correction > params_.matcher.min_normalized_score)
+            if(normalized_score_correction > mat_ptr_->getParams()->min_norm_score)
             {
                 feat_incoming_ptr->setKeypoint(correction_keypoints[correction_matches[0].trainIdx]);
                 feat_incoming_ptr->setDescriptor(correction_descriptors.row(correction_matches[0].trainIdx));

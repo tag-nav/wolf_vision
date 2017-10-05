@@ -35,30 +35,10 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 		vision_utils::DescriptorBasePtr des_ptr_;
 		vision_utils::MatcherBasePtr mat_ptr_;
 
-		//==========================================
-	    //==========================================
-
-//        cv::Ptr<cv::DescriptorMatcher> matcher_ptr_;
-//        cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
-
-        //==========================================
-        //==========================================
-
     protected:
         ProcessorParamsImage params_;           // Struct with parameters of the processors
         ActiveSearchGrid active_search_grid_;   // Active Search
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
-
-        //==========================================
-        //==========================================
-//        struct
-//        {
-//                unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
-//                unsigned int size_bits_; ///< length of the descriptor vector in bits
-//        } detector_descriptor_params_;
-
-        //==========================================
-        //==========================================
 
         struct
         {

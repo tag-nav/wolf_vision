@@ -33,6 +33,37 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
     	Node dd_yaml = params["vision_utils"];
     	p->yaml_file_params_vision_utils = dd_yaml["YAML file params"].as<std::string>();
 
+    	//===================================
+    	//=================================== REMOVE AFTER PROCESSOR_LANDMARK
+        dd_yaml = params["detector-descriptor"];
+        if(dd_yaml["type"].as<string>() == "ORB")
+        {
+            std::shared_ptr<DetectorDescriptorParamsOrb> dd = std::make_shared<DetectorDescriptorParamsOrb>();
+            dd->type                        = DD_ORB;
+            dd->nfeatures                   = dd_yaml["nfeatures"].as<unsigned int>();
+            dd->scaleFactor                 = dd_yaml["scale factor"].as<float>();
+            dd->nlevels                     = dd_yaml["nlevels"].as<unsigned int>();
+            dd->edgeThreshold               = dd_yaml["edge threshold"].as<unsigned int>();
+            dd->firstLevel                  = dd_yaml["first level"].as<unsigned int>();
+            dd->WTA_K                       = dd_yaml["WTA_K"].as<unsigned int>();
+            dd->scoreType                   = dd_yaml["score type"].as<int>(); // enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
+            dd->patchSize                   = dd_yaml["patch size"].as<unsigned int>();
+            p->detector_descriptor_params_ptr = dd;
+        }else
+        {
+            std::cout << "Unknown detector-descriptor type " << dd_yaml["type"].as<string>() << std::endl;
+            // TODO: add BRISK params struct
+        }
+
+        Node m = params["matcher"];
+        p->matcher.min_normalized_score = m["minimum normalized score"].as<Scalar>();
+        p->matcher.similarity_norm      = m["similarity norm"].as<int>(); // enum { NORM_INF=1, NORM_L1=2, NORM_L2=4, NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, NORM_RELATIVE=8, NORM_MINMAX=32 };
+        p->matcher.roi_width            = m["roi"]["width"].as<unsigned int>();
+        p->matcher.roi_height           = m["roi"]["height"].as<unsigned int>();
+
+    	//===================================
+    	//===================================
+
         Node as = params["active search"];
         p->active_search.grid_width     = as["grid width"].as<unsigned int>();
         p->active_search.grid_height    = as["grid height"].as<unsigned int>();

@@ -10,7 +10,7 @@
 namespace wolf
 {
 //=============================
-//=============================
+//============================= REMOVE AFTER PROCESSOR_LANDMARK
 
 enum DetectorDescriptorType
 {
@@ -57,7 +57,7 @@ struct ProcessorParamsImage : public ProcessorParamsBase
 		std::string yaml_file_params_vision_utils;
 
 		//=============================
-		//=============================
+		//============================= REMOVE AFTER PROCESSOR_LANDMARK
 
         DetectorDescriptorParamsBasePtr detector_descriptor_params_ptr;
 
