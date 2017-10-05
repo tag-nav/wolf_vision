@@ -161,17 +161,14 @@ class ProcessorMotion : public ProcessorBase
         const Eigen::MatrixXs getCurrentDeltaPreintCov();
 
         /** \brief Provide the motion integrated so far
-         * \return the integrated delta state
+         * \return the integrated motion
          */
         Motion getMotion() const;
 
-        void getMotion(Motion& _motion) const;
-
         /** \brief Provide the motion integrated until a given timestamp
-         * \return the integrated delta state
+         * \return the integrated motion
          */
         Motion getMotion(const TimeStamp& _ts) const;
-        void getMotion(const TimeStamp& _ts, Motion& _motion) const;
 
         /** \brief Finds the capture that contains the closest previous motion of _ts
          * \return a pointer to the capture (if it exists) or a nullptr (otherwise)
@@ -780,19 +777,6 @@ inline Motion ProcessorMotion::getMotion(const TimeStamp& _ts) const
     assert(capture_ptr != nullptr && "ProcessorMotion::getMotion: timestamp older than first motion");
 
     return capture_ptr->getBuffer().getMotion(_ts);
-}
-
-inline void ProcessorMotion::getMotion(Motion& _motion) const
-{
-    _motion = getBuffer().get().back();
-}
-
-inline void ProcessorMotion::getMotion(const TimeStamp& _ts, Motion& _motion) const
-{
-    auto capture_ptr = findCaptureContainingTimeStamp(_ts);
-    assert(capture_ptr != nullptr && "ProcessorMotion::getMotion: timestamp older than first motion");
-
-    _motion = capture_ptr->getBuffer().getMotion(_ts);
 }
 
 inline bool ProcessorMotion::isMotion()

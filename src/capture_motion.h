@@ -72,6 +72,17 @@ class CaptureMotion : public CaptureBase
         VectorXs getCalibrationPreint() const;
         VectorXs getCalibration() const;
 
+        // Get delta
+        VectorXs getDelta()
+        {
+            VectorXs calib_preint   = getCalibrationPreint();
+            VectorXs calib          = getCalibration();
+            VectorXs delta_preint   = getBuffer().get().back().delta_integr_;
+            MatrixXs jac_calib      = getBuffer().get().back().jacobian_calib_;
+            VectorXs delta_int      = delta_preint + jac_calib * (calib - calib_preint);
+            return delta_int;
+        }
+
         FrameBasePtr getOriginFramePtr();
         void setOriginFramePtr(FrameBasePtr _frame_ptr);
 
