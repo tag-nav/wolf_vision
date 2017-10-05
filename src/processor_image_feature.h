@@ -38,8 +38,8 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 		//==========================================
 	    //==========================================
 
-        cv::Ptr<cv::DescriptorMatcher> matcher_ptr_;
-        cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
+//        cv::Ptr<cv::DescriptorMatcher> matcher_ptr_;
+//        cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
 
         //==========================================
         //==========================================
@@ -51,11 +51,11 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 
         //==========================================
         //==========================================
-        struct
-        {
-                unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
-                unsigned int size_bits_; ///< length of the descriptor vector in bits
-        } detector_descriptor_params_;
+//        struct
+//        {
+//                unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
+//                unsigned int size_bits_; ///< length of the descriptor vector in bits
+//        } detector_descriptor_params_;
 
         //==========================================
         //==========================================

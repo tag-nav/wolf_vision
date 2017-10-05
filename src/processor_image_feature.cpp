@@ -83,74 +83,6 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
     	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING>(mat_ptr_);
     if (mat_name.compare("BRUTEFORCE_HAMMING_2") == 0)
        	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING_2>(mat_ptr_);
-
-
-    //==========================================
-    //==========================================
-
-    // 1. detector-descriptor params
-    DetectorDescriptorParamsBasePtr _dd_params = _params.detector_descriptor_params_ptr;
-    switch (_dd_params->type){
-        case DD_BRISK:
-            {
-            std::shared_ptr<DetectorDescriptorParamsBrisk> params_brisk = std::static_pointer_cast<DetectorDescriptorParamsBrisk>(_dd_params);
-
-            detector_descriptor_ptr_ = cv::BRISK::create(params_brisk->threshold, //
-                                                         params_brisk->octaves, //
-                                                         params_brisk->pattern_scale);
-
-            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((params_brisk->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
-                                                                   (unsigned int)((params_brisk->nominal_pattern_radius)*params_brisk->pattern_scale));
-            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
-
-            break;
-            }
-        case DD_ORB:
-            {
-            std::shared_ptr<DetectorDescriptorParamsOrb> params_orb = std::static_pointer_cast<DetectorDescriptorParamsOrb>(_dd_params);
-            detector_descriptor_ptr_ = cv::ORB::create(params_orb->nfeatures, //
-                                                   params_orb->scaleFactor, //
-                                                   params_orb->nlevels, //
-                                                   params_orb->edgeThreshold, //
-                                                   params_orb->firstLevel, //
-                                                   params_orb->WTA_K, //
-                                                   params_orb->scoreType, //
-                                                   params_orb->patchSize);
-
-            detector_descriptor_params_.pattern_radius_ = params_orb->edgeThreshold;
-            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
-
-            break;
-            }
-        default:
-            throw std::runtime_error("Unknown detector-descriptor type");
-    }
-
-    // 2. matcher params
-    // TODO: FIX this. Problems initializing with int (cv::DescriptorMatcher::create(int matcherType)
-    std::string matcherType = "BruteForce-Hamming"; // Default
-    switch (_params.matcher.similarity_norm)
-    {
-        case 1:
-            matcherType = "BruteForce";
-            break;
-        case 2:
-            matcherType = "BruteForce-L1";
-            break;
-        case 3:
-            matcherType = "BruteForce-Hamming";
-            break;
-        case 4:
-            matcherType = "BruteForce-Hamming(2)";
-            break;
-        case 5:
-            matcherType = "FlannBased";
-            break;
-    }
-    matcher_ptr_ = cv::DescriptorMatcher::create(matcherType);
-
-    //==========================================
-    //==========================================
 }
 
 //Destructor
@@ -166,7 +98,7 @@ void ProcessorImageFeature::setup(SensorCameraPtr _camera_ptr)
 
     active_search_grid_.setup(image_.width_,image_.height_,
             params_.active_search.grid_width, params_.active_search.grid_height,
-            detector_descriptor_params_.pattern_radius_,
+            det_ptr_->getPatternRadius(),
             params_.active_search.separation);
 }
 
@@ -204,8 +136,8 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
 
     unsigned int roi_width = params_.matcher.roi_width;
     unsigned int roi_heigth = params_.matcher.roi_height;
-    unsigned int roi_x;
-    unsigned int roi_y;
+//    unsigned int roi_x;
+//    unsigned int roi_y;
 
     std::vector<cv::KeyPoint> candidate_keypoints;
     cv::Mat candidate_descriptors;
@@ -215,9 +147,11 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
     {
         FeaturePointImagePtr feature_ptr = std::static_pointer_cast<FeaturePointImage>(feature_base_ptr);
 
-        roi_x = (feature_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
-        roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
-        cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
+//        roi_x = (feature_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
+//        roi_y = (feature_ptr->getKeypoint().pt.y) - (roi_width / 2);
+//        cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
+
+        cv::Rect roi = vision_utils::setRoi(feature_ptr->getKeypoint().pt.x, feature_ptr->getKeypoint().pt.y, roi_width, roi_heigth);
 
         active_search_grid_.hitCell(feature_ptr->getKeypoint());
         complete_target_size_++;
@@ -367,29 +301,16 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
 
 Scalar ProcessorImageFeature::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches)
 {
-    matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
-    Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
-//    std::cout << "target descriptor: " << _target_descriptor.row(0) << std::endl;
-//    std::cout << "normalized score: " << normalized_score << std::endl;
+    mat_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
+    Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/(des_ptr_->getSize()*8);
     return normalized_score;
 }
 
 unsigned int ProcessorImageFeature::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
                                     cv::Mat& new_descriptors)
 {
-    cv::Mat _image_roi;
-//    adaptRoi(_image_roi, _image, _roi);
-
-    vision_utils::adaptRoi(det_ptr_->getPatternRadius(), _image, _roi, _image_roi);
-
-    detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
-    detector_descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
-
-    for (unsigned int i = 0; i < _new_keypoints.size(); i++)
-    {
-        _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
-        _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
-    }
+    _new_keypoints = det_ptr_->detect(_image, _roi);
+    new_descriptors = des_ptr_->getDescriptor(_image, _new_keypoints);
     return _new_keypoints.size();
 }
 
