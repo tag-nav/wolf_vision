@@ -148,7 +148,7 @@ int main(int argc, char** argv)
 
         std::cout << "Time: " << ((double) clock() - t1) / CLOCKS_PER_SEC << "s" << std::endl;
 
-//        wolf_problem_->print();
+        wolf_problem_->print();
 
         cv::Mat image = frame_buff.back()->getImage().clone();
         prc_img_ptr->drawFeatures(image);

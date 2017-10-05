@@ -18,6 +18,12 @@
 #include "sensor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"
 
+// Vision utils includes
+#include <vision_utils.h>
+#include <vision_utils/sensors.h>
+#include <vision_utils/common_class/buffer.h>
+#include <vision_utils/common_class/frame.h>
+
 using Eigen::Vector3s;
 using Eigen::Vector4s;
 using Eigen::Vector6s;
@@ -73,6 +79,8 @@ int main(int argc, char** argv)
         //camera
         filename = "0";
         capture.open(0);
+
+        WOLF_DEBUG(__LINE__);
     }
     else
     {
@@ -117,7 +125,7 @@ int main(int argc, char** argv)
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sensor_base);
     camera->setImgWidth(img_width);
     camera->setImgHeight(img_height);
-    problem->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml");
+    ProcessorImageLandmarkPtr prc_img_ptr = std::static_pointer_cast<ProcessorImageLandmark>( problem->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml") );
 
     //=====================================================
 
@@ -270,8 +278,12 @@ int main(int argc, char** argv)
 
 
         // Finish loop -----------------------------------------
-
-        cv::waitKey(10);
+        cv::Mat image_graphics = frame[frame_count % buffer_size].clone();
+        prc_img_ptr->drawTrackerRoi(image_graphics, cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
+        prc_img_ptr->drawRoi(image_graphics, prc_img_ptr->detector_roi_, cv::Scalar(0.0,255.0, 255.0)); //active search roi
+        prc_img_ptr->drawLandmarks(image_graphics);
+        prc_img_ptr->drawFeaturesFromLandmarks(image_graphics);
+        cv::waitKey(1);
 
         std::cout << "=================================================================================================" << std::endl;
 

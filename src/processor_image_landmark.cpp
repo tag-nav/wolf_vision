@@ -18,71 +18,146 @@ namespace wolf
 ProcessorImageLandmark::ProcessorImageLandmark(const ProcessorParamsImage& _params) :
     ProcessorTrackerLandmark("IMAGE LANDMARK", _params.algorithm.max_new_features, _params.algorithm.time_tolerance),
     params_(_params),
-    active_search_grid_(),
+//    active_search_grid_(),
     n_feature_(0),
     landmark_idx_non_visible_(0)
 {
-    // 1. detector-descriptor params
-    std::shared_ptr<DetectorDescriptorParamsBase> _dd_params = _params.detector_descriptor_params_ptr;
-    switch (_dd_params->type){
-        case DD_BRISK:
-            {
-                std::shared_ptr<DetectorDescriptorParamsBrisk> params_brisk = std::static_pointer_cast<DetectorDescriptorParamsBrisk>(_dd_params);
-            detector_descriptor_ptr_ = cv::BRISK::create(params_brisk->threshold, //
-                                                     params_brisk->octaves, //
-                                                     params_brisk->pattern_scale);
+    // Detector
+    std::string det_name = vision_utils::readYamlType(params_.yaml_file_params_vision_utils, "detector");
+    det_ptr_ = vision_utils::setupDetector(det_name, det_name + " detector", params_.yaml_file_params_vision_utils);
 
-            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((params_brisk->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
-                                                                   (unsigned int)((params_brisk->nominal_pattern_radius)*params_brisk->pattern_scale));
+    if (det_name.compare("ORB") == 0)
+        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorORB>(det_ptr_);
+    else if (det_name.compare("FAST") == 0)
+        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorFAST>(det_ptr_);
+    else if (det_name.compare("SIFT") == 0)
+        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorSIFT>(det_ptr_);
+    else if (det_name.compare("SURF") == 0)
+        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorSURF>(det_ptr_);
+    else if (det_name.compare("BRISK") == 0)
+        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorBRISK>(det_ptr_);
+    else if (det_name.compare("MSER") == 0)
+        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorMSER>(det_ptr_);
+    else if (det_name.compare("GFTT") == 0)
+        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorGFTT>(det_ptr_);
+    else if (det_name.compare("HARRIS") == 0)
+        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorHARRIS>(det_ptr_);
+    else if (det_name.compare("SBD") == 0)
+        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorSBD>(det_ptr_);
+    else if (det_name.compare("KAZE") == 0)
+        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorKAZE>(det_ptr_);
+    else if (det_name.compare("AKAZE") == 0)
+        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorAKAZE>(det_ptr_);
+    else if (det_name.compare("AGAST") == 0)
+        det_ptr_ = std::static_pointer_cast<vision_utils::DetectorAGAST>(det_ptr_);
 
-            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
+    // Descriptor
+    std::string des_name = vision_utils::readYamlType(params_.yaml_file_params_vision_utils, "descriptor");
+    des_ptr_ = vision_utils::setupDescriptor(des_name, des_name + " descriptor", params_.yaml_file_params_vision_utils);
 
-            break;
-            }
-        case DD_ORB:
-            {
-            std::shared_ptr<DetectorDescriptorParamsOrb> params_orb = std::static_pointer_cast<DetectorDescriptorParamsOrb>(_dd_params);
-            detector_descriptor_ptr_ = cv::ORB::create(params_orb->nfeatures, //
-                                                   params_orb->scaleFactor, //
-                                                   params_orb->nlevels, //
-                                                   params_orb->edgeThreshold, //
-                                                   params_orb->firstLevel, //
-                                                   params_orb->WTA_K, //
-                                                   params_orb->scoreType, //
-                                                   params_orb->patchSize);
+    if (des_name.compare("ORB") == 0)
+        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorORB>(des_ptr_);
+    else if (des_name.compare("SIFT") == 0)
+        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorSIFT>(des_ptr_);
+    else if (des_name.compare("SURF") == 0)
+        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorSURF>(des_ptr_);
+    else if (des_name.compare("BRISK") == 0)
+        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorBRISK>(des_ptr_);
+    else if (des_name.compare("KAZE") == 0)
+        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorKAZE>(des_ptr_);
+    else if (des_name.compare("AKAZE") == 0)
+        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorAKAZE>(des_ptr_);
+    else if (des_name.compare("LATCH") == 0)
+        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorLATCH>(des_ptr_);
+    else if (des_name.compare("FREAK") == 0)
+        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorFREAK>(des_ptr_);
+    else if (des_name.compare("BRIEF") == 0)
+        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorBRIEF>(des_ptr_);
+    else if (des_name.compare("DAISY") == 0)
+        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorDAISY>(des_ptr_);
+    else if (des_name.compare("LUCID") == 0)
+        des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorLUCID>(des_ptr_);
 
-            detector_descriptor_params_.pattern_radius_ = params_orb->edgeThreshold;
-            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
+    // Matcher
+    std::string mat_name = vision_utils::readYamlType(params_.yaml_file_params_vision_utils, "matcher");
+    mat_ptr_ = vision_utils::setupMatcher(mat_name, mat_name + " matcher", params_.yaml_file_params_vision_utils);
 
-            break;
-            }
-        default:
-            throw std::runtime_error("Unknown detector-descriptor type");
-    }
+    if (mat_name.compare("FLANNBASED") == 0)
+        mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherFLANNBASED>(mat_ptr_);
+    if (mat_name.compare("BRUTEFORCE") == 0)
+        mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE>(mat_ptr_);
+    if (mat_name.compare("BRUTEFORCE_L1") == 0)
+        mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_L1>(mat_ptr_);
+    if (mat_name.compare("BRUTEFORCE_HAMMING") == 0)
+        mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING>(mat_ptr_);
+    if (mat_name.compare("BRUTEFORCE_HAMMING_2") == 0)
+        mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING_2>(mat_ptr_);
 
-    // 2. matcher params
-    // TODO: FIX this. Problems initializing with int (cv::DescriptorMatcher::create(int matcherType)
-    std::string matcherType = "BruteForce-Hamming"; // Default
-    switch (_params.matcher.similarity_norm)
-    {
-        case 1:
-            matcherType = "FlannBased";
-            break;
-        case 2:
-            matcherType = "BruteForce";
-            break;
-        case 3:
-            matcherType = "BruteForce-L1";
-            break;
-        case 4:
-            matcherType = "BruteForce-Hamming";
-            break;
-        case 5:
-            matcherType = "BruteForce-Hamming(2)";
-            break;
-    }
+    // Active search grid
+    vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_.yaml_file_params_vision_utils);
+    active_search_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmACTIVESEARCH>(alg_ptr);
 
-    matcher_ptr_ = cv::DescriptorMatcher::create(matcherType);
+//    // 1. detector-descriptor params
+//    std::shared_ptr<DetectorDescriptorParamsBase> _dd_params = _params.detector_descriptor_params_ptr;
+//    switch (_dd_params->type){
+//        case DD_BRISK:
+//            {
+//                std::shared_ptr<DetectorDescriptorParamsBrisk> params_brisk = std::static_pointer_cast<DetectorDescriptorParamsBrisk>(_dd_params);
+//            detector_descriptor_ptr_ = cv::BRISK::create(params_brisk->threshold, //
+//                                                     params_brisk->octaves, //
+//                                                     params_brisk->pattern_scale);
+//
+//            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((params_brisk->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
+//                                                                   (unsigned int)((params_brisk->nominal_pattern_radius)*params_brisk->pattern_scale));
+//
+//            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
+//
+//            break;
+//            }
+//        case DD_ORB:
+//            {
+//            std::shared_ptr<DetectorDescriptorParamsOrb> params_orb = std::static_pointer_cast<DetectorDescriptorParamsOrb>(_dd_params);
+//            detector_descriptor_ptr_ = cv::ORB::create(params_orb->nfeatures, //
+//                                                   params_orb->scaleFactor, //
+//                                                   params_orb->nlevels, //
+//                                                   params_orb->edgeThreshold, //
+//                                                   params_orb->firstLevel, //
+//                                                   params_orb->WTA_K, //
+//                                                   params_orb->scoreType, //
+//                                                   params_orb->patchSize);
+//
+//            detector_descriptor_params_.pattern_radius_ = params_orb->edgeThreshold;
+//            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
+//
+//            break;
+//            }
+//        default:
+//            throw std::runtime_error("Unknown detector-descriptor type");
+//    }
+//
+//    // 2. matcher params
+//    // TODO: FIX this. Problems initializing with int (cv::DescriptorMatcher::create(int matcherType)
+//    std::string matcherType = "BruteForce-Hamming"; // Default
+//    switch (_params.matcher.similarity_norm)
+//    {
+//        case 1:
+//            matcherType = "FlannBased";
+//            break;
+//        case 2:
+//            matcherType = "BruteForce";
+//            break;
+//        case 3:
+//            matcherType = "BruteForce-L1";
+//            break;
+//        case 4:
+//            matcherType = "BruteForce-Hamming";
+//            break;
+//        case 5:
+//            matcherType = "BruteForce-Hamming(2)";
+//            break;
+//    }
+//
+//    matcher_ptr_ = cv::DescriptorMatcher::create(matcherType);
 }
 
 ProcessorImageLandmark::~ProcessorImageLandmark()
@@ -95,16 +170,20 @@ void ProcessorImageLandmark::setup(SensorCameraPtr _camera_ptr)
     image_.width_ = _camera_ptr->getImgWidth();
     image_.height_ = _camera_ptr->getImgHeight();
 
-    active_search_grid_.setup(image_.width_,image_.height_,
-            params_.active_search.grid_width, params_.active_search.grid_height,
-            detector_descriptor_params_.pattern_radius_,
-            params_.active_search.separation);
+//    active_search_grid_.setup(image_.width_,image_.height_,
+//            params_.active_search.grid_width, params_.active_search.grid_height,
+//            detector_descriptor_params_.pattern_radius_,
+//            params_.active_search.separation);
+
+    active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight(), det_ptr_->getPatternRadius());
 }
 
 void ProcessorImageLandmark::preProcess()
 {
     image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
-    active_search_grid_.renew();
+
+//    active_search_grid_.renew();
+    active_search_ptr_->renew();
 
     detector_roi_.clear();
     feat_lmk_found_.clear();
@@ -112,14 +191,14 @@ void ProcessorImageLandmark::preProcess()
 
 void ProcessorImageLandmark::postProcess()
 {
-    if (last_ptr_!=nullptr)
-    {
-        cv::Mat image = image_last_.clone();
-        if(params_.draw.tracker_roi) drawRoi(image, std::static_pointer_cast<CaptureImage>(last_ptr_), cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
-        if(params_.draw.detector_roi) drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0)); //active search roi
-        if(params_.draw.primary_drawing) drawLandmarks(image);
-        if(params_.draw.secondary_drawing) drawFeaturesFromLandmarks(image);
-    }
+//    if (last_ptr_!=nullptr)
+//    {
+//        cv::Mat image = image_last_.clone();
+//        if(params_.draw.tracker_roi) drawRoi(image, std::static_pointer_cast<CaptureImage>(last_ptr_), cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
+//        if(params_.draw.detector_roi) drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0)); //active search roi
+//        if(params_.draw.primary_drawing) drawLandmarks(image);
+//        if(params_.draw.secondary_drawing) drawFeaturesFromLandmarks(image);
+//    }
     detector_roi_.clear();
     feat_lmk_found_.clear();
 }
@@ -129,13 +208,12 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                                                          LandmarkMatchMap& _feature_landmark_correspondences)
 {
 
-    unsigned int roi_width = params_.matcher.roi_width;
-    unsigned int roi_height = params_.matcher.roi_height;
-    unsigned int roi_x;
-    unsigned int roi_y;
-    std::vector<cv::KeyPoint> candidate_keypoints;
+//    unsigned int roi_width = mat_ptr_->getParams()->roi_width;
+//    unsigned int roi_height = mat_ptr_->getParams()->roi_height;
+
+    KeyPointVector candidate_keypoints;
     cv::Mat candidate_descriptors;
-    std::vector<cv::DMatch> cv_matches;
+    DMatchVector cv_matches;
 
     Eigen::VectorXs current_state = getProblem()->getState(incoming_ptr_->getTimeStamp());
 
@@ -156,11 +234,15 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
         if(pinhole::isInImage(pixel, image_.width_, image_.height_))
         {
-            roi_x = (pixel[0]) - (roi_width  / 2);
-            roi_y = (pixel[1]) - (roi_height / 2);
-            cv::Rect roi(roi_x, roi_y, roi_width, roi_height);
+//            unsigned int roi_x = (pixel[0]) - (roi_width  / 2);
+//            unsigned int roi_y = (pixel[1]) - (roi_height / 2);
+//            cv::Rect roi(roi_x, roi_y, roi_width, roi_height);
 
-            active_search_grid_.hitCell(pixel);
+            cv::Rect roi = vision_utils::setRoi(pixel[0], pixel[1], mat_ptr_->getParams()->roi_width, mat_ptr_->getParams()->roi_height);
+
+//            active_search_grid_.hitCell(pixel);
+
+            active_search_ptr_->hitCell(pixel);
 
             cv::Mat target_descriptor = landmark_ptr->getCvDescriptor();
 
@@ -168,7 +250,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
             {
                 Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
 
-                if (normalized_score > params_.matcher.min_normalized_score)
+                if (normalized_score > mat_ptr_->getParams()->min_norm_score)
                 {
                     FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                             candidate_keypoints[cv_matches[0].trainIdx],
@@ -189,9 +271,8 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
                     // To visualize
                     cv::Rect roi2 = roi;
-                    trimRoi(roi2);
+                    vision_utils::trimRoi(image_.width_, image_.height_, roi2);
                     incoming_point_ptr->setTrackerRoi(roi2);
-
                 }
 //                else
 //                    std::cout << "NOT FOUND" << std::endl;
@@ -209,28 +290,28 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
 bool ProcessorImageLandmark::voteForKeyFrame()
 {
-
     return false;
 //    return landmarks_tracked_ < params_.algorithm.min_features_for_keyframe;
 }
 
 unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_features)
 {
-
     cv::Rect roi;
-    std::vector<cv::KeyPoint> new_keypoints;
+    KeyPointVector new_keypoints;
     cv::Mat new_descriptors;
     cv::KeyPointsFilter keypoint_filter;
     unsigned int n_new_features = 0;
 
     for (unsigned int n_iterations = 0; n_iterations < _max_features; n_iterations++)
     {
-        if (active_search_grid_.pickRoi(roi))
+//        if (active_search_grid_.pickRoi(roi))
+//        {
+        if (active_search_ptr_->pickEmptyRoi(roi))
         {
             detector_roi_.push_back(roi);
             if (detect(image_last_, roi, new_keypoints, new_descriptors))
             {
-                std::vector<cv::KeyPoint> list_keypoints = new_keypoints;
+                KeyPointVector list_keypoints = new_keypoints;
                 unsigned int index = 0;
                 keypoint_filter.retainBest(new_keypoints,1);
                 for(unsigned int i = 0; i < list_keypoints.size(); i++)
@@ -239,7 +320,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
                         index = i;
                 }
 
-                if(new_keypoints[0].response > params_.algorithm.min_response_for_new_features)
+                if(new_keypoints[0].response > active_search_ptr_->getParams()->min_response_new_feature)
                 {
                     list_response_.push_back(new_keypoints[0].response);
                     FeaturePointImagePtr point_ptr = std::make_shared<FeaturePointImage>(
@@ -250,13 +331,16 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
                     point_ptr->setTrackId(point_ptr->id());
                     point_ptr->setExpectation(Eigen::Vector2s(new_keypoints[0].pt.x,new_keypoints[0].pt.y));
                     addNewFeatureLast(point_ptr);
-                    active_search_grid_.hitCell(new_keypoints[0]);
+//                    active_search_grid_.hitCell(new_keypoints[0]);
+                    active_search_ptr_->hitCell(new_keypoints[0]);
+
                     n_new_features++;
                 }
 
             }
             else
-                active_search_grid_.blockCell(roi);
+                active_search_ptr_->blockCell(roi);
+//                active_search_grid_.blockCell(roi);
         }
         else
             break;
@@ -379,156 +463,171 @@ void ProcessorImageLandmark::landmarkInCurrentCamera(const Eigen::VectorXs& _cur
     _point3D_hmg = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
 }
 
-Scalar ProcessorImageLandmark::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, std::vector<cv::DMatch>& _cv_matches)
+Scalar ProcessorImageLandmark::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
 {
-    matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
-    Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
-    //std::cout << "normalized score: " << normalized_score << std::endl;
+//    matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
+//    Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
+//    //std::cout << "normalized score: " << normalized_score << std::endl;
+//    return normalized_score;
+    mat_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
+    Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/(des_ptr_->getSize()*8);
     return normalized_score;
 }
 
-unsigned int ProcessorImageLandmark::detect(const cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints, cv::Mat& new_descriptors)
+unsigned int ProcessorImageLandmark::detect(const cv::Mat _image, cv::Rect& _roi, KeyPointVector& _new_keypoints, cv::Mat& new_descriptors)
 {
-    cv::Mat _image_roi;
-    adaptRoi(_image_roi, _image, _roi);
-
-    detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
-    detector_descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
-
-    for (unsigned int i = 0; i < _new_keypoints.size(); i++)
-    {
-        _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
-        _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
-    }
+//    cv::Mat _image_roi;
+//    adaptRoi(_image_roi, _image, _roi);
+//
+//    detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
+//    detector_descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
+//
+//    for (unsigned int i = 0; i < _new_keypoints.size(); i++)
+//    {
+//        _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
+//        _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
+//    }
+//    return _new_keypoints.size();
+    _new_keypoints = det_ptr_->detect(_image, _roi);
+    new_descriptors = des_ptr_->getDescriptor(_image, _new_keypoints);
     return _new_keypoints.size();
 }
 
-void ProcessorImageLandmark::trimRoi(cv::Rect& _roi)
+//void ProcessorImageLandmark::trimRoi(cv::Rect& _roi)
+//{
+//    if(_roi.x < 0)
+//    {
+//        int diff_x = -_roi.x;
+//        _roi.x = 0;
+//        _roi.width = _roi.width - diff_x;
+//    }
+//    if(_roi.y < 0)
+//    {
+//        int diff_y = -_roi.y;
+//        _roi.y = 0;
+//        _roi.height = _roi.height - diff_y;
+//    }
+//    if((unsigned int)(_roi.x + _roi.width) > image_.width_)
+//    {
+//        int diff_width = image_.width_ - (_roi.x + _roi.width);
+//        _roi.width = _roi.width+diff_width;
+//    }
+//    if((unsigned int)(_roi.y + _roi.height) > image_.height_)
+//    {
+//        int diff_height = image_.height_ - (_roi.y + _roi.height);
+//        _roi.height = _roi.height+diff_height;
+//    }
+//}
+//
+//void ProcessorImageLandmark::inflateRoi(cv::Rect& _roi)
+//{
+//    int inflation_rate = detector_descriptor_params_.pattern_radius_;
+//
+//    _roi.x = _roi.x - inflation_rate;
+//    _roi.y = _roi.y - inflation_rate;
+//    _roi.width = _roi.width + 2*inflation_rate;
+//    _roi.height = _roi.height + 2*inflation_rate;
+//}
+//
+//void ProcessorImageLandmark::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi)
+//{
+//    inflateRoi(_roi);
+//    trimRoi(_roi);
+//    _image_roi = _image(_roi);
+//}
+
+void ProcessorImageLandmark::drawTrackerRoi(cv::Mat _image, cv::Scalar _color)
 {
-    if(_roi.x < 0)
+    CaptureImagePtr _capture = std::static_pointer_cast<CaptureImage>(last_ptr_);
+    if (last_ptr_!=nullptr)
     {
-        int diff_x = -_roi.x;
-        _roi.x = 0;
-        _roi.width = _roi.width - diff_x;
+        for (auto feature : _capture->getFeatureList())
+            cv::rectangle(_image, std::static_pointer_cast<FeaturePointImage>(feature)->getTrackerRoi(), _color, 1, 8, 0);
+
+        cv::imshow("Feature tracker", _image);
     }
-    if(_roi.y < 0)
-    {
-        int diff_y = -_roi.y;
-        _roi.y = 0;
-        _roi.height = _roi.height - diff_y;
-    }
-    if((unsigned int)(_roi.x + _roi.width) > image_.width_)
-    {
-        int diff_width = image_.width_ - (_roi.x + _roi.width);
-        _roi.width = _roi.width+diff_width;
-    }
-    if((unsigned int)(_roi.y + _roi.height) > image_.height_)
-    {
-        int diff_height = image_.height_ - (_roi.y + _roi.height);
-        _roi.height = _roi.height+diff_height;
-    }
-}
-
-void ProcessorImageLandmark::inflateRoi(cv::Rect& _roi)
-{
-    int inflation_rate = detector_descriptor_params_.pattern_radius_;
-
-    _roi.x = _roi.x - inflation_rate;
-    _roi.y = _roi.y - inflation_rate;
-    _roi.width = _roi.width + 2*inflation_rate;
-    _roi.height = _roi.height + 2*inflation_rate;
-}
-
-void ProcessorImageLandmark::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi)
-{
-    inflateRoi(_roi);
-    trimRoi(_roi);
-    _image_roi = _image(_roi);
-}
-
-void ProcessorImageLandmark::drawRoi(cv::Mat _image, CaptureImagePtr _capture, cv::Scalar _color)
-{
-    for (auto feature : _capture->getFeatureList())
-        cv::rectangle(_image, std::static_pointer_cast<FeaturePointImage>(feature)->getTrackerRoi(), _color, 1, 8, 0);
-
-    cv::imshow("Feature tracker", _image);
-//    std::cout << "drawRoi" << std::endl;
-//    cv::waitKey(0);
 }
 
 void ProcessorImageLandmark::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
 {
-    for (auto roi : _roi_list)
-        cv::rectangle(_image, roi, _color, 1, 8, 0);
+    if (last_ptr_!=nullptr)
+    {
+        for (auto roi : _roi_list)
+            cv::rectangle(_image, roi, _color, 1, 8, 0);
 
-    cv::imshow("Feature tracker", _image);
-//    std::cout << "drawRoi" << std::endl;
-//    cv::waitKey(0);
+        cv::imshow("Feature tracker", _image);
+    }
 }
 
 void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
 {
-    FeaturePointImagePtr ftr;
-    for(auto feature_point : feat_lmk_found_)
+    if (last_ptr_!=nullptr)
     {
-        ftr = std::static_pointer_cast<FeaturePointImage>(feature_point);
+        FeaturePointImagePtr ftr;
+        for(auto feature_point : feat_lmk_found_)
+        {
+            ftr = std::static_pointer_cast<FeaturePointImage>(feature_point);
 
-        cv::Point2f point = ftr->getKeypoint().pt;
-        cv::circle(_image, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
+            cv::Point2f point = ftr->getKeypoint().pt;
+            cv::circle(_image, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
 
-        cv::Point2f point2 = point;
-        point2.x = point2.x - 16;
-        cv::putText(_image, std::to_string(ftr->landmarkId()) + "/" + std::to_string((int)(100*ftr->getScore())), point2,
-                    cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+            cv::Point2f point2 = point;
+            point2.x = point2.x - 16;
+            cv::putText(_image, std::to_string(ftr->landmarkId()) + "/" + std::to_string((int)(100*ftr->getScore())), point2,
+                        cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+        }
+        cv::imshow("Feature tracker", _image);
     }
-    cv::imshow("Feature tracker", _image);
 }
 
 void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
 {
-    unsigned int num_lmks_in_img = 0;
-//    cv::Mat image = image_incoming_.clone();
-    Eigen::VectorXs current_state = last_ptr_->getFramePtr()->getState();
-    SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensorPtr());
-
-    for (auto landmark_base_ptr : getProblem()->getMapPtr()->getLandmarkList())
+    if (last_ptr_!=nullptr)
     {
-        LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_base_ptr);
+        unsigned int num_lmks_in_img = 0;
 
-        Eigen::Vector4s point3D_hmg;
-        landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
+        Eigen::VectorXs current_state = last_ptr_->getFramePtr()->getState();
+        SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensorPtr());
 
-        Eigen::Vector2s point2D = pinhole::projectPoint(camera->getIntrinsicPtr()->getState(), // k
-                                        camera->getDistortionVector(),          // d
-                                        point3D_hmg.head(3));                   // v
-
-        if(pinhole::isInImage(point2D,image_.width_,image_.height_))
+        for (auto landmark_base_ptr : getProblem()->getMapPtr()->getLandmarkList())
         {
-            num_lmks_in_img++;
+            LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_base_ptr);
 
-            cv::Point2f point;
-            point.x = point2D[0];
-            point.y = point2D[1];
+            Eigen::Vector4s point3D_hmg;
+            landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
 
-            cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), 1, 3, 0);
-            cv::putText(_image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0) );
+            Eigen::Vector2s point2D = pinhole::projectPoint(camera->getIntrinsicPtr()->getState(), // k
+                                                            camera->getDistortionVector(),          // d
+                                                            point3D_hmg.head(3));                   // v
+
+            if(pinhole::isInImage(point2D,image_.width_,image_.height_))
+            {
+                num_lmks_in_img++;
+
+                cv::Point2f point;
+                point.x = point2D[0];
+                point.y = point2D[1];
+
+                cv::circle(_image, point, 4, cv::Scalar(51.0, 51.0, 255.0), 1, 3, 0);
+                cv::putText(_image, std::to_string(landmark_ptr->id()), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(100.0, 100.0, 255.0) );
+            }
         }
-    }
-    cv::Point label_for_landmark_point;
-    label_for_landmark_point.x = 3;
-    label_for_landmark_point.y = 10;
-    cv::putText(_image, std::to_string(landmarks_tracked_), label_for_landmark_point,
-                cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
+        cv::Point label_for_landmark_point;
+        label_for_landmark_point.x = 3;
+        label_for_landmark_point.y = 10;
+        cv::putText(_image, std::to_string(landmarks_tracked_), label_for_landmark_point,
+                    cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
 
-    cv::Point label_for_landmark_point2;
-    label_for_landmark_point2.x = 3;
-    label_for_landmark_point2.y = 20;
-    cv::putText(_image, std::to_string(num_lmks_in_img), label_for_landmark_point2,
-                cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
+        cv::Point label_for_landmark_point2;
+        label_for_landmark_point2.x = 3;
+        label_for_landmark_point2.y = 20;
+        cv::putText(_image, std::to_string(num_lmks_in_img), label_for_landmark_point2,
+                    cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
 
 //    std::cout << "\t\tTotal landmarks: " << counter << std::endl;
 
-    cv::imshow("Feature tracker", _image);
+        cv::imshow("Feature tracker", _image);
+    }
 }
 
 

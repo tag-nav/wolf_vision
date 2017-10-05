@@ -11,44 +11,44 @@ namespace wolf
 {
 //=============================
 //============================= REMOVE AFTER PROCESSOR_LANDMARK
-
-enum DetectorDescriptorType
-{
-    DD_BRISK,
-    DD_ORB
-};
-
-WOLF_STRUCT_PTR_TYPEDEFS(DetectorDescriptorParamsBase);
-
-struct DetectorDescriptorParamsBase
-{
-        DetectorDescriptorType type; ///< Type of algorithm. Accepted values in wolf.h
-        DetectorDescriptorParamsBase(DetectorDescriptorType _type = DD_ORB) : type(_type)
-        {
-            //
-        }
-
-};
-
-struct DetectorDescriptorParamsBrisk : public DetectorDescriptorParamsBase
-{
-        unsigned int threshold=30; ///< on the keypoint strength to declare it key-point
-        unsigned int octaves=0; ///< Multi-scale evaluation. 0: no multi-scale
-        float pattern_scale=1.0f; ///< Scale of the base pattern wrt the nominal one
-        unsigned int nominal_pattern_radius = 18; ///< Radius of the pattern before scaling //18 for brisk
-};
-
-struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
-{
-        unsigned int nfeatures=500; ///< Nbr of features to extract
-        float scaleFactor=1.2f; ///< Scale factor between two consecutive scales of the image pyramid
-        unsigned int nlevels=8;///< Number of levels in the pyramid. Default: 8
-        unsigned int edgeThreshold=16; ///< Default: 16
-        unsigned int firstLevel=0;
-        unsigned int WTA_K=2;
-        unsigned int scoreType=cv::ORB::HARRIS_SCORE; ///< Type of score to rank the detected points
-        unsigned int patchSize=31;
-};
+//
+//enum DetectorDescriptorType
+//{
+//    DD_BRISK,
+//    DD_ORB
+//};
+//
+//WOLF_STRUCT_PTR_TYPEDEFS(DetectorDescriptorParamsBase);
+//
+//struct DetectorDescriptorParamsBase
+//{
+//        DetectorDescriptorType type; ///< Type of algorithm. Accepted values in wolf.h
+//        DetectorDescriptorParamsBase(DetectorDescriptorType _type = DD_ORB) : type(_type)
+//        {
+//            //
+//        }
+//
+//};
+//
+//struct DetectorDescriptorParamsBrisk : public DetectorDescriptorParamsBase
+//{
+//        unsigned int threshold=30; ///< on the keypoint strength to declare it key-point
+//        unsigned int octaves=0; ///< Multi-scale evaluation. 0: no multi-scale
+//        float pattern_scale=1.0f; ///< Scale of the base pattern wrt the nominal one
+//        unsigned int nominal_pattern_radius = 18; ///< Radius of the pattern before scaling //18 for brisk
+//};
+//
+//struct DetectorDescriptorParamsOrb : public DetectorDescriptorParamsBase
+//{
+//        unsigned int nfeatures=500; ///< Nbr of features to extract
+//        float scaleFactor=1.2f; ///< Scale factor between two consecutive scales of the image pyramid
+//        unsigned int nlevels=8;///< Number of levels in the pyramid. Default: 8
+//        unsigned int edgeThreshold=16; ///< Default: 16
+//        unsigned int firstLevel=0;
+//        unsigned int WTA_K=2;
+//        unsigned int scoreType=cv::ORB::HARRIS_SCORE; ///< Type of score to rank the detected points
+//        unsigned int patchSize=31;
+//};
 //=============================
 //=============================
 
@@ -59,25 +59,27 @@ struct ProcessorParamsImage : public ProcessorParamsBase
 		//=============================
 		//============================= REMOVE AFTER PROCESSOR_LANDMARK
 
-        DetectorDescriptorParamsBasePtr detector_descriptor_params_ptr;
-
-        struct Matcher
-        {
-                Scalar min_normalized_score; ///< [-1..0]: awful match; 1: perfect match; out of [-1,1]: error
-                int similarity_norm; ///< Norm used to measure the distance between two descriptors
-                unsigned int roi_width; ///< Width of the roi used in tracking
-                unsigned int roi_height; ///< Height of the roi used in tracking
-        }matcher;
-
+//        DetectorDescriptorParamsBasePtr detector_descriptor_params_ptr;
+//
+//        struct Matcher
+//        {
+//                Scalar min_normalized_score; ///< [-1..0]: awful match; 1: perfect match; out of [-1,1]: error
+//                int similarity_norm; ///< Norm used to measure the distance between two descriptors
+//                unsigned int roi_width; ///< Width of the roi used in tracking
+//                unsigned int roi_height; ///< Height of the roi used in tracking
+//        }matcher;
+//
+//        struct Active_search
+//        {
+//                unsigned int grid_width; ///< cells per horizontal dimension of image
+//                unsigned int grid_height; ///< cells per vertical dimension of image
+//                unsigned int separation; ///< Distance between the border of the cell and the border of the associated ROI
+//        }active_search;
+//
         //=============================
         //=============================
 
-        struct Active_search
-        {
-                unsigned int grid_width; ///< cells per horizontal dimension of image
-                unsigned int grid_height; ///< cells per vertical dimension of image
-                unsigned int separation; ///< Distance between the border of the cell and the border of the associated ROI
-        }active_search;
+
         struct Algorithm
         {
                 unsigned int max_new_features; ///< Max nbr. of features to detect in one frame

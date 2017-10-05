@@ -255,7 +255,7 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                     if(list_keypoints[i].pt == new_keypoints[0].pt)
                         index = i;
                 }
-                if(new_keypoints[0].response > params_.algorithm.min_response_for_new_features)
+                if(new_keypoints[0].response > active_search_ptr_->getParams()->min_response_new_feature)
                 {
                     std::cout << "response: " << new_keypoints[0].response << std::endl;
                     FeaturePointImagePtr point_ptr = std::make_shared<FeaturePointImage>(

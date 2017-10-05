@@ -379,7 +379,7 @@ IF (vision_utils_FOUND)
         landmark_point_3d.h
         processor_image_params.h
         processor_image_feature.h
-        #processor_image_landmark.h
+        processor_image_landmark.h
         )
     SET(SRCS ${SRCS}
         capture_image.cpp
@@ -387,7 +387,7 @@ IF (vision_utils_FOUND)
         landmark_AHP.cpp
         landmark_point_3d.cpp
         processor_image_feature.cpp
-        #processor_image_landmark.cpp
+        processor_image_landmark.cpp
         )
 ENDIF(vision_utils_FOUND)
 

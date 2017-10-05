@@ -132,8 +132,6 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
         virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
                                     cv::Mat& new_descriptors);
 
-    private:
-
         /**
          * \brief Does the match between a target descriptor and (potentially) multiple candidate descriptors of a Feature.
          * \param _target_descriptor descriptor of the target

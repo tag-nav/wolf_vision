@@ -113,8 +113,8 @@ IF(vision_utils_FOUND)
         TARGET_LINK_LIBRARIES(test_image ${PROJECT_NAME})
 
         # Processor Image Landmark test
-        #ADD_EXECUTABLE(test_processor_image_landmark test_processor_image_landmark.cpp)
-        #TARGET_LINK_LIBRARIES(test_processor_image_landmark ${PROJECT_NAME})
+        ADD_EXECUTABLE(test_processor_image_landmark test_processor_image_landmark.cpp)
+        TARGET_LINK_LIBRARIES(test_processor_image_landmark ${PROJECT_NAME})
 
 	    # Simple AHP test
 	    ADD_EXECUTABLE(test_simple_AHP test_simple_AHP.cpp)
@@ -131,8 +131,8 @@ IF(vision_utils_FOUND)
     TARGET_LINK_LIBRARIES(test_constraint_AHP ${PROJECT_NAME})
 
     # ORB tracker test
-    #ADD_EXECUTABLE(test_tracker_ORB test_tracker_ORB.cpp)
-    #TARGET_LINK_LIBRARIES(test_tracker_ORB ${PROJECT_NAME})
+    ADD_EXECUTABLE(test_tracker_ORB test_tracker_ORB.cpp)
+    TARGET_LINK_LIBRARIES(test_tracker_ORB ${PROJECT_NAME})
 
 ENDIF(vision_utils_FOUND)
 
