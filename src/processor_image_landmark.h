@@ -2,12 +2,12 @@
 #define PROCESSOR_IMAGE_LANDMARK_H
 
 // Wolf includes
+#include <active_search.h>
 #include "sensor_camera.h"
 #include "capture_image.h"
 #include "feature_point_image.h"
 #include "state_block.h"
 #include "state_quaternion.h"
-#include "active_search.h"
 #include "processor_tracker_landmark.h"
 #include "landmark_AHP.h"
 #include "processor_image_params.h"

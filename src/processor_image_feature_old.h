@@ -2,11 +2,11 @@
 #define PROCESSOR_IMAGE_FEATURE_H
 
 // Wolf includes
+#include <_active_search.h>
 #include "sensor_camera.h"
 #include "capture_image.h"
 #include "feature_point_image.h"
 #include "state_block.h"
-#include "active_search.h"
 #include "processor_tracker_feature.h"
 #include "constraint_epipolar.h"
 #include "processor_image_params.h"

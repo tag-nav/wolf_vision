@@ -10,8 +10,7 @@ namespace wolf
 
 ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
     ProcessorTrackerFeature("IMAGE", _params.algorithm.max_new_features),
-    params_(_params),
-    active_search_grid_()
+    params_(_params)
 {
 	// Detector
     std::string det_name = vision_utils::readYamlType(params_.yaml_file_params_vision_utils, "detector");
@@ -83,6 +82,10 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
     	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING>(mat_ptr_);
     if (mat_name.compare("BRUTEFORCE_HAMMING_2") == 0)
        	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING_2>(mat_ptr_);
+
+    // Active search grid
+    vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_.yaml_file_params_vision_utils);
+    active_search_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmACTIVESEARCH>(alg_ptr);
 }
 
 //Destructor
@@ -96,17 +99,14 @@ void ProcessorImageFeature::setup(SensorCameraPtr _camera_ptr)
     image_.width_ = _camera_ptr->getImgWidth();
     image_.height_ = _camera_ptr->getImgHeight();
 
-    active_search_grid_.setup(image_.width_,image_.height_,
-            params_.active_search.grid_width, params_.active_search.grid_height,
-            det_ptr_->getPatternRadius(),
-            params_.active_search.separation);
+    active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight(), det_ptr_->getPatternRadius());
 }
 
 void ProcessorImageFeature::preProcess()
 {
     image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
-    active_search_grid_.renew();
 
+    active_search_ptr_->renew();
 
     //The visualization functions and variables
     if(last_ptr_ != nullptr)
@@ -143,7 +143,8 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
 
         cv::Rect roi = vision_utils::setRoi(feature_ptr->getKeypoint().pt.x, feature_ptr->getKeypoint().pt.y, mat_ptr_->getParams()->roi_width, mat_ptr_->getParams()->roi_height);
 
-        active_search_grid_.hitCell(feature_ptr->getKeypoint());
+        active_search_ptr_->hitCell(feature_ptr->getKeypoint());
+
         complete_target_size_++;
         cv::Mat target_descriptor = feature_ptr->getDescriptor();
 
@@ -214,7 +215,8 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
         std::vector<cv::DMatch> correction_matches;
 
         FeaturePointImagePtr feat_last_ptr = std::static_pointer_cast<FeaturePointImage>(_last_feature);
-        active_search_grid_.hitCell(feat_last_ptr->getKeypoint());
+
+        active_search_ptr_->hitCell(feat_last_ptr->getKeypoint());
 
         roi_x = (feat_last_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
         roi_y = (feat_last_ptr->getKeypoint().pt.y) - (roi_width / 2);
@@ -248,7 +250,8 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
 
     for (unsigned int n_iterations = 0; _max_new_features == 0 || n_iterations < _max_new_features; n_iterations++)
     {
-        if (active_search_grid_.pickRoi(roi))
+
+        if (active_search_ptr_->pickEmptyRoi(roi))
         {
             detector_roi_.push_back(roi);
             if (detect(image_last_, roi, new_keypoints, new_descriptors))
@@ -271,13 +274,16 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                     point_ptr->setIsKnown(false);
                     point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);
-                    active_search_grid_.hitCell(new_keypoints[0]);
+
+                    active_search_ptr_->hitCell(new_keypoints[0]);
 
                     n_new_features++;
                 }
             }
             else
-                active_search_grid_.blockCell(roi);
+            {
+                active_search_ptr_->blockCell(roi);
+            }
         }
         else
             break;

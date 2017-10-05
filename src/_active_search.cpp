@@ -4,8 +4,7 @@
  * \author jsola, dinesh
  */
 
-#include "active_search.h"
-
+#include <_active_search.h>
 #include <iostream>
 
 namespace wolf{

@@ -61,13 +61,13 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
         p->matcher.roi_width            = m["roi"]["width"].as<unsigned int>();
         p->matcher.roi_height           = m["roi"]["height"].as<unsigned int>();
 
-    	//===================================
-    	//===================================
-
         Node as = params["active search"];
         p->active_search.grid_width     = as["grid width"].as<unsigned int>();
         p->active_search.grid_height    = as["grid height"].as<unsigned int>();
         p->active_search.separation     = as["separation"].as<unsigned int>();
+
+        //===================================
+        //===================================
 
         Node alg = params["algorithm"];
         p->algorithm.max_new_features = alg["maximum new features"].as<unsigned int>();

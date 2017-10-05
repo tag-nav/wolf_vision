@@ -26,13 +26,13 @@ matcher:
         width: 20
         height: 20
 
-#//===================================
-#//===================================
-
 active search:
     grid width: 12
     grid height: 8
     separation: 10
+
+#//===================================
+#//===================================
 
 algorithm:
     maximum new features: 40

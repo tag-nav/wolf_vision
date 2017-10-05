@@ -6,7 +6,6 @@
 #include "capture_image.h"
 #include "feature_point_image.h"
 #include "state_block.h"
-#include "active_search.h"
 #include "processor_tracker_feature.h"
 #include "constraint_epipolar.h"
 #include "processor_image_params.h"
@@ -16,6 +15,7 @@
 #include <vision_utils/detectors.h>
 #include <vision_utils/descriptors.h>
 #include <vision_utils/matchers.h>
+#include <vision_utils/algorithms.h>
 
 // General includes
 #include <cmath>
@@ -34,10 +34,11 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 		vision_utils::DetectorBasePtr det_ptr_;
 		vision_utils::DescriptorBasePtr des_ptr_;
 		vision_utils::MatcherBasePtr mat_ptr_;
+		vision_utils::AlgorithmACTIVESEARCHPtr active_search_ptr_;  // Active Search
 
     protected:
-        ProcessorParamsImage params_;           // Struct with parameters of the processors
-        ActiveSearchGrid active_search_grid_;   // Active Search
+
+		ProcessorParamsImage params_;           // Struct with parameters of the processors
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
 
         struct

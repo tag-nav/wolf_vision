@@ -372,7 +372,6 @@ ENDIF(raw_gps_utils_FOUND)
 # Vision
 IF (vision_utils_FOUND)
     SET(HDRS ${HDRS}
-        active_search.h
         capture_image.h
         constraint_AHP.h
         feature_point_image.h
@@ -380,16 +379,15 @@ IF (vision_utils_FOUND)
         landmark_point_3d.h
         processor_image_params.h
         processor_image_feature.h
-        processor_image_landmark.h
+        #processor_image_landmark.h
         )
     SET(SRCS ${SRCS}
-        active_search.cpp
         capture_image.cpp
         feature_point_image.cpp
         landmark_AHP.cpp
         landmark_point_3d.cpp
         processor_image_feature.cpp
-        processor_image_landmark.cpp
+        #processor_image_landmark.cpp
         )
 ENDIF(vision_utils_FOUND)
 
