@@ -96,68 +96,6 @@ ProcessorImageLandmark::ProcessorImageLandmark(const ProcessorParamsImage& _para
     // Active search grid
     vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_.yaml_file_params_vision_utils);
     active_search_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmACTIVESEARCH>(alg_ptr);
-
-//    // 1. detector-descriptor params
-//    std::shared_ptr<DetectorDescriptorParamsBase> _dd_params = _params.detector_descriptor_params_ptr;
-//    switch (_dd_params->type){
-//        case DD_BRISK:
-//            {
-//                std::shared_ptr<DetectorDescriptorParamsBrisk> params_brisk = std::static_pointer_cast<DetectorDescriptorParamsBrisk>(_dd_params);
-//            detector_descriptor_ptr_ = cv::BRISK::create(params_brisk->threshold, //
-//                                                     params_brisk->octaves, //
-//                                                     params_brisk->pattern_scale);
-//
-//            detector_descriptor_params_.pattern_radius_ = std::max((unsigned int)((params_brisk->nominal_pattern_radius)*pow(2,params_brisk->octaves)),
-//                                                                   (unsigned int)((params_brisk->nominal_pattern_radius)*params_brisk->pattern_scale));
-//
-//            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
-//
-//            break;
-//            }
-//        case DD_ORB:
-//            {
-//            std::shared_ptr<DetectorDescriptorParamsOrb> params_orb = std::static_pointer_cast<DetectorDescriptorParamsOrb>(_dd_params);
-//            detector_descriptor_ptr_ = cv::ORB::create(params_orb->nfeatures, //
-//                                                   params_orb->scaleFactor, //
-//                                                   params_orb->nlevels, //
-//                                                   params_orb->edgeThreshold, //
-//                                                   params_orb->firstLevel, //
-//                                                   params_orb->WTA_K, //
-//                                                   params_orb->scoreType, //
-//                                                   params_orb->patchSize);
-//
-//            detector_descriptor_params_.pattern_radius_ = params_orb->edgeThreshold;
-//            detector_descriptor_params_.size_bits_ = detector_descriptor_ptr_->descriptorSize() * 8;
-//
-//            break;
-//            }
-//        default:
-//            throw std::runtime_error("Unknown detector-descriptor type");
-//    }
-//
-//    // 2. matcher params
-//    // TODO: FIX this. Problems initializing with int (cv::DescriptorMatcher::create(int matcherType)
-//    std::string matcherType = "BruteForce-Hamming"; // Default
-//    switch (_params.matcher.similarity_norm)
-//    {
-//        case 1:
-//            matcherType = "FlannBased";
-//            break;
-//        case 2:
-//            matcherType = "BruteForce";
-//            break;
-//        case 3:
-//            matcherType = "BruteForce-L1";
-//            break;
-//        case 4:
-//            matcherType = "BruteForce-Hamming";
-//            break;
-//        case 5:
-//            matcherType = "BruteForce-Hamming(2)";
-//            break;
-//    }
-//
-//    matcher_ptr_ = cv::DescriptorMatcher::create(matcherType);
 }
 
 ProcessorImageLandmark::~ProcessorImageLandmark()
@@ -170,11 +108,6 @@ void ProcessorImageLandmark::setup(SensorCameraPtr _camera_ptr)
     image_.width_ = _camera_ptr->getImgWidth();
     image_.height_ = _camera_ptr->getImgHeight();
 
-//    active_search_grid_.setup(image_.width_,image_.height_,
-//            params_.active_search.grid_width, params_.active_search.grid_height,
-//            detector_descriptor_params_.pattern_radius_,
-//            params_.active_search.separation);
-
     active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight(), det_ptr_->getPatternRadius());
 }
 
@@ -182,7 +115,6 @@ void ProcessorImageLandmark::preProcess()
 {
     image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
 
-//    active_search_grid_.renew();
     active_search_ptr_->renew();
 
     detector_roi_.clear();
@@ -191,14 +123,6 @@ void ProcessorImageLandmark::preProcess()
 
 void ProcessorImageLandmark::postProcess()
 {
-//    if (last_ptr_!=nullptr)
-//    {
-//        cv::Mat image = image_last_.clone();
-//        if(params_.draw.tracker_roi) drawRoi(image, std::static_pointer_cast<CaptureImage>(last_ptr_), cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
-//        if(params_.draw.detector_roi) drawRoi(image, detector_roi_, cv::Scalar(0.0,255.0, 255.0)); //active search roi
-//        if(params_.draw.primary_drawing) drawLandmarks(image);
-//        if(params_.draw.secondary_drawing) drawFeaturesFromLandmarks(image);
-//    }
     detector_roi_.clear();
     feat_lmk_found_.clear();
 }
@@ -207,10 +131,6 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
                                                          FeatureBaseList&  _feature_list_out,
                                                          LandmarkMatchMap& _feature_landmark_correspondences)
 {
-
-//    unsigned int roi_width = mat_ptr_->getParams()->roi_width;
-//    unsigned int roi_height = mat_ptr_->getParams()->roi_height;
-
     KeyPointVector candidate_keypoints;
     cv::Mat candidate_descriptors;
     DMatchVector cv_matches;
@@ -234,13 +154,7 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
 
         if(pinhole::isInImage(pixel, image_.width_, image_.height_))
         {
-//            unsigned int roi_x = (pixel[0]) - (roi_width  / 2);
-//            unsigned int roi_y = (pixel[1]) - (roi_height / 2);
-//            cv::Rect roi(roi_x, roi_y, roi_width, roi_height);
-
             cv::Rect roi = vision_utils::setRoi(pixel[0], pixel[1], mat_ptr_->getParams()->roi_width, mat_ptr_->getParams()->roi_height);
-
-//            active_search_grid_.hitCell(pixel);
 
             active_search_ptr_->hitCell(pixel);
 
@@ -304,8 +218,6 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
 
     for (unsigned int n_iterations = 0; n_iterations < _max_features; n_iterations++)
     {
-//        if (active_search_grid_.pickRoi(roi))
-//        {
         if (active_search_ptr_->pickEmptyRoi(roi))
         {
             detector_roi_.push_back(roi);
@@ -331,7 +243,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
                     point_ptr->setTrackId(point_ptr->id());
                     point_ptr->setExpectation(Eigen::Vector2s(new_keypoints[0].pt.x,new_keypoints[0].pt.y));
                     addNewFeatureLast(point_ptr);
-//                    active_search_grid_.hitCell(new_keypoints[0]);
+
                     active_search_ptr_->hitCell(new_keypoints[0]);
 
                     n_new_features++;
@@ -340,7 +252,6 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
             }
             else
                 active_search_ptr_->blockCell(roi);
-//                active_search_grid_.blockCell(roi);
         }
         else
             break;
@@ -465,10 +376,6 @@ void ProcessorImageLandmark::landmarkInCurrentCamera(const Eigen::VectorXs& _cur
 
 Scalar ProcessorImageLandmark::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
 {
-//    matcher_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
-//    Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/detector_descriptor_params_.size_bits_;
-//    //std::cout << "normalized score: " << normalized_score << std::endl;
-//    return normalized_score;
     mat_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
     Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/(des_ptr_->getSize()*8);
     return normalized_score;
@@ -476,65 +383,10 @@ Scalar ProcessorImageLandmark::match(const cv::Mat _target_descriptor, const cv:
 
 unsigned int ProcessorImageLandmark::detect(const cv::Mat _image, cv::Rect& _roi, KeyPointVector& _new_keypoints, cv::Mat& new_descriptors)
 {
-//    cv::Mat _image_roi;
-//    adaptRoi(_image_roi, _image, _roi);
-//
-//    detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
-//    detector_descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
-//
-//    for (unsigned int i = 0; i < _new_keypoints.size(); i++)
-//    {
-//        _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
-//        _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
-//    }
-//    return _new_keypoints.size();
     _new_keypoints = det_ptr_->detect(_image, _roi);
     new_descriptors = des_ptr_->getDescriptor(_image, _new_keypoints);
     return _new_keypoints.size();
 }
-
-//void ProcessorImageLandmark::trimRoi(cv::Rect& _roi)
-//{
-//    if(_roi.x < 0)
-//    {
-//        int diff_x = -_roi.x;
-//        _roi.x = 0;
-//        _roi.width = _roi.width - diff_x;
-//    }
-//    if(_roi.y < 0)
-//    {
-//        int diff_y = -_roi.y;
-//        _roi.y = 0;
-//        _roi.height = _roi.height - diff_y;
-//    }
-//    if((unsigned int)(_roi.x + _roi.width) > image_.width_)
-//    {
-//        int diff_width = image_.width_ - (_roi.x + _roi.width);
-//        _roi.width = _roi.width+diff_width;
-//    }
-//    if((unsigned int)(_roi.y + _roi.height) > image_.height_)
-//    {
-//        int diff_height = image_.height_ - (_roi.y + _roi.height);
-//        _roi.height = _roi.height+diff_height;
-//    }
-//}
-//
-//void ProcessorImageLandmark::inflateRoi(cv::Rect& _roi)
-//{
-//    int inflation_rate = detector_descriptor_params_.pattern_radius_;
-//
-//    _roi.x = _roi.x - inflation_rate;
-//    _roi.y = _roi.y - inflation_rate;
-//    _roi.width = _roi.width + 2*inflation_rate;
-//    _roi.height = _roi.height + 2*inflation_rate;
-//}
-//
-//void ProcessorImageLandmark::adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi)
-//{
-//    inflateRoi(_roi);
-//    trimRoi(_roi);
-//    _image_roi = _image(_roi);
-//}
 
 void ProcessorImageLandmark::drawTrackerRoi(cv::Mat _image, cv::Scalar _color)
 {
@@ -543,8 +395,6 @@ void ProcessorImageLandmark::drawTrackerRoi(cv::Mat _image, cv::Scalar _color)
     {
         for (auto feature : _capture->getFeatureList())
             cv::rectangle(_image, std::static_pointer_cast<FeaturePointImage>(feature)->getTrackerRoi(), _color, 1, 8, 0);
-
-        cv::imshow("Feature tracker", _image);
     }
 }
 
@@ -554,8 +404,6 @@ void ProcessorImageLandmark::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_li
     {
         for (auto roi : _roi_list)
             cv::rectangle(_image, roi, _color, 1, 8, 0);
-
-        cv::imshow("Feature tracker", _image);
     }
 }
 
@@ -576,7 +424,6 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
             cv::putText(_image, std::to_string(ftr->landmarkId()) + "/" + std::to_string((int)(100*ftr->getScore())), point2,
                         cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
         }
-        cv::imshow("Feature tracker", _image);
     }
 }
 
@@ -625,8 +472,6 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
                     cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 0.0, 255.0));
 
 //    std::cout << "\t\tTotal landmarks: " << counter << std::endl;
-
-        cv::imshow("Feature tracker", _image);
     }
 }
 

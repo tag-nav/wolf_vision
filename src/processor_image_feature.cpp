@@ -319,8 +319,6 @@ void ProcessorImageFeature::drawTarget(cv::Mat _image, std::list<cv::Point> _tar
         // draw the target of the tracking
         for(auto target_point : _target_list)
             cv::circle(_image, target_point, 7, cv::Scalar(255.0, 0.0, 255.0), 1, 3, 0);
-
-        cv::imshow("Feature tracker", _image);
     }
 }
 
@@ -330,8 +328,6 @@ void ProcessorImageFeature::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_lis
     {
         for (auto roi : _roi_list)
             cv::rectangle(_image, roi, _color, 1, 8, 0);
-
-        cv::imshow("Feature tracker", _image);
     }
 }
 
@@ -359,8 +355,6 @@ void ProcessorImageFeature::drawFeatures(cv::Mat _image)
             cv::putText(_image, std::to_string(feature_ptr->trackId()), point_ptr->getKeypoint().pt,
                         cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
         }
-        cv::imshow("Feature tracker", _image);
-
         std::cout << "\nKnown: " << known_feature_counter << "\tNew: " << new_feature_counter << std::endl;
         std::cout << "Known features tracked: " << known_feature_counter << "/" << target_size_ << std::endl;
         std::cout << "Percentage known: " << ((float)known_feature_counter/(float)target_size_)*100 << "%" << std::endl;

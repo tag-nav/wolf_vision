@@ -1,10 +1,3 @@
-/**
- * \file test_processor_tracker_image_landmark.cpp
- *
- *  Created on: Apr 12, 2016
- *      \author: jtarraso
- */
-
 //std
 #include <iostream>
 
@@ -63,53 +56,24 @@ int main(int argc, char** argv)
 {
     std::cout << std::endl << "==================== processor image landmark test ======================" << std::endl;
 
-    //=====================================================
-    // Parse arguments
-    cv::VideoCapture capture;
-    const char * filename;
-    if (argc == 1)
-    {
-//        filename = "/home/jtarraso/Videos/House_interior.mp4";
-//        filename = "/home/jtarraso/Vídeos/gray1.mp4";
-        filename = "/home/jtarraso/Escritorio/video_test2/sim_video.mpg";
-        capture.open(filename);
-    }
-    else if (std::string(argv[1]) == "0")
-    {
-        //camera
-        filename = "0";
-        capture.open(0);
+    // Sensor or sensor recording
+    vision_utils::SensorCameraPtr sen_ptr = vision_utils::askUserSource(argc, argv);
+    if (sen_ptr==NULL)
+        return 0;
 
-        WOLF_DEBUG(__LINE__);
-    }
-    else
-    {
-        filename = argv[1];
-        capture.open(filename);
-    }
-    std::cout << "Input video file: " << filename << std::endl;
-    if(!capture.isOpened()) std::cout << "failed" << std::endl; else std::cout << "succeded" << std::endl;
-    capture.set(CV_CAP_PROP_POS_MSEC, 6000);
-    //=====================================================
-
-
-    //=====================================================
-    // Properties of video sequence
-    unsigned int img_width  = capture.get(CV_CAP_PROP_FRAME_WIDTH);
-    unsigned int img_height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-    std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
     unsigned int buffer_size = 10;
-    std::vector<cv::Mat> frame(buffer_size);
-    //=====================================================
+    vision_utils::Buffer<vision_utils::FramePtr> frame_buff(buffer_size);
+    frame_buff.add( vision_utils::setFrame(sen_ptr->getImage(), 0) );
 
+    unsigned int img_width  = frame_buff.back()->getImage().cols;
+    unsigned int img_height = frame_buff.back()->getImage().rows;
+    std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
 
     //=====================================================
     // Environment variable for configuration files
     std::string wolf_root = _WOLF_ROOT_DIR;
     std::cout << wolf_root << std::endl;
     //=====================================================
-
-
 
     //=====================================================
     // Wolf problem
@@ -126,9 +90,7 @@ int main(int argc, char** argv)
     camera->setImgWidth(img_width);
     camera->setImgHeight(img_height);
     ProcessorImageLandmarkPtr prc_img_ptr = std::static_pointer_cast<ProcessorImageLandmark>( problem->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml") );
-
     //=====================================================
-
 
     //=====================================================
     // Origin Key Frame is fixed
@@ -141,15 +103,12 @@ int main(int argc, char** argv)
     std::cout << "--------------------------------------------------------------" << std::endl;
     //=====================================================
 
-
     //=====================================================
     // running CAPTURES preallocated
     CaptureImagePtr image;
     Vector6s data(Vector6s::Zero()); // will integrate this data repeatedly
     CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>(t, sensor_odom, data, 6, 7, 6, 0);
     //=====================================================
-
-
 
     //=====================================================
     // Ceres wrapper
@@ -164,36 +123,34 @@ int main(int argc, char** argv)
     CeresManager ceres_manager(problem, ceres_options);
     //=====================================================
 
-
     //=====================================================
     // graphics
     cv::namedWindow("Feature tracker");    // Creates a window for display.
     cv::moveWindow("Feature tracker", 0, 0);
     //=====================================================
 
-
     //=====================================================
     // main loop
-    unsigned int frame_count  = 1;
-    capture >> frame[frame_count % buffer_size];
     unsigned int number_of_KFs = 0;
-
     Scalar dt = 0.04;
 
-    while(!(frame[frame_count % buffer_size].empty()))
+    for(int frame_count = 0; frame_count<10000; ++frame_count)
     {
-
         t += dt;
 
         // Image ---------------------------------------------
 
+        frame_buff.add( vision_utils::setFrame(sen_ptr->getImage(), frame_count) );
+
         // Preferred method with factory objects:
-        image = std::make_shared<CaptureImage>(t, camera, frame[frame_count % buffer_size]);
+        image = std::make_shared<CaptureImage>(t, camera, frame_buff.back()->getImage());
+
+        WOLF_DEBUG(__LINE__);
 
         /* process */
         camera->process(image);
 
-
+        WOLF_DEBUG(__LINE__);
 
         // Odometry --------------------------------------------
 
@@ -248,7 +205,6 @@ int main(int argc, char** argv)
 
         Matrix6s data_cov = computeDataCovariance(data);
 
-
         cap_odo->setData(data);
         cap_odo->setDataCovariance(data_cov);
 
@@ -278,17 +234,15 @@ int main(int argc, char** argv)
 
 
         // Finish loop -----------------------------------------
-        cv::Mat image_graphics = frame[frame_count % buffer_size].clone();
+        cv::Mat image_graphics = frame_buff.back()->getImage().clone();
         prc_img_ptr->drawTrackerRoi(image_graphics, cv::Scalar(255.0, 0.0, 255.0)); //tracker roi
         prc_img_ptr->drawRoi(image_graphics, prc_img_ptr->detector_roi_, cv::Scalar(0.0,255.0, 255.0)); //active search roi
         prc_img_ptr->drawLandmarks(image_graphics);
         prc_img_ptr->drawFeaturesFromLandmarks(image_graphics);
+        cv::imshow("Feature tracker", image_graphics);
         cv::waitKey(1);
 
         std::cout << "=================================================================================================" << std::endl;
-
-        frame_count++;
-        capture >> frame[frame_count % buffer_size];
     }
 
     // problem->print(2);

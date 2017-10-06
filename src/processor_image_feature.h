@@ -6,6 +6,7 @@
 #include "capture_image.h"
 #include "feature_point_image.h"
 #include "state_block.h"
+#include "state_quaternion.h"
 #include "processor_tracker_feature.h"
 #include "constraint_epipolar.h"
 #include "processor_image_params.h"

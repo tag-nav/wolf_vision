@@ -155,7 +155,7 @@ int main(int argc, char** argv)
         prc_img_ptr->drawRoi(image,prc_img_ptr->detector_roi_,cv::Scalar(0.0,255.0, 255.0));   //active search roi
         prc_img_ptr->drawRoi(image,prc_img_ptr->tracker_roi_, cv::Scalar(255.0, 0.0, 255.0));  //tracker roi
         prc_img_ptr->drawTarget(image,prc_img_ptr->tracker_target_);
-
+        cv::imshow("Feature tracker", image);
         cv::waitKey(1);
 
 //        if((f%100) == 0)
