@@ -342,51 +342,6 @@ TEST(rotations, AngleAxis_limits)
     }
 }
 
-TEST(rotations, AngleAxis_limits2)
-{
-    using namespace wolf;
-
-    Matrix3s rotation_mat;
-    Vector3s rv;
-    AngleAxis<wolf::Scalar> aa0;
-
-    //FIX ME : 5. Building a rot mat doing this is not safe; You cannot guarantee that R is valid.
-    // Highlight limitation of AngleAxis
-    rotation_mat = skew(Vector3s::Random().eval()) * 1e-8;
-
-    rotation_mat(0,0) = 1;
-    rotation_mat(1,1) = 0.999999;
-    rotation_mat(2,2) = 1;
-    aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
-    rv = aa0.axis() * aa0.angle();
-    //checking if rv is 0 vector
-    ASSERT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
-
-    rotation_mat(0,0) = 1.0;
-    rotation_mat(1,1) = 1.0;
-    rotation_mat(2,2) = 1.0;
-    aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
-    rv = aa0.axis() * aa0.angle();
-    //checking if rv is 0 vector
-    ASSERT_MATRIX_APPROX(rv, Eigen::Vector3s::Zero(), wolf::Constants::EPS);
-
-    rotation_mat = skew(Vector3s::Random().eval()) *0.1;
-    rotation_mat(0,0) = 1;
-    rotation_mat(1,1) = 0.9999999;
-    rotation_mat(2,2) = 1;
-    aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
-    rv = aa0.axis() * aa0.angle();
-    //checking if rv is 0 vector
-    ASSERT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
-
-    rotation_mat(0,0) = 1.0;
-    rotation_mat(1,1) = 1.0;
-    rotation_mat(2,2) = 1.0;
-    aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
-    rv = aa0.axis() * aa0.angle();
-    //checking if rv is 0 vector
-    ASSERT_FALSE(rv.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
-}
 
 TEST(rotations, Quat_compos_const_rateOfTurn)
 {
