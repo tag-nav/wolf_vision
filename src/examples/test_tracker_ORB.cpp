@@ -3,6 +3,9 @@
 
 // Vision utils
 #include <vision_utils.h>
+#include <vision_utils/sensors.h>
+#include <vision_utils/common_class/buffer.h>
+#include <vision_utils/common_class/frame.h>
 
 //Wolf
 #include "processor_image_landmark.h"
@@ -13,188 +16,129 @@ int main(int argc, char** argv)
 
     std::cout << std::endl << "==================== tracker ORB test ======================" << std::endl;
 
-    // parsing input params
-     const char * filename;
-     cv::VideoCapture capture;
-     if (argc < 2)
-     {
-         std::cout << "Please use\n\t./test_opencv <arg> "
-                 "\nwith "
-                 "\n\targ = <path/videoname.mp4> for video input "
-                 "\n\targ = 0 for camera input." << std::endl;
-         return 0;
-     }
-     else if (std::string(argv[1]) == "0")
-     {
-         filename = "0"; // camera
-         capture.open(0);
-         std::cout << "Input stream from camera " << std::endl;
-     }
-     else
-     {
-         filename = argv[1]; // provided through argument
-         capture.open(filename);
-         std::cout << "Input video file: " << filename << std::endl;
-     }
-     // Open input stream
-     if (!capture.isOpened())  // check if we succeeded
-         std::cout << "failed" << std::endl;
-     else
-         std::cout << "succeded" << std::endl;
-
-     // set and print image properties
-     unsigned int img_width = (unsigned int)capture.get(CV_CAP_PROP_FRAME_WIDTH);
-     unsigned int img_height = (unsigned int)capture.get(CV_CAP_PROP_FRAME_HEIGHT);
-     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
-
     //=====================================================
     // Environment variable for configuration files
     std::string wolf_root = _WOLF_ROOT_DIR;
     //=====================================================
 
     //=====================================================
-    // Detector, descriptor and matcher
-    cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
-    cv::Ptr<cv::DescriptorMatcher> matcher_ptr_;
 
-    unsigned int nfeatures = 500;
-    float scaleFactor = 2;
-    unsigned int nlevels = 8;
-    unsigned int edgeThreshold = 16;
-    unsigned int firstLevel = 0;
-    unsigned int WTA_K = 2;                  //# See: http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html#a180ae17d3300cf2c619aa240d9b607e5
-    unsigned int scoreType = 0;              //#enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
-    unsigned int patchSize = 31;
+    // Sensor or sensor recording
+    vision_utils::SensorCameraPtr sen_ptr = vision_utils::askUserSource(argc, argv);
+    if (sen_ptr==NULL)
+        return 0;
 
-    //unsigned int fastThreshold = 20;
+    // Detector
+    vision_utils::DetectorParamsORBPtr params_det = std::make_shared<vision_utils::DetectorParamsORB>();
 
-    unsigned int roi_width = 200;
-    unsigned int roi_heigth = 200;
+    params_det->nfeatures = 500;        // The maximum number of features to retain.
+    params_det->scaleFactor = 2;        // Pyramid decimation ratio, greater than 1. scaleFactor==2 means the classical pyramid, where each next level has 4x less pixels than the previous, but such a big scale factor will degrade feature matching scores dramatically. On the other hand, too close to 1 scale factor will mean that to cover certain scale range you will need more pyramid levels and so the speed will suffer.
+    params_det->nlevels = 8;            // The number of pyramid levels. The smallest level will have linear size equal to input_image_linear_size/pow(scaleFactor, nlevels).
+    params_det->edgeThreshold = 16;     // This is size of the border where the features are not detected. It should roughly match the patchSize parameter.
+    params_det->firstLevel = 0;         // It should be 0 in the current implementation.
+    params_det->WTA_K = 2;              // The number of points that produce each element of the oriented BRIEF descriptor. The default value 2 means the BRIEF where we take a random point pair and compare their brightnesses, so we get 0/1 response. Other possible values are 3 and 4. For example, 3 means that we take 3 random points (of course, those point coordinates are random, but they are generated from the pre-defined seed, so each element of BRIEF descriptor is computed deterministically from the pixel rectangle), find point of maximum brightness and output index of the winner (0, 1 or 2). Such output will occupy 2 bits, and therefore it will need a special variant of Hamming distance, denoted as NORM_HAMMING2 (2 bits per bin). When WTA_K=4, we take 4 random points to compute each bin (that will also occupy 2 bits with possible values 0, 1, 2 or 3).
+    params_det->scoreType = cv::ORB::HARRIS_SCORE; //#enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
+    params_det->patchSize = 31;
 
-    detector_descriptor_ptr_ = cv::ORB::create(nfeatures, //
-                                           scaleFactor, //
-                                           nlevels, //
-                                           edgeThreshold, //
-                                           firstLevel, //
-                                           WTA_K, //
-                                           scoreType, //
-                                           patchSize);//
+    vision_utils::DetectorBasePtr det_b_ptr = vision_utils::setupDetector("ORB", "ORB detector", params_det);
+    vision_utils::DetectorORBPtr det_ptr = std::static_pointer_cast<vision_utils::DetectorORB>(det_b_ptr);
 
-    unsigned int pattern_radius = (unsigned int)(patchSize);
+    // Descriptor
+    vision_utils::DescriptorParamsORBPtr params_des = std::make_shared<vision_utils::DescriptorParamsORB>();
 
-    unsigned int size_bits = detector_descriptor_ptr_->descriptorSize() * 8;
+    params_des->nfeatures = 500;        // The maximum number of features to retain.
+    params_des->scaleFactor = 2;        // Pyramid decimation ratio, greater than 1. scaleFactor==2 means the classical pyramid, where each next level has 4x less pixels than the previous, but such a big scale factor will degrade feature matching scores dramatically. On the other hand, too close to 1 scale factor will mean that to cover certain scale range you will need more pyramid levels and so the speed will suffer.
+    params_des->nlevels = 8;            // The number of pyramid levels. The smallest level will have linear size equal to input_image_linear_size/pow(scaleFactor, nlevels).
+    params_des->edgeThreshold = 16;     // This is size of the border where the features are not detected. It should roughly match the patchSize parameter.
+    params_des->firstLevel = 0;         // It should be 0 in the current implementation.
+    params_des->WTA_K = 2;              // The number of points that produce each element of the oriented BRIEF descriptor. The default value 2 means the BRIEF where we take a random point pair and compare their brightnesses, so we get 0/1 response. Other possible values are 3 and 4. For example, 3 means that we take 3 random points (of course, those point coordinates are random, but they are generated from the pre-defined seed, so each element of BRIEF descriptor is computed deterministically from the pixel rectangle), find point of maximum brightness and output index of the winner (0, 1 or 2). Such output will occupy 2 bits, and therefore it will need a special variant of Hamming distance, denoted as NORM_HAMMING2 (2 bits per bin). When WTA_K=4, we take 4 random points to compute each bin (that will also occupy 2 bits with possible values 0, 1, 2 or 3).
+    params_des->scoreType = cv::ORB::HARRIS_SCORE; //#enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
+    params_des->patchSize = 31;
 
-    matcher_ptr_ = cv::DescriptorMatcher::create("BruteForce-Hamming(2)");
+    vision_utils::DescriptorBasePtr des_b_ptr = vision_utils::setupDescriptor("ORB", "ORB descriptor", params_des);
+    vision_utils::DescriptorORBPtr des_ptr = std::static_pointer_cast<vision_utils::DescriptorORB>(des_b_ptr);
+
+    // Matcher
+    vision_utils::MatcherParamsBRUTEFORCE_HAMMING_2Ptr params_mat = std::make_shared<vision_utils::MatcherParamsBRUTEFORCE_HAMMING_2>();
+    vision_utils::MatcherBasePtr mat_b_ptr = vision_utils::setupMatcher("BRUTEFORCE_HAMMING_2", "BRUTEFORCE_HAMMING_2 matcher", params_mat);
+    vision_utils::MatcherBRUTEFORCE_HAMMING_2Ptr mat_ptr = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING_2>(mat_b_ptr);
+
     //=====================================================
 
-    unsigned int buffer_size = 20;
-    std::vector<cv::Mat> frame(buffer_size);
-    unsigned int f  = 1;
-    capture >> frame[f % buffer_size];
+    unsigned int buffer_size = 8;
+    vision_utils::Buffer<vision_utils::FramePtr> frame_buff(buffer_size);
+    frame_buff.add( vision_utils::setFrame(sen_ptr->getImage(), 0) );
+
+    unsigned int img_width  = frame_buff.back()->getImage().cols;
+    unsigned int img_height = frame_buff.back()->getImage().rows;
+    std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
 
     cv::namedWindow("Feature tracker");    // Creates a window for display.
     cv::moveWindow("Feature tracker", 0, 0);
-
-    cv::imshow("Feature tracker", frame[f % buffer_size]);
+    cv::startWindowThread();
+    cv::imshow("Feature tracker", frame_buff.back()->getImage());
     cv::waitKey(1);
 
-    std::vector<cv::KeyPoint> target_keypoints;
-    std::vector<cv::KeyPoint> tracked_keypoints_;
-    std::vector<cv::KeyPoint> tracked_keypoints_2;
-    std::vector<cv::KeyPoint> current_keypoints;
+    KeyPointVector target_keypoints;
+    KeyPointVector tracked_keypoints_;
+    KeyPointVector tracked_keypoints_2;
+    KeyPointVector current_keypoints;
     cv::Mat target_descriptors;
     cv::Mat tracked_descriptors;
     cv::Mat tracked_descriptors2;
     cv::Mat current_descriptors;
-    cv::Mat image_original = frame[f % buffer_size].clone();
+    cv::Mat image_original = frame_buff.back()->getImage();
     cv::Mat image_graphics;
 
-
-    unsigned int roi_x;
-    unsigned int roi_y;
+    unsigned int roi_width = 200;
+    unsigned int roi_heigth = 200;
 
     int n_first_1 = 0;
     int n_second_1 = 0;
 
+    // Initial detection
+    target_keypoints = det_ptr->detect(image_original);
+    target_descriptors = des_ptr->getDescriptor(image_original, target_keypoints);
 
-    detector_descriptor_ptr_->detect(image_original, target_keypoints);
-    detector_descriptor_ptr_->compute(image_original, target_keypoints, target_descriptors);
-
-    while(!(frame[f % buffer_size].empty()))
+    for (unsigned int f_num=0; f_num < 1000; ++f_num)
     {
-        f++;
-        capture >> frame[f % buffer_size];
+        frame_buff.add( vision_utils::setFrame(sen_ptr->getImage(), f_num) );
 
-        std::vector<cv::KeyPoint> keypoints;
+        KeyPointVector keypoints;
         cv::Mat descriptors;
-        cv::Mat image = frame[f % buffer_size];
+        DMatchVector cv_matches;
+        cv::Mat image = frame_buff.back()->getImage();
         image_graphics = image.clone();
-        std::vector<cv::DMatch> cv_matches;
         bool matched = false;
         n_first_1 = n_second_1 = 0;
 
         unsigned int tracked_keypoints = 0;
 
-        for(unsigned int j = 0; j < target_keypoints.size(); j++)
+        for(unsigned int target_idx = 0; target_idx < target_keypoints.size(); target_idx++)
         {
-            std::cout << "\npixel: " << target_keypoints[j].pt << std::endl;
-            std::cout << "target_descriptor[" << j << "]:\n" << target_descriptors.row(j) << std::endl;
+            std::cout << "\npixel: " << target_keypoints[target_idx].pt << std::endl;
+            std::cout << "target_descriptor[" << target_idx << "]:\n" << target_descriptors.row(target_idx) << std::endl;
 
             matched = false;
-            roi_x = (target_keypoints[j].pt.x) - (roi_heigth / 2);
-            roi_y = (target_keypoints[j].pt.y) - (roi_width / 2);
-            cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
+
+            cv::Rect roi = vision_utils::setRoi(target_keypoints[target_idx].pt.x, target_keypoints[target_idx].pt.y, roi_width, roi_heigth);
+
             cv::Point2f roi_up_left_corner;
             roi_up_left_corner.x = roi.x;
             roi_up_left_corner.y = roi.y;
 
-            //inflate
-            roi.x = roi.x - pattern_radius;
-            roi.y = roi.y - pattern_radius;
-            roi.width = roi.width + 2*pattern_radius;
-            roi.height = roi.height + 2*pattern_radius;
-
-            //trim
-            if(roi.x < 0)
+            for(unsigned int fr = 0; fr < 2; fr++)
             {
-                int diff_x = -roi.x;
-                roi.x = 0;
-                roi.width = roi.width - diff_x;
-            }
-            if(roi.y < 0)
-            {
-                int diff_y = -roi.y;
-                roi.y = 0;
-                roi.height = roi.height - diff_y;
-            }
-            if((unsigned int)(roi.x + roi.width) > img_width)
-            {
-                int diff_width = img_width - (roi.x + roi.width);
-                roi.width = roi.width + diff_width;
-            }
-            if((unsigned int)(roi.y + roi.height) > img_height)
-            {
-                int diff_height = img_height - (roi.y + roi.height);
-                roi.height = roi.height+diff_height;
-            }
-
-
-            //assign
-            cv::Mat image_roi = image(roi);
-
-            for(unsigned int f = 0; f < 2; f++)
-            {
-
-                detector_descriptor_ptr_->detect(image_roi, keypoints);
-                detector_descriptor_ptr_->compute(image_roi, keypoints, descriptors);
+                keypoints = det_ptr->detect(image, roi);
+                descriptors = des_ptr->getDescriptor(image, keypoints);
 
                 cv::Mat target_descriptor; //B(cv::Rect(0,0,vec_length,1));
-                target_descriptor = target_descriptors(cv::Rect(0,j,target_descriptors.cols,1));
+                target_descriptor = target_descriptors(cv::Rect(0,target_idx,target_descriptors.cols,1));
 
                 if(keypoints.size() != 0)
                 {
-                    matcher_ptr_->match(target_descriptor, descriptors, cv_matches);
-                    Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/size_bits;
+                    mat_ptr->match(target_descriptor, descriptors, cv_matches);
+                    Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/(des_ptr->getSize()*8);
                     std::cout << "pixel: " << keypoints[cv_matches[0].trainIdx].pt + roi_up_left_corner << std::endl;
                     std::cout << "normalized score: " << normalized_score << std::endl;
                     if(normalized_score < 0.8)
@@ -208,40 +152,40 @@ int main(int argc, char** argv)
                         matched = true;
 
                         cv::Point2f point,t_point;
-                        point.x = keypoints[cv_matches[0].trainIdx].pt.x + roi.x;
-                        point.y = keypoints[cv_matches[0].trainIdx].pt.y + roi.y;
-                        t_point.x = target_keypoints[j].pt.x;
-                        t_point.y = target_keypoints[j].pt.y;
+                        point.x = keypoints[cv_matches[0].trainIdx].pt.x;
+                        point.y = keypoints[cv_matches[0].trainIdx].pt.y;
+                        t_point.x = target_keypoints[target_idx].pt.x;
+                        t_point.y = target_keypoints[target_idx].pt.y;
 
                         cv::circle(image_graphics, t_point, 4, cv::Scalar(51.0, 51.0, 255.0), -1, 3, 0);
                         cv::circle(image_graphics, point, 2, cv::Scalar(255.0, 255.0, 0.0), -1, 8, 0);
-                        cv::putText(image_graphics, std::to_string(j), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
+                        cv::putText(image_graphics, std::to_string(target_idx), point, cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
 
                         //introduce in list - tracked point
                         cv::KeyPoint tracked_kp = keypoints[cv_matches[0].trainIdx];
                         tracked_kp.pt.x = tracked_kp.pt.x + roi.x;
                         tracked_kp.pt.y = tracked_kp.pt.y + roi.y;
-                        if(f==0)
+                        if(fr==0)
                             tracked_keypoints_.push_back(tracked_kp);
                         else
                             tracked_keypoints_2.push_back(tracked_kp);
 
                         cv::Mat tracked_desc;
                         tracked_desc = descriptors(cv::Rect(0,cv_matches[0].trainIdx,target_descriptors.cols,1));
-                        if(f==0)
+                        if(fr==0)
                             tracked_descriptors.push_back(tracked_desc);
                         else
                             tracked_descriptors2.push_back(tracked_desc);
 
                         //introduce in list - target point
-                        if(f==0)
+                        if(fr==0)
                         {
-                            current_keypoints.push_back(target_keypoints[j]);
+                            current_keypoints.push_back(target_keypoints[target_idx]);
                             current_descriptors.push_back(target_descriptor);
                         }
 
-                        if (f == 0 && normalized_score == 1)n_first_1++;
-                        if (f == 1 && normalized_score == 1)n_second_1++;
+                        if (fr == 0 && normalized_score == 1)n_first_1++;
+                        if (fr == 1 && normalized_score == 1)n_second_1++;
                     }
                 }
                 else
@@ -249,8 +193,6 @@ int main(int argc, char** argv)
 
             }
             if (matched) tracked_keypoints++;
-
-
         }
 
         std::cout << "\ntracked keypoints: " << tracked_keypoints << "/" << target_keypoints.size() << std::endl;
@@ -260,8 +202,8 @@ int main(int argc, char** argv)
 
         if(tracked_keypoints == 0)
         {
-            detector_descriptor_ptr_->detect(image, target_keypoints);
-            detector_descriptor_ptr_->compute(image, target_keypoints, target_descriptors);
+            target_keypoints = det_ptr->detect(image);
+            target_descriptors = des_ptr->getDescriptor(image, target_keypoints);
             std::cout << "number of new keypoints to be tracked: " << target_keypoints.size() << std::endl;
         }
         else
@@ -319,8 +261,5 @@ int main(int argc, char** argv)
         tracked_keypoints = 0;
         cv::imshow("Feature tracker", image_graphics);
         cv::waitKey(1);
-
-//        f++;
-//        capture >> frame[f % buffer_size];
     }
 }

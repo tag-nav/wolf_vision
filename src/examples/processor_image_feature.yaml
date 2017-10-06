@@ -2,37 +2,7 @@ processor type: "IMAGE ORB"
 processor name: "ORB feature tracker"
 
 vision_utils:
-    YAML file params: /home/asantamaria/Code/cpp/vision_utils/src/examples/yaml/ACTIVESEARCH.yaml
-
-#//===================================
-#//===================================
-
-detector-descriptor:
-    type: "ORB"         # This affects the structure below. See processor_image_BRISK.yaml for another example
-    nfeatures: 100
-    scale factor: 1.2
-    nlevels: 8
-    edge threshold: 8  # 16
-    first level: 0 
-    WTA_K: 2            # See: http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html#a180ae17d3300cf2c619aa240d9b607e5
-    score type: 1       #enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
-    patch size: 15   # 31
-
-matcher:
-    minimum normalized score: 0.85
-    similarity norm: 6  # OpenCV 3 enum { BruteForce=1 (it uses L2 ), BruteForce-L1=2, BruteForce-Hamming=3, BruteForce-Hamming(2)=4, FlannBased=5};
-                        # OpenCV 2 enum { NORM_INF=1, NORM_L1=2, NORM_L2=4, NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, NORM_RELATIVE=8, NORM_MINMAX=32 };
-    roi:
-        width: 20
-        height: 20
-
-active search:
-    grid width: 12
-    grid height: 8
-    separation: 10
-
-#//===================================
-#//===================================
+    YAML file params: processor_image_vision_utils.yaml
 
 algorithm:
     maximum new features: 40

@@ -60,10 +60,7 @@ FIND_PACKAGE(vision_utils QUIET)
 IF (vision_utils_FOUND)
 	MESSAGE("vision_utils Library FOUND: vision related sources will be built.")
 	SET(PRINT_INFO_VU false)
-
-	# REMOVE OpenCV
 	FIND_PACKAGE(OpenCV QUIET)
-
 ENDIF(vision_utils_FOUND)
 
 # YAML with yaml-cpp
@@ -141,10 +138,7 @@ ENDIF(raw_gps_utils_FOUND)
 
 IF(vision_utils_FOUND)
 	INCLUDE_DIRECTORIES(${vision_utils_INCLUDE_DIR})
-
-	# REMOVE OpenCV
-   	INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
-
+	INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 ENDIF(vision_utils_FOUND)
 
 IF(Suitesparse_FOUND)
@@ -449,10 +443,7 @@ ENDIF (raw_gps_utils_FOUND)
 
 IF (vision_utils_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${vision_utils_LIBRARY})
-    
-    # REMOVE OpenCV
    	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
-    
 ENDIF (vision_utils_FOUND)
 
 IF (YAMLCPP_FOUND)

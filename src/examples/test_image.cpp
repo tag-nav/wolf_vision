@@ -40,6 +40,11 @@ int main(int argc, char** argv)
     unsigned int img_height = frame_buff.back()->getImage().rows;
     std::cout << "Image size: " << img_width << "x" << img_height << std::endl;
 
+    // graphics
+    cv::namedWindow("Feature tracker");    // Creates a window for display.
+    cv::moveWindow("Feature tracker", 0, 0);
+    cv::startWindowThread();
+
     CaptureImagePtr image_ptr;
 
     TimeStamp t = 1;

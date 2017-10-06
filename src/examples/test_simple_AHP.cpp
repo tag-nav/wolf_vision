@@ -15,6 +15,9 @@
 #include "constraint_AHP.h"
 #include "ceres_wrapper/ceres_manager.h"
 
+// Vision utils
+#include <vision_utils.h>
+
 /**
  * This test simulates the following situation:
  *   - A kf at the origin, we use it as anchor: kf1
@@ -224,11 +227,6 @@ int main(int argc, char** argv)
     // Wolf tree status ----------------------
     problem->print(3);
 //    problem->check();
-
-
-
-
-
 
     // ========== solve ==================================================================================================
     /* 12 */

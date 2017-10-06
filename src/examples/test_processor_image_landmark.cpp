@@ -127,6 +127,7 @@ int main(int argc, char** argv)
     // graphics
     cv::namedWindow("Feature tracker");    // Creates a window for display.
     cv::moveWindow("Feature tracker", 0, 0);
+    cv::startWindowThread();
     //=====================================================
 
     //=====================================================

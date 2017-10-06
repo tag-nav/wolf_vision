@@ -31,43 +31,18 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
     if (!params.IsNull())
     {
     	Node dd_yaml = params["vision_utils"];
-    	p->yaml_file_params_vision_utils = dd_yaml["YAML file params"].as<std::string>();
-
-//    	//===================================
-//    	//=================================== REMOVE AFTER PROCESSOR_LANDMARK
-//        dd_yaml = params["detector-descriptor"];
-//        if(dd_yaml["type"].as<string>() == "ORB")
-//        {
-//            std::shared_ptr<DetectorDescriptorParamsOrb> dd = std::make_shared<DetectorDescriptorParamsOrb>();
-//            dd->type                        = DD_ORB;
-//            dd->nfeatures                   = dd_yaml["nfeatures"].as<unsigned int>();
-//            dd->scaleFactor                 = dd_yaml["scale factor"].as<float>();
-//            dd->nlevels                     = dd_yaml["nlevels"].as<unsigned int>();
-//            dd->edgeThreshold               = dd_yaml["edge threshold"].as<unsigned int>();
-//            dd->firstLevel                  = dd_yaml["first level"].as<unsigned int>();
-//            dd->WTA_K                       = dd_yaml["WTA_K"].as<unsigned int>();
-//            dd->scoreType                   = dd_yaml["score type"].as<int>(); // enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
-//            dd->patchSize                   = dd_yaml["patch size"].as<unsigned int>();
-//            p->detector_descriptor_params_ptr = dd;
-//        }else
-//        {
-//            std::cout << "Unknown detector-descriptor type " << dd_yaml["type"].as<string>() << std::endl;
-//            // TODO: add BRISK params struct
-//        }
-//
-//        Node m = params["matcher"];
-//        p->matcher.min_normalized_score = m["minimum normalized score"].as<Scalar>();
-//        p->matcher.similarity_norm      = m["similarity norm"].as<int>(); // enum { NORM_INF=1, NORM_L1=2, NORM_L2=4, NORM_L2SQR=5, NORM_HAMMING=6, NORM_HAMMING2=7, NORM_TYPE_MASK=7, NORM_RELATIVE=8, NORM_MINMAX=32 };
-//        p->matcher.roi_width            = m["roi"]["width"].as<unsigned int>();
-//        p->matcher.roi_height           = m["roi"]["height"].as<unsigned int>();
-//
-//        Node as = params["active search"];
-//        p->active_search.grid_width     = as["grid width"].as<unsigned int>();
-//        p->active_search.grid_height    = as["grid height"].as<unsigned int>();
-//        p->active_search.separation     = as["separation"].as<unsigned int>();
-//
-//        //===================================
-//        //===================================
+   	    p->yaml_file_params_vision_utils = dd_yaml["YAML file params"].as<std::string>();
+   	    // Check if relative path
+   	    if (!p->yaml_file_params_vision_utils.empty())
+   	    {
+   	        if (p->yaml_file_params_vision_utils[0] != '/')
+   	        {
+   	            std::string wolf_root = _WOLF_ROOT_DIR;
+   	            std::cout << "Wolf root: " << wolf_root << std::endl;
+   	            std::string abs_path = wolf_root + "/src/examples/" + p->yaml_file_params_vision_utils;
+   	            p->yaml_file_params_vision_utils = abs_path;
+   	        }
+   	    }
 
         Node alg = params["algorithm"];
         p->algorithm.max_new_features = alg["maximum new features"].as<unsigned int>();
@@ -79,13 +54,6 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
         Node noi = params["noise"];
         p->noise.pixel_noise_std = noi["pixel noise std"].as<Scalar>();
         p->noise.pixel_noise_var = p->noise.pixel_noise_std * p->noise.pixel_noise_std;
-
-//        Node draw = params["draw"];
-//        p->draw.primary_drawing = draw["primary draw"].as<bool>();
-//        p->draw.secondary_drawing = draw["secondary draw"].as<bool>();
-//        p->draw.detector_roi = draw["detection roi"].as<bool>();
-//        p->draw.tracker_roi = draw["tracking roi"].as<bool>();
-
     }
 
     return p;
