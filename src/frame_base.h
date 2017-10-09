@@ -135,6 +135,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         CaptureBasePtr getCaptureOf(const SensorBasePtr _sensor_ptr);
         void unlinkCapture(CaptureBasePtr _cap_ptr);
 
+        ConstraintBasePtr getConstraintOf(const ProcessorBasePtr _processor_ptr);
+        ConstraintBasePtr getConstraintOf(const ProcessorBasePtr _processor_ptr, const std::string& type);
+
         void getConstraintList(ConstraintBaseList& _ctr_list);
         virtual ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
@@ -321,6 +324,25 @@ inline void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
 {
     _cap_ptr->unlinkFromFrame();
     capture_list_.remove(_cap_ptr);
+}
+
+inline ConstraintBasePtr
+FrameBase::getConstraintOf(const ProcessorBasePtr _processor_ptr)
+{
+  for (const ConstraintBasePtr& constaint_ptr : getConstrainedByList())
+      if (constaint_ptr->getProcessor() == _processor_ptr)
+          return constaint_ptr;
+  return nullptr;
+}
+
+inline ConstraintBasePtr
+FrameBase::getConstraintOf(const ProcessorBasePtr _processor_ptr, const std::string& type)
+{
+  for (const ConstraintBasePtr& constaint_ptr : getConstrainedByList())
+      if (constaint_ptr->getProcessor() == _processor_ptr &&
+          constaint_ptr->getType() == type)
+          return constaint_ptr;
+  return nullptr;
 }
 
 inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
