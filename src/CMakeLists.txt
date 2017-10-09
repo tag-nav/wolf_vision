@@ -79,6 +79,16 @@ ELSEIF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library NOT FOUND!")
 ENDIF(YAMLCPP_FOUND)
 
+#GLOG
+INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindGlog.cmake)
+IF(GLOG_FOUND)
+    MESSAGE("glog Library FOUND: glog related sources will be built.")
+    MESSAGE(STATUS ${GLOG_INCLUDE_DIR})
+    MESSAGE(STATUS ${GLOG_LIBRARY})
+ELSEIF(GLOG_FOUND)
+    MESSAGE("glog Library NOT FOUND!")
+ENDIF(GLOG_FOUND)
+
 # SuiteSparse doesn't have find*.cmake:
 FIND_PATH(
     Suitesparse_INCLUDE_DIRS
@@ -158,6 +168,10 @@ ENDIF(Suitesparse_FOUND)
 IF(YAMLCPP_FOUND)
     INCLUDE_DIRECTORIES(${YAMLCPP_INCLUDE_DIR})
 ENDIF(YAMLCPP_FOUND)
+
+IF(GLOG_FOUND)
+INCLUDE_DIRECTORIES(${GLOG_INCLUDE_DIR})
+ENDIF(GLOG_FOUND)
 
 #headers
 SET(HDRS_BASE
@@ -462,6 +476,9 @@ IF (YAMLCPP_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${YAMLCPP_LIBRARY})
 ENDIF (YAMLCPP_FOUND)
 
+IF (GLOG_FOUND)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLOG_LIBRARY})
+ENDIF (GLOG_FOUND)
 
 #install library
 #=============================================================
@@ -503,13 +520,14 @@ export(PACKAGE ${PROJECT_NAME})
 #############
 ## Testing ##
 #############
-
-if(BUILD_TESTS)
+IF (GLOG_FOUND)
+    if(BUILD_TESTS)
     
-    MESSAGE("Building tests.")
-    add_subdirectory(test)
+        MESSAGE("Building tests.")
+        add_subdirectory(test)
 
-endif()
+    endif(BUILD_TESTS)
+ENDIF (GLOG_FOUND)
 
 IF(BUILD_EXAMPLES)
   #Build examples & tests
