@@ -71,28 +71,13 @@ class CaptureMotion : public CaptureBase
         // Buffer's initial conditions for pre-integration
         VectorXs getCalibrationPreint() const;
         VectorXs getCalibration() const;
+        MatrixXs getJacobianCalib();
 
-        // Get delta
-        VectorXs getDelta()
-        {
-            VectorXs calib_preint   = getCalibrationPreint();
-            VectorXs calib          = getCalibration();
-            VectorXs delta_preint   = getBuffer().get().back().delta_integr_;
-            MatrixXs jac_calib      = getBuffer().get().back().jacobian_calib_;
-            VectorXs delta          = delta_preint + jac_calib * (calib - calib_preint);
-            return delta;
-        }
+        // Get delta, corrected for changes on calibration params
+        VectorXs getDelta();
+        VectorXs getDelta(const TimeStamp& _ts);
 
-        VectorXs getDelta(const TimeStamp& _ts)
-        {
-            VectorXs calib_preint   = getCalibrationPreint();
-            VectorXs calib          = getCalibration();
-            VectorXs delta_preint   = getBuffer().getMotion(_ts).delta_integr_;
-            MatrixXs jac_calib      = getBuffer().getMotion(_ts).jacobian_calib_;
-            VectorXs delta          = delta_preint + jac_calib * (calib - calib_preint);
-            return delta;
-        }
-
+        // Origin frame
         FrameBasePtr getOriginFramePtr();
         void setOriginFramePtr(FrameBasePtr _frame_ptr);
 
@@ -172,6 +157,31 @@ inline const wolf::MotionBuffer& CaptureMotion::getBuffer() const
 inline wolf::MotionBuffer& CaptureMotion::getBuffer()
 {
     return buffer_;
+}
+
+inline Eigen::MatrixXs CaptureMotion::getJacobianCalib()
+{
+    return getBuffer().get().back().jacobian_calib_;
+}
+
+inline Eigen::VectorXs CaptureMotion::getDelta(const TimeStamp& _ts)
+{
+    VectorXs calib_preint = getCalibrationPreint();
+    VectorXs calib = getCalibration();
+    VectorXs delta_preint = getBuffer().getMotion(_ts).delta_integr_;
+    MatrixXs jac_calib = getBuffer().getMotion(_ts).jacobian_calib_;
+    VectorXs delta = delta_preint + jac_calib * (calib - calib_preint);
+    return delta;
+}
+
+inline Eigen::VectorXs CaptureMotion::getDelta()
+{
+    VectorXs calib_preint = getCalibrationPreint();
+    VectorXs calib = getCalibration();
+    VectorXs delta_preint = getBuffer().get().back().delta_integr_;
+    MatrixXs jac_calib = getBuffer().get().back().jacobian_calib_;
+    VectorXs delta = delta_preint + jac_calib * (calib - calib_preint);
+    return delta;
 }
 
 inline wolf::FrameBasePtr CaptureMotion::getOriginFramePtr()
