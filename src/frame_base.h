@@ -123,6 +123,8 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         CaptureBaseList& getCaptureList();
         CaptureBasePtr addCapture(CaptureBasePtr _capt_ptr);
         CaptureBasePtr getCaptureOf(const SensorBasePtr _sensor_ptr);
+        CaptureBasePtr getCaptureOf(const SensorBasePtr _sensor_ptr, const std::string& type);
+        CaptureBaseList getCapturesOf(const SensorBasePtr _sensor_ptr);
         void unlinkCapture(CaptureBasePtr _cap_ptr);
 
         void getConstraintList(ConstraintBaseList& _ctr_list);
@@ -310,6 +312,27 @@ inline CaptureBasePtr FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr)
         if (capture_ptr->getSensorPtr() == _sensor_ptr)
             return capture_ptr;
     return nullptr;
+}
+
+inline CaptureBasePtr
+FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr, const std::string& type)
+{
+  for (CaptureBasePtr capture_ptr : getCaptureList())
+      if (capture_ptr->getSensorPtr() == _sensor_ptr &&
+          capture_ptr->getType() == type)
+          return capture_ptr;
+  return nullptr;
+}
+
+inline CaptureBaseList FrameBase::getCapturesOf(const SensorBasePtr _sensor_ptr)
+{
+    CaptureBaseList captures;
+
+    for (CaptureBasePtr capture_ptr : getCaptureList())
+        if (capture_ptr->getSensorPtr() == _sensor_ptr)
+            captures.push_back(capture_ptr);
+
+    return captures;
 }
 
 inline void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)

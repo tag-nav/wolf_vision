@@ -46,6 +46,7 @@ struct Motion
                const MatrixXs& _jac_delta_int,
                const MatrixXs& _jacobian_calib);// = MatrixXs::Zero(0,0));
         ~Motion();
+    private:
         void resize(Size _data_s, Size _delta_s, Size _delta_cov_s, Size _calib_s);
 
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.

@@ -316,10 +316,6 @@ TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
     Dq_of = q_o.conjugate() *  q_f;
 
 
-    R.resize(6,7,6,0);
-    F.resize(6,7,6,0);
-    I.resize(6,7,6,0);
-
     // set ref
     R.ts_           = t_r;
     R.delta_        = dx_or; // origin to ref
@@ -418,11 +414,6 @@ TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
     Dx_or = dx_or;
     prc.deltaPlusDelta(Dx_or, dx_rf, t_f - t_r, Dx_of);
     Dx_os = Dx_of;
-
-    R.resize(6,7,6,0);
-    I.resize(6,7,6,0);
-    S.resize(6,7,6,0);
-    F.resize(6,7,6,0);
 
     // set ref
     R.ts_           = t_r;
