@@ -25,8 +25,6 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts,
     data_cov.diagonal() = data_vars;
 
     setDataCovariance(data_cov);
-
-//    std::cout << "constructed    +C-IMU" << id() << std::endl;
 }
 
 CaptureIMU::CaptureIMU(const TimeStamp& _init_ts,
@@ -37,7 +35,6 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts,
                 CaptureMotion(_init_ts, _sensor_ptr, _acc_gyro_data, _data_cov, 10, 9, 6, _origin_frame_ptr)
 {
     setType("IMU");
-//    std::cout << "constructed    +C-IMU" << id() << std::endl;
 }
 
 
@@ -61,7 +58,6 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts,
         setStateBlockPtr(2, std::make_shared<StateBlock>(_bias, false));
     }
     setType("IMU");
-//    std::cout << "constructed    +C-IMU" << id() << std::endl;
 }
 
 
