@@ -111,6 +111,8 @@ inline const VectorXs& MotionBuffer::getCalibrationPreint() const
 
 inline void MotionBuffer::setCalibrationPreint(const VectorXs& _calib_preint)
 {
+    assert(_calib_preint.size() == calib_size_ && "Wrong size of calibration parameters");
+
     calib_preint_ = _calib_preint;
 }
 
