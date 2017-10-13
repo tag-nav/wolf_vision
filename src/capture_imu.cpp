@@ -20,9 +20,7 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts,
 
     Vector6s data_vars; data_vars << acc_var, acc_var, acc_var, gyro_var, gyro_var, gyro_var;
 
-    Matrix6s data_cov; data_cov.setZero();
-
-    data_cov.diagonal() = data_vars;
+    DiagonalMatrix<wolf::Scalar, 6> data_cov (data_vars);
 
     setDataCovariance(data_cov);
 }
