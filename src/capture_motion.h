@@ -79,8 +79,18 @@ class CaptureMotion : public CaptureBase
             VectorXs calib          = getCalibration();
             VectorXs delta_preint   = getBuffer().get().back().delta_integr_;
             MatrixXs jac_calib      = getBuffer().get().back().jacobian_calib_;
-            VectorXs delta_int      = delta_preint + jac_calib * (calib - calib_preint);
-            return delta_int;
+            VectorXs delta          = delta_preint + jac_calib * (calib - calib_preint);
+            return delta;
+        }
+
+        VectorXs getDelta(const TimeStamp& _ts)
+        {
+            VectorXs calib_preint   = getCalibrationPreint();
+            VectorXs calib          = getCalibration();
+            VectorXs delta_preint   = getBuffer().getMotion(_ts).delta_integr_;
+            MatrixXs jac_calib      = getBuffer().getMotion(_ts).jacobian_calib_;
+            VectorXs delta          = delta_preint + jac_calib * (calib - calib_preint);
+            return delta;
         }
 
         FrameBasePtr getOriginFramePtr();
