@@ -776,7 +776,7 @@ inline const MotionBuffer& ProcessorMotion::getBuffer() const
 
 inline VectorXs ProcessorMotion::getCalibration()
 {
-    return last_ptr_->getCalibration();
+    return std::static_pointer_cast<CaptureMotion>(origin_ptr_)->getCalibration();
 }
 
 inline VectorXs ProcessorMotion::getCalibrationPreint()

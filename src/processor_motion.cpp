@@ -222,6 +222,7 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
     // clear and reset buffer
     getBuffer().get().clear();
     getBuffer().setCalibrationPreint(getCalibration());
+//    getBuffer().setCalibrationPreint(std::static_pointer_cast<CaptureMotion>(origin_ptr_)->getCalibration());
     getBuffer().get().push_back(motionZero(_origin_frame->getTimeStamp()));
 
     // Reset derived things
