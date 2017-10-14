@@ -192,8 +192,6 @@ class ProcessorMotion : public ProcessorBase
         const MotionBuffer& getBuffer() const;
 
         // Autocalibration
-        virtual VectorXs getCalibration();
-        VectorXs getCalibrationPreint();
         MatrixXs getJacobianCalib();
 
 
@@ -778,16 +776,6 @@ inline void ProcessorMotion::updateDt()
 inline const MotionBuffer& ProcessorMotion::getBuffer() const
 {
     return last_ptr_->getBuffer();
-}
-
-inline VectorXs ProcessorMotion::getCalibration()
-{
-    return std::static_pointer_cast<CaptureMotion>(origin_ptr_)->getCalibration();
-}
-
-inline VectorXs ProcessorMotion::getCalibrationPreint()
-{
-    return getBuffer().getCalibrationPreint();
 }
 
 inline MatrixXs ProcessorMotion::getJacobianCalib()
