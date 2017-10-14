@@ -63,7 +63,6 @@ class ProcessorIMU : public ProcessorMotion{
                                 const Scalar _dt,
                                 Eigen::VectorXs& _x_plus_delta ) override;
         virtual Eigen::VectorXs deltaZero() const override;
-        VectorXs correctDelta(const Motion& _motion, const CaptureMotionPtr _capture);
         virtual Motion interpolate(const Motion& _motion_ref,
                                    Motion& _motion,
                                    TimeStamp& _ts) override;

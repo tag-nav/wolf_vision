@@ -30,44 +30,6 @@ ProcessorIMU::~ProcessorIMU()
 //    std::cout << "destructed     -p-IMU" << id() << std::endl;
 }
 
-VectorXs ProcessorIMU::correctDelta(const Motion& _motion, const CaptureMotionPtr _capture)
-{
-
-    /* Correct measured delta: delta_corr = delta ++ J_bias * (bias - bias_preint)
-     * where:
-     *   delta       = pre-integrated delta at time dt
-     *   J_bias      = Jacobian of the preintegrated delta at time dt
-     *   bias        = current bias estimate
-     *   bias_preint = bias estimate when we performed the pre-integration
-     *   ++          = additive composition: x+dx for p and v, q*exp(dv) for the quaternion.
-     */
-
-    // Get current delta and Jacobian
-    VectorXs delta_preint  = _motion.delta_integr_;
-    MatrixXs J_bias        = _motion.jacobian_calib_;
-
-    // Get current biases from the capture's origin frame
-    FrameIMUPtr frame_origin   = std::static_pointer_cast<FrameIMU>(_capture->getOriginFramePtr());
-    Vector6s bias; bias       << frame_origin->getAccBiasPtr()->getState(), frame_origin->getGyroBiasPtr()->getState();
-
-    // Get preintegrated biases from the capture's feature
-    FeatureIMUPtr feature              = std::static_pointer_cast<FeatureIMU>(_capture->getFeatureList().front());
-    Vector6s bias_preint; bias_preint << feature->acc_bias_preint_, feature->gyro_bias_preint_;
-
-    // Compute update step
-    VectorXs delta_step = J_bias * (bias - bias_preint);
-
-    // Correct delta
-    VectorXs delta_correct(10);
-    delta_correct.head(3)           = delta_preint.head(3) + delta_step.head(3);
-    Map<const Quaternions> deltaq   (&delta_preint(3));
-    Map<Quaternions> deltaq_correct (&delta_correct(3));
-    deltaq_correct                  = deltaq * v2q(delta_step.segment(3,3));
-    delta_correct.tail(3)           = delta_preint.tail(3) + delta_step.tail(3);
-
-    return delta_correct;
-}
-
 ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
     // cast inputs to the correct type
