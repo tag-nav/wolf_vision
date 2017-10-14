@@ -431,21 +431,6 @@ CaptureMotionPtr ProcessorMotion::getCaptureMotionContainingTimeStamp(const Time
     return capture_motion;
 }
 
-
-CaptureMotionPtr ProcessorMotion::makeCapture(const TimeStamp& _ts,
-                                                      const SensorBasePtr& _sensor,
-                                                      const VectorXs& _data,
-                                                      const MatrixXs& _data_cov,
-                                                      const FrameBasePtr& _frame_origin)
-{
-    return std::make_shared<CaptureMotion>(_ts,
-                                           _sensor,
-                                           _data,
-                                           _data_cov,
-                                           delta_size_, delta_cov_size_, calib_size_,
-                                           _frame_origin);
-}
-
 CaptureMotionPtr ProcessorMotion::emplaceCapture(const TimeStamp& _ts,
                                                  const SensorBasePtr& _sensor,
                                                  const VectorXs& _data,
@@ -453,7 +438,12 @@ CaptureMotionPtr ProcessorMotion::emplaceCapture(const TimeStamp& _ts,
                                                  const FrameBasePtr& _frame_own,
                                                  const FrameBasePtr& _frame_origin)
 {
-    CaptureMotionPtr capture = makeCapture(_ts, _sensor, _data, _data_cov, _frame_origin);
+    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(_ts,
+                                                               _sensor,
+                                                               _data,
+                                                               _data_cov,
+                                                               delta_size_, delta_cov_size_, calib_size_,
+                                                               _frame_origin);
     _frame_own->addCapture(capture);
     return capture;
 }

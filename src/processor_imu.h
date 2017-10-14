@@ -67,15 +67,16 @@ class ProcessorIMU : public ProcessorMotion{
                                    Motion& _motion,
                                    TimeStamp& _ts) override;
         virtual bool voteForKeyFrame() override;
+        virtual CaptureMotionPtr emplaceCapture(const TimeStamp& _ts,
+                                                const SensorBasePtr& _sensor,
+                                                const VectorXs& _data,
+                                                const MatrixXs& _data_cov,
+                                                const FrameBasePtr& _frame_own,
+                                                const FrameBasePtr& _frame_origin) override;
+        virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion,
+                                              FrameBasePtr _related_frame) override;
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
-                                                   FrameBasePtr _frame_origin) override;
-        virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, 
-                                                    FrameBasePtr _related_frame) override;
-        virtual CaptureMotionPtr makeCapture(const TimeStamp& _ts,
-                                             const SensorBasePtr& _sensor,
-                                             const VectorXs& _data,
-                                             const MatrixXs& _data_cov,
-                                             const FrameBasePtr& _frame_origin) override;
+                                                    FrameBasePtr _frame_origin) override;
         void resetDerived() override;
 
     protected:
@@ -376,46 +377,6 @@ inline void ProcessorIMU::resetDerived()
     acc_bias_  = frame_imu_ptr_->getAccBiasPtr()->getState(); // acc  bias
     gyro_bias_ = frame_imu_ptr_->getGyroBiasPtr()->getState(); // gyro bias
 }
-
-inline ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
-{
-    FeatureIMUPtr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
-    FrameIMUPtr frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
-    ConstraintIMUPtr ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu, shared_from_this());
-
-    _feature_motion->addConstraint(ctr_imu);
-    _frame_origin->addConstrainedBy(ctr_imu);
-
-    return ctr_imu;
-}
-
-inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame)
-{
-    // CaptureIMUPtr capt_imu = std::static_pointer_cast<CaptureIMU>(_capture_motion);
-    FrameIMUPtr key_frame_ptr = std::static_pointer_cast<FrameIMU>(_related_frame);
-    // create motion feature and add it to the key_capture
-//    MatrixXs delta_integr_cov(integrateBufferCovariance(_capture_motion->getBuffer()));
-    FeatureIMUPtr key_feature_ptr = std::make_shared<FeatureIMU>(
-            _capture_motion->getBuffer().get().back().delta_integr_,
-            _capture_motion->getBuffer().get().back().delta_integr_cov_,
-            key_frame_ptr->getAccBiasPtr()->getState(),
-            key_frame_ptr->getGyroBiasPtr()->getState(),
-            _capture_motion->getBuffer().get().back().jacobian_calib_);
-    _capture_motion->addFeature(key_feature_ptr);
-
-    return key_feature_ptr;
-}
-
-inline CaptureMotionPtr ProcessorIMU::makeCapture(const TimeStamp& _ts,
-                                                  const SensorBasePtr& _sensor,
-                                                  const VectorXs& _data,
-                                                  const MatrixXs& _data_cov,
-                                                  const FrameBasePtr& _frame_origin)
-{
-    CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(_ts, _sensor, _data, _data_cov, _frame_origin);
-    return capture_imu;
-}
-
 
 inline void ProcessorIMU::remapPQV(const Eigen::VectorXs& _delta1,
                                    const Eigen::VectorXs& _delta2,

@@ -612,12 +612,6 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts) = 0;
 
-        virtual CaptureMotionPtr makeCapture(const TimeStamp& _ts,
-                                             const SensorBasePtr& _sensor,
-                                             const VectorXs& _data,
-                                             const MatrixXs& _data_cov,
-                                             const FrameBasePtr& _frame_origin);
-
         virtual CaptureMotionPtr emplaceCapture(const TimeStamp& _ts,
                                                 const SensorBasePtr& _sensor,
                                                 const VectorXs& _data,
@@ -625,17 +619,17 @@ class ProcessorMotion : public ProcessorBase
                                                 const FrameBasePtr& _frame_own,
                                                 const FrameBasePtr& _frame_origin);
 
-        /** \brief create a constraint and link it in the wolf tree
-         * \param _feature_motion: the parent feature
-         * \param _frame_origin: the frame constrained by this motion constraint
-         */
-        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin) = 0;
-
         /** \brief create a feature corresponding to given capture and add the feature to this capture
          * \param _capture_motion: the parent capture
          * \param _related_frame: frame of the last_ptr set as KEYFRAME. (used only in processor_imu.h for now...)
          */
         virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame) = 0;
+
+        /** \brief create a constraint and link it in the wolf tree
+         * \param _feature_motion: the parent feature
+         * \param _frame_origin: the frame constrained by this motion constraint
+         */
+        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin) = 0;
 
         Motion motionZero(const TimeStamp& _ts);
         CaptureMotionPtr getCaptureMotionContainingTimeStamp(const TimeStamp& _ts);
