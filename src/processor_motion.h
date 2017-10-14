@@ -618,6 +618,13 @@ class ProcessorMotion : public ProcessorBase
                                              const MatrixXs& _data_cov,
                                              const FrameBasePtr& _frame_origin);
 
+        virtual CaptureMotionPtr emplaceCapture(const TimeStamp& _ts,
+                                                const SensorBasePtr& _sensor,
+                                                const VectorXs& _data,
+                                                const MatrixXs& _data_cov,
+                                                const FrameBasePtr& _frame_own,
+                                                const FrameBasePtr& _frame_origin);
+
         /** \brief create a constraint and link it in the wolf tree
          * \param _feature_motion: the parent feature
          * \param _frame_origin: the frame constrained by this motion constraint

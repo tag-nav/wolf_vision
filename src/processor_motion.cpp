@@ -455,5 +455,16 @@ CaptureMotionPtr ProcessorMotion::makeCapture(const TimeStamp& _ts,
                                            _frame_origin);
 }
 
+CaptureMotionPtr ProcessorMotion::emplaceCapture(const TimeStamp& _ts,
+                                                 const SensorBasePtr& _sensor,
+                                                 const VectorXs& _data,
+                                                 const MatrixXs& _data_cov,
+                                                 const FrameBasePtr& _frame_own,
+                                                 const FrameBasePtr& _frame_origin)
+{
+    CaptureMotionPtr capture = makeCapture(_ts, _sensor, _data, _data_cov, _frame_origin);
+    _frame_own->addCapture(capture);
+    return capture;
+}
 
 }
