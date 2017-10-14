@@ -146,7 +146,7 @@ inline Eigen::MatrixXs CaptureMotion::getJacobianCalib()
 
 inline Eigen::VectorXs CaptureMotion::correctDelta(const VectorXs& _delta, const VectorXs& _delta_error)
 {
-    WOLF_DEBUG("WARNING: using Cartesian sum for correction. If your deltas lie on a manifold, derive this function and implement the proper delta correction!")
+    WOLF_DEBUG("WARNING: using Cartesian sum for delta correction. \nIf your deltas lie on a manifold, derive this function and implement the proper delta correction!")
     return _delta + _delta_error;
 }
 
