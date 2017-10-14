@@ -56,37 +56,37 @@ class ProcessorIMU : public ProcessorMotion{
                                 Eigen::VectorXs& _delta,
                                 Eigen::MatrixXs& _delta_cov,
                                 const Eigen::VectorXs& _calib,
-                                Eigen::MatrixXs& _jacobian_calib);
+                                Eigen::MatrixXs& _jacobian_calib) override;
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
                                     const Eigen::VectorXs& _delta,
                                     const Scalar _dt,
-                                    Eigen::VectorXs& _delta_preint_plus_delta);
+                                    Eigen::VectorXs& _delta_preint_plus_delta) override;
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
                                     const Eigen::VectorXs& _delta,
                                     const Scalar _dt,
                                     Eigen::VectorXs& _delta_preint_plus_delta,
                                     Eigen::MatrixXs& _jacobian_delta_preint,
-                                    Eigen::MatrixXs& _jacobian_delta);
+                                    Eigen::MatrixXs& _jacobian_delta) override;
         virtual void statePlusDelta(const Eigen::VectorXs& _x,
                                 const Eigen::VectorXs& _delta,
                                 const Scalar _dt,
-                                Eigen::VectorXs& _x_plus_delta );
-        virtual Eigen::VectorXs deltaZero() const;
-        virtual VectorXs correctDelta(const Motion& _motion, const CaptureMotionPtr _capture);
+                                Eigen::VectorXs& _x_plus_delta ) override;
+        virtual Eigen::VectorXs deltaZero() const override;
+        VectorXs correctDelta(const Motion& _motion, const CaptureMotionPtr _capture);
         virtual Motion interpolate(const Motion& _motion_ref,
                                    Motion& _motion,
-                                   TimeStamp& _ts);
-        virtual bool voteForKeyFrame();
+                                   TimeStamp& _ts) override;
+        virtual bool voteForKeyFrame() override;
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
-                                                   FrameBasePtr _frame_origin);
+                                                   FrameBasePtr _frame_origin) override;
         virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, 
-                                                    FrameBasePtr _related_frame);
-        void resetDerived();
+                                                    FrameBasePtr _related_frame) override;
         virtual CaptureMotionPtr makeCapture(const TimeStamp& _ts,
                                              const SensorBasePtr& _sensor,
                                              const VectorXs& _data,
                                              const MatrixXs& _data_cov,
                                              const FrameBasePtr& _frame_origin) override;
+        void resetDerived() override;
 
     protected:
 
