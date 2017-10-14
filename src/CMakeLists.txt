@@ -162,6 +162,7 @@ ENDIF(YAMLCPP_FOUND)
 #headers
 SET(HDRS_BASE
     capture_base.h
+    capture_motion.h
     constraint_analytic.h
     constraint_autodiff.h
     constraint_base.h
@@ -202,7 +203,6 @@ SET(HDRS_BASE
 SET(HDRS
     capture_fix.h
     capture_gps_fix.h
-    capture_motion.h
     capture_imu.h
     capture_void.h
     constraint_container.h
@@ -262,6 +262,7 @@ SET(HDRS_DTASSC
 #sources
 SET(SRCS_BASE
     capture_base.cpp
+    capture_motion.cpp
     constraint_base.cpp
     constraint_analytic.cpp
     feature_base.cpp

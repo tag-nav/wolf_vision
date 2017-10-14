@@ -3,6 +3,7 @@
 
 //Wolf includes
 #include "capture_motion.h"
+#include "imu_tools.h"
 
 namespace wolf {
     
@@ -25,7 +26,14 @@ class CaptureIMU : public CaptureMotion
 
         virtual VectorXs getCalibration() const override;
 
+        virtual VectorXs correctDelta(const VectorXs& _delta, const VectorXs& _delta_error) override;
+
 };
+
+inline Eigen::VectorXs CaptureIMU::correctDelta(const VectorXs& _delta, const VectorXs& _delta_error)
+{
+    return imu::plus(_delta, _delta_error);
+}
 
 } // namespace wolf
 
