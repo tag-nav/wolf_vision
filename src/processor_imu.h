@@ -40,8 +40,6 @@ class ProcessorIMU : public ProcessorMotion{
         ProcessorIMU(ProcessorIMUParamsPtr _params = nullptr);
         virtual ~ProcessorIMU();
 
-        //void getJacobians(Eigen::Matrix3s& _dDp_dab, Eigen::Matrix3s& _dDv_dab, Eigen::Matrix3s& _dDp_dwb, Eigen::Matrix3s& _dDv_dwb, Eigen::Matrix3s& _dDq_dwb);
-
     protected:
         virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
