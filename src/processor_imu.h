@@ -82,6 +82,11 @@ class ProcessorIMU : public ProcessorMotion{
         virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, 
                                                     FrameBasePtr _related_frame);
         void resetDerived();
+        virtual CaptureMotionPtr makeCapture(const TimeStamp& _ts,
+                                             const SensorBasePtr& _sensor,
+                                             const VectorXs& _data,
+                                             const MatrixXs& _data_cov,
+                                             const FrameBasePtr& _frame_origin) override;
 
     protected:
 
@@ -410,6 +415,17 @@ inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureMotionPtr _capture_mot
 
     return key_feature_ptr;
 }
+
+inline CaptureMotionPtr ProcessorIMU::makeCapture(const TimeStamp& _ts,
+                                                          const SensorBasePtr& _sensor,
+                                                          const VectorXs& _data,
+                                                          const MatrixXs& _data_cov,
+                                                          const FrameBasePtr& _frame_origin)
+{
+    CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(_ts, _sensor, _data, _data_cov, _frame_origin);
+    return capture_imu;
+}
+
 
 inline void ProcessorIMU::remapPQV(const Eigen::VectorXs& _delta1,
                                    const Eigen::VectorXs& _delta2,
