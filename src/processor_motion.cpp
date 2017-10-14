@@ -184,33 +184,25 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
             && "ProcessorMotion::setOrigin: origin frame must be in the trajectory.");
     assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
 
-    // make (empty) origin Capture
-    origin_ptr_ = makeCapture(_origin_frame->getTimeStamp(),
-                              getSensorPtr(),
-                              Eigen::VectorXs::Zero(data_size_),
-                              Eigen::MatrixXs::Zero(data_size_, data_size_),
-                              nullptr);
-//    origin_ptr_ = std::make_shared<CaptureMotion>(_origin_frame->getTimeStamp(),
-//                                                  getSensorPtr(),
-//                                                  Eigen::VectorXs::Zero(data_size_),
-//                                                  Eigen::MatrixXs::Zero(data_size_, data_size_),
-//                                                  delta_size_, delta_cov_size_, calib_size_,
-//                                                  nullptr);
-    // Add origin capture to origin frame
-    _origin_frame->addCapture(origin_ptr_);
+    // emplace (empty) origin Capture
+    origin_ptr_ = emplaceCapture(_origin_frame->getTimeStamp(),
+                                 getSensorPtr(),
+                                 Eigen::VectorXs::Zero(data_size_),
+                                 Eigen::MatrixXs::Zero(data_size_, data_size_),
+                                 _origin_frame,
+                                 nullptr);
 
-    // make (emtpy) last Capture
-    last_ptr_ = makeCapture(_origin_frame->getTimeStamp(),
-                            getSensorPtr(),
-                            Eigen::VectorXs::Zero(data_size_),
-                            Eigen::MatrixXs::Zero(data_size_, data_size_),
-                            _origin_frame);
-
-    // Make non-key-frame at last Capture
+    // Make non-key-frame for last Capture
     FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
                                                            _origin_frame->getState(),
                                                            _origin_frame->getTimeStamp());
-    new_frame_ptr->addCapture(last_ptr_);
+    // emplace (emtpy) last Capture
+    last_ptr_ = emplaceCapture(_origin_frame->getTimeStamp(),
+                               getSensorPtr(),
+                               Eigen::VectorXs::Zero(data_size_),
+                               Eigen::MatrixXs::Zero(data_size_, data_size_),
+                               new_frame_ptr,
+                               _origin_frame);
 
     /* Status:
      * KF --- F ---
@@ -252,14 +244,13 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     // Find the frame acting as the capture's origin
     FrameBasePtr new_keyframe_origin = existing_capture->getOriginFramePtr();
 
-    // create motion capture
-    CaptureMotionPtr new_capture = std::make_shared<CaptureMotion>(new_ts, getSensorPtr(),
-                                                                   Eigen::VectorXs::Zero(data_size_),
-                                                                   Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                                   delta_size_, delta_cov_size_, calib_size_,
-                                                                   new_keyframe_origin);
-    // add motion capture to keyframe
-    _new_keyframe->addCapture(new_capture);
+    // emplace a new motion capture to the new keyframe
+    CaptureMotionPtr new_capture = emplaceCapture(new_ts,
+                                                  getSensorPtr(),
+                                                  Eigen::VectorXs::Zero(data_size_),
+                                                  Eigen::MatrixXs::Zero(data_size_, data_size_),
+                                                  _new_keyframe,
+                                                  new_keyframe_origin);
 
     // split the buffer
     // and give the old buffer to the key_capture
