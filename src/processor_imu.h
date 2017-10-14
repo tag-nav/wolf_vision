@@ -407,10 +407,10 @@ inline FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureMotionPtr _capture_mot
 }
 
 inline CaptureMotionPtr ProcessorIMU::makeCapture(const TimeStamp& _ts,
-                                                          const SensorBasePtr& _sensor,
-                                                          const VectorXs& _data,
-                                                          const MatrixXs& _data_cov,
-                                                          const FrameBasePtr& _frame_origin)
+                                                  const SensorBasePtr& _sensor,
+                                                  const VectorXs& _data,
+                                                  const MatrixXs& _data_cov,
+                                                  const FrameBasePtr& _frame_origin)
 {
     CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(_ts, _sensor, _data, _data_cov, _frame_origin);
     return capture_imu;
