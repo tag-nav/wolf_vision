@@ -23,6 +23,8 @@ class CaptureIMU : public CaptureMotion
 
         virtual ~CaptureIMU();
 
+        virtual VectorXs getCalibration() const override;
+
 };
 
 } // namespace wolf

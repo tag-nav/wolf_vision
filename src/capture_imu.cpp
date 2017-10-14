@@ -1,5 +1,6 @@
-#include "capture_imu.h"
 #include "sensor_imu.h"
+#include "frame_imu.h"
+#include "capture_imu.h"
 #include "state_quaternion.h"
 
 namespace wolf {
@@ -65,5 +66,12 @@ CaptureIMU::~CaptureIMU()
     //
 }
 
+VectorXs CaptureIMU::getCalibration() const
+{
+    VectorXs calib(6);
+    FrameIMUPtr frame_imu = std::static_pointer_cast<FrameIMU>(getFramePtr());
+    calib << frame_imu->getAccBiasPtr()->getState(), frame_imu->getGyroBiasPtr()->getState();
+    return calib;
+}
 
 } //namespace wolf
