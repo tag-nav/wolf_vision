@@ -80,21 +80,16 @@ ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const Pro
 
 bool ProcessorIMU::voteForKeyFrame()
 {
-    //WOLF_DEBUG( "Time span   : " , getBuffer().get().back().ts_ - getBuffer().get().front().ts_ );
-    //WOLF_DEBUG( "BufferLength: " , getBuffer().get().size() );
-    //WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
     if(!voting_active_)
         return false;
     // time span
     if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)
     {
-//        WOLF_DEBUG( "PM: vote: time span" );
         return true;
     }
     // buffer length
     if (getBuffer().get().size() > max_buff_length_)
     {
-//        WOLF_DEBUG( "PM: vote: buffer size" );
         return true;
     }
     /*// angle turned

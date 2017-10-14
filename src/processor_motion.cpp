@@ -185,22 +185,27 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
     assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
 
     // make (empty) origin Capture
-    origin_ptr_ = std::make_shared<CaptureMotion>(_origin_frame->getTimeStamp(),
-                                                  getSensorPtr(),
-                                                  Eigen::VectorXs::Zero(data_size_),
-                                                  Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                  delta_size_, delta_cov_size_, calib_size_,
-                                                  nullptr);
+    origin_ptr_ = makeCapture(_origin_frame->getTimeStamp(),
+                              getSensorPtr(),
+                              Eigen::VectorXs::Zero(data_size_),
+                              Eigen::MatrixXs::Zero(data_size_, data_size_),
+                              nullptr);
+//    origin_ptr_ = std::make_shared<CaptureMotion>(_origin_frame->getTimeStamp(),
+//                                                  getSensorPtr(),
+//                                                  Eigen::VectorXs::Zero(data_size_),
+//                                                  Eigen::MatrixXs::Zero(data_size_, data_size_),
+//                                                  delta_size_, delta_cov_size_, calib_size_,
+//                                                  nullptr);
     // Add origin capture to origin frame
     _origin_frame->addCapture(origin_ptr_);
 
     // make (emtpy) last Capture
-    last_ptr_ = std::make_shared<CaptureMotion>(_origin_frame->getTimeStamp(),
-                                                getSensorPtr(),
-                                                Eigen::VectorXs::Zero(data_size_),
-                                                Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                                delta_size_, delta_cov_size_, calib_size_,
-                                                _origin_frame);
+    last_ptr_ = makeCapture(_origin_frame->getTimeStamp(),
+                            getSensorPtr(),
+                            Eigen::VectorXs::Zero(data_size_),
+                            Eigen::MatrixXs::Zero(data_size_, data_size_),
+                            _origin_frame);
+
     // Make non-key-frame at last Capture
     FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
                                                            _origin_frame->getState(),
