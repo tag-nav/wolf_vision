@@ -70,7 +70,7 @@ class CaptureMotion : public CaptureBase
 
         // Buffer's initial conditions for pre-integration
         VectorXs getCalibrationPreint() const;
-        VectorXs getCalibration() const;
+        virtual VectorXs getCalibration() const;
         MatrixXs getJacobianCalib();
 
         // Get delta, corrected for changes on calibration params
