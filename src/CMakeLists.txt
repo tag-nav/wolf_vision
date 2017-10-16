@@ -196,6 +196,7 @@ SET(HDRS_BASE
     pinholeTools.h
     problem.h
     processor_base.h
+    processor_capture_holder.h
     processor_factory.h
     processor_motion.h
     processor_tracker.h
@@ -290,6 +291,7 @@ SET(SRCS_BASE
     node_base.cpp
     problem.cpp
     processor_base.cpp
+    processor_capture_holder.cpp
     processor_motion.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
