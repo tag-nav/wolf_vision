@@ -10,6 +10,7 @@
 
 #include "processor_motion.h"
 #include "sensor_odom_3D.h"
+#include "capture_odom_3D.h"
 #include "constraint_odom_3D.h"
 #include "rotations.h"
 #include <cmath>
@@ -77,30 +78,36 @@ class ProcessorOdom3D : public ProcessorMotion
                                 Eigen::VectorXs& _delta,
                                 Eigen::MatrixXs& _delta_cov,
                                 const Eigen::VectorXs& _calib,
-                                Eigen::MatrixXs& _jacobian_calib);
+                                Eigen::MatrixXs& _jacobian_calib) override;
         void deltaPlusDelta(const Eigen::VectorXs& _delta1,
                             const Eigen::VectorXs& _delta2,
                             const Scalar _Dt2,
-                            Eigen::VectorXs& _delta1_plus_delta2);
+                            Eigen::VectorXs& _delta1_plus_delta2) override;
         void deltaPlusDelta(const Eigen::VectorXs& _delta1,
                             const Eigen::VectorXs& _delta2,
                             const Scalar _Dt2,
                             Eigen::VectorXs& _delta1_plus_delta2,
                             Eigen::MatrixXs& _jacobian1,
-                            Eigen::MatrixXs& _jacobian2);
+                            Eigen::MatrixXs& _jacobian2) override;
         void statePlusDelta(const Eigen::VectorXs& _x,
                         const Eigen::VectorXs& _delta,
                         const Scalar _Dt,
-                        Eigen::VectorXs& _x_plus_delta);
-        Eigen::VectorXs deltaZero() const;
+                        Eigen::VectorXs& _x_plus_delta) override;
+        Eigen::VectorXs deltaZero() const override;
         Motion interpolate(const Motion& _motion_ref,
                            Motion& _motion,
-                           TimeStamp& _ts);
-        bool voteForKeyFrame();
+                           TimeStamp& _ts) override;
+        bool voteForKeyFrame() override;
+        virtual CaptureMotionPtr emplaceCapture(const TimeStamp& _ts,
+                                                const SensorBasePtr& _sensor,
+                                                const VectorXs& _data,
+                                                const MatrixXs& _data_cov,
+                                                const FrameBasePtr& _frame_own,
+                                                const FrameBasePtr& _frame_origin) override;
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
-                                           FrameBasePtr _frame_origin);
+                                           FrameBasePtr _frame_origin) override;
         virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, 
-                                            FrameBasePtr _related_frame);        
+                                            FrameBasePtr _related_frame) override;
 
     protected:
         // noise parameters (stolen from owner SensorOdom3D)
@@ -133,6 +140,15 @@ class ProcessorOdom3D : public ProcessorMotion
 inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
 {
     return (Eigen::VectorXs(7) << 0,0,0, 0,0,0,1).finished(); // p, q
+}
+
+inline CaptureMotionPtr ProcessorOdom3D::emplaceCapture(const TimeStamp& _ts, const SensorBasePtr& _sensor, const VectorXs& _data,
+                                                 const MatrixXs& _data_cov, const FrameBasePtr& _frame_own,
+                                                 const FrameBasePtr& _frame_origin)
+{
+    CaptureOdom3DPtr capture_odom = std::make_shared<CaptureOdom3D>(_ts, _sensor, _data, _data_cov, _frame_origin);
+    _frame_own->addCapture(capture_odom);
+    return capture_odom;
 }
 
 inline ConstraintBasePtr ProcessorOdom3D::emplaceConstraint(FeatureBasePtr _feature_motion,
