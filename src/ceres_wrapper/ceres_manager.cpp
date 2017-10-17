@@ -22,13 +22,13 @@ CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Option
   covariance_options.num_threads = 1;
   covariance_options.apply_loss_function = false;
   //covariance_options.null_space_rank = -1;
-  covariance_ = new ceres::Covariance(covariance_options);
+  covariance_ = wolf::make_unique<ceres::Covariance>(covariance_options);
 
   ceres::Problem::Options problem_options;
   problem_options.cost_function_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
   problem_options.loss_function_ownership = ceres::TAKE_OWNERSHIP;
   problem_options.local_parameterization_ownership = ceres::DO_NOT_TAKE_OWNERSHIP;
-  ceres_problem_ = new ceres::Problem(problem_options);
+  ceres_problem_ = wolf::make_unique<ceres::Problem>(problem_options);
 }
 
 CeresManager::~CeresManager()
@@ -38,11 +38,6 @@ CeresManager::~CeresManager()
   while (!ctr_2_residual_idx_.empty())
     removeConstraint(ctr_2_residual_idx_.begin()->first);
   //	std::cout << "all residuals removed! \n";
-
-  delete covariance_;
-  //std::cout << "covariance deleted! \n";
-  delete ceres_problem_;
-  //std::cout << "ceres problem deleted! \n";
 }
 
 std::string CeresManager::solve(const unsigned int& _report_level)
@@ -55,7 +50,7 @@ std::string CeresManager::solve(const unsigned int& _report_level)
   //std::cout << "After Update: Residual blocks: " << ceres_problem_->NumResidualBlocks() <<  " Parameter blocks: " << ceres_problem_->NumParameterBlocks() << std::endl;
 
   // run Ceres Solver
-  ceres::Solve(ceres_options_, ceres_problem_, &summary_);
+  ceres::Solve(ceres_options_, ceres_problem_.get(), &summary_);
   //std::cout << "solved" << std::endl;
 
   //return report
@@ -190,7 +185,7 @@ void CeresManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
   //std::cout << "pairs... " << double_pairs.size() << std::endl;
 
   // COMPUTE DESIRED COVARIANCES
-  if (covariance_->Compute(double_pairs, ceres_problem_))
+  if (covariance_->Compute(double_pairs, ceres_problem_.get()))
   {
     // STORE DESIRED COVARIANCES
     for (unsigned int i = 0; i < double_pairs.size(); i++)
@@ -230,7 +225,7 @@ void CeresManager::computeCovariances(const StateBlockList& st_list)
   //std::cout << "pairs... " << double_pairs.size() << std::endl;
 
   // COMPUTE DESIRED COVARIANCES
-  if (covariance_->Compute(double_pairs, ceres_problem_))
+  if (covariance_->Compute(double_pairs, ceres_problem_.get()))
     // STORE DESIRED COVARIANCES
     for (unsigned int i = 0; i < double_pairs.size(); i++)
     {

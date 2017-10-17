@@ -1,6 +1,8 @@
 #ifndef CERES_MANAGER_H_
 #define CERES_MANAGER_H_
 
+#include "../make_unique.h"
+
 //Ceres includes
 #include "ceres/jet.h"
 #include "ceres/ceres.h"
@@ -27,12 +29,14 @@ WOLF_PTR_TYPEDEFS(CeresManager);
 class CeresManager : public SolverManager
 {
 protected:
+
   std::map<ConstraintBasePtr, ceres::ResidualBlockId> ctr_2_residual_idx_;
   std::map<ConstraintBasePtr, ceres::CostFunctionPtr> ctr_2_costfunction_;
-  ceres::Problem* ceres_problem_;
+
   ceres::Solver::Options ceres_options_;
-  ceres::Covariance* covariance_;
   ceres::Solver::Summary summary_;
+  std::unique_ptr<ceres::Problem> ceres_problem_;
+  std::unique_ptr<ceres::Covariance> covariance_;
 
 public:
   CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Options& _ceres_options = ceres::Solver::Options());
