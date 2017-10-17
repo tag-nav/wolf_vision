@@ -447,9 +447,9 @@ IF (cereal_FOUND)
   ADD_SUBDIRECTORY(serialization/cereal)
 ENDIF(cereal_FOUND)
 
-#IF (Suitesparse_FOUND)
-#    ADD_SUBDIRECTORY(solver)
-#ENDIF(Suitesparse_FOUND)
+IF (Suitesparse_FOUND)
+    ADD_SUBDIRECTORY(solver_suitesparse)
+ENDIF(Suitesparse_FOUND)
 
 # LEAVE YAML FILES ALWAYS IN THE LAST POSITION !!
 IF(YAMLCPP_FOUND)
@@ -550,11 +550,15 @@ INSTALL(FILES ${HDRS_PROCESSOR}
     DESTINATION include/iri-algorithms/wolf/processors)
 INSTALL(FILES ${HDRS_WRAPPER}
     DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
+<<<<<<< HEAD
 #INSTALL(FILES ${HDRS_SOLVER}
 #    DESTINATION include/iri-algorithms/wolf/solver)
+=======
+INSTALL(FILES ${HDRS_SOLVER_SUITESPARSE}
+    DESTINATION include/iri-algorithms/wolf/solver)
+>>>>>>> mv solver -> solver_suitesparse
 INSTALL(FILES ${HDRS_SERIALIZATION}
     DESTINATION include/iri-algorithms/wolf/serialization)
-
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf.cmake"
     DESTINATION "lib/cmake/${PROJECT_NAME}")
 
