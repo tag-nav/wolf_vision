@@ -28,7 +28,6 @@ class CaptureIMU : public CaptureMotion
                    SensorBasePtr _sensor_ptr,
                    const Eigen::Vector6s& _data,
                    const Eigen::MatrixXs& _data_cov,
-                   const VectorXs& _extrinsics,
                    const Vector6s& _bias,
                    FrameBasePtr _origin_frame_ptr = nullptr);
 

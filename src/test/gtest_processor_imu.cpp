@@ -61,7 +61,7 @@ class ProcessorIMUt : public testing::Test
         x0.resize(16);
 
         // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-        cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data);
+        cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data, data_cov, Vector6s::Zero());
     }
 
     virtual void TearDown()
@@ -159,7 +159,7 @@ TEST(ProcessorIMU, voteForKeyFrame)
     data_cov(0,0) = 0.5;
 
     // Create the captureIMU to store the IMU data arriving from (sensor / callback / file / etc.)
-    std::shared_ptr<wolf::CaptureIMU> cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data, data_cov);
+    std::shared_ptr<wolf::CaptureIMU> cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data, data_cov, Vector6s::Zero());
 
     //  Time  
     // we want more than one data to integrate otherwise covariance will be 0

@@ -111,9 +111,7 @@ class ProcessorIMU : public ProcessorMotion{
         Eigen::Map<Eigen::Quaternions> Dq_out_;
 
         // Helper functions to remap several magnitudes
-        virtual void remapPQV(const Eigen::VectorXs& _delta1, const Eigen::VectorXs& _delta2, Eigen::VectorXs& _delta_out);
-        virtual void remapDelta(Eigen::VectorXs& _delta_out);
-        virtual void remapData(const Eigen::VectorXs& _data);
+//        virtual void remapDelta(Eigen::VectorXs& _delta_out);
 
     public:
         //getters
@@ -151,18 +149,9 @@ inline void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
 
     using namespace Eigen;
 
-    // remap data
-    new (&acc_measured_)    Map<const Vector3s>(_data.data());
-    new (&gyro_measured_)   Map<const Vector3s>(_data.data() + 3);
-
-    // remap delta_ is D*_out_
-    new (&Dp_out_) Map<Vector3s>      (_delta.data() + 0);
-    new (&Dq_out_) Map<Quaternions>   (_delta.data() + 3);
-    new (&Dv_out_) Map<Vector3s>      (_delta.data() + 7);
-
     // acc and gyro measurements corrected with the estimated bias, times dt
-    Vector3s a_dt = (acc_measured_  - _calib.head(3)) * _dt;
-    Vector3s w_dt = (gyro_measured_ - _calib.tail(3)) * _dt;
+    Vector3s a_dt = (_data.head(3) - _calib.head(3)) * _dt;
+    Vector3s w_dt = (_data.tail(3) - _calib.tail(3)) * _dt;
 
     /* create delta
      *
@@ -171,9 +160,10 @@ inline void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
      * dv = (a-a_b) * dt
      * dq = exp((w-w_b)*dt)
      */
-    Dv_out_ = a_dt;
-    Dp_out_ = Dv_out_ * _dt / 2;
-    Dq_out_ = v2q(w_dt);
+    Vector3s delta_v = a_dt;
+    Vector3s delta_p = delta_v * _dt / 2;
+    Quaternions delta_q = v2q(w_dt);
+    _delta << delta_p , delta_q.coeffs() , delta_v;
 
 
     /* Compute jacobian of delta wrt data
@@ -228,38 +218,16 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
                                          Eigen::MatrixXs& _jacobian_delta)
 {
 
-    remapPQV(_delta_preint, _delta, _delta_preint_plus_delta);
-
-    /* This function has two stages:
-     *
-     * 1. Computing the Jacobians of the delta integration wrt noise: this is for the covariance propagation.
-     *
-     * 2. Actually integrating the deltas: this is the regular integration; it is performed at the end to avoid aliasing in the previous sections.
-     *
-     *
-     * MATHS according to Sola-16, proof-checked against Forster-16
-     *
-     * A. Notation for the HELP comments
-     *
-     *     - We use D or Delta (with uppercase D) to refer to the preintegrated delta.
-     *     - We use d or delta (with lowercase d) to refer to the recent delta.
-     *     - We use p, q, v, (as in Dp, Dq, Dv) to refer to the deltas of position, quaternion, and velocity
-     *     - We use o, (as in Do, do) to refer to deltas of the orientation vector equivalent to the quaternion deltas,
-     *
-     *          that is,    Dq = Exp(Do), dq = Exp(do), Do = Log(Dq), do = Log(dq)
-     *          and / or    DR = Exp(Do), dR = Exp(do), etc.
-     *
-     * B. Expression of the delta integration step, D' = D (+) d:
+    /*
+     * Expression of the delta integration step, D' = D (+) d:
      *
      *     Dp' = Dp + Dv*dt + Dq*dp
      *     Dv' = Dv + Dq*dv
      *     Dq' = Dq * dq
-     *
-     * where d = (dp, dq, dv) needs to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq.conj.
      */
 
     /*/////////////////////////////////////////////////////////
-     * 1. Jacobians for covariance propagation.
+     * Note. Jacobians for covariance propagation.
      *
      * 1.a. With respect to Delta, gives _jacobian_delta_preint = D_D as:
      *
@@ -276,29 +244,7 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
      * Note: covariance propagation, i.e.,  P+ = D_D * P * D_D' + D_d * M * D_d', is done in ProcessorMotion.
      */
 
-    // Some useful temporaries
-    Matrix3s DR = Dq_.matrix(); // First  Delta, DR
-    Matrix3s dR = dq_.matrix(); // Second delta, dR
-
-    // Jac wrt preintegrated delta, D_D = dD'/dD
-    _jacobian_delta_preint.block<6,6>(0,0).setIdentity(6,6);                    // dDp'/dDp, dDv'/dDv, Identities
-    _jacobian_delta_preint.block<3,3>(0,3).noalias() = - DR * skew(dp_) ;       // dDp'/dDo
-    _jacobian_delta_preint.block<3,3>(0,6) = Matrix3s::Identity() * _dt;        // dDp'/dDv = I*dt
-    _jacobian_delta_preint.block<3,3>(3,3) =   dR.transpose();                  // dDo'/dDo
-    _jacobian_delta_preint.block<3,3>(6,3).noalias() = - DR * skew(dv_) ;       // dDv'/dDo
-
-    // Jac wrt current delta, D_d = dD'/dd
-    _jacobian_delta.setIdentity(9,9);                                           //
-    _jacobian_delta.block<3,3>(0,0) = DR;                                       // dDp'/ddp
-    _jacobian_delta.block<3,3>(6,6) = DR;                                       // dDv'/ddv
-    _jacobian_delta.block<3,3>(3,3) = Matrix3s::Identity();                     // dDo'/ddo = I
-
-
-
-    /*//////////////////////////////////////////////////////////////////////////
-     * 2. Update the deltas down here to avoid aliasing in the Jacobians section
-     */
-    deltaPlusDelta(_delta_preint, _delta, _dt, _delta_preint_plus_delta);
+    imu::compose(_delta_preint, _delta, _dt, _delta_preint_plus_delta, _jacobian_delta_preint, _jacobian_delta);
 
 }
 
@@ -307,10 +253,6 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
                                          const Scalar _dt,
                                          Eigen::VectorXs& _delta_preint_plus_delta)
 {
-    assert(_delta_preint.size() == 10 && "Wrong _delta_preint vector size");
-    assert(_delta.size() == 10 && "Wrong _delta vector size");
-    assert(_delta_preint_plus_delta.size() == 10 && "Wrong _delta_preint_plus_delta vector size");
-
 
     /* MATHS according to Sola-16
      * Dp' = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp   if  dp = 1/2*(a-a_b)*dt^2
@@ -318,23 +260,10 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
      * Dq' = Dq * exp((w-w_b)*dt)                = Dq * dq              if  dq = exp((w-w_b)*dt)
      *
      * where (dp, dq, dv) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
-     *
-     * Note: All deltas (Dp, Dq, Dv) are physically interpretable:
-     * they represent the position, velocity and orientation of a body with
-     * respect to a reference frame that is non-rotating and free-falling at the acceleration of gravity.
      */
 
-    // Note: we might be (and in fact we are) calling this fcn with the same input and output:
-    //     deltaPlusDelta(delta_integrated_, delta_, dt_, delta_integrated_);
-    // that is, _delta1 and _delta1_plus_delta2 point to the same memory locations.
-    // Therefore, to avoid aliasing, we proceed in the order p -> v -> q
-    remapPQV(_delta_preint, _delta, _delta_preint_plus_delta);
-    // _delta_preint             is D*_
-    // _delta                    is d*_
-    // _delta_preint_plus_delta  is D*_out_
-    Dp_out_ = Dp_ + Dv_ * _dt + Dq_ * dp_;
-    Dv_out_ = Dv_ + Dq_ * dv_;
-    Dq_out_ = Dq_ * dq_;
+    imu::compose(_delta_preint, _delta, _delta_preint_plus_delta);
+
 }
 
 inline void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x,
@@ -342,25 +271,16 @@ inline void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x,
                                      const Scalar _dt,
                                      Eigen::VectorXs& _x_plus_delta)
 {
-    assert(_x.size() == 16 && "Wrong _x vector size");
-    assert(_delta.size() == 10 && "Wrong _delta vector size");
-    assert(_x_plus_delta.size() == 16 && "Wrong _x_plus_delta vector size");
+//    assert(_x.size() == 10 && "Wrong _x vector size");
+//    assert(_delta.size() == 10 && "Wrong _delta vector size");
+//    assert(_x_plus_delta.size() == 10 && "Wrong _x_plus_delta vector size");
     assert(_dt >= 0 && "Time interval _Dt is negative!");
 
+    VectorXs x( _x.head(10) );
+    VectorXs x_plus_delta(10);
 
-    Vector3s gdt = gravity_ * _dt;
-
-    // state updates
-    remapPQV(_x, _delta, _x_plus_delta);
-    // _x               is D*_
-    // _delta           is d*_
-    // _x_plus_delta    is D*_out_
-    Dp_out_ = Dq_ * dp_ + Dp_ + Dv_ * _dt + gdt * _dt / 2 ;
-    Dv_out_ = Dq_ * dv_ + Dv_ + gdt;
-    Dq_out_ = Dq_ * dq_;
-
-    // bypass constant biases
-    _x_plus_delta.tail(6) = _x.tail(6);
+    x_plus_delta = imu::composeOverState(x, _delta, _dt);
+    _x_plus_delta.head(10) = x_plus_delta;
 }
 
 inline Eigen::VectorXs ProcessorIMU::deltaZero() const
@@ -378,35 +298,12 @@ inline void ProcessorIMU::resetDerived()
     gyro_bias_ = frame_imu_ptr_->getGyroBiasPtr()->getState(); // gyro bias
 }
 
-inline void ProcessorIMU::remapPQV(const Eigen::VectorXs& _delta1,
-                                   const Eigen::VectorXs& _delta2,
-                                   Eigen::VectorXs& _delta_out)
-{
-    new (&Dp_) Map<const Vector3s>    (_delta1.data() + 0);
-    new (&Dq_) Map<const Quaternions> (_delta1.data() + 3);
-    new (&Dv_) Map<const Vector3s>    (_delta1.data() + 7);
-
-    new (&dp_) Map<const Vector3s>    (_delta2.data() + 0);
-    new (&dq_) Map<const Quaternions> (_delta2.data() + 3);
-    new (&dv_) Map<const Vector3s>    (_delta2.data() + 7);
-
-    new (&Dp_out_) Map<Vector3s>      (_delta_out.data() + 0);
-    new (&Dq_out_) Map<Quaternions>   (_delta_out.data() + 3);
-    new (&Dv_out_) Map<Vector3s>      (_delta_out.data() + 7);
-}
-
-inline void ProcessorIMU::remapDelta(Eigen::VectorXs& _delta_out)
-{
-    new (&Dp_out_) Map<Vector3s>      (_delta_out.data() + 0);
-    new (&Dq_out_) Map<Quaternions>   (_delta_out.data() + 3);
-    new (&Dv_out_) Map<Vector3s>      (_delta_out.data() + 7);
-}
-
-inline void ProcessorIMU::remapData(const Eigen::VectorXs& _data)
-{
-    new (&acc_measured_) Map<const Vector3s>(_data.data());
-    new (&gyro_measured_) Map<const Vector3s>(_data.data() + 3);
-}
+//inline void ProcessorIMU::remapDelta(Eigen::VectorXs& _delta_out)
+//{
+//    new (&Dp_out_) Map<Vector3s>      (_delta_out.data() + 0);
+//    new (&Dq_out_) Map<Quaternions>   (_delta_out.data() + 3);
+//    new (&Dv_out_) Map<Vector3s>      (_delta_out.data() + 7);
+//}
 
 inline Scalar ProcessorIMU::getMaxTimeSpan() const
 {

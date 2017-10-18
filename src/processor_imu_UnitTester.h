@@ -150,6 +150,8 @@ namespace wolf {
 
         public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr = nullptr);
+        void remapDelta(Eigen::VectorXs& _delta_out);
+
     };
 
 }
