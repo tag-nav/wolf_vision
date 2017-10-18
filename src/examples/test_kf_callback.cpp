@@ -54,7 +54,7 @@ int main()
         problem->print(2, false, true, false); // print(level, constr_by, metric, state_blocks)
 
         cout << "Motion-----------------" << endl;
-        sen_odo->process(make_shared<CaptureMotion>(t, sen_odo, odo_data, 3, 3, 0));
+        sen_odo->process(make_shared<CaptureMotion>(t, sen_odo, odo_data, 3, 3, 0, nullptr));
         cout << "x(" << t.get() << ") = " << problem->getCurrentState().transpose() << endl;
         problem->print(2, false, true, false); // print(level, constr_by, metric, state_blocks)
 
