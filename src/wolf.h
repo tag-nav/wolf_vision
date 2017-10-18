@@ -79,6 +79,7 @@ const Scalar EPS_SMALL = 1e-16;
 namespace Eigen  // Eigen namespace extension
 {
 // 1. Vectors and Matrices
+typedef Matrix<wolf::Scalar, 1, 1, RowMajor> Matrix1s;                ///< 2x2 matrix of real Scalar type
 typedef Matrix<wolf::Scalar, 2, 2, RowMajor> Matrix2s;                ///< 2x2 matrix of real Scalar type
 typedef Matrix<wolf::Scalar, 3, 3, RowMajor> Matrix3s;                ///< 3x3 matrix of real Scalar type
 typedef Matrix<wolf::Scalar, 4, 4, RowMajor> Matrix4s;                ///< 4x4 matrix of real Scalar type
