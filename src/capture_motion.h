@@ -72,6 +72,7 @@ class CaptureMotion : public CaptureBase
         VectorXs getCalibrationPreint() const;
         virtual VectorXs getCalibration() const;
         MatrixXs getJacobianCalib();
+        MatrixXs getJacobianCalib(const TimeStamp& _ts);
 
         // Get delta, corrected for changes on calibration params
         VectorXs getDelta();
@@ -142,6 +143,11 @@ inline wolf::MotionBuffer& CaptureMotion::getBuffer()
 inline Eigen::MatrixXs CaptureMotion::getJacobianCalib()
 {
     return getBuffer().get().back().jacobian_calib_;
+}
+
+inline Eigen::MatrixXs CaptureMotion::getJacobianCalib(const TimeStamp& _ts)
+{
+    return getBuffer().getMotion(_ts).jacobian_calib_;
 }
 
 inline Eigen::VectorXs CaptureMotion::correctDelta(const VectorXs& _delta, const VectorXs& _delta_error)
