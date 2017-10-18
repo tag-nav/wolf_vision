@@ -153,27 +153,16 @@ inline void compose(const MatrixBase<D1>& d1,
     MatrixSizeCheck< 9, 9>::check(J_sum_d1);
     MatrixSizeCheck< 9, 9>::check(J_sum_d2);
 
-    // Maps over provided data
-    Map<const Matrix<typename D1::Scalar, 3, 1> >   dp1    ( & d1( 0 ) );
-    Map<const Quaternion<typename D1::Scalar> >     dq1    ( & d1( 3 ) );
-    Map<const Matrix<typename D1::Scalar, 3, 1> >   dv1    ( & d1( 7 ) );
-    Map<const Matrix<typename D2::Scalar, 3, 1> >   dp2    ( & d2( 0 ) );
-    Map<const Quaternion<typename D2::Scalar> >     dq2    ( & d2( 3 ) );
-    Map<const Matrix<typename D2::Scalar, 3, 1> >   dv2    ( & d2( 7 ) );
-    Map<Matrix<typename D3::Scalar, 3, 1> >         sum_p  ( & sum( 0 ) );
-    Map<Quaternion<typename D3::Scalar> >           sum_q  ( & sum( 3 ) );
-    Map<Matrix<typename D3::Scalar, 3, 1> >         sum_v  ( & sum( 7 ) );
-
     // Some useful temporaries
-    Matrix<typename D1::Scalar, 3, 3> dR1 = dq1.matrix(); // First  Delta, DR
-    Matrix<typename D2::Scalar, 3, 3> dR2 = dq2.matrix(); // Second delta, dR
+    Matrix<typename D1::Scalar, 3, 3> dR1 = q2R(d1.segment(3,4)); //dq1.matrix(); // First  Delta, DR
+    Matrix<typename D2::Scalar, 3, 3> dR2 = q2R(d2.segment(3,4)); //dq2.matrix(); // Second delta, dR
 
     // Jac wrt first delta
     J_sum_d1.setIdentity();                                     // dDp'/dDp = dDv'/dDv = I
-    J_sum_d1.block(0,3,3,3).noalias() = - dR1 * skew(dp2) ;     // dDp'/dDo
+    J_sum_d1.block(0,3,3,3).noalias() = - dR1 * skew(d2.head(3)) ;     // dDp'/dDo
     J_sum_d1.block(0,6,3,3) = Matrix3s::Identity() * dt;        // dDp'/dDv = I*dt
     J_sum_d1.block(3,3,3,3) = dR2.transpose();                  // dDo'/dDo
-    J_sum_d1.block(6,3,3,3).noalias() = - dR1 * skew(dv2) ;     // dDv'/dDo
+    J_sum_d1.block(6,3,3,3).noalias() = - dR1 * skew(d2.tail(3)) ;     // dDv'/dDo
 
     // Jac wrt second delta
     J_sum_d2.setIdentity();                                     //
