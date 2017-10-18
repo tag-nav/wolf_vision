@@ -366,12 +366,20 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts) = 0;
 
+        /** \brief create a CaptureMotion and add it to a Frame
+         * \param _ts time stamp
+         * \param _sensor Sensor that produced the Capture
+         * \param _data a vector of motion data
+         * \param _sata_cov covariances matrix of the motion data data
+         * \param _frame_own frame owning the Capture to create
+         * \param _frame_origin frame acting as the origin of motions for the MorionBuffer of the created MotionCapture
+         */
         virtual CaptureMotionPtr emplaceCapture(const TimeStamp& _ts,
                                                 const SensorBasePtr& _sensor,
                                                 const VectorXs& _data,
                                                 const MatrixXs& _data_cov,
                                                 const FrameBasePtr& _frame_own,
-                                                const FrameBasePtr& _frame_origin);
+                                                const FrameBasePtr& _frame_origin) = 0;
 
         /** \brief create a feature corresponding to given capture and add the feature to this capture
          * \param _capture_motion: the parent capture

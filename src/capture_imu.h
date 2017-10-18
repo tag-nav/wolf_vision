@@ -34,7 +34,7 @@ class CaptureIMU : public CaptureMotion
 
         virtual ~CaptureIMU();
 
-        virtual VectorXs getCalibration() const override;
+        virtual VectorXs getCalibration() const override; // TODO remove after merging proper IMU things
 
         virtual VectorXs correctDelta(const VectorXs& _delta, const VectorXs& _delta_error) override;
 
