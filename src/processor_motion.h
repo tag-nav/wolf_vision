@@ -191,9 +191,6 @@ class ProcessorMotion : public ProcessorBase
         MotionBuffer& getBuffer();
         const MotionBuffer& getBuffer() const;
 
-        // Autocalibration
-        MatrixXs getJacobianCalib();
-
 
         // Helper functions:
     protected:
@@ -540,12 +537,6 @@ inline const MotionBuffer& ProcessorMotion::getBuffer() const
 {
     return last_ptr_->getBuffer();
 }
-
-inline MatrixXs ProcessorMotion::getJacobianCalib()
-{
-    return getBuffer().get().back().jacobian_calib_;
-}
-
 
 
 inline MotionBuffer& ProcessorMotion::getBuffer()
