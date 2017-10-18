@@ -188,9 +188,17 @@ CaptureMotionPtr ProcessorIMU::emplaceCapture(const TimeStamp& _ts, const Sensor
                                               const MatrixXs& _data_cov, const FrameBasePtr& _frame_own,
                                               const FrameBasePtr& _frame_origin)
 {
-    CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(_ts, _sensor, _data, _data_cov, _sensor->getIntrinsicPtr()->getState(), _frame_origin);
-//    Vector6s bias = std::static_pointer_cast<CaptureMotion>(_frame_origin->getCaptureOf(_sensor))->getCalibration();
-//    CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(_ts, _sensor, _data, _data_cov, bias, _frame_origin);
+//    CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(_ts, _sensor, _data, _data_cov, _sensor->getIntrinsicPtr()->getState(), _frame_origin);
+    Vector6s bias(Vector6s::Zero());
+    if (_frame_origin)
+    {
+        CaptureBasePtr capture = _frame_origin->getCaptureOf(_sensor);
+        if (capture)
+            bias = std::static_pointer_cast<CaptureMotion>(capture)->getCalibration();
+    }
+
+
+    CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(_ts, _sensor, _data, _data_cov, bias, _frame_origin);
     _frame_own->addCapture(capture_imu);
     return capture_imu;
 }
