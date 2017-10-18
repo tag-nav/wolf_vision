@@ -496,7 +496,7 @@ inline Eigen::VectorXs ProcessorMotion::getCurrentState()
 inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
 {
     Scalar Dt = getCurrentTimeStamp() - origin_ptr_->getTimeStamp();
-    statePlusDelta(origin_ptr_->getFramePtr()->getState(), getBuffer().get().back().delta_integr_, Dt, _x);
+    statePlusDelta(origin_ptr_->getFramePtr()->getState(), last_ptr_->getDelta(), Dt, _x);
 }
 
 inline void ProcessorMotion::getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts)
