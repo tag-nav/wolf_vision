@@ -42,12 +42,12 @@ class ProcessorIMU : public ProcessorMotion{
 
     protected:
         virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
-                                const Eigen::MatrixXs& _data_cov,
-                                const Scalar _dt,
-                                Eigen::VectorXs& _delta,
-                                Eigen::MatrixXs& _delta_cov,
-                                const Eigen::VectorXs& _calib,
-                                Eigen::MatrixXs& _jacobian_calib) override;
+                                         const Eigen::MatrixXs& _data_cov,
+                                         const Eigen::VectorXs& _calib,
+                                         const Scalar _dt,
+                                         Eigen::VectorXs& _delta,
+                                         Eigen::MatrixXs& _delta_cov,
+                                         Eigen::MatrixXs& _jacobian_calib) override;
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
                                     const Eigen::VectorXs& _delta,
                                     const Scalar _dt,
@@ -140,12 +140,12 @@ class ProcessorIMU : public ProcessorMotion{
 namespace wolf{
 
 inline void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
-                                     const Eigen::MatrixXs& _data_cov,
-                                     const Scalar _dt,
-                                     Eigen::VectorXs& _delta,
-                                     Eigen::MatrixXs& _delta_cov,
-                                     const Eigen::VectorXs& _calib,
-                                     Eigen::MatrixXs& _jacobian_calib)
+                                              const Eigen::MatrixXs& _data_cov,
+                                              const Eigen::VectorXs& _calib,
+                                              const Scalar _dt,
+                                              Eigen::VectorXs& _delta,
+                                              Eigen::MatrixXs& _delta_cov,
+                                              Eigen::MatrixXs& _jacobian_calib)
 {
     assert(_data.size() == data_size_ && "Wrong data size!");
 

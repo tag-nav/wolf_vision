@@ -99,7 +99,7 @@ TEST(ProcessorOdom3D, computeCurrentDelta)
     MatrixXs jac_delta_calib(6,0);
 
     // call the function under test
-    prc.computeCurrentDelta(data, data_cov, dt, delta_ret, delta_cov_ret, VectorXs::Zero(0), jac_delta_calib);
+    prc.computeCurrentDelta(data, data_cov, VectorXs::Zero(0), dt, delta_ret, delta_cov_ret, jac_delta_calib);
 
     ASSERT_MATRIX_APPROX(delta_ret , delta, Constants::EPS_SMALL);
     ASSERT_MATRIX_APPROX(delta_cov_ret , delta_cov, Constants::EPS_SMALL);

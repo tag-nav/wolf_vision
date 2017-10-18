@@ -44,12 +44,12 @@ void ProcessorOdom3D::setup(SensorOdom3DPtr sen_ptr)
 }
 
 void ProcessorOdom3D::computeCurrentDelta(const Eigen::VectorXs& _data,
-                                 const Eigen::MatrixXs& _data_cov,
-                                 const Scalar _dt,
-                                 Eigen::VectorXs& _delta,
-                                 Eigen::MatrixXs& _delta_cov,
-                                 const Eigen::VectorXs& _calib,
-                                 Eigen::MatrixXs& _jacobian_calib)
+                                          const Eigen::MatrixXs& _data_cov,
+                                          const Eigen::VectorXs& _calib,
+                                          const Scalar _dt,
+                                          Eigen::VectorXs& _delta,
+                                          Eigen::MatrixXs& _delta_cov,
+                                          Eigen::MatrixXs& _jacobian_calib)
 {
     assert((_data.size() == 6 || _data.size() == 7) && "Wrong data size. Must be 6 or 7 for 3D.");
     Scalar disp, rot; // displacement and rotation of this motion step

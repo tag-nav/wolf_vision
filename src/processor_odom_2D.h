@@ -41,12 +41,12 @@ class ProcessorOdom2D : public ProcessorMotion
 
     protected:
         virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
-                                const Eigen::MatrixXs& _data_cov,
-                                const Scalar _dt,
-                                Eigen::VectorXs& _delta,
-                                Eigen::MatrixXs& _delta_cov,
-                                const Eigen::VectorXs& _calib,
-                                Eigen::MatrixXs& _jacobian_calib) override;
+                                         const Eigen::MatrixXs& _data_cov,
+                                         const Eigen::VectorXs& _calib,
+                                         const Scalar _dt,
+                                         Eigen::VectorXs& _delta,
+                                         Eigen::MatrixXs& _delta_cov,
+                                         Eigen::MatrixXs& _jacobian_calib) override;
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1,
                                     const Eigen::VectorXs& _delta2,
                                     const Scalar _Dt2,
@@ -106,12 +106,12 @@ inline ProcessorOdom2D::~ProcessorOdom2D()
 }
 
 inline void ProcessorOdom2D::computeCurrentDelta(const Eigen::VectorXs& _data,
-                                        const Eigen::MatrixXs& _data_cov,
-                                        const Scalar _dt,
-                                        Eigen::VectorXs& _delta,
-                                        Eigen::MatrixXs& _delta_cov,
-                                        const Eigen::VectorXs& _calib,
-                                        Eigen::MatrixXs& _jacobian_calib)
+                                                 const Eigen::MatrixXs& _data_cov,
+                                                 const Eigen::VectorXs& _calib,
+                                                 const Scalar _dt,
+                                                 Eigen::VectorXs& _delta,
+                                                 Eigen::MatrixXs& _delta_cov,
+                                                 Eigen::MatrixXs& _jacobian_calib)
 {
     //std::cout << "ProcessorOdom2d::data2delta" << std::endl;
 

@@ -292,10 +292,10 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
                                 const Eigen::MatrixXs& _data_cov,
+                                const Eigen::VectorXs& _calib,
                                 const Scalar _dt,
                                 Eigen::VectorXs& _delta,
                                 Eigen::MatrixXs& _delta_cov,
-                                const Eigen::VectorXs& _calib,
                                 Eigen::MatrixXs& _jacobian_calib) = 0;
 
         /** \brief composes a delta-state on top of another delta-state

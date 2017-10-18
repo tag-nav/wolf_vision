@@ -317,10 +317,10 @@ void ProcessorMotion::integrateOneStep()
     // get data and convert it to delta, and obtain also the delta covariance
     computeCurrentDelta(incoming_ptr_->getData(),
                         incoming_ptr_->getDataCovariance(),
+                        calib_,
                         dt_,
                         delta_,
                         delta_cov_,
-                        calib_,
                         jacobian_delta_calib_);
 
     // integrate the current delta to pre-integrated measurements, and get Jacobians
@@ -371,10 +371,10 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
 
         computeCurrentDelta(motion_it->data_,
                             motion_it->data_cov_,
+                            calib,
                             dt,
                             motion_it->delta_,
                             motion_it->delta_cov_,
-                            calib,
                             jacobian_delta_calib_);
 
         // integrate delta into delta_integr, and rewrite the buffer
