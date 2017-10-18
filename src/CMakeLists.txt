@@ -198,6 +198,7 @@ SET(HDRS_BASE
     processor_base.h
     processor_capture_holder.h
     processor_factory.h
+    processor_loopclosure_base.h
     processor_motion.h
     processor_tracker.h
     processor_tracker_feature.h
@@ -292,6 +293,7 @@ SET(SRCS_BASE
     problem.cpp
     processor_base.cpp
     processor_capture_holder.cpp
+    processor_loopclosure_base.cpp
     processor_motion.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp

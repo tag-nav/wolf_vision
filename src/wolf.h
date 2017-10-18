@@ -92,6 +92,9 @@ typedef Matrix<wolf::Scalar, 4, 1> Vector4s;                ///< 4-vector of rea
 typedef Matrix<wolf::Scalar, 5, 1> Vector5s;                ///< 5-vector of real Scalar type
 typedef Matrix<wolf::Scalar, 6, 1> Vector6s;                ///< 6-vector of real Scalar type
 typedef Matrix<wolf::Scalar, 7, 1> Vector7s;                ///< 7-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 8, 1> Vector8s;                ///< 8-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 9, 1> Vector9s;                ///< 9-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 10, 1> Vector10s;              ///< 10-vector of real Scalar type
 typedef Matrix<wolf::Scalar, Dynamic, 1> VectorXs;          ///< variable size vector of real Scalar type
 typedef Matrix<wolf::Scalar, 1, 2> RowVector2s;             ///< 2-row-vector of real Scalar type
 typedef Matrix<wolf::Scalar, 1, 3> RowVector3s;             ///< 3-row-vector of real Scalar type
