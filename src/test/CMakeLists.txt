@@ -114,6 +114,10 @@ target_link_libraries(gtest_frame_imu ${PROJECT_NAME})
 wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
 target_link_libraries(gtest_pinhole ${PROJECT_NAME})
 
+# ProcessorFrameNearestNeighborFilter class test
+wolf_add_gtest(gtest_processor_frame_nearest_neighbor_filter_2D gtest_processor_frame_nearest_neighbor_filter_2D.cpp)
+target_link_libraries(gtest_processor_frame_nearest_neighbor_filter_2D ${PROJECT_NAME})
+
 # ProcessorIMU class test
 wolf_add_gtest(gtest_processor_imu gtest_processor_imu.cpp)
 target_link_libraries(gtest_processor_imu ${PROJECT_NAME})

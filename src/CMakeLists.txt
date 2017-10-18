@@ -251,6 +251,7 @@ SET(HDRS
     landmark_line_2D.h
     landmark_polyline_2D.h
     local_parametrization_polyline_extreme.h
+    processor_frame_nearest_neighbor_filter.h
     processor_image_params.h
     processor_imu.h
     processor_imu_UnitTester.h
@@ -321,6 +322,7 @@ SET(SRCS
     landmark_line_2D.cpp
     landmark_polyline_2D.cpp
     local_parametrization_polyline_extreme.cpp
+    processor_frame_nearest_neighbor_filter.cpp
     processor_imu.cpp
     processor_imu_UnitTester.cpp
     processor_odom_2D.cpp
