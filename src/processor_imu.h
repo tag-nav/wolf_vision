@@ -160,9 +160,9 @@ inline void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
      * dv = (a-a_b) * dt
      * dq = exp((w-w_b)*dt)
      */
-    Vector3s delta_v = a_dt;
-    Vector3s delta_p = delta_v * _dt / 2;
+    Vector3s delta_p = a_dt * _dt / 2;
     Quaternions delta_q = v2q(w_dt);
+    Vector3s delta_v = a_dt;
     _delta << delta_p , delta_q.coeffs() , delta_v;
 
 
@@ -297,13 +297,6 @@ inline void ProcessorIMU::resetDerived()
     acc_bias_  = frame_imu_ptr_->getAccBiasPtr()->getState(); // acc  bias
     gyro_bias_ = frame_imu_ptr_->getGyroBiasPtr()->getState(); // gyro bias
 }
-
-//inline void ProcessorIMU::remapDelta(Eigen::VectorXs& _delta_out)
-//{
-//    new (&Dp_out_) Map<Vector3s>      (_delta_out.data() + 0);
-//    new (&Dq_out_) Map<Quaternions>   (_delta_out.data() + 3);
-//    new (&Dv_out_) Map<Vector3s>      (_delta_out.data() + 7);
-//}
 
 inline Scalar ProcessorIMU::getMaxTimeSpan() const
 {

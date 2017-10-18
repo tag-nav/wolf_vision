@@ -49,7 +49,7 @@ class ProcessorIMUt : public testing::Test
 
         // Wolf problem
         problem = Problem::create("PQVBB 3D");
-        Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
+        Vector7s extrinsics = (Vector7s() << 0,0,0, 0,0,0,1).finished();
         sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
         ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
 
@@ -268,10 +268,13 @@ TEST_F(ProcessorIMUt, acc_x)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    VectorXs x(16);
-    x << 0.01,0,0, 0,0,0,1, 0.2,0,0, 0,0,0, 0,0,0; // advanced at a=2m/s2 during 0.1s ==> dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2
+    VectorXs x(10);
+    x << 0.01,0,0, 0,0,0,1, 0.2,0,0; // advanced at a=2m/s2 during 0.1s ==> dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2
+    Vector6s b; b << 0,0,0, 0,0,0;
 
-    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibration() , b, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibrationPreint() , b, wolf::Constants::EPS_SMALL);
 }
 
 TEST_F(ProcessorIMUt, acc_y)
@@ -291,13 +294,16 @@ TEST_F(ProcessorIMUt, acc_y)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    VectorXs x(16);
-    x << 0,0.00001,0, 0,0,0,1, 0,0.02,0, 0,0,0, 0,0,0; // advanced at a=20m/s2 during 0.001s ==> dx = 0.5*20*0.001^2 = 0.00001; dvx = 20*0.001 = 0.02
+    VectorXs x(10);
+    x << 0,0.00001,0, 0,0,0,1, 0,0.02,0; // advanced at a=20m/s2 during 0.001s ==> dx = 0.5*20*0.001^2 = 0.00001; dvx = 20*0.001 = 0.02
+    Vector6s b; b<< 0,0,0, 0,0,0;
 
-    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibration() , b, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibrationPreint() , b, wolf::Constants::EPS_SMALL);
 
     //do so for 5s
-    const unsigned int iter = 1000; //how many ms 
+    const unsigned int iter = 1000; //how many ms
     for(int i = 1; i < iter; i++) //already did one integration above
     {
         cap_imu_ptr->setTimeStamp(i*0.001 + 0.001); //first one will be 0.002 and last will be 5.000
@@ -305,8 +311,10 @@ TEST_F(ProcessorIMUt, acc_y)
     }
 
     // advanced at a=20m/s2 during 1s ==> dx = 0.5*20*1^2 = 10; dvx = 20*1 = 20
-    x << 0,10,0, 0,0,0,1, 0,20,0, 0,0,0, 0,0,0;
-    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS);// << "current state is " << problem->getCurrentState().transpose() << std::endl;
+    x << 0,10,0, 0,0,0,1, 0,20,0;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibration() , b, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibrationPreint() , b, wolf::Constants::EPS);
 }
 
 TEST_F(ProcessorIMUt, acc_z)
@@ -323,10 +331,13 @@ TEST_F(ProcessorIMUt, acc_z)
     sensor_ptr->process(cap_imu_ptr);
 
     // Expected state after one integration
-    VectorXs x(16);
-    x << 0,0,0.01, 0,0,0,1, 0,0,0.2, 0,0,0, 0,0,0; // advanced at a=2m/s2 during 0.1s ==> dz = 0.5*2*0.1^2 = 0.01; dvz = 2*0.1 = 0.2
+    VectorXs x(10);
+    x << 0,0,0.01, 0,0,0,1, 0,0,0.2; // advanced at a=2m/s2 during 0.1s ==> dz = 0.5*2*0.1^2 = 0.01; dvz = 2*0.1 = 0.2
+    Vector6s b; b<< 0,0,0, 0,0,0;
 
-    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibration() , b, wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibrationPreint() , b, wolf::Constants::EPS_SMALL);
 
     //do so for 5s
     const unsigned int iter = 50; //how 0.1s 
@@ -337,107 +348,102 @@ TEST_F(ProcessorIMUt, acc_z)
     }
 
     // advanced at a=2m/s2 during 5s ==> dz = 0.5*2*5^2 = 25; dvz = 2*5 = 10
-    x << 0,0,25, 0,0,0,1, 0,0,10, 0,0,0, 0,0,0;
-    ASSERT_MATRIX_APPROX(problem->getCurrentState() , x, wolf::Constants::EPS);// << "current state is " << problem->getCurrentState().transpose() << "\n x is : " << x.transpose() << std::endl;
+    x << 0,0,25, 0,0,0,1, 0,0,10;
+    ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibration() , b, wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibrationPreint() , b, wolf::Constants::EPS);
 }
 
-TEST_F(ProcessorIMUt, acc_xyz)
-{
-    /* Here again the error seems to be in the discretization.
-     * integrating over 10s with a dt of 0.001s lead to an error in velocity of order 1e-3. 
-     * The smaller is the time step the more precise is the integration
-     * Same conclusion for position
-     */
-
-    Vector3s tmp_a_vec; //will be used to store IMU acceleration data
-    Vector3s w_vec((Vector3s()<<0,0,0).finished());
-    wolf::Scalar time = 0;
-    const wolf::Scalar x_freq = 2;
-    const wolf::Scalar y_freq = 1;
-    const wolf::Scalar z_freq = 4;
-
-    wolf::Scalar tmp_ax, tmp_ay, tmp_az;
-    /*
-        From evolution of position we determine the acceleration : 
-        x = sin(x_freq*t);
-        y = sin(y_freq*t);
-        z = sin(z_freq*t);
-
-        corresponding acceleration
-        ax = - (x_freq * x_freq) * sin(x_freq * t);
-        ay = - (y_freq * y_freq) * sin(y_freq * t);
-        az = - (z_freq * z_freq) * sin(z_freq * t);
-
-        Notice that in this case, initial velocity is given exactly as :
-        initial_vx = x_freq;
-        initial_vy = y_freq;
-        initial_vz = z_freq;
-     */
-
-    t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  x_freq,y_freq,z_freq,  0,0,0,  0,0,0; // Try some non-zero biases
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
-
-    const wolf::Scalar dt = 0.0001;
-    
-    // This test is for pure translation -> no rotation ==> constant rate of turn vector = [0,0,0]
-    data.tail(3) = w_vec;
-
-    for(unsigned int data_iter = 0; data_iter <= 1000; data_iter ++)
-    {   
-        tmp_ax = - (x_freq * x_freq) * sin(x_freq * time);
-        tmp_ay = - (y_freq * y_freq) * sin(y_freq * time);
-        tmp_az = - (z_freq * z_freq) * sin(z_freq * time);
-        tmp_a_vec << tmp_ax, tmp_ay, tmp_az;
-
-        Quaternions rot(problem->getCurrentState().data()+3); //should always be identity quaternion here...
-        data.head(3) =  tmp_a_vec + rot.conjugate() * (- wolf::gravity()); //gravity measured
-
-        cap_imu_ptr->setData(data);
-        cap_imu_ptr->setTimeStamp(time);
-        sensor_ptr->process(cap_imu_ptr);
-
-        time += dt;
-    }
-    time -= dt; //to get final time
-
-    /* We should not have turned : final quaternion must be identity quaternion [0,0,0,1]
-     * We integrated over 1 s : 
-     * x = sin(x_freq * 1)
-     * y = sin(y_freq * 1)
-     * z = sin(z_freq * 1)
-
-     * Velocity is given by first derivative :
-     * vx = x_freq * cos(x_freq * 1)
-     * vy = y_freq * cos(y_freq * 1)
-     * vz = z_freq * cos(z_freq * 1)
-     */
-
-    VectorXs x(16);
-    wolf::Scalar exp_px = sin(x_freq * time);
-    wolf::Scalar exp_py = sin(y_freq * time);
-    wolf::Scalar exp_pz = sin(z_freq * time);
-
-    wolf::Scalar exp_vx = x_freq * cos(x_freq * time);
-    wolf::Scalar exp_vy = y_freq * cos(y_freq * time);
-    wolf::Scalar exp_vz = z_freq * cos(z_freq * time);
-
-    x << exp_px,exp_py,exp_pz, 0,0,0,1, exp_vx,exp_vy,exp_vz, 0,0,0, 0,0,0;
-
-    //check velocity and bias parts
-    ASSERT_MATRIX_APPROX(problem->getCurrentState().tail(9) , x.tail(9), 0.001);// << "current VBB is : \n" << problem->getCurrentState().tail(9).transpose() <<
-//    "\n expected is : \n" << x.tail(9).transpose() << std::endl;
-
-    //check orientation part
-    ASSERT_MATRIX_APPROX(problem->getCurrentState().segment(3,4) , x.segment(3,4), wolf::Constants::EPS_SMALL*10);// << "current orientation is : \n" << problem->getCurrentState().segment(3,4).transpose() <<
-//    "\n expected is : \n" << x.segment(3,4).transpose() << std::endl;
-
-    //check position part
-    ASSERT_MATRIX_APPROX(problem->getCurrentState().head(3) , x.head(3), 0.001);// << "current position is : \n" << problem->getCurrentState().head(3).transpose() <<
-//    "\n expected is : \n" << x.head(3).transpose() << std::endl;
-
-}
+//TEST_F(ProcessorIMUt, acc_xyz)
+//{
+//    /* Here again the error seems to be in the discretization.
+//     * integrating over 10s with a dt of 0.001s lead to an error in velocity of order 1e-3.
+//     * The smaller is the time step the more precise is the integration
+//     * Same conclusion for position
+//     */
+//
+//    Vector3s tmp_a_vec; //will be used to store IMU acceleration data
+//    Vector3s w_vec((Vector3s()<<0,0,0).finished());
+//    wolf::Scalar time = 0;
+//    const wolf::Scalar x_freq = 2;
+//    const wolf::Scalar y_freq = 1;
+//    const wolf::Scalar z_freq = 4;
+//
+//    wolf::Scalar tmp_ax, tmp_ay, tmp_az;
+//    /*
+//        From evolution of position we determine the acceleration :
+//        x = sin(x_freq*t);
+//        y = sin(y_freq*t);
+//        z = sin(z_freq*t);
+//
+//        corresponding acceleration
+//        ax = - (x_freq * x_freq) * sin(x_freq * t);
+//        ay = - (y_freq * y_freq) * sin(y_freq * t);
+//        az = - (z_freq * z_freq) * sin(z_freq * t);
+//
+//        Notice that in this case, initial velocity is given exactly as :
+//        initial_vx = x_freq;
+//        initial_vy = y_freq;
+//        initial_vz = z_freq;
+//     */
+//
+//    t.set(0); // clock in 0,1 ms ticks
+//    x0 << 0,0,0,  0,0,0,1,  x_freq,y_freq,z_freq,  0,0,0,  0,0,0; // Try some non-zero biases
+//
+//    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+//
+//    const wolf::Scalar dt = 0.0001;
+//
+//    // This test is for pure translation -> no rotation ==> constant rate of turn vector = [0,0,0]
+//    data.tail(3) = w_vec;
+//
+//    for(unsigned int data_iter = 0; data_iter <= 1000; data_iter ++)
+//    {
+//        tmp_ax = - (x_freq * x_freq) * sin(x_freq * time);
+//        tmp_ay = - (y_freq * y_freq) * sin(y_freq * time);
+//        tmp_az = - (z_freq * z_freq) * sin(z_freq * time);
+//        tmp_a_vec << tmp_ax, tmp_ay, tmp_az;
+//
+//        Quaternions rot(problem->getCurrentState().data()+3); //should always be identity quaternion here...
+//        data.head(3) =  tmp_a_vec + rot.conjugate() * (- wolf::gravity()); //gravity measured
+//
+//        cap_imu_ptr->setData(data);
+//        cap_imu_ptr->setTimeStamp(time);
+//        sensor_ptr->process(cap_imu_ptr);
+//
+//        time += dt;
+//    }
+//    time -= dt; //to get final time
+//
+//    /* We should not have turned : final quaternion must be identity quaternion [0,0,0,1]
+//     * We integrated over 1 s :
+//     * x = sin(x_freq * 1)
+//     * y = sin(y_freq * 1)
+//     * z = sin(z_freq * 1)
+//
+//     * Velocity is given by first derivative :
+//     * vx = x_freq * cos(x_freq * 1)
+//     * vy = y_freq * cos(y_freq * 1)
+//     * vz = z_freq * cos(z_freq * 1)
+//     */
+//
+//    VectorXs x(10);
+//    wolf::Scalar exp_px = sin(x_freq * time);
+//    wolf::Scalar exp_py = sin(y_freq * time);
+//    wolf::Scalar exp_pz = sin(z_freq * time);
+//
+//    wolf::Scalar exp_vx = x_freq * cos(x_freq * time);
+//    wolf::Scalar exp_vy = y_freq * cos(y_freq * time);
+//    wolf::Scalar exp_vz = z_freq * cos(z_freq * time);
+//
+//    x << exp_px,exp_py,exp_pz, 0,0,0,1, exp_vx,exp_vy,exp_vz;
+//    Vector6s b; b << 0,0,0, 0,0,0;
+//
+//    //check velocity and bias parts
+//    ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, 0.0001);// << "current VBB is : \n" << problem->getCurrentState().tail(9).transpose() <<
+////    "\n expected is : \n" << x.tail(9).transpose() << std::endl;
+//
+//}
 
 TEST_F(ProcessorIMUt, check_Covariance)
 {

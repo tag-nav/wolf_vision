@@ -61,6 +61,12 @@ Eigen::VectorXs CaptureMotion::getDelta()
     MatrixXs jac_calib      = getBuffer().get().back().jacobian_calib_;
     VectorXs delta_error    = jac_calib * (calib - calib_preint);
     VectorXs delta          = correctDelta(delta_preint, delta_error);
+    //    WOLF_DEBUG("cal_preint: ", calib_preint.transpose());
+    //    WOLF_DEBUG("cal       : ", calib.transpose());
+    //    WOLF_DEBUG("delta_preint: ", delta_preint.transpose());
+    //    WOLF_DEBUG("Jac_calib: \n", jac_calib);
+    //    WOLF_DEBUG("delta error: ", delta_error.transpose());
+    //    WOLF_DEBUG("delta: ", delta.transpose());
     return delta;
 }
 
