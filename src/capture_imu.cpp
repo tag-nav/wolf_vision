@@ -44,12 +44,12 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts,
                        const Eigen::MatrixXs& _data_cov,
                        const Vector6s& _bias,
                        FrameBasePtr _origin_frame_ptr) :
-                CaptureMotion(_init_ts, _sensor_ptr, _acc_gyro_data, _data_cov, 10, 9, 6, _origin_frame_ptr)
+                CaptureMotion(_init_ts, _sensor_ptr, _acc_gyro_data, _data_cov, 10, 9, 6, _origin_frame_ptr, nullptr, nullptr, std::make_shared<StateBlock>(_bias, false))
 {
-    if (!getSensorPtr() || getSensorPtr()->isIntrinsicDynamic())
-    {
-        setStateBlockPtr(2, std::make_shared<StateBlock>(_bias, false));
-    }
+//    if (!getSensorPtr() || getSensorPtr()->isIntrinsicDynamic())
+//    {
+//        setStateBlockPtr(2, std::make_shared<StateBlock>(_bias, false));
+//    }
     setType("IMU");
 }
 
