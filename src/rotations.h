@@ -245,6 +245,19 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> q2R(const Eigen::Quaternion
     return _q.matrix();
 }
 
+/** \brief quaternion to rotation matrix conversion
+ *
+ * @param _q a right-handed unit quaternion
+ * @return the equivalent rotation matrix
+ */
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> q2R(const Eigen::MatrixBase<Derived>& _q)
+{
+    MatrixSizeCheck<4,1>::check(_q);
+    Eigen::Quaternion<typename Derived::Scalar> q(_q(3),_q(0),_q(1),_q(2));
+    return q2R( q );
+}
+
 /** \brief rotation matrix to quaternion conversion
  *
  * @param _R a rotation matrix
