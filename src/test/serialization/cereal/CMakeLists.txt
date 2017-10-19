@@ -1,0 +1,27 @@
+# NodeBase serialization class test
+wolf_add_gtest(gtest_cereal_serialization_node_base gtest_serialization_node_base.cpp)
+target_link_libraries(gtest_cereal_serialization_node_base ${PROJECT_NAME})
+
+wolf_add_gtest(gtest_cereal_serialization_local_parametrization
+  gtest_serialization_local_parametrization.cpp)
+target_link_libraries(gtest_cereal_serialization_local_parametrization ${PROJECT_NAME})
+
+wolf_add_gtest(gtest_cereal_serialization_sensor_intrinsic_base
+  gtest_serialization_sensor_intrinsic_base.cpp)
+target_link_libraries(gtest_cereal_serialization_sensor_intrinsic_base ${PROJECT_NAME})
+
+wolf_add_gtest(gtest_cereal_serialization_sensor_odom2d_intrinsic
+  gtest_serialization_sensor_odom2d_intrinsic.cpp)
+target_link_libraries(gtest_cereal_serialization_sensor_odom2d_intrinsic ${PROJECT_NAME})
+
+wolf_add_gtest(gtest_cereal_serialization_save_load
+  gtest_serialization_save_load.cpp)
+target_link_libraries(gtest_cereal_serialization_save_load ${PROJECT_NAME})
+
+wolf_add_gtest(gtest_cereal_serialization_processor_odom3d_params
+  gtest_serialization_processor_odom3d_params.cpp)
+target_link_libraries(gtest_cereal_serialization_processor_odom3d_params ${PROJECT_NAME})
+
+wolf_add_gtest(gtest_cereal_serialization_processor_odom2d_params
+  gtest_serialization_processor_odom2d_params.cpp)
+target_link_libraries(gtest_cereal_serialization_processor_odom2d_params ${PROJECT_NAME})
