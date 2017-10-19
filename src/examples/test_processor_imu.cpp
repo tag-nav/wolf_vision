@@ -99,7 +99,7 @@ int main(int argc, char** argv)
     problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
 
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
-    CaptureIMUPtr imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data, data_cov);
+    CaptureIMUPtr imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data, data_cov, Vector6s::Zero());
 
 //    problem_ptr_->print();
 
