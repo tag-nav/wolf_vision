@@ -57,7 +57,7 @@ class ConstraintEpipolar : public ConstraintBase
 inline ConstraintEpipolar::ConstraintEpipolar(const FeatureBasePtr& /*_feature_ptr*/, const FeatureBasePtr& _feature_other_ptr,
                                               const ProcessorBasePtr& _processor_ptr,
                                               bool _apply_loss_function, ConstraintStatus _status) :
-        ConstraintBase(CTR_EPIPOLAR, nullptr, _feature_other_ptr, nullptr, _processor_ptr, _apply_loss_function, _status)
+        ConstraintBase(CTR_EPIPOLAR, nullptr, nullptr, _feature_other_ptr, nullptr, _processor_ptr, _apply_loss_function, _status)
 {
     setType("EPIPOLAR");
 }

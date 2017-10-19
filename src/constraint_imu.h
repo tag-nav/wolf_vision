@@ -176,7 +176,7 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr& _ftr_ptr,
                                     const FrameIMUPtr& _frame_ptr,
                                     const ProcessorBasePtr& _processor_ptr,
                                     bool _apply_loss_function, ConstraintStatus _status) :
-        ConstraintAutodiff<ConstraintIMU,15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status,
+        ConstraintAutodiff<ConstraintIMU,15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>(CTR_IMU, _frame_ptr, nullptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status,
                                                     _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _frame_ptr->getVPtr(),
                                                     _frame_ptr->getAccBiasPtr(), _frame_ptr->getGyroBiasPtr(),
                                                     _ftr_ptr->getFramePtr()->getPPtr(),

@@ -23,8 +23,11 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
 }
 
 ConstraintBase::ConstraintBase(ConstraintType _tp,
-                               const FrameBasePtr& _frame_other_ptr, const FeatureBasePtr& _feature_other_ptr,
-                               const LandmarkBasePtr& _landmark_other_ptr, const ProcessorBasePtr& _processor_ptr,
+                               const FrameBasePtr& _frame_other_ptr,
+                               const CaptureBasePtr& _capture_other_ptr,
+                               const FeatureBasePtr& _feature_other_ptr,
+                               const LandmarkBasePtr& _landmark_other_ptr,
+                               const ProcessorBasePtr& _processor_ptr,
                                bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT", "Base"),
     feature_ptr_(),
@@ -34,6 +37,7 @@ ConstraintBase::ConstraintBase(ConstraintType _tp,
     status_(_status),
     apply_loss_function_(_apply_loss_function),
     frame_other_ptr_(_frame_other_ptr),
+    capture_other_ptr_(_capture_other_ptr),
     feature_other_ptr_(_feature_other_ptr),
     landmark_other_ptr_(_landmark_other_ptr),
     processor_ptr_(_processor_ptr)

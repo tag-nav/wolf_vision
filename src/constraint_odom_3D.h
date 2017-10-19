@@ -81,6 +81,7 @@ inline ConstraintOdom3D::ConstraintOdom3D(const FeatureBasePtr& _ftr_current_ptr
                                           ConstraintStatus _status) :
         ConstraintAutodiff<ConstraintOdom3D, 6, 3, 4, 3, 4>(CTR_ODOM_3D,        // type
                                         _frame_past_ptr,    // frame other
+                                        nullptr,            // capture other
                                         nullptr,            // feature other
                                         nullptr,            // landmark other
                                         _processor_ptr,     // processor

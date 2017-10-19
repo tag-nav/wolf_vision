@@ -60,6 +60,7 @@ class ConstraintAutodiff: public ConstraintBase
          **/
         ConstraintAutodiff(ConstraintType _tp,
                            const FrameBasePtr& _frame_other_ptr,
+                           const CaptureBasePtr& _capture_other_ptr,
                            const FeatureBasePtr& _feature_other_ptr,
                            const LandmarkBasePtr& _landmark_other_ptr,
                            const ProcessorBasePtr& _processor_ptr,
@@ -75,7 +76,7 @@ class ConstraintAutodiff: public ConstraintBase
                            StateBlockPtr _state7Ptr,
                            StateBlockPtr _state8Ptr,
                            StateBlockPtr _state9Ptr) :
-            ConstraintBase(_tp, _frame_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
+            ConstraintBase(_tp, _frame_other_ptr, _capture_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
             state_ptrs_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr,_state9Ptr}),
             residuals_jets_(new std::array<WolfJet, RES>),
             jets_0_(new std::array<WolfJet, B0>),
@@ -365,6 +366,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
 
        ConstraintAutodiff(ConstraintType _tp,
                           const FrameBasePtr& _frame_other_ptr,
+                          const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
                           const LandmarkBasePtr& _landmark_other_ptr,
                           const ProcessorBasePtr& _processor_ptr,
@@ -379,7 +381,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
                           StateBlockPtr _state6Ptr,
                           StateBlockPtr _state7Ptr,
                           StateBlockPtr _state8Ptr) :
-           ConstraintBase(_tp, _frame_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
+           ConstraintBase(_tp, _frame_other_ptr, _capture_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
            state_ptrs_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr,_state8Ptr}),
            residuals_jets_(new std::array<WolfJet, RES>),
            jets_0_(new std::array<WolfJet, B0>),
@@ -629,6 +631,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
 
        ConstraintAutodiff(ConstraintType _tp,
                           const FrameBasePtr& _frame_other_ptr,
+                          const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
                           const LandmarkBasePtr& _landmark_other_ptr,
                           const ProcessorBasePtr& _processor_ptr,
@@ -642,7 +645,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
                           StateBlockPtr _state5Ptr,
                           StateBlockPtr _state6Ptr,
                           StateBlockPtr _state7Ptr) :
-           ConstraintBase(_tp, _frame_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
+           ConstraintBase(_tp, _frame_other_ptr, _capture_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
            state_ptrs_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr,_state7Ptr}),
            residuals_jets_(new std::array<WolfJet, RES>),
            jets_0_(new std::array<WolfJet, B0>),
@@ -881,6 +884,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
 
        ConstraintAutodiff(ConstraintType _tp,
                           const FrameBasePtr& _frame_other_ptr,
+                          const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
                           const LandmarkBasePtr& _landmark_other_ptr,
                           const ProcessorBasePtr& _processor_ptr,
@@ -893,7 +897,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
                           StateBlockPtr _state4Ptr,
                           StateBlockPtr _state5Ptr,
                           StateBlockPtr _state6Ptr) :
-           ConstraintBase(_tp, _frame_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
+           ConstraintBase(_tp, _frame_other_ptr, _capture_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
            state_ptrs_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr,_state6Ptr}),
            residuals_jets_(new std::array<WolfJet, RES>),
            jets_0_(new std::array<WolfJet, B0>),
@@ -1121,6 +1125,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
 
        ConstraintAutodiff(ConstraintType _tp,
                           const FrameBasePtr& _frame_other_ptr,
+                          const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
                           const LandmarkBasePtr& _landmark_other_ptr,
                           const ProcessorBasePtr& _processor_ptr,
@@ -1132,7 +1137,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
                           StateBlockPtr _state3Ptr,
                           StateBlockPtr _state4Ptr,
                           StateBlockPtr _state5Ptr) :
-           ConstraintBase(_tp, _frame_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
+           ConstraintBase(_tp, _frame_other_ptr, _capture_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
            state_ptrs_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr,_state5Ptr}),
            residuals_jets_(new std::array<WolfJet, RES>),
            jets_0_(new std::array<WolfJet, B0>),
@@ -1274,10 +1279,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
                        std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
                                  (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
                                  jacobians_[i].data() + row * state_block_sizes_.at(i));
-
-          // print jacobian matrices
-//           for (auto i = 0; i < n_blocks; i++)
-//               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
        virtual std::vector<Scalar*> getStateScalarPtrVector() const
@@ -1348,6 +1349,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
 
        ConstraintAutodiff(ConstraintType _tp,
                           const FrameBasePtr& _frame_other_ptr,
+                          const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
                           const LandmarkBasePtr& _landmark_other_ptr,
                           const ProcessorBasePtr& _processor_ptr,
@@ -1358,7 +1360,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
                           StateBlockPtr _state2Ptr,
                           StateBlockPtr _state3Ptr,
                           StateBlockPtr _state4Ptr) :
-           ConstraintBase(_tp, _frame_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
+           ConstraintBase(_tp, _frame_other_ptr, _capture_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
            state_ptrs_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr,_state4Ptr}),
            residuals_jets_(new std::array<WolfJet, RES>),
            jets_0_(new std::array<WolfJet, B0>),
@@ -1491,10 +1493,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
                        std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
                                  (*residuals_jets_)[row].v.data() + jacobian_locations_.at(i) + state_block_sizes_.at(i),
                                  jacobians_[i].data() + row * state_block_sizes_.at(i));
-
-          // print jacobian matrices
-//           for (auto i = 0; i < n_blocks; i++)
-//               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
        virtual std::vector<Scalar*> getStateScalarPtrVector() const
@@ -1563,6 +1561,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
 
        ConstraintAutodiff(ConstraintType _tp,
                           const FrameBasePtr& _frame_other_ptr,
+                          const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
                           const LandmarkBasePtr& _landmark_other_ptr,
                           const ProcessorBasePtr& _processor_ptr,
@@ -1572,7 +1571,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
                           StateBlockPtr _state1Ptr,
                           StateBlockPtr _state2Ptr,
                           StateBlockPtr _state3Ptr) :
-           ConstraintBase(_tp, _frame_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
+           ConstraintBase(_tp, _frame_other_ptr, _capture_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
            state_ptrs_({_state0Ptr,_state1Ptr,_state2Ptr,_state3Ptr}),
            residuals_jets_(new std::array<WolfJet, RES>),
            jets_0_(new std::array<WolfJet, B0>),
@@ -1766,6 +1765,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
 
        ConstraintAutodiff(ConstraintType _tp,
                           const FrameBasePtr& _frame_other_ptr,
+                          const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
                           const LandmarkBasePtr& _landmark_other_ptr,
                           const ProcessorBasePtr& _processor_ptr,
@@ -1774,7 +1774,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
                           StateBlockPtr _state0Ptr,
                           StateBlockPtr _state1Ptr,
                           StateBlockPtr _state2Ptr) :
-           ConstraintBase(_tp, _frame_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
+           ConstraintBase(_tp, _frame_other_ptr, _capture_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
            state_ptrs_({_state0Ptr,_state1Ptr,_state2Ptr}),
            residuals_jets_(new std::array<WolfJet, RES>),
            jets_0_(new std::array<WolfJet, B0>),
@@ -1957,6 +1957,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
 
        ConstraintAutodiff(ConstraintType _tp,
                           const FrameBasePtr& _frame_other_ptr,
+                          const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
                           const LandmarkBasePtr& _landmark_other_ptr,
                           const ProcessorBasePtr& _processor_ptr,
@@ -1964,7 +1965,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
                           ConstraintStatus _status,
                           StateBlockPtr _state0Ptr,
                           StateBlockPtr _state1Ptr) :
-           ConstraintBase(_tp, _frame_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
+           ConstraintBase(_tp, _frame_other_ptr, _capture_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
            state_ptrs_({_state0Ptr,_state1Ptr}),
            residuals_jets_(new std::array<WolfJet, RES>),
            jets_0_(new std::array<WolfJet, B0>),
@@ -2136,13 +2137,14 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
 
        ConstraintAutodiff(ConstraintType _tp,
                           const FrameBasePtr& _frame_other_ptr,
+                          const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
                           const LandmarkBasePtr& _landmark_other_ptr,
                           const ProcessorBasePtr& _processor_ptr,
                           bool _apply_loss_function,
                           ConstraintStatus _status,
                           StateBlockPtr _state0Ptr) :
-           ConstraintBase(_tp, _frame_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
+           ConstraintBase(_tp, _frame_other_ptr, _capture_other_ptr, _feature_other_ptr, _landmark_other_ptr, _processor_ptr, _apply_loss_function, _status),
            state_ptrs_({_state0Ptr}),
            residuals_jets_(new std::array<WolfJet, RES>),
            jets_0_(new std::array<WolfJet, B0>)

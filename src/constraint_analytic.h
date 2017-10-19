@@ -24,24 +24,23 @@ class ConstraintAnalytic: public ConstraintBase
          *
          **/
         ConstraintAnalytic(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
-                         StateBlockPtr _state0Ptr,
-                         StateBlockPtr _state1Ptr = nullptr,
-                         StateBlockPtr _state2Ptr = nullptr,
-                         StateBlockPtr _state3Ptr = nullptr,
-                         StateBlockPtr _state4Ptr = nullptr,
-                         StateBlockPtr _state5Ptr = nullptr,
-                         StateBlockPtr _state6Ptr = nullptr,
-                         StateBlockPtr _state7Ptr = nullptr,
-                         StateBlockPtr _state8Ptr = nullptr,
-                         StateBlockPtr _state9Ptr = nullptr ) ;
+                           StateBlockPtr _state0Ptr,
+                           StateBlockPtr _state1Ptr = nullptr,
+                           StateBlockPtr _state2Ptr = nullptr,
+                           StateBlockPtr _state3Ptr = nullptr,
+                           StateBlockPtr _state4Ptr = nullptr,
+                           StateBlockPtr _state5Ptr = nullptr,
+                           StateBlockPtr _state6Ptr = nullptr,
+                           StateBlockPtr _state7Ptr = nullptr,
+                           StateBlockPtr _state8Ptr = nullptr,
+                           StateBlockPtr _state9Ptr = nullptr ) ;
 
-        /** \brief Constructor of category CTR_FRAME
-         *
-         * Constructor of category CTR_FRAME
-         *
-         **/
+
         ConstraintAnalytic(ConstraintType _tp,
-                           const FrameBasePtr&     _frame_ptr,
+                           const FrameBasePtr& _frame_other_ptr,
+                           const CaptureBasePtr& _capture_other_ptr,
+                           const FeatureBasePtr& _feature_other_ptr,
+                           const LandmarkBasePtr& _landmark_other_ptr,
                            const ProcessorBasePtr& _processor_ptr,
                            bool _apply_loss_function,
                            ConstraintStatus _status,
@@ -56,45 +55,6 @@ class ConstraintAnalytic: public ConstraintBase
                            StateBlockPtr _state8Ptr = nullptr,
                            StateBlockPtr _state9Ptr = nullptr );
 
-        /** \brief Constructor of category CTR_FEATURE
-         *
-         * Constructor of category CTR_FEATURE
-         *
-         **/
-        ConstraintAnalytic(ConstraintType _tp,
-                           const FeatureBasePtr&   _feature_ptr,
-                           const ProcessorBasePtr& _processor_ptr,
-                           bool _apply_loss_function, ConstraintStatus _status,
-                           StateBlockPtr _state0Ptr,
-                           StateBlockPtr _state1Ptr = nullptr,
-                           StateBlockPtr _state2Ptr = nullptr,
-                           StateBlockPtr _state3Ptr = nullptr,
-                           StateBlockPtr _state4Ptr = nullptr,
-                           StateBlockPtr _state5Ptr = nullptr,
-                           StateBlockPtr _state6Ptr = nullptr,
-                           StateBlockPtr _state7Ptr = nullptr,
-                           StateBlockPtr _state8Ptr = nullptr,
-                           StateBlockPtr _state9Ptr = nullptr );
-
-        /** \brief Constructor of category CTR_LANDMARK
-         *
-         * Constructor of category CTR_LANDMARK
-         *
-         **/
-        ConstraintAnalytic(ConstraintType _tp,
-                           const LandmarkBasePtr&  _landmark_ptr,
-                           const ProcessorBasePtr& _processor_ptr,
-                           bool _apply_loss_function, ConstraintStatus _status,
-                           StateBlockPtr _state0Ptr,
-                           StateBlockPtr _state1Ptr = nullptr,
-                           StateBlockPtr _state2Ptr = nullptr,
-                           StateBlockPtr _state3Ptr = nullptr,
-                           StateBlockPtr _state4Ptr = nullptr,
-                           StateBlockPtr _state5Ptr = nullptr,
-                           StateBlockPtr _state6Ptr = nullptr,
-                           StateBlockPtr _state7Ptr = nullptr,
-                           StateBlockPtr _state8Ptr = nullptr,
-                           StateBlockPtr _state9Ptr = nullptr );
 
         virtual ~ConstraintAnalytic() = default;
 

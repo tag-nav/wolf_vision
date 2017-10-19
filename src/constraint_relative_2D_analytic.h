@@ -17,30 +17,39 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 
         /** \brief Constructor of category CTR_FRAME
          **/
-        ConstraintRelative2DAnalytic(const FeatureBasePtr& _ftr_ptr, const ConstraintType& _tp, const FrameBasePtr& _frame_ptr,
+        ConstraintRelative2DAnalytic(const FeatureBasePtr& _ftr_ptr,
+                                     const ConstraintType& _tp,
+                                     const FrameBasePtr& _frame_ptr,
                                      const ProcessorBasePtr& _processor_ptr = nullptr,
-                                     bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic(_tp, _frame_ptr, _processor_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+                                     bool _apply_loss_function = false,
+                                     ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintAnalytic(_tp, _frame_ptr, nullptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
             //
         }
 
         /** \brief Constructor of category CTR_FEATURE
          **/
-        ConstraintRelative2DAnalytic(const FeatureBasePtr& _ftr_ptr, const ConstraintType& _tp, const FeatureBasePtr& _ftr_other_ptr,
+        ConstraintRelative2DAnalytic(const FeatureBasePtr& _ftr_ptr,
+                                     const ConstraintType& _tp,
+                                     const FeatureBasePtr& _ftr_other_ptr,
                                      const ProcessorBasePtr& _processor_ptr = nullptr,
-                                     bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic(_tp, _ftr_other_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _ftr_other_ptr->getFramePtr()->getPPtr(), _ftr_other_ptr->getFramePtr()->getOPtr() )
+                                     bool _apply_loss_function = false,
+                                     ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintAnalytic(_tp, nullptr, nullptr, _ftr_other_ptr, nullptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _ftr_other_ptr->getFramePtr()->getPPtr(), _ftr_other_ptr->getFramePtr()->getOPtr() )
         {
             //
         }
 
         /** \brief Constructor of category CTR_LANDMARK
          **/
-        ConstraintRelative2DAnalytic(const FeatureBasePtr& _ftr_ptr, const ConstraintType& _tp, const LandmarkBasePtr& _landmark_ptr,
+        ConstraintRelative2DAnalytic(const FeatureBasePtr& _ftr_ptr,
+                                     const ConstraintType& _tp,
+                                     const LandmarkBasePtr& _landmark_ptr,
                                      const ProcessorBasePtr& _processor_ptr = nullptr,
-                                     bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic(_tp, _landmark_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _landmark_ptr->getPPtr(), _landmark_ptr->getOPtr())
+                                     bool _apply_loss_function = false,
+                                     ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintAnalytic(_tp, nullptr, nullptr, nullptr, _landmark_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr(), _landmark_ptr->getPPtr(), _landmark_ptr->getOPtr())
         {
             //
         }
