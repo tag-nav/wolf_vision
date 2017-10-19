@@ -53,6 +53,22 @@ VectorXs CaptureMotion::getCalibration() const
     return calib;
 }
 
+void CaptureMotion::setCalibration(const VectorXs& _calib)
+{
+    assert(_calib.size() == calib_size_ && "Wrong size of calibration vector");
+    Size index = 0;
+    for (Size i = 0; i < getStateBlockVec().size(); i++)
+    {
+        auto sb = getStateBlockPtr(i);
+        if (sb && !sb->isFixed())
+        {
+            sb->setState(_calib.segment(index, sb->getSize()));
+            index += sb->getSize();
+        }
+    }
+}
+
+
 Eigen::VectorXs CaptureMotion::getDelta()
 {
     VectorXs calib_preint   = getCalibrationPreint();

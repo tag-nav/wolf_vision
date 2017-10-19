@@ -73,7 +73,9 @@ class CaptureMotion : public CaptureBase
 
         // Buffer's initial conditions for pre-integration
         VectorXs getCalibrationPreint() const;
+        void setCalibrationPreint(const VectorXs& _calib_preint);
         virtual VectorXs getCalibration() const;
+        void setCalibration(const VectorXs& _calib);
         MatrixXs getJacobianCalib();
         MatrixXs getJacobianCalib(const TimeStamp& _ts);
 
@@ -172,6 +174,11 @@ inline void CaptureMotion::setOriginFramePtr(FrameBasePtr _frame_ptr)
 inline VectorXs CaptureMotion::getCalibrationPreint() const
 {
     return getBuffer().getCalibrationPreint();
+}
+
+inline void CaptureMotion::setCalibrationPreint(const VectorXs& _calib_preint)
+{
+    getBuffer().setCalibrationPreint(_calib_preint);
 }
 
 } // namespace wolf
