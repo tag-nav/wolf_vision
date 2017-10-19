@@ -165,7 +165,6 @@ inline void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
     Vector3s delta_v = a_dt;
     _delta << delta_p , delta_q.coeffs() , delta_v;
 
-
     /* Compute jacobian of delta wrt data
      *
      * MATHS : jacobian dd_dn, of delta wrt noise
@@ -245,7 +244,6 @@ inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
      */
 
     imu::compose(_delta_preint, _delta, _dt, _delta_preint_plus_delta, _jacobian_delta_preint, _jacobian_delta);
-
 }
 
 inline void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,

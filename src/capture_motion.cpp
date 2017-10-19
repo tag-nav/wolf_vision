@@ -69,30 +69,22 @@ void CaptureMotion::setCalibration(const VectorXs& _calib)
 }
 
 
-Eigen::VectorXs CaptureMotion::getDelta()
+Eigen::VectorXs CaptureMotion::getDelta(const VectorXs& _calib_current)
 {
     VectorXs calib_preint   = getCalibrationPreint();
-    VectorXs calib          = getCalibration();
     VectorXs delta_preint   = getBuffer().get().back().delta_integr_;
     MatrixXs jac_calib      = getBuffer().get().back().jacobian_calib_;
-    VectorXs delta_error    = jac_calib * (calib - calib_preint);
+    VectorXs delta_error    = jac_calib * (_calib_current - calib_preint);
     VectorXs delta          = correctDelta(delta_preint, delta_error);
-    //    WOLF_DEBUG("cal_preint: ", calib_preint.transpose());
-    //    WOLF_DEBUG("cal       : ", calib.transpose());
-    //    WOLF_DEBUG("delta_preint: ", delta_preint.transpose());
-    //    WOLF_DEBUG("Jac_calib: \n", jac_calib);
-    //    WOLF_DEBUG("delta error: ", delta_error.transpose());
-    //    WOLF_DEBUG("delta: ", delta.transpose());
     return delta;
 }
 
-Eigen::VectorXs CaptureMotion::getDelta(const TimeStamp& _ts)
+Eigen::VectorXs CaptureMotion::getDelta(const VectorXs& _calib_current, const TimeStamp& _ts)
 {
     VectorXs calib_preint   = getCalibrationPreint();
-    VectorXs calib          = getCalibration();
     VectorXs delta_preint   = getBuffer().getMotion(_ts).delta_integr_;
     MatrixXs jac_calib      = getBuffer().getMotion(_ts).jacobian_calib_;
-    VectorXs delta_error    = jac_calib * (calib - calib_preint);
+    VectorXs delta_error    = jac_calib * (_calib_current - calib_preint);
     VectorXs delta          = correctDelta(delta_preint, delta_error);
     return delta;
 }

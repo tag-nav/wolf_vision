@@ -472,7 +472,7 @@ inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
     {
         // We found a CaptureMotion whose buffer contains the time stamp
         VectorXs state_0 = capture_motion->getOriginFramePtr()->getState();
-        VectorXs delta   = capture_motion->getDelta(_ts);
+        VectorXs delta   = capture_motion->getDelta(std::static_pointer_cast<CaptureMotion>(origin_ptr_)->getCalibration(), _ts);
         Scalar   dt      = _ts - capture_motion->getBuffer().get().front().ts_;
 
         statePlusDelta(state_0, delta, dt, _x);
@@ -496,7 +496,7 @@ inline Eigen::VectorXs ProcessorMotion::getCurrentState()
 inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
 {
     Scalar Dt = getCurrentTimeStamp() - origin_ptr_->getTimeStamp();
-    statePlusDelta(origin_ptr_->getFramePtr()->getState(), last_ptr_->getDelta(), Dt, _x);
+    statePlusDelta(origin_ptr_->getFramePtr()->getState(), last_ptr_->getDelta(std::static_pointer_cast<CaptureMotion>(origin_ptr_)->getCalibration()), Dt, _x);
 }
 
 inline void ProcessorMotion::getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts)

@@ -80,8 +80,8 @@ class CaptureMotion : public CaptureBase
         MatrixXs getJacobianCalib(const TimeStamp& _ts);
 
         // Get delta, corrected for changes on calibration params
-        VectorXs getDelta();
-        VectorXs getDelta(const TimeStamp& _ts);
+        VectorXs getDelta(const VectorXs& _calib_current);
+        VectorXs getDelta(const VectorXs& _calib_current, const TimeStamp& _ts);
         virtual VectorXs correctDelta(const VectorXs& _delta, const VectorXs& _delta_error);
 
         // Origin frame
