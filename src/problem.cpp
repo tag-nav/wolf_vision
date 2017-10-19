@@ -46,7 +46,7 @@ void Problem::setup()
 
 ProblemPtr Problem::create(const std::string& _frame_structure)
 {
-    ProblemPtr p(new Problem(_frame_structure)); // We use `new` and not `make_shared` since the Problem constructor is private and cannot be passes to `make_shared`.
+    ProblemPtr p(new Problem(_frame_structure)); // We use `new` and not `make_shared` since the Problem constructor is private and cannot be passed to `make_shared`.
     p->setup();
     return p->shared_from_this();
 }
@@ -756,6 +756,16 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     if (C->getSensorPtr()) cout << " -> S" << C->getSensorPtr()->id();
                     else cout << " -> S-";
                     cout << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "") << endl;
+                    if (state_blocks)
+                    {
+                        cout << "      sb:";
+                        for (auto sb : C->getStateBlockVec())
+                            if (sb != nullptr)
+                                cout << " " << (sb->isFixed() ? "Fix" : "Est");
+                            else
+                                cout << " ---";
+                        cout << endl;
+                    }
                     if (depth >= 3)
                     {
                         // Features
