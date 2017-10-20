@@ -69,6 +69,12 @@ else(OpenCV_FOUND)
     message("[WARN] OpenCV not found. Related sources will NOT be built.")
 endif(OpenCV_FOUND)
 
+# Cereal
+FIND_PACKAGE(cereal QUIET)
+IF(cereal_FOUND)
+    MESSAGE("cereal Library FOUND: cereal related sources will be built.")
+ENDIF(cereal_FOUND)
+
 # YAML with yaml-cpp
 INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindYamlCpp.cmake)
 IF(YAMLCPP_FOUND)
@@ -160,6 +166,11 @@ ENDIF(raw_gps_utils_FOUND)
 IF(OpenCV_FOUND)
     INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 ENDIF(OpenCV_FOUND)
+
+# cereal
+IF(cereal_FOUND)
+    INCLUDE_DIRECTORIES(${cereal_INCLUDE_DIRS})
+ENDIF(cereal_FOUND)
 
 IF(Suitesparse_FOUND)
     INCLUDE_DIRECTORIES(${Suitesparse_INCLUDE_DIRS})
@@ -417,6 +428,10 @@ IF (OpenCV_FOUND)
         )
 ENDIF(OpenCV_FOUND)
 
+IF (cereal_FOUND)
+  ADD_SUBDIRECTORY(serialization/cereal)
+ENDIF(cereal_FOUND)
+
 IF (Suitesparse_FOUND)
     ADD_SUBDIRECTORY(solver)
 ENDIF(Suitesparse_FOUND)
@@ -506,6 +521,8 @@ INSTALL(FILES ${HDRS_WRAPPER}
     DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
 INSTALL(FILES ${HDRS_SOLVER}
     DESTINATION include/iri-algorithms/wolf/solver)
+INSTALL(FILES ${HDRS_SERIALIZATION}
+    DESTINATION include/iri-algorithms/wolf/serialization)
 
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf.cmake"
     DESTINATION "lib/cmake/${PROJECT_NAME}")
