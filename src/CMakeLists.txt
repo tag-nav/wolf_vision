@@ -210,6 +210,7 @@ SET(HDRS_BASE
     processor_base.h
     processor_capture_holder.h
     processor_factory.h
+    processor_loopclosure_base.h
     processor_motion.h
     processor_tracker.h
     processor_tracker_feature.h
@@ -263,6 +264,7 @@ SET(HDRS
     landmark_line_2D.h
     landmark_polyline_2D.h
     local_parametrization_polyline_extreme.h
+    processor_frame_nearest_neighbor_filter.h
     processor_image_params.h
     processor_imu.h
     processor_imu_UnitTester.h
@@ -306,6 +308,7 @@ SET(SRCS_BASE
     problem.cpp
     processor_base.cpp
     processor_capture_holder.cpp
+    processor_loopclosure_base.cpp
     processor_motion.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
@@ -335,6 +338,7 @@ SET(SRCS
     landmark_line_2D.cpp
     landmark_polyline_2D.cpp
     local_parametrization_polyline_extreme.cpp
+    processor_frame_nearest_neighbor_filter.cpp
     processor_imu.cpp
     processor_imu_UnitTester.cpp
     processor_odom_2D.cpp
