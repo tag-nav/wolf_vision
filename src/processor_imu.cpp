@@ -208,8 +208,10 @@ FeatureBasePtr ProcessorIMU::emplaceFeature(CaptureMotionPtr _capture_motion, Fr
     FrameIMUPtr key_frame_ptr = std::static_pointer_cast<FrameIMU>(_related_frame);
     FeatureIMUPtr key_feature_ptr = std::make_shared<FeatureIMU>(
             _capture_motion->getBuffer().get().back().delta_integr_,
-            _capture_motion->getBuffer().get().back().delta_integr_cov_, key_frame_ptr->getAccBiasPtr()->getState(),
-            key_frame_ptr->getGyroBiasPtr()->getState(), _capture_motion->getBuffer().get().back().jacobian_calib_);
+            _capture_motion->getBuffer().get().back().delta_integr_cov_,
+            _capture_motion->getBuffer().getCalibrationPreint().head(3),
+            _capture_motion->getBuffer().getCalibrationPreint().tail(3),
+            _capture_motion->getBuffer().get().back().jacobian_calib_);
     _capture_motion->addFeature(key_feature_ptr);
     return key_feature_ptr;
 }
