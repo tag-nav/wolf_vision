@@ -438,6 +438,14 @@ void Problem::addCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, c
     covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)] = _cov;
 }
 
+void Problem::addCovarianceBlock(StateBlockPtr _state1, const Eigen::MatrixXs& _cov)
+{
+    assert(_state1->getSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
+    assert(_state1->getSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
+
+    covariances_[std::make_pair(_state1, _state1)] = _cov;
+}
+
 bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, Eigen::MatrixXs& _cov, const int _row,
                                  const int _col)
 {
@@ -461,7 +469,10 @@ bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, E
        _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
                 covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)].transpose();
     else
-        return false;
+    {
+      WOLF_DEBUG("Could not find the requested covariance block.");
+      return false;
+    }
 
     return true;
 }
@@ -517,16 +528,17 @@ bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _cova
 //           getCovarianceBlock(_frame_ptr->getOPtr(), _frame_ptr->getPPtr(), _covariance, _frame_ptr->getPPtr()->getSize(), 0                               ) &&
 //           getCovarianceBlock(_frame_ptr->getOPtr(), _frame_ptr->getOPtr(), _covariance, _frame_ptr->getPPtr()->getSize(), _frame_ptr->getPPtr()->getSize());
 
-
     bool success(true);
     int i = 0, j = 0;
 
-    for (const auto& sb_i : _frame_ptr->getStateBlockVec())
+    const auto& state_bloc_vec = _frame_ptr->getStateBlockVec();
+
+    for (const auto& sb_i : state_bloc_vec)
     {
         if (sb_i)
         {
             j = 0;
-            for (const auto& sb_j : _frame_ptr->getStateBlockVec())
+            for (const auto& sb_j : state_bloc_vec)
             {
                 if (sb_j)
                 {
