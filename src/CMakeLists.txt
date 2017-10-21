@@ -16,7 +16,7 @@ ENDIF()
 
 option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
-option(BUILD_EXAMPLES "Build examples" ON)
+option(BUILD_EXAMPLES "Build examples" OFF)
 
 
 # Does this has any other interest
