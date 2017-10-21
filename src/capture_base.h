@@ -27,12 +27,12 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, intrinsic.
 
         static unsigned int capture_id_count_;
-        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
+        bool is_removing_;          ///< A flag for safely removing nodes from the Wolf tree. See remove().
 
     protected:
         unsigned int capture_id_;
-        TimeStamp time_stamp_; ///< Time stamp
-        Size calib_size_;
+        TimeStamp time_stamp_;      ///< Time stamp
+        Size calib_size_;           ///< size of the calibration parameters (dynamic or static sensor params that are not fixed)
 
     public:
 
@@ -87,12 +87,14 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void unfixIntrinsics();
 
         Size getCalibSize() const;
-        Size computeCalibSize() const;
-        void updateCalilbSize();
-
         virtual Eigen::VectorXs getCalibration() const;
         void setCalibration(const Eigen::VectorXs& _calib);
 
+    protected:
+        Size computeCalibSize() const;
+
+    private:
+        void updateCalilbSize();
 };
 
 inline wolf::Size CaptureBase::getCalibSize() const

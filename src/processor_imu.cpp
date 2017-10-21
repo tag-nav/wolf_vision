@@ -194,7 +194,7 @@ CaptureMotionPtr ProcessorIMU::emplaceCapture(const TimeStamp& _ts, const Sensor
     {
         CaptureBasePtr capture = _frame_origin->getCaptureOf(_sensor);
         if (capture)
-            bias = std::static_pointer_cast<CaptureMotion>(capture)->getCalibration();
+            bias = capture->getCalibration();
     }
 
 
