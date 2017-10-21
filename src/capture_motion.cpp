@@ -14,7 +14,8 @@ CaptureMotion::CaptureMotion(const TimeStamp& _ts,
                              SensorBasePtr _sensor_ptr,
                              const Eigen::VectorXs& _data,
                              const Eigen::MatrixXs& _data_cov,
-                             Size _delta_size, Size _delta_cov_size, Size _calib_size,
+                             Size _delta_size,
+                             Size _delta_cov_size,
                              FrameBasePtr _origin_frame_ptr,
                              StateBlockPtr _p_ptr ,
                              StateBlockPtr _o_ptr ,
@@ -22,7 +23,7 @@ CaptureMotion::CaptureMotion(const TimeStamp& _ts,
                 CaptureBase("MOTION", _ts, _sensor_ptr, _p_ptr, _o_ptr, _intr_ptr),
                 data_(_data),
                 data_cov_(_data_cov),
-                buffer_(_data.size(), _delta_size, _delta_cov_size, _calib_size),
+                buffer_(_data.size(), _delta_size, _delta_cov_size, computeCalibSize()),
                 origin_frame_ptr_(_origin_frame_ptr)
 {
     //

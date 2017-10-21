@@ -14,7 +14,7 @@ CaptureOdom3D::CaptureOdom3D(const TimeStamp& _init_ts,
                              SensorBasePtr _sensor_ptr,
                              const Eigen::Vector3s& _data,
                              FrameBasePtr _origin_frame_ptr):
-        CaptureMotion(_init_ts, _sensor_ptr, _data, 10, 9, 6, _origin_frame_ptr)
+        CaptureMotion(_init_ts, _sensor_ptr, _data, 10, 9, _origin_frame_ptr)
 {
     setType("ODOM 3D");
 }
@@ -24,7 +24,7 @@ CaptureOdom3D::CaptureOdom3D(const TimeStamp& _init_ts,
                              const Eigen::Vector3s& _data,
                              const Eigen::MatrixXs& _data_cov,
                              FrameBasePtr _origin_frame_ptr):
-        CaptureMotion(_init_ts, _sensor_ptr, _data, _data_cov, 7, 6, 0, _origin_frame_ptr)
+        CaptureMotion(_init_ts, _sensor_ptr, _data, _data_cov, 7, 6, _origin_frame_ptr)
 {
     setType("ODOM 3D");
 }

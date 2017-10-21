@@ -105,7 +105,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         //                                                                           getSensorPtr(),
         //                                                                           Eigen::VectorXs::Zero(data_size_),
         //                                                                           Eigen::MatrixXs::Zero(data_size_, data_size_),
-        //                                                                           delta_size_, delta_cov_size_, calib_size_,
+        //                                                                           delta_size_, delta_cov_size_,
         //                                                                           key_frame_ptr);
         //        new_frame_ptr->addCapture(new_capture_ptr); // Add Capture to the new Frame
         // create a new frame
@@ -448,7 +448,7 @@ CaptureMotionPtr ProcessorMotion::emplaceCapture(const TimeStamp& _ts,
                                                                _sensor,
                                                                _data,
                                                                _data_cov,
-                                                               delta_size_, delta_cov_size_, calib_size_,
+                                                               delta_size_, delta_cov_size_,
                                                                _frame_origin);
     _frame_own->addCapture(capture);
     return capture;

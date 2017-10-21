@@ -73,7 +73,7 @@ TEST(FrameBase, LinksToTree)
     T->addFrame(F1);
     FrameBasePtr F2 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
     T->addFrame(F2);
-    CaptureMotionPtr C = make_shared<CaptureMotion>(1, S, Vector3s::Zero(), 3, 3, 0, nullptr);
+    CaptureMotionPtr C = make_shared<CaptureMotion>(1, S, Vector3s::Zero(), 3, 3, nullptr);
     F1->addCapture(C);
     /// @todo link sensor & proccessor
     ProcessorBasePtr p = std::make_shared<ProcessorOdom2D>();

@@ -347,7 +347,7 @@ TEST(Odom2D, KF_callback)
 //    std::cout << "\nIntegrating data..." << std::endl;
 
     // Capture to use as container for all incoming data
-    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 3, 3, 0, nullptr);
+    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 3, 3, nullptr);
 
     for (int n=1; n<=N; n++)
     {
