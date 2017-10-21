@@ -22,7 +22,6 @@ CaptureMotion::CaptureMotion(const TimeStamp& _ts,
                 CaptureBase("MOTION", _ts, _sensor_ptr, _p_ptr, _o_ptr, _intr_ptr),
                 data_(_data),
                 data_cov_(_data_cov),
-                calib_size_(_calib_size),
                 buffer_(_data.size(), _delta_size, _delta_cov_size, _calib_size),
                 origin_frame_ptr_(_origin_frame_ptr)
 {
@@ -35,37 +34,6 @@ CaptureMotion::CaptureMotion(const TimeStamp& _ts,
 CaptureMotion::~CaptureMotion()
 {
     //
-}
-
-VectorXs CaptureMotion::getCalibration() const
-{
-    VectorXs calib(calib_size_);
-    Size index = 0;
-    for (Size i = 0; i < getStateBlockVec().size(); i++)
-    {
-        auto sb = getStateBlockPtr(i);
-        if (sb && !sb->isFixed())
-        {
-            calib.segment(index, sb->getSize()) = sb->getState();
-            index += sb->getSize();
-        }
-    }
-    return calib;
-}
-
-void CaptureMotion::setCalibration(const VectorXs& _calib)
-{
-    assert(_calib.size() == calib_size_ && "Wrong size of calibration vector");
-    Size index = 0;
-    for (Size i = 0; i < getStateBlockVec().size(); i++)
-    {
-        auto sb = getStateBlockPtr(i);
-        if (sb && !sb->isFixed())
-        {
-            sb->setState(_calib.segment(index, sb->getSize()));
-            index += sb->getSize();
-        }
-    }
 }
 
 

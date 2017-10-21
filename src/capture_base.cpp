@@ -3,6 +3,8 @@
 
 namespace wolf{
 
+using namespace Eigen;
+
 unsigned int CaptureBase::capture_id_count_ = 0;
 
 CaptureBase::CaptureBase(const std::string& _type,
@@ -60,6 +62,7 @@ CaptureBase::CaptureBase(const std::string& _type,
     {
         WOLF_ERROR("Provided sensor parameters but no sensor pointer");
     }
+    updateCalilbSize();
 }
 
 
@@ -144,6 +147,7 @@ void CaptureBase::fix()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalilbSize();
 }
 
 void CaptureBase::unfix()
@@ -158,6 +162,7 @@ void CaptureBase::unfix()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalilbSize();
 }
 
 void CaptureBase::fixExtrinsics()
@@ -172,6 +177,7 @@ void CaptureBase::fixExtrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalilbSize();
 }
 
 void CaptureBase::unfixExtrinsics()
@@ -186,6 +192,7 @@ void CaptureBase::unfixExtrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalilbSize();
 }
 
 void CaptureBase::fixIntrinsics()
@@ -200,6 +207,7 @@ void CaptureBase::fixIntrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalilbSize();
 }
 
 void CaptureBase::unfixIntrinsics()
@@ -214,6 +222,7 @@ void CaptureBase::unfixIntrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalilbSize();
 }
 
 
@@ -225,6 +234,50 @@ void CaptureBase::registerNewStateBlocks()
         for (auto sbp : getStateBlockVec())
             if (sbp != nullptr)
                 getProblem()->addStateBlock(sbp);
+    }
+}
+
+wolf::Size CaptureBase::computeCalibSize() const
+{
+    Size sz = 0;
+    for (Size i = 0; i < state_block_vec_.size(); i++)
+    {
+        auto sb = getStateBlockPtr(i);
+        if (sb && !sb->isFixed())
+            sz += sb->getSize();
+    }
+    return sz;
+}
+
+Eigen::VectorXs CaptureBase::getCalibration() const
+{
+    Eigen::VectorXs calib(calib_size_);
+    Size index = 0;
+    for (Size i = 0; i < getStateBlockVec().size(); i++)
+    {
+        auto sb = getStateBlockPtr(i);
+        if (sb && !sb->isFixed())
+        {
+            calib.segment(index, sb->getSize()) = sb->getState();
+            index += sb->getSize();
+        }
+    }
+    return calib;
+}
+
+void CaptureBase::setCalibration(const VectorXs& _calib)
+{
+    updateCalilbSize();
+    assert(_calib.size() == calib_size_ && "Wrong size of calibration vector");
+    Size index = 0;
+    for (Size i = 0; i < getStateBlockVec().size(); i++)
+    {
+        auto sb = getStateBlockPtr(i);
+        if (sb && !sb->isFixed())
+        {
+            sb->setState(_calib.segment(index, sb->getSize()));
+            index += sb->getSize();
+        }
     }
 }
 

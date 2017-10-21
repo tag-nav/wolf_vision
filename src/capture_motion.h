@@ -74,8 +74,6 @@ class CaptureMotion : public CaptureBase
         // Buffer's initial conditions for pre-integration
         VectorXs getCalibrationPreint() const;
         void setCalibrationPreint(const VectorXs& _calib_preint);
-        virtual VectorXs getCalibration() const;
-        void setCalibration(const VectorXs& _calib);
         MatrixXs getJacobianCalib();
         MatrixXs getJacobianCalib(const TimeStamp& _ts);
 
@@ -92,7 +90,6 @@ class CaptureMotion : public CaptureBase
     private:
         Eigen::VectorXs data_;          ///< Motion data in form of vector mandatory
         Eigen::MatrixXs data_cov_;      ///< Motion data covariance
-        Size calib_size_;
         MotionBuffer buffer_;           ///< Buffer of motions between this Capture and the next one.
         FrameBasePtr origin_frame_ptr_; ///< Pointer to the origin frame of the motion
 };
@@ -105,7 +102,6 @@ inline CaptureMotion::CaptureMotion(const TimeStamp& _ts,
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),
         data_cov_(_sensor_ptr ? _sensor_ptr->getNoiseCov() : Eigen::MatrixXs::Zero(_data.rows(), _data.rows())), // Someone should test this zero and do something smart accordingly
-        calib_size_(_calib_size),
         buffer_(_data.size(), _delta_size, _delta_cov_size, _calib_size),
         origin_frame_ptr_(_origin_frame_ptr)
 {

@@ -32,6 +32,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
     protected:
         unsigned int capture_id_;
         TimeStamp time_stamp_; ///< Time stamp
+        Size calib_size_;
 
     public:
 
@@ -64,6 +65,8 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void getConstraintList(ConstraintBaseList& _ctr_list);
 
         SensorBasePtr getSensorPtr() const;
+        virtual void setSensorPtr(const SensorBasePtr sensor_ptr);
+
         // State blocks
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
         std::vector<StateBlockPtr>& getStateBlockVec();
@@ -83,8 +86,24 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void fixIntrinsics();
         void unfixIntrinsics();
 
-        virtual void setSensorPtr(const SensorBasePtr sensor_ptr);
+        Size getCalibSize() const;
+        Size computeCalibSize() const;
+        void updateCalilbSize();
+
+        virtual Eigen::VectorXs getCalibration() const;
+        void setCalibration(const Eigen::VectorXs& _calib);
+
 };
+
+inline wolf::Size CaptureBase::getCalibSize() const
+{
+    return calib_size_;
+}
+
+inline void CaptureBase::updateCalilbSize()
+{
+    calib_size_ = computeCalibSize();
+}
 
 }
 
