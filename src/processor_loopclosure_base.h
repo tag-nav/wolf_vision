@@ -115,7 +115,7 @@ protected:
    *
    * WARNING! This function only votes! It does not create KeyFrames!
    */
-  virtual bool voteForKeyFrame() = 0;
+  virtual bool voteForKeyFrame() override = 0;
 };
 
 inline const std::vector<FrameBasePtr>&
