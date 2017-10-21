@@ -342,17 +342,17 @@ inline const Eigen::Vector3s gravity(void) {
     return Eigen::Vector3s(0,0,-9.806);
 }
 
-template <typename T, int N>
-bool isSymmetric(const Eigen::Matrix<T, N, N>& M,
+template <typename T, int N, int RC>
+bool isSymmetric(const Eigen::Matrix<T, N, N, RC>& M,
                  const T eps = wolf::Constants::EPS)
 {
   return M.isApprox(M.transpose(), eps);
 }
 
-template <typename T, int N>
-bool isPositiveSemiDefinite(const Eigen::Matrix<T, N, N>& M)
+template <typename T, int N, int RC>
+bool isPositiveSemiDefinite(const Eigen::Matrix<T, N, N, RC>& M)
 {
-  Eigen::SelfAdjointEigenSolver<Eigen::Matrix<T, N, N> > eigensolver(M);
+  Eigen::SelfAdjointEigenSolver<Eigen::Matrix<T, N, N, RC> > eigensolver(M);
 
   if (eigensolver.info() == Eigen::Success)
   {
@@ -363,8 +363,8 @@ bool isPositiveSemiDefinite(const Eigen::Matrix<T, N, N>& M)
   return false;
 }
 
-template <typename T, int N>
-bool isCovariance(const Eigen::Matrix<T, N, N>& M)
+template <typename T, int N, int RC>
+bool isCovariance(const Eigen::Matrix<T, N, N, RC>& M)
 {
   return isSymmetric(M) && isPositiveSemiDefinite(M);
 }
