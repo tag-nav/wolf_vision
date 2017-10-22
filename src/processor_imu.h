@@ -72,8 +72,8 @@ class ProcessorIMU : public ProcessorMotion{
                                                const VectorXs& _data,
                                                const MatrixXs& _data_cov,
                                                const FrameBasePtr& _frame_origin) override;
-        virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion,
-                                              FrameBasePtr _related_frame) override;
+        virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion,
+                                             FrameBasePtr _related_frame) override;
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
                                                     FrameBasePtr _frame_origin) override;
         void resetDerived() override;

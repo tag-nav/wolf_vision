@@ -337,9 +337,9 @@ class ProcessorMotion : public ProcessorBase
          * This function implements the composition (+) so that _x2 = _x1 (+) _delta.
          */
         virtual void statePlusDelta(const Eigen::VectorXs& _x,
-                                const Eigen::VectorXs& _delta,
-                                const Scalar _dt,
-                                Eigen::VectorXs& _x_plus_delta) = 0;
+                                    const Eigen::VectorXs& _delta,
+                                    const Scalar _dt,
+                                    Eigen::VectorXs& _x_plus_delta) = 0;
 
         /** \brief Delta zero
          * \return a delta state equivalent to the null motion.
@@ -377,6 +377,7 @@ class ProcessorMotion : public ProcessorBase
                                         const MatrixXs& _data_cov,
                                         const FrameBasePtr& _frame_own,
                                         const FrameBasePtr& _frame_origin);
+
         virtual CaptureMotionPtr createCapture(const TimeStamp& _ts,
                                                const SensorBasePtr& _sensor,
                                                const VectorXs& _data,
@@ -387,7 +388,13 @@ class ProcessorMotion : public ProcessorBase
          * \param _capture_motion: the parent capture
          * \param _related_frame: frame of the last_ptr set as KEYFRAME. (used only in processor_imu.h for now...)
          */
-        virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame) = 0;
+        FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame)
+        {
+            FeatureBasePtr feature = createFeature(_capture_motion, _related_frame);
+            _capture_motion->addFeature(feature);
+            return feature;
+        }
+        virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame) = 0;
 
         /** \brief create a constraint and link it in the wolf tree
          * \param _feature_motion: the parent feature

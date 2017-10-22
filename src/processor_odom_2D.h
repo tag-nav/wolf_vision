@@ -71,9 +71,10 @@ class ProcessorOdom2D : public ProcessorMotion
                                                const VectorXs& _data,
                                                const MatrixXs& _data_cov,
                                                const FrameBasePtr& _frame_origin) override;
-
-        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin) override;
-        virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame) override;
+        virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion,
+                                             FrameBasePtr _related_frame) override;
+        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
+                                                    FrameBasePtr _frame_origin) override;
 
     protected:
         Scalar dist_traveled_th_;
@@ -225,7 +226,7 @@ inline ConstraintBasePtr ProcessorOdom2D::emplaceConstraint(FeatureBasePtr _feat
     return ctr_odom;
 }
 
-inline FeatureBasePtr ProcessorOdom2D::emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame)
+inline FeatureBasePtr ProcessorOdom2D::createFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame)
 {
     // create motion feature and add it to the key_capture
     FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
@@ -233,7 +234,7 @@ inline FeatureBasePtr ProcessorOdom2D::emplaceFeature(CaptureMotionPtr _capture_
             _capture_motion->getBuffer().get().back().delta_integr_,
             _capture_motion->getBuffer().get().back().delta_integr_cov_);
 
-    _capture_motion->addFeature(key_feature_ptr);
+//    _capture_motion->addFeature(key_feature_ptr);
 
     return key_feature_ptr;
 }
