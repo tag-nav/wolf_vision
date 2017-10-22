@@ -98,12 +98,11 @@ class ProcessorOdom3D : public ProcessorMotion
                            Motion& _motion,
                            TimeStamp& _ts) override;
         bool voteForKeyFrame() override;
-        virtual CaptureMotionPtr emplaceCapture(const TimeStamp& _ts,
-                                                const SensorBasePtr& _sensor,
-                                                const VectorXs& _data,
-                                                const MatrixXs& _data_cov,
-                                                const FrameBasePtr& _frame_own,
-                                                const FrameBasePtr& _frame_origin) override;
+        virtual CaptureMotionPtr createCapture(const TimeStamp& _ts,
+                                               const SensorBasePtr& _sensor,
+                                               const VectorXs& _data,
+                                               const MatrixXs& _data_cov,
+                                               const FrameBasePtr& _frame_origin) override;
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
                                            FrameBasePtr _frame_origin) override;
         virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, 
@@ -142,12 +141,13 @@ inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
     return (Eigen::VectorXs(7) << 0,0,0, 0,0,0,1).finished(); // p, q
 }
 
-inline CaptureMotionPtr ProcessorOdom3D::emplaceCapture(const TimeStamp& _ts, const SensorBasePtr& _sensor, const VectorXs& _data,
-                                                 const MatrixXs& _data_cov, const FrameBasePtr& _frame_own,
-                                                 const FrameBasePtr& _frame_origin)
+inline CaptureMotionPtr ProcessorOdom3D::createCapture(const TimeStamp& _ts,
+                                                       const SensorBasePtr& _sensor,
+                                                       const VectorXs& _data,
+                                                       const MatrixXs& _data_cov,
+                                                       const FrameBasePtr& _frame_origin)
 {
     CaptureOdom3DPtr capture_odom = std::make_shared<CaptureOdom3D>(_ts, _sensor, _data, _data_cov, _frame_origin);
-    _frame_own->addCapture(capture_odom);
     return capture_odom;
 }
 

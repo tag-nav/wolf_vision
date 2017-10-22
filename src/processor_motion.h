@@ -371,12 +371,17 @@ class ProcessorMotion : public ProcessorBase
          * \param _frame_own frame owning the Capture to create
          * \param _frame_origin frame acting as the origin of motions for the MorionBuffer of the created MotionCapture
          */
-        virtual CaptureMotionPtr emplaceCapture(const TimeStamp& _ts,
-                                                const SensorBasePtr& _sensor,
-                                                const VectorXs& _data,
-                                                const MatrixXs& _data_cov,
-                                                const FrameBasePtr& _frame_own,
-                                                const FrameBasePtr& _frame_origin) = 0;
+        CaptureMotionPtr emplaceCapture(const TimeStamp& _ts,
+                                        const SensorBasePtr& _sensor,
+                                        const VectorXs& _data,
+                                        const MatrixXs& _data_cov,
+                                        const FrameBasePtr& _frame_own,
+                                        const FrameBasePtr& _frame_origin);
+        virtual CaptureMotionPtr createCapture(const TimeStamp& _ts,
+                                               const SensorBasePtr& _sensor,
+                                               const VectorXs& _data,
+                                               const MatrixXs& _data_cov,
+                                               const FrameBasePtr& _frame_origin) = 0;
 
         /** \brief create a feature corresponding to given capture and add the feature to this capture
          * \param _capture_motion: the parent capture

@@ -67,12 +67,11 @@ class ProcessorIMU : public ProcessorMotion{
                                    Motion& _motion,
                                    TimeStamp& _ts) override;
         virtual bool voteForKeyFrame() override;
-        virtual CaptureMotionPtr emplaceCapture(const TimeStamp& _ts,
-                                                const SensorBasePtr& _sensor,
-                                                const VectorXs& _data,
-                                                const MatrixXs& _data_cov,
-                                                const FrameBasePtr& _frame_own,
-                                                const FrameBasePtr& _frame_origin) override;
+        virtual CaptureMotionPtr createCapture(const TimeStamp& _ts,
+                                               const SensorBasePtr& _sensor,
+                                               const VectorXs& _data,
+                                               const MatrixXs& _data_cov,
+                                               const FrameBasePtr& _frame_origin) override;
         virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion,
                                               FrameBasePtr _related_frame) override;
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,

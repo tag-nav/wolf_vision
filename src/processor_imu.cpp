@@ -184,22 +184,17 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
     return motion_int;
 }
 
-CaptureMotionPtr ProcessorIMU::emplaceCapture(const TimeStamp& _ts, const SensorBasePtr& _sensor, const VectorXs& _data,
-                                              const MatrixXs& _data_cov, const FrameBasePtr& _frame_own,
-                                              const FrameBasePtr& _frame_origin)
+CaptureMotionPtr ProcessorIMU::createCapture(const TimeStamp& _ts,
+                                             const SensorBasePtr& _sensor,
+                                             const VectorXs& _data,
+                                             const MatrixXs& _data_cov,
+                                             const FrameBasePtr& _frame_origin)
 {
-//    CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(_ts, _sensor, _data, _data_cov, _sensor->getIntrinsicPtr()->getState(), _frame_origin);
-    Vector6s bias(Vector6s::Zero());
-    if (_frame_origin)
-    {
-        CaptureBasePtr capture = _frame_origin->getCaptureOf(_sensor);
-        if (capture)
-            bias = capture->getCalibration();
-    }
-
-
-    CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(_ts, _sensor, _data, _data_cov, bias, _frame_origin);
-    _frame_own->addCapture(capture_imu);
+    CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(_ts,
+                                                             _sensor,
+                                                             _data,
+                                                             _data_cov,
+                                                             _frame_origin);
     return capture_imu;
 }
 

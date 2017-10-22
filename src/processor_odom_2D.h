@@ -66,12 +66,11 @@ class ProcessorOdom2D : public ProcessorMotion
                                    Motion& _second,
                                    TimeStamp& _ts) override;
 
-        virtual CaptureMotionPtr emplaceCapture(const TimeStamp& _ts,
-                                                const SensorBasePtr& _sensor,
-                                                const VectorXs& _data,
-                                                const MatrixXs& _data_cov,
-                                                const FrameBasePtr& _frame_own,
-                                                const FrameBasePtr& _frame_origin) override;
+        virtual CaptureMotionPtr createCapture(const TimeStamp& _ts,
+                                               const SensorBasePtr& _sensor,
+                                               const VectorXs& _data,
+                                               const MatrixXs& _data_cov,
+                                               const FrameBasePtr& _frame_origin) override;
 
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin) override;
         virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame) override;
@@ -208,15 +207,13 @@ inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const
     return Eigen::VectorXs::Zero(delta_size_);
 }
 
-CaptureMotionPtr ProcessorOdom2D::emplaceCapture(const TimeStamp& _ts,
+CaptureMotionPtr ProcessorOdom2D::createCapture(const TimeStamp& _ts,
                                                  const SensorBasePtr& _sensor,
                                                  const VectorXs& _data,
                                                  const MatrixXs& _data_cov,
-                                                 const FrameBasePtr& _frame_own,
                                                  const FrameBasePtr& _frame_origin)
 {
     CaptureOdom2DPtr capture_odom = std::make_shared<CaptureOdom2D>(_ts, _sensor, _data, _data_cov, _frame_origin);
-    _frame_own->addCapture(capture_odom);
     return capture_odom;
 }
 

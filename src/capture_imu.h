@@ -17,6 +17,12 @@ class CaptureIMU : public CaptureMotion
                    SensorBasePtr _sensor_ptr,
                    const Eigen::Vector6s& _data,
                    const Eigen::MatrixXs& _data_cov,
+                   FrameBasePtr _origin_frame_ptr = nullptr);
+
+        CaptureIMU(const TimeStamp& _init_ts,
+                   SensorBasePtr _sensor_ptr,
+                   const Eigen::Vector6s& _data,
+                   const Eigen::MatrixXs& _data_cov,
                    const Vector6s& _bias,
                    FrameBasePtr _origin_frame_ptr = nullptr);
 

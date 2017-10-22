@@ -444,12 +444,36 @@ CaptureMotionPtr ProcessorMotion::emplaceCapture(const TimeStamp& _ts,
                                                  const FrameBasePtr& _frame_own,
                                                  const FrameBasePtr& _frame_origin)
 {
-    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(_ts,
-                                                               _sensor,
-                                                               _data,
-                                                               _data_cov,
-                                                               delta_size_, delta_cov_size_,
-                                                               _frame_origin);
+    /* TODO do this:
+     *
+     * - code emplaceCapture() here
+     * - make virtual pure createCapture()
+     * - implement createCapture() in derived classes
+     *
+     * emplaceCapture( ts, sensor, data, data_cov, calib, frame_own, frame_origin )
+     * {
+     *     CaptureMotionPtr cap = createCapture( ts, sensor, data, data_cov, calib, frame_own, frame_origin );
+     *     // cap->setCalibration(calib); // might also do it inside createCapture above
+     *     frame_own->addCapture(cap);
+     *     return cap;
+     * }
+     */
+
+    CaptureMotionPtr capture = createCapture(_ts,
+                                             _sensor,
+                                             _data,
+                                             _data_cov,
+                                             _frame_origin);
+
+    // calib code below might also be placed inside createCapture above
+    VectorXs calib(calib_size_);
+    if (origin_ptr_)
+        calib = origin_ptr_->getCalibration();
+    else
+        calib.setZero();
+    capture->setCalibration(calib);
+
+    // add to wolf tree
     _frame_own->addCapture(capture);
     return capture;
 }
