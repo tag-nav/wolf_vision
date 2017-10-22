@@ -478,4 +478,12 @@ CaptureMotionPtr ProcessorMotion::emplaceCapture(const TimeStamp& _ts,
     return capture;
 }
 
+FeatureBasePtr ProcessorMotion::emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame)
+{
+    FeatureBasePtr feature = createFeature(_capture_motion, _related_frame);
+    _capture_motion->addFeature(feature);
+    return feature;
+}
+
+
 }
