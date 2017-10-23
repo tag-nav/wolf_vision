@@ -85,14 +85,17 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
          * Vector3s _v2 : velocity in current frame
          * Matrix<10,1, wolf::Scalar> _expectation : to retrieve resulting expectation (PVQ)
         */
-        template<typename D1, typename D2, typename D3>
+        template<typename D1, typename D2, typename D3, typename D4>
         void expectation(const Eigen::MatrixBase<D1> & _p1,
                          const Eigen::QuaternionBase<D2> & _q1,
                          const Eigen::MatrixBase<D1> & _v1,
                          const Eigen::MatrixBase<D1> & _p2,
                          const Eigen::QuaternionBase<D2> & _q2,
                          const Eigen::MatrixBase<D1> & _v2,
-                         Eigen::MatrixBase<D3> & _result) const;
+                         typename D1::Scalar _dt,
+                         Eigen::MatrixBase<D3> & _pe,
+                         Eigen::QuaternionBase<D4> & _qe,
+                         Eigen::MatrixBase<D3> & _ve) const;
 
         /* \brief : return the expected value given the state blocks in the wolf tree
             current frame data is taken from constraintIMU object.
@@ -119,7 +122,7 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
         Eigen::Matrix3s dDq_dwb_;
 
         /// Metrics
-        const wolf::Scalar dt_, dt_2_; ///< delta-time and delta-time-squared between keyframes
+        const wolf::Scalar dt_; ///< delta-time and delta-time-squared between keyframes
         const Eigen::Vector3s g_; ///< acceleration of gravity in World frame
         const wolf::Scalar ab_rate_stdev_, wb_rate_stdev_; //stdev for standard_deviation (= sqrt(variance))
         
@@ -172,13 +175,11 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr& _ftr_ptr,
         dDv_dwb_(_ftr_ptr->jacobian_bias_.block(6,3,3,3)),
         dDq_dwb_(_ftr_ptr->jacobian_bias_.block(3,3,3,3)),
         dt_(_ftr_ptr->getFramePtr()->getTimeStamp() - _cap_origin_ptr->getTimeStamp()),
-        dt_2_(dt_*dt_),
         g_(wolf::gravity()),
         ab_rate_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getAbRateStdev()),
         wb_rate_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getWbRateStdev()),
         sqrt_A_r_dt_inv((Eigen::Matrix3s::Identity() * ab_rate_stdev_ * sqrt(dt_)).inverse()),
         sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_rate_stdev_ * sqrt(dt_)).inverse())
-
 {
     setType("IMU");
 }
@@ -211,37 +212,7 @@ inline bool ConstraintIMU::operator ()(const T* const _p1,
 
     Map<Matrix<T,15,1> > residuals(_residuals);
 
-
-    // Predict delta: d_pred = x2 (-) x1
-    Matrix<T,3,1> dp_predict = q1.conjugate() * ( p2 - p1 - v1 * (T)dt_ - (T)0.5 * g_.cast<T>() * (T)dt_2_ );
-    Matrix<T,3,1> dv_predict = q1.conjugate() * ( v2 - v1 - g_.cast<T>() * (T)dt_ );
-    Quaternion<T> dq_predict = q1.conjugate() * q2;
-
-    // Bias increments due to optimization updates
-    Matrix<T,3,1> dab1 = ab1 - acc_bias_preint_.cast<T>();
-    Matrix<T,3,1> dwb1 = wb1 - gyro_bias_preint_.cast<T>();
-
-    // Correct measured delta: delta_corr = delta + J_bias * bias_increment
-    Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>() * dab1 + dDp_dwb_.cast<T>() * dwb1;
-    Matrix<T,3,1> dv_correct = dv_preint_.cast<T>() + dDv_dab_.cast<T>() * dab1 + dDv_dwb_.cast<T>() * dwb1;
-    Matrix<T,3,1> do_step    = dDq_dwb_  .cast<T>() * dwb1;
-    Quaternion<T> dq_correct = dq_preint_.cast<T>() * v2q(do_step);
-
-    // Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
-    // Note the Dt here is zero because it's the delta-time between the same time stamps!
-    // Note that we use P and V errors without rotation, since they should be zero anyway.
-    Matrix<T,3,1> dp_error   = dp_predict - dp_correct;
-    Matrix<T,3,1> dv_error   = dv_predict - dv_correct;
-    Matrix<T,3,1> do_error   = q2v(dq_correct.conjugate() * dq_predict); // In the name, 'o' of orientation, not 'q'
-    Matrix<T,3,1> ab_error(ab1 - ab2); //bias used for preintegration - bias in KeyFrame
-    Matrix<T,3,1> wb_error(wb1 - wb2);
-
-    Matrix<T,9,1> dpov_error((Matrix<T,9,1>() << dp_error, do_error, dv_error).finished());
-
-    // Assign to residuals vector
-    residuals.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * dpov_error;
-    residuals.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error; // ab_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * ab_error;
-    residuals.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error; // wb_residual = ( (1/sqrt(dt_)) * sqrt(A_r).inverse() ) * wb_error;   
+    getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, residuals);
 
     return true;
 }
@@ -260,91 +231,91 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1,
                                         Eigen::MatrixBase<D3> & _residuals) const
 {
     //needed typedefs
-    typedef typename D2::Scalar DataType;
+    typedef typename D2::Scalar T;
 
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D3, 15)
+    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D3, 15);
 
-    const Eigen::Matrix<DataType,3,1> ab1(_ab1);
-    const Eigen::Matrix<DataType,3,1> wb1(_wb1);
-    const Eigen::Matrix<DataType,3,1> ab2(_ab2);
-    const Eigen::Matrix<DataType,3,1> wb2(_wb2);
-    Eigen::Matrix<DataType,10,1> expected;
-    this->expectation(_p1, _q1, _v1, _p2, _q2, _v2, expected);
+    // Expected delta from states
+    Eigen::Matrix<T, 3, 1 >   dp_exp;
+    Eigen::Quaternion<T>      dq_exp;
+    Eigen::Matrix<T, 3, 1>    dv_exp;
 
-    // Correct measured delta: delta_corr = delta + J_bias * (bias - bias_measured)
-    Eigen::Matrix<DataType,3,1> dp_correct = dp_preint_.cast<DataType>() + dDp_dab_.cast<DataType>() * (ab1 - acc_bias_preint_.cast<DataType>()) + dDp_dwb_.cast<DataType>() * (wb1 - gyro_bias_preint_.cast<DataType>());
-    Eigen::Matrix<DataType,3,1> dv_correct = dv_preint_.cast<DataType>() + dDv_dab_.cast<DataType>() * (ab1 - acc_bias_preint_.cast<DataType>()) + dDv_dwb_.cast<DataType>() * (wb1 - gyro_bias_preint_.cast<DataType>());
-    Eigen::Matrix<DataType,3,1> do_step    = dDq_dwb_  .cast<DataType>() * (wb1 - gyro_bias_preint_.cast<DataType>());
-    Eigen::Quaternion<DataType> dq_correct = dq_preint_.cast<DataType>() * v2q(do_step);
+    expectation(_p1, _q1, _v1, _p2, _q2, _v2, (T)dt_, dp_exp, dq_exp, dv_exp);
+
+    // Corrected integrated delta: delta_corr = delta_preint (+) J_bias * (bias_current - bias_preint)
+    Eigen::Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>() * (_ab1 - acc_bias_preint_.cast<T>()) + dDp_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
+    Eigen::Matrix<T,3,1> dv_correct = dv_preint_.cast<T>() + dDv_dab_.cast<T>() * (_ab1 - acc_bias_preint_.cast<T>()) + dDv_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
+    Eigen::Matrix<T,3,1> do_step    = dDq_dwb_  .cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
+    Eigen::Quaternion<T> dq_correct = dq_preint_.cast<T>() * v2q(do_step);
 
     // Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
     // Note the Dt here is zero because it's the delta-time between the same time stamps!
-    Eigen::Quaternion<DataType> dq_predict((expected.segment(3,4)).data());
-    Eigen::Matrix<DataType,3,1> dp_error   = expected.head(3) - dp_correct;
-    Eigen::Matrix<DataType,3,1> do_error   = q2v(dq_correct.conjugate() * dq_predict); // In the name, 'o' of orientation, not 'q'
-    Eigen::Matrix<DataType,3,1> dv_error   = expected.tail(3) - dv_correct;
-    Eigen::Matrix<DataType,3,1> ab_error(ab1 - ab2); // KF1.bias - KF2.bias
-    Eigen::Matrix<DataType,3,1> wb_error(wb1 - wb2);
+    Eigen::Matrix<T, 9, 1> dpov_error;
+    Eigen::Map<Eigen::Matrix<T, 3, 1> >   dp_error(dpov_error.data()    );
+    Eigen::Map<Eigen::Matrix<T, 3, 1> >   do_error(dpov_error.data() + 3);
+    Eigen::Map<Eigen::Matrix<T, 3, 1> >   dv_error(dpov_error.data() + 6);
 
-    Eigen::Matrix<DataType,9,1> dpov_error((Eigen::Matrix<DataType,9,1>() << dp_error, do_error, dv_error).finished());
-    Eigen::Matrix<DataType,9,1> dpov_error_w(getMeasurementSquareRootInformationTransposed().cast<DataType>()  * dpov_error);
+    imu::diff(dp_exp, dq_exp, dv_exp, dp_correct, dq_correct, dv_correct, dp_error, do_error, dv_error);
+
+    // Errors between biases
+    Eigen::Matrix<T,3,1> ab_error(_ab1 - _ab2); // KF1.bias - KF2.bias
+    Eigen::Matrix<T,3,1> wb_error(_wb1 - _wb2);
+
+    // Residuals are the weighted errors
+    Eigen::Matrix<T,9,1> dpov_residuals(getMeasurementSquareRootInformationTransposed().cast<T>()  * dpov_error);
 
     // Assign to residuals vector
-    _residuals.head(3)       = dpov_error_w.head(3);
-    _residuals.segment(3,3)  = dpov_error_w.segment(3,3);
-    _residuals.segment(6,3)  = dpov_error_w.tail(3);
-    _residuals.segment(9,3)  = sqrt_A_r_dt_inv.cast<DataType>() * ab_error;
-    _residuals.tail(3)       = sqrt_A_r_dt_inv.cast<DataType>() * wb_error;
+    _residuals.head(3)       = dpov_residuals.head(3);
+    _residuals.segment(3,3)  = dpov_residuals.segment(3,3);
+    _residuals.segment(6,3)  = dpov_residuals.tail(3);
+    _residuals.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error;
+    _residuals.tail(3)       = sqrt_A_r_dt_inv.cast<T>() * wb_error;
 
     return true;
 }
 
 inline Eigen::VectorXs ConstraintIMU::expectation() const
 {
+    FrameBasePtr frm_current = getFeaturePtr()->getFramePtr();
+    FrameBasePtr frm_previous = getFrameOtherPtr();
+
+    //get information on current_frame in the ConstraintIMU
+    const Eigen::Vector3s frame_current_pos = frm_current->getPPtr()->getState();
+    const Eigen::Quaternions frame_current_ori(frm_current->getOPtr()->getState().data());
+    const Eigen::Vector3s frame_current_vel = frm_current->getVPtr()->getState();
+
+    // get info on previous frame in the ConstraintIMU
+    const Eigen::Vector3s frame_previous_pos = (frm_previous->getPPtr()->getState());
+    const Eigen::Quaternions frame_previous_ori  (frm_previous->getOPtr()->getState().data());
+    const Eigen::Vector3s frame_previous_vel = (frm_previous->getVPtr()->getState());
+
+    // Define results vector and Map bits over it
     Eigen::Matrix<wolf::Scalar, 10, 1> exp;
-    FrameBasePtr frm_current = getFeaturePtr()->getCapturePtr()->getFramePtr();
-    FrameBasePtr frm_imu = getFrameOtherPtr();
+    Eigen::Map<Eigen::Matrix<wolf::Scalar, 3, 1> >   pe(exp.data()    );
+    Eigen::Map<Eigen::Quaternion<wolf::Scalar> >     qe(exp.data() + 3);
+    Eigen::Map<Eigen::Matrix<wolf::Scalar, 3, 1> >   ve(exp.data() + 7);
 
-    //get information on current_frame in the constraintIMU
-    const Eigen::Vector3s frame_current_pos = dp_preint_;
-    const Eigen::Quaternions frame_current_ori = dq_preint_;
-    const Eigen::Vector3s frame_current_vel = dv_preint_;
-    const Eigen::Vector3s frame_imu_pos = (frm_imu->getPPtr()->getState());
-    const Eigen::Vector4s frame_imu_ori = (frm_imu->getOPtr()->getState());
-    const Eigen::Vector3s frame_imu_vel = (frm_imu->getVPtr()->getState());
-    Eigen::Quaternions frame_imu_ori_q(frame_imu_ori);
+    expectation(frame_previous_pos, frame_previous_ori, frame_previous_vel,
+                frame_current_pos, frame_current_ori, frame_current_vel,
+                dt_,
+                pe, qe, ve);
 
-    expectation(frame_current_pos, frame_current_ori, frame_current_vel, //frame_current_ab, frame_current_wb,
-                frame_imu_pos, frame_imu_ori_q, frame_imu_vel, exp);
     return exp;
 }
 
-template<typename D1, typename D2, typename D3>
-inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> & _p1,
-                                       const Eigen::QuaternionBase<D2> & _q1,
-                                       const Eigen::MatrixBase<D1> & _v1,
-                                       const Eigen::MatrixBase<D1> & _p2,
-                                       const Eigen::QuaternionBase<D2> & _q2,
-                                       const Eigen::MatrixBase<D1> & _v2,
-                                       Eigen::MatrixBase<D3> & _result) const
+template<typename D1, typename D2, typename D3, typename D4>
+inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> &        _p1,
+                                       const Eigen::QuaternionBase<D2> &    _q1,
+                                       const Eigen::MatrixBase<D1> &        _v1,
+                                       const Eigen::MatrixBase<D1> &        _p2,
+                                       const Eigen::QuaternionBase<D2> &    _q2,
+                                       const Eigen::MatrixBase<D1> &        _v2,
+                                       typename D1::Scalar                  _dt,
+                                       Eigen::MatrixBase<D3> &              _pe,
+                                       Eigen::QuaternionBase<D4> &          _qe,
+                                       Eigen::MatrixBase<D3> &              _ve) const
 {
-    //needed typedefs
-    typedef typename D2::Vector3 Vector3Map;
-    typedef typename D2::Scalar DataType;
-
-    //instead of maps we use static_asserts from eigen to detect size at compile time
-    //check entry sizes
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D1, 3)
-    EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D3, 10)
-     
-    // Predict delta: d_pred = x2 (-) x1
-    Vector3Map dp_predict (_q1.conjugate() * ( _p2 - _p1 - _v1 * (DataType)dt_ - (DataType)0.5 * g_.cast<DataType>() * (DataType)dt_2_ ));
-    Vector3Map dv_predict (_q1.conjugate() * ( _v2 - _v1 - g_.cast<DataType>() * (DataType)dt_ ));
-    Eigen::Quaternion<DataType> dq_predict (_q1.conjugate() * _q2);
-
-    _result.head(3) = dp_predict;
-    _result.segment(3,4) = dq_predict.coeffs();
-    _result.tail(3) = dv_predict;
+    imu::betweenStates(_p1, _q1, _v1, _p2, _q2, _v2, _dt, _pe, _qe, _ve);
 }
 
 inline JacobianMethod ConstraintIMU::getJacobianMethod() const
