@@ -37,12 +37,10 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
                          const T* const _o1,
                          const T* const _v1,
                          const T* const _b1,
-//                         const T* const _b_g1,
                          const T* const _p2,
                          const T* const _o2,
                          const T* const _v2,
                          const T* const _b2,
-//                         const T* const _b_g2,
                          T* _residuals) const;
         
         /* \brief : compute the residual from the state blocks being iterated by the solver. (same as operator())
@@ -91,8 +89,6 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
         void expectation(const Eigen::MatrixBase<D1> & _p1,
                          const Eigen::QuaternionBase<D2> & _q1,
                          const Eigen::MatrixBase<D1> & _v1,
-                         const Eigen::MatrixBase<D1> & _ab,
-                         const Eigen::MatrixBase<D1> & _wb,
                          const Eigen::MatrixBase<D1> & _p2,
                          const Eigen::QuaternionBase<D2> & _q2,
                          const Eigen::MatrixBase<D1> & _v2,
@@ -102,40 +98,8 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
             current frame data is taken from constraintIMU object.
             IMU frame is taken from wolf tree
         */
-        Eigen::VectorXs expectation() const
-        {
-            Eigen::Matrix<wolf::Scalar, 10, 1> exp;
-            FrameBasePtr frm_current    = getFeaturePtr()->getCapturePtr()->getFramePtr();
-            FrameBasePtr frm_imu     = getFrameOtherPtr();
-            
-            //get information on current_frame in the constraintIMU
-            const Eigen::Vector3s frame_current_pos     = dp_preint_;
-            const Eigen::Quaternions frame_current_ori  = dq_preint_;
-            const Eigen::Vector3s frame_current_vel     = dv_preint_;
-            const Eigen::Vector3s frame_current_ab      = acc_bias_preint_;
-            const Eigen::Vector3s frame_current_wb      = gyro_bias_preint_;
-            const Eigen::Vector3s frame_imu_pos         = (frm_imu->getPPtr()->getState());
-            const Eigen::Vector4s frame_imu_ori         = (frm_imu->getOPtr()->getState());
-            const Eigen::Vector3s frame_imu_vel         = (frm_imu->getVPtr()->getState());
+        Eigen::VectorXs expectation() const;
 
-            Eigen::Quaternions frame_imu_ori_q(frame_imu_ori);
-            
-            expectation(frame_current_pos,
-                        frame_current_ori,
-                        frame_current_vel,
-                        frame_current_ab,
-                        frame_current_wb,
-                        frame_imu_pos,
-                        frame_imu_ori_q,
-                        frame_imu_vel,
-                        exp);
-            return exp;
-        }
-
-    public:
-//        static wolf::ConstraintBasePtr create(const FeatureIMUPtr& _feature_ptr,
-//                                              const NodeBasePtr& _correspondant_ptr,
-//                                              const ProcessorBasePtr& _processor_ptr);
 
     private:
         /// Preintegrated delta
@@ -193,14 +157,10 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr& _ftr_ptr,
                         _cap_origin_ptr->getFramePtr()->getOPtr(),
                         _cap_origin_ptr->getFramePtr()->getVPtr(),
                         _cap_origin_ptr->getSensorIntrinsicPtr(),
-//                        _frame_ptr->getAccBiasPtr(),
-//                        _frame_ptr->getGyroBiasPtr(),
                         _ftr_ptr->getFramePtr()->getPPtr(),
                         _ftr_ptr->getFramePtr()->getOPtr(),
                         _ftr_ptr->getFramePtr()->getVPtr(),
                         _ftr_ptr->getCapturePtr()->getSensorIntrinsicPtr()),
-//                        std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getAccBiasPtr(),
-//                        std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getGyroBiasPtr()),
         dp_preint_(_ftr_ptr->dp_preint_), // dp, dv, dq at preintegration time
         dq_preint_(_ftr_ptr->dq_preint_),
         dv_preint_(_ftr_ptr->dv_preint_),
@@ -228,12 +188,10 @@ inline bool ConstraintIMU::operator ()(const T* const _p1,
                                        const T* const _q1,
                                        const T* const _v1,
                                        const T* const _b1,
-//                                       const T* const _wb1,
                                        const T* const _p2,
                                        const T* const _q2,
                                        const T* const _v2,
                                        const T* const _b2,
-//                                       const T* const _wb2,
                                        T* _residuals) const
 {
     using namespace Eigen;
@@ -311,7 +269,7 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1,
     const Eigen::Matrix<DataType,3,1> ab2(_ab2);
     const Eigen::Matrix<DataType,3,1> wb2(_wb2);
     Eigen::Matrix<DataType,10,1> expected;
-    this->expectation(_p1, _q1, _v1, _ab1, _wb1, _p2, _q2, _v2, expected);
+    this->expectation(_p1, _q1, _v1, _p2, _q2, _v2, expected);
 
     // Correct measured delta: delta_corr = delta + J_bias * (bias - bias_measured)
     Eigen::Matrix<DataType,3,1> dp_correct = dp_preint_.cast<DataType>() + dDp_dab_.cast<DataType>() * (ab1 - acc_bias_preint_.cast<DataType>()) + dDp_dwb_.cast<DataType>() * (wb1 - gyro_bias_preint_.cast<DataType>());
@@ -341,12 +299,30 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1,
     return true;
 }
 
+inline Eigen::VectorXs ConstraintIMU::expectation() const
+{
+    Eigen::Matrix<wolf::Scalar, 10, 1> exp;
+    FrameBasePtr frm_current = getFeaturePtr()->getCapturePtr()->getFramePtr();
+    FrameBasePtr frm_imu = getFrameOtherPtr();
+
+    //get information on current_frame in the constraintIMU
+    const Eigen::Vector3s frame_current_pos = dp_preint_;
+    const Eigen::Quaternions frame_current_ori = dq_preint_;
+    const Eigen::Vector3s frame_current_vel = dv_preint_;
+    const Eigen::Vector3s frame_imu_pos = (frm_imu->getPPtr()->getState());
+    const Eigen::Vector4s frame_imu_ori = (frm_imu->getOPtr()->getState());
+    const Eigen::Vector3s frame_imu_vel = (frm_imu->getVPtr()->getState());
+    Eigen::Quaternions frame_imu_ori_q(frame_imu_ori);
+
+    expectation(frame_current_pos, frame_current_ori, frame_current_vel, //frame_current_ab, frame_current_wb,
+                frame_imu_pos, frame_imu_ori_q, frame_imu_vel, exp);
+    return exp;
+}
+
 template<typename D1, typename D2, typename D3>
 inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> & _p1,
                                        const Eigen::QuaternionBase<D2> & _q1,
                                        const Eigen::MatrixBase<D1> & _v1,
-                                       const Eigen::MatrixBase<D1> & _ab,
-                                       const Eigen::MatrixBase<D1> & _wb,
                                        const Eigen::MatrixBase<D1> & _p2,
                                        const Eigen::QuaternionBase<D2> & _q2,
                                        const Eigen::MatrixBase<D1> & _v2,
@@ -355,7 +331,6 @@ inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> & _p1,
     //needed typedefs
     typedef typename D2::Vector3 Vector3Map;
     typedef typename D2::Scalar DataType;
-    typedef Eigen::Map <Eigen::Matrix<DataType,4,1> > ConstVector4Map;
 
     //instead of maps we use static_asserts from eigen to detect size at compile time
     //check entry sizes
@@ -366,10 +341,9 @@ inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> & _p1,
     Vector3Map dp_predict (_q1.conjugate() * ( _p2 - _p1 - _v1 * (DataType)dt_ - (DataType)0.5 * g_.cast<DataType>() * (DataType)dt_2_ ));
     Vector3Map dv_predict (_q1.conjugate() * ( _v2 - _v1 - g_.cast<DataType>() * (DataType)dt_ ));
     Eigen::Quaternion<DataType> dq_predict (_q1.conjugate() * _q2);
-    ConstVector4Map dq_vec4(dq_predict.coeffs().data());
 
     _result.head(3) = dp_predict;
-    _result.segment(3,4) = dq_vec4;
+    _result.segment(3,4) = dq_predict.coeffs();
     _result.tail(3) = dv_predict;
 }
 
@@ -377,11 +351,6 @@ inline JacobianMethod ConstraintIMU::getJacobianMethod() const
 {
     return JAC_AUTO;
 }
-
-//inline wolf::ConstraintBasePtr ConstraintIMU::create(const FeatureIMUPtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr, const ProcessorBasePtr& _processor_ptr)
-//{
-//    return std::make_shared<ConstraintIMU>(_feature_ptr, std::static_pointer_cast<FrameIMU>(_correspondant_ptr), _processor_ptr);
-//}
 
 
 } // namespace wolf
