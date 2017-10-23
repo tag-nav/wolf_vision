@@ -87,20 +87,35 @@ struct Extensions
   };
 };
 
-template <typename Ar, typename S, typename T, typename... Args>
-void serialize(S& stream, T&& object, Args&&... args)
+template <typename Ar>
+void serialize_pack(Ar&&)
 {
-  Ar archive(stream);
+  // end of expansion
+}
 
-  archive( cereal::make_nvp("object", std::forward<T>(object)) );
-  archive( cereal::make_nvp("object", std::forward<Args>(args))... );
+/// @todo demangle typeid.name ?
+
+template <typename Ar, typename T, typename... Args>
+void serialize_pack(Ar&& archive, T&& object, Args&&... args)
+{
+  archive( cereal::make_nvp(typeid(T).name(), std::forward<T>(object)) );
+  serialize_pack(archive, std::forward<Args>(args)...);
 }
 
 template <typename Ar, typename S, typename T>
 void serialize(S& stream, T&& object)
 {
   Ar archive(stream);
-  archive( cereal::make_nvp("object", std::forward<T>(object)) );
+  archive( cereal::make_nvp(typeid(T).name(), std::forward<T>(object)) );
+}
+
+template <typename Ar, typename S, typename T, typename... Args>
+void serialize(S& stream, T&& object, Args&&... args)
+{
+  Ar archive(stream);
+  archive( cereal::make_nvp(typeid(T).name(), std::forward<T>(object)) );
+
+  serialize_pack(archive, std::forward<Args>(args)...);
 }
 
 template <typename EXT, typename InAr, typename OutAr>
