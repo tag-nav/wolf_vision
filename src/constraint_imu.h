@@ -41,7 +41,7 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
                          const T* const _o2,
                          const T* const _v2,
                          const T* const _b2,
-                         T* _residuals) const;
+                         T* _res) const;
         
         /* \brief : compute the residual from the state blocks being iterated by the solver. (same as operator())
             -> computes the expected measurement
@@ -69,7 +69,7 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
                           const Eigen::MatrixBase<D1> & _v2,
                           const Eigen::MatrixBase<D1> & _ab2,
                           const Eigen::MatrixBase<D1> & _wb2,
-                          Eigen::MatrixBase<D3> & _residuals) const;
+                          Eigen::MatrixBase<D3> & _res) const;
 
         virtual JacobianMethod getJacobianMethod() const override;
 
@@ -193,7 +193,7 @@ inline bool ConstraintIMU::operator ()(const T* const _p1,
                                        const T* const _q2,
                                        const T* const _v2,
                                        const T* const _b2,
-                                       T* _residuals) const
+                                       T* _res) const
 {
     using namespace Eigen;
 
@@ -210,9 +210,9 @@ inline bool ConstraintIMU::operator ()(const T* const _p1,
     Map<const Matrix<T,3,1> > ab2(_b2);
     Map<const Matrix<T,3,1> > wb2(_b2 + 3);
 
-    Map<Matrix<T,15,1> > residuals(_residuals);
+    Map<Matrix<T,15,1> > res(_res);
 
-    residual(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, residuals);
+    residual(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, res);
 
     return true;
 }
@@ -228,7 +228,7 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> & _p1,
                                         const Eigen::MatrixBase<D1> & _v2,
                                         const Eigen::MatrixBase<D1> & _ab2,
                                         const Eigen::MatrixBase<D1> & _wb2,
-                                        Eigen::MatrixBase<D3> & _residuals) const
+                                        Eigen::MatrixBase<D3> & _res) const
 {
     //needed typedefs
     typedef typename D2::Scalar T;
@@ -271,9 +271,9 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> & _p1,
     Eigen::Matrix<T,3,1> wb_error(_wb1 - _wb2);
 
     // 4. Residuals are the weighted errors
-    _residuals.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>()  * dpov_error;
-    _residuals.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error;
-    _residuals.tail(3)       = sqrt_A_r_dt_inv.cast<T>() * wb_error;
+    _res.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>()  * dpov_error;
+    _res.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error;
+    _res.tail(3)       = sqrt_A_r_dt_inv.cast<T>() * wb_error;
 
     return true;
 }
