@@ -395,7 +395,7 @@ class ProcessorMotion : public ProcessorBase
          * \param _feature_motion: the parent feature
          * \param _frame_origin: the frame constrained by this motion constraint
          */
-        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin) = 0;
+        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin) = 0;
 
         Motion motionZero(const TimeStamp& _ts);
         CaptureMotionPtr getCaptureMotionContainingTimeStamp(const TimeStamp& _ts);

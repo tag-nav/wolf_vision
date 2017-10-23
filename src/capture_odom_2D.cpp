@@ -26,7 +26,6 @@ CaptureOdom2D::CaptureOdom2D(const TimeStamp& _init_ts,
                              FrameBasePtr _origin_frame_ptr):
         CaptureMotion(_init_ts, _sensor_ptr, _data, _data_cov, 3, 3, _origin_frame_ptr)
 {
-    WOLF_TRACE(" ");
     setType("ODOM 2D");
 }
 

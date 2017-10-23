@@ -310,7 +310,6 @@ TEST(Odom2D, KF_callback)
     //                                              KF10
     //                          KF11
 
-
     // Create Wolf tree nodes
     ProblemPtr problem = Problem::create("PO 2D");
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
@@ -398,12 +397,20 @@ TEST(Odom2D, KF_callback)
 
     MotionBuffer key_buffer_n = key_capture_n->getBuffer();
 
+//    show(problem);
+    problem->print(4,1,1,1);
+    problem->check(2);
+
+    WOLF_TRACE(" ");
     std::string report = ceres_manager.solve(1);
+    WOLF_TRACE(" ");
 //    std::cout << report << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
+    WOLF_TRACE(" ");
 
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
     ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance()       , integrated_cov_vector [n_split], 1e-6);
+    WOLF_TRACE(" ");
 
     ////////////////////////////////////////////////////////////////
     // Split between keyframes, exact timestamp
@@ -413,15 +420,19 @@ TEST(Odom2D, KF_callback)
 
 //    problem->print(4,1,1,0);
 
+    WOLF_TRACE(" ");
     x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
 
+    WOLF_TRACE(" ");
     ASSERT_TRUE(problem->check(0));
     processor_odom2d->keyFrameCallback(keyframe_1, 0);
     ASSERT_TRUE(problem->check(0));
+    WOLF_TRACE(" ");
 
     CaptureMotionPtr key_capture_m = std::static_pointer_cast<CaptureMotion>(keyframe_1->getCaptureList().front());
     MotionBuffer key_buffer_m = key_capture_m->getBuffer();
+    WOLF_TRACE(" ");
 
     // solve
 //    cout << "===== full ====" << endl;
@@ -433,14 +444,17 @@ TEST(Odom2D, KF_callback)
 //    std::cout << report << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
 //    show(problem);
+    WOLF_TRACE(" ");
 
     // check the split KF
     ASSERT_POSE2D_APPROX(keyframe_1->getState()                  , integrated_pose_vector[m_split], 1e-6);
     ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_1) , integrated_cov_vector [m_split], 1e-6); // FIXME test does not pass
+    WOLF_TRACE(" ");
 
     // check other KF in the future of the split KF
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
     ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_2)   , integrated_cov_vector [n_split], 1e-6);
+    WOLF_TRACE(" ");
 
     // Check full trajectory
     t = t0;
@@ -451,6 +465,7 @@ TEST(Odom2D, KF_callback)
         //        WOLF_DEBUG("ground truth(", t, ") = ", integrated_pose_vector[n].transpose());
         ASSERT_MATRIX_APPROX(problem->getState(t), integrated_pose_vector[n], 1e-6);
     }
+    WOLF_TRACE(" ");
 }
 
 

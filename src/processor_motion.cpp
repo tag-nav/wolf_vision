@@ -99,7 +99,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         FeatureBasePtr key_feature_ptr = emplaceFeature(last_ptr_, key_frame_ptr);
 
         // create motion constraint and link it to parent feature and other frame (which is origin's frame)
-        /*auto ctr_ptr =*/ emplaceConstraint(key_feature_ptr, origin_ptr_->getFramePtr());
+        auto ctr_ptr = emplaceConstraint(key_feature_ptr, origin_ptr_);
 
         //        CaptureMotionPtr new_capture_ptr = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(),
         //                                                                           getSensorPtr(),
@@ -278,7 +278,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     FeatureBasePtr new_feature = emplaceFeature(new_capture, new_keyframe_origin);
 
     // create motion constraint and add it to the feature, and link it to the other frame (origin)
-    emplaceConstraint(new_feature, new_keyframe_origin);
+    emplaceConstraint(new_feature, new_capture);
 
 
 
@@ -305,7 +305,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
         // Modify existing constraint --------
         // Instead of modifying, we remove one ctr, and create a new one.
         auto ctr_to_remove = existing_feature->getConstraintList().back(); // there is only one constraint!
-        auto new_ctr = emplaceConstraint(existing_feature, _new_keyframe);
+        auto new_ctr = emplaceConstraint(existing_feature, new_capture);
         ctr_to_remove->remove();  // remove old constraint now (otherwise c->remove() gets propagated to f, C, F, etc.)
     }
 
@@ -444,21 +444,6 @@ CaptureMotionPtr ProcessorMotion::emplaceCapture(const TimeStamp& _ts,
                                                  const FrameBasePtr& _frame_own,
                                                  const FrameBasePtr& _frame_origin)
 {
-    /* TODO do this:
-     *
-     * - code emplaceCapture() here
-     * - make virtual pure createCapture()
-     * - implement createCapture() in derived classes
-     *
-     * emplaceCapture( ts, sensor, data, data_cov, calib, frame_own, frame_origin )
-     * {
-     *     CaptureMotionPtr cap = createCapture( ts, sensor, data, data_cov, calib, frame_own, frame_origin );
-     *     // cap->setCalibration(calib); // might also do it inside createCapture above
-     *     frame_own->addCapture(cap);
-     *     return cap;
-     * }
-     */
-
     CaptureMotionPtr capture = createCapture(_ts,
                                              _sensor,
                                              _data,

@@ -211,13 +211,14 @@ FeatureBasePtr ProcessorIMU::createFeature(CaptureMotionPtr _capture_motion, Fra
     return key_feature_ptr;
 }
 
-ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
+ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin)
 {
+    CaptureIMUPtr cap_imu = std::static_pointer_cast<CaptureIMU>(_capture_origin);
     FeatureIMUPtr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
-    FrameIMUPtr frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
-    ConstraintIMUPtr ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, frm_imu, shared_from_this());
+//    FrameIMUPtr frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
+    ConstraintIMUPtr ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, cap_imu, shared_from_this());
     _feature_motion->addConstraint(ctr_imu);
-    _frame_origin->addConstrainedBy(ctr_imu);
+    cap_imu->getFramePtr()->addConstrainedBy(ctr_imu);
     return ctr_imu;
 }
 

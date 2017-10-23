@@ -104,9 +104,9 @@ class ProcessorOdom3D : public ProcessorMotion
                                                const MatrixXs& _data_cov,
                                                const FrameBasePtr& _frame_origin) override;
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
-                                           FrameBasePtr _frame_origin) override;
+                                                    CaptureBasePtr _capture_origin) override;
         virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion,
-                                            FrameBasePtr _related_frame) override;
+                                             FrameBasePtr _related_frame) override;
 
     protected:
         // noise parameters (stolen from owner SensorOdom3D)
@@ -152,11 +152,11 @@ inline CaptureMotionPtr ProcessorOdom3D::createCapture(const TimeStamp& _ts,
 }
 
 inline ConstraintBasePtr ProcessorOdom3D::emplaceConstraint(FeatureBasePtr _feature_motion,
-                                                           FrameBasePtr _frame_origin)
+                                                            CaptureBasePtr _capture_origin)
 {
-    ConstraintOdom3DPtr ctr_odom = std::make_shared<ConstraintOdom3D>(_feature_motion, _frame_origin, shared_from_this());
+    ConstraintOdom3DPtr ctr_odom = std::make_shared<ConstraintOdom3D>(_feature_motion, _capture_origin->getFramePtr(), shared_from_this());
     _feature_motion->addConstraint(ctr_odom);
-    _frame_origin->addConstrainedBy(ctr_odom);
+    _capture_origin->getFramePtr()->addConstrainedBy(ctr_odom);
     return ctr_odom;
 }
 

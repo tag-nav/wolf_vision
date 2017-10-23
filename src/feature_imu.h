@@ -37,8 +37,11 @@ class FeatureIMU : public FeatureBase
          * \param gyro_bias gyroscope bias of origin frame
          *
          */
-        FeatureIMU(const Eigen::VectorXs& _delta_preintegrated, const Eigen::MatrixXs& _delta_preintegrated_covariance, 
-        const Eigen::Vector3s& _acc_bias, const Eigen::Vector3s& _gyro_bias, const Eigen::Matrix<wolf::Scalar,9,6>& _dD_db_jacobians);
+        FeatureIMU(const Eigen::VectorXs& _delta_preintegrated,
+                   const Eigen::MatrixXs& _delta_preintegrated_covariance,
+                   const Eigen::Vector3s& _acc_bias,
+                   const Eigen::Vector3s& _gyro_bias,
+                   const Eigen::Matrix<wolf::Scalar,9,6>& _dD_db_jacobians);
 
         /** \brief Constructor from capture pointer and measure
          *
@@ -48,7 +51,10 @@ class FeatureIMU : public FeatureBase
          * \param _cap_imu_ptr is the CaptureIMUPtr pointing to desired capture containing the origin frame
          *
          */
-        FeatureIMU(const Eigen::VectorXs& _delta_preintegrated, const Eigen::MatrixXs& _delta_preintegrated_covariance, const wolf::CaptureIMUPtr _cap_imu_ptr, const Eigen::Matrix<wolf::Scalar,9,6>& _dD_db_jacobians);
+        FeatureIMU(const Eigen::VectorXs& _delta_preintegrated,
+                   const Eigen::MatrixXs& _delta_preintegrated_covariance,
+                   const wolf::CaptureIMUPtr _cap_imu_ptr,
+                   const Eigen::Matrix<wolf::Scalar,9,6>& _dD_db_jacobians);
 
         virtual ~FeatureIMU();
 
@@ -63,11 +69,13 @@ class FeatureIMU : public FeatureBase
         Eigen::Vector3s gyro_bias_preint_;      ///< Gyrometer bias used for delta preintegration
 
         // Jacobians of preintegrated deltas wrt biases
-        Eigen::Matrix3s dDp_dab_;
-        Eigen::Matrix3s dDv_dab_;
-        Eigen::Matrix3s dDp_dwb_;
-        Eigen::Matrix3s dDv_dwb_;
-        Eigen::Matrix3s dDq_dwb_;
+//        Eigen::Matrix3s dDp_dab_;
+//        Eigen::Matrix3s dDv_dab_;
+//        Eigen::Matrix3s dDp_dwb_;
+//        Eigen::Matrix3s dDv_dwb_;
+//        Eigen::Matrix3s dDq_dwb_;
+
+        Eigen::Matrix<Scalar, 9, 6> jacobian_bias_;
 
 };
 

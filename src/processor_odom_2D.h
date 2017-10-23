@@ -74,7 +74,7 @@ class ProcessorOdom2D : public ProcessorMotion
         virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion,
                                              FrameBasePtr _related_frame) override;
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
-                                                    FrameBasePtr _frame_origin) override;
+                                                    CaptureBasePtr _capture_origin) override;
 
     protected:
         Scalar dist_traveled_th_;
@@ -218,11 +218,11 @@ CaptureMotionPtr ProcessorOdom2D::createCapture(const TimeStamp& _ts,
     return capture_odom;
 }
 
-inline ConstraintBasePtr ProcessorOdom2D::emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
+inline ConstraintBasePtr ProcessorOdom2D::emplaceConstraint(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin)
 {
-    ConstraintOdom2DPtr ctr_odom = std::make_shared<ConstraintOdom2D>(_feature_motion, _frame_origin, shared_from_this());
+    ConstraintOdom2DPtr ctr_odom = std::make_shared<ConstraintOdom2D>(_feature_motion, _capture_origin->getFramePtr(), shared_from_this());
     _feature_motion->addConstraint(ctr_odom);
-    _frame_origin->addConstrainedBy(ctr_odom);
+    _capture_origin->getFramePtr()->addConstrainedBy(ctr_odom);
     return ctr_odom;
 }
 

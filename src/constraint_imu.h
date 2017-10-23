@@ -16,11 +16,11 @@ namespace wolf {
 WOLF_PTR_TYPEDEFS(ConstraintIMU);
 
 //class
-class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>
+class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
 {
     public:
         ConstraintIMU(const FeatureIMUPtr& _ftr_ptr,
-                      const FrameIMUPtr& _frame_ptr,
+                      const CaptureIMUPtr& _capture_origin_ptr,
                       const ProcessorBasePtr& _processor_ptr = nullptr,
                       bool _apply_loss_function = false,
                       ConstraintStatus _status = CTR_ACTIVE);
@@ -36,13 +36,13 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 3, 3
         bool operator ()(const T* const _p1,
                          const T* const _o1,
                          const T* const _v1,
-                         const T* const _b_a1,
-                         const T* const _b_g1,
+                         const T* const _b1,
+//                         const T* const _b_g1,
                          const T* const _p2,
                          const T* const _o2,
                          const T* const _v2,
-                         const T* const _b_a2,
-                         const T* const _b_g2,
+                         const T* const _b2,
+//                         const T* const _b_g2,
                          T* _residuals) const;
         
         /* \brief : compute the residual from the state blocks being iterated by the solver. (same as operator())
@@ -133,8 +133,9 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 3, 3
         }
 
     public:
-        static wolf::ConstraintBasePtr create(const FeatureIMUPtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr,
-                                              const ProcessorBasePtr& _processor_ptr);
+//        static wolf::ConstraintBasePtr create(const FeatureIMUPtr& _feature_ptr,
+//                                              const NodeBasePtr& _correspondant_ptr,
+//                                              const ProcessorBasePtr& _processor_ptr);
 
     private:
         /// Preintegrated delta
@@ -175,29 +176,42 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 3, 3
 };
 
 inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr& _ftr_ptr,
-                                    const FrameIMUPtr& _frame_ptr,
+                                    const CaptureIMUPtr& _cap_origin_ptr,
                                     const ProcessorBasePtr& _processor_ptr,
-                                    bool _apply_loss_function, ConstraintStatus _status) :
-                ConstraintAutodiff<ConstraintIMU,15, 3, 4, 3, 3, 3, 3, 4, 3, 3, 3>( // ...
-                        CTR_IMU, _frame_ptr, nullptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status,
-                        _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _frame_ptr->getVPtr(),
-                        _frame_ptr->getAccBiasPtr(), _frame_ptr->getGyroBiasPtr(),
+                                    bool _apply_loss_function,
+                                    ConstraintStatus _status) :
+                ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>( // ...
+                        CTR_IMU,
+                        _cap_origin_ptr->getFramePtr(),
+                        _cap_origin_ptr,
+                        nullptr,
+                        nullptr,
+                        _processor_ptr,
+                        _apply_loss_function,
+                        _status,
+                        _cap_origin_ptr->getFramePtr()->getPPtr(),
+                        _cap_origin_ptr->getFramePtr()->getOPtr(),
+                        _cap_origin_ptr->getFramePtr()->getVPtr(),
+                        _cap_origin_ptr->getSensorIntrinsicPtr(),
+//                        _frame_ptr->getAccBiasPtr(),
+//                        _frame_ptr->getGyroBiasPtr(),
                         _ftr_ptr->getFramePtr()->getPPtr(),
                         _ftr_ptr->getFramePtr()->getOPtr(),
                         _ftr_ptr->getFramePtr()->getVPtr(),
-                        std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getAccBiasPtr(),
-                        std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getGyroBiasPtr()),
+                        _ftr_ptr->getCapturePtr()->getSensorIntrinsicPtr()),
+//                        std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getAccBiasPtr(),
+//                        std::static_pointer_cast<FrameIMU>(_ftr_ptr->getFramePtr())->getGyroBiasPtr()),
         dp_preint_(_ftr_ptr->dp_preint_), // dp, dv, dq at preintegration time
         dq_preint_(_ftr_ptr->dq_preint_),
         dv_preint_(_ftr_ptr->dv_preint_),
         acc_bias_preint_(_ftr_ptr->acc_bias_preint_), // state biases at preintegration time
         gyro_bias_preint_(_ftr_ptr->gyro_bias_preint_),
-        dDp_dab_(_ftr_ptr->dDp_dab_), // Jacs of dp dv dq wrt biases
-        dDv_dab_(_ftr_ptr->dDv_dab_),
-        dDp_dwb_(_ftr_ptr->dDp_dwb_),
-        dDv_dwb_(_ftr_ptr->dDv_dwb_),
-        dDq_dwb_(_ftr_ptr->dDq_dwb_),
-        dt_(_ftr_ptr->getFramePtr()->getTimeStamp() - _frame_ptr->getTimeStamp()),
+        dDp_dab_(_ftr_ptr->jacobian_bias_.block(0,0,3,3)), // Jacs of dp dv dq wrt biases
+        dDv_dab_(_ftr_ptr->jacobian_bias_.block(6,0,3,3)),
+        dDp_dwb_(_ftr_ptr->jacobian_bias_.block(0,3,3,3)),
+        dDv_dwb_(_ftr_ptr->jacobian_bias_.block(6,3,3,3)),
+        dDq_dwb_(_ftr_ptr->jacobian_bias_.block(3,3,3,3)),
+        dt_(_ftr_ptr->getFramePtr()->getTimeStamp() - _cap_origin_ptr->getTimeStamp()),
         dt_2_(dt_*dt_),
         g_(wolf::gravity()),
         ab_rate_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getAbRateStdev()),
@@ -213,13 +227,13 @@ template<typename T>
 inline bool ConstraintIMU::operator ()(const T* const _p1,
                                        const T* const _q1,
                                        const T* const _v1,
-                                       const T* const _ab1,
-                                       const T* const _wb1,
+                                       const T* const _b1,
+//                                       const T* const _wb1,
                                        const T* const _p2,
                                        const T* const _q2,
                                        const T* const _v2,
-                                       const T* const _ab2,
-                                       const T* const _wb2,
+                                       const T* const _b2,
+//                                       const T* const _wb2,
                                        T* _residuals) const
 {
     using namespace Eigen;
@@ -228,14 +242,14 @@ inline bool ConstraintIMU::operator ()(const T* const _p1,
     Map<const Matrix<T,3,1> > p1(_p1);
     Map<const Quaternion<T> > q1(_q1);
     Map<const Matrix<T,3,1> > v1(_v1);
-    Map<const Matrix<T,3,1> > ab1(_ab1);
-    Map<const Matrix<T,3,1> > wb1(_wb1);
+    Map<const Matrix<T,3,1> > ab1(_b1);
+    Map<const Matrix<T,3,1> > wb1(_b1 + 3);
 
     Map<const Matrix<T,3,1> > p2(_p2);
     Map<const Quaternion<T> > q2(_q2);
     Map<const Matrix<T,3,1> > v2(_v2);
-    Map<const Matrix<T,3,1> > ab2(_ab2);
-    Map<const Matrix<T,3,1> > wb2(_wb2);
+    Map<const Matrix<T,3,1> > ab2(_b2);
+    Map<const Matrix<T,3,1> > wb2(_b2 + 3);
 
     Map<Matrix<T,15,1> > residuals(_residuals);
 
@@ -364,10 +378,10 @@ inline JacobianMethod ConstraintIMU::getJacobianMethod() const
     return JAC_AUTO;
 }
 
-inline wolf::ConstraintBasePtr ConstraintIMU::create(const FeatureIMUPtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr, const ProcessorBasePtr& _processor_ptr)
-{
-    return std::make_shared<ConstraintIMU>(_feature_ptr, std::static_pointer_cast<FrameIMU>(_correspondant_ptr), _processor_ptr);
-}
+//inline wolf::ConstraintBasePtr ConstraintIMU::create(const FeatureIMUPtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr, const ProcessorBasePtr& _processor_ptr)
+//{
+//    return std::make_shared<ConstraintIMU>(_feature_ptr, std::static_pointer_cast<FrameIMU>(_correspondant_ptr), _processor_ptr);
+//}
 
 
 } // namespace wolf
