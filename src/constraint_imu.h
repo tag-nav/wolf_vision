@@ -59,17 +59,17 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
          * Matrix<9,1, wolf::Scalar> _residuals : to retrieve residuals (POV) O is rotation vector... NOT A QUATERNION
         */
         template<typename D1, typename D2, typename D3>
-        bool residual(const Eigen::MatrixBase<D1> & _p1,
-                          const Eigen::QuaternionBase<D2> & _q1,
-                          const Eigen::MatrixBase<D1> & _v1,
-                          const Eigen::MatrixBase<D1> & _ab1,
-                          const Eigen::MatrixBase<D1> & _wb1,
-                          const Eigen::MatrixBase<D1> & _p2,
-                          const Eigen::QuaternionBase<D2> & _q2,
-                          const Eigen::MatrixBase<D1> & _v2,
-                          const Eigen::MatrixBase<D1> & _ab2,
-                          const Eigen::MatrixBase<D1> & _wb2,
-                          Eigen::MatrixBase<D3> & _res) const;
+        bool residual(const Eigen::MatrixBase<D1> &     _p1,
+                      const Eigen::QuaternionBase<D2> & _q1,
+                      const Eigen::MatrixBase<D1> &     _v1,
+                      const Eigen::MatrixBase<D1> &     _ab1,
+                      const Eigen::MatrixBase<D1> &     _wb1,
+                      const Eigen::MatrixBase<D1> &     _p2,
+                      const Eigen::QuaternionBase<D2> & _q2,
+                      const Eigen::MatrixBase<D1> &     _v2,
+                      const Eigen::MatrixBase<D1> &     _ab2,
+                      const Eigen::MatrixBase<D1> &     _wb2,
+                      Eigen::MatrixBase<D3> &           _res) const;
 
         virtual JacobianMethod getJacobianMethod() const override;
 
@@ -86,16 +86,16 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
          * Matrix<10,1, wolf::Scalar> _expectation : to retrieve resulting expectation (PVQ)
         */
         template<typename D1, typename D2, typename D3, typename D4>
-        void expectation(const Eigen::MatrixBase<D1> & _p1,
-                         const Eigen::QuaternionBase<D2> & _q1,
-                         const Eigen::MatrixBase<D1> & _v1,
-                         const Eigen::MatrixBase<D1> & _p2,
-                         const Eigen::QuaternionBase<D2> & _q2,
-                         const Eigen::MatrixBase<D1> & _v2,
-                         typename D1::Scalar _dt,
-                         Eigen::MatrixBase<D3> & _pe,
-                         Eigen::QuaternionBase<D4> & _qe,
-                         Eigen::MatrixBase<D3> & _ve) const;
+        void expectation(const Eigen::MatrixBase<D1> &      _p1,
+                         const Eigen::QuaternionBase<D2> &  _q1,
+                         const Eigen::MatrixBase<D1> &      _v1,
+                         const Eigen::MatrixBase<D1> &      _p2,
+                         const Eigen::QuaternionBase<D2> &  _q2,
+                         const Eigen::MatrixBase<D1> &      _v2,
+                         typename D1::Scalar                _dt,
+                         Eigen::MatrixBase<D3> &            _pe,
+                         Eigen::QuaternionBase<D4> &        _qe,
+                         Eigen::MatrixBase<D3> &            _ve) const;
 
         /* \brief : return the expected value given the state blocks in the wolf tree
             current frame data is taken from constraintIMU object.
@@ -123,7 +123,6 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
 
         /// Metrics
         const wolf::Scalar dt_; ///< delta-time and delta-time-squared between keyframes
-        const Eigen::Vector3s g_; ///< acceleration of gravity in World frame
         const wolf::Scalar ab_rate_stdev_, wb_rate_stdev_; //stdev for standard_deviation (= sqrt(variance))
         
         /* bias covariance and bias residuals
@@ -142,11 +141,11 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
         const Eigen::Matrix3s sqrt_W_r_dt_inv;
 };
 
-inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr& _ftr_ptr,
-                                    const CaptureIMUPtr& _cap_origin_ptr,
+inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
+                                    const CaptureIMUPtr&    _cap_origin_ptr,
                                     const ProcessorBasePtr& _processor_ptr,
-                                    bool _apply_loss_function,
-                                    ConstraintStatus _status) :
+                                    bool                    _apply_loss_function,
+                                    ConstraintStatus        _status) :
                 ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>( // ...
                         CTR_IMU,
                         _cap_origin_ptr->getFramePtr(),
@@ -175,7 +174,6 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr& _ftr_ptr,
         dDv_dwb_(_ftr_ptr->jacobian_bias_.block(6,3,3,3)),
         dDq_dwb_(_ftr_ptr->jacobian_bias_.block(3,3,3,3)),
         dt_(_ftr_ptr->getFramePtr()->getTimeStamp() - _cap_origin_ptr->getTimeStamp()),
-        g_(wolf::gravity()),
         ab_rate_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getAbRateStdev()),
         wb_rate_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getWbRateStdev()),
         sqrt_A_r_dt_inv((Eigen::Matrix3s::Identity() * ab_rate_stdev_ * sqrt(dt_)).inverse()),
@@ -218,17 +216,17 @@ inline bool ConstraintIMU::operator ()(const T* const _p1,
 }
 
 template<typename D1, typename D2, typename D3>
-inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> & _p1,
-                                        const Eigen::QuaternionBase<D2> & _q1,
-                                        const Eigen::MatrixBase<D1> & _v1,
-                                        const Eigen::MatrixBase<D1> & _ab1,
-                                        const Eigen::MatrixBase<D1> & _wb1,
-                                        const Eigen::MatrixBase<D1> & _p2,
-                                        const Eigen::QuaternionBase<D2> & _q2,
-                                        const Eigen::MatrixBase<D1> & _v2,
-                                        const Eigen::MatrixBase<D1> & _ab2,
-                                        const Eigen::MatrixBase<D1> & _wb2,
-                                        Eigen::MatrixBase<D3> & _res) const
+inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
+                                    const Eigen::QuaternionBase<D2> &   _q1,
+                                    const Eigen::MatrixBase<D1> &       _v1,
+                                    const Eigen::MatrixBase<D1> &       _ab1,
+                                    const Eigen::MatrixBase<D1> &       _wb1,
+                                    const Eigen::MatrixBase<D1> &       _p2,
+                                    const Eigen::QuaternionBase<D2> &   _q2,
+                                    const Eigen::MatrixBase<D1> &       _v2,
+                                    const Eigen::MatrixBase<D1> &       _ab2,
+                                    const Eigen::MatrixBase<D1> &       _wb2,
+                                    Eigen::MatrixBase<D3> &             _res) const
 {
     //needed typedefs
     typedef typename D2::Scalar T;
@@ -243,9 +241,9 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> & _p1,
     imu::betweenStates(_p1, _q1, _v1, _p2, _q2, _v2, (T)dt_, dp_exp, dq_exp, dv_exp);
 
     // 2. Corrected integrated delta: delta_corr = delta_preint (+) J_bias * (bias_current - bias_preint)
-    Eigen::Matrix<T,3,1> dp_correct;// = dp_preint_.cast<T>() +     dDp_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDp_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
-    Eigen::Quaternion<T> dq_correct;// = dq_preint_.cast<T>() * v2q(dDq_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>()));
-    Eigen::Matrix<T,3,1> dv_correct;// = dv_preint_.cast<T>() +     dDv_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDv_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
+    Eigen::Matrix<T,3,1> dp_correct;
+    Eigen::Quaternion<T> dq_correct;
+    Eigen::Matrix<T,3,1> dv_correct;
 
     imu::plus(dp_preint_.cast<T>(),
               dq_preint_.cast<T>(),
@@ -271,7 +269,7 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> & _p1,
     Eigen::Matrix<T,3,1> wb_error(_wb1 - _wb2);
 
     // 4. Residuals are the weighted errors
-    _res.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>()  * dpov_error;
+    _res.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * dpov_error;
     _res.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error;
     _res.tail(3)       = sqrt_A_r_dt_inv.cast<T>() * wb_error;
 
