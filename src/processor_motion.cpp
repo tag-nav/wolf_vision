@@ -96,7 +96,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         key_frame_ptr->setKey();
 
         // create motion feature and add it to the key_capture
-        FeatureBasePtr key_feature_ptr = emplaceFeature(last_ptr_, key_frame_ptr);
+        FeatureBasePtr key_feature_ptr = emplaceFeature(last_ptr_);
 
         // create motion constraint and link it to parent feature and other frame (which is origin's frame)
         auto ctr_ptr = emplaceConstraint(key_feature_ptr, origin_ptr_);
@@ -275,7 +275,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     }
 
     // create motion feature and add it to the capture
-    FeatureBasePtr new_feature = emplaceFeature(new_capture, new_keyframe_origin);
+    FeatureBasePtr new_feature = emplaceFeature(new_capture);
 
     // create motion constraint and add it to the feature, and link it to the other frame (origin)
     emplaceConstraint(new_feature, new_capture);
@@ -463,9 +463,9 @@ CaptureMotionPtr ProcessorMotion::emplaceCapture(const TimeStamp& _ts,
     return capture;
 }
 
-FeatureBasePtr ProcessorMotion::emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame)
+FeatureBasePtr ProcessorMotion::emplaceFeature(CaptureMotionPtr _capture_motion)
 {
-    FeatureBasePtr feature = createFeature(_capture_motion, _related_frame);
+    FeatureBasePtr feature = createFeature(_capture_motion);
     _capture_motion->addFeature(feature);
     return feature;
 }

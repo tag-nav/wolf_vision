@@ -386,10 +386,9 @@ class ProcessorMotion : public ProcessorBase
 
         /** \brief create a feature corresponding to given capture and add the feature to this capture
          * \param _capture_motion: the parent capture
-         * \param _related_frame: frame of the last_ptr set as KEYFRAME. (used only in processor_imu.h for now...)
          */
-        FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame);
-        virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame) = 0;
+        FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_own);
+        virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_own) = 0;
 
         /** \brief create a constraint and link it in the wolf tree
          * \param _feature_motion: the parent feature
