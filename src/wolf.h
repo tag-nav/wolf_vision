@@ -13,9 +13,9 @@
 #include "logging.h"
 
 //includes from Eigen lib
-#include <eigen3/Eigen/Dense>
-#include <eigen3/Eigen/Geometry>
-#include <eigen3/Eigen/Sparse>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
+#include <Eigen/Sparse>
 #include <libgen.h>
 
 //includes from std lib
