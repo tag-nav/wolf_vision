@@ -14,6 +14,8 @@ SET(HDRS_SERIALIZATION ${HDRS_SERIALIZATION}
     ${CMAKE_CURRENT_SOURCE_DIR}/serialization_processor_odom2d_params.h
     ${CMAKE_CURRENT_SOURCE_DIR}/serialization_processor_odom3d_params.h
 
+    ${CMAKE_CURRENT_SOURCE_DIR}/serialization_time_stamp.h
+
     ${CMAKE_CURRENT_SOURCE_DIR}/archives.h
     ${CMAKE_CURRENT_SOURCE_DIR}/io.h
 
