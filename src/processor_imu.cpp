@@ -8,16 +8,7 @@ ProcessorIMU::ProcessorIMU(ProcessorIMUParamsPtr _params) :
         max_buff_length_(_params ? _params    ->max_buff_length : 10000   ),
         dist_traveled_  (_params ? _params    ->dist_traveled   : 1.0  ),
         angle_turned_   (_params ? _params    ->angle_turned    : 0.2  ),
-        voting_active_  (_params ? _params    ->voting_active    : false  ),
-        frame_imu_ptr_(nullptr),
-        gravity_(wolf::gravity()),
-        acc_bias_(&calib_(0)),
-        gyro_bias_(&calib_(3)),
-        acc_measured_(nullptr),
-        gyro_measured_(nullptr),
-        Dp_(nullptr), dp_(nullptr), Dp_out_(nullptr),
-        Dv_(nullptr), dv_(nullptr), Dv_out_(nullptr),
-        Dq_(nullptr), dq_(nullptr), Dq_out_(nullptr)
+        voting_active_  (_params ? _params    ->voting_active    : false  )
 {
     // Set constant parts of Jacobians
     jacobian_delta_preint_.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
@@ -27,7 +18,7 @@ ProcessorIMU::ProcessorIMU(ProcessorIMUParamsPtr _params) :
 
 ProcessorIMU::~ProcessorIMU()
 {
-//    std::cout << "destructed     -p-IMU" << id() << std::endl;
+    //
 }
 
 ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
@@ -213,7 +204,6 @@ ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion
 {
     CaptureIMUPtr cap_imu = std::static_pointer_cast<CaptureIMU>(_capture_origin);
     FeatureIMUPtr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
-//    FrameIMUPtr frm_imu = std::static_pointer_cast<FrameIMU>(_frame_origin);
     ConstraintIMUPtr ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, cap_imu, shared_from_this());
     _feature_motion->addConstraint(ctr_imu);
     cap_imu->getFramePtr()->addConstrainedBy(ctr_imu);

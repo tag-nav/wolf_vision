@@ -75,7 +75,6 @@ class ProcessorIMU : public ProcessorMotion{
         virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion) override;
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
                                                     CaptureBasePtr _capture_origin) override;
-        void resetDerived() override;
 
     protected:
 
@@ -86,30 +85,6 @@ class ProcessorIMU : public ProcessorMotion{
         Scalar angle_turned_;   // maximum rotation between keyframes
         bool voting_active_;    // IMU will be voting for KeyFrame only if this is true
 
-        // Casted pointer to IMU frame
-        FrameIMUPtr frame_imu_ptr_;
-
-        // gravity vector
-        const Eigen::Vector3s gravity_;
-
-        // Biases in the first keyframe's state for pre-integration
-        Eigen::Map<Eigen::Vector3s> acc_bias_;
-        Eigen::Map<Eigen::Vector3s> gyro_bias_;
-
-        // Maps to the received measurements
-        Eigen::Map<Eigen::Vector3s> acc_measured_;
-        Eigen::Map<Eigen::Vector3s> gyro_measured_;
-
-        // Maps to pos, vel, quat, to be used as temporaries
-        Eigen::Map<const Eigen::Vector3s> Dp_, dp_;
-        Eigen::Map<Eigen::Vector3s> Dp_out_;
-        Eigen::Map<const Eigen::Vector3s> Dv_, dv_;
-        Eigen::Map<Eigen::Vector3s> Dv_out_;
-        Eigen::Map<const Eigen::Quaternions> Dq_, dq_;
-        Eigen::Map<Eigen::Quaternions> Dq_out_;
-
-        // Helper functions to remap several magnitudes
-//        virtual void remapDelta(Eigen::VectorXs& _delta_out);
 
     public:
         //getters
@@ -117,6 +92,7 @@ class ProcessorIMU : public ProcessorMotion{
         Scalar getMaxBuffLength() const;
         Scalar getDistTraveled() const;
         Scalar getAngleTurned() const;
+
         //for factory
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 };
@@ -282,16 +258,6 @@ inline void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x,
 inline Eigen::VectorXs ProcessorIMU::deltaZero() const
 {
     return (Eigen::VectorXs(10) << 0,0,0,  0,0,0,1,  0,0,0 ).finished(); // p, q, v
-}
-
-inline void ProcessorIMU::resetDerived()
-{
-    // Cast a pointer to origin IMU frame
-    frame_imu_ptr_ = std::static_pointer_cast<FrameIMU>(origin_ptr_->getFramePtr());
-
-    // Assign biases for the integration at the origin frame's biases
-    acc_bias_  = frame_imu_ptr_->getAccBiasPtr()->getState(); // acc  bias
-    gyro_bias_ = frame_imu_ptr_->getGyroBiasPtr()->getState(); // gyro bias
 }
 
 inline Scalar ProcessorIMU::getMaxTimeSpan() const
