@@ -59,7 +59,7 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
          * Matrix<9,1, wolf::Scalar> _residuals : to retrieve residuals (POV) O is rotation vector... NOT A QUATERNION
         */
         template<typename D1, typename D2, typename D3>
-        bool getResiduals(const Eigen::MatrixBase<D1> & _p1,
+        bool residual(const Eigen::MatrixBase<D1> & _p1,
                           const Eigen::QuaternionBase<D2> & _q1,
                           const Eigen::MatrixBase<D1> & _v1,
                           const Eigen::MatrixBase<D1> & _ab1,
@@ -212,13 +212,13 @@ inline bool ConstraintIMU::operator ()(const T* const _p1,
 
     Map<Matrix<T,15,1> > residuals(_residuals);
 
-    getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, residuals);
+    residual(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, residuals);
 
     return true;
 }
 
 template<typename D1, typename D2, typename D3>
-inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1,
+inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> & _p1,
                                         const Eigen::QuaternionBase<D2> & _q1,
                                         const Eigen::MatrixBase<D1> & _v1,
                                         const Eigen::MatrixBase<D1> & _ab1,

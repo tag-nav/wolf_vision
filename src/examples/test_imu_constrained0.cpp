@@ -350,7 +350,7 @@ int main(int argc, char** argv)
                     ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
                     wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
-                    std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
+                    std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->residual(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                     std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
                 }
             }
