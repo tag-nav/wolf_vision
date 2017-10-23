@@ -51,10 +51,13 @@ namespace wolf {
  *    Finally, all the other node names in the Wolf Tree are not required, and in fact they are not used for anything.
  *
  **/
+
 class NodeBase
 {
     private:
         static unsigned int node_id_count_; ///< Object counter (acts as simple ID factory)
+
+        struct Serializer;
 
     protected:
         ProblemWPtr problem_ptr_;
