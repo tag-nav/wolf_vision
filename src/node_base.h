@@ -67,19 +67,18 @@ class NodeBase
     public: 
 
         NodeBase(const std::string& _class, const std::string& _type = "Undefined", const std::string& _name = "");
-        virtual ~NodeBase();
+        virtual ~NodeBase() = default;
 
-        unsigned int nodeId() const;
+        unsigned int nodeId()  const;
         std::string getClass() const;
-        std::string getType() const {return node_type_;}
-        std::string getName() const;
+        std::string getType()  const;
+        std::string getName()  const;
 
-        void setType(const std::string& _name){node_type_ = _name;};
+        void setType(const std::string& _type);
         void setName(const std::string& _name);
 
-        virtual ProblemPtr getProblem(){return problem_ptr_.lock();}
-        void setProblem(ProblemPtr _prob_ptr) {problem_ptr_ = _prob_ptr;}
-
+        virtual ProblemPtr getProblem() const;
+        void setProblem(ProblemPtr _prob_ptr);
 };
 
 } // namespace wolf
@@ -98,11 +97,6 @@ inline NodeBase::NodeBase(const std::string& _class, const std::string& _type, c
     //
 }
 
-inline NodeBase::~NodeBase()
-{
-    //
-}
-
 inline unsigned int NodeBase::nodeId() const
 {
     return node_id_;
@@ -113,14 +107,34 @@ inline std::string NodeBase::getClass() const
     return node_class_;
 }
 
+inline std::string NodeBase::getType() const
+{
+    return node_type_;
+}
+
 inline std::string NodeBase::getName() const
 {
     return node_name_;
 }
 
+inline void NodeBase::setType(const std::string& _type)
+{
+    node_type_ = _type;
+}
+
 inline void NodeBase::setName(const std::string& _name)
 {
     node_name_ = _name;
+}
+
+inline ProblemPtr NodeBase::getProblem() const
+{
+  return problem_ptr_.lock();
+}
+
+inline void NodeBase::setProblem(ProblemPtr _prob_ptr)
+{
+  problem_ptr_ = _prob_ptr;
 }
 
 } // namespace wolf
