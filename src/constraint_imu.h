@@ -71,7 +71,7 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
                           const Eigen::MatrixBase<D1> & _v2,
                           const Eigen::MatrixBase<D1> & _ab2,
                           const Eigen::MatrixBase<D1> & _wb2,
-                          const Eigen::MatrixBase<D3> & _residuals) const;
+                          Eigen::MatrixBase<D3> & _residuals) const;
 
         virtual JacobianMethod getJacobianMethod() const override;
 
@@ -299,7 +299,7 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1,
                                         const Eigen::MatrixBase<D1> & _v2,
                                         const Eigen::MatrixBase<D1> & _ab2,
                                         const Eigen::MatrixBase<D1> & _wb2,
-                                        const Eigen::MatrixBase<D3> & _residuals) const
+                                        Eigen::MatrixBase<D3> & _residuals) const
 {
     //needed typedefs
     typedef typename D2::Scalar DataType;
@@ -332,11 +332,11 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1,
     Eigen::Matrix<DataType,9,1> dpov_error_w(getMeasurementSquareRootInformationTransposed().cast<DataType>()  * dpov_error);
 
     // Assign to residuals vector
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).head(3)       = dpov_error_w.head(3);
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(3,3)  = dpov_error_w.segment(3,3);
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(6,3)  = dpov_error_w.tail(3);
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).segment(9,3)  = sqrt_A_r_dt_inv.cast<DataType>() * ab_error;
-    const_cast< Eigen::MatrixBase<D3>& > (_residuals).tail(3)       = sqrt_A_r_dt_inv.cast<DataType>() * wb_error;
+    _residuals.head(3)       = dpov_error_w.head(3);
+    _residuals.segment(3,3)  = dpov_error_w.segment(3,3);
+    _residuals.segment(6,3)  = dpov_error_w.tail(3);
+    _residuals.segment(9,3)  = sqrt_A_r_dt_inv.cast<DataType>() * ab_error;
+    _residuals.tail(3)       = sqrt_A_r_dt_inv.cast<DataType>() * wb_error;
 
     return true;
 }
