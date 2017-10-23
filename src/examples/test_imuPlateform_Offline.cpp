@@ -125,7 +125,7 @@ int main(int argc, char** argv)
     Scalar input_clock;
     TimeStamp ts(0);
     wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu, Matrix6s::Identity(), Vector6s::Zero());
-    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6, 0, nullptr);
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6, nullptr);
 
     //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
     t = ts;
