@@ -150,7 +150,10 @@ namespace wolf {
 
         public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr = nullptr);
-        void remapDelta(Eigen::VectorXs& _delta_out);
+
+        public:
+        // Maps quat, to be used as temporary
+        Eigen::Map<Eigen::Quaternions> Dq_out_;
 
     };
 
@@ -216,8 +219,6 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
     // propagate bias noise
     for(int i=0; i<6; i++){
         //need to reset stuff here
-        acc_bias_ = Eigen::Vector3s::Zero();
-        gyro_bias_ = Eigen::Vector3s::Zero();
         delta_preint_plus_delta0 << 0,0,0, 0,0,0,1 ,0,0,0;  //PQV
         data_cov = Eigen::MatrixXs::Zero(6,6);
 
@@ -295,15 +296,12 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     {   
         //PQV formulation
         //fist we need to reset some stuff
-        Eigen::Matrix3s dqr_tmp;
         Eigen::Vector3s dtheta = Eigen::Vector3s::Zero();
 
         delta_ = delta0;
-        remapDelta(delta_); //not sure that we need this
-        dqr_tmp = Dq_out_.matrix();
+        new (&Dq_out_) Map<Quaternions>(delta_.data() + 3); //not sure that we need this
         dtheta(i) +=  _delta_noise(i+3); //introduce perturbation
-        dqr_tmp = dqr_tmp * v2R(dtheta); //Apply perturbation : R * exp(dtheta) --> using matrix
-        Dq_out_ = v2q(R2v(dqr_tmp)); //orientation noise has been added --> get back to quaternion form
+        Dq_out_ = Dq_out_ * v2q(dtheta);
         delta_noisy_vect(i+3) = delta_;
     }
 
@@ -328,15 +326,12 @@ inline IMU_jac_deltas ProcessorIMU_UnitTester::finite_diff_noise(const Scalar& _
     for(int i=0; i<3; i++) //for noise dtheta, it is in SO3, need to work on quaternions
     {
         //fist we need to reset some stuff
-        Eigen::Matrix3s dQr_tmp;
         Eigen::Vector3s dtheta = Eigen::Vector3s::Zero();
 
         Delta_ = _Delta0;
-        remapDelta(Delta_); //this time we need it
-        dQr_tmp = Dq_out_.matrix();
+        new (&Dq_out_) Map<Quaternions>(Delta_.data() + 3);
         dtheta(i) += _Delta_noise(i+3); //introduce perturbation
-        dQr_tmp = dQr_tmp * v2R(dtheta); //Apply perturbation : R * exp(dtheta) --> using matrix
-        Dq_out_ = v2q(R2v(dQr_tmp)); //orientation noise has been added --> get back to quaternion form
+        Dq_out_ = Dq_out_ * v2q(dtheta);
         Delta_noisy_vect(i+3) = Delta_;
     }
     
