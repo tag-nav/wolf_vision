@@ -235,20 +235,29 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1,
 
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D3, 15);
 
-    // Expected delta from states
+    // 1. Expected delta from states
     Eigen::Matrix<T, 3, 1 >   dp_exp;
     Eigen::Quaternion<T>      dq_exp;
     Eigen::Matrix<T, 3, 1>    dv_exp;
 
-    expectation(_p1, _q1, _v1, _p2, _q2, _v2, (T)dt_, dp_exp, dq_exp, dv_exp);
+    imu::betweenStates(_p1, _q1, _v1, _p2, _q2, _v2, (T)dt_, dp_exp, dq_exp, dv_exp);
 
-    // Corrected integrated delta: delta_corr = delta_preint (+) J_bias * (bias_current - bias_preint)
-    Eigen::Matrix<T,3,1> dp_correct = dp_preint_.cast<T>() + dDp_dab_.cast<T>() * (_ab1 - acc_bias_preint_.cast<T>()) + dDp_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
-    Eigen::Matrix<T,3,1> dv_correct = dv_preint_.cast<T>() + dDv_dab_.cast<T>() * (_ab1 - acc_bias_preint_.cast<T>()) + dDv_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
-    Eigen::Matrix<T,3,1> do_step    = dDq_dwb_  .cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
-    Eigen::Quaternion<T> dq_correct = dq_preint_.cast<T>() * v2q(do_step);
+    // 2. Corrected integrated delta: delta_corr = delta_preint (+) J_bias * (bias_current - bias_preint)
+    Eigen::Matrix<T,3,1> dp_correct;// = dp_preint_.cast<T>() +     dDp_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDp_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
+    Eigen::Quaternion<T> dq_correct;// = dq_preint_.cast<T>() * v2q(dDq_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>()));
+    Eigen::Matrix<T,3,1> dv_correct;// = dv_preint_.cast<T>() +     dDv_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDv_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
 
-    // Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
+    imu::plus(dp_preint_.cast<T>(),
+              dq_preint_.cast<T>(),
+              dv_preint_.cast<T>(),
+              dDp_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDp_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>()),
+              dDq_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>()),
+              dDv_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDv_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>()),
+              dp_correct,
+              dq_correct,
+              dv_correct);
+
+    // 3. Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
     // Note the Dt here is zero because it's the delta-time between the same time stamps!
     Eigen::Matrix<T, 9, 1> dpov_error;
     Eigen::Map<Eigen::Matrix<T, 3, 1> >   dp_error(dpov_error.data()    );
@@ -261,13 +270,8 @@ inline bool ConstraintIMU::getResiduals(const Eigen::MatrixBase<D1> & _p1,
     Eigen::Matrix<T,3,1> ab_error(_ab1 - _ab2); // KF1.bias - KF2.bias
     Eigen::Matrix<T,3,1> wb_error(_wb1 - _wb2);
 
-    // Residuals are the weighted errors
-    Eigen::Matrix<T,9,1> dpov_residuals(getMeasurementSquareRootInformationTransposed().cast<T>()  * dpov_error);
-
-    // Assign to residuals vector
-    _residuals.head(3)       = dpov_residuals.head(3);
-    _residuals.segment(3,3)  = dpov_residuals.segment(3,3);
-    _residuals.segment(6,3)  = dpov_residuals.tail(3);
+    // 4. Residuals are the weighted errors
+    _residuals.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>()  * dpov_error;
     _residuals.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error;
     _residuals.tail(3)       = sqrt_A_r_dt_inv.cast<T>() * wb_error;
 
