@@ -38,7 +38,7 @@ CaptureMotion::~CaptureMotion()
 }
 
 
-Eigen::VectorXs CaptureMotion::getDelta(const VectorXs& _calib_current)
+Eigen::VectorXs CaptureMotion::getDeltaCorrected(const VectorXs& _calib_current)
 {
     VectorXs calib_preint   = getCalibrationPreint();
     VectorXs delta_preint   = getBuffer().get().back().delta_integr_;
@@ -48,7 +48,7 @@ Eigen::VectorXs CaptureMotion::getDelta(const VectorXs& _calib_current)
     return delta;
 }
 
-Eigen::VectorXs CaptureMotion::getDelta(const VectorXs& _calib_current, const TimeStamp& _ts)
+Eigen::VectorXs CaptureMotion::getDeltaCorrected(const VectorXs& _calib_current, const TimeStamp& _ts)
 {
     VectorXs calib_preint   = getCalibrationPreint();
     VectorXs delta_preint   = getBuffer().getMotion(_ts).delta_integr_;

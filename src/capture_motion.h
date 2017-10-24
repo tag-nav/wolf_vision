@@ -79,9 +79,13 @@ class CaptureMotion : public CaptureBase
         MatrixXs getJacobianCalib();
         MatrixXs getJacobianCalib(const TimeStamp& _ts);
 
-        // Get delta, corrected for changes on calibration params
-        VectorXs getDelta(const VectorXs& _calib_current);
-        VectorXs getDelta(const VectorXs& _calib_current, const TimeStamp& _ts);
+        // Get delta preintegrated, and corrected for changes on calibration params
+        VectorXs getDeltaCorrected(const VectorXs& _calib_current);
+        VectorXs getDeltaCorrected(const VectorXs& _calib_current, const TimeStamp& _ts);
+        VectorXs getDeltaPreint();
+        VectorXs getDeltaPreint(const TimeStamp& _ts);
+        MatrixXs getDeltaPreintCov();
+        MatrixXs getDeltaPreintCov(const TimeStamp& _ts);
         virtual VectorXs correctDelta(const VectorXs& _delta, const VectorXs& _delta_error);
 
         // Origin frame
@@ -178,6 +182,26 @@ inline VectorXs CaptureMotion::getCalibrationPreint() const
 inline void CaptureMotion::setCalibrationPreint(const VectorXs& _calib_preint)
 {
     getBuffer().setCalibrationPreint(_calib_preint);
+}
+
+inline VectorXs CaptureMotion::getDeltaPreint()
+{
+    return getBuffer().get().back().delta_integr_;
+}
+
+inline VectorXs CaptureMotion::getDeltaPreint(const TimeStamp& _ts)
+{
+    return getBuffer().getMotion(_ts).delta_integr_;
+}
+
+inline MatrixXs CaptureMotion::getDeltaPreintCov()
+{
+    return getBuffer().get().back().delta_integr_cov_;
+}
+
+inline MatrixXs CaptureMotion::getDeltaPreintCov(const TimeStamp& _ts)
+{
+    return getBuffer().getMotion(_ts).delta_integr_cov_;
 }
 
 } // namespace wolf
