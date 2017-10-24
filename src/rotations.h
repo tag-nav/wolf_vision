@@ -416,6 +416,13 @@ inline Eigen::Matrix<T, 3, 3> matrixRollPitchYaw(const T roll,
   return (az * ay * ax).toRotationMatrix().matrix();
 }
 
+template <typename Derived>
+inline typename Eigen::MatrixBase<Derived>::Scalar
+getYaw(const Eigen::MatrixBase<Derived>& r)
+{
+  using std::atan2;
+  return atan2( r(1, 0), r(0, 0) );
+}
 
 } // namespace wolf
 
