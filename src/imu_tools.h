@@ -273,9 +273,9 @@ inline void betweenStates(const MatrixBase<D1>& p1, const QuaternionBase<D2>& q1
         MatrixSizeCheck<3, 1>::check(dp);
         MatrixSizeCheck<3, 1>::check(dv);
 
-        dp = q1.conjugate() * ( p2 - p1 - v1*dt - 0.5*gravity()*dt*dt );
+        dp = q1.conjugate() * ( p2 - p1 - v1*dt - (T)0.5*gravity().cast<T>()*(T)dt*(T)dt );
         dq = q1.conjugate() *   q2;
-        dv = q1.conjugate() * ( v2 - v1         -     gravity()*dt );
+        dv = q1.conjugate() * ( v2 - v1         -     gravity().cast<T>()*(T)dt );
 }
 
 template<typename D1, typename D2, typename D3, class T>
