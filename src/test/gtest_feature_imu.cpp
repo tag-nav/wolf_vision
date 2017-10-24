@@ -85,9 +85,9 @@ class FeatureIMU_test : public testing::Test
         dD_db_jacobians = std::static_pointer_cast<wolf::ProcessorIMU>(wolf_problem_ptr_->getProcessorMotionPtr())->getLastPtr()->getJacobianCalib();
         feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov, imu_ptr, dD_db_jacobians);
         feat_imu->setCapturePtr(imu_ptr); //associate the feature to a capture
-        WOLF_TRACE("P_pre: ", feat_imu->dp_preint_.transpose());
-        WOLF_TRACE("Q_pre: ", feat_imu->dq_preint_.coeffs().transpose());
-        WOLF_TRACE("V_pre: ", feat_imu->dv_preint_.transpose());
+        WOLF_TRACE("P_pre: ", feat_imu->getDpPreint().transpose());
+        WOLF_TRACE("Q_pre: ", feat_imu->getDqPreint().coeffs().transpose());
+        WOLF_TRACE("V_pre: ", feat_imu->getDvPreint().transpose());
 
     }
 
@@ -142,12 +142,11 @@ TEST_F(FeatureIMU_test, access_members)
     Eigen::VectorXs delta(10);
     //dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2; dz = 0.5*9.8*0.1^2 = 0.049; dvz = 9.8*0.1 = 0.98
     delta << 0.01,0,0.049, 0,0,0,1, 0.2,0,0.98;
-    ASSERT_MATRIX_APPROX(feat_imu->dp_preint_, delta.head<3>(), wolf::Constants::EPS_SMALL);
-    ASSERT_MATRIX_APPROX(feat_imu->dv_preint_, delta.tail<3>(), wolf::Constants::EPS);
-    EXPECT_MATRIX_APPROX(feat_imu->dv_preint_, delta.tail<3>(), wolf::Constants::EPS_SMALL*10)
+    ASSERT_MATRIX_APPROX(feat_imu->getDpPreint(), delta.head<3>(), wolf::Constants::EPS_SMALL);
+    ASSERT_MATRIX_APPROX(feat_imu->getDvPreint(), delta.tail<3>(), wolf::Constants::EPS);
 
     Eigen::Map<const Eigen::Quaternions> delta_quat(delta.segment<4>(3).data());
-    ASSERT_QUATERNION_APPROX(feat_imu->dq_preint_, delta_quat, wolf::Constants::EPS_SMALL);
+    ASSERT_QUATERNION_APPROX(feat_imu->getDqPreint(), delta_quat, wolf::Constants::EPS_SMALL);
 }
 
 //TEST_F(FeatureIMU_test, addConstraint)

@@ -12,7 +12,7 @@
 
 namespace wolf {
 
-WOLF_PTR_TYPEDEFS(CaptureIMU);
+//WOLF_PTR_TYPEDEFS(CaptureIMU);
 WOLF_PTR_TYPEDEFS(FeatureIMU);
 
 //class FeatureIMU
@@ -58,7 +58,14 @@ class FeatureIMU : public FeatureBase
 
         virtual ~FeatureIMU();
 
-    public: // TODO eventually produce getters for these and then go private
+        const Eigen::Vector3s&              getDpPreint()       const;
+        const Eigen::Quaternions&           getDqPreint()       const;
+        const Eigen::Vector3s&              getDvPreint()       const;
+        const Eigen::Vector3s&              getAccBiasPreint()  const;
+        const Eigen::Vector3s&              getGyroBiasPreint() const;
+        const Eigen::Matrix<Scalar, 9, 6>&  getJacobianBias()   const;
+
+    private:
         /// Preintegrated delta
         Eigen::Vector3s dp_preint_;
         Eigen::Vector3s dv_preint_;
@@ -68,16 +75,39 @@ class FeatureIMU : public FeatureBase
         Eigen::Vector3s acc_bias_preint_;       ///< Acceleration bias used for delta preintegration
         Eigen::Vector3s gyro_bias_preint_;      ///< Gyrometer bias used for delta preintegration
 
-        // Jacobians of preintegrated deltas wrt biases
-//        Eigen::Matrix3s dDp_dab_;
-//        Eigen::Matrix3s dDv_dab_;
-//        Eigen::Matrix3s dDp_dwb_;
-//        Eigen::Matrix3s dDv_dwb_;
-//        Eigen::Matrix3s dDq_dwb_;
-
         Eigen::Matrix<Scalar, 9, 6> jacobian_bias_;
 
 };
+
+inline const Eigen::Vector3s& FeatureIMU::getDpPreint() const
+{
+    return dp_preint_;
+}
+
+inline const Eigen::Quaternions& FeatureIMU::getDqPreint() const
+{
+    return dq_preint_;
+}
+
+inline const Eigen::Vector3s& FeatureIMU::getDvPreint() const
+{
+    return dv_preint_;
+}
+
+inline const Eigen::Vector3s& FeatureIMU::getAccBiasPreint() const
+{
+    return acc_bias_preint_;
+}
+
+inline const Eigen::Vector3s& FeatureIMU::getGyroBiasPreint() const
+{
+    return gyro_bias_preint_;
+}
+
+inline const Eigen::Matrix<Scalar, 9, 6>& FeatureIMU::getJacobianBias() const
+{
+    return jacobian_bias_;
+}
 
 } // namespace wolf
 

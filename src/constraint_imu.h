@@ -29,7 +29,8 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
 
         /* \brief : compute the residual from the state blocks being iterated by the solver.
             -> computes the expected measurement
-            -> compares the actual measurement with the expected one
+            -> corrects actual measurement with new bias
+            -> compares the corrected measurement with the expected one
             -> weights the result with the covariance of the noise (residual = sqrt_info_matrix * err;)
         */
         template<typename T>
@@ -45,7 +46,8 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
         
         /* \brief : compute the residual from the state blocks being iterated by the solver. (same as operator())
             -> computes the expected measurement
-            -> compares the actual measurement with the expected one
+            -> corrects actual measurement with new bias
+            -> compares the corrected measurement with the expected one
             -> weights the result with the covariance of the noise (residual = sqrt_info_matrix * err;)
          * params :
          * Vector3s _p1 : position in imu frame
@@ -56,7 +58,7 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
          * Vector3s _p2 : position in current frame
          * Vector4s _q2 : orientation quaternion in current frame
          * Vector3s _v2 : velocity in current frame
-         * Matrix<9,1, wolf::Scalar> _residuals : to retrieve residuals (POV) O is rotation vector... NOT A QUATERNION
+         * Matrix<9,1, wolf::Scalar> _res : to retrieve residuals (POV) O is rotation vector... NOT A QUATERNION
         */
         template<typename D1, typename D2, typename D3>
         bool residual(const Eigen::MatrixBase<D1> &     _p1,
@@ -78,12 +80,13 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
          * Vector3s _p1 : position in imu frame
          * Vector4s _q1 : orientation quaternion in imu frame
          * Vector3s _v1 : velocity in imu frame
-         * Vector3s _ab : accelerometer bias in imu frame
-         * Vector3s _wb : gyroscope bias in imu frame
          * Vector3s _p2 : position in current frame
          * Vector4s _q2 : orientation quaternion in current frame
          * Vector3s _v2 : velocity in current frame
-         * Matrix<10,1, wolf::Scalar> _expectation : to retrieve resulting expectation (PVQ)
+         * Scalar   _dt : time interval between the two states
+         *          _pe : expected position delta
+         *          _qe : expected quaternion delta
+         *          _ve : expected velocity delta
         */
         template<typename D1, typename D2, typename D3, typename D4>
         void expectation(const Eigen::MatrixBase<D1> &      _p1,
@@ -97,9 +100,7 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
                          Eigen::QuaternionBase<D4> &        _qe,
                          Eigen::MatrixBase<D3> &            _ve) const;
 
-        /* \brief : return the expected value given the state blocks in the wolf tree
-            current frame data is taken from constraintIMU object.
-            IMU frame is taken from wolf tree
+        /* \brief : return the expected delta given the state blocks in the wolf tree
         */
         Eigen::VectorXs expectation() const;
 
@@ -163,16 +164,16 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
                         _ftr_ptr->getFramePtr()->getOPtr(),
                         _ftr_ptr->getFramePtr()->getVPtr(),
                         _ftr_ptr->getCapturePtr()->getSensorIntrinsicPtr()),
-        dp_preint_(_ftr_ptr->dp_preint_), // dp, dv, dq at preintegration time
-        dq_preint_(_ftr_ptr->dq_preint_),
-        dv_preint_(_ftr_ptr->dv_preint_),
-        acc_bias_preint_(_ftr_ptr->acc_bias_preint_), // state biases at preintegration time
-        gyro_bias_preint_(_ftr_ptr->gyro_bias_preint_),
-        dDp_dab_(_ftr_ptr->jacobian_bias_.block(0,0,3,3)), // Jacs of dp dv dq wrt biases
-        dDv_dab_(_ftr_ptr->jacobian_bias_.block(6,0,3,3)),
-        dDp_dwb_(_ftr_ptr->jacobian_bias_.block(0,3,3,3)),
-        dDv_dwb_(_ftr_ptr->jacobian_bias_.block(6,3,3,3)),
-        dDq_dwb_(_ftr_ptr->jacobian_bias_.block(3,3,3,3)),
+        dp_preint_(_ftr_ptr->getDpPreint()), // dp, dv, dq at preintegration time
+        dq_preint_(_ftr_ptr->getDqPreint()),
+        dv_preint_(_ftr_ptr->getDvPreint()),
+        acc_bias_preint_(_ftr_ptr->getAccBiasPreint()), // state biases at preintegration time
+        gyro_bias_preint_(_ftr_ptr->getGyroBiasPreint()),
+        dDp_dab_(_ftr_ptr->getJacobianBias().block(0,0,3,3)), // Jacs of dp dv dq wrt biases
+        dDv_dab_(_ftr_ptr->getJacobianBias().block(6,0,3,3)),
+        dDp_dwb_(_ftr_ptr->getJacobianBias().block(0,3,3,3)),
+        dDv_dwb_(_ftr_ptr->getJacobianBias().block(6,3,3,3)),
+        dDq_dwb_(_ftr_ptr->getJacobianBias().block(3,3,3,3)),
         dt_(_ftr_ptr->getFramePtr()->getTimeStamp() - _cap_origin_ptr->getTimeStamp()),
         ab_rate_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getAbRateStdev()),
         wb_rate_stdev_(std::static_pointer_cast<SensorIMU>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getWbRateStdev()),
