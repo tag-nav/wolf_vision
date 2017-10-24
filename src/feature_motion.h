@@ -9,6 +9,7 @@
 #define FEATURE_MOTION_H_
 
 #include "feature_base.h"
+#include "capture_motion.h"
 
 namespace wolf
 {
@@ -16,7 +17,7 @@ namespace wolf
 class FeatureMotion : public FeatureBase
 {
     public:
-        FeatureMotion(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
+        FeatureMotion(const std::string& _type, const CaptureMotionPtr& _capture_motion);
         virtual ~FeatureMotion();
 
         Eigen::VectorXs getCalibrationPreint();
@@ -25,7 +26,7 @@ class FeatureMotion : public FeatureBase
         Eigen::VectorXs computeDeltaCorrection(const Eigen::VectorXs& _calib) const;
         Eigen::VectorXs getDeltaCorrected(const Eigen::VectorXs& _calib) const;
 
-        virtual Eigen::VectorXs plus(const Eigen::VectorXs& _delta, const Eigen::VectorXs& _delta_correction) = 0;
+        virtual Eigen::VectorXs correctDelta(const Eigen::VectorXs& _delta, const Eigen::VectorXs& _delta_correction) const = 0;
 
     private:
         Eigen::VectorXs& calib_preint_;
@@ -50,7 +51,8 @@ inline Eigen::VectorXs FeatureMotion::computeDeltaCorrection(const Eigen::Vector
 inline Eigen::VectorXs FeatureMotion::getDeltaCorrected(const Eigen::VectorXs& _calib) const
 {
     // delta_preint is stored in FeatureBase::measurement_;
-    return plus(measurement_, computeDeltaCorrection(_calib));
+    Eigen::VectorXs delta_step = computeDeltaCorrection(_calib);
+    return correctDelta(measurement_, delta_step);
 }
 
 } /* namespace wolf */

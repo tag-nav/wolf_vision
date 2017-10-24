@@ -10,14 +10,10 @@
 namespace wolf
 {
 
-FeatureMotion::FeatureMotion(const std::string& _type,
-                             const Eigen::VectorXs& _measurement,
-                             const Eigen::MatrixXs& _meas_covariance,
-                             const Eigen::VectorXs& _calib_preint,
-                             const Eigen::MatrixXs& _jacobian_calib) :
-        FeatureBase(_type, _measurement, _meas_covariance),
-        calib_preint_(_calib_preint),
-        jacobian_calib_(_jacobian_calib)
+FeatureMotion::FeatureMotion(const std::string& _type, const CaptureMotionPtr& _capture_motion) :
+        FeatureBase(_type, _capture_motion->getDeltaPreint(), _capture_motion->getDeltaPreintCov()),
+        calib_preint_(_capture_motion->getCalibrationPreint()),
+        jacobian_calib_(_capture_motion->getJacobianCalib())
 {
     //
 }
