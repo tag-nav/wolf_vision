@@ -190,6 +190,7 @@ SET(HDRS_BASE
     constraint_analytic.h
     constraint_autodiff.h
     constraint_base.h
+    eigen_assert.h
     factory.h
     feature_base.h
     feature_match.h
