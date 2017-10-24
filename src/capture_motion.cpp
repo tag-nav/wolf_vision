@@ -26,7 +26,7 @@ CaptureMotion::CaptureMotion(const TimeStamp& _ts,
                 buffer_(_data.size(), _delta_size, _delta_cov_size, computeCalibSize()),
                 origin_frame_ptr_(_origin_frame_ptr)
 {
-    //
+    // TODO put something in the buffer to start!
 }
 
 
