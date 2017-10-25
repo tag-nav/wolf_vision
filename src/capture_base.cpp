@@ -17,45 +17,57 @@ CaptureBase::CaptureBase(const std::string& _type,
     frame_ptr_(), // nullptr
     sensor_ptr_(_sensor_ptr),
     state_block_vec_(3),
+    calib_size_(0),
     is_removing_(false),
     capture_id_(++capture_id_count_),
     time_stamp_(_ts)
 {
     if (_sensor_ptr)
     {
-        getSensorPtr()->setHasCapture();
 
         if (_sensor_ptr->isExtrinsicDynamic())
         {
             assert(_p_ptr && "Pointer to dynamic position params is null!");
             assert(_o_ptr && "Pointer to dynamic orientation params is null!");
-            // copy fixed status from sensor
-            if (_sensor_ptr->getPPtr())
-                _p_ptr->setFixed(_sensor_ptr->getPPtr()->isFixed());
-            if (_sensor_ptr->getOPtr())
-                _o_ptr->setFixed(_sensor_ptr->getOPtr()->isFixed());
+//            // copy fixed status from sensor
+//            if (_sensor_ptr->getPPtr())
+//            {
+////                _p_ptr->setFixed(_sensor_ptr->getPPtr()->isFixed());
+////                _p_ptr->setState(_sensor_ptr->getPPtr()->getState());
+//            }
+//            if (_sensor_ptr->getOPtr())
+//            {
+////                _o_ptr->setFixed(_sensor_ptr->getOPtr()->isFixed());
+////                _o_ptr->setState(_sensor_ptr->getOPtr()->getState());
+//            }
             // assign to Capture's members
             state_block_vec_[0] = _p_ptr;
             state_block_vec_[1] = _o_ptr;
         }
         else if (_p_ptr || _o_ptr)
         {
-            WOLF_ERROR("Provided sensor parameters but the sensor extrinsics are static");
+            WOLF_ERROR("Provided dynamic sensor extrinsics but the sensor extrinsics are static");
         }
 
         if (_sensor_ptr->isIntrinsicDynamic())
         {
             assert(_intr_ptr && "Pointer to dynamic intrinsic params is null!");
-            // copy fixed status from sensor
-            if (_sensor_ptr->getIntrinsicPtr())
-                _intr_ptr->setFixed(_sensor_ptr->getIntrinsicPtr()->isFixed());
+//            // copy fixed status from sensor
+//            if (_sensor_ptr->getIntrinsicPtr())
+//            {
+//                // take values from sensor
+////                _intr_ptr->setFixed(_sensor_ptr->getIntrinsicPtr()->isFixed());
+////                _intr_ptr->setState(_sensor_ptr->getIntrinsicPtr()->getState());
+//            }
             // assign to Capture's member
             state_block_vec_[2] = _intr_ptr;
         }
         else if (_intr_ptr)
         {
-            WOLF_ERROR("Provided sensor parameters but the sensor intrinsics are static");
+            WOLF_ERROR("Provided dynamic sensor intrinsics but the sensor intrinsics are static");
         }
+
+        getSensorPtr()->setHasCapture();
         registerNewStateBlocks();
     }
     else if (_p_ptr || _o_ptr || _intr_ptr)
