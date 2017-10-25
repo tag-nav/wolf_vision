@@ -37,6 +37,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         HardwareBaseWPtr hardware_ptr_;
         ProcessorBaseList processor_list_;
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, intrinsic.
+        Size calib_size_;
 
         static unsigned int sensor_id_count_; ///< Object counter (acts as simple ID factory)
         bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
@@ -123,6 +124,9 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void fixIntrinsics();
         void unfixIntrinsics();
 
+        Size getCalibSize() const;
+        Eigen::VectorXs getCalibration() const;
+
         /** \brief Adds all stateBlocks of the sensor to the wolfProblem list of new stateBlocks
          **/
         virtual void registerNewStateBlocks();
@@ -134,6 +138,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         bool isIntrinsicDynamic();
         bool hasCapture() const {return has_capture_;}
         void setHasCapture(){has_capture_ = true;}
+        bool extrinsicsInCaptures() { return extrinsic_dynamic_ && has_capture_; }
+        bool intrinsicsInCaptures() { return intrinsic_dynamic_ && has_capture_; }
 
         void setNoise(const Eigen::VectorXs & _noise_std);
         Eigen::VectorXs getNoiseStd();
@@ -145,6 +151,12 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
         bool process(const CaptureBasePtr capture_ptr);
         CaptureBasePtr lastCapture(const TimeStamp& _ts);
+
+    protected:
+        Size computeCalibSize() const;
+
+    private:
+        void updateCalibSize();
 };
 
 }
@@ -219,13 +231,13 @@ inline void SensorBase::resizeStateBlockVec(int _size)
 inline bool SensorBase::isExtrinsicDynamic()
 {
     // If this Sensor has no Capture yet, we'll consider it static
-    return has_capture_ && extrinsic_dynamic_;
+    return extrinsic_dynamic_;
 }
 
 inline bool SensorBase::isIntrinsicDynamic()
 {
     // If this Sensor has no Capture yet, we'll consider it static
-    return has_capture_ && intrinsic_dynamic_;
+    return intrinsic_dynamic_;
 }
 
 inline Eigen::VectorXs SensorBase::getNoiseStd()
@@ -262,6 +274,18 @@ inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
 {
     hardware_ptr_ = _hw_ptr;
 }
+
+inline wolf::Size SensorBase::getCalibSize() const
+{
+    return calib_size_;
+}
+
+inline void SensorBase::updateCalibSize()
+{
+    calib_size_ = computeCalibSize();
+}
+
+
 
 } // namespace wolf
 

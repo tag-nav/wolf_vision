@@ -16,6 +16,7 @@ SensorBase::SensorBase(const std::string& _type,
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
         state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
+        calib_size_(0),
         is_removing_(false),
         sensor_id_(++sensor_id_count_), // simple ID factory
         extrinsic_dynamic_(_extr_dyn),
@@ -27,6 +28,7 @@ SensorBase::SensorBase(const std::string& _type,
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _intr_ptr;
+    updateCalibSize();
 }
 
 SensorBase::SensorBase(const std::string& _type,
@@ -39,6 +41,7 @@ SensorBase::SensorBase(const std::string& _type,
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
         state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
+        calib_size_(0),
         is_removing_(false),
         sensor_id_(++sensor_id_count_), // simple ID factory
         extrinsic_dynamic_(_extr_dyn),
@@ -53,6 +56,7 @@ SensorBase::SensorBase(const std::string& _type,
     noise_cov_.setZero();
     for (unsigned int i = 0; i < _noise_std.size(); i++)
         noise_cov_(i, i) = noise_std_(i) * noise_std_(i);
+    updateCalibSize();
 }
 
 SensorBase::~SensorBase()
@@ -112,6 +116,7 @@ void SensorBase::fix()
             if (getProblem() != nullptr)
                 getProblem()->updateStateBlockPtr(sbp);
         }
+    updateCalibSize();
 }
 
 void SensorBase::unfix()
@@ -123,6 +128,7 @@ void SensorBase::unfix()
             if (getProblem() != nullptr)
                 getProblem()->updateStateBlockPtr(sbp);
         }
+    updateCalibSize();
 }
 
 void SensorBase::fixExtrinsics()
@@ -137,6 +143,7 @@ void SensorBase::fixExtrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalibSize();
 }
 
 void SensorBase::unfixExtrinsics()
@@ -151,6 +158,7 @@ void SensorBase::unfixExtrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalibSize();
 }
 
 void SensorBase::fixIntrinsics()
@@ -165,6 +173,7 @@ void SensorBase::fixIntrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalibSize();
 }
 
 void SensorBase::unfixIntrinsics()
@@ -179,6 +188,7 @@ void SensorBase::unfixIntrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalibSize();
 }
 
 
@@ -223,40 +233,40 @@ CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
 
 StateBlockPtr SensorBase::getPPtr(const TimeStamp _ts)
 {
-    if (isExtrinsicDynamic())
+    if (extrinsicsInCaptures())
     {
         // we search for the most recent Capture before _ts to get the capture pointer
         CaptureBasePtr capture = lastCapture(_ts);
         if (capture)
             return capture->getSensorPPtr();
     }
-    // Static sensor, or Capture not found --> return own pointer
+    // Static sensor extrinsics, or Capture not found --> return own pointer
     return getStateBlockPtr(0);
 }
 
 StateBlockPtr SensorBase::getOPtr(const TimeStamp _ts)
 {
-    if (isExtrinsicDynamic())
+    if (extrinsicsInCaptures())
     {
         // we search for the most recent Capture before _ts to get the capture pointer
         CaptureBasePtr capture = lastCapture(_ts);
         if (capture)
             return capture->getSensorOPtr();
     }
-    // Static sensor, or Capture not found --> return own pointer
+    // Static sensor extrinsics, or Capture not found --> return own pointer
     return getStateBlockPtr(1);
 }
 
 StateBlockPtr SensorBase::getIntrinsicPtr(const TimeStamp _ts)
 {
-    if (isExtrinsicDynamic())
+    if (extrinsicsInCaptures())
     {
         // we search for the most recent Capture before _ts to get the capture pointer
         CaptureBasePtr capture = lastCapture(_ts);
         if (capture)
             return capture->getSensorIntrinsicPtr();
     }
-    // Static sensor, or Capture not found --> return own pointer
+    // Static sensor instrinsics, or Capture not found --> return own pointer
     return getStateBlockPtr(2);
 }
 
@@ -301,6 +311,37 @@ StateBlockPtr SensorBase::getIntrinsicPtr()
     }
     return getStateBlockPtr(2);
 }
+
+wolf::Size SensorBase::computeCalibSize() const
+{
+    Size sz = 0;
+    for (Size i = 0; i < state_block_vec_.size(); i++)
+    {
+        auto sb = state_block_vec_[i];
+        if (sb && !sb->isFixed())
+            sz += sb->getSize();
+    }
+    return sz;
+}
+
+
+Eigen::VectorXs SensorBase::getCalibration() const
+{
+    Size index = 0;
+    Size sz = getCalibSize();
+    Eigen::VectorXs calib(sz);
+    for (Size i = 0; i < state_block_vec_.size(); i++)
+    {
+        auto sb = getStateBlockPtr(i);
+        if (sb && !sb->isFixed())
+        {
+            calib.segment(index, sb->getSize()) = sb->getState();
+            index += sb->getSize();
+        }
+    }
+    return calib;
+}
+
 
 bool SensorBase::process(const CaptureBasePtr capture_ptr)
 {
