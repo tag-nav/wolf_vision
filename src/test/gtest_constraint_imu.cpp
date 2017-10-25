@@ -185,7 +185,7 @@ class ConstraintIMU_biasTest_Static_NonNullAccBias : public testing::Test
         data_imu << -wolf::gravity(), 0,0,0;
         data_imu = data_imu + origin_bias;
 
-        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu, Eigen::Matrix6s::Identity(), Eigen::Vector6s::Zero()); //set data on IMU (measure only gravity here)
+        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu, Eigen::Matrix6s::Identity(), origin_bias); //set data on IMU (measure only gravity here)
 
         for(unsigned int i = 0; i < 1000; i++) //integrate during 1 second
         {
