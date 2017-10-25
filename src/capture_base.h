@@ -151,7 +151,7 @@ inline StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
                 return state_block_vec_[_i];
             }
             else
-                return getSensorPtr()->getStateBlockPtr(_i);
+                return getSensorPtr()->getStateBlockPtrStatic(_i);
 
         else // 2 and onwards are intrinsics
             if (getSensorPtr()->intrinsicsInCaptures())
@@ -160,7 +160,7 @@ inline StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
                 return state_block_vec_[_i];
             }
             else
-                return getSensorPtr()->getStateBlockPtr(_i);
+                return getSensorPtr()->getStateBlockPtrStatic(_i);
     }
     else // No sensor associated: assume sensor params are here
     {

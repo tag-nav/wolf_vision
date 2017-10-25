@@ -96,11 +96,23 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
         unsigned int id();
 
+        ProblemPtr getProblem();
+        HardwareBasePtr getHardwarePtr();
+        void setHardwarePtr(const HardwareBasePtr _hw_ptr);
+
+        ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
+        ProcessorBaseList& getProcessorList();
+
+        CaptureBasePtr lastCapture(const TimeStamp& _ts);
+
+        bool process(const CaptureBasePtr capture_ptr);
+
         // State blocks
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
         std::vector<StateBlockPtr>& getStateBlockVec();
-        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
-        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
+        StateBlockPtr getStateBlockPtrStatic(unsigned int _i) const;
+        StateBlockPtr getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts);
+        void setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr);
         void resizeStateBlockVec(int _size);
 
         StateBlockPtr getPPtr(const TimeStamp _ts);
@@ -114,9 +126,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void setIntrinsicPtr(const StateBlockPtr _intr_ptr);
         void removeStateBlocks();
 
-        ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
-        ProcessorBaseList& getProcessorList();
-
         void fix();
         void unfix();
         void fixExtrinsics();
@@ -127,30 +136,18 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         Size getCalibSize() const;
         Eigen::VectorXs getCalibration() const;
 
-        /** \brief Adds all stateBlocks of the sensor to the wolfProblem list of new stateBlocks
-         **/
         virtual void registerNewStateBlocks();
 
-        /**
-         * Check if sensor is dynamic
-         */
-        bool isExtrinsicDynamic();
-        bool isIntrinsicDynamic();
+        bool isExtrinsicDynamic() const;
+        bool isIntrinsicDynamic() const;
         bool hasCapture() const {return has_capture_;}
-        void setHasCapture(){has_capture_ = true;}
-        bool extrinsicsInCaptures() { return extrinsic_dynamic_ && has_capture_; }
-        bool intrinsicsInCaptures() { return intrinsic_dynamic_ && has_capture_; }
+        void setHasCapture() {has_capture_ = true;}
+        bool extrinsicsInCaptures() const { return extrinsic_dynamic_ && has_capture_; }
+        bool intrinsicsInCaptures() const { return intrinsic_dynamic_ && has_capture_; }
 
         void setNoise(const Eigen::VectorXs & _noise_std);
         Eigen::VectorXs getNoiseStd();
         Eigen::MatrixXs getNoiseCov();
-
-        ProblemPtr getProblem();
-        HardwareBasePtr getHardwarePtr();
-        void setHardwarePtr(const HardwareBasePtr _hw_ptr);
-
-        bool process(const CaptureBasePtr capture_ptr);
-        CaptureBasePtr lastCapture(const TimeStamp& _ts);
 
     protected:
         Size computeCalibSize() const;
@@ -211,13 +208,25 @@ inline std::vector<StateBlockPtr>& SensorBase::getStateBlockVec()
     return state_block_vec_;
 }
 
-inline StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i) const
+inline StateBlockPtr SensorBase::getStateBlockPtrStatic(unsigned int _i) const
 {
     assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
     return state_block_vec_[_i];
 }
 
-inline void SensorBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
+inline StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts)
+{
+    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+    if ( ( (_i < 2) && extrinsicsInCaptures() ) || ( (_i >= 2) && intrinsicsInCaptures() ) )
+    {
+        CaptureBasePtr cap = lastCapture( _ts );
+        return cap->getStateBlockPtr(_i);
+    }
+    else
+        return state_block_vec_[_i];
+}
+
+inline void SensorBase::setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
     state_block_vec_[_i] = _sb_ptr;
 }
@@ -228,13 +237,13 @@ inline void SensorBase::resizeStateBlockVec(int _size)
         state_block_vec_.resize(_size);
 }
 
-inline bool SensorBase::isExtrinsicDynamic()
+inline bool SensorBase::isExtrinsicDynamic() const
 {
     // If this Sensor has no Capture yet, we'll consider it static
     return extrinsic_dynamic_;
 }
 
-inline bool SensorBase::isIntrinsicDynamic()
+inline bool SensorBase::isIntrinsicDynamic() const
 {
     // If this Sensor has no Capture yet, we'll consider it static
     return intrinsic_dynamic_;
@@ -257,17 +266,17 @@ inline HardwareBasePtr SensorBase::getHardwarePtr()
 
 inline void SensorBase::setPPtr(const StateBlockPtr _p_ptr)
 {
-    setStateBlockPtr(0, _p_ptr);
+    setStateBlockPtrStatic(0, _p_ptr);
 }
 
 inline void SensorBase::setOPtr(const StateBlockPtr _o_ptr)
 {
-    setStateBlockPtr(1, _o_ptr);
+    setStateBlockPtrStatic(1, _o_ptr);
 }
 
 inline void SensorBase::setIntrinsicPtr(const StateBlockPtr _intr_ptr)
 {
-    setStateBlockPtr(2, _intr_ptr);
+    setStateBlockPtrStatic(2, _intr_ptr);
 }
 
 inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)

@@ -93,14 +93,14 @@ void SensorBase::removeStateBlocks()
 {
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        auto sbp = getStateBlockPtrStatic(i);
         if (sbp != nullptr)
         {
             if (getProblem() != nullptr && !extrinsic_dynamic_)
             {
                 getProblem()->removeStateBlockPtr(sbp);
             }
-            setStateBlockPtr(i, nullptr);
+            setStateBlockPtrStatic(i, nullptr);
         }
     }
 }
@@ -233,41 +233,17 @@ CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
 
 StateBlockPtr SensorBase::getPPtr(const TimeStamp _ts)
 {
-    if (extrinsicsInCaptures())
-    {
-        // we search for the most recent Capture before _ts to get the capture pointer
-        CaptureBasePtr capture = lastCapture(_ts);
-        if (capture)
-            return capture->getSensorPPtr();
-    }
-    // Static sensor extrinsics, or Capture not found --> return own pointer
-    return getStateBlockPtr(0);
+    return getStateBlockPtrDynamic(0, _ts);
 }
 
 StateBlockPtr SensorBase::getOPtr(const TimeStamp _ts)
 {
-    if (extrinsicsInCaptures())
-    {
-        // we search for the most recent Capture before _ts to get the capture pointer
-        CaptureBasePtr capture = lastCapture(_ts);
-        if (capture)
-            return capture->getSensorOPtr();
-    }
-    // Static sensor extrinsics, or Capture not found --> return own pointer
-    return getStateBlockPtr(1);
+    return getStateBlockPtrDynamic(1, _ts);
 }
 
 StateBlockPtr SensorBase::getIntrinsicPtr(const TimeStamp _ts)
 {
-    if (extrinsicsInCaptures())
-    {
-        // we search for the most recent Capture before _ts to get the capture pointer
-        CaptureBasePtr capture = lastCapture(_ts);
-        if (capture)
-            return capture->getSensorIntrinsicPtr();
-    }
-    // Static sensor instrinsics, or Capture not found --> return own pointer
-    return getStateBlockPtr(2);
+    return getStateBlockPtrDynamic(2, _ts);
 }
 
 StateBlockPtr SensorBase::getPPtr()
@@ -281,7 +257,7 @@ StateBlockPtr SensorBase::getPPtr()
             return getPPtr(KF->getTimeStamp());
         }
     }
-    return getStateBlockPtr(0);
+    return state_block_vec_[0];
 }
 
 StateBlockPtr SensorBase::getOPtr()
@@ -295,7 +271,7 @@ StateBlockPtr SensorBase::getOPtr()
             return getOPtr(KF->getTimeStamp());
         }
     }
-    return getStateBlockPtr(1);
+    return state_block_vec_[1];
 }
 
 StateBlockPtr SensorBase::getIntrinsicPtr()
@@ -309,7 +285,7 @@ StateBlockPtr SensorBase::getIntrinsicPtr()
             return getIntrinsicPtr(KF->getTimeStamp());
         }
     }
-    return getStateBlockPtr(2);
+    return state_block_vec_[2];
 }
 
 wolf::Size SensorBase::computeCalibSize() const
@@ -332,7 +308,7 @@ Eigen::VectorXs SensorBase::getCalibration() const
     Eigen::VectorXs calib(sz);
     for (Size i = 0; i < state_block_vec_.size(); i++)
     {
-        auto sb = getStateBlockPtr(i);
+        auto sb = getStateBlockPtrStatic(i);
         if (sb && !sb->isFixed())
         {
             calib.segment(index, sb->getSize()) = sb->getState();
