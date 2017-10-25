@@ -264,14 +264,6 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
         //set origin of the problem
         origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
 
-//        origin_KF->getCaptureOf(sen_imu)->setCalibration(origin_bias);
-
-//        WOLF_TRACE("calib sensor    : ", sen_imu->getCalibration().transpose());
-//        WOLF_TRACE("intri cap origin: ", origin_KF->getCaptureOf(sen_imu)->getSensorIntrinsicPtr()->getState().transpose());
-//        WOLF_TRACE("calib cap origin: ", origin_KF->getCaptureOf(sen_imu)->getCalibration().transpose());
-//        WOLF_TRACE("intri cap last  : ", wolf_problem_ptr_->getLastFramePtr()->getCaptureOf(sen_imu)->getSensorIntrinsicPtr()->getState().transpose());
-//        WOLF_TRACE("calib cap last  : ", wolf_problem_ptr_->getLastFramePtr()->getCaptureOf(sen_imu)->getCalibration().transpose());
-
         //===================================================== END{INITIALIZATION}
         //===================================================== PROCESS DATA
         // PROCESS DATA
