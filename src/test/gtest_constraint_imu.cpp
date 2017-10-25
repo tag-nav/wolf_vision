@@ -46,8 +46,8 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
         CeresManager* ceres_manager_wolf_diff;
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
-        FrameIMUPtr KF0;
-        FrameIMUPtr KF1;
+        FrameBasePtr KF0;
+        FrameBasePtr KF1;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -132,8 +132,8 @@ class ConstraintIMU_biasTest_Static_NonNullAccBias : public testing::Test
         CeresManager* ceres_manager_wolf_diff;
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
-        FrameIMUPtr KF0;
-        FrameIMUPtr KF1;
+        FrameBasePtr KF0;
+        FrameBasePtr KF1;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -171,7 +171,6 @@ class ConstraintIMU_biasTest_Static_NonNullAccBias : public testing::Test
         x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
         t.set(0);
         origin_bias << 0.002, 0.005, 0.1, 0,0,0;
-        //origin_bias << 0.002, 0.005, 0.1, 0.07,-0.035,-0.1;
 
         expected_final_state = x_origin; //null bias + static
 
@@ -272,7 +271,7 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
         data_imu << -wolf::gravity(), 0,0,0;
         data_imu = data_imu + origin_bias;
 
-        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu, Eigen::Matrix6s::Identity(), Eigen::Vector6s::Zero()); //set data on IMU (measure only gravity here)
+        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu, Eigen::Matrix6s::Identity(), origin_bias); //set data on IMU (measure only gravity here)
 
         for(unsigned int i = 0; i < 1000; i++) //integrate during 1 second
         {
@@ -2316,20 +2315,26 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_i
     origin_KF->getOPtr()->fix();
     origin_KF->getVPtr()->fix();
 
-    last_KF->setState(expected_final_state);
+    last_KF->getPPtr()->setState(expected_final_state.head(3));
+    last_KF->getOPtr()->setState(expected_final_state.segment(3,4));
+    last_KF->getVPtr()->setState(expected_final_state.segment(7,3));
 
     last_KF->getPPtr()->fix();
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->fix();
 
+    WOLF_DEBUG("acc bias before solving : ",origin_KF->getCaptureOf(sen_imu)->getCalibration().head(3).transpose());
+
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
-
+    WOLF_DEBUG("acc bias after solving : ",origin_KF->getCaptureOf(sen_imu)->getCalibration().head(3).transpose());
+    WOLF_DEBUG("acc bias during preint : ",std::static_pointer_cast<CaptureIMU>(origin_KF->getCaptureOf(sen_imu))->getCalibrationPreint().head(3).transpose());
+    
     //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration().head(3), origin_bias.head(3), wolf::Constants::EPS*100) //Acc bias
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration().tail(3), origin_bias.tail(3), wolf::Constants::EPS*100) //Gyro bias
 
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getCaptureOf(sen_imu)->getCalibration().head(3), origin_bias.head(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getCaptureOf(sen_imu)->getCalibration().tail(3), origin_bias.tail(3), wolf::Constants::EPS*100)
 }
 
 TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
@@ -2353,17 +2358,17 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
     perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
-    last_KF->setState(expected_final_state);
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+    last_KF->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
     //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration().head(3), origin_bias.head(3), wolf::Constants::EPS*100) //Acc bias
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration().tail(3), origin_bias.tail(3), wolf::Constants::EPS*100) //Gyro bias
 
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getCaptureOf(sen_imu)->getCalibration().head(3), origin_bias.head(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getCaptureOf(sen_imu)->getCalibration().tail(3), origin_bias.tail(3), wolf::Constants::EPS*100)
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-4")
@@ -2371,17 +2376,17 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
     perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
-    last_KF->setState(expected_final_state);
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+    last_KF->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
     //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration().head(3), origin_bias.head(3), wolf::Constants::EPS*100) //Acc bias
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration().tail(3), origin_bias.tail(3), wolf::Constants::EPS*100) //Gyro bias
 
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getCaptureOf(sen_imu)->getCalibration().head(3), origin_bias.head(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getCaptureOf(sen_imu)->getCalibration().tail(3), origin_bias.tail(3), wolf::Constants::EPS*100)
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-2")
@@ -2389,17 +2394,17 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
     perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
-    last_KF->setState(expected_final_state);
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+    last_KF->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
     //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration().head(3), origin_bias.head(3), wolf::Constants::EPS*100) //Acc bias
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration().tail(3), origin_bias.tail(3), wolf::Constants::EPS*100) //Gyro bias
 
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getCaptureOf(sen_imu)->getCalibration().head(3), origin_bias.head(3), wolf::Constants::EPS*100)
+    ASSERT_MATRIX_APPROX(last_KF->getCaptureOf(sen_imu)->getCalibration().tail(3), origin_bias.tail(3), wolf::Constants::EPS*100)
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-1")
@@ -2409,17 +2414,17 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     {
         err = Eigen::Vector6s::Random() * epsilon_bias*10;
         perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-        origin_KF->setState(perturbated_origin_state);
-        last_KF->setState(expected_final_state);
+        origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+        last_KF->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
 
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
         //Only biases are unfixed
-        ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-        ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
-
-        ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-        ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+        ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration().head(3), origin_bias.head(3), wolf::Constants::EPS*100) //Acc bias
+        ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration().tail(3), origin_bias.tail(3), wolf::Constants::EPS*100) //Gyro bias
+    
+        ASSERT_MATRIX_APPROX(last_KF->getCaptureOf(sen_imu)->getCalibration().head(3), origin_bias.head(3), wolf::Constants::EPS*100)
+        ASSERT_MATRIX_APPROX(last_KF->getCaptureOf(sen_imu)->getCalibration().tail(3), origin_bias.tail(3), wolf::Constants::EPS*100)
     }
 }
 
@@ -4435,6 +4440,6 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_BiasedNoisyComplex_initOK, varQ1B1P2Q2B2
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
   return RUN_ALL_TESTS();
 }
