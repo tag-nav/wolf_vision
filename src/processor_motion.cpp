@@ -101,13 +101,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         // create motion constraint and link it to parent feature and other frame (which is origin's frame)
         auto ctr_ptr = emplaceConstraint(key_feature_ptr, origin_ptr_);
 
-        //        CaptureMotionPtr new_capture_ptr = std::make_shared<CaptureMotion>(key_frame_ptr->getTimeStamp(),
-        //                                                                           getSensorPtr(),
-        //                                                                           Eigen::VectorXs::Zero(data_size_),
-        //                                                                           Eigen::MatrixXs::Zero(data_size_, data_size_),
-        //                                                                           delta_size_, delta_cov_size_,
-        //                                                                           key_frame_ptr);
-        //        new_frame_ptr->addCapture(new_capture_ptr); // Add Capture to the new Frame
         // create a new frame
         FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
                                                                 getCurrentState(),

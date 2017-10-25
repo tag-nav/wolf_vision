@@ -29,17 +29,6 @@ CaptureBase::CaptureBase(const std::string& _type,
         {
             assert(_p_ptr && "Pointer to dynamic position params is null!");
             assert(_o_ptr && "Pointer to dynamic orientation params is null!");
-//            // copy fixed status from sensor
-//            if (_sensor_ptr->getPPtr())
-//            {
-////                _p_ptr->setFixed(_sensor_ptr->getPPtr()->isFixed());
-////                _p_ptr->setState(_sensor_ptr->getPPtr()->getState());
-//            }
-//            if (_sensor_ptr->getOPtr())
-//            {
-////                _o_ptr->setFixed(_sensor_ptr->getOPtr()->isFixed());
-////                _o_ptr->setState(_sensor_ptr->getOPtr()->getState());
-//            }
             // assign to Capture's members
             state_block_vec_[0] = _p_ptr;
             state_block_vec_[1] = _o_ptr;
@@ -52,13 +41,6 @@ CaptureBase::CaptureBase(const std::string& _type,
         if (_sensor_ptr->isIntrinsicDynamic())
         {
             assert(_intr_ptr && "Pointer to dynamic intrinsic params is null!");
-//            // copy fixed status from sensor
-//            if (_sensor_ptr->getIntrinsicPtr())
-//            {
-//                // take values from sensor
-////                _intr_ptr->setFixed(_sensor_ptr->getIntrinsicPtr()->isFixed());
-////                _intr_ptr->setState(_sensor_ptr->getIntrinsicPtr()->getState());
-//            }
             // assign to Capture's member
             state_block_vec_[2] = _intr_ptr;
         }
