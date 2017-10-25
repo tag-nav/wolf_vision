@@ -71,6 +71,14 @@ extern void ColoredPrintf(GTestColor color, const char* fmt, ...);
   testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, __VA_ARGS__); } \
   while(0)
 
+#define PRINT_TEST_FINISHED \
+{ \
+  const ::testing::TestInfo* const test_info = \
+    ::testing::UnitTest::GetInstance()->current_test_info(); \
+  PRINTF(std::string("Finished test case ").append(test_info->test_case_name()).\
+          append(" of test ").append(test_info->name()).append(".\n").c_str()); \
+}
+
 // C++ stream interface
 class TestCout : public std::stringstream
 {
