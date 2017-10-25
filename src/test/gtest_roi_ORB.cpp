@@ -230,6 +230,7 @@ TEST(RoiORB, RoiBounds)
 
 
 #ifdef _WOLF_DEBUG
+#if 0
             cv::Mat image_graphics = image.clone();
             cv::drawKeypoints(image_graphics,target_keypoints,image_graphics);
             cv::rectangle(image_graphics, roi, cv::Scalar(255.0, 0.0, 255.0), 1, 8, 0);
@@ -237,6 +238,7 @@ TEST(RoiORB, RoiBounds)
 
             cv::imshow("test",image_graphics);
             cv::waitKey(1);
+#endif
 #endif
             }
     }
