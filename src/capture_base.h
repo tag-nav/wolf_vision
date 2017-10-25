@@ -145,7 +145,7 @@ inline StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
     if (getSensorPtr())
     {
         if (_i < 2) // _i == 0 is position, 1 is orientation, 2 and onwards are intrinsics
-            if (getSensorPtr()->isExtrinsicDynamic())
+            if (getSensorPtr()->extrinsicsInCaptures())
             {
                 assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
                 return state_block_vec_[_i];
@@ -154,7 +154,7 @@ inline StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
                 return getSensorPtr()->getStateBlockPtr(_i);
 
         else // 2 and onwards are intrinsics
-            if (getSensorPtr()->isIntrinsicDynamic())
+            if (getSensorPtr()->intrinsicsInCaptures())
             {
                 assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
                 return state_block_vec_[_i];

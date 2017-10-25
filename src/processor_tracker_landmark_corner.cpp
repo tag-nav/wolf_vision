@@ -17,7 +17,7 @@ void ProcessorTrackerLandmarkCorner::preProcess()
     R_world_robot.topLeftCorner<2, 2>() = Eigen::Rotation2Ds(t_world_robot_(2)).matrix();
 
     // robot_sensor (to be computed once if extrinsics are fixed and not dynamic)
-    if (getSensorPtr()->isExtrinsicDynamic() || !getSensorPtr()->getPPtr()->isFixed()
+    if (getSensorPtr()->extrinsicsInCaptures() || !getSensorPtr()->getPPtr()->isFixed()
             || !getSensorPtr()->getOPtr()->isFixed() || !extrinsics_transformation_computed_)
     {
         t_robot_sensor_.head<2>() = getSensorPtr()->getPPtr()->getState();
