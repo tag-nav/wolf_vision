@@ -272,7 +272,7 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     // 4. Residuals are the weighted errors
     _res.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * dpov_error;
     _res.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error;
-    _res.tail(3)       = sqrt_A_r_dt_inv.cast<T>() * wb_error;
+    _res.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error;
 
     return true;
 }
