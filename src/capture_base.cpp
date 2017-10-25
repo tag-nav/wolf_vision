@@ -62,7 +62,7 @@ CaptureBase::CaptureBase(const std::string& _type,
     {
         WOLF_ERROR("Provided sensor parameters but no sensor pointer");
     }
-    updateCalilbSize();
+    updateCalibSize();
 }
 
 
@@ -147,7 +147,7 @@ void CaptureBase::fix()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
-    updateCalilbSize();
+    updateCalibSize();
 }
 
 void CaptureBase::unfix()
@@ -162,7 +162,7 @@ void CaptureBase::unfix()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
-    updateCalilbSize();
+    updateCalibSize();
 }
 
 void CaptureBase::fixExtrinsics()
@@ -177,7 +177,7 @@ void CaptureBase::fixExtrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
-    updateCalilbSize();
+    updateCalibSize();
 }
 
 void CaptureBase::unfixExtrinsics()
@@ -192,7 +192,7 @@ void CaptureBase::unfixExtrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
-    updateCalilbSize();
+    updateCalibSize();
 }
 
 void CaptureBase::fixIntrinsics()
@@ -207,7 +207,7 @@ void CaptureBase::fixIntrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
-    updateCalilbSize();
+    updateCalibSize();
 }
 
 void CaptureBase::unfixIntrinsics()
@@ -222,7 +222,7 @@ void CaptureBase::unfixIntrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
-    updateCalilbSize();
+    updateCalibSize();
 }
 
 
@@ -267,7 +267,7 @@ Eigen::VectorXs CaptureBase::getCalibration() const
 
 void CaptureBase::setCalibration(const VectorXs& _calib)
 {
-    updateCalilbSize();
+    updateCalibSize();
     assert(_calib.size() == calib_size_ && "Wrong size of calibration vector");
     Size index = 0;
     for (Size i = 0; i < getStateBlockVec().size(); i++)
