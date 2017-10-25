@@ -1,6 +1,10 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 SET(HDRS_SERIALIZATION ${HDRS_SERIALIZATION}
+    ${CMAKE_CURRENT_SOURCE_DIR}/serialization_eigen_core.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/serialization_eigen_geometry.h
+    ${CMAKE_CURRENT_SOURCE_DIR}/serialization_eigen_sparse.h
+
     ${CMAKE_CURRENT_SOURCE_DIR}/serialization_local_parametrization_base.h
     ${CMAKE_CURRENT_SOURCE_DIR}/serialization_local_parametrization_homogeneous.h
     ${CMAKE_CURRENT_SOURCE_DIR}/serialization_local_parametrization_quaternion.h

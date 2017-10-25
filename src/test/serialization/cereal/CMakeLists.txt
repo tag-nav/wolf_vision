@@ -29,3 +29,15 @@ target_link_libraries(gtest_cereal_serialization_processor_odom2d_params ${PROJE
 wolf_add_gtest(gtest_cereal_serialization_time_stamp
   gtest_serialization_time_stamp.cpp)
 target_link_libraries(gtest_cereal_serialization_time_stamp ${PROJECT_NAME})
+
+wolf_add_gtest(gtest_cereal_serialization_eigen_core
+  gtest_serialization_eigen_core.cpp)
+target_link_libraries(gtest_cereal_serialization_eigen_core ${PROJECT_NAME})
+
+wolf_add_gtest(gtest_cereal_serialization_eigen_geometry
+  gtest_serialization_eigen_geometry.cpp)
+target_link_libraries(gtest_cereal_serialization_eigen_geometry ${PROJECT_NAME})
+
+wolf_add_gtest(gtest_cereal_serialization_eigen_sparse
+  gtest_serialization_eigen_sparse.cpp)
+target_link_libraries(gtest_cereal_serialization_eigen_sparse ${PROJECT_NAME})
