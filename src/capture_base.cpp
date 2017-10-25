@@ -48,7 +48,7 @@ CaptureBase::CaptureBase(const std::string& _type,
             assert(_intr_ptr && "Pointer to dynamic intrinsic params is null!");
             // copy fixed status from sensor
             if (_sensor_ptr->getIntrinsicPtr())
-                _p_ptr->setFixed(_sensor_ptr->getIntrinsicPtr()->isFixed());
+                _intr_ptr->setFixed(_sensor_ptr->getIntrinsicPtr()->isFixed());
             // assign to Capture's member
             state_block_vec_[2] = _intr_ptr;
         }
