@@ -260,6 +260,10 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
         expected_final_state = x_origin; //null bias + static, 
         x_origin.tail(6) = origin_bias;
 
+        StateBlockPtr sb = sen0_ptr->getIntrinsicPtr();
+        if (sb)
+            sen0_ptr->getIntrinsicPtr()->setState(origin_bias);
+
         //set origin of the problem
         origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
 
@@ -2326,10 +2330,10 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_i
     WOLF_DEBUG("acc bias before solving : ",origin_KF->getCaptureOf(sen_imu)->getCalibration().head(3).transpose());
 
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
-    WOLF_DEBUG("acc bias after solving : ",origin_KF->getCaptureOf(sen_imu)->getCalibration().head(3).transpose());
-    WOLF_DEBUG("acc bias during preint : ",std::static_pointer_cast<CaptureIMU>(origin_KF->getCaptureOf(sen_imu))->getCalibrationPreint().head(3).transpose());
-    
-    //Only biases are unfixed
+
+    wolf_problem_ptr_->print(4, 1, 1, 1);
+
+    //    //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration().head(3), origin_bias.head(3), wolf::Constants::EPS*100) //Acc bias
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration().tail(3), origin_bias.tail(3), wolf::Constants::EPS*100) //Gyro bias
 
