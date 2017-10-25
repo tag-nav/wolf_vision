@@ -767,17 +767,26 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     cout << "    C" << C->id();
                     if (C->getSensorPtr()) cout << " -> S" << C->getSensorPtr()->id();
                     else cout << " -> S-";
-                    cout << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "") << endl;
-                    if (state_blocks)
+                    
+                    cout << " [" << C->getType() << ", ";
+                    if(C->getSensorPtr() != nullptr)
                     {
-                        cout << "      sb:";
-                        for (auto sb : C->getStateBlockVec())
-                            if (sb != nullptr)
-                                cout << " " << (sb->isFixed() ? "Fix" : "Est");
-                            else
-                                cout << " ---";
-                        cout << endl;
+                        if(C->getSensorPtr()->isExtrinsicDynamic()) cout << "Dyn, ";
+                        else cout << "Sta, ";
                     }
+
+                    if(C->getSensorPtr() != nullptr)
+                    {
+                        if(C->getSensorPtr()->isIntrinsicDynamic()) cout << "Dyn | ";
+                        else cout << "Sta | ";
+                    }
+
+                    for(auto cpt_sb : C->getStateBlockVec())
+                    if(cpt_sb != nullptr) cout << std::setprecision(3) << cpt_sb->getState().transpose() << " ";
+                    else cout << "nullptr ";
+                    cout << " ]";
+
+                    cout << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "") << endl;
                     if (depth >= 3)
                     {
                         // Features
