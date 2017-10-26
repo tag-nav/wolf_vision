@@ -436,6 +436,9 @@ ENDIF(OpenCV_FOUND)
 # Add the capture sub-directory
 ADD_SUBDIRECTORY(captures)
 
+# Add the processor sub-directory
+ADD_SUBDIRECTORY(processors)
+
 # Add the sensor sub-directory
 ADD_SUBDIRECTORY(sensors)
 
@@ -481,6 +484,7 @@ ADD_LIBRARY(${PROJECT_NAME}
             ${SRCS}
             ${SRCS_CAPTURE}
             ${SRCS_SENSOR}
+            ${SRCS_PROCESSOR}
             #${SRCS_DTASSC} 
             ${SRCS_WRAPPER}
             )
@@ -534,6 +538,8 @@ INSTALL(FILES ${HDRS_CAPTURE}
     DESTINATION include/iri-algorithms/wolf/captures)
 INSTALL(FILES ${HDRS_SENSOR}
     DESTINATION include/iri-algorithms/wolf/sensors)
+INSTALL(FILES ${HDRS_PROCESSOR}
+    DESTINATION include/iri-algorithms/wolf/processors)
 INSTALL(FILES ${HDRS_WRAPPER}
     DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
 INSTALL(FILES ${HDRS_SOLVER}
