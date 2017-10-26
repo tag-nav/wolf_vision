@@ -164,20 +164,20 @@ TARGET_LINK_LIBRARIES(test_processor_imu ${PROJECT_NAME})
 #TARGET_LINK_LIBRARIES(test_processor_imu_jacobians ${PROJECT_NAME})
 
 # Test IMU using printed Dock
-ADD_EXECUTABLE(test_imuDock test_imuDock.cpp)
-TARGET_LINK_LIBRARIES(test_imuDock ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_imuDock test_imuDock.cpp)
+#TARGET_LINK_LIBRARIES(test_imuDock ${PROJECT_NAME})
 
 # Test IMU with auto KF generation (Humanoids 20017)
-ADD_EXECUTABLE(test_imuDock_autoKFs test_imuDock_autoKFs.cpp)
-TARGET_LINK_LIBRARIES(test_imuDock_autoKFs ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_imuDock_autoKFs test_imuDock_autoKFs.cpp)
+#TARGET_LINK_LIBRARIES(test_imuDock_autoKFs ${PROJECT_NAME})
 
 # ConstraintIMU - factors test
-ADD_EXECUTABLE(test_imu_constrained0 test_imu_constrained0.cpp)
-TARGET_LINK_LIBRARIES(test_imu_constrained0 ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_imu_constrained0 test_imu_constrained0.cpp)
+#TARGET_LINK_LIBRARIES(test_imu_constrained0 ${PROJECT_NAME})
 
 # IMU - Offline plateform test
-ADD_EXECUTABLE(test_imuPlateform_Offline test_imuPlateform_Offline.cpp)
-TARGET_LINK_LIBRARIES(test_imuPlateform_Offline ${PROJECT_NAME})
+#ADD_EXECUTABLE(test_imuPlateform_Offline test_imuPlateform_Offline.cpp)
+#TARGET_LINK_LIBRARIES(test_imuPlateform_Offline ${PROJECT_NAME})
 
 # IMU - constraintIMU
 #ADD_EXECUTABLE(test_constraint_imu test_constraint_imu.cpp)

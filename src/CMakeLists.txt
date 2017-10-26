@@ -260,7 +260,6 @@ SET(HDRS
     feature_fix.h
     feature_odom_2D.h
     feature_polyline_2D.h
-    frame_imu.h
     landmark_corner_2D.h
     landmark_container.h
     landmark_line_2D.h
@@ -334,7 +333,6 @@ SET(SRCS
     feature_fix.cpp
     feature_odom_2D.cpp
     feature_polyline_2D.cpp
-    frame_imu.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
     landmark_line_2D.cpp
