@@ -1321,7 +1321,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     KF1->getVPtr()->fix();
 
     wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbated_origin_state(x_origin);
+    Eigen::VectorXs perturbed_bias(origin_bias);
     std::string report;
 
     //==============================================================
@@ -1330,8 +1330,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     Eigen::Vector6s err;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+    perturbed_bias = origin_bias + err;
+    KF0->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
     KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1348,8 +1348,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     epsilon_bias = 0.0001;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+    perturbed_bias = origin_bias + err;
+    KF0->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
     KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1366,8 +1366,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     epsilon_bias = 0.01;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+    perturbed_bias = origin_bias + err;
+    KF0->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
     KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1386,8 +1386,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     for(int i = 1; i<10; i++)
     {
         err = Eigen::Vector6s::Random() * epsilon_bias*10;
-        perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-        KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+        perturbed_bias = origin_bias + err;
+        KF0->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
         KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1437,7 +1437,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
     KF1->getVPtr()->fix();
 
     wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbated_origin_state(x_origin);
+    Eigen::VectorXs perturbed_bias(origin_bias);
     std::string report;
 
     //==============================================================
@@ -1446,8 +1446,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
     Eigen::Vector6s err;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+    perturbed_bias = origin_bias + err;
+    KF0->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
     KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1464,8 +1464,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
     epsilon_bias = 0.0001;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+    perturbed_bias = origin_bias + err;
+    KF0->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
     KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1482,8 +1482,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
     epsilon_bias = 0.01;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+    perturbed_bias = origin_bias + err;
+    KF0->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
     KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1502,8 +1502,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
     for(int i = 1; i<10; i++)
     {
         err = Eigen::Vector6s::Random() * epsilon_bias*10;
-        perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-        KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+        perturbed_bias = origin_bias + err;
+        KF0->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
         KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1554,7 +1554,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     last_KF->getVPtr()->fix();
 
     wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbated_origin_state(x_origin);
+    Eigen::VectorXs perturbed_bias(origin_bias);
     std::string report;
 
     //==============================================================
@@ -1563,9 +1563,9 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     Eigen::Vector6s err;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
+    perturbed_bias = origin_bias + err;
 
-    origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
     last_KF  ->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1579,8 +1579,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     epsilon_bias = 0.0001;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+    perturbed_bias = origin_bias + err;
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
     last_KF->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     WOLF_DEBUG("bias before solving : ",origin_KF->getCaptureOf(sen_imu)->getCalibration().transpose());
@@ -1599,8 +1599,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     epsilon_bias = 0.01;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+    perturbed_bias = origin_bias + err;
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
     last_KF->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1616,8 +1616,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     for(int i = 1; i<10; i++)
     {
         err = Eigen::Vector6s::Random() * epsilon_bias*10;
-        perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-        origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
+        perturbed_bias = origin_bias + err;
+        origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
         last_KF->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1639,7 +1639,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     last_KF->getVPtr()->fix();
 
     wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbated_origin_state(x_origin);
+    Eigen::VectorXs perturbed_bias(origin_bias);
     std::string report;
 
     //==============================================================
@@ -1648,8 +1648,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     Eigen::Vector6s err;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1664,8 +1664,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     epsilon_bias = 0.0001;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1680,8 +1680,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     epsilon_bias = 0.01;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1697,8 +1697,8 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     for(int i = 1; i<10; i++)
     {
         err = Eigen::Vector6s::Random() * epsilon_bias*10;
-        perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-        origin_KF->setState(perturbated_origin_state);
+        perturbed_bias = origin_bias + err;
+        origin_KF->setState(x_origin);
         last_KF->setState(expected_final_state);
 
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
@@ -1742,7 +1742,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     last_KF->getVPtr()->fix();
 
     wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbated_origin_state(x_origin);
+    Eigen::VectorXs perturbed_bias(origin_bias);
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-6")
@@ -1750,8 +1750,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     Eigen::Vector6s err;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
@@ -1765,8 +1765,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     epsilon_bias = 0.0001;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
@@ -1780,8 +1780,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     epsilon_bias = 0.01;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
@@ -1797,8 +1797,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     for(int i = 1; i<10; i++)
     {
         err = Eigen::Vector6s::Random() * epsilon_bias*10;
-        perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-        origin_KF->setState(perturbated_origin_state);
+        perturbed_bias = origin_bias + err;
+        origin_KF->setState(x_origin);
         last_KF->setState(expected_final_state);
 
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
@@ -1841,7 +1841,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     last_KF->getVPtr()->fix();
 
     wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbated_origin_state(x_origin);
+    Eigen::VectorXs perturbed_bias(origin_bias);
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-6")
@@ -1849,8 +1849,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     Eigen::Vector6s err;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
@@ -1864,8 +1864,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     epsilon_bias = 0.0001;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
@@ -1879,8 +1879,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     epsilon_bias = 0.01;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
@@ -1896,8 +1896,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias
     for(int i = 1; i<10; i++)
     {
         err = Eigen::Vector6s::Random() * epsilon_bias*10;
-        perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-        origin_KF->setState(perturbated_origin_state);
+        perturbed_bias = origin_bias + err;
+        origin_KF->setState(x_origin);
         last_KF->setState(expected_final_state);
 
         report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
@@ -1941,7 +1941,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     last_KF->getVPtr()->fix();
 
     wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbated_origin_state(x_origin);
+    Eigen::VectorXs perturbed_bias(origin_bias);
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-6")
@@ -1949,8 +1949,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     Eigen::Vector6s err;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
@@ -1964,8 +1964,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     epsilon_bias = 0.0001;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
@@ -1979,8 +1979,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     epsilon_bias = 0.01;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
@@ -1996,8 +1996,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_E
     for(int i = 1; i<10; i++)
     {
         err = Eigen::Vector6s::Random() * epsilon_bias*10;
-        perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-        origin_KF->setState(perturbated_origin_state);
+        perturbed_bias = origin_bias + err;
+        origin_KF->setState(x_origin);
         last_KF->setState(expected_final_state);
 
         report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
@@ -2041,7 +2041,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     last_KF->getVPtr()->fix();
 
     wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbated_origin_state(x_origin);
+    Eigen::VectorXs perturbed_bias(origin_bias);
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-6")
@@ -2049,8 +2049,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     Eigen::Vector6s err;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
@@ -2064,8 +2064,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     epsilon_bias = 0.0001;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
@@ -2079,8 +2079,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     epsilon_bias = 0.01;
 
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-    origin_KF->setState(perturbated_origin_state);
+    perturbed_bias = origin_bias + err;
+    origin_KF->setState(x_origin);
     last_KF->setState(expected_final_state);
 
     report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
@@ -2096,8 +2096,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     for(int i = 1; i<10; i++)
     {
         err = Eigen::Vector6s::Random() * epsilon_bias*10;
-        perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
-        origin_KF->setState(perturbated_origin_state);
+        perturbed_bias = origin_bias + err;
+        origin_KF->setState(x_origin);
         last_KF->setState(expected_final_state);
 
         report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
@@ -2784,6 +2784,6 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
-//  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
+  //::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Static_NonNullBias.*";
   return RUN_ALL_TESTS();
 }
