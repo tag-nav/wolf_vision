@@ -110,10 +110,6 @@ target_link_libraries(gtest_constraint_odom_3D ${PROJECT_NAME})
 wolf_add_gtest(gtest_feature_imu gtest_feature_imu.cpp)
 target_link_libraries(gtest_feature_imu ${PROJECT_NAME})
 
-# FrameIMU class test
-wolf_add_gtest(gtest_frame_imu gtest_frame_imu.cpp)
-target_link_libraries(gtest_frame_imu ${PROJECT_NAME})
-
 # IMU Bias + estimation tests
 #wolf_add_gtest(gtest_imuBias gtest_imuBias.cpp)
 #target_link_libraries(gtest_imuBias ${PROJECT_NAME})
