@@ -1822,11 +1822,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
 
         //Only biases are unfixed
-        ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-        ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
-
-        ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-        ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
+        ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
+        
     }
 }
 
@@ -2186,11 +2183,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2_InvarP1Q1V1P2Q2
     last_KF->getVPtr()->fix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     ceres_manager_wolf_diff->computeCovariances(ALL);
@@ -2233,11 +2228,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V2_InvarP1Q1V1P2
     last_KF->getVPtr()->unfix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     ceres_manager_wolf_diff->computeCovariances(ALL);
@@ -2282,11 +2275,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V1V2_InvarP1Q1P2
     last_KF->getVPtr()->unfix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.00001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     //ceres_manager_wolf_diff->computeCovariances(ALL);
@@ -2313,11 +2304,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V1Q2V2_InvarP1Q1
     last_KF->getVPtr()->unfix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.00001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
@@ -2345,11 +2334,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V1P2V2_InvarP1Q1
     last_KF->getVPtr()->unfix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.00001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
@@ -2375,11 +2362,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V1P2Q2V2_InvarP1
     last_KF->getVPtr()->unfix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.0001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.0001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
@@ -2406,11 +2391,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2P2Q2V2_InvarP1Q1
     last_KF->getVPtr()->unfix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.00001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     ceres_manager_wolf_diff->computeCovariances(ALL);
@@ -2466,11 +2449,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarQ1B1B2P2Q2_InvarP1V1
     last_KF->getVPtr()->fix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.00001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     ceres_manager_wolf_diff->computeCovariances(ALL);
@@ -2526,11 +2507,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY, VarQ1B1B2P2Q2_InvarP1V
     last_KF->getVPtr()->fix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.00001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     ceres_manager_wolf_diff->computeCovariances(ALL);
@@ -2578,11 +2557,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2_InvarP1Q1V1P2Q2V
     last_KF->getVPtr()->fix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     ceres_manager_wolf_diff->computeCovariances(ALL);
@@ -2625,11 +2602,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V2_InvarP1Q1V1P2Q
     last_KF->getVPtr()->unfix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     ceres_manager_wolf_diff->computeCovariances(ALL);
@@ -2673,11 +2648,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1V2_InvarP1Q1P2Q
     last_KF->getVPtr()->unfix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.00001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
@@ -2702,11 +2675,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1Q2V2_InvarP1Q1P
     last_KF->getVPtr()->unfix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.00001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
@@ -2733,11 +2704,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q
     last_KF->getVPtr()->unfix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.00001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
@@ -2762,11 +2731,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2Q2V2_InvarP1Q
     last_KF->getVPtr()->unfix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.0001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.0001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
@@ -2793,11 +2760,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
     last_KF->getVPtr()->unfix();
 
     //perturbation of origin bias
-    Eigen::Vector3s random_err(Eigen::Vector3s::Random() * 0.00001);
-    Eigen::Vector3s accBias = origin_KF->getAccBiasPtr()->getState();
-    Eigen::Vector3s gyroBias = origin_KF->getGyroBiasPtr()->getState();
-    origin_KF->getAccBiasPtr()->setState(accBias + random_err);
-    origin_KF->getGyroBiasPtr()->setState(gyroBias + random_err);
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     ceres_manager_wolf_diff->computeCovariances(ALL);
@@ -2830,37 +2795,6 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
     if(cov_stdev.tail(6).maxCoeff()>=1)
         WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
 }
-
-//not constrained enough, thus, estimation fails
-/*TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarAll_initOK)
-{
-    //prepare problem for solving
-    origin_KF->getPPtr()->unfix();
-    origin_KF->getOPtr()->unfix();
-    origin_KF->getVPtr()->unfix();
-
-    last_KF->setState(expected_final_state);
-
-    last_KF->getPPtr()->unfix();
-    last_KF->getOPtr()->unfix();
-    last_KF->getVPtr()->unfix();
-
-    std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-
-    ASSERT_MATRIX_APPROX(origin_KF->getPPtr()->getState(), x_origin.head(3), wolf::Constants::EPS*100)
-    Eigen::Map<const Eigen::Quaternions> estimatedOriginQuat(origin_KF->getOPtr()->getState().data()), expectedOriginQuat(x_origin.segment(3,4).data());
-    ASSERT_QUATERNION_APPROX(estimatedOriginQuat, expectedOriginQuat, wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(origin_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
-    
-    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*100)
-    Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
-    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getAccBiasPtr()->getState(), origin_bias.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getGyroBiasPtr()->getState(), origin_bias.tail(3), wolf::Constants::EPS*100)
-}*/
 
 //Tests related to noise
 
