@@ -155,6 +155,10 @@ TARGET_LINK_LIBRARIES(test_processor_tracker_landmark ${PROJECT_NAME})
 ADD_EXECUTABLE(test_processor_imu test_processor_imu.cpp)
 TARGET_LINK_LIBRARIES(test_processor_imu ${PROJECT_NAME})
 
+# Processor Diff-Drive test
+ADD_EXECUTABLE(test_processor_diff_drive test_diff_drive.cpp)
+TARGET_LINK_LIBRARIES(test_processor_diff_drive ${PROJECT_NAME})
+
 # MPU6050 IMU test
 #ADD_EXECUTABLE(test_mpu test_mpu.cpp)
 #TARGET_LINK_LIBRARIES(test_mpu ${PROJECT_NAME})
