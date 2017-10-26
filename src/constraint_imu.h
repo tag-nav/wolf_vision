@@ -4,7 +4,6 @@
 //Wolf includes
 #include "constraint_autodiff.h"
 #include "feature_imu.h"
-#include "frame_imu.h"
 #include "sensor_imu.h"
 #include "rotations.h"
 

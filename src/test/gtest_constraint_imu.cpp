@@ -62,7 +62,7 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
 
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -81,9 +81,9 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
 
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(16);
-        x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_final_state.resize(10);
+        x_origin.resize(10);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         t.set(0);
 
         origin_bias << 0,0,0, 0,0,0;
@@ -148,7 +148,7 @@ class ConstraintIMU_biasTest_Static_NonNullAccBias : public testing::Test
 
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -166,9 +166,9 @@ class ConstraintIMU_biasTest_Static_NonNullAccBias : public testing::Test
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(16);
-        x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_final_state.resize(10);
+        x_origin.resize(10);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         t.set(0);
         origin_bias << 0.002, 0.005, 0.1, 0,0,0;
 
@@ -232,7 +232,7 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
 
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -250,16 +250,15 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(16);
-        x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_final_state.resize(10);
+        x_origin.resize(10);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         t.set(0);
         origin_bias << 0, 0, 0, 0.07,-0.035,-0.1;
         origin_bias *= 1e-2;
         //origin_bias << 0.002, 0.005, 0.1, 0.07,-0.035,-0.1;
 
-        expected_final_state = x_origin; //null bias + static, 
-        x_origin.tail(6) = origin_bias;
+        expected_final_state = x_origin; //null bias + static,
 
         //set origin of the problem
         origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
@@ -319,7 +318,7 @@ class ConstraintIMU_biasTest_Static_NonNullBias : public testing::Test
 
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -337,15 +336,15 @@ class ConstraintIMU_biasTest_Static_NonNullBias : public testing::Test
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(16);
-        x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_final_state.resize(10);
+        x_origin.resize(10);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         t.set(0);
         origin_bias << 0.002, 0.005, 0.1, 0.07,-0.035,-0.1;
         origin_bias *= .01;
 
-        expected_final_state = x_origin; //null bias + static, 
-        x_origin.tail(6) = origin_bias;
+        expected_final_state = x_origin; //null bias + static
+        
 
         //set origin of the problem
         origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
@@ -405,7 +404,7 @@ class ConstraintIMU_biasTest_Move_NullBias : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -424,19 +423,18 @@ class ConstraintIMU_biasTest_Move_NullBias : public testing::Test
 
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(16);
-        x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_final_state.resize(10);
+        x_origin.resize(10);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         t.set(0);
 
         Eigen::Vector6s data_imu;
         data_imu << 0,10,-wolf::gravity()(2), 0,0,0; //10m/s on y direction
-        expected_final_state << 0,5,0, 0,0,0,1, 0,10,0, 0,0,0, 0,0,0; // advanced at a=10m/s2 during 1s ==> dx = 0.5*10*1^2 = 5; dvx = 10*1 = 10
+        expected_final_state << 0,5,0, 0,0,0,1, 0,10,0; // advanced at a=10m/s2 during 1s ==> dx = 0.5*10*1^2 = 5; dvx = 10*1 = 10
 
         origin_bias<< 0,0,0,0,0,0;
 
         expected_final_state = x_origin;
-        x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
         origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
@@ -494,7 +492,7 @@ class ConstraintIMU_biasTest_Move_NonNullBias : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -512,18 +510,16 @@ class ConstraintIMU_biasTest_Move_NonNullBias : public testing::Test
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(16);
-        x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_final_state.resize(10);
+        x_origin.resize(10);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         t.set(0);
 
         Eigen::Vector6s data_imu;
         origin_bias = Eigen::Vector6s::Random() * 0.001;
         data_imu << 0,10,-wolf::gravity()(2), 0,0,0; //10m/s on y direction
         data_imu = data_imu + origin_bias;
-        expected_final_state << 0,5,0, 0,0,0,1, 0,10,0, 0,0,0, 0,0,0; // advanced at a=10m/s2 during 1s ==> dx = 0.5*10*1^2 = 5; dvx = 10*1 = 10
-
-        x_origin.tail(6) = origin_bias;
+        expected_final_state << 0,5,0, 0,0,0,1, 0,10,0; // advanced at a=10m/s2 during 1s ==> dx = 0.5*10*1^2 = 5; dvx = 10*1 = 10
 
         //set origin of the problem
         origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
@@ -579,7 +575,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -597,9 +593,9 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(16);
-        x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_final_state.resize(10);
+        x_origin.resize(10);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         t.set(0);
 
         Eigen::Vector6s data_imu, data_imu_initial;
@@ -611,10 +607,9 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
         // Expected state after one second integration
         Eigen::Quaternions quat_comp(Eigen::Quaternions::Identity());
         quat_comp = quat_comp * wolf::v2q(data_imu.tail(3)*1);
-        expected_final_state << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0, 0,0,0, 0,0,0; // rotated at 5 deg/s for 0.1s = 5 deg => 5 * M_PI/180
+        expected_final_state << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0; // rotated at 5 deg/s for 0.1s = 5 deg => 5 * M_PI/180
 
         data_imu = data_imu + origin_bias; // bias measurements
-        x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
         origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
@@ -673,7 +668,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -691,9 +686,9 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(16);
-        x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 10,-3,4, 0,0,0, 0,0,0;
+        expected_final_state.resize(10);
+        x_origin.resize(10);
+        x_origin << 0,0,0, 0,0,0,1, 10,-3,4;
         t.set(0);
 
         Eigen::Vector6s data_imu, data_imu_initial;
@@ -710,10 +705,9 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
         // rotated at 5 deg/s for 1s = 5 deg => 5 * M_PI/180
         // no other acceleration : we should still be moving at initial velocity
         // position = V*dt, dt = 1s
-        expected_final_state << 10,-3,4, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 10,-3,4, 0,0,0, 0,0,0;
+        expected_final_state << 10,-3,4, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 10,-3,4;
 
         data_imu = data_imu + origin_bias; // bias measurements
-        x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
         origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
@@ -775,7 +769,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -793,16 +787,13 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(16);
-        x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_final_state.resize(10);
+        x_origin.resize(10);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         origin_bias << 0.0015, 0.004, -0.002, 0.005, -0.0074, -0.003;
         origin_bias *= 0.01;
         t.set(0);
         Eigen::Quaternions current_quatState(Eigen::Quaternions::Identity());
-
-        expected_final_state.tail(6) = origin_bias;
-        x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
         origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
@@ -838,7 +829,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
             sen_imu->process(imu_ptr);
         }
 
-        expected_final_state.head(10) << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
+        expected_final_state << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
         last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
         last_KF->setState(expected_final_state);
 
@@ -877,7 +868,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -907,16 +898,13 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(16);
-        x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_final_state.resize(10);
+        x_origin.resize(10);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         origin_bias << 0.0015, 0.004, -0.002, 0.005, -0.0074, -0.003;
         t.set(0);
         Eigen::Quaternions odom_quat(Eigen::Quaternions::Identity());
         Eigen::Quaternions current_quatState(Eigen::Quaternions::Identity());
-
-        expected_final_state.tail(6) = origin_bias;
-        x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
         origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
@@ -974,7 +962,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
             }
         }
 
-        expected_final_state.head(10) << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
+        expected_final_state << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
         last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
         last_KF->setState(expected_final_state);
 
@@ -1013,7 +1001,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -1043,17 +1031,14 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(16);
-        x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_final_state.resize(10);
+        x_origin.resize(10);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         origin_bias << 0.0015, 0.004, -0.002, 0.005, -0.0074, -0.003;
         origin_bias *= .1;
         t.set(0);
         Eigen::Quaternions odom_quat(Eigen::Quaternions::Identity());
         Eigen::Quaternions current_quatState(Eigen::Quaternions::Identity());
-
-        expected_final_state.tail(6) = origin_bias;
-        x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
         origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
@@ -1110,7 +1095,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
             }
         }
 
-        expected_final_state.head(10) << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
+        expected_final_state << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
         last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
         last_KF->setState(expected_final_state);
 
@@ -1149,7 +1134,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -1179,16 +1164,13 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(16);
-        x_origin.resize(16);
-        x_origin << 0,0,0, 0,0,0,1, 0,0,0, 0,0,0, 0,0,0;
+        expected_final_state.resize(10);
+        x_origin.resize(10);
+        x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         origin_bias << 0.0015, 0.004, -0.002, 0.005, -0.0074, -0.003;
         t.set(0);
         Eigen::Quaternions odom_quat(Eigen::Quaternions::Identity());
         Eigen::Quaternions current_quatState(Eigen::Quaternions::Identity());
-
-        expected_final_state.tail(6) = origin_bias;
-        x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
         origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
@@ -1286,7 +1268,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
             }
         }
 
-        expected_final_state.head(10) << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
+        expected_final_state << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
         last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
         last_KF->setState(expected_final_state);
 
@@ -1350,7 +1332,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
     perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
     KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
-    KF1->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
+    KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
@@ -1368,7 +1350,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
     perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
     KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
-    KF1->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
+    KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
@@ -1386,7 +1368,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
     perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
     KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
-    KF1->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
+    KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
@@ -1406,7 +1388,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
         err = Eigen::Vector6s::Random() * epsilon_bias*10;
         perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
         KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
-        KF1->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
+        KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
@@ -1466,7 +1448,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
     perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
     KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
-    KF1->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
+    KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
@@ -1484,7 +1466,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
     perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
     KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
-    KF1->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
+    KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
@@ -1502,7 +1484,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
     perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
     KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
-    KF1->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
+    KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
@@ -1522,7 +1504,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullAccBias,VarB1B2_InvarP1Q1V1P2Q2V2_Er
         err = Eigen::Vector6s::Random() * epsilon_bias*10;
         perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
         KF0->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
-        KF1->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
+        KF1->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
@@ -1584,7 +1566,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
 
     origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
-    last_KF  ->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
+    last_KF  ->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
@@ -1599,7 +1581,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
     perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
     origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
-    last_KF->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
+    last_KF->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     WOLF_DEBUG("bias before solving : ",origin_KF->getCaptureOf(sen_imu)->getCalibration().transpose());
 
@@ -1619,7 +1601,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     err = Eigen::Vector6s::Random() * epsilon_bias*10;
     perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
     origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
-    last_KF->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
+    last_KF->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 
@@ -1636,7 +1618,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
         err = Eigen::Vector6s::Random() * epsilon_bias*10;
         perturbated_origin_state.tail(6) = x_origin.tail(6) + err;
         origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbated_origin_state.tail(6));
-        last_KF->getCaptureOf(sen_imu)->setCalibration(expected_final_state.tail(6));
+        last_KF->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
         report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
 

@@ -21,7 +21,7 @@ class FeatureIMU_test : public testing::Test
         Eigen::VectorXs delta_preint;
         Eigen::Matrix<wolf::Scalar,9,9> delta_preint_cov;
         std::shared_ptr<wolf::FeatureIMU> feat_imu;
-        wolf::FrameIMUPtr last_frame;
+        wolf::FrameBasePtr last_frame;
         wolf::FrameBasePtr origin_frame;
         Eigen::MatrixXs dD_db_jacobians;
         wolf::ProcessorBasePtr processor_ptr_;
@@ -35,7 +35,7 @@ class FeatureIMU_test : public testing::Test
         using std::static_pointer_cast;
 
         // Wolf problem
-        wolf_problem_ptr_ = Problem::create("PQVBB 3D");
+        wolf_problem_ptr_ = Problem::create("POV 3D");
         Eigen::VectorXs IMU_extrinsics(7);
         IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
         IntrinsicsIMUPtr sen_imu_params = std::make_shared<IntrinsicsIMU>();
@@ -49,8 +49,8 @@ class FeatureIMU_test : public testing::Test
         t.set(0);
 
     // Set the origin
-        Eigen::VectorXs x0(16);
-        x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+        Eigen::VectorXs x0(10);
+        x0 << 0,0,0,  0,0,0,1,  0,0,0;
         origin_frame = wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);  //create a keyframe at origin
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
@@ -62,7 +62,7 @@ class FeatureIMU_test : public testing::Test
         data_ << 2, 0, 9.8, 0, 0, 0;
         t.set(0.1);
         // Expected state after one integration
-        //x << 0.01,0,0, 0,0,0,1, 0.2,0,0, 0,0,0, 0,0,0; // advanced at a=2m/s2 during 0.1s ==> dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2
+        //x << 0.01,0,0, 0,0,0,1, 0.2,0,0; // advanced at a=2m/s2 during 0.1s ==> dx = 0.5*2*0.1^2 = 0.01; dvx = 2*0.1 = 0.2
     // assign data to capture
         imu_ptr->setData(data_);
         imu_ptr->setTimeStamp(t);
@@ -71,10 +71,10 @@ class FeatureIMU_test : public testing::Test
         sensor_ptr->process(imu_ptr);
         WOLF_TRACE("D_pre: ", wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_.transpose());
 
-    //create FrameIMU
+    //create Frame
         ts = wolf_problem_ptr_->getProcessorMotionPtr()->getBuffer().get().back().ts_;
         state_vec = wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState();
-   	    last_frame = std::make_shared<FrameIMU>(KEY_FRAME, ts, state_vec);
+   	    last_frame = std::make_shared<FrameBase>(KEY_FRAME, ts, std::make_shared<StateBlock>(state_vec.head(3)), std::make_shared<StateBlock>(state_vec.segment(3,4)), std::make_shared<StateBlock>(state_vec.head(3)));
         wolf_problem_ptr_->getTrajectoryPtr()->addFrame(last_frame);
         
     //create a feature
@@ -153,7 +153,7 @@ TEST_F(FeatureIMU_test, access_members)
 //{
 //    using namespace wolf;
 //
-//    FrameIMUPtr frm_imu = std::static_pointer_cast<FrameIMU>(last_frame);
+//    FrameBasePtr frm_imu = std::static_pointer_cast<FrameBase>(last_frame);
 //    auto cap_imu = last_frame->getCaptureList().back();
 //    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, std::static_pointer_cast<CaptureIMU>(cap_imu), processor_ptr_);
 //    feat_imu->addConstraint(constraint_imu);

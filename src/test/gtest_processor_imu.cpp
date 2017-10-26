@@ -47,7 +47,7 @@ class ProcessorIMUt : public testing::Test
         std::string wolf_root = _WOLF_ROOT_DIR;
 
         // Wolf problem
-        problem = Problem::create("PQVBB 3D");
+        problem = Problem::create("POV 3D");
         Vector7s extrinsics = (Vector7s() << 0,0,0, 0,0,0,1).finished();
         sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
         ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
@@ -57,7 +57,7 @@ class ProcessorIMUt : public testing::Test
         data_cov = Matrix6s::Identity();
 
         // Set the origin
-        x0.resize(16);
+        x0.resize(10);
 
         // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
         cap_imu_ptr = make_shared<CaptureIMU>(t, sensor_ptr, data, data_cov, Vector6s::Zero());
@@ -104,7 +104,7 @@ TEST(ProcessorIMU_constructors, ALL)
 
     //Factory constructor without yaml
     std::string wolf_root = _WOLF_ROOT_DIR;
-    ProblemPtr problem = Problem::create("PQVBB 3D");
+    ProblemPtr problem = Problem::create("POV 3D");
     Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
     SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics, wolf_root + "/src/examples/sensor_imu.yaml");
     ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
@@ -133,7 +133,7 @@ TEST(ProcessorIMU, voteForKeyFrame)
     std::string wolf_root = _WOLF_ROOT_DIR;
 
     // Wolf problem
-    ProblemPtr problem = Problem::create("PQVBB 3D");
+    ProblemPtr problem = Problem::create("POV 3D");
     Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
     SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
     ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
@@ -145,9 +145,9 @@ TEST(ProcessorIMU, voteForKeyFrame)
     ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", sensor_ptr, prc_imu_params);
     
     //setting origin
-    VectorXs x0(16);
+    VectorXs x0(10);
     TimeStamp t(0);
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,.000,  0,0,.000; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
     problem->getProcessorMotionPtr()->setOrigin(x0, t); //this also creates a keyframe at origin
 
     //data variable and covariance matrix
@@ -210,7 +210,7 @@ TEST_F(ProcessorIMUt, interpolate)
     using namespace wolf;
 
     t.set(0);
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -256,7 +256,7 @@ ASSERT_MATRIX_APPROX(mot_final.delta_integr_,  mot_sec.delta_integr_, 1e-6);
 TEST_F(ProcessorIMUt, acc_x)
 {
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -282,7 +282,7 @@ TEST_F(ProcessorIMUt, acc_y)
     // difference hier is that we integrate over 1ms periods
 
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -319,7 +319,7 @@ TEST_F(ProcessorIMUt, acc_y)
 TEST_F(ProcessorIMUt, acc_z)
 {
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -387,7 +387,7 @@ TEST_F(ProcessorIMUt, acc_z)
 //     */
 //
 //    t.set(0); // clock in 0,1 ms ticks
-//    x0 << 0,0,0,  0,0,0,1,  x_freq,y_freq,z_freq,  0,0,0,  0,0,0; // Try some non-zero biases
+//    x0 << 0,0,0,  0,0,0,1,  x_freq,y_freq,z_freq;
 //
 //    problem->getProcessorMotionPtr()->setOrigin(x0, t);
 //
@@ -447,7 +447,7 @@ TEST_F(ProcessorIMUt, acc_z)
 TEST_F(ProcessorIMUt, check_Covariance)
 {
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -476,7 +476,7 @@ TEST_F(ProcessorIMUt, gyro_x)
 {
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -527,7 +527,7 @@ TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
     Vector6s bias; bias << abx,0,0,  0,0,0;
     Vector3s acc_bias = bias.head(3);
     // state
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  abx,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
 
     // init things
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
@@ -581,7 +581,7 @@ TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
     wolf::Scalar abx(0.002), aby(0.01);
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  abx,aby,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
     Vector6s bias; bias << abx,aby,0,  0,0,0;
     Vector3s acc_bias = bias.head(3);
 
@@ -631,7 +631,7 @@ TEST_F(ProcessorIMUt, gyro_z)
 {
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0;
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -669,7 +669,7 @@ TEST_F(ProcessorIMUt, gyro_z)
 TEST_F(ProcessorIMUt, gyro_xyz)
 {
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -756,7 +756,7 @@ TEST_F(ProcessorIMUt, gyro_z_ConstVelocity)
 {
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  2,0,0,  0,0,0,  0,0,0;
+    x0 << 0,0,0,  0,0,0,1,  2,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -795,7 +795,7 @@ TEST_F(ProcessorIMUt, gyro_x_ConstVelocity)
 {
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  2,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  2,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -839,7 +839,7 @@ TEST_F(ProcessorIMUt, gyro_xy_ConstVelocity)
 {
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  2,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  2,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -883,7 +883,7 @@ TEST_F(ProcessorIMUt, gyro_y_ConstVelocity)
 {
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  2,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  2,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -926,7 +926,7 @@ TEST_F(ProcessorIMUt, gyro_y_ConstVelocity)
 TEST_F(ProcessorIMUt, gyro_xyz_ConstVelocity)
 {
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  2,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  2,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -1015,7 +1015,7 @@ TEST_F(ProcessorIMUt, gyro_x_acc_x)
 {
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -1064,7 +1064,7 @@ TEST_F(ProcessorIMUt, gyro_y_acc_y)
 {
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
@@ -1113,7 +1113,7 @@ TEST_F(ProcessorIMUt, gyro_z_acc_z)
 {
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
-    x0 << 0,0,0,  0,0,0,1,  0,0,0,  0,0,0,  0,0,0; // Try some non-zero biases
+    x0 << 0,0,0,  0,0,0,1,  0,0,0;
 
     problem->getProcessorMotionPtr()->setOrigin(x0, t);
 
