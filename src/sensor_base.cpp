@@ -212,20 +212,20 @@ void SensorBase::setNoise(const Eigen::VectorXs& _noise_std) {
 
 CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
 {
-    // we search for the most recent Capture before _ts to get the capture pointer
+    // we search for the most recent Capture of this sensor before _ts
     CaptureBasePtr capture = nullptr;
     FrameBaseList frame_list = getProblem()->getTrajectoryPtr()->getFrameList();
-    FrameBaseList::reverse_iterator frame_it = frame_list.rbegin();
-    while (frame_it != frame_list.rend())
+    FrameBaseRevIter frame_rev_it = frame_list.rbegin();
+    while (frame_rev_it != frame_list.rend())
     {
-        if ((*frame_it)->getTimeStamp() < _ts)
+        if ((*frame_rev_it)->getTimeStamp() <= _ts)
         {
-            CaptureBasePtr capture = (*frame_it)->getCaptureOf(shared_from_this());
+            CaptureBasePtr capture = (*frame_rev_it)->getCaptureOf(shared_from_this());
             if (capture)
                 // found the most recent Capture made by this sensor !
                 break;
 
-            frame_it++;
+            frame_rev_it++;
         }
     }
     return capture;
