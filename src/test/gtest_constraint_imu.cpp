@@ -389,8 +389,8 @@ class ConstraintIMU_biasTest_Move_NullBias : public testing::Test
         CeresManager* ceres_manager_wolf_diff;
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
-        FrameIMUPtr origin_KF;
-        FrameIMUPtr last_KF;
+        FrameBasePtr origin_KF;
+        FrameBasePtr last_KF;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -439,7 +439,7 @@ class ConstraintIMU_biasTest_Move_NullBias : public testing::Test
         x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
-        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
 
         //===================================================== END{INITIALIZATION}
 
@@ -458,7 +458,7 @@ class ConstraintIMU_biasTest_Move_NullBias : public testing::Test
             sen_imu->process(imu_ptr);
         }
 
-        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t));
+        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t);
         last_KF->setState(expected_final_state);
 
         //===================================================== END{PROCESS DATA}
@@ -478,8 +478,8 @@ class ConstraintIMU_biasTest_Move_NonNullBias : public testing::Test
         CeresManager* ceres_manager_wolf_diff;
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
-        FrameIMUPtr origin_KF;
-        FrameIMUPtr last_KF;
+        FrameBasePtr origin_KF;
+        FrameBasePtr last_KF;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -526,7 +526,7 @@ class ConstraintIMU_biasTest_Move_NonNullBias : public testing::Test
         x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
-        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
 
         //===================================================== END{INITIALIZATION}
         //===================================================== PROCESS DATA
@@ -543,7 +543,7 @@ class ConstraintIMU_biasTest_Move_NonNullBias : public testing::Test
             sen_imu->process(imu_ptr);
         }
 
-        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t));
+        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t);
         last_KF->setState(expected_final_state);
 
         //===================================================== END{PROCESS DATA}
@@ -563,8 +563,8 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
         CeresManager* ceres_manager_wolf_diff;
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
-        FrameIMUPtr origin_KF;
-        FrameIMUPtr last_KF;
+        FrameBasePtr origin_KF;
+        FrameBasePtr last_KF;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -617,7 +617,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
         x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
-        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
 
         //===================================================== END{INITIALIZATION}
         //===================================================== PROCESS DATA
@@ -637,7 +637,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
             sen_imu->process(imu_ptr);
         }
 
-        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t));
+        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t);
         last_KF->setState(expected_final_state);
 
         //===================================================== END{PROCESS DATA}
@@ -657,8 +657,8 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
         CeresManager* ceres_manager_wolf_diff;
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
-        FrameIMUPtr origin_KF;
-        FrameIMUPtr last_KF;
+        FrameBasePtr origin_KF;
+        FrameBasePtr last_KF;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -716,7 +716,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
         x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
-        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
 
         //===================================================== END{INITIALIZATION}
         //===================================================== PROCESS DATA
@@ -737,7 +737,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
             sen_imu->process(imu_ptr);
         }
 
-        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t));
+        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t);
         last_KF->setState(expected_final_state);
 
         //===================================================== END{PROCESS DATA}
@@ -759,8 +759,8 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
         CeresManager* ceres_manager_wolf_diff;
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
-        FrameIMUPtr origin_KF;
-        FrameIMUPtr last_KF;
+        FrameBasePtr origin_KF;
+        FrameBasePtr last_KF;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -805,7 +805,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
         x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
-        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
 
         //===================================================== END{INITIALIZATION}
         //===================================================== PROCESS DATA
@@ -839,7 +839,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
         }
 
         expected_final_state.head(10) << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
-        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
         last_KF->setState(expected_final_state);
 
         //===================================================== END{PROCESS DATA}
@@ -861,8 +861,8 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
         ProcessorOdom3DPtr processor_ptr_odom3D;
-        FrameIMUPtr origin_KF;
-        FrameIMUPtr last_KF;
+        FrameBasePtr origin_KF;
+        FrameBasePtr last_KF;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -919,7 +919,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
-        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
         processor_ptr_odom3D->setOrigin(origin_KF);
 
         //===================================================== END{INITIALIZATION}
@@ -975,7 +975,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         }
 
         expected_final_state.head(10) << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
-        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
         last_KF->setState(expected_final_state);
 
         //===================================================== END{PROCESS DATA}
@@ -997,8 +997,8 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
         ProcessorOdom3DPtr processor_ptr_odom3D;
-        FrameIMUPtr origin_KF;
-        FrameIMUPtr last_KF;
+        FrameBasePtr origin_KF;
+        FrameBasePtr last_KF;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -1056,7 +1056,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
-        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
         processor_ptr_odom3D->setOrigin(origin_KF);
 
         //===================================================== END{INITIALIZATION}
@@ -1111,7 +1111,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         }
 
         expected_final_state.head(10) << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
-        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
         last_KF->setState(expected_final_state);
 
         //===================================================== END{PROCESS DATA}
@@ -1133,8 +1133,8 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
         ProcessorOdom3DPtr processor_ptr_odom3D;
-        FrameIMUPtr origin_KF;
-        FrameIMUPtr last_KF;
+        FrameBasePtr origin_KF;
+        FrameBasePtr last_KF;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -1191,7 +1191,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
         x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
-        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
         processor_ptr_odom3D->setOrigin(origin_KF);
 
         //===================================================== END{INITIALIZATION}
@@ -1287,7 +1287,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
         }
 
         expected_final_state.head(10) << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
-        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts));
+        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
         last_KF->setState(expected_final_state);
 
         //===================================================== END{PROCESS DATA}
