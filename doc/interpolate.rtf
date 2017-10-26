@@ -1,0 +1,263 @@
+{\rtf1\ansi\ansicpg1252\cocoartf1404\cocoasubrtf470
+{\fonttbl\f0\fnil\fcharset0 Monaco;}
+{\colortbl;\red255\green255\blue255;\red63\green127\blue95;\red127\green159\blue191;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww10800\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\partightenfactor0
+
+\f0\fs24 \cf0         \cf2 /** \\brief Interpolate motion to an intermediate time-stamp\cf0 \
+\cf2          *\cf0 \
+\cf2          * @\ul param\ulnone  _ref    The motion reference\cf0 \
+\cf2          * @\ul param\ulnone  _second The second motion. It is modified by the function (see documentation below).\cf0 \
+\cf2          * @\ul param\ulnone  _ts     The intermediate time stamp: it must be bounded by  `_ref.ts_ <= _ts <= _second.ts_`.\cf0 \
+\cf2          * @return        The interpolated motion (see documentation below).\cf0 \
+\cf2          *\cf0 \
+\cf2          * This function interpolates a motion between two existing motions.\cf0 \
+\cf2          *\cf0 \
+\cf2          * In particular, given a reference motion `R=_ref` at time `t_R`,\cf0 \
+\cf2          * a final motion `F=_second` at time `t_F`, and an interpolation time `t_I=_ts`,\cf0 \
+\cf2          * we search for the two interpolate motions `I` and `S` such that:\cf0 \
+\cf2          *\cf0 \
+\cf2          *   - `I` is the motion between `t_R` and `t_I`\cf0 \
+\cf2          *   - `S` is the motion between `t_I` and `t_F`\cf0 \
+\cf2          *\cf0 \
+\cf2          * ### Rationale\cf0 \
+\cf2          *\cf0 \
+\cf2          * Let us name\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          *     R = _ref      // initial motion where interpolation starts\cf0 \
+\cf2          *     F = _second   // final motion where interpolation ends\cf0 \
+\cf2          *\cf0 \
+\cf2          * and let us define\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          *     t_R            // \ul timestamp\ulnone  at R\cf0 \
+\cf2          *     t_F            // \ul timestamp\ulnone  at F\cf0 \
+\cf2          *     t_I = _ts      // time stamp where interpolation is queried.\cf0 \
+\cf2          *\cf0 \
+\cf2          * We can introduce the results of the interpolation as\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          *     I = motion_interpolated // from t_R to t_I\cf0 \
+\cf2          *     S = motion_second       // from t_I to t_F\cf0 \
+\cf2          *\cf0 \
+\cf2          * The Motion structure in wolf has the following members (among others; see below):\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          *     ts_           // time stamp\cf0 \
+\cf2          *     delta_        // relative motion between the previous motion and this one. It might be seen as a local motion.\cf0 \
+\cf2          *     delta_integr_ // integration of relative deltas, since some origin. It might be seen as a globally defined motion.\cf0 \
+\cf2          *\cf0 \
+\cf2          * In this documentation, we differentiate these deltas with lower-case d and upper-case D:\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          *     d = any_motion.delta_            // local delta, from previous to this\cf0 \
+\cf2          *     D = any_motion.delta_integr_     // global Delta, from origin to this\cf0 \
+\cf2          *\cf0 \
+\cf2          * so that `D_(i+1) = D_(i) (+) d_(i+1)`, where (i) is in \{R, I, S\} and (i+1) is in \{I, S, F\}\cf0 \
+\cf2          *\cf0 \
+\cf2          * NOTE: the operator (+) is implemented as `deltaPlusDelta()` in each class deriving from this.\cf0 \
+\cf2          *\cf0 \
+\cf2          * This is a schematic sketch of the situation (see more explanations below),\cf0 \
+\cf2          * before and after calling `interpolate()`:\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          *     BEFORE             _ref         _ts       _second        variable names\cf0 \
+\cf2          *        ------+-----------+-----------+-----------+----->     time scale\cf0 \
+\cf2          *            origin        R                       F           motion short names\cf0 \
+\cf2          *           t_origin      t_R         t_I         t_F          time stamps\cf0 \
+\cf2          *                          0          tau          1           \ul interp\ulnone . factor\cf0 \
+\cf2          *              +----D_R----+----------d_F----------+           D_R (+) d_F\cf0 \
+\cf2          *              +----------------D_F----------------+           D_F = D_R (+) d_F\cf0 \
+\cf2          *\cf0 \
+\cf2          *     AFTER              _ref        return     _second        variable names and return value\cf0 \
+\cf2          *        ------+-----------+-----------+-----------+----->     time scale\cf0 \
+\cf2          *                          R           I           S           motion short names\cf0 \
+\cf2          *              +----D_R----+----d_I----+----d_S----+           D_R (+) d_I (+) d_S\cf0 \
+\cf2          *              +----------D_I----------+----d_S----+           D_I (+) d_S\cf0 \
+\cf2          *              +----------------D_S----------------+           D_S = D_I (+) d_S = D_R (+) d_I (+) d_S\cf0 \
+\cf2          *\cf0 \
+\cf2          * where '`origin`' exists somewhere, but it is irrelevant for the operation of the interpolation.\cf0 \
+\cf2          * According to the schematic, and assuming a generic composition operator (+), the motion composition satisfies\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          *   d_I (+) d_S = d_F      (1)\cf0 \
+\cf2          *\cf0 \
+\cf2          * from where `d_I` and `d_S` are first derived. Then, the integrated deltas satisfy\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          *   D_I = D_R (+) d_I      (2)\cf0 \
+\cf2          *   D_S = D_F              (3)\cf0 \
+\cf2          *\cf0 \
+\cf2          * from where `D_I` and `D_S` can be derived.\cf0 \
+\cf2          *\cf0 \
+\cf2          * ### Interpolating `d_I`\cf0 \
+\cf2          *\cf0 \
+\cf2          * Equation (1) has two unknowns, `d_I` and `d_S`.\cf0 \
+\cf2          * To solve, we first need to consider the interpolation time,\cf0 \
+\cf2          * `t_I`, that determines `d_I`.\cf0 \
+\cf2          *\cf0 \
+\cf2          * In general, we do not have information about the particular trajectory\cf0 \
+\cf2          * taken between `R = _ref` and `F = _second`.\cf0 \
+\cf2          * Therefore, we consider a linear interpolation.\cf0 \
+\cf2          * The linear interpolation factor `tau` is defined from the time stamps,\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          *     tau = (t_I - t_R) / (t_F - t_R)\cf0 \
+\cf2          *\cf0 \
+\cf2          * such that for `tau=0` we are at `R`, and for `tau=1` we are at `F`.\cf0 \
+\cf2          *\cf0 \
+\cf2          * Conceptually, we want an interpolation such that the local motion 'd' takes the fraction,\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          *   d_I = tau (*) d_F       // the fraction of the local delta\cf0 \
+\cf2          *\cf0 \
+\cf2          * where again the operator (*) needs to be defined properly.\cf0 \
+\cf2          *\cf0 \
+\cf2          * ### Defining the operators (*), (+), and (-)\cf0 \
+\cf2          *\cf0 \
+\cf2          * We often break down these 'd' and 'D' deltas into chunks of data, e.g.\cf0 \
+\cf2          *\cf0 \
+\cf2          *     \ul dp\ulnone  = delta of position\cf0 \
+\cf2          *     \ul Dp\ulnone  = delta integrated of position\cf0 \
+\cf2          *     \ul dq\ulnone  = delta of \ul quaternion\cf0 \ulnone \
+\cf2          *     \ul Da\ulnone  = delta integrated of orientation angle\cf0 \
+\cf2          *     etc...\cf0 \
+\cf2          *\cf0 \
+\cf2          * which makes it easier to define the operators (+) and (*).\cf0 \
+\cf2          * In effect, defining (*) is now easy. We examine them below.\cf0 \
+\cf2          *\cf0 \
+\cf2          * #### Operator (*)\cf0 \
+\cf2          *\cf0 \
+\cf2          *   - for linear magnitudes, (*) is the regular product *:\cf0 \
+\cf2          *\cf0 \
+\cf2          *         dv_I = tau * dv_F\cf0 \
+\cf2          *\cf0 \
+\cf2          *   - for simple angles, (*) is the regular product:\cf0 \
+\cf2          *\cf0 \
+\cf2          *         da_I = tau * da_F\cf0 \
+\cf2          *\cf0 \
+\cf2          *   - for \ul quaternions\ulnone , we use \ul slerp\ulnone ():\cf0 \
+\cf2          *\cf0 \
+\cf2          *     dq_I = 1.\ul slerp\ulnone (tau, dq_F) // '1' is the unit \ul quaternion\cf0 \ulnone \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          * #### Operator (+)\cf0 \
+\cf2          *\cf0 \
+\cf2          * As for the operator (+), we simply make use of `deltaPlusDelta()`, which is implemented in each derived class.\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          * #### Operator (-)\cf0 \
+\cf2          *\cf0 \
+\cf2          * For the operator (-) we have two options. We might implement it explicitly inside interpolate(),\cf0 \
+\cf2          * or through a `deltaMinusDelta()` defined akin to `deltaPlusDelta()`.\cf0 \
+\cf2          *\cf0 \
+\cf2          * By now, this `deltaMinusDelta()` is not enforced by this class as an abstract method,\cf0 \
+\cf2          * and its implementation in derived classes is up to the user.\cf0 \
+\cf2          *\cf0 \
+\cf2          * The general rule for the operator (-) is that it is the inverse of (+).\cf0 \
+\cf2          * But this needs to be taken carefully, since (+) is not commutative in the general case.\cf0 \
+\cf2          * therefore, we must define this inverse in the following way:\cf0 \
+\cf2          *\cf0 \
+\cf2          *     C = A (+) B  <==> B = C (-) A        (4)\cf0 \
+\cf2          *\cf0 \
+\cf2          *           A\cf0 \
+\cf2          *         o--->o\cf0 \
+\cf2          *          \\   |\cf0 \
+\cf2          *         C \\  | B\cf0 \
+\cf2          *            \\ v\cf0 \
+\cf2          *              o\cf0 \
+\cf2          *\cf0 \
+\cf2          * ### Computing `d_S`\cf0 \
+\cf2          *\cf0 \
+\cf2          * Applying (1), we can define\cf0 \
+\cf2          *\cf0 \
+\cf2          *     d_S = d_F (-) d_I\cf0 \
+\cf2          *\cf0 \
+\cf2          * with the (-) operator defined according to (4), that is, `d_F = d_I (+) d_S`, as can be also observed in the sketch above.\cf0 \
+\cf2          *\cf0 \
+\cf2          * For simple pose increments, we can use a local implementation:\cf0 \
+\cf2          *\cf0 \
+\cf2          *   - for 2D\cf0 \
+\cf2          *\cf0 \
+\cf2          *     dp_S = dR_I.tr * (1-tau)*dp_F      // dR is the rotation matrix of the angle delta '\ul da\ulnone '; '\ul tr\ulnone ' is transposed\cf0 \
+\cf2          *     da_S = dR_I.tr * (1-tau)*da_F\cf0 \
+\cf2          *\cf0 \
+\cf2          *   - for 3D\cf0 \
+\cf2          *\cf0 \
+\cf2          *     dp_S = dq_I.conj * (1-tau)*dp_F    // \ul dq\ulnone  is a \ul quaternion\ulnone ; '\ul conj\ulnone ' is the \ul conjugate\ulnone  \ul quaternion\ulnone .\cf0 \
+\cf2          *     dq_S = dq_I.conj * dq_F\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          * Please refer to the examples at the end of this documentation for the computation of `d_S`.\cf0 \
+\cf2          *\cf0 \
+\cf2          * ### Computing `D_I`\cf0 \
+\cf2          *\cf0 \
+\cf2          * Conceptually, the global motion 'D' is interpolated, that is:\cf0 \
+\cf2          *\cf0 \
+\cf2          *     D_I = (1-tau) (*) D_R (+) tau (*) D_F  // the interpolation of the global Delta\cf0 \
+\cf2          *\cf0 \
+\cf2          * However, we better make use of (2) and write\cf0 \
+\cf2          *\cf0 \
+\cf2          *     D_I = D_R (+) d_I\cf0 \
+\cf2          *         = deltaPlusDelta(D_R, d_I)         // This form provides an easy implementation.\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          * ### Examples\cf0 \
+\cf2          *\cf0 \
+\cf2          * #### Example 1: For 2D poses\cf0 \
+\cf2          *\cf0 \
+\cf2          *\cf0 \
+\cf2          *     t_I  = _ts                         // time stamp of the interpolated motion\cf0 \
+\cf2          *     tau = (t_I - t_R) / (t_F - t_R)    // interpolation factor\cf0 \
+\cf2          *\cf0 \
+\cf2          *     dp_I = tau*dp_F                    // \ul dp\ulnone  is a 2-vector\cf0 \
+\cf2          *     da_I = tau*da_F                    // \ul da\ulnone  is an angle, for 2D poses\cf0 \
+\cf2          *\cf0 \
+\cf2          *     D_I  = deltaPlusDelta(D_R, d_I)\cf0 \
+\cf2          *\cf0 \
+\cf2          *     dp_S = dR_I.tr * (1-tau)*dp_F      // dR.tr is the transposed rotation matrix corresponding to '\ul da\ulnone ' above\cf0 \
+\cf2          *     da_S = dR_I.tr * (1-tau)*da_F\cf0 \
+\cf2          *\cf0 \
+\cf2          *     D_S  = D_F\cf0 \
+\cf2          *\cf0 \
+\cf2          * #### Example 2: For 3D poses\cf0 \
+\cf2          *\cf0 \
+\cf2          * Orientation is in \ul quaternion\ulnone  form, which is the best for interpolation using `\ul slerp\ulnone ()` :\cf0 \
+\cf2          *\cf0 \
+\cf2          *     t_I  = _ts                         // time stamp of the interpolated motion\cf0 \
+\cf2          *     tau = (t_I - t_R) / (t_F - t_R)    // interpolation factor\cf0 \
+\cf2          *\cf0 \
+\cf2          *     dp_I = tau*dp_F                    // \ul dp\ulnone  is a 3-vector\cf0 \
+\cf2          *     dq_I = 1.\ul slerp\ulnone (tau, dq_F)          // '1' is the identity \ul quaternion\ulnone ; \ul slerp\ulnone () interpolates 3D rotation.\cf0 \
+\cf2          *\cf0 \
+\cf2          *     D_I  = deltaPlusDelta(D_R, d_I)\cf0 \
+\cf2          *\cf0 \
+\cf2          *     dp_S = dq_I.conj * (1-tau)*dp_F    // \ul dq\ulnone  is a \ul quaternion\ulnone ; '\ul conj\ulnone ' is the \ul conjugate\ulnone  \ul quaternion\ulnone .\cf0 \
+\cf2          *     dq_S = dq_I.conj * dq_F\cf0 \
+\cf2          *\cf0 \
+\cf2          *     D_S  = D_F\cf0 \
+\cf2          *\cf0 \
+\cf2          */\cf0 \
+        \cf2 /* //\cf3 TODO\cf2 : JS: Remove these instructions since we will remove \ul covariances\ulnone  from Motion.\cf0 \
+\cf2          *\cf0 \
+\cf2          * ### \ul Covariances\cf0 \ulnone \
+\cf2          *\cf0 \
+\cf2          * The Motion structure adds local and global \ul covariances\ulnone , that we rename as,\cf0 \
+\cf2          *\cf0 \
+\cf2          *     dC: delta_cov_\cf0 \
+\cf2          *     DC: delta_integr_cov_\cf0 \
+\cf2          *\cf0 \
+\cf2          * and which are integrated as follows\cf0 \
+\cf2          *\cf0 \
+\cf2          *     dC_I = tau * dC_F\cf0 \
+\cf2          *     DC_I = (1-tau) * DC_R + tau * dC_F = DC_R + dC_I\cf0 \
+\cf2          *\cf0 \
+\cf2          * and\cf0 \
+\cf2          *\cf0 \
+\cf2          *     dC_S = (1-tau) * dC_F\cf0 \
+\cf2          *     DC_S = DC_F\cf0 \
+\cf2          *\cf0 \
+\cf2          */\cf0 \
+}
