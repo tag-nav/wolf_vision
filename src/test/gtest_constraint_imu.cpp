@@ -90,7 +90,7 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
         expected_final_state = x_origin; //null bias + static
 
         //set origin of the problem
-        KF0 = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        KF0 = processor_ptr_imu->setOrigin(x_origin, t);
 
         //===================================================== END{INITIALIZATION}
 
@@ -112,7 +112,7 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
             sen_imu->process(imu_ptr);
         }
 
-        KF1 = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t));
+        KF1 = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t);
         KF1->setState(expected_final_state); //We expect to find this solution, this can be perturbated in following tests
 
         //===================================================== END{PROCESS DATA}
@@ -175,7 +175,7 @@ class ConstraintIMU_biasTest_Static_NonNullAccBias : public testing::Test
         expected_final_state = x_origin; //null bias + static
 
         //set origin of the problem
-        KF0 = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        KF0 = processor_ptr_imu->setOrigin(x_origin, t);
 
         //===================================================== END{INITIALIZATION}
         //===================================================== PROCESS DATA
@@ -196,7 +196,7 @@ class ConstraintIMU_biasTest_Static_NonNullAccBias : public testing::Test
             sen_imu->process(imu_ptr);
         }
 
-        KF1 = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t));
+        KF1 = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t);
         KF1->setState(expected_final_state); //We expect to find this solution, this can be perturbated in following tests
 
         //===================================================== END{PROCESS DATA}
@@ -216,8 +216,8 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
         CeresManager* ceres_manager_wolf_diff;
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
-        FrameIMUPtr origin_KF;
-        FrameIMUPtr last_KF;
+        FrameBasePtr origin_KF;
+        FrameBasePtr last_KF;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -262,7 +262,7 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
         x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
-        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
 
         //===================================================== END{INITIALIZATION}
         //===================================================== PROCESS DATA
@@ -283,7 +283,7 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
             sen_imu->process(imu_ptr);
         }
 
-        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t));
+        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t);
         last_KF->setState(expected_final_state); //We expect to find this solution, this can be perturbated in following tests
 
         //===================================================== END{PROCESS DATA}
@@ -303,8 +303,8 @@ class ConstraintIMU_biasTest_Static_NonNullBias : public testing::Test
         CeresManager* ceres_manager_wolf_diff;
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
-        FrameIMUPtr origin_KF;
-        FrameIMUPtr last_KF;
+        FrameBasePtr origin_KF;
+        FrameBasePtr last_KF;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -348,7 +348,7 @@ class ConstraintIMU_biasTest_Static_NonNullBias : public testing::Test
         x_origin.tail(6) = origin_bias;
 
         //set origin of the problem
-        origin_KF = std::static_pointer_cast<FrameIMU>(processor_ptr_imu->setOrigin(x_origin, t));
+        origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
 
         //===================================================== END{INITIALIZATION}
         //===================================================== PROCESS DATA
@@ -369,7 +369,7 @@ class ConstraintIMU_biasTest_Static_NonNullBias : public testing::Test
             sen_imu->process(imu_ptr);
         }
 
-        last_KF = std::static_pointer_cast<FrameIMU>(wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t));
+        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t);
         last_KF->setState(expected_final_state); //We expect to find this solution, this can be perturbated in following tests
 
         //===================================================== END{PROCESS DATA}
