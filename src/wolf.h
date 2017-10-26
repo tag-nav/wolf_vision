@@ -265,7 +265,8 @@ typedef enum
 #define WOLF_LIST_TYPEDEFS(ClassName) \
         class ClassName; \
         typedef std::list<ClassName##Ptr>          ClassName##List; \
-        typedef ClassName##List::iterator          ClassName##Iter;
+        typedef ClassName##List::iterator          ClassName##Iter; \
+        typedef ClassName##List::reverse_iterator  ClassName##RevIter;
 
 #define WOLF_STRUCT_PTR_TYPEDEFS(StructName) \
         struct StructName; \
