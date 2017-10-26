@@ -5,7 +5,6 @@
 // Wolf
 #include "processor_imu.h"
 #include "processor_motion.h"
-#include "frame_imu.h"
 
 namespace wolf {
     struct IMU_jac_bias{ //struct used for checking jacobians by finite difference

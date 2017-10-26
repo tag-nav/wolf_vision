@@ -13,7 +13,6 @@
 #include "factory.h"
 #include "sensor_factory.h"
 #include "processor_factory.h"
-#include "frame_imu.h"
 
 #include <algorithm>
 
@@ -286,8 +285,6 @@ Size Problem::getFrameStructureSize() const
         return 7;
     if (trajectory_ptr_->getFrameStructure() == "POV 3D")
         return 10;
-    if (trajectory_ptr_->getFrameStructure() == "PQVBB 3D")
-        return 16;
     throw std::runtime_error(
             "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
 }
@@ -309,11 +306,6 @@ void Problem::getFrameStructureSize(Size& _x_size, Size& _cov_size) const
         _x_size = 10;
         _cov_size = 9;
     }
-    else if (trajectory_ptr_->getFrameStructure() == "PQVBB 3D")
-    {
-        _x_size = 16;
-        _cov_size = 15;
-    }
     else
         throw std::runtime_error(
                     "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
@@ -325,8 +317,7 @@ Eigen::VectorXs Problem::zeroState()
 
     // Set the quaternion identity for 3D states. Set only the real part to 1:
     if (trajectory_ptr_->getFrameStructure() == "PO 3D" ||
-        trajectory_ptr_->getFrameStructure() == "POV 3D"||
-        trajectory_ptr_->getFrameStructure() == "PQVBB 3D")
+        trajectory_ptr_->getFrameStructure() == "POV 3D")
         state(6) = 1.0;
 
     return state;
@@ -628,7 +619,7 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
         // create origin capture with the given state as data
         // Capture fix only takes 3D position and Quaternion orientation
         CaptureFixPtr init_capture;
-        if ((trajectory_ptr_->getFrameStructure() == "PQVBB 3D") || (trajectory_ptr_->getFrameStructure() == "POV 3D") )
+        if (trajectory_ptr_->getFrameStructure() == "POV 3D")
             init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state.head(7), _prior_cov);
         else
             init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state, _prior_cov);

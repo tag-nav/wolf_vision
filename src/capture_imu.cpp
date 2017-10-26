@@ -1,5 +1,4 @@
 #include "sensor_imu.h"
-#include "frame_imu.h"
 #include "capture_imu.h"
 #include "state_quaternion.h"
 
