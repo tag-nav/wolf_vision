@@ -12,7 +12,6 @@
 
 #include "../../../serialization/cereal/io.h"
 
-#include <cereal/types/memory.hpp>
 #include <fstream>
 
 class WolfTestCerealSerializationEigenSparse : public testing::Test
