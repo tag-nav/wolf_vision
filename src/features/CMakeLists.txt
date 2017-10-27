@@ -1,0 +1,9 @@
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+# Forward var to parent scope
+
+SET(HDRS_FEATURE ${HDRS_FEATURE}
+                 ${CMAKE_CURRENT_SOURCE_DIR}/feature_diff_drive.h PARENT_SCOPE)
+
+SET(SRCS_FEATURE ${SRCS_FEATURE}
+                 ${CMAKE_CURRENT_SOURCE_DIR}/feature_diff_drive.cpp PARENT_SCOPE)
