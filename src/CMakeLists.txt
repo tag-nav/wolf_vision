@@ -436,6 +436,9 @@ ENDIF(OpenCV_FOUND)
 # Add the capture sub-directory
 ADD_SUBDIRECTORY(captures)
 
+# Add the constraints sub-directory
+ADD_SUBDIRECTORY(constraints)
+
 # Add the features sub-directory
 ADD_SUBDIRECTORY(features)
 
@@ -486,6 +489,7 @@ ADD_LIBRARY(${PROJECT_NAME}
             ${SRCS_BASE} 
             ${SRCS}
             ${SRCS_CAPTURE}
+            ${SRCS_CONSTRAINT}
             ${SRCS_FEATURE}
             ${SRCS_SENSOR}
             ${SRCS_PROCESSOR}
@@ -540,6 +544,8 @@ INSTALL(FILES ${HDRS}
 #    DESTINATION include/iri-algorithms/wolf/data_association)
 INSTALL(FILES ${HDRS_CAPTURE}
     DESTINATION include/iri-algorithms/wolf/captures)
+INSTALL(FILES ${HDRS_CONSTRAINT}
+    DESTINATION include/iri-algorithms/wolf/constraints)
 INSTALL(FILES ${HDRS_FEATURE}
     DESTINATION include/iri-algorithms/wolf/features)
 INSTALL(FILES ${HDRS_SENSOR}

@@ -226,7 +226,8 @@ typedef enum
     CTR_EPIPOLAR,               ///< Epipolar constraint
     CTR_AHP,                    ///< Anchored Homogeneous Point constraint
     CTR_AHP_NL,                 ///< Anchored Homogeneous Point constraint (temporal, to be removed)
-    CTR_IMU                     ///< IMU constraint
+    CTR_IMU,                    ///< IMU constraint
+    CTR_DIFF_DRIVE              ///< Diff-drive constraint
 
 } ConstraintType;
 
