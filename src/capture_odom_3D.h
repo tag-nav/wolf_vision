@@ -22,12 +22,12 @@ class CaptureOdom3D : public CaptureMotion
     public:
         CaptureOdom3D(const TimeStamp& _init_ts,
                       SensorBasePtr _sensor_ptr,
-                      const Eigen::Vector3s& _data,
+                      const Eigen::Vector6s& _data,
                       FrameBasePtr _origin_frame_ptr = nullptr);
 
         CaptureOdom3D(const TimeStamp& _init_ts,
                       SensorBasePtr _sensor_ptr,
-                      const Eigen::Vector3s& _data,
+                      const Eigen::Vector6s& _data,
                       const Eigen::MatrixXs& _data_cov,
                       FrameBasePtr _origin_frame_ptr = nullptr);
 
