@@ -918,13 +918,13 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         Eigen::Vector6s data_imu(Eigen::Vector6s::Zero()), data_odom3D(Eigen::Vector6s::Zero());
         Eigen::Vector3s rateOfTurn(Eigen::Vector3s::Zero()); //deg/s
 
-        Scalar dt(0.0010), dt_odom(1.0);
-        TimeStamp ts(0.0), t_odom(0.0);
-        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu, Eigen::Matrix6s::Identity(), Eigen::Vector6s::Zero());
-        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 7, 6, nullptr);
-        sen_odom3D->process(mot_ptr);
+        Scalar   dt_imu(0.001), dt_odo(1.0);
+        TimeStamp t_imu(0.0),    t_odo(0.0);
+        wolf::CaptureIMUPtr     imu_ptr = std::make_shared<CaptureIMU>   (t_imu, sen_imu, data_imu, Eigen::Matrix6s::Identity(), Eigen::Vector6s::Zero());
+        wolf::CaptureOdom3DPtr  odo_ptr = std::make_shared<CaptureOdom3D>(t_odo, sen_odom3D, data_odom3D, nullptr);
+        sen_odom3D->process(odo_ptr);
         //first odometry data will be processed at this timestamp
-        t_odom.set(t_odom.get() + dt_odom);
+        t_odo += dt_odo;
 
         //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
 
@@ -932,39 +932,39 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         {
             // PROCESS IMU DATA
             // Time and data variables
-            ts.set(i*dt);
+            t_imu.set(i*dt_imu);
             
             rateOfTurn = Eigen::Vector3s::Random()*10; //to have rate of turn > 0.99 deg/s
             data_imu.tail<3>() = rateOfTurn* M_PI/180.0;
             data_imu.head<3>() =  current_quatState.conjugate() * (- wolf::gravity()); //gravity measured, we have no other translation movement
 
             //compute odometry + current orientaton taking this measure into account
-            odom_quat = odom_quat * wolf::v2q(data_imu.tail(3)*dt);
-            current_quatState = current_quatState * wolf::v2q(data_imu.tail(3)*dt);
+            odom_quat = odom_quat * wolf::v2q(data_imu.tail(3)*dt_imu);
+            current_quatState = current_quatState * wolf::v2q(data_imu.tail(3)*dt_imu);
 
             //set timestamp, add bias, set data and process
-            imu_ptr->setTimeStamp(ts);
+            imu_ptr->setTimeStamp(t_imu);
             data_imu = data_imu + origin_bias;
             imu_ptr->setData(data_imu);
             sen_imu->process(imu_ptr);
 
-            if(ts.get() >= t_odom.get())
+            if(t_imu.get() >= t_odo.get())
             {
                 // PROCESS ODOM 3D DATA
                 data_odom3D.head(3) << 0,0,0;
                 data_odom3D.tail(3) = q2v(odom_quat);
-                mot_ptr->setTimeStamp(t_odom);
-                mot_ptr->setData(data_odom3D);
-                sen_odom3D->process(mot_ptr);
+                odo_ptr->setTimeStamp(t_odo);
+                odo_ptr->setData(data_odom3D);
+                sen_odom3D->process(odo_ptr);
 
                 //prepare next odometry measurement
                 odom_quat = Eigen::Quaternions::Identity(); //set to identity to have next odom relative to this last KF
-                t_odom.set(t_odom.get() + dt_odom);
+                t_odo += dt_odo;
             }
         }
 
         expected_final_state << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
-        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
+        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t_imu);
         last_KF->setState(expected_final_state);
 
         //===================================================== END{PROCESS DATA}
