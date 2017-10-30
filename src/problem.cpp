@@ -31,9 +31,29 @@ Problem::Problem(const std::string& _frame_structure) :
         trajectory_ptr_(std::make_shared<TrajectoryBase>(_frame_structure)),
         map_ptr_(std::make_shared<MapBase>()),
         processor_motion_ptr_(),
-        origin_is_set_(false)
+        origin_is_set_(false),
+        state_size_(0),
+        state_cov_size_(0)
 {
-    //
+    if (_frame_structure == "PO 2D")
+    {
+        state_size_ = 3;
+        state_cov_size_ = 3;
+    }
+
+    else if (_frame_structure == "PO 3D")
+    {
+        state_size_ = 7;
+        state_cov_size_ = 6;
+    }
+    else if (_frame_structure == "POV 3D")
+    {
+        state_size_ = 10;
+        state_cov_size_ = 9;
+    }
+    else std::runtime_error(
+            "Problem::Problem(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
+
 }
 
 void Problem::setup()
@@ -279,36 +299,40 @@ Eigen::VectorXs Problem::getState(const TimeStamp& _ts)
 
 Size Problem::getFrameStructureSize() const
 {
-    if (trajectory_ptr_->getFrameStructure() == "PO 2D")
-        return 3;
-    if (trajectory_ptr_->getFrameStructure() == "PO 3D")
-        return 7;
-    if (trajectory_ptr_->getFrameStructure() == "POV 3D")
-        return 10;
-    throw std::runtime_error(
-            "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
+    return state_size_;
+//    if (trajectory_ptr_->getFrameStructure() == "PO 2D")
+//        return 3;
+//    if (trajectory_ptr_->getFrameStructure() == "PO 3D")
+//        return 7;
+//    if (trajectory_ptr_->getFrameStructure() == "POV 3D")
+//        return 10;
+//    throw std::runtime_error(
+//            "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
 }
 
 void Problem::getFrameStructureSize(Size& _x_size, Size& _cov_size) const
 {
-    if (trajectory_ptr_->getFrameStructure() == "PO 2D")
-    {
-        _x_size = 3;
-        _cov_size = 3;
-    }
-    else if (trajectory_ptr_->getFrameStructure() == "PO 3D")
-    {
-        _x_size = 7;
-        _cov_size = 6;
-    }
-    else if (trajectory_ptr_->getFrameStructure() == "POV 3D")
-    {
-        _x_size = 10;
-        _cov_size = 9;
-    }
-    else
-        throw std::runtime_error(
-                    "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
+    _x_size = state_size_;
+    _cov_size = state_cov_size_;
+
+//    if (trajectory_ptr_->getFrameStructure() == "PO 2D")
+//    {
+//        _x_size = 3;
+//        _cov_size = 3;
+//    }
+//    else if (trajectory_ptr_->getFrameStructure() == "PO 3D")
+//    {
+//        _x_size = 7;
+//        _cov_size = 6;
+//    }
+//    else if (trajectory_ptr_->getFrameStructure() == "POV 3D")
+//    {
+//        _x_size = 10;
+//        _cov_size = 9;
+//    }
+//    else
+//        throw std::runtime_error(
+//                    "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
 }
 
 Eigen::VectorXs Problem::zeroState()

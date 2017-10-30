@@ -55,6 +55,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         std::list<StateBlockNotification> state_block_notification_list_;
         std::list<ConstraintNotification> constraint_notification_list_;
         bool origin_is_set_;
+        Size state_size_, state_cov_size_;
 
     private: // CAUTION: THESE METHODS ARE PRIVATE, DO NOT MAKE THEM PUBLIC !!
         Problem(const std::string& _frame_structure); // USE create() below !!
