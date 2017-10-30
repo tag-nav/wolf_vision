@@ -433,6 +433,21 @@ IF (OpenCV_FOUND)
         )
 ENDIF(OpenCV_FOUND)
 
+# Add the capture sub-directory
+ADD_SUBDIRECTORY(captures)
+
+# Add the constraints sub-directory
+ADD_SUBDIRECTORY(constraints)
+
+# Add the features sub-directory
+ADD_SUBDIRECTORY(features)
+
+# Add the processor sub-directory
+ADD_SUBDIRECTORY(processors)
+
+# Add the sensor sub-directory
+ADD_SUBDIRECTORY(sensors)
+
 IF (cereal_FOUND)
   ADD_SUBDIRECTORY(serialization/cereal)
 ENDIF(cereal_FOUND)
@@ -472,7 +487,12 @@ ENDIF(YAMLCPP_FOUND)
 ADD_LIBRARY(${PROJECT_NAME} 
             SHARED 
             ${SRCS_BASE} 
-            ${SRCS} 
+            ${SRCS}
+            ${SRCS_CAPTURE}
+            ${SRCS_CONSTRAINT}
+            ${SRCS_FEATURE}
+            ${SRCS_SENSOR}
+            ${SRCS_PROCESSOR}
             #${SRCS_DTASSC} 
             ${SRCS_WRAPPER}
             )
@@ -522,6 +542,16 @@ INSTALL(FILES ${HDRS}
     DESTINATION include/iri-algorithms/wolf)
 #INSTALL(FILES ${HDRS_DTASSC}
 #    DESTINATION include/iri-algorithms/wolf/data_association)
+INSTALL(FILES ${HDRS_CAPTURE}
+    DESTINATION include/iri-algorithms/wolf/captures)
+INSTALL(FILES ${HDRS_CONSTRAINT}
+    DESTINATION include/iri-algorithms/wolf/constraints)
+INSTALL(FILES ${HDRS_FEATURE}
+    DESTINATION include/iri-algorithms/wolf/features)
+INSTALL(FILES ${HDRS_SENSOR}
+    DESTINATION include/iri-algorithms/wolf/sensors)
+INSTALL(FILES ${HDRS_PROCESSOR}
+    DESTINATION include/iri-algorithms/wolf/processors)
 INSTALL(FILES ${HDRS_WRAPPER}
     DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
 INSTALL(FILES ${HDRS_SOLVER}
