@@ -848,7 +848,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         SensorIMUPtr sen_imu;
         SensorOdom3DPtr sen_odom3D;
         ProblemPtr wolf_problem_ptr_;
-        CeresManager* ceres_manager_wolf_diff;
+        CeresManagerPtr ceres_manager_wolf_diff;
         ProcessorBasePtr processor_ptr_;
         ProcessorIMUPtr processor_ptr_imu;
         ProcessorOdom3DPtr processor_ptr_odom3D;
@@ -875,7 +875,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         ceres_options.minimizer_type = ceres::TRUST_REGION;
 //        ceres_options.max_line_search_step_contraction = 1e-3;
 //        ceres_options.max_num_iterations = 1e4;
-        ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
+        ceres_manager_wolf_diff = std::make_shared<CeresManager>(wolf_problem_ptr_, ceres_options);
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
