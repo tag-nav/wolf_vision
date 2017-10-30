@@ -443,18 +443,15 @@ CaptureMotionPtr ProcessorMotion::emplaceCapture(const TimeStamp& _ts,
                                              _data_cov,
                                              _frame_origin);
 
-    // calib code below might also be placed inside createCapture above
     // Only assign calibration params to this Capture if these parameters are dynamic
     if (getSensorPtr()->isExtrinsicDynamic() || getSensorPtr()->isIntrinsicDynamic())
     {
-        VectorXs calib(calib_size_);
         if (origin_ptr_)
             // get calib params from origin capture
-            calib = origin_ptr_->getCalibration();
+            capture->setCalibration(origin_ptr_->getCalibration());
         else
             // get calib params from sensor
-            calib = getSensorPtr()->getCalibration();
-        capture->setCalibration(calib);
+            capture->setCalibration(getSensorPtr()->getCalibration());
     }
 
     // add to wolf tree
