@@ -873,8 +873,8 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
         ceres_options.minimizer_type = ceres::TRUST_REGION;
-        ceres_options.max_line_search_step_contraction = 1e-3;
-        ceres_options.max_num_iterations = 1e4;
+//        ceres_options.max_line_search_step_contraction = 1e-3;
+//        ceres_options.max_num_iterations = 1e4;
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
 
         // SENSOR + PROCESSOR IMU
@@ -894,6 +894,9 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         ProcessorBasePtr processor_ptr_odom = wolf_problem_ptr_->installProcessor("ODOM 3D", "odom", sen1_ptr, prc_odom3D_params);
         sen_odom3D = std::static_pointer_cast<SensorOdom3D>(sen1_ptr);
         processor_ptr_odom3D = std::static_pointer_cast<ProcessorOdom3D>(processor_ptr_odom);
+
+        WOLF_TRACE("IMU noise cov: ", sen0_ptr->getNoiseCov());
+        WOLF_TRACE("ODO noise cov: ", sen1_ptr->getNoiseCov());
     
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
@@ -920,7 +923,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
 
         Scalar   dt_imu(0.001), dt_odo(1.0);
         TimeStamp t_imu(0.0),    t_odo(0.0);
-        wolf::CaptureIMUPtr     imu_ptr = std::make_shared<CaptureIMU>   (t_imu, sen_imu, data_imu, Eigen::Matrix6s::Identity(), Eigen::Vector6s::Zero());
+        wolf::CaptureIMUPtr     imu_ptr = std::make_shared<CaptureIMU>   (t_imu, sen_imu, data_imu, Eigen::Matrix6s::Identity()*1e-6, Eigen::Vector6s::Zero());
         wolf::CaptureOdom3DPtr  odo_ptr = std::make_shared<CaptureOdom3D>(t_odo, sen_odom3D, data_odom3D, nullptr);
         sen_odom3D->process(odo_ptr);
         //first odometry data will be processed at this timestamp
