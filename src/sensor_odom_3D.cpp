@@ -20,7 +20,7 @@ SensorOdom3D::SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _o_ptr, Intr
         min_disp_var_(params->min_disp_var),
         min_rot_var_(params->min_rot_var)
 {
-    //
+    noise_cov_ = (Eigen::Vector6s() << min_disp_var_, min_disp_var_, min_disp_var_, min_rot_var_, min_rot_var_, min_rot_var_).finished().asDiagonal();
 }
 
 SensorOdom3D::~SensorOdom3D()
