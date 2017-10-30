@@ -150,7 +150,7 @@ void ProcessorOdom3D::statePlusDelta(const Eigen::VectorXs& _x, const Eigen::Vec
 {   
     assert(_x.size() >= x_size_ && "Wrong _x vector size"); //we need a state vector which size is at least x_size_
     assert(_delta.size() == delta_size_ && "Wrong _delta vector size");
-    assert(_x_plus_delta.size() == x_size_ && "Wrong _x_plus_delta vector size");
+    assert(_x_plus_delta.size() >= x_size_ && "Wrong _x_plus_delta vector size");
     remap(_x.head(x_size_), _delta, _x_plus_delta); //we take only the x_sixe_ first elements of the state Vectors (Position + Orientation)
     p_out_ = p1_ + q1_ * p2_;
     q_out_ = q1_ * q2_;

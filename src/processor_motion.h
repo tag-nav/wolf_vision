@@ -459,8 +459,9 @@ inline bool ProcessorMotion::voteForKeyFrame()
 
 inline Eigen::VectorXs ProcessorMotion::getState(const TimeStamp& _ts)
 {
-    getState(_ts, x_);
-    return x_;
+    Eigen::VectorXs x(getProblem()->getFrameStructureSize());
+    getState(_ts, x);
+    return x;
 }
 
 inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
@@ -495,8 +496,9 @@ inline wolf::TimeStamp ProcessorMotion::getCurrentTimeStamp()
 
 inline Eigen::VectorXs ProcessorMotion::getCurrentState()
 {
-    getCurrentState(x_);
-    return x_;
+    Eigen::VectorXs x(getProblem()->getFrameStructureSize());
+    getCurrentState(x);
+    return x;
 }
 
 inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
