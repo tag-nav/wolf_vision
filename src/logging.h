@@ -109,7 +109,8 @@ inline Logger::Logger(const std::string& name) :
     // [thread num][hour:minutes:seconds.nanoseconds][log type] #log-content
     //set_pattern("[%t][%H:%M:%S.%F][%l] %v");
     // [log type][MM/DD/YY - hour:minutes:seconds.nanoseconds] #log-content
-    set_pattern("[%l][%x - %H:%M:%S.%F] %v");
+//    set_pattern("[%l][%x - %H:%M:%S.%F] %v");
+      set_pattern("[%l][%H:%M:%S] %v");
   else
     // Logging pattern is :
     // [logger name][thread num][hour:minutes:seconds.nanoseconds][log type] #log-content
@@ -137,7 +138,8 @@ inline Logger::Logger(std::string&& name) :
     // [thread num][hour:minutes:seconds.nanoseconds][log type] #log-content
     //set_pattern("[%t][%H:%M:%S.%F][%l] %v");
     // [log type][MM/DD/YY - hour:minutes:seconds.nanoseconds] #log-content
-    set_pattern("[%l][%x - %H:%M:%S.%F] %v");
+//    set_pattern("[%l][%x - %H:%M:%S.%F] %v");
+      set_pattern("[%l][%H:%M:%S] %v");
   else
     // Logging pattern is :
     // [logger name][thread num][hour:minutes:seconds.nanoseconds][log type] #log-content
