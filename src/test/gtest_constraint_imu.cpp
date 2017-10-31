@@ -897,9 +897,6 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         processor       = problem->installProcessor("ODOM 3D", "odom", sensor_odo, prc_odom3D_params);
         processor_odo   = std::static_pointer_cast<ProcessorOdom3D>(processor);
 
-        WOLF_TRACE("IMU noise cov: ", sensor_imu->getNoiseCov());
-        WOLF_TRACE("ODO noise cov: ", sensor_odo->getNoiseCov());
-    
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
 
@@ -929,10 +926,6 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         capture_odo = std::make_shared<CaptureOdom3D>(t_odo, sensor_odo, data_odo, sensor_odo->getNoiseCov(), nullptr);
         sensor_odo->process(capture_odo);
         t_odo += dt_odo;        //first odometry data will be processed at this timestamp
-
-        WOLF_TRACE("IMU noise cov: ", capture_imu->getDataCovariance());
-        WOLF_TRACE("ODO noise cov: ", capture_odo->getDataCovariance());
-
 
         // ground truth for quaternion:
         Eigen::Quaternions quat_odo(Eigen::Quaternions::Identity());
@@ -2562,13 +2555,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2_InvarP1Q1V1P2Q2V
     Eigen::Vector6s bias = origin_KF->getCaptureOf(sensor_imu)->getCalibration();
     origin_KF->getCaptureOf(sensor_imu)->setCalibration(bias + random_err);
 
-    problem->print(4,1,1,1);
+    WOLF_DEBUG("real   bias : ", origin_bias.transpose());
+    WOLF_DEBUG("origin bias : ", origin_KF->getCaptureOf(sensor_imu)->getCalibration().transpose());
+    WOLF_DEBUG("last   bias : ", last_KF->getCaptureOf(sensor_imu)->getCalibration().transpose());
+    WOLF_DEBUG("jacob  bias : ", std::static_pointer_cast<CaptureIMU>(last_KF->getCaptureOf(sensor_imu))->getJacobianCalib());
 
-    std::string report = ceres_manager->solve(2);// 0: nothing, 1: BriefReport, 2: FullReport
+    std::string report = ceres_manager->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     std::cout << report << std::endl;
 //    ceres_manager->computeCovariances(ALL);
-
-    problem->print(4,1,1,1);
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
@@ -2808,7 +2802,10 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.*";
+//  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
+
+
 
   return RUN_ALL_TESTS();
 }

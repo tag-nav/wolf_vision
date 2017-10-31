@@ -120,6 +120,8 @@ inline void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
 {
     assert(_data.size() == data_size_ && "Wrong data size!");
 
+//    WOLF_DEBUG("data cov: ", _data_cov);
+
     using namespace Eigen;
 
     // acc and gyro measurements corrected with the estimated bias, times dt
@@ -179,6 +181,8 @@ inline void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
     _jacobian_calib.block(0,0,3,3) = - ddp_dan;
     _jacobian_calib.block(3,3,3,3) = - ddo_dwn;
     _jacobian_calib.block(6,0,3,3) = - ddv_dan;
+
+    WOLF_TRACE("jac calib : ", _jacobian_calib);
 
 }
 
