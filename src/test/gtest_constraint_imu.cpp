@@ -845,15 +845,18 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
 {
     public:
         wolf::TimeStamp t;
-        SensorIMUPtr sen_imu;
-        SensorOdom3DPtr sen_odom3D;
-        ProblemPtr wolf_problem_ptr_;
-        CeresManagerPtr ceres_manager_wolf_diff;
-        ProcessorBasePtr processor_ptr_;
-        ProcessorIMUPtr processor_ptr_imu;
-        ProcessorOdom3DPtr processor_ptr_odom3D;
+        ProblemPtr problem;
+        CeresManagerPtr ceres_manager;
+        SensorBasePtr sensor;
+        SensorIMUPtr sensor_imu;
+        SensorOdom3DPtr sensor_odo;
+        ProcessorBasePtr processor;
+        ProcessorIMUPtr processor_imu;
+        ProcessorOdom3DPtr processor_odo;
         FrameBasePtr origin_KF;
         FrameBasePtr last_KF;
+        CaptureIMUPtr    capture_imu;
+        CaptureOdom3DPtr capture_odo;
         Eigen::Vector6s origin_bias;
         Eigen::VectorXs expected_final_state;
         Eigen::VectorXs x_origin;
@@ -868,111 +871,123 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("POV 3D");
+        problem = Problem::create("POV 3D");
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
         ceres_options.minimizer_type = ceres::TRUST_REGION;
-//        ceres_options.max_line_search_step_contraction = 1e-3;
-//        ceres_options.max_num_iterations = 1e4;
-        ceres_manager_wolf_diff = std::make_shared<CeresManager>(wolf_problem_ptr_, ceres_options);
+        ceres_manager = std::make_shared<CeresManager>(problem, ceres_options);
 
         // SENSOR + PROCESSOR IMU
-        SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
-        processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_t6.yaml");
-        sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
-        processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
+        sensor          = problem->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+        sensor_imu      = std::static_pointer_cast<SensorIMU>(sensor);
+        processor       = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_t6.yaml");
+        processor_imu   = std::static_pointer_cast<ProcessorIMU>(processor);
 
         // SENSOR + PROCESSOR ODOM 3D
-        SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
+        sensor          = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
+        sensor_odo      = std::static_pointer_cast<SensorOdom3D>(sensor);
+
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span = 0.9999;
-        prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
-        prc_odom3D_params->dist_traveled = 1000000000;
-        prc_odom3D_params->angle_turned = 1000000000;
+        prc_odom3D_params->max_time_span    = 0.9999;
+        prc_odom3D_params->max_buff_length  = 1000000000; //make it very high so that this condition will not pass
+        prc_odom3D_params->dist_traveled    = 1000000000;
+        prc_odom3D_params->angle_turned     = 1000000000;
 
-        ProcessorBasePtr processor_ptr_odom = wolf_problem_ptr_->installProcessor("ODOM 3D", "odom", sen1_ptr, prc_odom3D_params);
-        sen_odom3D = std::static_pointer_cast<SensorOdom3D>(sen1_ptr);
-        processor_ptr_odom3D = std::static_pointer_cast<ProcessorOdom3D>(processor_ptr_odom);
+        processor       = problem->installProcessor("ODOM 3D", "odom", sensor_odo, prc_odom3D_params);
+        processor_odo   = std::static_pointer_cast<ProcessorOdom3D>(processor);
 
-        WOLF_TRACE("IMU noise cov: ", sen0_ptr->getNoiseCov());
-        WOLF_TRACE("ODO noise cov: ", sen1_ptr->getNoiseCov());
+        WOLF_TRACE("IMU noise cov: ", sensor_imu->getNoiseCov());
+        WOLF_TRACE("ODO noise cov: ", sensor_odo->getNoiseCov());
     
         //===================================================== END{SETTING PROBLEM}
         //===================================================== INITIALIZATION
 
-        expected_final_state.resize(10);
         x_origin.resize(10);
         x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         origin_bias << 0.0015, 0.004, -0.002, 0.005, -0.0074, -0.003;
         t.set(0);
-        Eigen::Quaternions odom_quat(Eigen::Quaternions::Identity());
-        Eigen::Quaternions current_quatState(Eigen::Quaternions::Identity());
 
         //set origin of the problem
 
-        origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
-        processor_ptr_odom3D->setOrigin(origin_KF);
+        origin_KF = processor_imu->setOrigin(x_origin, t);
+        processor_odo->setOrigin(origin_KF);
 
         //===================================================== END{INITIALIZATION}
         //===================================================== PROCESS DATA
         // PROCESS DATA
 
-        Eigen::Vector6s data_imu(Eigen::Vector6s::Zero()), data_odom3D(Eigen::Vector6s::Zero());
+        Eigen::Vector6s data_imu(Eigen::Vector6s::Zero()),
+                        data_odo(Eigen::Vector6s::Zero());
         Eigen::Vector3s rateOfTurn(Eigen::Vector3s::Zero()); //deg/s
 
-        Scalar   dt_imu(0.001), dt_odo(1.0);
         TimeStamp t_imu(0.0),    t_odo(0.0);
-        wolf::CaptureIMUPtr     imu_ptr = std::make_shared<CaptureIMU>   (t_imu, sen_imu, data_imu, Eigen::Matrix6s::Identity()*1e-6, Eigen::Vector6s::Zero());
-        wolf::CaptureOdom3DPtr  odo_ptr = std::make_shared<CaptureOdom3D>(t_odo, sen_odom3D, data_odom3D, nullptr);
-        sen_odom3D->process(odo_ptr);
-        //first odometry data will be processed at this timestamp
-        t_odo += dt_odo;
+        Scalar   dt_imu(0.001), dt_odo(1.0);
 
-        //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
+        capture_imu = std::make_shared<CaptureIMU>   (t_imu, sensor_imu, data_imu, sensor_imu->getNoiseCov(), sensor_imu->getCalibration(), nullptr);
+
+        capture_odo = std::make_shared<CaptureOdom3D>(t_odo, sensor_odo, data_odo, sensor_odo->getNoiseCov(), nullptr);
+        sensor_odo->process(capture_odo);
+        t_odo += dt_odo;        //first odometry data will be processed at this timestamp
+
+        WOLF_TRACE("IMU noise cov: ", capture_imu->getDataCovariance());
+        WOLF_TRACE("ODO noise cov: ", capture_odo->getDataCovariance());
+
+
+        // ground truth for quaternion:
+        Eigen::Quaternions quat_odo(Eigen::Quaternions::Identity());
+        Eigen::Quaternions quat_imu(Eigen::Quaternions::Identity());
 
         for(unsigned int i = 1; i<=1000; i++)
         {
             // PROCESS IMU DATA
             // Time and data variables
-            t_imu.set(i*dt_imu);
+            t_imu += dt_imu;
             
             rateOfTurn = Eigen::Vector3s::Random()*10; //to have rate of turn > 0.99 deg/s
-            data_imu.tail<3>() = rateOfTurn* M_PI/180.0;
-            data_imu.head<3>() =  current_quatState.conjugate() * (- wolf::gravity()); //gravity measured, we have no other translation movement
+            data_imu.tail<3>() = rateOfTurn * M_PI/180.0;
+            data_imu.head<3>() =  quat_imu.conjugate() * (- wolf::gravity()); //gravity measured, we have no other translation movement
 
             //compute odometry + current orientaton taking this measure into account
-            odom_quat = odom_quat * wolf::v2q(data_imu.tail(3)*dt_imu);
-            current_quatState = current_quatState * wolf::v2q(data_imu.tail(3)*dt_imu);
+            quat_odo = quat_odo * wolf::v2q(data_imu.tail(3)*dt_imu);
+            quat_imu = quat_imu * wolf::v2q(data_imu.tail(3)*dt_imu);
 
             //set timestamp, add bias, set data and process
-            imu_ptr->setTimeStamp(t_imu);
+            capture_imu->setTimeStamp(t_imu);
             data_imu = data_imu + origin_bias;
-            imu_ptr->setData(data_imu);
-            sen_imu->process(imu_ptr);
+            capture_imu->setData(data_imu);
+            sensor_imu->process(capture_imu);
 
+            //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
             if(t_imu.get() >= t_odo.get())
             {
                 // PROCESS ODOM 3D DATA
-                data_odom3D.head(3) << 0,0,0;
-                data_odom3D.tail(3) = q2v(odom_quat);
-                odo_ptr->setTimeStamp(t_odo);
-                odo_ptr->setData(data_odom3D);
-                sen_odom3D->process(odo_ptr);
+                data_odo.head(3) << 0,0,0;
+                data_odo.tail(3) = q2v(quat_odo);
+                capture_odo->setTimeStamp(t_odo);
+                capture_odo->setData(data_odo);
+                sensor_odo->process(capture_odo);
 
                 //prepare next odometry measurement
-                odom_quat = Eigen::Quaternions::Identity(); //set to identity to have next odom relative to this last KF
+                quat_odo = Eigen::Quaternions::Identity(); //set to identity to have next odom relative to this last KF
                 t_odo += dt_odo;
             }
         }
 
-        expected_final_state << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
-        last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t_imu);
+        expected_final_state.resize(10);
+        expected_final_state << 0,0,0, quat_imu.x(), quat_imu.y(), quat_imu.z(), quat_imu.w(), 0,0,0;
+
+        last_KF = problem->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t_imu);
         last_KF->setState(expected_final_state);
 
         //===================================================== END{PROCESS DATA}
         origin_KF->unfix();
         last_KF->unfix();
+
+
+        // ==================================================== show problem status
+        problem->print(4,1,1,1);
+
     }
 
     virtual void TearDown(){}
@@ -2544,21 +2559,26 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2_InvarP1Q1V1P2Q2V
 
     //perturbation of origin bias
     Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.001);
-    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
-    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sensor_imu)->getCalibration();
+    origin_KF->getCaptureOf(sensor_imu)->setCalibration(bias + random_err);
 
-    std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-    ceres_manager_wolf_diff->computeCovariances(ALL);
+    problem->print(4,1,1,1);
+
+    std::string report = ceres_manager->solve(2);// 0: nothing, 1: BriefReport, 2: FullReport
+    std::cout << report << std::endl;
+//    ceres_manager->computeCovariances(ALL);
+
+    problem->print(4,1,1,1);
 
     //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
 
     Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev, actual_state(last_KF->getState());
     Eigen::MatrixXs covX(16,16);
         
     //get data from covariance blocks
-    wolf_problem_ptr_->getFrameCovariance(last_KF, covX);
+    problem->getFrameCovariance(last_KF, covX);
 
     for(int i = 0; i<16; i++)
         cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
@@ -2589,14 +2609,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V2_InvarP1Q1V1P2Q
 
     //perturbation of origin bias
     Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.001);
-    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
-    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sensor_imu)->getCalibration();
+    origin_KF->getCaptureOf(sensor_imu)->setCalibration(bias + random_err);
 
-    std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-    ceres_manager_wolf_diff->computeCovariances(ALL);
+    std::string report = ceres_manager->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+    ceres_manager->computeCovariances(ALL);
 
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
 
     ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*100)
 
@@ -2604,7 +2624,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V2_InvarP1Q1V1P2Q
     Eigen::MatrixXs covX(16,16);
         
     //get data from covariance blocks
-    wolf_problem_ptr_->getFrameCovariance(last_KF, covX);
+    problem->getFrameCovariance(last_KF, covX);
 
     for(int i = 0; i<16; i++)
         cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
@@ -2635,14 +2655,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1V2_InvarP1Q1P2Q
 
     //perturbation of origin bias
     Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
-    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
-    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sensor_imu)->getCalibration();
+    origin_KF->getCaptureOf(sensor_imu)->setCalibration(bias + random_err);
 
-    std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+    std::string report = ceres_manager->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
     ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*1000)
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
 
     ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*1000)
 }
@@ -2662,14 +2682,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1Q2V2_InvarP1Q1P
 
     //perturbation of origin bias
     Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
-    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
-    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sensor_imu)->getCalibration();
+    origin_KF->getCaptureOf(sensor_imu)->setCalibration(bias + random_err);
 
-    std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+    std::string report = ceres_manager->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
     ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*1000)
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
     
     ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*1000)
     Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
@@ -2691,14 +2711,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q
 
     //perturbation of origin bias
     Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
-    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
-    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sensor_imu)->getCalibration();
+    origin_KF->getCaptureOf(sensor_imu)->setCalibration(bias + random_err);
 
-    std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+    std::string report = ceres_manager->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
     ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*1000)
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
     
     ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*1000)
 }
@@ -2718,14 +2738,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2Q2V2_InvarP1Q
 
     //perturbation of origin bias
     Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.0001);
-    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
-    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sensor_imu)->getCalibration();
+    origin_KF->getCaptureOf(sensor_imu)->setCalibration(bias + random_err);
 
-    std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+    std::string report = ceres_manager->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
     ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*10000)
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
     
     ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*10000)
     Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
@@ -2747,15 +2767,15 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
 
     //perturbation of origin bias
     Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
-    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
-    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sensor_imu)->getCalibration();
+    origin_KF->getCaptureOf(sensor_imu)->setCalibration(bias + random_err);
 
-    std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-    ceres_manager_wolf_diff->computeCovariances(ALL);
+    std::string report = ceres_manager->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+    ceres_manager->computeCovariances(ALL);
 
     ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*1000)
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
     
     ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), wolf::Constants::EPS*100)
     ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*1000)
@@ -2766,7 +2786,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
     Eigen::MatrixXs covX(16,16);
         
     //get data from covariance blocks
-    wolf_problem_ptr_->getFrameCovariance(last_KF, covX);
+    problem->getFrameCovariance(last_KF, covX);
 
     for(int i = 0; i<16; i++)
         cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
