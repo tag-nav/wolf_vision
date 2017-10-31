@@ -179,11 +179,12 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
         sqrt_A_r_dt_inv((Eigen::Matrix3s::Identity() * ab_rate_stdev_ * sqrt(dt_)).inverse()),
         sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_rate_stdev_ * sqrt(dt_)).inverse())
 {
-    WOLF_TRACE("jac dp_ab", dDp_dab_);
-    WOLF_TRACE("jac dv_ab", dDv_dab_);
-    WOLF_TRACE("jac dp_wb", dDp_dwb_);
-    WOLF_TRACE("jac dv_wb", dDv_dwb_);
-    WOLF_TRACE("jac dq_wb", dDq_dwb_);
+    WOLF_TRACE("ftr jac  : ", _ftr_ptr->getJacobianBias().row(0));
+//    WOLF_TRACE("jac dp_ab: ", dDp_dab_.row(0));
+//    WOLF_TRACE("jac dv_ab: ", dDv_dab_.row(0));
+//    WOLF_TRACE("jac dp_wb: ", dDp_dwb_.row(0));
+//    WOLF_TRACE("jac dv_wb: ", dDv_dwb_.row(0));
+//    WOLF_TRACE("jac dq_wb: ", dDq_dwb_.row(0));
     setType("IMU");
 }
 
@@ -215,12 +216,12 @@ inline bool ConstraintIMU::operator ()(const T* const _p1,
 
     Map<Matrix<T,15,1> > res(_res);
 
-    WOLF_DEBUG("gyro 1 bias 0 :", wb1(0));
-    WOLF_DEBUG("gyro 1 bias 1 :", wb1(1));
-    WOLF_DEBUG("gyro 1 bias 2 :", wb1(2));
-    WOLF_DEBUG("gyro 2 bias 0 :", wb2(0));
-    WOLF_DEBUG("gyro 2 bias 1 :", wb2(1));
-    WOLF_DEBUG("gyro 2 bias 2 :", wb2(2));
+//    WOLF_DEBUG("gyro 1 bias 0 :", wb1(0));
+//    WOLF_DEBUG("gyro 1 bias 1 :", wb1(1));
+//    WOLF_DEBUG("gyro 1 bias 2 :", wb1(2));
+//    WOLF_DEBUG("gyro 2 bias 0 :", wb2(0));
+//    WOLF_DEBUG("gyro 2 bias 1 :", wb2(1));
+//    WOLF_DEBUG("gyro 2 bias 2 :", wb2(2));
 
     residual(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, res);
 

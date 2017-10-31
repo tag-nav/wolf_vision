@@ -182,7 +182,7 @@ inline void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
     _jacobian_calib.block(3,3,3,3) = - ddo_dwn;
     _jacobian_calib.block(6,0,3,3) = - ddv_dan;
 
-    WOLF_TRACE("jac calib : ", _jacobian_calib);
+//    WOLF_TRACE("jac calib : ", _jacobian_calib);
 
 }
 

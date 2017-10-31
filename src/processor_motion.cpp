@@ -251,6 +251,8 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
                                                   _new_keyframe,
                                                   new_keyframe_origin);
 
+//    WOLF_TRACE("CAP Jac calib: ", new_capture->getJacobianCalib().row(0));
+
     // split the buffer
     // and give the old buffer to the key_capture
     existing_capture->getBuffer().split(new_ts, new_capture->getBuffer());
@@ -266,6 +268,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
         // add to old buffer
         new_capture->getBuffer().get().push_back(motion_interpolated);
     }
+    WOLF_TRACE("CAP Jac calib: ", new_capture->getJacobianCalib().row(0));
 
     // create motion feature and add it to the capture
     FeatureBasePtr new_feature = emplaceFeature(new_capture);
@@ -332,9 +335,10 @@ void ProcessorMotion::integrateOneStep()
 
     // integrate Jacobian wrt calib
     if (calib_size_ > 0)
+    {
         jacobian_calib_ = jacobian_delta_preint_ * getBuffer().get().back().jacobian_calib_ + jacobian_delta_ * jacobian_delta_calib_;
-
-    WOLF_TRACE("jac calib: ", jacobian_calib_);
+        WOLF_TRACE("jac calib: ", jacobian_calib_.row(0));
+    }
 
     // Integrate covariance
     delta_integrated_cov_ = jacobian_delta_preint_ * getBuffer().get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
