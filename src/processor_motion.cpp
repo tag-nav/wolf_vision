@@ -259,15 +259,15 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     new_capture->getBuffer().setCalibrationPreint(new_capture->getCalibration());
 
     // interpolate individual delta
-    if (!existing_capture->getBuffer().get().empty() && new_capture->getBuffer().get().back().ts_ != new_ts)
-    {
-        // interpolate Motion at the new time stamp
-        Motion motion_interpolated = interpolate(new_capture->getBuffer().get().back(), // last Motion of old buffer
-                                                 existing_capture->getBuffer().get().front(), // first motion of new buffer
-                                                 new_ts);
-        // add to old buffer
-        new_capture->getBuffer().get().push_back(motion_interpolated);
-    }
+//    if (!existing_capture->getBuffer().get().empty() && new_capture->getBuffer().get().back().ts_ != new_ts)
+//    {
+//        // interpolate Motion at the new time stamp
+//        Motion motion_interpolated = interpolate(new_capture->getBuffer().get().back(), // last Motion of old buffer
+//                                                 existing_capture->getBuffer().get().front(), // first motion of new buffer
+//                                                 new_ts);
+//        // add to old buffer
+//        new_capture->getBuffer().get().push_back(motion_interpolated);
+//    }
     WOLF_TRACE("CAP Jac calib: ", new_capture->getJacobianCalib().row(0));
 
     // create motion feature and add it to the capture
