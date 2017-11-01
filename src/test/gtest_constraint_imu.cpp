@@ -888,6 +888,11 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         sensor          = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
         sensor_odo      = std::static_pointer_cast<SensorOdom3D>(sensor);
 
+        sensor_imu->setNoiseStd((sensor_imu->getNoiseStd()/10.0).eval());
+        sensor_odo->setNoiseStd((sensor_odo->getNoiseStd()/10.0).eval());
+        WOLF_TRACE("IMU cov: ", sensor_imu->getNoiseCov().diagonal().transpose());
+        WOLF_TRACE("ODO cov: ", sensor_odo->getNoiseCov().diagonal().transpose());
+
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
         prc_odom3D_params->max_time_span    = 0.9999;
         prc_odom3D_params->max_buff_length  = 1000000000; //make it very high so that this condition will not pass
@@ -951,14 +956,14 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
             capture_imu->setData(data_imu);
             sensor_imu->process(capture_imu);
 
-            WOLF_TRACE("Jac calib: ", processor_imu->getLastPtr()->getJacobianCalib().row(0));
-            WOLF_TRACE("last calib: ", processor_imu->getLastPtr()->getCalibration().transpose());
-            WOLF_TRACE("last calib preint: ", processor_imu->getLastPtr()->getCalibrationPreint().transpose());
-
             //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
             if(t_imu.get() >= t_odo.get())
             {
-                WOLF_TRACE("====== create ODOM KF ========")
+                WOLF_TRACE("====== create ODOM KF ========");
+                WOLF_TRACE("Jac calib: ", processor_imu->getLastPtr()->getJacobianCalib().row(0));
+                WOLF_TRACE("last calib: ", processor_imu->getLastPtr()->getCalibration().transpose());
+                WOLF_TRACE("last calib preint: ", processor_imu->getLastPtr()->getCalibrationPreint().transpose());
+
                 // PROCESS ODOM 3D DATA
                 data_odo.head(3) << 0,0,0;
                 data_odo.tail(3) = q2v(quat_odo);
@@ -990,6 +995,16 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         //===================================================== END{PROCESS DATA}
         origin_KF->unfix();
         last_KF->unfix();
+
+        CaptureBasePtr origin_CB = origin_KF->getCaptureOf(sensor_imu);
+        CaptureMotionPtr last_CM   = std::static_pointer_cast<CaptureMotion>(last_KF  ->getCaptureOf(sensor_imu));
+
+        WOLF_TRACE("KF1 calib    : ", origin_CB->getCalibration().transpose());
+        WOLF_TRACE("KF2 calib pre: ", last_CM  ->getCalibrationPreint().transpose());
+        WOLF_TRACE("KF2 calib    : ", last_CM  ->getCalibration().transpose());
+        WOLF_TRACE("KF2 delta pre: ", last_CM  ->getDeltaPreint().transpose());
+        WOLF_TRACE("KF2 delta cor: ", last_CM  ->getDeltaCorrected(origin_CB->getCalibration()).transpose());
+        WOLF_TRACE("KF2 jacob    : ", last_CM  ->getJacobianCalib().row(0));
 
 
         // ==================================================== show problem status

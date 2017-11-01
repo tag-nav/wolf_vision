@@ -337,7 +337,7 @@ void ProcessorMotion::integrateOneStep()
     if (calib_size_ > 0)
     {
         jacobian_calib_ = jacobian_delta_preint_ * getBuffer().get().back().jacobian_calib_ + jacobian_delta_ * jacobian_delta_calib_;
-        WOLF_TRACE("jac calib: ", jacobian_calib_.row(0));
+        // WOLF_TRACE("jac calib: ", jacobian_calib_.row(0));
     }
 
     // Integrate covariance

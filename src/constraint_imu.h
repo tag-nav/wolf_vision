@@ -163,9 +163,9 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
                         _ftr_ptr->getFramePtr()->getOPtr(),
                         _ftr_ptr->getFramePtr()->getVPtr(),
                         _ftr_ptr->getCapturePtr()->getSensorIntrinsicPtr()),
-        dp_preint_(_ftr_ptr->getDpPreint()), // dp, dv, dq at preintegration time
-        dq_preint_(_ftr_ptr->getDqPreint()),
-        dv_preint_(_ftr_ptr->getDvPreint()),
+        dp_preint_(_ftr_ptr->getMeasurement().head<3>()), // dp, dv, dq at preintegration time
+        dq_preint_(_ftr_ptr->getMeasurement().data()+3),
+        dv_preint_(_ftr_ptr->getMeasurement().tail<3>()),
         acc_bias_preint_(_ftr_ptr->getAccBiasPreint()), // state biases at preintegration time
         gyro_bias_preint_(_ftr_ptr->getGyroBiasPreint()),
         dDp_dab_(_ftr_ptr->getJacobianBias().block(0,0,3,3)), // Jacs of dp dv dq wrt biases
