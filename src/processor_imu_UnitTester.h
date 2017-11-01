@@ -9,9 +9,23 @@
 namespace wolf {
     struct IMU_jac_bias{ //struct used for checking jacobians by finite difference
 
-        IMU_jac_bias(Eigen::Matrix<Eigen::VectorXs,6,1> _Deltas_noisy_vect, Eigen::VectorXs _Delta0 , Eigen::Matrix3s _dDp_dab, Eigen::Matrix3s _dDv_dab, 
-                    Eigen::Matrix3s _dDp_dwb, Eigen::Matrix3s _dDv_dwb, Eigen::Matrix3s _dDq_dwb) : Deltas_noisy_vect_(_Deltas_noisy_vect), Delta0_(_Delta0) ,
-                    dDp_dab_(_dDp_dab), dDv_dab_(_dDv_dab), dDp_dwb_(_dDp_dwb), dDv_dwb_(_dDv_dwb), dDq_dwb_(_dDq_dwb){}
+        IMU_jac_bias(Eigen::Matrix<Eigen::VectorXs,6,1> _Deltas_noisy_vect,
+                     Eigen::VectorXs _Delta0 ,
+                     Eigen::Matrix3s _dDp_dab,
+                     Eigen::Matrix3s _dDv_dab,
+                     Eigen::Matrix3s _dDp_dwb,
+                     Eigen::Matrix3s _dDv_dwb,
+                     Eigen::Matrix3s _dDq_dwb) :
+                         Deltas_noisy_vect_(_Deltas_noisy_vect),
+                         Delta0_(_Delta0) ,
+                         dDp_dab_(_dDp_dab),
+                         dDv_dab_(_dDv_dab),
+                         dDp_dwb_(_dDp_dwb),
+                         dDv_dwb_(_dDv_dwb),
+                         dDq_dwb_(_dDq_dwb)
+        {
+            //
+        }
                 
         IMU_jac_bias(){
 
@@ -30,7 +44,7 @@ namespace wolf {
         IMU_jac_bias(IMU_jac_bias const & toCopy){
 
             Deltas_noisy_vect_ = toCopy.Deltas_noisy_vect_;
-            Delta0_ = toCopy.Delta0_;
+            Delta0_  = toCopy.Delta0_;
             dDp_dab_ = toCopy.dDp_dab_;
             dDv_dab_ = toCopy.dDv_dab_;
             dDp_dwb_ = toCopy.dDp_dwb_;
@@ -56,7 +70,7 @@ namespace wolf {
             void copyfrom(IMU_jac_bias const& right){
 
                 Deltas_noisy_vect_ = right.Deltas_noisy_vect_;
-                Delta0_ = right.Delta0_;
+                Delta0_  = right.Delta0_;
                 dDp_dab_ = right.dDp_dab_;
                 dDv_dab_ = right.dDv_dab_;
                 dDp_dwb_ = right.dDp_dwb_;
@@ -67,10 +81,21 @@ namespace wolf {
 
     struct IMU_jac_deltas{
 
-        IMU_jac_deltas(Eigen::VectorXs _Delta0, Eigen::VectorXs _delta0, Eigen::Matrix<Eigen::VectorXs,9,1> _Delta_noisy_vect, Eigen::Matrix<Eigen::VectorXs,9,1> _delta_noisy_vect, 
-                        Eigen::MatrixXs _jacobian_delta_preint, Eigen::MatrixXs _jacobian_delta ) :
-                        Delta0_(_Delta0), delta0_(_delta0), Delta_noisy_vect_(_Delta_noisy_vect), delta_noisy_vect_(_delta_noisy_vect), 
-                       jacobian_delta_preint_(_jacobian_delta_preint), jacobian_delta_(_jacobian_delta) {}
+        IMU_jac_deltas(Eigen::VectorXs _Delta0,
+                       Eigen::VectorXs _delta0,
+                       Eigen::Matrix<Eigen::VectorXs,9,1> _Delta_noisy_vect,
+                       Eigen::Matrix<Eigen::VectorXs,9,1> _delta_noisy_vect,
+                       Eigen::MatrixXs _jacobian_delta_preint,
+                       Eigen::MatrixXs _jacobian_delta ) :
+                           Delta0_(_Delta0),
+                           delta0_(_delta0),
+                           Delta_noisy_vect_(_Delta_noisy_vect),
+                           delta_noisy_vect_(_delta_noisy_vect),
+                           jacobian_delta_preint_(_jacobian_delta_preint),
+                           jacobian_delta_(_jacobian_delta)
+        {
+            //
+        }
 
         IMU_jac_deltas(){
             for (int i=0; i<9; i++){
@@ -114,12 +139,12 @@ namespace wolf {
         public:
             void copyfrom(IMU_jac_deltas const& right){
 
-                Delta_noisy_vect_ = right.Delta_noisy_vect_;
-                delta_noisy_vect_ = right.delta_noisy_vect_;
-                Delta0_ = right.Delta0_;
-                delta0_ = right.delta0_;
-                jacobian_delta_preint_ = right.jacobian_delta_preint_;
-                jacobian_delta_ = right.jacobian_delta_;
+                Delta_noisy_vect_       = right.Delta_noisy_vect_;
+                delta_noisy_vect_       = right.delta_noisy_vect_;
+                Delta0_                 = right.Delta0_;
+                delta0_                 = right.delta0_;
+                jacobian_delta_preint_  = right.jacobian_delta_preint_;
+                jacobian_delta_         = right.jacobian_delta_;
             }
     };
 
@@ -137,7 +162,10 @@ namespace wolf {
             _dt : time interval between 2 IMU measurements
             da_b : bias noise to add - scalar because adding the same noise to each component of bias (abx, aby, abz, wbx, wby, wbz) one by one. 
          */
-        IMU_jac_bias finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b, const Eigen::Matrix<wolf::Scalar,10,1>& _delta_preint0);
+        IMU_jac_bias finite_diff_ab(const Scalar _dt,
+                                    Eigen::Vector6s& _data,
+                                    const wolf::Scalar& da_b,
+                                    const Eigen::Matrix<wolf::Scalar,10,1>& _delta_preint0);
 
         /* params :
             _data : input data vector (size 6 : ax,ay,az,wx,wy,wz)
@@ -145,10 +173,16 @@ namespace wolf {
             _Delta_noise : noise to add to Delta_preint (D1 in D = D1 + d), vector 9 because rotation expressed as a vector (R2v(q.matrix()))
             _delta_noise : noise to add to instantaneous delta (d in D = D1 + d), vector 9 because rotation expressed as a vector (R2v(q.matrix()))
          */
-        IMU_jac_deltas finite_diff_noise(const Scalar& _dt, Eigen::Vector6s& _data, const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise, const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise, const Eigen::Matrix<wolf::Scalar,10,1>& _Delta0);
+        IMU_jac_deltas finite_diff_noise(const Scalar& _dt,
+                                         Eigen::Vector6s& _data,
+                                         const Eigen::Matrix<wolf::Scalar,9,1>& _Delta_noise,
+                                         const Eigen::Matrix<wolf::Scalar,9,1>& _delta_noise,
+                                         const Eigen::Matrix<wolf::Scalar,10,1>& _Delta0);
 
         public:
-        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr = nullptr);
+        static ProcessorBasePtr create(const std::string& _unique_name,
+                                       const ProcessorParamsBasePtr _params,
+                                       const SensorBasePtr = nullptr);
 
         public:
         // Maps quat, to be used as temporary
@@ -170,7 +204,10 @@ namespace wolf {
 namespace wolf{
 
     //Functions to test jacobians with finite difference method
-inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Eigen::Vector6s& _data, const wolf::Scalar& da_b, const Eigen::Matrix<wolf::Scalar,10,1>& _delta_preint0)
+inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt,
+                                                            Eigen::Vector6s& _data,
+                                                            const wolf::Scalar& da_b,
+                                                            const Eigen::Matrix<wolf::Scalar,10,1>& _delta_preint0)
 {
     //TODO : need to use a reset function here to make sure jacobians have not been used before --> reset everything
     ///Define all the needed variables
@@ -225,7 +262,7 @@ inline IMU_jac_bias ProcessorIMU_UnitTester::finite_diff_ab(const Scalar _dt, Ei
         _data = data0;
         _data(i) = _data(i) - da_b; //- because a = a_m − a_b + a_n, in out case, a = a_m − a_b - da_b + a_n
         //data2delta
-        computeCurrentDelta(_data, data_cov, bias, _dt,delta_,delta_cov_,jacobian_delta_calib_);
+        computeCurrentDelta(_data, data_cov, bias, _dt, delta_, delta_cov_, jacobian_delta_calib_);
         deltaPlusDelta(_delta_preint0, delta_, _dt, delta_preint_plus_delta0, jacobian_delta_preint, jacobian_delta);
         Deltas_noisy_vect(i) = delta_preint_plus_delta0; //preintegrated deltas affected by added bias noise
     }
