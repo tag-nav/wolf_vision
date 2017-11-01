@@ -54,6 +54,8 @@ class FeatureIMU : public FeatureBase
 
         Eigen::Matrix<Scalar, 9, 6> jacobian_bias_;
 
+    public:
+      EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 };
 
 

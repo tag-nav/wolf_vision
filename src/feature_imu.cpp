@@ -19,8 +19,8 @@ FeatureIMU::FeatureIMU(const Eigen::VectorXs& _delta_preintegrated,
 
 FeatureIMU::FeatureIMU(CaptureMotionPtr _cap_imu_ptr):
         FeatureBase("IMU", _cap_imu_ptr->getDeltaPreint(), _cap_imu_ptr->getDeltaPreintCov()),
-        acc_bias_preint_ (_cap_imu_ptr->getCalibrationPreint().head(3)),
-        gyro_bias_preint_(_cap_imu_ptr->getCalibrationPreint().tail(3)),
+        acc_bias_preint_ (_cap_imu_ptr->getCalibrationPreint().head<3>()),
+        gyro_bias_preint_(_cap_imu_ptr->getCalibrationPreint().tail<3>()),
         jacobian_bias_(_cap_imu_ptr->getJacobianCalib())
 {
     WOLF_TRACE("jac bias: ", jacobian_bias_.row(0));
