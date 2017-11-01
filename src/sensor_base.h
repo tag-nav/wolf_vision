@@ -145,7 +145,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         bool extrinsicsInCaptures() const { return extrinsic_dynamic_ && has_capture_; }
         bool intrinsicsInCaptures() const { return intrinsic_dynamic_ && has_capture_; }
 
-        void setNoise(const Eigen::VectorXs & _noise_std);
+        void setNoiseStd(const Eigen::VectorXs & _noise_std);
+        void setNoiseCov(const Eigen::MatrixXs & _noise_std);
         Eigen::VectorXs getNoiseStd();
         Eigen::MatrixXs getNoiseCov();
 

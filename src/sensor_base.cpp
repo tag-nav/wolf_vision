@@ -203,11 +203,19 @@ void SensorBase::registerNewStateBlocks()
     }
 }
 
-void SensorBase::setNoise(const Eigen::VectorXs& _noise_std) {
-	noise_std_ = _noise_std;
-	noise_cov_.setZero();
-	for (unsigned int i=0; i<_noise_std.size(); i++)
-		noise_cov_(i,i) = _noise_std(i) * _noise_std(i);
+void SensorBase::setNoiseStd(const Eigen::VectorXs& _noise_std) {
+    noise_std_ = _noise_std;
+    noise_cov_.setZero();
+    for (unsigned int i=0; i<_noise_std.size(); i++)
+    {
+        Scalar var_i = _noise_std(i) * _noise_std(i);
+        noise_cov_(i,i) = var_i;
+    }
+}
+
+void SensorBase::setNoiseCov(const Eigen::MatrixXs& _noise_cov) {
+    noise_std_ = _noise_cov.diagonal().array().sqrt();
+    noise_cov_ = _noise_cov;
 }
 
 CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
