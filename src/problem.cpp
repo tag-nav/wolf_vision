@@ -792,6 +792,12 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         cout << (C->getSensorPtr()->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
 
                     cout << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "");
+                    if (constr_by)
+                    {
+                        cout << "  <-- ";
+                        for (auto cby : C->getConstrainedByList())
+                            cout << "c" << cby->id() << " \t";
+                    }
                     cout << endl;
 
                     if (state_blocks)
@@ -1022,6 +1028,17 @@ bool Problem::check(int verbose_level)
                 cout << endl;
                 cout << "      -> P  @ " << C->getProblem().get() << endl;
                 cout << "      -> F" << C->getFramePtr()->id() << " @ " << C->getFramePtr().get() << endl;
+                for (auto sb : C->getStateBlockVec())
+                {
+                    cout <<  "      sb @ " << sb.get();
+                    if (sb)
+                    {
+                        auto lp = sb->getLocalParametrizationPtr();
+                        if (lp)
+                            cout <<  " (lp @ " << lp.get() << ")";
+                    }
+                    cout << endl;
+                }
             }
             // check problem and frame pointers
             is_consistent = is_consistent && (C->getProblem().get() == P_raw);
@@ -1054,10 +1071,11 @@ bool Problem::check(int verbose_level)
                         cout << "        c" << c->id() << " @ " << c.get();
 
                     auto Fo = c->getFrameOtherPtr();
+                    auto Co = c->getCaptureOtherPtr();
                     auto fo = c->getFeatureOtherPtr();
                     auto Lo = c->getLandmarkOtherPtr();
 
-                    if ( !Fo && !fo && !Lo )    // case ABSOLUTE:
+                    if ( !Fo && !Co && !fo && !Lo )    // case ABSOLUTE:
                     {
                         if (verbose_level > 0)
                             cout << " --> Abs." << endl;
@@ -1070,6 +1088,24 @@ bool Problem::check(int verbose_level)
                             cout << " --> F" << Fo->id() << " <- ";
                         bool found = false;
                         for (auto cby : Fo->getConstrainedByList())
+                        {
+                            if (verbose_level > 0)
+                                cout << " c" << cby->id();
+                            found = found || (c == cby);
+                        }
+                        if (verbose_level > 0)
+                            cout << endl;
+                        // check constrained_by pointer in constrained frame
+                        is_consistent = is_consistent && found;
+                    }
+
+                    // find constrained_by pointer in constrained capture
+                    if ( Co )  // case CAPTURE:
+                    {
+                        if (verbose_level > 0)
+                            cout << " --> C" << Co->id() << " <- ";
+                        bool found = false;
+                        for (auto cby : Co->getConstrainedByList())
                         {
                             if (verbose_level > 0)
                                 cout << " c" << cby->id();
@@ -1142,23 +1178,32 @@ bool Problem::check(int verbose_level)
                         }
                         // find in own Frame
                         found = found || (std::find(F->getStateBlockVec().begin(), F->getStateBlockVec().end(), sb) != F->getStateBlockVec().end());
+                        // find in own Capture
+                        found = found || (std::find(C->getStateBlockVec().begin(), C->getStateBlockVec().end(), sb) != C->getStateBlockVec().end());
                         // find in own Sensor
                         if (S)
                             found = found || (std::find(S->getStateBlockVec().begin(), S->getStateBlockVec().end(), sb) != S->getStateBlockVec().end());
                         // find in constrained Frame
                         if (Fo)
                             found = found || (std::find(Fo->getStateBlockVec().begin(), Fo->getStateBlockVec().end(), sb) != Fo->getStateBlockVec().end());
+                        // find in constrained Capture
+                        if (Co)
+                            found = found || (std::find(Co->getStateBlockVec().begin(), Co->getStateBlockVec().end(), sb) != Co->getStateBlockVec().end());
+                        // find in constrained Feature
                         if (fo)
                         {
                             // find in constrained feature's Frame
                             FrameBasePtr foF = fo->getFramePtr();
                             found = found || (std::find(foF->getStateBlockVec().begin(), foF->getStateBlockVec().end(), sb) != foF->getStateBlockVec().end());
+                            // find in constrained feature's Capture
+                            CaptureBasePtr foC = fo->getCapturePtr();
+                            found = found || (std::find(foC->getStateBlockVec().begin(), foC->getStateBlockVec().end(), sb) != foC->getStateBlockVec().end());
                             // find in constrained feature's Sensor
                             SensorBasePtr foS = fo->getCapturePtr()->getSensorPtr();
                             found = found || (std::find(foS->getStateBlockVec().begin(), foS->getStateBlockVec().end(), sb) != foS->getStateBlockVec().end());
                         }
+                        // find in constrained landmark
                         if (Lo)
-                            // find in constrained landmark
                             found = found || (std::find(Lo->getStateBlockVec().begin(), Lo->getStateBlockVec().end(), sb) != Lo->getStateBlockVec().end());
                         if (verbose_level > 0)
                         {
