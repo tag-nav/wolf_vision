@@ -218,9 +218,10 @@ void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data, const Eigen
                                        Eigen::MatrixXs& _delta_cov, Eigen::MatrixXs& _jacobian_calib)
 {
     assert(_data.size() == data_size_ && "Wrong data size!");
-    //    WOLF_DEBUG("data cov: ", _data_cov);
+
     using namespace Eigen;
     Matrix<Scalar, 9, 6> jac_data;
+
     /*
      * We have the following computing pipeline:
      *     Input: data, calib, dt
@@ -232,68 +233,22 @@ void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data, const Eigen
      *     jac_data     = jac_body
      *     jac_calib    = - jac_body
      *     delta_cov  <-- propagate data_cov using jac_data
+     *
+     * where body2delta(.) produces a delta from body=(a,w) as follows:
+     *     dp = 1/2 * a * dt^2
+     *     dq = exp(w * dt)
+     *     dv = a * dt
      */
+
+    // create delta
     imu::body2delta(_data - _calib, _dt, _delta, jac_data); // Jacobians tested in imu_tools
+
+    // compute delta_cov
     _delta_cov = jac_data * _data_cov * jac_data.transpose();
+
+    // compute jacobian_calib
     _jacobian_calib = -jac_data;
-    //    // acc and gyro measurements corrected with the estimated bias, times dt
-    //    Vector3s a_dt = (_data.head(3) - _calib.head(3)) * _dt;
-    //    Vector3s w_dt = (_data.tail(3) - _calib.tail(3)) * _dt;
-    //
-    //    /* create delta
-    //     *
-    //     * MATHS of delta creation -- Sola-16
-    //     * dp = 1/2 * (a-a_b) * dt^2 = 1/2 * dv * dt
-    //     * dv = (a-a_b) * dt
-    //     * dq = exp((w-w_b)*dt)
-    //     */
-    //    Vector3s delta_p = a_dt * _dt / 2;
-    //    Quaternions delta_q = v2q(w_dt);
-    //    Vector3s delta_v = a_dt;
-    //    _delta << delta_p , delta_q.coeffs() , delta_v;
-    //
-    //    /* Compute jacobian of delta wrt data
-    //     *
-    //     * MATHS : jacobian dd_dn, of delta wrt noise
-    //     * substituting a and w respectively by (a+a_n) and (w+w_n) (measurement noise is additive)
-    //     *                 an           wn
-    //     *         dp [ 0.5*I*dt*dt     0     ]
-    //     * dd_dn = do [    0           Jr*dt  ]
-    //     *         dv [    I*dt         0     ] // see Sola-16
-    //     */
-    //
-    //    // we go the sparse way:
-    //    Matrix3s ddv_dan = Matrix3s::Identity() * _dt;
-    //    Matrix3s ddp_dan = ddv_dan * _dt / 2;
-    //    Matrix3s ddo_dwn = jac_SO3_right(w_dt) * _dt;
-    //
-    //    /* Covariance computation
-    //     *
-    //     * Covariance is sparse:
-    //     *       [ Cpp   0   Cpv
-    //     * COV =    0   Coo   0
-    //     *         Cpv'  0   Cvv ]
-    //     *
-    //     * where Cpp, Cpv, Coo and Cvv are computed below
-    //     */
-    //    _delta_cov.block<3,3>(0,0).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddp_dan.transpose(); // Cpp = ddp_dan * Caa * ddp_dan'
-    //    _delta_cov.block<3,3>(0,6).noalias() = ddp_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cpv = ddp_dan * Caa * ddv_dan'
-    //    _delta_cov.block<3,3>(3,3).noalias() = ddo_dwn*_data_cov.block<3,3>(3,3)*ddo_dwn.transpose(); // Coo = ddo_dwn * Cww * ddo_dwn'
-    //    _delta_cov.block<3,3>(6,0)           = _delta_cov.block<3,3>(0,6).transpose();                // Cvp = Cpv'
-    //    _delta_cov.block<3,3>(6,6).noalias() = ddv_dan*_data_cov.block<3,3>(0,0)*ddv_dan.transpose(); // Cvv = ddv_dan * Caa * ddv_dan'
-    //
-    //
-    //    /* Jacobians of delta wrt calibration parameters -- bias
-    //     *
-    //     * We know that d_(meas - bias)/d_bias = -I
-    //     * so d_delta/d_bias = - d_delta/d_meas
-    //     * we assign only the non-null ones
-    //     */
-    //    _jacobian_calib.setZero(delta_cov_size_,calib_size_); // can be commented usually, more sure this way
-    //    _jacobian_calib.block(0,0,3,3) = - ddp_dan;
-    //    _jacobian_calib.block(3,3,3,3) = - ddo_dwn;
-    //    _jacobian_calib.block(6,0,3,3) = - ddv_dan;
-    //    WOLF_TRACE("jac calib : ", _jacobian_calib);
+
 }
 
 void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta, const Scalar _dt,
@@ -306,7 +261,7 @@ void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Ei
      *
      * where (dp, dq, dv) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
      */
-    imu::compose(_delta_preint, _delta, _delta_preint_plus_delta);
+    _delta_preint_plus_delta = imu::compose(_delta_preint, _delta, _dt);
 }
 
 void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _dt,
@@ -332,17 +287,16 @@ void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Ei
      *     Dp' = Dp + Dv*dt + Dq*dp
      *     Dv' = Dv + Dq*dv
      *     Dq' = Dq * dq
-     */
-    /*/////////////////////////////////////////////////////////
-     * Note. Jacobians for covariance propagation.
      *
-     * 1.a. With respect to Delta, gives _jacobian_delta_preint = D_D as:
+     * Jacobians for covariance propagation.
+     *
+     * a. With respect to Delta, gives _jacobian_delta_preint = D_D as:
      *
      *   D_D = [ I    -DR*skew(dp)   I*dt
      *           0     dR.tr          0
      *           0    -DR*skew(dv)    I  ] // See Sola-16
      *
-     * 1.b. With respect to delta, gives _jacobian_delta = D_d as:
+     * b. With respect to delta, gives _jacobian_delta = D_d as:
      *
      *   D_d = [ DR   0    0
      *           0    I    0
