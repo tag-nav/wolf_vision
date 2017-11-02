@@ -207,8 +207,12 @@ ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion
     CaptureIMUPtr cap_imu = std::static_pointer_cast<CaptureIMU>(_capture_origin);
     FeatureIMUPtr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
     ConstraintIMUPtr ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, cap_imu, shared_from_this());
+
+    // link ot wolf tree
     _feature_motion->addConstraint(ctr_imu);
-    cap_imu->getFramePtr()->addConstrainedBy(ctr_imu);
+    _capture_origin->addConstrainedBy(ctr_imu);
+    _capture_origin->getFramePtr()->addConstrainedBy(ctr_imu);
+
     return ctr_imu;
 }
 
