@@ -298,8 +298,8 @@ class Problem : public std::enable_shared_from_this<Problem>
          * \param state_blocks : show state blocks
          */
         void print(int depth = 4, bool constr_by = false, bool metric = true, bool state_blocks = false);
-        bool check(int verbose_level = 0);
         void print(const std::string& depth, bool constr_by = false, bool metric = true, bool state_blocks = false);
+        bool check(int verbose_level = 0);
 
 };
 

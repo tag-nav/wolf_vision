@@ -823,6 +823,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                             CaptureMotionPtr CM = std::static_pointer_cast<CaptureMotion>(C);
                             if ( CM->getCalibSize() > 0 && ! CM->getBuffer().get().empty())
                             {
+                                cout << "      buffer size  :  " << CM->getBuffer().get().size() << endl;
                                 cout << "      delta preint : (" << CM->getDeltaPreint().transpose() << ")" << endl;
                                 cout << "      calib preint : (" << CM->getCalibrationPreint().transpose() << ")" << endl;
                                 cout << "      jacob preint : (" << CM->getJacobianCalib().row(0) << ")" << endl;
