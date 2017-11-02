@@ -47,6 +47,9 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         virtual ~CaptureBase();
         void remove();
 
+        // Type
+        virtual bool isMotion() const { return false; }
+
         unsigned int id();
         TimeStamp getTimeStamp() const;
         void setTimeStamp(const TimeStamp& _ts);
