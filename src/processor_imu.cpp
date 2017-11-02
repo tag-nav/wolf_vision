@@ -196,9 +196,6 @@ FeatureBasePtr ProcessorIMU::createFeature(CaptureMotionPtr _capture_motion)
             _capture_motion->getBuffer().get().back().delta_integr_cov_,
             _capture_motion->getBuffer().getCalibrationPreint(),
             _capture_motion->getBuffer().get().back().jacobian_calib_);
-    WOLF_TRACE("FTR delta_pre : ", key_feature_ptr->getMeasurement().transpose());
-    WOLF_TRACE("FTR calib_pre : ", key_feature_ptr->getAccBiasPreint().transpose(), " ", key_feature_ptr->getGyroBiasPreint().transpose() );
-    WOLF_TRACE("FTR jac calib : ", key_feature_ptr->getJacobianBias().row(0));
     return key_feature_ptr;
 }
 

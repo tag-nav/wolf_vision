@@ -179,12 +179,6 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
         sqrt_A_r_dt_inv((Eigen::Matrix3s::Identity() * ab_rate_stdev_ * sqrt(dt_)).inverse()),
         sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_rate_stdev_ * sqrt(dt_)).inverse())
 {
-    WOLF_TRACE("ftr jac  : ", _ftr_ptr->getJacobianBias().row(0));
-//    WOLF_TRACE("jac dp_ab: ", dDp_dab_.row(0));
-//    WOLF_TRACE("jac dv_ab: ", dDv_dab_.row(0));
-//    WOLF_TRACE("jac dp_wb: ", dDp_dwb_.row(0));
-//    WOLF_TRACE("jac dv_wb: ", dDv_dwb_.row(0));
-//    WOLF_TRACE("jac dq_wb: ", dDq_dwb_.row(0));
     setType("IMU");
 }
 

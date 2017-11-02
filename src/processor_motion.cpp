@@ -268,7 +268,6 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
 //        // add to old buffer
 //        new_capture->getBuffer().get().push_back(motion_interpolated);
 //    }
-    WOLF_TRACE("CAP Jac calib: ", new_capture->getJacobianCalib().row(0));
 
     // create motion feature and add it to the capture
     FeatureBasePtr new_feature = emplaceFeature(new_capture);
