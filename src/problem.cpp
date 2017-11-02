@@ -1234,4 +1234,20 @@ bool Problem::check(int verbose_level)
     return is_consistent;
 }
 
+void Problem::print(const std::string& depth, bool constr_by, bool metric, bool state_blocks)
+{
+    if (depth.compare("T") == 0)
+        print(0, constr_by, metric, state_blocks);
+    else if (depth.compare("F") == 0)
+        print(1, constr_by, metric, state_blocks);
+    else if (depth.compare("C") == 0)
+        print(2, constr_by, metric, state_blocks);
+    else if (depth.compare("f") == 0)
+        print(3, constr_by, metric, state_blocks);
+    else if (depth.compare("c") == 0)
+        print(4, constr_by, metric, state_blocks);
+    else
+        print(0, constr_by, metric, state_blocks);
+}
+
 } // namespace wolf
