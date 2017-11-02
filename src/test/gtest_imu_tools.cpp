@@ -201,6 +201,38 @@ TEST(IMU_tools, compose_jacobians)
     ASSERT_MATRIX_APPROX(J2_a, J2_n, 1e-4);
 }
 
+TEST(IMU_tools, body2delta_jacobians)
+{
+    VectorXs delta(10), delta_pert(10); // deltas
+    VectorXs body(6), pert(6);
+    VectorXs tang(9); // tangents
+    Matrix<Scalar, 9, 6> J_a, J_n; // analytic and numerical jacs
+    Vector4s qv;;
+    Scalar dt = 0.1;
+    Scalar dx = 1e-6;
+    qv = (Vector4s() << 3, 4, 5, 6).finished().normalized();
+    delta << 0, 1, 2,   qv,   7, 8, 9;
+    body << 1, 2, 3,   3, 2, 1;
+
+    // analytical jacobians
+    body2delta(body, dt, delta, J_a);
+
+    // numerical jacobians
+    for (unsigned int i = 0; i<6; i++)
+    {
+        pert      . setZero();
+        pert(i)   = dx;
+
+        // Jac wrt first delta
+        delta_pert = body2delta(body + pert, dt);   //     delta(body + pert)
+        tang       = diff(delta, delta_pert);       //   delta(body + pert) -- delta(body)
+        J_n.col(i) = tang/dx;                       // ( delta(body + pert) -- delta(body) ) / dx
+    }
+
+    // check that numerical and analytical match
+    ASSERT_MATRIX_APPROX(J_a, J_n, 1e-4);
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
