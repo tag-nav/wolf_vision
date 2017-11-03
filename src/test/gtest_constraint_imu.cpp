@@ -956,13 +956,15 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
             capture_imu->setData(data_imu);
             sensor_imu->process(capture_imu);
 
+            WOLF_TRACE("last delta preint: ", processor_imu->getLastPtr()->getDeltaPreint().transpose());
+
             //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
             if(t_imu.get() >= t_odo.get())
             {
                 WOLF_TRACE("====== create ODOM KF ========");
-                WOLF_TRACE("Jac calib: ", processor_imu->getLastPtr()->getJacobianCalib().row(0));
-                WOLF_TRACE("last calib: ", processor_imu->getLastPtr()->getCalibration().transpose());
-                WOLF_TRACE("last calib preint: ", processor_imu->getLastPtr()->getCalibrationPreint().transpose());
+//                WOLF_TRACE("Jac calib: ", processor_imu->getLastPtr()->getJacobianCalib().row(0));
+//                WOLF_TRACE("last calib: ", processor_imu->getLastPtr()->getCalibration().transpose());
+//                WOLF_TRACE("last calib preint: ", processor_imu->getLastPtr()->getCalibrationPreint().transpose());
 
                 // PROCESS ODOM 3D DATA
                 data_odo.head(3) << 0,0,0;
@@ -970,15 +972,15 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
                 capture_odo->setTimeStamp(t_odo);
                 capture_odo->setData(data_odo);
 
-                WOLF_TRACE("Jac calib: ", processor_imu->getLastPtr()->getJacobianCalib().row(0));
-                WOLF_TRACE("last calib: ", processor_imu->getLastPtr()->getCalibration().transpose());
-                WOLF_TRACE("last calib preint: ", processor_imu->getLastPtr()->getCalibrationPreint().transpose());
+//                WOLF_TRACE("Jac calib: ", processor_imu->getLastPtr()->getJacobianCalib().row(0));
+//                WOLF_TRACE("last calib: ", processor_imu->getLastPtr()->getCalibration().transpose());
+//                WOLF_TRACE("last calib preint: ", processor_imu->getLastPtr()->getCalibrationPreint().transpose());
 
                 sensor_odo->process(capture_odo);
 
-                WOLF_TRACE("Jac calib: ", std::static_pointer_cast<CaptureMotion>(processor_imu->getOriginPtr())->getJacobianCalib().row(0));
-                WOLF_TRACE("orig calib: ", processor_imu->getOriginPtr()->getCalibration().transpose());
-                WOLF_TRACE("orig calib preint: ", std::static_pointer_cast<CaptureMotion>(processor_imu->getOriginPtr())->getCalibrationPreint().transpose());
+//                WOLF_TRACE("Jac calib: ", std::static_pointer_cast<CaptureMotion>(processor_imu->getOriginPtr())->getJacobianCalib().row(0));
+//                WOLF_TRACE("orig calib: ", processor_imu->getOriginPtr()->getCalibration().transpose());
+//                WOLF_TRACE("orig calib preint: ", std::static_pointer_cast<CaptureMotion>(processor_imu->getOriginPtr())->getCalibrationPreint().transpose());
 
                 //prepare next odometry measurement
                 quat_odo = Eigen::Quaternions::Identity(); //set to identity to have next odom relative to this last KF
@@ -1000,16 +1002,17 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         CaptureBasePtr origin_CB = origin_KF->getCaptureOf(sensor_imu);
         CaptureMotionPtr last_CM   = std::static_pointer_cast<CaptureMotion>(last_KF  ->getCaptureOf(sensor_imu));
 
-        WOLF_TRACE("KF1 calib    : ", origin_CB->getCalibration().transpose());
-        WOLF_TRACE("KF2 calib pre: ", last_CM  ->getCalibrationPreint().transpose());
-        WOLF_TRACE("KF2 calib    : ", last_CM  ->getCalibration().transpose());
-        WOLF_TRACE("KF2 delta pre: ", last_CM  ->getDeltaPreint().transpose());
-        WOLF_TRACE("KF2 delta cor: ", last_CM  ->getDeltaCorrected(origin_CB->getCalibration()).transpose());
-        WOLF_TRACE("KF2 jacob    : ", last_CM  ->getJacobianCalib().row(0));
+//        WOLF_TRACE("KF1 calib    : ", origin_CB->getCalibration().transpose());
+//        WOLF_TRACE("KF2 calib pre: ", last_CM  ->getCalibrationPreint().transpose());
+//        WOLF_TRACE("KF2 calib    : ", last_CM  ->getCalibration().transpose());
+//        WOLF_TRACE("KF2 delta pre: ", last_CM  ->getDeltaPreint().transpose());
+//        WOLF_TRACE("KF2 delta cor: ", last_CM  ->getDeltaCorrected(origin_CB->getCalibration()).transpose());
+//        WOLF_TRACE("KF2 jacob    : ", last_CM  ->getJacobianCalib().row(0));
 
 
         // ==================================================== show problem status
-        //        problem->print(4,1,1,1);
+
+        problem->print(4,1,1,1);
 
     }
 
@@ -2585,21 +2588,21 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2_InvarP1Q1V1P2Q2V
     Eigen::Vector6s bias = origin_KF->getCaptureOf(sensor_imu)->getCalibration();
     origin_KF->getCaptureOf(sensor_imu)->setCalibration(bias + random_err);
 
-    WOLF_TRACE("real   bias : ", origin_bias.transpose());
-    WOLF_TRACE("origin bias : ", origin_KF->getCaptureOf(sensor_imu)->getCalibration().transpose());
-    WOLF_TRACE("last   bias : ", last_KF->getCaptureOf(sensor_imu)->getCalibration().transpose());
-    WOLF_TRACE("jacob  bias : ", std::static_pointer_cast<CaptureIMU>(last_KF->getCaptureOf(sensor_imu))->getJacobianCalib().row(0));
+//    WOLF_TRACE("real   bias : ", origin_bias.transpose());
+//    WOLF_TRACE("origin bias : ", origin_KF->getCaptureOf(sensor_imu)->getCalibration().transpose());
+//    WOLF_TRACE("last   bias : ", last_KF->getCaptureOf(sensor_imu)->getCalibration().transpose());
+//    WOLF_TRACE("jacob  bias : ", std::static_pointer_cast<CaptureIMU>(last_KF->getCaptureOf(sensor_imu))->getJacobianCalib().row(0));
 
     std::string report = ceres_manager->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     std::cout << report << std::endl;
-//    ceres_manager->computeCovariances(ALL);
+    ceres_manager->computeCovariances(ALL);
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
 
-    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev, actual_state(last_KF->getState());
-    Eigen::MatrixXs covX(16,16);
+    Eigen::Matrix<wolf::Scalar, 10, 1> cov_stdev, actual_state(last_KF->getState());
+    Eigen::MatrixXs covX(10,10);
         
     //get data from covariance blocks
     problem->getFrameCovariance(last_KF, covX);
