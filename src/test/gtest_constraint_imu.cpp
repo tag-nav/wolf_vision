@@ -894,7 +894,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         WOLF_TRACE("ODO cov: ", sensor_odo->getNoiseCov().diagonal().transpose());
 
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
-        prc_odom3D_params->max_time_span    = 0.9999;
+        prc_odom3D_params->max_time_span    = 0.0099;
         prc_odom3D_params->max_buff_length  = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled    = 1000000000;
         prc_odom3D_params->angle_turned     = 1000000000;
@@ -924,7 +924,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         Eigen::Vector3s rateOfTurn(Eigen::Vector3s::Zero()); //deg/s
 
         TimeStamp t_imu(0.0),    t_odo(0.0);
-        Scalar   dt_imu(0.001), dt_odo(1.0);
+        Scalar   dt_imu(0.001), dt_odo(.01);
 
         capture_imu = std::make_shared<CaptureIMU>   (t_imu, sensor_imu, data_imu, sensor_imu->getNoiseCov(), sensor_imu->getCalibration(), nullptr);
 
@@ -983,6 +983,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
                 //prepare next odometry measurement
                 quat_odo = Eigen::Quaternions::Identity(); //set to identity to have next odom relative to this last KF
                 t_odo += dt_odo;
+                break;
             }
         }
 
