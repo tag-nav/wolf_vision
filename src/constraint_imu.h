@@ -139,7 +139,34 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
          */ 
         const Eigen::Matrix3s sqrt_A_r_dt_inv;
         const Eigen::Matrix3s sqrt_W_r_dt_inv;
+
+
+    private:
+        template<typename D>
+        void print(const std::string& name, const Eigen::MatrixBase<D>& mat) const;
+//        template<typename T, int R, int C>
+//        void print(const std::string& name, const Eigen::Matrix<T, R, C>& mat) const;
+        template<int R, int C>
+        void print(const std::string& name, const Matrix<Scalar, R, C>& mat) const;
 };
+
+template<typename D>
+inline void ConstraintIMU::print(const std::string& name, const Eigen::MatrixBase<D>& mat) const {}
+//template<typename T, int R, int C>
+//inline void ConstraintIMU::print(const std::string& name, const Eigen::Matrix<T, R, C>& mat) const {}
+template<int R, int C>
+inline void ConstraintIMU::print(const std::string& name, const Matrix<Scalar, R, C>& mat) const
+{
+    if (mat.cols() == 1)
+    {
+        WOLF_TRACE(name, ": ", mat.transpose());
+    }
+    else
+    {
+        WOLF_TRACE(name, ":\n", mat);
+    }
+}
+
 
 inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
                                     const CaptureIMUPtr&    _cap_origin_ptr,
@@ -180,7 +207,38 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
         sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_rate_stdev_ * sqrt(dt_)).inverse())
 {
     setType("IMU");
+
+    WOLF_TRACE("Constr IMU  (f", _ftr_ptr->id(),
+               " C", _ftr_ptr->getCapturePtr()->id(),
+               " F", _ftr_ptr->getCapturePtr()->getFramePtr()->id(),
+               ") (Co", _cap_origin_ptr->id(),
+               " Fo", _cap_origin_ptr->getFramePtr()->id(), ")");
+
+    WOLF_TRACE("dt: ", dt_);
+
+    WOLF_TRACE("delta preint: ", std::static_pointer_cast<CaptureMotion>(_ftr_ptr->getCapturePtr())->getDeltaPreint().transpose());
+//    WOLF_TRACE("Dp preint : ", dp_preint_.transpose()); // OK
+//    WOLF_TRACE("Dq preint : ", dq_preint_.coeffs().transpose()); // OK
+//    WOLF_TRACE("Dv preint : ", dv_preint_.transpose()); // OK
+
+    WOLF_TRACE("bias: ", std::static_pointer_cast<CaptureMotion>(_ftr_ptr->getCapturePtr())->getCalibrationPreint().transpose());
+//    WOLF_TRACE("bias acc : ", acc_bias_preint_.transpose()); // OK
+//    WOLF_TRACE("bias gyro: ", gyro_bias_preint_.transpose()); // OK
+
+    WOLF_TRACE("Jac bias : \n", std::static_pointer_cast<CaptureMotion>(_ftr_ptr->getCapturePtr())->getJacobianCalib());
+//    WOLF_TRACE("jac Dp_ab: \n", dDp_dab_); // OK
+//    WOLF_TRACE("jac Dv_ab: \n", dDv_dab_); // OK
+//    WOLF_TRACE("jac Dp_wb: \n", dDp_dwb_); // OK
+//    WOLF_TRACE("jac Dq_wb: \n", dDq_dwb_); // OK
+//    WOLF_TRACE("jac Dv_wb: \n", dDv_dwb_); // OK
+
+    WOLF_TRACE("Omega_delta.sqrt: \n", _ftr_ptr->getMeasurementSquareRootInformationUpper());
+    WOLF_TRACE("Omega_acc.sqrt: \n", sqrt_A_r_dt_inv);
+    WOLF_TRACE("Omega_gyro.sqrt: \n", sqrt_W_r_dt_inv);
+
 }
+
+
 
 template<typename T>
 inline bool ConstraintIMU::operator ()(const T* const _p1,
@@ -247,6 +305,13 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
 
     imu::betweenStates(_p1, _q1, _v1, _p2, _q2, _v2, (T)dt_, dp_exp, dq_exp, dv_exp);
 
+    print("p1_exp", _p1);
+    print("v1_exp", _v1);
+    print("p2_exp", _p2);
+    print("v2_exp", _v2);
+    print("dp_exp", dp_exp);
+    print("dv_exp", dp_exp);
+
     // 2. Corrected integrated delta: delta_corr = delta_preint (+) J_bias * (bias_current - bias_preint)
     Eigen::Matrix<T,3,1> dp_correct;
     Eigen::Quaternion<T> dq_correct;
@@ -261,6 +326,9 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
               dp_correct,
               dq_correct,
               dv_correct);
+
+    print("dp_correct", dp_correct);
+    print("dv_correct", dv_correct);
 
     // 3. Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
     // Note the Dt here is zero because it's the delta-time between the same time stamps!
@@ -331,6 +399,8 @@ inline JacobianMethod ConstraintIMU::getJacobianMethod() const
 {
     return JAC_AUTO;
 }
+
+
 
 
 } // namespace wolf
