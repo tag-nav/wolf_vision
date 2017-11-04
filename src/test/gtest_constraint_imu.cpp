@@ -170,7 +170,7 @@ class ConstraintIMU_biasTest_Static_NonNullAccBias : public testing::Test
         x_origin.resize(10);
         x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         t.set(0);
-        origin_bias << 0.002, 0.005, 0.1, 0,0,0;
+        origin_bias << 0.02, 0.05, 0.1, 0,0,0;
 
         expected_final_state = x_origin; //null bias + static
 
@@ -254,9 +254,8 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
         x_origin.resize(10);
         x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         t.set(0);
-        origin_bias << 0, 0, 0, 0.07,-0.035,-0.1;
+        origin_bias << 0, 0, 0, 0.02, 0.05, 0.1;
         origin_bias *= 1e-2;
-        //origin_bias << 0.002, 0.005, 0.1, 0.07,-0.035,-0.1;
 
         expected_final_state = x_origin; //null bias + static,
 
@@ -895,9 +894,9 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
 
         ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
         prc_odom3D_params->max_time_span    = 0.0099;
-        prc_odom3D_params->max_buff_length  = 1000000000; //make it very high so that this condition will not pass
-        prc_odom3D_params->dist_traveled    = 1000000000;
-        prc_odom3D_params->angle_turned     = 1000000000;
+        prc_odom3D_params->max_buff_length  = 1000; //make it very high so that this condition will not pass
+        prc_odom3D_params->dist_traveled    = 1000;
+        prc_odom3D_params->angle_turned     = 1000;
 
         processor       = problem->installProcessor("ODOM 3D", "odom", sensor_odo, prc_odom3D_params);
         processor_odo   = std::static_pointer_cast<ProcessorOdom3D>(processor);
@@ -908,6 +907,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         x_origin.resize(10);
         x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         origin_bias << 0.0015, 0.004, -0.002, 0.005, -0.0074, -0.003;
+//        origin_bias /= 100;
         t.set(0);
 
         //set origin of the problem
@@ -936,13 +936,18 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         Eigen::Quaternions quat_odo(Eigen::Quaternions::Identity());
         Eigen::Quaternions quat_imu(Eigen::Quaternions::Identity());
 
+        WOLF_TRACE("last delta preint: ", processor_imu->getLastPtr()->getDeltaPreint().transpose());
+        WOLF_TRACE("last jacoob bias : ", processor_imu->getLastPtr()->getJacobianCalib().row(0));
+
         for(unsigned int i = 1; i<=1000; i++)
         {
+
             // PROCESS IMU DATA
             // Time and data variables
             t_imu += dt_imu;
             
-            rateOfTurn = Eigen::Vector3s::Random()*10; //to have rate of turn > 0.99 deg/s
+//            rateOfTurn = Eigen::Vector3s::Random()*10; //to have rate of turn > 0.99 deg/s
+            rateOfTurn << 5, 10, 15; // deg/s
             data_imu.tail<3>() = rateOfTurn * M_PI/180.0;
             data_imu.head<3>() =  quat_imu.conjugate() * (- wolf::gravity()); //gravity measured, we have no other translation movement
 
@@ -957,6 +962,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
             sensor_imu->process(capture_imu);
 
             WOLF_TRACE("last delta preint: ", processor_imu->getLastPtr()->getDeltaPreint().transpose());
+            WOLF_TRACE("last jacoob bias : ", processor_imu->getLastPtr()->getJacobianCalib().row(0));
 
             //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
             if(t_imu.get() >= t_odo.get())
@@ -2836,7 +2842,8 @@ int main(int argc, char **argv)
   testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
 //  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.*";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
+    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
+//    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Static_NonNullGyroBias.VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias";
 
 
 
