@@ -268,13 +268,6 @@ inline bool ConstraintIMU::operator ()(const T* const _p1,
 
     Map<Matrix<T,15,1> > res(_res);
 
-//    WOLF_DEBUG("gyro 1 bias 0 :", wb1(0));
-//    WOLF_DEBUG("gyro 1 bias 1 :", wb1(1));
-//    WOLF_DEBUG("gyro 1 bias 2 :", wb1(2));
-//    WOLF_DEBUG("gyro 2 bias 0 :", wb2(0));
-//    WOLF_DEBUG("gyro 2 bias 1 :", wb2(1));
-//    WOLF_DEBUG("gyro 2 bias 2 :", wb2(2));
-
     residual(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, res);
 
     return true;
@@ -305,32 +298,39 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
 
     imu::betweenStates(_p1, _q1, _v1, _p2, _q2, _v2, (T)dt_, dp_exp, dq_exp, dv_exp);
 
-    print("p1_exp", _p1);
-    print("v1_exp", _v1);
-    print("p2_exp", _p2);
-    print("v2_exp", _v2);
-    print("dp_exp", dp_exp);
-    print("dv_exp", dp_exp);
 
     // 2. Corrected integrated delta: delta_corr = delta_preint (+) J_bias * (bias_current - bias_preint)
+
+    // 2.a. Compute the delta step in tangent space:   step = J_bias * (bias - bias_preint)
+    Eigen::Matrix<T, 3, 1> dp_step;
+    Eigen::Matrix<T, 3, 1> do_step;
+    Eigen::Matrix<T, 3, 1> dv_step;
+
+    dp_step = dDp_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDp_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
+    do_step =                                                             dDq_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
+    dv_step = dDv_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDv_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
+
+    /* TODO do this:
+     *
+     *    D_exp = between(x1,x2,dt)     // done
+     *    step  = J * (b - b_preint)    // done
+     *    diff  = diff(D_exp, D_preint) // todo
+     *    err   = diff - step           // todo
+     *    res   = Q.sqrt * err          // done
+     */
+
+
+    // 2.b. Add the correction step to the preintegrated delta:    delta_cor = delta_preint (+) step
     Eigen::Matrix<T,3,1> dp_correct;
     Eigen::Quaternion<T> dq_correct;
     Eigen::Matrix<T,3,1> dv_correct;
 
-    imu::plus(dp_preint_.cast<T>(),
-              dq_preint_.cast<T>(),
-              dv_preint_.cast<T>(),
-              dDp_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDp_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>()),
-              dDq_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>()),
-              dDv_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDv_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>()),
-              dp_correct,
-              dq_correct,
-              dv_correct);
+    imu::plus(dp_preint_.cast<T>(), dq_preint_.cast<T>(), dv_preint_.cast<T>(),
+              dp_step, do_step, dv_step,
+              dp_correct, dq_correct, dv_correct);
 
-    print("dp_correct", dp_correct);
-    print("dv_correct", dv_correct);
 
-    // 3. Delta error in minimal form: d_min = log(delta_pred (-) delta_corr)
+    // 3. Delta error in minimal form: d_min = lift(delta_pred (-) delta_corr)
     // Note the Dt here is zero because it's the delta-time between the same time stamps!
     Eigen::Matrix<T, 9, 1> dpov_error;
     Eigen::Map<Eigen::Matrix<T, 3, 1> >   dp_error(dpov_error.data()    );
@@ -338,6 +338,7 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     Eigen::Map<Eigen::Matrix<T, 3, 1> >   dv_error(dpov_error.data() + 6);
 
     imu::diff(dp_exp, dq_exp, dv_exp, dp_correct, dq_correct, dv_correct, dp_error, do_error, dv_error);
+
 
     // Errors between biases
     Eigen::Matrix<T,3,1> ab_error(_ab1 - _ab2); // KF1.bias - KF2.bias
@@ -348,8 +349,34 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     _res.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error;
     _res.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error;
 
+
+
+    // print values -----------------------
+    Matrix<T, 10, 1> x1; x1 << _p1 , _q1.coeffs(), _v1;
+    Matrix<T, 10, 1> x2; x2 << _p2 , _q2.coeffs(), _v2;
+    print("x1 ", x1);
+    print("x2 ", x2);
+    Matrix<T, 6, 1> bp; bp << acc_bias_preint_.cast<T>(), gyro_bias_preint_.cast<T>();
+    Matrix<T, 6, 1> b1; b1 << _ab1, _wb1;
+    Matrix<T, 6, 1> b2; b2 << _ab2, _wb2;
+    print("bp ", bp);
+    print("b1 ", b1);
+    print("b2 ", b2);
+    Matrix<T, 10, 1> exp; exp << dp_exp , dq_exp.coeffs(), dv_exp;
+    print("exp", exp);
+    Matrix<T, 9, 1> step; step << dp_step , do_step, dv_step;
+    print("step", step);
+    Matrix<T, 10, 1> cor; cor << dp_correct , dq_correct.coeffs(), dv_correct;
+    print("cor", cor);
+    Matrix<T, 9, 1> er; er << dp_error , do_error, dv_error;
+    print("err", er);
+    WOLF_TRACE("-----------------------------------------")
+
+
+
     return true;
 }
+
 
 inline Eigen::VectorXs ConstraintIMU::expectation() const
 {
@@ -357,14 +384,14 @@ inline Eigen::VectorXs ConstraintIMU::expectation() const
     FrameBasePtr frm_previous = getFrameOtherPtr();
 
     //get information on current_frame in the ConstraintIMU
-    const Eigen::Vector3s frame_current_pos = frm_current->getPPtr()->getState();
-    const Eigen::Quaternions frame_current_ori(frm_current->getOPtr()->getState().data());
-    const Eigen::Vector3s frame_current_vel = frm_current->getVPtr()->getState();
+    const Eigen::Vector3s frame_current_pos    = (frm_current->getPPtr()->getState());
+    const Eigen::Quaternions frame_current_ori   (frm_current->getOPtr()->getState().data());
+    const Eigen::Vector3s frame_current_vel    = (frm_current->getVPtr()->getState());
 
     // get info on previous frame in the ConstraintIMU
-    const Eigen::Vector3s frame_previous_pos = (frm_previous->getPPtr()->getState());
+    const Eigen::Vector3s frame_previous_pos   = (frm_previous->getPPtr()->getState());
     const Eigen::Quaternions frame_previous_ori  (frm_previous->getOPtr()->getState().data());
-    const Eigen::Vector3s frame_previous_vel = (frm_previous->getVPtr()->getState());
+    const Eigen::Vector3s frame_previous_vel   = (frm_previous->getVPtr()->getState());
 
     // Define results vector and Map bits over it
     Eigen::Matrix<wolf::Scalar, 10, 1> exp;
