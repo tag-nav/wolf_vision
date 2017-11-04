@@ -86,6 +86,7 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
      * Covariances receive linear interpolation
      *    Q_ret = (ts - t_ref) / dt * Q_sec
      */
+    /*
     // resolve out-of-bounds time stamp as if the time stamp was exactly on the bounds
     if (_ts <= _motion_ref.ts_)    // behave as if _ts == _motion_ref.ts_
     {
@@ -97,7 +98,7 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
         motion_int.delta_cov_ . setZero();
         return motion_int;
     }
-    if (_motion_second.ts_ <= _ts)    // behave as if _ts == _motion_second.ts_
+    if (_ts >= _motion_second.ts_)    // behave as if _ts == _motion_second.ts_
     {
         // return original second motion. Second motion becomes null motion
         Motion motion_int         ( _motion_second );
@@ -173,6 +174,10 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
     //_motion.delta_integr_cov_ = _motion.delta_integr_cov_; // trivial, just leave the code commented
 
     return motion_int;
+    */
+
+    return _motion_ref;
+
 }
 
 CaptureMotionPtr ProcessorIMU::createCapture(const TimeStamp& _ts,
@@ -213,9 +218,13 @@ ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion
     return ctr_imu;
 }
 
-void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov,
-                                       const Eigen::VectorXs& _calib, const Scalar _dt, Eigen::VectorXs& _delta,
-                                       Eigen::MatrixXs& _delta_cov, Eigen::MatrixXs& _jacobian_calib)
+void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
+                                       const Eigen::MatrixXs& _data_cov,
+                                       const Eigen::VectorXs& _calib,
+                                       const Scalar _dt,
+                                       Eigen::VectorXs& _delta,
+                                       Eigen::MatrixXs& _delta_cov,
+                                       Eigen::MatrixXs& _jac_delta_calib)
 {
     assert(_data.size() == data_size_ && "Wrong data size!");
 
@@ -247,11 +256,13 @@ void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data, const Eigen
     _delta_cov = jac_data * _data_cov * jac_data.transpose();
 
     // compute jacobian_calib
-    _jacobian_calib = -jac_data;
+    _jac_delta_calib = - jac_data;
 
 }
 
-void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta, const Scalar _dt,
+void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
+                                  const Eigen::VectorXs& _delta,
+                                  const Scalar _dt,
                                   Eigen::VectorXs& _delta_preint_plus_delta)
 {
     /* MATHS according to Sola-16
@@ -264,7 +275,9 @@ void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Ei
     _delta_preint_plus_delta = imu::compose(_delta_preint, _delta, _dt);
 }
 
-void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x, const Eigen::VectorXs& _delta, const Scalar _dt,
+void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x,
+                                  const Eigen::VectorXs& _delta,
+                                  const Scalar _dt,
                                   Eigen::VectorXs& _x_plus_delta)
 {
     //    assert(_x.size() == 10 && "Wrong _x vector size");
@@ -277,8 +290,11 @@ void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x, const Eigen::Vector
     _x_plus_delta.head(10) = x_plus_delta;
 }
 
-void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint, const Eigen::VectorXs& _delta, const Scalar _dt,
-                                  Eigen::VectorXs& _delta_preint_plus_delta, Eigen::MatrixXs& _jacobian_delta_preint,
+void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
+                                  const Eigen::VectorXs& _delta,
+                                  const Scalar _dt,
+                                  Eigen::VectorXs& _delta_preint_plus_delta,
+                                  Eigen::MatrixXs& _jacobian_delta_preint,
                                   Eigen::MatrixXs& _jacobian_delta)
 {
     /*
