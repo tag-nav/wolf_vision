@@ -429,6 +429,24 @@ inline Matrix<typename D1::Scalar, 9, 1> diff(const MatrixBase<D1>& d1,
 }
 
 
+template<typename D1, typename D2, typename D3, typename D4, typename D5>
+inline void body2delta(const MatrixBase<D1>& a,
+                       const MatrixBase<D2>& w,
+                       const typename D1::Scalar& dt,
+                       MatrixBase<D3>& dp,
+                       QuaternionBase<D4>& dq,
+                       MatrixBase<D5>& dv)
+{
+    MatrixSizeCheck<3,1>::check(a);
+    MatrixSizeCheck<3,1>::check(w);
+    MatrixSizeCheck<3,1>::check(dp);
+    MatrixSizeCheck<3,1>::check(dv);
+
+    dp = 0.5 * a * dt * dt;
+    dq = exp_q(w * dt);
+    dv =       a * dt;
+}
+
 template<typename D1>
 inline Matrix<typename D1::Scalar, 10, 1> body2delta(const MatrixBase<D1>& body,
                                                      const typename D1::Scalar& dt)
@@ -439,14 +457,12 @@ inline Matrix<typename D1::Scalar, 10, 1> body2delta(const MatrixBase<D1>& body,
 
     Matrix<T, 10, 1> delta;
 
-    Matrix<T, 3, 1> a_dt = body.block(0,0,3,1) * dt;
-    Matrix<T, 3, 1> w_dt = body.block(3,0,3,1) * dt;
+    Map< Matrix<T, 3, 1>> dp ( & delta(0) );
+    Map< Quaternion<T>>   dq ( & delta(3) );
+    Map< Matrix<T, 3, 1>> dv ( & delta(7) );
 
-    Quaternion<T> delta_q = exp_q(w_dt);
+    body2delta(body.block(0,0,3,1), body.block(3,0,3,1), dt, dp, dq, dv);
 
-    delta.block(0,0,3,1) = 0.5 * a_dt * dt;
-    delta.block(3,0,4,1) = delta_q.coeffs();
-    delta.block(7,0,3,1) = a_dt;
     return delta;
 }
 
@@ -470,7 +486,6 @@ inline void body2delta(const MatrixBase<D1>& body,
     jac_body.block(3,3,3,3) =            dt * jac_SO3_right(w * dt);
     jac_body.block(6,0,3,3) =            dt * Matrix<T, 3, 3>::Identity();
 }
-
 
 } // namespace imu
 } // namespace wolf

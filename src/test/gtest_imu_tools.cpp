@@ -148,6 +148,22 @@ TEST(IMU_tools, lift_retract)
     ASSERT_MATRIX_APPROX(delta_from_d, delta, 1e-10);
 }
 
+TEST(IMU_tools, plus)
+{
+    VectorXs d1(10), d2(10), d3(10);
+    VectorXs err(9);
+    Vector4s qv = (Vector4s() << 3, 4, 5, 6).finished().normalized();
+    d1 << 0, 1, 2, qv, 7, 8, 9;
+    err << 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09;
+
+    d3.head(3) = d1.head(3) + err.head(3);
+    d3.segment(3,4) = (Quaternions(qv.data()) * exp_q(err.segment(3,3))).coeffs();
+    d3.tail(3) = d1.tail(3) + err.tail(3);
+
+    plus(d1, err, d2);
+    ASSERT_MATRIX_APPROX(diff(d3, d2), VectorXs::Zero(9), 1e-10);
+}
+
 TEST(IMU_tools, diff)
 {
     VectorXs d1(10), d2(10);
@@ -159,6 +175,15 @@ TEST(IMU_tools, diff)
     diff(d1, d2, err);
     ASSERT_MATRIX_APPROX(err, VectorXs::Zero(9), 1e-10);
     ASSERT_MATRIX_APPROX(diff(d1, d2), VectorXs::Zero(9), 1e-10);
+
+    VectorXs d3(10);
+    d3.setRandom(); d3.segment(3,4).normalize();
+    err.head(3) = d3.head(3) - d1.head(3);
+    err.segment(3,3) = log_q(Quaternions(d1.data()+3).conjugate()*Quaternions(d3.data()+3));
+    err.tail(3) = d3.tail(3) - d1.tail(3);
+
+    ASSERT_MATRIX_APPROX(err, diff(d1, d3), 1e-10);
+
 }
 
 TEST(IMU_tools, compose_jacobians)
@@ -233,9 +258,127 @@ TEST(IMU_tools, body2delta_jacobians)
     ASSERT_MATRIX_APPROX(J_a, J_n, 1e-4);
 }
 
+VectorXs integrateDelta(int N, const VectorXs& data, const VectorXs& bias, Scalar dt)
+{
+    VectorXs body(6);
+    VectorXs delta(10);
+    VectorXs Delta(10), Delta_plus(10);
+    Delta << 0,0,0, 0,0,0,1, 0,0,0;
+    for (int n = 0; n<N; n++)
+    {
+        body = data - bias;
+        delta = body2delta(body, dt);
+        Delta_plus = compose(Delta, delta, dt);
+        Delta = Delta_plus;
+    }
+    return Delta;
+}
+
+VectorXs integrateDelta(int N, const VectorXs& data, const VectorXs& bias, Scalar dt, Matrix<Scalar, 9, 6>& J_D_b)
+{
+    VectorXs body(6);
+    VectorXs delta(10);
+    Matrix<Scalar, 9, 6> J_d_d, J_d_b;
+    Matrix<Scalar, 9, 9> J_D_D, J_D_d;
+    VectorXs Delta(10), Delta_plus(10);
+
+    Delta << 0,0,0, 0,0,0,1, 0,0,0;
+    J_D_b.setZero();
+    for (int n = 0; n<N; n++)
+    {
+        // Motion::integrateOneStep()
+        {   // IMU::computeCurrentDelta
+            body = data - bias;
+            body2delta(body, dt, delta, J_d_d);
+            J_d_b = - J_d_d;
+        }
+        {   // IMU::deltaPlusDelta
+            compose(Delta, delta, dt, Delta_plus, J_D_D, J_D_d);
+        }
+        // Motion:: jac calib
+        J_D_b = J_D_D*J_D_b + J_D_d*J_d_b;
+        // Motion:: buffer
+        Delta = Delta_plus;
+    }
+    return Delta;
+}
+
+TEST(IMU_tools, integral_jacobian_bias)
+{
+    VectorXs Delta(10), Delta_pert(10); // deltas
+    VectorXs bias(6), pert(6), bias_pert(6);
+    VectorXs body(6), data(6);
+    VectorXs tang(9); // tangents
+    Matrix<Scalar, 9, 6> J_a, J_n; // analytic and numerical jacs
+    Vector4s qv;;
+    Scalar dt = 0.001;
+    Scalar dx = 1e-4;
+    qv = (Vector4s() << 3, 4, 5, 6).finished().normalized();
+    data << 1, 2, 3,   3, 2, 1; data *= .1;
+    bias << .004, .005, .006,   .001, .002, .003;
+
+    int N = 500; // # steps of integration
+
+    // Analytical Jacobians
+    Delta = integrateDelta(N, data, bias, dt, J_a);
+
+    // numerical jacobians
+    for (unsigned int i = 0; i<6; i++)
+    {
+        pert       . setZero();
+        pert(i)    = dx;
+
+        bias_pert  = bias + pert;
+        Delta_pert = integrateDelta(N, data, bias_pert, dt);
+        tang       = diff(Delta, Delta_pert);       //   Delta(bias + pert) -- Delta(bias)
+        J_n.col(i) = tang/dx;                       // ( Delta(bias + pert) -- Delta(bias) ) / dx
+    }
+
+    // check that numerical and analytical match
+    ASSERT_MATRIX_APPROX(J_a, J_n, 1e-5);
+}
+
+TEST(IMU_tools, delta_correction)
+{
+    VectorXs Delta(10), Delta_preint(10), Delta_corr; // deltas
+    VectorXs bias(6), pert(6), bias_preint(6);
+    VectorXs body(6), data(6);
+    VectorXs tang(9); // tangents
+    Matrix<Scalar, 9, 6> J_b; // analytic and numerical jacs
+    Vector4s qv;;
+    Scalar dt = 0.001;
+    qv = (Vector4s() << 3, 4, 5, 6).finished().normalized();
+    data << 1, 2, 3,   3, 2, 1; data *= .1;
+
+    int N = 1000; // # steps of integration
+
+    // preintegration with correct bias
+    bias << .004, .005, .006,   .001, .002, .003;
+    Delta = integrateDelta(N, data, bias, dt);
+
+    // preintegration with wrong bias
+    pert << .002, -.001, .003,   -.0003, .0002, -.0001;
+    bias_preint = bias + pert;
+    Delta_preint = integrateDelta(N, data, bias_preint, dt, J_b);
+
+    // correct perturbated
+    Vector9s step = J_b*(bias-bias_preint);
+    Delta_corr = plus(Delta_preint, step);
+
+    // Corrected delta should match real delta
+    ASSERT_MATRIX_APPROX(Delta, Delta_corr, 1e-5);
+
+    // diff between real and corrected should be zero
+    ASSERT_MATRIX_APPROX(diff(Delta, Delta_corr), Vector9s::Zero(), 1e-5);
+
+    // diff between preint and corrected deltas should be the jacobian-computed step
+    ASSERT_MATRIX_APPROX(diff(Delta_preint, Delta_corr), step, 1e-5);
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
+//  ::testing::GTEST_FLAG(filter) = "IMU_tools.delta_correction";
   return RUN_ALL_TESTS();
 }
 
