@@ -258,37 +258,85 @@ TEST(IMU_tools, body2delta_jacobians)
     ASSERT_MATRIX_APPROX(J_a, J_n, 1e-4);
 }
 
-VectorXs integrateDelta(int N, const VectorXs& data, const VectorXs& bias, Scalar dt)
+/* Create IMU data from body motion
+ * Input:
+ *   motion: [ax, ay, az, wx, wy, wz] the motion in body frame
+ *   q: the current orientation wrt horizontal
+ *   bias: the bias of the IMU
+ * Output:
+ *   return: the data vector as created by the IMU (with motion, gravity, and bias)
+ */
+VectorXs motion2data(const VectorXs& body, const Quaternions& q, const VectorXs& bias)
 {
+    VectorXs data(6);
+    data = body;                                // start with body motion
+    data.head(3) -= q.conjugate()*gravity();    // add -g
+    data = data + bias;                         // add bias
+    return data;
+}
+
+/* Integrate acc and angVel motion, obtain Delta_preintegrated
+ * Input:
+ *   N: number of steps
+ *   q0: initial orientaiton
+ *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body brame
+ *   bias_real: the real bias of the IMU
+ *   bias_preint: the bias used for Delta pre-integration
+ * Output:
+ *   return: the preintegrated delta
+ */
+VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt)
+{
+    VectorXs data(6);
     VectorXs body(6);
     VectorXs delta(10);
     VectorXs Delta(10), Delta_plus(10);
     Delta << 0,0,0, 0,0,0,1, 0,0,0;
+    Quaternions q(q0);
     for (int n = 0; n<N; n++)
     {
-        body = data - bias;
-        delta = body2delta(body, dt);
-        Delta_plus = compose(Delta, delta, dt);
-        Delta = Delta_plus;
+        data        = motion2data(motion, q, bias_real);
+        q           = q*exp_q(motion.tail(3)*dt);
+        body        = data - bias_preint;
+        delta       = body2delta(body, dt);
+        Delta_plus  = compose(Delta, delta, dt);
+        Delta       = Delta_plus;
     }
     return Delta;
 }
 
-VectorXs integrateDelta(int N, const VectorXs& data, const VectorXs& bias, Scalar dt, Matrix<Scalar, 9, 6>& J_D_b)
+/* Integrate acc and angVel motion, obtain Delta_preintegrated
+ * Input:
+ *   N: number of steps
+ *   q0: initial orientaiton
+ *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body brame
+ *   bias_real: the real bias of the IMU
+ *   bias_preint: the bias used for Delta pre-integration
+ * Output:
+ *   J_D_b: the Jacobian of the preintegrated delta wrt the bias
+ *   return: the preintegrated delta
+ */
+VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Matrix<Scalar, 9, 6>& J_D_b)
 {
+    VectorXs data(6);
     VectorXs body(6);
     VectorXs delta(10);
     Matrix<Scalar, 9, 6> J_d_d, J_d_b;
     Matrix<Scalar, 9, 9> J_D_D, J_D_d;
     VectorXs Delta(10), Delta_plus(10);
+    Quaternions q;
 
     Delta << 0,0,0, 0,0,0,1, 0,0,0;
     J_D_b.setZero();
+    q = q0;
     for (int n = 0; n<N; n++)
     {
+        // Simulate data
+        data = motion2data(motion, q, bias_real);
+        q    = q*exp_q(motion.tail(3)*dt);
         // Motion::integrateOneStep()
         {   // IMU::computeCurrentDelta
-            body = data - bias;
+            body  = data - bias_preint;
             body2delta(body, dt, delta, J_d_d);
             J_d_b = - J_d_d;
         }
@@ -306,21 +354,21 @@ VectorXs integrateDelta(int N, const VectorXs& data, const VectorXs& bias, Scala
 TEST(IMU_tools, integral_jacobian_bias)
 {
     VectorXs Delta(10), Delta_pert(10); // deltas
-    VectorXs bias(6), pert(6), bias_pert(6);
-    VectorXs body(6), data(6);
+    VectorXs bias_real(6), pert(6), bias_pert(6), bias_preint(6);
+    VectorXs body(6), data(6), motion(6);
     VectorXs tang(9); // tangents
     Matrix<Scalar, 9, 6> J_a, J_n; // analytic and numerical jacs
-    Vector4s qv;;
     Scalar dt = 0.001;
     Scalar dx = 1e-4;
-    qv = (Vector4s() << 3, 4, 5, 6).finished().normalized();
-    data << 1, 2, 3,   3, 2, 1; data *= .1;
-    bias << .004, .005, .006,   .001, .002, .003;
+    Quaternions q0(3, 4, 5, 6); q0.normalize();
+    motion << .1, .2, .3,   .3, .2, .1;
+    bias_real   << .002, .004, .001,   .003, .002, .001;
+    bias_preint << .004, .005, .006,   .001, .002, .003;
 
     int N = 500; // # steps of integration
 
     // Analytical Jacobians
-    Delta = integrateDelta(N, data, bias, dt, J_a);
+    Delta = integrateDelta(N, q0, motion, bias_real, bias_preint, dt, J_a);
 
     // numerical jacobians
     for (unsigned int i = 0; i<6; i++)
@@ -328,38 +376,38 @@ TEST(IMU_tools, integral_jacobian_bias)
         pert       . setZero();
         pert(i)    = dx;
 
-        bias_pert  = bias + pert;
-        Delta_pert = integrateDelta(N, data, bias_pert, dt);
+        bias_pert  = bias_preint + pert;
+        Delta_pert = integrateDelta(N, q0, motion, bias_real, bias_pert, dt);
         tang       = diff(Delta, Delta_pert);       //   Delta(bias + pert) -- Delta(bias)
         J_n.col(i) = tang/dx;                       // ( Delta(bias + pert) -- Delta(bias) ) / dx
     }
 
     // check that numerical and analytical match
-    ASSERT_MATRIX_APPROX(J_a, J_n, 1e-5);
+    ASSERT_MATRIX_APPROX(J_a, J_n, 1e-4);
 }
 
 TEST(IMU_tools, delta_correction)
 {
     VectorXs Delta(10), Delta_preint(10), Delta_corr; // deltas
     VectorXs bias(6), pert(6), bias_preint(6);
-    VectorXs body(6), data(6);
+    VectorXs body(6), motion(6);
     VectorXs tang(9); // tangents
     Matrix<Scalar, 9, 6> J_b; // analytic and numerical jacs
     Vector4s qv;;
     Scalar dt = 0.001;
-    qv = (Vector4s() << 3, 4, 5, 6).finished().normalized();
-    data << 1, 2, 3,   3, 2, 1; data *= .1;
+    Quaternions q0(3, 4, 5, 6); q0.normalize();
+    motion << 1, 2, 3,   3, 2, 1; motion *= .1;
 
     int N = 1000; // # steps of integration
 
     // preintegration with correct bias
     bias << .004, .005, .006,   .001, .002, .003;
-    Delta = integrateDelta(N, data, bias, dt);
+    Delta = integrateDelta(N, q0, motion, bias, bias, dt);
 
     // preintegration with wrong bias
     pert << .002, -.001, .003,   -.0003, .0002, -.0001;
     bias_preint = bias + pert;
-    Delta_preint = integrateDelta(N, data, bias_preint, dt, J_b);
+    Delta_preint = integrateDelta(N, q0, motion, bias, bias_preint, dt, J_b);
 
     // correct perturbated
     Vector9s step = J_b*(bias-bias_preint);
@@ -373,6 +421,89 @@ TEST(IMU_tools, delta_correction)
 
     // diff between preint and corrected deltas should be the jacobian-computed step
     ASSERT_MATRIX_APPROX(diff(Delta_preint, Delta_corr), step, 1e-5);
+}
+
+TEST(IMU_tools, full_delta)
+{
+    VectorXs x1(10), x2(10);
+    VectorXs Delta(10), Delta_preint(10), Delta_corr(10);
+    VectorXs Delta_real(9), Delta_err(9), Delta_exp(10);
+    VectorXs bias(6), pert(6), bias_preint(6), bias_null(6);
+    VectorXs body(6), motion(6);
+    VectorXs tang(9); // tangents
+    Matrix<Scalar, 9, 6> J_b; // analytic and numerical jacs
+    Scalar dt = 0.001;
+    Quaternions q0; q0.setIdentity();
+
+    x1          << 0,0,0, 0,0,0,1, 0,0,0;
+//    motion      <<  .3,    .2,    .1,      .1,     .2,     .3; // acc and gyro
+//    motion      <<  .3,    .2,    .1,      .0,     .0,     .0; // only acc
+    motion      <<  .0,    .0,    .0,      .1,     .2,     .3; // only gyro
+    bias        << 0.01, 0.02, 0.003,   0.002, 0.005, 0.01;
+    bias_null   << 0,     0,     0,       0,      0,      0;
+//    bias_preint << 0.003, 0.002, 0.001,   0.001,  0.002,  0.003;
+    bias_preint = bias_null;
+
+    int N = 1000; // # steps of integration
+
+    // preintegration with no bias
+    Delta_real = integrateDelta(N, q0, motion, bias_null, bias_null, dt);
+    WOLF_TRACE("Delta real: ", Delta_real.transpose());
+
+    // final state
+    x2 = composeOverState(x1, Delta_real, 1000*dt);
+    WOLF_TRACE("x2: ", x2.transpose());
+
+    // preintegration with the correct bias
+    Delta = integrateDelta(N, q0, motion, bias, bias, dt);
+    WOLF_TRACE("Delta: ", Delta.transpose());
+
+    ASSERT_MATRIX_APPROX(Delta, Delta_real, 1e-4);
+
+    // preintegration with wrong bias
+    Delta_preint = integrateDelta(N, q0, motion, bias, bias_preint, dt, J_b);
+    WOLF_TRACE("Delta pre: ", Delta_preint.transpose());
+    WOLF_TRACE("Jac bias: \n", J_b);
+
+    // compute correction step
+    Vector9s step = J_b*(bias-bias_preint);
+    WOLF_TRACE("Delta step: ", step.transpose());
+
+    // correct preintegrated delta
+    Delta_corr = plus(Delta_preint, step);
+    WOLF_TRACE("Delta cor: ", Delta_corr.transpose());
+
+    // Corrected delta should match real delta
+    ASSERT_MATRIX_APPROX(Delta_real, Delta_corr, 1e-3);
+
+    // diff between real and corrected should be zero
+    ASSERT_MATRIX_APPROX(diff(Delta_real, Delta_corr), Vector9s::Zero(), 1e-3);
+
+    // expected delta
+    Delta_exp = betweenStates(x1, x2, N*dt);
+    WOLF_TRACE("Delta exp: ", Delta_exp.transpose());
+
+    ASSERT_MATRIX_APPROX(Delta_exp, Delta_corr, 1e-3);
+
+    // compute diff between expected and corrected
+    Delta_err = diff(Delta_exp, Delta_corr);
+    WOLF_TRACE("Delta err: ", Delta_err.transpose());
+
+    ASSERT_MATRIX_APPROX(Delta_err, Vector9s::Zero(), 1e-3);
+
+    // compute error between expected and preintegrated
+    Delta_err = diff(Delta_preint, Delta_exp);
+    WOLF_TRACE("Delta err exp-pre: ", Delta_err.transpose());
+
+    // diff between preint and corrected deltas should be the jacobian-computed step
+    ASSERT_MATRIX_APPROX(diff(Delta_preint, Delta_corr), step, 1e-3);
+    /* This implies:
+     *   - Since D_corr is expected to be similar to D_exp
+     *      step ~ diff(Delta_preint, Delta_exp)
+     *   - the residual can be computed with a regular '-' :
+     *      residual = diff(D_preint, D_exp) - J_bias * (bias - bias_preint)
+     */
+
 }
 
 int main(int argc, char **argv)
