@@ -215,6 +215,7 @@ inline void between(const MatrixBase<D1>& d1,
     between(dp1, dq1, dv1, dp2, dq2, dv2, dt, diff_p, diff_q, diff_v);
 }
 
+
 template<typename D1, typename D2, class T>
 inline Matrix<typename D1::Scalar, 10, 1> between(const MatrixBase<D1>& d1,
                                                   const MatrixBase<D2>& d2,
@@ -418,6 +419,21 @@ inline void diff(const MatrixBase<D1>& d1,
 
     diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v);
 }
+
+//template<typename D1, typename D2, typename D3, typename D4, typename D5>
+//inline void diff(const MatrixBase<D1>& d1,
+//                 const MatrixBase<D2>& d2,
+//                 MatrixBase<D3>& err,
+//                 MatrixBase<D4>& J_diff_d1,
+//                 MatrixBase<D5>& J_diff_d2)
+//{
+//    diff(d1, d2, err);
+//
+//    typedef typename D4::Scalar T4;
+//    typedef typename D5::Scalar T5;
+//    J_diff_d1.setIdentity();
+//    J_diff_d1.block<3,3>(3,3) =
+//}
 
 template<typename D1, typename D2>
 inline Matrix<typename D1::Scalar, 9, 1> diff(const MatrixBase<D1>& d1,
