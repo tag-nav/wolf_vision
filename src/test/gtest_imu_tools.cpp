@@ -226,6 +226,45 @@ TEST(IMU_tools, compose_jacobians)
     ASSERT_MATRIX_APPROX(J2_a, J2_n, 1e-4);
 }
 
+TEST(IMU_tools, diff_jacobians)
+{
+    VectorXs d1(10), d2(10), d3(9), d1_pert(10), d2_pert(10), d3_pert(9); // deltas
+    VectorXs t1(9), t2(9); // tangents
+    Matrix<Scalar, 9, 9> J1_a, J2_a, J1_n, J2_n;
+    Vector4s qv1, qv2;
+    Scalar dx = 1e-6;
+    qv1 = (Vector4s() << 3, 4, 5, 6).finished().normalized();
+    d1 << 0, 1, 2, qv1, 7, 8, 9;
+    qv2 = (Vector4s() << 1, 2, 3, 4).finished().normalized();
+    d2 << 9, 8, 7, qv2, 2, 1, 0;
+
+    // analytical jacobians
+    diff(d1, d2, d3, J1_a, J2_a);
+
+    // numerical jacobians
+    for (unsigned int i = 0; i<9; i++)
+    {
+        t1      . setZero();
+        t1(i)   = dx;
+
+        // Jac wrt first delta
+        d1_pert = plus(d1, t1);                 //          (d1 + t1)
+        d3_pert = diff(d1_pert, d2);            //     d2 - (d1 + t1)
+        t2      = d3_pert - d3;                 //   { d2 - (d1 + t1) } - { d2 - d1 }
+        J1_n.col(i) = t2/dx;                    // [ { d2 - (d1 + t1) } - { d2 - d1 } ] / dx
+
+        // Jac wrt second delta
+        d2_pert = plus(d2, t1);                 //     (d2 + t1)
+        d3_pert = diff(d1, d2_pert);            //     (d2 + t1) - d1
+        t2      = d3_pert - d3;                 //   { (d2 + t1) - d1 } - { d2 - d1 }
+        J2_n.col(i) = t2/dx;                    // [ { (d2 + t1) - d1 } - { d2 - d1 } ] / dx
+    }
+
+    // check that numerical and analytical match
+    ASSERT_MATRIX_APPROX(J1_a, J1_n, 1e-4);
+    ASSERT_MATRIX_APPROX(J2_a, J2_n, 1e-4);
+}
+
 TEST(IMU_tools, body2delta_jacobians)
 {
     VectorXs delta(10), delta_pert(10); // deltas
@@ -427,7 +466,7 @@ TEST(IMU_tools, full_delta)
 {
     VectorXs x1(10), x2(10);
     VectorXs Delta(10), Delta_preint(10), Delta_corr(10);
-    VectorXs Delta_real(9), Delta_err(9), Delta_exp(10);
+    VectorXs Delta_real(9), Delta_err(9), Delta_diff(10), Delta_exp(10);
     VectorXs bias(6), pert(6), bias_preint(6), bias_null(6);
     VectorXs body(6), motion(6);
     VectorXs tang(9); // tangents
@@ -486,7 +525,8 @@ TEST(IMU_tools, full_delta)
     ASSERT_MATRIX_APPROX(Delta_exp, Delta_corr, 1e-3);
 
     // compute diff between expected and corrected
-    Delta_err = diff(Delta_exp, Delta_corr);
+    Matrix<Scalar, 9, 9> J_err_exp, J_err_corr;
+    diff(Delta_exp, Delta_corr, Delta_err, J_err_exp, J_err_corr);
     WOLF_TRACE("Delta err: ", Delta_err.transpose());
 
     ASSERT_MATRIX_APPROX(Delta_err, Vector9s::Zero(), 1e-3);

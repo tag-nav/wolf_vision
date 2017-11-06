@@ -79,6 +79,24 @@ inline void inverse(const MatrixBase<D1>& d,
     inverse(dp, dq, dv, dt, idp, idq, idv);
 }
 
+template<typename D1, typename D2, class T, typename D3>
+inline void inverse(const MatrixBase<D1>& d,
+                    T dt,
+                    MatrixBase<D2>& id,
+                    MatrixBase<D3>& Jac)
+{
+    MatrixSizeCheck<10, 1>::check(d);
+    MatrixSizeCheck<10, 1>::check(id);
+    MatrixSizeCheck<9, 9>::check(Jac);
+
+    Map<const Quaternion<typename D1::Scalar> >     dq   ( & d( 3 ) );
+
+    inverse(d, dt, id);
+
+    Jac.setIdentity();
+    Jac.block<3,3>(3,3) = -q2R(dq); // d(R.tr) / dR = - R.tr
+}
+
 template<typename D, class T>
 inline Matrix<typename D::Scalar, 10, 1> inverse(const MatrixBase<D>& d,
                                                  T dt)
@@ -401,6 +419,18 @@ inline void diff(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1, const
         diff_v = dv2 - dv1;
 }
 
+template<typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
+inline void diff(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1, const MatrixBase<D3>& dv1,
+                 const MatrixBase<D4>& dp2, const QuaternionBase<D5>& dq2, const MatrixBase<D6>& dv2,
+                 MatrixBase<D7>& diff_p, MatrixBase<D8>& diff_o, MatrixBase<D9>& diff_v ,
+                 MatrixBase<D10>& J_do_dq1, MatrixBase<D11>& J_do_dq2)
+{
+    diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v);
+
+    J_do_dq1    = - jac_SO3_left_inv(diff_o);
+    J_do_dq2    =   jac_SO3_right_inv(diff_o);
+}
+
 
 template<typename D1, typename D2, typename D3>
 inline void diff(const MatrixBase<D1>& d1,
@@ -420,20 +450,45 @@ inline void diff(const MatrixBase<D1>& d1,
     diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v);
 }
 
-//template<typename D1, typename D2, typename D3, typename D4, typename D5>
-//inline void diff(const MatrixBase<D1>& d1,
-//                 const MatrixBase<D2>& d2,
-//                 MatrixBase<D3>& err,
-//                 MatrixBase<D4>& J_diff_d1,
-//                 MatrixBase<D5>& J_diff_d2)
-//{
-//    diff(d1, d2, err);
-//
-//    typedef typename D4::Scalar T4;
-//    typedef typename D5::Scalar T5;
-//    J_diff_d1.setIdentity();
-//    J_diff_d1.block<3,3>(3,3) =
-//}
+template<typename D1, typename D2, typename D3, typename D4, typename D5>
+inline void diff(const MatrixBase<D1>& d1,
+                 const MatrixBase<D2>& d2,
+                 MatrixBase<D3>& dif,
+                 MatrixBase<D4>& J_diff_d1,
+                 MatrixBase<D5>& J_diff_d2)
+{
+    Map<const Matrix<typename D1::Scalar, 3, 1> >   dp1    ( & d1(0) );
+    Map<const Quaternion<typename D1::Scalar> >     dq1    ( & d1(3) );
+    Map<const Matrix<typename D1::Scalar, 3, 1> >   dv1    ( & d1(7) );
+    Map<const Matrix<typename D2::Scalar, 3, 1> >   dp2    ( & d2(0) );
+    Map<const Quaternion<typename D2::Scalar> >     dq2    ( & d2(3) );
+    Map<const Matrix<typename D2::Scalar, 3, 1> >   dv2    ( & d2(7) );
+    Map<Matrix<typename D3::Scalar, 3, 1> >         diff_p ( & dif(0) );
+    Map<Matrix<typename D3::Scalar, 3, 1> >         diff_o ( & dif(3) );
+    Map<Matrix<typename D3::Scalar, 3, 1> >         diff_v ( & dif(6) );
+
+    Matrix<typename D4::Scalar, 3, 3> J_do_dq1, J_do_dq2;
+
+    diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v, J_do_dq1, J_do_dq2);
+
+
+    /* d = diff(d1, d2) is
+     *   dp = dp2 - dp1
+     *   do = Log(dq1.conj * dq2)
+     *   dv = dv2 - dv1
+     *
+     * With trivial Jacobians for dp and dv, and:
+     *   J_do_dq1 = - J_l_inv(theta)
+     *   J_do_dq2 =   J_r_inv(theta)
+     */
+
+    J_diff_d1 = - Matrix<typename D4::Scalar, 9, 9>::Identity();// d(p2  - p1) / d(p1) = - Identity
+    J_diff_d1.block(3,3,3,3) = J_do_dq1;       // d(R1.tr*R2) / d(R1) = - J_l_inv(theta)
+
+    J_diff_d2.setIdentity();                                    // d(R1.tr*R2) / d(R2) =   Identity
+    J_diff_d2.block(3,3,3,3) = J_do_dq2;      // d(R1.tr*R2) / d(R1) =   J_r_inv(theta)
+
+}
 
 template<typename D1, typename D2>
 inline Matrix<typename D1::Scalar, 9, 1> diff(const MatrixBase<D1>& d1,
