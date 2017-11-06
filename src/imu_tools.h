@@ -57,8 +57,8 @@ inline void inverse(const MatrixBase<D1>& dp, const QuaternionBase<D2>& dq, cons
     MatrixSizeCheck<3, 1>::check(idv);
 
     idp = - ( dq.conjugate() * (dp - dv * typename D3::Scalar(dt) ) );
-    idv = - ( dq.conjugate() * dv );
     idq =     dq.conjugate();
+    idv = - ( dq.conjugate() * dv );
 }
 
 template<typename D1, typename D2, class T>
@@ -79,23 +79,6 @@ inline void inverse(const MatrixBase<D1>& d,
     inverse(dp, dq, dv, dt, idp, idq, idv);
 }
 
-template<typename D1, typename D2, class T, typename D3>
-inline void inverse(const MatrixBase<D1>& d,
-                    T dt,
-                    MatrixBase<D2>& id,
-                    MatrixBase<D3>& Jac)
-{
-    MatrixSizeCheck<10, 1>::check(d);
-    MatrixSizeCheck<10, 1>::check(id);
-    MatrixSizeCheck<9, 9>::check(Jac);
-
-    Map<const Quaternion<typename D1::Scalar> >     dq   ( & d( 3 ) );
-
-    inverse(d, dt, id);
-
-    Jac.setIdentity();
-    Jac.block<3,3>(3,3) = -q2R(dq); // d(R.tr) / dR = - R.tr
-}
 
 template<typename D, class T>
 inline Matrix<typename D::Scalar, 10, 1> inverse(const MatrixBase<D>& d,
