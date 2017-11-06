@@ -290,6 +290,32 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
                                     const Eigen::MatrixBase<D1> &       _wb2,
                                     Eigen::MatrixBase<D3> &             _res) const
 {
+
+    /* Two methods are possible (select with #define below this note)
+     *
+     *  Common computations:
+     *    D_exp = between(x1,x2,dt)     // Predict delta from states
+     *    step  = J * (b - b_preint)    // compute the delta correction step due to bias change
+     *
+     *  Method 1:
+     *    corr  = plus(D_preint, step)  // correct the pre-integrated delta with correction step due to bias change
+     *    err   = diff(D_exp, D_corr)   // compare against expected delta
+     *    res   = W.sqrt * err
+     *
+     *  results in:
+     *    res   = W.sqrt * ( diff ( D_exp, (D_preint * retract(J * (b - b_preint) ) ) )
+     *
+     *  Method 2:
+     *    diff  = diff(D_preint, D_exp) // compare pre-integrated against expected delta
+     *    err   = diff - step           // the difference should be the correction step due to bias change
+     *    res   = W.sqrt * err
+     *
+     *  results in :
+     *    res   = W.sqrt * ( diff ( D_preint , D_exp ) ) - J * (b - b_preint)
+     */
+#define METHOD_1
+
+
     //needed typedefs
     typedef typename D2::Scalar T;
 
@@ -312,22 +338,6 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     d_step.block(3,0,3,1) =                                                             dDq_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
     d_step.block(6,0,3,1) = dDv_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDv_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
 
-    /* TODO do this:
-     *
-     *    D_exp = between(x1,x2,dt)     // done
-     *    step  = J * (b - b_preint)    // done
-     *    diff  = diff(D_preint, D_exp) // todo
-     *    err   = diff - step           // todo
-     *    res   = Q.sqrt * err          // done
-     *
-     *  results in method 2:
-     *    res   = Q.sqrt * ( diff ( D_preint , D_exp ) ) - J * (b - b_preint)
-     *
-     *  instead of methode 1:
-     *    res   = Q.sqrt * ( diff ( (D_preint * retract(J * (b - b_preint) ) ) , D_exp )
-     */
-
-//#define METHOD_1
 #ifdef METHOD_1 // method 1
     Eigen::Matrix<T, 3, 1> dp_step = d_step.block(0,0,3,1);
     Eigen::Matrix<T, 3, 1> do_step = d_step.block(3,0,3,1);
@@ -350,9 +360,25 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     Eigen::Map<Eigen::Matrix<T, 3, 1> >   do_error(d_error.data() + 3);
     Eigen::Map<Eigen::Matrix<T, 3, 1> >   dv_error(d_error.data() + 6);
 
+    Eigen::Matrix<T, 3, 3> J_do_dq1, J_do_dq2;
+    Eigen::Matrix<T, 9, 9> J_err_corr;
+
+//#define WITH_JAC
+#ifdef WITH_JAC
+    imu::diff(dp_exp, dq_exp, dv_exp, dp_correct, dq_correct, dv_correct, dp_error, do_error, dv_error, J_do_dq1, J_do_dq2);
+
+    J_err_corr.setIdentity();
+    J_err_corr.block(3,3,3,3) = J_do_dq2;
+
+    // 4. Residuals are the weighted errors
+    _res.head(9)       = J_err_corr.inverse().transpose() * getMeasurementSquareRootInformationTransposed().cast<T>() * d_error;
+#else
     imu::diff(dp_exp, dq_exp, dv_exp, dp_correct, dq_correct, dv_correct, dp_error, do_error, dv_error);
+    _res.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * d_error;
+#endif
 
 #else // method 2
+
     Eigen::Matrix<T, 9, 1> d_diff;
     Eigen::Map<Eigen::Matrix<T, 3, 1> >   dp_diff(d_diff.data()    );
     Eigen::Map<Eigen::Matrix<T, 3, 1> >   do_diff(d_diff.data() + 3);
@@ -364,6 +390,10 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
 
     Eigen::Matrix<T, 9, 1> d_error;
     d_error << d_diff - d_step;
+
+    // 4. Residuals are the weighted errors
+    _res.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * d_error;
+
 #endif
 
     // Errors between biases
@@ -371,12 +401,12 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     Eigen::Matrix<T,3,1> wb_error(_wb1 - _wb2);
 
     // 4. Residuals are the weighted errors
-    _res.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * d_error;
     _res.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error;
     _res.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error;
 
 
-
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
     // print values -----------------------
     Matrix<T, 10, 1> x1; x1 << _p1 , _q1.coeffs(), _v1;
     Matrix<T, 10, 1> x2; x2 << _p2 , _q2.coeffs(), _v2;
@@ -406,6 +436,8 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
 #endif
     print("D err", d_error);
     WOLF_TRACE("-----------------------------------------")
+    /////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
