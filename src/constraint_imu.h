@@ -161,6 +161,10 @@ inline void ConstraintIMU::print(const std::string& name, const Matrix<Scalar, R
     {
         WOLF_TRACE(name, ": ", mat.transpose());
     }
+    else if (mat.rows() == 1)
+    {
+        WOLF_TRACE(name, ": ", mat);
+    }
     else
     {
         WOLF_TRACE(name, ":\n", mat);
@@ -208,33 +212,33 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
 {
     setType("IMU");
 
-    WOLF_TRACE("Constr IMU  (f", _ftr_ptr->id(),
-               " C", _ftr_ptr->getCapturePtr()->id(),
-               " F", _ftr_ptr->getCapturePtr()->getFramePtr()->id(),
-               ") (Co", _cap_origin_ptr->id(),
-               " Fo", _cap_origin_ptr->getFramePtr()->id(), ")");
-
-    WOLF_TRACE("dt: ", dt_);
-
-    WOLF_TRACE("delta preint: ", std::static_pointer_cast<CaptureMotion>(_ftr_ptr->getCapturePtr())->getDeltaPreint().transpose());
-//    WOLF_TRACE("Dp preint : ", dp_preint_.transpose()); // OK
-//    WOLF_TRACE("Dq preint : ", dq_preint_.coeffs().transpose()); // OK
-//    WOLF_TRACE("Dv preint : ", dv_preint_.transpose()); // OK
-
-    WOLF_TRACE("bias: ", std::static_pointer_cast<CaptureMotion>(_ftr_ptr->getCapturePtr())->getCalibrationPreint().transpose());
-//    WOLF_TRACE("bias acc : ", acc_bias_preint_.transpose()); // OK
-//    WOLF_TRACE("bias gyro: ", gyro_bias_preint_.transpose()); // OK
-
-    WOLF_TRACE("Jac bias : \n", std::static_pointer_cast<CaptureMotion>(_ftr_ptr->getCapturePtr())->getJacobianCalib());
-//    WOLF_TRACE("jac Dp_ab: \n", dDp_dab_); // OK
-//    WOLF_TRACE("jac Dv_ab: \n", dDv_dab_); // OK
-//    WOLF_TRACE("jac Dp_wb: \n", dDp_dwb_); // OK
-//    WOLF_TRACE("jac Dq_wb: \n", dDq_dwb_); // OK
-//    WOLF_TRACE("jac Dv_wb: \n", dDv_dwb_); // OK
-
-    WOLF_TRACE("Omega_delta.sqrt: \n", _ftr_ptr->getMeasurementSquareRootInformationUpper());
-    WOLF_TRACE("Omega_acc.sqrt: \n", sqrt_A_r_dt_inv);
-    WOLF_TRACE("Omega_gyro.sqrt: \n", sqrt_W_r_dt_inv);
+//    WOLF_TRACE("Constr IMU  (f", _ftr_ptr->id(),
+//               " C", _ftr_ptr->getCapturePtr()->id(),
+//               " F", _ftr_ptr->getCapturePtr()->getFramePtr()->id(),
+//               ") (Co", _cap_origin_ptr->id(),
+//               " Fo", _cap_origin_ptr->getFramePtr()->id(), ")");
+//
+//    WOLF_TRACE("dt: ", dt_);
+//
+//    WOLF_TRACE("delta preint: ", std::static_pointer_cast<CaptureMotion>(_ftr_ptr->getCapturePtr())->getDeltaPreint().transpose());
+////    WOLF_TRACE("Dp preint : ", dp_preint_.transpose()); // OK
+////    WOLF_TRACE("Dq preint : ", dq_preint_.coeffs().transpose()); // OK
+////    WOLF_TRACE("Dv preint : ", dv_preint_.transpose()); // OK
+//
+//    WOLF_TRACE("bias: ", std::static_pointer_cast<CaptureMotion>(_ftr_ptr->getCapturePtr())->getCalibrationPreint().transpose());
+////    WOLF_TRACE("bias acc : ", acc_bias_preint_.transpose()); // OK
+////    WOLF_TRACE("bias gyro: ", gyro_bias_preint_.transpose()); // OK
+//
+//    WOLF_TRACE("Jac bias : \n", std::static_pointer_cast<CaptureMotion>(_ftr_ptr->getCapturePtr())->getJacobianCalib());
+////    WOLF_TRACE("jac Dp_ab: \n", dDp_dab_); // OK
+////    WOLF_TRACE("jac Dv_ab: \n", dDv_dab_); // OK
+////    WOLF_TRACE("jac Dp_wb: \n", dDp_dwb_); // OK
+////    WOLF_TRACE("jac Dq_wb: \n", dDq_dwb_); // OK
+////    WOLF_TRACE("jac Dv_wb: \n", dDv_dwb_); // OK
+//
+//    WOLF_TRACE("Omega_delta.sqrt: \n", _ftr_ptr->getMeasurementSquareRootInformationUpper());
+//    WOLF_TRACE("Omega_acc.sqrt: \n", sqrt_A_r_dt_inv);
+//    WOLF_TRACE("Omega_gyro.sqrt: \n", sqrt_W_r_dt_inv);
 
 }
 
@@ -302,23 +306,32 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     // 2. Corrected integrated delta: delta_corr = delta_preint (+) J_bias * (bias_current - bias_preint)
 
     // 2.a. Compute the delta step in tangent space:   step = J_bias * (bias - bias_preint)
-    Eigen::Matrix<T, 3, 1> dp_step;
-    Eigen::Matrix<T, 3, 1> do_step;
-    Eigen::Matrix<T, 3, 1> dv_step;
+    Eigen::Matrix<T, 9, 1> d_step;
 
-    dp_step = dDp_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDp_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
-    do_step =                                                             dDq_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
-    dv_step = dDv_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDv_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
+    d_step.block(0,0,3,1) = dDp_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDp_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
+    d_step.block(3,0,3,1) =                                                             dDq_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
+    d_step.block(6,0,3,1) = dDv_dab_.cast<T>() * (_ab1 - acc_bias_preint_ .cast<T>()) + dDv_dwb_.cast<T>() * (_wb1 - gyro_bias_preint_.cast<T>());
 
     /* TODO do this:
      *
      *    D_exp = between(x1,x2,dt)     // done
      *    step  = J * (b - b_preint)    // done
-     *    diff  = diff(D_exp, D_preint) // todo
+     *    diff  = diff(D_preint, D_exp) // todo
      *    err   = diff - step           // todo
      *    res   = Q.sqrt * err          // done
+     *
+     *  results in method 2:
+     *    res   = Q.sqrt * ( diff ( D_preint , D_exp ) ) - J * (b - b_preint)
+     *
+     *  instead of methode 1:
+     *    res   = Q.sqrt * ( diff ( (D_preint * retract(J * (b - b_preint) ) ) , D_exp )
      */
 
+//#define METHOD_1
+#ifdef METHOD_1 // method 1
+    Eigen::Matrix<T, 3, 1> dp_step = d_step.block(0,0,3,1);
+    Eigen::Matrix<T, 3, 1> do_step = d_step.block(3,0,3,1);
+    Eigen::Matrix<T, 3, 1> dv_step = d_step.block(6,0,3,1);
 
     // 2.b. Add the correction step to the preintegrated delta:    delta_cor = delta_preint (+) step
     Eigen::Matrix<T,3,1> dp_correct;
@@ -332,20 +345,33 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
 
     // 3. Delta error in minimal form: d_min = lift(delta_pred (-) delta_corr)
     // Note the Dt here is zero because it's the delta-time between the same time stamps!
-    Eigen::Matrix<T, 9, 1> dpov_error;
-    Eigen::Map<Eigen::Matrix<T, 3, 1> >   dp_error(dpov_error.data()    );
-    Eigen::Map<Eigen::Matrix<T, 3, 1> >   do_error(dpov_error.data() + 3);
-    Eigen::Map<Eigen::Matrix<T, 3, 1> >   dv_error(dpov_error.data() + 6);
+    Eigen::Matrix<T, 9, 1> d_error;
+    Eigen::Map<Eigen::Matrix<T, 3, 1> >   dp_error(d_error.data()    );
+    Eigen::Map<Eigen::Matrix<T, 3, 1> >   do_error(d_error.data() + 3);
+    Eigen::Map<Eigen::Matrix<T, 3, 1> >   dv_error(d_error.data() + 6);
 
     imu::diff(dp_exp, dq_exp, dv_exp, dp_correct, dq_correct, dv_correct, dp_error, do_error, dv_error);
 
+#else // method 2
+    Eigen::Matrix<T, 9, 1> d_diff;
+    Eigen::Map<Eigen::Matrix<T, 3, 1> >   dp_diff(d_diff.data()    );
+    Eigen::Map<Eigen::Matrix<T, 3, 1> >   do_diff(d_diff.data() + 3);
+    Eigen::Map<Eigen::Matrix<T, 3, 1> >   dv_diff(d_diff.data() + 6);
+
+    imu::diff(dp_preint_.cast<T>(), dq_preint_.cast<T>(), dv_preint_.cast<T>(),
+              dp_exp, dq_exp, dv_exp,
+              dp_diff, do_diff, dv_diff);
+
+    Eigen::Matrix<T, 9, 1> d_error;
+    d_error << d_diff - d_step;
+#endif
 
     // Errors between biases
     Eigen::Matrix<T,3,1> ab_error(_ab1 - _ab2); // KF1.bias - KF2.bias
     Eigen::Matrix<T,3,1> wb_error(_wb1 - _wb2);
 
     // 4. Residuals are the weighted errors
-    _res.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * dpov_error;
+    _res.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * d_error;
     _res.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error;
     _res.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error;
 
@@ -363,13 +389,22 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     print("b1 ", b1);
     print("b2 ", b2);
     Matrix<T, 10, 1> exp; exp << dp_exp , dq_exp.coeffs(), dv_exp;
-    print("exp", exp);
-    Matrix<T, 9, 1> step; step << dp_step , do_step, dv_step;
-    print("step", step);
-    Matrix<T, 10, 1> cor; cor << dp_correct , dq_correct.coeffs(), dv_correct;
-    print("cor", cor);
-    Matrix<T, 9, 1> er; er << dp_error , do_error, dv_error;
-    print("err", er);
+    print("D exp", exp);
+    Matrix<T, 10, 1> pre; pre << dp_preint_.cast<T>() , dq_preint_.cast<T>().coeffs(), dv_preint_.cast<T>();
+    print("D preint", pre);
+    Matrix<T, 9, 6> J_b_r0; J_b_r0.setZero();
+    J_b_r0.block(0,0,3,3) = dDp_dab_.cast<T>();
+    J_b_r0.block(0,3,3,3) = dDp_dwb_.cast<T>();
+    J_b_r0.block(3,3,3,3) = dDq_dwb_.cast<T>();
+    J_b_r0.block(6,0,3,3) = dDv_dab_.cast<T>();
+    J_b_r0.block(6,3,3,3) = dDv_dwb_.cast<T>();
+    print("J bias", J_b_r0);
+    print("D step", d_step);
+#ifndef METHOD_1
+    Matrix<T, 9, 1> dif; dif << dp_diff , do_diff, dv_diff;
+    print("D diff", dif);
+#endif
+    print("D err", d_error);
     WOLF_TRACE("-----------------------------------------")
 
 
