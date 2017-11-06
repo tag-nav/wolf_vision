@@ -63,6 +63,9 @@ class CaptureMotion : public CaptureBase
 
         virtual ~CaptureMotion();
 
+        // Type
+        virtual bool isMotion() const override { return true; }
+
         // Data
         const Eigen::VectorXs& getData() const;
         const Eigen::MatrixXs& getDataCovariance() const;

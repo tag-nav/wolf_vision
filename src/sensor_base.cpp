@@ -25,6 +25,8 @@ SensorBase::SensorBase(const std::string& _type,
         noise_std_(_noise_size),
         noise_cov_(_noise_size, _noise_size)
 {
+    noise_std_.setZero();
+    noise_cov_.setZero();
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _intr_ptr;
@@ -53,9 +55,7 @@ SensorBase::SensorBase(const std::string& _type,
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _intr_ptr;
-    noise_cov_.setZero();
-    for (unsigned int i = 0; i < _noise_std.size(); i++)
-        noise_cov_(i, i) = noise_std_(i) * noise_std_(i);
+    setNoiseStd(_noise_std);
     updateCalibSize();
 }
 
@@ -203,11 +203,19 @@ void SensorBase::registerNewStateBlocks()
     }
 }
 
-void SensorBase::setNoise(const Eigen::VectorXs& _noise_std) {
-	noise_std_ = _noise_std;
-	noise_cov_.setZero();
-	for (unsigned int i=0; i<_noise_std.size(); i++)
-		noise_cov_(i,i) = _noise_std(i) * _noise_std(i);
+void SensorBase::setNoiseStd(const Eigen::VectorXs& _noise_std) {
+    noise_std_ = _noise_std;
+    noise_cov_.setZero();
+    for (unsigned int i=0; i<_noise_std.size(); i++)
+    {
+        Scalar var_i = _noise_std(i) * _noise_std(i);
+        noise_cov_(i,i) = var_i;
+    }
+}
+
+void SensorBase::setNoiseCov(const Eigen::MatrixXs& _noise_cov) {
+    noise_std_ = _noise_cov.diagonal().array().sqrt();
+    noise_cov_ = _noise_cov;
 }
 
 CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)

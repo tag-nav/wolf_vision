@@ -38,7 +38,7 @@ Eigen::VectorXs CaptureOdom3D::correctDelta(const VectorXs& _delta, const Vector
 {
     VectorXs delta(7);
     delta.head(3) = _delta.head(3) + _delta_error.head(3);
-    delta.tail(4) = (Quaternions(_delta.head(4).data()) * exp_q(_delta_error.tail(3))).coeffs();
+    delta.tail(4) = (Quaternions(_delta.data()+3) * exp_q(_delta_error.tail(3))).coeffs();
     return delta;
 }
 

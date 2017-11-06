@@ -22,6 +22,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
     private:
         FrameBaseWPtr   frame_ptr_;
         FeatureBaseList feature_list_;
+        ConstraintBaseList constrained_by_list_;
         SensorBaseWPtr  sensor_ptr_; ///< Pointer to sensor
         // Deal with sensors with dynamic extrinsics (check dynamic_extrinsic_ in SensorBase)
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, intrinsic.
@@ -47,6 +48,9 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         virtual ~CaptureBase();
         void remove();
 
+        // Type
+        virtual bool isMotion() const { return false; }
+
         unsigned int id();
         TimeStamp getTimeStamp() const;
         void setTimeStamp(const TimeStamp& _ts);
@@ -66,6 +70,11 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
 
         SensorBasePtr getSensorPtr() const;
         virtual void setSensorPtr(const SensorBasePtr sensor_ptr);
+
+        // constrained by
+        virtual ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        unsigned int getHits() const;
+        ConstraintBaseList& getConstrainedByList();
 
         // State blocks
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
@@ -216,6 +225,24 @@ inline void CaptureBase::getConstraintList(ConstraintBaseList& _ctr_list)
     for (auto f_ptr : getFeatureList())
         f_ptr->getConstraintList(_ctr_list);
 }
+
+inline ConstraintBasePtr CaptureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.push_back(_ctr_ptr);
+    _ctr_ptr->setCaptureOtherPtr( shared_from_this() );
+    return _ctr_ptr;
+}
+
+inline unsigned int CaptureBase::getHits() const
+{
+    return constrained_by_list_.size();
+}
+
+inline ConstraintBaseList& CaptureBase::getConstrainedByList()
+{
+    return constrained_by_list_;
+}
+
 
 inline TimeStamp CaptureBase::getTimeStamp() const
 {

@@ -71,9 +71,9 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> skew(const Eigen::MatrixBas
 
     Eigen::Matrix<T, 3, 3> sk;
 
-    sk <<   0.0 , -_v(2), +_v(1),
-          +_v(2),   0.0 , -_v(0),
-          -_v(1), +_v(0),  0.0;
+    sk << (T)0.0 , -_v(2), +_v(1),
+           +_v(2), (T)0.0, -_v(0),
+           -_v(1), +_v(0), (T)0.0;
 
     return sk;
 }
@@ -354,7 +354,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eig
         return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
     T theta = sqrt(theta2);  // rotation angle
     Eigen::Matrix<T, 3, 3> M;
-    M.noalias() = ((T)1 / theta2 - (1 + cos(theta)) / ((T)2 * theta * sin(theta))) * (W * W);
+    M.noalias() = ((T)1.0 / theta2 - ((T)1.0 + cos(theta)) / ((T)2.0 * theta * sin(theta))) * (W * W);
     return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W + M; //is this really more optimized?
 }
 
@@ -426,8 +426,40 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left_inv(const Eige
         return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
     T theta = sqrt(theta2);  // rotation angle
     Eigen::Matrix<T, 3, 3> M;
-    M.noalias() = ((T)1 / theta2 - (1 + cos(theta)) / ((T)2 * theta * sin(theta))) * (W * W);
+    M.noalias() = ((T)1.0 / theta2 - ((T)1.0 + cos(theta)) / ((T)2.0 * theta * sin(theta))) * (W * W);
     return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W + M; //is this really more optimized?
+}
+
+template<typename D1, typename D2, typename D3, typename D4, typename D5>
+inline void compose(const Eigen::QuaternionBase<D1>& _q1,
+                    const Eigen::QuaternionBase<D2>& _q2,
+                    Eigen::QuaternionBase<D3>& _q_comp,
+                    Eigen::MatrixBase<D4>& _J_comp_q1,
+                    Eigen::MatrixBase<D5>& _J_comp_q2)
+{
+    MatrixSizeCheck<3, 3>::check(_J_comp_q1);
+    MatrixSizeCheck<3, 3>::check(_J_comp_q2);
+
+    _q_comp = _q1 * _q2;
+
+    _J_comp_q1 = q2R(_q2.conjugate()); //  R2.tr
+    _J_comp_q2 . setIdentity();
+}
+
+template<typename D1, typename D2, typename D3, typename D4, typename D5>
+inline void between(const Eigen::QuaternionBase<D1>& _q1,
+                    const Eigen::QuaternionBase<D2>& _q2,
+                    Eigen::QuaternionBase<D3>& _q_between,
+                    Eigen::MatrixBase<D4>& _J_between_q1,
+                    Eigen::MatrixBase<D5>& _J_between_q2)
+{
+    MatrixSizeCheck<3, 3>::check(_J_between_q1);
+    MatrixSizeCheck<3, 3>::check(_J_between_q2);
+
+    _q_between = _q1.conjugate() * _q2;
+
+    _J_between_q1 = -q2R(_q2.conjugate()*_q1); // - R2.tr * R1
+    _J_between_q2 . setIdentity();
 }
 
 template<typename T>
@@ -435,19 +467,21 @@ inline Eigen::Matrix<T, 3, 3> matrixRollPitchYaw(const T roll,
                                                  const T pitch,
                                                  const T yaw)
 {
-  const Eigen::AngleAxis<T> ax = Eigen::AngleAxis<T>(roll,  Eigen::Matrix<T, 3, 1>::UnitX());
-  const Eigen::AngleAxis<T> ay = Eigen::AngleAxis<T>(pitch, Eigen::Matrix<T, 3, 1>::UnitY());
-  const Eigen::AngleAxis<T> az = Eigen::AngleAxis<T>(yaw,   Eigen::Matrix<T, 3, 1>::UnitZ());
+    const Eigen::AngleAxis<T> ax = Eigen::AngleAxis<T>(roll,  Eigen::Matrix<T, 3, 1>::UnitX());
+    const Eigen::AngleAxis<T> ay = Eigen::AngleAxis<T>(pitch, Eigen::Matrix<T, 3, 1>::UnitY());
+    const Eigen::AngleAxis<T> az = Eigen::AngleAxis<T>(yaw,   Eigen::Matrix<T, 3, 1>::UnitZ());
 
-  return (az * ay * ax).toRotationMatrix().matrix();
+    return (az * ay * ax).toRotationMatrix().matrix();
 }
 
 template <typename Derived>
 inline typename Eigen::MatrixBase<Derived>::Scalar
-getYaw(const Eigen::MatrixBase<Derived>& r)
+getYaw(const Eigen::MatrixBase<Derived>& R)
 {
-  using std::atan2;
-  return atan2( r(1, 0), r(0, 0) );
+    MatrixSizeCheck<3, 3>::check(R);
+
+    using std::atan2;
+    return atan2( R(1, 0), R(0, 0) );
 }
 
 } // namespace wolf

@@ -12,6 +12,8 @@ ProcessorOdom3D::ProcessorOdom3D(ProcessorOdom3DParamsPtr _params, SensorOdom3DP
                 q1_(nullptr), q2_(nullptr), q_out_(nullptr)
         {
             setup(_sensor_ptr);
+            delta_ = deltaZero();
+            delta_integrated_ = deltaZero();
             jacobian_delta_preint_.setZero(delta_cov_size_, delta_cov_size_);
             jacobian_delta_.setZero(delta_cov_size_, delta_cov_size_);
         }
@@ -293,14 +295,14 @@ bool ProcessorOdom3D::voteForKeyFrame()
         return true;
     }
     // distance traveled
-    Scalar dist = delta_integrated_.head(3).norm();
+    Scalar dist = getMotion().delta_integr_.head(3).norm();
     if (dist > dist_traveled_)
     {
         WOLF_DEBUG( "PM: vote: distance traveled" );
         return true;
     }
     // angle turned
-    Scalar angle = 2.0 * acos(delta_integrated_(6));
+    Scalar angle = q2v(Quaternions(getMotion().delta_integr_.data()+3)).norm(); // 2.0 * acos(getMotion().delta_integr_(6));
     if (angle > angle_turned_)
     {
         WOLF_DEBUG( "PM: vote: angle turned" );

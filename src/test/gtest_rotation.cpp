@@ -583,7 +583,7 @@ TEST(rotations, q2R_R2q)
     ASSERT_MATRIX_APPROX(R,          qq_R.matrix(),   wolf::Constants::EPS);
 }
 
-TEST(rotations, Jr)
+TEST(Jacobians, Jr)
 {
     Vector3s theta; theta.setRandom();
     Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
@@ -595,7 +595,7 @@ TEST(rotations, Jr)
     ASSERT_MATRIX_APPROX(exp_R(theta+dtheta), (exp_R(theta) * exp_R(Jr*dtheta)), 1e-8);
 }
 
-TEST(rotations, Jl)
+TEST(Jacobians, Jl)
 {
     Vector3s theta; theta.setRandom();
     Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
@@ -605,9 +605,15 @@ TEST(rotations, Jl)
     Matrix3s Jl = jac_SO3_left(theta);
     ASSERT_QUATERNION_APPROX(exp_q(theta+dtheta), exp_q(Jl*dtheta) * exp_q(theta), 1e-8);
     ASSERT_MATRIX_APPROX(exp_R(theta+dtheta), (exp_R(Jl*dtheta) * exp_R(theta)), 1e-8);
+
+    // Jl = Jr.tr
+    ASSERT_MATRIX_APPROX(Jl, jac_SO3_right(theta).transpose(), 1e-8);
+
+    // Jl = R*Jr
+    ASSERT_MATRIX_APPROX(Jl, exp_R(theta)*jac_SO3_right(theta), 1e-8);
 }
 
-TEST(rotations, Jr_inv)
+TEST(Jacobians, Jr_inv)
 {
     Vector3s theta; theta.setRandom();
     Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
@@ -621,7 +627,7 @@ TEST(rotations, Jr_inv)
     ASSERT_MATRIX_APPROX(log_R(R * exp_R(dtheta)), log_R(R) + Jr_inv*dtheta, 1e-8);
 }
 
-TEST(rotations, Jl_inv)
+TEST(Jacobians, Jl_inv)
 {
     Vector3s theta; theta.setRandom();
     Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
@@ -633,6 +639,78 @@ TEST(rotations, Jl_inv)
     Matrix3s Jl_inv = jac_SO3_left_inv(theta);
     ASSERT_MATRIX_APPROX(log_q(exp_q(dtheta) * q), log_q(q) + Jl_inv*dtheta, 1e-8);
     ASSERT_MATRIX_APPROX(log_R(exp_R(dtheta) * R), log_R(R) + Jl_inv*dtheta, 1e-8);
+}
+
+TEST(Jacobians, compose)
+{
+
+    Vector3s th1(.1,.2,.3), th2(.3,.1,.2);
+    Quaternions q1(exp_q(th1));
+    Quaternions q2(exp_q(th2));
+    Quaternions qc;
+    Matrix3s J1a, J2a, J1n, J2n;
+
+    // composition and analytic Jacobians
+    wolf::compose(q1, q2, qc, J1a, J2a);
+
+    // Numeric Jacobians
+    Scalar dx = 1e-6;
+    Vector3s pert;
+    Quaternions q1_pert, q2_pert, qc_pert;
+    for (int i = 0; i<3; i++)
+    {
+        pert.setZero();
+        pert(i) = dx;
+
+        // Jac wrt q1
+        q1_pert     = q1*exp_q(pert);
+        qc_pert     = q1_pert * q2;
+        J1n.col(i)  = log_q(qc.conjugate()*qc_pert) / dx;
+
+        // Jac wrt q2
+        q2_pert     = q2*exp_q(pert);
+        qc_pert     = q1 * q2_pert;
+        J2n.col(i)  = log_q(qc.conjugate()*qc_pert) / dx;
+    }
+
+    ASSERT_MATRIX_APPROX(J1a, J1n, 1e-5);
+    ASSERT_MATRIX_APPROX(J2a, J2n, 1e-5);
+}
+
+TEST(Jacobians, between)
+{
+
+    Vector3s th1(.1,.2,.3), th2(.3,.1,.2);
+    Quaternions q1(exp_q(th1));
+    Quaternions q2(exp_q(th2));
+    Quaternions qc;
+    Matrix3s J1a, J2a, J1n, J2n;
+
+    // composition and analytic Jacobians
+    wolf::between(q1, q2, qc, J1a, J2a);
+
+    // Numeric Jacobians
+    Scalar dx = 1e-6;
+    Vector3s pert;
+    Quaternions q1_pert, q2_pert, qc_pert;
+    for (int i = 0; i<3; i++)
+    {
+        pert.setZero();
+        pert(i) = dx;
+
+        // Jac wrt q1
+        q1_pert     = q1*exp_q(pert);
+        qc_pert     = q1_pert.conjugate() * q2;
+        J1n.col(i)  = log_q(qc.conjugate()*qc_pert) / dx;
+
+        // Jac wrt q2
+        q2_pert     = q2*exp_q(pert);
+        qc_pert     = q1.conjugate() * q2_pert;
+        J2n.col(i)  = log_q(qc.conjugate()*qc_pert) / dx;
+    }
+
+    ASSERT_MATRIX_APPROX(J1a, J1n, 1e-5);
+    ASSERT_MATRIX_APPROX(J2a, J2n, 1e-5);
 }
 
 
