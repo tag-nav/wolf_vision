@@ -462,7 +462,7 @@ TEST(IMU_tools, delta_correction)
     ASSERT_MATRIX_APPROX(diff(Delta_preint, Delta_corr), step, 1e-5);
 }
 
-TEST(IMU_tools, full_delta)
+TEST(IMU_tools, full_delta_residual)
 {
     VectorXs x1(10), x2(10);
     VectorXs Delta(10), Delta_preint(10), Delta_corr(10);
@@ -475,9 +475,9 @@ TEST(IMU_tools, full_delta)
     Quaternions q0; q0.setIdentity();
 
     x1          << 0,0,0, 0,0,0,1, 0,0,0;
-//    motion      <<  .3,    .2,    .1,      .1,     .2,     .3; // acc and gyro
+    motion      <<  .3,    .2,    .1,      .1,     .2,     .3; // acc and gyro
 //    motion      <<  .3,    .2,    .1,      .0,     .0,     .0; // only acc
-    motion      <<  .0,    .0,    .0,      .1,     .2,     .3; // only gyro
+//    motion      <<  .0,    .0,    .0,      .1,     .2,     .3; // only gyro
     bias        << 0.01, 0.02, 0.003,   0.002, 0.005, 0.01;
     bias_null   << 0,     0,     0,       0,      0,      0;
 //    bias_preint << 0.003, 0.002, 0.001,   0.001,  0.002,  0.003;
@@ -487,30 +487,23 @@ TEST(IMU_tools, full_delta)
 
     // preintegration with no bias
     Delta_real = integrateDelta(N, q0, motion, bias_null, bias_null, dt);
-    WOLF_TRACE("Delta real: ", Delta_real.transpose());
 
     // final state
     x2 = composeOverState(x1, Delta_real, 1000*dt);
-    WOLF_TRACE("x2: ", x2.transpose());
 
     // preintegration with the correct bias
     Delta = integrateDelta(N, q0, motion, bias, bias, dt);
-    WOLF_TRACE("Delta: ", Delta.transpose());
 
     ASSERT_MATRIX_APPROX(Delta, Delta_real, 1e-4);
 
     // preintegration with wrong bias
     Delta_preint = integrateDelta(N, q0, motion, bias, bias_preint, dt, J_b);
-    WOLF_TRACE("Delta pre: ", Delta_preint.transpose());
-    WOLF_TRACE("Jac bias: \n", J_b);
 
     // compute correction step
     Vector9s step = J_b*(bias-bias_preint);
-    WOLF_TRACE("Delta step: ", step.transpose());
 
     // correct preintegrated delta
     Delta_corr = plus(Delta_preint, step);
-    WOLF_TRACE("Delta cor: ", Delta_corr.transpose());
 
     // Corrected delta should match real delta
     ASSERT_MATRIX_APPROX(Delta_real, Delta_corr, 1e-3);
@@ -520,20 +513,17 @@ TEST(IMU_tools, full_delta)
 
     // expected delta
     Delta_exp = betweenStates(x1, x2, N*dt);
-    WOLF_TRACE("Delta exp: ", Delta_exp.transpose());
 
     ASSERT_MATRIX_APPROX(Delta_exp, Delta_corr, 1e-3);
 
     // compute diff between expected and corrected
     Matrix<Scalar, 9, 9> J_err_exp, J_err_corr;
     diff(Delta_exp, Delta_corr, Delta_err, J_err_exp, J_err_corr);
-    WOLF_TRACE("Delta err: ", Delta_err.transpose());
 
     ASSERT_MATRIX_APPROX(Delta_err, Vector9s::Zero(), 1e-3);
 
     // compute error between expected and preintegrated
     Delta_err = diff(Delta_preint, Delta_exp);
-    WOLF_TRACE("Delta err exp-pre: ", Delta_err.transpose());
 
     // diff between preint and corrected deltas should be the jacobian-computed step
     ASSERT_MATRIX_APPROX(diff(Delta_preint, Delta_corr), step, 1e-3);
@@ -544,6 +534,16 @@ TEST(IMU_tools, full_delta)
      *      residual = diff(D_preint, D_exp) - J_bias * (bias - bias_preint)
      */
 
+//    WOLF_TRACE("Delta real: ", Delta_real.transpose());
+//    WOLF_TRACE("x2: ", x2.transpose());
+//    WOLF_TRACE("Delta: ", Delta.transpose());
+//    WOLF_TRACE("Delta pre: ", Delta_preint.transpose());
+//    WOLF_TRACE("Jac bias: \n", J_b);
+//    WOLF_TRACE("Delta step: ", step.transpose());
+//    WOLF_TRACE("Delta cor: ", Delta_corr.transpose());
+//    WOLF_TRACE("Delta exp: ", Delta_exp.transpose());
+//    WOLF_TRACE("Delta err: ", Delta_err.transpose());
+//    WOLF_TRACE("Delta err exp-pre: ", Delta_err.transpose());
 }
 
 int main(int argc, char **argv)
