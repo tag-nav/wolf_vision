@@ -236,9 +236,9 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
-        ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
-        ceres_options.max_line_search_step_contraction = 1e-3;
-        ceres_options.max_num_iterations = 1e4;
+//        ceres_options.minimizer_type = ceres::TRUST_REGION; //ceres::TRUST_REGION;ceres::LINE_SEARCH
+//        ceres_options.max_line_search_step_contraction = 1e-3;
+//        ceres_options.max_num_iterations = 1e4;
         ceres_manager_wolf_diff = new CeresManager(wolf_problem_ptr_, ceres_options);
 
         // SENSOR + PROCESSOR IMU
@@ -254,8 +254,7 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
         x_origin.resize(10);
         x_origin << 0,0,0, 0,0,0,1, 0,0,0;
         t.set(0);
-        origin_bias << 0, 0, 0, 0.02, 0.05, 0.1;
-        origin_bias *= 1e-2;
+        origin_bias << 0, 0, 0, 0.0002, 0.0005, 0.001;
 
         expected_final_state = x_origin; //null bias + static,
 
@@ -789,10 +788,9 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
         expected_final_state.resize(10);
         x_origin.resize(10);
         x_origin << 0,0,0, 0,0,0,1, 0,0,0;
-        origin_bias << 0.0015, 0.004, -0.002, 0.005, -0.0074, -0.003;
-        origin_bias *= 0.01;
+        origin_bias << 0.01, 0.02, 0.003, 0.002, 0.005, 0.01;
         t.set(0);
-        Eigen::Quaternions current_quatState(Eigen::Quaternions::Identity());
+        Eigen::Quaternions quat_current(Eigen::Quaternions::Identity());
 
         //set origin of the problem
         origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
@@ -812,14 +810,14 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
         {
             // PROCESS IMU DATA
             // Time and data variables
-            ts.set(ts.get() + dt);
+            ts += dt;
             
-            rateOfTurn = Eigen::Vector3s::Random()*10; //to have rate of turn > 0 deg/s
-            data_imu.tail(3) = rateOfTurn* M_PI/180.0;
-            data_imu.head(3) =  current_quatState.conjugate() * (- wolf::gravity()); //gravity measured, we have no other translation movement
+            rateOfTurn << .1, .2, .3; //to have rate of turn > 0 deg/s
+            data_imu.head(3) = quat_current.conjugate() * (- wolf::gravity()); //gravity measured, we have no other translation movement
+            data_imu.tail(3) = rateOfTurn;
 
             //compute current orientaton taking this measure into account
-            current_quatState = current_quatState * wolf::v2q(data_imu.tail(3)*dt);
+            quat_current = quat_current * wolf::v2q(rateOfTurn*dt);
 
             //set timestamp, add bias, set data and process
             imu_ptr->setTimeStamp(ts);
@@ -828,7 +826,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
             sen_imu->process(imu_ptr);
         }
 
-        expected_final_state << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
+        expected_final_state << 0,0,0, quat_current.x(), quat_current.y(), quat_current.z(), quat_current.w(), 0,0,0;
         last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
         last_KF->setState(expected_final_state);
 
@@ -2197,8 +2195,8 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q2_ini
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
     //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-3)
+    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-3)
 
 }
 
@@ -2842,8 +2840,8 @@ int main(int argc, char **argv)
   testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
 //  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.*";
-    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
-//    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Static_NonNullGyroBias.VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias";
+//    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
+    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.VarB1B2V1P2V2_InvarP1Q1Q2_initOK";
 
 
 
