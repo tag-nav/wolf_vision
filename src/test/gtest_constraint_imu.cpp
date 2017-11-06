@@ -1104,7 +1104,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         Scalar dt(0.0010), dt_odom(1.0);
         TimeStamp ts(0.0), t_odom(0.0);
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu, sen_imu->getNoiseCov(), Eigen::Vector6s::Zero());
-        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 7, 6, nullptr);
+        wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, sen_odom3D->getNoiseCov(), 7, 6, nullptr);
         sen_odom3D->process(mot_ptr);
         //first odometry data will be processed at this timestamp
         t_odom.set(t_odom.get() + dt_odom);
@@ -1581,11 +1581,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_i
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->fix();
 
-    WOLF_DEBUG("bias before solving : ",origin_KF->getCaptureOf(sen_imu)->getCalibration().transpose());
-
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
-
-    WOLF_DEBUG("bias after  solving : ",origin_KF->getCaptureOf(sen_imu)->getCalibration().transpose());
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
@@ -1632,11 +1628,7 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
     last_KF->getCaptureOf(sen_imu)->setCalibration(origin_bias);
 
-    WOLF_DEBUG("bias before solving : ",origin_KF->getCaptureOf(sen_imu)->getCalibration().transpose());
-
     report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport;
-
-    WOLF_DEBUG("bias after  solving : ",origin_KF->getCaptureOf(sen_imu)->getCalibration().transpose());
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
@@ -2179,26 +2171,26 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst, VarB1B2V1P2V2_InvarP1Q
 
 }
 
-TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q2_initOK)
-{
-    //prepare problem for solving
-    origin_KF->getPPtr()->fix();
-    origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->unfix();
-
-    last_KF->getPPtr()->unfix();
-    last_KF->getOPtr()->fix();
-    last_KF->getVPtr()->unfix();
-
-    last_KF->setState(expected_final_state);
-
-    std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-
-    //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-3)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-3)
-
-}
+//TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRot, VarB1B2V1P2V2_InvarP1Q1Q2_initOK)
+//{
+//    //prepare problem for solving
+//    origin_KF->getPPtr()->fix();
+//    origin_KF->getOPtr()->fix();
+//    origin_KF->getVPtr()->unfix();
+//
+//    last_KF->getPPtr()->unfix();
+//    last_KF->getOPtr()->fix();
+//    last_KF->getVPtr()->unfix();
+//
+//    last_KF->setState(expected_final_state);
+//
+//    std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+//
+//    //Only biases are unfixed
+//    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-3)
+//    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-3)
+//
+//}
 
 TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
 {
@@ -2225,20 +2217,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2_InvarP1Q1V1P2Q2
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
 
-    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev, actual_state(last_KF->getState());
-    Eigen::MatrixXs covX(16,16);
+    Eigen::Matrix<wolf::Scalar, 10, 1> cov_stdev, actual_state(last_KF->getState());
+    Eigen::MatrixXs covX(10,10);
         
     //get data from covariance blocks
     wolf_problem_ptr_->getFrameCovariance(last_KF, covX);
 
-    for(int i = 0; i<16; i++)
+    for(int i = 0; i<10; i++)
         cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
     
     /*TEST_COUT << "2*std : " << cov_stdev.transpose();
     TEST_COUT << "expect : " << expected_final_state.transpose(); //expected final state
     TEST_COUT << "estim : " << last_KF->getState().transpose(); //estimated final state*/
 
-    for(unsigned int i = 0; i<16; i++)
+    for(unsigned int i = 0; i<10; i++)
         assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
 
     if(cov_stdev.tail(6).maxCoeff()>=1)
@@ -2271,20 +2263,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V2_InvarP1Q1V1P2
 
     ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*100)
 
-    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev, actual_state(last_KF->getState());
-    Eigen::MatrixXs covX(16,16);
+    Eigen::Matrix<wolf::Scalar, 10, 1> cov_stdev, actual_state(last_KF->getState());
+    Eigen::MatrixXs covX(10,10);
         
     //get data from covariance blocks
     wolf_problem_ptr_->getFrameCovariance(last_KF, covX);
 
-    for(int i = 0; i<16; i++)
+    for(int i = 0; i<10; i++)
         cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
     
     /*TEST_COUT << "2*std : " << cov_stdev.transpose();
     TEST_COUT << "expect : " << expected_final_state.transpose(); //expected final state
     TEST_COUT << "estim : " << last_KF->getState().transpose(); //estimated final state*/
 
-    for(unsigned int i = 0; i<16; i++)
+    for(unsigned int i = 0; i<10; i++)
         assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
 
     if(cov_stdev.tail(6).maxCoeff()>=1)
@@ -2438,20 +2430,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2P2Q2V2_InvarP1Q1
     Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
     ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
 
-    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev, actual_state(last_KF->getState());
-    Eigen::MatrixXs covX(16,16);
+    Eigen::Matrix<wolf::Scalar, 10, 1> cov_stdev, actual_state(last_KF->getState());
+    Eigen::MatrixXs covX(10,10);
         
     //get data from covariance blocks
     wolf_problem_ptr_->getFrameCovariance(last_KF, covX);
 
-    for(int i = 0; i<16; i++)
+    for(int i = 0; i<10; i++)
         cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
     
     /*TEST_COUT << "2*std : " << cov_stdev.transpose();
     TEST_COUT << "expect : " << expected_final_state.transpose(); //expected final state
     TEST_COUT << "estim : " << last_KF->getState().transpose(); //estimated final state*/
 
-    for(unsigned int i = 0; i<16; i++)
+    for(unsigned int i = 0; i<10; i++)
         assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
 
     if(cov_stdev.tail(6).maxCoeff()>=1)
@@ -2496,20 +2488,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarQ1B1B2P2Q2_InvarP1V1
     Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
     ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
 
-    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev, actual_state(last_KF->getState());
-    Eigen::MatrixXs covX(16,16);
+    Eigen::Matrix<wolf::Scalar, 10, 1> cov_stdev, actual_state(last_KF->getState());
+    Eigen::MatrixXs covX(10,10);
         
     //get data from covariance blocks
     wolf_problem_ptr_->getFrameCovariance(last_KF, covX);
 
-    for(int i = 0; i<16; i++)
+    for(int i = 0; i<10; i++)
         cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
     
     /*TEST_COUT << "2*std : " << cov_stdev.transpose();
     TEST_COUT << "expect : " << expected_final_state.transpose(); //expected final state
     TEST_COUT << "estim : " << last_KF->getState().transpose(); //estimated final state*/
 
-    for(unsigned int i = 0; i<16; i++)
+    for(unsigned int i = 0; i<10; i++)
         assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
     
     if(cov_stdev.tail(6).maxCoeff()>=1)
@@ -2554,20 +2546,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY, VarQ1B1B2P2Q2_InvarP1V
     Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
     ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
 
-    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev, actual_state(last_KF->getState());
-    Eigen::MatrixXs covX(16,16);
+    Eigen::Matrix<wolf::Scalar, 10, 1> cov_stdev, actual_state(last_KF->getState());
+    Eigen::MatrixXs covX(10,10);
         
     //get data from covariance blocks
     wolf_problem_ptr_->getFrameCovariance(last_KF, covX);
 
-    for(int i = 0; i<16; i++)
+    for(int i = 0; i<10; i++)
         cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
     
     /*TEST_COUT << "2*std : " << cov_stdev.transpose();
     TEST_COUT << "expect : " << expected_final_state.transpose(); //expected final state
     TEST_COUT << "estim : " << last_KF->getState().transpose(); //estimated final state*/
 
-    for(unsigned int i = 0; i<16; i++)
+    for(unsigned int i = 0; i<10; i++)
         assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
     
     if(cov_stdev.tail(6).maxCoeff()>=1)
@@ -2611,14 +2603,14 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2_InvarP1Q1V1P2Q2V
     //get data from covariance blocks
     problem->getFrameCovariance(last_KF, covX);
 
-    for(int i = 0; i<16; i++)
+    for(int i = 0; i<10; i++)
         cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
     
     /*TEST_COUT << "2*std : " << cov_stdev.transpose();
     TEST_COUT << "expect : " << expected_final_state.transpose(); //expected final state
     TEST_COUT << "estim : " << last_KF->getState().transpose(); //estimated final state*/
 
-    for(unsigned int i = 0; i<16; i++)
+    for(unsigned int i = 0; i<10; i++)
         assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
 
     if(cov_stdev.tail(6).maxCoeff()>=1)
@@ -2651,20 +2643,20 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V2_InvarP1Q1V1P2Q
 
     ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*100)
 
-    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev, actual_state(last_KF->getState());
-    Eigen::MatrixXs covX(16,16);
+    Eigen::Matrix<wolf::Scalar, 10, 1> cov_stdev, actual_state(last_KF->getState());
+    Eigen::MatrixXs covX(10,10);
         
     //get data from covariance blocks
     problem->getFrameCovariance(last_KF, covX);
 
-    for(int i = 0; i<16; i++)
+    for(int i = 0; i<10; i++)
         cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
     
     /*TEST_COUT << "2*std : " << cov_stdev.transpose();
     TEST_COUT << "expect : " << expected_final_state.transpose(); //expected final state
     TEST_COUT << "estim : " << last_KF->getState().transpose(); //estimated final state*/
 
-    for(unsigned int i = 0; i<16; i++)
+    for(unsigned int i = 0; i<10; i++)
         assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
 
     if(cov_stdev.tail(6).maxCoeff()>=1)
@@ -2813,24 +2805,24 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
     Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
     ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
 
-    Eigen::Matrix<wolf::Scalar, 16, 1> cov_stdev, actual_state(last_KF->getState());
-    Eigen::MatrixXs covX(16,16);
+    Eigen::Matrix<wolf::Scalar, 10, 1> cov_stdev, actual_state(last_KF->getState());
+    Eigen::MatrixXs covX(10,10);
         
     //get data from covariance blocks
     problem->getFrameCovariance(last_KF, covX);
 
-    for(int i = 0; i<16; i++)
+    for(int i = 0; i<10; i++)
         cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
     
     /*TEST_COUT << "2*std : " << cov_stdev.transpose();
     TEST_COUT << "expect : " << expected_final_state.transpose(); //expected final state
     TEST_COUT << "estim : " << last_KF->getState().transpose(); //estimated final state*/
 
-    for(unsigned int i = 0; i<16; i++)
+    for(unsigned int i = 0; i<10; i++)
         assert((expected_final_state(i) <= actual_state(i) + cov_stdev(i)) && (expected_final_state(i) >= actual_state(i) - cov_stdev(i)));
 
-    if(cov_stdev.tail(6).maxCoeff()>=1)
-        WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
+//    if(cov_stdev.tail(6).maxCoeff()>=1)
+//        WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
 }
 
 //Tests related to noise
@@ -2839,9 +2831,9 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   //::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
-//  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY.VarB1B2V1V2_InvarP1Q1P2Q2_initOK";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
-    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.VarB1B2V1P2V2_InvarP1Q1Q2_initOK";
+//    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.VarB1B2V1P2V2_InvarP1Q1Q2_initOK";
 
 
 
