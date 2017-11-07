@@ -12,6 +12,37 @@
 #include "wolf.h"
 #include "rotations.h"
 
+/*
+ * Most functions in this file are explained in the document:
+ *
+ *   Joan Sola, "IMU pre-integration", 2015-2017 IRI-CSIC
+ *
+ * They relate manipulations of Delta motion magnitudes used for IMU pre-integration.
+ *
+ * The Delta is defined as
+ *     Delta = [Dp, Dq, Dv]
+ * with
+ *     Dp : position delta
+ *     Dq : quaternion delta
+ *     Dv : velocity delta
+ *
+ * They are listed below:
+ *
+ *   - identity: I = Delta at the origin, with Dp = [0,0,0]; Dq = [0,0,0,1], Dv = [0,0,0]
+ *   - inverse: so that D (+) D.inv = I
+ *   - compose: Dc = D1 (+) D2
+ *   - between: Db = D2 (-) D1, so that D2 = D1 (+) Db
+ *   - composeOverState: x2 = x1 (+) D
+ *   - betweenStates: D = x2 (-) x1, so that x2 = x1 (+) D
+ *   - lift: got from Delta manifold to tangent space (equivalent to log() in rotations)
+ *   - retract: go from tangent space to delta manifold (equivalent to exp() in rotations)
+ *   - plus: D2 = D1 (+) retract(d)
+ *   - diff: d = lift( D2 (-) D1 )
+ *   - body2delta: construct a delta from body magnitudes of linAcc and angVel
+ */
+
+
+
 namespace wolf 
 {
 namespace imu {
