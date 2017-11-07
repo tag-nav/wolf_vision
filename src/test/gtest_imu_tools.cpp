@@ -517,8 +517,8 @@ TEST(IMU_tools, full_delta_residual)
     ASSERT_MATRIX_APPROX(Delta_exp, Delta_corr, 1e-3);
 
     // compute diff between expected and corrected
-    Matrix<Scalar, 9, 9> J_err_exp, J_err_corr;
-    diff(Delta_exp, Delta_corr, Delta_err, J_err_exp, J_err_corr);
+//    Matrix<Scalar, 9, 9> J_err_exp, J_err_corr;
+    diff(Delta_exp, Delta_corr, Delta_err); //, J_err_exp, J_err_corr);
 
     ASSERT_MATRIX_APPROX(Delta_err, Vector9s::Zero(), 1e-3);
 

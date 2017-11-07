@@ -280,14 +280,12 @@ void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x,
                                   const Scalar _dt,
                                   Eigen::VectorXs& _x_plus_delta)
 {
-    //    assert(_x.size() == 10 && "Wrong _x vector size");
-    //    assert(_delta.size() == 10 && "Wrong _delta vector size");
-    //    assert(_x_plus_delta.size() == 10 && "Wrong _x_plus_delta vector size");
+    assert(_x.size() == 10 && "Wrong _x vector size");
+    assert(_delta.size() == 10 && "Wrong _delta vector size");
+    assert(_x_plus_delta.size() == 10 && "Wrong _x_plus_delta vector size");
     assert(_dt >= 0 && "Time interval _Dt is negative!");
-    VectorXs x(_x.head(10));
-    VectorXs x_plus_delta(10);
-    x_plus_delta = imu::composeOverState(x, _delta, _dt);
-    _x_plus_delta.head(10) = x_plus_delta;
+
+    _x_plus_delta = imu::composeOverState(_x, _delta, _dt);
 }
 
 void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
@@ -306,17 +304,17 @@ void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
      *
      * Jacobians for covariance propagation.
      *
-     * a. With respect to Delta, gives _jacobian_delta_preint = D_D as:
+     * a. With respect to Delta, gives _jacobian_delta_preint = D'_D as:
      *
-     *   D_D = [ I    -DR*skew(dp)   I*dt
-     *           0     dR.tr          0
-     *           0    -DR*skew(dv)    I  ] // See Sola-16
+     *   D'_D = [ I    -DR*skew(dp)   I*dt
+     *            0     dR.tr          0
+     *            0    -DR*skew(dv)    I  ] // See Sola-16
      *
-     * b. With respect to delta, gives _jacobian_delta = D_d as:
+     * b. With respect to delta, gives _jacobian_delta = D'_d as:
      *
-     *   D_d = [ DR   0    0
-     *           0    I    0
-     *           0    0    DR ] // See Sola-16
+     *   D'_d = [ DR   0    0
+     *            0    I    0
+     *            0    0    DR ] // See Sola-16
      *
      * Note: covariance propagation, i.e.,  P+ = D_D * P * D_D' + D_d * M * D_d', is done in ProcessorMotion.
      */
