@@ -140,37 +140,9 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
         const Eigen::Matrix3s sqrt_A_r_dt_inv;
         const Eigen::Matrix3s sqrt_W_r_dt_inv;
 
-
-    private:
-        template<typename D>
-        void print(const std::string& name, const Eigen::MatrixBase<D>& mat) const;
-//        template<typename T, int R, int C>
-//        void print(const std::string& name, const Eigen::Matrix<T, R, C>& mat) const;
-        template<int R, int C>
-        void print(const std::string& name, const Matrix<Scalar, R, C>& mat) const;
 };
 
-template<typename D>
-inline void ConstraintIMU::print(const std::string& name, const Eigen::MatrixBase<D>& mat) const {}
-//template<typename T, int R, int C>
-//inline void ConstraintIMU::print(const std::string& name, const Eigen::Matrix<T, R, C>& mat) const {}
-template<int R, int C>
-inline void ConstraintIMU::print(const std::string& name, const Matrix<Scalar, R, C>& mat) const
-{
-    if (mat.cols() == 1)
-    {
-        WOLF_TRACE(name, ": ", mat.transpose());
-    }
-    else if (mat.rows() == 1)
-    {
-        WOLF_TRACE(name, ": ", mat);
-    }
-    else
-    {
-        WOLF_TRACE(name, ":\n", mat);
-    }
-}
-
+///////////////////// IMPLEMENTAITON ////////////////////////////
 
 inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
                                     const CaptureIMUPtr&    _cap_origin_ptr,
@@ -211,35 +183,6 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
         sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_rate_stdev_ * sqrt(dt_)).inverse())
 {
     setType("IMU");
-
-//    WOLF_TRACE("Constr IMU  (f", _ftr_ptr->id(),
-//               " C", _ftr_ptr->getCapturePtr()->id(),
-//               " F", _ftr_ptr->getCapturePtr()->getFramePtr()->id(),
-//               ") (Co", _cap_origin_ptr->id(),
-//               " Fo", _cap_origin_ptr->getFramePtr()->id(), ")");
-//
-//    WOLF_TRACE("dt: ", dt_);
-//
-//    WOLF_TRACE("delta preint: ", std::static_pointer_cast<CaptureMotion>(_ftr_ptr->getCapturePtr())->getDeltaPreint().transpose());
-////    WOLF_TRACE("Dp preint : ", dp_preint_.transpose()); // OK
-////    WOLF_TRACE("Dq preint : ", dq_preint_.coeffs().transpose()); // OK
-////    WOLF_TRACE("Dv preint : ", dv_preint_.transpose()); // OK
-//
-//    WOLF_TRACE("bias: ", std::static_pointer_cast<CaptureMotion>(_ftr_ptr->getCapturePtr())->getCalibrationPreint().transpose());
-////    WOLF_TRACE("bias acc : ", acc_bias_preint_.transpose()); // OK
-////    WOLF_TRACE("bias gyro: ", gyro_bias_preint_.transpose()); // OK
-//
-//    WOLF_TRACE("Jac bias : \n", std::static_pointer_cast<CaptureMotion>(_ftr_ptr->getCapturePtr())->getJacobianCalib());
-////    WOLF_TRACE("jac Dp_ab: \n", dDp_dab_); // OK
-////    WOLF_TRACE("jac Dv_ab: \n", dDv_dab_); // OK
-////    WOLF_TRACE("jac Dp_wb: \n", dDp_dwb_); // OK
-////    WOLF_TRACE("jac Dq_wb: \n", dDq_dwb_); // OK
-////    WOLF_TRACE("jac Dv_wb: \n", dDv_dwb_); // OK
-//
-//    WOLF_TRACE("Omega_delta.sqrt: \n", _ftr_ptr->getMeasurementSquareRootInformationUpper());
-//    WOLF_TRACE("Omega_acc.sqrt: \n", sqrt_A_r_dt_inv);
-//    WOLF_TRACE("Omega_gyro.sqrt: \n", sqrt_W_r_dt_inv);
-
 }
 
 
@@ -313,7 +256,7 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
      *  results in :
      *    res   = W.sqrt * ( diff ( D_preint , D_exp ) ) - J * (b - b_preint)
      */
-#define METHOD_1
+//#define METHOD_1
 
 
     //needed typedefs
@@ -405,8 +348,8 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     _res.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error;
 
 
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    /////////////////////////////////       PRINT VALUES       ///////////////////////////////////
 #if 0
     // print values -----------------------
     Matrix<T, 10, 1> x1; x1 << _p1 , _q1.coeffs(), _v1;

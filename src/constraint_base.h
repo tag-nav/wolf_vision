@@ -167,6 +167,11 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
          */
         ProblemPtr getProblem();
 
+    protected:
+        template<typename D>
+        void print(const std::string& name, const Eigen::MatrixBase<D>& mat) const; // Do nothing if input Scalar type is ceres::Jet
+        template<int R, int C>
+        void print(const std::string& name, const Eigen::Matrix<Scalar, R, C>& mat) const; // Normal print if Scalar type is wolf::Scalar
 };
 
 
@@ -181,6 +186,25 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 #include "landmark_base.h"
 
 namespace wolf{
+
+template<typename D>
+inline void ConstraintBase::print(const std::string& name, const Eigen::MatrixBase<D>& mat) const {} // Do nothing if input Scalar type is ceres::Jet
+template<int R, int C>
+inline void ConstraintBase::print(const std::string& name, const Eigen::Matrix<Scalar, R, C>& mat) const // Normal print if Scalar type is wolf::Scalar
+{
+    if (mat.cols() == 1)
+    {
+        WOLF_TRACE(name, ": ", mat.transpose());
+    }
+    else if (mat.rows() == 1)
+    {
+        WOLF_TRACE(name, ": ", mat);
+    }
+    else
+    {
+        WOLF_TRACE(name, ":\n", mat);
+    }
+}
 
 inline wolf::ProblemPtr ConstraintBase::getProblem()
 {
