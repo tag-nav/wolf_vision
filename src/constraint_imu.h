@@ -234,33 +234,46 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
                                     Eigen::MatrixBase<D3> &             _res) const
 {
 
-    /* Two methods are possible (select with #define below this note)
+    /*  Help for the IMU residual function
      *
-     *  Common computations:
-     *    D_exp = between(x1,x2,dt)     // Predict delta from states
-     *    step  = J * (b - b_preint)    // compute the delta correction step due to bias change
+     *  Notations:
+     *    D_* : a motion in the Delta manifold                           -- implemented as 10-vectors with [Dp, Dq, Dv]
+     *    T_* : a motion difference in the Tangent space to the manifold -- implemented as  9-vectors with [Dp, Do, Dv]
+     *    b*  : a bias
+     *    J*  : a Jacobian matrix
+     *
+     *  We use the following functions from imu_tools.h:
+     *    D  = betweenStates(x1,x2,dt) : obtain a Delta from two states separated dt=t2-t1
+     *    D2 = plus(D1,T)              : plus operator,  D2 = D1 (+) T
+     *    T  = diff(D1,D2)             : minus operator, T  = D2 (-) D1
+     *
+     *  Two methods are possible (select with #define below this note) :
+     *
+     *  Computations common to methods 1 and 2:
+     *    D_exp  = betweenStates(x1,x2,dt)   // Predict delta from states
+     *    T_step = J_preint * (b - b_preint) // compute the delta correction step due to bias change
      *
      *  Method 1:
-     *    corr  = plus(D_preint, step)  // correct the pre-integrated delta with correction step due to bias change
-     *    err   = diff(D_exp, D_corr)   // compare against expected delta
-     *    res   = W.sqrt * err
+     *    D_corr = plus(D_preint, T_step)    // correct the pre-integrated delta with correction step due to bias change
+     *    T_err  = diff(D_exp, D_corr)       // compare against expected delta
+     *    res    = W.sqrt * T_err
      *
-     *  results in:
-     *    res   = W.sqrt * ( diff ( D_exp, (D_preint * retract(J * (b - b_preint) ) ) )
+     *   results in:
+     *    res    = W.sqrt * ( diff ( D_exp, plus(D_preint, J_preint * (b - b_preint) ) ) )
      *
      *  Method 2:
-     *    diff  = diff(D_preint, D_exp) // compare pre-integrated against expected delta
-     *    err   = diff - step           // the difference should be the correction step due to bias change
-     *    res   = W.sqrt * err
+     *    T_diff = diff(D_preint, D_exp)     // compare pre-integrated against expected delta
+     *    T_err  = T_diff - T_step           // the difference should match the correction step due to bias change
+     *    res    = W.sqrt * err
      *
-     *  results in :
-     *    res   = W.sqrt * ( diff ( D_preint , D_exp ) ) - J * (b - b_preint)
+     *   results in :
+     *    res    = W.sqrt * ( ( diff ( D_preint , D_exp ) ) - J_preint * (b - b_preint) )
      */
-//#define METHOD_1
+//#define METHOD_1 // if commented, then METHOD_2 will be applied
 
 
     //needed typedefs
-    typedef typename D2::Scalar T;
+    typedef typename D1::Scalar T;
 
     EIGEN_STATIC_ASSERT_VECTOR_SPECIFIC_SIZE(D3, 15);
 
@@ -296,7 +309,7 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
               dp_correct, dq_correct, dv_correct);
 
 
-    // 3. Delta error in minimal form: d_min = lift(delta_pred (-) delta_corr)
+    // 3. Delta error in minimal form: D_err = diff(D_exp , D_corr)
     // Note the Dt here is zero because it's the delta-time between the same time stamps!
     Eigen::Matrix<T, 9, 1> d_error;
     Eigen::Map<Eigen::Matrix<T, 3, 1> >   dp_error(d_error.data()    );
