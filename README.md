@@ -363,6 +363,10 @@ If they are available, just do
 
 #### Do the profiling and watch the reports
 
+_Remember:_ For a proper profiling, compile Wolf and related libraries 
+in RELEASE mode. Profiling code compiled in DEBUG mode is not going to take you 
+anywhere, and in the reports you will mostly see the overhead of the DEBUG mode.
+
 Type in your `wolf/bin/` directory:
 
     $ cd bin/
