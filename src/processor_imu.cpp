@@ -1,4 +1,5 @@
 #include "processor_imu.h"
+#include "imu_tools.h"
 
 namespace wolf {
 

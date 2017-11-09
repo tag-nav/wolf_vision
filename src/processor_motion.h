@@ -131,17 +131,13 @@ class ProcessorMotion : public ProcessorBase
          * \param _x the returned state vector
          */
         void getCurrentState(Eigen::VectorXs& _x);
+        void getCurrentTimeStamp(TimeStamp& _ts){ _ts = getBuffer().get().back().ts_; }
 
-        /** \brief Get a constant reference to the state integrated so far
+        /** \brief Get the state integrated so far
          * \return the state vector
          */
         Eigen::VectorXs getCurrentState();
-
-        /** \brief Fill a reference to the state integrated so far and its stamp
-         * \param _x the returned state vector
-         * \param _ts the returned stamp
-         */
-        void getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts);
+        wolf::TimeStamp getCurrentTimeStamp();
 
         /** \brief Fill the state corresponding to the provided time-stamp
          * \param _ts the time stamp
@@ -225,14 +221,6 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual void postProcess() { };
 
-        /**
-         * @brief Get the incoming CaptureBasePtr and returns a CaptureMotionPtr out of it.
-         * If not overloaded, the base class calls
-         * std::static_pointer_cast<CaptureMotion>(_incoming_ptr)
-         * @return CaptureMotionPtr.
-         */
-        virtual CaptureMotionPtr getIncomingCaptureMotion(CaptureBasePtr& _incoming_ptr);
-
 
         // These are the pure virtual functions doing the mathematics
     protected:
@@ -291,12 +279,12 @@ class ProcessorMotion : public ProcessorBase
          *  where `F_data = d_f/d_data` is the Jacobian of `f()`.
          */
         virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
-                                const Eigen::MatrixXs& _data_cov,
-                                const Eigen::VectorXs& _calib,
-                                const Scalar _dt,
-                                Eigen::VectorXs& _delta,
-                                Eigen::MatrixXs& _delta_cov,
-                                Eigen::MatrixXs& _jacobian_calib) = 0;
+                                         const Eigen::MatrixXs& _data_cov,
+                                         const Eigen::VectorXs& _calib,
+                                         const Scalar _dt,
+                                         Eigen::VectorXs& _delta,
+                                         Eigen::MatrixXs& _delta_cov,
+                                         Eigen::MatrixXs& _jacobian_calib) = 0;
 
         /** \brief composes a delta-state on top of another delta-state
          * \param _delta1 the first delta-state
@@ -433,8 +421,6 @@ class ProcessorMotion : public ProcessorBase
         Eigen::MatrixXs jacobian_calib_;        ///< jacobian of delta preintegration wrt calibration params
         Eigen::MatrixXs jacobian_delta_calib_;  ///< jacobian of delta wrt calib params
 
-    private:
-        wolf::TimeStamp getCurrentTimeStamp();
 };
 
 }
@@ -507,12 +493,6 @@ inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
 {
     Scalar Dt = getCurrentTimeStamp() - origin_ptr_->getTimeStamp();
     statePlusDelta(origin_ptr_->getFramePtr()->getState(), last_ptr_->getDeltaCorrected(origin_ptr_->getCalibration()), Dt, _x);
-}
-
-inline void ProcessorMotion::getCurrentStateAndStamp(Eigen::VectorXs& _x, TimeStamp& _ts)
-{
-    getCurrentState(_x);
-    _ts = getCurrentTimeStamp();
 }
 
 inline const Eigen::MatrixXs ProcessorMotion::getCurrentDeltaPreintCov()

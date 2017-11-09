@@ -203,7 +203,6 @@ class Problem : public std::enable_shared_from_this<Problem>
         // State getters
         Eigen::VectorXs getCurrentState();
         void getCurrentState(Eigen::VectorXs& state);
-        Eigen::VectorXs getCurrentStateAndStamp(TimeStamp& _ts);
         void getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& _ts);
         Eigen::VectorXs getState(const TimeStamp& _ts);
         void getState(const TimeStamp& _ts, Eigen::VectorXs& state);

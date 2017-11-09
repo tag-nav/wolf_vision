@@ -110,6 +110,7 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
 
             // process data in capture
             sen_imu->process(imu_ptr);
+
         }
 
         KF1 = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t);
@@ -824,6 +825,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
             data_imu = data_imu + origin_bias;
             imu_ptr->setData(data_imu);
             sen_imu->process(imu_ptr);
+
         }
 
         expected_final_state << 0,0,0, quat_current.x(), quat_current.y(), quat_current.z(), quat_current.w(), 0,0,0;
@@ -1100,6 +1102,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         Eigen::Vector6s data_imu(Eigen::Vector6s::Zero()), data_odom3D(Eigen::Vector6s::Zero());
         Eigen::Vector3s rateOfTurn; //deg/s
         rateOfTurn << 0,90,0;
+        VectorXs D_cor(10);
 
         Scalar dt(0.0010), dt_odom(1.0);
         TimeStamp ts(0.0), t_odom(0.0);
@@ -1129,8 +1132,12 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
             imu_ptr->setData(data_imu);
             sen_imu->process(imu_ptr);
 
+            D_cor = processor_ptr_imu->getLastPtr()->getDeltaCorrected(origin_bias);
+
             if(ts.get() >= t_odom.get())
             {
+                WOLF_TRACE("X_preint(t)  : ", wolf_problem_ptr_->getState(ts).transpose());
+
                 // PROCESS ODOM 3D DATA
                 data_odom3D.head(3) << 0,0,0;
                 data_odom3D.tail(3) = q2v(odom_quat);
@@ -1147,6 +1154,9 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         expected_final_state << 0,0,0, current_quatState.x(), current_quatState.y(), current_quatState.z(), current_quatState.w(), 0,0,0;
         last_KF = wolf_problem_ptr_->getTrajectoryPtr()->closestKeyFrameToTimeStamp(ts);
         last_KF->setState(expected_final_state);
+
+        WOLF_TRACE("X_correct(t) : ", imu::composeOverState(x_origin, D_cor, ts - t).transpose());
+        WOLF_TRACE("X_true(t)    : ", expected_final_state.transpose());
 
         //===================================================== END{PROCESS DATA}
         origin_KF->unfix();

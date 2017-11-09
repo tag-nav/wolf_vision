@@ -235,13 +235,6 @@ Eigen::VectorXs Problem::getCurrentState()
     return state;
 }
 
-Eigen::VectorXs Problem::getCurrentStateAndStamp(TimeStamp& ts)
-{
-    Eigen::VectorXs state(getFrameStructureSize());
-    getCurrentStateAndStamp(state, ts);
-    return state;
-}
-
 void Problem::getCurrentState(Eigen::VectorXs& state)
 {
     assert(state.size() == getFrameStructureSize() && "Problem::getCurrentState: bad state size");
@@ -260,7 +253,10 @@ void Problem::getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& ts)
     assert(state.size() == getFrameStructureSize() && "Problem::getCurrentState: bad state size");
 
     if (processor_motion_ptr_ != nullptr)
-        processor_motion_ptr_->getCurrentStateAndStamp(state, ts);
+    {
+        processor_motion_ptr_->getCurrentState(state);
+        processor_motion_ptr_->getCurrentTimeStamp(ts);
+    }
     else if (trajectory_ptr_->getLastKeyFramePtr() != nullptr)
     {
         trajectory_ptr_->getLastKeyFramePtr()->getTimeStamp(ts);
@@ -300,39 +296,12 @@ Eigen::VectorXs Problem::getState(const TimeStamp& _ts)
 Size Problem::getFrameStructureSize() const
 {
     return state_size_;
-//    if (trajectory_ptr_->getFrameStructure() == "PO 2D")
-//        return 3;
-//    if (trajectory_ptr_->getFrameStructure() == "PO 3D")
-//        return 7;
-//    if (trajectory_ptr_->getFrameStructure() == "POV 3D")
-//        return 10;
-//    throw std::runtime_error(
-//            "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
 }
 
 void Problem::getFrameStructureSize(Size& _x_size, Size& _cov_size) const
 {
     _x_size = state_size_;
     _cov_size = state_cov_size_;
-
-//    if (trajectory_ptr_->getFrameStructure() == "PO 2D")
-//    {
-//        _x_size = 3;
-//        _cov_size = 3;
-//    }
-//    else if (trajectory_ptr_->getFrameStructure() == "PO 3D")
-//    {
-//        _x_size = 7;
-//        _cov_size = 6;
-//    }
-//    else if (trajectory_ptr_->getFrameStructure() == "POV 3D")
-//    {
-//        _x_size = 10;
-//        _cov_size = 9;
-//    }
-//    else
-//        throw std::runtime_error(
-//                    "Problem::getFrameStructureSize(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
 }
 
 Eigen::VectorXs Problem::zeroState()
@@ -573,9 +542,9 @@ Eigen::MatrixXs Problem::getFrameCovariance(FrameBasePtr _frame_ptr)
     for (const auto& sb : _frame_ptr->getStateBlockVec())
         if (sb)
             sz += sb->getSize();
+
     Eigen::MatrixXs covariance(sz, sz);
 
-//    Eigen::MatrixXs covariance = Eigen::MatrixXs::Zero(_frame_ptr->getPPtr()->getSize()+_frame_ptr->getOPtr()->getSize(), _frame_ptr->getPPtr()->getSize()+_frame_ptr->getOPtr()->getSize());
     getFrameCovariance(_frame_ptr, covariance);
     return covariance;
 }

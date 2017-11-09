@@ -70,7 +70,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         status_ = RUNNING;
     }
 
-    incoming_ptr_ = getIncomingCaptureMotion(_incoming_ptr);
+    incoming_ptr_ = std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
 
     /// @todo Anything else to do ?
     if (incoming_ptr_ == nullptr) return;
@@ -400,11 +400,6 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
         motion_it++;
         prev_motion_it++;
     }
-}
-
-CaptureMotionPtr ProcessorMotion::getIncomingCaptureMotion(CaptureBasePtr& _incoming_ptr)
-{
-  return std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
 }
 
 CaptureMotionPtr ProcessorMotion::getCaptureMotionContainingTimeStamp(const TimeStamp& _ts)
