@@ -106,6 +106,7 @@ class ProcessorIMU : public ProcessorMotion{
 #include "constraint_imu.h"
 #include "state_block.h"
 #include "rotations.h"
+#include "imu_tools.h"
 
 
 namespace wolf{
