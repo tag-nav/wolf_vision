@@ -2840,8 +2840,8 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-//  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY.VarB1B2V1V2_InvarP1Q1P2Q2_initOK";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
+//  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY.VarB1B2V1V2_InvarP1Q1P2Q2_initOK";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.VarB1B2V1P2V2_InvarP1Q1Q2_initOK";
 
