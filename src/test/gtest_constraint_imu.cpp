@@ -1339,6 +1339,88 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
     virtual void TearDown(){}
 };
 
+class ConstraintIMU_biasTest_Move_NonNullBias2 : public testing::Test
+{
+    public:
+        ProblemPtr problem;
+        SensorIMUPtr sensor_imu;
+        ProcessorIMUPtr processor_imu;
+        CaptureIMUPtr capture_imu;
+        FrameBasePtr KF_0, KF_1;
+        CaptureMotionPtr CM_0, CM_1;
+        CeresManagerPtr ceres_manager;
+
+    virtual void SetUp( )
+    {
+        using std::shared_ptr;
+        using std::make_shared;
+        using std::static_pointer_cast;
+
+        std::string wolf_root = _WOLF_ROOT_DIR;
+
+        //===================================== SETTING PROBLEM
+        problem = Problem::create("POV 3D");
+
+        // CERES WRAPPER
+        ceres::Solver::Options ceres_options;
+        ceres_options.minimizer_type = ceres::TRUST_REGION;
+        ceres_options.max_line_search_step_contraction = 1e-3;
+        ceres_options.max_num_iterations = 1e4;
+        ceres_manager = std::make_shared<CeresManager>(problem, ceres_options);
+
+        // SENSOR + PROCESSOR IMU
+        SensorBasePtr       sensor = problem->installSensor   ("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+        ProcessorBasePtr processor = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_t6.yaml");
+        sensor_imu    = std::static_pointer_cast<SensorIMU>   (sensor);
+        processor_imu = std::static_pointer_cast<ProcessorIMU>(processor);
+
+        // ==================================== INITIAL CONDITIONS
+        TimeStamp t0(0);
+        VectorXs x0(10); x0 << 0,0,0, 0,0,0,1, 0,0,0;
+        MatrixXs P0(9,9); P0.setIdentity() * 0.01;
+
+        KF_0 = problem->setPrior(x0, P0, t0);
+
+        Scalar dt = 0.01;
+
+        Vector6s data; data << 0,0,0, 0,0,0;
+        Vector3s a, am, w, wm;
+        a << 0,0,0;
+        w << 0,0,0; w *= 0.1;
+
+        Quaternions q; q.setIdentity();
+        Vector6s bias; bias << 0,0,0, 0,0,0;
+        Vector6s bias_preint; bias_preint << 0,0,0, 0,0,0;
+
+        CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(t0, sensor_imu, data, sensor_imu->getNoiseCov());
+
+        VectorXs D_current(10), D_preint(10), D_corrected(10);
+
+        for (TimeStamp t = t0; t < t0 + 1.0; t += dt)
+        {
+            q *= exp_q(wm*dt);
+            am = a - q*gravity();
+            wm = w;
+            data << am, wm;
+            data += bias;
+
+            capture_imu->setTimeStamp(t);
+            capture_imu->setData(data);
+
+            sensor_imu->process(capture_imu);
+
+            D_current = processor_imu->getLastPtr()->getDeltaCorrected(bias);
+            D_preint = processor_imu->getLastPtr()->getDeltaCorrected(bias_preint);
+
+            WOLF_TRACE("X_current(t): ", imu::composeOverState(x0, D_current, t - t0 ) );
+            WOLF_TRACE("X_preint(t) : ", imu::composeOverState(x0, D_preint , t - t0 ) );
+        }
+
+    }
+
+    virtual void TearDown( ) { }
+};
+
 // tests with following conditions :
 //  var(b1,b2),        invar(p1,q1,v1,p2,q2,v2),    factor : imu(p,q,v)
 
