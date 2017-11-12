@@ -1339,16 +1339,28 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
     virtual void TearDown(){}
 };
 
-class ConstraintIMU_biasTest_Move_NonNullBias2 : public testing::Test
+class ConstraintIMU_biasTest : public testing::Test
 {
     public:
         ProblemPtr problem;
         SensorIMUPtr sensor_imu;
         ProcessorIMUPtr processor_imu;
-        CaptureIMUPtr capture_imu;
         FrameBasePtr KF_0, KF_1;
+        CaptureBasePtr   C_0;
         CaptureMotionPtr CM_0, CM_1;
+        CaptureIMUPtr capture_imu;
         CeresManagerPtr ceres_manager;
+
+        TimeStamp t0, t;
+        Scalar dt, DT;
+        int num_integrations;
+
+        VectorXs x0;
+        Vector3s p0, v0;
+        Quaternions q0, q;
+        Vector6s motion, data, bias_real, bias_preint, bias_null;
+        Vector3s a, w, am, wm;
+
 
     virtual void SetUp( )
     {
@@ -1374,52 +1386,185 @@ class ConstraintIMU_biasTest_Move_NonNullBias2 : public testing::Test
         sensor_imu    = std::static_pointer_cast<SensorIMU>   (sensor);
         processor_imu = std::static_pointer_cast<ProcessorIMU>(processor);
 
-        // ==================================== INITIAL CONDITIONS
-        TimeStamp t0(0);
-        VectorXs x0(10); x0 << 0,0,0, 0,0,0,1, 0,0,0;
-        MatrixXs P0(9,9); P0.setIdentity() * 0.01;
+        bias_null.setZero();
 
-        KF_0 = problem->setPrior(x0, P0, t0);
+        x0.resize(10);
 
-        Scalar dt = 0.01;
+    }
 
-        Vector6s data; data << 0,0,0, 0,0,0;
-        Vector3s a, am, w, wm;
-        a << 0,0,0;
-        w << 0,0,0; w *= 0.1;
+    virtual void TearDown( ) { }
 
-        Quaternions q; q.setIdentity();
-        Vector6s bias; bias << 0,0,0, 0,0,0;
-        Vector6s bias_preint; bias_preint << 0,0,0, 0,0,0;
+    /* Create IMU data from body motion
+     * Input:
+     *   motion: [ax, ay, az, wx, wy, wz] the motion in body frame
+     *   q: the current orientation wrt horizontal
+     *   bias: the bias of the IMU
+     * Output:
+     *   return: the data vector as created by the IMU (with motion, gravity, and bias)
+     */
+    VectorXs motion2data(const VectorXs& body, const Quaternions& q, const VectorXs& bias)
+    {
+        VectorXs data(6);
+        data = body;                                // start with body motion
+        data.head(3) -= q.conjugate()*gravity();    // add -g
+        data = data + bias;                         // add bias
+        return data;
+    }
 
-        CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(t0, sensor_imu, data, sensor_imu->getNoiseCov());
 
-        VectorXs D_current(10), D_preint(10), D_corrected(10);
 
-        for (TimeStamp t = t0; t < t0 + 1.0; t += dt)
+    /* Integrate acc and angVel motion, obtain Delta_preintegrated
+     * Input:
+     *   N: number of steps
+     *   q0: initial orientaiton
+     *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body brame
+     *   bias_real: the real bias of the IMU
+     *   bias_preint: the bias used for Delta pre-integration
+     * Output:
+     *   return: the preintegrated delta
+     */
+    VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt)
+    {
+        VectorXs data(6);
+        VectorXs body(6);
+        VectorXs delta(10);
+        VectorXs Delta(10), Delta_plus(10);
+        Delta = imu::identity();
+        Quaternions q(q0);
+        for (int n = 0; n<N; n++)
         {
-            q *= exp_q(wm*dt);
-            am = a - q*gravity();
-            wm = w;
-            data << am, wm;
-            data += bias;
+            data        = motion2data(motion, q, bias_real);
+            q           = q*exp_q(motion.tail(3)*dt);
+            body        = data - bias_preint;
+            delta       = imu::body2delta(body, dt);
+            Delta_plus  = imu::compose(Delta, delta, dt);
+            Delta       = Delta_plus;
+        }
+        return Delta;
+    }
+
+    /* Integrate acc and angVel motion, obtain Delta_preintegrated
+     * Input:
+     *   N: number of steps
+     *   q0: initial orientaiton
+     *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body brame
+     *   bias_real: the real bias of the IMU
+     *   bias_preint: the bias used for Delta pre-integration
+     * Output:
+     *   J_D_b: the Jacobian of the preintegrated delta wrt the bias
+     *   return: the preintegrated delta
+     */
+    VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Matrix<Scalar, 9, 6>& J_D_b)
+    {
+        VectorXs data(6);
+        VectorXs body(6);
+        VectorXs delta(10);
+        Matrix<Scalar, 9, 6> J_d_d, J_d_b;
+        Matrix<Scalar, 9, 9> J_D_D, J_D_d;
+        VectorXs Delta(10), Delta_plus(10);
+        Quaternions q;
+
+        Delta = imu::identity();
+        J_D_b.setZero();
+        q = q0;
+        for (int n = 0; n<N; n++)
+        {
+            // Simulate data
+            data = motion2data(motion, q, bias_real);
+            q    = q*exp_q(motion.tail(3)*dt);
+            // Motion::integrateOneStep()
+            {   // IMU::computeCurrentDelta
+                body  = data - bias_preint;
+                imu::body2delta(body, dt, delta, J_d_d);
+                J_d_b = - J_d_d;
+            }
+            {   // IMU::deltaPlusDelta
+                imu::compose(Delta, delta, dt, Delta_plus, J_D_D, J_D_d);
+            }
+            // Motion:: jac calib
+            J_D_b = J_D_D*J_D_b + J_D_d*J_d_b;
+            // Motion:: buffer
+            Delta = Delta_plus;
+        }
+        return Delta;
+    }
+
+};
+
+TEST_F(ConstraintIMU_biasTest, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
+{
+
+         // ==================================== INITIAL CONDITIONS
+        t0 = 0;
+        dt = 0.1;
+        num_integrations = 10;
+        DT = num_integrations * dt;
+
+        p0 << 0,0,0;
+        q0.setIdentity();
+        v0 << 0,0,0;
+        MatrixXs  P0(9,9); P0.setIdentity() * 0.01;
+
+        x0 << p0, q0.coeffs(), v0;
+        KF_0 = problem->setPrior(x0, P0, t0);
+        C_0  = processor_imu->getOriginPtr();
+
+        // bias
+        bias_real   << .001, .002, .003, -.001, -.002, -.003;
+        bias_preint = bias_null;
+
+        processor_imu->getLastPtr()->setCalibrationPreint(bias_preint);
+
+        // ===================================== MOTION params
+        a << 0,0,0;
+        w << 0,1,0; w *= 0.1;
+
+        motion << a, w;
+
+        // ===================================== INTEGRATE USING PROCESSOR
+
+        capture_imu = std::make_shared<CaptureIMU>(t0, sensor_imu, data, sensor_imu->getNoiseCov());
+        VectorXs D_preint(10), D_corrected(10);
+        q = q0;
+        for ( t = t0 + dt; t < t0 + num_integrations * dt; t += dt )
+        {
+            data = motion2data(motion, q, bias_real);
+            q    = q * exp_q(wm*dt);
 
             capture_imu->setTimeStamp(t);
             capture_imu->setData(data);
 
             sensor_imu->process(capture_imu);
 
-            D_current = processor_imu->getLastPtr()->getDeltaCorrected(bias);
-            D_preint = processor_imu->getLastPtr()->getDeltaCorrected(bias_preint);
+            D_preint    = processor_imu->getLastPtr()->getDeltaPreint();
+            D_corrected = processor_imu->getLastPtr()->getDeltaCorrected(bias_real);
 
-            WOLF_TRACE("X_current(t): ", imu::composeOverState(x0, D_current, t - t0 ) );
-            WOLF_TRACE("X_preint(t) : ", imu::composeOverState(x0, D_preint , t - t0 ) );
         }
 
-    }
+        // INTEGRATE USING IMU_TOOLS
+        VectorXs D_preint_imu, D_corrected_imu;
+        Matrix<Scalar, 9, 6> J_b;
+        D_preint_imu = integrateDelta(num_integrations, q0, motion, bias_real, bias_preint, dt, J_b);
 
-    virtual void TearDown( ) { }
-};
+        // correct perturbated
+        Vector9s step = J_b*(bias_real-bias_preint);
+        D_corrected_imu = imu::plus(D_preint_imu, step);
+
+        WOLF_TRACE("D_preint     : ", D_preint       .transpose() );
+        WOLF_TRACE("D_preint_imu : ", D_preint_imu   .transpose() );
+//        ASSERT_MATRIX_APPROX(D_preint, D_preint_imu, 1e-8);
+
+        WOLF_TRACE("D_correct    : ", D_corrected    .transpose() );
+        WOLF_TRACE("D_correct_imu: ", D_corrected_imu.transpose() );
+//        ASSERT_MATRIX_APPROX(D_corrected, D_corrected_imu, 1e-8);
+
+        WOLF_TRACE("X_preint     : ", imu::composeOverState(x0, D_preint       , DT ).transpose() );
+        WOLF_TRACE("X_preint_imu : ", imu::composeOverState(x0, D_preint_imu   , DT ).transpose() );
+
+        WOLF_TRACE("X_correct    : ", imu::composeOverState(x0, D_corrected    , DT ).transpose() );
+        WOLF_TRACE("X_correct_imu: ", imu::composeOverState(x0, D_corrected_imu, DT ).transpose() );
+
+}
 
 // tests with following conditions :
 //  var(b1,b2),        invar(p1,q1,v1,p2,q2,v2),    factor : imu(p,q,v)
@@ -2922,11 +3067,11 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
+//  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
 //  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY.VarB1B2V1V2_InvarP1Q1P2Q2_initOK";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.VarB1B2V1P2V2_InvarP1Q1Q2_initOK";
-
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest.*";
 
 
   return RUN_ALL_TESTS();
