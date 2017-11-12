@@ -613,7 +613,7 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
         // Capture fix only takes 3D position and Quaternion orientation
         CaptureFixPtr init_capture;
         if (trajectory_ptr_->getFrameStructure() == "POV 3D")
-            init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state.head(7), _prior_cov);
+            init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
         else
             init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state, _prior_cov);
 
