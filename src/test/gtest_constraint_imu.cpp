@@ -1508,6 +1508,8 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
         x0  << p0, q0.coeffs(), v0;
         KF_0 = problem->setPrior(x0, P0, t0);
         C_0  = processor_imu->getOriginPtr();
+        CM_1 = processor_imu->getLastPtr();
+        KF_1 = CM_1->getFramePtr();
 
         // bias
         bias_real  << .001, .002, .003, -.001, -.002, -.003;
@@ -1558,7 +1560,7 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
         D_preint_imu = integrateDelta(num_integrations, q0, motion, bias_real, bias_preint, dt, J_b);
 
         // correct perturbated
-        Vector9s step = J_b*(bias_real-bias_preint);
+        Vector9s step = J_b * (bias_real - bias_preint);
         D_corrected_imu = imu::plus(D_preint_imu, step);
 
         WOLF_TRACE("D_preint     : ", D_preint       .transpose() );
@@ -1576,6 +1578,46 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
         WOLF_TRACE("X_correct_imu: ", imu::composeOverState(x0, D_corrected_imu, DT ).transpose() );
         ASSERT_MATRIX_APPROX(imu::composeOverState(x0, D_corrected     , DT ), x_exact, 1e-5);
         ASSERT_MATRIX_APPROX(imu::composeOverState(x0, D_corrected_imu , DT ), x_exact, 1e-5);
+
+        // ================================ SET KF AND SOLVE
+        KF_1->setState(x_exact);
+        KF_1->setKey();
+
+        KF_0->getPPtr()->fix();
+        KF_0->getOPtr()->fix();
+        KF_0->getVPtr()->fix();
+        KF_1->getPPtr()->fix();
+        KF_1->getOPtr()->fix();
+        KF_1->getVPtr()->fix();
+
+        FeatureBasePtr ft_1 = processor_imu->emplaceFeature(CM_1);
+        processor_imu->emplaceConstraint(ft_1, C_0);
+
+//        problem->print(4,1,1,1);
+
+        string report = ceres_manager->solve(1);
+
+        Vector6s bias_0 = C_0 ->getCalibration();
+        Vector6s bias_1 = CM_1->getCalibration();
+
+        WOLF_TRACE("bias preint  : ", bias_preint.transpose());
+        WOLF_TRACE("bias real    : ", bias_real  .transpose());
+        WOLF_TRACE("bias optim 0 : ", bias_0     .transpose());
+        WOLF_TRACE("bias optim 1 : ", bias_1     .transpose());
+
+        ASSERT_MATRIX_APPROX(bias_0, bias_real, 1e-4);
+        ASSERT_MATRIX_APPROX(bias_1, bias_real, 1e-4);
+
+        // ============================= CHECK INTEGRATED STATE WITH SOLVED BIAS
+        step = J_b * (bias_0 - bias_preint);
+        VectorXs D_optim = imu::plus(D_preint, step);
+        VectorXs x_optim = imu::composeOverState(x0, D_optim, DT);
+
+        WOLF_TRACE("D_optim      : ", D_optim.transpose());
+        WOLF_TRACE("X_optim      : ", x_optim.transpose());
+        WOLF_TRACE("X_optim error: ", (x_exact - x_optim).transpose());
+
+        ASSERT_MATRIX_APPROX(x_optim, x_exact, 1e-5);
 
 }
 
@@ -3080,11 +3122,11 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest.*:ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
+//  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest.*:ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
 //  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY.VarB1B2V1V2_InvarP1Q1P2Q2_initOK";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.VarB1B2V1P2V2_InvarP1Q1Q2_initOK";
-//  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest.*";
 
 
   return RUN_ALL_TESTS();
