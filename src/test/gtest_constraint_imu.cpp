@@ -1346,7 +1346,7 @@ class ConstraintIMU_biasTest : public testing::Test
         SensorIMUPtr sensor_imu;
         ProcessorIMUPtr processor_imu;
         FrameBasePtr KF_0, KF_1;
-        CaptureBasePtr   C_0;
+        CaptureBasePtr   C_0, C_1;
         CaptureMotionPtr CM_0, CM_1;
         CaptureIMUPtr capture_imu;
         CeresManagerPtr ceres_manager;
@@ -1375,9 +1375,12 @@ class ConstraintIMU_biasTest : public testing::Test
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
-        ceres_options.minimizer_type = ceres::TRUST_REGION;
-        ceres_options.max_line_search_step_contraction = 1e-3;
-        ceres_options.max_num_iterations = 1e4;
+        //        ceres_options.minimizer_type                   = ceres::TRUST_REGION;
+        //        ceres_options.max_line_search_step_contraction = 1e-3;
+        //        ceres_options.max_num_iterations               = 1e4;
+        //        ceres_options.min_relative_decrease            = 1e-10;
+        //        ceres_options.parameter_tolerance              = 1e-10;
+        //        ceres_options.function_tolerance               = 1e-10;
         ceres_manager = std::make_shared<CeresManager>(problem, ceres_options);
 
         // SENSOR + PROCESSOR IMU
@@ -1521,7 +1524,7 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
         a << 1,2,3;
         w << 1,2,3;
 
-        WOLF_TRACE("w * DT (rather be lower than 1.507 approx) = ", (DT*w).transpose()); // beware if w*DT is large (>~ 1.507) then Jacobian for correction is poor
+        WOLF_TRACE("w * DT (rather be lower than 1.507 approx) = ", w.transpose() * DT); // beware if w*DT is large (>~ 1.507) then Jacobian for correction is poor
 
         motion << a, w;
 
@@ -1580,8 +1583,11 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
         ASSERT_MATRIX_APPROX(imu::composeOverState(x0, D_corrected_imu , DT ), x_exact, 1e-5);
 
         // ================================ SET KF AND SOLVE
-        KF_1->setState(x_exact);
-        KF_1->setKey();
+        FrameBasePtr KF = problem->emplaceFrame(KEY_FRAME, x_exact, t);
+        processor_imu->keyFrameCallback(KF, 0.01);
+
+        KF_1 = problem->getLastKeyFramePtr();
+        C_1  = KF_1->getCaptureList().back();
 
         KF_0->getPPtr()->fix();
         KF_0->getOPtr()->fix();
@@ -1590,15 +1596,10 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
         KF_1->getOPtr()->fix();
         KF_1->getVPtr()->fix();
 
-        FeatureBasePtr ft_1 = processor_imu->emplaceFeature(CM_1);
-        processor_imu->emplaceConstraint(ft_1, C_0);
+        string report = ceres_manager->solve(2);
 
-//        problem->print(4,1,1,1);
-
-        string report = ceres_manager->solve(1);
-
-        Vector6s bias_0 = C_0 ->getCalibration();
-        Vector6s bias_1 = CM_1->getCalibration();
+        Vector6s bias_0 = C_0->getCalibration();
+        Vector6s bias_1 = C_1->getCalibration();
 
         WOLF_TRACE("bias preint  : ", bias_preint.transpose());
         WOLF_TRACE("bias real    : ", bias_real  .transpose());
@@ -1619,6 +1620,7 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
 
         ASSERT_MATRIX_APPROX(x_optim, x_exact, 1e-5);
 
+        cout << report << endl;
 }
 
 // tests with following conditions :
