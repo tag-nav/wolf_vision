@@ -113,21 +113,21 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
     typedef typename Derived::Scalar T;
 
     T angle_squared = _v.squaredNorm();
-    T angle = sqrt(angle_squared);
-    T angle_half = angle / (T)2.0;
+    T angle         = sqrt(angle_squared);
+    T angle_half    = angle / (T)2.0;
 
     Eigen::Quaternion<T> q;
     if (angle > (T)(wolf::Constants::EPS))
     {
-        q.w() = cos(angle_half);
-        q.vec() = _v / angle * sin(angle_half);
+        q.w()   = cos(angle_half);
+        q.vec() = sin(angle_half) * _v.normalized();// / angle;
     }
     else
     {
         q.w()   = (T)1.0 - angle_squared/(T)2; // Taylor expansion of cos(x) = 1 - x^2/2!;
         q.vec() = _v * ((T)2.0 - angle_squared / (T)48.0); // Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
     }
-    return q;
+    return q.normalized();
 }
 
 /** \brief Quaternion logarithmic map

@@ -35,7 +35,7 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::plus(const Eigen::Map<const
     }
 
     // result as a quaternion
-    // the delta is in global reference: dq * q
+    // the delta is in local reference: q * dq
     _q_plus_delta_theta = (Map<const Quaternions>(_q.data()) * dq).coeffs();
 
     return true;

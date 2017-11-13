@@ -50,7 +50,7 @@ inline Eigen::Quaternion<typename Derived::Scalar> v2q_new(const Eigen::MatrixBa
     const T angle_square = a0 * a0 + a1 * a1 + a2 * a2;
 
     //We need the angle : means we have to take the square root of angle_square, 
-    // which is defined for all angle_square beonging to R+ (except 0)
+    // which is defined for all angle_square belonging to R+ (except 0)
     if (angle_square > (T)0.0 ){
         //sqrt is defined here
         const T angle = sqrt(angle_square);
@@ -104,6 +104,23 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v_new(const Eigen::Quater
     }
 }
     
+}
+
+TEST(rotations, exp_q_unit_norm)
+{
+    Vector3s v0  = Vector3s::Random();
+    Scalar scale = 1.0;
+    for (int i = 0; i < 16; i++)
+    {
+        Vector3s v = v0 * scale;
+        Quaternions q = exp_q(v);
+        EXPECT_NEAR(q.norm(), 1.0, 1e-10) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
+        EXPECT_NEAR(q.norm(), 1.0, 1e-12) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
+        EXPECT_NEAR(q.norm(), 1.0, 1e-14) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
+        EXPECT_NEAR(q.norm(), 1.0, 1e-16) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
+        ASSERT_NEAR(q.norm(), 1.0, 1e-10) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
+        scale /= 10;
+    }
 }
 
 TEST(rotations, v2q_VS_v2q_new) //this test will use functions defined above
