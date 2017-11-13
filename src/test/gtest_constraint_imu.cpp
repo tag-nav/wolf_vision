@@ -1369,6 +1369,7 @@ class ConstraintIMU_biasTest : public testing::Test
         VectorXs D_preint, D_corrected;
         VectorXs x_preint, x_corrected;
         VectorXs D_optim, x_optim;
+        VectorXs D_optim_imu, x_optim_imu;
         Matrix<Scalar, 9, 6> J_b;
         Vector9s step;
 
@@ -1596,6 +1597,7 @@ class ConstraintIMU_biasTest : public testing::Test
 
         KF_1 = problem->getLastKeyFramePtr();
         C_1  = KF_1->getCaptureList().back();
+        CM_1 = std::static_pointer_cast<CaptureMotion>(C_1);
 
         // ===================================== SET BOUNDARY CONDITIONS
         setFixedBlocks();
@@ -1608,10 +1610,15 @@ class ConstraintIMU_biasTest : public testing::Test
         bias_0 = C_0->getCalibration();
         bias_1 = C_1->getCalibration();
 
-        // ===================================== CHECK INTEGRATED STATE WITH SOLVED BIAS
+        // ===================================== GET INTEGRATED STATE WITH SOLVED BIAS
+        // with processor
+        D_optim     = CM_1->getDeltaCorrected(bias_0);
+        x_optim     = processor_imu->getCurrentState();
+
+        // with imu_tools
         step        = J_b * (bias_0 - bias_preint);
-        D_optim     = imu::plus(D_preint, step);
-        x_optim     = imu::composeOverState(x0, D_optim, DT);
+        D_optim_imu = imu::plus(D_preint, step);
+        x_optim_imu = imu::composeOverState(x0, D_optim, DT);
 
         return report;
     }
@@ -1660,7 +1667,7 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2V2_InvarP1Q1V1P2Q2)
     v0_fixed       = true;
     p1_fixed       = true;
     q1_fixed       = true;
-    v1_fixed       = false;
+    v1_fixed       = true;
     //
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
@@ -1671,6 +1678,32 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2V2_InvarP1Q1V1P2Q2)
     cout << report << endl;
 
     WOLF_TRACE("w * DT (rather be lower than 1.507 approx) = ", w.transpose() * DT); // beware if w*DT is large (>~ 1.507) then Jacobian for correction is poor
+
+
+    // ===================================== PRINT RESULTS
+    WOLF_TRACE("D_exact      : ", D_exact            .transpose() ); // exact delta integrated, with absolutely no bias
+    WOLF_TRACE("D_preint     : ", D_preint           .transpose() ); // pre-integrated delta using processor
+    WOLF_TRACE("D_preint_imu : ", D_preint_imu       .transpose() ); // pre-integrated delta using imu_tools
+    WOLF_TRACE("D_correct    : ", D_corrected        .transpose() ); // corrected delta using processor
+    WOLF_TRACE("D_correct_imu: ", D_corrected_imu    .transpose() ); // corrected delta using imu_tools
+    WOLF_TRACE("D_optim      : ", D_optim            .transpose() ); // corrected delta using optimum bias after solving using processor
+    WOLF_TRACE("D_optim_imu  : ", D_optim_imu        .transpose() ); // corrected delta using optimum bias after solving using imu_tools
+
+    WOLF_TRACE("bias real    : ", bias_real          .transpose() ); // real bias
+    WOLF_TRACE("bias preint  : ", bias_preint        .transpose() ); // bias used during pre-integration
+    WOLF_TRACE("bias optim 0 : ", bias_0             .transpose() ); // solved bias at KF_0
+    WOLF_TRACE("bias optim 1 : ", bias_1             .transpose() ); // solved bias at KF_1
+
+    // states at the end of integration, i.e., at KF_1
+    WOLF_TRACE("X_exact      : ", x_exact           .transpose() ); // exact state
+    WOLF_TRACE("X_preint     : ", x_preint          .transpose() ); // state using delta preintegrated by processor
+    WOLF_TRACE("X_preint_imu : ", x_preint_imu      .transpose() ); // state using delta preintegrated by imu_tools
+    WOLF_TRACE("X_correct    : ", x_corrected       .transpose() ); // corrected state vy processor
+    WOLF_TRACE("X_correct_imu: ", x_corrected_imu   .transpose() ); // corrected state by imu_tools
+    WOLF_TRACE("X_optim      : ", x_optim           .transpose() ); // optimal state after solving using processor
+    WOLF_TRACE("X_optim_imu  : ", x_optim_imu       .transpose() ); // optimal state after solving using imu_tools
+    WOLF_TRACE("err_optim_imu: ", (x_optim_imu - x_exact).transpose() ); // error of optimal state corrected by imu_tools w.r.t. exact state
+
 
     // ===================================== CHECK ALL (SEE RESULTS SECTION BELOW FOT THE MEANING OF ALL VARIABLES)
 
@@ -1683,33 +1716,13 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2V2_InvarP1Q1V1P2Q2)
     ASSERT_MATRIX_APPROX(x_corrected    , x_exact           , 1e-5 );
 
     // check optimal solutions
-    ASSERT_MATRIX_APPROX(bias_0 , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1 , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim, D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x_optim, x_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(bias_0     , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(bias_1     , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(D_optim    , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x_optim    , x_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_optim_imu, D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x_optim_imu, x_exact   , 1e-5 );
 
-
-    // ===================================== PRINT RESULTS
-    WOLF_TRACE("D_exact      : ", D_exact            .transpose() ); // exact delta integrated, with absolutely no bias
-    WOLF_TRACE("D_preint     : ", D_preint           .transpose() ); // pre-integrated delta using processor
-    WOLF_TRACE("D_preint_imu : ", D_preint_imu       .transpose() ); // pre-integrated delta using imu_tools
-    WOLF_TRACE("D_correct    : ", D_corrected        .transpose() ); // corrected delta using processor
-    WOLF_TRACE("D_correct_imu: ", D_corrected_imu    .transpose() ); // corrected delta using imu_tools
-    WOLF_TRACE("D_optim      : ", D_optim            .transpose() ); // corrected delta using optimum bias after solving
-
-    WOLF_TRACE("bias real    : ", bias_real          .transpose() ); // real bias
-    WOLF_TRACE("bias preint  : ", bias_preint        .transpose() ); // bias used during pre-integration
-    WOLF_TRACE("bias optim 0 : ", bias_0             .transpose() ); // solved bias at KF_0
-    WOLF_TRACE("bias optim 1 : ", bias_1             .transpose() ); // solved bias at KF_1
-
-    // states at the end of integration, i.e., at KF_1
-    WOLF_TRACE("X_exact      : ", x_exact            .transpose() ); // exact state
-    WOLF_TRACE("X_preint     : ", x_preint           .transpose() ); // state using delta preintegrated by processor
-    WOLF_TRACE("X_preint_imu : ", x_preint_imu       .transpose() ); // state using delta preintegrated by imu_tools
-    WOLF_TRACE("X_correct    : ", x_corrected        .transpose() ); // corrected state vy processor
-    WOLF_TRACE("X_correct_imu: ", x_corrected_imu    .transpose() ); // corrected state by imu_tools
-    WOLF_TRACE("X_optim      : ", x_optim            .transpose() ); // optimal state after solving
-    WOLF_TRACE("X_optim error: ", (x_exact - x_optim).transpose() ); // error of optimal state w.r.t. exact state
 }
 
 
