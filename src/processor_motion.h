@@ -374,18 +374,22 @@ class ProcessorMotion : public ProcessorBase
                                                const MatrixXs& _data_cov,
                                                const FrameBasePtr& _frame_origin) = 0;
 
+    public:
         /** \brief create a feature corresponding to given capture and add the feature to this capture
          * \param _capture_motion: the parent capture
          */
         FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_own);
+    protected:
         virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_own) = 0;
 
+    public:
         /** \brief create a constraint and link it in the wolf tree
          * \param _feature_motion: the parent feature
          * \param _frame_origin: the frame constrained by this motion constraint
          */
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin) = 0;
 
+    protected:
         Motion motionZero(const TimeStamp& _ts);
         CaptureMotionPtr getCaptureMotionContainingTimeStamp(const TimeStamp& _ts);
 
