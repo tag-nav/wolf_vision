@@ -1360,278 +1360,280 @@ class ConstraintIMU_biasTest : public testing::Test
         Quaternions q0, q;
         Matrix<Scalar, 9, 9> P0;
         Vector6s motion, data, bias_real, bias_preint, bias_null;
-        Vector6s bias_0, bias_1;
-        Vector3s a, w, am, wm;
+        Vector6s bias_0, bias_1;                    // optimized bias at KF's 0 and 1
+        Vector3s a, w;                              // true acc and angvel in IMU frame
 
-        VectorXs D_exact, x_exact;
-        VectorXs D_preint_imu, D_corrected_imu;
-        VectorXs x_preint_imu, x_corrected_imu;
-        VectorXs D_preint, D_corrected;
-        VectorXs x_preint, x_corrected;
-        VectorXs D_optim, x_optim;
-        VectorXs D_optim_imu, x_optim_imu;
+        // Deltas and states
+        VectorXs D_exact, x_exact;                  // exact or ground truth
+        VectorXs D_preint_imu, x_preint_imu;        // preintegrated with imu_tools
+        VectorXs D_corrected_imu, x_corrected_imu;  // corrected with imu_tools
+        VectorXs D_preint, x_preint;                // preintegrated with processor_imu
+        VectorXs D_corrected, x_corrected;          // corrected with processor_imu
+        VectorXs D_optim, x_optim;                  // optimized using constraint_imu
+        VectorXs D_optim_imu, x_optim_imu;          // corrected with imu_tools osing optimized bias
+
         Matrix<Scalar, 9, 6> J_b;
         Vector9s step;
 
+        // Flags for fixing/unfixing state blocks
         bool p0_fixed, q0_fixed, v0_fixed;
         bool p1_fixed, q1_fixed, v1_fixed;
 
 
 
-    virtual void SetUp( )
-    {
-        using std::shared_ptr;
-        using std::make_shared;
-        using std::static_pointer_cast;
-
-        std::string wolf_root = _WOLF_ROOT_DIR;
-
-        //===================================== SETTING PROBLEM
-        problem = Problem::create("POV 3D");
-
-        // CERES WRAPPER
-        ceres::Solver::Options ceres_options;
-        //        ceres_options.minimizer_type                   = ceres::TRUST_REGION;
-        //        ceres_options.max_line_search_step_contraction = 1e-3;
-        //        ceres_options.max_num_iterations               = 1e4;
-        //        ceres_options.min_relative_decrease            = 1e-10;
-        //        ceres_options.parameter_tolerance              = 1e-10;
-        //        ceres_options.function_tolerance               = 1e-10;
-        ceres_manager = std::make_shared<CeresManager>(problem, ceres_options);
-
-        // SENSOR + PROCESSOR IMU
-        SensorBasePtr       sensor = problem->installSensor   ("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
-        ProcessorBasePtr processor = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_no_vote.yaml");
-        sensor_imu    = std::static_pointer_cast<SensorIMU>   (sensor);
-        processor_imu = std::static_pointer_cast<ProcessorIMU>(processor);
-
-        bias_null.setZero();
-
-        x0.resize(10);
-        D_preint.resize(10);
-        D_corrected.resize(10);
-
-    }
-
-    virtual void TearDown( )
-    {
-        //
-    }
-
-    /* Create IMU data from body motion
-     * Input:
-     *   motion: [ax, ay, az, wx, wy, wz] the motion in body frame
-     *   q: the current orientation wrt horizontal
-     *   bias: the bias of the IMU
-     * Output:
-     *   return: the data vector as created by the IMU (with motion, gravity, and bias)
-     */
-    VectorXs motion2data(const VectorXs& body, const Quaternions& q, const VectorXs& bias)
-    {
-        VectorXs data(6);
-        data = body;                                // start with body motion
-        data.head(3) -= q.conjugate()*gravity();    // add -g
-        data = data + bias;                         // add bias
-        return data;
-    }
-
-    void setFixedBlocks()
-    {
-        KF_0->getPPtr()->setFixed(p0_fixed);
-        KF_0->getOPtr()->setFixed(q0_fixed);
-        KF_0->getVPtr()->setFixed(v0_fixed);
-        KF_1->getPPtr()->setFixed(p1_fixed);
-        KF_1->getOPtr()->setFixed(q1_fixed);
-        KF_1->getVPtr()->setFixed(v1_fixed);
-    }
-
-
-
-    /* Integrate acc and angVel motion, obtain Delta_preintegrated
-     * Input:
-     *   N: number of steps
-     *   q0: initial orientaiton
-     *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body brame
-     *   bias_real: the real bias of the IMU
-     *   bias_preint: the bias used for Delta pre-integration
-     * Output:
-     *   return: the preintegrated delta
-     */
-    VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt)
-    {
-        VectorXs data(6);
-        VectorXs body(6);
-        VectorXs delta(10);
-        VectorXs Delta(10), Delta_plus(10);
-        Delta = imu::identity();
-        Quaternions q(q0);
-        for (int n = 0; n<N; n++)
+        virtual void SetUp( )
         {
-            data        = motion2data(motion, q, bias_real);
-            q           = q*exp_q(motion.tail(3)*dt);
-            body        = data - bias_preint;
-            delta       = imu::body2delta(body, dt);
-            Delta_plus  = imu::compose(Delta, delta, dt);
-            Delta       = Delta_plus;
+            using std::shared_ptr;
+            using std::make_shared;
+            using std::static_pointer_cast;
+
+            std::string wolf_root = _WOLF_ROOT_DIR;
+
+            //===================================== SETTING PROBLEM
+            problem = Problem::create("POV 3D");
+
+            // CERES WRAPPER
+            ceres::Solver::Options ceres_options;
+            //        ceres_options.minimizer_type                   = ceres::TRUST_REGION;
+            //        ceres_options.max_line_search_step_contraction = 1e-3;
+            //        ceres_options.max_num_iterations               = 1e4;
+            //        ceres_options.min_relative_decrease            = 1e-10;
+            //        ceres_options.parameter_tolerance              = 1e-10;
+            //        ceres_options.function_tolerance               = 1e-10;
+            ceres_manager = std::make_shared<CeresManager>(problem, ceres_options);
+
+            // SENSOR + PROCESSOR IMU
+            SensorBasePtr       sensor = problem->installSensor   ("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
+            ProcessorBasePtr processor = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_no_vote.yaml");
+            sensor_imu    = std::static_pointer_cast<SensorIMU>   (sensor);
+            processor_imu = std::static_pointer_cast<ProcessorIMU>(processor);
+
+            bias_null.setZero();
+
+            x0.resize(10);
+            D_preint.resize(10);
+            D_corrected.resize(10);
+
         }
-        return Delta;
-    }
 
-    /* Integrate acc and angVel motion, obtain Delta_preintegrated
-     * Input:
-     *   N: number of steps
-     *   q0: initial orientaiton
-     *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body brame
-     *   bias_real: the real bias of the IMU
-     *   bias_preint: the bias used for Delta pre-integration
-     * Output:
-     *   J_D_b: the Jacobian of the preintegrated delta wrt the bias
-     *   return: the preintegrated delta
-     */
-    VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Matrix<Scalar, 9, 6>& J_D_b)
-    {
-        VectorXs data(6);
-        VectorXs body(6);
-        VectorXs delta(10);
-        Matrix<Scalar, 9, 6> J_d_d, J_d_b;
-        Matrix<Scalar, 9, 9> J_D_D, J_D_d;
-        VectorXs Delta(10), Delta_plus(10);
-        Quaternions q;
-
-        Delta = imu::identity();
-        J_D_b.setZero();
-        q = q0;
-        for (int n = 0; n<N; n++)
+        virtual void TearDown( )
         {
-            // Simulate data
-            data = motion2data(motion, q, bias_real);
-            q    = q*exp_q(motion.tail(3)*dt);
-            // Motion::integrateOneStep()
-            {   // IMU::computeCurrentDelta
-                body  = data - bias_preint;
-                imu::body2delta(body, dt, delta, J_d_d);
-                J_d_b = - J_d_d;
+            //
+        }
+
+        /* Create IMU data from body motion
+         * Input:
+         *   motion: [ax, ay, az, wx, wy, wz] the motion in body frame
+         *   q: the current orientation wrt horizontal
+         *   bias: the bias of the IMU
+         * Output:
+         *   return: the data vector as created by the IMU (with motion, gravity, and bias)
+         */
+        VectorXs motion2data(const VectorXs& body, const Quaternions& q, const VectorXs& bias)
+        {
+            VectorXs data(6);
+            data = body;                                // start with body motion
+            data.head(3) -= q.conjugate()*gravity();    // add -g
+            data = data + bias;                         // add bias
+            return data;
+        }
+
+        void setFixedBlocks()
+        {
+            KF_0->getPPtr()->setFixed(p0_fixed);
+            KF_0->getOPtr()->setFixed(q0_fixed);
+            KF_0->getVPtr()->setFixed(v0_fixed);
+            KF_1->getPPtr()->setFixed(p1_fixed);
+            KF_1->getOPtr()->setFixed(q1_fixed);
+            KF_1->getVPtr()->setFixed(v1_fixed);
+        }
+
+
+
+        /* Integrate acc and angVel motion, obtain Delta_preintegrated
+         * Input:
+         *   N: number of steps
+         *   q0: initial orientaiton
+         *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body brame
+         *   bias_real: the real bias of the IMU
+         *   bias_preint: the bias used for Delta pre-integration
+         * Output:
+         *   return: the preintegrated delta
+         */
+        VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt)
+        {
+            VectorXs data(6);
+            VectorXs body(6);
+            VectorXs delta(10);
+            VectorXs Delta(10), Delta_plus(10);
+            Delta = imu::identity();
+            Quaternions q(q0);
+            for (int n = 0; n<N; n++)
+            {
+                data        = motion2data(motion, q, bias_real);
+                q           = q*exp_q(motion.tail(3)*dt);
+                body        = data - bias_preint;
+                delta       = imu::body2delta(body, dt);
+                Delta_plus  = imu::compose(Delta, delta, dt);
+                Delta       = Delta_plus;
             }
-            {   // IMU::deltaPlusDelta
-                imu::compose(Delta, delta, dt, Delta_plus, J_D_D, J_D_d);
-            }
-            // Motion:: jac calib
-            J_D_b = J_D_D*J_D_b + J_D_d*J_d_b;
-            // Motion:: buffer
-            Delta = Delta_plus;
+            return Delta;
         }
-        return Delta;
-    }
 
-    void integrateWithProcessor(int N, const TimeStamp& t0, const Quaternions q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, VectorXs& D_preint, VectorXs& D_corrected)
-    {
-        data = motion2data(motion, q0, bias_real);
-        capture_imu = std::make_shared<CaptureIMU>(t0, sensor_imu, data, sensor_imu->getNoiseCov());
-        q = q0;
-        t = t0;
-        for (int i= 0; i < N; i++)
+        /* Integrate acc and angVel motion, obtain Delta_preintegrated
+         * Input:
+         *   N: number of steps
+         *   q0: initial orientaiton
+         *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body brame
+         *   bias_real: the real bias of the IMU
+         *   bias_preint: the bias used for Delta pre-integration
+         * Output:
+         *   J_D_b: the Jacobian of the preintegrated delta wrt the bias
+         *   return: the preintegrated delta
+         */
+        VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Matrix<Scalar, 9, 6>& J_D_b)
         {
-            t   += dt;
-            data = motion2data(motion, q, bias_real);
-            q    = q * exp_q(w*dt);
+            VectorXs data(6);
+            VectorXs body(6);
+            VectorXs delta(10);
+            Matrix<Scalar, 9, 6> J_d_d, J_d_b;
+            Matrix<Scalar, 9, 9> J_D_D, J_D_d;
+            VectorXs Delta(10), Delta_plus(10);
+            Quaternions q;
 
-            capture_imu->setTimeStamp(t);
-            capture_imu->setData(data);
-
-            sensor_imu->process(capture_imu);
-
-            D_preint    = processor_imu->getLastPtr()->getDeltaPreint();
-            D_corrected = processor_imu->getLastPtr()->getDeltaCorrected(bias_real);
+            Delta = imu::identity();
+            J_D_b.setZero();
+            q = q0;
+            for (int n = 0; n<N; n++)
+            {
+                // Simulate data
+                data = motion2data(motion, q, bias_real);
+                q    = q*exp_q(motion.tail(3)*dt);
+                // Motion::integrateOneStep()
+                {   // IMU::computeCurrentDelta
+                    body  = data - bias_preint;
+                    imu::body2delta(body, dt, delta, J_d_d);
+                    J_d_b = - J_d_d;
+                }
+                {   // IMU::deltaPlusDelta
+                    imu::compose(Delta, delta, dt, Delta_plus, J_D_D, J_D_d);
+                }
+                // Motion:: jac calib
+                J_D_b = J_D_D*J_D_b + J_D_d*J_d_b;
+                // Motion:: buffer
+                Delta = Delta_plus;
+            }
+            return Delta;
         }
-    }
 
-    bool configure()
-    {
-        DT      = num_integrations * dt;
-        x0     << p0, q0.coeffs(), v0;
-        P0      .setIdentity() * 0.01;
-        KF_0    = problem->setPrior(x0, P0, t0);
-        C_0     = processor_imu->getOriginPtr();
-        CM_1    = processor_imu->getLastPtr();
-        KF_1    = CM_1->getFramePtr();
-        motion << a, w;
+        void integrateWithProcessor(int N, const TimeStamp& t0, const Quaternions q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, VectorXs& D_preint, VectorXs& D_corrected)
+        {
+            data = motion2data(motion, q0, bias_real);
+            capture_imu = std::make_shared<CaptureIMU>(t0, sensor_imu, data, sensor_imu->getNoiseCov());
+            q = q0;
+            t = t0;
+            for (int i= 0; i < N; i++)
+            {
+                t   += dt;
+                data = motion2data(motion, q, bias_real);
+                q    = q * exp_q(w*dt);
 
-        processor_imu->getLastPtr()->setCalibrationPreint(bias_preint);
+                capture_imu->setTimeStamp(t);
+                capture_imu->setData(data);
 
-        return true;
-    }
+                sensor_imu->process(capture_imu);
 
-    void integrateAll()
-    {
-        // ===================================== INTEGRATE EXACTLY WITH IMU_TOOLS with no bias at all
-        D_exact = integrateDelta(num_integrations, q0, motion, bias_null, bias_null, dt);
-        x_exact = imu::composeOverState(x0, D_exact, DT );
+                D_preint    = processor_imu->getLastPtr()->getDeltaPreint();
+                D_corrected = processor_imu->getLastPtr()->getDeltaCorrected(bias_real);
+            }
+        }
+
+        bool configureAll()
+        {
+            DT      = num_integrations * dt;
+            x0     << p0, q0.coeffs(), v0;
+            P0      .setIdentity() * 0.01;
+            KF_0    = problem->setPrior(x0, P0, t0);
+            C_0     = processor_imu->getOriginPtr();
+            CM_1    = processor_imu->getLastPtr();
+            KF_1    = CM_1->getFramePtr();
+            motion << a, w;
+
+            processor_imu->getLastPtr()->setCalibrationPreint(bias_preint);
+
+            return true;
+        }
+
+        void integrateAll()
+        {
+            // ===================================== INTEGRATE EXACTLY WITH IMU_TOOLS with no bias at all
+            D_exact = integrateDelta(num_integrations, q0, motion, bias_null, bias_null, dt);
+            x_exact = imu::composeOverState(x0, D_exact, DT );
 
 
-        // ===================================== INTEGRATE USING IMU_TOOLS
-        // pre-integrate
-        D_preint_imu = integrateDelta(num_integrations, q0, motion, bias_real, bias_preint, dt, J_b);
+            // ===================================== INTEGRATE USING IMU_TOOLS
+            // pre-integrate
+            D_preint_imu = integrateDelta(num_integrations, q0, motion, bias_real, bias_preint, dt, J_b);
 
-        // correct perturbated
-        step = J_b * (bias_real - bias_preint);
-        D_corrected_imu = imu::plus(D_preint_imu, step);
+            // correct perturbated
+            step = J_b * (bias_real - bias_preint);
+            D_corrected_imu = imu::plus(D_preint_imu, step);
 
-        // compose states
-        x_preint_imu    = imu::composeOverState(x0, D_preint_imu    , DT );
-        x_corrected_imu = imu::composeOverState(x0, D_corrected_imu , DT );
+            // compose states
+            x_preint_imu    = imu::composeOverState(x0, D_preint_imu    , DT );
+            x_corrected_imu = imu::composeOverState(x0, D_corrected_imu , DT );
 
-        // ===================================== INTEGRATE USING PROCESSOR
+            // ===================================== INTEGRATE USING PROCESSOR
 
-        integrateWithProcessor(num_integrations, t0, q0, motion, bias_real, bias_preint, dt, D_preint, D_corrected);
+            integrateWithProcessor(num_integrations, t0, q0, motion, bias_real, bias_preint, dt, D_preint, D_corrected);
 
-        // compose states
-        x_preint        = imu::composeOverState(x0, D_preint        , DT );
-        x_corrected     = imu::composeOverState(x0, D_corrected     , DT );
-    }
+            // compose states
+            x_preint        = imu::composeOverState(x0, D_preint        , DT );
+            x_corrected     = imu::composeOverState(x0, D_corrected     , DT );
+        }
 
-    void buildProblem()
-    {
-        // ===================================== SET KF in Wolf tree
-        FrameBasePtr KF = problem->emplaceFrame(KEY_FRAME, x_exact, t);
-        processor_imu->keyFrameCallback(KF, 0.01);
+        void buildProblem()
+        {
+            // ===================================== SET KF in Wolf tree
+            FrameBasePtr KF = problem->emplaceFrame(KEY_FRAME, x_exact, t);
+            processor_imu->keyFrameCallback(KF, 0.01);
 
-        KF_1 = problem->getLastKeyFramePtr();
-        C_1  = KF_1->getCaptureList().back();
-        CM_1 = std::static_pointer_cast<CaptureMotion>(C_1);
+            KF_1 = problem->getLastKeyFramePtr();
+            C_1  = KF_1->getCaptureList().back();
+            CM_1 = std::static_pointer_cast<CaptureMotion>(C_1);
 
-        // ===================================== SET BOUNDARY CONDITIONS
-        setFixedBlocks();
-    }
+            // ===================================== SET BOUNDARY CONDITIONS
+            setFixedBlocks();
+        }
 
-    string solveProblem(int verbose = 1)
-    {
-        string report = ceres_manager->solve(verbose);
+        string solveProblem(int verbose = 1)
+        {
+            string report = ceres_manager->solve(verbose);
 
-        bias_0 = C_0->getCalibration();
-        bias_1 = C_1->getCalibration();
+            bias_0 = C_0->getCalibration();
+            bias_1 = C_1->getCalibration();
 
-        // ===================================== GET INTEGRATED STATE WITH SOLVED BIAS
-        // with processor
-        D_optim     = CM_1->getDeltaCorrected(bias_0);
-        x_optim     = processor_imu->getCurrentState();
+            // ===================================== GET INTEGRATED STATE WITH SOLVED BIAS
+            // with processor
+            D_optim     = CM_1->getDeltaCorrected(bias_0);
+            x_optim     = processor_imu->getCurrentState();
 
-        // with imu_tools
-        step        = J_b * (bias_0 - bias_preint);
-        D_optim_imu = imu::plus(D_preint, step);
-        x_optim_imu = imu::composeOverState(x0, D_optim, DT);
+            // with imu_tools
+            step        = J_b * (bias_0 - bias_preint);
+            D_optim_imu = imu::plus(D_preint, step);
+            x_optim_imu = imu::composeOverState(x0, D_optim, DT);
 
-        return report;
-    }
+            return report;
+        }
 
-    string run(int verbose)
-    {
-        string report;
-        configure();
-        integrateAll();
-        buildProblem();
-        report = solveProblem(verbose);
-        return report;
-    }
+        string run(int verbose)
+        {
+            configureAll();
+            integrateAll();
+            buildProblem();
+            string report = solveProblem(verbose);
+            return report;
+        }
 
 
 };
@@ -1674,7 +1676,10 @@ TEST_F(ConstraintIMU_biasTest, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
 
 
     // ===================================== RUN ALL
-    string report = run(1);
+    configureAll();
+    integrateAll();
+    buildProblem();
+    string report = solveProblem(1);
     cout << report << endl;
 
     WOLF_TRACE("w * DT (rather be lower than 1.507 approx) = ", w.transpose() * DT); // beware if w*DT is large (>~ 1.507) then Jacobian for correction is poor
@@ -1766,7 +1771,7 @@ TEST_F(ConstraintIMU_biasTest, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
 
 
     // ===================================== RUN ALL but do not solve yet
-    configure();
+    configureAll();
     integrateAll();
     buildProblem();
 
