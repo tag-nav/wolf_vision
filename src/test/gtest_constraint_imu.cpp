@@ -1636,7 +1636,7 @@ class ConstraintIMU_biasTest : public testing::Test
 
 };
 
-TEST_F(ConstraintIMU_biasTest, VarB1B2V2_InvarP1Q1V1P2Q2)
+TEST_F(ConstraintIMU_biasTest, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
 {
 
     // ================================================================================================================ //
@@ -1681,6 +1681,131 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2V2_InvarP1Q1V1P2Q2)
 
 
     // ===================================== PRINT RESULTS
+//    WOLF_TRACE("D_exact      : ", D_exact            .transpose() ); // exact delta integrated, with absolutely no bias
+//    WOLF_TRACE("D_preint     : ", D_preint           .transpose() ); // pre-integrated delta using processor
+//    WOLF_TRACE("D_preint_imu : ", D_preint_imu       .transpose() ); // pre-integrated delta using imu_tools
+//    WOLF_TRACE("D_correct    : ", D_corrected        .transpose() ); // corrected delta using processor
+//    WOLF_TRACE("D_correct_imu: ", D_corrected_imu    .transpose() ); // corrected delta using imu_tools
+//    WOLF_TRACE("D_optim      : ", D_optim            .transpose() ); // corrected delta using optimum bias after solving using processor
+//    WOLF_TRACE("D_optim_imu  : ", D_optim_imu        .transpose() ); // corrected delta using optimum bias after solving using imu_tools
+//
+//    WOLF_TRACE("bias real    : ", bias_real          .transpose() ); // real bias
+//    WOLF_TRACE("bias preint  : ", bias_preint        .transpose() ); // bias used during pre-integration
+//    WOLF_TRACE("bias optim 0 : ", bias_0             .transpose() ); // solved bias at KF_0
+//    WOLF_TRACE("bias optim 1 : ", bias_1             .transpose() ); // solved bias at KF_1
+//
+//    // states at the end of integration, i.e., at KF_1
+//    WOLF_TRACE("X_exact      : ", x_exact           .transpose() ); // exact state
+//    WOLF_TRACE("X_preint     : ", x_preint          .transpose() ); // state using delta preintegrated by processor
+//    WOLF_TRACE("X_preint_imu : ", x_preint_imu      .transpose() ); // state using delta preintegrated by imu_tools
+//    WOLF_TRACE("X_correct    : ", x_corrected       .transpose() ); // corrected state vy processor
+//    WOLF_TRACE("X_correct_imu: ", x_corrected_imu   .transpose() ); // corrected state by imu_tools
+//    WOLF_TRACE("X_optim      : ", x_optim           .transpose() ); // optimal state after solving using processor
+//    WOLF_TRACE("X_optim_imu  : ", x_optim_imu       .transpose() ); // optimal state after solving using imu_tools
+//    WOLF_TRACE("err_optim_imu: ", (x_optim_imu - x_exact).transpose() ); // error of optimal state corrected by imu_tools w.r.t. exact state
+
+
+    // ===================================== CHECK ALL (SEE RESULTS SECTION BELOW FOT THE MEANING OF ALL VARIABLES)
+
+    // check delta and state integrals
+    ASSERT_MATRIX_APPROX(D_preint       , D_preint_imu      , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected    , D_corrected_imu   , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected_imu, D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_corrected    , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x_corrected_imu, x_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x_corrected    , x_exact           , 1e-5 );
+
+    // check optimal solutions
+    ASSERT_MATRIX_APPROX(bias_0     , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(bias_1     , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(D_optim    , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x_optim    , x_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_optim_imu, D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x_optim_imu, x_exact   , 1e-5 );
+
+    ASSERT_NEAR(KF_0->getState().segment(3,4).norm(), 1.0, 1e-8);
+
+}
+
+
+TEST_F(ConstraintIMU_biasTest, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0                  .setIdentity();
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  << 1,2,3;
+    w                  << 1,2,3;
+
+    // ---------- fix boundaries
+    p0_fixed       = false;
+    q0_fixed       = false;
+    v0_fixed       = false;
+    p1_fixed       = true;
+    q1_fixed       = true;
+    v1_fixed       = true;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL but do not solve yet
+    configure();
+    integrateAll();
+    buildProblem();
+
+    // ===================================== PERTURB VAR STATES
+    Vector3s p0_pert    = Vector3s::Random() * .001;
+    Quaternions q0_pert = exp_q(Vector3s::Random() * .001);
+    Vector3s v0_pert    = Vector3s::Random() * .001;
+
+    VectorXs x0_pert(10);
+    x0_pert            << p0_pert, q0_pert.coeffs(), v0_pert;
+
+    KF_0->setState(x0_pert);
+
+    // ===================================== SOLVE
+    string report = solveProblem(2);
+//    cout << report << endl;
+
+
+    // ===================================== CHECK ALL (SEE RESULTS SECTION BELOW FOT THE MEANING OF ALL VARIABLES)
+
+    // check delta and state integrals
+    ASSERT_MATRIX_APPROX(D_preint       , D_preint_imu      , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected    , D_corrected_imu   , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected_imu, D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_corrected    , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x_corrected_imu, x_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x_corrected    , x_exact           , 1e-5 );
+
+    // check optimal solutions
+    ASSERT_MATRIX_APPROX(bias_0     , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(bias_1     , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(D_optim    , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x_optim    , x_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_optim_imu, D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x_optim_imu, x_exact   , 1e-5 );
+
+    ASSERT_NEAR(KF_0->getState().segment(3,4).norm(), 1.0, 1e-8);
+
+    // ===================================== PRINT RESULTS
     WOLF_TRACE("D_exact      : ", D_exact            .transpose() ); // exact delta integrated, with absolutely no bias
     WOLF_TRACE("D_preint     : ", D_preint           .transpose() ); // pre-integrated delta using processor
     WOLF_TRACE("D_preint_imu : ", D_preint_imu       .transpose() ); // pre-integrated delta using imu_tools
@@ -1703,25 +1828,6 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2V2_InvarP1Q1V1P2Q2)
     WOLF_TRACE("X_optim      : ", x_optim           .transpose() ); // optimal state after solving using processor
     WOLF_TRACE("X_optim_imu  : ", x_optim_imu       .transpose() ); // optimal state after solving using imu_tools
     WOLF_TRACE("err_optim_imu: ", (x_optim_imu - x_exact).transpose() ); // error of optimal state corrected by imu_tools w.r.t. exact state
-
-
-    // ===================================== CHECK ALL (SEE RESULTS SECTION BELOW FOT THE MEANING OF ALL VARIABLES)
-
-    // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint       , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected    , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu, D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected    , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x_corrected_imu, x_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x_corrected    , x_exact           , 1e-5 );
-
-    // check optimal solutions
-    ASSERT_MATRIX_APPROX(bias_0     , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1     , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim    , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x_optim    , x_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_optim_imu, D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x_optim_imu, x_exact   , 1e-5 );
 
 }
 
