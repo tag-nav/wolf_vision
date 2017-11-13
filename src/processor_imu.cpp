@@ -39,20 +39,22 @@ bool ProcessorIMU::voteForKeyFrame()
     // time span
     if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)
     {
+        WOLF_DEBUG( "PM: vote: time span" );
         return true;
     }
     // buffer length
     if (getBuffer().get().size() > max_buff_length_)
     {
+        WOLF_DEBUG( "PM: vote: buffer length" );
         return true;
     }
-    /*// angle turned
-    Scalar angle = 2.0 * acos(delta_integrated_(6));
+    // angle turned
+    Scalar angle = 2.0 * asin(delta_integrated_.segment(4,3).norm());
     if (angle > angle_turned_)
     {
         WOLF_DEBUG( "PM: vote: angle turned" );
         return true;
-    }*/
+    }
     //WOLF_DEBUG( "PM: do not vote" );
     return false;
 }
