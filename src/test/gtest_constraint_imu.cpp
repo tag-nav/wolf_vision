@@ -1382,7 +1382,7 @@ class ConstraintIMU_biasTest : public testing::Test
 
         // SENSOR + PROCESSOR IMU
         SensorBasePtr       sensor = problem->installSensor   ("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
-        ProcessorBasePtr processor = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_t6.yaml");
+        ProcessorBasePtr processor = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_no_vote.yaml");
         sensor_imu    = std::static_pointer_cast<SensorIMU>   (sensor);
         processor_imu = std::static_pointer_cast<ProcessorIMU>(processor);
 
@@ -1496,8 +1496,8 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
 
          // ==================================== INITIAL CONDITIONS
         t0 = 0;
-        dt = 0.1;
-        num_integrations = 10;
+        dt = 0.01;
+        num_integrations = 50;
         DT = num_integrations * dt;
 
         p0 << 0,0,0;
@@ -1505,31 +1505,42 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
         v0 << 0,0,0;
         MatrixXs  P0(9,9); P0.setIdentity() * 0.01;
 
-        x0 << p0, q0.coeffs(), v0;
+        x0  << p0, q0.coeffs(), v0;
         KF_0 = problem->setPrior(x0, P0, t0);
         C_0  = processor_imu->getOriginPtr();
 
         // bias
-        bias_real   << .001, .002, .003, -.001, -.002, -.003;
-        bias_preint = bias_null;
+        bias_real  << .001, .002, .003, -.001, -.002, -.003;
+        bias_preint = -bias_real;
 
         processor_imu->getLastPtr()->setCalibrationPreint(bias_preint);
 
         // ===================================== MOTION params
-        a << 0,0,0;
-        w << 0,1,0; w *= 0.1;
+        a << 1,2,3;
+        w << 1,2,3;
+
+        WOLF_TRACE("w * DT (rather be lower than 1.507 approx) = ", (DT*w).transpose()); // beware if w*DT is large (>~ 1.507) then Jacobian for correction is poor
 
         motion << a, w;
 
+        // ===================================== INTEGRATE EXACTLY with no bias at all
+        VectorXs D_exact = integrateDelta(num_integrations, q0, motion, bias_null, bias_null, dt);
+        VectorXs x_exact = imu::composeOverState(x0, D_exact, DT );
+
+        WOLF_TRACE("D_exact      : ", D_exact.transpose() );
+        WOLF_TRACE("X_exact      : ", x_exact.transpose() );
+
         // ===================================== INTEGRATE USING PROCESSOR
+        VectorXs D_preint(10), D_corrected(10);
 
         capture_imu = std::make_shared<CaptureIMU>(t0, sensor_imu, data, sensor_imu->getNoiseCov());
-        VectorXs D_preint(10), D_corrected(10);
         q = q0;
-        for ( t = t0 + dt; t < t0 + num_integrations * dt; t += dt )
+        t = t0;
+        for (int i= 0; i < num_integrations; i++)
         {
+            t   += dt;
             data = motion2data(motion, q, bias_real);
-            q    = q * exp_q(wm*dt);
+            q    = q * exp_q(w*dt);
 
             capture_imu->setTimeStamp(t);
             capture_imu->setData(data);
@@ -1541,7 +1552,7 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
 
         }
 
-        // INTEGRATE USING IMU_TOOLS
+        // ========================================== INTEGRATE USING IMU_TOOLS
         VectorXs D_preint_imu, D_corrected_imu;
         Matrix<Scalar, 9, 6> J_b;
         D_preint_imu = integrateDelta(num_integrations, q0, motion, bias_real, bias_preint, dt, J_b);
@@ -1552,17 +1563,19 @@ TEST_F(ConstraintIMU_biasTest, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
 
         WOLF_TRACE("D_preint     : ", D_preint       .transpose() );
         WOLF_TRACE("D_preint_imu : ", D_preint_imu   .transpose() );
-//        ASSERT_MATRIX_APPROX(D_preint, D_preint_imu, 1e-8);
+        ASSERT_MATRIX_APPROX(D_preint, D_preint_imu, 1e-8);
 
         WOLF_TRACE("D_correct    : ", D_corrected    .transpose() );
         WOLF_TRACE("D_correct_imu: ", D_corrected_imu.transpose() );
-//        ASSERT_MATRIX_APPROX(D_corrected, D_corrected_imu, 1e-8);
+        ASSERT_MATRIX_APPROX(D_corrected, D_corrected_imu, 1e-8);
 
         WOLF_TRACE("X_preint     : ", imu::composeOverState(x0, D_preint       , DT ).transpose() );
         WOLF_TRACE("X_preint_imu : ", imu::composeOverState(x0, D_preint_imu   , DT ).transpose() );
 
         WOLF_TRACE("X_correct    : ", imu::composeOverState(x0, D_corrected    , DT ).transpose() );
         WOLF_TRACE("X_correct_imu: ", imu::composeOverState(x0, D_corrected_imu, DT ).transpose() );
+        ASSERT_MATRIX_APPROX(imu::composeOverState(x0, D_corrected     , DT ), x_exact, 1e-5);
+        ASSERT_MATRIX_APPROX(imu::composeOverState(x0, D_corrected_imu , DT ), x_exact, 1e-5);
 
 }
 
@@ -3067,11 +3080,11 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
-//  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
+  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest.*:ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*";
 //  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY.VarB1B2V1V2_InvarP1Q1P2Q2_initOK";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.VarB1B2V1P2V2_InvarP1Q1Q2_initOK";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest.*";
+//  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest.*";
 
 
   return RUN_ALL_TESTS();
