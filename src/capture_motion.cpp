@@ -19,7 +19,8 @@ CaptureMotion::CaptureMotion(const TimeStamp& _ts,
         CaptureBase("MOTION", _ts, _sensor_ptr),
         data_(_data),
         data_cov_(_sensor_ptr ? _sensor_ptr->getNoiseCov() : Eigen::MatrixXs::Zero(_data.rows(), _data.rows())), // Someone should test this zero and do something smart accordingly
-        buffer_(_data.size(), _delta_size, _delta_cov_size, computeCalibSize()), origin_frame_ptr_(_origin_frame_ptr)
+        buffer_(_data.size(), _delta_size, _delta_cov_size, computeCalibSize()),
+        origin_frame_ptr_(_origin_frame_ptr)
 {
     //
 }
@@ -54,22 +55,23 @@ CaptureMotion::~CaptureMotion()
 
 Eigen::VectorXs CaptureMotion::getDeltaCorrected(const VectorXs& _calib_current)
 {
-    VectorXs calib_preint   = getCalibrationPreint();
-    VectorXs delta_preint   = getBuffer().get().back().delta_integr_;
-    MatrixXs jac_calib      = getBuffer().get().back().jacobian_calib_;
-    VectorXs delta_error    = jac_calib * (_calib_current - calib_preint);
-    VectorXs delta          = correctDelta(delta_preint, delta_error);
-    return delta;
+    VectorXs calib_preint    = getCalibrationPreint();
+    VectorXs delta_preint    = getBuffer().get().back().delta_integr_;
+    MatrixXs jac_calib       = getBuffer().get().back().jacobian_calib_;
+    VectorXs delta_error     = jac_calib * (_calib_current - calib_preint);
+    VectorXs delta_corrected = correctDelta(delta_preint, delta_error);
+    return   delta_corrected;
 }
 
 Eigen::VectorXs CaptureMotion::getDeltaCorrected(const VectorXs& _calib_current, const TimeStamp& _ts)
 {
-    VectorXs calib_preint   = getCalibrationPreint();
-    VectorXs delta_preint   = getBuffer().getMotion(_ts).delta_integr_;
-    MatrixXs jac_calib      = getBuffer().getMotion(_ts).jacobian_calib_;
-    VectorXs delta_error    = jac_calib * (_calib_current - calib_preint);
-    VectorXs delta          = correctDelta(delta_preint, delta_error);
-    return delta;
+    VectorXs calib_preint    = getBuffer().getCalibrationPreint();
+    Motion   motion          = getBuffer().getMotion(_ts);
+    VectorXs delta_preint    = motion.delta_integr_;
+    MatrixXs jac_calib       = motion.jacobian_calib_;
+    VectorXs delta_error     = jac_calib * (_calib_current - calib_preint);
+    VectorXs delta_corrected = correctDelta(delta_preint, delta_error);
+    return   delta_corrected;
 }
 
 }
