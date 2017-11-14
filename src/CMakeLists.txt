@@ -268,7 +268,7 @@ SET(HDRS
     processor_frame_nearest_neighbor_filter.h
     processor_image_params.h
     processor_imu.h
-    processor_imu_UnitTester.h
+    test/processor_imu_UnitTester.h
     processor_odom_2D.h
     processor_odom_3D.h
     processor_tracker_feature_dummy.h
@@ -340,7 +340,7 @@ SET(SRCS
     local_parametrization_polyline_extreme.cpp
     processor_frame_nearest_neighbor_filter.cpp
     processor_imu.cpp
-    processor_imu_UnitTester.cpp
+    test/processor_imu_UnitTester.cpp
     processor_odom_2D.cpp
     processor_odom_3D.cpp
     processor_tracker_feature_dummy.cpp
