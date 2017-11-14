@@ -1712,18 +1712,18 @@ TEST_F(ConstraintIMU_biasTest, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
 //    WOLF_TRACE("X_optim      : ", x1_optim           .transpose() ); // optimal state after solving using processor
 //    WOLF_TRACE("X_optim_imu  : ", x1_optim_imu       .transpose() ); // optimal state after solving using imu_tools
 //    WOLF_TRACE("err_optim_imu: ", (x1_optim_imu - x1_exact).transpose() ); // error of optimal state corrected by imu_tools w.r.t. exact state
-//    WOLF_TRACE("X0_optim      : ", x0_optim           .transpose() ); // optimal state after solving using processor
+//    WOLF_TRACE("X0_optim     : ", x0_optim           .transpose() ); // optimal state after solving using processor
 
 
     // ===================================== CHECK ALL (SEE RESULTS SECTION BELOW FOT THE MEANING OF ALL VARIABLES)
 
     // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint       , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected    , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu, D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected    , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu, x1_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected    , x1_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_preint        , D_preint_imu      , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected     , D_corrected_imu   , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected_imu , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_corrected     , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected_imu, x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected    , x1_exact          , 1e-5 );
 
     // check optimal solutions
     ASSERT_MATRIX_APPROX(x0_optim    , x0        , 1e-5 );
@@ -1800,12 +1800,12 @@ TEST_F(ConstraintIMU_biasTest, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
     // ===================================== CHECK ALL (SEE RESULTS SECTION BELOW FOT THE MEANING OF ALL VARIABLES)
 
     // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint       , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected    , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu, D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected    , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu, x1_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected    , x1_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_preint        , D_preint_imu      , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected     , D_corrected_imu   , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected_imu , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_corrected     , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected_imu, x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected    , x1_exact          , 1e-5 );
 
     // check optimal solutions
     ASSERT_MATRIX_APPROX(x0_optim    , x0        , 1e-5 );
