@@ -114,6 +114,10 @@ target_link_libraries(gtest_feature_imu ${PROJECT_NAME})
 #wolf_add_gtest(gtest_imuBias gtest_imuBias.cpp)
 #target_link_libraries(gtest_imuBias ${PROJECT_NAME})
 
+# IMU Bias + estimation tests
+wolf_add_gtest(gtest_IMU gtest_IMU.cpp)
+target_link_libraries(gtest_IMU ${PROJECT_NAME})
+
 # Pinhole test
 wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
 target_link_libraries(gtest_pinhole ${PROJECT_NAME})
