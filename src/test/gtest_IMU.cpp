@@ -130,17 +130,6 @@ class ConstraintIMU_biasTest : public testing::Test
             return data;
         }
 
-        void setFixedBlocks()
-        {
-            KF_0->getPPtr()->setFixed(p0_fixed);
-            KF_0->getOPtr()->setFixed(q0_fixed);
-            KF_0->getVPtr()->setFixed(v0_fixed);
-            KF_1->getPPtr()->setFixed(p1_fixed);
-            KF_1->getOPtr()->setFixed(q1_fixed);
-            KF_1->getVPtr()->setFixed(v1_fixed);
-        }
-
-
 
         /* Integrate acc and angVel motion, obtain Delta_preintegrated
          * Input:
@@ -284,6 +273,45 @@ class ConstraintIMU_biasTest : public testing::Test
             x1_corrected     = imu::composeOverState(x0, D_corrected     , DT );
         }
 
+        void setFixedBlocks()
+        {
+            // this sets each state block status fixed / unfixed
+            KF_0->getPPtr()->setFixed(p0_fixed);
+            KF_0->getOPtr()->setFixed(q0_fixed);
+            KF_0->getVPtr()->setFixed(v0_fixed);
+            KF_1->getPPtr()->setFixed(p1_fixed);
+            KF_1->getOPtr()->setFixed(q1_fixed);
+            KF_1->getVPtr()->setFixed(v1_fixed);
+        }
+
+
+        void setKfStates()
+        {
+            // This perturbs states to estimate around the exact value, then assigns to the keyframe
+
+            VectorXs x_pert(10);
+
+            // KF 0
+            x_pert = x0;
+            if (!p0_fixed)
+                x_pert.head(3)      += Vector3s::Random() * 0.01;
+            if (!q0_fixed)
+                x_pert.segment(3,4) = (Quaternions(x_pert.data() + 3) * exp_q(Vector3s::Random() * 0.01)).coeffs().normalized();
+            if (!v0_fixed)
+                x_pert.tail(3)      += Vector3s::Random() * 0.01;
+            KF_0->setState(x_pert);
+
+            // KF 1
+            x_pert = x1_exact;
+            if (!p1_fixed)
+                x_pert.head(3)      += Vector3s::Random() * 0.01;
+            if (!q1_fixed)
+                x_pert.segment(3,4) = (Quaternions(x_pert.data() + 3) * exp_q(Vector3s::Random() * 0.01)).coeffs().normalized();
+            if (!v1_fixed)
+                x_pert.tail(3)      += Vector3s::Random() * 0.01;
+            KF_1->setState(x_pert);
+        }
+
         void buildProblem()
         {
             // ===================================== SET KF in Wolf tree
@@ -296,6 +324,7 @@ class ConstraintIMU_biasTest : public testing::Test
 
             // ===================================== SET BOUNDARY CONDITIONS
             setFixedBlocks();
+            setKfStates();
         }
 
         string solveProblem(int verbose = 1)
@@ -479,14 +508,6 @@ TEST_F(ConstraintIMU_biasTest, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
     integrateAll();
     buildProblem();
 
-    // ===================================== PERTURB VAR STATES
-
-    VectorXs x_pert(10);
-    x_pert.head(3)      =       Vector3s::Random() * .01;
-    x_pert.segment(3,4) = exp_q(Vector3s::Random() * .01).coeffs();
-    x_pert.tail(3)      =       Vector3s::Random() * .01;
-
-    KF_0->setState(x_pert);
 
     // ===================================== SOLVE
     string report = solveProblem(1);
@@ -563,22 +584,6 @@ TEST_F(ConstraintIMU_biasTest, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_
     integrateAll();
     buildProblem();
 
-    // ===================================== PERTURB VAR STATES
-
-    VectorXs x_pert;
-
-    // KF 0
-    x_pert              =       x0;
-    x_pert.head(3)      =       Vector3s::Random() * .01;
-    x_pert.segment(3,4) = exp_q(Vector3s::Random() * .01).coeffs();
-
-    KF_0->setState(x_pert);
-
-    // KF 1
-    x_pert              =       x1_exact;
-    x_pert.tail(3)     +=       Vector3s::Random() * .01;
-
-    KF_1->setState(x_pert);
 
     // ===================================== SOLVE
     string report = solveProblem(1);
