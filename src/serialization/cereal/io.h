@@ -9,6 +9,14 @@
 namespace wolf {
 namespace serialization {
 
+/// @todo demangle typeid.name ?
+template <typename T>
+inline const std::string& type_name(const T&)
+{
+  static const std::string typeid_name = typeid(T).name();
+  return typeid_name;
+}
+
 inline std::string extension(const std::string& file)
 {
   const std::size_t p = file.find_last_of(".");
@@ -87,20 +95,26 @@ struct Extensions
   };
 };
 
+template <typename Ar>
+void serialize_pack(Ar&&)
+{
+  // end of expansion
+}
+
+template <typename Ar, typename T, typename... Args>
+void serialize_pack(Ar&& archive, T&& object, Args&&... args)
+{
+  archive( cereal::make_nvp(type_name(object), std::forward<T>(object)) );
+  serialize_pack(archive, std::forward<Args>(args)...);
+}
+
 template <typename Ar, typename S, typename T, typename... Args>
 void serialize(S& stream, T&& object, Args&&... args)
 {
   Ar archive(stream);
+  archive( cereal::make_nvp(type_name(object), std::forward<T>(object)) );
 
-  archive( cereal::make_nvp("object", std::forward<T>(object)) );
-  archive( cereal::make_nvp("object", std::forward<Args>(args))... );
-}
-
-template <typename Ar, typename S, typename T>
-void serialize(S& stream, T&& object)
-{
-  Ar archive(stream);
-  archive( cereal::make_nvp("object", std::forward<T>(object)) );
+  serialize_pack(archive, std::forward<Args>(args)...);
 }
 
 template <typename EXT, typename InAr, typename OutAr>
