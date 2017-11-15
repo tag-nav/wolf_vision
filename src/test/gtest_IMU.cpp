@@ -223,6 +223,7 @@ class Process_Constraint_IMU : public testing::Test
         bool configureAll()
         {
             DT      = num_integrations * dt;
+            q0      .normalize();
             x0     << p0, q0.coeffs(), v0;
             P0      .setIdentity() * 0.01;
             KF_0    = problem->setPrior(x0, P0, t0);
@@ -395,7 +396,7 @@ TEST_F(Process_Constraint_IMU, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
 
     // ---------- initial pose
     p0                 << 0,0,0;
-    q0                  .setIdentity();
+    q0.coeffs()        << 0,0,0,1;
     v0                 << 0,0,0;
 
     // ---------- bias
@@ -471,7 +472,7 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
 
     // ---------- initial pose
     p0                 << 0,0,0;
-    q0                  .setIdentity();
+    q0.coeffs()        << 0,0,0,1;
     v0                 << 0,0,0;
 
     // ---------- bias
@@ -544,7 +545,7 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_
 
     // ---------- initial pose
     p0                 << 0,0,0;
-    q0                  .setIdentity();
+    q0.coeffs()        << 0,0,0,1;
     v0                 << 0,0,0;
 
     // ---------- bias
