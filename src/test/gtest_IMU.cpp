@@ -433,7 +433,7 @@ TEST_F(Process_Constraint_IMU, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
     //    print();
 
 
-    // ===================================== CHECK ALL (SEE RESULTS SECTION BELOW FOT THE MEANING OF ALL VARIABLES)
+    // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
 
     // check delta and state integrals
     ASSERT_MATRIX_APPROX(D_preint        , D_preint_imu      , 1e-8 );
@@ -503,7 +503,11 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
     WOLF_TRACE(report);
 
 
-    // ===================================== CHECK ALL (SEE RESULTS SECTION BELOW FOT THE MEANING OF ALL VARIABLES)
+    // ===================================== PRINT RESULTS
+    //    print();
+
+
+    // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
 
     // check delta and state integrals
     ASSERT_MATRIX_APPROX(D_preint        , D_preint_imu      , 1e-8 );
@@ -524,9 +528,6 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
     ASSERT_MATRIX_APPROX(x1_optim_imu, x1_exact  , 1e-5 );
     ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0, 1e-8 );
 
-
-    // ===================================== PRINT RESULTS
-    //    print();
 
 }
 
@@ -579,7 +580,11 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_
     WOLF_TRACE(report);
 
 
-    // ===================================== CHECK ALL (SEE RESULTS SECTION BELOW FOT THE MEANING OF ALL VARIABLES)
+    // ===================================== PRINT RESULTS
+    //    print();
+
+
+    // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
 
     // check delta and state integrals
     ASSERT_MATRIX_APPROX(D_preint        , D_preint_imu      , 1e-8 );
@@ -600,11 +605,8 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_
     ASSERT_MATRIX_APPROX(x1_optim_imu, x1_exact  , 1e-5 );
     ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0, 1e-8 );
 
-
-    // ===================================== PRINT RESULTS
-    //    print();
-
 }
+
 
 
 int main(int argc, char **argv)
