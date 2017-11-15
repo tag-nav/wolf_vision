@@ -7,111 +7,100 @@
 
 //Wolf
 #include "wolf.h"
-#include "problem.h"
 #include "sensor_imu.h"
-#include "capture_imu.h"
-#include "state_block.h"
-#include "state_quaternion.h"
 #include "processor_imu.h"
-#include "processor_odom_3D.h"
+//#include "processor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"
-#include "constraint_fix_3D.h"
 
 #include "utils_gtest.h"
-#include "../src/logging.h"
+#include "logging.h"
 
-#include <iostream>
-#include <fstream>
-
-//#define GET_RESIDUALS
-
+// make my life easier
 using namespace Eigen;
-using namespace std;
 using namespace wolf;
+using std::shared_ptr;
+using std::make_shared;
+using std::static_pointer_cast;
+using std::string;
 
 
-class ConstraintIMU_biasTest : public testing::Test
+class Process_Constraint_IMU : public testing::Test
 {
     public:
-        ProblemPtr problem;
-        SensorIMUPtr sensor_imu;
-        ProcessorIMUPtr processor_imu;
-        FrameBasePtr KF_0, KF_1;
-        CaptureBasePtr   C_0, C_1;
-        CaptureMotionPtr CM_0, CM_1;
-        CaptureIMUPtr capture_imu;
-        CeresManagerPtr ceres_manager;
+        // Wolf objects
+        ProblemPtr          problem;
+        SensorIMUPtr        sensor_imu;
+        ProcessorIMUPtr     processor_imu;
+        FrameBasePtr        KF_0, KF_1;
+        CaptureBasePtr      C_0, C_1;
+        CaptureMotionPtr    CM_0, CM_1;
+        CaptureIMUPtr       capture_imu;
+        CeresManagerPtr     ceres_manager;
 
-        TimeStamp t0, t;
-        Scalar dt, DT;
-        int num_integrations;
+        // time
+        TimeStamp           t0, t;
+        Scalar              dt, DT;
+        int                 num_integrations;
 
-        VectorXs x0;
-        Vector3s p0, v0;
-        Quaternions q0, q;
+        // initial state
+        VectorXs            x0;
+        Vector3s            p0, v0;
+        Quaternions         q0, q;
         Matrix<Scalar, 9, 9> P0;
-        Vector6s motion, data, bias_real, bias_preint, bias_null;
-        Vector6s bias_0, bias_1;                    // optimized bias at KF's 0 and 1
-        Vector3s a, w;                              // true acc and angvel in IMU frame
 
-        // Deltas and states
-        VectorXs D_exact, x1_exact;                 // exact or ground truth
-        VectorXs D_preint_imu, x1_preint_imu;       // preintegrated with imu_tools
-        VectorXs D_corrected_imu, x1_corrected_imu; // corrected with imu_tools
-        VectorXs D_preint, x1_preint;               // preintegrated with processor_imu
-        VectorXs D_corrected, x1_corrected;         // corrected with processor_imu
-        VectorXs D_optim, x1_optim;                 // optimized using constraint_imu
-        VectorXs D_optim_imu, x1_optim_imu;         // corrected with imu_tools osing optimized bias
-        VectorXs x0_optim;                          // optimized using constraint_imu
+        // bias
+        Vector6s            bias_real, bias_preint, bias_null;
+        Vector6s            bias_0, bias_1;                    // optimized bias at KF's 0 and 1
 
-        Matrix<Scalar, 9, 6> J_b;
-        Vector9s step;
+        // input
+        Vector6s            motion, data;
+        Vector3s            a, w;                              // true acc and angvel in IMU frame
+
+        // Deltas and states (exact, integrated, corrected, solved, etc)
+        VectorXs            D_exact, x1_exact;                 // exact or ground truth
+        VectorXs            D_preint_imu, x1_preint_imu;       // preintegrated with imu_tools
+        VectorXs            D_corrected_imu, x1_corrected_imu; // corrected with imu_tools
+        VectorXs            D_preint, x1_preint;               // preintegrated with processor_imu
+        VectorXs            D_corrected, x1_corrected;         // corrected with processor_imu
+        VectorXs            D_optim, x1_optim;                 // optimized using constraint_imu
+        VectorXs            D_optim_imu, x1_optim_imu;         // corrected with imu_tools osing optimized bias
+        VectorXs            x0_optim;                          // optimized using constraint_imu
+
+        // Delta correction Jacobian and step
+        Matrix<Scalar, 9, 6> J_D_bias;
+        Vector9s            step;
 
         // Flags for fixing/unfixing state blocks
-        bool p0_fixed, q0_fixed, v0_fixed;
-        bool p1_fixed, q1_fixed, v1_fixed;
+        bool                p0_fixed, q0_fixed, v0_fixed;
+        bool                p1_fixed, q1_fixed, v1_fixed;
 
 
 
         virtual void SetUp( )
         {
-            using std::shared_ptr;
-            using std::make_shared;
-            using std::static_pointer_cast;
-
-            std::string wolf_root = _WOLF_ROOT_DIR;
+            string wolf_root = _WOLF_ROOT_DIR;
 
             //===================================== SETTING PROBLEM
             problem = Problem::create("POV 3D");
 
             // CERES WRAPPER
             ceres::Solver::Options ceres_options;
-            //        ceres_options.minimizer_type                   = ceres::TRUST_REGION;
-            //        ceres_options.max_line_search_step_contraction = 1e-3;
-            //        ceres_options.max_num_iterations               = 1e4;
-            //        ceres_options.min_relative_decrease            = 1e-10;
-            //        ceres_options.parameter_tolerance              = 1e-10;
-            //        ceres_options.function_tolerance               = 1e-10;
-            ceres_manager = std::make_shared<CeresManager>(problem, ceres_options);
+            ceres_manager = make_shared<CeresManager>(problem, ceres_options);
 
             // SENSOR + PROCESSOR IMU
             SensorBasePtr       sensor = problem->installSensor   ("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
             ProcessorBasePtr processor = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu_no_vote.yaml");
-            sensor_imu    = std::static_pointer_cast<SensorIMU>   (sensor);
-            processor_imu = std::static_pointer_cast<ProcessorIMU>(processor);
+            sensor_imu    = static_pointer_cast<SensorIMU>   (sensor);
+            processor_imu = static_pointer_cast<ProcessorIMU>(processor);
 
+            // Some initializations
             bias_null.setZero();
-
             x0.resize(10);
             D_preint.resize(10);
             D_corrected.resize(10);
 
         }
 
-        virtual void TearDown( )
-        {
-            //
-        }
 
         /* Create IMU data from body motion
          * Input:
@@ -124,9 +113,9 @@ class ConstraintIMU_biasTest : public testing::Test
         VectorXs motion2data(const VectorXs& body, const Quaternions& q, const VectorXs& bias)
         {
             VectorXs data(6);
-            data = body;                                // start with body motion
+            data          = body;                       // start with body motion
             data.head(3) -= q.conjugate()*gravity();    // add -g
-            data = data + bias;                         // add bias
+            data         += bias;                       // add bias
             return data;
         }
 
@@ -190,6 +179,7 @@ class ConstraintIMU_biasTest : public testing::Test
                 // Simulate data
                 data = motion2data(motion, q, bias_real);
                 q    = q*exp_q(motion.tail(3)*dt);
+
                 // Motion::integrateOneStep()
                 {   // IMU::computeCurrentDelta
                     body  = data - bias_preint;
@@ -210,7 +200,7 @@ class ConstraintIMU_biasTest : public testing::Test
         void integrateWithProcessor(int N, const TimeStamp& t0, const Quaternions q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, VectorXs& D_preint, VectorXs& D_corrected)
         {
             data = motion2data(motion, q0, bias_real);
-            capture_imu = std::make_shared<CaptureIMU>(t0, sensor_imu, data, sensor_imu->getNoiseCov());
+            capture_imu = make_shared<CaptureIMU>(t0, sensor_imu, data, sensor_imu->getNoiseCov());
             q = q0;
             t = t0;
             for (int i= 0; i < N; i++)
@@ -229,6 +219,7 @@ class ConstraintIMU_biasTest : public testing::Test
             }
         }
 
+        // Initial configuration of variables
         bool configureAll()
         {
             DT      = num_integrations * dt;
@@ -245,20 +236,21 @@ class ConstraintIMU_biasTest : public testing::Test
             return true;
         }
 
+        // Integrate using all methods
         void integrateAll()
         {
             // ===================================== INTEGRATE EXACTLY WITH IMU_TOOLS with no bias at all
-            D_exact = integrateDelta(num_integrations, q0, motion, bias_null, bias_null, dt);
+            D_exact  = integrateDelta(num_integrations, q0, motion, bias_null, bias_null, dt);
             x1_exact = imu::composeOverState(x0, D_exact, DT );
 
 
             // ===================================== INTEGRATE USING IMU_TOOLS
             // pre-integrate
-            D_preint_imu = integrateDelta(num_integrations, q0, motion, bias_real, bias_preint, dt, J_b);
+            D_preint_imu = integrateDelta(num_integrations, q0, motion, bias_real, bias_preint, dt, J_D_bias);
 
             // correct perturbated
-            step = J_b * (bias_real - bias_preint);
-            D_corrected_imu = imu::plus(D_preint_imu, step);
+            step             = J_D_bias * (bias_real - bias_preint);
+            D_corrected_imu  = imu::plus(D_preint_imu, step);
 
             // compose states
             x1_preint_imu    = imu::composeOverState(x0, D_preint_imu    , DT );
@@ -273,6 +265,7 @@ class ConstraintIMU_biasTest : public testing::Test
             x1_corrected     = imu::composeOverState(x0, D_corrected     , DT );
         }
 
+        // Set state_blocks status
         void setFixedBlocks()
         {
             // this sets each state block status fixed / unfixed
@@ -320,7 +313,7 @@ class ConstraintIMU_biasTest : public testing::Test
 
             KF_1 = problem->getLastKeyFramePtr();
             C_1  = KF_1->getCaptureList().back();
-            CM_1 = std::static_pointer_cast<CaptureMotion>(C_1);
+            CM_1 = static_pointer_cast<CaptureMotion>(C_1);
 
             // ===================================== SET BOUNDARY CONDITIONS
             setFixedBlocks();
@@ -336,15 +329,13 @@ class ConstraintIMU_biasTest : public testing::Test
 
             // ===================================== GET INTEGRATED STATE WITH SOLVED BIAS
             // with processor
-            x0_optim    = KF_0->getState();
-            D_optim     = CM_1->getDeltaCorrected(bias_0);
-            //            x1_optim     = processor_imu->getCurrentState();
+            x0_optim     = KF_0->getState();
+            D_optim      = CM_1->getDeltaCorrected(bias_0);
             x1_optim     = KF_1->getState();
-            //            x1_optim     = imu::composeOverState(x0, D_optim, DT);
 
             // with imu_tools
-            step        = J_b * (bias_0 - bias_preint);
-            D_optim_imu = imu::plus(D_preint, step);
+            step         = J_D_bias * (bias_0 - bias_preint);
+            D_optim_imu  = imu::plus(D_preint, step);
             x1_optim_imu = imu::composeOverState(x0, D_optim_imu, DT);
 
             return report;
@@ -390,7 +381,7 @@ class ConstraintIMU_biasTest : public testing::Test
 
 };
 
-TEST_F(ConstraintIMU_biasTest, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
+TEST_F(Process_Constraint_IMU, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
 {
 
     // ================================================================================================================ //
@@ -466,7 +457,7 @@ TEST_F(ConstraintIMU_biasTest, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
 }
 
 
-TEST_F(ConstraintIMU_biasTest, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
+TEST_F(Process_Constraint_IMU, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
 {
 
     // ================================================================================================================ //
@@ -503,13 +494,10 @@ TEST_F(ConstraintIMU_biasTest, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
     // ================================================================================================================ //
 
 
-    // ===================================== RUN ALL but do not solve yet
+    // ===================================== RUN ALL
     configureAll();
     integrateAll();
     buildProblem();
-
-
-    // ===================================== SOLVE
     string report = solveProblem(1);
     WOLF_TRACE(report);
 
@@ -542,7 +530,7 @@ TEST_F(ConstraintIMU_biasTest, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
 }
 
 
-TEST_F(ConstraintIMU_biasTest, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_B
+TEST_F(Process_Constraint_IMU, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_B
 {
 
     // ================================================================================================================ //
@@ -621,7 +609,7 @@ TEST_F(ConstraintIMU_biasTest, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
-    ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest.*";
+    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU.*";
 
     return RUN_ALL_TESTS();
 }
