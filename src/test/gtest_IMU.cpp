@@ -9,7 +9,8 @@
 #include "wolf.h"
 #include "sensor_imu.h"
 #include "processor_imu.h"
-//#include "processor_odom_3D.h"
+#include "sensor_odom_3D.h"
+#include "processor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 #include "utils_gtest.h"
@@ -63,7 +64,7 @@ class Process_Constraint_IMU : public testing::Test
         VectorXs            D_preint, x1_preint;               // preintegrated with processor_imu
         VectorXs            D_corrected, x1_corrected;         // corrected with processor_imu
         VectorXs            D_optim, x1_optim;                 // optimized using constraint_imu
-        VectorXs            D_optim_imu, x1_optim_imu;         // corrected with imu_tools osing optimized bias
+        VectorXs            D_optim_imu, x1_optim_imu;         // corrected with imu_tools using optimized bias
         VectorXs            x0_optim;                          // optimized using constraint_imu
 
         // Delta correction Jacobian and step
@@ -382,6 +383,23 @@ class Process_Constraint_IMU : public testing::Test
 
 };
 
+class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
+{
+    public:
+        // Wolf objects
+        SensorOdom3DPtr     sensor_odo;
+        ProcessorOdom3DPtr  processor_odo;
+
+        virtual void SetUp( )
+        {
+            Process_Constraint_IMU::SetUp();
+
+//            SensorBasePtr sensor = problem->installSensor("ODOM 3D", "Odometer", (Vector7s()<<0,0,0,0,0,0,1).finished(),_WOLF_ROOT_DIR+"/src/examples/sensor_odom_3D.yaml");
+//            ProcessorBasePtr processor = problem->installProcessor("ODOM 3D", "Odometer", "Odometer", _WOLF_ROOT_DIR+"/src/examples/processor_odom_3D.yaml");
+        }
+
+};
+
 TEST_F(Process_Constraint_IMU, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
 {
 
@@ -430,7 +448,7 @@ TEST_F(Process_Constraint_IMU, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
 
 
     // ===================================== PRINT RESULTS
-    //    print();
+        print();
 
 
     // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
