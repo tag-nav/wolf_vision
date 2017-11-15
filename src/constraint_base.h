@@ -161,12 +161,6 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
          */
         void setProcessor(const ProcessorBasePtr& _processor_ptr);
 
-        /**
-         * @brief getProblem
-         * @return
-         */
-        ProblemPtr getProblem();
-
     protected:
         template<typename D>
         void print(const std::string& name, const Eigen::MatrixBase<D>& mat) const; // Do nothing if input Scalar type is ceres::Jet
@@ -204,21 +198,6 @@ inline void ConstraintBase::print(const std::string& name, const Eigen::Matrix<S
     {
         WOLF_TRACE(name, ":\n", mat);
     }
-}
-
-inline wolf::ProblemPtr ConstraintBase::getProblem()
-{
-    ProblemPtr prb = problem_ptr_.lock();
-    if (!prb)
-    {
-        FeatureBasePtr ftr = feature_ptr_.lock();
-        if (ftr)
-        {
-            prb = ftr->getProblem();
-            problem_ptr_ = prb;
-        }
-    }
-    return prb;
 }
 
 inline unsigned int ConstraintBase::id() const

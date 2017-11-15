@@ -80,7 +80,7 @@ class NodeBase
         void setType(const std::string& _type);
         void setName(const std::string& _name);
 
-        virtual ProblemPtr getProblem();
+        ProblemPtr getProblem() const;
         void setProblem(ProblemPtr _prob_ptr);
 };
 
@@ -130,7 +130,7 @@ inline void NodeBase::setName(const std::string& _name)
     node_name_ = _name;
 }
 
-inline ProblemPtr NodeBase::getProblem()
+inline ProblemPtr NodeBase::getProblem() const
 {
   return problem_ptr_.lock();
 }

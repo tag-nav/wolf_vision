@@ -96,7 +96,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
         unsigned int id();
 
-        ProblemPtr getProblem();
         HardwareBasePtr getHardwarePtr();
         void setHardwarePtr(const HardwareBasePtr _hw_ptr);
 
@@ -165,21 +164,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 #include "capture_base.h"
 
 namespace wolf{
-
-inline ProblemPtr SensorBase::getProblem()
-{
-    ProblemPtr prb = problem_ptr_.lock();
-    if (!prb)
-    {
-        HardwareBasePtr hw = hardware_ptr_.lock();
-        if (hw)
-        {
-            prb = hw->getProblem();
-            problem_ptr_ = prb;
-        }
-    }
-    return prb;
-}
 
 inline unsigned int SensorBase::id()
 {

@@ -112,8 +112,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
         // Wolf tree access ---------------------------------------------------
     public:
-        ProblemPtr getProblem();
-
         TrajectoryBasePtr getTrajectoryPtr() const;
         void setTrajectoryPtr(TrajectoryBasePtr _trj_ptr);
 
@@ -157,22 +155,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 #include "state_block.h"
 
 namespace wolf {
-
-inline ProblemPtr FrameBase::getProblem()
-{
-    ProblemPtr prb = problem_ptr_.lock();
-    if (!prb)
-    {
-        TrajectoryBasePtr trj = trajectory_ptr_.lock();
-        if (trj)
-        {
-            prb = trj->getProblem();
-            problem_ptr_ = prb;
-        }
-    }
-
-    return prb;
-}
 
 
 inline unsigned int FrameBase::id()

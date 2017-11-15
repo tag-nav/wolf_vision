@@ -88,7 +88,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         unsigned int getHits() const;
         ConstraintBaseList& getConstrainedByList();
 
-        ProblemPtr getProblem();
         void setMapPtr(const MapBasePtr _map_ptr);
         MapBasePtr getMapPtr();
 
@@ -101,21 +100,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 #include "state_block.h"
 
 namespace wolf{
-
-inline wolf::ProblemPtr LandmarkBase::getProblem()
-{
-    ProblemPtr prb = problem_ptr_.lock();
-    if (!prb)
-    {
-        MapBasePtr map = map_ptr_.lock();
-        if (map)
-        {
-            prb = map->getProblem();
-            problem_ptr_ = prb;
-        }
-    }
-    return prb;
-}
 
 inline MapBasePtr LandmarkBase::getMapPtr()
 {

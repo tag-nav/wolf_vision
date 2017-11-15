@@ -56,8 +56,6 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void setTimeStamp(const TimeStamp& _ts);
         void setTimeStampToNow();
 
-        ProblemPtr getProblem();
-
         FrameBasePtr getFramePtr() const;
         void setFramePtr(const FrameBasePtr _frm_ptr);
         void unlinkFromFrame(){frame_ptr_.reset();}
@@ -123,21 +121,6 @@ inline void CaptureBase::updateCalibSize()
 #include "feature_base.h"
 
 namespace wolf{
-
-inline ProblemPtr CaptureBase::getProblem()
-{
-    ProblemPtr prb = problem_ptr_.lock();
-    if (!prb)
-    {
-        FrameBasePtr frm = frame_ptr_.lock();
-        if (frm)
-        {
-            prb = frm->getProblem();
-            problem_ptr_ = prb;
-        }
-    }
-    return prb;
-}
 
 inline const std::vector<StateBlockPtr>& CaptureBase::getStateBlockVec() const
 {
