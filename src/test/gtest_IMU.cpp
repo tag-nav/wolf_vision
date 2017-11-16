@@ -242,7 +242,7 @@ class Process_Constraint_IMU : public testing::Test
         }
 
         // Integrate using all methods
-        void integrateAll()
+        virtual void integrateAll()
         {
             // ===================================== INTEGRATE EXACTLY WITH IMU_TOOLS with no bias at all
             D_exact  = integrateDelta(num_integrations, q0, motion, bias_null, bias_null, dt);
@@ -310,7 +310,7 @@ class Process_Constraint_IMU : public testing::Test
             KF_1->setState(x_pert);
         }
 
-        void buildProblem()
+        virtual void buildProblem()
         {
             // ===================================== SET KF in Wolf tree
             FrameBasePtr KF = problem->emplaceFrame(KEY_FRAME, x1_exact, t);
@@ -395,7 +395,7 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
         SensorOdom3DPtr     sensor_odo;
         ProcessorOdom3DPtr  processor_odo;
 
-        virtual void SetUp( )
+        virtual void SetUp( ) override
         {
             Process_Constraint_IMU::SetUp();
 
@@ -413,8 +413,10 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
             processor_odo->setMaxTimeSpan(1.0);
         }
 
-        void integrateOdo()
+        virtual void integrateAll() override
         {
+            Process_Constraint_IMU::integrateAll();
+
             Vector6s    data;
             Vector3s    p1  = x1_exact.head(3);
             Quaternions q1   (x1_exact.data() + 3);
@@ -427,8 +429,10 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
             sensor_odo->process(capture_odo);
        }
 
-        void buildOdoProblem()
+        virtual void buildProblem() override
         {
+            Process_Constraint_IMU::buildProblem();
+
             processor_odo->keyFrameCallback(KF_1, 0.1);
         }
 
@@ -700,9 +704,7 @@ TEST_F(Process_Constraint_IMU_ODO, Var_P0_Q0_V0_B0_P1_Q1_B1__Invar_V1)
     // ===================================== RUN ALL but do not solve yet
     configureAll();
     integrateAll();
-    integrateOdo();
     buildProblem();
-    buildOdoProblem();
 
 //    problem->print(4,1,1,1);
 
@@ -778,9 +780,7 @@ TEST_F(Process_Constraint_IMU_ODO, Var_P0_Q0_B0_P1_Q1_V1_B1__Invar_V0)
     // ===================================== RUN ALL but do not solve yet
     configureAll();
     integrateAll();
-    integrateOdo();
     buildProblem();
-    buildOdoProblem();
 
 //    problem->print(4,1,1,1);
 
