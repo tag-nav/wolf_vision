@@ -133,6 +133,26 @@ class ProcessorOdom3D : public ProcessorMotion
         static ProcessorBasePtr create(const std::string& _unique_name,
                                        const ProcessorParamsBasePtr _params,
                                        const SensorBasePtr sensor_ptr = nullptr);
+
+        void setAngleTurned(Scalar angleTurned)
+        {
+            angle_turned_ = angleTurned;
+        }
+
+        void setDistTraveled(Scalar distTraveled)
+        {
+            dist_traveled_ = distTraveled;
+        }
+
+        void setMaxBuffLength(Size maxBuffLength)
+        {
+            max_buff_length_ = maxBuffLength;
+        }
+
+        void setMaxTimeSpan(Scalar maxTimeSpan)
+        {
+            max_time_span_ = maxTimeSpan;
+        }
 };
 
 inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const
