@@ -9,7 +9,8 @@
 #include "wolf.h"
 #include "sensor_imu.h"
 #include "processor_imu.h"
-//#include "processor_odom_3D.h"
+#include "sensor_odom_3D.h"
+#include "processor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 #include "utils_gtest.h"
@@ -63,7 +64,7 @@ class Process_Constraint_IMU : public testing::Test
         VectorXs            D_preint, x1_preint;               // preintegrated with processor_imu
         VectorXs            D_corrected, x1_corrected;         // corrected with processor_imu
         VectorXs            D_optim, x1_optim;                 // optimized using constraint_imu
-        VectorXs            D_optim_imu, x1_optim_imu;         // corrected with imu_tools osing optimized bias
+        VectorXs            D_optim_imu, x1_optim_imu;         // corrected with imu_tools using optimized bias
         VectorXs            x0_optim;                          // optimized using constraint_imu
 
         // Delta correction Jacobian and step
@@ -222,15 +223,18 @@ class Process_Constraint_IMU : public testing::Test
         // Initial configuration of variables
         bool configureAll()
         {
+            // variables
             DT      = num_integrations * dt;
             q0      .normalize();
             x0     << p0, q0.coeffs(), v0;
             P0      .setIdentity() * 0.01;
+            motion << a, w;
+
+            // wolf objects
             KF_0    = problem->setPrior(x0, P0, t0);
             C_0     = processor_imu->getOriginPtr();
             CM_1    = processor_imu->getLastPtr();
             KF_1    = CM_1->getFramePtr();
-            motion << a, w;
 
             processor_imu->getLastPtr()->setCalibrationPreint(bias_preint);
 
@@ -310,10 +314,12 @@ class Process_Constraint_IMU : public testing::Test
         {
             // ===================================== SET KF in Wolf tree
             FrameBasePtr KF = problem->emplaceFrame(KEY_FRAME, x1_exact, t);
+
+            // ===================================== IMU CALLBACK
             processor_imu->keyFrameCallback(KF, 0.01);
 
             KF_1 = problem->getLastKeyFramePtr();
-            C_1  = KF_1->getCaptureList().back();
+            C_1  = KF_1->getCaptureList().front(); // front is IMU
             CM_1 = static_pointer_cast<CaptureMotion>(C_1);
 
             // ===================================== SET BOUNDARY CONDITIONS
@@ -382,6 +388,52 @@ class Process_Constraint_IMU : public testing::Test
 
 };
 
+class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
+{
+    public:
+        // Wolf objects
+        SensorOdom3DPtr     sensor_odo;
+        ProcessorOdom3DPtr  processor_odo;
+
+        virtual void SetUp( )
+        {
+            Process_Constraint_IMU::SetUp();
+
+            string wolf_root = _WOLF_ROOT_DIR;
+
+            SensorBasePtr    sensor     = problem->installSensor   ("ODOM 3D", "Odometer", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml"   );
+            ProcessorBasePtr processor  = problem->installProcessor("ODOM 3D", "Odometer", "Odometer"                            , wolf_root + "/src/examples/processor_odom_3D.yaml");
+            sensor_odo      = static_pointer_cast<SensorOdom3D>(sensor);
+            processor_odo   = static_pointer_cast<ProcessorOdom3D>(processor);
+
+            // prevent this processor from voting by setting high thresholds :
+            processor_odo->setAngleTurned(2.0);
+            processor_odo->setDistTraveled(1.0);
+            processor_odo->setMaxBuffLength(10);
+            processor_odo->setMaxTimeSpan(1.0);
+        }
+
+        void integrateOdo()
+        {
+            Vector6s    data;
+            Vector3s    p1  = x1_exact.head(3);
+            Quaternions q1   (x1_exact.data() + 3);
+            Vector3s    dp  =              q0.conjugate() * (p1 - p0);
+            Vector3s    dth = wolf::log_q( q0.conjugate() *  q1     );
+            data           << dp, dth;
+
+            CaptureOdom3DPtr capture_odo = make_shared<CaptureOdom3D>(t, sensor_odo, data, sensor_odo->getNoiseCov());
+
+            sensor_odo->process(capture_odo);
+       }
+
+        void buildOdoProblem()
+        {
+            processor_odo->keyFrameCallback(KF_1, 0.1);
+        }
+
+};
+
 TEST_F(Process_Constraint_IMU, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
 {
 
@@ -430,29 +482,29 @@ TEST_F(Process_Constraint_IMU, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
 
 
     // ===================================== PRINT RESULTS
-    //    print();
+//    print();
 
 
     // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
 
     // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint        , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected     , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected     , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu, x1_exact          , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected    , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
 
     // check optimal solutions
-    ASSERT_MATRIX_APPROX(x0_optim    , x0        , 1e-5 );
-    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0, 1e-8 );
-    ASSERT_MATRIX_APPROX(bias_0      , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1      , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim     , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim    , x1_exact  , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_optim_imu , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim_imu, x1_exact  , 1e-5 );
-    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0, 1e-8 );
+    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
+    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
+    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
+    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
 
 
 }
@@ -510,23 +562,23 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
     // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
 
     // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint        , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected     , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected     , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu, x1_exact          , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected    , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
 
     // check optimal solutions
-    ASSERT_MATRIX_APPROX(x0_optim    , x0        , 1e-5 );
-    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0, 1e-8 );
-    ASSERT_MATRIX_APPROX(bias_0      , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1      , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim     , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim    , x1_exact  , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_optim_imu , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim_imu, x1_exact  , 1e-5 );
-    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0, 1e-8 );
+    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
+    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
+    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
+    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
 
 
 }
@@ -587,24 +639,180 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_
     // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
 
     // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint        , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected     , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected     , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu, x1_exact          , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected    , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
 
     // check optimal solutions
-    ASSERT_MATRIX_APPROX(x0_optim    , x0        , 1e-5 );
-    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0, 1e-8 );
-    ASSERT_MATRIX_APPROX(bias_0      , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1      , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim     , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim    , x1_exact  , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_optim_imu , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim_imu, x1_exact  , 1e-5 );
-    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0, 1e-8 );
+    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
+    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
+    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
+    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
 
+}
+
+
+TEST_F(Process_Constraint_IMU_ODO, Var_P0_Q0_V0_B0_P1_Q1_B1__Invar_V1)
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  << 1,2,3;
+    w                  << 1,2,3;
+
+    // ---------- fix boundaries
+    p0_fixed       = false;
+    q0_fixed       = false;
+    v0_fixed       = false;
+    p1_fixed       = false;
+    q1_fixed       = false;
+    v1_fixed       = true;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL but do not solve yet
+    configureAll();
+    integrateAll();
+    integrateOdo();
+    buildProblem();
+    buildOdoProblem();
+
+//    problem->print(4,1,1,1);
+
+    // ===================================== SOLVE
+    string report = solveProblem(1);
+    WOLF_TRACE(report);
+
+
+    // ===================================== PRINT RESULTS
+//    print();
+
+
+    // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
+
+    // check delta and state integrals
+    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
+
+    // check optimal solutions
+    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
+    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
+    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
+    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
+}
+
+
+TEST_F(Process_Constraint_IMU_ODO, Var_P0_Q0_B0_P1_Q1_V1_B1__Invar_V0)
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  << 1,2,3;
+    w                  << 1,2,3;
+
+    // ---------- fix boundaries
+    p0_fixed       = false;
+    q0_fixed       = false;
+    v0_fixed       = true;
+    p1_fixed       = false;
+    q1_fixed       = false;
+    v1_fixed       = false;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL but do not solve yet
+    configureAll();
+    integrateAll();
+    integrateOdo();
+    buildProblem();
+    buildOdoProblem();
+
+//    problem->print(4,1,1,1);
+
+    // ===================================== SOLVE
+    string report = solveProblem(1);
+    WOLF_TRACE(report);
+
+
+    // ===================================== PRINT RESULTS
+//    print();
+
+
+    // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
+
+    // check delta and state integrals
+    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
+
+    // check optimal solutions
+    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
+    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
+    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
+    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
 }
 
 
@@ -612,7 +820,8 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
-    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU.*";
+//        ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU.*";
+//    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.*";
 
     return RUN_ALL_TESTS();
 }

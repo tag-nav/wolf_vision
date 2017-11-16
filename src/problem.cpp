@@ -326,7 +326,7 @@ void Problem::keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _pro
     //std::cout << "Problem::keyFrameCallback: processor " << _processor_ptr->getName() << std::endl;
     for (auto sensor : hardware_ptr_->getSensorList())
     	for (auto processor : sensor->getProcessorList())
-    		if (processor->id() != _processor_ptr->id())
+    		if (processor && (processor != _processor_ptr) )
                 processor->keyFrameCallback(_keyframe_ptr, _time_tolerance);
 }
 
