@@ -454,23 +454,23 @@ TEST_F(Process_Constraint_IMU, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
     // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
 
     // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint        , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected     , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected     , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu, x1_exact          , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected    , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
 
     // check optimal solutions
-    ASSERT_MATRIX_APPROX(x0_optim    , x0        , 1e-5 );
-    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0, 1e-8 );
-    ASSERT_MATRIX_APPROX(bias_0      , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1      , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim     , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim    , x1_exact  , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_optim_imu , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim_imu, x1_exact  , 1e-5 );
-    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0, 1e-8 );
+    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
+    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
+    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
+    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
 
 
 }
@@ -528,23 +528,23 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
     // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
 
     // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint        , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected     , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected     , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu, x1_exact          , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected    , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
 
     // check optimal solutions
-    ASSERT_MATRIX_APPROX(x0_optim    , x0        , 1e-5 );
-    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0, 1e-8 );
-    ASSERT_MATRIX_APPROX(bias_0      , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1      , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim     , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim    , x1_exact  , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_optim_imu , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim_imu, x1_exact  , 1e-5 );
-    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0, 1e-8 );
+    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
+    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
+    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
+    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
 
 
 }
@@ -605,23 +605,23 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_
     // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
 
     // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint        , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected     , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected     , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu, x1_exact          , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected    , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
+    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
 
     // check optimal solutions
-    ASSERT_MATRIX_APPROX(x0_optim    , x0        , 1e-5 );
-    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0, 1e-8 );
-    ASSERT_MATRIX_APPROX(bias_0      , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1      , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim     , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim    , x1_exact  , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_optim_imu , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim_imu, x1_exact  , 1e-5 );
-    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0, 1e-8 );
+    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
+    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
+    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
+    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
+    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
+    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
+    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
 
 }
 
