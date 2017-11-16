@@ -180,7 +180,7 @@ FrameBasePtr ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const 
 
 void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 {
-
+    assert(_origin_frame && "ProcessorMotion::setOrigin: Provided frame pointer is nullptr.");
     assert(_origin_frame->getTrajectoryPtr() != nullptr
             && "ProcessorMotion::setOrigin: origin frame must be in the trajectory.");
     assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
