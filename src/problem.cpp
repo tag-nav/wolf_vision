@@ -81,9 +81,9 @@ void Problem::addSensor(SensorBasePtr _sen_ptr)
 }
 
 SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
-                                   const std::string& _unique_sensor_name, //
-                                   const Eigen::VectorXs& _extrinsics, //
-                                   IntrinsicsBasePtr _intrinsics)
+                                     const std::string& _unique_sensor_name, //
+                                     const Eigen::VectorXs& _extrinsics, //
+                                     IntrinsicsBasePtr _intrinsics)
 {
     SensorBasePtr sen_ptr = SensorFactory::get().create(uppercase(_sen_type), _unique_sensor_name, _extrinsics, _intrinsics);
     addSensor(sen_ptr);
@@ -91,9 +91,9 @@ SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
 }
 
 SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
-                                   const std::string& _unique_sensor_name, //
-                                   const Eigen::VectorXs& _extrinsics, //
-                                   const std::string& _intrinsics_filename)
+                                     const std::string& _unique_sensor_name, //
+                                     const Eigen::VectorXs& _extrinsics, //
+                                     const std::string& _intrinsics_filename)
 {
     if (_intrinsics_filename != "")
     {
@@ -106,9 +106,9 @@ SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
 }
 
 ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
-                                         const std::string& _unique_processor_name, //
-                                         SensorBasePtr _corresponding_sensor_ptr, //
-                                         ProcessorParamsBasePtr _prc_params)
+                                           const std::string& _unique_processor_name, //
+                                           SensorBasePtr _corresponding_sensor_ptr, //
+                                           ProcessorParamsBasePtr _prc_params)
 {
     if (_corresponding_sensor_ptr == nullptr)
     {
@@ -132,9 +132,9 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
 }
 
 ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
-                               const std::string& _unique_processor_name, //
-                               const std::string& _corresponding_sensor_name, //
-                               const std::string& _params_filename)
+                                           const std::string& _unique_processor_name, //
+                                           const std::string& _corresponding_sensor_name, //
+                                           const std::string& _params_filename)
 {
     SensorBasePtr sen_ptr = getSensorPtr(_corresponding_sensor_name);
     if (sen_ptr == nullptr)
@@ -205,25 +205,32 @@ void Problem::clearProcessorMotion()
 }
 
 
-FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, FrameType _frame_key_type,
-                                   const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
+FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, //
+                                   FrameType _frame_key_type, //
+                                   const Eigen::VectorXs& _frame_state, //
+                                   const TimeStamp& _time_stamp)
 {
     FrameBasePtr frm = FrameFactory::get().create(_frame_structure, _frame_key_type, _time_stamp, _frame_state);
     trajectory_ptr_->addFrame(frm);
     return frm;
 }
 
-FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, FrameType _frame_key_type, const TimeStamp& _time_stamp)
+FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, //
+                                   FrameType _frame_key_type, //
+                                   const TimeStamp& _time_stamp)
 {
     return emplaceFrame(_frame_structure, _frame_key_type, getState(_time_stamp), _time_stamp);
 }
 
-FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, const Eigen::VectorXs& _frame_state, const TimeStamp& _time_stamp)
+FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, //
+                                   const Eigen::VectorXs& _frame_state, //
+                                   const TimeStamp& _time_stamp)
 {
     return emplaceFrame(trajectory_ptr_->getFrameStructure(), _frame_key_type, _frame_state, _time_stamp);
 }
 
-FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, const TimeStamp& _time_stamp)
+FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, //
+                                   const TimeStamp& _time_stamp)
 {
     return emplaceFrame(trajectory_ptr_->getFrameStructure(), _frame_key_type, _time_stamp);
 }

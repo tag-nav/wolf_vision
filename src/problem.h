@@ -80,9 +80,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          * \param _intrinsics a base-pointer to a derived struct defining the intrinsic parameters.
          */
         SensorBasePtr installSensor(const std::string& _sen_type, //
-                                  const std::string& _unique_sensor_name, //
-                                  const Eigen::VectorXs& _extrinsics, //
-                                  IntrinsicsBasePtr _intrinsics = nullptr);
+                                    const std::string& _unique_sensor_name, //
+                                    const Eigen::VectorXs& _extrinsics, //
+                                    IntrinsicsBasePtr _intrinsics = nullptr);
 
         /** \brief Factory method to install (create and add) sensors only from its properties -- Helper method loading parameters from file
          * \param _sen_type type of sensor
@@ -91,9 +91,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          * \param _intrinsics_filename the name of a file containing the intrinsic parameters in a format compatible with the intrinsics creator registered in IntrinsicsFactory under the key _sen_type.
          */
         SensorBasePtr installSensor(const std::string& _sen_type, //
-                                  const std::string& _unique_sensor_name, //
-                                  const Eigen::VectorXs& _extrinsics, //
-                                  const std::string& _intrinsics_filename);
+                                    const std::string& _unique_sensor_name, //
+                                    const Eigen::VectorXs& _extrinsics, //
+                                    const std::string& _intrinsics_filename);
 
         /** \brief get a sensor pointer by its name
          * \param _sensor_name The sensor name, as it was installed with installSensor()
@@ -110,9 +110,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          * \param _prc_params a base-pointer to a derived struct defining the processor parameters.
          */
         ProcessorBasePtr installProcessor(const std::string& _prc_type, //
-                                        const std::string& _unique_processor_name, //
-                                        SensorBasePtr _corresponding_sensor_ptr, //
-                                        ProcessorParamsBasePtr _prc_params = nullptr);
+                                          const std::string& _unique_processor_name, //
+                                          SensorBasePtr _corresponding_sensor_ptr, //
+                                          ProcessorParamsBasePtr _prc_params = nullptr);
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *
@@ -125,9 +125,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          * \param _params_filename name of formatted file (xml, yaml, etc) defining the processor parameters.
          */
         ProcessorBasePtr installProcessor(const std::string& _prc_type, //
-                              const std::string& _unique_processor_name, //
-                              const std::string& _corresponding_sensor_name, //
-                              const std::string& _params_filename = "");
+                                          const std::string& _unique_processor_name, //
+                                          const std::string& _corresponding_sensor_name, //
+                                          const std::string& _params_filename = "");
 
         /** \brief Set the processor motion
          *
@@ -141,8 +141,9 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         // Trajectory branch ----------------------------------
         TrajectoryBasePtr getTrajectoryPtr();
-        virtual FrameBasePtr setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov,
-                               const TimeStamp& _ts);
+        virtual FrameBasePtr setPrior(const Eigen::VectorXs& _prior_state, //
+                                      const Eigen::MatrixXs& _prior_cov, //
+                                      const TimeStamp& _ts);
 
         /** \brief Emplace frame from string frame_structure
          * \param _frame_structure String indicating the frame structure.
@@ -155,9 +156,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          *   - Add it to Trajectory
          *   - If it is key-frame, update state-block lists in Problem
          */
-        FrameBasePtr emplaceFrame(const std::string& _frame_structure,
-                                  FrameType _frame_key_type,
-                                  const Eigen::VectorXs& _frame_state,
+        FrameBasePtr emplaceFrame(const std::string& _frame_structure, //
+                                  FrameType _frame_key_type, //
+                                  const Eigen::VectorXs& _frame_state, //
                                   const TimeStamp& _time_stamp);
 
         /** \brief Emplace frame from string frame_structure without state
@@ -170,8 +171,8 @@ class Problem : public std::enable_shared_from_this<Problem>
          *   - Add it to Trajectory
          *   - If it is key-frame, update state-block lists in Problem
          */
-        FrameBasePtr emplaceFrame(const std::string& _frame_structure,
-                                  FrameType _frame_key_type,
+        FrameBasePtr emplaceFrame(const std::string& _frame_structure, //
+                                  FrameType _frame_key_type, //
                                   const TimeStamp& _time_stamp);
 
         /** \brief Emplace frame from string frame_structure without structure
@@ -184,8 +185,8 @@ class Problem : public std::enable_shared_from_this<Problem>
          *   - Add it to Trajectory
          *   - If it is key-frame, update state-block lists in Problem
          */
-        FrameBasePtr emplaceFrame(FrameType _frame_key_type,
-                                  const Eigen::VectorXs& _frame_state,
+        FrameBasePtr emplaceFrame(FrameType _frame_key_type, //
+                                  const Eigen::VectorXs& _frame_state, //
                                   const TimeStamp& _time_stamp);
 
         /** \brief Emplace frame from string frame_structure without structure nor state
@@ -197,7 +198,7 @@ class Problem : public std::enable_shared_from_this<Problem>
          *   - Add it to Trajectory
          *   - If it is key-frame, update state-block lists in Problem
          */
-        FrameBasePtr emplaceFrame(FrameType _frame_key_type,
+        FrameBasePtr emplaceFrame(FrameType _frame_key_type, //
                                   const TimeStamp& _time_stamp);
 
         // State getters
@@ -218,7 +219,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          *
          * New key frame callback: It should be called by any processor that creates a new keyframe. It calls the keyFrameCallback of the rest of processors.
          */
-        void keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _processor_ptr, const Scalar& _time_tolerance);
+        void keyFrameCallback(FrameBasePtr _keyframe_ptr, //
+                              ProcessorBasePtr _processor_ptr, //
+                              const Scalar& _time_tolerance);
 
         /** \brief Returns a pointer to last frame
          **/
@@ -236,7 +239,8 @@ class Problem : public std::enable_shared_from_this<Problem>
         LandmarkBasePtr addLandmark(LandmarkBasePtr _lmk_ptr);
         void addLandmarkList(LandmarkBaseList& _lmk_list);
         void loadMap(const std::string& _filename_dot_yaml);
-        void saveMap(const std::string& _filename_dot_yaml, const std::string& _map_name = "Map automatically saved by Wolf");
+        void saveMap(const std::string& _filename_dot_yaml, //
+                     const std::string& _map_name = "Map automatically saved by Wolf");
 
 
 
@@ -296,8 +300,14 @@ class Problem : public std::enable_shared_from_this<Problem>
          * \param metric :       show metric info (status, time stamps, state vectors, measurements)
          * \param state_blocks : show state blocks
          */
-        void print(int depth = 4, bool constr_by = false, bool metric = true, bool state_blocks = false);
-        void print(const std::string& depth, bool constr_by = false, bool metric = true, bool state_blocks = false);
+        void print(int depth = 4, //
+                   bool constr_by = false, //
+                   bool metric = true, //
+                   bool state_blocks = false);
+        void print(const std::string& depth, //
+                   bool constr_by = false, //
+                   bool metric = true, //
+                   bool state_blocks = false);
         bool check(int verbose_level = 0);
 
 };
