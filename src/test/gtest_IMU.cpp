@@ -233,8 +233,6 @@ class Process_Constraint_IMU : public testing::Test
             // wolf objects
             KF_0    = problem->setPrior(x0, P0, t0);
             C_0     = processor_imu->getOriginPtr();
-            CM_1    = processor_imu->getLastPtr();
-            KF_1    = CM_1->getFramePtr();
 
             processor_imu->getLastPtr()->setCalibrationPreint(bias_preint);
 
@@ -261,7 +259,7 @@ class Process_Constraint_IMU : public testing::Test
             x1_preint_imu    = imu::composeOverState(x0, D_preint_imu    , DT );
             x1_corrected_imu = imu::composeOverState(x0, D_corrected_imu , DT );
 
-            // ===================================== INTEGRATE USING PROCESSOR
+            // ===================================== INTEGRATE USING PROCESSOR_IMU
 
             integrateWithProcessor(num_integrations, t0, q0, motion, bias_real, bias_preint, dt, D_preint, D_corrected);
 
@@ -397,8 +395,11 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
 
         virtual void SetUp( ) override
         {
+
+            // ===================================== IMU
             Process_Constraint_IMU::SetUp();
 
+            // ===================================== ODO
             string wolf_root = _WOLF_ROOT_DIR;
 
             SensorBasePtr    sensor     = problem->installSensor   ("ODOM 3D", "Odometer", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml"   );
@@ -415,8 +416,10 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
 
         virtual void integrateAll() override
         {
+            // ===================================== IMU
             Process_Constraint_IMU::integrateAll();
 
+            // ===================================== ODO
             Vector6s    data;
             Vector3s    p1  = x1_exact.head(3);
             Quaternions q1   (x1_exact.data() + 3);
@@ -431,8 +434,10 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
 
         virtual void buildProblem() override
         {
+            // ===================================== IMU
             Process_Constraint_IMU::buildProblem();
 
+            // ===================================== ODO
             processor_odo->keyFrameCallback(KF_1, 0.1);
         }
 
@@ -625,13 +630,10 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_
     // ================================================================================================================ //
 
 
-    // ===================================== RUN ALL but do not solve yet
+    // ===================================== RUN ALL
     configureAll();
     integrateAll();
     buildProblem();
-
-
-    // ===================================== SOLVE
     string report = solveProblem(1);
     WOLF_TRACE(report);
 
@@ -701,14 +703,10 @@ TEST_F(Process_Constraint_IMU_ODO, Var_P0_Q0_V0_B0_P1_Q1_B1__Invar_V1)
     // ================================================================================================================ //
 
 
-    // ===================================== RUN ALL but do not solve yet
+    // ===================================== RUN ALL
     configureAll();
     integrateAll();
     buildProblem();
-
-//    problem->print(4,1,1,1);
-
-    // ===================================== SOLVE
     string report = solveProblem(1);
     WOLF_TRACE(report);
 
@@ -777,14 +775,10 @@ TEST_F(Process_Constraint_IMU_ODO, Var_P0_Q0_B0_P1_Q1_V1_B1__Invar_V0)
     // ================================================================================================================ //
 
 
-    // ===================================== RUN ALL but do not solve yet
+    // ===================================== RUN ALL
     configureAll();
     integrateAll();
     buildProblem();
-
-//    problem->print(4,1,1,1);
-
-    // ===================================== SOLVE
     string report = solveProblem(1);
     WOLF_TRACE(report);
 
