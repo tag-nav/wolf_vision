@@ -102,6 +102,43 @@ class Process_Constraint_IMU : public testing::Test
 
         }
 
+        /* Integrate one step of acc and angVel motion, obtain Delta_preintegrated
+         * Input:
+         *   q: current orientation
+         *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body frame
+         *   bias_real: the real bias of the IMU
+         *   bias_preint: the bias used for Delta pre-integration
+         * Input/output
+         *   Delta: the preintegrated delta
+         *   J_D_b_ptr: a pointer to the Jacobian of Delta wrt bias. Defaults to nullptr.
+         */
+        void integrateOneStep(const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Quaternions& q_real, VectorXs& Delta, Matrix<Scalar, 9, 6>* J_D_d_ptr = nullptr)
+        {
+            VectorXs delta(10);
+            VectorXs Delta_plus(10);
+            Matrix<Scalar, 9, 6> J_d_d, J_D_b, J_d_b;
+            Matrix<Scalar, 9, 9> J_D_D, J_D_d;
+
+            data                = motion2data(motion, q_real, bias_real);
+            q_real              = q_real*exp_q(motion.tail(3)*dt);
+            Vector6s body       = data - bias_preint;
+            if (J_D_d_ptr == nullptr)
+            {
+                delta           = imu::body2delta(body, dt);
+                Delta_plus      = imu::compose(Delta, delta, dt);
+            }
+            else
+            {
+                imu::body2delta(body, dt, delta, J_d_d);
+                imu::compose(Delta, delta, dt, Delta_plus, J_D_D, J_D_d);
+                J_D_b           = *J_D_d_ptr;
+                J_d_b           = - J_d_d;
+                J_D_b           = J_D_D*J_D_b + J_D_d*J_d_b;
+                *J_D_d_ptr      = J_D_b;
+            }
+            Delta               = Delta_plus;
+        }
+
 
         /* Create IMU data from body motion
          * Input:
@@ -124,8 +161,8 @@ class Process_Constraint_IMU : public testing::Test
         /* Integrate acc and angVel motion, obtain Delta_preintegrated
          * Input:
          *   N: number of steps
-         *   q0: initial orientaiton
-         *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body brame
+         *   q0: initial orientation
+         *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body frame
          *   bias_real: the real bias of the IMU
          *   bias_preint: the bias used for Delta pre-integration
          * Output:
@@ -133,20 +170,12 @@ class Process_Constraint_IMU : public testing::Test
          */
         VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt)
         {
-            VectorXs data(6);
-            VectorXs body(6);
-            VectorXs delta(10);
-            VectorXs Delta(10), Delta_plus(10);
-            Delta = imu::identity();
+            VectorXs    Delta(10);
+            Delta       = imu::identity();
             Quaternions q(q0);
-            for (int n = 0; n<N; n++)
+            for (int n = 0; n < N; n++)
             {
-                data        = motion2data(motion, q, bias_real);
-                q           = q*exp_q(motion.tail(3)*dt);
-                body        = data - bias_preint;
-                delta       = imu::body2delta(body, dt);
-                Delta_plus  = imu::compose(Delta, delta, dt);
-                Delta       = Delta_plus;
+                integrateOneStep(motion, bias_real, bias_preint, dt, q, Delta);
             }
             return Delta;
         }
@@ -154,8 +183,8 @@ class Process_Constraint_IMU : public testing::Test
         /* Integrate acc and angVel motion, obtain Delta_preintegrated
          * Input:
          *   N: number of steps
-         *   q0: initial orientaiton
-         *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body brame
+         *   q0: initial orientation
+         *   motion: [ax, ay, az, wx, wy, wz] as the true magnitudes in body frame
          *   bias_real: the real bias of the IMU
          *   bias_preint: the bias used for Delta pre-integration
          * Output:
@@ -164,46 +193,50 @@ class Process_Constraint_IMU : public testing::Test
          */
         VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Matrix<Scalar, 9, 6>& J_D_b)
         {
-            VectorXs data(6);
-            VectorXs body(6);
-            VectorXs delta(10);
-            Matrix<Scalar, 9, 6> J_d_d, J_d_b;
-            Matrix<Scalar, 9, 9> J_D_D, J_D_d;
-            VectorXs Delta(10), Delta_plus(10);
+            VectorXs    Delta(10);
             Quaternions q;
 
-            Delta = imu::identity();
-            J_D_b.setZero();
-            q = q0;
-            for (int n = 0; n<N; n++)
+            Delta   = imu::identity();
+            J_D_b   .setZero();
+            q       = q0;
+            for (int n = 0; n < N; n++)
             {
-                // Simulate data
-                data = motion2data(motion, q, bias_real);
-                q    = q*exp_q(motion.tail(3)*dt);
+                integrateOneStep(motion, bias_real, bias_preint, dt, q, Delta, &J_D_b);
+            }
+            return Delta;
+        }
 
-                // Motion::integrateOneStep()
-                {   // IMU::computeCurrentDelta
-                    body  = data - bias_preint;
-                    imu::body2delta(body, dt, delta, J_d_d);
-                    J_d_b = - J_d_d;
-                }
-                {   // IMU::deltaPlusDelta
-                    imu::compose(Delta, delta, dt, Delta_plus, J_D_D, J_D_d);
-                }
-                // Motion:: jac calib
-                J_D_b = J_D_D*J_D_b + J_D_d*J_d_b;
-                // Motion:: buffer
-                Delta = Delta_plus;
+        /* Integrate acc and angVel motion, obtain Delta_preintegrated
+         * Input:
+         *   q0: initial orientation
+         *   motion: Matrix with N columns [ax, ay, az, wx, wy, wz] with the true magnitudes in body frame
+         *   bias_real: the real bias of the IMU
+         *   bias_preint: the bias used for Delta pre-integration
+         * Output:
+         *   J_D_b: the Jacobian of the preintegrated delta wrt the bias
+         *   return: the preintegrated delta
+         */
+        VectorXs integrateDelta(const Quaternions& q0, const MatrixXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Matrix<Scalar, 9, 6>& J_D_b)
+        {
+            VectorXs    Delta(10);
+            Quaternions q;
+
+            Delta   = imu::identity();
+            J_D_b   .setZero();
+            q       = q0;
+            for (int n = 0; n < motion.cols(); n++)
+            {
+                integrateOneStep(motion.col(n), bias_real, bias_preint, dt, q, Delta, &J_D_b);
             }
             return Delta;
         }
 
         void integrateWithProcessor(int N, const TimeStamp& t0, const Quaternions q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, VectorXs& D_preint, VectorXs& D_corrected)
         {
-            data = motion2data(motion, q0, bias_real);
+            data        = motion2data(motion, q0, bias_real);
             capture_imu = make_shared<CaptureIMU>(t0, sensor_imu, data, sensor_imu->getNoiseCov());
-            q = q0;
-            t = t0;
+            q           = q0;
+            t           = t0;
             for (int i= 0; i < N; i++)
             {
                 t   += dt;
