@@ -268,6 +268,9 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
      *
      *   results in :
      *    res    = W.sqrt * ( ( diff ( D_preint , D_exp ) ) - J_preint * (b - b_preint) )
+     *
+     *
+     * NOTE: See optimization report at the end of this file for comparisons of both methods.
      */
 //#define METHOD_1 // if commented, then METHOD_2 will be applied
 
@@ -458,3 +461,68 @@ inline JacobianMethod ConstraintIMU::getJacobianMethod() const
 } // namespace wolf
 
 #endif
+
+
+/*
+ * Optimization results
+ * ================================================
+ *
+ *
+ * Using gtest_IMU.cpp
+ *
+ * Conclusion: Residuals with method 1 and 2 are essentially identical, after exactly the same number of iterations.
+ *
+ * You can verify this by looking at the 'Iterations' and 'Final costs' in the Ceres reports below.
+ *
+ *
+ *
+ * With Method 1:
+ *
+[ RUN      ] Process_Constraint_IMU.Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2
+[trace][10:58:16] [gtest_IMU.cpp L488 : TestBody] Ceres Solver Report: Iterations: 3, Initial cost: 1.092909e+02, Final cost: 1.251480e-06, Termination: CONVERGENCE
+[trace][10:58:16] [gtest_IMU.cpp L490 : TestBody] w * DT (rather be lower than 1.57 approx) = 0.5   1 1.5
+[       OK ] Process_Constraint_IMU.Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2 (53 ms)
+[ RUN      ] Process_Constraint_IMU.Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2
+[trace][10:58:16] [gtest_IMU.cpp L564 : TestBody] Ceres Solver Report: Iterations: 16, Initial cost: 1.238969e+03, Final cost: 1.059256e-19, Termination: CONVERGENCE
+[       OK ] Process_Constraint_IMU.Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2 (56 ms)
+[ RUN      ] Process_Constraint_IMU.Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2
+[trace][10:58:16] [gtest_IMU.cpp L638 : TestBody] Ceres Solver Report: Iterations: 17, Initial cost: 4.769588e+03, Final cost: 3.767740e-19, Termination: CONVERGENCE
+[       OK ] Process_Constraint_IMU.Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2 (50 ms)
+[----------] 3 tests from Process_Constraint_IMU (159 ms total)
+
+[----------] 2 tests from Process_Constraint_IMU_ODO
+[ RUN      ] Process_Constraint_IMU_ODO.Var_P0_Q0_V0_B0_P1_Q1_B1__Invar_V1
+[trace][10:58:16] [gtest_IMU.cpp L711 : TestBody] Ceres Solver Report: Iterations: 19, Initial cost: 6.842446e+03, Final cost: 1.867678e-22, Termination: CONVERGENCE
+[       OK ] Process_Constraint_IMU_ODO.Var_P0_Q0_V0_B0_P1_Q1_B1__Invar_V1 (68 ms)
+[ RUN      ] Process_Constraint_IMU_ODO.Var_P0_Q0_B0_P1_Q1_V1_B1__Invar_V0
+[trace][10:58:16] [gtest_IMU.cpp L783 : TestBody] Ceres Solver Report: Iterations: 16, Initial cost: 1.363681e+04, Final cost: 1.879880e-20, Termination: CONVERGENCE
+[       OK ] Process_Constraint_IMU_ODO.Var_P0_Q0_B0_P1_Q1_V1_B1__Invar_V0 (52 ms)
+[----------] 2 tests from Process_Constraint_IMU_ODO (120 ms total)
+*
+*
+*
+* With Method 2:
+*
+[ RUN      ] Process_Constraint_IMU.Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2
+[trace][11:15:43] [gtest_IMU.cpp L488 : TestBody] Ceres Solver Report: Iterations: 3, Initial cost: 1.092909e+02, Final cost: 1.251479e-06, Termination: CONVERGENCE
+[trace][11:15:43] [gtest_IMU.cpp L490 : TestBody] w * DT (rather be lower than 1.57 approx) = 0.5   1 1.5
+[       OK ] Process_Constraint_IMU.Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2 (37 ms)
+[ RUN      ] Process_Constraint_IMU.Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2
+[trace][11:15:43] [gtest_IMU.cpp L564 : TestBody] Ceres Solver Report: Iterations: 16, Initial cost: 1.238985e+03, Final cost: 1.058935e-19, Termination: CONVERGENCE
+[       OK ] Process_Constraint_IMU.Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2 (48 ms)
+[ RUN      ] Process_Constraint_IMU.Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2
+[trace][11:15:43] [gtest_IMU.cpp L638 : TestBody] Ceres Solver Report: Iterations: 17, Initial cost: 4.769603e+03, Final cost: 3.762091e-19, Termination: CONVERGENCE
+[       OK ] Process_Constraint_IMU.Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2 (47 ms)
+[----------] 3 tests from Process_Constraint_IMU (133 ms total)
+
+[----------] 2 tests from Process_Constraint_IMU_ODO
+[ RUN      ] Process_Constraint_IMU_ODO.Var_P0_Q0_V0_B0_P1_Q1_B1__Invar_V1
+[trace][11:15:43] [gtest_IMU.cpp L711 : TestBody] Ceres Solver Report: Iterations: 19, Initial cost: 6.842446e+03, Final cost: 1.855814e-22, Termination: CONVERGENCE
+[       OK ] Process_Constraint_IMU_ODO.Var_P0_Q0_V0_B0_P1_Q1_B1__Invar_V1 (68 ms)
+[ RUN      ] Process_Constraint_IMU_ODO.Var_P0_Q0_B0_P1_Q1_V1_B1__Invar_V0
+[trace][11:15:43] [gtest_IMU.cpp L783 : TestBody] Ceres Solver Report: Iterations: 16, Initial cost: 1.363675e+04, Final cost: 1.880084e-20, Termination: CONVERGENCE
+[       OK ] Process_Constraint_IMU_ODO.Var_P0_Q0_B0_P1_Q1_V1_B1__Invar_V0 (59 ms)
+[----------] 2 tests from Process_Constraint_IMU_ODO (127 ms total)
+*
+*
+*/
