@@ -476,7 +476,7 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
 
 };
 
-TEST_F(Process_Constraint_IMU, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
+TEST_F(Process_Constraint_IMU, PQV_b__PQV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -552,7 +552,7 @@ TEST_F(Process_Constraint_IMU, Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2)
 }
 
 
-TEST_F(Process_Constraint_IMU, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
+TEST_F(Process_Constraint_IMU, pqv_b__PQV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -626,7 +626,7 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_V1_B1_B2_Invar_P2_Q2_V2)
 }
 
 
-TEST_F(Process_Constraint_IMU, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_B
+TEST_F(Process_Constraint_IMU, pqV_b__PQv_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -699,7 +699,7 @@ TEST_F(Process_Constraint_IMU, Var_P1_Q1_B1_V2_B2_Invar_V1_P2_Q2) // PQv_B__pqV_
 }
 
 
-TEST_F(Process_Constraint_IMU_ODO, Var_P0_Q0_V0_B0_P1_Q1_B1__Invar_V1)
+TEST_F(Process_Constraint_IMU_ODO, pqv_b__pqV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -771,7 +771,7 @@ TEST_F(Process_Constraint_IMU_ODO, Var_P0_Q0_V0_B0_P1_Q1_B1__Invar_V1)
 }
 
 
-TEST_F(Process_Constraint_IMU_ODO, Var_P0_Q0_B0_P1_Q1_V1_B1__Invar_V0)
+TEST_F(Process_Constraint_IMU_ODO, pqV_b__pqv_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
