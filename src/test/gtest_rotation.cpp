@@ -106,7 +106,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v_new(const Eigen::Quater
     
 }
 
-TEST(rotations, exp_q_unit_norm)
+TEST(exp_q, unit_norm)
 {
     Vector3s v0  = Vector3s::Random();
     Scalar scale = 1.0;
@@ -123,7 +123,7 @@ TEST(rotations, exp_q_unit_norm)
     }
 }
 
-TEST(rotations, v2q_VS_v2q_new) //this test will use functions defined above
+TEST(exp_q, v2q_VS_v2q_new) //this test will use functions defined above
 {
     using namespace wolf;
     //defines scalars
@@ -190,7 +190,7 @@ TEST(rotations, pi2pi)
     ASSERT_NEAR(-M_PI+.01, pi2pi(M_PI+.01), 1e-10);
 }
 
-TEST(rotations, Skew_vee)
+TEST(skew, Skew_vee)
 {
     using namespace wolf;
     Vector3s vec3 = Vector3s::Random();
@@ -204,7 +204,7 @@ TEST(rotations, Skew_vee)
     ASSERT_TRUE(vec3_bis == vec3);
 }
 
-TEST(rotations, v2q_q2v)
+TEST(exp_q, v2q_q2v)
 {
     using namespace wolf;
     //defines scalars
@@ -237,7 +237,7 @@ TEST(rotations, v2q_q2v)
     ASSERT_MATRIX_APPROX(rot_vector1, quat_to_v1x, wolf::Constants::EPS);
 }
 
-TEST(rotations, v2R_R2v)
+TEST(exp_R, v2R_R2v)
 {
     using namespace wolf;
     //First test is to verify we get the good result with v -> v2R -> R2v -> v
@@ -265,7 +265,7 @@ TEST(rotations, v2R_R2v)
     ASSERT_MATRIX_APPROX(rot1_vec, rot_vector1, wolf::Constants::EPS);
 }
 
-TEST(rotations, R2v_v2R_limits)
+TEST(log_R, R2v_v2R_limits)
 {
     using namespace wolf;
     //test 2 : how small can angles in rotation vector be ?
@@ -285,7 +285,7 @@ TEST(rotations, R2v_v2R_limits)
     }
 }
 
-TEST(rotations, R2v_v2R_AAlimits)
+TEST(log_R, R2v_v2R_AAlimits)
 {
     using namespace wolf;
     //let's see how small the angles can be here : limit reached at scale/10 =  1e-16
@@ -309,7 +309,7 @@ TEST(rotations, R2v_v2R_AAlimits)
     }
 }
 
-TEST(rotations, v2q2R2v)
+TEST(exp_q, v2q2R2v)
 {
     using namespace wolf;
     wolf::Scalar scale = 1;
@@ -360,7 +360,7 @@ TEST(rotations, AngleAxis_limits)
 }
 
 
-TEST(rotations, Quat_compos_const_rateOfTurn)
+TEST(compose, Quat_compos_const_rateOfTurn)
 {
     using namespace wolf;
 
@@ -427,7 +427,7 @@ TEST(rotations, Quat_compos_const_rateOfTurn)
      "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
 }
 
-TEST(rotations, Quat_compos_var_rateOfTurn)
+TEST(compose, Quat_compos_var_rateOfTurn)
 {
     using namespace wolf;
 
@@ -504,7 +504,7 @@ TEST(rotations, Quat_compos_var_rateOfTurn)
 
 }
 
-TEST(rotations, Quat_compos_var_rateOfTurn_diff)
+TEST(compose, Quat_compos_var_rateOfTurn_diff)
 {
     using namespace wolf;
 
@@ -581,7 +581,7 @@ TEST(rotations, Quat_compos_var_rateOfTurn_diff)
     "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
 }
 
-TEST(rotations, q2R_R2q)
+TEST(q2R, q2R_R2q)
 {
     Vector3s v; v.setRandom();
     Quaternions q = v2q(v);
@@ -598,6 +598,50 @@ TEST(rotations, q2R_R2q)
     ASSERT_MATRIX_APPROX(q.coeffs(), qq_R.coeffs(),   wolf::Constants::EPS);
     ASSERT_MATRIX_APPROX(R,          q2R(q),          wolf::Constants::EPS);
     ASSERT_MATRIX_APPROX(R,          qq_R.matrix(),   wolf::Constants::EPS);
+}
+
+TEST(Plus, Random)
+{
+    Quaternions q;
+    q               .coeffs().setRandom().normalize();
+
+    Vector3s v;
+    v               .setRandom();
+
+    Quaternions q2  = q * exp_q(v);
+
+    ASSERT_QUATERNION_APPROX(plus(q,v), q2, 1e-12);
+
+}
+
+TEST(Plus, Identity_plus_small)
+{
+    Quaternions q;
+    q               .setIdentity();
+
+    Vector3s v;
+    v               .setRandom();
+    v              *= 1e-6;
+
+    Quaternions q2;
+    q2.w()          = 1;
+    q2.vec()        = 0.5*v;
+
+    ASSERT_QUATERNION_APPROX(plus(q,v), q2, 1e-12);
+}
+
+TEST(Minus_and_diff, Random)
+{
+    Quaternions q1, q2;
+    q1              .coeffs().setRandom().normalize();
+    q2              .coeffs().setRandom().normalize();
+
+    Vector3s v      = log_q(q1.conjugate() * q2);
+
+    ASSERT_MATRIX_APPROX(minus(q1, q2), v, 1e-12);
+    ASSERT_QUATERNION_APPROX(plus(q1, minus(q1, q2)), q2, 1e-12);
+    ASSERT_MATRIX_APPROX(diff(q1, q2), v, 1e-12);
+    ASSERT_QUATERNION_APPROX(plus(q1, diff(q1, q2)), q2, 1e-12);
 }
 
 TEST(Jacobians, Jr)

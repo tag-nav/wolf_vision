@@ -462,6 +462,25 @@ inline void between(const Eigen::QuaternionBase<D1>& _q1,
     _J_between_q2 . setIdentity();
 }
 
+template<typename D1, typename D2>
+inline Eigen::Quaternion<typename D1::Scalar> plus(const Eigen::QuaternionBase<D1>& q, const Eigen::MatrixBase<D2>& v)
+{
+    MatrixSizeCheck<3,1>::check(v);
+    return q * exp_q(v);
+}
+
+template<typename D1, typename D2>
+inline  Eigen::Matrix<typename D2::Scalar, 3, 1> minus(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
+{
+    return log_q(q1.conjugate() * q2);
+}
+
+template<typename D1, typename D2>
+inline  Eigen::Matrix<typename D2::Scalar, 3, 1> diff(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
+{
+    return minus(q1, q2);
+}
+
 template<typename T>
 inline Eigen::Matrix<T, 3, 3> matrixRollPitchYaw(const T roll,
                                                  const T pitch,
