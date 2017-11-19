@@ -44,31 +44,32 @@ class Process_Constraint_IMU : public testing::Test
         int                 num_integrations;
 
         // initial state
-        VectorXs            x0;
-        Vector3s            p0, v0;
-        Quaternions         q0, q;
-        Matrix<Scalar, 9, 9> P0;
+        VectorXs            x0;                                 // initial state
+        Vector3s            p0, v0;                             // initial pos and vel
+        Quaternions         q0, q;                              // initial and current orientations
+        Matrix<Scalar,9,9>  P0;                                 // initial state covariance
 
         // bias
-        Vector6s            bias_real, bias_preint, bias_null;
-        Vector6s            bias_0, bias_1;                    // optimized bias at KF's 0 and 1
+        Vector6s            bias_real, bias_preint, bias_null;  // real, pre-int and zero biases.
+        Vector6s            bias_0, bias_1;                     // optimized bias at KF's 0 and 1
 
         // input
-        Vector6s            motion, data;
-        Vector3s            a, w;                              // true acc and angvel in IMU frame
+        Matrix<Scalar, 6, Eigen::Dynamic> motion;               // Motion in IMU frame. Each column is a motion step. If just one column, then the number of steps is defined in num_integrations
+        Vector3s            a, w;                               // True acc and angvel in IMU frame. Used to create motion with `motion << a,w;`
+        Vector6s            data;                               // IMU data. It's the motion with gravity and bias. See motion2data().
 
         // Deltas and states (exact, integrated, corrected, solved, etc)
-        VectorXs            D_exact, x1_exact;                 // exact or ground truth
-        VectorXs            D_preint_imu, x1_preint_imu;       // preintegrated with imu_tools
-        VectorXs            D_corrected_imu, x1_corrected_imu; // corrected with imu_tools
-        VectorXs            D_preint, x1_preint;               // preintegrated with processor_imu
-        VectorXs            D_corrected, x1_corrected;         // corrected with processor_imu
-        VectorXs            D_optim, x1_optim;                 // optimized using constraint_imu
-        VectorXs            D_optim_imu, x1_optim_imu;         // corrected with imu_tools using optimized bias
-        VectorXs            x0_optim;                          // optimized using constraint_imu
+        VectorXs            D_exact, x1_exact;                  // exact or ground truth
+        VectorXs            D_preint_imu, x1_preint_imu;        // preintegrated with imu_tools
+        VectorXs            D_corrected_imu, x1_corrected_imu;  // corrected with imu_tools
+        VectorXs            D_preint, x1_preint;                // preintegrated with processor_imu
+        VectorXs            D_corrected, x1_corrected;          // corrected with processor_imu
+        VectorXs            D_optim, x1_optim;                  // optimized using constraint_imu
+        VectorXs            D_optim_imu, x1_optim_imu;          // corrected with imu_tools using optimized bias
+        VectorXs            x0_optim;                           // optimized using constraint_imu
 
         // Delta correction Jacobian and step
-        Matrix<Scalar, 9, 6> J_D_bias;
+        Matrix<Scalar,9,6>  J_D_bias;                           // Jacobian of pre-integrated delta w
         Vector9s            step;
 
         // Flags for fixing/unfixing state blocks
@@ -95,10 +96,10 @@ class Process_Constraint_IMU : public testing::Test
             processor_imu = static_pointer_cast<ProcessorIMU>(processor);
 
             // Some initializations
-            bias_null.setZero();
-            x0.resize(10);
-            D_preint.resize(10);
-            D_corrected.resize(10);
+            bias_null   .setZero();
+            x0          .resize(10);
+            D_preint    .resize(10);
+            D_corrected .resize(10);
 
         }
 
@@ -261,7 +262,17 @@ class Process_Constraint_IMU : public testing::Test
             q0      .normalize();
             x0     << p0, q0.coeffs(), v0;
             P0      .setIdentity() * 0.01;
-            motion << a, w;
+            if (motion.cols() == 0)
+            {
+                motion.resize(6,a.cols());
+                motion << a, w;
+            }
+            else
+            {
+                // if motion has any column at all, then it is already initialized in TEST_F(...) and we do nothing.
+            }
+            if (motion.cols() != 1)
+                num_integrations = motion.cols();
 
             // wolf objects
             KF_0    = problem->setPrior(x0, P0, t0);
@@ -276,13 +287,19 @@ class Process_Constraint_IMU : public testing::Test
         virtual void integrateAll()
         {
             // ===================================== INTEGRATE EXACTLY WITH IMU_TOOLS with no bias at all
-            D_exact  = integrateDelta(num_integrations, q0, motion, bias_null, bias_null, dt);
+            if (motion.cols() == 1)
+                D_exact  = integrateDelta(num_integrations, q0, motion, bias_null, bias_null, dt);
+            else
+                D_preint_imu = integrateDelta(q0, motion, bias_real, bias_preint, dt, J_D_bias);
             x1_exact = imu::composeOverState(x0, D_exact, DT );
 
 
             // ===================================== INTEGRATE USING IMU_TOOLS
             // pre-integrate
-            D_preint_imu = integrateDelta(num_integrations, q0, motion, bias_real, bias_preint, dt, J_D_bias);
+            if (motion.cols() == 1)
+                D_preint_imu = integrateDelta(num_integrations, q0, motion, bias_real, bias_preint, dt, J_D_bias);
+            else
+                D_preint_imu = integrateDelta(q0, motion, bias_real, bias_preint, dt, J_D_bias);
 
             // correct perturbated
             step             = J_D_bias * (bias_real - bias_preint);
@@ -379,7 +396,7 @@ class Process_Constraint_IMU : public testing::Test
             return report;
         }
 
-        string run(int verbose)
+        string runAll(int verbose)
         {
             configureAll();
             integrateAll();
@@ -388,7 +405,7 @@ class Process_Constraint_IMU : public testing::Test
             return report;
         }
 
-        void print()
+        void printAll()
         {
             WOLF_TRACE("D_exact       : ", D_exact            .transpose() ); // exact delta integrated, with absolutely no bias
             WOLF_TRACE("D_preint      : ", D_preint           .transpose() ); // pre-integrated delta using processor
@@ -414,6 +431,28 @@ class Process_Constraint_IMU : public testing::Test
             WOLF_TRACE("err1_optim    : ", (x1_optim-x1_exact).transpose() ); // error of optimal state corrected by imu_tools w.r.t. exact state
             WOLF_TRACE("err1_optim_imu: ", (x1_optim_imu-x1_exact).transpose() ); // error of optimal state corrected by imu_tools w.r.t. exact state
             WOLF_TRACE("X0_optim      : ", x0_optim           .transpose() ); // optimal state after solving using processor
+        }
+
+        virtual void assertAll()
+        {
+            // check delta and state integrals
+            ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
+            ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
+            ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
+            ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
+            ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
+            ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
+
+            // check optimal solutions
+            ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
+            ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
+            ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
+            ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
+            ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
+            ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
+            ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
+            ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
+            ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
         }
 
 
@@ -514,40 +553,13 @@ TEST_F(Process_Constraint_IMU, PQV_b__PQV_b) // F_ixed___e_stimated
 
 
     // ===================================== RUN ALL
-    configureAll();
-    integrateAll();
-    buildProblem();
-    string report = solveProblem(1);
+    string report = runAll(1);
+
     WOLF_TRACE(report);
 
-    WOLF_TRACE("w * DT (rather be lower than 1.57 approx) = ", w.transpose() * DT); // beware if w*DT is large (>~ 1.57) then Jacobian for correction is poor
+//    printAll();
 
-
-    // ===================================== PRINT RESULTS
-//    print();
-
-
-    // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
-
-    // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
-
-    // check optimal solutions
-    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
-    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
-    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
-    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
-
+    assertAll();
 
 }
 
@@ -590,38 +602,13 @@ TEST_F(Process_Constraint_IMU, pqv_b__PQV_b) // F_ixed___e_stimated
 
 
     // ===================================== RUN ALL
-    configureAll();
-    integrateAll();
-    buildProblem();
-    string report = solveProblem(1);
+    string report = runAll(1);
+
     WOLF_TRACE(report);
 
+    //    printAll();
 
-    // ===================================== PRINT RESULTS
-    //    print();
-
-
-    // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
-
-    // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
-
-    // check optimal solutions
-    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
-    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
-    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
-    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
-
+    assertAll();
 
 }
 
@@ -664,37 +651,14 @@ TEST_F(Process_Constraint_IMU, pqV_b__PQv_b) // F_ixed___e_stimated
 
 
     // ===================================== RUN ALL
-    configureAll();
-    integrateAll();
-    buildProblem();
-    string report = solveProblem(1);
+    string report = runAll(1);
+
     WOLF_TRACE(report);
 
 
-    // ===================================== PRINT RESULTS
-    //    print();
+    //    printAll();
 
-
-    // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
-
-    // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
-
-    // check optimal solutions
-    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
-    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
-    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
-    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
+    assertAll();
 
 }
 
@@ -737,37 +701,14 @@ TEST_F(Process_Constraint_IMU_ODO, pqv_b__pqV_b) // F_ixed___e_stimated
 
 
     // ===================================== RUN ALL
-    configureAll();
-    integrateAll();
-    buildProblem();
-    string report = solveProblem(1);
+    string report = runAll(1);
+
     WOLF_TRACE(report);
 
+//    printAll();
 
-    // ===================================== PRINT RESULTS
-//    print();
+    assertAll();
 
-
-    // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
-
-    // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
-
-    // check optimal solutions
-    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
-    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
-    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
-    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
 }
 
 
@@ -809,37 +750,14 @@ TEST_F(Process_Constraint_IMU_ODO, pqV_b__pqv_b) // F_ixed___e_stimated
 
 
     // ===================================== RUN ALL
-    configureAll();
-    integrateAll();
-    buildProblem();
-    string report = solveProblem(1);
+    string report = runAll(1);
+
     WOLF_TRACE(report);
 
+//    printAll();
 
-    // ===================================== PRINT RESULTS
-//    print();
+    assertAll();
 
-
-    // ===================================== CHECK ALL (SEE CLASS DEFINITION FOR THE MEANING OF ALL VARIABLES)
-
-    // check delta and state integrals
-    ASSERT_MATRIX_APPROX(D_preint           , D_preint_imu      , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected        , D_corrected_imu   , 1e-8 );
-    ASSERT_MATRIX_APPROX(D_corrected_imu    , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_corrected        , D_exact           , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected_imu   , x1_exact          , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_corrected       , x1_exact          , 1e-5 );
-
-    // check optimal solutions
-    ASSERT_MATRIX_APPROX(x0_optim           , x0        , 1e-5 );
-    ASSERT_NEAR(x0_optim.segment(3,4).norm(), 1.0       , 1e-8 );
-    ASSERT_MATRIX_APPROX(bias_0             , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(bias_1             , bias_real , 1e-4 );
-    ASSERT_MATRIX_APPROX(D_optim            , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim           , x1_exact  , 1e-5 );
-    ASSERT_MATRIX_APPROX(D_optim_imu        , D_exact   , 1e-5 );
-    ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
-    ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
 }
 
 
