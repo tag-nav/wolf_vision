@@ -572,6 +572,49 @@ inline void body2delta(const MatrixBase<D1>& body,
     jac_body.block(6,0,3,3) =            dt * Matrix<T, 3, 3>::Identity();
 }
 
+template<typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7>
+void motion2data(const MatrixBase<D1>& a, const MatrixBase<D2>& w, const QuaternionBase<D3>& q, const MatrixBase<D4>& a_b, const MatrixBase<D5>& w_b, MatrixBase<D6>& a_m, MatrixBase<D7>& w_m)
+{
+    MatrixSizeCheck<3,1>::check(a);
+    MatrixSizeCheck<3,1>::check(w);
+    MatrixSizeCheck<3,1>::check(a_b);
+    MatrixSizeCheck<3,1>::check(w_b);
+    MatrixSizeCheck<3,1>::check(a_m);
+    MatrixSizeCheck<3,1>::check(w_m);
+
+    // Note: data = (a_m , w_m)
+    a_m = a + a_b - q.conjugate()*gravity();
+    w_m = w + w_b;
+}
+
+/* Create IMU data from body motion
+ * Input:
+ *   motion : [ax, ay, az, wx, wy, wz] the motion in body frame
+ *   q      : the current orientation wrt horizontal
+ *   bias   : the bias of the IMU
+ * Output:
+ *   return : the data vector as created by the IMU (with motion, gravity, and bias)
+ */
+template<typename D1, typename D2, typename D3>
+Matrix<typename D1::Scalar, 6, 1> motion2data(const MatrixBase<D1>& motion, const QuaternionBase<D2>& q, const MatrixBase<D3>& bias)
+{
+    Matrix<typename D1::Scalar, 6, 1>      data;
+    Map<Matrix<typename D1::Scalar, 3, 1>> a_m (data.data()    );
+    Map<Matrix<typename D1::Scalar, 3, 1>> w_m (data.data() + 3);
+
+    motion2data(motion.block(0,0,3,1),
+                motion.block(3,0,3,1),
+                q,
+                bias.block(0,0,3,1),
+                bias.block(3,0,3,1),
+                a_m,
+                w_m   );
+
+    return  data;
+}
+
+
+
 } // namespace imu
 } // namespace wolf
 

@@ -54,9 +54,9 @@ class Process_Constraint_IMU : public testing::Test
         Vector6s            bias_0, bias_1;                     // optimized bias at KF's 0 and 1
 
         // input
-        Matrix<Scalar, 6, Eigen::Dynamic> motion;               // Motion in IMU frame. Each column is a motion step. If just one column, then the number of steps is defined in num_integrations
+        Matrix<Scalar, 6, Dynamic> motion;                      // Motion in IMU frame. Each column is a motion step. If just one column, then the number of steps is defined in num_integrations
         Vector3s            a, w;                               // True acc and angvel in IMU frame. Used to create motion with `motion << a,w;`
-        Vector6s            data;                               // IMU data. It's the motion with gravity and bias. See motion2data().
+        Vector6s            data;                               // IMU data. It's the motion with gravity and bias. See imu::motion2data().
 
         // Deltas and states (exact, integrated, corrected, solved, etc)
         VectorXs            D_exact, x1_exact;                  // exact or ground truth
@@ -103,6 +103,8 @@ class Process_Constraint_IMU : public testing::Test
 
         }
 
+
+        
         /* Integrate one step of acc and angVel motion, obtain Delta_preintegrated
          * Input:
          *   q: current orientation
@@ -113,14 +115,14 @@ class Process_Constraint_IMU : public testing::Test
          *   Delta: the preintegrated delta
          *   J_D_b_ptr: a pointer to the Jacobian of Delta wrt bias. Defaults to nullptr.
          */
-        void integrateOneStep(const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Quaternions& q_real, VectorXs& Delta, Matrix<Scalar, 9, 6>* J_D_d_ptr = nullptr)
+        static void integrateOneStep(const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Quaternions& q_real, VectorXs& Delta, Matrix<Scalar, 9, 6>* J_D_d_ptr = nullptr)
         {
-            VectorXs delta(10);
+            VectorXs delta(10), data(6);
             VectorXs Delta_plus(10);
             Matrix<Scalar, 9, 6> J_d_d, J_D_b, J_d_b;
             Matrix<Scalar, 9, 9> J_D_D, J_D_d;
 
-            data                = motion2data(motion, q_real, bias_real);
+            data                = imu::motion2data(motion, q_real, bias_real);
             q_real              = q_real*exp_q(motion.tail(3)*dt);
             Vector6s body       = data - bias_preint;
             if (J_D_d_ptr == nullptr)
@@ -141,24 +143,6 @@ class Process_Constraint_IMU : public testing::Test
         }
 
 
-        /* Create IMU data from body motion
-         * Input:
-         *   motion: [ax, ay, az, wx, wy, wz] the motion in body frame
-         *   q: the current orientation wrt horizontal
-         *   bias: the bias of the IMU
-         * Output:
-         *   return: the data vector as created by the IMU (with motion, gravity, and bias)
-         */
-        VectorXs motion2data(const VectorXs& body, const Quaternions& q, const VectorXs& bias)
-        {
-            VectorXs data(6);
-            data          = body;                       // start with body motion
-            data.head(3) -= q.conjugate()*gravity();    // add -g
-            data         += bias;                       // add bias
-            return data;
-        }
-
-
         /* Integrate acc and angVel motion, obtain Delta_preintegrated
          * Input:
          *   N: number of steps
@@ -169,7 +153,7 @@ class Process_Constraint_IMU : public testing::Test
          * Output:
          *   return: the preintegrated delta
          */
-        VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt)
+        static VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt)
         {
             VectorXs    Delta(10);
             Delta       = imu::identity();
@@ -192,7 +176,7 @@ class Process_Constraint_IMU : public testing::Test
          *   J_D_b: the Jacobian of the preintegrated delta wrt the bias
          *   return: the preintegrated delta
          */
-        VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Matrix<Scalar, 9, 6>& J_D_b)
+        static VectorXs integrateDelta(int N, const Quaternions& q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Matrix<Scalar, 9, 6>& J_D_b)
         {
             VectorXs    Delta(10);
             Quaternions q;
@@ -217,7 +201,7 @@ class Process_Constraint_IMU : public testing::Test
          *   J_D_b: the Jacobian of the preintegrated delta wrt the bias
          *   return: the preintegrated delta
          */
-        VectorXs integrateDelta(const Quaternions& q0, const MatrixXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Matrix<Scalar, 9, 6>& J_D_b)
+        static VectorXs integrateDelta(const Quaternions& q0, const MatrixXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Matrix<Scalar, 9, 6>& J_D_b)
         {
             VectorXs    Delta(10);
             Quaternions q;
@@ -234,14 +218,14 @@ class Process_Constraint_IMU : public testing::Test
 
         void integrateWithProcessor(int N, const TimeStamp& t0, const Quaternions q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, VectorXs& D_preint, VectorXs& D_corrected)
         {
-            data        = motion2data(motion, q0, bias_real);
+            data        = imu::motion2data(motion, q0, bias_real);
             capture_imu = make_shared<CaptureIMU>(t0, sensor_imu, data, sensor_imu->getNoiseCov());
             q           = q0;
             t           = t0;
             for (int i= 0; i < N; i++)
             {
                 t   += dt;
-                data = motion2data(motion, q, bias_real);
+                data = imu::motion2data(motion, q, bias_real);
                 q    = q * exp_q(w*dt);
 
                 capture_imu->setTimeStamp(t);
@@ -495,8 +479,8 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
             Vector6s    data;
             Vector3s    p1  = x1_exact.head(3);
             Quaternions q1   (x1_exact.data() + 3);
-            Vector3s    dp  =              q0.conjugate() * (p1 - p0);
-            Vector3s    dth = wolf::log_q( q0.conjugate() *  q1     );
+            Vector3s    dp  =        q0.conjugate() * (p1 - p0);
+            Vector3s    dth = log_q( q0.conjugate() *  q1     );
             data           << dp, dth;
 
             CaptureOdom3DPtr capture_odo = make_shared<CaptureOdom3D>(t, sensor_odo, data, sensor_odo->getNoiseCov());

@@ -297,22 +297,100 @@ TEST(IMU_tools, body2delta_jacobians)
     ASSERT_MATRIX_APPROX(J_a, J_n, 1e-4);
 }
 
-/* Create IMU data from body motion
- * Input:
- *   motion: [ax, ay, az, wx, wy, wz] the motion in body frame
- *   q: the current orientation wrt horizontal
- *   bias: the bias of the IMU
- * Output:
- *   return: the data vector as created by the IMU (with motion, gravity, and bias)
- */
-VectorXs motion2data(const VectorXs& body, const Quaternions& q, const VectorXs& bias)
+TEST(motion2data, zero)
 {
-    VectorXs data(6);
-    data = body;                                // start with body motion
-    data.head(3) -= q.conjugate()*gravity();    // add -g
-    data = data + bias;                         // add bias
-    return data;
+    Vector6s motion;
+    Vector6s bias;
+    Quaternions q;
+
+    motion  .setZero();
+    bias    .setZero();
+    q       .setIdentity();
+
+    Vector6s data = imu::motion2data(motion, q, bias);
+
+    Vector6s data_true; data_true << -gravity(), Vector3s::Zero();
+
+    ASSERT_MATRIX_APPROX(data, data_true, 1e-12);
 }
+
+TEST(motion2data, motion)
+{
+    Vector6s motion, g_extended;
+    Vector6s bias;
+    Quaternions q;
+
+    g_extended << gravity() , Vector3s::Zero();
+
+    motion  << 1,2,3, 4,5,6;
+    bias    .setZero();
+    q       .setIdentity();
+
+    Vector6s data = imu::motion2data(motion, q, bias);
+
+    Vector6s data_true; data_true = motion - g_extended;
+
+    ASSERT_MATRIX_APPROX(data, data_true, 1e-12);
+}
+
+TEST(motion2data, bias)
+{
+    Vector6s motion, g_extended;
+    Vector6s bias;
+    Quaternions q;
+
+    g_extended << gravity() , Vector3s::Zero();
+
+    motion  .setZero();
+    bias    << 1,2,3, 4,5,6;
+    q       .setIdentity();
+
+    Vector6s data = imu::motion2data(motion, q, bias);
+
+    Vector6s data_true; data_true = bias - g_extended;
+
+    ASSERT_MATRIX_APPROX(data, data_true, 1e-12);
+}
+
+TEST(motion2data, orientation)
+{
+    Vector6s motion, g_extended;
+    Vector6s bias;
+    Quaternions q;
+
+    g_extended << gravity() , Vector3s::Zero();
+
+    motion  .setZero();
+    bias    .setZero();
+    q       = v2q(Vector3s(M_PI/2, 0, 0)); // turn 90 deg in X axis
+
+    Vector6s data = imu::motion2data(motion, q, bias);
+
+    Vector6s data_true; data_true << 0,-gravity()(2),0, 0,0,0;
+
+    ASSERT_MATRIX_APPROX(data, data_true, 1e-12);
+}
+
+TEST(motion2data, AllRandom)
+{
+    Vector6s motion, g_extended;
+    Vector6s bias;
+    Quaternions q;
+
+
+    motion      .setRandom();
+    bias        .setRandom();
+    q.coeffs()  .setRandom().normalize();
+
+    g_extended << q.conjugate()*gravity() , Vector3s::Zero();
+
+    Vector6s data = imu::motion2data(motion, q, bias);
+
+    Vector6s data_true; data_true = motion + bias - g_extended;
+
+    ASSERT_MATRIX_APPROX(data, data_true, 1e-12);
+}
+
 
 /* Integrate acc and angVel motion, obtain Delta_preintegrated
  * Input:
