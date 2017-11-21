@@ -30,13 +30,13 @@ class Process_Constraint_IMU : public testing::Test
     public:
         // Wolf objects
         ProblemPtr          problem;
+        CeresManagerPtr     ceres_manager;
         SensorIMUPtr        sensor_imu;
         ProcessorIMUPtr     processor_imu;
-        FrameBasePtr        KF_0, KF_1;
-        CaptureBasePtr      C_0, C_1;
-        CaptureMotionPtr    CM_0, CM_1;
         CaptureIMUPtr       capture_imu;
-        CeresManagerPtr     ceres_manager;
+        FrameBasePtr        KF_0, KF_1;     // keyframes
+        CaptureBasePtr      C_0 , C_1;      // base captures
+        CaptureMotionPtr    CM_0, CM_1;     // motion captures
 
         // time
         TimeStamp           t0, t;
@@ -55,18 +55,18 @@ class Process_Constraint_IMU : public testing::Test
 
         // input
         Matrix<Scalar, 6, Dynamic> motion;                      // Motion in IMU frame. Each column is a motion step. If just one column, then the number of steps is defined in num_integrations
-        Matrix<Scalar, 3, Dynamic> a, w;                        // True acc and angvel in IMU frame. Used to create motion with `motion << a,w;`
+        Matrix<Scalar, 3, Dynamic> a, w;                        // True acc and angvel in IMU frame. Each column is a motion step. Used to create motion with `motion << a,w;`
         Vector6s            data;                               // IMU data. It's the motion with gravity and bias. See imu::motion2data().
 
         // Deltas and states (exact, integrated, corrected, solved, etc)
-        VectorXs            D_exact, x1_exact;                  // exact or ground truth
-        VectorXs            D_preint_imu, x1_preint_imu;        // preintegrated with imu_tools
-        VectorXs            D_corrected_imu, x1_corrected_imu;  // corrected with imu_tools
-        VectorXs            D_preint, x1_preint;                // preintegrated with processor_imu
-        VectorXs            D_corrected, x1_corrected;          // corrected with processor_imu
-        VectorXs            D_optim, x1_optim;                  // optimized using constraint_imu
-        VectorXs            D_optim_imu, x1_optim_imu;          // corrected with imu_tools using optimized bias
-        VectorXs            x0_optim;                           // optimized using constraint_imu
+        VectorXs        D_exact,         x1_exact;          // exact or ground truth
+        VectorXs        D_preint_imu,    x1_preint_imu;     // preintegrated with imu_tools
+        VectorXs        D_corrected_imu, x1_corrected_imu;  // corrected with imu_tools
+        VectorXs        D_preint,        x1_preint;         // preintegrated with processor_imu
+        VectorXs        D_corrected,     x1_corrected;      // corrected with processor_imu
+        VectorXs        D_optim,         x1_optim;          // optimized using constraint_imu
+        VectorXs        D_optim_imu,     x1_optim_imu;      // corrected with imu_tools using optimized bias
+        VectorXs                         x0_optim;          // optimized using constraint_imu
 
         // Delta correction Jacobian and step
         Matrix<Scalar,9,6>  J_D_bias;                           // Jacobian of pre-integrated delta w
@@ -246,10 +246,12 @@ class Process_Constraint_IMU : public testing::Test
         // Initial configuration of variables
         bool configureAll()
         {
-            // variables
+            // initial state
             q0      .normalize();
             x0     << p0, q0.coeffs(), v0;
             P0      .setIdentity() * 0.01;
+
+            // motion
             if (motion.cols() == 0)
             {
                 motion.resize(6,a.cols());
@@ -264,6 +266,8 @@ class Process_Constraint_IMU : public testing::Test
                 // if motion has more than 1 col, make num_integrations consistent with nbr of cols, just for consistency
                 num_integrations = motion.cols();
             }
+
+            // total run time
             DT      = num_integrations * dt;
 
             // wolf objects
@@ -326,6 +330,7 @@ class Process_Constraint_IMU : public testing::Test
         void setKfStates()
         {
             // This perturbs states to estimate around the exact value, then assigns to the keyframe
+            // Perturbations are applied only if the state block is unfixed
 
             VectorXs x_pert(10);
 
