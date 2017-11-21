@@ -55,7 +55,7 @@ class Process_Constraint_IMU : public testing::Test
 
         // input
         Matrix<Scalar, 6, Dynamic> motion;                      // Motion in IMU frame. Each column is a motion step. If just one column, then the number of steps is defined in num_integrations
-        Vector3s            a, w;                               // True acc and angvel in IMU frame. Used to create motion with `motion << a,w;`
+        Matrix<Scalar, 3, Dynamic> a, w;                        // True acc and angvel in IMU frame. Used to create motion with `motion << a,w;`
         Vector6s            data;                               // IMU data. It's the motion with gravity and bias. See imu::motion2data().
 
         // Deltas and states (exact, integrated, corrected, solved, etc)
@@ -216,16 +216,21 @@ class Process_Constraint_IMU : public testing::Test
             return Delta;
         }
 
-        void integrateWithProcessor(int N, const TimeStamp& t0, const Quaternions q0, const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, VectorXs& D_preint, VectorXs& D_corrected)
+        void integrateWithProcessor(int N, const TimeStamp& t0, const Quaternions q0, const MatrixXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, VectorXs& D_preint, VectorXs& D_corrected)
         {
-            data        = imu::motion2data(motion, q0, bias_real);
+            Vector6s      motion_now;
+            data        = imu::motion2data(motion.col(0), q0, bias_real);
             capture_imu = make_shared<CaptureIMU>(t0, sensor_imu, data, sensor_imu->getNoiseCov());
             q           = q0;
             t           = t0;
             for (int i= 0; i < N; i++)
             {
                 t   += dt;
-                data = imu::motion2data(motion, q, bias_real);
+                motion_now = motion.cols() == 1
+                                ? motion
+                                : motion.col(i);
+                data = imu::motion2data(motion_now, q, bias_real);
+                w    = motion_now.tail<3>();
                 q    = q * exp_q(w*dt);
 
                 capture_imu->setTimeStamp(t);
@@ -256,7 +261,10 @@ class Process_Constraint_IMU : public testing::Test
                 // if motion has any column at all, then it is already initialized in TEST_F(...) and we do nothing.
             }
             if (motion.cols() != 1)
+            {
+                // if motion has more than 1 col, make num_integrations consistent with nbr of cols, just for consistency
                 num_integrations = motion.cols();
+            }
 
             // wolf objects
             KF_0    = problem->setPrior(x0, P0, t0);
@@ -272,9 +280,9 @@ class Process_Constraint_IMU : public testing::Test
         {
             // ===================================== INTEGRATE EXACTLY WITH IMU_TOOLS with no bias at all
             if (motion.cols() == 1)
-                D_exact  = integrateDelta(num_integrations, q0, motion, bias_null, bias_null, dt);
+                D_exact = integrateDelta(num_integrations, q0, motion, bias_null, bias_null, dt);
             else
-                D_preint_imu = integrateDelta(q0, motion, bias_real, bias_preint, dt, J_D_bias);
+                D_exact = integrateDelta(q0, motion, bias_null, bias_null, dt, J_D_bias);
             x1_exact = imu::composeOverState(x0, D_exact, DT );
 
 
@@ -499,7 +507,7 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
 
 };
 
-TEST_F(Process_Constraint_IMU, PQV_b__PQV_b) // F_ixed___e_stimated
+TEST_F(Process_Constraint_IMU, MotionConstant_PQV_b__PQV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -521,8 +529,8 @@ TEST_F(Process_Constraint_IMU, PQV_b__PQV_b) // F_ixed___e_stimated
     bias_preint         = -bias_real;
 
     // ---------- motion params
-    a                  << 1,2,3;
-    w                  << 1,2,3;
+    a                  = Vector3s( 1,2,3 );
+    w                  = Vector3s( 1,2,3 );
 
     // ---------- fix boundaries
     p0_fixed       = true;
@@ -548,7 +556,7 @@ TEST_F(Process_Constraint_IMU, PQV_b__PQV_b) // F_ixed___e_stimated
 }
 
 
-TEST_F(Process_Constraint_IMU, pqv_b__PQV_b) // F_ixed___e_stimated
+TEST_F(Process_Constraint_IMU, MotionConstant_pqv_b__PQV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -570,8 +578,8 @@ TEST_F(Process_Constraint_IMU, pqv_b__PQV_b) // F_ixed___e_stimated
     bias_preint         = -bias_real;
 
     // ---------- motion params
-    a                  << 1,2,3;
-    w                  << 1,2,3;
+    a                  = Vector3s( 1,2,3 );
+    w                  = Vector3s( 1,2,3 );
 
     // ---------- fix boundaries
     p0_fixed       = false;
@@ -597,7 +605,7 @@ TEST_F(Process_Constraint_IMU, pqv_b__PQV_b) // F_ixed___e_stimated
 }
 
 
-TEST_F(Process_Constraint_IMU, pqV_b__PQv_b) // F_ixed___e_stimated
+TEST_F(Process_Constraint_IMU, MotionConstant_pqV_b__PQv_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -619,8 +627,8 @@ TEST_F(Process_Constraint_IMU, pqV_b__PQv_b) // F_ixed___e_stimated
     bias_preint         = -bias_real;
 
     // ---------- motion params
-    a                  << 1,2,3;
-    w                  << 1,2,3;
+    a                  = Vector3s( 1,2,3 );
+    w                  = Vector3s( 1,2,3 );
 
     // ---------- fix boundaries
     p0_fixed       = false;
@@ -647,7 +655,7 @@ TEST_F(Process_Constraint_IMU, pqV_b__PQv_b) // F_ixed___e_stimated
 }
 
 
-TEST_F(Process_Constraint_IMU_ODO, pqv_b__pqV_b) // F_ixed___e_stimated
+TEST_F(Process_Constraint_IMU, MotionRandom_PQV_b__PQV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -669,8 +677,106 @@ TEST_F(Process_Constraint_IMU_ODO, pqv_b__pqV_b) // F_ixed___e_stimated
     bias_preint         = -bias_real;
 
     // ---------- motion params
-    a                  << 1,2,3;
-    w                  << 1,2,3;
+    a                  = Matrix<Scalar, 3, 50>::Random();
+    w                  = Matrix<Scalar, 3, 50>::Random();
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = true;
+    v0_fixed       = true;
+    p1_fixed       = true;
+    q1_fixed       = true;
+    v1_fixed       = true;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+    WOLF_TRACE(report);
+
+//    printAll();
+
+    assertAll();
+
+}
+
+
+TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__PQv_b) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Matrix<Scalar, 3, 50>::Random();
+    w                  = Matrix<Scalar, 3, 50>::Random();
+
+    // ---------- fix boundaries
+    p0_fixed       = false;
+    q0_fixed       = false;
+    v0_fixed       = true;
+    p1_fixed       = true;
+    q1_fixed       = true;
+    v1_fixed       = false;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+    WOLF_TRACE(report);
+
+//    printAll();
+
+    assertAll();
+
+}
+
+
+TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqv_b__pqV_b) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Vector3s( 1,2,3 );
+    w                  = Vector3s( 1,2,3 );
 
     // ---------- fix boundaries
     p0_fixed       = false;
@@ -696,7 +802,7 @@ TEST_F(Process_Constraint_IMU_ODO, pqv_b__pqV_b) // F_ixed___e_stimated
 }
 
 
-TEST_F(Process_Constraint_IMU_ODO, pqV_b__pqv_b) // F_ixed___e_stimated
+TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -718,8 +824,8 @@ TEST_F(Process_Constraint_IMU_ODO, pqV_b__pqv_b) // F_ixed___e_stimated
     bias_preint         = -bias_real;
 
     // ---------- motion params
-    a                  << 1,2,3;
-    w                  << 1,2,3;
+    a                  = Vector3s( 1,2,3 );
+    w                  = Vector3s( 1,2,3 );
 
     // ---------- fix boundaries
     p0_fixed       = false;
