@@ -247,7 +247,6 @@ class Process_Constraint_IMU : public testing::Test
         bool configureAll()
         {
             // variables
-            DT      = num_integrations * dt;
             q0      .normalize();
             x0     << p0, q0.coeffs(), v0;
             P0      .setIdentity() * 0.01;
@@ -265,6 +264,7 @@ class Process_Constraint_IMU : public testing::Test
                 // if motion has more than 1 col, make num_integrations consistent with nbr of cols, just for consistency
                 num_integrations = motion.cols();
             }
+            DT      = num_integrations * dt;
 
             // wolf objects
             KF_0    = problem->setPrior(x0, P0, t0);
