@@ -216,6 +216,8 @@ class Process_Constraint_IMU : public testing::Test
             return Delta;
         }
 
+
+
         void integrateWithProcessor(int N, const TimeStamp& t0, const Quaternions q0, const MatrixXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, VectorXs& D_preint, VectorXs& D_corrected)
         {
             Vector6s      motion_now;
@@ -242,6 +244,8 @@ class Process_Constraint_IMU : public testing::Test
                 D_corrected = processor_imu->getLastPtr()->getDeltaCorrected(bias_real);
             }
         }
+
+
 
         // Initial configuration of variables
         bool configureAll()
@@ -279,6 +283,8 @@ class Process_Constraint_IMU : public testing::Test
             return true;
         }
 
+
+
         // Integrate using all methods
         virtual void integrateAll()
         {
@@ -314,6 +320,8 @@ class Process_Constraint_IMU : public testing::Test
             x1_corrected     = imu::composeOverState(x0, D_corrected     , DT );
         }
 
+
+
         // Set state_blocks status
         void setFixedBlocks()
         {
@@ -325,6 +333,7 @@ class Process_Constraint_IMU : public testing::Test
             KF_1->getOPtr()->setFixed(q1_fixed);
             KF_1->getVPtr()->setFixed(v1_fixed);
         }
+
 
 
         void setKfStates()
@@ -355,6 +364,8 @@ class Process_Constraint_IMU : public testing::Test
             KF_1->setState(x_pert);
         }
 
+
+
         virtual void buildProblem()
         {
             // ===================================== SET KF in Wolf tree
@@ -372,26 +383,30 @@ class Process_Constraint_IMU : public testing::Test
             setKfStates();
         }
 
+
+
         string solveProblem(int verbose = 1)
         {
-            string report = ceres_manager->solve(verbose);
+            string report   = ceres_manager->solve(verbose);
 
-            bias_0 = C_0->getCalibration();
-            bias_1 = C_1->getCalibration();
+            bias_0          = C_0->getCalibration();
+            bias_1          = C_1->getCalibration();
 
             // ===================================== GET INTEGRATED STATE WITH SOLVED BIAS
             // with processor
-            x0_optim     = KF_0->getState();
-            D_optim      = CM_1->getDeltaCorrected(bias_0);
-            x1_optim     = KF_1->getState();
+            x0_optim        = KF_0->getState();
+            D_optim         = CM_1->getDeltaCorrected(bias_0);
+            x1_optim        = KF_1->getState();
 
             // with imu_tools
-            step         = J_D_bias * (bias_0 - bias_preint);
-            D_optim_imu  = imu::plus(D_preint, step);
-            x1_optim_imu = imu::composeOverState(x0, D_optim_imu, DT);
+            step            = J_D_bias * (bias_0 - bias_preint);
+            D_optim_imu     = imu::plus(D_preint, step);
+            x1_optim_imu    = imu::composeOverState(x0_optim, D_optim_imu, DT);
 
             return report;
         }
+
+
 
         string runAll(int verbose)
         {
@@ -402,8 +417,12 @@ class Process_Constraint_IMU : public testing::Test
             return report;
         }
 
-        void printAll()
+
+
+        void printAll(std::string report = "")
         {
+            WOLF_TRACE(report);
+
             WOLF_TRACE("D_exact       : ", D_exact            .transpose() ); // exact delta integrated, with absolutely no bias
             WOLF_TRACE("D_preint      : ", D_preint           .transpose() ); // pre-integrated delta using processor
             WOLF_TRACE("D_preint_imu  : ", D_preint_imu       .transpose() ); // pre-integrated delta using imu_tools
@@ -430,6 +449,8 @@ class Process_Constraint_IMU : public testing::Test
             WOLF_TRACE("X0_optim      : ", x0_optim           .transpose() ); // optimal state after solving using processor
         }
 
+
+
         virtual void assertAll()
         {
             // check delta and state integrals
@@ -451,7 +472,6 @@ class Process_Constraint_IMU : public testing::Test
             ASSERT_MATRIX_APPROX(x1_optim_imu       , x1_exact  , 1e-5 );
             ASSERT_NEAR(x1_optim.segment(3,4).norm(), 1.0       , 1e-8 );
         }
-
 
 };
 
@@ -552,9 +572,54 @@ TEST_F(Process_Constraint_IMU, MotionConstant_PQV_b__PQV_b) // F_ixed___e_stimat
     // ===================================== RUN ALL
     string report = runAll(1);
 
-    WOLF_TRACE(report);
+//    printAll(report);
 
-//    printAll();
+    assertAll();
+
+}
+
+
+TEST_F(Process_Constraint_IMU, MotionConstant_NonNullState_PQV_b__PQV_b) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 3,2,1;
+    q0.coeffs()        << 0.5,0.5,0.5,.5;
+    v0                 << 1,2,3;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Vector3s( 1,2,3 );
+    w                  = Vector3s( 1,2,3 );
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = true;
+    v0_fixed       = true;
+    p1_fixed       = true;
+    q1_fixed       = true;
+    v1_fixed       = true;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+//    printAll(report);
 
     assertAll();
 
@@ -601,9 +666,7 @@ TEST_F(Process_Constraint_IMU, MotionConstant_pqv_b__PQV_b) // F_ixed___e_stimat
     // ===================================== RUN ALL
     string report = runAll(1);
 
-    WOLF_TRACE(report);
-
-    //    printAll();
+    //    printAll(report);
 
     assertAll();
 
@@ -650,10 +713,7 @@ TEST_F(Process_Constraint_IMU, MotionConstant_pqV_b__PQv_b) // F_ixed___e_stimat
     // ===================================== RUN ALL
     string report = runAll(1);
 
-    WOLF_TRACE(report);
-
-
-    //    printAll();
+    //    printAll(report);
 
     assertAll();
 
@@ -700,9 +760,7 @@ TEST_F(Process_Constraint_IMU, MotionRandom_PQV_b__PQV_b) // F_ixed___e_stimated
     // ===================================== RUN ALL
     string report = runAll(1);
 
-    WOLF_TRACE(report);
-
-//    printAll();
+//    printAll(report);
 
     assertAll();
 
@@ -749,9 +807,7 @@ TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__PQv_b) // F_ixed___e_stimated
     // ===================================== RUN ALL
     string report = runAll(1);
 
-    WOLF_TRACE(report);
-
-//    printAll();
+//    printAll(report);
 
     assertAll();
 
@@ -798,9 +854,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqv_b__pqV_b) // F_ixed___e_st
     // ===================================== RUN ALL
     string report = runAll(1);
 
-    WOLF_TRACE(report);
-
-//    printAll();
+//    printAll(report);
 
     assertAll();
 
@@ -847,9 +901,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_st
     // ===================================== RUN ALL
     string report = runAll(1);
 
-    WOLF_TRACE(report);
-
-//    printAll();
+//    printAll(report);
 
     assertAll();
 
