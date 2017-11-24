@@ -1108,7 +1108,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
 
         Scalar dt(0.0010), dt_odom(1.0);
         TimeStamp ts(0.0), t_odom(0.0);
-        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu, sen_imu->getNoiseCov(), Eigen::Vector6s::Zero());
+        wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu, sen_imu->getNoiseCov(), origin_bias);
         wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, sen_odom3D->getNoiseCov(), 7, 6, nullptr);
         sen_odom3D->process(mot_ptr);
         //first odometry data will be processed at this timestamp
@@ -2064,7 +2064,6 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-3)
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-3)
-
 }
 
 TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
@@ -2194,7 +2193,7 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRot, VarB1B2P1P2_InvarV1Q1V2Q2_ini
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-3)
 }
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2_InvarP1Q1V1P2Q2V2_initOK)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2_InvarP1Q1V1P2Q2V2_init0)
 {
     //prepare problem for solving
     origin_KF->fix();
@@ -2234,7 +2233,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2_InvarP1Q1V1P2Q2
         WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
 }
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V2_InvarP1Q1V1P2Q2_initOK)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V2_InvarP1Q1V1P2Q2_init0)
 {
     //prepare problem for solving
     origin_KF->fix();
@@ -2277,19 +2276,18 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V2_InvarP1Q1V1P2
         WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
 }
 
-//jacobian matrix rank deficient here - estimating both initial and final velocity
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V1V2_InvarP1Q1P2Q2_initOK)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2P2_InvarP1Q1V1Q2V2_init0)
 {
     //prepare problem for solving
     origin_KF->getPPtr()->fix();
     origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->unfix();
+    origin_KF->getVPtr()->fix();
 
     last_KF->setState(expected_final_state);
 
-    last_KF->getPPtr()->fix();
+    last_KF->getPPtr()->unfix();
     last_KF->getOPtr()->fix();
-    last_KF->getVPtr()->unfix();
+    last_KF->getVPtr()->fix();
 
     //perturbation of origin bias
     Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
@@ -2299,26 +2297,23 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V1V2_InvarP1Q1P2
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     //ceres_manager_wolf_diff->computeCovariances(ALL);
 
+    ASSERT_MATRIX_APPROX(last_KF->getState(), expected_final_state, 1e-7)
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*1000)
-
-    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*1000)
 }
 
-//jacobian matrix rank deficient here - estimating both initial and final velocity
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V1Q2V2_InvarP1Q1P2_initOK)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2P2Q2_InvarP1Q1V1V2_init0)
 {
     //prepare problem for solving
     origin_KF->getPPtr()->fix();
     origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->unfix();
+    origin_KF->getVPtr()->fix();
 
     last_KF->setState(expected_final_state);
 
-    last_KF->getPPtr()->fix();
+    last_KF->getPPtr()->unfix();
     last_KF->getOPtr()->unfix();
-    last_KF->getVPtr()->unfix();
+    last_KF->getVPtr()->fix();
 
     //perturbation of origin bias
     Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
@@ -2327,22 +2322,18 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V1Q2V2_InvarP1Q1
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*1000)
-    
-    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*1000)
-    Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
-    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
+
+    ASSERT_MATRIX_APPROX(last_KF->getState(), expected_final_state, 1e-7)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-6)
+    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-6)
 }
 
-//jacobian matrix rank deficient here - estimating both initial and final velocity
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V1P2V2_InvarP1Q1Q2_initOK)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2P2V2_InvarP1Q1V1Q2_init0)
 {
     //prepare problem for solving
     origin_KF->getPPtr()->fix();
     origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->unfix();
+    origin_KF->getVPtr()->fix();
 
     last_KF->setState(expected_final_state);
 
@@ -2357,26 +2348,24 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V1P2V2_InvarP1Q1
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
-    ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*1000)
+    ASSERT_MATRIX_APPROX(last_KF->getState(), expected_final_state, 1e-6)
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    
-    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*1000)
 }
 
 //jacobian matrix rank deficient here - estimating both initial and final velocity
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V1P2Q2V2_InvarP1Q1_initOK)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2P1Q1_InvarV1P2Q2V2_init0)
 {
     //prepare problem for solving
-    origin_KF->getPPtr()->fix();
-    origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->unfix();
+    origin_KF->getPPtr()->unfix();
+    origin_KF->getOPtr()->unfix();
+    origin_KF->getVPtr()->fix();
 
     last_KF->setState(expected_final_state);
 
-    last_KF->getPPtr()->unfix();
-    last_KF->getOPtr()->unfix();
-    last_KF->getVPtr()->unfix();
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+    last_KF->getVPtr()->fix();
 
     //perturbation of origin bias
     Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.0001);
@@ -2385,16 +2374,12 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2V1P2Q2V2_InvarP1
 
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
 
-    ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*10000)
+    ASSERT_MATRIX_APPROX(origin_KF->getState(), x_origin, 1e-7)
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    
-    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*10000)
-    Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
-    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
 }
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2P2Q2V2_InvarP1Q1V1_initOK)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2P2Q2V2_InvarP1Q1V1_init0)
 {
     //prepare problem for solving
     origin_KF->getPPtr()->fix();
@@ -2415,14 +2400,9 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2P2Q2V2_InvarP1Q1
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     ceres_manager_wolf_diff->computeCovariances(ALL);
 
-    ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*1000)
+    ASSERT_MATRIX_APPROX(last_KF->getState(), expected_final_state, 1e-6)
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    
-    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*1000)
-    Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
-    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
 
     Eigen::Matrix<wolf::Scalar, 10, 1> cov_stdev, actual_state(last_KF->getState());
     Eigen::MatrixXs covX(10,10);
@@ -2444,7 +2424,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2P2Q2V2_InvarP1Q1
         WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
 }
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarQ1B1B2P2Q2_InvarP1V1V2_initOK)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarQ1B1B2P2Q2_InvarP1V1V2_init0)
 {
     //Add fix constraint on yaw to make the problem observable
     Eigen::MatrixXs featureFix_cov(6,6);
@@ -2473,14 +2453,10 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarQ1B1B2P2Q2_InvarP1V1
     std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
     ceres_manager_wolf_diff->computeCovariances(ALL);
 
-    ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*1000)
+    ASSERT_MATRIX_APPROX(origin_KF->getState(), x_origin, 1e-6)
+    ASSERT_MATRIX_APPROX(last_KF->getState(), expected_final_state, 1e-6)
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    
-    ASSERT_MATRIX_APPROX(last_KF->getPPtr()->getState(), expected_final_state.head(3), wolf::Constants::EPS*100)
-    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*1000)
-    Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
-    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
 
     Eigen::Matrix<wolf::Scalar, 10, 1> cov_stdev, actual_state(last_KF->getState());
     Eigen::MatrixXs covX(10,10);
@@ -2502,7 +2478,59 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarQ1B1B2P2Q2_InvarP1V1
         WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
 }
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY, VarQ1B1B2P2Q2_InvarP1V1V2_initOK)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2P1Q1V1_InvarP2Q2V2_init0)
+{
+    //Add fix constraint on yaw to make the problem observable
+    Eigen::MatrixXs featureFix_cov(6,6);
+    featureFix_cov = Eigen::MatrixXs::Identity(6,6); 
+    featureFix_cov(5,5) = 0.1;
+    CaptureBasePtr capfix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6, nullptr));
+    FeatureBasePtr ffix = capfix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
+    ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(ffix->addConstraint(std::make_shared<ConstraintFix3D>(ffix)));
+    
+    //prepare problem for solving
+    origin_KF->getPPtr()->unfix();
+    origin_KF->getOPtr()->unfix();
+    origin_KF->getVPtr()->unfix();
+
+    last_KF->setState(expected_final_state);
+
+    last_KF->getPPtr()->fix();
+    last_KF->getOPtr()->fix();
+    last_KF->getVPtr()->fix();
+
+    //perturbation of origin bias
+    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.00001);
+    Eigen::Vector6s bias = origin_KF->getCaptureOf(sen_imu)->getCalibration();
+    origin_KF->getCaptureOf(sen_imu)->setCalibration(bias + random_err);
+
+    std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+    ceres_manager_wolf_diff->computeCovariances(ALL);
+
+    ASSERT_MATRIX_APPROX(origin_KF->getState(), x_origin, 1e-6)
+    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
+    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
+
+    Eigen::Matrix<wolf::Scalar, 10, 1> cov_stdev, actual_state(origin_KF->getState());
+    Eigen::MatrixXs covX(10,10);
+        
+    //get data from covariance blocks
+    wolf_problem_ptr_->getFrameCovariance(origin_KF, covX);
+
+    for(int i = 0; i<10; i++)
+        cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
+    
+    /*TEST_COUT << "2*std : " << cov_stdev.transpose();
+    TEST_COUT << "expect : " << expected_final_state.transpose(); //expected final state
+    TEST_COUT << "estim : " << origin_KF->getState().transpose(); //estimated final state*/
+
+    for(unsigned int i = 0; i<10; i++)
+        assert((x_origin(i) <= actual_state(i) + cov_stdev(i)) && (x_origin(i) >= actual_state(i) - cov_stdev(i)));
+    
+    if(cov_stdev.tail(6).maxCoeff()>=1)
+        WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
+}
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY, VarB1B2Q1P2Q2_InvarP1V1V2_initO)
 {
     //Add fix constraint on yaw to make the problem observable
     Eigen::MatrixXs featureFix_cov(6,6);
