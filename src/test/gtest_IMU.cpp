@@ -578,6 +578,54 @@ TEST_F(Process_Constraint_IMU, MotionConstant_PQV_b__PQV_b) // F_ixed___e_stimat
 
 }
 
+TEST_F(Process_Constraint_IMU, test_capture) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Vector3s( 1,2,3 );
+    w                  = Vector3s( 1,2,3 );
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = true;
+    v0_fixed       = true;
+    p1_fixed       = true;
+    q1_fixed       = true;
+    v1_fixed       = true;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    Eigen::Vector6s initial_bias((Eigen::Vector6s()<< .002, .0007, -.001,   .003, -.002, .001).finished());
+    sensor_imu->getIntrinsicPtr()->setState(initial_bias);
+    configureAll();
+    integrateAll();
+    buildProblem();
+    //Since we did not solve, hence bias estimates did not change yet, both capture should have the same calibration
+    ASSERT_MATRIX_APPROX(KF_0->getCaptureOf(sensor_imu)->getCalibration(), initial_bias, 1e-8 );
+    ASSERT_MATRIX_APPROX(KF_0->getCaptureOf(sensor_imu)->getCalibration(), KF_1->getCaptureOf(sensor_imu)->getCalibration(), 1e-8 );
+}
+
 
 TEST_F(Process_Constraint_IMU, MotionConstant_pqv_b__PQV_b) // F_ixed___e_stimated
 {
