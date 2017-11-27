@@ -1889,98 +1889,13 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_initO)
     last_KF->getPPtr()->fix();
     last_KF->getOPtr()->fix();
     last_KF->getVPtr()->fix();
-    wolf_problem_ptr_->print(4,1,1,1);
+
     std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
 
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-4)
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-4)
 
-}
-
-TEST_F(ConstraintIMU_biasTest_Move_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias) //something is wrong with this test
-{
-    //prepare problem for solving
-    origin_KF->fix();
-
-    last_KF->setState(expected_final_state);
-    last_KF->fix();
-
-    wolf_problem_ptr_->print(4,1,1,1);
-    std::string report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
-
-    //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-4)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-4)
-
-    wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbed_bias(origin_bias);
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-4")
-    epsilon_bias = 0.0001;
-    Eigen::Vector6s err;
-
-    err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbed_bias = origin_bias + err;
-    
-    origin_KF->getCaptureOf(sen_imu)->setCalibration(perturbed_bias);
-    last_KF->getCaptureOf(sen_imu)->setCalibration(origin_bias);
-
-    report = ceres_manager_wolf_diff->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
-
-    //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-4)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-4)
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-3")
-    epsilon_bias = 0.001;
-
-    err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbed_bias = origin_bias + err;
-    origin_KF->setState(x_origin);
-    last_KF->setState(expected_final_state);
-
-    report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-
-    //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-4)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-4)
-
-    //==============================================================
-    WOLF_INFO("Starting error bias 1e-2")
-    epsilon_bias = 0.01;
-
-    err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbed_bias = origin_bias + err;
-    origin_KF->setState(x_origin);
-    last_KF->setState(expected_final_state);
-
-    report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-
-    //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-4)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-4)
-
-    //==============================================================
-    //WOLF_INFO("Starting error bias 1e-1")
-    epsilon_bias = 0.1;
-
-    for(int i = 1; i<10; i++)
-    {
-        err = Eigen::Vector6s::Random() * epsilon_bias*10;
-        perturbed_bias = origin_bias + err;
-        origin_KF->setState(x_origin);
-        last_KF->setState(expected_final_state);
-
-        report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-
-        //Only biases are unfixed
-        ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-4)
-        ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-4)
-
-    }
 }
 
 TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotCst,VarB1B2_InvarP1Q1V1P2Q2V2_init0)
@@ -2069,81 +1984,6 @@ TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-3)
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-3)
-}
-
-TEST_F(ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBias)
-{
-    //prepare problem for solving
-    origin_KF->fix();
-    last_KF->fix();
-
-    wolf::Scalar epsilon_bias = 0.0000001;
-    Eigen::VectorXs perturbed_bias(origin_bias);
-
-    //==============================================================
-    //WOLF_INFO("Starting error bias 1e-5")
-    epsilon_bias = 0.00001;
-    Eigen::Vector6s err;
-
-    err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbed_bias = origin_bias + err;
-    origin_KF->setState(x_origin);
-    last_KF->setState(expected_final_state);
-
-    std::string report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-
-    //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-
-    //==============================================================
-    //WOLF_INFO("Starting error bias 1e-4")
-    epsilon_bias = 0.0001;
-
-    err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbed_bias = origin_bias + err;
-    origin_KF->setState(x_origin);
-    last_KF->setState(expected_final_state);
-
-    report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-
-    //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-
-    //==============================================================
-    //WOLF_INFO("Starting error bias 1e-2")
-    epsilon_bias = 0.01;
-
-    err = Eigen::Vector6s::Random() * epsilon_bias*10;
-    perturbed_bias = origin_bias + err;
-    origin_KF->setState(x_origin);
-    last_KF->setState(expected_final_state);
-
-    report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-
-    //Only biases are unfixed
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-
-    //==============================================================
-    //WOLF_INFO("Starting error bias 1e-1")
-    epsilon_bias = 0.1;
-
-    for(int i = 1; i<10; i++)
-    {
-        err = Eigen::Vector6s::Random() * epsilon_bias*10;
-        perturbed_bias = origin_bias + err;
-        origin_KF->setState(x_origin);
-        last_KF->setState(expected_final_state);
-
-        report = ceres_manager_wolf_diff->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-
-        //Only biases are unfixed
-        ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-        ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-
-    }
 }
 
 /* The bias introduced in the data was < 1e-2 (random * 0.01), therefore we check that the estimation is OK at least with precision 1e-3
@@ -2536,7 +2376,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarB1B2P1Q1V1_InvarP2Q2
         WOLF_WARN("Big 2*stdev on one or more biases! Max coeff :", cov_stdev.tail(6).maxCoeff())
 }
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY, VarB1B2Q1P2Q2_InvarP1V1V2_initO)
+TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY, VarB1B2Q1P2Q2_InvarP1V1V2_init0)
 {
     //Add fix constraint on yaw to make the problem observable
     Eigen::MatrixXs featureFix_cov(6,6);
@@ -2739,35 +2579,6 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2V2_InvarP1Q1V1Q
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-8)
 }
 
-TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2V1P2Q2V2_InvarP1Q1_initOK)
-{
-    //prepare problem for solving
-    origin_KF->getPPtr()->fix();
-    origin_KF->getOPtr()->fix();
-    origin_KF->getVPtr()->unfix();
-
-    last_KF->setState(expected_final_state);
-
-    last_KF->getPPtr()->unfix();
-    last_KF->getOPtr()->unfix();
-    last_KF->getVPtr()->unfix();
-
-    //perturbation of origin bias
-    Eigen::Vector6s random_err(Eigen::Vector6s::Random() * 0.0001);
-    Eigen::Vector6s bias = origin_KF->getCaptureOf(sensor_imu)->getCalibration();
-    origin_KF->getCaptureOf(sensor_imu)->setCalibration(bias + random_err);
-
-    std::string report = ceres_manager->solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
-
-    ASSERT_MATRIX_APPROX(origin_KF->getVPtr()->getState(), x_origin.segment(7,3), wolf::Constants::EPS*10000)
-    ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
-    ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sensor_imu)->getCalibration(), origin_bias, 1e-5)
-    
-    ASSERT_MATRIX_APPROX(last_KF->getVPtr()->getState(), expected_final_state.segment(7,3), wolf::Constants::EPS*10000)
-    Eigen::Map<const Eigen::Quaternions> estimatedLastQuat(last_KF->getOPtr()->getState().data()), expectedLastQuat(expected_final_state.segment(3,4).data());
-    ASSERT_QUATERNION_APPROX(estimatedLastQuat, expectedLastQuat, wolf::Constants::EPS*100)
-}
-
 TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot, VarB1B2P2Q2V2_InvarP1Q1V1_initOK)
 {
     //prepare problem for solving
@@ -2817,8 +2628,7 @@ int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
 //  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.*:ConstraintIMU_biasTest_Static_NullBias.*:ConstraintIMU_biasTest_Static_NonNullAccBias.*:ConstraintIMU_biasTest_Static_NonNullGyroBias.*:ConstraintIMU_biasTest_Static_NonNullBias.*:ConstraintIMU_biasTest_Move_NullBias.*:ConstraintIMU_biasTest_Move_NonNullBiasRotCst.*";
-  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2P2Q2V2_InvarP1Q1V1_initOK";
-//  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
+//  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2V1P2Q2V2_InvarP1Q1_initOK";
 
   return RUN_ALL_TESTS();
 }
