@@ -103,9 +103,9 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
 
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu, sen_imu->getNoiseCov(), origin_bias); //set data on IMU (measure only gravity here)
 
-        for(unsigned int i = 0; i < 1000; i++) //integrate during 1 second
+        for(unsigned int i = 0; i < 10; i++) //integrate during 1 second
         {
-            t.set(t.get() + 0.001); //increment of 1 ms
+            t.set(t.get() + 0.1); //increment of 1 ms
             imu_ptr->setTimeStamp(t);
 
             // process data in capture
@@ -188,9 +188,9 @@ class ConstraintIMU_biasTest_Static_NonNullAccBias : public testing::Test
 
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu, sen_imu->getNoiseCov(), origin_bias); //set data on IMU (measure only gravity here)
 
-        for(unsigned int i = 0; i < 1000; i++) //integrate during 1 second
+        for(unsigned int i = 0; i < 10; i++) //integrate during 1 second
         {
-            t.set(t.get() + 0.001); //increment of 1 ms
+            t.set(t.get() + 0.1); //increment of 1 ms
             imu_ptr->setTimeStamp(t);
 
             // process data in capture
@@ -272,9 +272,9 @@ class ConstraintIMU_biasTest_Static_NonNullGyroBias : public testing::Test
 
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu, sen_imu->getNoiseCov() );//, origin_bias); //set data on IMU (measure only gravity here)
 
-        for(unsigned int i = 0; i < 1000; i++) //integrate during 1 second
+        for(unsigned int i = 0; i < 10; i++) //integrate during 1 second
         {
-            t.set(t.get() + 0.001); //increment of 1 ms
+            t.set(t.get() + 0.1); //increment of 1 ms
             imu_ptr->setTimeStamp(t);
 
             // process data in capture
@@ -362,9 +362,9 @@ class ConstraintIMU_biasTest_Static_NonNullBias : public testing::Test
 
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu, sen_imu->getNoiseCov(), Eigen::Vector6s::Zero()); //set data on IMU (measure only gravity here)
 
-        for(unsigned int i = 0; i < 1000; i++) //integrate during 1 second
+        for(unsigned int i = 0; i < 10; i++) //integrate during 1 second
         {
-            t.set(t.get() + 0.001); //increment of 1 ms
+            t.set(t.get() + 0.1); //increment of 1 ms
             imu_ptr->setTimeStamp(t);
 
             // process data in capture
@@ -450,9 +450,9 @@ class ConstraintIMU_biasTest_Move_NullBias : public testing::Test
 
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu, sen_imu->getNoiseCov(), Eigen::Vector6s::Zero());
 
-        for(unsigned int i = 0; i < 1000; i++) //integrate during 1 second
+        for(unsigned int i = 0; i < 10; i++) //integrate during 1 second
         {
-            t.set(t.get() + 0.001); //increment of 1 ms
+            t.set(t.get() + 0.1); //increment of 1 ms
             imu_ptr->setTimeStamp(t);
 
             // process data in capture
@@ -533,9 +533,9 @@ class ConstraintIMU_biasTest_Move_NonNullBias : public testing::Test
 
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu, sen_imu->getNoiseCov(), Eigen::Vector6s::Zero());
 
-        for(unsigned int i = 0; i < 1000; i++) //integrate during 1 second
+        for(unsigned int i = 0; i < 10; i++) //integrate during 1 second
         {
-            t.set(t.get() + 0.001); //increment of 1 ms
+            t.set(t.get() + 0.1); //increment of 1 ms
             imu_ptr->setTimeStamp(t);
 
             // process data in capture
@@ -622,12 +622,12 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
 
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu, sen_imu->getNoiseCov(), Eigen::Vector6s::Zero());
 
-        for(unsigned int i = 0; i < 1000; i++) //integrate during 1 second
+        for(unsigned int i = 0; i < 10; i++) //integrate during 1 second
         {
             //gravity measure depends on current IMU orientation + bias
             //use data_imu_initial to measure gravity from real orientation of IMU then add biases
             data_imu.head(3) = (v2q(data_imu_initial.tail(3) * t.get()).conjugate() * data_imu_initial.head(3)) + origin_bias.head(3);
-            t.set(t.get() + 0.001); //increment of 1 ms
+            t.set(t.get() + 0.1); //increment of 1 ms
             imu_ptr->setData(data_imu);
             imu_ptr->setTimeStamp(t);
 
@@ -720,12 +720,12 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
 
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(t, sen_imu, data_imu, sen_imu->getNoiseCov(), Eigen::Vector6s::Zero());
 
-        for(unsigned int i = 0; i < 1000; i++) //integrate during 1 second
+        for(unsigned int i = 0; i < 10; i++) //integrate during 1 second
         {
             //gravity measure depends on current IMU orientation + bias
             //use data_imu_initial to measure gravity from real orientation of IMU then add biases
             data_imu.head(3) = (v2q(data_imu_initial.tail(3) * t.get()).conjugate() * data_imu_initial.head(3)) + origin_bias.head(3);
-            t.set(t.get() + 0.001); //increment of 1 ms
+            t.set(t.get() + 0.1); //increment of 1 ms
             imu_ptr->setData(data_imu);
             imu_ptr->setTimeStamp(t);
 
@@ -806,7 +806,7 @@ class ConstraintIMU_biasTest_Move_NonNullBiasRot : public testing::Test
         Eigen::Vector6s data_imu(Eigen::Vector6s::Zero());
         Eigen::Vector3s rateOfTurn(Eigen::Vector3s::Zero()); //deg/s
 
-        Scalar dt(0.001);
+        Scalar dt(0.01);
         TimeStamp ts(0);
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu, sen_imu->getNoiseCov(), Eigen::Vector6s::Zero());
 
@@ -927,7 +927,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         Eigen::Vector3s rateOfTurn(Eigen::Vector3s::Zero()); //deg/s
 
         TimeStamp t_imu(0.0),    t_odo(0.0);
-        Scalar   dt_imu(0.001), dt_odo(1.0);
+        Scalar   dt_imu(0.1), dt_odo(1.0);
 
         capture_imu = std::make_shared<CaptureIMU>   (t_imu, sensor_imu, data_imu, sensor_imu->getNoiseCov(), sensor_imu->getCalibration(), nullptr);
 
@@ -943,7 +943,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         //WOLF_TRACE("last delta preint: ", processor_imu->getLastPtr()->getDeltaPreint().transpose());
         //WOLF_TRACE("last jacoob bias : ", processor_imu->getLastPtr()->getJacobianCalib().row(0));
 
-        for(unsigned int i = 1; i<=1000; i++)
+        for(unsigned int i = 1; i<=10; i++)
         {
 
             // PROCESS IMU DATA
@@ -1108,7 +1108,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         rateOfTurn << 0,90,0;
         VectorXs D_cor(10);
 
-        Scalar dt(0.0010), dt_odom(1.0);
+        Scalar dt(0.0020), dt_odom(1.0);
         TimeStamp ts(0.0), t_odom(0.0);
 
         wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu, sen_imu->getNoiseCov(), origin_bias);
@@ -1122,7 +1122,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         data_imu.tail<3>() = rateOfTurn* M_PI/180.0; //constant rotation =
 
         //when we find a IMU timestamp corresponding with this odometry timestamp then we process odometry measurement
-        for(unsigned int i = 1; i<=1000; i++)
+        for(unsigned int i = 1; i<=500; i++)
         {
             // PROCESS IMU DATA
             // Time and data variables
