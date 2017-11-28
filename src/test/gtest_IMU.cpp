@@ -1230,7 +1230,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_st
 }
 
 
-
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
@@ -1240,3 +1239,21 @@ int main(int argc, char **argv)
     return RUN_ALL_TESTS();
 }
 
+/* Some notes :
+ *
+ * - Process_Constraint_IMU_ODO.MotionConstant_PQv_b__PQv_b :
+ *      this test will not work + jacobian is rank deficient because of estimating both initial
+ *      and final velocities. 
+ *      IMU data integration is done with correct biases (so this is the case of a calibrated IMU). Before solving the problem, we perturbate the initial bias.
+ *      We solve the problem by fixing all states excepted V1 and V2. while creating the constraints, both velocities are corrected using the difference between the actual
+ *      bias and the bias used during preintegration. One way to solve this in the solver side would be to make the actual bias match the preintegraion bias so that the
+ *      difference is 0 and does not affect the states of the KF. Another possibility is to have both velocities modified without changing the biases. it is likely that this
+ *      solution is chosen in this case (bias changes is penalized between 2 KeyFrames, but velocities have no other constraints here.)
+ * 
+ *  - Bias evaluation with a precision of 1e-4 :
+ *      The bias introduced in the data for the preintegration steps is different of the real bias. This is simulating the case of a non calibrated IMU
+ *      Because of cross relations between acc and gyro biases (respectively a_b and w_b) it is difficult to expect a better estimation.
+ *      A small change in a_b can be cancelled by a small variation in w_b. in other words : there are local minima.
+ *      In addition, for Process_Constraint_IMU tests, P and V are tested against 1e-5 precision while 1e-8 is used for Q.
+ *      Errors tend to be distributed in different estimated variable when we get into a local minima (to minimize residuals in a least square sense).
+ */
