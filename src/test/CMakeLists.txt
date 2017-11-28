@@ -111,10 +111,6 @@ wolf_add_gtest(gtest_feature_imu gtest_feature_imu.cpp)
 target_link_libraries(gtest_feature_imu ${PROJECT_NAME})
 
 # IMU Bias + estimation tests
-#wolf_add_gtest(gtest_imuBias gtest_imuBias.cpp)
-#target_link_libraries(gtest_imuBias ${PROJECT_NAME})
-
-# IMU Bias + estimation tests
 wolf_add_gtest(gtest_IMU gtest_IMU.cpp)
 target_link_libraries(gtest_IMU ${PROJECT_NAME})
 
@@ -133,10 +129,6 @@ target_link_libraries(gtest_processor_imu ${PROJECT_NAME})
 # ProcessorIMU_jacobians test
 wolf_add_gtest(gtest_processorIMU_jacobians gtest_processorIMU_jacobians.cpp)
 target_link_libraries(gtest_processorIMU_jacobians ${PROJECT_NAME})
-
-# Ceres ProcessorMotion solver tests
-#wolf_add_gtest(gtest_processorMotion_optimization_testCase gtest_processorMotion_optimization_testCase.cpp)
-#target_link_libraries(gtest_processorMotion_optimization_testCase ${PROJECT_NAME})
 
 # ProcessorMotion in 2D
 wolf_add_gtest(gtest_odom_2D gtest_odom_2D.cpp)
