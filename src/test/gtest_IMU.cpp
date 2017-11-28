@@ -1182,7 +1182,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqv_b__pqV_b) // F_ixed___e_st
 
 }
 
-
 TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_stimated
 {
 
@@ -1229,6 +1228,97 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_st
 
 }
 
+TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PQV_b__pqv_b) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Matrix<Scalar, 3, 50>::Random();
+    w                  = Matrix<Scalar, 3, 50>::Random();
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = true;
+    v0_fixed       = true;
+    p1_fixed       = false;
+    q1_fixed       = false;
+    v1_fixed       = false;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+    // printAll(report);
+
+    assertAll();
+
+}
+
+TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PqV_b__pqV_b) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Matrix<Scalar, 3, 50>::Random();
+    w                  = Matrix<Scalar, 3, 50>::Random();
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = false;
+    v0_fixed       = true;
+    p1_fixed       = false;
+    q1_fixed       = false;
+    v1_fixed       = true;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+    // printAll(report);
+
+    assertAll();
+
+}
 
 int main(int argc, char **argv)
 {
@@ -1238,6 +1328,8 @@ int main(int argc, char **argv)
 
     return RUN_ALL_TESTS();
 }
+
+
 
 /* Some notes :
  *
