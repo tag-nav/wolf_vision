@@ -227,8 +227,8 @@ typedef enum
     CTR_AHP,                    ///< Anchored Homogeneous Point constraint
     CTR_AHP_NL,                 ///< Anchored Homogeneous Point constraint (temporal, to be removed)
     CTR_IMU,                    ///< IMU constraint
-    CTR_DIFF_DRIVE              ///< Diff-drive constraint
-
+    CTR_DIFF_DRIVE,             ///< Diff-drive constraint
+    CTR_BEARING_2D              ///< 2D bearing
 } ConstraintType;
 
 /** \brief Enumeration of constraint status
