@@ -269,6 +269,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
     }
 
     // create motion feature and add it to the capture
+//    reintegrateBuffer(new_capture);
     FeatureBasePtr new_feature = emplaceFeature(new_capture);
 
     // create motion constraint and add it to the feature, and constrain to the other capture (origin)
