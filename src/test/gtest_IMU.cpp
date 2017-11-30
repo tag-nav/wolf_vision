@@ -100,6 +100,8 @@ class Process_Constraint_IMU : public testing::Test
             x0          .resize(10);
             D_preint    .resize(10);
             D_corrected .resize(10);
+            x1_optim    .resize(10);
+            x1_optim_imu.resize(10);
 
         }
 
