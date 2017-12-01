@@ -17,18 +17,20 @@ WOLF_PTR_TYPEDEFS(ConstraintRangeBearing);
 
 using namespace Eigen;
 
-class ConstraintRangeBearing : public ConstraintAutodiff<ConstraintRangeBearing, 2, 2, 1, 2>
+class ConstraintRangeBearing : public ConstraintAutodiff<ConstraintRangeBearing, 2, 2, 1, 2, 1, 2>
 {
     public:
         ConstraintRangeBearing(const LandmarkBasePtr& _landmark_other_ptr,
                                const ProcessorBasePtr& _processor_ptr,
                                bool _apply_loss_function, ConstraintStatus _status) :
-                     ConstraintAutodiff<ConstraintBearing, 2, 2, 1, 2>(CTR_BEARING_2D, nullptr, nullptr, nullptr,
-                                                                       _landmark_other_ptr, _processor_ptr,
-                                                                       _apply_loss_function, _status,
-                                                                       getCapturePtr()->getFramePtr()->getPPtr(),
-                                                                       getCapturePtr()->getFramePtr()->getOPtr(),
-                                                                       _landmark_other_ptr->getPPtr())
+                                   ConstraintAutodiff<ConstraintBearing, 2, 2, 1, 2, 1, 2>(CTR_BEARING_2D, nullptr, nullptr, nullptr,
+                                                                                           _landmark_other_ptr, _processor_ptr,
+                                                                                           _apply_loss_function, _status,
+                                                                                           getCapturePtr()->getFramePtr()->getPPtr(),
+                                                                                           getCapturePtr()->getFramePtr()->getOPtr(),
+                                                                                           getCapturePtr()->getSensorPtr()->getPPtr(),
+                                                                                           getCapturePtr()->getSensorPtr()->getOPtr(),
+                                                                                           _landmark_other_ptr->getPPtr())
         {
             //
         }
@@ -39,9 +41,11 @@ class ConstraintRangeBearing : public ConstraintAutodiff<ConstraintRangeBearing,
         }
 
         template<typename T>
-        bool operator ()(const T* const _p1,
-                         const T* const _o1,
-                         const T* const _p2,
+        bool operator ()(const T* const _p_w_r,
+                         const T* const _o_w_r,
+                         const T* const _p_r_s,
+                         const T* const _o_r_s,
+                         const T* const _p,
                          T* _res) const;
 
 };
@@ -52,37 +56,44 @@ namespace wolf
 {
 
 template<typename T>
-inline bool ConstraintRangeBearing::operator ()(const T* const _p1, const T* const _o1,
-                                                                    const T* const _p2, T* _res) const
+inline bool ConstraintRangeBearing::operator ()(const T* const _p_w_r,
+                                                const T* const _o_w_r,
+                                                const T* const _p_r_s,
+                                                const T* const _o_r_s,
+                                                const T* const _p,
+                                                T* _res) const
 {
+    // NOTE: This code here is very verbose
 
-    // 1. produce a transformation matrix to transform from robot frame to world frame
-    Transform<T, 2, Affine> H_w_r = Translation<T,2>(_p1[0], _p1[1]) * Rotation2D<T>(*_o1) ; // Robot frame = robot-to-world transform
     // Map input pointers into meaningful Eigen elements
-    Map<const Matrix<T, 2, 1>>      point_w(_p2);
-    Map<const Matrix<T, 1, 1>>      res(_res);
+    Map<const Matrix<T, 2, 1>>      point_w(_p); // point in world frame
+    Map<const Matrix<T, 1, 1>>      res(_res); // residual
 
-    // 2. Transform world point to robot-referenced point
-    Matrix<T, 2, 1> point_r = H_w_r.inverse() * point_w;
+    // 1. produce transformation matrices to transform from sensor frame to robot frame to world frame
+    Transform<T, 2, Affine> H_w_r = Translation<T,2>(_p_w_r[0], _p_w_r[1]) * Rotation2D<T>(*_o_w_r) ; // Robot  frame = robot-to-world transform
+    Transform<T, 2, Affine> H_r_s = Translation<T,2>(_p_r_s[0], _p_r_s[1]) * Rotation2D<T>(*_o_r_s) ; // Sensor frame = sensor-to-robot transform
 
-    // 3. Get the expected range and bearing of the point
+    // 2. Transform world point to sensor-referenced point
+    Transform<T, 2, 1> H_w_s = H_w_r * H_r_s;
+    Matrix<T, 2, 1> point_s = H_w_s.inverse() * point_w;  // point in sensor frame
+
+    // 3. Get the expected range-and-bearing of the point
     Matrix<T, 2, 1> exp;
-    exp(0)      = sqrt(point_r.squaredNorm());
-    exp(1)      = atan2(point_r(1), point_r(0));
+    exp(0)      = sqrt(point_s.squaredNorm());      // range is norm. This code workaround is because Eigen::v.norm() is problematic with scalar type ceres::Jet
+    exp(1)      = atan2(point_s(1), point_s(0));    // bearing
 
-    // 4. Get the measured range-and-bearing to the point, and its covariance
+    // 4. Get the measured range-and-bearing to the point
     Matrix<T, 2, 1> range_bearing       = getMeasurement().cast<T>();
-    Matrix<T, 2, 2> range_bearing_cov   = getMeasurementCovariance().cast<T>();
 
-    // 5. Get the bearing error by comparing against the bearing measurement
+    // 5. Get the error by comparing the expected against the measurement
     Matrix<T, 2, 1> er(range_bearing - exp);
     if (er(1) < T(-M_PI))
         er(1) += T(2*M_PI);
     else if  (er(1) > T(-M_PI))
         er(1) -= T(2*M_PI);
 
-    // 6. Compute the residual by scaling according to the standard deviation of the bearing part
     res     = getMeasurementSquareRootInformationTransposed().cast<T>() * er;
+    // 6. Compute the residual by weighting the error according to the standard deviation of the bearing part
 
     return true;
 }
