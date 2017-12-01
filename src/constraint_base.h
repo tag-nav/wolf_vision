@@ -98,7 +98,7 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 
         /** \brief Returns a reference to the feature measurement square root information
          **/
-        virtual const Eigen::MatrixXs& getMeasurementSquareRootInformationTransposed() const;
+        virtual const Eigen::MatrixXs& getMeasurementSquareRootInformationUpper() const;
 
         /** \brief Returns a pointer to the feature constrained from
          **/

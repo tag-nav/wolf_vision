@@ -52,6 +52,9 @@ class ConstraintRangeBearing : public ConstraintAutodiff<ConstraintRangeBearing,
 
 } /* namespace wolf */
 
+
+//////////////   IMPLEMENTATION   //////////////////////////////////
+
 namespace wolf
 {
 
@@ -92,8 +95,8 @@ inline bool ConstraintRangeBearing::operator ()(const T* const _p_w_r,
     else if  (er(1) > T(-M_PI))
         er(1) -= T(2*M_PI);
 
-    res     = getMeasurementSquareRootInformationTransposed().cast<T>() * er;
     // 6. Compute the residual by weighting the error according to the standard deviation of the bearing part
+    res     = getMeasurementSquareRootInformationUpper().cast<T>() * er;
 
     return true;
 }

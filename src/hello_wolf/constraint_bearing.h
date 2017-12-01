@@ -49,8 +49,6 @@ class ConstraintBearing : public ConstraintAutodiff<ConstraintBearing, 1, 2, 1, 
 
 ////////////////   IMPLEMENTATION   //////////////////////////////////////////
 
-#include "rotations.h"
-
 namespace wolf
 {
 

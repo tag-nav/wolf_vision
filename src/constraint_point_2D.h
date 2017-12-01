@@ -110,7 +110,7 @@ class ConstraintPoint2D: public ConstraintAutodiff<ConstraintPoint2D, 2,2,1,2,1,
 
     /** \brief Returns a reference to the feature measurement square root information
          **/
-    virtual const Eigen::MatrixXs& getMeasurementSquareRootInformationTransposed() const override
+    virtual const Eigen::MatrixXs& getMeasurementSquareRootInformationUpper() const override
     {
       return measurement_sqrt_information_;
     }
@@ -139,7 +139,7 @@ inline bool ConstraintPoint2D::operator ()(const T* const _robotP, const T* cons
     Eigen::Matrix<T,2,1> expected_measurement_position = inverse_R_sensor * (inverse_R_robot * (landmark_point - robot_position_map) - sensor_position);
 
     // Residuals
-    residuals_map = getMeasurementSquareRootInformationTransposed().cast<T>() * (expected_measurement_position - getMeasurement().head<2>().cast<T>());
+    residuals_map = getMeasurementSquareRootInformationUpper().cast<T>() * (expected_measurement_position - getMeasurement().head<2>().cast<T>());
 
 	//std::cout << "residuals_map" << residuals_map[0] << std::endl;
     return true;

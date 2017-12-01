@@ -216,7 +216,7 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p_current, const
     residuals.head(3) = dp_m - dp; // being a residual, rotating it has no implications, so we skip the product by dq.conj
     residuals.tail(3) = q2v(dq.conjugate() * dq_m);
 
-    residuals = getMeasurementSquareRootInformationTransposed().cast<T>() * residuals;
+    residuals = getMeasurementSquareRootInformationUpper().cast<T>() * residuals;
 
     //Eigen::Matrix<T,6,1> r = residuals;
 

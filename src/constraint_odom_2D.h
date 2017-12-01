@@ -78,7 +78,7 @@ inline bool ConstraintOdom2D::operator ()(const T* const _p1, const T* const _o1
         er(2) +=   T( 2 * M_PI );
 
     // Residuals
-    res = getMeasurementSquareRootInformationTransposed().cast<T>() * er;
+    res = getMeasurementSquareRootInformationUpper().cast<T>() * er;
 
 
     ////////////////////////////////////////////////////////
@@ -95,7 +95,7 @@ inline bool ConstraintOdom2D::operator ()(const T* const _p1, const T* const _o1
 //    {
 //        std::cout << "ConstraintOdom2D::Jacobian(c" << id() << ") = \n " << J << std::endl;
 //        std::cout << "ConstraintOdom2D::Weighted Jacobian(c" << id() << ") = \n " << J << std::endl;
-//        std::cout << "ConstraintOdom2D::Sqrt Info(c" << id() << ") = \n" << getMeasurementSquareRootInformationTransposed() << std::endl;
+//        std::cout << "ConstraintOdom2D::Sqrt Info(c" << id() << ") = \n" << getMeasurementSquareRootInformationUpper() << std::endl;
 //    }
     ////////////////////////////////////////////////////////
 

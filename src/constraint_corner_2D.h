@@ -87,7 +87,7 @@ inline bool ConstraintCorner2D::operator ()(const T* const _robotP, const T* con
         _residuals[2] = _residuals[2] + T(2*M_PI);
 
     // Residuals
-    residuals_map = getMeasurementSquareRootInformationTransposed().topLeftCorner<3,3>().cast<T>() * residuals_map;
+    residuals_map = getMeasurementSquareRootInformationUpper().topLeftCorner<3,3>().cast<T>() * residuals_map;
 
     //std::cout << "\nCONSTRAINT: " << id() << std::endl;
     //std::cout << "Feature: " << getFeaturePtr()->id() << std::endl;

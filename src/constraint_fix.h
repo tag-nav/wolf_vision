@@ -76,7 +76,7 @@ inline bool ConstraintFix::operator ()(const T* const _p, const T* const _o, T* 
 //    {
 //        std::cout << "ConstraintFix::Jacobian(c" << id() << ") = \n " << J << std::endl;
 //        std::cout << "ConstraintFix::Weighted Jacobian(c" << id() << ") = \n " << J << std::endl;
-//        std::cout << "Sqrt Info(c" << id() << ") = \n " << getMeasurementSquareRootInformationTransposed() << std::endl;
+//        std::cout << "Sqrt Info(c" << id() << ") = \n " << getMeasurementSquareRootInformationUpper() << std::endl;
 //    }
     ////////////////////////////////////////////////////////
 

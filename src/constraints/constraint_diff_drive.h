@@ -129,7 +129,7 @@ ConstraintDiffDrive::operator ()(const T* const _p1, const T* const _o1, const T
     residuals_map(2) = residuals_map(2) + T(2. * M_PI);
 
   // weighted residual
-  residuals_map = getMeasurementSquareRootInformationTransposed().cast<T>() * residuals_map;
+  residuals_map = getMeasurementSquareRootInformationUpper().cast<T>() * residuals_map;
 
   return true;
 }
