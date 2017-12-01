@@ -16,7 +16,8 @@ WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsRangeBearing);
 
 struct IntrinsicsRangeBearing : public IntrinsicsBase
 {
-        Scalar noise_range_metres_std, noise_bearing_degrees_std;
+        Scalar noise_range_metres_std       = 0.05;
+        Scalar noise_bearing_degrees_std    = 0.5;
 };
 
 
@@ -26,10 +27,10 @@ WOLF_PTR_TYPEDEFS(SensorRangeBearing)
 class SensorRangeBearing : public SensorBase
 {
     public:
-        SensorRangeBearing(const Eigen::VectorXs& _extrinsics, const Eigen::VectorXs& _intrinsics);
+        SensorRangeBearing(const Eigen::VectorXs& _extrinsics, const Eigen::Vector2s& _noise_std);
         virtual ~SensorRangeBearing();
         SensorBasePtr create(const std::string& _unique_name, //
-                             const Eigen::VectorXs& _extrinsics_pq, //
+                             const Eigen::VectorXs& _extrinsics, //
                              const IntrinsicsBasePtr _intrinsics);
 };
 

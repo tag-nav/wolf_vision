@@ -13,7 +13,6 @@
 namespace wolf
 {
 
-}
 class FeatureRangeBearing : public wolf::FeatureBase
 {
     public:

@@ -10,7 +10,7 @@
 namespace wolf
 {
 
-ProcessorRangeBearing::ProcessorRangeBearing(const Scalar& _time_tolerance = 0) :
+ProcessorRangeBearing::ProcessorRangeBearing(const SensorRangeBearingPtr _sensor_ptr, const Scalar& _time_tolerance) :
         ProcessorBase("RANGE BEARING", _time_tolerance)
 {
     //
@@ -21,16 +21,22 @@ ProcessorRangeBearing::~ProcessorRangeBearing()
     //
 }
 
-ProcessorBasePtr ProcessorRangeBearing::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
+void ProcessorRangeBearing::process(CaptureBasePtr _capture)
 {
+    // TODO implement some processing to be applied to _capture
+}
+
+ProcessorBasePtr ProcessorRangeBearing::create(const std::string& _unique_name, const ProcessorParamsRangeBearingPtr _params, const SensorBasePtr _sen_ptr)
+{
+    SensorRangeBearingPtr sensor_rb = std::static_pointer_cast<SensorRangeBearing>(_sen_ptr);
 
     // construct processor
-    ProcessorOdom3DPtr prc_odo = std::make_shared<ProcessorOdom3D>(prc_odo_params, sen_odo);
+    ProcessorRangeBearingPtr prc = std::make_shared<ProcessorRangeBearing>(sensor_rb, _params->time_tolerance);
 
     // setup processor
-    prc_odo->setName(_unique_name);
+    prc->setName(_unique_name);
 
-    return prc_odo;
+    return prc;
 }
 
 

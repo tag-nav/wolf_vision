@@ -448,6 +448,9 @@ ADD_SUBDIRECTORY(processors)
 # Add the sensor sub-directory
 ADD_SUBDIRECTORY(sensors)
 
+# Add the hello_wolf sub-directory
+ADD_SUBDIRECTORY(hello_wolf)
+
 IF (cereal_FOUND)
   ADD_SUBDIRECTORY(serialization/cereal)
 ENDIF(cereal_FOUND)

@@ -14,17 +14,33 @@
 namespace wolf
 {
 
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsRangeBearing);
+
+struct ProcessorParamsRangeBearing : public ProcessorParamsBase
+{
+
+};
+
+
+
 WOLF_PTR_TYPEDEFS(ProcessorRangeBearing);
 
 class ProcessorRangeBearing : public ProcessorBase
 {
     public:
-        ProcessorRangeBearing(const SensorRangeBearingPtr sensor_ptr, const Scalar& _time_tolerance = 0);
+        ProcessorRangeBearing(const SensorRangeBearingPtr _sensor_ptr, const Scalar& _time_tolerance = 0);
         virtual ~ProcessorRangeBearing();
 
+        // Implementation of pure virtuals from ProcessorBase
+        virtual void process(CaptureBasePtr _capture) override;
+        virtual bool voteForKeyFrame() override {return false;}
+        virtual bool keyFrameCallback(FrameBasePtr _key_frame, const Scalar& _time_tolerance) override {return true;}
+
+        // Factory method for high level API
         ProcessorBasePtr create(const std::string& _unique_name,
-                                const ProcessorParamsBasePtr _params,
+                                const ProcessorParamsRangeBearingPtr _params,
                                 const SensorBasePtr sensor_ptr = nullptr);
+
 };
 
 } /* namespace wolf */
