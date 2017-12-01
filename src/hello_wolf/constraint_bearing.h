@@ -9,7 +9,6 @@
 #define HELLO_WOLF_CONSTRAINT_BEARING_H_
 
 #include "constraint_autodiff.h"
-#include "rotations.h"
 
 namespace wolf
 {
@@ -21,9 +20,21 @@ class ConstraintBearing : public ConstraintAutodiff<ConstraintBearing, 1, 2, 1, 
     public:
         ConstraintBearing(const LandmarkBasePtr& _landmark_other_ptr,
                           const ProcessorBasePtr& _processor_ptr,
-                          bool _apply_loss_function,
-                          ConstraintStatus _status);
-        virtual ~ConstraintBearing();
+                          bool _apply_loss_function, ConstraintStatus _status) :
+                ConstraintAutodiff<ConstraintBearing, 1, 2, 1, 2>(CTR_BEARING_2D, nullptr, nullptr, nullptr,
+                                                                  _landmark_other_ptr, _processor_ptr,
+                                                                  _apply_loss_function, _status,
+                                                                  getCapturePtr()->getFramePtr()->getPPtr(),
+                                                                  getCapturePtr()->getFramePtr()->getOPtr(),
+                                                                  _landmark_other_ptr->getPPtr())
+        {
+            //
+        }
+
+        virtual ~ConstraintBearing()
+        {
+            //
+        }
 
         template<typename T>
         bool operator ()(const T* const _p1,
@@ -35,8 +46,16 @@ class ConstraintBearing : public ConstraintAutodiff<ConstraintBearing, 1, 2, 1, 
 
 } /* namespace wolf */
 
+
+////////////////   IMPLEMENTATION   //////////////////////////////////////////
+
+#include "rotations.h"
+
+namespace wolf
+{
+
 template<typename T>
-inline bool wolf::ConstraintBearing::ConstraintBearing::operator ()(const T* const _p1, const T* const _o1,
+inline bool ConstraintBearing::operator ()(const T* const _p1, const T* const _o1,
                                                                     const T* const _p2, T* _res) const
 {
 
@@ -69,5 +88,7 @@ inline bool wolf::ConstraintBearing::ConstraintBearing::operator ()(const T* con
 
     return true;
 }
+
+} // namespace wolf
 
 #endif /* HELLO_WOLF_CONSTRAINT_BEARING_H_ */
