@@ -5,19 +5,19 @@
  *      Author: jsola
  */
 
-#include "FeatureRangeBearing2D.h"
+#include "feature_range_bearing.h"
 
 namespace wolf
 {
 
-FeatureRangeBearing2D::FeatureRangeBearing2D(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
+FeatureRangeBearing::FeatureRangeBearing(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance) :
         FeatureBase("RANGE BEARING 2D", _measurement, _meas_covariance)
 {
     //
 }
 
 
-FeatureRangeBearing2D::~FeatureRangeBearing2D()
+FeatureRangeBearing::~FeatureRangeBearing()
 {
     // TODO Auto-generated destructor stub
 }

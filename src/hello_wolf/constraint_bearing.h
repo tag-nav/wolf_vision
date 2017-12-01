@@ -5,8 +5,8 @@
  *      Author: jsola
  */
 
-#ifndef HELLO_WOLF_CONSTRAINTBEARING_H_
-#define HELLO_WOLF_CONSTRAINTBEARING_H_
+#ifndef HELLO_WOLF_CONSTRAINT_BEARING_H_
+#define HELLO_WOLF_CONSTRAINT_BEARING_H_
 
 #include "constraint_autodiff.h"
 
@@ -65,4 +65,4 @@ inline bool wolf::ConstraintBearing::ConstraintBearing::operator ()(const T* con
     res     = err / sqrt(range_bearing_cov(1,1));
 }
 
-#endif /* HELLO_WOLF_CONSTRAINTBEARING_H_ */
+#endif /* HELLO_WOLF_CONSTRAINT_BEARING_H_ */

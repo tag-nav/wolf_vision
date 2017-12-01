@@ -5,7 +5,7 @@
  *      Author: jsola
  */
 
-#include "ConstraintBearing.h"
+#include "constraint_bearing.h"
 
 namespace wolf
 {
