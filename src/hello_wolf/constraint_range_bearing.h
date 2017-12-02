@@ -37,7 +37,7 @@ class ConstraintRangeBearing : public ConstraintAutodiff<ConstraintRangeBearing,
 
         virtual ~ConstraintRangeBearing()
         {
-            // TODO Auto-generated destructor stub
+            //
         }
 
         template<typename T>

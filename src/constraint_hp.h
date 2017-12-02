@@ -22,7 +22,7 @@ class ConstraintHP : public ConstraintSparse<2, 3, 4, 4>
         }
         virtual ~ConstraintHP()
         {
-            // TODO Auto-generated destructor stub
+            //
         }
 };
 

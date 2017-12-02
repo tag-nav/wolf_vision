@@ -13,13 +13,13 @@ namespace wolf
 CaptureRangeBearing::CaptureRangeBearing(const TimeStamp& _ts, const SensorBasePtr& _scanner, const Eigen::VectorXs& _ranges, unsigned int _num_points, Scalar _d_angle) :
         CaptureBase("RANGE BEARING", _ts, _scanner)
 {
-    // TODO Auto-generated constructor stub
+    //
 
 }
 
 CaptureRangeBearing::~CaptureRangeBearing()
 {
-    // TODO Auto-generated destructor stub
+    //
 }
 
 } /* namespace wolf */

@@ -30,12 +30,12 @@ class LocalParametrizationAngle : public LocalParametrizationBase
 inline LocalParametrizationAngle::LocalParametrizationAngle() :
         LocalParametrizationBase(1,1)
 {
-    // TODO Auto-generated constructor stub
+    //
 }
 
 inline LocalParametrizationAngle::~LocalParametrizationAngle()
 {
-    // TODO Auto-generated destructor stub
+    //
 }
 
 inline bool LocalParametrizationAngle::plus(const Eigen::Map<const Eigen::VectorXs>& _h,

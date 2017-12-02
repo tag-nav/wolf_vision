@@ -19,7 +19,7 @@ FeatureRangeBearing::FeatureRangeBearing(const Eigen::VectorXs& _measurement, co
 
 FeatureRangeBearing::~FeatureRangeBearing()
 {
-    // TODO Auto-generated destructor stub
+    //
 }
 
 } // namespace wolf
