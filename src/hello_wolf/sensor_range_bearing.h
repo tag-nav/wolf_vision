@@ -29,9 +29,11 @@ class SensorRangeBearing : public SensorBase
     public:
         SensorRangeBearing(const Eigen::VectorXs& _extrinsics, const Eigen::Vector2s& _noise_std);
         virtual ~SensorRangeBearing();
-        SensorBasePtr create(const std::string& _unique_name, //
-                             const Eigen::VectorXs& _extrinsics, //
-                             const IntrinsicsBasePtr _intrinsics);
+
+        // Factory method for high level API
+        static SensorBasePtr create(const std::string& _unique_name, //
+                                    const Eigen::VectorXs& _extrinsics, //
+                                    const IntrinsicsBasePtr _intrinsics);
 };
 
 } /* namespace wolf */

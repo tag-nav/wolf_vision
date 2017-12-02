@@ -26,7 +26,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
     // TODO implement some processing to be applied to _capture
 }
 
-ProcessorBasePtr ProcessorRangeBearing::create(const std::string& _unique_name, const ProcessorParamsRangeBearingPtr _params, const SensorBasePtr _sen_ptr)
+ProcessorBasePtr ProcessorRangeBearing::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
     SensorRangeBearingPtr sensor_rb = std::static_pointer_cast<SensorRangeBearing>(_sen_ptr);
 
@@ -41,3 +41,12 @@ ProcessorBasePtr ProcessorRangeBearing::create(const std::string& _unique_name, 
 
 
 } /* namespace wolf */
+
+
+// Register in the SensorFactory
+#include "processor_factory.h"
+namespace wolf
+{
+WOLF_REGISTER_PROCESSOR("RANGE BEARING", ProcessorRangeBearing)
+} // namespace wolf
+

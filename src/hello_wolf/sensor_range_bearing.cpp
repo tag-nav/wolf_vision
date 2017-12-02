@@ -46,11 +46,11 @@ SensorBasePtr SensorRangeBearing::create(const std::string& _unique_name, //
 } /* namespace wolf */
 
 
-//// Register in the SensorFactory
-//#include "sensor_factory.h"
-//namespace wolf
-//{
-//WOLF_REGISTER_SENSOR("RANGE BEARING", SensorRangeBearing)
-//} // namespace wolf
+// Register in the SensorFactory
+#include "sensor_factory.h"
+namespace wolf
+{
+WOLF_REGISTER_SENSOR("RANGE BEARING", SensorRangeBearing)
+} // namespace wolf
 
 

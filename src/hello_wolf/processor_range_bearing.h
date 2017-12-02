@@ -37,9 +37,9 @@ class ProcessorRangeBearing : public ProcessorBase
         virtual bool keyFrameCallback(FrameBasePtr _key_frame, const Scalar& _time_tolerance) override {return true;}
 
         // Factory method for high level API
-        ProcessorBasePtr create(const std::string& _unique_name,
-                                const ProcessorParamsRangeBearingPtr _params,
-                                const SensorBasePtr sensor_ptr = nullptr);
+        static ProcessorBasePtr create(const std::string& _unique_name,
+                                       const ProcessorParamsBasePtr _params,
+                                       const SensorBasePtr sensor_ptr = nullptr);
 
 };
 
