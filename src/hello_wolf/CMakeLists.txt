@@ -15,5 +15,6 @@ SET(SRCS_PROCESSOR ${SRCS_PROCESSOR}
     ${CMAKE_CURRENT_SOURCE_DIR}/sensor_range_bearing.cpp 		
     ${CMAKE_CURRENT_SOURCE_DIR}/processor_range_bearing.cpp 	
     ${CMAKE_CURRENT_SOURCE_DIR}/capture_range_bearing.cpp 	
-    ${CMAKE_CURRENT_SOURCE_DIR}/feature_range_bearing.cpp 	PARENT_SCOPE
+    ${CMAKE_CURRENT_SOURCE_DIR}/feature_range_bearing.cpp 	
+    ${CMAKE_CURRENT_SOURCE_DIR}/hello_wolf.cpp            	PARENT_SCOPE
     )

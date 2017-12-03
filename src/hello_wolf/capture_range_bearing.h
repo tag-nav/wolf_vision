@@ -13,6 +13,8 @@
 namespace wolf
 {
 
+WOLF_PTR_TYPEDEFS(CaptureRangeBearing)
+
 using namespace Eigen;
 
 class CaptureRangeBearing : public CaptureBase

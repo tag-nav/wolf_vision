@@ -6,6 +6,7 @@
  */
 
 #include "processor_range_bearing.h"
+#include "capture_range_bearing.h"
 
 namespace wolf
 {
@@ -23,7 +24,14 @@ ProcessorRangeBearing::~ProcessorRangeBearing()
 
 void ProcessorRangeBearing::process(CaptureBasePtr _capture)
 {
-    // TODO implement some processing to be applied to _capture
+    CaptureRangeBearingPtr capture = std::static_pointer_cast<CaptureRangeBearing>(_capture);
+    Size n = capture->getRanges().size();
+
+    for (Size i = 0; i < n; i++)
+    {
+        Scalar range    = capture->getRange  (i);
+        Scalar bearing  = capture->getBearing(i);
+    }
 }
 
 ProcessorBasePtr ProcessorRangeBearing::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
