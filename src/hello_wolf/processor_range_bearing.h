@@ -12,7 +12,7 @@
 #include "sensor_range_bearing.h"
 #include "Eigen/Geometry"
 
-#include <set>
+#include <map>
 
 namespace wolf
 {
@@ -33,8 +33,8 @@ class ProcessorRangeBearing : public ProcessorBase
     public:
         typedef Eigen::Transform<Scalar, 2, Eigen::Affine> Trf;
 
-        ProcessorRangeBearing(const SensorRangeBearingPtr _sensor_ptr, const Vector3s& _pose0, const Vector3s& _delta, const Scalar& _time_tolerance = 0);
-        virtual ~ProcessorRangeBearing();
+        ProcessorRangeBearing(const SensorRangeBearingPtr _sensor_ptr, const Scalar& _time_tolerance = 0);
+        virtual ~ProcessorRangeBearing() {/* empty */}
 
         // Implementation of pure virtuals from ProcessorBase
         virtual void process(CaptureBasePtr _capture) override;
@@ -52,13 +52,12 @@ class ProcessorRangeBearing : public ProcessorBase
 
     private:
         // control variables
-        Size step_number;
-        Trf H_w_r, H_r_s, H_delta; // transformation matrices, world to robot, to sensor, and motion delta
-        std::set<int> lmk_ids; // ids of all observed lmks so far
+        Trf H_r_s; // transformation matrix, robot to sensor
+        std::map<int, LandmarkBasePtr> lmk_ids; // ids of all observed lmks so far
 
         // helper methods
-        Trf transform(const Eigen::Vector3s& _pose);
-        Trf transform(const Eigen::Vector2s& _position, const Eigen::Vector1s& _orientation);
+        Trf transform(const Eigen::Vector3s& _pose) const;
+        Trf transform(const Eigen::Vector2s& _position, const Eigen::Vector1s& _orientation) const;
         Eigen::Vector2s fromSensor(const Eigen::Vector2s& lmk_s) const;
         Eigen::Vector2s   toSensor(const Eigen::Vector2s& lmk_w) const;
         Eigen::Vector2s polar(const Eigen::Vector2s& rect) const;

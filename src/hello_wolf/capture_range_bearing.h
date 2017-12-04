@@ -20,16 +20,16 @@ using namespace Eigen;
 class CaptureRangeBearing : public CaptureBase
 {
     public:
-        CaptureRangeBearing(const TimeStamp& _ts, const SensorBasePtr& _scanner, const Eigen::VectorXs& _ranges, unsigned int _num_points = 271, Scalar _d_angle = 1.0);
+        CaptureRangeBearing(const TimeStamp& _ts, const SensorBasePtr& _scanner, const Eigen::VectorXi& _ids, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _bearings);
         virtual ~CaptureRangeBearing();
 
-        const VectorXi& getIds() const;
-        const int& getId(int _i) const;
-        const Eigen::VectorXs& getRanges() const;
-        const Eigen::VectorXs& getBearings() const;
-        const wolf::Scalar& getRange(int _i) const;
-        const wolf::Scalar& getBearing(int _i) const;
-        Eigen::Vector2s getRangeBearing(int _i) const;
+        const VectorXi&         getIds          ()          const;
+        const int&              getId           (int _i)    const;
+        const Eigen::VectorXs&  getRanges       ()          const;
+        const Eigen::VectorXs&  getBearings     ()          const;
+        const wolf::Scalar&     getRange        (int _i)    const;
+        const wolf::Scalar&     getBearing      (int _i)    const;
+        Eigen::Vector2s         getRangeBearing (int _i)    const;
         Eigen::Matrix<double, Dynamic, 2> getRangeBearing() const;
 
     private:

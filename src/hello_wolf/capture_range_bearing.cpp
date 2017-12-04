@@ -10,11 +10,13 @@
 namespace wolf
 {
 
-CaptureRangeBearing::CaptureRangeBearing(const TimeStamp& _ts, const SensorBasePtr& _scanner, const Eigen::VectorXs& _ranges, unsigned int _num_points, Scalar _d_angle) :
-        CaptureBase("RANGE BEARING", _ts, _scanner)
+CaptureRangeBearing::CaptureRangeBearing(const TimeStamp& _ts, const SensorBasePtr& _scanner, const Eigen::VectorXi& _ids, const Eigen::VectorXs& _ranges, const Eigen::VectorXs& _bearings) :
+        CaptureBase("RANGE BEARING", _ts, _scanner),
+        ids_(_ids),
+        ranges_(_ranges),
+        bearings_(_bearings)
 {
     //
-
 }
 
 CaptureRangeBearing::~CaptureRangeBearing()
