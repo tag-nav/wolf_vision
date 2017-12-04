@@ -126,7 +126,7 @@ TEST(Problem, SetOrigin_PO_2D)
 
     // check that the Feature measurement and covariance are the ones provided
     ASSERT_TRUE((x0 - f->getMeasurement()).isMuchSmallerThan(1, Constants::EPS_SMALL));
-    ASSERT_TRUE((P0 - f->getMeasurementCovariance()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((P0 - f->getMeasurementCovariance()).isMuchSmallerThan(1, 1e-9));
 
     //    P->print(4,1,1,1);
 }
@@ -165,7 +165,7 @@ TEST(Problem, SetOrigin_PO_3D)
 
     // check that the Feature measurement and covariance are the ones provided
     ASSERT_TRUE((x0 - f->getMeasurement()).isMuchSmallerThan(1, Constants::EPS_SMALL));
-    ASSERT_TRUE((P0 - f->getMeasurementCovariance()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_TRUE((P0 - f->getMeasurementCovariance()).isMuchSmallerThan(1, 1e-9));
 
     //    P->print(4,1,1,1);
 }
