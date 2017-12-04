@@ -20,19 +20,21 @@ using namespace Eigen;
 class ConstraintRangeBearing : public ConstraintAutodiff<ConstraintRangeBearing, 2, 2, 1, 2, 1, 2>
 {
     public:
-        ConstraintRangeBearing(const LandmarkBasePtr& _landmark_other_ptr,
+        ConstraintRangeBearing(const CaptureBasePtr& _capture_own,
+                               const LandmarkBasePtr& _landmark_other_ptr,
                                const ProcessorBasePtr& _processor_ptr,
                                bool _apply_loss_function,
                                ConstraintStatus _status) :
                     ConstraintAutodiff<ConstraintRangeBearing, 2, 2, 1, 2, 1, 2>(CTR_BEARING_2D, nullptr, nullptr, nullptr,
                                                                                  _landmark_other_ptr, _processor_ptr,
                                                                                  _apply_loss_function, _status,
-                                                                                 getCapturePtr()->getFramePtr()->getPPtr(),
-                                                                                 getCapturePtr()->getFramePtr()->getOPtr(),
-                                                                                 getCapturePtr()->getSensorPtr()->getPPtr(),
-                                                                                 getCapturePtr()->getSensorPtr()->getOPtr(),
+                                                                                 _capture_own->getFramePtr()->getPPtr(),
+                                                                                 _capture_own->getFramePtr()->getOPtr(),
+                                                                                 _capture_own->getSensorPtr()->getPPtr(),
+                                                                                 _capture_own->getSensorPtr()->getOPtr(),
                                                                                  _landmark_other_ptr->getPPtr())
         {
+            setType("RANGE BEARING");
             //
         }
 
@@ -82,22 +84,28 @@ inline bool ConstraintRangeBearing::operator ()(const T* const _p_w_r,
     Matrix<T, 2, 1> lmk_s = H_w_s.inverse() * lmk;  // point in sensor frame
 
     // 3. Get the expected range-and-bearing of the point
-    Matrix<T, 2, 1> exp;
-    exp(0)      = sqrt(lmk_s.squaredNorm());        // range is norm. This code workaround is because Eigen::v.norm() is problematic with scalar type ceres::Jet
-    exp(1)      = atan2(lmk_s(1), lmk_s(0));        // bearing
+    Matrix<T, 2, 1> exp_rb;
+    exp_rb(0)      = sqrt(lmk_s.squaredNorm());        // range is norm. This code workaround is because Eigen::v.norm() is problematic with scalar type ceres::Jet
+    exp_rb(1)      = atan2(lmk_s(1), lmk_s(0));        // bearing
+//    WOLF_TRACE("exp  r: ", exp_rb(0));
+//    WOLF_TRACE("exp  b: ", exp_rb(1));
 
     // 4. Get the measured range-and-bearing to the point
-    Matrix<T, 2, 1> range_bearing       = getMeasurement().cast<T>();
+    Matrix<T, 2, 1> meas_rb       = getMeasurement().cast<T>();
+//    WOLF_TRACE("meas r: ", getMeasurement()(0));
+//    WOLF_TRACE("meas b: ", getMeasurement()(1));
 
     // 5. Get the error by comparing the expected against the measurement
-    Matrix<T, 2, 1> er(range_bearing - exp);
-    if (er(1) < T(-M_PI))
-        er(1) += T(2*M_PI);
-    else if  (er(1) > T(-M_PI))
-        er(1) -= T(2*M_PI);
+    Matrix<T, 2, 1> err_rb(meas_rb - exp_rb);
+    while (err_rb(1) < T(-M_PI))
+        err_rb(1) += T(2*M_PI);
+    while (err_rb(1) > T(M_PI))
+        err_rb(1) -= T(2*M_PI);
+//    WOLF_TRACE("err  r: ", err_rb(0));
+//    WOLF_TRACE("err  b: ", err_rb(1));
 
     // 6. Compute the residual by weighting the error according to the standard deviation of the bearing part
-    res     = getMeasurementSquareRootInformationUpper().cast<T>() * er;
+    res     = getMeasurementSquareRootInformationUpper().cast<T>() * err_rb;
 
     return true;
 }

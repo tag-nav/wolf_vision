@@ -28,6 +28,7 @@ class ConstraintBearing : public ConstraintAutodiff<ConstraintBearing, 1, 2, 1, 
                                                                   getCapturePtr()->getFramePtr()->getOPtr(),
                                                                   _landmark_other_ptr->getPPtr())
         {
+            setType("BEARING");
             //
         }
 

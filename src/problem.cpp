@@ -699,10 +699,10 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     }
                     else
                     {
-                        try
+                        cout << "    pt" << p->id() << " " << p->getType() << endl;
+                        ProcessorTrackerPtr pt = std::dynamic_pointer_cast<ProcessorTracker>(p);
+                        if (pt)
                         {
-                            cout << "    pt" << p->id() << " " << p->getType() << endl;
-                            ProcessorTrackerPtr pt = std::static_pointer_cast<ProcessorTracker>(p);
                             if (pt->getOriginPtr())
                                 cout << "      o: C" << pt->getOriginPtr()->id() << " - F"
                                 << pt->getOriginPtr()->getFramePtr()->id() << endl;
@@ -712,11 +712,6 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                             if (pt->getIncomingPtr())
                                 cout << "      i: C" << pt->getIncomingPtr()->id() << endl;
                         }
-                        catch (std::runtime_error& e)
-                        {
-                            cout << "Unknown processor type!" << endl;
-                        }
-
                     }
                 } // for p
             }
@@ -867,6 +862,12 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     cout << "c" << cby->id() << " \t";
             }
             cout << endl;
+            if (metric)
+            {
+                cout << (L->isFixed() ? "    Fix" : "    Est");
+                cout << ",\t x = ( " << std::setprecision(2) << L->getState().transpose() << ")";
+                cout << endl;
+            }
             if (state_blocks)
             {
                 cout << "    sb:";

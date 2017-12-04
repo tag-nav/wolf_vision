@@ -15,8 +15,8 @@ WOLF_PTR_TYPEDEFS(SensorRangeBearing);
 
 SensorRangeBearing::SensorRangeBearing(const Eigen::VectorXs& _extrinsics, const Eigen::Vector2s& _noise_std) :
         SensorBase("RANGE BEARING",
-                   std::make_shared<StateBlock>(_extrinsics.head<2>()),
-                   std::make_shared<StateAngle>(_extrinsics(2)),
+                   std::make_shared<StateBlock>(_extrinsics.head<2>(), true),
+                   std::make_shared<StateAngle>(_extrinsics(2), true),
                    nullptr,
                    _noise_std)
 {

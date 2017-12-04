@@ -24,12 +24,13 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
 {
     CaptureRangeBearingPtr capture = std::static_pointer_cast<CaptureRangeBearing>(_capture);
 
-    // 1. create KF
-    VectorXs    x(3);
-    TimeStamp   ts;
-    getProblem()->getCurrentStateAndStamp(x, ts);
-    FrameBasePtr kf = getProblem()->emplaceFrame(KEY_FRAME, x, ts);
-    getProblem()->keyFrameCallback(kf, shared_from_this(), 0.1);
+//    // 1. create KF
+//    VectorXs    x(3);
+//    TimeStamp   ts;
+//    getProblem()->getCurrentStateAndStamp(x, ts);
+//    FrameBasePtr kf = getProblem()->emplaceFrame(KEY_FRAME, x, ts);
+//    getProblem()->keyFrameCallback(kf, shared_from_this(), 0.1);
+    FrameBasePtr kf = getProblem()->getLastKeyFramePtr();
 
     // 2. create Capture
     CaptureRangeBearingPtr cap = std::make_shared<CaptureRangeBearing>(capture->getTimeStamp(),
@@ -37,6 +38,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
                                                                        capture->getIds(),
                                                                        capture->getRanges(),
                                                                        capture->getBearings());
+    kf->addCapture(cap);
 
     // 3. explore all observations in the capture
     for (Size i = 0; i < capture->getIds().size(); i++)
@@ -55,6 +57,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
             // new landmark:
             // - create landmark
             lmk = std::make_shared<LandmarkPoint2D>(id, invObserve(range, bearing));
+            WOLF_TRACE("new   lmk(", id, "): ", lmk->getPPtr()->getState().transpose());
             getProblem()->getMapPtr()->addLandmark(lmk);
             // - add to known landmarks
             lmk_ids.emplace(id, lmk);
@@ -63,6 +66,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
         {
             // known landmarks : recover landmark
             lmk = std::static_pointer_cast<LandmarkPoint2D>(it->second);
+            WOLF_TRACE("known lmk(", id, "): ", lmk->getPPtr()->getState().transpose());
         }
 
         // 5. create feature
@@ -72,8 +76,10 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
         cap->addFeature(ftr);
 
         // 6. create constraint
-        ConstraintRangeBearingPtr ctr = std::make_shared<ConstraintRangeBearing>(lmk,
-                                                                                 shared_from_this(),
+        ProcessorBasePtr prc = shared_from_this();
+        ConstraintRangeBearingPtr ctr = std::make_shared<ConstraintRangeBearing>(cap,
+                                                                                 lmk,
+                                                                                 prc,
                                                                                  false,
                                                                                  CTR_ACTIVE);
         ftr->addConstraint(ctr);
@@ -114,15 +120,17 @@ ProcessorRangeBearing::Trf ProcessorRangeBearing::transform(const Eigen::Vector3
 
 Eigen::Vector2s ProcessorRangeBearing::fromSensor(const Eigen::Vector2s& lmk_s) const
 {
-    Eigen::Vector2s pos_s = getSensorPtr()->getPPtr()->getState();
-    Eigen::Vector1s ori_s = getSensorPtr()->getOPtr()->getState();
-    Trf H_w_r = transform(pos_s, ori_s);
+//    Eigen::Vector2s pos_s = getSensorPtr()->getPPtr()->getState();
+//    Eigen::Vector1s ori_s = getSensorPtr()->getOPtr()->getState();
+//    Trf H_w_r = transform(pos_s, ori_s);
+    Trf H_w_r = transform(getProblem()->getCurrentState());
     return H_w_r * H_r_s * lmk_s;
 }
 
 Eigen::Vector2s ProcessorRangeBearing::toSensor(const Eigen::Vector2s& lmk_w) const
 {
-    Trf H_w_r = transform(getSensorPtr()->getPPtr()->getState(), getSensorPtr()->getOPtr()->getState());
+//    Trf H_w_r = transform(getSensorPtr()->getPPtr()->getState(), getSensorPtr()->getOPtr()->getState());
+    Trf H_w_r = transform(getProblem()->getCurrentState());
     return (H_w_r * H_r_s).inverse() * lmk_w;
 }
 
@@ -132,6 +140,11 @@ Eigen::Vector2s ProcessorRangeBearing::polar(const Eigen::Vector2s& rect) const
     polar(0) = rect.norm();
     polar(1) = atan2(rect(1), rect(0));
     return polar;
+}
+
+bool ProcessorRangeBearing::keyFrameCallback(FrameBasePtr _key_frame, const Scalar& _time_tolerance)
+{
+    return true;
 }
 
 Eigen::Vector2s ProcessorRangeBearing::rect(Scalar range, Scalar bearing) const

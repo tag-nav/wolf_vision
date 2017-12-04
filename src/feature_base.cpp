@@ -79,9 +79,9 @@ void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 {
-    assert(_meas_cov.determinant() > 0 && "Not positive definite measurement covariance");
+    Eigen::MatrixXs eps = Eigen::MatrixXs::Identity(_meas_cov.rows(), _meas_cov.cols()) * 1e-10;
 
-    measurement_covariance_ = _meas_cov;
+    measurement_covariance_ = _meas_cov + eps; // avoid singular covariance
 	measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_cov);
 }
 
