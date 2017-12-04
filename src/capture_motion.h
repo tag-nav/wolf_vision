@@ -48,25 +48,50 @@ class CaptureMotion : public CaptureBase
     public:
         CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr,
                       const Eigen::VectorXs& _data,
-                      Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size,
-                      FrameBasePtr _origin_frame_ptr = nullptr);
+                      Size _delta_size,
+                      Size _delta_cov_size,
+                      FrameBasePtr _origin_frame_ptr);
 
         CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr,
                       const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov,
-                      Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size,
-                      FrameBasePtr _origin_frame_ptr = nullptr);
+                      Size _delta_size,
+                      Size _delta_cov_size,
+                      FrameBasePtr _origin_frame_ptr,
+                      StateBlockPtr _p_ptr = nullptr,
+                      StateBlockPtr _o_ptr = nullptr,
+                      StateBlockPtr _intr_ptr = nullptr);
 
         virtual ~CaptureMotion();
 
+        // Type
+        virtual bool isMotion() const override { return true; }
+
+        // Data
         const Eigen::VectorXs& getData() const;
         const Eigen::MatrixXs& getDataCovariance() const;
         void setData(const Eigen::VectorXs& _data);
         void setDataCovariance(const Eigen::MatrixXs& _data_cov);
 
+        // Buffer
         MotionBuffer& getBuffer();
         const MotionBuffer& getBuffer() const;
-        const Eigen::VectorXs& getDelta() const;
 
+        // Buffer's initial conditions for pre-integration
+        VectorXs getCalibrationPreint() const;
+        void setCalibrationPreint(const VectorXs& _calib_preint);
+        MatrixXs getJacobianCalib();
+        MatrixXs getJacobianCalib(const TimeStamp& _ts);
+
+        // Get delta preintegrated, and corrected for changes on calibration params
+        VectorXs getDeltaCorrected(const VectorXs& _calib_current);
+        VectorXs getDeltaCorrected(const VectorXs& _calib_current, const TimeStamp& _ts);
+        VectorXs getDeltaPreint();
+        VectorXs getDeltaPreint(const TimeStamp& _ts);
+        MatrixXs getDeltaPreintCov();
+        MatrixXs getDeltaPreintCov(const TimeStamp& _ts);
+        virtual VectorXs correctDelta(const VectorXs& _delta, const VectorXs& _delta_error);
+
+        // Origin frame
         FrameBasePtr getOriginFramePtr();
         void setOriginFramePtr(FrameBasePtr _frame_ptr);
 
@@ -77,40 +102,6 @@ class CaptureMotion : public CaptureBase
         MotionBuffer buffer_;           ///< Buffer of motions between this Capture and the next one.
         FrameBasePtr origin_frame_ptr_; ///< Pointer to the origin frame of the motion
 };
-
-inline CaptureMotion::CaptureMotion(const TimeStamp& _ts,
-                                    SensorBasePtr _sensor_ptr,
-                                    const Eigen::VectorXs& _data,
-                                    Size _data_size, Size _delta_size, Size _delta_cov_size, Size _calib_size,
-                                    FrameBasePtr _origin_frame_ptr) :
-        CaptureBase("MOTION", _ts, _sensor_ptr),
-        data_(_data),
-        data_cov_(Eigen::MatrixXs::Zero(_data.rows(), _data.rows())), // Someone should test this zero and do something smart accordingly
-        buffer_(_data_size, _delta_size,_delta_cov_size, _calib_size),
-        origin_frame_ptr_(_origin_frame_ptr)
-{
-    //
-}
-
-inline CaptureMotion::CaptureMotion(const TimeStamp& _ts,
-                                    SensorBasePtr _sensor_ptr,
-                                    const Eigen::VectorXs& _data,
-                                    const Eigen::MatrixXs& _data_cov,
-                                    Size _data_size, Size _delta_size, Size _delta_cov_size, Size _calib_size,
-                                    FrameBasePtr _origin_frame_ptr) :
-        CaptureBase("MOTION", _ts, _sensor_ptr),
-        data_(_data),
-        data_cov_(_data_cov),
-        buffer_(_data_size, _delta_size,_delta_cov_size, _calib_size),
-        origin_frame_ptr_(_origin_frame_ptr)
-{
-    //
-}
-
-inline CaptureMotion::~CaptureMotion()
-{
-    //
-}
 
 inline const Eigen::VectorXs& CaptureMotion::getData() const
 {
@@ -124,11 +115,14 @@ inline const Eigen::MatrixXs& CaptureMotion::getDataCovariance() const
 
 inline void CaptureMotion::setData(const Eigen::VectorXs& _data)
 {
+    assert(_data.size() == data_.size() && "Wrong size of data vector!");
     data_ = _data;
 }
 
 inline void CaptureMotion::setDataCovariance(const Eigen::MatrixXs& _data_cov)
 {
+    assert(_data_cov.rows() == data_cov_.rows() && "Wrong number of rows of data vector!");
+    assert(_data_cov.cols() == data_cov_.cols() && "Wrong number of cols of data vector!");
     data_cov_ = _data_cov;
 }
 
@@ -142,9 +136,20 @@ inline wolf::MotionBuffer& CaptureMotion::getBuffer()
     return buffer_;
 }
 
-inline const Eigen::VectorXs& CaptureMotion::getDelta() const
+inline Eigen::MatrixXs CaptureMotion::getJacobianCalib()
 {
-    return buffer_.get().back().delta_integr_;
+    return getBuffer().get().back().jacobian_calib_;
+}
+
+inline Eigen::MatrixXs CaptureMotion::getJacobianCalib(const TimeStamp& _ts)
+{
+    return getBuffer().getMotion(_ts).jacobian_calib_;
+}
+
+inline Eigen::VectorXs CaptureMotion::correctDelta(const VectorXs& _delta, const VectorXs& _delta_error)
+{
+    WOLF_DEBUG("WARNING: using Cartesian sum for delta correction. \nIf your deltas lie on a manifold, derive this function and implement the proper delta correction!")
+    return _delta + _delta_error;
 }
 
 inline wolf::FrameBasePtr CaptureMotion::getOriginFramePtr()
@@ -155,6 +160,36 @@ inline wolf::FrameBasePtr CaptureMotion::getOriginFramePtr()
 inline void CaptureMotion::setOriginFramePtr(FrameBasePtr _frame_ptr)
 {
     origin_frame_ptr_ = _frame_ptr;
+}
+
+inline VectorXs CaptureMotion::getCalibrationPreint() const
+{
+    return getBuffer().getCalibrationPreint();
+}
+
+inline void CaptureMotion::setCalibrationPreint(const VectorXs& _calib_preint)
+{
+    getBuffer().setCalibrationPreint(_calib_preint);
+}
+
+inline VectorXs CaptureMotion::getDeltaPreint()
+{
+    return getBuffer().get().back().delta_integr_;
+}
+
+inline VectorXs CaptureMotion::getDeltaPreint(const TimeStamp& _ts)
+{
+    return getBuffer().getMotion(_ts).delta_integr_;
+}
+
+inline MatrixXs CaptureMotion::getDeltaPreintCov()
+{
+    return getBuffer().get().back().delta_integr_cov_;
+}
+
+inline MatrixXs CaptureMotion::getDeltaPreintCov(const TimeStamp& _ts)
+{
+    return getBuffer().getMotion(_ts).delta_integr_cov_;
 }
 
 } // namespace wolf

@@ -13,9 +13,9 @@
 #include "logging.h"
 
 //includes from Eigen lib
-#include <eigen3/Eigen/Dense>
-#include <eigen3/Eigen/Geometry>
-#include <eigen3/Eigen/Sparse>
+#include <Eigen/Dense>
+#include <Eigen/Geometry>
+#include <Eigen/Sparse>
 #include <libgen.h>
 
 //includes from std lib
@@ -79,6 +79,7 @@ const Scalar EPS_SMALL = 1e-16;
 namespace Eigen  // Eigen namespace extension
 {
 // 1. Vectors and Matrices
+typedef Matrix<wolf::Scalar, 1, 1, RowMajor> Matrix1s;                ///< 2x2 matrix of real Scalar type
 typedef Matrix<wolf::Scalar, 2, 2, RowMajor> Matrix2s;                ///< 2x2 matrix of real Scalar type
 typedef Matrix<wolf::Scalar, 3, 3, RowMajor> Matrix3s;                ///< 3x3 matrix of real Scalar type
 typedef Matrix<wolf::Scalar, 4, 4, RowMajor> Matrix4s;                ///< 4x4 matrix of real Scalar type
@@ -92,6 +93,9 @@ typedef Matrix<wolf::Scalar, 4, 1> Vector4s;                ///< 4-vector of rea
 typedef Matrix<wolf::Scalar, 5, 1> Vector5s;                ///< 5-vector of real Scalar type
 typedef Matrix<wolf::Scalar, 6, 1> Vector6s;                ///< 6-vector of real Scalar type
 typedef Matrix<wolf::Scalar, 7, 1> Vector7s;                ///< 7-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 8, 1> Vector8s;                ///< 8-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 9, 1> Vector9s;                ///< 9-vector of real Scalar type
+typedef Matrix<wolf::Scalar, 10, 1> Vector10s;              ///< 10-vector of real Scalar type
 typedef Matrix<wolf::Scalar, Dynamic, 1> VectorXs;          ///< variable size vector of real Scalar type
 typedef Matrix<wolf::Scalar, 1, 2> RowVector2s;             ///< 2-row-vector of real Scalar type
 typedef Matrix<wolf::Scalar, 1, 3> RowVector3s;             ///< 3-row-vector of real Scalar type
@@ -222,7 +226,8 @@ typedef enum
     CTR_EPIPOLAR,               ///< Epipolar constraint
     CTR_AHP,                    ///< Anchored Homogeneous Point constraint
     CTR_AHP_NL,                 ///< Anchored Homogeneous Point constraint (temporal, to be removed)
-    CTR_IMU                     ///< IMU constraint
+    CTR_IMU,                    ///< IMU constraint
+    CTR_DIFF_DRIVE              ///< Diff-drive constraint
 
 } ConstraintType;
 
@@ -261,7 +266,8 @@ typedef enum
 #define WOLF_LIST_TYPEDEFS(ClassName) \
         class ClassName; \
         typedef std::list<ClassName##Ptr>          ClassName##List; \
-        typedef ClassName##List::iterator          ClassName##Iter;
+        typedef ClassName##List::iterator          ClassName##Iter; \
+        typedef ClassName##List::reverse_iterator  ClassName##RevIter;
 
 #define WOLF_STRUCT_PTR_TYPEDEFS(StructName) \
         struct StructName; \
@@ -324,6 +330,7 @@ WOLF_LIST_TYPEDEFS(LandmarkBase);
 // - - State blocks
 WOLF_PTR_TYPEDEFS(StateBlock);
 WOLF_LIST_TYPEDEFS(StateBlock);
+WOLF_PTR_TYPEDEFS(StateAngle);
 WOLF_PTR_TYPEDEFS(StateQuaternion);
 
 // - - Local Parametrization
@@ -337,17 +344,17 @@ inline const Eigen::Vector3s gravity(void) {
     return Eigen::Vector3s(0,0,-9.806);
 }
 
-template <typename T, int N>
-bool isSymmetric(const Eigen::Matrix<T, N, N>& M,
+template <typename T, int N, int RC>
+bool isSymmetric(const Eigen::Matrix<T, N, N, RC>& M,
                  const T eps = wolf::Constants::EPS)
 {
   return M.isApprox(M.transpose(), eps);
 }
 
-template <typename T, int N>
-bool isPositiveSemiDefinite(const Eigen::Matrix<T, N, N>& M)
+template <typename T, int N, int RC>
+bool isPositiveSemiDefinite(const Eigen::Matrix<T, N, N, RC>& M)
 {
-  Eigen::SelfAdjointEigenSolver<Eigen::Matrix<T, N, N> > eigensolver(M);
+  Eigen::SelfAdjointEigenSolver<Eigen::Matrix<T, N, N, RC> > eigensolver(M);
 
   if (eigensolver.info() == Eigen::Success)
   {
@@ -358,8 +365,8 @@ bool isPositiveSemiDefinite(const Eigen::Matrix<T, N, N>& M)
   return false;
 }
 
-template <typename T, int N>
-bool isCovariance(const Eigen::Matrix<T, N, N>& M)
+template <typename T, int N, int RC>
+bool isCovariance(const Eigen::Matrix<T, N, N, RC>& M)
 {
   return isSymmetric(M) && isPositiveSemiDefinite(M);
 }

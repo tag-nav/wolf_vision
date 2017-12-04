@@ -17,7 +17,7 @@ namespace wolf
 class StateAngle : public StateBlock
 {
     public:
-        StateAngle(Scalar _angle, bool _fixed = false);
+        StateAngle(Scalar _angle = 0.0, bool _fixed = false);
 
         virtual ~StateAngle();
 };

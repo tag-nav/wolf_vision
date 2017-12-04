@@ -42,8 +42,8 @@ class SensorIMU : public SensorBase
 {
 
     protected:
-        wolf::Scalar w_noise; //Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
         wolf::Scalar a_noise; //Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
+        wolf::Scalar w_noise; //Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
 
         //This is a trial to constraint how much can the bias change in 1 sec at most
         wolf::Scalar ab_initial_stdev; //accelerometer micro_g/sec
@@ -52,15 +52,6 @@ class SensorIMU : public SensorBase
         wolf::Scalar wb_rate_stdev; //gyroscope rad/sec
 
     public:
-        /** \brief Constructor with arguments
-         *
-         * Constructor with arguments
-         * \param _p_ptr StateBlock pointer to the sensor position wrt vehicle base
-         * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
-         * \param _a_w_biases_ptr StateBlock pointer to the vector of acc and gyro biases
-         *
-         **/
-        SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr);
 
         /** \brief Constructor with arguments
          *

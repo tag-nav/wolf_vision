@@ -18,7 +18,7 @@ class ConstraintCorner2D: public ConstraintAutodiff<ConstraintCorner2D, 3,2,1,2,
                        const ProcessorBasePtr& _processor_ptr,
                        bool _apply_loss_function = false,
                        ConstraintStatus _status = CTR_ACTIVE) :
-        ConstraintAutodiff<ConstraintCorner2D,3,2,1,2,1>(CTR_CORNER_2D, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
+        ConstraintAutodiff<ConstraintCorner2D,3,2,1,2,1>(CTR_CORNER_2D, nullptr, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr())
     {
       setType("CORNER 2D");
     }

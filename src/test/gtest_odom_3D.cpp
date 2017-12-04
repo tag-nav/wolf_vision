@@ -66,7 +66,7 @@ ProcessorOdom3DTest::ProcessorOdom3DTest() : ProcessorOdom3D()
     rvar_min() = 0.25;
 }
 
-TEST(ProcessorOdom3D, data2delta)
+TEST(ProcessorOdom3D, computeCurrentDelta)
 {
     // One instance of the processor to test
     ProcessorOdom3DTest prc;
@@ -99,7 +99,7 @@ TEST(ProcessorOdom3D, data2delta)
     MatrixXs jac_delta_calib(6,0);
 
     // call the function under test
-    prc.data2delta(data, data_cov, dt, delta_ret, delta_cov_ret, VectorXs::Zero(0), jac_delta_calib);
+    prc.computeCurrentDelta(data, data_cov, VectorXs::Zero(0), dt, delta_ret, delta_cov_ret, jac_delta_calib);
 
     ASSERT_MATRIX_APPROX(delta_ret , delta, Constants::EPS_SMALL);
     ASSERT_MATRIX_APPROX(delta_cov_ret , delta_cov, Constants::EPS_SMALL);
@@ -316,10 +316,6 @@ TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
     Dq_of = q_o.conjugate() *  q_f;
 
 
-    R.resize(6,7,6,0);
-    F.resize(6,7,6,0);
-    I.resize(6,7,6,0);
-
     // set ref
     R.ts_           = t_r;
     R.delta_        = dx_or; // origin to ref
@@ -418,11 +414,6 @@ TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
     Dx_or = dx_or;
     prc.deltaPlusDelta(Dx_or, dx_rf, t_f - t_r, Dx_of);
     Dx_os = Dx_of;
-
-    R.resize(6,7,6,0);
-    I.resize(6,7,6,0);
-    S.resize(6,7,6,0);
-    F.resize(6,7,6,0);
 
     // set ref
     R.ts_           = t_r;

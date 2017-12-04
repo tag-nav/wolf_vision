@@ -17,16 +17,16 @@ class SensorLaser2D;
 namespace wolf {
 
 WOLF_PTR_TYPEDEFS(CaptureLaser2D);
-    
-    
+
+
 class CaptureLaser2D : public CaptureBase
 {
     public:
         /** \brief Constructor with ranges
          **/
         CaptureLaser2D(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const std::vector<float>& _ranges);
-        virtual ~CaptureLaser2D();
-        
+        virtual ~CaptureLaser2D() = default;
+
         laserscanutils::LaserScan& getScan();
 
         void setSensorPtr(const SensorBasePtr sensor_ptr);

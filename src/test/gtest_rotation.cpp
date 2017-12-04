@@ -6,7 +6,7 @@
  */
 
 //Eigen
-#include <eigen3/Eigen/Geometry>
+#include <Eigen/Geometry>
 
 //Wolf
 #include "wolf.h"
@@ -50,7 +50,7 @@ inline Eigen::Quaternion<typename Derived::Scalar> v2q_new(const Eigen::MatrixBa
     const T angle_square = a0 * a0 + a1 * a1 + a2 * a2;
 
     //We need the angle : means we have to take the square root of angle_square, 
-    // which is defined for all angle_square beonging to R+ (except 0)
+    // which is defined for all angle_square belonging to R+ (except 0)
     if (angle_square > (T)0.0 ){
         //sqrt is defined here
         const T angle = sqrt(angle_square);
@@ -106,7 +106,24 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v_new(const Eigen::Quater
     
 }
 
-TEST(rotations, v2q_VS_v2q_new) //this test will use functions defined above
+TEST(exp_q, unit_norm)
+{
+    Vector3s v0  = Vector3s::Random();
+    Scalar scale = 1.0;
+    for (int i = 0; i < 16; i++)
+    {
+        Vector3s v = v0 * scale;
+        Quaternions q = exp_q(v);
+        EXPECT_NEAR(q.norm(), 1.0, 1e-10) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
+        EXPECT_NEAR(q.norm(), 1.0, 1e-12) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
+        EXPECT_NEAR(q.norm(), 1.0, 1e-14) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
+        EXPECT_NEAR(q.norm(), 1.0, 1e-16) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
+        ASSERT_NEAR(q.norm(), 1.0, 1e-10) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
+        scale /= 10;
+    }
+}
+
+TEST(exp_q, v2q_VS_v2q_new) //this test will use functions defined above
 {
     using namespace wolf;
     //defines scalars
@@ -173,7 +190,7 @@ TEST(rotations, pi2pi)
     ASSERT_NEAR(-M_PI+.01, pi2pi(M_PI+.01), 1e-10);
 }
 
-TEST(rotations, Skew_vee)
+TEST(skew, Skew_vee)
 {
     using namespace wolf;
     Vector3s vec3 = Vector3s::Random();
@@ -187,7 +204,7 @@ TEST(rotations, Skew_vee)
     ASSERT_TRUE(vec3_bis == vec3);
 }
 
-TEST(rotations, v2q_q2v)
+TEST(exp_q, v2q_q2v)
 {
     using namespace wolf;
     //defines scalars
@@ -220,7 +237,7 @@ TEST(rotations, v2q_q2v)
     ASSERT_MATRIX_APPROX(rot_vector1, quat_to_v1x, wolf::Constants::EPS);
 }
 
-TEST(rotations, v2R_R2v)
+TEST(exp_R, v2R_R2v)
 {
     using namespace wolf;
     //First test is to verify we get the good result with v -> v2R -> R2v -> v
@@ -248,7 +265,7 @@ TEST(rotations, v2R_R2v)
     ASSERT_MATRIX_APPROX(rot1_vec, rot_vector1, wolf::Constants::EPS);
 }
 
-TEST(rotations, R2v_v2R_limits)
+TEST(log_R, R2v_v2R_limits)
 {
     using namespace wolf;
     //test 2 : how small can angles in rotation vector be ?
@@ -268,7 +285,7 @@ TEST(rotations, R2v_v2R_limits)
     }
 }
 
-TEST(rotations, R2v_v2R_AAlimits)
+TEST(log_R, R2v_v2R_AAlimits)
 {
     using namespace wolf;
     //let's see how small the angles can be here : limit reached at scale/10 =  1e-16
@@ -292,7 +309,7 @@ TEST(rotations, R2v_v2R_AAlimits)
     }
 }
 
-TEST(rotations, v2q2R2v)
+TEST(exp_q, v2q2R2v)
 {
     using namespace wolf;
     wolf::Scalar scale = 1;
@@ -343,7 +360,7 @@ TEST(rotations, AngleAxis_limits)
 }
 
 
-TEST(rotations, Quat_compos_const_rateOfTurn)
+TEST(compose, Quat_compos_const_rateOfTurn)
 {
     using namespace wolf;
 
@@ -410,7 +427,7 @@ TEST(rotations, Quat_compos_const_rateOfTurn)
      "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
 }
 
-TEST(rotations, Quat_compos_var_rateOfTurn)
+TEST(compose, Quat_compos_var_rateOfTurn)
 {
     using namespace wolf;
 
@@ -487,7 +504,7 @@ TEST(rotations, Quat_compos_var_rateOfTurn)
 
 }
 
-TEST(rotations, Quat_compos_var_rateOfTurn_diff)
+TEST(compose, Quat_compos_var_rateOfTurn_diff)
 {
     using namespace wolf;
 
@@ -564,7 +581,7 @@ TEST(rotations, Quat_compos_var_rateOfTurn_diff)
     "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
 }
 
-TEST(rotations, q2R_R2q)
+TEST(q2R, q2R_R2q)
 {
     Vector3s v; v.setRandom();
     Quaternions q = v2q(v);
@@ -583,7 +600,51 @@ TEST(rotations, q2R_R2q)
     ASSERT_MATRIX_APPROX(R,          qq_R.matrix(),   wolf::Constants::EPS);
 }
 
-TEST(rotations, Jr)
+TEST(Plus, Random)
+{
+    Quaternions q;
+    q               .coeffs().setRandom().normalize();
+
+    Vector3s v;
+    v               .setRandom();
+
+    Quaternions q2  = q * exp_q(v);
+
+    ASSERT_QUATERNION_APPROX(plus(q,v), q2, 1e-12);
+
+}
+
+TEST(Plus, Identity_plus_small)
+{
+    Quaternions q;
+    q               .setIdentity();
+
+    Vector3s v;
+    v               .setRandom();
+    v              *= 1e-6;
+
+    Quaternions q2;
+    q2.w()          = 1;
+    q2.vec()        = 0.5*v;
+
+    ASSERT_QUATERNION_APPROX(plus(q,v), q2, 1e-12);
+}
+
+TEST(Minus_and_diff, Random)
+{
+    Quaternions q1, q2;
+    q1              .coeffs().setRandom().normalize();
+    q2              .coeffs().setRandom().normalize();
+
+    Vector3s v      = log_q(q1.conjugate() * q2);
+
+    ASSERT_MATRIX_APPROX(minus(q1, q2), v, 1e-12);
+    ASSERT_QUATERNION_APPROX(plus(q1, minus(q1, q2)), q2, 1e-12);
+    ASSERT_MATRIX_APPROX(diff(q1, q2), v, 1e-12);
+    ASSERT_QUATERNION_APPROX(plus(q1, diff(q1, q2)), q2, 1e-12);
+}
+
+TEST(Jacobians, Jr)
 {
     Vector3s theta; theta.setRandom();
     Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
@@ -595,7 +656,7 @@ TEST(rotations, Jr)
     ASSERT_MATRIX_APPROX(exp_R(theta+dtheta), (exp_R(theta) * exp_R(Jr*dtheta)), 1e-8);
 }
 
-TEST(rotations, Jl)
+TEST(Jacobians, Jl)
 {
     Vector3s theta; theta.setRandom();
     Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
@@ -605,9 +666,15 @@ TEST(rotations, Jl)
     Matrix3s Jl = jac_SO3_left(theta);
     ASSERT_QUATERNION_APPROX(exp_q(theta+dtheta), exp_q(Jl*dtheta) * exp_q(theta), 1e-8);
     ASSERT_MATRIX_APPROX(exp_R(theta+dtheta), (exp_R(Jl*dtheta) * exp_R(theta)), 1e-8);
+
+    // Jl = Jr.tr
+    ASSERT_MATRIX_APPROX(Jl, jac_SO3_right(theta).transpose(), 1e-8);
+
+    // Jl = R*Jr
+    ASSERT_MATRIX_APPROX(Jl, exp_R(theta)*jac_SO3_right(theta), 1e-8);
 }
 
-TEST(rotations, Jr_inv)
+TEST(Jacobians, Jr_inv)
 {
     Vector3s theta; theta.setRandom();
     Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
@@ -621,7 +688,7 @@ TEST(rotations, Jr_inv)
     ASSERT_MATRIX_APPROX(log_R(R * exp_R(dtheta)), log_R(R) + Jr_inv*dtheta, 1e-8);
 }
 
-TEST(rotations, Jl_inv)
+TEST(Jacobians, Jl_inv)
 {
     Vector3s theta; theta.setRandom();
     Vector3s dtheta; dtheta.setRandom(); dtheta *= 1e-4;
@@ -633,6 +700,78 @@ TEST(rotations, Jl_inv)
     Matrix3s Jl_inv = jac_SO3_left_inv(theta);
     ASSERT_MATRIX_APPROX(log_q(exp_q(dtheta) * q), log_q(q) + Jl_inv*dtheta, 1e-8);
     ASSERT_MATRIX_APPROX(log_R(exp_R(dtheta) * R), log_R(R) + Jl_inv*dtheta, 1e-8);
+}
+
+TEST(Jacobians, compose)
+{
+
+    Vector3s th1(.1,.2,.3), th2(.3,.1,.2);
+    Quaternions q1(exp_q(th1));
+    Quaternions q2(exp_q(th2));
+    Quaternions qc;
+    Matrix3s J1a, J2a, J1n, J2n;
+
+    // composition and analytic Jacobians
+    wolf::compose(q1, q2, qc, J1a, J2a);
+
+    // Numeric Jacobians
+    Scalar dx = 1e-6;
+    Vector3s pert;
+    Quaternions q1_pert, q2_pert, qc_pert;
+    for (int i = 0; i<3; i++)
+    {
+        pert.setZero();
+        pert(i) = dx;
+
+        // Jac wrt q1
+        q1_pert     = q1*exp_q(pert);
+        qc_pert     = q1_pert * q2;
+        J1n.col(i)  = log_q(qc.conjugate()*qc_pert) / dx;
+
+        // Jac wrt q2
+        q2_pert     = q2*exp_q(pert);
+        qc_pert     = q1 * q2_pert;
+        J2n.col(i)  = log_q(qc.conjugate()*qc_pert) / dx;
+    }
+
+    ASSERT_MATRIX_APPROX(J1a, J1n, 1e-5);
+    ASSERT_MATRIX_APPROX(J2a, J2n, 1e-5);
+}
+
+TEST(Jacobians, between)
+{
+
+    Vector3s th1(.1,.2,.3), th2(.3,.1,.2);
+    Quaternions q1(exp_q(th1));
+    Quaternions q2(exp_q(th2));
+    Quaternions qc;
+    Matrix3s J1a, J2a, J1n, J2n;
+
+    // composition and analytic Jacobians
+    wolf::between(q1, q2, qc, J1a, J2a);
+
+    // Numeric Jacobians
+    Scalar dx = 1e-6;
+    Vector3s pert;
+    Quaternions q1_pert, q2_pert, qc_pert;
+    for (int i = 0; i<3; i++)
+    {
+        pert.setZero();
+        pert(i) = dx;
+
+        // Jac wrt q1
+        q1_pert     = q1*exp_q(pert);
+        qc_pert     = q1_pert.conjugate() * q2;
+        J1n.col(i)  = log_q(qc.conjugate()*qc_pert) / dx;
+
+        // Jac wrt q2
+        q2_pert     = q2*exp_q(pert);
+        qc_pert     = q1.conjugate() * q2_pert;
+        J2n.col(i)  = log_q(qc.conjugate()*qc_pert) / dx;
+    }
+
+    ASSERT_MATRIX_APPROX(J1a, J1n, 1e-5);
+    ASSERT_MATRIX_APPROX(J2a, J2n, 1e-5);
 }
 
 

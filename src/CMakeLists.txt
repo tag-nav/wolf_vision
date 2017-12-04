@@ -16,7 +16,7 @@ ENDIF()
 
 option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
-option(BUILD_EXAMPLES "Build examples" ON)
+option(BUILD_EXAMPLES "Build examples" OFF)
 
 
 # Does this has any other interest
@@ -29,7 +29,7 @@ ENDIF(BUILD_EXAMPLES OR BUILD_TESTS)
 
 #find dependencies.
 
-FIND_PACKAGE(Eigen 3 REQUIRED)
+FIND_PACKAGE(Eigen 3.2.92 REQUIRED)
 
 FIND_PACKAGE(Threads REQUIRED)
 
@@ -63,6 +63,12 @@ IF (vision_utils_FOUND)
 	FIND_PACKAGE(OpenCV QUIET)
 ENDIF(vision_utils_FOUND)
 
+# Cereal
+FIND_PACKAGE(cereal QUIET)
+IF(cereal_FOUND)
+    MESSAGE("cereal Library FOUND: cereal related sources will be built.")
+ENDIF(cereal_FOUND)
+
 # YAML with yaml-cpp
 INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindYamlCpp.cmake)
 IF(YAMLCPP_FOUND)
@@ -70,6 +76,16 @@ IF(YAMLCPP_FOUND)
 ELSEIF(YAMLCPP_FOUND)
     MESSAGE("yaml-cpp Library NOT FOUND!")
 ENDIF(YAMLCPP_FOUND)
+
+#GLOG
+INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindGlog.cmake)
+IF(GLOG_FOUND)
+    MESSAGE("glog Library FOUND: glog related sources will be built.")
+    MESSAGE(STATUS ${GLOG_INCLUDE_DIR})
+    MESSAGE(STATUS ${GLOG_LIBRARY})
+ELSEIF(GLOG_FOUND)
+    MESSAGE("glog Library NOT FOUND!")
+ENDIF(GLOG_FOUND)
 
 # SuiteSparse doesn't have find*.cmake:
 FIND_PATH(
@@ -141,6 +157,11 @@ IF(vision_utils_FOUND)
 	INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 ENDIF(vision_utils_FOUND)
 
+# cereal
+IF(cereal_FOUND)
+    INCLUDE_DIRECTORIES(${cereal_INCLUDE_DIRS})
+ENDIF(cereal_FOUND)
+
 IF(Suitesparse_FOUND)
     INCLUDE_DIRECTORIES(${Suitesparse_INCLUDE_DIRS})
 ENDIF(Suitesparse_FOUND)
@@ -149,12 +170,19 @@ IF(YAMLCPP_FOUND)
     INCLUDE_DIRECTORIES(${YAMLCPP_INCLUDE_DIR})
 ENDIF(YAMLCPP_FOUND)
 
+IF(GLOG_FOUND)
+INCLUDE_DIRECTORIES(${GLOG_INCLUDE_DIR})
+ENDIF(GLOG_FOUND)
+
 #headers
 SET(HDRS_BASE
     capture_base.h
+    capture_motion.h
     constraint_analytic.h
     constraint_autodiff.h
     constraint_base.h
+    eigen_assert.h
+    eigen_predicates.h
     factory.h
     feature_base.h
     feature_match.h
@@ -172,7 +200,9 @@ SET(HDRS_BASE
     pinholeTools.h
     problem.h
     processor_base.h
+    processor_capture_holder.h
     processor_factory.h
+    processor_loopclosure_base.h
     processor_motion.h
     processor_tracker.h
     processor_tracker_feature.h
@@ -192,8 +222,9 @@ SET(HDRS_BASE
 SET(HDRS
     capture_fix.h
     capture_gps_fix.h
-    capture_motion.h
     capture_imu.h
+    capture_odom_2D.h
+    capture_odom_3D.h
     capture_void.h
     constraint_container.h
     constraint_corner_2D.h
@@ -219,14 +250,15 @@ SET(HDRS
     feature_fix.h
     feature_odom_2D.h
     feature_polyline_2D.h
-    frame_imu.h
     landmark_corner_2D.h
     landmark_container.h
     landmark_line_2D.h
     landmark_polyline_2D.h
     local_parametrization_polyline_extreme.h
+    processor_frame_nearest_neighbor_filter.h
+    processor_image_params.h
     processor_imu.h
-    processor_imu_UnitTester.h
+    test/processor_imu_UnitTester.h
     processor_odom_2D.h
     processor_odom_3D.h
     processor_tracker_feature_dummy.h
@@ -251,6 +283,7 @@ SET(HDRS_DTASSC
 #sources
 SET(SRCS_BASE
     capture_base.cpp
+    capture_motion.cpp
     constraint_base.cpp
     constraint_analytic.cpp
     feature_base.cpp
@@ -265,6 +298,8 @@ SET(SRCS_BASE
     node_base.cpp
     problem.cpp
     processor_base.cpp
+    processor_capture_holder.cpp
+    processor_loopclosure_base.cpp
     processor_motion.cpp
     processor_tracker.cpp
     processor_tracker_feature.cpp
@@ -275,9 +310,11 @@ SET(SRCS_BASE
     )
 
 SET(SRCS
+    capture_fix.cpp
     capture_gps_fix.cpp
     capture_imu.cpp
-    capture_fix.cpp
+    capture_odom_2D.cpp
+    capture_odom_3D.cpp
     capture_void.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp
@@ -286,14 +323,14 @@ SET(SRCS
     feature_fix.cpp
     feature_odom_2D.cpp
     feature_polyline_2D.cpp
-    frame_imu.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
     landmark_line_2D.cpp
     landmark_polyline_2D.cpp
     local_parametrization_polyline_extreme.cpp
+    processor_frame_nearest_neighbor_filter.cpp
     processor_imu.cpp
-    processor_imu_UnitTester.cpp
+    test/processor_imu_UnitTester.cpp
     processor_odom_2D.cpp
     processor_odom_3D.cpp
     processor_tracker_feature_dummy.cpp
@@ -385,6 +422,25 @@ IF (vision_utils_FOUND)
         )
 ENDIF(vision_utils_FOUND)
 
+# Add the capture sub-directory
+ADD_SUBDIRECTORY(captures)
+
+# Add the constraints sub-directory
+ADD_SUBDIRECTORY(constraints)
+
+# Add the features sub-directory
+ADD_SUBDIRECTORY(features)
+
+# Add the processor sub-directory
+ADD_SUBDIRECTORY(processors)
+
+# Add the sensor sub-directory
+ADD_SUBDIRECTORY(sensors)
+
+IF (cereal_FOUND)
+  ADD_SUBDIRECTORY(serialization/cereal)
+ENDIF(cereal_FOUND)
+
 IF (Suitesparse_FOUND)
     ADD_SUBDIRECTORY(solver)
 ENDIF(Suitesparse_FOUND)
@@ -420,7 +476,12 @@ ENDIF(YAMLCPP_FOUND)
 ADD_LIBRARY(${PROJECT_NAME} 
             SHARED 
             ${SRCS_BASE} 
-            ${SRCS} 
+            ${SRCS}
+            ${SRCS_CAPTURE}
+            ${SRCS_CONSTRAINT}
+            ${SRCS_FEATURE}
+            ${SRCS_SENSOR}
+            ${SRCS_PROCESSOR}
             #${SRCS_DTASSC} 
             ${SRCS_WRAPPER}
             )
@@ -450,6 +511,9 @@ IF (YAMLCPP_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${YAMLCPP_LIBRARY})
 ENDIF (YAMLCPP_FOUND)
 
+IF (GLOG_FOUND)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLOG_LIBRARY})
+ENDIF (GLOG_FOUND)
 
 #install library
 #=============================================================
@@ -467,10 +531,22 @@ INSTALL(FILES ${HDRS}
     DESTINATION include/iri-algorithms/wolf)
 #INSTALL(FILES ${HDRS_DTASSC}
 #    DESTINATION include/iri-algorithms/wolf/data_association)
+INSTALL(FILES ${HDRS_CAPTURE}
+    DESTINATION include/iri-algorithms/wolf/captures)
+INSTALL(FILES ${HDRS_CONSTRAINT}
+    DESTINATION include/iri-algorithms/wolf/constraints)
+INSTALL(FILES ${HDRS_FEATURE}
+    DESTINATION include/iri-algorithms/wolf/features)
+INSTALL(FILES ${HDRS_SENSOR}
+    DESTINATION include/iri-algorithms/wolf/sensors)
+INSTALL(FILES ${HDRS_PROCESSOR}
+    DESTINATION include/iri-algorithms/wolf/processors)
 INSTALL(FILES ${HDRS_WRAPPER}
     DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
 INSTALL(FILES ${HDRS_SOLVER}
     DESTINATION include/iri-algorithms/wolf/solver)
+INSTALL(FILES ${HDRS_SERIALIZATION}
+    DESTINATION include/iri-algorithms/wolf/serialization)
 
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf.cmake"
     DESTINATION "lib/cmake/${PROJECT_NAME}")
@@ -491,13 +567,14 @@ export(PACKAGE ${PROJECT_NAME})
 #############
 ## Testing ##
 #############
-
-if(BUILD_TESTS)
+IF (GLOG_FOUND)
+    if(BUILD_TESTS)
     
-    MESSAGE("Building tests.")
-    add_subdirectory(test)
+        MESSAGE("Building tests.")
+        add_subdirectory(test)
 
-endif()
+    endif(BUILD_TESTS)
+ENDIF (GLOG_FOUND)
 
 IF(BUILD_EXAMPLES)
   #Build examples & tests

@@ -49,6 +49,10 @@ target_link_libraries(gtest_capture_base ${PROJECT_NAME})
 #target_link_libraries(gtest_constraint_sparse ${PROJECT_NAME})
 
 # FeatureBase classes test
+wolf_add_gtest(gtest_eigen_predicates gtest_eigen_predicates.cpp)
+target_link_libraries(gtest_eigen_predicates ${PROJECT_NAME})
+
+# FeatureBase classes test
 wolf_add_gtest(gtest_feature_base gtest_feature_base.cpp)
 target_link_libraries(gtest_feature_base ${PROJECT_NAME})
 
@@ -68,6 +72,14 @@ target_link_libraries(gtest_local_param ${PROJECT_NAME})
 wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
 target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
 
+# Problem class test
+wolf_add_gtest(gtest_problem gtest_problem.cpp)
+target_link_libraries(gtest_problem ${PROJECT_NAME})
+
+# ProcessorMotion class test
+wolf_add_gtest(gtest_processor_motion gtest_processor_motion.cpp)
+target_link_libraries(gtest_processor_motion ${PROJECT_NAME})
+  
 # Rotation test
 wolf_add_gtest(gtest_rotation gtest_rotation.cpp)
 target_link_libraries(gtest_rotation ${PROJECT_NAME})
@@ -102,17 +114,21 @@ target_link_libraries(gtest_constraint_odom_3D ${PROJECT_NAME})
 wolf_add_gtest(gtest_feature_imu gtest_feature_imu.cpp)
 target_link_libraries(gtest_feature_imu ${PROJECT_NAME})
 
-# FrameIMU class test
-wolf_add_gtest(gtest_frame_imu gtest_frame_imu.cpp)
-target_link_libraries(gtest_frame_imu ${PROJECT_NAME})
-
 # IMU Bias + estimation tests
 #wolf_add_gtest(gtest_imuBias gtest_imuBias.cpp)
 #target_link_libraries(gtest_imuBias ${PROJECT_NAME})
 
+# IMU Bias + estimation tests
+wolf_add_gtest(gtest_IMU gtest_IMU.cpp)
+target_link_libraries(gtest_IMU ${PROJECT_NAME})
+
 # Pinhole test
 wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
 target_link_libraries(gtest_pinhole ${PROJECT_NAME})
+
+# ProcessorFrameNearestNeighborFilter class test
+wolf_add_gtest(gtest_processor_frame_nearest_neighbor_filter_2D gtest_processor_frame_nearest_neighbor_filter_2D.cpp)
+target_link_libraries(gtest_processor_frame_nearest_neighbor_filter_2D ${PROJECT_NAME})
 
 # ProcessorIMU class test
 wolf_add_gtest(gtest_processor_imu gtest_processor_imu.cpp)
@@ -138,11 +154,7 @@ target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
 wolf_add_gtest(gtest_constraint_autodiff gtest_constraint_autodiff.cpp)
 target_link_libraries(gtest_constraint_autodiff ${PROJECT_NAME})
 
-# ROI test
-IF(vision_utils_FOUND)
+# ------- Now Core classes Serialization ----------
 
-  # Problem class test
-  wolf_add_gtest(gtest_problem gtest_problem.cpp)
-  target_link_libraries(gtest_problem ${PROJECT_NAME})
+add_subdirectory(serialization)
 
-ENDIF(vision_utils_FOUND)

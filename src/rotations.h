@@ -23,8 +23,10 @@ namespace wolf
  * @return formatted angle
  */
 template<typename T>
-inline T pi2pi(T angle)
+inline T pi2pi(const T angle)
 {
+    using std::fmod;
+
     return (angle > (T)0 ?
             fmod(angle + (T)M_PI, (T)(2*M_PI)) - (T)M_PI :
             fmod(angle - (T)M_PI, (T)(2*M_PI)) + (T)M_PI);
@@ -36,7 +38,7 @@ inline T pi2pi(T angle)
  * @return angle in radians
  */
 template<typename T>
-inline T toRad(const T& deg)
+inline T toRad(const T deg)
 {
     return (T)M_TORAD * deg;
 }
@@ -47,7 +49,7 @@ inline T toRad(const T& deg)
  * @return angle in degrees
  */
 template<typename T>
-inline T toDeg(const T& rad)
+inline T toDeg(const T rad)
 {
     return (T)M_TODEG * rad;
 }
@@ -69,9 +71,9 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> skew(const Eigen::MatrixBas
 
     Eigen::Matrix<T, 3, 3> sk;
 
-    sk <<   0.0 , -_v(2), +_v(1),
-          +_v(2),   0.0 , -_v(0),
-          -_v(1), +_v(0),  0.0;
+    sk << (T)0.0 , -_v(2), +_v(1),
+           +_v(2), (T)0.0, -_v(0),
+           -_v(1), +_v(0), (T)0.0;
 
     return sk;
 }
@@ -102,26 +104,30 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> vee(const Eigen::MatrixBase
 template<typename Derived>
 inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase<Derived>& _v)
 {
+    using std::sqrt;
+    using std::cos;
+    using std::sin;
+
     MatrixSizeCheck<3,1>::check(_v);
 
     typedef typename Derived::Scalar T;
 
     T angle_squared = _v.squaredNorm();
-    T angle = sqrt(angle_squared);
-    T angle_half = angle / (T)2.0;
+    T angle         = sqrt(angle_squared);
+    T angle_half    = angle / (T)2.0;
 
     Eigen::Quaternion<T> q;
     if (angle > (T)(wolf::Constants::EPS))
     {
-        q.w() = cos(angle_half);
-        q.vec() = _v / angle * sin(angle_half);
+        q.w()   = cos(angle_half);
+        q.vec() = sin(angle_half) * _v.normalized();// / angle;
     }
     else
     {
         q.w()   = (T)1.0 - angle_squared/(T)2; // Taylor expansion of cos(x) = 1 - x^2/2!;
         q.vec() = _v * ((T)2.0 - angle_squared / (T)48.0); // Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
     }
-    return q;
+    return q.normalized();
 }
 
 /** \brief Quaternion logarithmic map
@@ -132,6 +138,8 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::QuaternionBase<Derived>& _q)
 {
+    using std::sqrt;
+
     typedef typename Derived::Scalar T;
 
     Eigen::Matrix<T, 3, 1> vec = _q.vec();
@@ -157,6 +165,8 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::Quaterni
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBase<Derived>& _v)
 {
+    using std::sqrt;
+
     MatrixSizeCheck<3, 1>::check(_v);
 
     typedef typename Derived::Scalar T;
@@ -245,6 +255,19 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> q2R(const Eigen::Quaternion
     return _q.matrix();
 }
 
+/** \brief quaternion to rotation matrix conversion
+ *
+ * @param _q a right-handed unit quaternion
+ * @return the equivalent rotation matrix
+ */
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 3> q2R(const Eigen::MatrixBase<Derived>& _q)
+{
+    MatrixSizeCheck<4,1>::check(_q);
+    Eigen::Quaternion<typename Derived::Scalar> q(_q(3),_q(0),_q(1),_q(2));
+    return q2R( q );
+}
+
 /** \brief rotation matrix to quaternion conversion
  *
  * @param _R a rotation matrix
@@ -278,6 +301,10 @@ inline Eigen::Quaternion<typename Derived::Scalar> R2q(const Eigen::MatrixBase<D
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right(const Eigen::MatrixBase<Derived>& _theta)
 {
+    using std::sqrt;
+    using std::cos;
+    using std::sin;
+
     MatrixSizeCheck<3, 1>::check(_theta);
 
     typedef typename Derived::Scalar T;
@@ -313,6 +340,10 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right(const Eigen::
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eigen::MatrixBase<Derived>& _theta)
 {
+    using std::sqrt;
+    using std::cos;
+    using std::sin;
+
     MatrixSizeCheck<3, 1>::check(_theta);
 
     typedef typename Derived::Scalar T;
@@ -321,9 +352,9 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eig
     Eigen::Matrix<T, 3, 3> W(skew(_theta));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
-    T theta = std::sqrt(theta2);  // rotation angle
+    T theta = sqrt(theta2);  // rotation angle
     Eigen::Matrix<T, 3, 3> M;
-    M.noalias() = ((T)1 / theta2 - (1 + cos(theta)) / ((T)2 * theta * sin(theta))) * (W * W);
+    M.noalias() = ((T)1.0 / theta2 - ((T)1.0 + cos(theta)) / ((T)2.0 * theta * sin(theta))) * (W * W);
     return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W + M; //is this really more optimized?
 }
 
@@ -343,6 +374,10 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eig
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::MatrixBase<Derived>& _theta)
 {
+    using std::sqrt;
+    using std::cos;
+    using std::sin;
+
     MatrixSizeCheck<3, 1>::check(_theta);
 
     typedef typename Derived::Scalar T;
@@ -377,6 +412,10 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::M
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left_inv(const Eigen::MatrixBase<Derived>& _theta)
 {
+    using std::sqrt;
+    using std::cos;
+    using std::sin;
+
     MatrixSizeCheck<3, 1>::check(_theta);
 
     typedef typename Derived::Scalar T;
@@ -385,10 +424,61 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left_inv(const Eige
     Eigen::Matrix<T, 3, 3> W(skew(_theta));
     if (theta2 <= Constants::EPS_SMALL)
         return Eigen::Matrix<T, 3, 3>::Identity() + (T)0.5 * W; // Small angle approximation
-    T theta = std::sqrt(theta2);  // rotation angle
+    T theta = sqrt(theta2);  // rotation angle
     Eigen::Matrix<T, 3, 3> M;
-    M.noalias() = ((T)1 / theta2 - (1 + cos(theta)) / ((T)2 * theta * sin(theta))) * (W * W);
+    M.noalias() = ((T)1.0 / theta2 - ((T)1.0 + cos(theta)) / ((T)2.0 * theta * sin(theta))) * (W * W);
     return Eigen::Matrix<T, 3, 3>::Identity() - (T)0.5 * W + M; //is this really more optimized?
+}
+
+template<typename D1, typename D2, typename D3, typename D4, typename D5>
+inline void compose(const Eigen::QuaternionBase<D1>& _q1,
+                    const Eigen::QuaternionBase<D2>& _q2,
+                    Eigen::QuaternionBase<D3>& _q_comp,
+                    Eigen::MatrixBase<D4>& _J_comp_q1,
+                    Eigen::MatrixBase<D5>& _J_comp_q2)
+{
+    MatrixSizeCheck<3, 3>::check(_J_comp_q1);
+    MatrixSizeCheck<3, 3>::check(_J_comp_q2);
+
+    _q_comp = _q1 * _q2;
+
+    _J_comp_q1 = q2R(_q2.conjugate()); //  R2.tr
+    _J_comp_q2 . setIdentity();
+}
+
+template<typename D1, typename D2, typename D3, typename D4, typename D5>
+inline void between(const Eigen::QuaternionBase<D1>& _q1,
+                    const Eigen::QuaternionBase<D2>& _q2,
+                    Eigen::QuaternionBase<D3>& _q_between,
+                    Eigen::MatrixBase<D4>& _J_between_q1,
+                    Eigen::MatrixBase<D5>& _J_between_q2)
+{
+    MatrixSizeCheck<3, 3>::check(_J_between_q1);
+    MatrixSizeCheck<3, 3>::check(_J_between_q2);
+
+    _q_between = _q1.conjugate() * _q2;
+
+    _J_between_q1 = -q2R(_q2.conjugate()*_q1); // - R2.tr * R1
+    _J_between_q2 . setIdentity();
+}
+
+template<typename D1, typename D2>
+inline Eigen::Quaternion<typename D1::Scalar> plus(const Eigen::QuaternionBase<D1>& q, const Eigen::MatrixBase<D2>& v)
+{
+    MatrixSizeCheck<3,1>::check(v);
+    return q * exp_q(v);
+}
+
+template<typename D1, typename D2>
+inline  Eigen::Matrix<typename D2::Scalar, 3, 1> minus(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
+{
+    return log_q(q1.conjugate() * q2);
+}
+
+template<typename D1, typename D2>
+inline  Eigen::Matrix<typename D2::Scalar, 3, 1> diff(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
+{
+    return minus(q1, q2);
 }
 
 template<typename T>
@@ -396,13 +486,22 @@ inline Eigen::Matrix<T, 3, 3> matrixRollPitchYaw(const T roll,
                                                  const T pitch,
                                                  const T yaw)
 {
-  const Eigen::AngleAxis<T> ax = Eigen::AngleAxis<T>(roll,  Eigen::Matrix<T, 3, 1>::UnitX());
-  const Eigen::AngleAxis<T> ay = Eigen::AngleAxis<T>(pitch, Eigen::Matrix<T, 3, 1>::UnitY());
-  const Eigen::AngleAxis<T> az = Eigen::AngleAxis<T>(yaw,   Eigen::Matrix<T, 3, 1>::UnitZ());
+    const Eigen::AngleAxis<T> ax = Eigen::AngleAxis<T>(roll,  Eigen::Matrix<T, 3, 1>::UnitX());
+    const Eigen::AngleAxis<T> ay = Eigen::AngleAxis<T>(pitch, Eigen::Matrix<T, 3, 1>::UnitY());
+    const Eigen::AngleAxis<T> az = Eigen::AngleAxis<T>(yaw,   Eigen::Matrix<T, 3, 1>::UnitZ());
 
-  return (az * ay * ax).toRotationMatrix().matrix();
+    return (az * ay * ax).toRotationMatrix().matrix();
 }
 
+template <typename Derived>
+inline typename Eigen::MatrixBase<Derived>::Scalar
+getYaw(const Eigen::MatrixBase<Derived>& R)
+{
+    MatrixSizeCheck<3, 3>::check(R);
+
+    using std::atan2;
+    return atan2( R(1, 0), R(0, 0) );
+}
 
 } // namespace wolf
 

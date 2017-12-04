@@ -5,7 +5,7 @@
  *      Author: jsola
  */
 
-#include "/Users/jsola/dev/wolf/src/constraint_odom_3D.h"
+#include "../src/constraint_odom_3D.h"
 
 namespace wolf
 {

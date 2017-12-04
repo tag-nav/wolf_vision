@@ -12,6 +12,37 @@
 #include "wolf.h"
 #include "rotations.h"
 
+/*
+ * Most functions in this file are explained in the document:
+ *
+ *   Joan Sola, "IMU pre-integration", 2015-2017 IRI-CSIC
+ *
+ * They relate manipulations of Delta motion magnitudes used for IMU pre-integration.
+ *
+ * The Delta is defined as
+ *     Delta = [Dp, Dq, Dv]
+ * with
+ *     Dp : position delta
+ *     Dq : quaternion delta
+ *     Dv : velocity delta
+ *
+ * They are listed below:
+ *
+ *   - identity: I = Delta at the origin, with Dp = [0,0,0]; Dq = [0,0,0,1], Dv = [0,0,0]
+ *   - inverse: so that D (+) D.inv = I
+ *   - compose: Dc = D1 (+) D2
+ *   - between: Db = D2 (-) D1, so that D2 = D1 (+) Db
+ *   - composeOverState: x2 = x1 (+) D
+ *   - betweenStates: D = x2 (-) x1, so that x2 = x1 (+) D
+ *   - lift: got from Delta manifold to tangent space (equivalent to log() in rotations)
+ *   - retract: go from tangent space to delta manifold (equivalent to exp() in rotations)
+ *   - plus: D2 = D1 (+) retract(d)
+ *   - diff: d = lift( D2 (-) D1 )
+ *   - body2delta: construct a delta from body magnitudes of linAcc and angVel
+ */
+
+
+
 namespace wolf 
 {
 namespace imu {
@@ -57,8 +88,8 @@ inline void inverse(const MatrixBase<D1>& dp, const QuaternionBase<D2>& dq, cons
     MatrixSizeCheck<3, 1>::check(idv);
 
     idp = - ( dq.conjugate() * (dp - dv * typename D3::Scalar(dt) ) );
-    idv = - ( dq.conjugate() * dv );
     idq =     dq.conjugate();
+    idv = - ( dq.conjugate() * dv );
 }
 
 template<typename D1, typename D2, class T>
@@ -78,6 +109,7 @@ inline void inverse(const MatrixBase<D1>& d,
 
     inverse(dp, dq, dv, dt, idp, idq, idv);
 }
+
 
 template<typename D, class T>
 inline Matrix<typename D::Scalar, 10, 1> inverse(const MatrixBase<D>& d,
@@ -153,27 +185,16 @@ inline void compose(const MatrixBase<D1>& d1,
     MatrixSizeCheck< 9, 9>::check(J_sum_d1);
     MatrixSizeCheck< 9, 9>::check(J_sum_d2);
 
-    // Maps over provided data
-    Map<const Matrix<typename D1::Scalar, 3, 1> >   dp1    ( & d1( 0 ) );
-    Map<const Quaternion<typename D1::Scalar> >     dq1    ( & d1( 3 ) );
-    Map<const Matrix<typename D1::Scalar, 3, 1> >   dv1    ( & d1( 7 ) );
-    Map<const Matrix<typename D2::Scalar, 3, 1> >   dp2    ( & d2( 0 ) );
-    Map<const Quaternion<typename D2::Scalar> >     dq2    ( & d2( 3 ) );
-    Map<const Matrix<typename D2::Scalar, 3, 1> >   dv2    ( & d2( 7 ) );
-    Map<Matrix<typename D3::Scalar, 3, 1> >         sum_p  ( & sum( 0 ) );
-    Map<Quaternion<typename D3::Scalar> >           sum_q  ( & sum( 3 ) );
-    Map<Matrix<typename D3::Scalar, 3, 1> >         sum_v  ( & sum( 7 ) );
-
     // Some useful temporaries
-    Matrix<typename D1::Scalar, 3, 3> dR1 = dq1.matrix(); // First  Delta, DR
-    Matrix<typename D2::Scalar, 3, 3> dR2 = dq2.matrix(); // Second delta, dR
+    Matrix<typename D1::Scalar, 3, 3> dR1 = q2R(d1.segment(3,4)); //dq1.matrix(); // First  Delta, DR
+    Matrix<typename D2::Scalar, 3, 3> dR2 = q2R(d2.segment(3,4)); //dq2.matrix(); // Second delta, dR
 
     // Jac wrt first delta
     J_sum_d1.setIdentity();                                     // dDp'/dDp = dDv'/dDv = I
-    J_sum_d1.block(0,3,3,3).noalias() = - dR1 * skew(dp2) ;     // dDp'/dDo
+    J_sum_d1.block(0,3,3,3).noalias() = - dR1 * skew(d2.head(3)) ;     // dDp'/dDo
     J_sum_d1.block(0,6,3,3) = Matrix3s::Identity() * dt;        // dDp'/dDv = I*dt
     J_sum_d1.block(3,3,3,3) = dR2.transpose();                  // dDo'/dDo
-    J_sum_d1.block(6,3,3,3).noalias() = - dR1 * skew(dv2) ;     // dDv'/dDo
+    J_sum_d1.block(6,3,3,3).noalias() = - dR1 * skew(d2.tail(3)) ;     // dDv'/dDo
 
     // Jac wrt second delta
     J_sum_d2.setIdentity();                                     //
@@ -181,7 +202,7 @@ inline void compose(const MatrixBase<D1>& d1,
     J_sum_d2.block(6,6,3,3) = dR1;                              // dDv'/ddv
     // J_sum_d2.block(3,3,3,3) = Matrix3s::Identity();          // dDo'/ddo = I
 
-    // compose deltas -- done here to avoid aliasing when calling with `d1` and `sum` pointing to the same variable
+    // compose deltas -- done here to avoid aliasing when calling with input `d1` and result `sum` referencing the same variable
     compose(d1, d2, dt, sum);
 }
 
@@ -225,6 +246,7 @@ inline void between(const MatrixBase<D1>& d1,
 
     between(dp1, dq1, dv1, dp2, dq2, dv2, dt, diff_p, diff_q, diff_v);
 }
+
 
 template<typename D1, typename D2, class T>
 inline Matrix<typename D1::Scalar, 10, 1> between(const MatrixBase<D1>& d1,
@@ -284,9 +306,9 @@ inline void betweenStates(const MatrixBase<D1>& p1, const QuaternionBase<D2>& q1
         MatrixSizeCheck<3, 1>::check(dp);
         MatrixSizeCheck<3, 1>::check(dv);
 
-        dp = q1.conjugate() * ( p2 - p1 - v1*dt - 0.5*gravity()*dt*dt );
+        dp = q1.conjugate() * ( p2 - p1 - v1*dt - (T)0.5*gravity().cast<T>()*(T)dt*(T)dt );
         dq = q1.conjugate() *   q2;
-        dv = q1.conjugate() * ( v2 - v1         -     gravity()*dt );
+        dv = q1.conjugate() * ( v2 - v1         -     gravity().cast<T>()*(T)dt );
 }
 
 template<typename D1, typename D2, typename D3, class T>
@@ -411,6 +433,18 @@ inline void diff(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1, const
         diff_v = dv2 - dv1;
 }
 
+template<typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
+inline void diff(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1, const MatrixBase<D3>& dv1,
+                 const MatrixBase<D4>& dp2, const QuaternionBase<D5>& dq2, const MatrixBase<D6>& dv2,
+                 MatrixBase<D7>& diff_p, MatrixBase<D8>& diff_o, MatrixBase<D9>& diff_v ,
+                 MatrixBase<D10>& J_do_dq1, MatrixBase<D11>& J_do_dq2)
+{
+    diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v);
+
+    J_do_dq1    = - jac_SO3_left_inv(diff_o);
+    J_do_dq2    =   jac_SO3_right_inv(diff_o);
+}
+
 
 template<typename D1, typename D2, typename D3>
 inline void diff(const MatrixBase<D1>& d1,
@@ -430,6 +464,46 @@ inline void diff(const MatrixBase<D1>& d1,
     diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v);
 }
 
+template<typename D1, typename D2, typename D3, typename D4, typename D5>
+inline void diff(const MatrixBase<D1>& d1,
+                 const MatrixBase<D2>& d2,
+                 MatrixBase<D3>& dif,
+                 MatrixBase<D4>& J_diff_d1,
+                 MatrixBase<D5>& J_diff_d2)
+{
+    Map<const Matrix<typename D1::Scalar, 3, 1> >   dp1    ( & d1(0) );
+    Map<const Quaternion<typename D1::Scalar> >     dq1    ( & d1(3) );
+    Map<const Matrix<typename D1::Scalar, 3, 1> >   dv1    ( & d1(7) );
+    Map<const Matrix<typename D2::Scalar, 3, 1> >   dp2    ( & d2(0) );
+    Map<const Quaternion<typename D2::Scalar> >     dq2    ( & d2(3) );
+    Map<const Matrix<typename D2::Scalar, 3, 1> >   dv2    ( & d2(7) );
+    Map<Matrix<typename D3::Scalar, 3, 1> >         diff_p ( & dif(0) );
+    Map<Matrix<typename D3::Scalar, 3, 1> >         diff_o ( & dif(3) );
+    Map<Matrix<typename D3::Scalar, 3, 1> >         diff_v ( & dif(6) );
+
+    Matrix<typename D4::Scalar, 3, 3> J_do_dq1, J_do_dq2;
+
+    diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v, J_do_dq1, J_do_dq2);
+
+
+    /* d = diff(d1, d2) is
+     *   dp = dp2 - dp1
+     *   do = Log(dq1.conj * dq2)
+     *   dv = dv2 - dv1
+     *
+     * With trivial Jacobians for dp and dv, and:
+     *   J_do_dq1 = - J_l_inv(theta)
+     *   J_do_dq2 =   J_r_inv(theta)
+     */
+
+    J_diff_d1 = - Matrix<typename D4::Scalar, 9, 9>::Identity();// d(p2  - p1) / d(p1) = - Identity
+    J_diff_d1.block(3,3,3,3) = J_do_dq1;       // d(R1.tr*R2) / d(R1) = - J_l_inv(theta)
+
+    J_diff_d2.setIdentity();                                    // d(R1.tr*R2) / d(R2) =   Identity
+    J_diff_d2.block(3,3,3,3) = J_do_dq2;      // d(R1.tr*R2) / d(R1) =   J_r_inv(theta)
+
+}
+
 template<typename D1, typename D2>
 inline Matrix<typename D1::Scalar, 9, 1> diff(const MatrixBase<D1>& d1,
                                               const MatrixBase<D2>& d2)
@@ -438,6 +512,107 @@ inline Matrix<typename D1::Scalar, 9, 1> diff(const MatrixBase<D1>& d1,
     diff(d1, d2, ret);
     return ret;
 }
+
+
+template<typename D1, typename D2, typename D3, typename D4, typename D5>
+inline void body2delta(const MatrixBase<D1>& a,
+                       const MatrixBase<D2>& w,
+                       const typename D1::Scalar& dt,
+                       MatrixBase<D3>& dp,
+                       QuaternionBase<D4>& dq,
+                       MatrixBase<D5>& dv)
+{
+    MatrixSizeCheck<3,1>::check(a);
+    MatrixSizeCheck<3,1>::check(w);
+    MatrixSizeCheck<3,1>::check(dp);
+    MatrixSizeCheck<3,1>::check(dv);
+
+    dp = 0.5 * a * dt * dt;
+    dq = exp_q(w * dt);
+    dv =       a * dt;
+}
+
+template<typename D1>
+inline Matrix<typename D1::Scalar, 10, 1> body2delta(const MatrixBase<D1>& body,
+                                                     const typename D1::Scalar& dt)
+{
+    MatrixSizeCheck<6,1>::check(body);
+
+    typedef typename D1::Scalar T;
+
+    Matrix<T, 10, 1> delta;
+
+    Map< Matrix<T, 3, 1>> dp ( & delta(0) );
+    Map< Quaternion<T>>   dq ( & delta(3) );
+    Map< Matrix<T, 3, 1>> dv ( & delta(7) );
+
+    body2delta(body.block(0,0,3,1), body.block(3,0,3,1), dt, dp, dq, dv);
+
+    return delta;
+}
+
+template<typename D1, typename D2, typename D3>
+inline void body2delta(const MatrixBase<D1>& body,
+                       const typename D1::Scalar& dt,
+                       MatrixBase<D2>& delta,
+                       MatrixBase<D3>& jac_body)
+{
+    MatrixSizeCheck<6,1>::check(body);
+    MatrixSizeCheck<9,6>::check(jac_body);
+
+    typedef typename D1::Scalar T;
+
+    delta = body2delta(body, dt);
+
+    Matrix<T, 3, 1> w = body.block(3,0,3,1);
+
+    jac_body.setZero();
+    jac_body.block(0,0,3,3) = 0.5 * dt * dt * Matrix<T, 3, 3>::Identity();
+    jac_body.block(3,3,3,3) =            dt * jac_SO3_right(w * dt);
+    jac_body.block(6,0,3,3) =            dt * Matrix<T, 3, 3>::Identity();
+}
+
+template<typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7>
+void motion2data(const MatrixBase<D1>& a, const MatrixBase<D2>& w, const QuaternionBase<D3>& q, const MatrixBase<D4>& a_b, const MatrixBase<D5>& w_b, MatrixBase<D6>& a_m, MatrixBase<D7>& w_m)
+{
+    MatrixSizeCheck<3,1>::check(a);
+    MatrixSizeCheck<3,1>::check(w);
+    MatrixSizeCheck<3,1>::check(a_b);
+    MatrixSizeCheck<3,1>::check(w_b);
+    MatrixSizeCheck<3,1>::check(a_m);
+    MatrixSizeCheck<3,1>::check(w_m);
+
+    // Note: data = (a_m , w_m)
+    a_m = a + a_b - q.conjugate()*gravity();
+    w_m = w + w_b;
+}
+
+/* Create IMU data from body motion
+ * Input:
+ *   motion : [ax, ay, az, wx, wy, wz] the motion in body frame
+ *   q      : the current orientation wrt horizontal
+ *   bias   : the bias of the IMU
+ * Output:
+ *   return : the data vector as created by the IMU (with motion, gravity, and bias)
+ */
+template<typename D1, typename D2, typename D3>
+Matrix<typename D1::Scalar, 6, 1> motion2data(const MatrixBase<D1>& motion, const QuaternionBase<D2>& q, const MatrixBase<D3>& bias)
+{
+    Matrix<typename D1::Scalar, 6, 1>      data;
+    Map<Matrix<typename D1::Scalar, 3, 1>> a_m (data.data()    );
+    Map<Matrix<typename D1::Scalar, 3, 1>> w_m (data.data() + 3);
+
+    motion2data(motion.block(0,0,3,1),
+                motion.block(3,0,3,1),
+                q,
+                bias.block(0,0,3,1),
+                bias.block(3,0,3,1),
+                a_m,
+                w_m   );
+
+    return  data;
+}
+
 
 
 } // namespace imu

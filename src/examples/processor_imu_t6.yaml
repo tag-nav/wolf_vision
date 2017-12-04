@@ -6,3 +6,4 @@ keyframe vote:
     dist traveled:      10000   # meters
     angle turned:       10000   # radians (1 rad approx 57 deg, approx 60 deg)
     voting_active:      true
+    

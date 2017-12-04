@@ -16,7 +16,7 @@ class ConstraintGPS2D : public ConstraintAutodiff<ConstraintGPS2D, 2, 2>
     public:
 
         ConstraintGPS2D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAutodiff<ConstraintGPS2D, 2, 2>(CTR_GPS_FIX_2D, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr())
+            ConstraintAutodiff<ConstraintGPS2D, 2, 2>(CTR_GPS_FIX_2D, nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr())
         {
             setType("GPS FIX 2D");
         }

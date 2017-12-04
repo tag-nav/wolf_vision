@@ -85,8 +85,6 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
         virtual bool isMotion();
 
-        ProblemPtr getProblem();
-
         void setTimeTolerance(Scalar _time_tolerance);
 
     protected:
@@ -100,21 +98,6 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 #include "constraint_base.h"
 
 namespace wolf {
-
-inline wolf::ProblemPtr ProcessorBase::getProblem()
-{
-    ProblemPtr prb = problem_ptr_.lock();
-    if (!prb)
-    {
-        SensorBasePtr sen = sensor_ptr_.lock();
-        if (sen)
-        {
-            prb = sen->getProblem();
-            problem_ptr_ = prb;
-        }
-    }
-    return prb;
-}
 
 inline bool ProcessorBase::isMotion()
 {

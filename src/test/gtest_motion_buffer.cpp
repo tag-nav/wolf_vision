@@ -83,12 +83,12 @@ TEST(MotionBuffer, getDelta)
 
     MB.get().push_back(m0);
 
-    ASSERT_EQ(MB.getDelta(t0), m0.delta_integr_);
+    ASSERT_EQ(MB.getMotion(t0).delta_integr_, m0.delta_integr_);
 
     MB.get().push_back(m1);
 
-    ASSERT_EQ(MB.getDelta(t0), m0.delta_integr_);
-    ASSERT_EQ(MB.getDelta(t1), m1.delta_integr_);
+    ASSERT_EQ(MB.getMotion(t0).delta_integr_, m0.delta_integr_);
+    ASSERT_EQ(MB.getMotion(t1).delta_integr_, m1.delta_integr_);
 }
 
 TEST(MotionBuffer, Split)
@@ -115,51 +115,51 @@ TEST(MotionBuffer, Split)
     ASSERT_EQ(MB    .getMotion(t2).ts_, t2);
 }
 
-TEST(MotionBuffer, integrateCovariance)
-{
-    MotionBuffer MB(1,1,1,0);
-
-    MB.get().push_back(m0);
-    MB.get().push_back(m1);
-    MB.get().push_back(m2);
-    MB.get().push_back(m3);
-    MB.get().push_back(m4); // put 5 motions
-
-    Eigen::MatrixXs cov = MB.integrateCovariance();
-    ASSERT_NEAR(cov(0), 0.04, 1e-8);
-
-}
-
-TEST(MotionBuffer, integrateCovariance_ts)
-{
-    MotionBuffer MB(1,1,1,0);
-
-    MB.get().push_back(m0);
-    MB.get().push_back(m1);
-    MB.get().push_back(m2);
-    MB.get().push_back(m3);
-    MB.get().push_back(m4); // put 5 motions
-
-    Eigen::MatrixXs cov = MB.integrateCovariance(t2);
-    ASSERT_NEAR(cov(0), 0.02, 1e-8);
-}
-
-TEST(MotionBuffer, integrateCovariance_ti_tf)
-{
-    MotionBuffer MB(1,1,1,0);
-
-    MB.get().push_back(m0);
-    MB.get().push_back(m1);
-    MB.get().push_back(m2);
-    MB.get().push_back(m3);
-    MB.get().push_back(m4); // put 5 motions
-
-    Eigen::MatrixXs cov = MB.integrateCovariance(t1, t3);
-    ASSERT_NEAR(cov(0), 0.03, 1e-8);
-
-    cov = MB.integrateCovariance(t0, t3); // first delta_cov is zero so it does not integate
-    ASSERT_NEAR(cov(0), 0.03, 1e-8);
-}
+// TEST(MotionBuffer, integrateCovariance)
+// {
+//     MotionBuffer MB(1,1,1,0);
+// 
+//     MB.get().push_back(m0);
+//     MB.get().push_back(m1);
+//     MB.get().push_back(m2);
+//     MB.get().push_back(m3);
+//     MB.get().push_back(m4); // put 5 motions
+// 
+//     Eigen::MatrixXs cov = MB.integrateCovariance();
+//     ASSERT_NEAR(cov(0), 0.04, 1e-8);
+// 
+// }
+// 
+// TEST(MotionBuffer, integrateCovariance_ts)
+// {
+//     MotionBuffer MB(1,1,1,0);
+// 
+//     MB.get().push_back(m0);
+//     MB.get().push_back(m1);
+//     MB.get().push_back(m2);
+//     MB.get().push_back(m3);
+//     MB.get().push_back(m4); // put 5 motions
+// 
+//     Eigen::MatrixXs cov = MB.integrateCovariance(t2);
+//     ASSERT_NEAR(cov(0), 0.02, 1e-8);
+// }
+// 
+// TEST(MotionBuffer, integrateCovariance_ti_tf)
+// {
+//     MotionBuffer MB(1,1,1,0);
+// 
+//     MB.get().push_back(m0);
+//     MB.get().push_back(m1);
+//     MB.get().push_back(m2);
+//     MB.get().push_back(m3);
+//     MB.get().push_back(m4); // put 5 motions
+// 
+//     Eigen::MatrixXs cov = MB.integrateCovariance(t1, t3);
+//     ASSERT_NEAR(cov(0), 0.03, 1e-8);
+// 
+//     cov = MB.integrateCovariance(t0, t3); // first delta_cov is zero so it does not integate
+//     ASSERT_NEAR(cov(0), 0.03, 1e-8);
+// }
 
 TEST(MotionBuffer, print)
 {

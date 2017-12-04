@@ -16,18 +16,21 @@ SensorBase::SensorBase(const std::string& _type,
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
         state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
+        calib_size_(0),
         is_removing_(false),
         sensor_id_(++sensor_id_count_), // simple ID factory
         extrinsic_dynamic_(_extr_dyn),
         intrinsic_dynamic_(_intr_dyn),
+        has_capture_(false),
         noise_std_(_noise_size),
         noise_cov_(_noise_size, _noise_size)
 {
+    noise_std_.setZero();
+    noise_cov_.setZero();
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _intr_ptr;
-//    std::cout << "constructed  +S" << id() << std::endl;
-    //
+    updateCalibSize();
 }
 
 SensorBase::SensorBase(const std::string& _type,
@@ -39,29 +42,27 @@ SensorBase::SensorBase(const std::string& _type,
                        const bool _intr_dyn) :
         NodeBase("SENSOR", _type),
         hardware_ptr_(),
-        state_block_vec_(6), // allow for 3 state blocks by default. Resize in derived constructors if needed.
+        state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
+        calib_size_(0),
         is_removing_(false),
         sensor_id_(++sensor_id_count_), // simple ID factory
         extrinsic_dynamic_(_extr_dyn),
         intrinsic_dynamic_(_intr_dyn),
+        has_capture_(false),
         noise_std_(_noise_std),
         noise_cov_(_noise_std.size(), _noise_std.size())
 {
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _intr_ptr;
-    noise_cov_.setZero();
-    for (unsigned int i = 0; i < _noise_std.size(); i++)
-        noise_cov_(i, i) = noise_std_(i) * noise_std_(i);
-
-//    std::cout << "constructed  +S" << id() << std::endl;
+    setNoiseStd(_noise_std);
+    updateCalibSize();
 }
 
 SensorBase::~SensorBase()
 {
     // Remove State Blocks
     removeStateBlocks();
-    //    std::cout << "destructed   -S" << id() << std::endl;
 }
 
 void SensorBase::remove()
@@ -92,14 +93,14 @@ void SensorBase::removeStateBlocks()
 {
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        auto sbp = getStateBlockPtrStatic(i);
         if (sbp != nullptr)
         {
             if (getProblem() != nullptr && !extrinsic_dynamic_)
             {
                 getProblem()->removeStateBlockPtr(sbp);
             }
-            setStateBlockPtr(i, nullptr);
+            setStateBlockPtrStatic(i, nullptr);
         }
     }
 }
@@ -115,6 +116,7 @@ void SensorBase::fix()
             if (getProblem() != nullptr)
                 getProblem()->updateStateBlockPtr(sbp);
         }
+    updateCalibSize();
 }
 
 void SensorBase::unfix()
@@ -126,6 +128,7 @@ void SensorBase::unfix()
             if (getProblem() != nullptr)
                 getProblem()->updateStateBlockPtr(sbp);
         }
+    updateCalibSize();
 }
 
 void SensorBase::fixExtrinsics()
@@ -140,6 +143,7 @@ void SensorBase::fixExtrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalibSize();
 }
 
 void SensorBase::unfixExtrinsics()
@@ -154,6 +158,7 @@ void SensorBase::unfixExtrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalibSize();
 }
 
 void SensorBase::fixIntrinsics()
@@ -168,6 +173,7 @@ void SensorBase::fixIntrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalibSize();
 }
 
 void SensorBase::unfixIntrinsics()
@@ -182,6 +188,7 @@ void SensorBase::unfixIntrinsics()
                 getProblem()->updateStateBlockPtr(sbp);
         }
     }
+    updateCalibSize();
 }
 
 
@@ -196,11 +203,140 @@ void SensorBase::registerNewStateBlocks()
     }
 }
 
-void SensorBase::setNoise(const Eigen::VectorXs& _noise_std) {
-	noise_std_ = _noise_std;
-	noise_cov_.setZero();
-	for (unsigned int i=0; i<_noise_std.size(); i++)
-		noise_cov_(i,i) = _noise_std(i) * _noise_std(i);
+void SensorBase::setNoiseStd(const Eigen::VectorXs& _noise_std) {
+    noise_std_ = _noise_std;
+    noise_cov_.setZero();
+    for (unsigned int i=0; i<_noise_std.size(); i++)
+    {
+        Scalar var_i = _noise_std(i) * _noise_std(i);
+        noise_cov_(i,i) = var_i;
+    }
+}
+
+void SensorBase::setNoiseCov(const Eigen::MatrixXs& _noise_cov) {
+    noise_std_ = _noise_cov.diagonal().array().sqrt();
+    noise_cov_ = _noise_cov;
+}
+
+CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
+{
+    // we search for the most recent Capture of this sensor before _ts
+    CaptureBasePtr capture = nullptr;
+    FrameBaseList frame_list = getProblem()->getTrajectoryPtr()->getFrameList();
+    FrameBaseRevIter frame_rev_it = frame_list.rbegin();
+    while (frame_rev_it != frame_list.rend())
+    {
+        if ((*frame_rev_it)->getTimeStamp() <= _ts)
+        {
+            CaptureBasePtr capture = (*frame_rev_it)->getCaptureOf(shared_from_this());
+            if (capture)
+                // found the most recent Capture made by this sensor !
+                break;
+
+            frame_rev_it++;
+        }
+    }
+    return capture;
+}
+
+StateBlockPtr SensorBase::getPPtr(const TimeStamp _ts)
+{
+    return getStateBlockPtrDynamic(0, _ts);
+}
+
+StateBlockPtr SensorBase::getOPtr(const TimeStamp _ts)
+{
+    return getStateBlockPtrDynamic(1, _ts);
+}
+
+StateBlockPtr SensorBase::getIntrinsicPtr(const TimeStamp _ts)
+{
+    return getStateBlockPtrDynamic(2, _ts);
+}
+
+StateBlockPtr SensorBase::getPPtr()
+{
+    ProblemPtr P = getProblem();
+    if (P)
+    {
+        FrameBasePtr KF = P->getLastKeyFramePtr();
+        if (KF)
+        {
+            return getPPtr(KF->getTimeStamp());
+        }
+    }
+    return state_block_vec_[0];
+}
+
+StateBlockPtr SensorBase::getOPtr()
+{
+    ProblemPtr P = getProblem();
+    if (P)
+    {
+        FrameBasePtr KF = P->getLastKeyFramePtr();
+        if (KF)
+        {
+            return getOPtr(KF->getTimeStamp());
+        }
+    }
+    return state_block_vec_[1];
+}
+
+StateBlockPtr SensorBase::getIntrinsicPtr()
+{
+    ProblemPtr P = getProblem();
+    if (P)
+    {
+        FrameBasePtr KF = P->getLastKeyFramePtr();
+        if (KF)
+        {
+            return getIntrinsicPtr(KF->getTimeStamp());
+        }
+    }
+    return state_block_vec_[2];
+}
+
+wolf::Size SensorBase::computeCalibSize() const
+{
+    Size sz = 0;
+    for (Size i = 0; i < state_block_vec_.size(); i++)
+    {
+        auto sb = state_block_vec_[i];
+        if (sb && !sb->isFixed())
+            sz += sb->getSize();
+    }
+    return sz;
+}
+
+
+Eigen::VectorXs SensorBase::getCalibration() const
+{
+    Size index = 0;
+    Size sz = getCalibSize();
+    Eigen::VectorXs calib(sz);
+    for (Size i = 0; i < state_block_vec_.size(); i++)
+    {
+        auto sb = getStateBlockPtrStatic(i);
+        if (sb && !sb->isFixed())
+        {
+            calib.segment(index, sb->getSize()) = sb->getState();
+            index += sb->getSize();
+        }
+    }
+    return calib;
+}
+
+
+bool SensorBase::process(const CaptureBasePtr capture_ptr)
+{
+    capture_ptr->setSensorPtr(shared_from_this());
+
+    for (const auto processor : processor_list_)
+    {
+        processor->process(capture_ptr);
+    }
+
+    return true;
 }
 
 } // namespace wolf

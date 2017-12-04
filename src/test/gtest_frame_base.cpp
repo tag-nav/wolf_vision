@@ -23,7 +23,6 @@ using namespace Eigen;
 using namespace std;
 using namespace wolf;
 
-
 TEST(FrameBase, GettersAndSetters)
 {
     FrameBasePtr F = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
@@ -34,7 +33,7 @@ TEST(FrameBase, GettersAndSetters)
     TimeStamp t;
     F->getTimeStamp(t);
     ASSERT_EQ(t, 1);
-    ASSERT_EQ(F->isFixed(), false);
+    ASSERT_FALSE(F->isFixed());
     ASSERT_EQ(F->isKey(), false);
 }
 
@@ -74,7 +73,7 @@ TEST(FrameBase, LinksToTree)
     T->addFrame(F1);
     FrameBasePtr F2 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
     T->addFrame(F2);
-    CaptureMotionPtr C = make_shared<CaptureMotion>(1, S, Vector3s::Zero(), 3, 3, 3, 0);
+    CaptureMotionPtr C = make_shared<CaptureMotion>(1, S, Vector3s::Zero(), 3, 3, nullptr);
     F1->addCapture(C);
     /// @todo link sensor & proccessor
     ProcessorBasePtr p = std::make_shared<ProcessorOdom2D>();
@@ -110,6 +109,18 @@ TEST(FrameBase, LinksToTree)
     ASSERT_TRUE(F1->isFixed());
     F1->unfix();
     ASSERT_FALSE(F1->isFixed());
+    F1->fix();
+    ASSERT_TRUE(F1->isFixed());
+    F1->getPPtr()->unfix();
+    ASSERT_FALSE(F1->isFixed());
+    F1->unfix();
+    ASSERT_FALSE(F1->isFixed());
+    F1->getPPtr()->fix();
+    ASSERT_FALSE(F1->isFixed());
+    F1->getOPtr()->fix();
+    ASSERT_TRUE(F1->isFixed());
+
+
 
     // set key
     F1->setKey();

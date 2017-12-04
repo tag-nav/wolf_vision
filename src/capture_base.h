@@ -20,34 +20,41 @@ namespace wolf{
 class CaptureBase : public NodeBase, public std::enable_shared_from_this<CaptureBase>
 {
     private:
-        FrameBaseWPtr frame_ptr_;
+        FrameBaseWPtr   frame_ptr_;
         FeatureBaseList feature_list_;
+        ConstraintBaseList constrained_by_list_;
+        SensorBaseWPtr  sensor_ptr_; ///< Pointer to sensor
+        // Deal with sensors with dynamic extrinsics (check dynamic_extrinsic_ in SensorBase)
+        std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, intrinsic.
+        Size calib_size_;           ///< size of the calibration parameters (dynamic or static sensor params that are not fixed)
 
         static unsigned int capture_id_count_;
-        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
+        bool is_removing_;          ///< A flag for safely removing nodes from the Wolf tree. See remove().
 
     protected:
         unsigned int capture_id_;
-        TimeStamp time_stamp_; ///< Time stamp
-        SensorBaseWPtr sensor_ptr_; ///< Pointer to sensor
-
-        // Deal with sensors with dynamic extrinsics (check dynamic_extrinsic_ in SensorBase)
-        StateBlockPtr sensor_p_ptr_;
-        StateBlockPtr sensor_o_ptr_;
+        TimeStamp time_stamp_;      ///< Time stamp
 
     public:
 
-        CaptureBase(const std::string& _type, const TimeStamp& _ts, SensorBasePtr _sensor_ptr = nullptr);
+        CaptureBase(const std::string& _type,
+                    const TimeStamp& _ts,
+                    SensorBasePtr _sensor_ptr   = nullptr,
+                    StateBlockPtr _p_ptr        = nullptr,
+                    StateBlockPtr _o_ptr        = nullptr,
+                    StateBlockPtr _intr_ptr     = nullptr
+                    );
 
         virtual ~CaptureBase();
         void remove();
+
+        // Type
+        virtual bool isMotion() const { return false; }
 
         unsigned int id();
         TimeStamp getTimeStamp() const;
         void setTimeStamp(const TimeStamp& _ts);
         void setTimeStampToNow();
-
-        ProblemPtr getProblem();
 
         FrameBasePtr getFramePtr() const;
         void setFramePtr(const FrameBasePtr _frm_ptr);
@@ -60,12 +67,52 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void getConstraintList(ConstraintBaseList& _ctr_list);
 
         SensorBasePtr getSensorPtr() const;
-        StateBlockPtr getSensorPPtr() const;
-        StateBlockPtr getSensorOPtr() const;
-
         virtual void setSensorPtr(const SensorBasePtr sensor_ptr);
 
+        // constrained by
+        virtual ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        unsigned int getHits() const;
+        ConstraintBaseList& getConstrainedByList();
+
+        // State blocks
+        const std::vector<StateBlockPtr>& getStateBlockVec() const;
+        std::vector<StateBlockPtr>& getStateBlockVec();
+        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
+        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
+
+        StateBlockPtr getSensorPPtr() const;
+        StateBlockPtr getSensorOPtr() const;
+        StateBlockPtr getSensorIntrinsicPtr() const;
+        void removeStateBlocks();
+        virtual void registerNewStateBlocks();
+
+        void fix();
+        void unfix();
+        void fixExtrinsics();
+        void unfixExtrinsics();
+        void fixIntrinsics();
+        void unfixIntrinsics();
+
+        Size getCalibSize() const;
+        virtual Eigen::VectorXs getCalibration() const;
+        void setCalibration(const Eigen::VectorXs& _calib);
+
+    protected:
+        Size computeCalibSize() const;
+
+    private:
+        void updateCalibSize();
 };
+
+inline wolf::Size CaptureBase::getCalibSize() const
+{
+    return calib_size_;
+}
+
+inline void CaptureBase::updateCalibSize()
+{
+    calib_size_ = computeCalibSize();
+}
 
 }
 
@@ -75,51 +122,70 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
 
 namespace wolf{
 
-inline ProblemPtr CaptureBase::getProblem()
+inline const std::vector<StateBlockPtr>& CaptureBase::getStateBlockVec() const
 {
-    ProblemPtr prb = problem_ptr_.lock();
-    if (!prb)
+    return state_block_vec_;
+}
+
+inline std::vector<StateBlockPtr>& CaptureBase::getStateBlockVec()
+{
+    return state_block_vec_;
+}
+
+inline StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
+{
+    if (getSensorPtr())
     {
-        FrameBasePtr frm = frame_ptr_.lock();
-        if (frm)
-        {
-            prb = frm->getProblem();
-            problem_ptr_ = prb;
-        }
+        if (_i < 2) // _i == 0 is position, 1 is orientation, 2 and onwards are intrinsics
+            if (getSensorPtr()->extrinsicsInCaptures())
+            {
+                assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+                return state_block_vec_[_i];
+            }
+            else
+                return getSensorPtr()->getStateBlockPtrStatic(_i);
+
+        else // 2 and onwards are intrinsics
+            if (getSensorPtr()->intrinsicsInCaptures())
+            {
+                assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+                return state_block_vec_[_i];
+            }
+            else
+                return getSensorPtr()->getStateBlockPtrStatic(_i);
     }
-
-    return prb;
+    else // No sensor associated: assume sensor params are here
+    {
+        assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+        return state_block_vec_[_i];
+    }
 }
 
-inline wolf::StateBlockPtr CaptureBase::getSensorPPtr() const
+inline void CaptureBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
-    if (getSensorPtr()->isExtrinsicDynamic())
-        return sensor_p_ptr_;
-    else
-        return getSensorPtr()->getPPtr();
+    state_block_vec_[_i] = _sb_ptr;
 }
 
-inline wolf::StateBlockPtr CaptureBase::getSensorOPtr() const
+
+inline StateBlockPtr CaptureBase::getSensorPPtr() const
 {
-    if (getSensorPtr()->isExtrinsicDynamic())
-        return sensor_o_ptr_;
-    else
-        return getSensorPtr()->getOPtr();
+    return getStateBlockPtr(0);
+}
+
+inline StateBlockPtr CaptureBase::getSensorOPtr() const
+{
+    return getStateBlockPtr(1);
+}
+
+inline StateBlockPtr CaptureBase::getSensorIntrinsicPtr() const
+{
+    return getStateBlockPtr(2);
 }
 
 
 inline unsigned int CaptureBase::id()
 {
     return capture_id_;
-}
-
-inline FeatureBasePtr CaptureBase::addFeature(FeatureBasePtr _ft_ptr)
-{
-    //std::cout << "Adding feature" << std::endl;
-    feature_list_.push_back(_ft_ptr);
-    _ft_ptr->setCapturePtr(shared_from_this());
-    _ft_ptr->setProblem(getProblem());
-    return _ft_ptr;
 }
 
 inline FrameBasePtr CaptureBase::getFramePtr() const
@@ -142,6 +208,24 @@ inline void CaptureBase::getConstraintList(ConstraintBaseList& _ctr_list)
     for (auto f_ptr : getFeatureList())
         f_ptr->getConstraintList(_ctr_list);
 }
+
+inline ConstraintBasePtr CaptureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.push_back(_ctr_ptr);
+    _ctr_ptr->setCaptureOtherPtr( shared_from_this() );
+    return _ctr_ptr;
+}
+
+inline unsigned int CaptureBase::getHits() const
+{
+    return constrained_by_list_.size();
+}
+
+inline ConstraintBaseList& CaptureBase::getConstrainedByList()
+{
+    return constrained_by_list_;
+}
+
 
 inline TimeStamp CaptureBase::getTimeStamp() const
 {

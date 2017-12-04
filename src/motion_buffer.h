@@ -46,6 +46,7 @@ struct Motion
                const MatrixXs& _jac_delta_int,
                const MatrixXs& _jacobian_calib);// = MatrixXs::Zero(0,0));
         ~Motion();
+    private:
         void resize(Size _data_s, Size _delta_s, Size _delta_cov_s, Size _calib_s);
 
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.
@@ -79,17 +80,18 @@ class MotionBuffer{
         MotionBuffer(Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size);
         std::list<Motion>& get();
         const std::list<Motion>& get() const;
+        const VectorXs& getCalibrationPreint() const;
+        void setCalibrationPreint(const VectorXs& _calib_preint);
         const Motion& getMotion(const TimeStamp& _ts) const;
         void getMotion(const TimeStamp& _ts, Motion& _motion) const;
-        const Eigen::VectorXs& getDelta(const TimeStamp& _ts) const;
-        void getDelta(const TimeStamp& _ts, Eigen::VectorXs& _delta_integr) const;
         void split(const TimeStamp& _ts, MotionBuffer& _oldest_buffer);
-        MatrixXs integrateCovariance() const; // Integrate all buffer
-        MatrixXs integrateCovariance(const TimeStamp& _ts) const; // Integrate up to time stamp (included)
-        MatrixXs integrateCovariance(const TimeStamp& _ts_1, const TimeStamp _ts_2) const; // integrate between time stamps (both included)
+//        MatrixXs integrateCovariance() const; // Integrate all buffer
+//        MatrixXs integrateCovariance(const TimeStamp& _ts) const; // Integrate up to time stamp (included)
+//        MatrixXs integrateCovariance(const TimeStamp& _ts_1, const TimeStamp _ts_2) const; // integrate between time stamps (both included)
         void print(bool show_data = 0, bool show_delta = 0, bool show_delta_int = 0, bool show_jacs = 0);
 
     private:
+        VectorXs calib_preint_;         ///< value of the calibration params during pre-integration
         std::list<Motion> container_;
 };
 
@@ -103,15 +105,18 @@ inline const std::list<Motion>& MotionBuffer::get() const
     return container_;
 }
 
-inline const Eigen::VectorXs& MotionBuffer::getDelta(const TimeStamp& _ts) const
+inline const VectorXs& MotionBuffer::getCalibrationPreint() const
 {
-    return getMotion(_ts).delta_integr_;
+    return calib_preint_;
 }
 
-inline void MotionBuffer::getDelta(const TimeStamp& _ts, Eigen::VectorXs& _delta_integr) const
+inline void MotionBuffer::setCalibrationPreint(const VectorXs& _calib_preint)
 {
-    _delta_integr = getMotion(_ts).delta_integr_;
+    assert(_calib_preint.size() == calib_size_ && "Wrong size of calibration parameters");
+
+    calib_preint_ = _calib_preint;
 }
+
 
 } // namespace wolf
 

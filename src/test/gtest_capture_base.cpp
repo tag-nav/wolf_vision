@@ -9,6 +9,7 @@
 #include "utils_gtest.h"
 
 #include "capture_base.h"
+#include "state_angle.h"
 
 using namespace wolf;
 using namespace Eigen;
@@ -33,6 +34,44 @@ TEST(CaptureBase, ConstructorWithSensor)
     ASSERT_TRUE(C->getSensorPtr());
     ASSERT_FALSE(C->getSensorPPtr());
     ASSERT_FALSE(C->getSensorOPtr());
+}
+
+TEST(CaptureBase, Static_sensor_params)
+{
+    StateBlockPtr p(std::make_shared<StateBlock>(2));
+    StateBlockPtr o(std::make_shared<StateAngle>() );
+    StateBlockPtr i(std::make_shared<StateBlock>(2));
+    SensorBasePtr S(std::make_shared<SensorBase>("DUMMY", p, o, i, 2));
+    CaptureBasePtr C(std::make_shared<CaptureBase>("DUMMY", 1.5, S)); // timestamp = 1.5
+
+    // query sensor blocks
+    ASSERT_EQ(S->getPPtr(), p);
+    ASSERT_EQ(S->getOPtr(), o);
+    ASSERT_EQ(S->getIntrinsicPtr(), i);
+
+    // query capture blocks
+    ASSERT_EQ(C->getSensorPPtr(), p);
+    ASSERT_EQ(C->getSensorOPtr(), o);
+    ASSERT_EQ(C->getSensorIntrinsicPtr(), i);
+}
+
+TEST(CaptureBase, Dynamic_sensor_params)
+{
+    StateBlockPtr p(std::make_shared<StateBlock>(2));
+    StateBlockPtr o(std::make_shared<StateAngle>() );
+    StateBlockPtr i(std::make_shared<StateBlock>(2));
+    SensorBasePtr S(std::make_shared<SensorBase>("DUMMY", nullptr, nullptr, nullptr, 2, true, true)); // last 2 'true' mark dynamic
+    CaptureBasePtr C(std::make_shared<CaptureBase>("DUMMY", 1.5, S, p, o, i)); // timestamp = 1.5
+
+    // query sensor blocks -- need KFs to find some Capture with the params
+    //    ASSERT_EQ(S->getPPtr(), p);
+    //    ASSERT_EQ(S->getOPtr(), o);
+    //    ASSERT_EQ(S->getIntrinsicPtr(), i);
+
+    // query capture blocks
+    ASSERT_EQ(C->getSensorPPtr(), p);
+    ASSERT_EQ(C->getSensorOPtr(), o);
+    ASSERT_EQ(C->getSensorIntrinsicPtr(), i);
 }
 
 TEST(CaptureBase, addFeature)

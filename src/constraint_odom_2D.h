@@ -16,13 +16,19 @@ class ConstraintOdom2D : public ConstraintAutodiff<ConstraintOdom2D, 3, 2, 1, 2,
 {
     public:
         ConstraintOdom2D(const FeatureBasePtr& _ftr_ptr,
-                         const FrameBasePtr& _frame_ptr,
+                         const FrameBasePtr& _frame_other_ptr,
                          const ProcessorBasePtr& _processor_ptr = nullptr,
                          bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-             ConstraintAutodiff<ConstraintOdom2D, 3, 2, 1, 2, 1>(CTR_ODOM_2D, _frame_ptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status, _frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+             ConstraintAutodiff<ConstraintOdom2D, 3, 2, 1, 2, 1>(CTR_ODOM_2D,
+                                                                 _frame_other_ptr, nullptr, nullptr, nullptr,
+                                                                 _processor_ptr,
+                                                                 _apply_loss_function, _status,
+                                                                 _frame_other_ptr->getPPtr(),
+                                                                 _frame_other_ptr->getOPtr(),
+                                                                 _ftr_ptr->getFramePtr()->getPPtr(),
+                                                                 _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("ODOM 2D");
-//            std::cout << "created ConstraintOdom2D " << std::endl;
         }
 
         virtual ~ConstraintOdom2D() = default;

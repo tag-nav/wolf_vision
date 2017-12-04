@@ -72,8 +72,6 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         void setExpectation(const Eigen::VectorXs& expectation);
 
         // wolf tree access
-        ProblemPtr getProblem();
-
         FrameBasePtr getFramePtr() const;
 
         CaptureBasePtr getCapturePtr() const;
@@ -112,21 +110,6 @@ inline ConstraintBasePtr FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_pt
 inline unsigned int FeatureBase::getHits() const
 {
     return constrained_by_list_.size();
-}
-
-inline ProblemPtr FeatureBase::getProblem()
-{
-    ProblemPtr prb = problem_ptr_.lock();
-    if (!prb)
-    {
-        CaptureBasePtr cap = capture_ptr_.lock();
-        if (cap)
-        {
-            prb = cap->getProblem();
-            problem_ptr_ = prb;
-        }
-    }
-    return prb;
 }
 
 inline wolf::ConstraintBaseList& FeatureBase::getConstrainedByList()

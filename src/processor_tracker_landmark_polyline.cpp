@@ -25,7 +25,7 @@ void ProcessorTrackerLandmarkPolyline::computeTransformations(const TimeStamp& _
     Eigen::Matrix2s R_world_robot = Eigen::Rotation2Ds(vehicle_pose(2)).matrix();
 
     // robot_sensor (to be computed once if extrinsics are fixed and not dynamic)
-    if (getSensorPtr()->isExtrinsicDynamic() || !getSensorPtr()->getPPtr()->isFixed()
+    if (getSensorPtr()->extrinsicsInCaptures() || !getSensorPtr()->getPPtr()->isFixed()
             || !getSensorPtr()->getOPtr()->isFixed() || !extrinsics_transformation_computed_)
     {
         t_robot_sensor_ = getSensorPtr()->getPPtr()->getState();

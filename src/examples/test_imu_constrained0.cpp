@@ -151,8 +151,8 @@ int main(int argc, char** argv)
     Scalar input_clock;
     TimeStamp ts(0);
     TimeStamp t_odom(0);
-    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu);
-    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6, 6, 0);
+    wolf::CaptureIMUPtr imu_ptr = std::make_shared<CaptureIMU>(ts, sen_imu, data_imu, Matrix6s::Identity(), Vector6s::Zero());
+    wolf::CaptureMotionPtr mot_ptr = std::make_shared<CaptureMotion>(t, sen_odom3D, data_odom3D, 6, 6, nullptr);
     
     //read first odom data from file
     odom_data_input >> input_clock >> data_odom3D[0] >> data_odom3D[1] >> data_odom3D[2] >> data_odom3D[3] >> data_odom3D[4] >> data_odom3D[5];
@@ -350,7 +350,7 @@ int main(int argc, char** argv)
                     ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getAccBiasPtr()->getState();
                     wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeaturePtr()->getFramePtr())->getGyroBiasPtr()->getState();
 
-                    std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->getResiduals(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
+                    std::static_pointer_cast<ConstraintIMU>(ctr_ptr)->residual(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                     std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
                 }
             }

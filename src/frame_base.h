@@ -18,16 +18,6 @@ class StateBlock;
 
 namespace wolf {
 
-/** \brief Enumeration of all possible state status
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    ST_ESTIMATED = 0,   ///< State in estimation (default)
-    ST_FIXED = 1,       ///< State fixed, estimated enough or fixed infrastructure.
-} StateStatus;
-
 
 //class FrameBase
 class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase>
@@ -44,7 +34,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
     protected:
         unsigned int frame_id_;
         FrameType type_;     ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
-        StateStatus status_;       ///< status of the estimation of the frame state
         TimeStamp time_stamp_;     ///< frame time stamp
         
     public:
@@ -83,11 +72,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         bool isKey() const;
         void setKey();
 
-        // Fixed / Estimated
-        void fix();
-        void unfix();
-        bool isFixed() const;
-
         // Frame values ------------------------------------------------
     public:
         void        setTimeStamp(const TimeStamp& _ts);
@@ -97,7 +81,13 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         // State blocks
     public:
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
-        std::vector<StateBlockPtr>&       getStateBlockVec();
+        std::vector<StateBlockPtr>& getStateBlockVec();
+    protected:
+        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
+        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
+        void resizeStateBlockVec(int _size);
+
+    public:
         StateBlockPtr getPPtr() const;
         StateBlockPtr getOPtr() const;
         StateBlockPtr getVPtr() const;
@@ -105,25 +95,23 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void setOPtr(const StateBlockPtr _o_ptr);
         void setVPtr(const StateBlockPtr _v_ptr);
         void registerNewStateBlocks();
-    private:
         void removeStateBlocks();
 
-    protected:
-        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
-        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
-        void resizeStateBlockVec(int _size);
+        // Fixed / Estimated
+    public:
+        void fix();
+        void unfix();
+        bool isFixed() const;
 
         // States
     public:
-        void setState(const Eigen::VectorXs& _st);
+        void setState(const Eigen::VectorXs& _state);
         Eigen::VectorXs getState() const;
-        void getState(Eigen::VectorXs& state) const;
+        void getState(Eigen::VectorXs& _state) const;
         unsigned int getSize() const;
 
         // Wolf tree access ---------------------------------------------------
     public:
-        ProblemPtr getProblem();
-
         TrajectoryBasePtr getTrajectoryPtr() const;
         void setTrajectoryPtr(TrajectoryBasePtr _trj_ptr);
 
@@ -133,18 +121,17 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         CaptureBaseList& getCaptureList();
         CaptureBasePtr addCapture(CaptureBasePtr _capt_ptr);
         CaptureBasePtr getCaptureOf(const SensorBasePtr _sensor_ptr);
+        CaptureBasePtr getCaptureOf(const SensorBasePtr _sensor_ptr, const std::string& type);
+        CaptureBaseList getCapturesOf(const SensorBasePtr _sensor_ptr);
         void unlinkCapture(CaptureBasePtr _cap_ptr);
+
+        ConstraintBasePtr getConstraintOf(const ProcessorBasePtr _processor_ptr);
+        ConstraintBasePtr getConstraintOf(const ProcessorBasePtr _processor_ptr, const std::string& type);
 
         void getConstraintList(ConstraintBaseList& _ctr_list);
         virtual ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
         ConstraintBaseList& getConstrainedByList();
-
-
-
-    private:
-        StateStatus getStatus() const;
-        void setStatus(StateStatus _st);
 
     public:
         static FrameBasePtr create_PO_2D (const FrameType & _tp,
@@ -169,22 +156,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
 namespace wolf {
 
-inline ProblemPtr FrameBase::getProblem()
-{
-    ProblemPtr prb = problem_ptr_.lock();
-    if (!prb)
-    {
-        TrajectoryBasePtr trj = trajectory_ptr_.lock();
-        if (trj)
-        {
-            prb = trj->getProblem();
-            problem_ptr_ = prb;
-        }
-    }
-
-    return prb;
-}
-
 
 inline unsigned int FrameBase::id()
 {
@@ -198,18 +169,35 @@ inline bool FrameBase::isKey() const
 
 inline void FrameBase::fix()
 {
-    this->setStatus(ST_FIXED);
+    for( auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->fix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
 }
 
 inline void FrameBase::unfix()
 {
-    //std::cout << "Unfixing frame " << id() << std::endl;
-    this->setStatus(ST_ESTIMATED);
+    for( auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->unfix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
 }
 
 inline bool FrameBase::isFixed() const
 {
-    return status_ == ST_FIXED;
+    bool fixed = true;
+    for (auto sb : getStateBlockVec())
+    {
+        if (sb)
+            fixed &= sb->isFixed();
+    }
+    return fixed;
 }
 
 inline void FrameBase::setTimeStamp(const TimeStamp& _ts)
@@ -303,12 +291,6 @@ inline void FrameBase::resizeStateBlockVec(int _size)
         state_block_vec_.resize(_size);
 }
 
-inline StateStatus FrameBase::getStatus() const
-{
-    return status_;
-}
-
-
 inline CaptureBasePtr FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr)
 {
     for (CaptureBasePtr capture_ptr : getCaptureList())
@@ -317,10 +299,50 @@ inline CaptureBasePtr FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr)
     return nullptr;
 }
 
+inline CaptureBasePtr
+FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr, const std::string& type)
+{
+  for (CaptureBasePtr capture_ptr : getCaptureList())
+      if (capture_ptr->getSensorPtr() == _sensor_ptr &&
+          capture_ptr->getType() == type)
+          return capture_ptr;
+  return nullptr;
+}
+
+inline CaptureBaseList FrameBase::getCapturesOf(const SensorBasePtr _sensor_ptr)
+{
+    CaptureBaseList captures;
+
+    for (CaptureBasePtr capture_ptr : getCaptureList())
+        if (capture_ptr->getSensorPtr() == _sensor_ptr)
+            captures.push_back(capture_ptr);
+
+    return captures;
+}
+
 inline void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
 {
     _cap_ptr->unlinkFromFrame();
     capture_list_.remove(_cap_ptr);
+}
+
+inline ConstraintBasePtr
+FrameBase::getConstraintOf(const ProcessorBasePtr _processor_ptr)
+{
+  for (const ConstraintBasePtr& constaint_ptr : getConstrainedByList())
+      if (constaint_ptr->getProcessor() == _processor_ptr)
+          return constaint_ptr;
+  return nullptr;
+}
+
+inline ConstraintBasePtr
+FrameBase::getConstraintOf(const ProcessorBasePtr _processor_ptr, const std::string& type)
+{
+  for (const ConstraintBasePtr& constaint_ptr : getConstrainedByList())
+      if (constaint_ptr->getProcessor() == _processor_ptr &&
+          constaint_ptr->getType() == type)
+          return constaint_ptr;
+  return nullptr;
 }
 
 inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)

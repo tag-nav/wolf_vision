@@ -1,23 +1,15 @@
 #include "processor_imu.h"
+#include "imu_tools.h"
 
 namespace wolf {
 
 ProcessorIMU::ProcessorIMU(ProcessorIMUParamsPtr _params) :
-        ProcessorMotion("IMU", 16, 10, 9, 6, 0.01, 6),
+        ProcessorMotion("IMU", 10, 10, 9, 6, 0.01, 6),
         max_time_span_  (_params ? _params    ->max_time_span   : 1.0  ),
         max_buff_length_(_params ? _params    ->max_buff_length : 10000   ),
         dist_traveled_  (_params ? _params    ->dist_traveled   : 1.0  ),
         angle_turned_   (_params ? _params    ->angle_turned    : 0.2  ),
-        voting_active_  (_params ? _params    ->voting_active    : false  ),
-        frame_imu_ptr_(nullptr),
-        gravity_(wolf::gravity()),
-        acc_bias_(&calib_(0)),
-        gyro_bias_(&calib_(3)),
-        acc_measured_(nullptr),
-        gyro_measured_(nullptr),
-        Dp_(nullptr), dp_(nullptr), Dp_out_(nullptr),
-        Dv_(nullptr), dv_(nullptr), Dv_out_(nullptr),
-        Dq_(nullptr), dq_(nullptr), Dq_out_(nullptr)
+        voting_active_  (_params ? _params    ->voting_active    : false  )
 {
     // Set constant parts of Jacobians
     jacobian_delta_preint_.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
@@ -27,45 +19,7 @@ ProcessorIMU::ProcessorIMU(ProcessorIMUParamsPtr _params) :
 
 ProcessorIMU::~ProcessorIMU()
 {
-//    std::cout << "destructed     -p-IMU" << id() << std::endl;
-}
-
-VectorXs ProcessorIMU::correctDelta(const Motion& _motion, const CaptureMotionPtr _capture)
-{
-
-    /* Correct measured delta: delta_corr = delta ++ J_bias * (bias - bias_preint)
-     * where:
-     *   delta       = pre-integrated delta at time dt
-     *   J_bias      = Jacobian of the preintegrated delta at time dt
-     *   bias        = current bias estimate
-     *   bias_preint = bias estimate when we performed the pre-integration
-     *   ++          = additive composition: x+dx for p and v, q*exp(dv) for the quaternion.
-     */
-
-    // Get current delta and Jacobian
-    VectorXs delta_preint  = _motion.delta_integr_;
-    MatrixXs J_bias        = _motion.jacobian_calib_;
-
-    // Get current biases from the capture's origin frame
-    FrameIMUPtr frame_origin   = std::static_pointer_cast<FrameIMU>(_capture->getOriginFramePtr());
-    Vector6s bias; bias       << frame_origin->getAccBiasPtr()->getState(), frame_origin->getGyroBiasPtr()->getState();
-
-    // Get preintegrated biases from the capture's feature
-    FeatureIMUPtr feature              = std::static_pointer_cast<FeatureIMU>(_capture->getFeatureList().front());
-    Vector6s bias_preint; bias_preint << feature->acc_bias_preint_, feature->gyro_bias_preint_;
-
-    // Compute update step
-    VectorXs delta_step = J_bias * (bias - bias_preint);
-
-    // Correct delta
-    VectorXs delta_correct(10);
-    delta_correct.head(3)           = delta_preint.head(3) + delta_step.head(3);
-    Map<const Quaternions> deltaq   (&delta_preint(3));
-    Map<Quaternions> deltaq_correct (&delta_correct(3));
-    deltaq_correct                  = deltaq * v2q(delta_step.segment(3,3));
-    delta_correct.tail(3)           = delta_preint.tail(3) + delta_step.tail(3);
-
-    return delta_correct;
+    //
 }
 
 ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
@@ -80,9 +34,6 @@ ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const Pro
 
 bool ProcessorIMU::voteForKeyFrame()
 {
-    //WOLF_DEBUG( "Time span   : " , getBuffer().get().back().ts_ - getBuffer().get().front().ts_ );
-    //WOLF_DEBUG( "BufferLength: " , getBuffer().get().size() );
-    //WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
     if(!voting_active_)
         return false;
     // time span
@@ -94,16 +45,16 @@ bool ProcessorIMU::voteForKeyFrame()
     // buffer length
     if (getBuffer().get().size() > max_buff_length_)
     {
-        WOLF_DEBUG( "PM: vote: buffer size" );
+        WOLF_DEBUG( "PM: vote: buffer length" );
         return true;
     }
-    /*// angle turned
-    Scalar angle = 2.0 * acos(delta_integrated_(6));
+    // angle turned
+    Scalar angle = 2.0 * asin(delta_integrated_.segment(4,3).norm());
     if (angle > angle_turned_)
     {
         WOLF_DEBUG( "PM: vote: angle turned" );
         return true;
-    }*/
+    }
     //WOLF_DEBUG( "PM: do not vote" );
     return false;
 }
@@ -138,6 +89,7 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
      * Covariances receive linear interpolation
      *    Q_ret = (ts - t_ref) / dt * Q_sec
      */
+    /*
     // resolve out-of-bounds time stamp as if the time stamp was exactly on the bounds
     if (_ts <= _motion_ref.ts_)    // behave as if _ts == _motion_ref.ts_
     {
@@ -149,7 +101,7 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
         motion_int.delta_cov_ . setZero();
         return motion_int;
     }
-    if (_motion_second.ts_ <= _ts)    // behave as if _ts == _motion_second.ts_
+    if (_ts >= _motion_second.ts_)    // behave as if _ts == _motion_second.ts_
     {
         // return original second motion. Second motion becomes null motion
         Motion motion_int         ( _motion_second );
@@ -225,6 +177,151 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
     //_motion.delta_integr_cov_ = _motion.delta_integr_cov_; // trivial, just leave the code commented
 
     return motion_int;
+    */
+
+    return _motion_ref;
+
+}
+
+CaptureMotionPtr ProcessorIMU::createCapture(const TimeStamp& _ts,
+                                             const SensorBasePtr& _sensor,
+                                             const VectorXs& _data,
+                                             const MatrixXs& _data_cov,
+                                             const FrameBasePtr& _frame_origin)
+{
+    CaptureIMUPtr capture_imu = std::make_shared<CaptureIMU>(_ts,
+                                                             _sensor,
+                                                             _data,
+                                                             _data_cov,
+                                                             _frame_origin);
+    return capture_imu;
+}
+
+FeatureBasePtr ProcessorIMU::createFeature(CaptureMotionPtr _capture_motion)
+{
+    FeatureIMUPtr key_feature_ptr = std::make_shared<FeatureIMU>(
+            _capture_motion->getBuffer().get().back().delta_integr_,
+            _capture_motion->getBuffer().get().back().delta_integr_cov_,
+            _capture_motion->getBuffer().getCalibrationPreint(),
+            _capture_motion->getBuffer().get().back().jacobian_calib_);
+    return key_feature_ptr;
+}
+
+ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin)
+{
+    CaptureIMUPtr cap_imu = std::static_pointer_cast<CaptureIMU>(_capture_origin);
+    FeatureIMUPtr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
+    ConstraintIMUPtr ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, cap_imu, shared_from_this());
+
+    // link ot wolf tree
+    _feature_motion->addConstraint(ctr_imu);
+    _capture_origin->addConstrainedBy(ctr_imu);
+    _capture_origin->getFramePtr()->addConstrainedBy(ctr_imu);
+
+    return ctr_imu;
+}
+
+void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
+                                       const Eigen::MatrixXs& _data_cov,
+                                       const Eigen::VectorXs& _calib,
+                                       const Scalar _dt,
+                                       Eigen::VectorXs& _delta,
+                                       Eigen::MatrixXs& _delta_cov,
+                                       Eigen::MatrixXs& _jac_delta_calib)
+{
+    assert(_data.size() == data_size_ && "Wrong data size!");
+
+    using namespace Eigen;
+    Matrix<Scalar, 9, 6> jac_data;
+
+    /*
+     * We have the following computing pipeline:
+     *     Input: data, calib, dt
+     *     Output: delta, delta_cov, jac_calib
+     *
+     * We do:
+     *     body         = data - calib
+     *     delta        = body2delta(body, dt) --> jac_body
+     *     jac_data     = jac_body
+     *     jac_calib    = - jac_body
+     *     delta_cov  <-- propagate data_cov using jac_data
+     *
+     * where body2delta(.) produces a delta from body=(a,w) as follows:
+     *     dp = 1/2 * a * dt^2
+     *     dq = exp(w * dt)
+     *     dv = a * dt
+     */
+
+    // create delta
+    imu::body2delta(_data - _calib, _dt, _delta, jac_data); // Jacobians tested in imu_tools
+
+    // compute delta_cov
+    _delta_cov = jac_data * _data_cov * jac_data.transpose();
+
+    // compute jacobian_calib
+    _jac_delta_calib = - jac_data;
+
+}
+
+void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
+                                  const Eigen::VectorXs& _delta,
+                                  const Scalar _dt,
+                                  Eigen::VectorXs& _delta_preint_plus_delta)
+{
+    /* MATHS according to Sola-16
+     * Dp' = Dp + Dv*dt + 1/2*Dq*(a-a_b)*dt^2    = Dp + Dv*dt + Dq*dp   if  dp = 1/2*(a-a_b)*dt^2
+     * Dv' = Dv + Dq*(a-a_b)*dt                  = Dv + Dq*dv           if  dv = (a-a_b)*dt
+     * Dq' = Dq * exp((w-w_b)*dt)                = Dq * dq              if  dq = exp((w-w_b)*dt)
+     *
+     * where (dp, dq, dv) need to be computed in data2delta(), and Dq*dx =is_equivalent_to= Dq*dx*Dq'.
+     */
+    _delta_preint_plus_delta = imu::compose(_delta_preint, _delta, _dt);
+}
+
+void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x,
+                                  const Eigen::VectorXs& _delta,
+                                  const Scalar _dt,
+                                  Eigen::VectorXs& _x_plus_delta)
+{
+    assert(_x.size() == 10 && "Wrong _x vector size");
+    assert(_delta.size() == 10 && "Wrong _delta vector size");
+    assert(_x_plus_delta.size() == 10 && "Wrong _x_plus_delta vector size");
+    assert(_dt >= 0 && "Time interval _Dt is negative!");
+
+    _x_plus_delta = imu::composeOverState(_x, _delta, _dt);
+}
+
+void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
+                                  const Eigen::VectorXs& _delta,
+                                  const Scalar _dt,
+                                  Eigen::VectorXs& _delta_preint_plus_delta,
+                                  Eigen::MatrixXs& _jacobian_delta_preint,
+                                  Eigen::MatrixXs& _jacobian_delta)
+{
+    /*
+     * Expression of the delta integration step, D' = D (+) d:
+     *
+     *     Dp' = Dp + Dv*dt + Dq*dp
+     *     Dv' = Dv + Dq*dv
+     *     Dq' = Dq * dq
+     *
+     * Jacobians for covariance propagation.
+     *
+     * a. With respect to Delta, gives _jacobian_delta_preint = D'_D as:
+     *
+     *   D'_D = [ I    -DR*skew(dp)   I*dt
+     *            0     dR.tr          0
+     *            0    -DR*skew(dv)    I  ] // See Sola-16
+     *
+     * b. With respect to delta, gives _jacobian_delta = D'_d as:
+     *
+     *   D'_d = [ DR   0    0
+     *            0    I    0
+     *            0    0    DR ] // See Sola-16
+     *
+     * Note: covariance propagation, i.e.,  P+ = D_D * P * D_D' + D_d * M * D_d', is done in ProcessorMotion.
+     */
+    imu::compose(_delta_preint, _delta, _dt, _delta_preint_plus_delta, _jacobian_delta_preint, _jacobian_delta); // jacobians tested in imu_tools
 }
 
 } // namespace wolf

@@ -232,7 +232,7 @@ TEST(Odom2D, VoteForKfAndSolve)
 
     t += dt;
     // Capture to use as container for all incoming data
-    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 2, 3, 3, 0, nullptr);
+    CaptureMotionPtr capture = std::make_shared<CaptureOdom2D>(t, sensor_odom2d, data, data_cov, nullptr);
 
     for (int n=1; n<=N; n++)
     {
@@ -310,7 +310,6 @@ TEST(Odom2D, KF_callback)
     //                                              KF10
     //                          KF11
 
-
     // Create Wolf tree nodes
     ProblemPtr problem = Problem::create("PO 2D");
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
@@ -347,7 +346,7 @@ TEST(Odom2D, KF_callback)
 //    std::cout << "\nIntegrating data..." << std::endl;
 
     // Capture to use as container for all incoming data
-    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 2, 3, 3, 0, nullptr);
+    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 3, 3, nullptr);
 
     for (int n=1; n<=N; n++)
     {
@@ -411,8 +410,6 @@ TEST(Odom2D, KF_callback)
     t_split = t0 + m_split*dt;
 //    std::cout << "-----------------------------\nSplit between KFs; time: " << t_split - t0 << std::endl;
 
-//    problem->print(4,1,1,0);
-
     x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
 
@@ -432,7 +429,6 @@ TEST(Odom2D, KF_callback)
     report = ceres_manager.solve(1);
 //    std::cout << report << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
-//    show(problem);
 
     // check the split KF
     ASSERT_POSE2D_APPROX(keyframe_1->getState()                  , integrated_pose_vector[m_split], 1e-6);

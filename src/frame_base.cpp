@@ -18,7 +18,6 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
             is_removing_(false),
             frame_id_(++frame_id_count_),
             type_(NON_KEY_FRAME),
-			status_(ST_ESTIMATED),
             time_stamp_(_ts)
 {
     state_block_vec_[0] = _p_ptr;
@@ -38,7 +37,6 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
             is_removing_(false),
             frame_id_(++frame_id_count_),
             type_(_tp),
-			status_(ST_ESTIMATED),
             time_stamp_(_ts)
 {
     state_block_vec_[0] = _p_ptr;
@@ -53,7 +51,8 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
                 
 FrameBase::~FrameBase()
 {
-    removeStateBlocks();
+    if (type_ == KEY_FRAME)
+        removeStateBlocks();
 }
 
 void FrameBase::remove()
@@ -78,7 +77,8 @@ void FrameBase::remove()
         }
 
         // Remove Frame State Blocks
-        removeStateBlocks();
+        if (type_ == KEY_FRAME)
+            removeStateBlocks();
 
         if (getTrajectoryPtr()->getLastKeyFramePtr()->id() == this_F->id())
             getTrajectoryPtr()->setLastKeyFramePtr(getTrajectoryPtr()->findLastKeyFramePtr());
@@ -104,7 +104,7 @@ void FrameBase::removeStateBlocks()
         StateBlockPtr sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
         {
-            if (getProblem() != nullptr && type_ == KEY_FRAME)
+            if (getProblem() != nullptr)
             {
                 getProblem()->removeStateBlockPtr(sbp);
             }
@@ -127,7 +127,7 @@ void FrameBase::setKey()
     }
 }
 
-void FrameBase::setState(const Eigen::VectorXs& _st)
+void FrameBase::setState(const Eigen::VectorXs& _state)
 {
     int size = 0;
     for(unsigned int i = 0; i<state_block_vec_.size(); i++){
@@ -136,16 +136,16 @@ void FrameBase::setState(const Eigen::VectorXs& _st)
     
     //State Vector size must be lower or equal to frame state size :
     // example : PQVBB -> if we initialize only position and orientation due to use of processorOdom3D
-    assert(_st.size() <= size && "In FrameBase::setState wrong state size");
+    assert(_state.size() <= size && "In FrameBase::setState wrong state size");
 
     unsigned int index = 0;
-    const unsigned int _st_size = _st.size();
+    const unsigned int _st_size = _state.size();
 
     //initialize the FrameBase StateBlocks while StateBlocks list's end not reached and input state_size can go further 
     for (StateBlockPtr sb : state_block_vec_)
         if (sb && (index < _st_size))
         {
-            sb->setState(_st.segment(index, sb->getSize()));
+            sb->setState(_state.segment(index, sb->getSize()));
             index += sb->getSize();
         }
 }
@@ -163,21 +163,21 @@ Eigen::VectorXs FrameBase::getState() const
     return state;
 }
 
-void FrameBase::getState(Eigen::VectorXs& state) const
+void FrameBase::getState(Eigen::VectorXs& _state) const
 {
     Size size = 0;
     for (StateBlockPtr sb : state_block_vec_)
         if (sb)
             size += sb->getSize();
 
-    assert(state.size() == size && "Wrong state vector size");
+    assert(_state.size() == size && "Wrong state vector size");
 
     unsigned int index = 0;
 
     for (StateBlockPtr sb : state_block_vec_)
         if (sb)
         {
-            state.segment(index,sb->getSize()) = sb->getState();
+            _state.segment(index,sb->getSize()) = sb->getState();
             index += sb->getSize();
         }
 }
@@ -239,33 +239,6 @@ FrameBasePtr FrameBase::getNextFrame() const
     }
     std::cout << "next frame not found!" << std::endl;
     return nullptr;
-}
-
-void FrameBase::setStatus(StateStatus _st)
-{
-
-    status_ = _st;
-
-    if (status_ == ST_FIXED)
-    {
-        for (StateBlockPtr sb : state_block_vec_)
-            if (sb != nullptr)
-            {
-                sb->fix();
-                if (getProblem() != nullptr)
-                    getProblem()->updateStateBlockPtr(sb);
-            }
-    }
-    else if (status_ == ST_ESTIMATED)
-    {
-        for (StateBlockPtr sb : state_block_vec_)
-            if (sb != nullptr)
-            {
-                sb->unfix();
-                if (getProblem() != nullptr)
-                    getProblem()->updateStateBlockPtr(sb);
-            }
-    }
 }
 
 FrameBasePtr FrameBase::create_PO_2D(const FrameType & _tp,

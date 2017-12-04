@@ -19,7 +19,7 @@ class ConstraintFix: public ConstraintAutodiff<ConstraintFix,3,2,1>
 {
     public:
         ConstraintFix(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-                ConstraintAutodiff<ConstraintFix, 3, 2, 1>(CTR_FIX, nullptr, nullptr, nullptr, nullptr,_apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+                ConstraintAutodiff<ConstraintFix, 3, 2, 1>(CTR_FIX, nullptr, nullptr, nullptr, nullptr, nullptr,_apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("FIX");
 //            std::cout << "created ConstraintFix " << std::endl;

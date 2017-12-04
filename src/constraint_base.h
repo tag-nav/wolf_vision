@@ -29,25 +29,30 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         ConstraintType type_id_;                        ///< type of constraint (types defined at wolf.h)
         ConstraintStatus status_;                       ///< status of constraint (types defined at wolf.h)
         bool apply_loss_function_;                      ///< flag for applying loss function to this constraint
-        FrameBaseWPtr frame_other_ptr_;                    ///< FrameBase pointer (for category CTR_FRAME)
-        FeatureBaseWPtr feature_other_ptr_;                ///< FeatureBase pointer (for category CTR_FEATURE)
-        LandmarkBaseWPtr landmark_other_ptr_;              ///< LandmarkBase pointer (for category CTR_LANDMARK)
-        ProcessorBaseWPtr processor_ptr_;
+        FrameBaseWPtr frame_other_ptr_;                 ///< FrameBase pointer (for category CTR_FRAME)
+        CaptureBaseWPtr capture_other_ptr_;             ///< CaptureBase pointer
+        FeatureBaseWPtr feature_other_ptr_;             ///< FeatureBase pointer (for category CTR_FEATURE)
+        LandmarkBaseWPtr landmark_other_ptr_;           ///< LandmarkBase pointer (for category CTR_LANDMARK)
+        ProcessorBaseWPtr processor_ptr_;               ///< ProcessorBase pointer
 
     public:
 
         /** \brief Constructor of category CTR_ABSOLUTE
          **/
-        ConstraintBase(ConstraintType _tp,  bool _apply_loss_function = false,
+        ConstraintBase(ConstraintType _tp,
+                       bool _apply_loss_function = false,
                        ConstraintStatus _status = CTR_ACTIVE);
 
         /** \brief Constructor valid for all categories (FRAME, FEATURE, LANDMARK)
          **/
         ConstraintBase(ConstraintType _tp,
-                       const FrameBasePtr& _frame_other_ptr, const FeatureBasePtr& _feature_other_ptr,
+                       const FrameBasePtr& _frame_other_ptr,
+                       const CaptureBasePtr& _capture_other_ptr,
+                       const FeatureBasePtr& _feature_other_ptr,
                        const LandmarkBasePtr& _landmark_other_ptr,
                        const ProcessorBasePtr& _processor_ptr = nullptr,
-                       bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE);
+                       bool _apply_loss_function = false,
+                       ConstraintStatus _status = CTR_ACTIVE);
 
         virtual ~ConstraintBase() = default;
 
@@ -126,18 +131,23 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 
         /** \brief Returns a pointer to the frame constrained to
          **/
-        FrameBasePtr getFrameOtherPtr() const;
-        void setFrameOtherPtr(FrameBasePtr _frm_o){frame_other_ptr_ = _frm_o;}
+        FrameBasePtr getFrameOtherPtr() const       { return frame_other_ptr_.lock(); }
+        void setFrameOtherPtr(FrameBasePtr _frm_o)  { frame_other_ptr_ = _frm_o; }
+
+        /** \brief Returns a pointer to the frame constrained to
+         **/
+        CaptureBasePtr getCaptureOtherPtr() const       { return capture_other_ptr_.lock(); }
+        void setCaptureOtherPtr(CaptureBasePtr _cap_o)  { capture_other_ptr_ = _cap_o; }
 
         /** \brief Returns a pointer to the feature constrained to
          **/
-        FeatureBasePtr getFeatureOtherPtr() const;
-        void setFeatureOtherPtr(FeatureBasePtr _ftr_o){feature_other_ptr_ = _ftr_o;}
+        FeatureBasePtr getFeatureOtherPtr() const       { return feature_other_ptr_.lock(); }
+        void setFeatureOtherPtr(FeatureBasePtr _ftr_o)  { feature_other_ptr_ = _ftr_o; }
 
         /** \brief Returns a pointer to the landmark constrained to
          **/
-        LandmarkBasePtr getLandmarkOtherPtr() const;
-        void setLandmarkOtherPtr(LandmarkBasePtr _lmk_o){landmark_other_ptr_ = _lmk_o;}
+        LandmarkBasePtr getLandmarkOtherPtr() const     { return landmark_other_ptr_.lock(); }
+        void setLandmarkOtherPtr(LandmarkBasePtr _lmk_o){ landmark_other_ptr_ = _lmk_o; }
 
         /**
          * @brief getProcessor
@@ -151,12 +161,11 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
          */
         void setProcessor(const ProcessorBasePtr& _processor_ptr);
 
-        /**
-         * @brief getProblem
-         * @return
-         */
-        ProblemPtr getProblem();
-
+    protected:
+        template<typename D>
+        void print(const std::string& name, const Eigen::MatrixBase<D>& mat) const; // Do nothing if input Scalar type is ceres::Jet
+        template<int R, int C>
+        void print(const std::string& name, const Eigen::Matrix<Scalar, R, C>& mat) const; // Normal print if Scalar type is wolf::Scalar
 };
 
 
@@ -172,19 +181,23 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 
 namespace wolf{
 
-inline wolf::ProblemPtr ConstraintBase::getProblem()
+template<typename D>
+inline void ConstraintBase::print(const std::string& name, const Eigen::MatrixBase<D>& mat) const {} // Do nothing if input Scalar type is ceres::Jet
+template<int R, int C>
+inline void ConstraintBase::print(const std::string& name, const Eigen::Matrix<Scalar, R, C>& mat) const // Normal print if Scalar type is wolf::Scalar
 {
-    ProblemPtr prb = problem_ptr_.lock();
-    if (!prb)
+    if (mat.cols() == 1)
     {
-        FeatureBasePtr ftr = feature_ptr_.lock();
-        if (ftr)
-        {
-            prb = ftr->getProblem();
-            problem_ptr_ = prb;
-        }
+        WOLF_TRACE(name, ": ", mat.transpose());
     }
-    return prb;
+    else if (mat.rows() == 1)
+    {
+        WOLF_TRACE(name, ": ", mat);
+    }
+    else
+    {
+        WOLF_TRACE(name, ":\n", mat);
+    }
 }
 
 inline unsigned int ConstraintBase::id() const
@@ -230,21 +243,6 @@ inline void ConstraintBase::setApplyLossFunction(const bool _apply)
             getProblem()->addConstraintPtr(this_c);
         }
     }
-}
-
-inline FrameBasePtr ConstraintBase::getFrameOtherPtr() const
-{
-    return frame_other_ptr_.lock();
-}
-
-inline FeatureBasePtr ConstraintBase::getFeatureOtherPtr() const
-{
-    return feature_other_ptr_.lock();
-}
-
-inline LandmarkBasePtr ConstraintBase::getLandmarkOtherPtr() const
-{
-    return landmark_other_ptr_.lock();
 }
 
 inline ProcessorBasePtr ConstraintBase::getProcessor() const

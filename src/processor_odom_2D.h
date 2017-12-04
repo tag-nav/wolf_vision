@@ -9,6 +9,7 @@
 #define SRC_PROCESSOR_ODOM_2D_H_
 
 #include "processor_motion.h"
+#include "capture_odom_2D.h"
 #include "constraint_odom_2D.h"
 #include "rotations.h"
 
@@ -36,37 +37,43 @@ class ProcessorOdom2D : public ProcessorMotion
                         const Scalar& _elapsed_time_th              = 1.0,
                         const Scalar& _unmeasured_perturbation_std  = 0.001);
         virtual ~ProcessorOdom2D();
-        virtual bool voteForKeyFrame();
+        virtual bool voteForKeyFrame() override;
 
     protected:
-        virtual void data2delta(const Eigen::VectorXs& _data,
-                                const Eigen::MatrixXs& _data_cov,
-                                const Scalar _dt,
-                                Eigen::VectorXs& _delta,
-                                Eigen::MatrixXs& _delta_cov,
-                                const Eigen::VectorXs& _calib,
-                                Eigen::MatrixXs& _jacobian_calib);
+        virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
+                                         const Eigen::MatrixXs& _data_cov,
+                                         const Eigen::VectorXs& _calib,
+                                         const Scalar _dt,
+                                         Eigen::VectorXs& _delta,
+                                         Eigen::MatrixXs& _delta_cov,
+                                         Eigen::MatrixXs& _jacobian_calib) override;
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1,
                                     const Eigen::VectorXs& _delta2,
                                     const Scalar _Dt2,
-                                    Eigen::VectorXs& _delta1_plus_delta2);
+                                    Eigen::VectorXs& _delta1_plus_delta2) override;
         virtual void deltaPlusDelta(const Eigen::VectorXs& _delta1,
                                     const Eigen::VectorXs& _delta2,
                                     const Scalar _Dt2,
                                     Eigen::VectorXs& _delta1_plus_delta2,
                                     Eigen::MatrixXs& _jacobian1,
-                                    Eigen::MatrixXs& _jacobian2);
+                                    Eigen::MatrixXs& _jacobian2) override;
         virtual void statePlusDelta(const Eigen::VectorXs& _x,
                                 const Eigen::VectorXs& _delta,
                                 const Scalar _Dt,
-                                Eigen::VectorXs& _x_plus_delta);
-        virtual Eigen::VectorXs deltaZero() const;
+                                Eigen::VectorXs& _x_plus_delta) override;
+        virtual Eigen::VectorXs deltaZero() const override;
         virtual Motion interpolate(const Motion& _ref,
                                    Motion& _second,
-                                   TimeStamp& _ts);
+                                   TimeStamp& _ts) override;
 
-        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin);
-        virtual FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame); 
+        virtual CaptureMotionPtr createCapture(const TimeStamp& _ts,
+                                               const SensorBasePtr& _sensor,
+                                               const VectorXs& _data,
+                                               const MatrixXs& _data_cov,
+                                               const FrameBasePtr& _frame_origin) override;
+        virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion) override;
+        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature,
+                                                    CaptureBasePtr _capture_origin) override;
 
     protected:
         Scalar dist_traveled_th_;
@@ -97,13 +104,13 @@ inline ProcessorOdom2D::~ProcessorOdom2D()
 {
 }
 
-inline void ProcessorOdom2D::data2delta(const Eigen::VectorXs& _data,
-                                        const Eigen::MatrixXs& _data_cov,
-                                        const Scalar _dt,
-                                        Eigen::VectorXs& _delta,
-                                        Eigen::MatrixXs& _delta_cov,
-                                        const Eigen::VectorXs& _calib,
-                                        Eigen::MatrixXs& _jacobian_calib)
+inline void ProcessorOdom2D::computeCurrentDelta(const Eigen::VectorXs& _data,
+                                                 const Eigen::MatrixXs& _data_cov,
+                                                 const Eigen::VectorXs& _calib,
+                                                 const Scalar _dt,
+                                                 Eigen::VectorXs& _delta,
+                                                 Eigen::MatrixXs& _delta_cov,
+                                                 Eigen::MatrixXs& _jacobian_calib)
 {
     //std::cout << "ProcessorOdom2d::data2delta" << std::endl;
 
@@ -200,23 +207,30 @@ inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const
     return Eigen::VectorXs::Zero(delta_size_);
 }
 
-inline ConstraintBasePtr ProcessorOdom2D::emplaceConstraint(FeatureBasePtr _feature_motion, FrameBasePtr _frame_origin)
+CaptureMotionPtr ProcessorOdom2D::createCapture(const TimeStamp& _ts,
+                                                 const SensorBasePtr& _sensor,
+                                                 const VectorXs& _data,
+                                                 const MatrixXs& _data_cov,
+                                                 const FrameBasePtr& _frame_origin)
 {
-    ConstraintOdom2DPtr ctr_odom = std::make_shared<ConstraintOdom2D>(_feature_motion, _frame_origin, shared_from_this());
-    _feature_motion->addConstraint(ctr_odom);
-    _frame_origin->addConstrainedBy(ctr_odom);
+    CaptureOdom2DPtr capture_odom = std::make_shared<CaptureOdom2D>(_ts, _sensor, _data, _data_cov, _frame_origin);
+    return capture_odom;
+}
+
+inline ConstraintBasePtr ProcessorOdom2D::emplaceConstraint(FeatureBasePtr _feature, CaptureBasePtr _capture_origin)
+{
+    ConstraintOdom2DPtr ctr_odom = std::make_shared<ConstraintOdom2D>(_feature, _capture_origin->getFramePtr(), shared_from_this());
+    _feature->addConstraint(ctr_odom);
+    _capture_origin->getFramePtr()->addConstrainedBy(ctr_odom);
     return ctr_odom;
 }
 
-inline FeatureBasePtr ProcessorOdom2D::emplaceFeature(CaptureMotionPtr _capture_motion, FrameBasePtr _related_frame)
+inline FeatureBasePtr ProcessorOdom2D::createFeature(CaptureMotionPtr _capture_motion)
 {
-    // create motion feature and add it to the key_capture
     FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
             "ODOM 2D",
             _capture_motion->getBuffer().get().back().delta_integr_,
             _capture_motion->getBuffer().get().back().delta_integr_cov_);
-
-    _capture_motion->addFeature(key_feature_ptr);
 
     return key_feature_ptr;
 }

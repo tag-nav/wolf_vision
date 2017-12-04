@@ -29,7 +29,11 @@ Motion::Motion(const TimeStamp& _ts,
 {
 }
 
-Motion::Motion(const TimeStamp& _ts, Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size) :
+Motion::Motion(const TimeStamp& _ts,
+               Size _data_size,
+               Size _delta_size,
+               Size _cov_size,
+               Size _calib_size) :
         data_size_(_data_size),
         delta_size_(_delta_size),
         cov_size_(_cov_size),
@@ -59,8 +63,15 @@ void Motion::resize(Size _data_s, Size _delta_s, Size _delta_cov_s, Size _calib_
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-MotionBuffer::MotionBuffer(Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size) :
-        data_size_(_data_size), delta_size_(_delta_size), cov_size_(_cov_size), calib_size_(_calib_size)
+MotionBuffer::MotionBuffer(Size _data_size,
+                           Size _delta_size,
+                           Size _cov_size,
+                           Size _calib_size) :
+        data_size_(_data_size),
+        delta_size_(_delta_size),
+        cov_size_(_cov_size),
+        calib_size_(_calib_size),
+        calib_preint_(_calib_size)
 {
 }
 
@@ -97,6 +108,9 @@ void MotionBuffer::getMotion(const TimeStamp& _ts, Motion& _motion) const
 void MotionBuffer::split(const TimeStamp& _ts, MotionBuffer& _buffer_part_before_ts)
 {
     assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
+
+    _buffer_part_before_ts.setCalibrationPreint(calib_preint_);
+
     auto previous = std::find_if(container_.rbegin(), container_.rend(), [&](const Motion& m)
     {
         return m.ts_ <= _ts;
@@ -110,53 +124,55 @@ void MotionBuffer::split(const TimeStamp& _ts, MotionBuffer& _buffer_part_before
     else
     {
         // Transfer part of the buffer
-        _buffer_part_before_ts.container_.splice(_buffer_part_before_ts.container_.begin(), container_, container_.begin(),
-                                         (previous--).base());
+        _buffer_part_before_ts.container_.splice(_buffer_part_before_ts.container_.begin(),
+                                                 container_,
+                                                 container_.begin(),
+                                                 (previous--).base());
     }
 }
 
-MatrixXs MotionBuffer::integrateCovariance() const
-{
-    Eigen::MatrixXs delta_integr_cov(cov_size_, cov_size_);
-    delta_integr_cov.setZero();
-    for (Motion mot : container_)
-    {
-        delta_integr_cov = mot.jacobian_delta_integr_ * delta_integr_cov * mot.jacobian_delta_integr_.transpose()
-                         + mot.jacobian_delta_        * mot.delta_cov_   * mot.jacobian_delta_.transpose();
-    }
-    return delta_integr_cov;
-}
-
-MatrixXs MotionBuffer::integrateCovariance(const TimeStamp& _ts) const
-{
-    Eigen::MatrixXs delta_integr_cov(cov_size_, cov_size_);
-    delta_integr_cov.setZero();
-    for (Motion mot : container_)
-    {
-        if (mot.ts_ > _ts)
-            break;
-
-        delta_integr_cov = mot.jacobian_delta_integr_ * delta_integr_cov * mot.jacobian_delta_integr_.transpose()
-                         + mot.jacobian_delta_        * mot.delta_cov_   * mot.jacobian_delta_.transpose();
-    }
-    return delta_integr_cov;
-}
-
-MatrixXs MotionBuffer::integrateCovariance(const TimeStamp& _ts_1, const TimeStamp _ts_2) const
-{
-    Eigen::MatrixXs cov(cov_size_, cov_size_);
-    cov.setZero();
-    for (Motion mot : container_)
-    {
-        if (mot.ts_ > _ts_2)
-            break;
-
-        if (mot.ts_ >= _ts_1)
-            cov = mot.jacobian_delta_integr_ * cov * mot.jacobian_delta_integr_.transpose()
-                + mot.jacobian_delta_ * mot.delta_cov_ * mot.jacobian_delta_.transpose();
-    }
-    return cov;
-}
+//MatrixXs MotionBuffer::integrateCovariance() const
+//{
+//    Eigen::MatrixXs delta_integr_cov(cov_size_, cov_size_);
+//    delta_integr_cov.setZero();
+//    for (Motion mot : container_)
+//    {
+//        delta_integr_cov = mot.jacobian_delta_integr_ * delta_integr_cov * mot.jacobian_delta_integr_.transpose()
+//                         + mot.jacobian_delta_        * mot.delta_cov_   * mot.jacobian_delta_.transpose();
+//    }
+//    return delta_integr_cov;
+//}
+//
+//MatrixXs MotionBuffer::integrateCovariance(const TimeStamp& _ts) const
+//{
+//    Eigen::MatrixXs delta_integr_cov(cov_size_, cov_size_);
+//    delta_integr_cov.setZero();
+//    for (Motion mot : container_)
+//    {
+//        if (mot.ts_ > _ts)
+//            break;
+//
+//        delta_integr_cov = mot.jacobian_delta_integr_ * delta_integr_cov * mot.jacobian_delta_integr_.transpose()
+//                         + mot.jacobian_delta_        * mot.delta_cov_   * mot.jacobian_delta_.transpose();
+//    }
+//    return delta_integr_cov;
+//}
+//
+//MatrixXs MotionBuffer::integrateCovariance(const TimeStamp& _ts_1, const TimeStamp _ts_2) const
+//{
+//    Eigen::MatrixXs cov(cov_size_, cov_size_);
+//    cov.setZero();
+//    for (Motion mot : container_)
+//    {
+//        if (mot.ts_ > _ts_2)
+//            break;
+//
+//        if (mot.ts_ >= _ts_1)
+//            cov = mot.jacobian_delta_integr_ * cov * mot.jacobian_delta_integr_.transpose()
+//                + mot.jacobian_delta_ * mot.delta_cov_ * mot.jacobian_delta_.transpose();
+//    }
+//    return cov;
+//}
 
 void MotionBuffer::print(bool show_data, bool show_delta, bool show_delta_int, bool show_jacs)
 {

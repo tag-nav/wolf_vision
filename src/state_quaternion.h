@@ -17,17 +17,17 @@ class StateQuaternion : public StateBlock
 {
     public:
         StateQuaternion(bool _fixed = false);
-        StateQuaternion(const Eigen::VectorXs _state, bool _fixed = false);
-        StateQuaternion(const Eigen::Quaternions _quaternion, bool _fixed = false);
+        StateQuaternion(const Eigen::VectorXs& _state, bool _fixed = false);
+        StateQuaternion(const Eigen::Quaternions& _quaternion, bool _fixed = false);
         virtual ~StateQuaternion();
 };
 
-inline StateQuaternion::StateQuaternion(const Eigen::Quaternions _quaternion, bool _fixed) :
+inline StateQuaternion::StateQuaternion(const Eigen::Quaternions& _quaternion, bool _fixed) :
         StateBlock(_quaternion.coeffs(), _fixed, std::make_shared<LocalParametrizationQuaternion<DQ_LOCAL>>())
 {
 }
 
-inline StateQuaternion::StateQuaternion(const Eigen::VectorXs _state, bool _fixed) :
+inline StateQuaternion::StateQuaternion(const Eigen::VectorXs& _state, bool _fixed) :
         StateBlock(_state, _fixed, std::make_shared<LocalParametrizationQuaternion<DQ_LOCAL>>())
 {
     assert(_state.size() == 4 && "The quaternion state vector must be of size 4");

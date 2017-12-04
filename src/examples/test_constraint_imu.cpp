@@ -108,7 +108,7 @@ int main(int argc, char** argv)
     Eigen::Matrix<wolf::Scalar, 9, 1> residu;
     residu << 0,0,0,  0,0,0,  0,0,0;
     
-    constraint_imu->expectation(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v, expect);
+    constraint_imu->expectation(ref_frame_p, ref_frame_o, ref_frame_v, current_frame_p, current_frame_o, current_frame_v, expect);
     std::cout << "expectation : " << expect.transpose() << std::endl;
 
     constraint_imu->getResiduals(ref_frame_p, ref_frame_o, ref_frame_v, acc_bias, gyro_bias, current_frame_p, current_frame_o, current_frame_v,residu);

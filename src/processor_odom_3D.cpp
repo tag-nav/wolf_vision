@@ -12,6 +12,8 @@ ProcessorOdom3D::ProcessorOdom3D(ProcessorOdom3DParamsPtr _params, SensorOdom3DP
                 q1_(nullptr), q2_(nullptr), q_out_(nullptr)
         {
             setup(_sensor_ptr);
+            delta_ = deltaZero();
+            delta_integrated_ = deltaZero();
             jacobian_delta_preint_.setZero(delta_cov_size_, delta_cov_size_);
             jacobian_delta_.setZero(delta_cov_size_, delta_cov_size_);
         }
@@ -43,13 +45,13 @@ void ProcessorOdom3D::setup(SensorOdom3DPtr sen_ptr)
     }
 }
 
-void ProcessorOdom3D::data2delta(const Eigen::VectorXs& _data,
-                                 const Eigen::MatrixXs& _data_cov,
-                                 const Scalar _dt,
-                                 Eigen::VectorXs& _delta,
-                                 Eigen::MatrixXs& _delta_cov,
-                                 const Eigen::VectorXs& _calib,
-                                 Eigen::MatrixXs& _jacobian_calib)
+void ProcessorOdom3D::computeCurrentDelta(const Eigen::VectorXs& _data,
+                                          const Eigen::MatrixXs& _data_cov,
+                                          const Eigen::VectorXs& _calib,
+                                          const Scalar _dt,
+                                          Eigen::VectorXs& _delta,
+                                          Eigen::MatrixXs& _delta_cov,
+                                          Eigen::MatrixXs& _jacobian_calib)
 {
     assert((_data.size() == 6 || _data.size() == 7) && "Wrong data size. Must be 6 or 7 for 3D.");
     Scalar disp, rot; // displacement and rotation of this motion step
@@ -150,7 +152,7 @@ void ProcessorOdom3D::statePlusDelta(const Eigen::VectorXs& _x, const Eigen::Vec
 {   
     assert(_x.size() >= x_size_ && "Wrong _x vector size"); //we need a state vector which size is at least x_size_
     assert(_delta.size() == delta_size_ && "Wrong _delta vector size");
-    assert(_x_plus_delta.size() == x_size_ && "Wrong _x_plus_delta vector size");
+    assert(_x_plus_delta.size() >= x_size_ && "Wrong _x_plus_delta vector size");
     remap(_x.head(x_size_), _delta, _x_plus_delta); //we take only the x_sixe_ first elements of the state Vectors (Position + Orientation)
     p_out_ = p1_ + q1_ * p2_;
     q_out_ = q1_ * q2_;
@@ -293,14 +295,14 @@ bool ProcessorOdom3D::voteForKeyFrame()
         return true;
     }
     // distance traveled
-    Scalar dist = delta_integrated_.head(3).norm();
+    Scalar dist = getMotion().delta_integr_.head(3).norm();
     if (dist > dist_traveled_)
     {
         WOLF_DEBUG( "PM: vote: distance traveled" );
         return true;
     }
     // angle turned
-    Scalar angle = 2.0 * acos(delta_integrated_(6));
+    Scalar angle = q2v(Quaternions(getMotion().delta_integr_.data()+3)).norm(); // 2.0 * acos(getMotion().delta_integr_(6));
     if (angle > angle_turned_)
     {
         WOLF_DEBUG( "PM: vote: angle turned" );

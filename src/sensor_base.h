@@ -11,6 +11,7 @@ class StateBlock;
 //Wolf includes
 #include "wolf.h"
 #include "node_base.h"
+#include "time_stamp.h"
 
 //std includes
 
@@ -36,6 +37,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         HardwareBaseWPtr hardware_ptr_;
         ProcessorBaseList processor_list_;
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, intrinsic.
+        Size calib_size_;
 
         static unsigned int sensor_id_count_; ///< Object counter (acts as simple ID factory)
         bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
@@ -43,8 +45,9 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
     protected:
         unsigned int sensor_id_;   // sensor ID
 
-        bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
-        bool intrinsic_dynamic_;// intrinsic parameters vary with time? If so, they will be taken from the Capture nodes. TODO: Not Yet Implemented.
+        bool extrinsic_dynamic_;// extrinsic parameters vary with time? If so, they will be taken from the Capture nodes.
+        bool intrinsic_dynamic_;// intrinsic parameters vary with time? If so, they will be taken from the Capture nodes.
+        bool has_capture_;      // indicates this sensor took at least one capture
 
         Eigen::VectorXs noise_std_; // std of sensor noise
         Eigen::MatrixXs noise_cov_; // cov matrix of noise
@@ -93,29 +96,34 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
         unsigned int id();
 
+        HardwareBasePtr getHardwarePtr();
+        void setHardwarePtr(const HardwareBasePtr _hw_ptr);
+
+        ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
+        ProcessorBaseList& getProcessorList();
+
+        CaptureBasePtr lastCapture(const TimeStamp& _ts);
+
+        bool process(const CaptureBasePtr capture_ptr);
+
         // State blocks
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
         std::vector<StateBlockPtr>& getStateBlockVec();
-        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
-        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
+        StateBlockPtr getStateBlockPtrStatic(unsigned int _i) const;
+        StateBlockPtr getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts);
+        void setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr);
+        void resizeStateBlockVec(int _size);
 
-        StateBlockPtr getPPtr() const;
-        StateBlockPtr getOPtr() const;
-        /** \brief intrinsic parameters.
-         * Use it if desired. By using this StateBlock, WOLF will be able to auto-calibrate these parameters.
-         * To do so, just unfix() it. After the calibration process, you can fix() it again if desired.
-         *
-         * (Note: Many other intrinsic parameters can be stored as members of the classes derived from this.
-         * We recommend you use a struct for this purpose if the number of intrinsic parameters is large.)
-         */
-        StateBlockPtr getIntrinsicPtr() const;
+        StateBlockPtr getPPtr(const TimeStamp _ts);
+        StateBlockPtr getOPtr(const TimeStamp _ts);
+        StateBlockPtr getIntrinsicPtr(const TimeStamp _ts);
+        StateBlockPtr getPPtr() ;
+        StateBlockPtr getOPtr();
+        StateBlockPtr getIntrinsicPtr();
         void setPPtr(const StateBlockPtr _p_ptr);
         void setOPtr(const StateBlockPtr _o_ptr);
         void setIntrinsicPtr(const StateBlockPtr _intr_ptr);
         void removeStateBlocks();
-
-        ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
-        ProcessorBaseList& getProcessorList();
 
         void fix();
         void unfix();
@@ -124,48 +132,38 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void fixIntrinsics();
         void unfixIntrinsics();
 
-        /** \brief Adds all stateBlocks of the sensor to the wolfProblem list of new stateBlocks
-         **/
+        Size getCalibSize() const;
+        Eigen::VectorXs getCalibration() const;
+
         virtual void registerNewStateBlocks();
 
-        /**
-         * Check if sensor is dynamic
-         */
-        bool isExtrinsicDynamic();
+        bool isExtrinsicDynamic() const;
+        bool isIntrinsicDynamic() const;
+        bool hasCapture() const {return has_capture_;}
+        void setHasCapture() {has_capture_ = true;}
+        bool extrinsicsInCaptures() const { return extrinsic_dynamic_ && has_capture_; }
+        bool intrinsicsInCaptures() const { return intrinsic_dynamic_ && has_capture_; }
 
-        void setNoise(const Eigen::VectorXs & _noise_std);
+        void setNoiseStd(const Eigen::VectorXs & _noise_std);
+        void setNoiseCov(const Eigen::MatrixXs & _noise_std);
         Eigen::VectorXs getNoiseStd();
         Eigen::MatrixXs getNoiseCov();
 
-        ProblemPtr getProblem();
-        HardwareBasePtr getHardwarePtr();
-        void setHardwarePtr(const HardwareBasePtr _hw_ptr);
+    protected:
+        Size computeCalibSize() const;
 
-        bool process(const CaptureBasePtr capture_ptr);
-
+    private:
+        void updateCalibSize();
 };
 
 }
 
+#include "problem.h"
 #include "hardware_base.h"
 #include "processor_base.h"
 #include "capture_base.h"
 
 namespace wolf{
-
-inline wolf::ProblemPtr SensorBase::getProblem()
-{
-    ProblemPtr prb = problem_ptr_.lock();
-    if (!prb){
-        HardwareBasePtr hw = hardware_ptr_.lock();
-    if (hw)
-    {
-        prb = hw->getProblem();
-        problem_ptr_ = prb;
-    }
-    }
-    return prb;
-}
 
 inline unsigned int SensorBase::id()
 {
@@ -189,37 +187,51 @@ inline const std::vector<StateBlockPtr>& SensorBase::getStateBlockVec() const
 {
     return state_block_vec_;
 }
+
 inline std::vector<StateBlockPtr>& SensorBase::getStateBlockVec()
 {
     return state_block_vec_;
 }
-inline StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i) const
+
+inline StateBlockPtr SensorBase::getStateBlockPtrStatic(unsigned int _i) const
 {
     assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
     return state_block_vec_[_i];
 }
-inline void SensorBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
+
+inline StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts)
+{
+    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+    if ( ( (_i < 2) && extrinsicsInCaptures() ) || ( (_i >= 2) && intrinsicsInCaptures() ) )
+    {
+        CaptureBasePtr cap = lastCapture( _ts );
+        return cap->getStateBlockPtr(_i);
+    }
+    else
+        return state_block_vec_[_i];
+}
+
+inline void SensorBase::setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
     state_block_vec_[_i] = _sb_ptr;
 }
-inline StateBlockPtr SensorBase::getPPtr() const
+
+inline void SensorBase::resizeStateBlockVec(int _size)
 {
-    return getStateBlockPtr(0);
+    if (_size > state_block_vec_.size())
+        state_block_vec_.resize(_size);
 }
 
-inline StateBlockPtr SensorBase::getOPtr() const
+inline bool SensorBase::isExtrinsicDynamic() const
 {
-    return getStateBlockPtr(1);
-}
-
-inline StateBlockPtr SensorBase::getIntrinsicPtr() const
-{
-    return getStateBlockPtr(2);
-}
-
-inline bool SensorBase::isExtrinsicDynamic()
-{
+    // If this Sensor has no Capture yet, we'll consider it static
     return extrinsic_dynamic_;
+}
+
+inline bool SensorBase::isIntrinsicDynamic() const
+{
+    // If this Sensor has no Capture yet, we'll consider it static
+    return intrinsic_dynamic_;
 }
 
 inline Eigen::VectorXs SensorBase::getNoiseStd()
@@ -239,17 +251,17 @@ inline HardwareBasePtr SensorBase::getHardwarePtr()
 
 inline void SensorBase::setPPtr(const StateBlockPtr _p_ptr)
 {
-    setStateBlockPtr(0, _p_ptr);
+    setStateBlockPtrStatic(0, _p_ptr);
 }
 
 inline void SensorBase::setOPtr(const StateBlockPtr _o_ptr)
 {
-    setStateBlockPtr(1, _o_ptr);
+    setStateBlockPtrStatic(1, _o_ptr);
 }
 
 inline void SensorBase::setIntrinsicPtr(const StateBlockPtr _intr_ptr)
 {
-    setStateBlockPtr(2, _intr_ptr);
+    setStateBlockPtrStatic(2, _intr_ptr);
 }
 
 inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
@@ -257,19 +269,17 @@ inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
     hardware_ptr_ = _hw_ptr;
 }
 
-inline bool SensorBase::process(const CaptureBasePtr capture_ptr)
+inline wolf::Size SensorBase::getCalibSize() const
 {
-  if (capture_ptr == nullptr) return false;
-
-  capture_ptr->setSensorPtr(shared_from_this());
-
-  for (const auto& processor : processor_list_)
-  {
-    processor->process(capture_ptr);
-  }
-
-  return true;
+    return calib_size_;
 }
+
+inline void SensorBase::updateCalibSize()
+{
+    calib_size_ = computeCalibSize();
+}
+
+
 
 } // namespace wolf
 
