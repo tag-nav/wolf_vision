@@ -41,7 +41,7 @@ class ProcessorRangeBearing : public ProcessorBase
         virtual bool voteForKeyFrame() override {return false;}
         virtual bool keyFrameCallback(FrameBasePtr _key_frame, const Scalar& _time_tolerance) override {return true;}
 
-        // helpers
+        // landmark observation models -- they would be better off in a separate library e.g. range_bearing_tools.h
         Eigen::Vector2s observe(const Eigen::Vector2s& lmk_w) const;
         Eigen::Vector2s invObserve(Scalar r, Scalar b) const;
 
