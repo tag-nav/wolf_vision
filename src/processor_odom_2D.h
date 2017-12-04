@@ -207,11 +207,11 @@ inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const
     return Eigen::VectorXs::Zero(delta_size_);
 }
 
-CaptureMotionPtr ProcessorOdom2D::createCapture(const TimeStamp& _ts,
-                                                 const SensorBasePtr& _sensor,
-                                                 const VectorXs& _data,
-                                                 const MatrixXs& _data_cov,
-                                                 const FrameBasePtr& _frame_origin)
+inline CaptureMotionPtr ProcessorOdom2D::createCapture(const TimeStamp& _ts,
+                                                       const SensorBasePtr& _sensor,
+                                                       const VectorXs& _data,
+                                                       const MatrixXs& _data_cov,
+                                                       const FrameBasePtr& _frame_origin)
 {
     CaptureOdom2DPtr capture_odom = std::make_shared<CaptureOdom2D>(_ts, _sensor, _data, _data_cov, _frame_origin);
     return capture_odom;
@@ -258,38 +258,28 @@ inline Motion ProcessorOdom2D::interpolate(const Motion& _ref, Motion& _second, 
 inline bool ProcessorOdom2D::voteForKeyFrame()
 {
     // Distance criterion
-    //std::cout << "ProcessorOdom2D::voteForKeyFrame: traveled distance " << getBufferPtr()->get().back().delta_integr_.norm() << std::endl;
     if (getBuffer().get().back().delta_integr_.head<2>().norm() > dist_traveled_th_)
     {
-//        std::cout << "ProcessorOdom2D:: " << id() << " -  VOTE FOR KEY FRAME traveled distance "
-//                << getBuffer().get().back().delta_integr_.head<2>().norm() << std::endl;
         return true;
     }
 
-    if (/*std::abs*/(getBuffer().get().back().delta_integr_.tail<1>().norm()) > theta_traveled_th_)
+    if (getBuffer().get().back().delta_integr_.tail<1>().norm() > theta_traveled_th_)
     {
-//        std::cout << "ProcessorOdom2D:: " << id() << " -  VOTE FOR KEY FRAME traveled distance "
-//                << getBuffer().get().back().delta_integr_.head<2>().norm() << std::endl;
         return true;
     }
 
     // Uncertainty criterion
-//    delta_integrated_cov_ = getBuffer().get().back().jacobian_delta_integr_ * delta_integrated_cov_ * getBuffer().get().back().jacobian_delta_integr_.transpose() + getBuffer().get().back().jacobian_delta_ * getBuffer().get().back().delta_cov_ * getBuffer().get().back().jacobian_delta_.transpose();
     if (getBuffer().get().back().delta_integr_cov_.determinant() > cov_det_th_)
     {
-//        std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME covariance det "
-//                << delta_integrated_cov_.determinant() << std::endl;
         return true;
     }
 
     // Time criterion
     if (getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() > elapsed_time_th_)
     {
-//        std::cout << "ProcessorOdom2D:: " << id() << " - VOTE FOR KEY FRAME elapsed time "
-//                << getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get()
-//                << std::endl;
         return true;
     }
+
     return false;
 }
 
