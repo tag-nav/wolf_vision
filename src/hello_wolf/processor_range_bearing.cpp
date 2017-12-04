@@ -17,7 +17,7 @@ namespace wolf
 ProcessorRangeBearing::ProcessorRangeBearing(const SensorRangeBearingPtr _sensor_ptr, const Scalar& _time_tolerance) :
         ProcessorBase("RANGE BEARING", _time_tolerance)
 {
-    H_r_s   = transform(getSensorPtr()->getPPtr()->getState(), getSensorPtr()->getOPtr()->getState());
+    H_r_s   = transform(_sensor_ptr->getPPtr()->getState(), _sensor_ptr->getOPtr()->getState());
 }
 
 void ProcessorRangeBearing::process(CaptureBasePtr _capture)
