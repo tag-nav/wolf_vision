@@ -1,5 +1,5 @@
 /*
- * CaptureRangeBearing2D.h
+ * capture_range_bearing.h
  *
  *  Created on: Nov 30, 2017
  *      Author: jsola
@@ -23,44 +23,57 @@ class CaptureRangeBearing : public CaptureBase
         CaptureRangeBearing(const TimeStamp& _ts, const SensorBasePtr& _scanner, const Eigen::VectorXs& _ranges, unsigned int _num_points = 271, Scalar _d_angle = 1.0);
         virtual ~CaptureRangeBearing();
 
-        VectorXs getRanges();
-        VectorXs getBearings();
-        Scalar getRange(int _i);
-        Scalar getBearing(int _i);
-        Vector2s getRangeBearing(int _i);
-        Matrix<Scalar, Dynamic, 2> getRangeBearing();
+        const VectorXi& getIds() const;
+        const int& getId(int _i) const;
+        const Eigen::VectorXs& getRanges() const;
+        const Eigen::VectorXs& getBearings() const;
+        const wolf::Scalar& getRange(int _i) const;
+        const wolf::Scalar& getBearing(int _i) const;
+        Eigen::Vector2s getRangeBearing(int _i) const;
+        Eigen::Matrix<double, Dynamic, 2> getRangeBearing() const;
 
     private:
-        VectorXs ranges_;
-        VectorXs bearings_;
+        VectorXi ids_;          // identifiers
+        VectorXs ranges_;       // ranges
+        VectorXs bearings_;     // bearings
 };
 
-inline Eigen::VectorXs CaptureRangeBearing::getRanges()
+inline const Eigen::VectorXi& CaptureRangeBearing::getIds() const
+{
+    return ids_;
+}
+
+inline const int& CaptureRangeBearing::getId(int _i) const
+{
+    return ids_(_i);
+}
+
+inline const Eigen::VectorXs& CaptureRangeBearing::getRanges() const
 {
     return ranges_;
 }
 
-inline Eigen::VectorXs CaptureRangeBearing::getBearings()
+inline const Eigen::VectorXs& CaptureRangeBearing::getBearings() const
 {
     return bearings_;
 }
 
-inline wolf::Scalar CaptureRangeBearing::getRange(int _i)
+inline const wolf::Scalar& CaptureRangeBearing::getRange(int _i) const
 {
     return ranges_(_i);
 }
 
-inline wolf::Scalar CaptureRangeBearing::getBearing(int _i)
+inline const wolf::Scalar& CaptureRangeBearing::getBearing(int _i) const
 {
     return bearings_(_i);
 }
 
-inline Eigen::Matrix<double,Dynamic,2> CaptureRangeBearing::getRangeBearing()
+inline Eigen::Matrix<Scalar,Dynamic,2> CaptureRangeBearing::getRangeBearing() const
 {
     return (Matrix<Scalar,Dynamic,2>() << ranges_, bearings_).finished();
 }
 
-inline Eigen::Vector2s CaptureRangeBearing::getRangeBearing(int _i)
+inline Eigen::Vector2s CaptureRangeBearing::getRangeBearing(int _i) const
 {
     return Vector2s(ranges_(_i), bearings_(_i));
 }

@@ -30,6 +30,8 @@ int main()
 
     // processor
     ProcessorParamsRangeBearingPtr params;
+    params->pose0 << 0,0,0;
+    params->delta << 1,0,0;
     ProcessorBasePtr processor  = problem->installProcessor("RANGE BEARING", "processor", sensor, params);
 
     return 0;
