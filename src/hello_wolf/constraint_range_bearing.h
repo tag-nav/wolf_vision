@@ -87,13 +87,9 @@ inline bool ConstraintRangeBearing::operator ()(const T* const _p_w_r,
     Matrix<T, 2, 1> exp_rb;
     exp_rb(0)      = sqrt(lmk_s.squaredNorm());        // range is norm. This code workaround is because Eigen::v.norm() is problematic with scalar type ceres::Jet
     exp_rb(1)      = atan2(lmk_s(1), lmk_s(0));        // bearing
-//    WOLF_TRACE("exp  r: ", exp_rb(0));
-//    WOLF_TRACE("exp  b: ", exp_rb(1));
 
     // 4. Get the measured range-and-bearing to the point
     Matrix<T, 2, 1> meas_rb       = getMeasurement().cast<T>();
-//    WOLF_TRACE("meas r: ", getMeasurement()(0));
-//    WOLF_TRACE("meas b: ", getMeasurement()(1));
 
     // 5. Get the error by comparing the expected against the measurement
     Matrix<T, 2, 1> err_rb(meas_rb - exp_rb);
@@ -101,8 +97,6 @@ inline bool ConstraintRangeBearing::operator ()(const T* const _p_w_r,
         err_rb(1) += T(2*M_PI);
     while (err_rb(1) > T(M_PI))
         err_rb(1) -= T(2*M_PI);
-//    WOLF_TRACE("err  r: ", err_rb(0));
-//    WOLF_TRACE("err  b: ", err_rb(1));
 
     // 6. Compute the residual by weighting the error according to the standard deviation of the bearing part
     res     = getMeasurementSquareRootInformationUpper().cast<T>() * err_rb;
