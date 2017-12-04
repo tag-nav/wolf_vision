@@ -57,16 +57,17 @@ int main()
      *
      * We consider 3 KFs and 3 lmks, observed as follows
      *
-     *
+     *     (0,1)   (1,1)   (2,1)
      *      L1      L2      L3
      *      | \     | \     |
      *      |   \   |   \   |
      *      |     \ |     \ |
      *      F1->    F2->    F3->
+     *    (0,0,0) (1,0,0) (2,0,0)
      *
      * That is:
      *   - Lmks have ids '1', '2', '3'
-     *   - All KFs look East, theta = 0
+     *   - All KFs look East, so all theta = 0
      *   - KFs  are at poses (0,0, 0), (1,0, 0), and (2,0, 0)
      *   - Lmks are at positions (0,1), (1,1), (2,1)
      *   - Observations have ranges 1 or sqrt(2)
