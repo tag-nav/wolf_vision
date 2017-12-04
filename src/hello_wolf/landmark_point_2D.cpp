@@ -10,8 +10,9 @@
 namespace wolf
 {
 
-LandmarkPoint2D::LandmarkPoint2D(const Eigen::Vector2s& _xy) :
-        LandmarkBase("POINT 2D", std::make_shared<StateBlock>(_xy))
+LandmarkPoint2D::LandmarkPoint2D(int _id, const Eigen::Vector2s& _xy) :
+        LandmarkBase("POINT 2D", std::make_shared<StateBlock>(_xy)),
+        id_(_id)
 {
     //
 

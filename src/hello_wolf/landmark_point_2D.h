@@ -18,8 +18,21 @@ WOLF_PTR_TYPEDEFS(LandmarkPoint2D);
 class LandmarkPoint2D : public LandmarkBase
 {
     public:
-        LandmarkPoint2D(const Eigen::Vector2s& _xy);
+        LandmarkPoint2D(int _id, const Eigen::Vector2s& _xy);
         virtual ~LandmarkPoint2D();
+
+        int getId() const
+        {
+            return id_;
+        }
+
+        void setId(int id)
+        {
+            id_ = id;
+        }
+
+    private:
+        int id_;
 };
 
 } /* namespace wolf */

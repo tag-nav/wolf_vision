@@ -54,7 +54,7 @@ class ProcessorRangeBearing : public ProcessorBase
         // control variables
         Size step_number;
         Trf H_w_r, H_r_s, H_delta; // transformation matrices, world to robot, to sensor, and motion delta
-        std::set<int> observed_ids; // ids of all observed lmks so far
+        std::set<int> lmk_ids; // ids of all observed lmks so far
 
         // helper methods
         Trf transform(const Eigen::Vector3s& _pose);

@@ -13,6 +13,8 @@
 namespace wolf
 {
 
+WOLF_PTR_TYPEDEFS(FeatureRangeBearing);
+
 class FeatureRangeBearing : public wolf::FeatureBase
 {
     public:

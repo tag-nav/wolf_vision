@@ -7,6 +7,8 @@
 
 
 #include "wolf.h"
+#include "sensor_odom_2D.h"
+#include "processor_odom_2D.h"
 #include "sensor_range_bearing.h"
 #include "processor_range_bearing.h"
 #include "capture_range_bearing.h"
@@ -22,17 +24,31 @@ int main()
     ceres::Solver::Options ceres_options;
     CeresManagerPtr ceres                   = std::make_shared<CeresManager>(problem, ceres_options);
 
-    // sensor
-    IntrinsicsRangeBearingPtr intrinsics;
-    intrinsics->noise_bearing_degrees_std   = 1.0;
-    intrinsics->noise_range_metres_std      = 0.1;
-    SensorBasePtr sensor        = problem->installSensor("RANGE BEARING", "sensor", Vector3s(0,0,0), intrinsics);
+    // sensor odom
+    IntrinsicsOdom2DPtr intrinsics_odo;
+    intrinsics_odo->k_disp_to_disp  = 0.1;
+    intrinsics_odo->k_rot_to_rot    = 0.1;
+    SensorBasePtr sensor_odo        = problem->installSensor("ODOM 2D", "sensor odo", Vector3s(0,0,0), intrinsics_odo);
 
-    // processor
-    ProcessorParamsRangeBearingPtr params;
-    params->pose0 << 0,0,0;
-    params->delta << 1,0,0;
-    ProcessorBasePtr processor  = problem->installProcessor("RANGE BEARING", "processor", sensor, params);
+    // processor odom
+    ProcessorParamsOdom2DPtr params_odo;
+    params_odo->elapsed_time_th_  = 999;
+    params_odo->dist_traveled_th_ = 0.95;
+    params_odo->theta_traveled_th_= 999;
+    params_odo->cov_det_th_       = 999;
+    ProcessorBasePtr processor_odo  = problem->installProcessor("ODOM 2D", "processor odo", sensor_odo, params_odo);
+
+    // sensor RB
+    IntrinsicsRangeBearingPtr intrinsics_rb;
+    intrinsics_rb->noise_bearing_degrees_std   = 1.0;
+    intrinsics_rb->noise_range_metres_std      = 0.1;
+    SensorBasePtr sensor_rb        = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(0,0,0), intrinsics_rb);
+
+    // processor RB
+    ProcessorParamsRangeBearingPtr params_rb;
+    params_rb->pose0 << 0,0,0;
+    params_rb->delta << 1,0,0;
+    ProcessorBasePtr processor_rb  = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
 
     return 0;
 }

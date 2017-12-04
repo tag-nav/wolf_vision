@@ -7,6 +7,8 @@
 
 #include "processor_range_bearing.h"
 #include "capture_range_bearing.h"
+#include "landmark_point_2D.h"
+#include "feature_range_bearing.h"
 
 namespace wolf
 {
@@ -29,27 +31,38 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
 {
     CaptureRangeBearingPtr capture = std::static_pointer_cast<CaptureRangeBearing>(_capture);
 
+    // explore all observations in the capture
     for (Size i = 0; i < capture->getIds().size(); i++)
     {
         int     id      = capture->getId(i);
         Scalar  range   = capture->getRange  (i);
         Scalar  bearing = capture->getBearing(i);
-        if (observed_ids.find(id) == observed_ids.end())
+        WOLF_TRACE("id(", i, ") = ", id, "; range(", i, ") = ", range, "; bearing(", i, ") = ", bearing);
+
+        // create KF
+
+        // create Capture
+
+        // create or recover landmark
+
+        LandmarkPoint2DPtr lmk;
+        if (lmk_ids.find(id) == lmk_ids.end())
         {
             // new landmarks:
             // - create landmark
-            // - create feature
-            // - create constraint
-
-            observed_ids.insert(id);
+            lmk = std::make_shared<LandmarkPoint2D>(id, invObserve(range, bearing));
+            getProblem()->getMapPtr()->addLandmark(lmk);
+            // - add to known landmarks
+            lmk_ids.insert(id);
         }
         else
         {
-            // known landmarks
-            // - create feature
-            // - create constraint
+            // known landmarks : recover landmark
         }
-        WOLF_TRACE("range(", i, ") = ", range, "; bearing(", i, ") = ", bearing);
+        // create feature
+        Vector2s rb(range,bearing);
+        FeatureRangeBearingPtr ftr = std::make_shared<FeatureRangeBearing>(rb, getSensorPtr()->getNoiseCov());
+        // create constraint
     }
 
     // advance one step
