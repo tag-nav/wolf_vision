@@ -21,11 +21,11 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsOdom2D);
 
 struct ProcessorParamsOdom2D : public ProcessorParamsBase
 {
-    Scalar dist_traveled_th_;
-    Scalar theta_traveled_th_;
-    Scalar cov_det_th_;
-    Scalar elapsed_time_th_;
-    Scalar unmeasured_perturbation_std_;
+    Scalar dist_traveled_th_            = 1.0;
+    Scalar theta_traveled_th_           = 0.17;
+    Scalar cov_det_th_                  = 1.0;
+    Scalar elapsed_time_th_             = 1.0;
+    Scalar unmeasured_perturbation_std_ = 0.001;
 };
 
 class ProcessorOdom2D : public ProcessorMotion
