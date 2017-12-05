@@ -34,24 +34,22 @@ int main()
 
     // processor odom
     ProcessorParamsOdom2DPtr params_odo = std::make_shared<ProcessorParamsOdom2D>();
-    params_odo->elapsed_time_th_  = 999;
-    params_odo->dist_traveled_th_ = 0.95; // Will make KFs every 1m displacement
-    params_odo->theta_traveled_th_= 999;
-    params_odo->cov_det_th_       = 999;
-    ProcessorBasePtr processor  = problem->installProcessor("ODOM 2D", "processor odo", sensor_odo, params_odo);
+    params_odo->elapsed_time_th_    = 999;
+    params_odo->dist_traveled_th_   = 0.95; // Will make KFs every 1m displacement
+    params_odo->theta_traveled_th_  = 999;
+    params_odo->cov_det_th_         = 999;
+    ProcessorBasePtr processor      = problem->installProcessor("ODOM 2D", "processor odo", sensor_odo, params_odo);
     ProcessorOdom2DPtr processor_odo = std::static_pointer_cast<ProcessorOdom2D>(processor);
 
     // sensor RB
-    IntrinsicsRangeBearingPtr intrinsics_rb = std::make_shared<IntrinsicsRangeBearing>();
-    intrinsics_rb->noise_bearing_degrees_std   = 1.0;
-    intrinsics_rb->noise_range_metres_std      = 0.1;
-    SensorBasePtr sensor_rb        = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(0,0,0), intrinsics_rb);
+    IntrinsicsRangeBearingPtr intrinsics_rb     = std::make_shared<IntrinsicsRangeBearing>();
+    intrinsics_rb->noise_bearing_degrees_std    = 1.0;
+    intrinsics_rb->noise_range_metres_std       = 0.1;
+    SensorBasePtr sensor_rb         = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(0,0,0), intrinsics_rb);
 
     // processor RB
     ProcessorParamsRangeBearingPtr params_rb = std::make_shared<ProcessorParamsRangeBearing>();
-    params_rb->pose0 << 0,0,0;
-    params_rb->delta << 1,0,0;
-    ProcessorBasePtr processor_rb  = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
+    ProcessorBasePtr processor_rb   = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
 
     /* PROBLEM DEFINITION
      *
@@ -62,7 +60,7 @@ int main()
      *      | \     | \     |
      *      |   \   |   \   |
      *      |     \ |     \ |
-     *      F1->    F2->    F3->
+     *     KF1->   KF2->   KF3->
      *    (0,0,0) (1,0,0) (2,0,0)
      *
      * That is:
@@ -73,7 +71,7 @@ int main()
      *   - Observations have ranges 1 or sqrt(2)
      *   - Observations have bearings pi/2 or 3pi/4
      *
-     * The sensor is considered at the origin (0,0, 0)
+     * The sensor is considered at the robot's origin (0,0, 0)
      */
 
     // Origin

@@ -21,7 +21,7 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsRangeBearing);
 
 struct ProcessorParamsRangeBearing : public ProcessorParamsBase
 {
-        Eigen::Vector3s pose0, delta;
+        //        Eigen::Vector3s pose0, delta;
 };
 
 

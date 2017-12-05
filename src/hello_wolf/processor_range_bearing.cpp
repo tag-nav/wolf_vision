@@ -46,8 +46,8 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
 
         // 4. create or recover landmark
         LandmarkPoint2DPtr lmk;
-        auto it = lmk_ids.find(id);
-        if ( it == lmk_ids.end() )
+        auto lmk_it = lmk_ids.find(id);
+        if ( lmk_it == lmk_ids.end() )
         {
             // new landmark:
             // - create landmark
@@ -60,7 +60,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
         else
         {
             // known landmarks : recover landmark
-            lmk = std::static_pointer_cast<LandmarkPoint2D>(it->second);
+            lmk = std::static_pointer_cast<LandmarkPoint2D>(lmk_it->second);
             WOLF_TRACE("known lmk(", id, "): ", lmk->getPPtr()->getState().transpose());
         }
 
