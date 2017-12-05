@@ -775,15 +775,15 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     {
                         for(auto sb : C->getStateBlockVec())
                         {
-                            cout << "      sb: ";
                             if(sb != nullptr)
                             {
+                                cout << "      sb: ";
                                 cout << (sb->isFixed() ? "Fix" : "Est");
                                 if (metric)
                                     cout << std::setprecision(3) << " (" << sb->getState().transpose() << ")";
+                                cout << endl;
                             }
-                            else cout << "nullptr ";
-                            cout << endl;
+//                            else cout << "      sb: nullptr " << endl;
                         }
                     }
 

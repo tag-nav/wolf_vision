@@ -21,39 +21,9 @@
 
 int main()
 {
-    using namespace wolf;
-    ProblemPtr problem                      = Problem::create("PO 2D");
-    ceres::Solver::Options ceres_options;
-    CeresManagerPtr ceres                   = std::make_shared<CeresManager>(problem, ceres_options);
-
-    // sensor odom
-    IntrinsicsOdom2DPtr intrinsics_odo = std::make_shared<IntrinsicsOdom2D>();
-    intrinsics_odo->k_disp_to_disp  = 0.1;
-    intrinsics_odo->k_rot_to_rot    = 0.1;
-    SensorBasePtr sensor_odo        = problem->installSensor("ODOM 2D", "sensor odo", Vector3s(0,0,0), intrinsics_odo);
-
-    // processor odom
-    ProcessorParamsOdom2DPtr params_odo = std::make_shared<ProcessorParamsOdom2D>();
-    params_odo->elapsed_time_th_    = 999;
-    params_odo->dist_traveled_th_   = 0.95; // Will make KFs every 1m displacement
-    params_odo->theta_traveled_th_  = 999;
-    params_odo->cov_det_th_         = 999;
-    ProcessorBasePtr processor      = problem->installProcessor("ODOM 2D", "processor odo", sensor_odo, params_odo);
-    ProcessorOdom2DPtr processor_odo = std::static_pointer_cast<ProcessorOdom2D>(processor);
-
-    // sensor RB
-    IntrinsicsRangeBearingPtr intrinsics_rb     = std::make_shared<IntrinsicsRangeBearing>();
-    intrinsics_rb->noise_bearing_degrees_std    = 1.0;
-    intrinsics_rb->noise_range_metres_std       = 0.1;
-    SensorBasePtr sensor_rb         = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(0,0,0), intrinsics_rb);
-
-    // processor RB
-    ProcessorParamsRangeBearingPtr params_rb = std::make_shared<ProcessorParamsRangeBearing>();
-    ProcessorBasePtr processor_rb   = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
-
     /* PROBLEM DEFINITION
      *
-     * We consider 3 KFs and 3 lmks, observed as follows
+     * We consider 3 keyframes 'KF' and 3 landmarks 'L', observed as follows
      *
      *     (0,1)   (1,1)   (2,1)
      *      L1      L2      L3
@@ -62,6 +32,12 @@ int main()
      *      |     \ |     \ |
      *     KF1->   KF2->   KF3->
      *    (0,0,0) (1,0,0) (2,0,0)
+     *      |
+     *      |
+     *      * prior
+     *    (0,0,0)
+     *
+     * where the links '\' and '|' are the measurement factors.
      *
      * That is:
      *   - Lmks have ids '1', '2', '3'
@@ -70,87 +46,150 @@ int main()
      *   - Lmks are at positions (0,1), (1,1), (2,1)
      *   - Observations have ranges 1 or sqrt(2)
      *   - Observations have bearings pi/2 or 3pi/4
+     *   - We set a prior at (0,0,0) on KF1 to render the system observable
      *
      * The sensor is considered at the robot's origin (0,0, 0)
      */
 
+    // SET PROBLEM =======================================================
+
+    using namespace wolf;
+
+    // Wolf problem and solver
+    ProblemPtr problem                      = Problem::create("PO 2D");
+    ceres::Solver::Options ceres_options;
+    ceres_options.max_num_iterations        = 1000; // We depart far from solution, need a lot of iterations
+    CeresManagerPtr ceres                   = std::make_shared<CeresManager>(problem, ceres_options);
+
+    // sensor odometer 2D
+    IntrinsicsOdom2DPtr intrinsics_odo = std::make_shared<IntrinsicsOdom2D>();
+    intrinsics_odo->k_disp_to_disp  = 0.1;
+    intrinsics_odo->k_rot_to_rot    = 0.1;
+    SensorBasePtr sensor_odo        = problem->installSensor("ODOM 2D", "sensor odo", Vector3s(0,0,0), intrinsics_odo);
+
+    // processor odometer 2D
+    ProcessorParamsOdom2DPtr params_odo = std::make_shared<ProcessorParamsOdom2D>();
+    params_odo->elapsed_time_th_    = 999;
+    params_odo->dist_traveled_th_   = 0.95; // Will make KFs automatically every 1m displacement
+    params_odo->theta_traveled_th_  = 999;
+    params_odo->cov_det_th_         = 999;
+    ProcessorBasePtr processor      = problem->installProcessor("ODOM 2D", "processor odo", sensor_odo, params_odo);
+    ProcessorOdom2DPtr processor_odo = std::static_pointer_cast<ProcessorOdom2D>(processor);
+
+    // sensor Range and Bearing
+    IntrinsicsRangeBearingPtr intrinsics_rb     = std::make_shared<IntrinsicsRangeBearing>();
+    intrinsics_rb->noise_bearing_degrees_std    = 1.0;
+    intrinsics_rb->noise_range_metres_std       = 0.1;
+    SensorBasePtr sensor_rb         = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(0,0,0), intrinsics_rb);
+
+    // processor Range and Bearing
+    ProcessorParamsRangeBearingPtr params_rb = std::make_shared<ProcessorParamsRangeBearing>();
+    ProcessorBasePtr processor_rb   = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
+
+
+    // CONFIGURE ==========================================================
+
     // Origin
     TimeStamp   t(0.0);
     Vector3s    x(0,0,0);
-    processor_odo->setOrigin(x, t);
+    Matrix3s    P = Matrix3s::Identity() * 0.1;
 
-    // Motion
+    // Motion data
     Vector2s motion_data(1.0,0.0);
     Matrix2s motion_cov = 0.1 * Matrix2s::Identity();
-
+    // Capture for motion data (will use always the same and update its time stamp only)
     CaptureOdom2DPtr cap_motion = std::make_shared<CaptureOdom2D>(t, sensor_odo, motion_data, motion_cov);
 
-    // Set of events
-
-    // observation
+    // landmark observations data
     VectorXi ids;
     VectorXs ranges, bearings;
 
-    // STEP 1
 
-    // lmks
+    // SET OF EVENTS =======================================================
+    // We'll do 3 steps of motion and landmark observations.
+
+    // STEP 1 --------------------------------------------------------------
+
+    // initialize
+    problem->setPrior(x, P, t);             // KF1
+
+    // observe lmks
     ids.resize(1); ranges.resize(1); bearings.resize(1);
-    ids         << 1;
-    ranges      << 1.0;
+    ids         << 1;                       // will observe Lmk 1
+    ranges      << 1.0;                     // see drawing
     bearings    << M_PI/2;
     CaptureRangeBearingPtr cap_rb = std::make_shared<CaptureRangeBearing>(t, sensor_rb, ids, ranges, bearings);
     sensor_rb   ->process(cap_rb);
 
-    // motion
+    // STEP 2 --------------------------------------------------------------
     t += 1.0;
+
+    // motion
     cap_motion  ->setTimeStamp(t);
-    sensor_odo  ->process(cap_motion);
+    sensor_odo  ->process(cap_motion);      // KF2
 
-    // STEP 2
-
-    // lmks
+    // observe lmks
     ids.resize(2); ranges.resize(2); bearings.resize(2);
-    ids         << 1, 2;
-    ranges      << sqrt(2.0), 1.0;
+    ids         << 1, 2;                    // will observe Lmks 1 and 2
+    ranges      << sqrt(2.0), 1.0;          // see drawing
     bearings    << 3*M_PI/4, M_PI/2;
     cap_rb      = std::make_shared<CaptureRangeBearing>(t, sensor_rb, ids, ranges, bearings);
     sensor_rb   ->process(cap_rb);
 
-    // motion
+    // STEP 3 --------------------------------------------------------------
     t += 1.0;
+
+    // motion
     cap_motion  ->setTimeStamp(t);
-    sensor_odo  ->process(cap_motion);
+    sensor_odo  ->process(cap_motion);      // KF3
 
-    // STEP 3
-
-    // lmks
+    // observe lmks
     ids.resize(2); ranges.resize(2); bearings.resize(2);
-    ids         << 2, 3;
-    ranges      << sqrt(2.0), 1.0;
+    ids         << 2, 3;                    // will observe Lmks 2 and 3
+    ranges      << sqrt(2.0), 1.0;          // see drawing
     bearings    << 3*M_PI/4, M_PI/2;
     cap_rb      = std::make_shared<CaptureRangeBearing>(t, sensor_rb, ids, ranges, bearings);
     sensor_rb   ->process(cap_rb);
     problem->print(4,1,1,1);
+
+
+    // SOLVE ================================================================
 
     // SOLVE with exact initial guess
     std::string report = ceres->solve(2);
-    WOLF_TRACE(report);
+    WOLF_TRACE(report);                     // should show a very low iteration number (possibly 1)
     problem->print(4,1,1,1);
 
-    // PERTURB initial guess and SOLVE again
+    // PERTURB initial guess
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
-    {
-        if (kf->id() == 1)
-            kf->fix();
-        else
-            kf->setState(kf->getState() + 1 * Vector3s::Random());
-    }
+        kf->setState(Vector3s::Random());                       // We perturb A LOT !
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
-        lmk->getPPtr()->setState(lmk->getPPtr()->getState() + 1 * Vector2s::Random());
+        lmk->getPPtr()->setState(Vector2s::Random());           // We perturb A LOT !
 
+    // SOLVE again
     report = ceres->solve(2);
-    WOLF_TRACE(report);
+    WOLF_TRACE(report);                     // should show a very high iteration number (more than 10, or than 100!)
     problem->print(4,1,1,1);
+    /*
+     * Note:
+     *
+     * IF YOU SEE at the end of the printed problem the estimate for Lmk 3 as:
+     *
+     * L3 POINT 2D   <-- c8
+     *   Est,     x = ( 2 1)
+     *   sb: Est
+     *
+     * it means WOLF SOLVED SUCCESSFULLY (L3 is effectively at location (2,1) ) !
+     *
+     * Side notes:
+     *
+     *  - Observe that all other KFs and Lmks are correct.
+     *
+     *  - Observe that F4 is not correct. Since it is not a KF, is has not been estimated.
+     *    But this is a no-issue because F4 is just an inner frame used by the odometer processor,
+     *    with no role in the problem itself, nor in the optimization process.
+     *
+     */
 
 
 
