@@ -207,6 +207,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         void getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& _ts);
         Eigen::VectorXs getState(const TimeStamp& _ts);
         void getState(const TimeStamp& _ts, Eigen::VectorXs& state);
+        FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts);
 
         // Zero state provider
         Eigen::VectorXs zeroState();

@@ -882,6 +882,11 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
     cout << endl;
 }
 
+FrameBasePtr wolf::Problem::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
+{
+    return trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
+}
+
 bool Problem::check(int verbose_level)
 {
     using std::cout;
