@@ -1,7 +1,14 @@
 /**
  * \file hello_wolf.cpp
  *
- *  Created on: Dec 1, 2017
+ *  Created on: Dec 1, 2017 -- two months exactly after Oct-1st, we still have 4 political prisoners.
+ *
+ *     ###
+ *    ## ##
+ *     ###
+ *    ## ##
+ *   ##   ##
+ *
  *      \author: jsola
  */
 
@@ -30,25 +37,24 @@ int main()
      *      | \     | \     |
      *      |   \   |   \   |
      *      |     \ |     \ |
-     *     KF1->   KF2->   KF3->
+     *     KF1->---KF2->---KF3->
      *    (0,0,0) (1,0,0) (2,0,0)
      *      |
      *      |
      *      * prior
      *    (0,0,0)
      *
-     * where the links '\' and '|' are the measurement factors.
+     * where the links '--', '\' and '|' are the measurement factors.
      *
      * That is:
      *   - Lmks have ids '1', '2', '3'
      *   - All KFs look East, so all theta = 0
      *   - KFs  are at poses (0,0, 0), (1,0, 0), and (2,0, 0)
      *   - Lmks are at positions (0,1), (1,1), (2,1)
+     *   - The sensor is considered at the robot's origin (0,0, 0)
      *   - Observations have ranges 1 or sqrt(2)
      *   - Observations have bearings pi/2 or 3pi/4
      *   - We set a prior at (0,0,0) on KF1 to render the system observable
-     *
-     * The sensor is considered at the robot's origin (0,0, 0)
      */
 
     // SET PROBLEM =======================================================
