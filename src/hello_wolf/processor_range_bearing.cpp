@@ -24,12 +24,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
 {
     CaptureRangeBearingPtr capture = std::static_pointer_cast<CaptureRangeBearing>(_capture);
 
-//    // 1. create KF
-//    VectorXs    x(3);
-//    TimeStamp   ts;
-//    getProblem()->getCurrentStateAndStamp(x, ts);
-//    FrameBasePtr kf = getProblem()->emplaceFrame(KEY_FRAME, x, ts);
-//    getProblem()->keyFrameCallback(kf, shared_from_this(), 0.1);
+//    // 1. get KF
     FrameBasePtr kf = getProblem()->getLastKeyFramePtr();
 
     // 2. create Capture
