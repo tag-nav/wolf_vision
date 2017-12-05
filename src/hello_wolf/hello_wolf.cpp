@@ -62,43 +62,38 @@ int main()
     CeresManagerPtr ceres                   = std::make_shared<CeresManager>(problem, ceres_options);
 
     // sensor odometer 2D
-    IntrinsicsOdom2DPtr intrinsics_odo = std::make_shared<IntrinsicsOdom2D>();
-    intrinsics_odo->k_disp_to_disp  = 0.1;
-    intrinsics_odo->k_rot_to_rot    = 0.1;
-    SensorBasePtr sensor_odo        = problem->installSensor("ODOM 2D", "sensor odo", Vector3s(0,0,0), intrinsics_odo);
+    IntrinsicsOdom2DPtr intrinsics_odo  = std::make_shared<IntrinsicsOdom2D>();
+    intrinsics_odo->k_disp_to_disp      = 0.1;
+    intrinsics_odo->k_rot_to_rot        = 0.1;
+    SensorBasePtr sensor_odo            = problem->installSensor("ODOM 2D", "sensor odo", Vector3s(0,0,0), intrinsics_odo);
 
     // processor odometer 2D
     ProcessorParamsOdom2DPtr params_odo = std::make_shared<ProcessorParamsOdom2D>();
-    params_odo->elapsed_time_th_    = 999;
-    params_odo->dist_traveled_th_   = 0.95; // Will make KFs automatically every 1m displacement
-    params_odo->theta_traveled_th_  = 999;
-    params_odo->cov_det_th_         = 999;
-    ProcessorBasePtr processor      = problem->installProcessor("ODOM 2D", "processor odo", sensor_odo, params_odo);
-    ProcessorOdom2DPtr processor_odo = std::static_pointer_cast<ProcessorOdom2D>(processor);
+    params_odo->elapsed_time_th_        = 999;
+    params_odo->dist_traveled_th_       = 0.95; // Will make KFs automatically every 1m displacement
+    params_odo->theta_traveled_th_      = 999;
+    params_odo->cov_det_th_             = 999;
+    params_odo->unmeasured_perturbation_std_ = 0.001;
+    ProcessorBasePtr processor          = problem->installProcessor("ODOM 2D", "processor odo", sensor_odo, params_odo);
+    ProcessorOdom2DPtr processor_odo    = std::static_pointer_cast<ProcessorOdom2D>(processor);
 
     // sensor Range and Bearing
     IntrinsicsRangeBearingPtr intrinsics_rb     = std::make_shared<IntrinsicsRangeBearing>();
     intrinsics_rb->noise_bearing_degrees_std    = 1.0;
     intrinsics_rb->noise_range_metres_std       = 0.1;
-    SensorBasePtr sensor_rb         = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(0,0,0), intrinsics_rb);
+    SensorBasePtr sensor_rb             = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(0,0,0), intrinsics_rb);
 
     // processor Range and Bearing
     ProcessorParamsRangeBearingPtr params_rb = std::make_shared<ProcessorParamsRangeBearing>();
-    ProcessorBasePtr processor_rb   = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
+    params_rb->time_tolerance           = 0.01;
+    ProcessorBasePtr processor_rb       = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
 
 
     // CONFIGURE ==========================================================
 
-    // Origin
-    TimeStamp   t(0.0);
-    Vector3s    x(0,0,0);
-    Matrix3s    P = Matrix3s::Identity() * 0.1;
-
     // Motion data
-    Vector2s motion_data(1.0,0.0);
+    Vector2s motion_data(1.0, 0.0);
     Matrix2s motion_cov = 0.1 * Matrix2s::Identity();
-    // Capture for motion data (will use always the same and update its time stamp only)
-    CaptureOdom2DPtr cap_motion = std::make_shared<CaptureOdom2D>(t, sensor_odo, motion_data, motion_cov);
 
     // landmark observations data
     VectorXi ids;
@@ -111,6 +106,9 @@ int main()
     // STEP 1 --------------------------------------------------------------
 
     // initialize
+    TimeStamp   t(0.0);
+    Vector3s    x(0,0,0);
+    Matrix3s    P = Matrix3s::Identity() * 0.1;
     problem->setPrior(x, P, t);             // KF1
 
     // observe lmks
@@ -125,7 +123,7 @@ int main()
     t += 1.0;
 
     // motion
-    cap_motion  ->setTimeStamp(t);
+    CaptureOdom2DPtr cap_motion = std::make_shared<CaptureOdom2D>(t, sensor_odo, motion_data, motion_cov);
     sensor_odo  ->process(cap_motion);      // KF2
 
     // observe lmks

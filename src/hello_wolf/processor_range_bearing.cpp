@@ -24,8 +24,9 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
 {
     CaptureRangeBearingPtr capture = std::static_pointer_cast<CaptureRangeBearing>(_capture);
 
-//    // 1. get KF
-    FrameBasePtr kf = getProblem()->getLastKeyFramePtr();
+    // 1. get KF -- we assume a KF is available to hold this _capture (checked in assert below)
+    FrameBasePtr kf = getProblem()->closestKeyFrameToTimeStamp(capture->getTimeStamp());
+    assert( (fabs(kf->getTimeStamp() - _capture->getTimeStamp()) < time_tolerance_) && "Could not find a KF close enough to _capture!");
 
     // 2. create Capture
     CaptureRangeBearingPtr cap = std::make_shared<CaptureRangeBearing>(capture->getTimeStamp(),
