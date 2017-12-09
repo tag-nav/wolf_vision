@@ -90,6 +90,10 @@ target_link_libraries(gtest_trajectory ${PROJECT_NAME})
 
 # ------- Now Derived classes ----------
 
+# ConstraintAbs(P/O/V) classes test
+wolf_add_gtest(gtest_constraint_absolute gtest_constraint_absolute.cpp)
+target_link_libraries(gtest_constraint_absolute ${PROJECT_NAME})
+
 # ConstraintFix3D class test
 wolf_add_gtest(gtest_constraint_fix_3D gtest_constraint_fix_3D.cpp)
 target_link_libraries(gtest_constraint_fix_3D ${PROJECT_NAME})
