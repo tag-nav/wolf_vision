@@ -12,7 +12,7 @@ namespace wolf {
 WOLF_PTR_TYPEDEFS(ConstraintAbsP);
 
 //class
-class ConstraintAbsP: public ConstraintAutodiff<ConstraintAbsP,6,3>
+class ConstraintAbsP: public ConstraintAutodiff<ConstraintAbsP,3,3>
 {
     public:
 

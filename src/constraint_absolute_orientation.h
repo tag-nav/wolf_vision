@@ -13,12 +13,12 @@ namespace wolf {
 WOLF_PTR_TYPEDEFS(ConstraintAbsO);
 
 //class
-class ConstraintAbsO: public ConstraintAutodiff<ConstraintAbsO,6,3,4>
+class ConstraintAbsO: public ConstraintAutodiff<ConstraintAbsO,3,4>
 {
     public:
 
         ConstraintAbsO(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAutodiff<ConstraintAbsO,3,4>(CTR_ABS_Q, nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getOPtr())
+            ConstraintAutodiff<ConstraintAbsO,3,4>(CTR_ABS_O, nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("ABS O");
         }
@@ -26,7 +26,7 @@ class ConstraintAbsO: public ConstraintAutodiff<ConstraintAbsO,6,3,4>
         virtual ~ConstraintAbsO() = default;
 
         template<typename T>
-        bool operator ()(const T* const _p, const T* const _o, T* _residuals) const;
+        bool operator ()(const T* const _o, T* _residuals) const;
 
         virtual JacobianMethod getJacobianMethod() const override
         {
