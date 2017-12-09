@@ -43,9 +43,12 @@ FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeS
 
 // Capture, feature and constraint
 CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>(0, nullptr, pose10, 10, 9, nullptr));
-//FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("FIX", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
 
 ////////////////////////////////////////////////////////
+/* In the tests below, we check that ConstraintAbsP, then ConstraintAbsO, and finally ConstraintAbsV are working fine
+ * These are absolute constraints related to a specific part of the frame's state
+ * Both features and constraints are created in the TEST(). Hence, tests will not interfere each others.
+ */
 
 TEST(ConstraintAbsP, ctr_abs_p_check)
 {
@@ -70,6 +73,7 @@ TEST(ConstraintAbsP, ctr_abs_p_solve)
     ASSERT_MATRIX_APPROX(frm0->getState().head<3>(), pose10.head<3>(), 1e-6);
 }
 
+
 TEST(ConstraintAbsO, ctr_abs_o_check)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("FIX", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
@@ -92,6 +96,7 @@ TEST(ConstraintAbsO, ctr_abs_o_solve)
     //only orientation is constrained
     ASSERT_MATRIX_APPROX(frm0->getState().segment<4>(3), pose10.segment<4>(3), 1e-6);
 }
+
 
 TEST(ConstraintAbsV, ctr_abs_v_check)
 {
