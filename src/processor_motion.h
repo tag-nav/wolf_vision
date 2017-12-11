@@ -348,8 +348,13 @@ class ProcessorMotion : public ProcessorBase
          * @return        The interpolated motion (see documentation below).
          *
          * This function interpolates a motion between two existing motions.
+         *
+         * In this base implementation, we just provide the closest motion provided (ref or second),
+         * so really no interpolation takes place and just the current data and delta are updated.
+         *
+         * Should you require finer interpolation, you must overload this method in your derived class.
          */
-        virtual Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts) = 0;
+        virtual Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts);
 
         /** \brief create a CaptureMotion and add it to a Frame
          * \param _ts time stamp

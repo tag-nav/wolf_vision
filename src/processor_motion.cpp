@@ -425,6 +425,45 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
     }
 }
 
+inline Motion ProcessorMotion::interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts)
+{
+    // Check time bounds
+    assert(_ref.ts_ <= _second.ts_ && "Interpolation bounds not causal.");
+    assert(_ts >= _ref.ts_    && "Interpolation time is before the _ref    motion.");
+    assert(_ts <= _second.ts_ && "Interpolation time is after  the _second motion.");
+
+    // Fraction of the time interval
+    Scalar tau    = (_ts - _ref.ts_) / (_second.ts_ - _ref.ts_);
+
+    if (tau < 0.5)
+    {
+        // _ts is closest to _ref
+        Motion interpolated                 ( _ref );
+        interpolated.data_                  . setZero();
+        interpolated.data_cov_              . setZero();
+        interpolated.delta_                 = deltaZero();
+        interpolated.delta_cov_             . setZero();
+        interpolated.jacobian_delta_integr_ . setIdentity();
+        interpolated.jacobian_delta_        . setZero();
+
+        return interpolated;
+    }
+    else
+    {
+        // _ts is closest to _second
+        Motion interpolated             ( _second );
+        _second.data_                   . setZero();
+        _second.data_cov_               . setZero();
+        _second.delta_                  = deltaZero();
+        _second.delta_cov_              . setZero();
+        _second.jacobian_delta_integr_  . setIdentity();
+        _second.jacobian_delta_         . setZero();
+
+        return interpolated;
+    }
+
+}
+
 CaptureMotionPtr ProcessorMotion::getCaptureMotionContainingTimeStamp(const TimeStamp& _ts)
 {
     // We need to search in previous keyframes for the capture containing a motion buffer with the queried time stamp
