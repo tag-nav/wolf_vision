@@ -127,6 +127,17 @@ void FrameBase::setKey()
     }
 }
 
+void FrameBase::fix()
+{
+    for (auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->fix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
+}
+
 void FrameBase::setState(const Eigen::VectorXs& _state)
 {
     int size = 0;

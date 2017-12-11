@@ -167,17 +167,6 @@ inline bool FrameBase::isKey() const
     return (type_ == KEY_FRAME);
 }
 
-inline void FrameBase::fix()
-{
-    for( auto sbp : state_block_vec_)
-        if (sbp != nullptr)
-        {
-            sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
-}
-
 inline void FrameBase::unfix()
 {
     for( auto sbp : state_block_vec_)
