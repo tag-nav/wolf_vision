@@ -206,7 +206,6 @@ class ActiveSearchGrid {
          */
         void blockCell(const cv::Rect & _roi);
 
-
     private:
         /**
          * \brief Get cell corresponding to pixel
@@ -248,26 +247,6 @@ inline void ActiveSearchGrid::renew()
     clear();
 }
 
-inline void ActiveSearchGrid::hitCell(const cv::KeyPoint& _pix)
-{
-    hitCell(_pix.pt.x, _pix.pt.y);
-}
-
-/**
- * \brief Add a projected pixel to the grid.
- * \param _pix the pixel to add as an Eigen 2-vector.
- */
-template<typename Scalar>
-inline void ActiveSearchGrid::hitCell(const Eigen::Matrix<Scalar, 2, 1>& _pix)
-{
-    hitCell(_pix(0), _pix(1));
-}
-
-/**
- * \brief Add a projected pixel to the grid.
- * \param _x the x-coordinate of the pixel to add.
- * \param _y the y-coordinate of the pixel to add.
- */
 template<typename Scalar>
 inline void ActiveSearchGrid::hitCell(const Scalar _x, const Scalar _y)
 {
@@ -281,9 +260,17 @@ inline void ActiveSearchGrid::hitCell(const Scalar _x, const Scalar _y)
     projections_count_(cell(0), cell(1))++;
 }
 
-/**
- * Get cell corresponding to pixel
- */
+inline void ActiveSearchGrid::hitCell(const cv::KeyPoint& _pix)
+{
+    hitCell(_pix.pt.x, _pix.pt.y);
+}
+
+template<typename Scalar>
+inline void ActiveSearchGrid::hitCell(const Eigen::Matrix<Scalar, 2, 1>& _pix)
+{
+    hitCell(_pix(0), _pix(1));
+}
+
 template<typename Scalar>
 inline Eigen::Vector2i ActiveSearchGrid::coords2cell(const Scalar _x, const Scalar _y)
 {
@@ -298,44 +285,6 @@ inline Eigen::Vector2i ActiveSearchGrid::cellCenter(const Eigen::Vector2i& _cell
     return cellOrigin(_cell) + cell_size_ / 2;
 }
 
-//#if 0
-//		/**
-//		 * Class for active search algorithms.
-//		 * \ingroup rtslam
-//		 */
-//		class ActiveSearch {
-//			public:
-//				vecb visibleObs;
-//				vecb selectedObs;
-
-//				/**
-//				 * Project all landmarks to the sensor space.
-//				 *
-//				 * This function also computes visibility and information gain
-//				 * for each observation.
-//				 * The result is a map of visible observations,
-//				 * ordered from least to most expected information gain.
-//				 *
-//				 * \param senPtr pointer to the sensor under consideration.
-//				 * \return a map of all observations that are visible from the sensor, ordered according to the information gain.
-//				 */
-//				std::map<double, observation_ptr_t> projectAll(const sensor_ptr_t & senPtr, Size & numVis);
-
-//				/**
-//				 * Predict observed appearance.
-//				 * This function predicts the appearance of the perceived landmark.
-//				 * It does so by computing the appearance of the landmark descriptor from the current sensor position.
-//				 * The result of this operation is an updated observation.
-//				 * \param obsPtr a pointer to the observation.
-//				 */
-//				void predictApp(const observation_ptr_t & obsPtr);
-
-//				/**
-//				 * Scan search region for match.
-//				 */
-//				void scanObs(const observation_ptr_t & obsPtr, const image::ConvexRoi & roi);
-//		};
-//#endif
 
 }
 
