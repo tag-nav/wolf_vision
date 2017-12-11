@@ -138,6 +138,28 @@ void FrameBase::fix()
         }
 }
 
+void FrameBase::unfix()
+{
+    for (auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->unfix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
+}
+
+bool FrameBase::isFixed() const
+{
+    bool fixed = true;
+    for (auto sb : getStateBlockVec())
+    {
+        if (sb)
+            fixed &= sb->isFixed();
+    }
+    return fixed;
+}
+
 void FrameBase::setState(const Eigen::VectorXs& _state)
 {
     int size = 0;
@@ -250,6 +272,62 @@ FrameBasePtr FrameBase::getNextFrame() const
     }
     std::cout << "next frame not found!" << std::endl;
     return nullptr;
+}
+
+CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
+{
+    capture_list_.push_back(_capt_ptr);
+    _capt_ptr->setFramePtr(shared_from_this());
+    _capt_ptr->setProblem(getProblem());
+    return _capt_ptr;
+}
+
+CaptureBasePtr FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr, const std::string& type)
+{
+    for (CaptureBasePtr capture_ptr : getCaptureList())
+        if (capture_ptr->getSensorPtr() == _sensor_ptr && capture_ptr->getType() == type)
+            return capture_ptr;
+    return nullptr;
+}
+
+CaptureBasePtr FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr)
+{
+    for (CaptureBasePtr capture_ptr : getCaptureList())
+        if (capture_ptr->getSensorPtr() == _sensor_ptr)
+            return capture_ptr;
+    return nullptr;
+}
+
+CaptureBaseList FrameBase::getCapturesOf(const SensorBasePtr _sensor_ptr)
+{
+    CaptureBaseList captures;
+    for (CaptureBasePtr capture_ptr : getCaptureList())
+        if (capture_ptr->getSensorPtr() == _sensor_ptr)
+            captures.push_back(capture_ptr);
+    return captures;
+}
+
+ConstraintBasePtr FrameBase::getConstraintOf(const ProcessorBasePtr _processor_ptr, const std::string& type)
+{
+    for (const ConstraintBasePtr& constaint_ptr : getConstrainedByList())
+        if (constaint_ptr->getProcessor() == _processor_ptr && constaint_ptr->getType() == type)
+            return constaint_ptr;
+    return nullptr;
+}
+
+ConstraintBasePtr FrameBase::getConstraintOf(const ProcessorBasePtr _processor_ptr)
+{
+    for (const ConstraintBasePtr& constaint_ptr : getConstrainedByList())
+        if (constaint_ptr->getProcessor() == _processor_ptr)
+            return constaint_ptr;
+    return nullptr;
+}
+
+ConstraintBasePtr FrameBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.push_back(_ctr_ptr);
+    _ctr_ptr->setFrameOtherPtr(shared_from_this());
+    return _ctr_ptr;
 }
 
 FrameBasePtr FrameBase::create_PO_2D(const FrameType & _tp,

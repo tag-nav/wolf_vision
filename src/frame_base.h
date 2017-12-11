@@ -167,28 +167,6 @@ inline bool FrameBase::isKey() const
     return (type_ == KEY_FRAME);
 }
 
-inline void FrameBase::unfix()
-{
-    for( auto sbp : state_block_vec_)
-        if (sbp != nullptr)
-        {
-            sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
-}
-
-inline bool FrameBase::isFixed() const
-{
-    bool fixed = true;
-    for (auto sb : getStateBlockVec())
-    {
-        if (sb)
-            fixed &= sb->isFixed();
-    }
-    return fixed;
-}
-
 inline void FrameBase::setTimeStamp(const TimeStamp& _ts)
 {
     time_stamp_ = _ts;
@@ -266,47 +244,10 @@ inline CaptureBaseList& FrameBase::getCaptureList()
     return capture_list_;
 }
 
-inline CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
-{
-    capture_list_.push_back(_capt_ptr);
-    _capt_ptr->setFramePtr(shared_from_this());
-    _capt_ptr->setProblem(getProblem());
-    return _capt_ptr;
-}
-
 inline void FrameBase::resizeStateBlockVec(int _size)
 {
     if (_size > state_block_vec_.size())
         state_block_vec_.resize(_size);
-}
-
-inline CaptureBasePtr FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr)
-{
-    for (CaptureBasePtr capture_ptr : getCaptureList())
-        if (capture_ptr->getSensorPtr() == _sensor_ptr)
-            return capture_ptr;
-    return nullptr;
-}
-
-inline CaptureBasePtr
-FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr, const std::string& type)
-{
-  for (CaptureBasePtr capture_ptr : getCaptureList())
-      if (capture_ptr->getSensorPtr() == _sensor_ptr &&
-          capture_ptr->getType() == type)
-          return capture_ptr;
-  return nullptr;
-}
-
-inline CaptureBaseList FrameBase::getCapturesOf(const SensorBasePtr _sensor_ptr)
-{
-    CaptureBaseList captures;
-
-    for (CaptureBasePtr capture_ptr : getCaptureList())
-        if (capture_ptr->getSensorPtr() == _sensor_ptr)
-            captures.push_back(capture_ptr);
-
-    return captures;
 }
 
 inline void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
@@ -315,37 +256,10 @@ inline void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
     capture_list_.remove(_cap_ptr);
 }
 
-inline ConstraintBasePtr
-FrameBase::getConstraintOf(const ProcessorBasePtr _processor_ptr)
-{
-  for (const ConstraintBasePtr& constaint_ptr : getConstrainedByList())
-      if (constaint_ptr->getProcessor() == _processor_ptr)
-          return constaint_ptr;
-  return nullptr;
-}
-
-inline ConstraintBasePtr
-FrameBase::getConstraintOf(const ProcessorBasePtr _processor_ptr, const std::string& type)
-{
-  for (const ConstraintBasePtr& constaint_ptr : getConstrainedByList())
-      if (constaint_ptr->getProcessor() == _processor_ptr &&
-          constaint_ptr->getType() == type)
-          return constaint_ptr;
-  return nullptr;
-}
-
 inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
 {
     for (auto c_ptr : getCaptureList())
         c_ptr->getConstraintList(_ctr_list);
-}
-
-
-inline ConstraintBasePtr FrameBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
-{
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setFrameOtherPtr( shared_from_this() );
-    return _ctr_ptr;
 }
 
 inline unsigned int FrameBase::getHits() const
