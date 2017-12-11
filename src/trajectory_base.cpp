@@ -52,6 +52,16 @@ void TrajectoryBase::sortFrame(FrameBasePtr _frame_ptr)
     //    last_key_frame_ptr_ = findLastKeyFramePtr(); // done in moveFrame() just above
 }
 
+void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
+{
+    if (*_place != _frm_ptr)
+    {
+        frame_list_.remove(_frm_ptr);
+        frame_list_.insert(_place, _frm_ptr);
+        last_key_frame_ptr_ = findLastKeyFramePtr();
+    }
+}
+
 FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBasePtr _frame_ptr)
 {
     for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); frm_rit++)
