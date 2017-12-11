@@ -312,6 +312,41 @@ bool ProcessorOdom3D::voteForKeyFrame()
     return false;
 }
 
+CaptureMotionPtr ProcessorOdom3D::createCapture(const TimeStamp& _ts, const SensorBasePtr& _sensor,
+                                                const VectorXs& _data, const MatrixXs& _data_cov,
+                                                const FrameBasePtr& _frame_origin)
+{
+    CaptureOdom3DPtr capture_odom = std::make_shared<CaptureOdom3D>(_ts, _sensor, _data, _data_cov, _frame_origin);
+    return capture_odom;
+}
+
+ConstraintBasePtr ProcessorOdom3D::emplaceConstraint(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin)
+{
+    ConstraintOdom3DPtr ctr_odom = std::make_shared<ConstraintOdom3D>(_feature_motion, _capture_origin->getFramePtr(),
+                                                                      shared_from_this());
+    _feature_motion->addConstraint(ctr_odom);
+    _capture_origin->getFramePtr()->addConstrainedBy(ctr_odom);
+    return ctr_odom;
+}
+
+FeatureBasePtr ProcessorOdom3D::createFeature(CaptureMotionPtr _capture_motion)
+{
+    FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
+            "ODOM 3D", _capture_motion->getBuffer().get().back().delta_integr_,
+            _capture_motion->getBuffer().get().back().delta_integr_cov_);
+    return key_feature_ptr;
+}
+
+void ProcessorOdom3D::remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _x2, Eigen::VectorXs& _x_out)
+{
+    new (&p1_) Eigen::Map<const Eigen::Vector3s>(_x1.data());
+    new (&q1_) Eigen::Map<const Eigen::Quaternions>(_x1.data() + 3);
+    new (&p2_) Eigen::Map<const Eigen::Vector3s>(_x2.data());
+    new (&q2_) Eigen::Map<const Eigen::Quaternions>(_x2.data() + 3);
+    new (&p_out_) Eigen::Map<Eigen::Vector3s>(_x_out.data());
+    new (&q_out_) Eigen::Map<Eigen::Quaternions>(_x_out.data() + 3);
+}
+
 }
 
 
