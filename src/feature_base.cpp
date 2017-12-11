@@ -67,6 +67,13 @@ FrameBasePtr FeatureBase::getFramePtr() const
     return capture_ptr_.lock()->getFramePtr();
 }
 
+ConstraintBasePtr FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.push_back(_ctr_ptr);
+    _ctr_ptr->setFeatureOtherPtr(shared_from_this());
+    return _ctr_ptr;
+}
+
 ConstraintBaseList& FeatureBase::getConstraintList()
 {
     return constraint_list_;
