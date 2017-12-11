@@ -350,6 +350,16 @@ Scalar ProcessorImageFeature::match(cv::Mat _target_descriptor, cv::Mat _candida
     return normalized_score;
 }
 
+ConstraintBasePtr ProcessorImageFeature::createConstraint(FeatureBasePtr _feature_ptr,
+                                                          FeatureBasePtr _feature_other_ptr)
+{
+    ConstraintEpipolarPtr const_epipolar_ptr = std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr,
+                                                                                    shared_from_this());
+    //    _feature_ptr->addConstraint(const_epipolar_ptr);
+    //    _feature_other_ptr->addConstrainedBy(const_epipolar_ptr);
+    return const_epipolar_ptr;
+}
+
 unsigned int ProcessorImageFeature::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
                                     cv::Mat& new_descriptors)
 {
