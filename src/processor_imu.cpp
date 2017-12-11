@@ -179,7 +179,9 @@ Motion ProcessorIMU::interpolate(const Motion& _motion_ref, Motion& _motion_seco
     return motion_int;
     */
 
-    return _motion_ref;
+    //    return _motion_ref;
+
+    return ProcessorMotion::interpolate(_motion_ref, _motion_second, _ts);
 
 }
 
