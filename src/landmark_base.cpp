@@ -50,6 +50,48 @@ void LandmarkBase::remove()
     }
 }
 
+void LandmarkBase::fix()
+{
+    for (auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->fix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
+}
+
+void LandmarkBase::unfix()
+{
+    for (auto sbp : state_block_vec_)
+        if (sbp != nullptr)
+        {
+            sbp->unfix();
+            if (getProblem() != nullptr)
+                getProblem()->updateStateBlockPtr(sbp);
+        }
+}
+
+bool LandmarkBase::isFixed() const
+{
+    bool fixed = true;
+    for (auto sb : getStateBlockVec())
+    {
+        if (sb)
+            fixed &= sb->isFixed();
+    }
+    return fixed;
+}
+
+std::vector<StateBlockPtr> LandmarkBase::getUsedStateBlockVec() const
+{
+    std::vector<StateBlockPtr> used_state_block_vec(0);
+    for (auto sbp : state_block_vec_)
+        if (sbp)
+            used_state_block_vec.push_back(sbp);
+    return used_state_block_vec;
+}
+
 void LandmarkBase::registerNewStateBlocks()
 {
     if (getProblem() != nullptr)
@@ -126,6 +168,13 @@ YAML::Node LandmarkBase::saveToYaml() const
         node["orientation fixed"] = getOPtr()->isFixed();
     }
     return node;
+}
+
+ConstraintBasePtr LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.push_back(_ctr_ptr);
+    _ctr_ptr->setLandmarkOtherPtr(shared_from_this());
+    return _ctr_ptr;
 }
 
 } // namespace wolf
