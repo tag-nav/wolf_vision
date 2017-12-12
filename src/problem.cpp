@@ -564,10 +564,28 @@ Eigen::MatrixXs Problem::getLastKeyFrameCovariance()
 
 bool Problem::getLandmarkCovariance(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& _covariance)
 {
-    return getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), _covariance, 0, 0) &&
-    getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), _covariance, 0,_landmark_ptr->getPPtr()->getSize()) &&
-    getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getPPtr(), _covariance, _landmark_ptr->getPPtr()->getSize(), 0) &&
-    getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), _covariance, _landmark_ptr->getPPtr()->getSize() ,_landmark_ptr->getPPtr()->getSize());
+    bool success(true);
+    int i = 0, j = 0;
+
+    const auto& state_bloc_vec = _landmark_ptr->getStateBlockVec();
+
+    for (const auto& sb_i : state_bloc_vec)
+    {
+        if (sb_i)
+        {
+            j = 0;
+            for (const auto& sb_j : state_bloc_vec)
+            {
+                if (sb_j)
+                {
+                    success = success && getCovarianceBlock(sb_i, sb_j, _covariance, i, j);
+                    j += sb_j->getSize();
+                }
+            }
+            i += sb_i->getSize();
+        }
+    }
+    return success;
 }
 
 Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBasePtr _landmark_ptr)
