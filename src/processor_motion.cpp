@@ -425,7 +425,7 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
     }
 }
 
-inline Motion ProcessorMotion::interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts)
+Motion ProcessorMotion::interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts)
 {
     // Check time bounds
     assert(_ref.ts_ <= _second.ts_ && "Interpolation bounds not causal.");
@@ -439,6 +439,7 @@ inline Motion ProcessorMotion::interpolate(const Motion& _ref, Motion& _second, 
     {
         // _ts is closest to _ref
         Motion interpolated                 ( _ref );
+        interpolated.ts_                    = _ts;
         interpolated.data_                  . setZero();
         interpolated.data_cov_              . setZero();
         interpolated.delta_                 = deltaZero();
@@ -452,12 +453,13 @@ inline Motion ProcessorMotion::interpolate(const Motion& _ref, Motion& _second, 
     {
         // _ts is closest to _second
         Motion interpolated             ( _second );
-        _second.data_                   . setZero();
-        _second.data_cov_               . setZero();
-        _second.delta_                  = deltaZero();
-        _second.delta_cov_              . setZero();
-        _second.jacobian_delta_integr_  . setIdentity();
-        _second.jacobian_delta_         . setZero();
+        interpolated.ts_                    = _ts;
+        _second.data_                       . setZero();
+        _second.data_cov_                   . setZero();
+        _second.delta_                      = deltaZero();
+        _second.delta_cov_                  . setZero();
+        _second.jacobian_delta_integr_      . setIdentity();
+        _second.jacobian_delta_             . setZero();
 
         return interpolated;
     }
