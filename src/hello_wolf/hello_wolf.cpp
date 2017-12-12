@@ -184,21 +184,10 @@ int main()
     // GET COVARIANCES of all states
     ceres->computeCovariances(ALL_MARGINALS);
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
-    {
         if (kf->isKey())
-        {
-            MatrixXs cov(3,3);
-            problem->getFrameCovariance(kf, cov);
-            WOLF_TRACE("KF", kf->id(), "_cov = \n", cov);
-        }
-    }
+            WOLF_TRACE("KF", kf->id(), "_cov = \n", problem->getFrameCovariance(kf));
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
-    {
-        MatrixXs cov(2,2);
-//        problem->getCovarianceBlock(lmk->getPPtr(), cov, 0);
-        problem->getLandmarkCovariance(lmk, cov);
-        WOLF_TRACE("L", lmk->id(), "_cov = \n", cov);
-    }
+        WOLF_TRACE("L", lmk->id(), "_cov = \n", problem->getLandmarkCovariance(lmk));
 
     /*
      * Note:
