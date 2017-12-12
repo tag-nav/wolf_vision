@@ -43,6 +43,27 @@ TimeStamp::~TimeStamp()
     //nothing to do
 }
 
+void TimeStamp::setToNow()
+{
+    timeval ts;
+    gettimeofday(&ts, NULL);
+    time_stamp_ = (Scalar)((ts.tv_sec)) + (Scalar)((ts.tv_usec)) / 1e6;
+}
+
+unsigned long int TimeStamp::getSeconds() const
+{
+    unsigned long int ts;
+    ts = (unsigned long int)(((floor(time_stamp_))));
+    return ts;
+}
+
+unsigned long int TimeStamp::getNanoSeconds() const
+{
+    Scalar ts;
+    ts = (Scalar)(((floor(time_stamp_))));
+    return (unsigned long int)(((time_stamp_ - ts) * 1e9));
+}
+
 void TimeStamp::print(std::ostream & ost) const
 {
     std::streamsize nn;

@@ -364,6 +364,58 @@ ProcessorBasePtr ProcessorTrackerLandmarkCorner::create(const std::string& _uniq
     return prc_ptr;
 }
 
+LandmarkBasePtr ProcessorTrackerLandmarkCorner::createLandmark(FeatureBasePtr _feature_ptr)
+{
+    //std::cout << "ProcessorTrackerLandmarkCorner::createLandmark" << std::endl;
+    // compute feature global pose
+    Eigen::Vector3s feature_global_pose = R_world_sensor_ * _feature_ptr->getMeasurement().head<3>() + t_world_sensor_;
+    // Create new landmark
+    return std::make_shared<LandmarkCorner2D>(std::make_shared<StateBlock>(feature_global_pose.head(2)),
+                                              std::make_shared<StateBlock>(feature_global_pose.tail(1)),
+                                              _feature_ptr->getMeasurement()(3));
+}
+
+unsigned int ProcessorTrackerLandmarkCorner::detectNewFeatures(const unsigned int& _max_features)
+{
+    // already computed since each scan is computed in preprocess()
+    new_features_last_ = std::move(corners_last_);
+    return new_features_last_.size();
+}
+
+ConstraintBasePtr ProcessorTrackerLandmarkCorner::createConstraint(FeatureBasePtr _feature_ptr,
+                                                                   LandmarkBasePtr _landmark_ptr)
+{
+    assert(_feature_ptr != nullptr && _landmark_ptr != nullptr
+            && "ProcessorTrackerLandmarkCorner::createConstraint: feature and landmark pointers can not be nullptr!");
+    return std::make_shared<ConstraintCorner2D>(_feature_ptr,
+                                                std::static_pointer_cast<LandmarkCorner2D>((_landmark_ptr)),
+                                                shared_from_this());
+}
+
+ProcessorTrackerLandmarkCorner::~ProcessorTrackerLandmarkCorner()
+{
+    while (!corners_last_.empty())
+    {
+        corners_last_.front()->remove();
+        corners_last_.pop_front(); // TODO check if this is needed
+    }
+    while (!corners_incoming_.empty())
+    {
+        corners_incoming_.front()->remove();
+        corners_incoming_.pop_front(); // TODO check if this is needed
+    }
+}
+
+ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(
+        const laserscanutils::LineFinderIterativeParams& _line_finder_params, const unsigned int& _new_corners_th,
+        const unsigned int& _loop_frames_th) :
+        ProcessorTrackerLandmark("TRACKER LANDMARK CORNER", 0), line_finder_(_line_finder_params), new_corners_th_(
+                _new_corners_th), loop_frames_th_(_loop_frames_th), R_sensor_world_(Eigen::Matrix3s::Identity()), R_world_sensor_(
+                Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(
+                false)
+{
+}
+
 }        //namespace wolf
 
 // Register in the SensorFactory

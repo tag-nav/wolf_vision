@@ -752,15 +752,15 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                 for (auto C : F->getCaptureList())
                 {
                     cout << "    C" << (C->isMotion() ? "M" : "") << C->id() << " " << C->getType();
-                    if (C->getSensorPtr()) cout << " -> S" << C->getSensorPtr()->id();
-                    else cout << " -> S-";
                     
-                    cout << " [";
                     if(C->getSensorPtr() != nullptr)
-                        cout << (C->getSensorPtr()->isExtrinsicDynamic() ? "Dyn, ": "Sta, ");
-
-                    if(C->getSensorPtr() != nullptr)
+                    {
+                        cout << " -> S" << C->getSensorPtr()->id();
+                        cout << (C->getSensorPtr()->isExtrinsicDynamic() ? " [Dyn, ": " [Sta, ");
                         cout << (C->getSensorPtr()->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
+                    }
+                    else
+                        cout << " -> S-";
 
                     cout << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "");
                     if (constr_by)

@@ -168,43 +168,4 @@ class ProcessorTrackerLandmark : public ProcessorTracker
 // IMPLEMENTATION
 #include "landmark_base.h"
 
-#include <utility>
-
-namespace wolf
-{
-inline void ProcessorTrackerLandmark::advance()
-{
-
-    for ( auto match : matches_landmark_from_last_)
-    {
-        match.second.reset(); // TODO: Should we just remove the entries? What about match.first?
-    }
-
-    matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
-
-    new_features_last_ = std::move(new_features_incoming_);
-
-//    for (auto match : matches_landmark_from_last_)
-//            std::cout << "\t" << match.first->id() << " to " << match.second->landmark_ptr_->id() << std::endl;
-}
-
-inline void ProcessorTrackerLandmark::reset()
-{
-
-    //std::cout << "ProcessorTrackerLandmark::reset" << std::endl;
-    for ( auto match : matches_landmark_from_last_)
-    {
-        match.second.reset(); // TODO: Should we just remove the entries? What about match.first?
-    }
-
-    matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
-
-    new_features_last_ = std::move(new_features_incoming_);
-
-//    for (auto match : matches_landmark_from_last_)
-//            std::cout << "\t" << match.first->id() << " to " << match.second.landmark_ptr_->id() << std::endl;
-}
-
-}// namespace wolf
-
 #endif /* PROCESSOR_TRACKER_LANDMARK_H_ */

@@ -1,5 +1,6 @@
 #include "sensor_odom_2D.h"
 #include "state_block.h"
+#include "state_angle.h"
 
 namespace wolf {
 
@@ -33,7 +34,7 @@ SensorBasePtr SensorOdom2D::create(const std::string& _unique_name, const Eigen:
     // decode extrinsics vector
     assert(_extrinsics_po.size() == 3 && "Bad extrinsics vector length. Should be 3 for 2D.");
     StateBlockPtr pos_ptr = std::make_shared<StateBlock>(_extrinsics_po.head(2), true);
-    StateBlockPtr ori_ptr = std::make_shared<StateBlock>(_extrinsics_po.tail(1), true);
+    StateBlockPtr ori_ptr = std::make_shared<StateAngle>(_extrinsics_po(2), true);
     // cast intrinsics into derived type
     SensorOdom2DPtr odo;
     if (_intrinsics)

@@ -141,6 +141,29 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }
 
+void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
+{
+    CaptureMotionPtr capture_motion;
+    if (_ts >= origin_ptr_->getTimeStamp())
+        // timestamp found in the current processor buffer
+        capture_motion = last_ptr_;
+    else
+        // We need to search in previous keyframes for the capture containing a motion buffer with the queried time stamp
+        capture_motion = getCaptureMotionContainingTimeStamp(_ts);
+
+    if (capture_motion)
+    {
+        // We found a CaptureMotion whose buffer contains the time stamp
+        VectorXs state_0 = capture_motion->getOriginFramePtr()->getState();
+        VectorXs delta = capture_motion->getDeltaCorrected(origin_ptr_->getCalibration(), _ts);
+        Scalar dt = _ts - capture_motion->getBuffer().get().front().ts_;
+        statePlusDelta(state_0, delta, dt, _x);
+    }
+    else
+        // We could not find any CaptureMotion for the time stamp requested
+        std::runtime_error("Could not find any Capture for the time stamp requested");
+}
+
 CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
 {
     //std::cout << "ProcessorMotion::findCaptureContainingTimeStamp: ts = " << _ts.getSeconds() << "." << _ts.getNanoSeconds() << std::endl;
@@ -400,6 +423,47 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
         motion_it++;
         prev_motion_it++;
     }
+}
+
+Motion ProcessorMotion::interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts)
+{
+    // Check time bounds
+    assert(_ref.ts_ <= _second.ts_ && "Interpolation bounds not causal.");
+    assert(_ts >= _ref.ts_    && "Interpolation time is before the _ref    motion.");
+    assert(_ts <= _second.ts_ && "Interpolation time is after  the _second motion.");
+
+    // Fraction of the time interval
+    Scalar tau    = (_ts - _ref.ts_) / (_second.ts_ - _ref.ts_);
+
+    if (tau < 0.5)
+    {
+        // _ts is closest to _ref
+        Motion interpolated                 ( _ref );
+        interpolated.ts_                    = _ts;
+        interpolated.data_                  . setZero();
+        interpolated.data_cov_              . setZero();
+        interpolated.delta_                 = deltaZero();
+        interpolated.delta_cov_             . setZero();
+        interpolated.jacobian_delta_integr_ . setIdentity();
+        interpolated.jacobian_delta_        . setZero();
+
+        return interpolated;
+    }
+    else
+    {
+        // _ts is closest to _second
+        Motion interpolated             ( _second );
+        interpolated.ts_                    = _ts;
+        _second.data_                       . setZero();
+        _second.data_cov_                   . setZero();
+        _second.delta_                      = deltaZero();
+        _second.delta_cov_                  . setZero();
+        _second.jacobian_delta_integr_      . setIdentity();
+        _second.jacobian_delta_             . setZero();
+
+        return interpolated;
+    }
+
 }
 
 CaptureMotionPtr ProcessorMotion::getCaptureMotionContainingTimeStamp(const TimeStamp& _ts)

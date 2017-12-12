@@ -113,6 +113,35 @@ void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
     feature_list_.splice(feature_list_.end(), _new_ft_list);
 }
 
+StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
+{
+    if (getSensorPtr())
+    {
+        if (_i < 2) // _i == 0 is position, 1 is orientation, 2 and onwards are intrinsics
+            if (getSensorPtr()->extrinsicsInCaptures())
+            {
+                assert(_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+                return state_block_vec_[_i];
+            }
+            else
+                return getSensorPtr()->getStateBlockPtrStatic(_i);
+
+        else // 2 and onwards are intrinsics
+        if (getSensorPtr()->intrinsicsInCaptures())
+        {
+            assert(_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+            return state_block_vec_[_i];
+        }
+        else
+            return getSensorPtr()->getStateBlockPtrStatic(_i);
+    }
+    else // No sensor associated: assume sensor params are here
+    {
+        assert(_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+        return state_block_vec_[_i];
+    }
+}
+
 void CaptureBase::removeStateBlocks()
 {
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)

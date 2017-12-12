@@ -339,4 +339,24 @@ bool SensorBase::process(const CaptureBasePtr capture_ptr)
     return true;
 }
 
+ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
+{
+    processor_list_.push_back(_proc_ptr);
+    _proc_ptr->setSensorPtr(shared_from_this());
+    _proc_ptr->setProblem(getProblem());
+    return _proc_ptr;
+}
+
+StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts)
+{
+    assert(_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
+    if (((_i < 2) && extrinsicsInCaptures()) || ((_i >= 2) && intrinsicsInCaptures()))
+    {
+        CaptureBasePtr cap = lastCapture(_ts);
+        return cap->getStateBlockPtr(_i);
+    }
+    else
+        return state_block_vec_[_i];
+}
+
 } // namespace wolf

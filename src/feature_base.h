@@ -100,13 +100,6 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
 
 namespace wolf{
 
-inline ConstraintBasePtr FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
-{
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setFeatureOtherPtr( shared_from_this() );
-    return _ctr_ptr;
-}
-
 inline unsigned int FeatureBase::getHits() const
 {
     return constrained_by_list_.size();

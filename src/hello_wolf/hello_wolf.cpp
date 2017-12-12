@@ -166,7 +166,7 @@ int main()
 
     // PERTURB initial guess
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
-        kf->setState(Vector3s::Random());                       // We perturb A LOT !
+        kf->setState(Vector3s::Random() * 0.5);                 // We perturb A LOT !
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
         lmk->getPPtr()->setState(Vector2s::Random());           // We perturb A LOT !
 

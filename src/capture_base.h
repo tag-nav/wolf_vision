@@ -132,35 +132,6 @@ inline std::vector<StateBlockPtr>& CaptureBase::getStateBlockVec()
     return state_block_vec_;
 }
 
-inline StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
-{
-    if (getSensorPtr())
-    {
-        if (_i < 2) // _i == 0 is position, 1 is orientation, 2 and onwards are intrinsics
-            if (getSensorPtr()->extrinsicsInCaptures())
-            {
-                assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
-                return state_block_vec_[_i];
-            }
-            else
-                return getSensorPtr()->getStateBlockPtrStatic(_i);
-
-        else // 2 and onwards are intrinsics
-            if (getSensorPtr()->intrinsicsInCaptures())
-            {
-                assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
-                return state_block_vec_[_i];
-            }
-            else
-                return getSensorPtr()->getStateBlockPtrStatic(_i);
-    }
-    else // No sensor associated: assume sensor params are here
-    {
-        assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
-        return state_block_vec_[_i];
-    }
-}
-
 inline void CaptureBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
     state_block_vec_[_i] = _sb_ptr;

@@ -51,17 +51,6 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
 
 };
 
-
-inline void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
-{
-    if (*_place != _frm_ptr)
-    {
-        frame_list_.remove(_frm_ptr);
-        frame_list_.insert(_place, _frm_ptr);
-        last_key_frame_ptr_ = findLastKeyFramePtr();
-    }
-}
-
 inline FrameBaseList& TrajectoryBase::getFrameList()
 {
     return frame_list_;

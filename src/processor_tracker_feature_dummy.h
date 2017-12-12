@@ -90,17 +90,6 @@ inline bool ProcessorTrackerFeatureDummy::correctFeatureDrift(const FeatureBaseP
     return true;
 }
 
-inline ConstraintBasePtr ProcessorTrackerFeatureDummy::createConstraint(FeatureBasePtr _feature_ptr,
-                                                                      FeatureBasePtr _feature_other_ptr)
-{
-//    std::cout << "creating constraint: last feature " << _feature_ptr->getMeasurement()
-//              << " with origin feature " << _feature_other_ptr->getMeasurement() << std::endl;
-    auto ctr = std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr, shared_from_this());
-//    _feature_ptr->addConstraint(ctr);
-//    _feature_other_ptr->addConstrainedBy(ctr);
-    return ctr;
-}
-
 } // namespace wolf
 
 #endif /* PROCESSOR_TRACKER_FEATURE_DUMMY_H_ */
