@@ -32,11 +32,16 @@ int main()
      *
      * We consider 3 keyframes 'KF' and 3 landmarks 'L', observed as follows
      *
-     *     (0,1)   (1,1)   (2,1)
-     *      L1      L2      L3
-     *      | \     | \     |
-     *      |   \   |   \   |
-     *      |     \ |     \ |
+     *             (1,2)   (2,2)   (3,2)
+     *              L1      L2      L3
+     *              | \     | \     |
+     *              |   \   |   \   |
+     *              |     \ |     \ |
+     *              S       S       S
+     *           (1,1,0) (1,1,0) (1,1,0)
+     *           /       /       /
+     *         /       /       /
+     *       /       /       /
      *     KF1->---KF2->---KF3->
      *    (0,0,0) (1,0,0) (2,0,0)
      *      |
@@ -44,14 +49,15 @@ int main()
      *      * prior
      *    (0,0,0)
      *
-     * where the links '--', '\' and '|' are the measurement factors.
+     * where the links '--', '\' and '|' are the measurement factors,
+     * and the links '/' are the robot-to-sensor transforms.
      *
      * That is:
      *   - Lmks have ids '1', '2', '3'
      *   - All KFs look East, so all theta = 0
      *   - KFs  are at poses (0,0, 0), (1,0, 0), and (2,0, 0)
-     *   - Lmks are at positions (0,1), (1,1), (2,1)
-     *   - The sensor is considered at the robot's origin (0,0, 0)
+     *   - The sensor is considered at pose (1,1, 0) w.r.t. the robot's origin
+     *   - Lmks are at positions (1,2), (2,2), (3,2)
      *   - Observations have ranges 1 or sqrt(2)
      *   - Observations have bearings pi/2 or 3pi/4
      *   - We set a prior at (0,0,0) on KF1 to render the system observable
@@ -87,7 +93,7 @@ int main()
     IntrinsicsRangeBearingPtr intrinsics_rb     = std::make_shared<IntrinsicsRangeBearing>();
     intrinsics_rb->noise_bearing_degrees_std    = 1.0;
     intrinsics_rb->noise_range_metres_std       = 0.1;
-    SensorBasePtr sensor_rb             = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(0,0,0), intrinsics_rb);
+    SensorBasePtr sensor_rb             = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(1,1,0), intrinsics_rb);
 
     // processor Range and Bearing
     ProcessorParamsRangeBearingPtr params_rb = std::make_shared<ProcessorParamsRangeBearing>();
@@ -180,10 +186,10 @@ int main()
      * IF YOU SEE at the end of the printed problem the estimate for Lmk 3 as:
      *
      * L3 POINT 2D   <-- c8
-     *   Est,     x = ( 2 1)
+     *   Est,     x = ( 3 2)
      *   sb: Est
      *
-     * it means WOLF SOLVED SUCCESSFULLY (L3 is effectively at location (2,1) ) !
+     * it means WOLF SOLVED SUCCESSFULLY (L3 is effectively at location (3,2) ) !
      *
      * Side notes:
      *
@@ -259,13 +265,13 @@ int main()
             CM10 ODOM 2D -> S1 [Sta, Sta]  <--
         Map
           L1 POINT 2D   <-- c2  c4                      // Landmark 1, constrained by Constraints 2 and 4
-            Est,     x = ( -1.4e-10 1       )           // L4 state is estimated, state vector
+            Est,     x = ( 1 2)                         // L4 state is estimated, state vector
             sb: Est                                     // L4 has 1 state block estimated
           L2 POINT 2D   <-- c5  c7
-            Est,     x = ( 1 1)
+            Est,     x = ( 2 2)
             sb: Est
           L3 POINT 2D   <-- c8
-            Est,     x = ( 2 1)
+            Est,     x = ( 3 2)
             sb: Est
         -----------------------------------------
      *
