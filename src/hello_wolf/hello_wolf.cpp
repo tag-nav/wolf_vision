@@ -180,6 +180,26 @@ int main()
     report = ceres->solve(2);
     WOLF_TRACE(report);                     // should show a very high iteration number (more than 10, or than 100!)
     problem->print(4,1,1,1);
+
+    // GET COVARIANCES of all states
+    ceres->computeCovariances(ALL_MARGINALS);
+    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+    {
+        if (kf->isKey())
+        {
+            MatrixXs cov(3,3);
+            problem->getFrameCovariance(kf, cov);
+            WOLF_TRACE("KF", kf->id(), "_cov = \n", cov);
+        }
+    }
+    for (auto lmk : problem->getMapPtr()->getLandmarkList())
+    {
+        MatrixXs cov(2,2);
+//        problem->getCovarianceBlock(lmk->getPPtr(), cov, 0);
+        problem->getLandmarkCovariance(lmk, cov);
+        WOLF_TRACE("L", lmk->id(), "_cov = \n", cov);
+    }
+
     /*
      * Note:
      *
