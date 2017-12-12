@@ -199,13 +199,13 @@ int main()
     /*
      * Note: description of the printed result.
      *
-     * The line problem->print(4,1,1,1) produce a printout of the status of the WOLF problem.
+     * The line problem->print(4,1,1,1) produces a printout of the status of the WOLF problem.
      * The full message is explained below.
      *
      * P: wolf tree status ---------------------
         Hardware
-          S1 ODOM 2D [Sta,Sta]                          // Sensor 1, type ODOMETRY 2D, static extrinsics and intrinsics
-            sb: Fix Fix                                 // Extrinsics position and orientation are fixed. No intrinsics.
+          S1 ODOM 2D [Sta,Sta]                          // Sensor 1, type ODOMETRY 2D, static extrinsics and intrinsics (1)
+            sb: Fix Fix                                 // Extrinsics position and orientation are fixed (2). No intrinsics.
             pm1 ODOM 2D                                 // Processor 1, type ODOMETRY 2D
               o: C7 - F3                                // origin at Capture 7, Frame 3
               l: C10 - F4                               // last at Capture 10, frame 4
@@ -268,6 +268,31 @@ int main()
             Est,     x = ( 2 1)
             sb: Est
         -----------------------------------------
+     *
+     * Explanatory notes:
+     *
+     * (1): Sensor params (extrinsics and intrinsics) can be declared Dynamic or Static
+     *          Static:  they do not change with time --> stored in the Sensor
+     *          Dynamic: they change with time        --> stored in each Capture
+     *
+     * (2): General params can be declared Fixed or Estimated
+     *          Fixed:     they are used as constant values, never estimated
+     *          Estimated: they are estimated by the solver iteratively
+     *
+     * Overall, each block of sensor parameters can be Static/Dynamic and Fixed/Estimated. This produces 4 combinations:
+     *
+     *         1 Fixed + Static : general case of calibrated sensor.
+     *              Example: rigidly fixed sensor with calibrated parameters
+     *
+     *         2 Estimated + Static : Wolf performs self-calibration.
+     *              Example: extrinsics self-calibration of a camera
+     *
+     *         3 Fixed + Dynamic : calibrated but variable parameters.
+     *              Example: pan and tilt camera extrinsics, known through precise encoders
+     *
+     *         4 Estimated + Dynamic : Wolf will track these sensor parameters.
+     *              Example: IMU bias
+     *
      */
 
     return 0;
