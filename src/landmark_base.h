@@ -68,13 +68,14 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         void setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr);
         StateBlockPtr getPPtr() const;
         StateBlockPtr getOPtr() const;
-        StateBlockPtr getVPtr() const;
         void setPPtr(const StateBlockPtr _p_ptr);
         void setOPtr(const StateBlockPtr _o_ptr);
-        void setVPtr(const StateBlockPtr _v_ptr);
         virtual void registerNewStateBlocks();
         Eigen::VectorXs getState() const;
         void getState(Eigen::VectorXs& _state) const;
+        bool getCovariance(Eigen::MatrixXs& _cov) const;
+        Eigen::MatrixXs getCovariance() const;
+
 
     protected:
         virtual void removeStateBlocks();
@@ -103,6 +104,16 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 #include "state_block.h"
 
 namespace wolf{
+
+inline bool LandmarkBase::getCovariance(Eigen::MatrixXs& _cov) const
+{
+    return getProblem()->getLandmarkCovariance(shared_from_this(), _cov);
+}
+
+inline Eigen::MatrixXs LandmarkBase::getCovariance() const
+{
+    return getProblem()->getLandmarkCovariance(shared_from_this());
+}
 
 inline MapBasePtr LandmarkBase::getMapPtr()
 {

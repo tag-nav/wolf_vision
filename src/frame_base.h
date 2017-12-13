@@ -109,6 +109,8 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         Eigen::VectorXs getState() const;
         void getState(Eigen::VectorXs& _state) const;
         unsigned int getSize() const;
+        bool getCovariance(Eigen::MatrixXs& _cov) const;
+        Eigen::MatrixXs getCovariance() const;
 
         // Wolf tree access ---------------------------------------------------
     public:

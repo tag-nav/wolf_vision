@@ -512,13 +512,8 @@ bool Problem::getCovarianceBlock(StateBlockPtr _state, Eigen::MatrixXs& _cov, co
     return getCovarianceBlock(_state, _state, _cov, _row_and_col, _row_and_col);
 }
 
-bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance)
+bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& _covariance)
 {
-//    return getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getPPtr(), _covariance, 0,                                0                               ) &&
-//           getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _covariance, 0,                                _frame_ptr->getPPtr()->getSize()) &&
-//           getCovarianceBlock(_frame_ptr->getOPtr(), _frame_ptr->getPPtr(), _covariance, _frame_ptr->getPPtr()->getSize(), 0                               ) &&
-//           getCovarianceBlock(_frame_ptr->getOPtr(), _frame_ptr->getOPtr(), _covariance, _frame_ptr->getPPtr()->getSize(), _frame_ptr->getPPtr()->getSize());
-
     bool success(true);
     int i = 0, j = 0;
 
@@ -543,7 +538,7 @@ bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _cova
     return success;
 }
 
-Eigen::MatrixXs Problem::getFrameCovariance(FrameBasePtr _frame_ptr)
+Eigen::MatrixXs Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr)
 {
     Size sz = 0;
     for (const auto& sb : _frame_ptr->getStateBlockVec())
@@ -562,7 +557,7 @@ Eigen::MatrixXs Problem::getLastKeyFrameCovariance()
     return getFrameCovariance(frm);
 }
 
-bool Problem::getLandmarkCovariance(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& _covariance)
+bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::MatrixXs& _covariance)
 {
     bool success(true);
     int i = 0, j = 0;
@@ -588,7 +583,7 @@ bool Problem::getLandmarkCovariance(LandmarkBasePtr _landmark_ptr, Eigen::Matrix
     return success;
 }
 
-Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBasePtr _landmark_ptr)
+Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr)
 {
     Size sz = 0;
     for (const auto& sb : _landmark_ptr->getStateBlockVec())

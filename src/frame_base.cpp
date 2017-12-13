@@ -224,6 +224,18 @@ unsigned int FrameBase::getSize() const
     return size;
 }
 
+bool FrameBase::getCovariance(Eigen::MatrixXs& _cov) const
+{
+    return getProblem()->getFrameCovariance(shared_from_this(), _cov);
+}
+
+Eigen::MatrixXs FrameBase::getCovariance() const
+{
+    return getProblem()->getFrameCovariance(shared_from_this());
+}
+
+
+
 FrameBasePtr FrameBase::getPreviousFrame() const
 {
     //std::cout << "finding previous frame of " << this->frame_id_ << std::endl;
