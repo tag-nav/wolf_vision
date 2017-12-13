@@ -53,14 +53,15 @@ int main()
      * and the links '/' are the robot-to-sensor transforms.
      *
      * That is:
-     *   - Lmks have ids '1', '2', '3'
+     *   - KFs  have ids '1', '2', '3'
      *   - All KFs look East, so all theta = 0
      *   - KFs  are at poses (0,0, 0), (1,0, 0), and (2,0, 0)
+     *   - We set a prior at (0,0,0) on KF1 to render the system observable
      *   - The sensor is considered at pose (1,1, 0) w.r.t. the robot's origin
+     *   - Lmks have ids '1', '2', '3'
      *   - Lmks are at positions (1,2), (2,2), (3,2)
      *   - Observations have ranges 1 or sqrt(2)
      *   - Observations have bearings pi/2 or 3pi/4
-     *   - We set a prior at (0,0,0) on KF1 to render the system observable
      */
 
     // SET PROBLEM =======================================================
@@ -74,31 +75,31 @@ int main()
     CeresManagerPtr ceres                   = std::make_shared<CeresManager>(problem, ceres_options);
 
     // sensor odometer 2D
-    IntrinsicsOdom2DPtr intrinsics_odo  = std::make_shared<IntrinsicsOdom2D>();
-    intrinsics_odo->k_disp_to_disp      = 0.1;
-    intrinsics_odo->k_rot_to_rot        = 0.1;
-    SensorBasePtr sensor_odo            = problem->installSensor("ODOM 2D", "sensor odo", Vector3s(0,0,0), intrinsics_odo);
+    IntrinsicsOdom2DPtr intrinsics_odo      = std::make_shared<IntrinsicsOdom2D>();
+    intrinsics_odo->k_disp_to_disp          = 0.1;
+    intrinsics_odo->k_rot_to_rot            = 0.1;
+    SensorBasePtr sensor_odo                = problem->installSensor("ODOM 2D", "sensor odo", Vector3s(0,0,0), intrinsics_odo);
 
     // processor odometer 2D
-    ProcessorParamsOdom2DPtr params_odo = std::make_shared<ProcessorParamsOdom2D>();
-    params_odo->elapsed_time_th_        = 999;
-    params_odo->dist_traveled_th_       = 0.95; // Will make KFs automatically every 1m displacement
-    params_odo->theta_traveled_th_      = 999;
-    params_odo->cov_det_th_             = 999;
+    ProcessorParamsOdom2DPtr params_odo     = std::make_shared<ProcessorParamsOdom2D>();
+    params_odo->elapsed_time_th_            = 999;
+    params_odo->dist_traveled_th_           = 0.95; // Will make KFs automatically every 1m displacement
+    params_odo->theta_traveled_th_          = 999;
+    params_odo->cov_det_th_                 = 999;
     params_odo->unmeasured_perturbation_std_ = 0.001;
-    ProcessorBasePtr processor          = problem->installProcessor("ODOM 2D", "processor odo", sensor_odo, params_odo);
-    ProcessorOdom2DPtr processor_odo    = std::static_pointer_cast<ProcessorOdom2D>(processor);
+    ProcessorBasePtr processor              = problem->installProcessor("ODOM 2D", "processor odo", sensor_odo, params_odo);
+    ProcessorOdom2DPtr processor_odo        = std::static_pointer_cast<ProcessorOdom2D>(processor);
 
     // sensor Range and Bearing
-    IntrinsicsRangeBearingPtr intrinsics_rb     = std::make_shared<IntrinsicsRangeBearing>();
-    intrinsics_rb->noise_bearing_degrees_std    = 1.0;
-    intrinsics_rb->noise_range_metres_std       = 0.1;
-    SensorBasePtr sensor_rb             = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(1,1,0), intrinsics_rb);
+    IntrinsicsRangeBearingPtr intrinsics_rb = std::make_shared<IntrinsicsRangeBearing>();
+    intrinsics_rb->noise_bearing_degrees_std = 1.0;
+    intrinsics_rb->noise_range_metres_std   = 0.1;
+    SensorBasePtr sensor_rb                 = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(1,1,0), intrinsics_rb);
 
     // processor Range and Bearing
     ProcessorParamsRangeBearingPtr params_rb = std::make_shared<ProcessorParamsRangeBearing>();
-    params_rb->time_tolerance           = 0.01;
-    ProcessorBasePtr processor_rb       = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
+    params_rb->time_tolerance               = 0.01;
+    ProcessorBasePtr processor_rb           = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
 
 
     // CONFIGURE ==========================================================
@@ -113,7 +114,7 @@ int main()
 
 
     // SET OF EVENTS =======================================================
-    WOLF_TRACE("======== PROBLEM AS BUILT =======")
+    WOLF_TRACE("======== BUILD PROBLEM =======")
 
     // We'll do 3 steps of motion and landmark observations.
 
@@ -169,7 +170,7 @@ int main()
     // SOLVE ================================================================
 
     // SOLVE with exact initial guess
-    WOLF_TRACE("======== PROBLEM SOLVED WITH EXACT PRIORS =======")
+    WOLF_TRACE("======== SOLVE PROBLEM WITH EXACT PRIORS =======")
     std::string report = ceres->solve(2);
     WOLF_TRACE(report);                     // should show a very low iteration number (possibly 1)
     problem->print(4,1,1,1);
@@ -181,7 +182,7 @@ int main()
         lmk->getPPtr()->setState(Vector2s::Random());           // We perturb A LOT !
 
     // SOLVE again
-    WOLF_TRACE("======== PROBLEM SOLVED WITH PERTURBED PRIORS =======")
+    WOLF_TRACE("======== SOLVE PROBLEM WITH PERTURBED PRIORS =======")
     report = ceres->solve(2);
     WOLF_TRACE(report);                     // should show a very high iteration number (more than 10, or than 100!)
     problem->print(4,1,1,1);
