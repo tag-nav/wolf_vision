@@ -28,9 +28,11 @@
 
 int main()
 {
-    /* PROBLEM DEFINITION
+    /*
+     * ============= PROBLEM DEFINITION ==================
      *
-     * We have a planar robot with a range-and-bearing sensor mounted at the front-left corner, looking forward:
+     *
+     * We have a planar robot with a range-and-bearing sensor 'S' mounted at its front-left corner, looking forward:
      *
      *              ^ Y
      *              |
@@ -42,26 +44,26 @@ int main()
      *     |                 |
      *     -------------------
      *
-     * We consider a straight robot motion with 3 keyframes 'KF', and 3 landmarks 'L'.
+     * The robot performs a straight trajectory with 3 keyframes 'KF', and observes 3 landmarks 'L'.
      *
-     * The 3 robot keyframes, the 3 consecutive sensor poses, and the 3 landmark positions can be sketched as follows
+     * The 3 robot keyframes, the 3 resulting sensor poses, and the 3 landmark positions can be sketched as follows
      *
-     *             (1,2)   (2,2)   (3,2)
-     *              L1      L2      L3          Landmarks
+     *             (1,2)   (2,2)   (3,2)        landmark positions in world frame
+     *              L1      L2      L3          LANDMARKS
      *              | \     | \     |
      *              |   \   |   \   |
      *              |     \ |     \ |
      *           (1,1,0) (2,1,0) (3,1,0)        sensor poses in world frame
-     *              S->     S->     S->         Range-and-Bearing sensor
+     *              S->     S->     S->         SENSOR
      *           (1,1,0) (1,1,0) (1,1,0)        sensor poses in robot frame
      *           /       /       /
      *         /       /       /
      *       /       /       /
-     *     KF1->---KF2->---KF3->                Keyframes -- robot poses
-     *   (0,0,0) (1,0,0) (2,0,0)
+     *     KF1->---KF2->---KF3->                KEYFRAMES -- robot poses
+     *   (0,0,0) (1,0,0) (2,0,0)                keyframe poses in world frame
      *      |
      *      |
-     *      * prior                             Initial robot pose
+     *      * prior                             Initial robot pose in world frame
      *    (0,0,0)
      *
      * where:
@@ -79,6 +81,26 @@ int main()
      *   - Lmks are at positions (1,2), (2,2), (3,2)
      *   - Observations have ranges 1 or sqrt(2)
      *   - Observations have bearings pi/2 or 3pi/4
+     *
+     *
+     * The robot starts at (0,0,0) with a map with no previously known landmarks.
+     * At each keyframe, it does:
+     *   - Create a motion factor to the previous keyframe
+     *   - Measure some landmarks. For each measurement,
+     *      - If the landmark is unknown, add it to the map and create an observation factor
+     *      - If the landmark is known, create an observation factor
+     *
+     * The landmarks observed at each keyframe are as follows:
+     *   - KF1: lmk  1
+     *   - KF2: lmks 1 and 2
+     *   - KF3: lmks 2 and 3
+     *
+     * After 3 keyframes, the problem is solved and the robot poses and landmark positions are optimized:
+     *   - First,  using the exact values as initial guess for the solver
+     *   - Second, using random values
+     * Both solutions must produce the same exact values as in the sketches above.
+     *
+     * (c) 2017 Joan Sola @ IRI-CSIC
      */
 
     // SET PROBLEM =======================================================
@@ -122,7 +144,7 @@ int main()
     // CONFIGURE ==========================================================
 
     // Motion data
-    Vector2s motion_data(1.0, 0.0);
+    Vector2s motion_data(1.0, 0.0);                     // Will advance 1m at each keyframe, will not turn.
     Matrix2s motion_cov = 0.1 * Matrix2s::Identity();
 
     // landmark observations data
