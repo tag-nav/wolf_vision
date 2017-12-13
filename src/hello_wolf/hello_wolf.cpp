@@ -113,6 +113,8 @@ int main()
 
 
     // SET OF EVENTS =======================================================
+    WOLF_TRACE("======== PROBLEM AS BUILT =======")
+
     // We'll do 3 steps of motion and landmark observations.
 
     // STEP 1 --------------------------------------------------------------
@@ -160,12 +162,14 @@ int main()
     bearings    << 3*M_PI/4, M_PI/2;
     cap_rb      = std::make_shared<CaptureRangeBearing>(t, sensor_rb, ids, ranges, bearings);
     sensor_rb   ->process(cap_rb);
+
     problem->print(4,1,1,1);
 
 
     // SOLVE ================================================================
 
     // SOLVE with exact initial guess
+    WOLF_TRACE("======== PROBLEM SOLVED WITH EXACT PRIORS =======")
     std::string report = ceres->solve(2);
     WOLF_TRACE(report);                     // should show a very low iteration number (possibly 1)
     problem->print(4,1,1,1);
@@ -177,17 +181,19 @@ int main()
         lmk->getPPtr()->setState(Vector2s::Random());           // We perturb A LOT !
 
     // SOLVE again
+    WOLF_TRACE("======== PROBLEM SOLVED WITH PERTURBED PRIORS =======")
     report = ceres->solve(2);
     WOLF_TRACE(report);                     // should show a very high iteration number (more than 10, or than 100!)
     problem->print(4,1,1,1);
 
     // GET COVARIANCES of all states
+    WOLF_TRACE("======== COVARIANCES OF SOLVED PROBLEM =======")
     ceres->computeCovariances(ALL_MARGINALS);
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         if (kf->isKey())
-            WOLF_TRACE("KF", kf->id(), "_cov = \n", problem->getFrameCovariance(kf));
+            WOLF_TRACE("KF", kf->id(), "_cov = \n", kf->getCovariance());
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
-        WOLF_TRACE("L", lmk->id(), "_cov = \n", problem->getLandmarkCovariance(lmk));
+        WOLF_TRACE("L", lmk->id(), "_cov = \n", lmk->getCovariance());
 
     /*
      * Note:
