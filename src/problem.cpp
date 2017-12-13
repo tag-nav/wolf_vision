@@ -754,7 +754,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             {
                 cout << (F->isFixed() ? "    Fix" : "    Est") << ", ts=" << std::setprecision(5)
                         << F->getTimeStamp().get();
-                cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
+                cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << " )";
                 cout << endl;
             }
             if (state_blocks)
@@ -791,20 +791,15 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     cout << endl;
 
                     if (state_blocks)
-                    {
                         for(auto sb : C->getStateBlockVec())
-                        {
                             if(sb != nullptr)
                             {
                                 cout << "      sb: ";
                                 cout << (sb->isFixed() ? "Fix" : "Est");
                                 if (metric)
-                                    cout << std::setprecision(3) << " (" << sb->getState().transpose() << ")";
+                                    cout << std::setprecision(3) << " (" << sb->getState().transpose() << " )";
                                 cout << endl;
                             }
-//                            else cout << "      sb: nullptr " << endl;
-                        }
-                    }
 
                     if (C->isMotion() && metric)
                     {
@@ -841,7 +836,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                             cout << endl;
                             if (metric)
                                 cout << "        m = ( " << std::setprecision(3) << f->getMeasurement().transpose()
-                                        << ")" << endl;
+                                        << " )" << endl;
                             if (depth >= 4)
                             {
                                 // Constraints
@@ -884,7 +879,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             if (metric)
             {
                 cout << (L->isFixed() ? "    Fix" : "    Est");
-                cout << ",\t x = ( " << std::setprecision(2) << L->getState().transpose() << ")";
+                cout << ",\t x = ( " << std::setprecision(2) << L->getState().transpose() << " )";
                 cout << endl;
             }
             if (state_blocks)
@@ -892,7 +887,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                 cout << "    sb:";
                 for (auto sb : L->getStateBlockVec())
                     if (sb != nullptr)
-                        cout << " " << (sb->isFixed() ? "Fix" : "Est");
+                        cout << (sb->isFixed() ? " Fix" : " Est");
                 cout << endl;
             }
         } // for L
