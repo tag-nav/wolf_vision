@@ -43,12 +43,17 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
         int     id      = capture->getId     (i);
         Scalar  range   = capture->getRange  (i);
         Scalar  bearing = capture->getBearing(i);
-        WOLF_TRACE("id(", i, ") = ", id, "; range(", i, ") = ", range, "; bearing(", i, ") = ", bearing);
 
         // 4. create or recover landmark
         LandmarkPoint2DPtr lmk;
-        auto lmk_it = lmk_ids.find(id);
-        if ( lmk_it == lmk_ids.end() )
+        auto lmk_it = known_lmks.find(id);
+        if ( lmk_it != known_lmks.end() )
+        {
+            // known landmarks : recover landmark
+            lmk = std::static_pointer_cast<LandmarkPoint2D>(lmk_it->second);
+            WOLF_TRACE("known lmk(", id, "): ", lmk->getPPtr()->getState().transpose());
+        }
+        else
         {
             // new landmark:
             // - create landmark
@@ -56,13 +61,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
             WOLF_TRACE("new   lmk(", id, "): ", lmk->getPPtr()->getState().transpose());
             getProblem()->getMapPtr()->addLandmark(lmk);
             // - add to known landmarks
-            lmk_ids.emplace(id, lmk);
-        }
-        else
-        {
-            // known landmarks : recover landmark
-            lmk = std::static_pointer_cast<LandmarkPoint2D>(lmk_it->second);
-            WOLF_TRACE("known lmk(", id, "): ", lmk->getPPtr()->getState().transpose());
+            known_lmks.emplace(id, lmk);
         }
 
         // 5. create feature

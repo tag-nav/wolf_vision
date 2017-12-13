@@ -54,7 +54,7 @@ class ProcessorRangeBearing : public ProcessorBase
     private:
         // control variables
         Trf H_r_s; // transformation matrix, robot to sensor
-        std::map<int, LandmarkBasePtr> lmk_ids; // ids of all observed lmks so far
+        std::map<int, LandmarkBasePtr> known_lmks; // all observed lmks so far
 
     private:
         // helper methods -- to be used only here -- they would be better off in a separate library e.g. range_bearing_tools.h
