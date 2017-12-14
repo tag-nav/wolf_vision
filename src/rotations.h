@@ -117,7 +117,7 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
     T angle_half    = angle / (T)2.0;
 
     Eigen::Quaternion<T> q;
-    if (angle > (T)(wolf::Constants::EPS))
+    if (angle > (T)(wolf::Constants::EPS_SMALL))
     {
         q.w()   = cos(angle_half);
         q.vec() = sin(angle_half) * _v.normalized();// / angle;
@@ -176,7 +176,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBa
     T angle_squared = _v.squaredNorm();
     T angle = sqrt(angle_squared);
 
-    if (angle > wolf::Constants::EPS)
+    if (angle > wolf::Constants::EPS_SMALL)
         R = Eigen::AngleAxis<T>(angle, _v.normalized()).toRotationMatrix();
     else
         R = Eigen::Matrix<T, 3, 3>::Identity() + skew(_v);
