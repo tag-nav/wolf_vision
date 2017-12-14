@@ -19,27 +19,7 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::plus(const Eigen::Map<const
 
     using namespace Eigen;
 
-    double angle = _delta_theta.norm();
-    Quaternions dq;
-    if (angle > Constants::EPS_SMALL)
-    {
-        // compute rotation axis -- this guarantees unity norm
-        Vector3s axis = _delta_theta / angle;
-
-        // express delta_theta as a quaternion using the angle-axis helper
-        dq = AngleAxis<Scalar>(angle, axis);
-
-    }
-    else // Consider small angle approx
-    {
-        dq.w() = 1;
-        dq.vec() = _delta_theta/2;
-        dq.normalize();
-    }
-
-    // result as a quaternion
-    // the delta is in local reference: q * dq
-    _q_plus_delta_theta = (Map<const Quaternions>(_q.data()) * dq).coeffs();
+    _q_plus_delta_theta = ( Quaternions(_q.data()) * exp_q(_delta_theta) ).coeffs();
 
     return true;
 }
@@ -58,27 +38,7 @@ bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::plus(const Eigen::Map<cons
 
     using namespace Eigen;
 
-    double angle = _delta_theta.norm();
-    Quaternions dq;
-    if (angle > Constants::EPS_SMALL)
-    {
-        // compute rotation axis -- this guarantees unity norm
-        Vector3s axis = _delta_theta / angle;
-
-        // express delta_theta as a quaternion using the angle-axis helper
-        dq = AngleAxis<Scalar>(angle, axis);
-
-    }
-    else // Consider small angle approx
-    {
-        dq.w() = 1;
-        dq.vec() = _delta_theta/2;
-        dq.normalize();
-    }
-
-    // result as a quaternion
-    // the delta is in global reference: dq * q
-    _q_plus_delta_theta = (dq * Map<const Quaternions>(_q.data())).coeffs();
+    _q_plus_delta_theta = ( exp_q(_delta_theta) * Quaternions(_q.data()) ).coeffs();
 
     return true;
 }
@@ -117,8 +77,8 @@ bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::computeJacobian(const Eige
 
 template <>
 bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::minus(const Eigen::Map<const Eigen::VectorXs>& _q1,
-                   const Eigen::Map<const Eigen::VectorXs>& _q2,
-                   Eigen::Map<Eigen::VectorXs>& _q2_minus_q1)
+                                                           const Eigen::Map<const Eigen::VectorXs>& _q2,
+                                                           Eigen::Map<Eigen::VectorXs>& _q2_minus_q1)
 {
     assert(_q1.size() == global_size_ && "Wrong size of input quaternion.");
     assert(_q2.size() == global_size_ && "Wrong size of input quaternion.");
@@ -132,8 +92,8 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::minus(const Eigen::Map<cons
 
 template <>
 bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::minus(const Eigen::Map<const Eigen::VectorXs>& _q1,
-                   const Eigen::Map<const Eigen::VectorXs>& _q2,
-                   Eigen::Map<Eigen::VectorXs>& _q2_minus_q1)
+                                                            const Eigen::Map<const Eigen::VectorXs>& _q2,
+                                                            Eigen::Map<Eigen::VectorXs>& _q2_minus_q1)
 {
     assert(_q1.size() == global_size_ && "Wrong size of input quaternion.");
     assert(_q2.size() == global_size_ && "Wrong size of input quaternion.");
