@@ -24,6 +24,9 @@ class LocalParametrizationAngle : public LocalParametrizationBase
                           Eigen::Map<Eigen::VectorXs>& _h_plus_delta) const;
         virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _h,
                                      Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
+        virtual bool minus(const Eigen::Map<const Eigen::VectorXs>& _x1,
+                           const Eigen::Map<const Eigen::VectorXs>& _x2,
+                           Eigen::Map<Eigen::VectorXs>& _x2_minus_x1);
 
 };
 
@@ -50,6 +53,14 @@ inline bool LocalParametrizationAngle::computeJacobian(const Eigen::Map<const Ei
                                                        Eigen::Map<Eigen::MatrixXs>& _jacobian) const
 {
     _jacobian(0) = 1.0;
+    return true;
+}
+
+inline bool LocalParametrizationAngle::minus(const Eigen::Map<const Eigen::VectorXs>& _x1,
+                                             const Eigen::Map<const Eigen::VectorXs>& _x2,
+                                             Eigen::Map<Eigen::VectorXs>& _x2_minus_x1)
+{
+    _x2_minus_x1(0) = pi2pi(_x2(0)-_x1(0));
     return true;
 }
 

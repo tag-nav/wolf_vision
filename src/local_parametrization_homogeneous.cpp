@@ -7,6 +7,7 @@
 
 #include "local_parametrization_homogeneous.h"
 #include "iostream"
+#include "rotations.h" // we use quaternion algebra here
 
 namespace wolf {
 
@@ -69,4 +70,14 @@ bool LocalParametrizationHomogeneous::computeJacobian(const Eigen::Map<const Eig
     return true;
 }
 
+bool LocalParametrizationHomogeneous::minus(const Eigen::Map<const Eigen::VectorXs>& _h1,
+                                            const Eigen::Map<const Eigen::VectorXs>& _h2,
+                                            Eigen::Map<Eigen::VectorXs>& _h2_minus_h1)
+{
+    using Eigen::Quaternions;
+    _h2_minus_h1 = log_q(Quaternions(_h2.data()) * Quaternions(_h1.data()).conjugate());
+    return true;
+}
+
 } // namespace wolf
+

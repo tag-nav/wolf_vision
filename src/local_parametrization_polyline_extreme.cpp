@@ -1,5 +1,6 @@
 #include "local_parametrization_polyline_extreme.h"
 #include "state_block.h"
+#include "rotations.h"
 
 namespace wolf {
 
@@ -39,4 +40,17 @@ bool LocalParametrizationPolylineExtreme::computeJacobian(const Eigen::Map<const
     return true;
 }
 
+bool LocalParametrizationPolylineExtreme::minus(const Eigen::Map<const Eigen::VectorXs>& _point1,
+                                                const Eigen::Map<const Eigen::VectorXs>& _point2,
+                                                Eigen::Map<Eigen::VectorXs>& _delta_theta)
+{
+    Eigen::Vector2s v1 = _point1 - reference_point_->getState().head(2);
+    Eigen::Vector2s v2 = _point2 - reference_point_->getState().head(2);
+
+    _delta_theta(0) = pi2pi(atan2(v2(1),v2(0)) - atan2(v1(1),v1(0)));
+
+    return true;
+}
+
 } // namespace wolf
+

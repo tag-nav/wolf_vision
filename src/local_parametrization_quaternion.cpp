@@ -1,4 +1,7 @@
+
 #include "local_parametrization_quaternion.h"
+#include "rotations.h"
+
 #include <iostream>
 namespace wolf {
 
@@ -108,6 +111,36 @@ bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::computeJacobian(const Eige
                  -qq(2),  qq(3),  qq(0),
                   qq(1), -qq(0),  qq(3),
                  -qq(0), -qq(1), -qq(2);
+
+    return true;
+}
+
+template <>
+bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::minus(const Eigen::Map<const Eigen::VectorXs>& _q1,
+                   const Eigen::Map<const Eigen::VectorXs>& _q2,
+                   Eigen::Map<Eigen::VectorXs>& _q2_minus_q1)
+{
+    assert(_q1.size() == global_size_ && "Wrong size of input quaternion.");
+    assert(_q2.size() == global_size_ && "Wrong size of input quaternion.");
+    assert(_q2_minus_q1.size() == local_size_ && "Wrong size of output quaternion difference.");
+
+    using Eigen::Quaternions;
+    _q2_minus_q1 = log_q(Quaternions(_q1.data()).conjugate() * Quaternions(_q2.data()));
+
+    return true;
+}
+
+template <>
+bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::minus(const Eigen::Map<const Eigen::VectorXs>& _q1,
+                   const Eigen::Map<const Eigen::VectorXs>& _q2,
+                   Eigen::Map<Eigen::VectorXs>& _q2_minus_q1)
+{
+    assert(_q1.size() == global_size_ && "Wrong size of input quaternion.");
+    assert(_q2.size() == global_size_ && "Wrong size of input quaternion.");
+    assert(_q2_minus_q1.size() == local_size_ && "Wrong size of output quaternion difference.");
+
+    using Eigen::Quaternions;
+    _q2_minus_q1 = log_q(Quaternions(_q2.data()) * Quaternions(_q1.data()).conjugate());
 
     return true;
 }

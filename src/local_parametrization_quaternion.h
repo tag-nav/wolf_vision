@@ -71,6 +71,9 @@ public:
 
   virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _q,
                                Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
+  virtual bool minus(const Eigen::Map<const Eigen::VectorXs>& _q1,
+                     const Eigen::Map<const Eigen::VectorXs>& _q2,
+                     Eigen::Map<Eigen::VectorXs>& _q2_minus_q1);
 };
 
 typedef LocalParametrizationQuaternion<DQ_GLOBAL> LocalParametrizationQuaternionGlobal;
