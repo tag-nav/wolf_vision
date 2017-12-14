@@ -2,11 +2,16 @@
 namespace wolf
 {
 
-ProcessorOdom2D::ProcessorOdom2D(const Scalar& _dist_traveled_th, const Scalar& _theta_traveled_th,
-                                 const Scalar& _cov_det_th, const Scalar& _elapsed_time_th,
+ProcessorOdom2D::ProcessorOdom2D(const Scalar& _dist_traveled_th,
+                                 const Scalar& _theta_traveled_th,
+                                 const Scalar& _cov_det_th,
+                                 const Scalar& _elapsed_time_th,
                                  const Scalar& _unmeasured_perturbation_std) :
-        ProcessorMotion("ODOM 2D", 3, 3, 3, 2), dist_traveled_th_(_dist_traveled_th), theta_traveled_th_(
-                _theta_traveled_th), cov_det_th_(_cov_det_th), elapsed_time_th_(_elapsed_time_th)
+        ProcessorMotion("ODOM 2D", 3, 3, 3, 2),
+        dist_traveled_th_(_dist_traveled_th),
+        theta_traveled_th_(_theta_traveled_th),
+        cov_det_th_(_cov_det_th),
+        elapsed_time_th_(_elapsed_time_th)
 {
     unmeasured_perturbation_cov_ = _unmeasured_perturbation_std * _unmeasured_perturbation_std * Matrix3s::Identity();
 }

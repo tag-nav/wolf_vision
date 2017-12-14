@@ -346,6 +346,7 @@ int main()
      *
      *         1 Fixed + Static : general case of calibrated sensor.
      *              Example: rigidly fixed sensor with calibrated parameters
+     *              This is the case for the current example (the SensorRangeBearing we use is like this)
      *
      *         2 Estimated + Static : Wolf performs self-calibration.
      *              Example: extrinsics self-calibration of a camera

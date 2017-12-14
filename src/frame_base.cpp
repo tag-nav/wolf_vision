@@ -12,7 +12,7 @@ namespace wolf {
 unsigned int FrameBase::frame_id_count_ = 0;
 
 FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
-            NodeBase("FRAME", "BASE"),
+            NodeBase("FRAME", "Base"),
             trajectory_ptr_(),
             state_block_vec_(3), // allow for 6 state blocks by default. Resize in derived constructors if needed.
             is_removing_(false),
@@ -31,7 +31,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
 }
 
 FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
-            NodeBase("FRAME", "BASE"),
+            NodeBase("FRAME", "Base"),
             trajectory_ptr_(),
             state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
             is_removing_(false),

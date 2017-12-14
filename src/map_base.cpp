@@ -19,7 +19,7 @@
 namespace wolf {
 
 MapBase::MapBase() :
-    NodeBase("MAP")
+    NodeBase("MAP", "Base")
 {
 //    std::cout << "constructed M"<< std::endl;
 }
