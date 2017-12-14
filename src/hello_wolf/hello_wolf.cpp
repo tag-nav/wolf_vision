@@ -236,7 +236,7 @@ int main()
         WOLF_TRACE("L", lmk->id(), "_cov = \n", lmk->getCovariance());
 
     /*
-     * Note:
+     * ============= FIRST COMMENT ON THE RESULTS ==================
      *
      * IF YOU SEE at the end of the printed problem the estimate for Lmk 3 as:
      *
@@ -258,7 +258,7 @@ int main()
 
 
     /*
-     * Note: description of the printed result.
+     * ============= DETAILED DESCRIPTION OF THE PRINTED RESULT ==================
      *
      * The line problem->print(4,1,1,1) produces a printout of the status of the WOLF problem.
      * The full message is explained below.
@@ -279,40 +279,40 @@ int main()
             sb: Est Est                                 // State's pos and orient are estimated
             C1 FIX -> S- [  <--                         // Capture 1, type FIX or Absolute
               f1 FIX  <--                               // Feature 1, type Fix
-                m = ( 0 0 0)                            // The absolute measurement for this frame is (0,0,0) --> origin
+                m = ( 0 0 0 )                           // The absolute measurement for this frame is (0,0,0) --> origin
                 c1 FIX --> A                            // Constraint 1, type FIX, it is Absolute
             CM2 ODOM 2D -> S1 [Sta, Sta]  <--           // Capture 2, type ODOM, from Sensor 1 (static extr and intr)
             C5 RANGE BEARING -> S2 [Sta, Sta]  <--      // Capture 5, type RB, from Sensor 2 (static extr and intr)
               f2 RANGE BEARING  <--                     // Feature 2, type RB
-                m = ( 1    1.57)                        // The feature's measurement is 1m, 1.57rad
+                m = ( 1    1.57 )                       // The feature's measurement is 1m, 1.57rad
                 c2 RANGE BEARING --> L1                 // Constraint 2 against Landmark 1
           KF2  <-- c6
-            Est, ts=1,   x = ( 1       2.5e-10 1.6e-10)
+            Est, ts=1,   x = ( 1       2.5e-10 1.6e-10 )
             sb: Est Est
             CM3 ODOM 2D -> S1 [Sta, Sta]  <--
               f3 ODOM 2D  <--
-                m = ( 1 0 0)
+                m = ( 1 0 0 )
                 c3 ODOM 2D --> F1                       // Constraint 3, type ODOM, against Frame 1
             C9 RANGE BEARING -> S2 [Sta, Sta]  <--
               f4 RANGE BEARING  <--
-                m = ( 1.41 2.36)
+                m = ( 1.41 2.36 )
                 c4 RANGE BEARING --> L1
               f5 RANGE BEARING  <--
-                m = ( 1    1.57)
+                m = ( 1    1.57 )
                 c5 RANGE BEARING --> L2
           KF3  <--
-            Est, ts=2,   x = ( 2       4.1e-10 1.7e-10)
+            Est, ts=2,   x = ( 2       4.1e-10 1.7e-10 )
             sb: Est Est
             CM7 ODOM 2D -> S1 [Sta, Sta]  <--
               f6 ODOM 2D  <--
-                m = ( 1 0 0)
+                m = ( 1 0 0 )
                 c6 ODOM 2D --> F2
             C12 RANGE BEARING -> S2 [Sta, Sta]  <--
               f7 RANGE BEARING  <--
-                m = ( 1.41 2.36)
+                m = ( 1.41 2.36 )
                 c7 RANGE BEARING --> L2
               f8 RANGE BEARING  <--
-                m = ( 1    1.57)
+                m = ( 1    1.57 )
                 c8 RANGE BEARING --> L3
           F4  <--
             Est, ts=2,   x = ( 0.11   -0.045 0.26  )
@@ -320,17 +320,19 @@ int main()
             CM10 ODOM 2D -> S1 [Sta, Sta]  <--
         Map
           L1 POINT 2D   <-- c2  c4                      // Landmark 1, constrained by Constraints 2 and 4
-            Est,     x = ( 1 2)                         // L4 state is estimated, state vector
+            Est,     x = ( 1 2 )                        // L4 state is estimated, state vector
             sb: Est                                     // L4 has 1 state block estimated
           L2 POINT 2D   <-- c5  c7
-            Est,     x = ( 2 2)
+            Est,     x = ( 2 2 )
             sb: Est
           L3 POINT 2D   <-- c8
-            Est,     x = ( 3 2)
+            Est,     x = ( 3 2 )
             sb: Est
         -----------------------------------------
      *
-     * Explanatory notes:
+     * ============= GENERAL WOLF NOTES ==================
+     *
+     * Explanatory notes, general to the Wolf architecture design:
      *
      * (1): Sensor params (extrinsics and intrinsics) can be declared Dynamic or Static
      *          Static:  they do not change with time --> stored in the Sensor
@@ -340,7 +342,7 @@ int main()
      *          Fixed:     they are used as constant values, never estimated
      *          Estimated: they are estimated by the solver iteratively
      *
-     * Overall, each block of sensor parameters can be Static/Dynamic and Fixed/Estimated. This produces 4 combinations:
+     * Therefore, in the case of Sensors, each block of parameters can be Static/Dynamic and Fixed/Estimated. This produces 4 combinations:
      *
      *         1 Fixed + Static : general case of calibrated sensor.
      *              Example: rigidly fixed sensor with calibrated parameters
@@ -349,9 +351,9 @@ int main()
      *              Example: extrinsics self-calibration of a camera
      *
      *         3 Fixed + Dynamic : calibrated but variable parameters.
-     *              Example: pan and tilt camera extrinsics, known through precise encoders
+     *              Example: pan and tilt camera extrinsics, known at every time through precise encoders
      *
-     *         4 Estimated + Dynamic : Wolf will track these sensor parameters.
+     *         4 Estimated + Dynamic : Wolf will track those sensor parameters that evolve with time.
      *              Example: IMU bias
      *
      */
