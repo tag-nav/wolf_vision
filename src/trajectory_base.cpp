@@ -5,7 +5,7 @@
 namespace wolf {
 
 TrajectoryBase::TrajectoryBase(const std::string& _frame_structure) :
-    NodeBase("TRAJECTORY"),
+    NodeBase("TRAJECTORY", "Base"),
     frame_structure_(_frame_structure),
     last_key_frame_ptr_(nullptr)
 {
