@@ -150,7 +150,7 @@ TEST(ConstraintBlockAbs, ctr_bloc_abs_p_solve)
     std::string brief_report = ceres_mgr.solve(1);
 
     //only orientation is constrained
-    ASSERT_MATRIX_APPROX(frm0->getState().segment<4>(3), pose10.segment<4>(3), 1e-6);
+    ASSERT_MATRIX_APPROX(frm0->getState().head<3>(), pose10.head<3>(), 1e-6);
 }
 
 TEST(ConstraintBlockAbs, ctr_bloc_abs_v_check)
