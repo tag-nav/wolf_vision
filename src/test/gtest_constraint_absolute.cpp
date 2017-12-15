@@ -10,6 +10,7 @@
 #include "constraint_absolute_position.h"
 #include "constraint_absolute_orientation.h"
 #include "constraint_absolute_velocity.h"
+#include "constraint_block_absolute.h"
 #include "capture_motion.h"
 
 #include "ceres_wrapper/ceres_manager.h"
@@ -109,6 +110,37 @@ TEST(ConstraintAbsV, ctr_abs_v_solve)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("FIX", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
     ConstraintAbsVPtr ctr0 = std::static_pointer_cast<ConstraintAbsV>(fea0->addConstraint(std::make_shared<ConstraintAbsV>(fea0)));
+    
+    // Fix frame 0, perturb frm1
+    frm0->unfix();
+    frm0->setState(x0);
+
+    // solve for frm0
+    std::string brief_report = ceres_mgr.solve(1);
+
+    //only velocity is constrained
+    ASSERT_MATRIX_APPROX(frm0->getState().tail<3>(), pose10.tail<3>(), 1e-6);
+}
+
+TEST(ConstraintBlockAbs, ctr_bloc_abs_v_check)
+{
+    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("FIX", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
+    ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
+        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr(),
+                                                                    fea0->getMeasurement(),
+                                                                    data_cov.bottomRightCorner<3,3>()))
+        );
+    ASSERT_TRUE(problem->check(0));
+}
+
+TEST(ConstraintBlockAbs, ctr_bloc_abs_v_solve)
+{
+    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("FIX", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
+    ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
+        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr(),
+                                                                    fea0->getMeasurement(),
+                                                                    data_cov.bottomRightCorner<3,3>()))
+        );
     
     // Fix frame 0, perturb frm1
     frm0->unfix();
