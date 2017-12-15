@@ -22,10 +22,8 @@ class ConstraintBlockAbsolute: public ConstraintAutodiff<ConstraintBlockAbsolute
 {
     public:
 
-        ConstraintBlockAbsolute(StateBlockPtr _sb_ptr, const Eigen::VectorXs& _state, const Eigen::MatrixXs& _cov, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAutodiff<ConstraintBlockAbsolute,3,3>(CTR_BLOCK_ABS, nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _sb_ptr),
-            state_(_state),
-            cov_(_cov)
+        ConstraintBlockAbsolute(StateBlockPtr _sb_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintAutodiff<ConstraintBlockAbsolute,3,3>(CTR_BLOCK_ABS, nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _sb_ptr)
         {
             setType("FIX SB");
         }
@@ -40,10 +38,6 @@ class ConstraintBlockAbsolute: public ConstraintAutodiff<ConstraintBlockAbsolute
             return JAC_AUTO;
         }
 
-    private:
-            const Eigen::VectorXs state_;
-            const Eigen::MatrixXs cov_;
-
 };
 
 template<typename T>
@@ -54,7 +48,7 @@ inline bool ConstraintBlockAbsolute::operator ()(const T* const _sb, T* _residua
     Eigen::Matrix<T, 3, 1>  sb(_sb);
 
     // measurements
-    Eigen::Vector3s     measured_state(state_.data() + 0);
+    Eigen::Vector3s     measured_state(getMeasurement().data() + 0);
 
     // error
     Eigen::Matrix<T, 3, 1> er;
