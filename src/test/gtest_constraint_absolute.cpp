@@ -127,9 +127,7 @@ TEST(ConstraintBlockAbs, ctr_bloc_abs_p_check)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("FIX", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
     ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
-        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr(),
-                                                                    fea0->getMeasurement(),
-                                                                    data_cov.block<3,3>(3,3)))
+        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr()))
         );
     ASSERT_TRUE(problem->check(0));
 }
@@ -138,9 +136,7 @@ TEST(ConstraintBlockAbs, ctr_bloc_abs_p_solve)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("FIX", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
     ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
-        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr(),
-                                                                    fea0->getMeasurement(),
-                                                                    data_cov.block<3,3>(3,3)))
+        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr()))
         );
     
     // Fix frame 0, perturb frm1
@@ -158,9 +154,7 @@ TEST(ConstraintBlockAbs, ctr_bloc_abs_v_check)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("FIX", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
     ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
-        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr(),
-                                                                    fea0->getMeasurement(),
-                                                                    data_cov.bottomRightCorner<3,3>()))
+        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr()))
         );
     ASSERT_TRUE(problem->check(0));
 }
@@ -169,9 +163,7 @@ TEST(ConstraintBlockAbs, ctr_bloc_abs_v_solve)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("FIX", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
     ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
-        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr(),
-                                                                    fea0->getMeasurement(),
-                                                                    data_cov.bottomRightCorner<3,3>()))
+        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr()))
         );
     
     // Fix frame 0, perturb frm1
