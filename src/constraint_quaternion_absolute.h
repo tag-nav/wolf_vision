@@ -11,6 +11,7 @@
 //Wolf includes
 #include "constraint_autodiff.h"
 #include "frame_base.h"
+#include "rotations.h"
 
 
 namespace wolf {
