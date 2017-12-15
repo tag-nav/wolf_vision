@@ -11,6 +11,7 @@
 #include "constraint_absolute_orientation.h"
 #include "constraint_absolute_velocity.h"
 #include "constraint_block_absolute.h"
+#include "constraint_quaternion_absolute.h"
 #include "capture_motion.h"
 
 #include "ceres_wrapper/ceres_manager.h"
@@ -182,6 +183,33 @@ TEST(ConstraintBlockAbs, ctr_bloc_abs_v_solve)
 
     //only velocity is constrained
     ASSERT_MATRIX_APPROX(frm0->getState().tail<3>(), pose10.tail<3>(), 1e-6);
+}
+
+TEST(ConstraintQuatAbs, ctr_bloc_abs_o_check)
+{
+    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("FIX", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
+    ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
+        fea0->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(fea0->getFramePtr()->getOPtr()))
+        );
+    ASSERT_TRUE(problem->check(0));
+}
+
+TEST(ConstraintQuatAbs, ctr_bloc_abs_o_solve)
+{
+    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("FIX", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
+    ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
+        fea0->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(fea0->getFramePtr()->getOPtr()))
+        );
+    
+    // Fix frame 0, perturb frm1
+    frm0->unfix();
+    frm0->setState(x0);
+
+    // solve for frm0
+    std::string brief_report = ceres_mgr.solve(1);
+
+    //only velocity is constrained
+    ASSERT_MATRIX_APPROX(frm0->getState().segment<4>(3), pose10.segment<4>(3), 1e-6);
 }
 
 int main(int argc, char **argv)
