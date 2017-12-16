@@ -124,10 +124,10 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
     }
     else
     {
-        q.w()   = (T)1.0 - angle_squared/(T)2; // Taylor expansion of cos(x) = 1 - x^2/2!;
-        q.vec() = _v * ((T)2.0 - angle_squared / (T)48.0); // Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
+        q.w()   = (T)1.0;
+        q.vec() = _v * (T)0.5;
     }
-    return q.normalized();
+    return q;
 }
 
 /** \brief Quaternion logarithmic map
@@ -152,8 +152,9 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::Quaterni
     }
     else
     { // small-angle approximation using truncated Taylor series
-        T r2 = vecnorm_squared / (_q.w() *_q.w());
-        return vec * ( (T)2.0 -  r2 / (T)1.5 ) / _q.w(); // log = 2 * vec * ( 1 - norm(vec)^2 / 3*w^2 ) / w.
+//        T r2 = vecnorm_squared / (_q.w() *_q.w());
+//        return vec * ( (T)2.0 -  r2 / (T)1.5 ) / _q.w(); // log = 2 * vec * ( 1 - norm(vec)^2 / 3*w^2 ) / w.
+        return vec * (T)2.0;
     }
 }
 

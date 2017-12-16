@@ -110,14 +110,10 @@ TEST(exp_q, unit_norm)
 {
     Vector3s v0  = Vector3s::Random();
     Scalar scale = 1.0;
-    for (int i = 0; i < 16; i++)
+    for (int i = 0; i < 20; i++)
     {
         Vector3s v = v0 * scale;
         Quaternions q = exp_q(v);
-        EXPECT_NEAR(q.norm(), 1.0, 1e-10) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
-        EXPECT_NEAR(q.norm(), 1.0, 1e-12) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
-        EXPECT_NEAR(q.norm(), 1.0, 1e-14) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
-        EXPECT_NEAR(q.norm(), 1.0, 1e-16) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
         ASSERT_NEAR(q.norm(), 1.0, 1e-10) << "Failed at scale 1e-" << i << " with angle = " << 2.0*q.vec().norm();
         scale /= 10;
     }
