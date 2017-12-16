@@ -370,7 +370,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eig
  *  This maps a perturbation in the tangent space (d_theta) to a perturbation on the manifold (expmap(Jl * d_theta))
  *  so that:
  *
- *      exp(theta+d_theta) = exp(Jr(theta)*d_theta)*exp(theta)
+ *      exp(theta+d_theta) = exp(Jl(theta)*d_theta)*exp(theta)
  */
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::MatrixBase<Derived>& _theta)
