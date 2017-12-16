@@ -770,6 +770,41 @@ TEST(Jacobians, between)
     ASSERT_MATRIX_APPROX(J2a, J2n, 1e-5);
 }
 
+TEST(exp_q, small)
+{
+    Vector3s u; u.setRandom().normalize();
+    Vector3s v;
+    Quaternions q;
+    Scalar scale = 1.0;
+    for (int i = 0; i<20; i++)
+    {
+        v               = u*scale;
+        q               = exp_q(v);
+        Vector3s ratio  = q.vec().array() / v.array();
+
+        WOLF_TRACE("scale = ", scale, "; ratio = ", ratio.transpose());
+
+        scale          /= 10;
+    }
+    ASSERT_MATRIX_APPROX(q.vec()/(10*scale), u/2, 1e-12);
+}
+
+TEST(log_q, small)
+{
+    Vector3s u; u.setRandom().normalize();
+    Scalar scale = 1.0;
+    for (int i = 0; i<20; i++)
+    {
+        Vector3s v      = u*scale;
+        Quaternions q   = exp_q(v);
+        Vector3s l      = log_q(q);
+
+        ASSERT_MATRIX_APPROX(v, l, 1e-10);
+
+        scale          /= 10;
+    }
+}
+
 
 int main(int argc, char **argv)
 {
