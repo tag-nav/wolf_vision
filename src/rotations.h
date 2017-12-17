@@ -10,8 +10,6 @@
 
 #include "wolf.h"
 
-#include "iostream"
-
 namespace wolf
 {
 
@@ -114,20 +112,15 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
 
     T angle_squared = _v.squaredNorm();
     T angle         = sqrt(angle_squared);
-    T angle_half    = angle / (T)2.0;
 
-    Eigen::Quaternion<T> q;
     if (angle > (T)(wolf::Constants::EPS_SMALL))
     {
-        q.w()   = cos(angle_half);
-        q.vec() = sin(angle_half) * _v.normalized();// / angle;
+        return Eigen::Quaternion<T> ( Eigen::AngleAxis<T>(angle, _v.normalized()) );
     }
     else
     {
-        q.w()   = (T)1.0;
-        q.vec() = _v * (T)0.5;
+        return Eigen::Quaternion<T> ( (T)1.0 , _v(0,0)/(T)2 , _v(1,0)/(T)2 , _v(2,0)/(T)2 );
     }
-    return q;
 }
 
 /** \brief Quaternion logarithmic map
@@ -143,17 +136,28 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::Quaterni
     typedef typename Derived::Scalar T;
 
     Eigen::Matrix<T, 3, 1> vec = _q.vec();
-    T vecnorm_squared = vec.squaredNorm();
-    T vecnorm = sqrt(vecnorm_squared); // vec.norm();
-    if (vecnorm > (T)wolf::Constants::EPS_SMALL)
-    { // regular angle-axis conversion
-        T angle = (T)2.0 * atan2(vecnorm, _q.w());
-        return vec * angle / vecnorm;
+    const T sin_angle_squared = vec.squaredNorm();
+    if (sin_angle_squared > (T)wolf::Constants::EPS_SMALL)
+    {
+        const T  sin_angle = sqrt(sin_angle_squared); // vec.norm();
+        const T& cos_angle = _q.w();
+
+        /* If (cos_angle < 0) then angle >= pi/2 , means : angle for angle_axis vector >= pi (== 2*angle)
+                    |-> results in correct rotation but not a normalized angle_axis vector
+
+        In that case we observe that 2 * angle ~ 2 * angle - 2 * pi,
+        which is equivalent saying
+
+            angle - pi = atan(sin(angle - pi), cos(angle - pi))
+                       = atan(-sin(angle), -cos(angle))
+        */
+        const T two_angle = T(2.0) * ((cos_angle < 0.0) ? atan2(-sin_angle, -cos_angle) : atan2(sin_angle, cos_angle));
+        const T k = two_angle / sin_angle;
+        return vec * k;
     }
     else
-    { // small-angle approximation using truncated Taylor series
-//        T r2 = vecnorm_squared / (_q.w() *_q.w());
-//        return vec * ( (T)2.0 -  r2 / (T)1.5 ) / _q.w(); // log = 2 * vec * ( 1 - norm(vec)^2 / 3*w^2 ) / w.
+    {
+        // small-angle approximation
         return vec * (T)2.0;
     }
 }
