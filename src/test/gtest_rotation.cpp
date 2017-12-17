@@ -27,84 +27,6 @@
 using namespace wolf;
 using namespace Eigen;
 
-namespace wolf
-{
-
-inline Eigen::VectorXs q2v_aa(const Eigen::Quaternions& _q)
-{
-    Eigen::AngleAxiss aa = Eigen::AngleAxiss(_q);
-    return aa.axis() * aa.angle();
-}
-
-// 'New' version (alternative version also used by ceres)
-template<typename Derived>
-inline Eigen::Quaternion<typename Derived::Scalar> v2q_new(const Eigen::MatrixBase<Derived>& _v)
-{
-    MatrixSizeCheck<3, 1>::check(_v);
-    typedef typename Derived::Scalar T;
-
-    Eigen::Quaternion<T> q;
-    const T& a0 = _v[0];
-    const T& a1 = _v[1];
-    const T& a2 = _v[2];
-    const T angle_square = a0 * a0 + a1 * a1 + a2 * a2;
-
-    //We need the angle : means we have to take the square root of angle_square, 
-    // which is defined for all angle_square belonging to R+ (except 0)
-    if (angle_square > (T)0.0 ){
-        //sqrt is defined here
-        const T angle = sqrt(angle_square);
-        const T angle_half = angle / (T)2.0;
-        
-        q.w() = cos(angle_half);
-        q.vec() = _v / angle * sin(angle_half);
-        return q;
-    }
-    else
-    {
-        //sqrt not defined at 0 and will produce NaNs, thuswe use an approximation with taylor series truncated at one term
-        q.w() = (T)1.0;
-        q.vec() = _v *(T)0.5; // see the Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
-                                                                    //                                 for angle_half == 0 then ,     = v/2
-        return q;
-    }
-}
-
-// 'New' version (alternative version also used by ceres)
-template<typename Derived>
-inline Eigen::Matrix<typename Derived::Scalar, 3, 1> q2v_new(const Eigen::QuaternionBase<Derived>& _q)
-{
-    typedef typename Derived::Scalar T;
-    Eigen::Matrix<T, 3, 1> vec = _q.vec();
-    const T sin_angle_square = vec(0) * vec(0) + vec(1) * vec(1) + vec(2) * vec(2);
-
-    //everything shouold be OK for non-zero rotations
-    if (sin_angle_square > (T)0.0)
-    {
-        const T sin_angle = sqrt(sin_angle_square);
-        const T& cos_angle = _q.w();
-
-        /* If (cos_theta < 0) then theta >= pi/2 , means : angle for angle_axis vector >= pi (== 2*theta) 
-                    |-> results in correct rotation but not a normalized angle_axis vector 
-    
-        In that case we observe that 2 * theta ~ 2 * theta - 2 * pi,
-        which is equivalent saying
-    
-            theta - pi = atan(sin(theta - pi), cos(theta - pi))
-                        = atan(-sin(theta), -cos(theta))
-        */
-        const T two_angle = T(2.0) * ((cos_angle < 0.0) ? atan2(-sin_angle, -cos_angle) : atan2(sin_angle, cos_angle));
-        const T k = two_angle / sin_angle;
-        return vec * k;
-    }
-    else
-    { // small-angle approximation using truncated Taylor series
-        //zero rotation --> sqrt will result in NaN
-        return vec * (T)2.0; // log = 2 * vec * ( 1 - norm(vec)^2 / 3*w^2 ) / w.
-    }
-}
-    
-}
 
 TEST(exp_q, unit_norm)
 {
@@ -119,61 +41,6 @@ TEST(exp_q, unit_norm)
     }
 }
 
-TEST(exp_q, v2q_VS_v2q_new) //this test will use functions defined above
-{
-    using namespace wolf;
-    //defines scalars
-    wolf::Scalar deg_to_rad = M_PI/180.0;
-
-    Eigen::Vector4s vec0, vec1;
-
-        //v2q
-    Eigen::Vector3s rot_vector0, rot_vector1;
-    Eigen::Quaternions quat_o, quat_o1, quat_new, quat_new1;
-    Eigen::Vector4s vec_o, vec_o1, vec_new, vec_new1;
-    Eigen::Vector3s qvec_o, qvec_o1, qvec_new, qvec_new1, qvec_aao, qvec_aa1;
-    for (unsigned int iter = 0; iter < 10000; iter ++)
-    {
-        rot_vector0 = Eigen::Vector3s::Random();
-        rot_vector1 = rot_vector0 * 100 *deg_to_rad; //far from origin
-        rot_vector0 = rot_vector0 *0.0001*deg_to_rad; //close to origin
-
-        quat_o = v2q(rot_vector0);
-        quat_new = v2q_new(rot_vector0);
-        quat_o1 = v2q(rot_vector1);
-        quat_new1 = v2q_new(rot_vector1);
-
-        //now we do the checking
-        vec_o << quat_o.w(), quat_o.x(), quat_o.y(), quat_o.z();
-        vec_new << quat_new.w(), quat_new.x(), quat_new.y(), quat_new.z();
-        vec_o1 << quat_o1.w(), quat_o1.x(), quat_o1.y(), quat_o1.z();
-        vec_new1 << quat_new1.w(), quat_new1.x(), quat_new1.y(), quat_new1.z();
-
-        ASSERT_TRUE((vec_o - vec_new).isMuchSmallerThan(1,wolf::Constants::EPS));
-        ASSERT_TRUE((vec_o1 - vec_new1).isMuchSmallerThan(1,wolf::Constants::EPS));
-    
-
-        //q2v
-        qvec_o     = q2v(quat_o);
-        qvec_o1    = q2v(quat_o1);
-        qvec_aao   = q2v_aa(quat_o);
-        qvec_aa1   = q2v_aa(quat_o1);
-        qvec_new   = q2v_new(quat_new);
-        qvec_new1  = q2v_new(quat_new1);
-
-        // 'New' version (alternative version also used by ceres) of q2v is working, result with template version gives the same that the regular version with Eigen::Quaternions argument
-        ASSERT_TRUE((qvec_aao - qvec_new).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_aao : " << qvec_aao.transpose() << "\n qvec_new : " << qvec_new.transpose() << std::endl;
-        ASSERT_TRUE((qvec_aa1 - qvec_new1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_aa1 : " << qvec_aa1.transpose() << "\n qvec_new1 : " << qvec_new1.transpose() << std::endl;
-        EXPECT_TRUE((qvec_new - rot_vector0).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_new : " << qvec_new.transpose() << "\n rot_vector0 : " << rot_vector0.transpose() << std::endl;
-        EXPECT_TRUE((qvec_new1 - rot_vector1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_new1 : " << qvec_new1.transpose() << "\n rot_vector1 : " << rot_vector1.transpose() << std::endl;
-
-        // checking current q2v
-        ASSERT_TRUE((qvec_aao - qvec_o).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_aao : " << qvec_aao.transpose() << "\n qvec_new : " << qvec_new.transpose() << std::endl;
-        ASSERT_TRUE((qvec_aa1 - qvec_o1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_aa1 : " << qvec_aa1.transpose() << "\n qvec_new1 : " << qvec_new1.transpose() << std::endl;
-        EXPECT_TRUE((qvec_o - rot_vector0).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_new : " << qvec_new.transpose() << "\n rot_vector0 : " << rot_vector0.transpose() << std::endl;
-        EXPECT_TRUE((qvec_o1 - rot_vector1).isMuchSmallerThan(1,wolf::Constants::EPS)) << "\n qvec_new1 : " << qvec_new1.transpose() << "\n rot_vector1 : " << rot_vector1.transpose() << std::endl;
-    }
-}
 
 TEST(rotations, pi2pi)
 {
@@ -291,9 +158,6 @@ TEST(log_R, R2v_v2R_AAlimits)
 
     for(int i = 0; i<8; i++){
         rotation_mat = v2R(Vector3s::Random().eval() * scale);
-        //rotation_mat(0,0) = 1.0;
-        //rotation_mat(1,1) = 1.0;
-        //rotation_mat(2,2) = 1.0;
 
         //rv = R2v(rotation_mat); //decomposing R2v below
         AngleAxis<wolf::Scalar> aa0 = AngleAxis<wolf::Scalar>(rotation_mat);
@@ -787,6 +651,13 @@ TEST(exp_q, small)
         scale          /= 10;
     }
     ASSERT_MATRIX_APPROX(q.vec()/(10*scale), u/2, 1e-12);
+}
+
+TEST(log_q, double_cover)
+{
+    Quaternions qp; qp.coeffs().setRandom().normalize();
+    Quaternions qn; qn.coeffs() = - qp.coeffs();
+    ASSERT_MATRIX_APPROX(log_q(qp), log_q(qn), 1e-16);
 }
 
 TEST(log_q, small)
