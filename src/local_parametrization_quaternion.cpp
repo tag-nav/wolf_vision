@@ -57,20 +57,6 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::minus(Eigen::Map<const Eige
     return true;
 }
 
-//template <>
-//bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::minus(const Eigen::VectorXs& _q1,
-//                                                           const Eigen::VectorXs& _q2,
-//                                                           Eigen::VectorXs& _q2_minus_q1)
-//{
-//    assert(_q1.size() == global_size_ && "Wrong size of input quaternion.");
-//    assert(_q2.size() == global_size_ && "Wrong size of input quaternion.");
-//    assert(_q2_minus_q1.size() == local_size_ && "Wrong size of output quaternion difference.");
-//
-//    using Eigen::Quaternions;
-//    _q2_minus_q1 = log_q(Quaternions(_q1.data()).conjugate() * Quaternions(_q2.data()));
-//
-//    return true;
-//}
 
 ////////// GLOBAL PERTURBATION //////////////
 
@@ -123,21 +109,6 @@ bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::minus(Eigen::Map<const Eig
 
     return true;
 }
-
-//template <>
-//bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::minus(const Eigen::VectorXs& _q1,
-//                                                            const Eigen::VectorXs& _q2,
-//                                                            Eigen::VectorXs& _q2_minus_q1)
-//{
-//    assert(_q1.size() == global_size_ && "Wrong size of input quaternion.");
-//    assert(_q2.size() == global_size_ && "Wrong size of input quaternion.");
-//    assert(_q2_minus_q1.size() == local_size_ && "Wrong size of output quaternion difference.");
-//
-//    using Eigen::Quaternions;
-//    _q2_minus_q1 = log_q(Quaternions(_q2.data()) * Quaternions(_q1.data()).conjugate());
-//
-//    return true;
-//}
 
 
 
