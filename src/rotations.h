@@ -111,7 +111,7 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
     typedef typename Derived::Scalar T;
 
     T angle_squared = _v.squaredNorm();
-    T angle         = sqrt(angle_squared);
+    T angle         = sqrt(angle_squared); // Allow ceres::Jet to use its own sqrt() version.
 
     if (angle > (T)(wolf::Constants::EPS_SMALL))
     {
@@ -131,7 +131,15 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::QuaternionBase<Derived>& _q)
 {
-    using std::sqrt;
+
+    // Will try this implementation once Eigen accepts it!
+    // see https://forum.kde.org/viewtopic.php?f=74&t=143269&p=385299#p385265
+    //    typedef typename Derived::Scalar T;
+    //    Eigen::AngleAxis<T> aa(_q);
+    //    return aa.angle() * aa.axis();
+
+
+    // In the meanwhile, we have a custom implementation as follows
 
     typedef typename Derived::Scalar T;
 
@@ -139,7 +147,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::Quaterni
     const T sin_angle_squared = vec.squaredNorm();
     if (sin_angle_squared > (T)wolf::Constants::EPS_SMALL)
     {
-        const T  sin_angle = sqrt(sin_angle_squared); // vec.norm();
+        const T  sin_angle = sqrt(sin_angle_squared); // Allow ceres::Jet to use its own sqrt() version.
         const T& cos_angle = _q.w();
 
         /* If (cos_angle < 0) then angle >= pi/2 , means : angle for angle_axis vector >= pi (== 2*angle)
@@ -176,17 +184,13 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBa
 
     typedef typename Derived::Scalar T;
 
-    Eigen::Matrix<typename Derived::Scalar, 3, 3> R;
-
     T angle_squared = _v.squaredNorm();
-    T angle = sqrt(angle_squared);
+    T angle = sqrt(angle_squared); // Allow ceres::Jet to use its own sqrt() version.
 
     if (angle > wolf::Constants::EPS_SMALL)
-        R = Eigen::AngleAxis<T>(angle, _v.normalized()).toRotationMatrix();
+        return Eigen::AngleAxis<T>(angle, _v.normalized()).toRotationMatrix();
     else
-        R = Eigen::Matrix<T, 3, 3>::Identity() + skew(_v);
-
-    return R;
+        return Eigen::Matrix<T, 3, 3>::Identity() + skew(_v);
 }
 
 /** \brief Rotation matrix logarithmic map
