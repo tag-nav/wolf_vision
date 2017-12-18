@@ -109,9 +109,9 @@ int main()
 
     // Wolf problem and solver
     ProblemPtr problem                      = Problem::create("PO 2D");
-    ceres::Solver::Options ceres_options;
-    ceres_options.max_num_iterations        = 1000; // We depart far from solution, need a lot of iterations
-    CeresManagerPtr ceres                   = std::make_shared<CeresManager>(problem, ceres_options);
+    ceres::Solver::Options options;
+    options.max_num_iterations              = 1000; // We depart far from solution, need a lot of iterations
+    CeresManagerPtr ceres                   = std::make_shared<CeresManager>(problem, options);
 
     // sensor odometer 2D
     IntrinsicsOdom2DPtr intrinsics_odo      = std::make_shared<IntrinsicsOdom2D>();
@@ -265,8 +265,8 @@ int main()
      *
      * P: wolf tree status ---------------------
         Hardware
-          S1 ODOM 2D [Sta,Sta]                          // Sensor 1, type ODOMETRY 2D, static extrinsics and intrinsics (1)
-            sb: Fix Fix                                 // Extrinsics position and orientation are fixed (2). No intrinsics.
+          S1 ODOM 2D [Sta,Sta]                          // Sensor 1, type ODOMETRY 2D, static extrinsics and intrinsics (See note 1 below).
+            sb: Fix Fix                                 // Extrinsics position and orientation are fixed (see note 2). No intrinsics.
             pm1 ODOM 2D                                 // Processor 1, type ODOMETRY 2D
               o: C7 - F3                                // origin at Capture 7, Frame 3
               l: C10 - F4                               // last at Capture 10, frame 4
