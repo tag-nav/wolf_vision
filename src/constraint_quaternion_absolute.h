@@ -52,8 +52,12 @@ inline bool ConstraintQuaternionAbsolute::operator ()(const T* const _o, T* _res
     Eigen::Quaternions  q_measured(getMeasurement().data() + 0);
 
     // error
+    // to compute the difference between both quaternions, we do 
+    //        diff = log(q2 * q1.conj)
+    // isolating q2 we get 
+    //        q2 = exp(diff) * q1  ==> exp on the left means global.
     Eigen::Matrix<T, 3, 1> er;
-    er        = q2v(q.conjugate() * q_measured.cast<T>());
+    er        = q2v(q_measured.cast<T>() * q.conjugate()); 
 
     // residual
     Eigen::Map<Eigen::Matrix<T, 3, 1>> res(_residuals);
