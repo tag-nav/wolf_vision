@@ -48,7 +48,7 @@ typedef enum {
  *   \f]
  *
  */
-template <unsigned int DeltaReference = DQ_LOCAL>
+template <QuaternionDeltaReference DeltaReference = DQ_LOCAL>
 class LocalParametrizationQuaternion : public LocalParametrizationBase
 {
 
@@ -65,14 +65,14 @@ public:
     //
   }
 
-  virtual bool plus(const Eigen::Map<const Eigen::VectorXs>& _q,
-                    const Eigen::Map<const Eigen::VectorXs>& _delta_theta,
+  virtual bool plus(Eigen::Map<const Eigen::VectorXs>& _q,
+                    Eigen::Map<const Eigen::VectorXs>& _delta_theta,
                     Eigen::Map<Eigen::VectorXs>& _q_plus_delta_theta) const;
 
-  virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _q,
+  virtual bool computeJacobian(Eigen::Map<const Eigen::VectorXs>& _q,
                                Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
-  virtual bool minus(const Eigen::Map<const Eigen::VectorXs>& _q1,
-                     const Eigen::Map<const Eigen::VectorXs>& _q2,
+  virtual bool minus(Eigen::Map<const Eigen::VectorXs>& _q1,
+                     Eigen::Map<const Eigen::VectorXs>& _q2,
                      Eigen::Map<Eigen::VectorXs>& _q2_minus_q1);
 };
 
