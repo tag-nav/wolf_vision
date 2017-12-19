@@ -117,15 +117,15 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         new_capture_ptr->getBuffer().get().push_back( motionZero(key_frame_ptr->getTimeStamp()) ) ;
 
         // reset integrals
-        delta_ = deltaZero();
-        delta_cov_.setZero();
-        delta_integrated_ = deltaZero();
-        delta_integrated_cov_.setZero();
-        jacobian_calib_.setZero();
+        delta_                  = deltaZero();
+        delta_cov_              . setZero();
+        delta_integrated_       = deltaZero();
+        delta_integrated_cov_   . setZero();
+        jacobian_calib_         . setZero();
 
         // reset processor origin to the new keyframe's capture
-        origin_ptr_ = last_ptr_;
-        last_ptr_ = new_capture_ptr;
+        origin_ptr_     = last_ptr_;
+        last_ptr_       = new_capture_ptr;
 
         // reset derived things
         resetDerived();
@@ -239,11 +239,11 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
     getBuffer().get().push_back(motionZero(_origin_frame->getTimeStamp()));
 
     // Reset integrals
-    delta_ = deltaZero();
-    delta_cov_.setZero();
-    delta_integrated_ = deltaZero();
-    delta_integrated_cov_.setZero();
-    jacobian_calib_.setZero();
+    delta_                  = deltaZero();
+    delta_cov_              . setZero();
+    delta_integrated_       = deltaZero();
+    delta_integrated_cov_   . setZero();
+    jacobian_calib_         . setZero();
 
     // Reset derived things
     resetDerived();
@@ -321,9 +321,9 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
 
         // Modify existing constraint --------
         // Instead of modifying, we remove one ctr, and create a new one.
-        auto ctr_to_remove = existing_feature->getConstraintList().back(); // there is only one constraint!
-        auto new_ctr = emplaceConstraint(existing_feature, new_capture);
-        ctr_to_remove->remove();  // remove old constraint now (otherwise c->remove() gets propagated to f, C, F, etc.)
+        auto ctr_to_remove  = existing_feature->getConstraintList().back(); // there is only one constraint!
+        auto new_ctr        = emplaceConstraint(existing_feature, new_capture);
+        ctr_to_remove       ->remove();  // remove old constraint now (otherwise c->remove() gets propagated to f, C, F, etc.)
     }
 
     return true;
