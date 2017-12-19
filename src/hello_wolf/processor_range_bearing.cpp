@@ -25,15 +25,15 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
     CaptureRangeBearingPtr capture = std::static_pointer_cast<CaptureRangeBearing>(_capture);
 
     // 1. get KF -- we assume a KF is available to hold this _capture (checked in assert below)
-    FrameBasePtr kf = getProblem()->closestKeyFrameToTimeStamp(capture->getTimeStamp());
+    auto kf = getProblem()->closestKeyFrameToTimeStamp(capture->getTimeStamp());
     assert( (fabs(kf->getTimeStamp() - _capture->getTimeStamp()) < time_tolerance_) && "Could not find a KF close enough to _capture!");
 
     // 2. create Capture
-    CaptureRangeBearingPtr cap = std::make_shared<CaptureRangeBearing>(capture->getTimeStamp(),
-                                                                       getSensorPtr(),
-                                                                       capture->getIds(),
-                                                                       capture->getRanges(),
-                                                                       capture->getBearings());
+    auto cap = std::make_shared<CaptureRangeBearing>(capture->getTimeStamp(),
+                                                     getSensorPtr(),
+                                                     capture->getIds(),
+                                                     capture->getRanges(),
+                                                     capture->getBearings());
     kf->addCapture(cap);
 
     // 3. explore all observations in the capture
@@ -66,17 +66,17 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
 
         // 5. create feature
         Vector2s rb(range,bearing);
-        FeatureRangeBearingPtr ftr = std::make_shared<FeatureRangeBearing>(rb,
-                                                                           getSensorPtr()->getNoiseCov());
+        auto ftr = std::make_shared<FeatureRangeBearing>(rb,
+                                                         getSensorPtr()->getNoiseCov());
         cap->addFeature(ftr);
 
         // 6. create constraint
-        ProcessorBasePtr prc = shared_from_this();
-        ConstraintRangeBearingPtr ctr = std::make_shared<ConstraintRangeBearing>(cap,
-                                                                                 lmk,
-                                                                                 prc,
-                                                                                 false,
-                                                                                 CTR_ACTIVE);
+        auto prc = shared_from_this();
+        auto ctr = std::make_shared<ConstraintRangeBearing>(cap,
+                                                            lmk,
+                                                            prc,
+                                                            false,
+                                                            CTR_ACTIVE);
         ftr->addConstraint(ctr);
         lmk->addConstrainedBy(ctr);
     }
