@@ -100,6 +100,8 @@ int main()
      *   - Second, using random values
      * Both solutions must produce the same exact values as in the sketches above.
      *
+     * Optionally, the user can opt to self-calibrate the sensor's orientation (see NOTE within the code around Line 139)
+     *
      * (c) 2017 Joan Sola @ IRI-CSIC
      */
 
@@ -134,6 +136,8 @@ int main()
     intrinsics_rb->noise_bearing_degrees_std = 1.0;
     intrinsics_rb->noise_range_metres_std   = 0.1;
     SensorBasePtr sensor_rb                 = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(1,1,0), intrinsics_rb);
+    // NOTE: uncomment this line below to achieve sensor self-calibration (of the orientation only)
+    // sensor_rb->getOPtr()->unfix();
 
     // processor Range and Bearing
     ProcessorParamsRangeBearingPtr params_rb = std::make_shared<ProcessorParamsRangeBearing>();
@@ -215,10 +219,16 @@ int main()
     problem->print(4,1,1,1);
 
     // PERTURB initial guess
+    WOLF_TRACE("======== PERTURB PROBLEM PRIORS =======")
+    for (auto sen : problem->getHardwarePtr()->getSensorList())
+        for (auto sb : sen->getStateBlockVec())
+            if (sb && !sb->isFixed())
+                sb->setState(VectorXs::Random(sb->getSize()));
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         kf->setState(Vector3s::Random() * 0.5);                 // We perturb A LOT !
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
         lmk->getPPtr()->setState(Vector2s::Random());           // We perturb A LOT !
+    problem->print(4,1,1,1);
 
     // SOLVE again
     WOLF_TRACE("======== SOLVE PROBLEM WITH PERTURBED PRIORS =======")
