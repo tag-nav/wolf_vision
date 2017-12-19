@@ -687,6 +687,12 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
         {
             cout << "  S" << S->id() << " " << S->getType();
             cout << (S->isExtrinsicDynamic() ? " [Dyn," : " [Sta,") << (S->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
+            if (metric)
+            {
+                cout << " Extr = ( " << S->getPPtr()->getState().transpose() << " " << S->getOPtr()->getState().transpose() << " )";
+                if (S->getIntrinsicPtr())
+                    cout << " Intr = ( " << S->getIntrinsicPtr()->getState().transpose() << " )";
+            }
             if (depth < 2)
                 cout << " -- " << S->getProcessorList().size() << "p";
             cout << endl;
