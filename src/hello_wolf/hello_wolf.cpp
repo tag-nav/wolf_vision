@@ -223,7 +223,7 @@ int main()
     for (auto sen : problem->getHardwarePtr()->getSensorList())
         for (auto sb : sen->getStateBlockVec())
             if (sb && !sb->isFixed())
-                sb->setState(VectorXs::Random(sb->getSize()));
+                sb->setState(VectorXs::Random(sb->getSize()) * 0.5); // We perturb A LOT !
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         kf->setState(Vector3s::Random() * 0.5);                 // We perturb A LOT !
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
@@ -275,12 +275,12 @@ int main()
      *
      * P: wolf tree status ---------------------
         Hardware
-          S1 ODOM 2D [Sta,Sta]                          // Sensor 1, type ODOMETRY 2D, static extrinsics and intrinsics (See note 1 below).
+          S1 ODOM 2D [Sta,Sta] Extr = ( 0 0 0 )         // Sensor 1, type ODOMETRY 2D, static extrinsics and intrinsics (See note 1 below). Extrinsics vector.
             sb: Fix Fix                                 // Extrinsics position and orientation are fixed (see note 2). No intrinsics.
             pm1 ODOM 2D                                 // Processor 1, type ODOMETRY 2D
               o: C7 - F3                                // origin at Capture 7, Frame 3
               l: C10 - F4                               // last at Capture 10, frame 4
-          S2 RANGE BEARING [Sta,Sta]                    // Sensor 2, type RANGE and BEARING, static extrinsics and intrinsics
+          S2 RANGE BEARING [Sta,Sta] Extr = ( 1 1 0 )   // Sensor 2, type RANGE and BEARING, static extrinsics and intrinsics. Extrinsics vector.
             sb: Fix Fix                                 // Fixed position and orientation. No intrinsics.
             pt2 RANGE BEARING                           // Processor 2: type Range and Bearing
         Trajectory
