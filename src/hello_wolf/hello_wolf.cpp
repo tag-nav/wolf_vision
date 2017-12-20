@@ -275,13 +275,15 @@ int main()
      *
      * P: wolf tree status ---------------------
         Hardware
-          S1 ODOM 2D [Sta,Sta] Extr = ( 0 0 0 )         // Sensor 1, type ODOMETRY 2D, static extrinsics and intrinsics (See note 1 below). Extrinsics vector.
-            sb: Fix Fix                                 // Extrinsics position and orientation are fixed (see note 2). No intrinsics.
+          S1 ODOM 2D                                    // Sensor 1, type ODOMETRY 2D.
+            Extr [Sta] = [ Fix( 0 0 ) Fix( 0 ) ]        // Static extrinsics, fixed position, fixed orientation (See notes 1 and 2 below)
+            Intr [Sta] = [ ]                            // Static intrinsics, but no intrinsics anyway
             pm1 ODOM 2D                                 // Processor 1, type ODOMETRY 2D
               o: C7 - F3                                // origin at Capture 7, Frame 3
               l: C10 - F4                               // last at Capture 10, frame 4
-          S2 RANGE BEARING [Sta,Sta] Extr = ( 1 1 0 )   // Sensor 2, type RANGE and BEARING, static extrinsics and intrinsics. Extrinsics vector.
-            sb: Fix Fix                                 // Fixed position and orientation. No intrinsics.
+          S2 RANGE BEARING                              // Sensor 2, type RANGE and BEARING.
+            Extr [Sta] = [ Fix( 1 1 ) Est( 0 ) ]        // Static extrinsics, fixed position, estimated orientation (See notes 1 and 2 below)
+            Intr [Sta] = [ ]                            // Static intrinsics, but no intrinsics anyway
             pt2 RANGE BEARING                           // Processor 2: type Range and Bearing
         Trajectory
           KF1  <-- c3                                   // KeyFrame 1, constrained by Constraint 3
@@ -292,8 +294,8 @@ int main()
                 m = ( 0 0 0 )                           // The absolute measurement for this frame is (0,0,0) --> origin
                 c1 FIX --> A                            // Constraint 1, type FIX, it is Absolute
             CM2 ODOM 2D -> S1 [Sta, Sta]  <--           // Capture 2, type ODOM, from Sensor 1 (static extr and intr)
-            C5 RANGE BEARING -> S2 [Sta, Sta]  <--      // Capture 5, type RB, from Sensor 2 (static extr and intr)
-              f2 RANGE BEARING  <--                     // Feature 2, type RB
+            C5 RANGE BEARING -> S2 [Sta, Sta]  <--      // Capture 5, type R+B, from Sensor 2 (static extr and intr)
+              f2 RANGE BEARING  <--                     // Feature 2, type R+B
                 m = ( 1    1.57 )                       // The feature's measurement is 1m, 1.57rad
                 c2 RANGE BEARING --> L1                 // Constraint 2 against Landmark 1
           KF2  <-- c6
