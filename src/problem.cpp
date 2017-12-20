@@ -686,19 +686,40 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
         for (auto S : getHardwarePtr()->getSensorList())
         {
             cout << "  S" << S->id() << " " << S->getType();
-            cout << (S->isExtrinsicDynamic() ? " [Dyn," : " [Sta,") << (S->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
-            if (metric)
-            {
-                cout << " Extr = ( " << S->getPPtr()->getState().transpose() << " " << S->getOPtr()->getState().transpose() << " )";
-                if (S->getIntrinsicPtr())
-                    cout << " Intr = ( " << S->getIntrinsicPtr()->getState().transpose() << " )";
-            }
+            if (!metric && !state_blocks) cout << (S->isExtrinsicDynamic() ? " [Dyn," : " [Sta,") << (S->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
             if (depth < 2)
                 cout << " -- " << S->getProcessorList().size() << "p";
             cout << endl;
-            if (state_blocks)
+            if (metric && state_blocks)
             {
-                cout << "    sb:";
+                for (auto i = 0; i < S->getStateBlockVec().size(); i++)
+                {
+                    if (i==0) cout << "    Extr " << (S->isExtrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
+                    if (i==2) cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
+                    auto sb = S->getStateBlockPtrAuto(i);
+                    if (sb)
+                    {
+                        cout << (sb->isFixed() ? " Fix( " : " Est( ") << sb->getState().transpose() << " )";
+                    }
+                    if (i==1) cout << " ]" << endl;
+                }
+                if (S->getStateBlockVec().size() > 2) cout << " ]" << endl;
+            }
+            else if (metric)
+            {
+                cout << "    Extr " << (S->isExtrinsicDynamic() ? "[Dyn]" : "[Sta]") << "= ( ";
+                if (S->getPPtr())
+                    cout << S->getPPtr()->getState().transpose();
+                if (S->getOPtr())
+                    cout << " " << S->getOPtr()->getState().transpose();
+                cout  << " )";
+                if (S->getIntrinsicPtr())
+                    cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << "= ( " << S->getIntrinsicPtr()->getState().transpose() << " )";
+                cout << endl;
+            }
+            else if (state_blocks)
+            {
+                cout << "    sb:" << (S->isExtrinsicDynamic() ? "[Dyn," : "[Sta,") << (S->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
                 for (auto sb : S->getStateBlockVec())
                     if (sb != nullptr)
                         cout << " " << (sb->isFixed() ? "Fix" : "Est");
