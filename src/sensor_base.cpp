@@ -359,4 +359,18 @@ StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i, const TimeSta
         return state_block_vec_[_i];
 }
 
+StateBlockPtr SensorBase::getStateBlockPtrAuto(unsigned int _i)
+{
+    ProblemPtr P = getProblem();
+    if (P)
+    {
+        FrameBasePtr KF = P->getLastKeyFramePtr();
+        if (KF)
+        {
+            return getStateBlockPtrDynamic(_i, KF->getTimeStamp());
+        }
+    }
+    return state_block_vec_[_i];
+}
+
 } // namespace wolf
