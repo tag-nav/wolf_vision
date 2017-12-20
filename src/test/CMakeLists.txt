@@ -99,8 +99,8 @@ wolf_add_gtest(gtest_constraint_fix gtest_constraint_fix.cpp)
 target_link_libraries(gtest_constraint_fix ${PROJECT_NAME})
 
 # ConstraintIMU test
-wolf_add_gtest(gtest_constraint_imu gtest_constraint_imu.cpp)
-target_link_libraries(gtest_constraint_imu ${PROJECT_NAME})
+#wolf_add_gtest(gtest_constraint_imu gtest_constraint_imu.cpp)
+#target_link_libraries(gtest_constraint_imu ${PROJECT_NAME})
 
 # ConstraintOdom3D class test
 wolf_add_gtest(gtest_constraint_odom_3D gtest_constraint_odom_3D.cpp)

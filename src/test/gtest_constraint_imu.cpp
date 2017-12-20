@@ -6,12 +6,8 @@
  */
 
 //Wolf
-#include "wolf.h"
-#include "problem.h"
 #include "sensor_imu.h"
 #include "capture_imu.h"
-#include "state_block.h"
-#include "state_quaternion.h"
 #include "processor_imu.h"
 #include "processor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"
