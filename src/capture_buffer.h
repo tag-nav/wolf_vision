@@ -68,8 +68,8 @@ public:
   void clear();
 //  void print();
 
-  const TimeStamp& earliest() const;
-  const TimeStamp& latest() const;
+  const TimeStamp earliest() const;
+  const TimeStamp latest() const;
 
 //private:
 
@@ -156,13 +156,13 @@ inline void CaptureBuffer::clear()
   return container_.clear();
 }
 
-inline const TimeStamp& CaptureBuffer::earliest() const
+inline const TimeStamp CaptureBuffer::earliest() const
 {
   return (!container_.empty())? container_.front()->getTimeStamp() :
                                 InvalidStamp;
 }
 
-inline const TimeStamp& CaptureBuffer::latest() const
+inline const TimeStamp CaptureBuffer::latest() const
 {
   return (!container_.empty())? container_.back()->getTimeStamp() :
                                 InvalidStamp;
