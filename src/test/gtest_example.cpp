@@ -10,7 +10,7 @@ TEST(TestTest, DummyTestExample)
 
   ASSERT_EQ(my_int, 5);
 
-  PRINTF("All good at TestTest::DummyTestExample !\n");
+//  PRINTF("All good at TestTest::DummyTestExample !\n");
 }
 
 int main(int argc, char **argv)
