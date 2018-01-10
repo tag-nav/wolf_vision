@@ -296,7 +296,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
 //    reintegrateBuffer(new_capture);
 
     // create motion constraint and add it to the feature, and constrain to the other capture (origin)
-    emplaceConstraint(new_feature, keyframe_origin->getCaptureOf(getSensorPtr()) ); // XXX it was new_keyframe_origin
+    emplaceConstraint(new_feature, keyframe_origin->getCaptureOf(getSensorPtr()) );
 
 
 
