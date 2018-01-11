@@ -234,7 +234,7 @@ void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
     assert(_data.size() == data_size_ && "Wrong data size!");
 
     using namespace Eigen;
-    Matrix<Scalar, 9, 6> jac_data;
+    Matrix<Scalar, 9, 6> jac_delta_data;
 
     /*
      * We have the following computing pipeline:
@@ -255,13 +255,13 @@ void ProcessorIMU::computeCurrentDelta(const Eigen::VectorXs& _data,
      */
 
     // create delta
-    imu::body2delta(_data - _calib, _dt, _delta, jac_data); // Jacobians tested in imu_tools
+    imu::body2delta(_data - _calib, _dt, _delta, jac_delta_data); // Jacobians tested in imu_tools
 
     // compute delta_cov
-    _delta_cov = jac_data * _data_cov * jac_data.transpose();
+    _delta_cov = jac_delta_data * _data_cov * jac_delta_data.transpose();
 
     // compute jacobian_calib
-    _jac_delta_calib = - jac_data;
+    _jac_delta_calib = - jac_delta_data;
 
 }
 

@@ -22,8 +22,8 @@ LocalParametrizationHomogeneous::~LocalParametrizationHomogeneous()
     //
 }
 
-bool LocalParametrizationHomogeneous::plus(const Eigen::Map<const Eigen::VectorXs>& _h,
-                                           const Eigen::Map<const Eigen::VectorXs>& _delta,
+bool LocalParametrizationHomogeneous::plus(Eigen::Map<const Eigen::VectorXs>& _h,
+                                           Eigen::Map<const Eigen::VectorXs>& _delta,
                                            Eigen::Map<Eigen::VectorXs>& _h_plus_delta) const
 {
     assert(_h.size() == global_size_ && "Wrong size of input homogeneous point.");
@@ -37,7 +37,7 @@ bool LocalParametrizationHomogeneous::plus(const Eigen::Map<const Eigen::VectorX
     return true;
 }
 
-bool LocalParametrizationHomogeneous::computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _h,
+bool LocalParametrizationHomogeneous::computeJacobian(Eigen::Map<const Eigen::VectorXs>& _h,
                                                       Eigen::Map<Eigen::MatrixXs>& _jacobian) const
 {
     assert(_h.size() == global_size_ && "Wrong size of input quaternion.");
@@ -51,8 +51,8 @@ bool LocalParametrizationHomogeneous::computeJacobian(const Eigen::Map<const Eig
     return true;
 }
 
-bool LocalParametrizationHomogeneous::minus(const Eigen::Map<const Eigen::VectorXs>& _h1,
-                                            const Eigen::Map<const Eigen::VectorXs>& _h2,
+bool LocalParametrizationHomogeneous::minus(Eigen::Map<const Eigen::VectorXs>& _h1,
+                                            Eigen::Map<const Eigen::VectorXs>& _h2,
                                             Eigen::Map<Eigen::VectorXs>& _h2_minus_h1)
 {
     using Eigen::Quaternions;

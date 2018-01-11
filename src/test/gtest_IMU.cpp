@@ -100,6 +100,8 @@ class Process_Constraint_IMU : public testing::Test
             x0          .resize(10);
             D_preint    .resize(10);
             D_corrected .resize(10);
+            x1_optim    .resize(10);
+            x1_optim_imu.resize(10);
 
         }
 
@@ -578,6 +580,54 @@ TEST_F(Process_Constraint_IMU, MotionConstant_PQV_b__PQV_b) // F_ixed___e_stimat
 
 }
 
+TEST_F(Process_Constraint_IMU, test_capture) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Vector3s( 1,2,3 );
+    w                  = Vector3s( 1,2,3 );
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = true;
+    v0_fixed       = true;
+    p1_fixed       = true;
+    q1_fixed       = true;
+    v1_fixed       = true;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    Eigen::Vector6s initial_bias((Eigen::Vector6s()<< .002, .0007, -.001,   .003, -.002, .001).finished());
+    sensor_imu->getIntrinsicPtr()->setState(initial_bias);
+    configureAll();
+    integrateAll();
+    buildProblem();
+    //Since we did not solve, hence bias estimates did not change yet, both capture should have the same calibration
+    ASSERT_MATRIX_APPROX(KF_0->getCaptureOf(sensor_imu)->getCalibration(), initial_bias, 1e-8 );
+    ASSERT_MATRIX_APPROX(KF_0->getCaptureOf(sensor_imu)->getCalibration(), KF_1->getCaptureOf(sensor_imu)->getCalibration(), 1e-8 );
+}
+
 
 TEST_F(Process_Constraint_IMU, MotionConstant_pqv_b__PQV_b) // F_ixed___e_stimated
 {
@@ -766,6 +816,51 @@ TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__PQv_b) // F_ixed___e_stimated
 
 }
 
+TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__pQV_b) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Matrix<Scalar, 3, 50>::Random();
+    w                  = Matrix<Scalar, 3, 50>::Random();
+
+    // ---------- fix boundaries
+    p0_fixed       = false;
+    q0_fixed       = false;
+    v0_fixed       = true;
+    p1_fixed       = false;
+    q1_fixed       = true;
+    v1_fixed       = true;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+    // printAll(report);
+
+    assertAll();
+
+}
 
 TEST_F(Process_Constraint_IMU, MotionConstant_NonNullState_PQV_b__PQV_b) // F_ixed___e_stimated
 {
@@ -813,6 +908,235 @@ TEST_F(Process_Constraint_IMU, MotionConstant_NonNullState_PQV_b__PQV_b) // F_ix
 
 }
 
+TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__PQV_b) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Vector3s( 0,0,0 );
+    w                  = Vector3s( 1,2,3 );
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = true;
+    v0_fixed       = true;
+    p1_fixed       = true;
+    q1_fixed       = true;
+    v1_fixed       = true;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+    //    printAll(report);
+
+    assertAll();
+
+}
+
+TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__PQv_b) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Vector3s( 0,0,0 );
+    w                  = Vector3s( 1,2,3 );
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = true;
+    v0_fixed       = true;
+    p1_fixed       = true;
+    q1_fixed       = true;
+    v1_fixed       = false;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+    //    printAll(report);
+
+    assertAll();
+
+}
+
+TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__Pqv_b) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Vector3s( 0,0,0 );
+    w                  = Vector3s( 1,2,3 );
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = true;
+    v0_fixed       = true;
+    p1_fixed       = true;
+    q1_fixed       = false;
+    v1_fixed       = false;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+    //    printAll(report);
+
+    assertAll();
+
+}
+
+TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__pQv_b) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Vector3s( 0,0,0 );
+    w                  = Vector3s( 1,2,3 );
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = true;
+    v0_fixed       = true;
+    p1_fixed       = false;
+    q1_fixed       = true;
+    v1_fixed       = false;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+    //    printAll(report);
+
+    assertAll();
+
+}
+
+TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__pqv_b) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Vector3s( 0,0,0 );
+    w                  = Vector3s( 1,2,3 );
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = true;
+    v0_fixed       = true;
+    p1_fixed       = false;
+    q1_fixed       = false;
+    v1_fixed       = false;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+    //    printAll(report);
+
+    assertAll();
+
+}
 
 TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqv_b__pqV_b) // F_ixed___e_stimated
 {
@@ -860,7 +1184,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqv_b__pqV_b) // F_ixed___e_st
 
 }
 
-
 TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_stimated
 {
 
@@ -907,7 +1230,97 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_st
 
 }
 
+TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PQV_b__pqv_b) // F_ixed___e_stimated
+{
 
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Matrix<Scalar, 3, 50>::Random();
+    w                  = Matrix<Scalar, 3, 50>::Random();
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = true;
+    v0_fixed       = true;
+    p1_fixed       = false;
+    q1_fixed       = false;
+    v1_fixed       = false;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+    // printAll(report);
+
+    assertAll();
+
+}
+
+TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PqV_b__pqV_b) // F_ixed___e_stimated
+{
+
+    // ================================================================================================================ //
+    // ==================================== INITIAL CONDITIONS -- USER OPTIONS ======================================== //
+    // ================================================================================================================ //
+    //
+    // ---------- time
+    t0                  = 0;
+    dt                  = 0.01;
+    num_integrations    = 50;
+
+    // ---------- initial pose
+    p0                 << 0,0,0;
+    q0.coeffs()        << 0,0,0,1;
+    v0                 << 0,0,0;
+
+    // ---------- bias
+    bias_real          << .001, .002, .003,    -.001, -.002, -.003;
+    bias_preint         = -bias_real;
+
+    // ---------- motion params
+    a                  = Matrix<Scalar, 3, 50>::Random();
+    w                  = Matrix<Scalar, 3, 50>::Random();
+
+    // ---------- fix boundaries
+    p0_fixed       = true;
+    q0_fixed       = false;
+    v0_fixed       = true;
+    p1_fixed       = false;
+    q1_fixed       = false;
+    v1_fixed       = true;
+    //
+    // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
+    // ================================================================================================================ //
+
+
+    // ===================================== RUN ALL
+    string report = runAll(1);
+
+    // printAll(report);
+
+    assertAll();
+
+}
 
 int main(int argc, char **argv)
 {
@@ -918,3 +1331,23 @@ int main(int argc, char **argv)
     return RUN_ALL_TESTS();
 }
 
+
+
+/* Some notes :
+ *
+ * - Process_Constraint_IMU_ODO.MotionConstant_PQv_b__PQv_b :
+ *      this test will not work + jacobian is rank deficient because of estimating both initial
+ *      and final velocities. 
+ *      IMU data integration is done with correct biases (so this is the case of a calibrated IMU). Before solving the problem, we perturbate the initial bias.
+ *      We solve the problem by fixing all states excepted V1 and V2. while creating the constraints, both velocities are corrected using the difference between the actual
+ *      bias and the bias used during preintegration. One way to solve this in the solver side would be to make the actual bias match the preintegraion bias so that the
+ *      difference is 0 and does not affect the states of the KF. Another possibility is to have both velocities modified without changing the biases. it is likely that this
+ *      solution is chosen in this case (bias changes is penalized between 2 KeyFrames, but velocities have no other constraints here.)
+ * 
+ *  - Bias evaluation with a precision of 1e-4 :
+ *      The bias introduced in the data for the preintegration steps is different of the real bias. This is simulating the case of a non calibrated IMU
+ *      Because of cross relations between acc and gyro biases (respectively a_b and w_b) it is difficult to expect a better estimation.
+ *      A small change in a_b can be cancelled by a small variation in w_b. in other words : there are local minima.
+ *      In addition, for Process_Constraint_IMU tests, P and V are tested against 1e-5 precision while 1e-8 is used for Q.
+ *      Errors tend to be distributed in different estimated variable when we get into a local minima (to minimize residuals in a least square sense).
+ */

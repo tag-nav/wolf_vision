@@ -25,12 +25,12 @@ class LocalParametrizationPolylineExtreme : public LocalParametrizationBase
         LocalParametrizationPolylineExtreme(StateBlockPtr _reference_point);
         virtual ~LocalParametrizationPolylineExtreme();
 
-        virtual bool plus(const Eigen::Map<const Eigen::VectorXs>& _point,
-                          const Eigen::Map<const Eigen::VectorXs>& _delta_theta,
+        virtual bool plus(Eigen::Map<const Eigen::VectorXs>& _point,
+                          Eigen::Map<const Eigen::VectorXs>& _delta_theta,
                           Eigen::Map<Eigen::VectorXs>& _point_plus_delta_theta) const;
-        virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _point, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
-        virtual bool minus(const Eigen::Map<const Eigen::VectorXs>& _point1,
-                           const Eigen::Map<const Eigen::VectorXs>& _point2,
+        virtual bool computeJacobian(Eigen::Map<const Eigen::VectorXs>& _point, Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
+        virtual bool minus(Eigen::Map<const Eigen::VectorXs>& _point1,
+                           Eigen::Map<const Eigen::VectorXs>& _point2,
                            Eigen::Map<Eigen::VectorXs>& _delta_theta);
 };
 

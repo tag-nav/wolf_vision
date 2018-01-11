@@ -14,7 +14,7 @@ TEST(TestEigenPredicates, TestEigenDynPredZero)
   EXPECT_FALSE(wolf::pred_zero(B, wolf::Constants::EPS));
   EXPECT_TRUE(wolf::pred_zero(C,  wolf::Constants::EPS));
 
-  PRINT_TEST_FINISHED;
+//  PRINT_TEST_FINISHED;
 }
 
 TEST(TestEigenPredicates, TestEigenFixPredZero)
@@ -29,7 +29,7 @@ TEST(TestEigenPredicates, TestEigenFixPredZero)
   EXPECT_FALSE(wolf::pred_zero(B, wolf::Constants::EPS));
   EXPECT_TRUE(wolf::pred_zero(C,  wolf::Constants::EPS));
 
-  PRINT_TEST_FINISHED;
+//  PRINT_TEST_FINISHED;
 }
 
 TEST(TestEigenPredicates, TestEigenDynPredDiffZero)
@@ -43,7 +43,7 @@ TEST(TestEigenPredicates, TestEigenDynPredDiffZero)
   EXPECT_TRUE(wolf::pred_diff_zero(A, C, wolf::Constants::EPS));
   EXPECT_FALSE(wolf::pred_diff_zero(A, B, wolf::Constants::EPS));
 
-  PRINT_TEST_FINISHED;
+//  PRINT_TEST_FINISHED;
 }
 
 TEST(TestEigenPredicates, TestEigenFixPredDiffZero)
@@ -57,7 +57,7 @@ TEST(TestEigenPredicates, TestEigenFixPredDiffZero)
   EXPECT_TRUE(wolf::pred_diff_zero(A, C, wolf::Constants::EPS));
   EXPECT_FALSE(wolf::pred_diff_zero(A, B, wolf::Constants::EPS));
 
-  PRINT_TEST_FINISHED;
+//  PRINT_TEST_FINISHED;
 }
 
 TEST(TestEigenPredicates, TestEigenDynPredDiffNorm)
@@ -71,7 +71,7 @@ TEST(TestEigenPredicates, TestEigenDynPredDiffNorm)
   EXPECT_TRUE(wolf::pred_diff_norm_zero(A, C, wolf::Constants::EPS));
   EXPECT_FALSE(wolf::pred_diff_norm_zero(A, B, wolf::Constants::EPS));
 
-  PRINT_TEST_FINISHED;
+//  PRINT_TEST_FINISHED;
 }
 
 TEST(TestEigenPredicates, TestEigenFixPredDiffNorm)
@@ -85,7 +85,7 @@ TEST(TestEigenPredicates, TestEigenFixPredDiffNorm)
   EXPECT_TRUE(wolf::pred_diff_norm_zero(A, C, wolf::Constants::EPS));
   EXPECT_FALSE(wolf::pred_diff_norm_zero(A, B, wolf::Constants::EPS));
 
-  PRINT_TEST_FINISHED;
+//  PRINT_TEST_FINISHED;
 }
 
 TEST(TestEigenPredicates, TestEigenDynPredIsApprox)
@@ -99,7 +99,7 @@ TEST(TestEigenPredicates, TestEigenDynPredIsApprox)
   EXPECT_TRUE(wolf::pred_is_approx(A, C, wolf::Constants::EPS));
   EXPECT_FALSE(wolf::pred_is_approx(A, B, wolf::Constants::EPS));
 
-  PRINT_TEST_FINISHED;
+//  PRINT_TEST_FINISHED;
 }
 
 TEST(TestEigenPredicates, TestEigenFixPredIsApprox)
@@ -113,7 +113,7 @@ TEST(TestEigenPredicates, TestEigenFixPredIsApprox)
   EXPECT_TRUE(wolf::pred_is_approx(A, C, wolf::Constants::EPS));
   EXPECT_FALSE(wolf::pred_is_approx(A, B, wolf::Constants::EPS));
 
-  PRINT_TEST_FINISHED;
+//  PRINT_TEST_FINISHED;
 }
 
 TEST(TestEigenPredicates, TestEigenPredQuatIsApprox)
@@ -130,7 +130,7 @@ TEST(TestEigenPredicates, TestEigenPredQuatIsApprox)
   EXPECT_TRUE(wolf::pred_quat_is_approx(A, C, wolf::Constants::EPS));
   EXPECT_FALSE(wolf::pred_quat_is_approx(A, B, wolf::Constants::EPS));
 
-  PRINT_TEST_FINISHED;
+//  PRINT_TEST_FINISHED;
 }
 
 TEST(TestEigenPredicates, TestEigenPredQuatIsIdentity)
@@ -143,7 +143,7 @@ TEST(TestEigenPredicates, TestEigenPredQuatIsIdentity)
   EXPECT_TRUE(wolf::pred_quat_identity(A, wolf::Constants::EPS));
   EXPECT_FALSE(wolf::pred_quat_identity(B, wolf::Constants::EPS));
 
-  PRINT_TEST_FINISHED;
+//  PRINT_TEST_FINISHED;
 }
 
 TEST(TestEigenPredicates, TestEigenPredAngleIsApprox)
@@ -155,7 +155,7 @@ TEST(TestEigenPredicates, TestEigenPredAngleIsApprox)
   EXPECT_TRUE(wolf::pred_angle_is_approx(a, b, wolf::Constants::EPS));
   EXPECT_FALSE(wolf::pred_angle_is_approx(a, c, wolf::Constants::EPS));
 
-  PRINT_TEST_FINISHED;
+//  PRINT_TEST_FINISHED;
 }
 
 TEST(TestEigenPredicates, TestEigenPredAngleIsZero)
@@ -168,7 +168,7 @@ TEST(TestEigenPredicates, TestEigenPredAngleIsZero)
   EXPECT_FALSE(wolf::pred_angle_zero(b, wolf::Constants::EPS));
   EXPECT_TRUE(wolf::pred_angle_zero(c, wolf::Constants::EPS));
 
-  PRINT_TEST_FINISHED;
+//  PRINT_TEST_FINISHED;
 }
 
 int main(int argc, char **argv)

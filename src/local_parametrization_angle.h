@@ -20,12 +20,12 @@ class LocalParametrizationAngle : public LocalParametrizationBase
         LocalParametrizationAngle();
         virtual ~LocalParametrizationAngle();
 
-        virtual bool plus(const Eigen::Map<const Eigen::VectorXs>& _h, const Eigen::Map<const Eigen::VectorXs>& _delta,
+        virtual bool plus(Eigen::Map<const Eigen::VectorXs>& _h, Eigen::Map<const Eigen::VectorXs>& _delta,
                           Eigen::Map<Eigen::VectorXs>& _h_plus_delta) const;
-        virtual bool computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _h,
+        virtual bool computeJacobian(Eigen::Map<const Eigen::VectorXs>& _h,
                                      Eigen::Map<Eigen::MatrixXs>& _jacobian) const;
-        virtual bool minus(const Eigen::Map<const Eigen::VectorXs>& _x1,
-                           const Eigen::Map<const Eigen::VectorXs>& _x2,
+        virtual bool minus(Eigen::Map<const Eigen::VectorXs>& _x1,
+                           Eigen::Map<const Eigen::VectorXs>& _x2,
                            Eigen::Map<Eigen::VectorXs>& _x2_minus_x1);
 
 };
@@ -41,23 +41,23 @@ inline LocalParametrizationAngle::~LocalParametrizationAngle()
     //
 }
 
-inline bool LocalParametrizationAngle::plus(const Eigen::Map<const Eigen::VectorXs>& _h,
-                                            const Eigen::Map<const Eigen::VectorXs>& _delta,
+inline bool LocalParametrizationAngle::plus(Eigen::Map<const Eigen::VectorXs>& _h,
+                                            Eigen::Map<const Eigen::VectorXs>& _delta,
                                             Eigen::Map<Eigen::VectorXs>& _h_plus_delta) const
 {
     _h_plus_delta(0) = pi2pi(_h(0) + _delta(0));
     return true;
 }
 
-inline bool LocalParametrizationAngle::computeJacobian(const Eigen::Map<const Eigen::VectorXs>& _h,
+inline bool LocalParametrizationAngle::computeJacobian(Eigen::Map<const Eigen::VectorXs>& _h,
                                                        Eigen::Map<Eigen::MatrixXs>& _jacobian) const
 {
     _jacobian(0) = 1.0;
     return true;
 }
 
-inline bool LocalParametrizationAngle::minus(const Eigen::Map<const Eigen::VectorXs>& _x1,
-                                             const Eigen::Map<const Eigen::VectorXs>& _x2,
+inline bool LocalParametrizationAngle::minus(Eigen::Map<const Eigen::VectorXs>& _x1,
+                                             Eigen::Map<const Eigen::VectorXs>& _x2,
                                              Eigen::Map<Eigen::VectorXs>& _x2_minus_x1)
 {
     _x2_minus_x1(0) = pi2pi(_x2(0)-_x1(0));

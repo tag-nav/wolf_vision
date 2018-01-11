@@ -593,7 +593,7 @@ IF (GLOG_FOUND)
 ENDIF (GLOG_FOUND)
 
 IF(BUILD_EXAMPLES)
-  #Build examples & tests
+  #Build examples
   MESSAGE("Building examples.")
   ADD_SUBDIRECTORY(examples)
 ENDIF(BUILD_EXAMPLES)
