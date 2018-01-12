@@ -10,6 +10,7 @@
 
 //Wolf includes
 #include "constraint_autodiff.h"
+#include "local_parametrization_quaternion.h"
 #include "frame_base.h"
 #include "rotations.h"
 
@@ -46,18 +47,25 @@ inline bool ConstraintQuaternionAbsolute::operator ()(const T* const _o, T* _res
 {
 
     // states
-    Eigen::Quaternion<T>    q(_o);
+    Eigen::Quaternion<T>  q1(_o);
 
     // measurements
-    Eigen::Quaternions  q_measured(getMeasurement().data() + 0);
+    Eigen::Quaternions  q2(getMeasurement().data() + 0); //q_measured
 
-    // error
-    // to compute the difference between both quaternions, we do 
-    //        diff = log(q2 * q1.conj)
-    // isolating q2 we get 
-    //        q2 = exp(diff) * q1  ==> exp on the left means global.
+    /* error
+     * to compute the difference between both quaternions, we do 
+     *      diff = log(q2 * q1.conj)
+     * isolating q2 we get 
+     *      q2 = exp(diff) * q1  ==> exp on the left means global.
+     *
+     * In rotations.h, we have
+     *      minus(q1,q2) = log_q(q1.conjugate() * q2); --> this is a local 'minus'
+     * But we can use this function to make a global 'minus' :
+     *      minus(q2.conjugate(),q1.conjugate()) = log_q(q2 * q1.conjugate());
+     */ 
+
     Eigen::Matrix<T, 3, 1> er;
-    er        = q2v(q_measured.cast<T>() * q.conjugate()); 
+    er = minus(q2.cast<T>().conjugate(), q1.conjugate());
 
     // residual
     Eigen::Map<Eigen::Matrix<T, 3, 1>> res(_residuals);
