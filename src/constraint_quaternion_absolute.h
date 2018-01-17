@@ -60,12 +60,15 @@ inline bool ConstraintQuaternionAbsolute::operator ()(const T* const _o, T* _res
      *
      * In rotations.h, we have
      *      minus(q1,q2) = log_q(q1.conjugate() * q2); --> this is a local 'minus'
-     * But we can use this function to make a global 'minus' :
+     * But we could use this function to make a global 'minus' :
      *      minus(q2.conjugate(),q1.conjugate()) = log_q(q2 * q1.conjugate());
+     * 
+     * Other option : define plus_left(), plus_right(), minus_left() and minus_right(), 
+     *                as we defined Jac_SO3_left() and Jac_SO3_right() in rotations.h.
      */ 
 
     Eigen::Matrix<T, 3, 1> er;
-    er = minus(q2.cast<T>().conjugate(), q1.conjugate());
+    er = log_q( q2.cast<T> * q1.conjugate() );
 
     // residual
     Eigen::Map<Eigen::Matrix<T, 3, 1>> res(_residuals);
