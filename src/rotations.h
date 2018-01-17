@@ -472,16 +472,41 @@ inline void between(const Eigen::QuaternionBase<D1>& _q1,
 }
 
 template<typename D1, typename D2>
-inline Eigen::Quaternion<typename D1::Scalar> plus(const Eigen::QuaternionBase<D1>& q, const Eigen::MatrixBase<D2>& v)
+inline Eigen::Quaternion<typename D1::Scalar> plus_right(const Eigen::QuaternionBase<D1>& q, const Eigen::MatrixBase<D2>& v)
 {
     MatrixSizeCheck<3,1>::check(v);
     return q * exp_q(v);
 }
 
 template<typename D1, typename D2>
-inline  Eigen::Matrix<typename D2::Scalar, 3, 1> minus(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
+inline  Eigen::Matrix<typename D2::Scalar, 3, 1> minus_right(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
 {
     return log_q(q1.conjugate() * q2);
+}
+
+template<typename D1, typename D2>
+inline Eigen::Quaternion<typename D1::Scalar> plus_left(const Eigen::MatrixBase<D2>& v, const Eigen::QuaternionBase<D1>& q)
+{
+    MatrixSizeCheck<3,1>::check(v);
+    return exp_q(v) * q;
+}
+
+template<typename D1, typename D2>
+inline  Eigen::Matrix<typename D2::Scalar, 3, 1> minus_left(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
+{
+    return log_q(q2 * q1.conjugate());
+}
+
+template<typename D1, typename D2>
+inline Eigen::Quaternion<typename D1::Scalar> plus(const Eigen::QuaternionBase<D1>& q, const Eigen::MatrixBase<D2>& v)
+{
+    return plus_right(q, v);
+}
+
+template<typename D1, typename D2>
+inline  Eigen::Matrix<typename D2::Scalar, 3, 1> minus(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
+{
+    return minus_right(q1, q2);
 }
 
 template<typename D1, typename D2>

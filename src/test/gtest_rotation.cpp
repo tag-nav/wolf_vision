@@ -469,8 +469,11 @@ TEST(Plus, Random)
     v               .setRandom();
 
     Quaternions q2  = q * exp_q(v);
+    Quaternions q3  = exp_q(v) * q;
 
-    ASSERT_QUATERNION_APPROX(plus(q,v), q2, 1e-12);
+    ASSERT_QUATERNION_APPROX(plus(q,v)      , q2, 1e-12);
+    ASSERT_QUATERNION_APPROX(plus_right(q,v), q2, 1e-12);
+    ASSERT_QUATERNION_APPROX(plus_left(v,q) , q3, 1e-12);
 
 }
 
@@ -496,12 +499,16 @@ TEST(Minus_and_diff, Random)
     q1              .coeffs().setRandom().normalize();
     q2              .coeffs().setRandom().normalize();
 
-    Vector3s v      = log_q(q1.conjugate() * q2);
+    Vector3s vr      = log_q(q1.conjugate() * q2);
+    Vector3s vl      = log_q(q2 * q1.conjugate());
 
-    ASSERT_MATRIX_APPROX(minus(q1, q2), v, 1e-12);
+    ASSERT_MATRIX_APPROX(minus(q1, q2), vr, 1e-12);
     ASSERT_QUATERNION_APPROX(plus(q1, minus(q1, q2)), q2, 1e-12);
-    ASSERT_MATRIX_APPROX(diff(q1, q2), v, 1e-12);
+    ASSERT_MATRIX_APPROX(diff(q1, q2), vr, 1e-12);
     ASSERT_QUATERNION_APPROX(plus(q1, diff(q1, q2)), q2, 1e-12);
+
+    ASSERT_MATRIX_APPROX(minus_left(q1, q2), vl, 1e-12);
+    ASSERT_QUATERNION_APPROX(plus_left(minus_left(q1, q2), q1), q2, 1e-12);
 }
 
 TEST(Jacobians, Jr)
