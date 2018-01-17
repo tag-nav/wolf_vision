@@ -68,7 +68,7 @@ inline bool ConstraintQuaternionAbsolute::operator ()(const T* const _o, T* _res
      */ 
 
     Eigen::Matrix<T, 3, 1> er;
-    er = log_q( q2.cast<T> * q1.conjugate() );
+    er = log_q( q2.cast<T>() * q1.conjugate() );
 
     // residual
     Eigen::Map<Eigen::Matrix<T, 3, 1>> res(_residuals);
