@@ -228,7 +228,8 @@ typedef enum
     CTR_AHP_NL,                 ///< Anchored Homogeneous Point constraint (temporal, to be removed)
     CTR_IMU,                    ///< IMU constraint
     CTR_DIFF_DRIVE,             ///< Diff-drive constraint
-    CTR_BEARING_2D              ///< 2D bearing
+    CTR_BEARING_2D,             ///< 2D bearing 
+    CTR_BLOCK_ABS               ///< absolute constraint to Poisition or Velocity depending on argument StateBlockPtr (for priors) 
 } ConstraintType;
 
 /** \brief Enumeration of constraint status

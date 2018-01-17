@@ -236,6 +236,7 @@ SET(HDRS
     capture_odom_2D.h
     capture_odom_3D.h
     capture_void.h
+    constraint_block_absolute.h
     constraint_container.h
     constraint_corner_2D.h
     constraint_AHP.h
@@ -252,6 +253,7 @@ SET(HDRS
     constraint_odom_3D.h
     constraint_point_2D.h
     constraint_point_to_line_2D.h
+    constraint_quaternion_absolute.h
     constraint_relative_2D_analytic.h
     feature_corner_2D.h
     feature_gps_fix.h
