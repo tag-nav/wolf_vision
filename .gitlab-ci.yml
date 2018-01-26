@@ -67,6 +67,8 @@ wolf_build:
   stage: build
 #  only:
 #    - renameFixPose
+  except:
+    - master
   script:
     - mkdir -pv build
     - cd build
@@ -78,6 +80,8 @@ wolf_test:
   stage: test
 #  only:
 #    - renameFixPose
+  except:
+    - master
   script:
     - cd build
     - ctest
