@@ -8,12 +8,12 @@
 //std
 #include <iostream>
 
+#include "../capture_pose.h"
 //Wolf
 #include "wolf.h"
 #include "problem.h"
 #include "state_block.h"
 #include "processor_image_landmark.h"
-#include "capture_fix.h"
 #include "processor_odom_3D.h"
 #include "sensor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"

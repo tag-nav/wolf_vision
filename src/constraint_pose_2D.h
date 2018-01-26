@@ -1,6 +1,6 @@
 
-#ifndef CONSTRAINT_FIX_H_
-#define CONSTRAINT_FIX_H_
+#ifndef CONSTRAINT_POSE_2D_H_
+#define CONSTRAINT_POSE_2D_H_
 
 //Wolf includes
 #include "constraint_autodiff.h"
@@ -12,20 +12,20 @@
 
 namespace wolf {
     
-WOLF_PTR_TYPEDEFS(ConstraintFix);
+WOLF_PTR_TYPEDEFS(ConstraintPose2D);
 
 //class
-class ConstraintFix: public ConstraintAutodiff<ConstraintFix,3,2,1>
+class ConstraintPose2D: public ConstraintAutodiff<ConstraintPose2D,3,2,1>
 {
     public:
-        ConstraintFix(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-                ConstraintAutodiff<ConstraintFix, 3, 2, 1>(CTR_FIX, nullptr, nullptr, nullptr, nullptr, nullptr,_apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+        ConstraintPose2D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+                ConstraintAutodiff<ConstraintPose2D, 3, 2, 1>(CTR_POSE_2D, nullptr, nullptr, nullptr, nullptr, nullptr,_apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
-            setType("FIX");
-//            std::cout << "created ConstraintFix " << std::endl;
+            setType("POSE 2D");
+//            std::cout << "created ConstraintPose2D " << std::endl;
         }
 
-        virtual ~ConstraintFix() = default;
+        virtual ~ConstraintPose2D() = default;
 
         template<typename T>
         bool operator ()(const T* const _p, const T* const _o, T* _residuals) const;
@@ -43,7 +43,7 @@ class ConstraintFix: public ConstraintAutodiff<ConstraintFix,3,2,1>
 };
 
 template<typename T>
-inline bool ConstraintFix::operator ()(const T* const _p, const T* const _o, T* _residuals) const
+inline bool ConstraintPose2D::operator ()(const T* const _p, const T* const _o, T* _residuals) const
 {
     // measurement
     Eigen::Matrix<T,3,1> meas =  getMeasurement().cast<T>();
@@ -74,8 +74,8 @@ inline bool ConstraintFix::operator ()(const T* const _p, const T* const _o, T* 
 //    J.row(2) = ((Jet<Scalar, 3>)(res(2))).v;
 //    if (sizeof(er(0)) != sizeof(double))
 //    {
-//        std::cout << "ConstraintFix::Jacobian(c" << id() << ") = \n " << J << std::endl;
-//        std::cout << "ConstraintFix::Weighted Jacobian(c" << id() << ") = \n " << J << std::endl;
+//        std::cout << "ConstraintPose2D::Jacobian(c" << id() << ") = \n " << J << std::endl;
+//        std::cout << "ConstraintPose2D::Weighted Jacobian(c" << id() << ") = \n " << J << std::endl;
 //        std::cout << "Sqrt Info(c" << id() << ") = \n " << getMeasurementSquareRootInformationUpper() << std::endl;
 //    }
     ////////////////////////////////////////////////////////
