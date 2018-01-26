@@ -3,9 +3,9 @@
 
 //Wolf includes
 #include "capture_base.h"
-#include "feature_fix.h"
 #include "constraint_pose_2D.h"
 #include "constraint_pose_3D.h"
+#include "feature_pose.h"
 
 //std includes
 //
