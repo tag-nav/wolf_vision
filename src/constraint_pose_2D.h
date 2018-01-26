@@ -21,7 +21,7 @@ class ConstraintPose2D: public ConstraintAutodiff<ConstraintPose2D,3,2,1>
         ConstraintPose2D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
                 ConstraintAutodiff<ConstraintPose2D, 3, 2, 1>(CTR_POSE_2D, nullptr, nullptr, nullptr, nullptr, nullptr,_apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
-            setType("FIX");
+            setType("POSE 2D");
 //            std::cout << "created ConstraintPose2D " << std::endl;
         }
 
