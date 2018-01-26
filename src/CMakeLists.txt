@@ -259,9 +259,9 @@ SET(HDRS
     feature_gps_fix.h
     feature_gps_pseudorange.h
     feature_imu.h
-    feature_fix.h
     feature_odom_2D.h
     feature_polyline_2D.h
+    feature_pose.h
     landmark_corner_2D.h
     landmark_container.h
     landmark_line_2D.h
@@ -332,9 +332,9 @@ SET(SRCS
     feature_gps_fix.cpp
     feature_gps_pseudorange.cpp
     feature_imu.cpp
-    feature_fix.cpp
     feature_odom_2D.cpp
     feature_polyline_2D.cpp
+    feature_pose.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
     landmark_line_2D.cpp

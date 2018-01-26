@@ -1,5 +1,5 @@
-#ifndef FEATURE_FIX_H_
-#define FEATURE_FIX_H_
+#ifndef FEATURE_POSE_H_
+#define FEATURE_POSE_H_
 
 
 //Wolf includes
@@ -10,10 +10,10 @@
 
 namespace wolf {
     
-WOLF_PTR_TYPEDEFS(FeatureFix);
+WOLF_PTR_TYPEDEFS(FeaturePose);
 
-//class FeatureFix
-class FeatureFix : public FeatureBase
+//class FeaturePose
+class FeaturePose : public FeatureBase
 {
     public:
 
@@ -23,8 +23,8 @@ class FeatureFix : public FeatureBase
          * \param _meas_covariance the noise of the measurement
          *
          */
-        FeatureFix(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
-        virtual ~FeatureFix();
+        FeaturePose(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);
+        virtual ~FeaturePose();
 };
 
 } // namespace wolf
