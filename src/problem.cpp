@@ -9,12 +9,12 @@
 #include "processor_tracker.h"
 #include "sensor_base.h"
 #include "sensor_gps.h"
-#include "capture_fix.h"
 #include "factory.h"
 #include "sensor_factory.h"
 #include "processor_factory.h"
 
 #include <algorithm>
+#include "capture_pose.h"
 
 namespace wolf
 {
@@ -637,11 +637,11 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
 
         // create origin capture with the given state as data
         // Capture fix only takes 3D position and Quaternion orientation
-        CaptureFixPtr init_capture;
+        CapturePosePtr init_capture;
         if (trajectory_ptr_->getFrameStructure() == "POV 3D")
-            init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
+            init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
         else
-            init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state, _prior_cov);
+            init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state, _prior_cov);
 
         origin_frame_ptr->addCapture(init_capture);
 

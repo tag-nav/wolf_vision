@@ -1,5 +1,5 @@
-#ifndef CAPTURE_FIX_H_
-#define CAPTURE_FIX_H_
+#ifndef CAPTURE_POSE_H_
+#define CAPTURE_POSE_H_
 
 //Wolf includes
 #include "capture_base.h"
@@ -12,10 +12,10 @@
 
 namespace wolf {
 
-WOLF_PTR_TYPEDEFS(CaptureFix);
+WOLF_PTR_TYPEDEFS(CapturePose);
 
-//class CaptureFix
-class CaptureFix : public CaptureBase
+//class CapturePose
+class CapturePose : public CaptureBase
 {
     protected:
         Eigen::VectorXs data_; ///< Raw data.
@@ -23,9 +23,9 @@ class CaptureFix : public CaptureBase
 
     public:
 
-        CaptureFix(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
+        CapturePose(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance);
 
-        virtual ~CaptureFix();
+        virtual ~CapturePose();
 
         virtual void emplaceFeatureAndConstraint();
 

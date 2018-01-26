@@ -1,8 +1,8 @@
-#include "capture_fix.h"
+#include "capture_pose.h"
 
 namespace wolf{
 
-CaptureFix::CaptureFix(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
+CapturePose::CapturePose(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_covariance) :
 	CaptureBase("FIX", _ts, _sensor_ptr),
 	data_(_data),
 	data_covariance_(_data_covariance)
@@ -10,12 +10,12 @@ CaptureFix::CaptureFix(const TimeStamp& _ts, SensorBasePtr _sensor_ptr, const Ei
     //
 }
 
-CaptureFix::~CaptureFix()
+CapturePose::~CapturePose()
 {
 	//
 }
 
-void CaptureFix::emplaceFeatureAndConstraint()
+void CapturePose::emplaceFeatureAndConstraint()
 {
     // Emplace feature
     FeatureFixPtr feature_fix = std::make_shared<FeatureFix>(data_,data_covariance_);

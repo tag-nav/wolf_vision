@@ -13,7 +13,6 @@
 
 // Wolf includes
 #include "../sensor_odom_2D.h"
-#include "../capture_fix.h"
 #include "../state_block.h"
 #include "../wolf.h"
 #include "../ceres_wrapper/ceres_manager.h"
@@ -27,6 +26,7 @@
 // General includes
 #include <iostream>
 #include <iomanip>      // std::setprecision
+#include "../capture_pose.h"
 
 using namespace wolf;
 using namespace Eigen;

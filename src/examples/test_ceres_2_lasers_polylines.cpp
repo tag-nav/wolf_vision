@@ -22,7 +22,6 @@
 #include "sensor_laser_2D.h"
 #include "sensor_odom_2D.h"
 #include "sensor_gps_fix.h"
-#include "capture_fix.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 // laserscanutils
@@ -32,6 +31,7 @@
 //C includes for sleep, time and main args
 #include "unistd.h"
 
+#include "../capture_pose.h"
 //faramotics includes
 #include "faramotics/dynamicSceneRender.h"
 #include "faramotics/rangeScan2D.h"
@@ -258,7 +258,7 @@ int main(int argc, char** argv)
     FrameBasePtr origin_frame = problem.createFrame(KEY_FRAME, ground_truth_pose, ts);
 
     // Prior covariance
-    CaptureFix* initial_covariance = new CaptureFix(ts, gps_sensor, ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1);
+    CapturePose* initial_covariance = new CapturePose(ts, gps_sensor, ground_truth_pose, Eigen::Matrix3s::Identity() * 0.1);
     origin_frame->addCapture(initial_covariance);
     initial_covariance->process();
 
