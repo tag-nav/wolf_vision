@@ -66,8 +66,7 @@ before_script:
 wolf_build:
   stage: build
   only:
-    - renameFixPose
-    - master
+    - "$CI_COMMIT_REF_NAME"
   script:
     - mkdir -pv build
     - cd build
@@ -78,8 +77,7 @@ wolf_build:
 wolf_test:
   stage: test
   only:
-    - renameFixPose
-    - master
+    - "$CI_COMMIT_REF_NAME"
   script:
     - cd build
     - ctest
