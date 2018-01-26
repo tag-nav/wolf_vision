@@ -23,9 +23,9 @@ void CaptureFix::emplaceFeatureAndConstraint()
 
     // Emplace constraint
     if (data_.size() == 3 && data_covariance_.rows() == 3 && data_covariance_.cols() == 3 )
-        feature_fix->addConstraint(std::make_shared<ConstraintFix>(feature_fix));
+        feature_fix->addConstraint(std::make_shared<ConstraintPose2D>(feature_fix));
     else if (data_.size() == 7 && data_covariance_.rows() == 6 && data_covariance_.cols() == 6 )
-        feature_fix->addConstraint(std::make_shared<ConstraintFix3D>(feature_fix));
+        feature_fix->addConstraint(std::make_shared<ConstraintPose3D>(feature_fix));
     else
         throw std::runtime_error("Wrong data size in CaptureFix. Use 3 for 2D. Use 7 for 3D.");
 }

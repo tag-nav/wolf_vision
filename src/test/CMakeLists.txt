@@ -94,17 +94,17 @@ target_link_libraries(gtest_trajectory ${PROJECT_NAME})
 wolf_add_gtest(gtest_constraint_absolute gtest_constraint_absolute.cpp)
 target_link_libraries(gtest_constraint_absolute ${PROJECT_NAME})
 
-# ConstraintFix3D class test
-wolf_add_gtest(gtest_constraint_fix_3D gtest_constraint_fix_3D.cpp)
-target_link_libraries(gtest_constraint_fix_3D ${PROJECT_NAME})
-
-# ConstraintFix class test
-wolf_add_gtest(gtest_constraint_fix gtest_constraint_fix.cpp)
-target_link_libraries(gtest_constraint_fix ${PROJECT_NAME})
-
 # ConstraintOdom3D class test
 wolf_add_gtest(gtest_constraint_odom_3D gtest_constraint_odom_3D.cpp)
 target_link_libraries(gtest_constraint_odom_3D ${PROJECT_NAME})
+
+# ConstraintPose2D class test
+wolf_add_gtest(gtest_constraint_pose_2D gtest_constraint_pose_2D.cpp)
+target_link_libraries(gtest_constraint_pose_2D ${PROJECT_NAME})
+
+# ConstraintPose3D class test
+wolf_add_gtest(gtest_constraint_pose_3D gtest_constraint_pose_3D.cpp)
+target_link_libraries(gtest_constraint_pose_3D ${PROJECT_NAME})
 
 # FeatureIMU test
 wolf_add_gtest(gtest_feature_imu gtest_feature_imu.cpp)

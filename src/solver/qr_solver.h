@@ -15,9 +15,6 @@
 //Wolf includes
 #include "state_block.h"
 #include "../constraint_sparse.h"
-#include "../constraint_fix.h"
-//#include "../constraint_gps_2D.h"
-//#include "../constraint_gps_pseudorange_2D.h"
 #include "../constraint_odom_2D.h"
 #include "../constraint_corner_2D.h"
 #include "../constraint_container.h"
@@ -31,6 +28,7 @@
 #include <eigen3/Eigen/OrderingMethods>
 #include <eigen3/Eigen/SparseQR>
 #include <Eigen/StdVector>
+#include "../constraint_pose_2D.h"
 
 namespace wolf
 {
