@@ -9,12 +9,12 @@
 #include "processor_tracker.h"
 #include "sensor_base.h"
 #include "sensor_gps.h"
-#include "capture_fix.h"
 #include "factory.h"
 #include "sensor_factory.h"
 #include "processor_factory.h"
 
 #include <algorithm>
+#include "capture_pose.h"
 
 namespace wolf
 {
@@ -512,13 +512,8 @@ bool Problem::getCovarianceBlock(StateBlockPtr _state, Eigen::MatrixXs& _cov, co
     return getCovarianceBlock(_state, _state, _cov, _row_and_col, _row_and_col);
 }
 
-bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _covariance)
+bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& _covariance)
 {
-//    return getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getPPtr(), _covariance, 0,                                0                               ) &&
-//           getCovarianceBlock(_frame_ptr->getPPtr(), _frame_ptr->getOPtr(), _covariance, 0,                                _frame_ptr->getPPtr()->getSize()) &&
-//           getCovarianceBlock(_frame_ptr->getOPtr(), _frame_ptr->getPPtr(), _covariance, _frame_ptr->getPPtr()->getSize(), 0                               ) &&
-//           getCovarianceBlock(_frame_ptr->getOPtr(), _frame_ptr->getOPtr(), _covariance, _frame_ptr->getPPtr()->getSize(), _frame_ptr->getPPtr()->getSize());
-
     bool success(true);
     int i = 0, j = 0;
 
@@ -543,7 +538,7 @@ bool Problem::getFrameCovariance(FrameBasePtr _frame_ptr, Eigen::MatrixXs& _cova
     return success;
 }
 
-Eigen::MatrixXs Problem::getFrameCovariance(FrameBasePtr _frame_ptr)
+Eigen::MatrixXs Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr)
 {
     Size sz = 0;
     for (const auto& sb : _frame_ptr->getStateBlockVec())
@@ -562,17 +557,41 @@ Eigen::MatrixXs Problem::getLastKeyFrameCovariance()
     return getFrameCovariance(frm);
 }
 
-bool Problem::getLandmarkCovariance(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& _covariance)
+bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::MatrixXs& _covariance)
 {
-    return getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getPPtr(), _covariance, 0, 0) &&
-    getCovarianceBlock(_landmark_ptr->getPPtr(), _landmark_ptr->getOPtr(), _covariance, 0,_landmark_ptr->getPPtr()->getSize()) &&
-    getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getPPtr(), _covariance, _landmark_ptr->getPPtr()->getSize(), 0) &&
-    getCovarianceBlock(_landmark_ptr->getOPtr(), _landmark_ptr->getOPtr(), _covariance, _landmark_ptr->getPPtr()->getSize() ,_landmark_ptr->getPPtr()->getSize());
+    bool success(true);
+    int i = 0, j = 0;
+
+    const auto& state_bloc_vec = _landmark_ptr->getStateBlockVec();
+
+    for (const auto& sb_i : state_bloc_vec)
+    {
+        if (sb_i)
+        {
+            j = 0;
+            for (const auto& sb_j : state_bloc_vec)
+            {
+                if (sb_j)
+                {
+                    success = success && getCovarianceBlock(sb_i, sb_j, _covariance, i, j);
+                    j += sb_j->getSize();
+                }
+            }
+            i += sb_i->getSize();
+        }
+    }
+    return success;
 }
 
-Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBasePtr _landmark_ptr)
+Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr)
 {
-    Eigen::MatrixXs covariance = Eigen::MatrixXs::Zero(_landmark_ptr->getPPtr()->getSize()+_landmark_ptr->getOPtr()->getSize(), _landmark_ptr->getPPtr()->getSize()+_landmark_ptr->getOPtr()->getSize());
+    Size sz = 0;
+    for (const auto& sb : _landmark_ptr->getStateBlockVec())
+        if (sb)
+            sz += sb->getSize();
+
+    Eigen::MatrixXs covariance(sz, sz);
+
     getLandmarkCovariance(_landmark_ptr, covariance);
     return covariance;
 }
@@ -618,11 +637,11 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
 
         // create origin capture with the given state as data
         // Capture fix only takes 3D position and Quaternion orientation
-        CaptureFixPtr init_capture;
+        CapturePosePtr init_capture;
         if (trajectory_ptr_->getFrameStructure() == "POV 3D")
-            init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
+            init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
         else
-            init_capture = std::make_shared<CaptureFix>(_ts, nullptr, _prior_state, _prior_cov);
+            init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state, _prior_cov);
 
         origin_frame_ptr->addCapture(init_capture);
 
@@ -667,13 +686,40 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
         for (auto S : getHardwarePtr()->getSensorList())
         {
             cout << "  S" << S->id() << " " << S->getType();
-            cout << (S->isExtrinsicDynamic() ? " [Dyn," : " [Sta,") << (S->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
+            if (!metric && !state_blocks) cout << (S->isExtrinsicDynamic() ? " [Dyn," : " [Sta,") << (S->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
             if (depth < 2)
                 cout << " -- " << S->getProcessorList().size() << "p";
             cout << endl;
-            if (state_blocks)
+            if (metric && state_blocks)
             {
-                cout << "    sb:";
+                for (auto i = 0; i < S->getStateBlockVec().size(); i++)
+                {
+                    if (i==0) cout << "    Extr " << (S->isExtrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
+                    if (i==2) cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
+                    auto sb = S->getStateBlockPtrAuto(i);
+                    if (sb)
+                    {
+                        cout << (sb->isFixed() ? " Fix( " : " Est( ") << sb->getState().transpose() << " )";
+                    }
+                    if (i==1) cout << " ]" << endl;
+                }
+                if (S->getStateBlockVec().size() > 2) cout << " ]" << endl;
+            }
+            else if (metric)
+            {
+                cout << "    Extr " << (S->isExtrinsicDynamic() ? "[Dyn]" : "[Sta]") << "= ( ";
+                if (S->getPPtr())
+                    cout << S->getPPtr()->getState().transpose();
+                if (S->getOPtr())
+                    cout << " " << S->getOPtr()->getState().transpose();
+                cout  << " )";
+                if (S->getIntrinsicPtr())
+                    cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << "= ( " << S->getIntrinsicPtr()->getState().transpose() << " )";
+                cout << endl;
+            }
+            else if (state_blocks)
+            {
+                cout << "    sb:" << (S->isExtrinsicDynamic() ? "[Dyn," : "[Sta,") << (S->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
                 for (auto sb : S->getStateBlockVec())
                     if (sb != nullptr)
                         cout << " " << (sb->isFixed() ? "Fix" : "Est");
@@ -699,10 +745,10 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     }
                     else
                     {
-                        try
+                        cout << "    pt" << p->id() << " " << p->getType() << endl;
+                        ProcessorTrackerPtr pt = std::dynamic_pointer_cast<ProcessorTracker>(p);
+                        if (pt)
                         {
-                            cout << "    pt" << p->id() << " " << p->getType() << endl;
-                            ProcessorTrackerPtr pt = std::static_pointer_cast<ProcessorTracker>(p);
                             if (pt->getOriginPtr())
                                 cout << "      o: C" << pt->getOriginPtr()->id() << " - F"
                                 << pt->getOriginPtr()->getFramePtr()->id() << endl;
@@ -712,11 +758,6 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                             if (pt->getIncomingPtr())
                                 cout << "      i: C" << pt->getIncomingPtr()->id() << endl;
                         }
-                        catch (std::runtime_error& e)
-                        {
-                            cout << "Unknown processor type!" << endl;
-                        }
-
                     }
                 } // for p
             }
@@ -740,7 +781,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             {
                 cout << (F->isFixed() ? "    Fix" : "    Est") << ", ts=" << std::setprecision(5)
                         << F->getTimeStamp().get();
-                cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << ")";
+                cout << ",\t x = ( " << std::setprecision(2) << F->getState().transpose() << " )";
                 cout << endl;
             }
             if (state_blocks)
@@ -757,15 +798,15 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                 for (auto C : F->getCaptureList())
                 {
                     cout << "    C" << (C->isMotion() ? "M" : "") << C->id() << " " << C->getType();
-                    if (C->getSensorPtr()) cout << " -> S" << C->getSensorPtr()->id();
-                    else cout << " -> S-";
                     
-                    cout << " [";
                     if(C->getSensorPtr() != nullptr)
-                        cout << (C->getSensorPtr()->isExtrinsicDynamic() ? "Dyn, ": "Sta, ");
-
-                    if(C->getSensorPtr() != nullptr)
+                    {
+                        cout << " -> S" << C->getSensorPtr()->id();
+                        cout << (C->getSensorPtr()->isExtrinsicDynamic() ? " [Dyn, ": " [Sta, ");
                         cout << (C->getSensorPtr()->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
+                    }
+                    else
+                        cout << " -> S-";
 
                     cout << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "");
                     if (constr_by)
@@ -777,20 +818,15 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     cout << endl;
 
                     if (state_blocks)
-                    {
                         for(auto sb : C->getStateBlockVec())
-                        {
-                            cout << "      sb: ";
                             if(sb != nullptr)
                             {
+                                cout << "      sb: ";
                                 cout << (sb->isFixed() ? "Fix" : "Est");
                                 if (metric)
-                                    cout << std::setprecision(3) << " (" << sb->getState().transpose() << ")";
+                                    cout << std::setprecision(3) << " (" << sb->getState().transpose() << " )";
+                                cout << endl;
                             }
-                            else cout << "nullptr ";
-                            cout << endl;
-                        }
-                    }
 
                     if (C->isMotion() && metric)
                     {
@@ -827,14 +863,14 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                             cout << endl;
                             if (metric)
                                 cout << "        m = ( " << std::setprecision(3) << f->getMeasurement().transpose()
-                                        << ")" << endl;
+                                        << " )" << endl;
                             if (depth >= 4)
                             {
                                 // Constraints
                                 for (auto c : f->getConstraintList())
                                 {
                                     cout << "        c" << c->id() << " " << c->getType() << " -->";
-                                    if (c->getFrameOtherPtr() == nullptr && c->getFeatureOtherPtr() == nullptr && c->getLandmarkOtherPtr() == nullptr)
+                                    if (c->getFrameOtherPtr() == nullptr && c->getCaptureOtherPtr() == nullptr && c->getFeatureOtherPtr() == nullptr && c->getLandmarkOtherPtr() == nullptr)
                                         cout << " A";
                                     if (c->getFrameOtherPtr() != nullptr)
                                         cout << " F" << c->getFrameOtherPtr()->id();
@@ -867,18 +903,29 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     cout << "c" << cby->id() << " \t";
             }
             cout << endl;
+            if (metric)
+            {
+                cout << (L->isFixed() ? "    Fix" : "    Est");
+                cout << ",\t x = ( " << std::setprecision(2) << L->getState().transpose() << " )";
+                cout << endl;
+            }
             if (state_blocks)
             {
                 cout << "    sb:";
                 for (auto sb : L->getStateBlockVec())
                     if (sb != nullptr)
-                        cout << " " << (sb->isFixed() ? "Fix" : "Est");
+                        cout << (sb->isFixed() ? " Fix" : " Est");
                 cout << endl;
             }
         } // for L
     }
     cout << "-----------------------------------------" << endl;
     cout << endl;
+}
+
+FrameBasePtr wolf::Problem::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
+{
+    return trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
 }
 
 bool Problem::check(int verbose_level)

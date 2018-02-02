@@ -71,13 +71,8 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
     protected:
 
         virtual void preProcess();
-        virtual void postProcess();
 
-        void advance()
-        {
-            ProcessorTrackerFeature::advance();
-            corners_last_ = std::move(corners_incoming_);
-        }
+        void advance();
 
         /** \brief Track provided features from \b last to \b incoming
          * \param _feature_list_in input list of features in \b last to track
@@ -122,25 +117,6 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
         void extractCorners(CaptureLaser2DPtr _capture_laser_ptr, FeatureBaseList& _corner_list);
 
 };
-
-inline ProcessorTrackerFeatureCorner::ProcessorTrackerFeatureCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-                                                                    const unsigned int& _n_corners_th) :
-        ProcessorTrackerFeature("TRACKER FEATURE CORNER", 0), line_finder_(_line_finder_params), n_tracks_th_(_n_corners_th), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
-{
-    //
-}
-
-inline ProcessorTrackerFeatureCorner::~ProcessorTrackerFeatureCorner()
-{
-    for (auto corner : corners_last_)
-        corner->remove();
-    for (auto corner : corners_incoming_)
-        corner->remove();
-}
-
-inline void ProcessorTrackerFeatureCorner::postProcess()
-{
-}
 
 inline bool ProcessorTrackerFeatureCorner::correctFeatureDrift(const FeatureBasePtr _last_feature,
                                                               FeatureBasePtr _incoming_feature)

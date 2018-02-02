@@ -10,8 +10,6 @@
 
 #include "wolf.h"
 
-#include "iostream"
-
 namespace wolf
 {
 
@@ -113,21 +111,16 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
     typedef typename Derived::Scalar T;
 
     T angle_squared = _v.squaredNorm();
-    T angle         = sqrt(angle_squared);
-    T angle_half    = angle / (T)2.0;
+    T angle         = sqrt(angle_squared); // Allow ceres::Jet to use its own sqrt() version.
 
-    Eigen::Quaternion<T> q;
-    if (angle > (T)(wolf::Constants::EPS))
+    if (angle > (T)(wolf::Constants::EPS_SMALL))
     {
-        q.w()   = cos(angle_half);
-        q.vec() = sin(angle_half) * _v.normalized();// / angle;
+        return Eigen::Quaternion<T> ( Eigen::AngleAxis<T>(angle, _v.normalized()) );
     }
     else
     {
-        q.w()   = (T)1.0 - angle_squared/(T)2; // Taylor expansion of cos(x) = 1 - x^2/2!;
-        q.vec() = _v * ((T)2.0 - angle_squared / (T)48.0); // Taylor series of sinc(x) ~ 1 - x^2/3!, and have q.vec = v/2 * sinc(angle_half)
+        return Eigen::Quaternion<T> ( (T)1.0 , _v(0,0)/(T)2 , _v(1,0)/(T)2 , _v(2,0)/(T)2 );
     }
-    return q.normalized();
 }
 
 /** \brief Quaternion logarithmic map
@@ -138,22 +131,42 @@ inline Eigen::Quaternion<typename Derived::Scalar> exp_q(const Eigen::MatrixBase
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::QuaternionBase<Derived>& _q)
 {
-    using std::sqrt;
+
+    // Will try this implementation once Eigen accepts it!
+    // see https://forum.kde.org/viewtopic.php?f=74&t=143269&p=385299#p385265
+    //    typedef typename Derived::Scalar T;
+    //    Eigen::AngleAxis<T> aa(_q);
+    //    return aa.angle() * aa.axis();
+
+
+    // In the meanwhile, we have a custom implementation as follows
 
     typedef typename Derived::Scalar T;
 
     Eigen::Matrix<T, 3, 1> vec = _q.vec();
-    T vecnorm_squared = vec.squaredNorm();
-    T vecnorm = sqrt(vecnorm_squared); // vec.norm();
-    if (vecnorm > (T)wolf::Constants::EPS_SMALL)
-    { // regular angle-axis conversion
-        T angle = (T)2.0 * atan2(vecnorm, _q.w());
-        return vec * angle / vecnorm;
+    const T sin_angle_squared = vec.squaredNorm();
+    if (sin_angle_squared > (T)wolf::Constants::EPS_SMALL)
+    {
+        const T  sin_angle = sqrt(sin_angle_squared); // Allow ceres::Jet to use its own sqrt() version.
+        const T& cos_angle = _q.w();
+
+        /* If (cos_angle < 0) then angle >= pi/2 , means : angle for angle_axis vector >= pi (== 2*angle)
+                    |-> results in correct rotation but not a normalized angle_axis vector
+
+        In that case we observe that 2 * angle ~ 2 * angle - 2 * pi,
+        which is equivalent saying
+
+            angle - pi = atan(sin(angle - pi), cos(angle - pi))
+                       = atan(-sin(angle), -cos(angle))
+        */
+        const T two_angle = T(2.0) * ((cos_angle < 0.0) ? atan2(-sin_angle, -cos_angle) : atan2(sin_angle, cos_angle));
+        const T k = two_angle / sin_angle;
+        return vec * k;
     }
     else
-    { // small-angle approximation using truncated Taylor series
-        T r2 = vecnorm_squared / (_q.w() *_q.w());
-        return vec * ( (T)2.0 -  r2 / (T)1.5 ) / _q.w(); // log = 2 * vec * ( 1 - norm(vec)^2 / 3*w^2 ) / w.
+    {
+        // small-angle approximation
+        return vec * (T)2.0;
     }
 }
 
@@ -171,17 +184,13 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBa
 
     typedef typename Derived::Scalar T;
 
-    Eigen::Matrix<typename Derived::Scalar, 3, 3> R;
-
     T angle_squared = _v.squaredNorm();
-    T angle = sqrt(angle_squared);
+    T angle = sqrt(angle_squared); // Allow ceres::Jet to use its own sqrt() version.
 
-    if (angle > wolf::Constants::EPS)
-        R = Eigen::AngleAxis<T>(angle, _v.normalized()).toRotationMatrix();
+    if (angle > wolf::Constants::EPS_SMALL)
+        return Eigen::AngleAxis<T>(angle, _v.normalized()).toRotationMatrix();
     else
-        R = Eigen::Matrix<T, 3, 3>::Identity() + skew(_v);
-
-    return R;
+        return Eigen::Matrix<T, 3, 3>::Identity() + skew(_v);
 }
 
 /** \brief Rotation matrix logarithmic map
@@ -369,7 +378,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_right_inv(const Eig
  *  This maps a perturbation in the tangent space (d_theta) to a perturbation on the manifold (expmap(Jl * d_theta))
  *  so that:
  *
- *      exp(theta+d_theta) = exp(Jr(theta)*d_theta)*exp(theta)
+ *      exp(theta+d_theta) = exp(Jl(theta)*d_theta)*exp(theta)
  */
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3> jac_SO3_left(const Eigen::MatrixBase<Derived>& _theta)
@@ -463,16 +472,41 @@ inline void between(const Eigen::QuaternionBase<D1>& _q1,
 }
 
 template<typename D1, typename D2>
-inline Eigen::Quaternion<typename D1::Scalar> plus(const Eigen::QuaternionBase<D1>& q, const Eigen::MatrixBase<D2>& v)
+inline Eigen::Quaternion<typename D1::Scalar> plus_right(const Eigen::QuaternionBase<D1>& q, const Eigen::MatrixBase<D2>& v)
 {
     MatrixSizeCheck<3,1>::check(v);
     return q * exp_q(v);
 }
 
 template<typename D1, typename D2>
-inline  Eigen::Matrix<typename D2::Scalar, 3, 1> minus(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
+inline  Eigen::Matrix<typename D2::Scalar, 3, 1> minus_right(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
 {
     return log_q(q1.conjugate() * q2);
+}
+
+template<typename D1, typename D2>
+inline Eigen::Quaternion<typename D1::Scalar> plus_left(const Eigen::MatrixBase<D2>& v, const Eigen::QuaternionBase<D1>& q)
+{
+    MatrixSizeCheck<3,1>::check(v);
+    return exp_q(v) * q;
+}
+
+template<typename D1, typename D2>
+inline  Eigen::Matrix<typename D2::Scalar, 3, 1> minus_left(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
+{
+    return log_q(q2 * q1.conjugate());
+}
+
+template<typename D1, typename D2>
+inline Eigen::Quaternion<typename D1::Scalar> plus(const Eigen::QuaternionBase<D1>& q, const Eigen::MatrixBase<D2>& v)
+{
+    return plus_right(q, v);
+}
+
+template<typename D1, typename D2>
+inline  Eigen::Matrix<typename D2::Scalar, 3, 1> minus(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
+{
+    return minus_right(q1, q2);
 }
 
 template<typename D1, typename D2>

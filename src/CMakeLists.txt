@@ -220,20 +220,19 @@ SET(HDRS_BASE
     )
 
 SET(HDRS
-    capture_fix.h
+    capture_pose.h
     capture_gps_fix.h
     capture_imu.h
     capture_odom_2D.h
     capture_odom_3D.h
     capture_void.h
+    constraint_block_absolute.h
     constraint_container.h
     constraint_corner_2D.h
     constraint_AHP.h
     constraint_epipolar.h
     constraint_imu.h
-    constraint_fix.h
     constraint_fix_bias.h
-    constraint_fix_3D.h
     constraint_gps_2D.h
     constraint_gps_pseudorange_3D.h
     constraint_gps_pseudorange_2D.h
@@ -242,14 +241,17 @@ SET(HDRS
     constraint_odom_3D.h
     constraint_point_2D.h
     constraint_point_to_line_2D.h
+    constraint_pose_2D.h
+    constraint_pose_3D.h
+    constraint_quaternion_absolute.h
     constraint_relative_2D_analytic.h
     feature_corner_2D.h
     feature_gps_fix.h
     feature_gps_pseudorange.h
     feature_imu.h
-    feature_fix.h
     feature_odom_2D.h
     feature_polyline_2D.h
+    feature_pose.h
     landmark_corner_2D.h
     landmark_container.h
     landmark_line_2D.h
@@ -310,19 +312,19 @@ SET(SRCS_BASE
     )
 
 SET(SRCS
-    capture_fix.cpp
     capture_gps_fix.cpp
     capture_imu.cpp
     capture_odom_2D.cpp
     capture_odom_3D.cpp
+    capture_pose.cpp
     capture_void.cpp
     feature_corner_2D.cpp
     feature_gps_fix.cpp
     feature_gps_pseudorange.cpp
     feature_imu.cpp
-    feature_fix.cpp
     feature_odom_2D.cpp
     feature_polyline_2D.cpp
+    feature_pose.cpp
     landmark_corner_2D.cpp
     landmark_container.cpp
     landmark_line_2D.cpp
@@ -436,6 +438,9 @@ ADD_SUBDIRECTORY(processors)
 
 # Add the sensor sub-directory
 ADD_SUBDIRECTORY(sensors)
+
+# Add the hello_wolf sub-directory
+ADD_SUBDIRECTORY(hello_wolf)
 
 IF (cereal_FOUND)
   ADD_SUBDIRECTORY(serialization/cereal)
@@ -577,7 +582,7 @@ IF (GLOG_FOUND)
 ENDIF (GLOG_FOUND)
 
 IF(BUILD_EXAMPLES)
-  #Build examples & tests
+  #Build examples
   MESSAGE("Building examples.")
   ADD_SUBDIRECTORY(examples)
 ENDIF(BUILD_EXAMPLES)

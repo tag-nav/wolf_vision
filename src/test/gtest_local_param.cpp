@@ -74,6 +74,13 @@ TEST(TestLocalParametrization, QuaternionLocal)
 
     ASSERT_NEAR((J-J_num).norm(), 0, 1e-6);
 
+    Map<const VectorXs> qoc_m(qo_m.data(), 4);
+    Map<VectorXs>       da2_m(x_storage.data() + 10, 3);
+
+    Qpar_loc.minus(q_m, qoc_m, da2_m);
+
+    ASSERT_MATRIX_APPROX(da_m, da2_m, 1e-10);
+
 }
 
 TEST(TestLocalParametrization, QuaternionGlobal)
@@ -112,6 +119,14 @@ TEST(TestLocalParametrization, QuaternionGlobal)
 
     ASSERT_NEAR((J-J_num).norm(), 0, 1e-6);
 
+    Map<const VectorXs> qoc_m(qo_m.data(), 4);
+    Map<VectorXs>       da2_m(x_storage.data() + 10, 3);
+
+    Qpar_glob.minus(q_m, qoc_m, da2_m);
+
+    ASSERT_MATRIX_APPROX(da_m, da2_m, 1e-10);
+
+
 }
 
 TEST(TestLocalParametrization, Homogeneous)
@@ -142,6 +157,14 @@ TEST(TestLocalParametrization, Homogeneous)
     JAC_NUMERIC(Hpar, h_m, J_num, 1e-9)
 
     ASSERT_NEAR((J-J_num).norm(), 0, 1e-6);
+
+    Map<const VectorXs> hoc_m(ho_m.data(), 4);
+    Map<VectorXs>       d2_m(x_storage.data() + 10, 3);
+
+    Hpar.minus(h_m, hoc_m, d2_m);
+
+    ASSERT_MATRIX_APPROX(d_m, d2_m, 1e-10);
+
 }
 
 int main(int argc, char **argv)

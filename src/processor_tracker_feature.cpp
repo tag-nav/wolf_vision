@@ -60,6 +60,30 @@ unsigned int ProcessorTrackerFeature::processKnown()
     return matches_last_from_incoming_.size();
 }
 
+void ProcessorTrackerFeature::advance()
+{
+    //    std::cout << "ProcessorTrackerFeature::advance()" << std::endl;
+    // Compose correspondences to get origin_from_incoming
+    for (auto match : matches_last_from_incoming_)
+    {
+        matches_last_from_incoming_[match.first] =
+                matches_origin_from_last_[matches_last_from_incoming_[match.first]->feature_ptr_];
+    }
+    matches_origin_from_last_ = std::move(matches_last_from_incoming_);
+    //    std::cout << "advanced correspondences: " << std::endl;
+    //    std::cout << "\tincoming 2 last: " << matches_last_from_incoming_.size() << std::endl;
+    //    std::cout << "\tlast 2 origin: " << std::endl;
+    //    for (auto match : matches_origin_from_last_)
+    //        std::cout << "\t\t" << match.first->getMeasurement() << " to " << match.second.feature_ptr_->getMeasurement() << std::endl;
+}
+
+void ProcessorTrackerFeature::reset()
+{
+    //    std::cout << "ProcessorTrackerFeature::reset()" << std::endl;
+    // We also reset here the list of correspondences, which passes from last--incoming to origin--last.
+    matches_origin_from_last_ = std::move(matches_last_from_incoming_);
+}
+
 unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_features)
 {
     //    std::cout << "ProcessorTrackerFeature::processNew()" << std::endl;
@@ -93,6 +117,16 @@ unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_fe
 
     // return the number of new features detected in \b last
     return n;
+}
+
+void ProcessorTrackerFeature::establishConstraints()
+{
+    for (auto match : matches_origin_from_last_)
+    {
+        auto ctr = createConstraint(match.first, match.second->feature_ptr_);
+        match.first->addConstraint(ctr);
+        match.second->feature_ptr_->addConstrainedBy(ctr);
+    }
 }
 
 } // namespace wolf

@@ -348,8 +348,13 @@ class ProcessorMotion : public ProcessorBase
          * @return        The interpolated motion (see documentation below).
          *
          * This function interpolates a motion between two existing motions.
+         *
+         * In this base implementation, we just provide the closest motion provided (ref or second),
+         * so really no interpolation takes place and just the current data and delta are updated.
+         *
+         * Should you require finer interpolation, you must overload this method in your derived class.
          */
-        virtual Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts) = 0;
+        virtual Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts);
 
         /** \brief create a CaptureMotion and add it to a Frame
          * \param _ts time stamp
@@ -450,31 +455,6 @@ inline Eigen::VectorXs ProcessorMotion::getState(const TimeStamp& _ts)
     Eigen::VectorXs x(getProblem()->getFrameStructureSize());
     getState(_ts, x);
     return x;
-}
-
-inline void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
-{
-    CaptureMotionPtr capture_motion;
-
-    if (_ts >= origin_ptr_->getTimeStamp())
-        // timestamp found in the current processor buffer
-        capture_motion = last_ptr_;
-    else
-        // We need to search in previous keyframes for the capture containing a motion buffer with the queried time stamp
-        capture_motion = getCaptureMotionContainingTimeStamp(_ts);
-
-    if (capture_motion)
-    {
-        // We found a CaptureMotion whose buffer contains the time stamp
-        VectorXs state_0 = capture_motion->getOriginFramePtr()->getState();
-        VectorXs delta   = capture_motion->getDeltaCorrected(origin_ptr_->getCalibration(), _ts);
-        Scalar   dt      = _ts - capture_motion->getBuffer().get().front().ts_;
-
-        statePlusDelta(state_0, delta, dt, _x);
-    }
-    else
-        // We could not find any CaptureMotion for the time stamp requested
-        std::runtime_error("Could not find any Capture for the time stamp requested");
 }
 
 inline wolf::TimeStamp ProcessorMotion::getCurrentTimeStamp()

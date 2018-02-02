@@ -6,22 +6,17 @@
  */
 
 //Wolf
-#include "wolf.h"
-#include "problem.h"
 #include "sensor_imu.h"
 #include "capture_imu.h"
-#include "state_block.h"
-#include "state_quaternion.h"
 #include "processor_imu.h"
 #include "processor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"
-#include "constraint_fix_3D.h"
-
 #include "utils_gtest.h"
 #include "../src/logging.h"
 
 #include <iostream>
 #include <fstream>
+#include "../constraint_pose_3D.h"
 
 //#define GET_RESIDUALS
 
@@ -2470,7 +2465,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarQ1B1B2P2Q2_InvarP1V1
     featureFix_cov(5,5) = 0.1;
     CaptureBasePtr capfix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6, nullptr));
     FeatureBasePtr ffix = capfix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
-    ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(ffix->addConstraint(std::make_shared<ConstraintFix3D>(ffix)));
+    ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintPose3D>(ffix->addConstraint(std::make_shared<ConstraintPose3D>(ffix)));
     
     //prepare problem for solving
     origin_KF->getPPtr()->fix();
@@ -2528,7 +2523,7 @@ TEST_F(ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY, VarQ1B1B2P2Q2_InvarP1V
     featureFix_cov(5,5) = 0.1;
     CaptureBasePtr capfix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6, nullptr));
     FeatureBasePtr ffix = capfix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
-    ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(ffix->addConstraint(std::make_shared<ConstraintFix3D>(ffix)));
+    ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintPose3D>(ffix->addConstraint(std::make_shared<ConstraintPose3D>(ffix)));
     
     //prepare problem for solving
     origin_KF->getPPtr()->fix();

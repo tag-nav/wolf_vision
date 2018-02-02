@@ -11,6 +11,23 @@
 namespace wolf
 {
 
+ProcessorTrackerFeatureCorner::ProcessorTrackerFeatureCorner(
+        const laserscanutils::LineFinderIterativeParams& _line_finder_params, const unsigned int& _n_corners_th) :
+        ProcessorTrackerFeature("TRACKER FEATURE CORNER", 0), line_finder_(_line_finder_params), n_tracks_th_(
+                _n_corners_th), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(
+                Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
+{
+    //
+}
+
+ProcessorTrackerFeatureCorner::~ProcessorTrackerFeatureCorner()
+{
+    for (auto corner : corners_last_)
+        corner->remove();
+    for (auto corner : corners_incoming_)
+        corner->remove();
+}
+
 void ProcessorTrackerFeatureCorner::preProcess()
 {
     // extract corners of incoming
@@ -44,6 +61,12 @@ void ProcessorTrackerFeatureCorner::preProcess()
     // current_prev
     R_current_prev_ = R_world_sensor_.transpose() * R_world_sensor_prev_;
     t_current_prev_ = R_world_sensor_.transpose() * (t_world_sensor_prev_ - t_world_sensor_);
+}
+
+void ProcessorTrackerFeatureCorner::advance()
+{
+    ProcessorTrackerFeature::advance();
+    corners_last_ = std::move(corners_incoming_);
 }
 
 unsigned int ProcessorTrackerFeatureCorner::trackFeatures(const FeatureBaseList& _feature_list_in,

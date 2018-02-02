@@ -23,7 +23,7 @@ TEST(WolfTestTimeStamp, TimeStampInitNow)
 
   ASSERT_LT(start.get(), time_stamp.get());
 
-  PRINTF("All good at WolfTestTimeStamp::TimeStampInitNow !\n");
+//  PRINTF("All good at WolfTestTimeStamp::TimeStampInitNow !\n");
 }
 
 TEST(WolfTestTimeStamp, TimeStampInitScalar)
@@ -41,7 +41,7 @@ TEST(WolfTestTimeStamp, TimeStampInitScalar)
 
   ASSERT_STREQ("101010.0000000000", ss.str().c_str());
 
-  PRINTF("All good at WolfTestTimeStamp::TimeStampInitScalar !\n");
+//  PRINTF("All good at WolfTestTimeStamp::TimeStampInitScalar !\n");
 }
 
 TEST(WolfTestTimeStamp, TimeStampInitScalarSecNano)
@@ -63,7 +63,7 @@ TEST(WolfTestTimeStamp, TimeStampInitScalarSecNano)
 
   ASSERT_STREQ("101010.0002020200", ss.str().c_str());
 
-  PRINTF("All good at WolfTestTimeStamp::TimeStampInitScalarSecNano !\n");
+//  PRINTF("All good at WolfTestTimeStamp::TimeStampInitScalarSecNano !\n");
 }
 
 TEST(WolfTestTimeStamp, TimeStampEquality)
@@ -85,7 +85,7 @@ TEST(WolfTestTimeStamp, TimeStampEquality)
 
   ASSERT_EQ(time_stamp.get(), start.get());
 
-  PRINTF("All good at WolfTestTimeStamp::TimeStampEquality !\n");
+//  PRINTF("All good at WolfTestTimeStamp::TimeStampEquality !\n");
 }
 
 TEST(WolfTestTimeStamp, TimeStampInequality)
@@ -108,7 +108,7 @@ TEST(WolfTestTimeStamp, TimeStampInequality)
   ASSERT_GE(time_stamp, start);
   ASSERT_GE(start, start);
 
-  PRINTF("All good at WolfTestTimeStamp::TimeStampInequality !\n");
+//  PRINTF("All good at WolfTestTimeStamp::TimeStampInequality !\n");
 }
 
 TEST(WolfTestTimeStamp, TimeStampOperatorOstream)
@@ -123,7 +123,7 @@ TEST(WolfTestTimeStamp, TimeStampOperatorOstream)
 
     ASSERT_EQ(ss1.str(), ss2.str());
 
-    PRINTF("All good at WolfTestTimeStamp::TimeStampOperatorOstream !\n");
+//    PRINTF("All good at WolfTestTimeStamp::TimeStampOperatorOstream !\n");
 }
 
 int main(int argc, char **argv)

@@ -68,11 +68,15 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         void setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr);
         StateBlockPtr getPPtr() const;
         StateBlockPtr getOPtr() const;
-        StateBlockPtr getVPtr() const;
         void setPPtr(const StateBlockPtr _p_ptr);
         void setOPtr(const StateBlockPtr _o_ptr);
-        void setVPtr(const StateBlockPtr _v_ptr);
         virtual void registerNewStateBlocks();
+        Eigen::VectorXs getState() const;
+        void getState(Eigen::VectorXs& _state) const;
+        bool getCovariance(Eigen::MatrixXs& _cov) const;
+        Eigen::MatrixXs getCovariance() const;
+
+
     protected:
         virtual void removeStateBlocks();
 
@@ -101,6 +105,16 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
 namespace wolf{
 
+inline bool LandmarkBase::getCovariance(Eigen::MatrixXs& _cov) const
+{
+    return getProblem()->getLandmarkCovariance(shared_from_this(), _cov);
+}
+
+inline Eigen::MatrixXs LandmarkBase::getCovariance() const
+{
+    return getProblem()->getLandmarkCovariance(shared_from_this());
+}
+
 inline MapBasePtr LandmarkBase::getMapPtr()
 {
     return map_ptr_.lock();
@@ -123,46 +137,6 @@ inline void LandmarkBase::setId(unsigned int _id)
         landmark_id_count_ = _id;
 }
 
-inline void LandmarkBase::fix()
-{
-    for( auto sbp : state_block_vec_)
-        if (sbp != nullptr)
-        {
-            sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
-}
-
-inline void LandmarkBase::unfix()
-{
-    for( auto sbp : state_block_vec_)
-        if (sbp != nullptr)
-        {
-            sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
-}
-
-inline bool LandmarkBase::isFixed() const
-{
-    bool fixed = true;
-    for (auto sb : getStateBlockVec())
-    {
-        if (sb)
-            fixed &= sb->isFixed();
-    }
-    return fixed;
-}
-
-inline ConstraintBasePtr LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
-{
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setLandmarkOtherPtr( shared_from_this() );
-    return _ctr_ptr;
-}
-
 inline unsigned int LandmarkBase::getHits() const
 {
     return constrained_by_list_.size();
@@ -181,15 +155,6 @@ inline const std::vector<StateBlockPtr>& LandmarkBase::getStateBlockVec() const
 inline std::vector<StateBlockPtr>& LandmarkBase::getStateBlockVec()
 {
     return state_block_vec_;
-}
-
-inline std::vector<StateBlockPtr> LandmarkBase::getUsedStateBlockVec() const
-{
-    std::vector<StateBlockPtr> used_state_block_vec(0);
-    for (auto sbp : state_block_vec_)
-        if (sbp)
-            used_state_block_vec.push_back(sbp);
-    return used_state_block_vec;
 }
 
 inline StateBlockPtr LandmarkBase::getStateBlockPtr(unsigned int _i) const

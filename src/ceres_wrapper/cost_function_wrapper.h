@@ -22,25 +22,29 @@ class CostFunctionWrapper : public ceres::CostFunction
 
     public:
 
-        CostFunctionWrapper(ConstraintBasePtr _constraint_ptr) :
-            ceres::CostFunction(),
-            constraint_ptr_(_constraint_ptr)
-        {
-            for (auto st_block_size : constraint_ptr_->getStateSizes())
-                mutable_parameter_block_sizes()->push_back(st_block_size);
+        CostFunctionWrapper(ConstraintBasePtr _constraint_ptr);
 
-            set_num_residuals(constraint_ptr_->getSize());
-        };
+        virtual ~CostFunctionWrapper();
 
-        virtual ~CostFunctionWrapper()
-        {
-        };
-
-        virtual bool Evaluate(double const* const* parameters, double* residuals, double** jacobians) const
-        {
-            return constraint_ptr_->evaluate(parameters, residuals, jacobians);
-        }
+        virtual bool Evaluate(const double* const * parameters, double* residuals, double** jacobians) const;
 };
+
+inline CostFunctionWrapper::CostFunctionWrapper(ConstraintBasePtr _constraint_ptr) :
+        ceres::CostFunction(), constraint_ptr_(_constraint_ptr)
+{
+    for (auto st_block_size : constraint_ptr_->getStateSizes())
+        mutable_parameter_block_sizes()->push_back(st_block_size);
+    set_num_residuals(constraint_ptr_->getSize());
+}
+
+inline CostFunctionWrapper::~CostFunctionWrapper()
+{
+}
+
+inline bool CostFunctionWrapper::Evaluate(const double* const * parameters, double* residuals, double** jacobians) const
+{
+    return constraint_ptr_->evaluate(parameters, residuals, jacobians);
+}
 
 } // namespace wolf
 

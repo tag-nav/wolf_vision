@@ -6,9 +6,9 @@
  */
 
 
+#include "../constraint_pose_3D.h"
 #include "utils_gtest.h"
 
-#include "constraint_fix_3D.h"
 #include "capture_motion.h"
 
 #include "ceres_wrapper/ceres_manager.h"
@@ -44,12 +44,12 @@ FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeS
 // Capture, feature and constraint
 CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>(0, nullptr, pose7, 7, 6, nullptr));
 FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("ODOM 3D", pose7, data_cov));
-ConstraintFix3DPtr ctr0 = std::static_pointer_cast<ConstraintFix3D>(fea0->addConstraint(std::make_shared<ConstraintFix3D>(fea0)));
+ConstraintPose3DPtr ctr0 = std::static_pointer_cast<ConstraintPose3D>(fea0->addConstraint(std::make_shared<ConstraintPose3D>(fea0)));
 
 
 ////////////////////////////////////////////////////////
 
-TEST(ConstraintFix3D, check_tree)
+TEST(ConstraintPose3D, check_tree)
 {
     ASSERT_TRUE(problem->check(0));
 }
@@ -59,7 +59,7 @@ TEST(ConstraintFix3D, check_tree)
 //    ASSERT_EIGEN_APPROX(ctr0->expectation() , delta);
 //}
 
-TEST(ConstraintFix3D, solve)
+TEST(ConstraintPose3D, solve)
 {
 
     // Fix frame 0, perturb frm1

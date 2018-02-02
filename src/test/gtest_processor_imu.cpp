@@ -353,96 +353,6 @@ TEST_F(ProcessorIMUt, acc_z)
     ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibrationPreint() , b, wolf::Constants::EPS);
 }
 
-//TEST_F(ProcessorIMUt, acc_xyz)
-//{
-//    /* Here again the error seems to be in the discretization.
-//     * integrating over 10s with a dt of 0.001s lead to an error in velocity of order 1e-3.
-//     * The smaller is the time step the more precise is the integration
-//     * Same conclusion for position
-//     */
-//
-//    Vector3s tmp_a_vec; //will be used to store IMU acceleration data
-//    Vector3s w_vec((Vector3s()<<0,0,0).finished());
-//    wolf::Scalar time = 0;
-//    const wolf::Scalar x_freq = 2;
-//    const wolf::Scalar y_freq = 1;
-//    const wolf::Scalar z_freq = 4;
-//
-//    wolf::Scalar tmp_ax, tmp_ay, tmp_az;
-//    /*
-//        From evolution of position we determine the acceleration :
-//        x = sin(x_freq*t);
-//        y = sin(y_freq*t);
-//        z = sin(z_freq*t);
-//
-//        corresponding acceleration
-//        ax = - (x_freq * x_freq) * sin(x_freq * t);
-//        ay = - (y_freq * y_freq) * sin(y_freq * t);
-//        az = - (z_freq * z_freq) * sin(z_freq * t);
-//
-//        Notice that in this case, initial velocity is given exactly as :
-//        initial_vx = x_freq;
-//        initial_vy = y_freq;
-//        initial_vz = z_freq;
-//     */
-//
-//    t.set(0); // clock in 0,1 ms ticks
-//    x0 << 0,0,0,  0,0,0,1,  x_freq,y_freq,z_freq;
-//
-//    problem->getProcessorMotionPtr()->setOrigin(x0, t);
-//
-//    const wolf::Scalar dt = 0.0001;
-//
-//    // This test is for pure translation -> no rotation ==> constant rate of turn vector = [0,0,0]
-//    data.tail(3) = w_vec;
-//
-//    for(unsigned int data_iter = 0; data_iter <= 1000; data_iter ++)
-//    {
-//        tmp_ax = - (x_freq * x_freq) * sin(x_freq * time);
-//        tmp_ay = - (y_freq * y_freq) * sin(y_freq * time);
-//        tmp_az = - (z_freq * z_freq) * sin(z_freq * time);
-//        tmp_a_vec << tmp_ax, tmp_ay, tmp_az;
-//
-//        Quaternions rot(problem->getCurrentState().data()+3); //should always be identity quaternion here...
-//        data.head(3) =  tmp_a_vec + rot.conjugate() * (- wolf::gravity()); //gravity measured
-//
-//        cap_imu_ptr->setData(data);
-//        cap_imu_ptr->setTimeStamp(time);
-//        sensor_ptr->process(cap_imu_ptr);
-//
-//        time += dt;
-//    }
-//    time -= dt; //to get final time
-//
-//    /* We should not have turned : final quaternion must be identity quaternion [0,0,0,1]
-//     * We integrated over 1 s :
-//     * x = sin(x_freq * 1)
-//     * y = sin(y_freq * 1)
-//     * z = sin(z_freq * 1)
-//
-//     * Velocity is given by first derivative :
-//     * vx = x_freq * cos(x_freq * 1)
-//     * vy = y_freq * cos(y_freq * 1)
-//     * vz = z_freq * cos(z_freq * 1)
-//     */
-//
-//    VectorXs x(10);
-//    wolf::Scalar exp_px = sin(x_freq * time);
-//    wolf::Scalar exp_py = sin(y_freq * time);
-//    wolf::Scalar exp_pz = sin(z_freq * time);
-//
-//    wolf::Scalar exp_vx = x_freq * cos(x_freq * time);
-//    wolf::Scalar exp_vy = y_freq * cos(y_freq * time);
-//    wolf::Scalar exp_vz = z_freq * cos(z_freq * time);
-//
-//    x << exp_px,exp_py,exp_pz, 0,0,0,1, exp_vx,exp_vy,exp_vz;
-//    Vector6s b; b << 0,0,0, 0,0,0;
-//
-//    //check velocity and bias parts
-//    ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, 0.0001);// << "current VBB is : \n" << problem->getCurrentState().tail(9).transpose() <<
-////    "\n expected is : \n" << x.tail(9).transpose() << std::endl;
-//
-//}
 
 TEST_F(ProcessorIMUt, check_Covariance)
 {
@@ -462,14 +372,6 @@ TEST_F(ProcessorIMUt, check_Covariance)
 
     ASSERT_FALSE(delta_preint.isMuchSmallerThan(1, wolf::Constants::EPS_SMALL));
 //    ASSERT_MATRIX_APPROX(delta_preint_cov, MatrixXs::Zero(9,9), wolf::Constants::EPS_SMALL); // << "delta_preint_cov :\n" << delta_preint_cov; //covariances computed only at keyframe creation
-}
-
-TEST_F(ProcessorIMUt, Covariances)
-{
-    data_cov.topLeftCorner(3,3)     *= 0.01; // acc variance
-    data_cov.bottomRightCorner(3,3) *= 0.01; // gyro variance
-    cap_imu_ptr->setDataCovariance(data_cov);
-
 }
 
 TEST_F(ProcessorIMUt, gyro_x)

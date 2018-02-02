@@ -1,14 +1,14 @@
 /**
- * \file gtest_constraint_fix.cpp
+ * \file gtest_constraint_pose_2D.cpp
  *
  *  Created on: Mar 30, 2017
  *      \author: jsola
  */
 
 
+#include "../constraint_pose_2D.h"
 #include "utils_gtest.h"
 
-#include "constraint_fix.h"
 #include "capture_motion.h"
 
 #include "ceres_wrapper/ceres_manager.h"
@@ -37,11 +37,11 @@ FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeS
 // Capture, feature and constraint from frm1 to frm0
 CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>(0, nullptr, pose, 3, 3, nullptr));
 FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("ODOM 2D", pose, data_cov));
-ConstraintFixPtr ctr0 = std::static_pointer_cast<ConstraintFix>(fea0->addConstraint(std::make_shared<ConstraintFix>(fea0)));
+ConstraintPose2DPtr ctr0 = std::static_pointer_cast<ConstraintPose2D>(fea0->addConstraint(std::make_shared<ConstraintPose2D>(fea0)));
 
 ////////////////////////////////////////////////////////
 
-TEST(ConstraintFix, check_tree)
+TEST(ConstraintPose2D, check_tree)
 {
     ASSERT_TRUE(problem->check(0));
 }
@@ -51,7 +51,7 @@ TEST(ConstraintFix, check_tree)
 //    ASSERT_EIGEN_APPROX(ctr0->expectation() , delta);
 //}
 
-TEST(ConstraintFix, solve)
+TEST(ConstraintPose2D, solve)
 {
 
     // Fix frame 0, perturb frm1

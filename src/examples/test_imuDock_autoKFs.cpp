@@ -14,12 +14,12 @@
 #include "processor_odom_3D.h"
 
 //Constraints headers
-#include "constraint_fix_3D.h"
 #include "constraint_fix_bias.h"
 
 //std
 #include <iostream>
 #include <fstream>
+#include "../constraint_pose_3D.h"
 
 #define OUTPUT_RESULTS
 //#define AUTO_KFS
@@ -198,7 +198,7 @@ int main(int argc, char** argv)
     featureFix_cov(5,5) = pow( .001 , 2); // yaw variance
     CaptureBasePtr cap_fix = KF1->addCapture(std::make_shared<CaptureMotion>(0, nullptr, problem_origin.head(7), 7, 6, nullptr));
     FeatureBasePtr featureFix = cap_fix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", problem_origin.head(7), featureFix_cov));
-    ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintFix3D>(featureFix->addConstraint(std::make_shared<ConstraintFix3D>(featureFix)));
+    ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintPose3D>(featureFix->addConstraint(std::make_shared<ConstraintPose3D>(featureFix)));
 
     Eigen::MatrixXs featureFixBias_cov(6,6);
     featureFixBias_cov = Eigen::MatrixXs::Identity(6,6); 

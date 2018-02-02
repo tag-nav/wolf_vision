@@ -111,6 +111,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         std::vector<StateBlockPtr>& getStateBlockVec();
         StateBlockPtr getStateBlockPtrStatic(unsigned int _i) const;
         StateBlockPtr getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts);
+        StateBlockPtr getStateBlockPtrAuto(unsigned int _i);
         void setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr);
         void resizeStateBlockVec(int _size);
 
@@ -170,14 +171,6 @@ inline unsigned int SensorBase::id()
     return sensor_id_;
 }
 
-inline ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
-{
-    processor_list_.push_back(_proc_ptr);
-    _proc_ptr->setSensorPtr(shared_from_this());
-    _proc_ptr->setProblem(getProblem());
-    return _proc_ptr;
-}
-
 inline ProcessorBaseList& SensorBase::getProcessorList()
 {
     return processor_list_;
@@ -197,18 +190,6 @@ inline StateBlockPtr SensorBase::getStateBlockPtrStatic(unsigned int _i) const
 {
     assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
     return state_block_vec_[_i];
-}
-
-inline StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts)
-{
-    assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
-    if ( ( (_i < 2) && extrinsicsInCaptures() ) || ( (_i >= 2) && intrinsicsInCaptures() ) )
-    {
-        CaptureBasePtr cap = lastCapture( _ts );
-        return cap->getStateBlockPtr(_i);
-    }
-    else
-        return state_block_vec_[_i];
 }
 
 inline void SensorBase::setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr)

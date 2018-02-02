@@ -22,7 +22,6 @@
 #include "../sensor_laser_2D.h"
 #include "../sensor_odom_2D.h"
 #include "../sensor_gps_fix.h"
-#include "../capture_fix.h"
 #include "../ceres_wrapper/ceres_manager.h"
 
 // laserscanutils
@@ -32,6 +31,7 @@
 //C includes for sleep, time and main args
 #include "unistd.h"
 
+#include "../capture_pose.h"
 //faramotics includes
 #include "faramotics/dynamicSceneRender.h"
 #include "faramotics/rangeScan2D.h"

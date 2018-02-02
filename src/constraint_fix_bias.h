@@ -84,7 +84,7 @@ inline bool ConstraintFixBias::operator ()(const T* const _ab, const T* const _w
 //    {
 //        std::cout << "ConstraintFixBias::Jacobian(c" << id() << ") = \n " << J << std::endl;
 //        std::cout << "ConstraintFixBias::Weighted Jacobian(c" << id() << ") = \n " << J << std::endl;
-//        std::cout << "Sqrt Info(c" << id() << ") = \n " << getMeasurementSquareRootInformationTransposed() << std::endl;
+//        std::cout << "Sqrt Info(c" << id() << ") = \n " << getMeasurementSquareRootInformationUpper() << std::endl;
 //    }
     ////////////////////////////////////////////////////////
 

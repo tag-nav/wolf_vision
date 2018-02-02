@@ -101,7 +101,7 @@ class ConstraintPointToLine2D: public ConstraintAutodiff<ConstraintPointToLine2D
 
     /** \brief Returns a reference to the feature measurement square root information
          **/
-    virtual const Eigen::MatrixXs& getMeasurementSquareRootInformationTransposed() const override
+    virtual const Eigen::MatrixXs& getMeasurementSquareRootInformationUpper() const override
     {
       return measurement_sqrt_information_;
     }

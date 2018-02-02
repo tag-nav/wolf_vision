@@ -30,7 +30,7 @@ std::shared_ptr<ceres::NumericDiffCostFunction<T, ceres::CENTRAL, T::residualSiz
 };
 
 
-std::shared_ptr<ceres::CostFunction> createNumericDiffCostFunction(ConstraintBasePtr _ctr_ptr)
+inline std::shared_ptr<ceres::CostFunction> createNumericDiffCostFunction(ConstraintBasePtr _ctr_ptr)
 {
     switch (_ctr_ptr->getTypeId())
     {

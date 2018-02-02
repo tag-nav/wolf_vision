@@ -23,11 +23,12 @@ namespace wolf {
  */
 struct ProcessorParamsBase
 {
-    ProcessorParamsBase()          = default;
+    ProcessorParamsBase()          {time_tolerance = 0;};
     virtual ~ProcessorParamsBase() = default;
 
     std::string type;
     std::string name;
+    Scalar time_tolerance;
 };
 
 //class ProcessorBase

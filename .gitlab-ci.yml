@@ -1,0 +1,87 @@
+image: segaleran/ceres
+
+cache:
+  key: "$CI_COMMIT_REF_NAME"
+  untracked: true
+  paths:
+    - build
+    - bin
+    - lib
+ 
+before_script:
+  - ls
+  - apt-get update
+  - apt-get install -y build-essential cmake 
+
+# SPDLOG
+#  - apt-get install -y libspdlog-dev
+  - if [ -d spdlog ]; then
+  -   echo "directory exists" 
+  -   if [ "$(ls -A ./spdlog)" ]; then 
+  -     echo "directory not empty" 
+  -     cd spdlog
+  -     git pull
+  -   else 
+  -     echo "directory empty" 
+  -     git clone https://github.com/gabime/spdlog.git
+  -     cd spdlog
+  -   fi
+  - else
+  -   echo "directory inexistent" 
+  -   git clone https://github.com/gabime/spdlog.git
+  -   cd spdlog
+  - fi
+  - mkdir -pv build
+  - cd build
+  - ls
+  - cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" -DSPDLOG_BUILD_TESTING=OFF ..
+  - make install
+  - cd ../..
+
+# YAML
+#  - apt-get install -y libyaml-cpp-dev
+  - if [ -d yaml-cpp ]; then
+  -   echo "directory exists" 
+  -   if [ "$(ls -A ./yaml-cpp)" ]; then 
+  -     echo "directory not empty" 
+  -     cd yaml-cpp
+  -     git pull
+  -   else 
+  -     echo "directory empty" 
+  -     git clone https://github.com/jbeder/yaml-cpp.git
+  -     cd yaml-cpp
+  -   fi
+  - else
+  -   echo "directory inexistent" 
+  -   git clone https://github.com/jbeder/yaml-cpp.git
+  -   cd yaml-cpp
+  - fi
+  - mkdir -pv build
+  - cd build
+  - ls
+  - cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" -DYAML_CPP_BUILD_TESTS=OFF ..
+  - make install
+  - cd ../..
+
+wolf_build:
+  stage: build
+#  only:
+#    - renameFixPose
+  except:
+    - master
+  script:
+    - mkdir -pv build
+    - cd build
+    - ls # we can check whether the directory was already full
+    - cmake -DCMAKE_BUILD_TYPE=release ..
+    - make
+
+wolf_test:
+  stage: test
+#  only:
+#    - renameFixPose
+  except:
+    - master
+  script:
+    - cd build
+    - ctest

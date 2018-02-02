@@ -330,10 +330,10 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     J_err_corr.block(3,3,3,3) = J_do_dq2;
 
     // 4. Residuals are the weighted errors
-    _res.head(9)       = J_err_corr.inverse().transpose() * getMeasurementSquareRootInformationTransposed().cast<T>() * d_error;
+    _res.head(9)       = J_err_corr.inverse().transpose() * getMeasurementSquareRootInformationUpper().cast<T>() * d_error;
 #else
     imu::diff(dp_exp, dq_exp, dv_exp, dp_correct, dq_correct, dv_correct, dp_error, do_error, dv_error);
-    _res.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * d_error;
+    _res.head(9)       = getMeasurementSquareRootInformationUpper().cast<T>() * d_error;
 #endif
 
 #else // method 2
@@ -351,7 +351,7 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     d_error << d_diff - d_step;
 
     // 4. Residuals are the weighted errors
-    _res.head(9)       = getMeasurementSquareRootInformationTransposed().cast<T>() * d_error;
+    _res.head(9)       = getMeasurementSquareRootInformationUpper().cast<T>() * d_error;
 
 #endif
 

@@ -1,6 +1,6 @@
 
-#ifndef CONSTRAINT_FIX_3D_H_
-#define CONSTRAINT_FIX_3D_H_
+#ifndef CONSTRAINT_POSE_3D_H_
+#define CONSTRAINT_POSE_3D_H_
 
 //Wolf includes
 #include "constraint_autodiff.h"
@@ -10,20 +10,20 @@
 
 namespace wolf {
 
-WOLF_PTR_TYPEDEFS(ConstraintFix3D);
+WOLF_PTR_TYPEDEFS(ConstraintPose3D);
 
 //class
-class ConstraintFix3D: public ConstraintAutodiff<ConstraintFix3D,6,3,4>
+class ConstraintPose3D: public ConstraintAutodiff<ConstraintPose3D,6,3,4>
 {
     public:
 
-        ConstraintFix3D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAutodiff<ConstraintFix3D,6,3,4>(CTR_FIX_3D, nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+        ConstraintPose3D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintAutodiff<ConstraintPose3D,6,3,4>(CTR_POSE_3D, nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
             setType("FIX3D");
         }
 
-        virtual ~ConstraintFix3D() = default;
+        virtual ~ConstraintPose3D() = default;
 
         template<typename T>
         bool operator ()(const T* const _p, const T* const _o, T* _residuals) const;
@@ -36,7 +36,7 @@ class ConstraintFix3D: public ConstraintAutodiff<ConstraintFix3D,6,3,4>
 };
 
 template<typename T>
-inline bool ConstraintFix3D::operator ()(const T* const _p, const T* const _o, T* _residuals) const
+inline bool ConstraintPose3D::operator ()(const T* const _p, const T* const _o, T* _residuals) const
 {
 
     // states

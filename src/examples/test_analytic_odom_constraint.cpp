@@ -238,7 +238,7 @@ int main(int argc, char** argv)
                     bNum.clear();
 
                     // add capture, feature and constraint to problem
-                    FeatureBasePtr feature_ptr_autodiff = new FeatureBase("FIX", edge_vector, edge_information.inverse());
+                    FeatureBasePtr feature_ptr_autodiff = new FeatureBase("POSE", edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_autodiff = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_autodiff.find(edge_old) != index_2_frame_ptr_autodiff.end() && "edge from vertex not added!");
                     FrameBasePtr frame_old_ptr_autodiff = index_2_frame_ptr_autodiff[edge_old];
@@ -251,7 +251,7 @@ int main(int argc, char** argv)
                     //std::cout << "Added autodiff edge! " << constraint_ptr_autodiff->id() << " from vertex " << constraint_ptr_autodiff->getCapturePtr()->getFramePtr()->id() << " to " << constraint_ptr_autodiff->getFrameOtherPtr()->id() << std::endl;
 
                     // add capture, feature and constraint to problem
-                    FeatureBasePtr feature_ptr_analytic = new FeatureBase("FIX", edge_vector, edge_information.inverse());
+                    FeatureBasePtr feature_ptr_analytic = new FeatureBase("POSE", edge_vector, edge_information.inverse());
                     CaptureVoid* capture_ptr_analytic = new CaptureVoid(TimeStamp(0), sensor);
                     assert(index_2_frame_ptr_analytic.find(edge_old) != index_2_frame_ptr_analytic.end() && "edge from vertex not added!");
                     FrameBasePtr frame_old_ptr_analytic = index_2_frame_ptr_analytic[edge_old];

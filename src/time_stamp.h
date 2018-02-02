@@ -157,14 +157,6 @@ class TimeStamp
 
 };
 
-
-inline void TimeStamp::setToNow()
-{
-    timeval ts;
-    gettimeofday(&ts, NULL);
-    time_stamp_ = (Scalar)(ts.tv_sec) + (Scalar)(ts.tv_usec) / 1e6;
-}
-
 inline void TimeStamp::set(const Scalar ts)
 {
     time_stamp_ = ts;
@@ -183,20 +175,6 @@ inline void TimeStamp::set(const timeval& ts)
 inline Scalar TimeStamp::get() const
 {
     return time_stamp_;
-}
-
-inline unsigned long int TimeStamp::getSeconds() const
-{
-    unsigned long int ts;
-    ts = (unsigned long int)((floor(time_stamp_)));
-    return ts;
-}
-
-inline unsigned long int TimeStamp::getNanoSeconds() const
-{
-    Scalar ts;
-    ts = (Scalar)((floor(time_stamp_)));
-    return (unsigned long int)((time_stamp_ - ts) * 1e9);
 }
 
 inline void TimeStamp::operator =(const TimeStamp& ts)

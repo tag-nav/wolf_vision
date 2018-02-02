@@ -5,7 +5,7 @@
 namespace wolf {
 
 HardwareBase::HardwareBase() :
-        NodeBase("HARDWARE")
+        NodeBase("HARDWARE", "Base")
 {
 //    std::cout << "constructed H" << std::endl;
 }

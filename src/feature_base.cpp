@@ -67,6 +67,13 @@ FrameBasePtr FeatureBase::getFramePtr() const
     return capture_ptr_.lock()->getFramePtr();
 }
 
+ConstraintBasePtr FeatureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.push_back(_ctr_ptr);
+    _ctr_ptr->setFeatureOtherPtr(shared_from_this());
+    return _ctr_ptr;
+}
+
 ConstraintBaseList& FeatureBase::getConstraintList()
 {
     return constraint_list_;
@@ -79,9 +86,14 @@ void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 {
-    assert(_meas_cov.determinant() > 0 && "Not positive definite measurement covariance");
+    if (_meas_cov.determinant() < Constants::EPS_SMALL)
+    {
+        Eigen::MatrixXs eps = Eigen::MatrixXs::Identity(_meas_cov.rows(), _meas_cov.cols()) * 1e-10;
+        measurement_covariance_ = _meas_cov + eps; // avoid singular covariance
+    }
+    else
+        measurement_covariance_ = _meas_cov;
 
-    measurement_covariance_ = _meas_cov;
 	measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_cov);
 }
 

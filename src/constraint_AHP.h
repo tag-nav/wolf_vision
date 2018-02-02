@@ -186,7 +186,7 @@ inline bool ConstraintAHP::operator ()(const T* const _current_frame_p,
 
     // residual
     Eigen::Map<Eigen::Matrix<T, 2, 1> > residuals(_residuals);
-    residuals = getMeasurementSquareRootInformationTransposed().cast<T>() * (expected - measured);
+    residuals = getMeasurementSquareRootInformationUpper().cast<T>() * (expected - measured);
     return true;
 }
 

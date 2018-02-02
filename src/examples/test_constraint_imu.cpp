@@ -1,4 +1,5 @@
 //Wolf
+#include "../capture_pose.h"
 #include "wolf.h"
 #include "problem.h"
 #include "sensor_imu.h"
@@ -7,7 +8,6 @@
 #include "state_block.h"
 #include "state_quaternion.h"
 #include "processor_imu.h"
-#include "capture_fix.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 //#define DEBUG_RESULTS
@@ -249,7 +249,7 @@ int main(int argc, char** argv)
     //FrameBasePtr first_frame = wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front();
     wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().front());
     //SensorBasePtr sensorbase = std::make_shared<SensorBase>("ABSOLUTE POSE", nullptr, nullptr, nullptr, 0);
-    //CaptureFixPtr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensorbase, first_frame->getState().head(7), Eigen::Matrix6s::Identity() * 0.01);
+    //CapturePosePtr initial_covariance = std::make_shared<CaptureFix>(TimeStamp(0), sensorbase, first_frame->getState().head(7), Eigen::Matrix6s::Identity() * 0.01);
     //first_frame->addCapture(initial_covariance);
     //initial_covariance->process();
     //std::cout << "initial covariance: constraint " << initial_covariance->getFeatureList().front()->getConstrainedByList().front()->id() << std::endl << initial_covariance->getFeatureList().front()->getMeasurementCovariance() << std::endl;
