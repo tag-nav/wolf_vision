@@ -87,8 +87,11 @@ wolf_test:
     - ctest
 
 gtest_problem:
-  stage: gtest_problem
+  stage: test
+#  only:
+#    - renameFixPose
   except:
     - master
   script: 
-    - ../bin/./gtest_problem
+    - cd bin
+    - ./gtest_problem
