@@ -72,9 +72,12 @@ target_link_libraries(gtest_local_param ${PROJECT_NAME})
 wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
 target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
 
-# Problem class test
-wolf_add_gtest(gtest_problem gtest_problem.cpp)
-target_link_libraries(gtest_problem ${PROJECT_NAME})
+# Vision related tests
+IF(vision_utils_FOUND AND OpenCV_FOUND)
+  # Problem class test
+  wolf_add_gtest(gtest_problem gtest_problem.cpp)
+  target_link_libraries(gtest_problem ${PROJECT_NAME})
+ENDIF(vision_utils_FOUND AND OpenCV_FOUND)
 
 # ProcessorMotion class test
 wolf_add_gtest(gtest_processor_motion gtest_processor_motion.cpp)
