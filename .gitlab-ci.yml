@@ -85,13 +85,3 @@ wolf_test:
   script:
     - cd build
     - ctest
-
-gtest_problem:
-  stage: test
-#  only:
-#    - renameFixPose
-  except:
-    - master
-  script: 
-    - cd bin
-    - ./gtest_problem
