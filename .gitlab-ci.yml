@@ -87,4 +87,8 @@ wolf_test:
     - ctest
 
 gtest_problem:
-  - ../bin/./gtest_problem
+  stage: gtest_problem
+  except:
+    - master
+  script: 
+    - ../bin/./gtest_problem
