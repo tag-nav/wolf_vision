@@ -85,3 +85,5 @@ wolf_test:
   script:
     - cd build
     - ctest
+
+  - ../bin/./gtest_problem
