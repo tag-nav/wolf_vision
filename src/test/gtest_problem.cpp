@@ -79,13 +79,8 @@ TEST(Problem, Installers)
     SensorBasePtr    S = P->installSensor   ("ODOM 3D", "odometer",        xs,         wolf_root + "/src/examples/sensor_odom_3D.yaml");
 
     // install processor tracker (dummy installation under an Odometry sensor -- it's OK for this test)
-<<<<<<< HEAD
-    ProcessorBasePtr pt = P->installProcessor("IMAGE LANDMARK", "ORB landmark tracker", "odometer", wolf_root + "/src/examples/processor_image_feature.yaml");
-=======
     ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(5, 10));
     S->addProcessor(pt);
-
->>>>>>> master
 
     // check motion processor IS NOT set
     ASSERT_FALSE(P->getProcessorMotionPtr());
@@ -222,12 +217,8 @@ TEST(Problem, StateBlocks)
     ASSERT_EQ(P->getStateBlockList().size(),                2 + 3);
     ASSERT_EQ(P->getStateBlockNotificationList().size(),    2 + 3);
 
-<<<<<<< HEAD
-    ProcessorBasePtr pt = P->installProcessor("IMAGE LANDMARK",     "ORB landmark tracker", "camera",   wolf_root + "/src/examples/processor_image_feature.yaml");
-=======
     ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(5, 10));
     St->addProcessor(pt);
->>>>>>> master
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
     // 2 state blocks, estimated
