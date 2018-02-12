@@ -3,9 +3,10 @@ image: segaleran/ceres
 test_kk:
   stage: build
   variables: 
-    - KK: 'echo $CI_COMMIT_REF_NAME'
+    KK: 'echo $CI_COMMIT_REF_NAME'
   script:
     - 'eval $KK' 
+
 
 before_script:
   - ls
