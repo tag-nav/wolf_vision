@@ -57,14 +57,6 @@ before_script:
 
 wolf_build_and_test:
   stage: build
-#  cache:
-#    #key: "$CI_COMMIT_REF_NAME"
-#    untracked: true
-#    paths:
-#      - build
-#      - bin
-#      - lib
-#    policy: push
   except:
     - master
   script:
@@ -74,19 +66,3 @@ wolf_build_and_test:
     - cmake -DCMAKE_BUILD_TYPE=release ..
     - make
     - ctest
-
-#wolf_test:
-#  stage: test
-#  cache:
-#    #key: "$CI_COMMIT_REF_NAME"
-#    untracked: true
-#    paths:
-#      - build
-#      - bin
-#      - lib
-#    policy: pull
-#  except:
-#    - master
-#  script:
-#    - cd build
-#    - ctest
