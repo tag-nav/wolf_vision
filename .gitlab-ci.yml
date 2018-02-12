@@ -1,13 +1,5 @@
 image: segaleran/ceres
 
-cache:
-  key: "$CI_COMMIT_REF_NAME"
-  untracked: true
-  paths:
-    - build
-    - bin
-    - lib
- 
 before_script:
   - ls
   - apt-get update
@@ -65,8 +57,14 @@ before_script:
 
 wolf_build:
   stage: build
-#  only:
-#    - renameFixPose
+  cache:
+    #key: "$CI_COMMIT_REF_NAME"
+    untracked: true
+    paths:
+      - build
+      - bin
+      - lib
+    policy: push
   except:
     - master
   script:
@@ -78,8 +76,14 @@ wolf_build:
 
 wolf_test:
   stage: test
-#  only:
-#    - renameFixPose
+  cache:
+    #key: "$CI_COMMIT_REF_NAME"
+    untracked: true
+    paths:
+      - build
+      - bin
+      - lib
+    policy: pull
   except:
     - master
   script:
