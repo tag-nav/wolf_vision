@@ -72,6 +72,10 @@ target_link_libraries(gtest_local_param ${PROJECT_NAME})
 wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
 target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
 
+# Problem class test
+wolf_add_gtest(gtest_problem gtest_problem.cpp)
+target_link_libraries(gtest_problem ${PROJECT_NAME})
+
 # ProcessorMotion class test
 wolf_add_gtest(gtest_processor_motion gtest_processor_motion.cpp)
 target_link_libraries(gtest_processor_motion ${PROJECT_NAME})
@@ -144,10 +148,6 @@ target_link_libraries(gtest_constraint_autodiff ${PROJECT_NAME})
 
 # ROI test
 IF(OpenCV_FOUND)
-  # Problem class test
-  wolf_add_gtest(gtest_problem gtest_problem.cpp)
-  target_link_libraries(gtest_problem ${PROJECT_NAME})
-
   wolf_add_gtest(gtest_roi_ORB gtest_roi_ORB.cpp)
   target_link_libraries(gtest_roi_ORB ${PROJECT_NAME})
 ENDIF(OpenCV_FOUND)

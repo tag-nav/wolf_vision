@@ -9,6 +9,8 @@
 #define WOLF_LOGGING_H_
 
 // third_party include
+#include <map>
+
 // spdlog include
 #include "spdlog/spdlog.h"
 // enable the use of ostream operator<<
