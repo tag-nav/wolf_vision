@@ -55,10 +55,13 @@ before_script:
   - make install
   - cd ../..
 
+variables:
+  DATE: "echo `date`"
+
 wolf_build:
   stage: build
   cache:
-    key: "$CI_PIPELINE_ID"
+    key: 'eval ${DATE}'
     #key: kk
     untracked: true
     paths:
@@ -69,6 +72,7 @@ wolf_build:
   except:
     - master
   script:
+    - eval ${DATE}
     - mkdir -pv build
     - cd build
     - ls # we can check whether the directory was already full
@@ -78,7 +82,8 @@ wolf_build:
 wolf_test:
   stage: test
   cache:
-    key: "$CI_PIPELINE_ID"
+    key: 'eval ${DATE}'
+    #key: "$CI_PIPELINE_ID"
     #key: kk
     untracked: true
     paths:
