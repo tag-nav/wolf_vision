@@ -1,5 +1,5 @@
-#ifndef PROCESSOR_IMAGE_FEATURE_H
-#define PROCESSOR_IMAGE_FEATURE_H
+#ifndef PROCESSOR_TRACKER_TRIFOCAL_TENSOR_H
+#define PROCESSOR_TRACKER_TRIFOCAL_TENSOR_H
 
 // Wolf includes
 #include "sensor_camera.h"
@@ -25,10 +25,10 @@
 namespace wolf
 {
 
-WOLF_PTR_TYPEDEFS(ProcessorImageFeature);
+WOLF_PTR_TYPEDEFS(ProcessorTrackerTrifocalTensor);
 
 //class
-class ProcessorImageFeature : public ProcessorTrackerFeature
+class ProcessorTrackerTrifocalTensor : public ProcessorTrackerFeature
 {
     protected:
 
@@ -61,8 +61,8 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
 
-        ProcessorImageFeature(ProcessorParamsImage _params);
-        virtual ~ProcessorImageFeature();
+        ProcessorTrackerTrifocalTensor(ProcessorParamsImage _params);
+        virtual ~ProcessorTrackerTrifocalTensor();
 
         virtual void setup(SensorCameraPtr _camera_ptr);
 
@@ -160,11 +160,11 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 
 };
 
-inline bool ProcessorImageFeature::voteForKeyFrame()
+inline bool ProcessorTrackerTrifocalTensor::voteForKeyFrame()
 {
     return (incoming_ptr_->getFeatureList().size() < params_.algorithm.min_features_for_keyframe);
 }
 
 } // namespace wolf
 
-#endif // PROCESSOR_IMAGE_FEATURE_H
+#endif // PROCESSOR_TRACKER_TRIFOCAL_TENSOR_H

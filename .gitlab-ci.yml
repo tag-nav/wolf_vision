@@ -58,7 +58,7 @@ before_script:
 wolf_build:
   stage: build
   cache:
-    key: $CI_COMMIT_REF_NAME
+    key: "$CI_PIPELINE_ID"
     #key: kk
     untracked: true
     paths:
@@ -78,7 +78,7 @@ wolf_build:
 wolf_test:
   stage: test
   cache:
-    key: $CI_COMMIT_REF_NAME
+    key: "$CI_PIPELINE_ID"
     #key: kk
     untracked: true
     paths:

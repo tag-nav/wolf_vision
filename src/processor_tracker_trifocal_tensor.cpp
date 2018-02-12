@@ -1,14 +1,12 @@
 // Wolf includes
-#include "processor_image_feature.h"
-
-// other includes
+#include <processor_tracker_trifocal_tensor.h>
 #include <bitset>
 #include <algorithm>
 
 namespace wolf
 {
 
-ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
+ProcessorTrackerTrifocalTensor::ProcessorTrackerTrifocalTensor(ProcessorParamsImage _params) :
     ProcessorTrackerFeature("IMAGE", _params.algorithm.max_new_features),
     params_(_params)
 {
@@ -89,12 +87,12 @@ ProcessorImageFeature::ProcessorImageFeature(ProcessorParamsImage _params) :
 }
 
 //Destructor
-ProcessorImageFeature::~ProcessorImageFeature()
+ProcessorTrackerTrifocalTensor::~ProcessorTrackerTrifocalTensor()
 {
     //
 }
 
-void ProcessorImageFeature::setup(SensorCameraPtr _camera_ptr)
+void ProcessorTrackerTrifocalTensor::setup(SensorCameraPtr _camera_ptr)
 {
     image_.width_ = _camera_ptr->getImgWidth();
     image_.height_ = _camera_ptr->getImgHeight();
@@ -102,7 +100,7 @@ void ProcessorImageFeature::setup(SensorCameraPtr _camera_ptr)
     active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight(), det_ptr_->getPatternRadius());
 }
 
-void ProcessorImageFeature::preProcess()
+void ProcessorTrackerTrifocalTensor::preProcess()
 {
     image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
 
@@ -117,11 +115,11 @@ void ProcessorImageFeature::preProcess()
     tracker_target_.clear();
 }
 
-void ProcessorImageFeature::postProcess()
+void ProcessorTrackerTrifocalTensor::postProcess()
 {
 }
 
-unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
+unsigned int ProcessorTrackerTrifocalTensor::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
                                            FeatureMatchMap& _feature_matches)
 {
     KeyPointVector candidate_keypoints;
@@ -176,7 +174,7 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
     return _feature_list_out.size();
 }
 
-bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
+bool ProcessorTrackerTrifocalTensor::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
 {
     DMatchVector matches_mat;
     FeaturePointImagePtr feat_incoming_ptr = std::static_pointer_cast<FeaturePointImage>(_incoming_feature);
@@ -231,7 +229,7 @@ bool ProcessorImageFeature::correctFeatureDrift(const FeatureBasePtr _origin_fea
     }
 }
 
-unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_new_features)
+unsigned int ProcessorTrackerTrifocalTensor::detectNewFeatures(const unsigned int& _max_new_features)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -286,14 +284,14 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
 
 //============================================================
 
-Scalar ProcessorImageFeature::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
+Scalar ProcessorTrackerTrifocalTensor::match(cv::Mat _target_descriptor, cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
 {
     mat_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
     Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/(des_ptr_->getSize()*8);
     return normalized_score;
 }
 
-ConstraintBasePtr ProcessorImageFeature::createConstraint(FeatureBasePtr _feature_ptr,
+ConstraintBasePtr ProcessorTrackerTrifocalTensor::createConstraint(FeatureBasePtr _feature_ptr,
                                                           FeatureBasePtr _feature_other_ptr)
 {
     ConstraintEpipolarPtr const_epipolar_ptr = std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr,
@@ -303,7 +301,7 @@ ConstraintBasePtr ProcessorImageFeature::createConstraint(FeatureBasePtr _featur
     return const_epipolar_ptr;
 }
 
-unsigned int ProcessorImageFeature::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
+unsigned int ProcessorTrackerTrifocalTensor::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
                                     cv::Mat& new_descriptors)
 {
     _new_keypoints = det_ptr_->detect(_image, _roi);
@@ -311,7 +309,7 @@ unsigned int ProcessorImageFeature::detect(cv::Mat _image, cv::Rect& _roi, std::
     return _new_keypoints.size();
 }
 
-void ProcessorImageFeature::resetVisualizationFlag(FeatureBaseList& _feature_list_last)
+void ProcessorTrackerTrifocalTensor::resetVisualizationFlag(FeatureBaseList& _feature_list_last)
 {
     for (auto feature_base_last_ptr : _feature_list_last)
     {
@@ -322,7 +320,7 @@ void ProcessorImageFeature::resetVisualizationFlag(FeatureBaseList& _feature_lis
 
 // draw functions ===================================================================
 
-void ProcessorImageFeature::drawTarget(cv::Mat _image, std::list<cv::Point> _target_list)
+void ProcessorTrackerTrifocalTensor::drawTarget(cv::Mat _image, std::list<cv::Point> _target_list)
 {
     if (last_ptr_!=nullptr)
     {
@@ -332,7 +330,7 @@ void ProcessorImageFeature::drawTarget(cv::Mat _image, std::list<cv::Point> _tar
     }
 }
 
-void ProcessorImageFeature::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
+void ProcessorTrackerTrifocalTensor::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
 {
     if (last_ptr_!=nullptr)
     {
@@ -341,7 +339,7 @@ void ProcessorImageFeature::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_lis
     }
 }
 
-void ProcessorImageFeature::drawFeatures(cv::Mat _image)
+void ProcessorTrackerTrifocalTensor::drawFeatures(cv::Mat _image)
 {
     if (last_ptr_!=nullptr)
     {
@@ -377,9 +375,9 @@ void ProcessorImageFeature::drawFeatures(cv::Mat _image)
 }
 
 
-ProcessorBasePtr ProcessorImageFeature::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
+ProcessorBasePtr ProcessorTrackerTrifocalTensor::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
 {
-    ProcessorImageFeaturePtr prc_ptr = std::make_shared<ProcessorImageFeature>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
+    ProcessorTrackerTrifocalTensorPtr prc_ptr = std::make_shared<ProcessorTrackerTrifocalTensor>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
@@ -391,6 +389,6 @@ ProcessorBasePtr ProcessorImageFeature::create(const std::string& _unique_name, 
 // Register in the SensorFactory
 #include "processor_factory.h"
 namespace wolf {
-WOLF_REGISTER_PROCESSOR("IMAGE FEATURE", ProcessorImageFeature)
+WOLF_REGISTER_PROCESSOR("IMAGE FEATURE", ProcessorTrackerTrifocalTensor)
 } // namespace wolf
 

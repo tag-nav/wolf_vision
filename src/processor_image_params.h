@@ -1,6 +1,8 @@
 #ifndef PROCESSOR_IMAGE_PARAMS_H
 #define PROCESSOR_IMAGE_PARAMS_H
 
+#include "wolf.h"
+
 // Vision utils
 #include <vision_utils.h>
 #include <vision_utils/detectors.h>
