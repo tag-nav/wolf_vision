@@ -1,13 +1,5 @@
 image: segaleran/ceres
 
-#cache:
-#  key: "$CI_COMMIT_REF_NAME"
-#  untracked: true
-#  paths:
-#    - build
-#    - bin
-#    - lib
- 
 before_script:
   - ls
   - apt-get update
@@ -76,11 +68,12 @@ wolf_build:
   except:
     - master
   script:
-    - mkdir -pv build
-    - cd build
-    - ls # we can check whether the directory was already full
-    - cmake -DCMAKE_BUILD_TYPE=release ..
-    - make
+    - echo $CI_COMMIT_REF_NAME
+    #- mkdir -pv build
+    #- cd build
+    #- ls # we can check whether the directory was already full
+    #- cmake -DCMAKE_BUILD_TYPE=release ..
+    #- make
 
 wolf_test:
   stage: test
