@@ -32,6 +32,10 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 {
     protected:
 
+        // Add all vars related to middle capture
+        CaptureBasePtr middle_ptr_;             ///< Pointer to the middle capture of the tracker.
+        FeatureBaseList new_features_middle_;   ///< List of new features in \b middle for new key-frame creation.
+
 		vision_utils::DetectorBasePtr det_ptr_;
 		vision_utils::DescriptorBasePtr des_ptr_;
 		vision_utils::MatcherBasePtr mat_ptr_;

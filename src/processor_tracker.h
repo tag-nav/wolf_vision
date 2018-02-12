@@ -72,8 +72,6 @@ class ProcessorTracker : public ProcessorBase
         CaptureBasePtr last_ptr_;               ///< Pointer to the last tracked capture.
         CaptureBasePtr incoming_ptr_;           ///< Pointer to the incoming capture being processed.
         unsigned int max_new_features_;         ///< max features allowed to detect in one iteration. 0 = no limit
-        FeatureBaseList new_features_last_;     ///< List of new features in \b last for landmark initialization and new key-frame creation.
-        FeatureBaseList new_features_incoming_; ///< list of the new features of \b last successfully tracked in \b incoming
 
     public:
         ProcessorTracker(const std::string& _type, const unsigned int _max_new_features = 0, const Scalar& _time_tolerance = 0.1);
@@ -178,18 +176,6 @@ class ProcessorTracker : public ProcessorBase
         /** \brief Reset the tracker using the \b last Capture as the new \b origin.
          */
         virtual void reset() = 0;
-
-    public:
-
-        FeatureBaseList& getNewFeaturesListLast();
-
-    protected:
-
-        void addNewFeatureLast(FeatureBasePtr _feature_ptr);
-
-        FeatureBaseList& getNewFeaturesListIncoming();
-
-        void addNewFeatureIncoming(FeatureBasePtr _feature_ptr);
 };
 
 inline void ProcessorTracker::setMaxNewFeatures(const unsigned int& _max_new_features)
@@ -200,26 +186,6 @@ inline void ProcessorTracker::setMaxNewFeatures(const unsigned int& _max_new_fea
 inline unsigned int ProcessorTracker::getMaxNewFeatures()
 {
     return max_new_features_;
-}
-
-inline FeatureBaseList& ProcessorTracker::getNewFeaturesListLast()
-{
-    return new_features_last_;
-}
-
-inline void ProcessorTracker::addNewFeatureLast(FeatureBasePtr _feature_ptr)
-{
-    new_features_last_.push_back(_feature_ptr);
-}
-
-inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
-{
-    return new_features_incoming_;
-}
-
-inline void ProcessorTracker::addNewFeatureIncoming(FeatureBasePtr _feature_ptr)
-{
-    new_features_incoming_.push_back(_feature_ptr);
 }
 
 inline CaptureBasePtr ProcessorTracker::getOriginPtr()

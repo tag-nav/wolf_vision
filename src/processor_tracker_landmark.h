@@ -77,6 +77,9 @@ class ProcessorTrackerLandmark : public ProcessorTracker
 
     protected:
 
+        FeatureBaseList new_features_last_;     ///< List of new features in \b last for landmark initialization and new key-frame creation.
+        FeatureBaseList new_features_incoming_; ///< list of the new features of \b last successfully tracked in \b incoming
+
         LandmarkBaseList new_landmarks_;        ///< List of new detected landmarks
         LandmarkMatchMap matches_landmark_from_incoming_;
         LandmarkMatchMap matches_landmark_from_last_;
@@ -161,7 +164,38 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          */
         virtual void establishConstraints();
 
+    public:
+
+        FeatureBaseList& getNewFeaturesListLast();
+
+    protected:
+
+        void addNewFeatureLast(FeatureBasePtr _feature_ptr);
+
+        FeatureBaseList& getNewFeaturesListIncoming();
+
+        void addNewFeatureIncoming(FeatureBasePtr _feature_ptr);
 };
+
+inline FeatureBaseList& ProcessorTrackerLandmark::getNewFeaturesListLast()
+{
+    return new_features_last_;
+}
+
+inline void ProcessorTrackerLandmark::addNewFeatureLast(FeatureBasePtr _feature_ptr)
+{
+    new_features_last_.push_back(_feature_ptr);
+}
+
+inline FeatureBaseList& ProcessorTrackerLandmark::getNewFeaturesListIncoming()
+{
+    return new_features_incoming_;
+}
+
+inline void ProcessorTrackerLandmark::addNewFeatureIncoming(FeatureBasePtr _feature_ptr)
+{
+    new_features_incoming_.push_back(_feature_ptr);
+}
 
 }// namespace wolf
 

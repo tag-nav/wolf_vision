@@ -58,8 +58,8 @@ before_script:
 wolf_build:
   stage: build
   cache:
-    #key: "$CI_COMMIT_REF_NAME"
-    key: kk
+    key: $CI_COMMIT_REF_NAME
+    #key: kk
     untracked: true
     paths:
       - build
@@ -78,8 +78,8 @@ wolf_build:
 wolf_test:
   stage: test
   cache:
-    #key: "$CI_COMMIT_REF_NAME"
-    key: kk
+    key: $CI_COMMIT_REF_NAME
+    #key: kk
     untracked: true
     paths:
       - build
