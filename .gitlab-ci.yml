@@ -73,7 +73,7 @@ wolf_build:
     - cd build
     - ls # we can check whether the directory was already full
     - cmake -DCMAKE_BUILD_TYPE=release ..
-    - make
+    #- make
 
 wolf_test:
   stage: test
