@@ -1,7 +1,7 @@
 image: segaleran/ceres
 
 cache:
-  key: "$CI_COMMIT_REF_NAME"
+ # key: "$CI_COMMIT_REF_NAME"
   untracked: true
   paths:
     - build
