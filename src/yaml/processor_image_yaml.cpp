@@ -9,8 +9,7 @@
 #include "yaml_conversion.h"
 
 // wolf
-#include "../processor_tracker_trifocal_tensor.h"
-//#include "../processor_image_params.h"
+#include "../processor_image_params.h"
 #include "../factory.h"
 
 // yaml-cpp library
