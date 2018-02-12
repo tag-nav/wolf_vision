@@ -56,7 +56,7 @@ before_script:
   - cd ../..
 
 variables:
-  DATE: "echo `date`"
+  DATE: echo `date`
 
 wolf_build:
   stage: build
