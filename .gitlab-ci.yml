@@ -1,7 +1,7 @@
 image: segaleran/ceres
 
 before_script:
-  - echo "$CI_COMMIT_REF_NAME"
+  - echo ${CI_COMMIT_REF_NAME}
   - ls
   - apt-get update
   - apt-get install -y build-essential cmake 
