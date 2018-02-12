@@ -1,13 +1,5 @@
 image: segaleran/ceres
 
-test_kk:
-  stage: build
-  variables: 
-    KK: 'echo $CI_COMMIT_REF_NAME'
-  script:
-    - 'eval $KK' 
-
-
 before_script:
   - ls
   - apt-get update
@@ -66,7 +58,7 @@ before_script:
 wolf_build:
   stage: build
   cache:
-    key: "$CI_COMMIT_REF_NAME"
+    #key: "$CI_COMMIT_REF_NAME"
     untracked: true
     paths:
       - build
@@ -85,7 +77,7 @@ wolf_build:
 wolf_test:
   stage: test
   cache:
-    key: "$CI_COMMIT_REF_NAME"
+    #key: "$CI_COMMIT_REF_NAME"
     untracked: true
     paths:
       - build
