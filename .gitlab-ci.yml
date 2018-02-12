@@ -56,12 +56,12 @@ before_script:
   - cd ../..
 
 variables:
-  DATE: 'eval ${echo `date`}' 
+  DATE: 'echo `date`' 
 
 wolf_build:
   stage: build
   cache:
-    key: $DATE
+    key: "${DATE}"
     #key: kk
     untracked: true
     paths:
@@ -82,7 +82,7 @@ wolf_build:
 wolf_test:
   stage: test
   cache:
-    key: $DATE
+    key: "${DATE}"
     #key: "$CI_PIPELINE_ID"
     #key: kk
     untracked: true
