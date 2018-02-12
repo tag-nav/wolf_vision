@@ -146,15 +146,6 @@ target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
 wolf_add_gtest(gtest_constraint_autodiff gtest_constraint_autodiff.cpp)
 target_link_libraries(gtest_constraint_autodiff ${PROJECT_NAME})
 
-<<<<<<< HEAD
-=======
-# ROI test
-IF(OpenCV_FOUND)
-  wolf_add_gtest(gtest_roi_ORB gtest_roi_ORB.cpp)
-  target_link_libraries(gtest_roi_ORB ${PROJECT_NAME})
-ENDIF(OpenCV_FOUND)
-
->>>>>>> master
 # ------- Now Core classes Serialization ----------
 
 add_subdirectory(serialization)
