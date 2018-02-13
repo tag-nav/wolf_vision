@@ -31,7 +31,7 @@ ExternalProject_Add(googletest
     PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
     # Disable install step
     INSTALL_COMMAND ""
-    UPDATE_DISCONNECTED 1
+    UPDATE_DISCONNECTED 1 # 1: do not update googletest; 0: update googletest via github
 )
 
 # Get GTest source and binary directories from CMake project
