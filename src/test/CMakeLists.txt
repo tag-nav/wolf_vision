@@ -76,6 +76,10 @@ target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
 wolf_add_gtest(gtest_problem gtest_problem.cpp)
 target_link_libraries(gtest_problem ${PROJECT_NAME})
 
+# ProcessorBase class test
+wolf_add_gtest(gtest_processor_base gtest_processor_base.cpp)
+target_link_libraries(gtest_processor_base ${PROJECT_NAME})
+
 # ProcessorMotion class test
 wolf_add_gtest(gtest_processor_motion gtest_processor_motion.cpp)
 target_link_libraries(gtest_processor_motion ${PROJECT_NAME})

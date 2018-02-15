@@ -6,16 +6,51 @@ namespace wolf{
 class SensorBase;
 }
 
-//Wolf includes
+// Wolf includes
 #include "wolf.h"
 #include "node_base.h"
+#include "time_stamp.h"
 
 // std
 #include <memory>
+#include <map>
 
 namespace wolf {
 
+class KFPack
+{
+    public:
+        KFPack(const FrameBasePtr _key_frame, const Scalar _time_tolerance) : key_frame(_key_frame), time_tolerance(_time_tolerance) {};
+        ~KFPack(){};
+        FrameBasePtr key_frame;
+        Scalar time_tolerance;
+};
 
+WOLF_PTR_TYPEDEFS(KFPack);
+
+class KFPackBuffer
+{
+    public:
+
+        typedef std::map<TimeStamp,KFPackPtr>::iterator Iterator;
+
+        KFPackBuffer(void);
+        ~KFPackBuffer(void);
+
+        KFPackPtr selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
+
+        size_t size(void);
+
+        void add(const FrameBasePtr& _key_frame, const Scalar& _time_tolerance);
+
+        void removeUpTo(const KFPackPtr& _pack);
+
+    private:
+
+        std::map<TimeStamp,KFPackPtr> container_;
+
+        bool checkTimeTolerance(const TimeStamp& _time_stamp1, const Scalar& _time_tolerance1, const TimeStamp& _time_stamp2, const Scalar& _time_tolerance2);
+};
 
 /** \brief base struct for processor parameters
  *
@@ -123,6 +158,26 @@ inline const SensorBasePtr ProcessorBase::getSensorPtr() const
 inline void ProcessorBase::setTimeTolerance(Scalar _time_tolerance)
 {
     time_tolerance_ = _time_tolerance;
+}
+
+inline KFPackBuffer::KFPackBuffer(void)
+{
+
+}
+
+inline KFPackBuffer::~KFPackBuffer(void)
+{
+
+}
+
+inline bool KFPackBuffer::checkTimeTolerance(const TimeStamp& _time_stamp1, const Scalar& _time_tolerance1, const TimeStamp& _time_stamp2, const Scalar& _time_tolerance2)
+{
+    return (std::fabs(_time_stamp1 - _time_stamp2) < std::min(_time_tolerance1, _time_tolerance2) );
+}
+
+inline size_t KFPackBuffer::size(void)
+{
+    return container_.size();
 }
 
 } // namespace wolf

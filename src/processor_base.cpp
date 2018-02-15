@@ -67,4 +67,43 @@ void ProcessorBase::remove()
     }
 }
 
+void KFPackBuffer::removeUpTo(const KFPackPtr& _pack)
+{
+    KFPackBuffer::Iterator post = container_.upper_bound(_pack->key_frame->getTimeStamp());
+    container_.erase(container_.begin(), post); // erasing by range
+}
+
+void KFPackBuffer::add(const FrameBasePtr& _key_frame, const Scalar& _time_tolerance)
+{
+    TimeStamp time_stamp = _key_frame->getTimeStamp();
+    KFPackPtr kfpack = std::make_shared<KFPack>(_key_frame, _time_tolerance);
+    container_.emplace(time_stamp, kfpack);
+}
+
+KFPackPtr KFPackBuffer::selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance)
+{
+    KFPackBuffer::Iterator post = container_.upper_bound(_time_stamp);
+    KFPackBuffer::Iterator prev = container_.begin();
+    if (post != container_.begin())
+        prev = post--;
+
+    if (post == container_.end() && prev != container_.end()
+            && checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance))
+        return prev->second;
+    else if (prev == container_.end() && post != container_.end()
+            && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
+        return post->second;
+    else if (post != container_.end() && prev != container_.end()
+            && checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance)
+            && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
+    {
+        if (std::fabs((*post).first - _time_stamp) < std::fabs((*prev).first - _time_stamp))
+            return post->second;
+        else
+            return prev->second;
+    }
+
+    return nullptr;
+}
+
 } // namespace wolf
