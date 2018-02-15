@@ -302,10 +302,10 @@ ConstraintBasePtr ProcessorTrackerTrifocalTensor::createConstraint(FeatureBasePt
 }
 
 unsigned int ProcessorTrackerTrifocalTensor::detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
-                                    cv::Mat& new_descriptors)
+                                    cv::Mat& _new_descriptors)
 {
     _new_keypoints = det_ptr_->detect(_image, _roi);
-    new_descriptors = des_ptr_->getDescriptor(_image, _new_keypoints);
+    _new_descriptors = des_ptr_->getDescriptor(_image, _new_keypoints);
     return _new_keypoints.size();
 }
 

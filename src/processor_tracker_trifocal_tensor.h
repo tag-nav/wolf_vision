@@ -135,7 +135,7 @@ class ProcessorTrackerTrifocalTensor : public ProcessorTrackerFeature
          * \return the number of detected features
          */
         virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
-                                    cv::Mat& new_descriptors);
+                                    cv::Mat& _new_descriptors);
 
         /**
          * \brief Does the match between a target descriptor and (potentially) multiple candidate descriptors of a Feature.
