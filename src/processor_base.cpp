@@ -83,27 +83,39 @@ void KFPackBuffer::add(const FrameBasePtr& _key_frame, const Scalar& _time_toler
 KFPackPtr KFPackBuffer::selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance)
 {
     KFPackBuffer::Iterator post = container_.upper_bound(_time_stamp);
-    KFPackBuffer::Iterator prev = container_.begin();
+    KFPackBuffer::Iterator prev = container_.end();
+
     if (post != container_.begin())
-        prev = post--;
-
-    if (post == container_.end() && prev != container_.end()
-            && checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance))
-        return prev->second;
-    else if (prev == container_.end() && post != container_.end()
-            && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
-        return post->second;
-    else if (post != container_.end() && prev != container_.end()
-            && checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance)
-            && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
     {
-        if (std::fabs((*post).first - _time_stamp) < std::fabs((*prev).first - _time_stamp))
+        prev = std::prev(post);
+        if (!checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance) && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
             return post->second;
-        else
+        else if (checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance) && !checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
             return prev->second;
+        else if (checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance) && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
+        {
+            if (std::fabs((*post).first - _time_stamp) < std::fabs((*prev).first - _time_stamp))
+                return post->second;
+            else
+                return prev->second;
+        }
     }
-
+    else
+    {
+        if (checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
+            return post->second;
+    }
     return nullptr;
+}
+
+void KFPackBuffer::print(void)
+{
+    std::cout << "[ ";
+    for (auto iter : container_)
+    {
+        std::cout << "( tstamp: " << iter.first << ", id: " << iter.second->key_frame->id() << ") ";
+    }
+    std::cout << "]" << std::endl;
 }
 
 } // namespace wolf

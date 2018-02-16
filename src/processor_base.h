@@ -45,11 +45,17 @@ class KFPackBuffer
 
         void removeUpTo(const KFPackPtr& _pack);
 
+        bool checkTimeTolerance(const TimeStamp& _time_stamp1, const Scalar& _time_tolerance1, const TimeStamp& _time_stamp2, const Scalar& _time_tolerance2);
+
+        void clear();
+
+        bool empty();
+
+        void print();
+
     private:
 
         std::map<TimeStamp,KFPackPtr> container_;
-
-        bool checkTimeTolerance(const TimeStamp& _time_stamp1, const Scalar& _time_tolerance1, const TimeStamp& _time_stamp2, const Scalar& _time_tolerance2);
 };
 
 /** \brief base struct for processor parameters
@@ -173,6 +179,16 @@ inline KFPackBuffer::~KFPackBuffer(void)
 inline bool KFPackBuffer::checkTimeTolerance(const TimeStamp& _time_stamp1, const Scalar& _time_tolerance1, const TimeStamp& _time_stamp2, const Scalar& _time_tolerance2)
 {
     return (std::fabs(_time_stamp1 - _time_stamp2) < std::min(_time_tolerance1, _time_tolerance2) );
+}
+
+inline void KFPackBuffer::clear()
+{
+    container_.clear();
+}
+
+inline bool KFPackBuffer::empty()
+{
+    return container_.empty();
 }
 
 inline size_t KFPackBuffer::size(void)
