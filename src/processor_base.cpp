@@ -92,14 +92,25 @@ KFPackPtr KFPackBuffer::selectPack(const TimeStamp& _time_stamp, const Scalar& _
     KFPackBuffer::Iterator post = container_.upper_bound(_time_stamp);
     KFPackBuffer::Iterator prev = container_.end();
 
+    if (container_.empty())
+        return nullptr;
+
+    bool check_post = (post != container_.end());
+
     if (post != container_.begin())
     {
         prev = std::prev(post);
-        if (!checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance) && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
+        if (!checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance)
+                && check_post
+                && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
             return post->second;
-        else if (checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance) && !checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
+        else if (checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance)
+                && check_post
+                && !checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
             return prev->second;
-        else if (checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance) && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
+        else if (checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance)
+                && check_post
+                && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
         {
             if (std::fabs((*post).first - _time_stamp) < std::fabs((*prev).first - _time_stamp))
                 return post->second;

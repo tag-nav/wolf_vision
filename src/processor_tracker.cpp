@@ -52,11 +52,11 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
 
         // Select using incoming_ptr
-        pack = kf_pack_buffer_.selectPack( incoming_ptr_->getTimeStamp(), time_tolerance_ );
+        pack = kf_pack_buffer_.selectPack( _incoming_ptr->getTimeStamp(), time_tolerance_ );
         if (pack!=nullptr)
         {
             keyFrameCallback(pack->key_frame,pack->time_tolerance);
-            kf_pack_buffer_.removeUpTo( incoming_ptr_->getTimeStamp() );
+            kf_pack_buffer_.removeUpTo( _incoming_ptr->getTimeStamp() );
         }
     }
 
