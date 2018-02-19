@@ -89,40 +89,39 @@ void KFPackBuffer::add(const FrameBasePtr& _key_frame, const Scalar& _time_toler
 
 KFPackPtr KFPackBuffer::selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance)
 {
-    KFPackBuffer::Iterator post = container_.upper_bound(_time_stamp);
-    KFPackBuffer::Iterator prev = container_.end();
-
     if (container_.empty())
         return nullptr;
 
-    bool check_post = (post != container_.end());
+    KFPackBuffer::Iterator post = container_.upper_bound(_time_stamp);
 
-    if (post != container_.begin())
+    bool prev_exists = (post != container_.begin());
+    bool post_exists = (post != container_.end());
+
+    bool post_ok = post_exists && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance);
+
+    if (prev_exists)
     {
-        prev = std::prev(post);
-        if (!checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance)
-                && (check_post
-                        && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance)))
+        KFPackBuffer::Iterator prev = std::prev(post);
+
+        bool prev_ok = checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance);
+
+        if (!prev_ok && post_ok)
             return post->second;
-        else if (checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance)
-                && !(check_post
-                        && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance)))
+
+        else if (prev_ok && !post_ok)
             return prev->second;
-        else if (checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance)
-                && (check_post
-                        && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance)))
+
+        else if (prev_ok && post_ok)
         {
-            if (std::fabs((*post).first - _time_stamp) < std::fabs((*prev).first - _time_stamp))
+            if (std::fabs(post->first - _time_stamp) < std::fabs(prev->first - _time_stamp))
                 return post->second;
             else
                 return prev->second;
         }
     }
-    else
-    {
-        if (checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
-            return post->second;
-    }
+    else if (post_ok)
+        return post->second;
+
     return nullptr;
 }
 
