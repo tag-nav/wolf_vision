@@ -42,103 +42,128 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 {
   if (_incoming_ptr == nullptr)
   {
-    WOLF_ERROR("Process got a nullptr !");
+    WOLF_ERROR("Received capture is nullptr.");
     return;
   }
 
-    if (status_ == IDLE)
-    {
-        TimeStamp t0 = _incoming_ptr->getTimeStamp();
+  if ( !kf_pack_buffer_.empty() )
+  {
+      KFPackPtr pack;
 
-        if (origin_ptr_ == nullptr)
-        {
-            auto frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t0);
-            if (frm && fabs(frm->getTimeStamp() - t0) < time_tolerance_)
-            {
-                std::cout << "PM: join KF" << std::endl;
-                // Join existing KF
-                setOrigin(frm);
-            }
-            else
-            {
-                // Create new KF for origin
-                std::cout << "PM: make KF" << std::endl;
-                VectorXs x0 = getProblem()->zeroState();
-                setOrigin(x0, t0);
-            }
-        }
-        status_ = RUNNING;
-    }
+      // Select using last_ptr
+      if (last_ptr_ != nullptr)
+      {
+          pack = kf_pack_buffer_.selectPack( last_ptr_->getTimeStamp(), time_tolerance_ );
+          if (pack!=nullptr)
+          {
+              keyFrameCallback(pack->key_frame,pack->time_tolerance);
+              kf_pack_buffer_.removeUpTo( last_ptr_->getTimeStamp() );
+          }
+      }
 
-    incoming_ptr_ = std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
-
-    /// @todo Anything else to do ?
-    if (incoming_ptr_ == nullptr) return;
-
-    preProcess();
-
-    // integrate data
-    integrateOneStep();
-
-    // Update state and time stamps
-    last_ptr_->setTimeStamp(incoming_ptr_->getTimeStamp());
-    last_ptr_->getFramePtr()->setTimeStamp(last_ptr_->getTimeStamp());
-    last_ptr_->getFramePtr()->setState(getCurrentState());
-
-    if (voteForKeyFrame() && permittedKeyFrame())
-    {
-        // Set the frame of last_ptr as key
-        auto key_frame_ptr = last_ptr_->getFramePtr();
-        key_frame_ptr->setState(getCurrentState());
-        key_frame_ptr->setTimeStamp(getCurrentTimeStamp());
-        key_frame_ptr->setKey();
-
-        // create motion feature and add it to the key_capture
-        auto key_feature_ptr = emplaceFeature(last_ptr_);
-
-        // create motion constraint and link it to parent feature and other frame (which is origin's frame)
-        auto ctr_ptr = emplaceConstraint(key_feature_ptr, origin_ptr_);
-
-        // create a new frame
-        auto new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
-                                                        getCurrentState(),
-                                                        getCurrentTimeStamp());
-        // create a new capture
-        auto new_capture_ptr = emplaceCapture(new_frame_ptr,
-                                              getSensorPtr(),
-                                              key_frame_ptr->getTimeStamp(),
-                                              Eigen::VectorXs::Zero(data_size_),
-                                              Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                              last_ptr_->getCalibration(),
-                                              last_ptr_->getCalibration(),
-                                              key_frame_ptr);
-        // reset the new buffer
-        new_capture_ptr->getBuffer().get().clear();
-        new_capture_ptr->getBuffer().get().push_back( motionZero(key_frame_ptr->getTimeStamp()) ) ;
-
-        // reset integrals
-        delta_                  = deltaZero();
-        delta_cov_              . setZero();
-        delta_integrated_       = deltaZero();
-        delta_integrated_cov_   . setZero();
-        jacobian_calib_         . setZero();
-
-        // reset processor origin to the new keyframe's capture
-        origin_ptr_     = last_ptr_;
-        last_ptr_       = new_capture_ptr;
-
-        // reset derived things
-        resetDerived();
-
-        // callback to other processors
-        getProblem()->keyFrameCallback(key_frame_ptr, shared_from_this(), time_tolerance_);
-    }
+      // Select using incoming_ptr
+      pack = kf_pack_buffer_.selectPack( incoming_ptr_->getTimeStamp(), time_tolerance_ );
+      if (pack!=nullptr)
+      {
+          keyFrameCallback(pack->key_frame,pack->time_tolerance);
+          kf_pack_buffer_.removeUpTo( incoming_ptr_->getTimeStamp() );
+      }
+  }
 
 
-    postProcess();
+  if (status_ == IDLE)
+  {
+      TimeStamp t0 = _incoming_ptr->getTimeStamp();
 
-    // clear incoming just in case
-    incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+      if (origin_ptr_ == nullptr)
+      {
+          auto frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(t0);
+          if (frm && fabs(frm->getTimeStamp() - t0) < time_tolerance_)
+          {
+              std::cout << "PM: join KF" << std::endl;
+              // Join existing KF
+              setOrigin(frm);
+          }
+          else
+          {
+              // Create new KF for origin
+              std::cout << "PM: make KF" << std::endl;
+              VectorXs x0 = getProblem()->zeroState();
+              setOrigin(x0, t0);
+          }
+      }
+      status_ = RUNNING;
+  }
+
+  incoming_ptr_ = std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
+
+  /// @todo Anything else to do ?
+  if (incoming_ptr_ == nullptr) return;
+
+  preProcess();
+
+  // integrate data
+  integrateOneStep();
+
+  // Update state and time stamps
+  last_ptr_->setTimeStamp(incoming_ptr_->getTimeStamp());
+  last_ptr_->getFramePtr()->setTimeStamp(last_ptr_->getTimeStamp());
+  last_ptr_->getFramePtr()->setState(getCurrentState());
+
+  if (voteForKeyFrame() && permittedKeyFrame())
+  {
+      // Set the frame of last_ptr as key
+      auto key_frame_ptr = last_ptr_->getFramePtr();
+      key_frame_ptr->setState(getCurrentState());
+      key_frame_ptr->setTimeStamp(getCurrentTimeStamp());
+      key_frame_ptr->setKey();
+
+      // create motion feature and add it to the key_capture
+      auto key_feature_ptr = emplaceFeature(last_ptr_);
+
+      // create motion constraint and link it to parent feature and other frame (which is origin's frame)
+      auto ctr_ptr = emplaceConstraint(key_feature_ptr, origin_ptr_);
+
+      // create a new frame
+      auto new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
+                                                      getCurrentState(),
+                                                      getCurrentTimeStamp());
+      // create a new capture
+      auto new_capture_ptr = emplaceCapture(new_frame_ptr,
+                                            getSensorPtr(),
+                                            key_frame_ptr->getTimeStamp(),
+                                            Eigen::VectorXs::Zero(data_size_),
+                                            Eigen::MatrixXs::Zero(data_size_, data_size_),
+                                            last_ptr_->getCalibration(),
+                                            last_ptr_->getCalibration(),
+                                            key_frame_ptr);
+      // reset the new buffer
+      new_capture_ptr->getBuffer().get().clear();
+      new_capture_ptr->getBuffer().get().push_back( motionZero(key_frame_ptr->getTimeStamp()) ) ;
+
+      // reset integrals
+      delta_                  = deltaZero();
+      delta_cov_              . setZero();
+      delta_integrated_       = deltaZero();
+      delta_integrated_cov_   . setZero();
+      jacobian_calib_         . setZero();
+
+      // reset processor origin to the new keyframe's capture
+      origin_ptr_     = last_ptr_;
+      last_ptr_       = new_capture_ptr;
+
+      // reset derived things
+      resetDerived();
+
+      // callback to other processors
+      getProblem()->keyFrameCallback(key_frame_ptr, shared_from_this(), time_tolerance_);
+  }
+
+
+  postProcess();
+
+  // clear incoming just in case
+  incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
 }
 
 void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)

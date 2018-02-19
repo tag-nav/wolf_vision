@@ -5,13 +5,20 @@
  *      Author: asantamaria
  */
 
-
+//Wolf
 #include "utils_gtest.h"
 
-#include "processor_base.h"
+#include "processor_odom_2D.h"
+#include "sensor_odom_2D.h"
+
+#include "processor_tracker_feature_dummy.h"
+#include "capture_void.h"
+
+#include "problem.h"
 
 // STL
 #include <iterator>
+#include <iostream>
 
 using namespace wolf;
 using namespace Eigen;
@@ -148,7 +155,7 @@ TEST_F(KFPackBufferTest, removeUpTo)
     // it should remove f20 and f10, thus size should be 1 after removal
     // Specifically, only f21 should remain
     KFPackPtr pack20 = std::make_shared<KFPack>(f20,tt20);
-    kfpackbuffer.removeUpTo( pack20 );
+    kfpackbuffer.removeUpTo( pack20->key_frame->getTimeStamp() );
     ASSERT_EQ(kfpackbuffer.size(),1);
     ASSERT_TRUE(kfpackbuffer.selectPack(f10->getTimeStamp(),tt10)==nullptr);
     ASSERT_TRUE(kfpackbuffer.selectPack(f20->getTimeStamp(),tt20)==nullptr);
@@ -160,10 +167,83 @@ TEST_F(KFPackBufferTest, removeUpTo)
     ASSERT_EQ(kfpackbuffer.size(),2);
     FrameBasePtr f22 = std::make_shared<FrameBase>(TimeStamp(22),nullptr,nullptr,nullptr);
     KFPackPtr pack22 = std::make_shared<KFPack>(f22,5);
-    kfpackbuffer.removeUpTo( pack22 );
+    kfpackbuffer.removeUpTo( pack22->key_frame->getTimeStamp() );
     ASSERT_EQ(kfpackbuffer.size(),1);
     ASSERT_TRUE(kfpackbuffer.selectPack(f21->getTimeStamp(),tt21)==nullptr);
     ASSERT_TRUE(kfpackbuffer.selectPack(f28->getTimeStamp(),tt28)!=nullptr);
+}
+
+
+TEST(ProcessorBase, KeyFrameCallback)
+{
+
+    using namespace wolf;
+    using std::shared_ptr;
+    using std::make_shared;
+    using std::static_pointer_cast;
+    using Eigen::Vector2s;
+
+    // Wolf problem
+    ProblemPtr problem = Problem::create("PO 2D");
+
+    // Install tracker (sensor and processor)
+    SensorBasePtr sen_tracker = make_shared<SensorBase>("FEATURE", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
+                                             std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
+                                             std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
+    shared_ptr<ProcessorTrackerFeatureDummy> proc_tracker = make_shared<ProcessorTrackerFeatureDummy>(7, 4);
+
+    problem->addSensor(sen_tracker);
+    sen_tracker->addProcessor(proc_tracker);
+
+    // Install odometer (sensor and processor)
+    SensorBasePtr sen_odo = problem->installSensor("ODOM 2D", "odometer", Vector3s(0,0,0), "");
+    ProcessorParamsOdom2DPtr proc_odo_params = make_shared<ProcessorParamsOdom2D>();
+    ProcessorBasePtr prc_odo = problem->installProcessor("ODOM 2D", "odometer", sen_odo, proc_odo_params);
+    prc_odo->setTimeTolerance(0.01);
+
+    std::cout << "sensor & processor created and added to wolf problem" << std::endl;
+
+    // Sequence to test KeyFrame creations (callback calls)
+
+    // initialize
+    TimeStamp   t(0.0);
+    Vector3s    x(0,0,0);
+    Matrix3s    P = Matrix3s::Identity() * 0.1;
+    problem->setPrior(x, P, t);             // KF1
+
+    CaptureOdom2DPtr capture_odo = make_shared<CaptureOdom2D>(t, sen_odo, Vector2s(0.5,0));
+
+    for (size_t ii=0; ii<10; ii++ )
+    {
+        WOLF_DEBUG("iter:",ii,"  ts: ", t);
+
+        // Move
+        t = t+0.01;
+        capture_odo->setTimeStamp(t);
+        sen_odo->process(capture_odo);
+
+        WOLF_DEBUG("iter:",ii,"  ts: ", t);
+
+        t = t+0.01;
+        capture_odo->setTimeStamp(t);
+        sen_odo->process(capture_odo);
+
+        WOLF_DEBUG("iter:",ii,"  ts: ", t);
+
+        t = t+0.01;
+        capture_odo->setTimeStamp(t);
+        sen_odo->process(capture_odo);
+
+        WOLF_DEBUG("iter:",ii,"  ts: ", t);
+
+        // Track
+        proc_tracker->process(make_shared<CaptureVoid>(t, sen_tracker));
+
+        WOLF_DEBUG("iter:",ii,"  ts: ", t);
+    }
+
+    // Print WOLF info
+    problem->print(2);
 }
 
 int main(int argc, char **argv)

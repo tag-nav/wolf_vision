@@ -45,6 +45,13 @@ FrameBasePtr ProcessorBase::emplaceFrame(FrameType _type, CaptureBasePtr _captur
     return new_frame_ptr;
 }
 
+void ProcessorBase::keyFrameCallbackNew(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
+{
+    if (_keyframe_ptr != nullptr)
+        kf_pack_buffer_.add(_keyframe_ptr,_time_tol_other);
+
+}
+
 void ProcessorBase::remove()
 {
     if (!is_removing_)
@@ -67,9 +74,9 @@ void ProcessorBase::remove()
     }
 }
 
-void KFPackBuffer::removeUpTo(const KFPackPtr& _pack)
+void KFPackBuffer::removeUpTo(const TimeStamp& _time_stamp)
 {
-    KFPackBuffer::Iterator post = container_.upper_bound(_pack->key_frame->getTimeStamp());
+    KFPackBuffer::Iterator post = container_.upper_bound(_time_stamp);
     container_.erase(container_.begin(), post); // erasing by range
 }
 

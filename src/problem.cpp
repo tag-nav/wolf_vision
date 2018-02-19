@@ -334,7 +334,7 @@ void Problem::keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _pro
     for (auto sensor : hardware_ptr_->getSensorList())
     	for (auto processor : sensor->getProcessorList())
     		if (processor && (processor != _processor_ptr) )
-                processor->keyFrameCallback(_keyframe_ptr, _time_tolerance);
+                processor->keyFrameCallbackNew(_keyframe_ptr, _time_tolerance);
 }
 
 LandmarkBasePtr Problem::addLandmark(LandmarkBasePtr _lmk_ptr)

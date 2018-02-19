@@ -43,7 +43,7 @@ class KFPackBuffer
 
         void add(const FrameBasePtr& _key_frame, const Scalar& _time_tolerance);
 
-        void removeUpTo(const KFPackPtr& _pack);
+        void removeUpTo(const TimeStamp& _time_stamp);
 
         bool checkTimeTolerance(const TimeStamp& _time_stamp1, const Scalar& _time_tolerance1, const TimeStamp& _time_stamp2, const Scalar& _time_tolerance2);
 
@@ -121,6 +121,8 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
         virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tolerance) = 0;
 
+        void keyFrameCallbackNew(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
+
         SensorBasePtr getSensorPtr();
         const SensorBasePtr getSensorPtr() const;
         void setSensorPtr(SensorBasePtr _sen_ptr){sensor_ptr_ = _sen_ptr;}
@@ -131,7 +133,10 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
     protected:
         unsigned int processor_id_;
+
         Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
+
+        KFPackBuffer kf_pack_buffer_;
 };
 
 }
