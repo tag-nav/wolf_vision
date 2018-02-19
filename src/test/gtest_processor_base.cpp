@@ -191,6 +191,7 @@ TEST(ProcessorBase, KeyFrameCallback)
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
     shared_ptr<ProcessorTrackerFeatureDummy> proc_tracker = make_shared<ProcessorTrackerFeatureDummy>(7, 4);
+    proc_tracker->setTimeTolerance(0.02);
 
     problem->addSensor(sen_tracker);
     sen_tracker->addProcessor(proc_tracker);
