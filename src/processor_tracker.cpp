@@ -28,68 +28,42 @@ ProcessorTracker::~ProcessorTracker()
 
 void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 {
+    using std::abs;
+
     if (_incoming_ptr == nullptr)
     {
       WOLF_ERROR("Received capture is nullptr.");
       return;
     }
 
-    WOLF_TRACE("");
-
     if ( !kf_pack_buffer_.empty() )
     {
         KFPackPtr pack;
 
-        WOLF_TRACE("");
-
         // Select using last_ptr
         if (last_ptr_ != nullptr)
         {
-
-            WOLF_TRACE("");
-
             pack = kf_pack_buffer_.selectPack( last_ptr_->getTimeStamp(), time_tolerance_ );
             if (pack!=nullptr)
             {
-
-                WOLF_TRACE("");
-
                 keyFrameCallback(pack->key_frame,pack->time_tolerance);
-
-                WOLF_TRACE("");
-
                 kf_pack_buffer_.removeUpTo( last_ptr_->getTimeStamp() );
             }
         }
 
-        WOLF_TRACE("");
-
         // Select using incoming_ptr
         pack = kf_pack_buffer_.selectPack( incoming_ptr_->getTimeStamp(), time_tolerance_ );
-
-        WOLF_TRACE("");
-
         if (pack!=nullptr)
         {
-            WOLF_TRACE("");
-
             keyFrameCallback(pack->key_frame,pack->time_tolerance);
-
-            WOLF_TRACE("");
-
             kf_pack_buffer_.removeUpTo( incoming_ptr_->getTimeStamp() );
         }
     }
-
-    WOLF_TRACE("");
-
-    using std::abs;
 
     incoming_ptr_ = _incoming_ptr;
 
     preProcess();
 
-    WOLF_TRACE("");
 
     // FIRST TIME
     if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
