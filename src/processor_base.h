@@ -181,11 +181,6 @@ inline KFPackBuffer::~KFPackBuffer(void)
 
 }
 
-inline bool KFPackBuffer::checkTimeTolerance(const TimeStamp& _time_stamp1, const Scalar& _time_tolerance1, const TimeStamp& _time_stamp2, const Scalar& _time_tolerance2)
-{
-    return (std::fabs(_time_stamp1 - _time_stamp2) < std::min(_time_tolerance1, _time_tolerance2) );
-}
-
 inline void KFPackBuffer::clear()
 {
     container_.clear();

@@ -136,4 +136,14 @@ void KFPackBuffer::print(void)
     std::cout << "]" << std::endl;
 }
 
+bool KFPackBuffer::checkTimeTolerance(const TimeStamp& _time_stamp1, const Scalar& _time_tolerance1,
+                                      const TimeStamp& _time_stamp2, const Scalar& _time_tolerance2)
+{
+    Scalar time_diff = std::fabs(_time_stamp1 - _time_stamp2);
+    Scalar time_tol  = std::min(_time_tolerance1, _time_tolerance2);
+    bool pass = time_diff <= time_tol;
+    return pass;
+    return (std::fabs(_time_stamp1 - _time_stamp2) <= std::min(_time_tolerance1, _time_tolerance2));
+}
+
 } // namespace wolf
