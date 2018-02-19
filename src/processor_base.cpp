@@ -101,16 +101,16 @@ KFPackPtr KFPackBuffer::selectPack(const TimeStamp& _time_stamp, const Scalar& _
     {
         prev = std::prev(post);
         if (!checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance)
-                && check_post
-                && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
+                && (check_post
+                        && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance)))
             return post->second;
         else if (checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance)
-                && check_post
-                && !checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
+                && !(check_post
+                        && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance)))
             return prev->second;
         else if (checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance)
-                && check_post
-                && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance))
+                && (check_post
+                        && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance)))
         {
             if (std::fabs((*post).first - _time_stamp) < std::fabs((*prev).first - _time_stamp))
                 return post->second;
