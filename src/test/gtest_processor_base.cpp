@@ -147,6 +147,8 @@ TEST_F(KFPackBufferTest, selectPack)
 
 TEST_F(KFPackBufferTest, removeUpTo)
 {
+    // Small time tolerance for all test asserts
+    Scalar tt = 0.1;
     kfpackbuffer.clear();
     kfpackbuffer.add(f10, tt10);
     kfpackbuffer.add(f20, tt20);
@@ -157,9 +159,9 @@ TEST_F(KFPackBufferTest, removeUpTo)
     KFPackPtr pack20 = std::make_shared<KFPack>(f20,tt20);
     kfpackbuffer.removeUpTo( pack20->key_frame->getTimeStamp() );
     ASSERT_EQ(kfpackbuffer.size(),1);
-    ASSERT_TRUE(kfpackbuffer.selectPack(f10->getTimeStamp(),tt10)==nullptr);
-    ASSERT_TRUE(kfpackbuffer.selectPack(f20->getTimeStamp(),tt20)==nullptr);
-    ASSERT_TRUE(kfpackbuffer.selectPack(f21->getTimeStamp(),tt21)!=nullptr);
+    ASSERT_TRUE(kfpackbuffer.selectPack(f10->getTimeStamp(),tt)==nullptr);
+    ASSERT_TRUE(kfpackbuffer.selectPack(f20->getTimeStamp(),tt)==nullptr);
+    ASSERT_TRUE(kfpackbuffer.selectPack(f21->getTimeStamp(),tt)!=nullptr);
 
     // Chech removal of an imprecise time stamp
     // Specifically, only f28 should remain
@@ -169,8 +171,8 @@ TEST_F(KFPackBufferTest, removeUpTo)
     KFPackPtr pack22 = std::make_shared<KFPack>(f22,5);
     kfpackbuffer.removeUpTo( pack22->key_frame->getTimeStamp() );
     ASSERT_EQ(kfpackbuffer.size(),1);
-    ASSERT_TRUE(kfpackbuffer.selectPack(f21->getTimeStamp(),tt21)==nullptr);
-    ASSERT_TRUE(kfpackbuffer.selectPack(f28->getTimeStamp(),tt28)!=nullptr);
+    ASSERT_TRUE(kfpackbuffer.selectPack(f21->getTimeStamp(),tt)==nullptr);
+    ASSERT_TRUE(kfpackbuffer.selectPack(f28->getTimeStamp(),tt)!=nullptr);
 }
 
 
