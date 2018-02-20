@@ -105,11 +105,11 @@ KFPackPtr KFPackBuffer::selectPack(const TimeStamp& _time_stamp, const Scalar& _
 
         bool prev_ok = checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance);
 
-        if (!prev_ok && post_ok)
-            return post->second;
-
-        else if (prev_ok && !post_ok)
+        if (prev_ok && !post_ok)
             return prev->second;
+
+        else if (!prev_ok && post_ok)
+            return post->second;
 
         else if (prev_ok && post_ok)
         {
