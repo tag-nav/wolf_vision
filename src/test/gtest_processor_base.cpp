@@ -242,6 +242,9 @@ TEST(ProcessorBase, KeyFrameCallback)
         // Track
         proc_tracker->process(make_shared<CaptureVoid>(t, sen_tracker));
 
+        // Only odom creating KFs
+        ASSERT_TRUE( problem->getLastKeyFramePtr()->getType().compare("PO 2D")==0 );
+
         WOLF_DEBUG("iter:",ii,"  ts: ", t);
     }
 
