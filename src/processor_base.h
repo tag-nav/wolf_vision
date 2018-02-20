@@ -17,6 +17,10 @@ class SensorBase;
 
 namespace wolf {
 
+/** \brief Key frame class pack
+ *
+ * To store a key_frame with an associated time tolerance.
+ */
 class KFPack
 {
     public:
@@ -28,34 +32,67 @@ class KFPack
 
 WOLF_PTR_TYPEDEFS(KFPack);
 
+
+/** \brief Buffer of Key frame class objects
+ *
+ * Object and functions to manage a buffer of KFPack objects.
+ */
 class KFPackBuffer
 {
     public:
 
-        typedef std::map<TimeStamp,KFPackPtr>::iterator Iterator;
+        typedef std::map<TimeStamp,KFPackPtr>::iterator Iterator; // buffer iterator
 
         KFPackBuffer(void);
         ~KFPackBuffer(void);
 
+        /**\brief Select a Pack from the buffer
+         *
+         *  Select from the buffer the closest pack (w.r.t. time stamp),
+         * respecting a defined time tolerance
+         */
         KFPackPtr selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
 
+        /**\brief Buffer size
+         *
+         */
         size_t size(void);
 
+        /**\brief Add a pack to the buffer
+         *
+         */
         void add(const FrameBasePtr& _key_frame, const Scalar& _time_tolerance);
 
+        /**\brief Remove all packs in the buffer with a time stamp older than the specified
+         *
+         */
         void removeUpTo(const TimeStamp& _time_stamp);
 
+        /**\brief Check time tolerance
+         *
+         * Check if the time distance between two time stamps is smaller than
+         * the minimum time tolerance of the two frames.
+         */
         bool checkTimeTolerance(const TimeStamp& _time_stamp1, const Scalar& _time_tolerance1, const TimeStamp& _time_stamp2, const Scalar& _time_tolerance2);
 
+        /**\brief Clear the buffer
+         *
+         */
         void clear();
 
+        /**\brief Empty the buffer
+         *
+         */
         bool empty();
 
+        /**\brief Print buffer information
+         *
+         */
         void print();
 
     private:
 
-        std::map<TimeStamp,KFPackPtr> container_;
+        std::map<TimeStamp,KFPackPtr> container_; // Main buffer container
 };
 
 /** \brief base struct for processor parameters
