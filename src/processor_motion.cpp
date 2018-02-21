@@ -278,78 +278,95 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
 {
 
     assert(_new_keyframe->getTrajectoryPtr() != nullptr
-            && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");
+           && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");
 
     // get keyframe's time stamp
     TimeStamp new_ts = _new_keyframe->getTimeStamp();
 
     // find the capture whose buffer is affected by the new keyframe
     auto existing_capture = findCaptureContainingTimeStamp(new_ts);
-    assert(existing_capture != nullptr
-            && "ProcessorMotion::keyFrameCallback: no motion capture containing the required TimeStamp found");
 
-    // Find the frame acting as the capture's origin
-    auto keyframe_origin = existing_capture->getOriginFramePtr();
 
-    // emplace a new motion capture to the new keyframe
-    auto new_capture = emplaceCapture(_new_keyframe,
-                                      getSensorPtr(),
-                                      new_ts,
-                                      Eigen::VectorXs::Zero(data_size_),
-                                      existing_capture->getDataCovariance(),
-                                      existing_capture->getCalibration(),
-                                      existing_capture->getCalibration(),
-                                      keyframe_origin);
-
-    // split the buffer
-    // and give the part of the buffer before the new keyframe to the key_capture
-    existing_capture->getBuffer().split(new_ts, new_capture->getBuffer());
-
-    // interpolate individual delta
-    if (!existing_capture->getBuffer().get().empty() && new_capture->getBuffer().get().back().ts_ != new_ts)
+    if(existing_capture == nullptr) // Keyframe without Capture --> first time
     {
-        // interpolate Motion at the new time stamp
-        Motion motion_interpolated = interpolate(new_capture->getBuffer().get().back(), // last Motion of old buffer
-                                                 existing_capture->getBuffer().get().front(), // first motion of new buffer
-                                                 new_ts);
-        // add to old buffer
-        new_capture->getBuffer().get().push_back(motion_interpolated);
+        CaptureMotionPtr new_capture = createCapture(new_ts,
+                                                     getSensorPtr(),
+                                                     Eigen::VectorXs::Zero(data_size_),
+                                                     getSensorPtr()->getNoiseCov(),
+                                                     _new_keyframe);
+
+        new_capture->setCalibration(getSensorPtr()->getCalibration());
+        new_capture->setCalibrationPreint(getSensorPtr()->getCalibration());
+
+        emplaceFrame(NON_KEY_FRAME, new_capture);
     }
-
-    // create motion feature and add it to the capture
-    auto new_feature = emplaceFeature(new_capture);
-//    reintegrateBuffer(new_capture);
-
-    // create motion constraint and add it to the feature, and constrain to the other capture (origin)
-    emplaceConstraint(new_feature, keyframe_origin->getCaptureOf(getSensorPtr()) );
-
-
-
-    /////////////////////////////////////////////////////////
-    // Update the existing capture
-    if (existing_capture == last_ptr_)
-        // reset processor origin
-        origin_ptr_ = new_capture;
-
-    existing_capture->setOriginFramePtr(_new_keyframe);
-
-    // reintegrate existing buffer -- note: the result of re-integration is stored in the same buffer!
-    reintegrateBuffer(existing_capture);
-
-    // modify existing feature and constraint (if they exist in the existing capture)
-    if (!existing_capture->getFeatureList().empty())
+    else   // Normal operation
     {
-        auto existing_feature = existing_capture->getFeatureList().back(); // there is only one feature!
 
-        // Modify existing feature --------
-        existing_feature->setMeasurement          (existing_capture->getBuffer().get().back().delta_integr_);
-        existing_feature->setMeasurementCovariance(existing_capture->getBuffer().get().back().delta_integr_cov_);
+        // Find the frame acting as the capture's origin
+        auto keyframe_origin = existing_capture->getOriginFramePtr();
 
-        // Modify existing constraint --------
-        // Instead of modifying, we remove one ctr, and create a new one.
-        auto ctr_to_remove  = existing_feature->getConstraintList().back(); // there is only one constraint!
-        auto new_ctr        = emplaceConstraint(existing_feature, new_capture);
-        ctr_to_remove       ->remove();  // remove old constraint now (otherwise c->remove() gets propagated to f, C, F, etc.)
+        // emplace a new motion capture to the new keyframe
+        auto new_capture = emplaceCapture(_new_keyframe,
+                                          getSensorPtr(),
+                                          new_ts,
+                                          Eigen::VectorXs::Zero(data_size_),
+                                          existing_capture->getDataCovariance(),
+                                          existing_capture->getCalibration(),
+                                          existing_capture->getCalibration(),
+                                          keyframe_origin);
+
+        // split the buffer
+        // and give the part of the buffer before the new keyframe to the key_capture
+        existing_capture->getBuffer().split(new_ts, new_capture->getBuffer());
+
+        // interpolate individual delta
+        if (!existing_capture->getBuffer().get().empty() && new_capture->getBuffer().get().back().ts_ != new_ts)
+        {
+            // interpolate Motion at the new time stamp
+            Motion motion_interpolated = interpolate(new_capture->getBuffer().get().back(), // last Motion of old buffer
+                                                     existing_capture->getBuffer().get().front(), // first motion of new buffer
+                                                     new_ts);
+            // add to old buffer
+            new_capture->getBuffer().get().push_back(motion_interpolated);
+        }
+
+        // create motion feature and add it to the capture
+        auto new_feature = emplaceFeature(new_capture);
+        //    reintegrateBuffer(new_capture);
+
+        // create motion constraint and add it to the feature, and constrain to the other capture (origin)
+        emplaceConstraint(new_feature, keyframe_origin->getCaptureOf(getSensorPtr()) );
+
+
+
+        /////////////////////////////////////////////////////////
+        // Update the existing capture
+        if (existing_capture == last_ptr_)
+            // reset processor origin
+            origin_ptr_ = new_capture;
+
+        existing_capture->setOriginFramePtr(_new_keyframe);
+
+        // reintegrate existing buffer -- note: the result of re-integration is stored in the same buffer!
+        reintegrateBuffer(existing_capture);
+
+        // modify existing feature and constraint (if they exist in the existing capture)
+        if (!existing_capture->getFeatureList().empty())
+        {
+            auto existing_feature = existing_capture->getFeatureList().back(); // there is only one feature!
+
+            // Modify existing feature --------
+            existing_feature->setMeasurement          (existing_capture->getBuffer().get().back().delta_integr_);
+            existing_feature->setMeasurementCovariance(existing_capture->getBuffer().get().back().delta_integr_cov_);
+
+            // Modify existing constraint --------
+            // Instead of modifying, we remove one ctr, and create a new one.
+            auto ctr_to_remove  = existing_feature->getConstraintList().back(); // there is only one constraint!
+            auto new_ctr        = emplaceConstraint(existing_feature, new_capture);
+            ctr_to_remove       ->remove();  // remove old constraint now (otherwise c->remove() gets propagated to f, C, F, etc.)
+        }
+
     }
 
     return true;
