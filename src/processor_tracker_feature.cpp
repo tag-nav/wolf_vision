@@ -53,8 +53,13 @@ unsigned int ProcessorTrackerFeature::processKnown()
                 known_incoming_feature_it++;
         }
     }
-    // Append not destructed incoming features -> this empties known_features_incoming_
+    std::cout << "known features incoming: ";
+    for (auto ftr:known_features_incoming_)
+        std::cout << ftr->id() << ", ";
+    std::cout << std::endl;
+    // Append remaining incoming features -> this empties known_features_incoming_
     incoming_ptr_->addFeatureList(known_features_incoming_);
+    known_features_incoming_.clear();
     std::cout << "Added to incoming features: " << incoming_ptr_->getFeatureList().size() << std::endl;
 
     return matches_last_from_incoming_.size();
@@ -70,18 +75,39 @@ void ProcessorTrackerFeature::advance()
                 matches_origin_from_last_[matches_last_from_incoming_[match.first]->feature_ptr_];
     }
     matches_origin_from_last_ = std::move(matches_last_from_incoming_);
-    //    std::cout << "advanced correspondences: " << std::endl;
-    //    std::cout << "\tincoming 2 last: " << matches_last_from_incoming_.size() << std::endl;
-    //    std::cout << "\tlast 2 origin: " << std::endl;
-    //    for (auto match : matches_origin_from_last_)
-    //        std::cout << "\t\t" << match.first->getMeasurement() << " to " << match.second.feature_ptr_->getMeasurement() << std::endl;
+
+
+//    std::cout << "advanced correspondences: " << std::endl;
+//    std::cout << "\tincoming 2 last: " << matches_last_from_incoming_.size() << std::endl;
+//    for (auto match : matches_last_from_incoming_)
+//        std::cout << "inc -> last: \t\t" << match.second->feature_ptr_->id() << " <- " << match.first->id() << std::endl;
+//    std::cout << "\tlast 2 origin: " << std::endl;
+//    for (auto match : matches_origin_from_last_)
+//        std::cout << "ori <- last: \t\t" << match.second->feature_ptr_->id() << match.first->id() << std::endl;
+
+    // We set problem here because we could not determine Problem from incoming capture at the time of adding the features to incoming's feature list.
+    for (auto ftr : incoming_ptr_->getFeatureList())
+        ftr->setProblem(getProblem());
 }
 
 void ProcessorTrackerFeature::reset()
 {
     //    std::cout << "ProcessorTrackerFeature::reset()" << std::endl;
     // We also reset here the list of correspondences, which passes from last--incoming to origin--last.
+
+    std::cout << "\tincoming 2 last: " << matches_last_from_incoming_.size() << std::endl;
+    for (auto match : matches_last_from_incoming_)
+        std::cout << "inc -> last: \t\t" << match.second->feature_ptr_->id() << " <- " << match.first->id() << std::endl;
+    std::cout << "\tlast 2 origin: " << std::endl;
+    for (auto match : matches_origin_from_last_)
+        std::cout << "ori <- last: \t\t" << match.second->feature_ptr_->id() << match.first->id() << std::endl;
+
     matches_origin_from_last_ = std::move(matches_last_from_incoming_);
+
+    // Update features according to the move above.
+    for (auto match: matches_origin_from_last_)
+        match.first->setProblem(getProblem()); // Since these features were in incoming_, they had no Problem assigned.
+
 }
 
 unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_features)
