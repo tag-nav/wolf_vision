@@ -67,7 +67,11 @@ struct ProcessorParamsTracker : public ProcessorParamsBase
  */
 class ProcessorTracker : public ProcessorBase
 {
+    public:
+        typedef enum {FIRST_TIME, SECOND_TIME} ProcessingStep ;
+
     protected:
+        ProcessingStep processing_step_;
         CaptureBasePtr origin_ptr_;             ///< Pointer to the origin of the tracker.
         CaptureBasePtr last_ptr_;               ///< Pointer to the last tracked capture.
         CaptureBasePtr incoming_ptr_;           ///< Pointer to the incoming capture being processed.
@@ -90,6 +94,11 @@ class ProcessorTracker : public ProcessorBase
         unsigned int getMaxNewFeatures();
 
         virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
+
+        bool checkTimeTolerance(const TimeStamp& _ts1, const TimeStamp& _ts2);
+        bool checkTimeTolerance(const CaptureBasePtr _cap, const TimeStamp& _ts);
+        bool checkTimeTolerance(const FrameBasePtr _frm, const TimeStamp& _ts);
+        bool checkTimeTolerance(const FrameBasePtr _frm, const CaptureBasePtr _cap);
 
         virtual CaptureBasePtr getOriginPtr();
         virtual CaptureBasePtr getLastPtr();
@@ -185,11 +194,14 @@ class ProcessorTracker : public ProcessorBase
 
     protected:
 
+        void computeProcessingStep();
+
         void addNewFeatureLast(FeatureBasePtr _feature_ptr);
 
         FeatureBaseList& getNewFeaturesListIncoming();
 
         void addNewFeatureIncoming(FeatureBasePtr _feature_ptr);
+
 };
 
 inline void ProcessorTracker::setMaxNewFeatures(const unsigned int& _max_new_features)
@@ -215,6 +227,26 @@ inline void ProcessorTracker::addNewFeatureLast(FeatureBasePtr _feature_ptr)
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
 {
     return new_features_incoming_;
+}
+
+inline bool ProcessorTracker::checkTimeTolerance(const TimeStamp& _ts1, const TimeStamp& _ts2)
+{
+    return (std::fabs(_ts2 - _ts2) < time_tolerance_);
+}
+
+inline bool ProcessorTracker::checkTimeTolerance(const CaptureBasePtr _cap, const TimeStamp& _ts)
+{
+    return checkTimeTolerance(_cap->getTimeStamp(), _ts);
+}
+
+inline bool ProcessorTracker::checkTimeTolerance(const FrameBasePtr _frm, const TimeStamp& _ts)
+{
+    return checkTimeTolerance(_frm->getTimeStamp(), _ts);
+}
+
+inline bool ProcessorTracker::checkTimeTolerance(const FrameBasePtr _frm, const CaptureBasePtr _cap)
+{
+    return checkTimeTolerance(_frm->getTimeStamp(), _cap->getTimeStamp());
 }
 
 inline void ProcessorTracker::addNewFeatureIncoming(FeatureBasePtr _feature_ptr)

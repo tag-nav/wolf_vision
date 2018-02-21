@@ -15,7 +15,11 @@ namespace wolf
 {
 
 ProcessorTracker::ProcessorTracker(const std::string& _type, const unsigned int _max_new_features, const Scalar& _time_tolerance) :
-        ProcessorBase(_type, _time_tolerance), origin_ptr_(nullptr), last_ptr_(nullptr), incoming_ptr_(nullptr),
+        ProcessorBase(_type, _time_tolerance),
+        processing_step_(FIRST_TIME),
+        origin_ptr_(nullptr),
+        last_ptr_(nullptr),
+        incoming_ptr_(nullptr),
         max_new_features_(_max_new_features)
 {
     //
@@ -32,8 +36,8 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
     if (_incoming_ptr == nullptr)
     {
-      WOLF_ERROR("Received capture is nullptr.");
-      return;
+        WOLF_ERROR("Received capture is nullptr.");
+        return;
     }
 
     if ( !kf_pack_buffer_.empty() )
@@ -64,165 +68,173 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
     preProcess();
 
+    computeProcessingStep();
 
-    // FIRST TIME
-    if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
+    switch (processing_step_)
     {
-        WOLF_DEBUG( "FIRST TIME" );
-
-        // advance
-        advance();
-
-        // advance this
-        last_ptr_ = incoming_ptr_;
-        incoming_ptr_ = nullptr;
-
-        // keyframe creation on last
-        FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
-        if (closest_key_frm && abs(closest_key_frm->getTimeStamp() - last_ptr_->getTimeStamp()) <= time_tolerance_)
+        case FIRST_TIME :
         {
-            // Set KF
-            closest_key_frm->addCapture(last_ptr_);
-            closest_key_frm->setKey();
-            WOLF_DEBUG( "Last appended to existing F, set KF" , closest_key_frm->id() );
-        }
-        else
-        {
-            // Make KF
-            FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(KEY_FRAME,
-                                                                   getProblem()->getState(last_ptr_->getTimeStamp()),
-                                                                   last_ptr_->getTimeStamp());
-            new_frame_ptr->addCapture(last_ptr_); // Add incoming Capture to the new Frame
-            WOLF_DEBUG( "Last appended to new KF" , new_frame_ptr->id() );
+            WOLF_DEBUG( "FIRST TIME" );
 
-            getProblem()->keyFrameCallback(new_frame_ptr, shared_from_this(), time_tolerance_);
-        }
-
-        // Detect new Features, initialize Landmarks, create Constraints, ...
-        processNew(max_new_features_);
-
-        // Establish constraints from last
-        establishConstraints();
-    }
-
-    // SECOND TIME or after KEY FRAME CALLBACK
-    else if (origin_ptr_ == nullptr)
-    {
-        WOLF_DEBUG("SECOND TIME or after KEY FRAME CALLBACK");
-
-        // First we track the known Features
-        processKnown();
-
-        // Create a new non-key Frame in the Trajectory with the incoming Capture
-        FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
-        if (closest_key_frm && abs(closest_key_frm->getTimeStamp() - incoming_ptr_->getTimeStamp()) <= time_tolerance_)
-        {
-            // Just append the Capture to the existing keyframe
-            closest_key_frm->addCapture(incoming_ptr_);
-            WOLF_DEBUG("Incoming appended to F" , closest_key_frm->id() );
-        }
-        else
-        {
-            // Create a frame to hold what will become the last Capture
-            FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
-            new_frame_ptr->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
-            WOLF_DEBUG("Incoming in new F" , new_frame_ptr->id() );
-        }
-
-        // Reset the derived Tracker
-        reset();
-
-        // Reset this
-        origin_ptr_     = last_ptr_;
-        last_ptr_       = incoming_ptr_;
-        incoming_ptr_   = nullptr; // This line is not really needed, but it makes things clearer.
-
-
-    }
-
-    // OTHER TIMES
-    else
-    {
-        WOLF_DEBUG("OTHER TIMES");
-
-        // 1. First we track the known Features and create new constraints as needed
-
-        processKnown();
-
-        // 2. Then we see if we want and we are allowed to create a KeyFrame
-        // Three conditions to make a KF:
-        //   - We vote for KF
-        //   - Problem allows us to make keyframe
-        //   - There is no existing KF very close to our Time Stamp <--- NOT SURE OF THIS
-
-        FrameBasePtr closest_key_frm_to_last = last_ptr_->getFramePtr(); // start with the same last's frame
-        if ( ! ( closest_key_frm_to_last && closest_key_frm_to_last->isKey() ) ) // last F is not KF
-            closest_key_frm_to_last = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
-
-        if (closest_key_frm_to_last && abs(closest_key_frm_to_last->getTimeStamp() - last_ptr_->getTimeStamp()) > time_tolerance_) // closest KF is not close enough
-            closest_key_frm_to_last = nullptr;
-
-        if ( !( (voteForKeyFrame() && permittedKeyFrame() ) || closest_key_frm_to_last ) )
-        {
-
-            // 2.a. We did not create a KeyFrame:
-
-            // advance the derived tracker
+            // advance
             advance();
 
-            // Advance this
-            last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's last Frame
-            last_ptr_->remove();
-            incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
-            last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
-            incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+            // advance this
+            last_ptr_ = incoming_ptr_;
+            incoming_ptr_ = nullptr;
 
-            WOLF_DEBUG("last <-- incoming");
+            // keyframe creation on last
+            FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
+            if (closest_key_frm && checkTimeTolerance(closest_key_frm, last_ptr_))
+            {
+                // Set KF
+                closest_key_frm->addCapture(last_ptr_);
+                closest_key_frm->setKey();
+                WOLF_DEBUG( "Last appended to existing F",  closest_key_frm->id(), " ==> set KF" , closest_key_frm->id() );
+            }
+            else
+            {
+                // Make KF
+                FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(KEY_FRAME,
+                                                                        getProblem()->getState(last_ptr_->getTimeStamp()),
+                                                                        last_ptr_->getTimeStamp());
+                new_frame_ptr->addCapture(last_ptr_); // Add incoming Capture to the new Frame
+                WOLF_DEBUG( "Last appended to new KF" , new_frame_ptr->id() );
 
-        }
-        else
-        {
-
-            // 2.b. We create a KF
+                getProblem()->keyFrameCallback(new_frame_ptr, shared_from_this(), time_tolerance_);
+            }
 
             // Detect new Features, initialize Landmarks, create Constraints, ...
             processNew(max_new_features_);
 
-            FrameBasePtr key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
-            if ( abs(key_frm->getTimeStamp() - incoming_ptr_->getTimeStamp() ) < time_tolerance_)
+            // Establish constraints from last
+            establishConstraints();
+
+            break;
+        }
+
+
+        case SECOND_TIME :
+        {
+            WOLF_DEBUG("SECOND TIME or after KEY FRAME CALLBACK");
+
+            // First we track the known Features between last and incoming
+            processKnown();
+
+            // Create a new non-key Frame in the Trajectory with the incoming Capture
+            FrameBasePtr closest_key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
+            if (closest_key_frm && checkTimeTolerance(closest_key_frm, incoming_ptr_))
             {
-                // Append incoming to existing key-frame
-                key_frm->addCapture(incoming_ptr_);
-                WOLF_DEBUG("Incoming adhered to existing KF" , key_frm->id());
+                // Just append the Capture to the existing keyframe
+                closest_key_frm->addCapture(incoming_ptr_);
+                WOLF_DEBUG("Incoming appended to F" , closest_key_frm->id() );
             }
             else
             {
-                // Create a new non-key Frame in the Trajectory with the incoming Capture
-                // Make a non-key-frame to hold incoming
+                // Create a frame to hold what will become the last Capture
                 FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
                 new_frame_ptr->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
-                WOLF_DEBUG( "Incoming adhered to new F" , key_frm->id() );
-
-                // Make the last Capture's Frame a KeyFrame
-                setKeyFrame(last_ptr_);
-                WOLF_DEBUG( "Set KEY to last F" , key_frm->id() );
+                WOLF_DEBUG("Incoming in new F" , new_frame_ptr->id() );
             }
-
-            // Establish constraints between last and origin
-            establishConstraints();
 
             // Reset the derived Tracker
             reset();
 
             // Reset this
-            origin_ptr_ = last_ptr_;
-            last_ptr_ = incoming_ptr_;
-            incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+            origin_ptr_     = last_ptr_;
+            last_ptr_       = incoming_ptr_;
+            incoming_ptr_   = nullptr; // This line is not really needed, but it makes things clearer.
 
-}
+            // Establish constraints from last
+            establishConstraints();
 
+            break;
+        }
 
+        default:
+        {
+            WOLF_DEBUG("OTHER TIMES");
+
+            // 1. First we track the known Features and create new constraints as needed
+
+            processKnown();
+
+            // 2. Then we see if we want and we are allowed to create a KeyFrame
+            // Three conditions to make a KF:
+            //   - We vote for KF
+            //   - Problem allows us to make keyframe
+            //   - There is no existing KF very close to our Time Stamp <--- NOT SURE OF THIS
+
+            FrameBasePtr closest_key_frm_to_last = last_ptr_->getFramePtr(); // start with the same last's frame
+            if ( ! ( closest_key_frm_to_last && closest_key_frm_to_last->isKey() ) ) // last F is not KF
+                closest_key_frm_to_last = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(last_ptr_->getTimeStamp());
+
+            if (closest_key_frm_to_last && !checkTimeTolerance(closest_key_frm_to_last, last_ptr_)) // closest KF is not close enough
+                closest_key_frm_to_last = nullptr;
+
+            if ( !( (voteForKeyFrame() && permittedKeyFrame() ) || closest_key_frm_to_last ) )
+            {
+
+                // 2.a. We did not create a KeyFrame:
+
+                // advance the derived tracker
+                advance();
+
+                // Advance this
+                last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's last Frame
+                last_ptr_->remove();
+                incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
+                last_ptr_ = incoming_ptr_; // Incoming Capture takes the place of last Capture
+                incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+
+                WOLF_DEBUG("last <-- incoming");
+
+            }
+            else
+            {
+
+                // 2.b. We create a KF
+
+                // Detect new Features, initialize Landmarks, create Constraints, ...
+                processNew(max_new_features_);
+
+                FrameBasePtr key_frm = getProblem()->getTrajectoryPtr()->closestKeyFrameToTimeStamp(incoming_ptr_->getTimeStamp());
+                if ( abs(key_frm->getTimeStamp() - incoming_ptr_->getTimeStamp() ) < time_tolerance_)
+                {
+                    // Append incoming to existing key-frame
+                    key_frm->addCapture(incoming_ptr_);
+                    WOLF_DEBUG("Incoming adhered to existing KF" , key_frm->id());
+                }
+                else
+                {
+                    // Create a new non-key Frame in the Trajectory with the incoming Capture
+                    // Make a non-key-frame to hold incoming
+                    FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+                    new_frame_ptr->addCapture(incoming_ptr_); // Add incoming Capture to the new Frame
+                    WOLF_DEBUG( "Incoming adhered to new F" , key_frm->id() );
+
+                    // Make the last Capture's Frame a KeyFrame
+                    setKeyFrame(last_ptr_);
+                    WOLF_DEBUG( "Set KEY to last F" , key_frm->id() );
+                }
+
+                // Reset the derived Tracker
+                reset();
+
+                // Reset this
+                origin_ptr_ = last_ptr_;
+                last_ptr_ = incoming_ptr_;
+                incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+
+                // Establish constraints between last and origin
+                establishConstraints();
+
+            }
+
+            break;
+        }
     }
+
     postProcess();
 
     //std::cout << "-----End of process():" << std::endl;
@@ -283,6 +295,16 @@ void ProcessorTracker::setKeyFrame(CaptureBasePtr _capture_ptr)
         getProblem()->keyFrameCallback(_capture_ptr->getFramePtr(), std::static_pointer_cast<ProcessorBase>(shared_from_this()), time_tolerance_);
     }
 }
+
+void ProcessorTracker::computeProcessingStep()
+{
+    if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
+        processing_step_ = FIRST_TIME;
+    else if (origin_ptr_ == nullptr)
+        processing_step_ = SECOND_TIME;
+}
+
+
 
 
 } // namespace wolf
