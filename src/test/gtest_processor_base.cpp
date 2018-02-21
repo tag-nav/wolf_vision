@@ -216,42 +216,43 @@ TEST(ProcessorBase, KeyFrameCallback)
 
     CaptureOdom2DPtr capture_odo = make_shared<CaptureOdom2D>(t, sen_odo, Vector2s(0.5,0));
 
-    for (size_t ii=0; ii<10; ii++ )
+    for (size_t ii=0; ii<3; ii++ )
     {
-        WOLF_DEBUG("iter:",ii,"  ts: ", t);
+//        WOLF_DEBUG("iter:",ii,"  ts: ", t);
 
         // Move
         t = t+0.01;
-        capture_odo->setTimeStamp(t);
-        sen_odo->process(capture_odo);
+//        capture_odo->setTimeStamp(t);
+//        sen_odo->process(capture_odo);
 
-        WOLF_DEBUG("iter:",ii,"  ts: ", t);
+//        WOLF_DEBUG("iter:",ii,"  ts: ", t);
 
-        t = t+0.01;
-        capture_odo->setTimeStamp(t);
-        sen_odo->process(capture_odo);
+//        t = t+0.01;
+//        capture_odo->setTimeStamp(t);
+//        sen_odo->process(capture_odo);
 
-        WOLF_DEBUG("iter:",ii,"  ts: ", t);
+//        WOLF_DEBUG("iter:",ii,"  ts: ", t);
 
-        t = t+0.01;
-        capture_odo->setTimeStamp(t);
-        sen_odo->process(capture_odo);
+//        t = t+0.01;
+//        capture_odo->setTimeStamp(t);
+//        sen_odo->process(capture_odo);
 
-        WOLF_DEBUG("iter:",ii,"  ts: ", t);
+//        WOLF_DEBUG("iter:",ii,"  ts: ", t);
 
         // Track
-        proc_tracker->process(make_shared<CaptureVoid>(t, sen_tracker));
+        CaptureVoidPtr cap(make_shared<CaptureVoid>(t, sen_tracker));
+        proc_tracker->process(cap);
 
         problem->print(4,0,0,0);
 
         // Only odom creating KFs
         ASSERT_TRUE( problem->getLastKeyFramePtr()->getType().compare("PO 2D")==0 );
 
-        WOLF_DEBUG("iter:",ii,"  ts: ", t);
+//        WOLF_DEBUG("iter:",ii,"  ts: ", t);
     }
 
     // Print WOLF info
-    problem->print(2);
+//    problem->print(2);
 }
 
 int main(int argc, char **argv)

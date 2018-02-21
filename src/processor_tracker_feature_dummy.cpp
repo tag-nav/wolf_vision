@@ -24,13 +24,13 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
         if (features_lost < 2)
         {
             features_lost++;
-            std::cout << "feature " << feat_in_ptr->getMeasurement() << " lost!" << std::endl;
+            std::cout << "feature " << feat_in_ptr->id() << " lost!" << std::endl;
         }
         else
         {
             _feature_list_out.push_back(std::make_shared<FeatureBase>("POINT IMAGE", feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
             _feature_correspondences[_feature_list_out.back()] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in_ptr,0}));
-            std::cout << "feature " << feat_in_ptr->getMeasurement() << " tracked!" << std::endl;
+            std::cout << "feature " << feat_in_ptr->id() << " tracked!" << std::endl;
         }
     }
 
@@ -56,7 +56,7 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
         n_feature_++;
         new_features_last_.push_back(
                 std::make_shared<FeatureBase>("POINT IMAGE", n_feature_* Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
-        //std::cout << "feature " << new_features_last_.back()->getMeasurement() << " detected!" << std::endl;
+        std::cout << "feature " << new_features_last_.back()->id() << " detected!" << std::endl;
     }
     std::cout << new_features_last_.size() << " features detected!" << std::endl;
 
@@ -66,8 +66,8 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
 ConstraintBasePtr ProcessorTrackerFeatureDummy::createConstraint(FeatureBasePtr _feature_ptr,
                                                                  FeatureBasePtr _feature_other_ptr)
 {
-    //    std::cout << "creating constraint: last feature " << _feature_ptr->getMeasurement()
-    //              << " with origin feature " << _feature_other_ptr->getMeasurement() << std::endl;
+    std::cout << "creating constraint: last feature " << _feature_ptr->id()
+                          << " with origin feature " << _feature_other_ptr->id() << std::endl;
     auto ctr = std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr, shared_from_this());
     //    _feature_ptr->addConstraint(ctr);
     //    _feature_other_ptr->addConstrainedBy(ctr);
