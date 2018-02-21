@@ -127,7 +127,7 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     CeresManager ceres_manager(Pr);
 
     // KF0 and absolute prior
-    FrameBasePtr        F0 = Pr->setPrior(x0, P0,t0);
+    FrameBasePtr        F0 = Pr->setPrior(x0, P0,t0, dt/2);
 
     // KF1 and motion from KF0
     t += dt;
@@ -210,7 +210,7 @@ TEST(Odom2D, VoteForKfAndSolve)
     CeresManager ceres_manager(problem);
 
     // Origin Key Frame
-    FrameBasePtr origin_frame = problem->setPrior(x0, P0, t0);
+    FrameBasePtr origin_frame = problem->setPrior(x0, P0, t0, dt/2);
     ceres_manager.solve(0);
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
@@ -327,7 +327,7 @@ TEST(Odom2D, KF_callback)
     CeresManager ceres_manager(problem);
 
     // Origin Key Frame
-    FrameBasePtr keyframe_0 = problem->setPrior(x0, x0_cov, t0);
+    FrameBasePtr keyframe_0 = problem->setPrior(x0, x0_cov, t0, dt/2);
 
     // Check covariance values
     Eigen::Vector3s integrated_pose = x0;

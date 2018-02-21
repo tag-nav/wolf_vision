@@ -277,7 +277,7 @@ class Process_Constraint_IMU : public testing::Test
             DT      = num_integrations * dt;
 
             // wolf objects
-            KF_0    = problem->setPrior(x0, P0, t0);
+            KF_0    = problem->setPrior(x0, P0, t0, dt/2);
             C_0     = processor_imu->getOriginPtr();
 
             processor_imu->getLastPtr()->setCalibrationPreint(bias_preint);

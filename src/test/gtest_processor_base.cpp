@@ -185,6 +185,8 @@ TEST(ProcessorBase, KeyFrameCallback)
     using std::static_pointer_cast;
     using Eigen::Vector2s;
 
+    Scalar dt = 0.01;
+
     // Wolf problem
     ProblemPtr problem = Problem::create("PO 2D");
 
@@ -193,7 +195,7 @@ TEST(ProcessorBase, KeyFrameCallback)
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
     shared_ptr<ProcessorTrackerFeatureDummy> proc_tracker = make_shared<ProcessorTrackerFeatureDummy>(7, 4);
-    proc_tracker->setTimeTolerance(0.02);
+    proc_tracker->setTimeTolerance(dt/2);
 
     problem->addSensor(sen_tracker);
     sen_tracker->addProcessor(proc_tracker);
@@ -202,7 +204,7 @@ TEST(ProcessorBase, KeyFrameCallback)
     SensorBasePtr sen_odo = problem->installSensor("ODOM 2D", "odometer", Vector3s(0,0,0), "");
     ProcessorParamsOdom2DPtr proc_odo_params = make_shared<ProcessorParamsOdom2D>();
     ProcessorBasePtr prc_odo = problem->installProcessor("ODOM 2D", "odometer", sen_odo, proc_odo_params);
-    prc_odo->setTimeTolerance(0.01);
+    prc_odo->setTimeTolerance(dt/2);
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
@@ -212,7 +214,7 @@ TEST(ProcessorBase, KeyFrameCallback)
     TimeStamp   t(0.0);
     Vector3s    x(0,0,0);
     Matrix3s    P = Matrix3s::Identity() * 0.1;
-    problem->setPrior(x, P, t);             // KF1
+    problem->setPrior(x, P, t, dt/2);             // KF1
 
     CaptureOdom2DPtr capture_odo = make_shared<CaptureOdom2D>(t, sen_odo, Vector2s(0.5,0));
 
@@ -221,19 +223,19 @@ TEST(ProcessorBase, KeyFrameCallback)
 //        WOLF_DEBUG("iter:",ii,"  ts: ", t);
 
         // Move
-        t = t+0.01;
+        t = t+dt;
 //        capture_odo->setTimeStamp(t);
 //        sen_odo->process(capture_odo);
 
 //        WOLF_DEBUG("iter:",ii,"  ts: ", t);
 
-//        t = t+0.01;
+//        t = t+dt;
 //        capture_odo->setTimeStamp(t);
 //        sen_odo->process(capture_odo);
 
 //        WOLF_DEBUG("iter:",ii,"  ts: ", t);
 
-//        t = t+0.01;
+//        t = t+dt;
 //        capture_odo->setTimeStamp(t);
 //        sen_odo->process(capture_odo);
 

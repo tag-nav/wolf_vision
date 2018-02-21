@@ -143,7 +143,8 @@ class Problem : public std::enable_shared_from_this<Problem>
         TrajectoryBasePtr getTrajectoryPtr();
         virtual FrameBasePtr setPrior(const Eigen::VectorXs& _prior_state, //
                                       const Eigen::MatrixXs& _prior_cov, //
-                                      const TimeStamp& _ts);
+                                      const TimeStamp& _ts,
+                                      const Scalar _time_tolerance);
 
         /** \brief Emplace frame from string frame_structure
          * \param _frame_structure String indicating the frame structure.
