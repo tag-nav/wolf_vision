@@ -282,7 +282,7 @@ SET(HDRS
     sensor_odom_2D.h
     sensor_odom_3D.h
     )
-
+# [Add generic derived header before this line]
 
 SET(HDRS_DTASSC
     data_association/matrix.h

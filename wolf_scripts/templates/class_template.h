@@ -1,0 +1,30 @@
+#ifndef PROCESSOR_CLASS_H_
+#define PROCESSOR_CLASS_H_
+
+//Wolf includes
+#include "wolf.h"
+#include "base_header_file"
+
+namespace wolf
+{
+
+WOLF_PTR_TYPEDEFS(class_name);
+
+class class_name : public ProcessorTracker
+{
+    public:
+
+        /** \brief Class constructor
+         */
+        class_name();
+
+        /** \brief Class Destructor
+         */
+        virtual ~class_name();
+
+        // [base class inherited methods]
+};
+
+} // namespace wolf
+
+#endif /* PROCESSOR_CLASS_H_ */
