@@ -9,10 +9,10 @@ unsigned int ProcessorBase::processor_id_count_ = 0;
 
 ProcessorBase::ProcessorBase(const std::string& _type, const Scalar& _time_tolerance) :
         NodeBase("PROCESSOR", _type),
-        sensor_ptr_(),
-        is_removing_(false),
         processor_id_(++processor_id_count_),
-        time_tolerance_(_time_tolerance)
+        time_tolerance_(_time_tolerance),
+        sensor_ptr_(),
+        is_removing_(false)
 {
 //    WOLF_DEBUG("constructed    +p" , id());
 }
@@ -73,6 +73,8 @@ void ProcessorBase::remove()
             sen->getProcessorList().remove(this_p);
     }
 }
+
+/////////////////////////////////////////////////////////////////////////////////////////
 
 void KFPackBuffer::removeUpTo(const TimeStamp& _time_stamp)
 {

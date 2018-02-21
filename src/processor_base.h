@@ -33,6 +33,7 @@ class KFPack
 WOLF_PTR_TYPEDEFS(KFPack);
 
 
+
 /** \brief Buffer of Key frame class objects
  *
  * Object and functions to manage a buffer of KFPack objects.
@@ -112,6 +113,11 @@ struct ProcessorParamsBase
 //class ProcessorBase
 class ProcessorBase : public NodeBase, public std::enable_shared_from_this<ProcessorBase>
 {
+    protected:
+        unsigned int processor_id_;
+        Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
+        KFPackBuffer kf_pack_buffer_;
+
     private:
         SensorBaseWPtr sensor_ptr_;
 
@@ -168,12 +174,6 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
         void setTimeTolerance(Scalar _time_tolerance);
 
-    protected:
-        unsigned int processor_id_;
-
-        Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
-
-        KFPackBuffer kf_pack_buffer_;
 };
 
 }
