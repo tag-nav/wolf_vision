@@ -68,7 +68,13 @@ struct ProcessorParamsTracker : public ProcessorParamsBase
 class ProcessorTracker : public ProcessorBase
 {
     public:
-        typedef enum {FIRST_TIME, SECOND_TIME} ProcessingStep ;
+        typedef enum {
+            FIRST_TIME_WITH_PACK,
+            FIRST_TIME_WITHOUT_PACK,
+            SECOND_TIME_WITHOUT_PACK,
+            RUNNING_WITH_PACK,
+            RUNNING_WITHOUT_PACK
+        } ProcessingStep ;
 
     protected:
         ProcessingStep processing_step_;
@@ -202,6 +208,8 @@ class ProcessorTracker : public ProcessorBase
 
         void addNewFeatureIncoming(FeatureBasePtr _feature_ptr);
 
+    private:
+        KFPackPtr selectPack(const CaptureBasePtr & _cap);
 };
 
 inline void ProcessorTracker::setMaxNewFeatures(const unsigned int& _max_new_features)

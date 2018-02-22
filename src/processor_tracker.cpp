@@ -16,7 +16,7 @@ namespace wolf
 
 ProcessorTracker::ProcessorTracker(const std::string& _type, const unsigned int _max_new_features, const Scalar& _time_tolerance) :
         ProcessorBase(_type, _time_tolerance),
-        processing_step_(FIRST_TIME),
+        processing_step_(FIRST_TIME_WITHOUT_PACK),
         origin_ptr_(nullptr),
         last_ptr_(nullptr),
         incoming_ptr_(nullptr),
@@ -40,6 +40,8 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         return;
     }
 
+    incoming_ptr_ = _incoming_ptr;
+
     if ( !kf_pack_buffer_.empty() )
     {
         KFPackPtr pack;
@@ -56,15 +58,13 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
 
         // Select using incoming_ptr
-        pack = kf_pack_buffer_.selectPack( _incoming_ptr->getTimeStamp(), time_tolerance_ );
+        pack = kf_pack_buffer_.selectPack( incoming_ptr_->getTimeStamp(), time_tolerance_ );
         if (pack!=nullptr)
         {
             keyFrameCallback(pack->key_frame,pack->time_tolerance);
-            kf_pack_buffer_.removeUpTo( _incoming_ptr->getTimeStamp() );
+            kf_pack_buffer_.removeUpTo( incoming_ptr_->getTimeStamp() );
         }
     }
-
-    incoming_ptr_ = _incoming_ptr;
 
     preProcess();
 
@@ -72,7 +72,8 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
     switch (processing_step_)
     {
-        case FIRST_TIME :
+        case FIRST_TIME_WITHOUT_PACK :
+        case FIRST_TIME_WITH_PACK :
         {
             WOLF_DEBUG( "FIRST TIME" );
 
@@ -114,7 +115,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
 
 
-        case SECOND_TIME :
+        case SECOND_TIME_WITHOUT_PACK :
         {
             WOLF_DEBUG("SECOND TIME or after KEY FRAME CALLBACK");
 
@@ -151,6 +152,8 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             break;
         }
 
+        case RUNNING_WITH_PACK :
+        case RUNNING_WITHOUT_PACK :
         default:
         {
             WOLF_DEBUG("OTHER TIMES");
@@ -296,12 +299,95 @@ void ProcessorTracker::setKeyFrame(CaptureBasePtr _capture_ptr)
     }
 }
 
+KFPackPtr ProcessorTracker::selectPack(const CaptureBasePtr & _cap)
+{
+    if (_cap)
+        return kf_pack_buffer_.selectPack(_cap->getTimeStamp(), time_tolerance_);
+
+    return nullptr;
+}
+
 void ProcessorTracker::computeProcessingStep()
 {
+    enum {FIRST_TIME, SECOND_TIME, RUNNING} step;
     if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
-        processing_step_ = FIRST_TIME;
-    else if (origin_ptr_ == nullptr)
-        processing_step_ = SECOND_TIME;
+        step = FIRST_TIME;
+    else if (origin_ptr_ == last_ptr_)
+        step = SECOND_TIME;
+    else
+        step = RUNNING;
+
+    ////////////////////
+    switch (step)
+    {
+        case FIRST_TIME :
+        {
+            if (selectPack(incoming_ptr_))
+            {
+                processing_step_ = FIRST_TIME_WITH_PACK;
+                // (1)
+                // pack.KF.addCapture(incoming)
+                // makeF; F.addCapture(incoming)
+                // o <- i
+                // l <- i
+            }
+            else // ! last && ! pack(incoming)
+            {
+                processing_step_ = FIRST_TIME_WITHOUT_PACK;
+                // (4)  WARNING No pack on first incoming!
+                // makeKF; KF.addCapture(incoming)
+                // makeF; F.addCapture(incoming)
+                // o <- i
+                // l <- i
+            }
+        }
+        break;
+        case SECOND_TIME :
+        {
+            if (selectPack(last_ptr_))
+            {
+                WOLF_WARN("\n||*||");
+                WOLF_INFO("\n ... It seems you missed something!");
+                WOLF_INFO("\nPack's KF and origin's KF have matching time stamps (i.e. below time tolerances)");
+                WOLF_INFO("Check the following:");
+                WOLF_INFO("  - You have all processors installed before starting receiving any data");
+                WOLF_INFO("  - You issued a problem->setPrior() after all processors are installed");
+                WOLF_INFO("  - You have configured all your processors with compatible time tolerances");
+                WOLF_ERROR("Pack's KF and origin's KF have matching time stamps (i.e. below time tolerances). Check time tolerances!");
+            }
+            else
+            {
+                processing_step_ = SECOND_TIME_WITHOUT_PACK;
+                // (2)
+                // last.F.setKey()
+                // makeF; F.addCapture(incoming)
+                // o <- l
+                // l <- i
+            }
+            break;
+        }
+        case RUNNING :
+        default :
+        {
+            if (selectPack(last_ptr_))
+            {
+                processing_step_ = RUNNING_WITH_PACK;
+                // (1)
+                // pack.KF.addCapture(last)
+                // makeF; F.addCapture(incoming)
+                // o <- l
+                // l <- i
+            }
+            else
+            {
+                processing_step_ = RUNNING_WITHOUT_PACK;
+                // (3)
+                // o <- o   // verbose
+                // l <- i
+            }
+            break;
+        }
+    }
 }
 
 
