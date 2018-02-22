@@ -346,9 +346,9 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
     //std::cout << "-----End of process():" << std::endl;
 }
 
-bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
-{
-    WOLF_TRACE("This callback doing nothing!!! ");
+//bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
+//{
+//    WOLF_TRACE("This callback doing nothing!!! ");
 //    WOLF_DEBUG( "PT: KF" , _keyframe_ptr->id() , " callback received at ts= " , _keyframe_ptr->getTimeStamp().get() );
 //
 //    assert((last_ptr_ == nullptr || last_ptr_->getFramePtr() != nullptr) && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame always");

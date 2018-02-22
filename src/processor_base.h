@@ -162,9 +162,9 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
          */
         FrameBasePtr emplaceFrame(FrameType _type, CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state);
 
-        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tolerance) = 0;
+//        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tolerance) = 0;
 
-        void keyFrameCallbackNew(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
+        void keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
 
         SensorBasePtr getSensorPtr();
         const SensorBasePtr getSensorPtr() const;

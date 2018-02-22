@@ -45,7 +45,7 @@ FrameBasePtr ProcessorBase::emplaceFrame(FrameType _type, CaptureBasePtr _captur
     return new_frame_ptr;
 }
 
-void ProcessorBase::keyFrameCallbackNew(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
+void ProcessorBase::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
     if (_keyframe_ptr != nullptr)
         kf_pack_buffer_.add(_keyframe_ptr,_time_tol_other);
