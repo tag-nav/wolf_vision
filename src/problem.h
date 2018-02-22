@@ -54,7 +54,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         std::map<std::pair<StateBlockPtr, StateBlockPtr>, Eigen::MatrixXs> covariances_;
         std::list<StateBlockNotification> state_block_notification_list_;
         std::list<ConstraintNotification> constraint_notification_list_;
-        bool origin_is_set_;
+        bool prior_is_set_;
         Size state_size_, state_cov_size_;
 
     private: // CAUTION: THESE METHODS ARE PRIVATE, DO NOT MAKE THEM PUBLIC !!
@@ -312,6 +312,10 @@ class Problem : public std::enable_shared_from_this<Problem>
                    bool state_blocks = false);
         bool check(int verbose_level = 0);
 
+        bool priorIsSet() const
+        {
+            return prior_is_set_;
+        }
 };
 
 } // namespace wolf

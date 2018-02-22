@@ -31,7 +31,7 @@ Problem::Problem(const std::string& _frame_structure) :
         trajectory_ptr_(std::make_shared<TrajectoryBase>(_frame_structure)),
         map_ptr_(std::make_shared<MapBase>()),
         processor_motion_ptr_(),
-        origin_is_set_(false),
+        prior_is_set_(false),
         state_size_(0),
         state_cov_size_(0)
 {
@@ -121,7 +121,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     _corresponding_sensor_ptr->addProcessor(prc_ptr);
 
     // setting the origin in all processor motion if origin already setted
-    if (prc_ptr->isMotion() && origin_is_set_)
+    if (prc_ptr->isMotion() && prior_is_set_)
         (std::static_pointer_cast<ProcessorMotion>(prc_ptr))->setOrigin(getLastKeyFramePtr());
 
     // setting the main processor motion
@@ -334,7 +334,7 @@ void Problem::keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _pro
     for (auto sensor : hardware_ptr_->getSensorList())
     	for (auto processor : sensor->getProcessorList())
     		if (processor && (processor != _processor_ptr) )
-                processor->keyFrameCallbackNew(_keyframe_ptr, _time_tolerance);
+                processor->keyFrameCallback(_keyframe_ptr, _time_tolerance);
 }
 
 LandmarkBasePtr Problem::addLandmark(LandmarkBasePtr _lmk_ptr)
@@ -630,7 +630,7 @@ StateBlockList& Problem::getStateBlockList()
 
 FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov, const TimeStamp& _ts, const Scalar _time_tolerance)
 {
-    if (!origin_is_set_)
+    if ( ! prior_is_set_ )
     {
         // Create origin frame
         FrameBasePtr origin_frame_ptr = emplaceFrame(KEY_FRAME, _prior_state, _ts);
@@ -654,7 +654,7 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
                 if (processor_ptr->isMotion())
                     (std::static_pointer_cast<ProcessorMotion>(processor_ptr))->setOrigin(origin_frame_ptr);
 
-        origin_is_set_ = true;
+        prior_is_set_ = true;
 
         keyFrameCallback(origin_frame_ptr, nullptr, _time_tolerance);
 
