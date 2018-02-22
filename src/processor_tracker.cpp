@@ -42,33 +42,136 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
     incoming_ptr_ = _incoming_ptr;
 
-    if ( !kf_pack_buffer_.empty() )
-    {
-        KFPackPtr pack;
-
-        // Select using last_ptr
-        if (last_ptr_ != nullptr)
-        {
-            pack = kf_pack_buffer_.selectPack( last_ptr_->getTimeStamp(), time_tolerance_ );
-            if (pack!=nullptr)
-            {
-                keyFrameCallback(pack->key_frame,pack->time_tolerance);
-                kf_pack_buffer_.removeUpTo( last_ptr_->getTimeStamp() );
-            }
-        }
-
-        // Select using incoming_ptr
-        pack = kf_pack_buffer_.selectPack( incoming_ptr_->getTimeStamp(), time_tolerance_ );
-        if (pack!=nullptr)
-        {
-            keyFrameCallback(pack->key_frame,pack->time_tolerance);
-            kf_pack_buffer_.removeUpTo( incoming_ptr_->getTimeStamp() );
-        }
-    }
-
-    preProcess();
+    preProcess(); // Derived class operations
 
     computeProcessingStep();
+
+    switch(processing_step_)
+    {
+        case FIRST_TIME_WITH_PACK :
+        {
+            // (1)
+            // pack.KF.addCapture(incoming)
+            // makeF; F.addCapture(incoming)
+            // o <- i
+            // l <- i
+
+            KFPackPtr pack = selectPack( incoming_ptr_);
+            kf_pack_buffer_.removeUpTo( incoming_ptr_->getTimeStamp() );
+
+            // Append incoming to KF
+            pack->key_frame->addCapture(incoming_ptr_);
+
+            // TODO process info
+            processNew(max_new_features_); // TODO not sure. Check code inside.
+
+            origin_ptr_ = incoming_ptr_;
+            last_ptr_   = incoming_ptr_;
+            incoming_ptr_ = nullptr;
+            // KF_O, F_L, -
+
+            break;
+        }
+        case FIRST_TIME_WITHOUT_PACK :
+        {
+            // (4)  WARNING No pack on first incoming!
+            // makeKF; KF.addCapture(incoming)
+            // makeF; F.addCapture(incoming)
+            // o <- i
+            // l <- i
+
+            FrameBasePtr kfrm = getProblem()->emplaceFrame(KEY_FRAME, incoming_ptr_->getTimeStamp());
+            kfrm->addCapture(incoming_ptr_);
+            FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+            frm->addCapture(incoming_ptr_);
+
+            // TODO process info
+
+            // Issue KF callback with new KF
+            getProblem()->keyFrameCallback(kfrm, shared_from_this(), time_tolerance_);
+
+
+            origin_ptr_ = incoming_ptr_;
+            last_ptr_   = incoming_ptr_;
+            incoming_ptr_ = nullptr;
+
+            break;
+        }
+        case SECOND_TIME_WITHOUT_PACK :
+        {
+            // (2)
+            // origin.F.unlink(last)
+            // makeF; F.addCapture(incoming)
+            // o <- l
+            // l <- i
+
+            origin_ptr_->getFramePtr()->unlinkCapture(last_ptr_);
+
+            FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+            frm->addCapture(incoming_ptr_);
+
+            // TODO process info
+
+            origin_ptr_ = last_ptr_;
+            last_ptr_   = incoming_ptr_;
+            incoming_ptr_ = nullptr;
+
+            break;
+        }
+        case RUNNING_WITH_PACK :
+        {
+            // (1)
+            // pack.KF.addCapture(last)
+            // makeF; F.addCapture(incoming)
+            // o <- l
+            // l <- i
+
+            KFPackPtr pack = selectPack( last_ptr_ );
+            kf_pack_buffer_.removeUpTo( last_ptr_->getTimeStamp() );
+
+            WOLF_DEBUG( "PT: KF" , pack->key_frame->id() , " callback received at ts= " , pack->key_frame->getTimeStamp().get() );
+
+            // Capture last_ is added to the new keyframe
+            FrameBasePtr last_old_frame = last_ptr_->getFramePtr();
+            last_old_frame->unlinkCapture(last_ptr_);
+            last_old_frame->remove();
+            pack->key_frame->addCapture(last_ptr_);
+            WOLF_DEBUG( " --> appended last capture" );
+
+            // Create new frame
+            FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+            frm->addCapture(incoming_ptr_);
+
+            // Detect new Features, initialize Landmarks, create Constraints, ...
+            processNew(max_new_features_);
+
+            // Establish constraints between last and origin
+            // TODO: revise this fcn: code inside, and placement in here
+            establishConstraints();
+
+            // reset pointers
+            origin_ptr_ = last_ptr_;
+            last_ptr_   = incoming_ptr_;
+            incoming_ptr_ = nullptr;
+
+            break;
+        }
+        case RUNNING_WITHOUT_PACK :
+        {
+            // (3)
+            // o <- o   // verbose
+            // l <- i
+
+            // TODO process info
+
+            last_ptr_   = incoming_ptr_;
+            incoming_ptr_ = nullptr;
+
+            break;
+        }
+        default :
+            break;
+    }
 
     switch (processing_step_)
     {
@@ -245,40 +348,41 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
 bool ProcessorTracker::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
-    WOLF_DEBUG( "PT: KF" , _keyframe_ptr->id() , " callback received at ts= " , _keyframe_ptr->getTimeStamp().get() );
-
-    assert((last_ptr_ == nullptr || last_ptr_->getFramePtr() != nullptr) && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame always");
-
-    Scalar time_tol = std::min(time_tolerance_, _time_tol_other);
-
-
-    // Nothing to do if:
-    //   - there is no last
-    //   - last frame is already a key frame
-    //   - last frame is too far in time from keyframe
-    if (last_ptr_ == nullptr || last_ptr_->getFramePtr()->isKey() || std::abs(last_ptr_->getTimeStamp() - _keyframe_ptr->getTimeStamp()) > time_tol)
-    {
-        WOLF_DEBUG( " --> nothing done" );
-        return false;
-    }
-
-    WOLF_DEBUG( " --> appended last capture" );
-    //std::cout << "ProcessorTracker::keyFrameCallback in sensor " << getSensorPtr()->id() << std::endl;
-
-    // Capture last_ is added to the new keyframe
-    FrameBasePtr last_old_frame = last_ptr_->getFramePtr();
-    last_old_frame->unlinkCapture(last_ptr_);
-    last_old_frame->remove();
-    _keyframe_ptr->addCapture(last_ptr_);
-
-    // Detect new Features, initialize Landmarks, create Constraints, ...
-    processNew(max_new_features_);
-
-    // Establish constraints between last and origin
-    establishConstraints();
-
-    // Set ready to go to 2nd case in process()
-    origin_ptr_ = nullptr;
+    WOLF_TRACE("This callback doing nothing!!! ");
+//    WOLF_DEBUG( "PT: KF" , _keyframe_ptr->id() , " callback received at ts= " , _keyframe_ptr->getTimeStamp().get() );
+//
+//    assert((last_ptr_ == nullptr || last_ptr_->getFramePtr() != nullptr) && "ProcessorTracker::keyFrameCallback: last_ptr_ must have a frame always");
+//
+//    Scalar time_tol = std::min(time_tolerance_, _time_tol_other);
+//
+//
+//    // Nothing to do if:
+//    //   - there is no last
+//    //   - last frame is already a key frame
+//    //   - last frame is too far in time from keyframe
+//    if (last_ptr_ == nullptr || last_ptr_->getFramePtr()->isKey() || std::abs(last_ptr_->getTimeStamp() - _keyframe_ptr->getTimeStamp()) > time_tol)
+//    {
+//        WOLF_DEBUG( " --> nothing done" );
+//        return false;
+//    }
+//
+//    WOLF_DEBUG( " --> appended last capture" );
+//    //std::cout << "ProcessorTracker::keyFrameCallback in sensor " << getSensorPtr()->id() << std::endl;
+//
+//    // Capture last_ is added to the new keyframe
+//    FrameBasePtr last_old_frame = last_ptr_->getFramePtr();
+//    last_old_frame->unlinkCapture(last_ptr_);
+//    last_old_frame->remove();
+//    _keyframe_ptr->addCapture(last_ptr_);
+//
+//    // Detect new Features, initialize Landmarks, create Constraints, ...
+//    processNew(max_new_features_);
+//
+//    // Establish constraints between last and origin
+//    establishConstraints();
+//
+//    // Set ready to go to 2nd case in process()
+//    origin_ptr_ = nullptr;
 
     return true;
 
@@ -309,6 +413,7 @@ KFPackPtr ProcessorTracker::selectPack(const CaptureBasePtr & _cap)
 
 void ProcessorTracker::computeProcessingStep()
 {
+
     enum {FIRST_TIME, SECOND_TIME, RUNNING} step;
     if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
         step = FIRST_TIME;
@@ -317,33 +422,29 @@ void ProcessorTracker::computeProcessingStep()
     else
         step = RUNNING;
 
-    ////////////////////
+
     switch (step)
     {
         case FIRST_TIME :
-        {
+
             if (selectPack(incoming_ptr_))
-            {
                 processing_step_ = FIRST_TIME_WITH_PACK;
-                // (1)
-                // pack.KF.addCapture(incoming)
-                // makeF; F.addCapture(incoming)
-                // o <- i
-                // l <- i
-            }
             else // ! last && ! pack(incoming)
             {
+                WOLF_WARN("\n||*||");
+                WOLF_INFO("\n ... It seems you missed something!");
+                WOLF_INFO("\nReceived first Capture without KF pack to associate to");
+                WOLF_INFO("Creating a KF for the Capture. But...")
+                WOLF_INFO("Check the following:");
+                WOLF_INFO("  - You have all processors installed before starting receiving any data");
+                WOLF_INFO("  - You issued a problem->setPrior() after all processors are installed");
+                WOLF_INFO("  - You have configured all your processors with compatible time tolerances");
                 processing_step_ = FIRST_TIME_WITHOUT_PACK;
-                // (4)  WARNING No pack on first incoming!
-                // makeKF; KF.addCapture(incoming)
-                // makeF; F.addCapture(incoming)
-                // o <- i
-                // l <- i
             }
-        }
         break;
+
         case SECOND_TIME :
-        {
+
             if (selectPack(last_ptr_))
             {
                 WOLF_WARN("\n||*||");
@@ -356,37 +457,30 @@ void ProcessorTracker::computeProcessingStep()
                 WOLF_ERROR("Pack's KF and origin's KF have matching time stamps (i.e. below time tolerances). Check time tolerances!");
             }
             else
-            {
                 processing_step_ = SECOND_TIME_WITHOUT_PACK;
-                // (2)
-                // last.F.setKey()
-                // makeF; F.addCapture(incoming)
-                // o <- l
-                // l <- i
-            }
             break;
-        }
+
         case RUNNING :
         default :
-        {
+
             if (selectPack(last_ptr_))
             {
+                if (last_ptr_->getFramePtr()->isKey())
+                {
+                    WOLF_WARN("\n||*||");
+                    WOLF_INFO("\n ... It seems you missed something!");
+                    WOLF_INFO("\nPack's KF and last's KF have matching time stamps (i.e. below time tolerances)");
+                    WOLF_INFO("Check the following:");
+                    WOLF_INFO("  - You have all processors installed before starting receiving any data");
+                    WOLF_INFO("  - You issued a problem->setPrior() after all processors are installed");
+                    WOLF_INFO("  - You have configured all your processors with compatible time tolerances");
+                    WOLF_ERROR("Pack's KF and last's KF have matching time stamps (i.e. below time tolerances). Check time tolerances!");
+                }
                 processing_step_ = RUNNING_WITH_PACK;
-                // (1)
-                // pack.KF.addCapture(last)
-                // makeF; F.addCapture(incoming)
-                // o <- l
-                // l <- i
             }
             else
-            {
                 processing_step_ = RUNNING_WITHOUT_PACK;
-                // (3)
-                // o <- o   // verbose
-                // l <- i
-            }
             break;
-        }
     }
 }
 
