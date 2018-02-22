@@ -71,6 +71,7 @@ class ProcessorTracker : public ProcessorBase
         typedef enum {
             FIRST_TIME_WITH_PACK,
             FIRST_TIME_WITHOUT_PACK,
+            SECOND_TIME_WITH_PACK,
             SECOND_TIME_WITHOUT_PACK,
             RUNNING_WITH_PACK,
             RUNNING_WITHOUT_PACK
