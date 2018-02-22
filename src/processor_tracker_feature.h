@@ -137,14 +137,12 @@ class ProcessorTrackerFeature : public ProcessorTracker
         virtual unsigned int processNew(const unsigned int& _max_features);
 
         /** \brief Detect new Features
-         * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
-         * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
+         * \param _max_features maximum number of features detected
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
-         * The function sets the member new_features_list_, the list of newly detected features,
-         * to be used for landmark initialization.
+         * The function sets the member new_features_last_, the list of newly detected features.
          */
         virtual unsigned int detectNewFeatures(const unsigned int& _max_features) = 0;
 

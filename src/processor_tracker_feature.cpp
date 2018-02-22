@@ -112,31 +112,21 @@ void ProcessorTrackerFeature::reset()
 
 unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_features)
 {
-    //    std::cout << "ProcessorTrackerFeature::processNew()" << std::endl;
-
     /* Rationale: A keyFrame will be created using the last Capture.
-     * First, we create the constraints from the existing Features in last,
-     * because the ones that we want to detect later on will not be constrained by anyone yet.
-     * Then, we work on this last Capture to detect new Features,
+     * First, we work on the last Capture to detect new Features,
      * When done, we need to track these new Features to the incoming Capture.
      * At the end, all new Features are appended to the lists of known Features in
      * the last and incoming Captures.
      */
 
-
     // Populate the last Capture with new Features. The result is in new_features_last_.
     unsigned int n = detectNewFeatures(_max_new_features);
 
-    //  std::cout << "detected " << n << " new features!" << std::endl;
-
     // Track new features from last to incoming. This will append new correspondences to matches_last_incoming
-    if (incoming_ptr_ != last_ptr_ && incoming_ptr_ != nullptr) // we do not do it the first time.
-    {
-        trackFeatures(new_features_last_, new_features_incoming_, matches_last_from_incoming_);
+    trackFeatures(new_features_last_, new_features_incoming_, matches_last_from_incoming_);
 
-        // Append all new Features to the incoming Captures' list of Features
-        incoming_ptr_->addFeatureList(new_features_incoming_);
-    }
+    // Append all new Features to the incoming Captures' list of Features
+    incoming_ptr_->addFeatureList(new_features_incoming_);
 
     // Append all new Features to the last Captures' list of Features
     last_ptr_->addFeatureList(new_features_last_);
