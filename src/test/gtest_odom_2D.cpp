@@ -402,13 +402,15 @@ TEST(Odom2D, KF_callback)
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
-    ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance()       , integrated_cov_vector [n_split], 1e-6);
+    ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance()      , integrated_cov_vector [n_split], 1e-6);
 
     ////////////////////////////////////////////////////////////////
     // Split between keyframes, exact timestamp
     int m_split = 4;
     t_split = t0 + m_split*dt;
 //    std::cout << "-----------------------------\nSplit between KFs; time: " << t_split - t0 << std::endl;
+
+    problem->print(4,1,1,1);
 
     x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
