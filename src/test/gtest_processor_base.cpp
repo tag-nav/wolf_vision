@@ -227,23 +227,10 @@ TEST(ProcessorBase, KeyFrameCallback)
 //        capture_odo->setTimeStamp(t);
 //        sen_odo->process(capture_odo);
 
-//        WOLF_DEBUG("iter:",ii,"  ts: ", t);
-
-//        t = t+dt;
-//        capture_odo->setTimeStamp(t);
-//        sen_odo->process(capture_odo);
-
-//        WOLF_DEBUG("iter:",ii,"  ts: ", t);
-
-//        t = t+dt;
-//        capture_odo->setTimeStamp(t);
-//        sen_odo->process(capture_odo);
-
-//        WOLF_DEBUG("iter:",ii,"  ts: ", t);
-
         // Track
         CaptureVoidPtr cap(make_shared<CaptureVoid>(t, sen_tracker));
         proc_tracker->process(cap);
+//        t = t+dt;
 
         problem->print(4,0,0,0);
 
