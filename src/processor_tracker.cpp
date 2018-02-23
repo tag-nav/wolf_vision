@@ -186,14 +186,14 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
                 setKeyFrame(last_ptr_);
 
+                // Establish constraints
+                establishConstraints();
+
                 // Update pointers
                 reset();
                 origin_ptr_ = last_ptr_;
                 last_ptr_   = incoming_ptr_;
                 incoming_ptr_ = nullptr;
-
-                // Establish constraints
-                establishConstraints();
             }
             else
             {
