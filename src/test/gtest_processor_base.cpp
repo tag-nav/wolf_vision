@@ -224,20 +224,18 @@ TEST(ProcessorBase, KeyFrameCallback)
 
         // Move
         t = t+dt;
-//        capture_odo->setTimeStamp(t);
-//        sen_odo->process(capture_odo);
+        capture_odo->setTimeStamp(t);
+        sen_odo->process(capture_odo);
 
         // Track
         CaptureVoidPtr cap(make_shared<CaptureVoid>(t, sen_tracker));
         proc_tracker->process(cap);
-//        t = t+dt;
 
-        problem->print(4,0,0,0);
+        problem->print(4,1,0,0);
 
         // Only odom creating KFs
         ASSERT_TRUE( problem->getLastKeyFramePtr()->getType().compare("PO 2D")==0 );
-
-//        WOLF_DEBUG("iter:",ii,"  ts: ", t);
+//        t = t+dt;
     }
 
     // Print WOLF info
