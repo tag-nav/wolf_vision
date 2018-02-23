@@ -78,7 +78,7 @@ class ProcessorTracker : public ProcessorBase
         } ProcessingStep ;
 
     protected:
-        ProcessingStep processing_step_;
+        ProcessingStep processing_step_;        ///< State machine controlling the processing step
         CaptureBasePtr origin_ptr_;             ///< Pointer to the origin of the tracker.
         CaptureBasePtr last_ptr_;               ///< Pointer to the last tracked capture.
         CaptureBasePtr incoming_ptr_;           ///< Pointer to the incoming capture being processed.

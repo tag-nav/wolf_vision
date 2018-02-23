@@ -52,6 +52,8 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         {
             KFPackPtr pack = selectPack( incoming_ptr_);
 
+            WOLF_DEBUG( "PT: KF" , pack->key_frame->id() , " callback received at ts= " , pack->key_frame->getTimeStamp().get() );
+
             // Append incoming to KF
             pack->key_frame->addCapture(incoming_ptr_);
 
@@ -116,7 +118,6 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             last_old_frame->unlinkCapture(last_ptr_);
             last_old_frame->remove();
             pack->key_frame->addCapture(last_ptr_);
-            WOLF_DEBUG( " --> appended last capture" );
 
             // Create new frame
             FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
@@ -251,7 +252,7 @@ void ProcessorTracker::computeProcessingStep()
                     WOLF_WARN("||*||");
                     WOLF_INFO(" ... It seems you missed something!");
                     WOLF_INFO("Pack's KF and last's KF have matching time stamps (i.e. below time tolerances)");
-                    WOLF_INFO("Check the following:");
+                    WOLF_INFO("Check the following for correctness:");
                     WOLF_INFO("  - You have all processors installed before starting receiving any data");
                     WOLF_INFO("  - You issued a problem->setPrior() after all processors are installed ---> ", (getProblem()->priorIsSet() ? "OK" : "NOK"));
                     WOLF_INFO("  - You have configured all your processors with compatible time tolerances");
