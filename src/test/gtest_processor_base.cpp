@@ -194,7 +194,7 @@ TEST(ProcessorBase, KeyFrameCallback)
     SensorBasePtr sen_tracker = make_shared<SensorBase>("FEATURE", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
-    shared_ptr<ProcessorTrackerFeatureDummy> proc_tracker = make_shared<ProcessorTrackerFeatureDummy>(7, 4);
+    shared_ptr<ProcessorTrackerFeatureDummy> proc_tracker = make_shared<ProcessorTrackerFeatureDummy>(5, 5);
     proc_tracker->setTimeTolerance(dt/2);
 
     problem->addSensor(sen_tracker);
@@ -218,7 +218,7 @@ TEST(ProcessorBase, KeyFrameCallback)
 
     CaptureOdom2DPtr capture_odo = make_shared<CaptureOdom2D>(t, sen_odo, Vector2s(0.5,0));
 
-    for (size_t ii=0; ii<3; ii++ )
+    for (size_t ii=0; ii<20; ii++ )
     {
 //        WOLF_DEBUG("iter:",ii,"  ts: ", t);
 
