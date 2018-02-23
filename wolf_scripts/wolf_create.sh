@@ -1,143 +1,46 @@
 #! /bin/bash
 
-# check wether the scripts path environment variable has been defined
-WOLF_SCRIPTS_PATH=`echo "${WOLF_SCRIPTS_PATH}"`
-if [ -z "${WOLF_SCRIPTS_PATH}" ]
-then
-  echo "The scripts path environment varibale has not been defined. Please see the wiki documentation for instructions on how to create it."
-  exit
-fi
+# Load functions
+. $WOLF_SCRIPTS_PATH/generic_func/functions.sh
 
-NAME=
-BASE=
+# check environment variables are been defined
+WOLF_ROOT=$(getEnvVariable WOLF_ROOT)
+WOLF_SCRIPTS_PATH=$(getEnvVariable WOLF_SCRIPTS_PATH)
 
-while getopts ":n:b:" OPTION
-do
-  case $OPTION in
-    n)
-       NAME=$OPTARG
-       ;;
-    b)
-       BASE=$OPTARG
-       ;;
-    ?)
-       echo "******************************************"  
-       echo "Script to generate a WOLF processor class"
-       echo "******************************************"
-       echo "Options:"
-       echo "  -n: Processor name"
-       echo "  -b: Processor base class (inheritance)"
-       echo ""  
-       echo "Example of usage:"
-       echo "create_wolf_processor.sh -n processor_example -b processor_tracker" 
-       echo ""
-       exit
-       ;;
-  esac
-done
-
-# Templates path
-TEMPLATES_PATH=${WOLF_SCRIPTS_PATH}/templates
-
-#Lower case naming
-if [ $NAME ]
-then
-  NAME=$(echo $NAME | tr '[:upper:]' '[:lower:]')
-  NAME_CAP=$(echo $NAME | tr '[:lower:]' '[:upper:]')
-else
-  echo "No processor name provided, aborting ..."
-  exit
-fi
-if [ $BASE ]
-then
-  BASE=$(echo $BASE | tr '[:upper:]' '[:lower:]')
-else
-  echo "No base processor name provided, aborting ..."
-  exit
-fi
-
-# Check naming
-if ! echo "$NAME" | grep -q "processor_" ;  
-then
-    NAME=processor_$NAME;
-fi
-if ! echo "$BASE" | grep -q "processor_" ; 
-then
-    BASE=processor_$BASE;
-fi
-
-# Find bas class files
-if find $WOLF_ROOT -name $BASE.h -print -quit | grep -q '^'; 
-then
-  BASE_H_PATH=$(find "$WOLF_ROOT/src" -name $BASE.h)
-  BASE_CPP_PATH=$(find "$WOLF_ROOT/src" -name $BASE.cpp)
-else
-  echo "Cannot find the BASE class files for processor $BASE."modify CMakeLists.
-  exit
-fi
+# Source user menu to obtain main variables
+. $WOLF_SCRIPTS_PATH/generic_func/user_menu.sh
 
 #============================================
-echo "Creating new class and methods for $NAME derived from $BASE"
 echo ""
+echo "==========================================================================================================================="
+echo "     Creating new class and methods for $NAME derived from $BASE"
+echo "==========================================================================================================================="
+echo ""
+#============================================
+
+# Create git branch is requested
+askIfGitBranch $NAME
+
+#============================================
 echo -n "- Generating CPP and H files."
 #============================================
 
-# ===== Create Git branch if requested =====
+# Find base class files
+BASE_H_PATH=$(getFilePath $BASE.h)
+BASE_CPP_PATH=$(getFilePath $BASE.cpp)
 
-# TODO
+# Create Header and CPP files
+createHCPPFromTemplates $NAME_H_PATH $NAME_CPP_PATH
 
-#============================================
-
-# ===== Create HEADER and CPP files =====
-CLASSNAME="${NAME#processor_}"
-CLASSNAME=Processor$(echo "$(echo "$CLASSNAME" | sed 's/.*/\u&/')") 
-
-#Set the processor and class names on the template files
-sed 's/header_file/'"${NAME}.h"'/g' "${TEMPLATES_PATH}"/class_template.cpp > "${TEMPLATES_PATH}"/tmp.cpp
-sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp
-rm "${TEMPLATES_PATH}"/tmp.cpp
-#rm "${TEMPLATES_PATH}"/tmp2.cpp
-
-sed 's/base_header_file/'"${BASE}.h"'/g' "${TEMPLATES_PATH}"/class_template.h > "${TEMPLATES_PATH}"/tmp.h
-sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp.h > "${TEMPLATES_PATH}"/tmp2.h
-sed 's/PROCESSOR_CLASS/'"${NAME_CAP}"'/g' "${TEMPLATES_PATH}"/tmp2.h > "${TEMPLATES_PATH}"/tmp3.h
-rm "${TEMPLATES_PATH}"/tmp.h
-rm "${TEMPLATES_PATH}"/tmp2.h
-
-# Copy all pure virtual methods to derived class
-FuncInBase=$(grep -e " = 0;" -e "=0;" $BASE_H_PATH)
-D=";"   #Multi Character Delimiter
-FuncList=($(echo $FuncInBase | sed -e 's/'"$D"'/\n/g' | while read line; do echo $line | sed 's/[\t ]/'"$D"'/g'; done))
-for (( i = 0; i < ${#FuncList[@]}; i++ )); do
-  FuncList[i]=$(echo ${FuncList[i]} | sed -r 's/'"$D"'/ /g')
-  FuncList[i]=$(echo ${FuncList[i]} | sed -r 's/'"virtual"'/ /g')
-  FuncList[i]=$(echo ${FuncList[i]} | sed -r 's/'"=0"'/ /g')
-  FuncList[i]=$(echo ${FuncList[i]} | sed -r 's/'" = 0"'/ /g')  
-  TXTH="${FuncList[i]%"${FuncList[i]##*[![:space:]]}"}"
-  TXTCPP_3=$(echo $TXTH | sed 's/.*(//g')
-  TXTCPP_2=$(echo $TXTH | sed 's/(.*//g' | sed 's/.* //g')
-  TXTCPP_1=$(echo $TXTH | sed 's/'"$TXTCPP_2"'.*//g')
- 
-  # CPP file
-  FUNCNAME=${TXT%*\(}
-  #echo FUNCNAME
-  sed -i "/\[base class inherited methods\]/a ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}\n\{\n\}\n" "${TEMPLATES_PATH}"/tmp2.cpp
-  
-  # H file
-  sed -i "/\[base class inherited methods\]/a \       \ virtual ${TXTH};\n" "${TEMPLATES_PATH}"/tmp3.h
-done
-
-# Rename and move files
-NAME_H_PATH=$WOLF_ROOT/src/processors/$NAME.h
-NAME_CPP_PATH=$WOLF_ROOT/src/processors/$NAME.cpp
-mv "${TEMPLATES_PATH}"/tmp3.h "$NAME_H_PATH"
-mv "${TEMPLATES_PATH}"/tmp2.cpp "$NAME_CPP_PATH"
+# Copy all pure virtual methods from base class to derived class
+copyVirtualMethods
 
 echo " Done."
 echo " \--> Created $NAME_H_PATH file."
 echo " \--> Created $NAME_CPP_PATH file."
-
+echo ""
 #============================================
+
 # ===== Modify CMakeLists.txt =====
 #echo ""
 #echo -n "- Modifying CMakeLists.txt to include CPP and H files."
@@ -153,10 +56,6 @@ echo " \--> Created $NAME_CPP_PATH file."
 #LINENUM=$( sed -n "Add generic derived header before this line" "${TEMPLATES_PATH}"/tmp.txt )
 #echo $LINENUM
 
-echo " Done."
-
-#============================================
-
 # ===== Create gtest =====
 #echo ""
 #echo -n "- Creating gtest for $NAME."
@@ -167,27 +66,9 @@ echo " Done."
 
 #============================================
 
-
-#grep -e ") = 0;" -e ")=0;" $BASE_H_PATH >> "${TEMPLATES_PATH}"/tmp3.h
-#sed "s/=0//g" < "${TEMPLATES_PATH}"/tmp3.h > "${TEMPLATES_PATH}"/tmp4.h
-#sed "s/ = 0//g" < "${TEMPLATES_PATH}"/tmp4.h > "${TEMPLATES_PATH}"/tmp5.h
-#rm "${TEMPLATES_PATH}"/tmp3.h
-#rm "${TEMPLATES_PATH}"/tmp4.h
-
-
-#======
-
-
-
-
-#create the project directory
-#if [ -e "$ORIGNAME" ]
-#then
-#  echo "  ! $ORIGNAME directory already exists, skipping ..."
-#else
-#  echo "  > Creating $ORIGNAME directory"
-#  mkdir $ORIGNAME
-#fi  
+echo "All Done."
+echo ""
+#============================================
 
 
 #create the CMakeLists.txt script file

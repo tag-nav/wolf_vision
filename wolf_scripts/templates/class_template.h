@@ -1,5 +1,5 @@
-#ifndef PROCESSOR_CLASS_H_
-#define PROCESSOR_CLASS_H_
+#ifndef _name_cap_H_
+#define _name_cap_H_
 
 //Wolf includes
 #include "wolf.h"
@@ -10,7 +10,7 @@ namespace wolf
 
 WOLF_PTR_TYPEDEFS(class_name);
 
-class class_name : public ProcessorTracker
+class class_name : public base_class
 {
     public:
 
