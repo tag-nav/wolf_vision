@@ -99,6 +99,19 @@ namespace wolf
  */
 class ProcessorMotion : public ProcessorBase
 {
+    public:
+        typedef enum {
+            FIRST_TIME_WITH_PACK,
+            FIRST_TIME_WITHOUT_PACK,
+            SECOND_TIME_WITH_PACK,
+            SECOND_TIME_WITHOUT_PACK,
+            RUNNING_WITH_PACK,
+            RUNNING_WITHOUT_PACK
+        } ProcessingStep ;
+
+    protected:
+        ProcessingStep processing_step_;        ///< State machine controlling the processing step
+
     private:
         enum
         {
@@ -119,6 +132,7 @@ class ProcessorMotion : public ProcessorBase
 
         // Instructions to the processor:
 
+        void process2(CaptureBasePtr _incoming_ptr);
         void process(CaptureBasePtr _incoming_ptr);
         virtual void resetDerived();
 
@@ -220,6 +234,10 @@ class ProcessorMotion : public ProcessorBase
          *   - drawing / printing / logging the results of the processing
          */
         virtual void postProcess() { };
+
+        KFPackPtr selectPack(const CaptureBasePtr & _cap);
+
+        void computeProcessingStep();
 
 
         // These are the pure virtual functions doing the mathematics

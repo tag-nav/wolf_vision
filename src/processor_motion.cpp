@@ -10,6 +10,7 @@ ProcessorMotion::ProcessorMotion(const std::string& _type,
                                  Scalar _time_tolerance,
                                  Size _calib_size) :
         ProcessorBase(_type, _time_tolerance),
+        processing_step_(FIRST_TIME_WITHOUT_PACK),
         x_size_(_state_size),
         data_size_(_data_size),
         delta_size_(_delta_size),
@@ -36,6 +37,61 @@ ProcessorMotion::ProcessorMotion(const std::string& _type,
 ProcessorMotion::~ProcessorMotion()
 {
 //    std::cout << "destructed     -p-Mot" << id() << std::endl;
+}
+
+void ProcessorMotion::process2(CaptureBasePtr _incoming_ptr)
+{
+    if (_incoming_ptr == nullptr)
+    {
+        WOLF_ERROR("Received capture is nullptr.");
+        return;
+    }
+
+    incoming_ptr_ = std::static_pointer_cast<CaptureMotion>(_incoming_ptr);
+
+    preProcess(); // Derived class operations
+
+    computeProcessingStep();
+
+    switch(processing_step_)
+    {
+        case FIRST_TIME_WITH_PACK :
+        {
+            KFPackPtr pack = selectPack( incoming_ptr_);
+            setOrigin(pack->key_frame);
+
+            // TODO process
+            break;
+        }
+        case FIRST_TIME_WITHOUT_PACK :
+        {
+            // Create new KF for origin
+            std::cout << "PM: make KF" << std::endl;
+            VectorXs x0 = getProblem()->zeroState();
+            setOrigin(x0, _incoming_ptr->getTimeStamp());
+            break;
+        }
+        case SECOND_TIME_WITH_PACK :
+        {
+            KFPackPtr pack = selectPack( last_ptr_);
+            break;
+        }
+        case SECOND_TIME_WITHOUT_PACK :
+        {
+            break;
+        }
+        case RUNNING_WITH_PACK :
+        {
+            KFPackPtr pack = selectPack( last_ptr_);
+            break;
+        }
+        case RUNNING_WITHOUT_PACK :
+        {
+            break;
+        }
+        default :
+            break;
+    }
 }
 
 void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
@@ -566,5 +622,67 @@ FeatureBasePtr ProcessorMotion::emplaceFeature(CaptureMotionPtr _capture_motion)
     return feature;
 }
 
+KFPackPtr ProcessorMotion::selectPack(const CaptureBasePtr & _cap)
+{
+    if (_cap)
+        return kf_pack_buffer_.selectPack(_cap->getTimeStamp(), time_tolerance_);
+
+    return nullptr;
+}
+
+void ProcessorMotion::computeProcessingStep()
+{
+    // First determine the processing phase by checking the status of the tracker pointers
+    enum {FIRST_TIME, SECOND_TIME, RUNNING} step;
+    if (origin_ptr_ == nullptr && last_ptr_ == nullptr)
+        step = FIRST_TIME;
+    else if (origin_ptr_ == last_ptr_)
+        step = SECOND_TIME;
+    else
+        step = RUNNING;
+
+
+    // Then combine with the existence (or not) of a keyframe callback pack
+    switch (step)
+    {
+        case FIRST_TIME :
+
+            if (selectPack(incoming_ptr_))
+                processing_step_ = FIRST_TIME_WITH_PACK;
+            else // ! last && ! pack(incoming)
+                processing_step_ = FIRST_TIME_WITHOUT_PACK;
+        break;
+
+        case SECOND_TIME :
+
+            if (selectPack(last_ptr_))
+                processing_step_ = SECOND_TIME_WITH_PACK;
+            else
+                processing_step_ = SECOND_TIME_WITHOUT_PACK;
+            break;
+
+        case RUNNING :
+        default :
+
+            if (selectPack(last_ptr_))
+            {
+                if (last_ptr_->getFramePtr()->isKey())
+                {
+                    WOLF_WARN("||*||");
+                    WOLF_INFO(" ... It seems you missed something!");
+                    WOLF_INFO("Pack's KF and last's KF have matching time stamps (i.e. below time tolerances)");
+                    WOLF_INFO("Check the following for correctness:");
+                    WOLF_INFO("  - You have all processors installed before starting receiving any data");
+                    WOLF_INFO("  - You issued a problem->setPrior() after all processors are installed ---> ", (getProblem()->priorIsSet() ? "OK" : "NOK"));
+                    WOLF_INFO("  - You have configured all your processors with compatible time tolerances");
+                    WOLF_ERROR("Pack's KF and last's KF have matching time stamps (i.e. below time tolerances).");
+                }
+                processing_step_ = RUNNING_WITH_PACK;
+            }
+            else
+                processing_step_ = RUNNING_WITHOUT_PACK;
+            break;
+    }
+}
 
 }
