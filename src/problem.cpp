@@ -737,10 +737,10 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         std::cout << "    pm" << p->id() << " " << p->getType() << endl;
                         ProcessorMotionPtr pm = std::static_pointer_cast<ProcessorMotion>(p);
                         if (pm->getOriginPtr())
-                            cout << "      o: C" << pm->getOriginPtr()->id() << " - F"
+                            cout << "      o: C" << pm->getOriginPtr()->id() << " - " << (pm->getOriginPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
                             << pm->getOriginPtr()->getFramePtr()->id() << endl;
                         if (pm->getLastPtr())
-                            cout << "      l: C" << pm->getLastPtr()->id() << " - F"
+                            cout << "      l: C" << pm->getLastPtr()->id() << " - " << (pm->getLastPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
                             << pm->getLastPtr()->getFramePtr()->id() << endl;
                         if (pm->getIncomingPtr())
                             cout << "      i: C" << pm->getIncomingPtr()->id() << endl;
@@ -752,10 +752,10 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         if (pt)
                         {
                             if (pt->getOriginPtr())
-                                cout << "      o: C" << pt->getOriginPtr()->id() << " - F"
+                                cout << "      o: C" << pt->getOriginPtr()->id() << " - " << (pt->getOriginPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
                                 << pt->getOriginPtr()->getFramePtr()->id() << endl;
                             if (pt->getLastPtr())
-                                cout << "      l: C" << pt->getLastPtr()->id() << " - F"
+                                cout << "      l: C" << pt->getLastPtr()->id() << " - " << (pt->getLastPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
                                 << pt->getLastPtr()->getFramePtr()->id() << endl;
                             if (pt->getIncomingPtr())
                                 cout << "      i: C" << pt->getIncomingPtr()->id() << endl;
