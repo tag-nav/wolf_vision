@@ -87,6 +87,68 @@ void ProcessorMotion::process2(CaptureBasePtr _incoming_ptr)
         }
         case RUNNING_WITHOUT_PACK :
         {
+            preProcess();
+
+            // integrate data
+            integrateOneStep();
+
+            // Update state and time stamps
+            last_ptr_->setTimeStamp(incoming_ptr_->getTimeStamp());
+            last_ptr_->getFramePtr()->setTimeStamp(getCurrentTimeStamp());
+            last_ptr_->getFramePtr()->setState(getCurrentState());
+
+            if (voteForKeyFrame() && permittedKeyFrame())
+            {
+                // Set the frame of last_ptr as key
+                auto key_frame_ptr = last_ptr_->getFramePtr();
+                key_frame_ptr->setKey();
+
+                // create motion feature and add it to the key_capture
+                auto key_feature_ptr = emplaceFeature(last_ptr_);
+
+                // create motion constraint and link it to parent feature and other frame (which is origin's frame)
+                auto ctr_ptr = emplaceConstraint(key_feature_ptr, origin_ptr_);
+
+                // create a new frame
+                auto new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
+                                                                getCurrentState(),
+                                                                getCurrentTimeStamp());
+                // create a new capture
+                auto new_capture_ptr = emplaceCapture(new_frame_ptr,
+                                                      getSensorPtr(),
+                                                      key_frame_ptr->getTimeStamp(),
+                                                      Eigen::VectorXs::Zero(data_size_),
+                                                      Eigen::MatrixXs::Zero(data_size_, data_size_),
+                                                      last_ptr_->getCalibration(),
+                                                      last_ptr_->getCalibration(),
+                                                      key_frame_ptr);
+                // reset the new buffer
+                new_capture_ptr->getBuffer().get().push_back( motionZero(key_frame_ptr->getTimeStamp()) ) ;
+
+                // reset integrals
+                delta_                  = deltaZero();
+                delta_cov_              . setZero();
+                delta_integrated_       = deltaZero();
+                delta_integrated_cov_   . setZero();
+                jacobian_calib_         . setZero();
+
+                // reset processor origin to the new keyframe's capture
+                origin_ptr_     = last_ptr_;
+                last_ptr_       = new_capture_ptr;
+
+                // reset derived things
+                resetDerived();
+
+                // callback to other processors
+                getProblem()->keyFrameCallback(key_frame_ptr, shared_from_this(), time_tolerance_);
+            }
+
+
+            postProcess();
+
+            // clear incoming just in case
+            incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
+
             break;
         }
         default :
@@ -194,7 +256,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
                                             last_ptr_->getCalibration(),
                                             key_frame_ptr);
       // reset the new buffer
-      new_capture_ptr->getBuffer().get().clear();
       new_capture_ptr->getBuffer().get().push_back( motionZero(key_frame_ptr->getTimeStamp()) ) ;
 
       // reset integrals
@@ -316,7 +377,6 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
                                _origin_frame);
 
     // clear and reset buffer
-    getBuffer().get().clear();
     getBuffer().get().push_back(motionZero(_origin_frame->getTimeStamp()));
 
     // Reset integrals
