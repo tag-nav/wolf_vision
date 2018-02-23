@@ -205,7 +205,7 @@ class ProcessorMotion : public ProcessorBase
         // Helper functions:
     protected:
 
-        void updateDt();
+        Scalar updateDt();
         void integrateOneStep();
         void splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part);
         void reintegrateBuffer(CaptureMotionPtr _capture_ptr);
@@ -516,9 +516,9 @@ inline bool ProcessorMotion::isMotion()
     return true;
 }
 
-inline void ProcessorMotion::updateDt()
+inline Scalar ProcessorMotion::updateDt()
 {
-    dt_ = incoming_ptr_->getTimeStamp() - getBuffer().get().back().ts_;
+    return dt_ = incoming_ptr_->getTimeStamp() - getBuffer().get().back().ts_;
 }
 
 inline const MotionBuffer& ProcessorMotion::getBuffer() const

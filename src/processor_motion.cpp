@@ -431,7 +431,7 @@ bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar&
 void ProcessorMotion::integrateOneStep()
 {
     // Set dt
-    updateDt();
+    dt_ = updateDt();
 
     // get vector of parameters to calibrate
     calib_ = getBuffer().getCalibrationPreint();
