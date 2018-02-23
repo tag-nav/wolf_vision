@@ -23,7 +23,8 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
     auto features_lost = 0;
     for (auto feat_in_ptr : _feature_list_in)
     {
-        if (features_lost < 2)
+
+        if ( rand() % static_cast<int>(101) < 30 )
         {
             features_lost++;
             std::cout << "feature " << feat_in_ptr->id() << " lost!" << std::endl;
