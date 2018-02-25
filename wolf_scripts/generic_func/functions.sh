@@ -133,34 +133,44 @@ createHCPPFromTemplates()
   mv "${TEMPLATES_PATH}"/tmp2.cpp "$NAME_CPP_PATH"
 }
 
-copyVirtualMethods()
+fillWithBaseVirtualMethods()
 {
-# TODO: FIX locating the exact class in file, not only the file because it parses also parameter structs in a wrong way.	
-# TODO: Copy also comments above functions.	
-	
-  # Function calls
-  FuncInBase=$(grep -e " = 0;" -e "=0;" $BASE_H_PATH)
+  # Get base class	
+  H_TXT=$(cat $BASE_H_PATH)
+  H_TXT="${H_TXT##*class $BASECLASSNAME :}"
+  BASECLASS_TXT="${H_TXT%%\n\};*}"
+
+  echo "class $BASECLASSNAME :$BASECLASS_TXT };" > "${WOLF_SCRIPTS_PATH}"/class.h
+
+  # H file Get Virtual function declarations with help
+  sed -e '/./{H;$!d;}' -e 'x;/ = 0;/!d;' "${WOLF_SCRIPTS_PATH}"/class.h > "${WOLF_SCRIPTS_PATH}"/tmp.h
+  sed -r 's/'" = 0"'//g' "${WOLF_SCRIPTS_PATH}"/tmp.h > "${WOLF_SCRIPTS_PATH}"/tmp2.h
+  sed -i -e "/\[base class inherited methods\]/r ${WOLF_SCRIPTS_PATH}/tmp2.h" "$NAME_H_PATH" 
+  rm "${WOLF_SCRIPTS_PATH}"/tmp.h	
+  rm ${WOLF_SCRIPTS_PATH}/tmp2.h
+    
+  # CPP file  
+  FuncInBase=$(grep -e " = 0;" -e "=0;" "${WOLF_SCRIPTS_PATH}/class.h")
   D=";"   #Multi Character Delimiter
   FuncList=($(echo $FuncInBase | sed -e 's/'"$D"'/\n/g' | while read line; do echo $line | sed 's/[\t ]/'"$D"'/g'; done))
-  for (( i = 0; i < ${#FuncList[@]}; i++ )); do
-    FuncList[i]=$(echo ${FuncList[i]} | sed -r 's/'"$D"'/ /g')
-    FuncList[i]=$(echo ${FuncList[i]} | sed -r 's/'"virtual"'/ /g')
-    FuncList[i]=$(echo ${FuncList[i]} | sed -r 's/'"=0"'/ /g')
-    FuncList[i]=$(echo ${FuncList[i]} | sed -r 's/'" = 0"'/ /g')  
-    TXTH="${FuncList[i]%"${FuncList[i]##*[![:space:]]}"}"
+
+  #for (( idx = 0; idx < ${#FuncList[@]}; idx++ )); do
+  for (( idx = $((${#FuncList[@]}-1)); idx > -1; idx-- )); do
+  	TMP=$(echo ${FuncList[idx]} | sed -r 's/'"$D"'/ /g')
+    TMP=$(echo $TMP | sed -r 's/'"virtual"'/ /g')
+    TMP=$(echo $TMP | sed -r 's/'"=0"'/ /g')
+    TMP=$(echo $TMP | sed -r 's/'" = 0"'/ /g')
+    TXTH="${TMP%"$TMP##*[![:space:]]}"}"
     TXTCPP_3=$(echo $TXTH | sed 's/.*(//g')
     TXTCPP_2=$(echo $TXTH | sed 's/(.*//g' | sed 's/.* //g')
     TXTCPP_1=$(echo $TXTH | sed 's/'"$TXTCPP_2"'.*//g')
  
     # CPP file
     FUNCNAME=${TXT%*\(}
-    #echo FUNCNAME
-    sed -i "/\[base class inherited methods\]/a ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}\n\{\n\}\n" "$NAME_CPP_PATH"
-  
-    # H file
-    sed -i "/\[base class inherited methods\]/a \       \ virtual ${TXTH};\n" "$NAME_H_PATH"
-
-  done
+    sed -i "/\[base class inherited methods\]/a ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}\n\{\n\}\n" "$NAME_CPP_PATH"  
+  done    
+    
+  rm "${WOLF_SCRIPTS_PATH}"/class.h
 }
 
 # ============================

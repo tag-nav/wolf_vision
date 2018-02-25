@@ -169,7 +169,7 @@ class ProcessorTracker : public ProcessorBase
         /**\brief Creates and adds constraints from last_ to origin_
          *
          */
-        virtual void establishConstraints()=0;
+        virtual void establishConstraints() = 0;
 
         /**\brief set key Frame to the provided Capture's frame
          */

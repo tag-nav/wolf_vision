@@ -37,7 +37,7 @@ BASE_CPP_PATH=$(getFilePath $BASE.cpp)
 createHCPPFromTemplates $NAME_H_PATH $NAME_CPP_PATH
 
 # Copy all pure virtual methods from base class to derived class
-copyVirtualMethods
+fillWithBaseVirtualMethods
 
 echo " Done."
 echo " \--> Created $NAME_H_PATH file."
@@ -73,6 +73,8 @@ echo ""
 echo "All Done."
 echo ""
 #============================================
+
+
 
 
 #create the CMakeLists.txt script file
