@@ -42,23 +42,16 @@ fillWithBaseVirtualMethods
 echo " Done."
 echo " \--> Created $NAME_H_PATH file."
 echo " \--> Created $NAME_CPP_PATH file."
-echo ""
 #============================================
 
 # ===== Modify CMakeLists.txt =====
-#echo ""
-#echo -n "- Modifying CMakeLists.txt to include CPP and H files."
+echo ""
+echo -n "- Modifying CMakeLists.txt to include CPP and H files."
 
-#cp "$WOLF_ROOT/src/CMakeLists.txt" "${TEMPLATES_PATH}"/tmp.txt
+updateCMakeLists
 
-#echo ""
-
-#LINENUM=$( sed -n '/\[Add generic derived header before this line\]/=' "${TEMPLATES_PATH}"/tmp.txt )
-
-#sed -i '$LINENUMi$LINENUM This is Line 8' FILE
-
-#LINENUM=$( sed -n "Add generic derived header before this line" "${TEMPLATES_PATH}"/tmp.txt )
-#echo $LINENUM
+echo " Done."
+echo " \--> Updated $CML_PATH file."
 
 # ===== Create gtest =====
 #echo ""

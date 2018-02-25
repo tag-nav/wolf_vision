@@ -34,7 +34,7 @@ TYPE_CAP=$(UpperCase $TYPE)
 
 if ! [[ $NAME =~ $TYPE ]];
 then
-    NAME="$TYPE"_"$NAME";
+    NAME="$TYPE"_"$BASE"_"$NAME";
 fi
 if ! [[ $BASE =~ $TYPE ]];
 then

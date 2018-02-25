@@ -3,7 +3,9 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 # Forward var to parent scope
 
 SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/processor_diff_drive.h PARENT_SCOPE)
+    ${CMAKE_CURRENT_SOURCE_DIR}/processor_diff_drive.h 
+    PARENT_SCOPE)
 
 SET(SRCS_PROCESSOR ${SRCS_PROCESSOR}
-    ${CMAKE_CURRENT_SOURCE_DIR}/processor_diff_drive.cpp PARENT_SCOPE)
+    ${CMAKE_CURRENT_SOURCE_DIR}/processor_diff_drive.cpp 
+    PARENT_SCOPE)

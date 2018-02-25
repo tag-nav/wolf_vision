@@ -124,8 +124,6 @@ createHCPPFromTemplates()
   rm "${TEMPLATES_PATH}"/tmp2.h
   rm "${TEMPLATES_PATH}"/tmp3.h
   
-  echo $NAME
-  
   # Rename and move files
   NAME_H_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".h
   NAME_CPP_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".cpp
@@ -154,7 +152,6 @@ fillWithBaseVirtualMethods()
   D=";"   #Multi Character Delimiter
   FuncList=($(echo $FuncInBase | sed -e 's/'"$D"'/\n/g' | while read line; do echo $line | sed 's/[\t ]/'"$D"'/g'; done))
 
-  #for (( idx = 0; idx < ${#FuncList[@]}; idx++ )); do
   for (( idx = $((${#FuncList[@]}-1)); idx > -1; idx-- )); do
   	TMP=$(echo ${FuncList[idx]} | sed -r 's/'"$D"'/ /g')
     TMP=$(echo $TMP | sed -r 's/'"virtual"'/ /g')
@@ -171,6 +168,61 @@ fillWithBaseVirtualMethods()
   done    
     
   rm "${WOLF_SCRIPTS_PATH}"/class.h
+}
+
+updateCMakeLists()
+{	
+  CML_PATH="${WOLF_ROOT}/src/${TYPE}s/CMakeLists.txt"
+  
+  echo ""
+  echo ""
+  echo ""
+  echo ""
+
+  # Add Header source
+  Hsources=( $(grep -e ".h" "${CML_PATH}") )
+  NewH="\${CMAKE_CURRENT_SOURCE_DIR}/$NAME.h"
+  Hsources=( "${Hsources[@]}" $NewH )
+  IFS=$'\n' 
+  sorted=($(sort <<<"${Hsources[*]}"))
+  unset IFS
+  SET_AFTER_POS=-2
+   
+  for (( idx = 0; idx < ${#sorted[@]}; idx++ )); do
+    if [ "${sorted[idx]}" == "\${CMAKE_CURRENT_SOURCE_DIR}/"$NAME".h" ] ;
+    then
+  	  SET_AFTER_POS=$(( idx-1 ))
+  	  if [ $SET_AFTER_POS == -1 ] ; 
+  	  then
+  	  	sed -i "\%${sorted[1]}%i \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.h" "$CML_PATH"
+  	  else
+  	  	sed -i "\%${sorted[$SET_AFTER_POS]}%a \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.h" "$CML_PATH"
+  	  fi
+    fi	  	
+  done
+  
+  # Add CPP source
+  Hsources=( $(grep -e ".cpp" "${CML_PATH}") )
+  NewCPP="\${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp"
+  Hsources=( "${Hsources[@]}" $NewCPP )
+  IFS=$'\n' 
+  sorted=($(sort <<<"${Hsources[*]}"))
+  unset IFS
+  SET_AFTER_POS=-2
+   
+  for (( idx = 0; idx < ${#sorted[@]}; idx++ )); do
+    if [ "${sorted[idx]}" == "\${CMAKE_CURRENT_SOURCE_DIR}/"$NAME".cpp" ] ;
+    then
+  	  SET_AFTER_POS=$(( idx-1 ))
+  	  if [ $SET_AFTER_POS == -1 ] ; 
+  	  then
+  	  	sed -i "\%${sorted[1]}%i \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp" "$CML_PATH"
+  	  else
+  	  	sed -i "\%${sorted[$SET_AFTER_POS]}%a \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp" "$CML_PATH"
+  	  fi
+    fi	  	
+  done
+  
 }
 
 # ============================
