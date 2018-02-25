@@ -19,7 +19,7 @@ echo ""
 #============================================
 
 # Create git branch is requested
-askIfGitBranch $NAME
+#askIfGitBranch $NAME
 
 #============================================
 echo -n "- Generating CPP and H files."
