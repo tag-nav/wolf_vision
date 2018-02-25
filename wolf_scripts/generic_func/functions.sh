@@ -110,11 +110,6 @@ createHCPPFromTemplates()
   TEMPLATES_PATH=${WOLF_SCRIPTS_PATH}/templates
 
   # ===== Create HEADER and CPP files =====
-  TYPE_CAP1=$(UpperCaseFirstLetter $TYPE)
-  CLASSNAME=$(echo ${NAME##*_})
-  CLASSNAME=Processor$(echo "$(echo "$CLASSNAME" | sed 's/.*/\u&/')") 
-  BASECLASSNAME=$(echo ${BASE##*_})
-  BASECLASSNAME=Processor$(echo "$(echo "$BASECLASSNAME" | sed 's/.*/\u&/')") 
 
   #Set the TYPE and class names on the template files
   sed 's/header_file/'"${NAME}.h"'/g' "${TEMPLATES_PATH}"/class_template.cpp > "${TEMPLATES_PATH}"/tmp.cpp
@@ -129,6 +124,7 @@ createHCPPFromTemplates()
   rm "${TEMPLATES_PATH}"/tmp2.h
   rm "${TEMPLATES_PATH}"/tmp3.h
   
+  echo $NAME
   
   # Rename and move files
   NAME_H_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".h
@@ -139,6 +135,9 @@ createHCPPFromTemplates()
 
 copyVirtualMethods()
 {
+# TODO: FIX locating the exact class in file, not only the file because it parses also parameter structs in a wrong way.	
+# TODO: Copy also comments above functions.	
+	
   # Function calls
   FuncInBase=$(grep -e " = 0;" -e "=0;" $BASE_H_PATH)
   D=";"   #Multi Character Delimiter
@@ -160,6 +159,7 @@ copyVirtualMethods()
   
     # H file
     sed -i "/\[base class inherited methods\]/a \       \ virtual ${TXTH};\n" "$NAME_H_PATH"
+
   done
 }
 

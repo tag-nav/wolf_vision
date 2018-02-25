@@ -6,6 +6,10 @@
 # check environment variables are been defined
 WOLF_ROOT=$(getEnvVariable WOLF_ROOT)
 WOLF_SCRIPTS_PATH=$(getEnvVariable WOLF_SCRIPTS_PATH)
+if [ -z "${WOLF_ROOT}" ] || [ -z "${WOLF_SCRIPTS_PATH}" ] ;
+then 
+	exit 
+fi
 
 # Source user menu to obtain main variables
 . $WOLF_SCRIPTS_PATH/generic_func/user_menu.sh

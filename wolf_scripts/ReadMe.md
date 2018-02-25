@@ -17,7 +17,7 @@ Helpful scripts to create WOLF tree elements (e.g. processors)
 Creates the main structure of a new processor, including .cpp and .h files, doxygen files and a gtest for that processor in `test/processors/`. 
 
   * Example of usage  
-  `create_wolf_processor.sh -n example -b processor_tracker` 
+  `create_wolf_processor.sh -n example -b tracker` 
 
   * Options:
     - n: Processor name

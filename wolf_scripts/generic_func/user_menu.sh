@@ -1,25 +1,29 @@
 NAME=
 BASE=
 TYPE=
-
 while getopts ":t:n:b:" OPTION
 do
-  case $OPTION in
+  case ${OPTION} in
     t)
-       TYPE=$OPTARG
+       TYPE=${OPTARG}
        ;;
     n)
-       NAME=$OPTARG
+       NAME=${OPTARG}
        ;;
     b)
-       BASE=$OPTARG
+       BASE=${OPTARG}
        ;;
-    ?)
+    *) 
        showHelp 
        exit
        ;;
   esac
 done
+if [ -z "$TYPE" ] || [ -z "$NAME" ] || [ -z "$BASE" ]
+then
+   showHelp	
+   exit
+fi
 
 NAME=$(LowerCase $NAME)
 NAME_CAP=$(UpperCase $NAME)
@@ -28,12 +32,18 @@ BASE_CAP=$(UpperCase $BASE)
 TYPE=$(LowerCase $TYPE)
 TYPE_CAP=$(UpperCase $TYPE)
 
-# Check naming (add type in front to keep WOLF naming format)
-if ! echo "$NAME" | grep -q "$TYPE_" ;  
+if ! [[ $NAME =~ $TYPE ]];
 then
-    NAME=$TYPE_$NAME;
+    NAME="$TYPE"_"$NAME";
 fi
-if ! echo "$BASE" | grep -q "$TYPE_" ; 
+if ! [[ $BASE =~ $TYPE ]];
 then
-    BASE=$TYPE_$BASE;
+    BASE="$TYPE"_"$BASE";
 fi
+
+# Useful derivatives
+TYPE_CAP1=$(UpperCaseFirstLetter $TYPE)
+CLASSNAME=$(echo ${NAME##*_})
+CLASSNAME=Processor$(echo "$(echo "$CLASSNAME" | sed 's/.*/\u&/')") 
+BASECLASSNAME=$(echo ${BASE##*_})
+BASECLASSNAME=Processor$(echo "$(echo "$BASECLASSNAME" | sed 's/.*/\u&/')") 
