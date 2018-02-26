@@ -867,7 +867,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         // Features
                         for (auto f : C->getFeatureList())
                         {
-                            cout << "      f" << f->id() << " " << f->getType() << ((depth < 4) ? " -- " + std::to_string(f->getConstraintList().size()) + "c  " : "");
+                            cout << "      f" << f->id() << " trk" << f->trackId() << " " << f->getType() << ((depth < 4) ? " -- " + std::to_string(f->getConstraintList().size()) + "c  " : "");
                             if (constr_by)
                             {
                                 cout << "  <--\t";
