@@ -37,13 +37,6 @@ class ConstraintOdom2D : public ConstraintAutodiff<ConstraintOdom2D, 3, 2, 1, 2,
         bool operator ()(const T* const _p1, const T* const _o1, const T* const _p2, const T* const _o2,
                          T* _residuals) const;
 
-        /** \brief Returns the jacobians computation method
-         **/
-        virtual JacobianMethod getJacobianMethod() const override
-        {
-            return JAC_AUTO;
-        }
-
     public:
         static wolf::ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr, const ProcessorBasePtr& _processor_ptr)
         {

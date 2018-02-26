@@ -27,6 +27,7 @@ class ConstraintEpipolar : public ConstraintBase
         /** Returns a residual vector and a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
          **/
         virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const override {};
+
         /** \brief Returns the jacobians computation method
          **/
         virtual JacobianMethod getJacobianMethod() const override {return JAC_ANALYTIC;}

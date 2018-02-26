@@ -51,11 +51,6 @@ class ConstraintAHP : public ConstraintAutodiff<ConstraintAHP, 2, 3, 4, 3, 4, 4>
                          const T* const _lmk_hmg,
                          T* _residuals) const;
 
-        /** \brief Returns the jacobians computation method
-         **/
-        virtual JacobianMethod getJacobianMethod() const override;
-
-
         // Static creator method
         static ConstraintAHPPtr create(const FeatureBasePtr&   _ftr_ptr,
                                        const LandmarkAHPPtr&   _lmk_ahp_ptr,
@@ -188,11 +183,6 @@ inline bool ConstraintAHP::operator ()(const T* const _current_frame_p,
     Eigen::Map<Eigen::Matrix<T, 2, 1> > residuals(_residuals);
     residuals = getMeasurementSquareRootInformationUpper().cast<T>() * (expected - measured);
     return true;
-}
-
-inline wolf::JacobianMethod ConstraintAHP::getJacobianMethod() const
-{
-    return JAC_AUTO;
 }
 
 inline wolf::ConstraintAHPPtr ConstraintAHP::create(const FeatureBasePtr&   _ftr_ptr,

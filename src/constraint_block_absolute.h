@@ -33,11 +33,6 @@ class ConstraintBlockAbsolute: public ConstraintAutodiff<ConstraintBlockAbsolute
         template<typename T>
         bool operator ()(const T* const _sb, T* _residuals) const;
 
-        virtual JacobianMethod getJacobianMethod() const override
-        {
-            return JAC_AUTO;
-        }
-
 };
 
 template<typename T>

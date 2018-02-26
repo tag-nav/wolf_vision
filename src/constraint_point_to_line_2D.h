@@ -75,16 +75,6 @@ class ConstraintPointToLine2D: public ConstraintAutodiff<ConstraintPointToLine2D
     template <typename T>
     bool operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkOriginPosition, const T* const _landmarkOriginOrientation, const T* const _landmarkPoint, const T* const _landmarkPointAux, T* _residuals) const;
 
-    /** \brief Returns the jacobians computation method
-         *
-         * Returns the jacobians computation method
-         *
-         **/
-    virtual JacobianMethod getJacobianMethod() const override
-    {
-      return JAC_AUTO;
-    }
-
     /** \brief Returns a reference to the feature measurement
          **/
     virtual const Eigen::VectorXs& getMeasurement() const override

@@ -53,17 +53,6 @@ class ConstraintGPSPseudorange3D: public ConstraintAutodiff<ConstraintGPSPseudor
                         const T* const _bias, const T* const _init_vehicle_p, const T* const _init_vehicle_o,
                         T* _residual) const;
 
-
-        /** \brief Returns the jacobians computation method
-        *
-        * Returns the jacobians computation method
-        *
-        **/
-        virtual JacobianMethod getJacobianMethod() const override
-        {
-            return JAC_AUTO;
-        }
-
     protected:
         Eigen::Vector3s sat_position_;
         Scalar pseudorange_;

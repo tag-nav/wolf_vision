@@ -28,11 +28,6 @@ class ConstraintPose3D: public ConstraintAutodiff<ConstraintPose3D,6,3,4>
         template<typename T>
         bool operator ()(const T* const _p, const T* const _o, T* _residuals) const;
 
-        virtual JacobianMethod getJacobianMethod() const override
-        {
-            return JAC_AUTO;
-        }
-
 };
 
 template<typename T>
