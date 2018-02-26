@@ -231,7 +231,7 @@ TEST(ProcessorBase, KeyFrameCallback)
         CaptureVoidPtr cap(make_shared<CaptureVoid>(t, sen_tracker));
         proc_tracker->process(cap);
 
-        problem->print(4,1,0,0);
+        problem->print(4,1,1,0);
 
         // Only odom creating KFs
         ASSERT_TRUE( problem->getLastKeyFramePtr()->getType().compare("PO 2D")==0 );
