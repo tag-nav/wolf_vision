@@ -51,6 +51,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         case FIRST_TIME_WITH_PACK :
         {
             KFPackPtr pack = selectPack( incoming_ptr_);
+            kf_pack_buffer_.removeUpTo( incoming_ptr_->getTimeStamp() );
 
             WOLF_DEBUG( "PT: KF" , pack->key_frame->id() , " callback received at ts= " , pack->key_frame->getTimeStamp().get() );
 
@@ -172,6 +173,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 origin_ptr_ = last_ptr_;
                 last_ptr_   = incoming_ptr_;
                 incoming_ptr_ = nullptr;
+
             }
             else
             {
