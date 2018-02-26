@@ -56,44 +56,111 @@ void ProcessorMotion::process2(CaptureBasePtr _incoming_ptr)
     switch(processing_step_)
     {
         case FIRST_TIME_WITH_PACK :
-        {
-            KFPackPtr pack = selectPack( incoming_ptr_);
-            setOrigin(pack->key_frame);
-
-            // TODO process
-            break;
-        }
         case FIRST_TIME_WITHOUT_PACK :
-        {
-            // Create new KF for origin
-            std::cout << "PM: make KF" << std::endl;
-            VectorXs x0 = getProblem()->zeroState();
-            setOrigin(x0, _incoming_ptr->getTimeStamp());
-            break;
-        }
         case SECOND_TIME_WITH_PACK :
-        {
-            KFPackPtr pack = selectPack( last_ptr_);
-            break;
-        }
         case SECOND_TIME_WITHOUT_PACK :
         {
-            break;
+            WOLF_WARN("ProcessorMotion received data before being initialized.");
+            WOLF_INFO("Did you forget to issue a Problem::setPrior()?");
+            throw std::runtime_error("ProcessorMotion received data before being initialized.");
         }
         case RUNNING_WITH_PACK :
         {
+            ////////////////////////////////////////////////////
+            // FIRST open pack and join KF
+
             KFPackPtr pack = selectPack( last_ptr_);
-            break;
-        }
-        case RUNNING_WITHOUT_PACK :
-        {
-            preProcess();
+            kf_pack_buffer_.removeUpTo( last_ptr_->getTimeStamp() );
+
+            // extract pack elements TODO rename _new_keyframe
+            FrameBasePtr new_kf = pack->key_frame;
+            TimeStamp    new_ts = new_kf->getTimeStamp();
+
+            // find the capture whose buffer is affected by the new keyframe
+            auto existing_capture = findCaptureContainingTimeStamp(new_ts);
+
+            if(existing_capture == nullptr) // Keyframe without Capture --> first time
+            {
+                // TODO should be an error
+            }
+            else   // Normal operation
+            {
+                // Find the frame acting as the capture's origin
+                auto keyframe_origin = existing_capture->getOriginFramePtr();
+
+                // emplace a new motion capture to the new keyframe
+                auto new_capture = emplaceCapture(new_kf,
+                                                  getSensorPtr(),
+                                                  new_ts,
+                                                  Eigen::VectorXs::Zero(data_size_),
+                                                  existing_capture->getDataCovariance(),
+                                                  existing_capture->getCalibration(),
+                                                  existing_capture->getCalibration(),
+                                                  keyframe_origin);
+
+                // split the buffer
+                // and give the part of the buffer before the new keyframe to the key_capture
+                existing_capture->getBuffer().split(new_ts, new_capture->getBuffer());
+
+                // TODO add interpolation code ...
+
+                // create motion feature and add it to the capture
+                auto new_feature = emplaceFeature(new_capture);
+
+                // create motion constraint and add it to the feature, and constrain to the other capture (origin)
+                emplaceConstraint(new_feature, keyframe_origin->getCaptureOf(getSensorPtr()) );
+
+                // Update the processor pointers
+                if (existing_capture == last_ptr_)
+                    // reset processor origin
+                    origin_ptr_ = new_capture;
+
+                // Update the existing capture
+                existing_capture->setOriginFramePtr(new_kf);
+
+                // re-integrate existing buffer -- note: the result of re-integration is stored in the same buffer!
+                reintegrateBuffer(existing_capture);
+
+                // modify existing feature and constraint (if they exist in the existing capture)
+                if (!existing_capture->getFeatureList().empty())
+                {
+                    auto existing_feature = existing_capture->getFeatureList().back(); // there is only one feature!
+
+                    // Modify existing feature --------
+                    existing_feature->setMeasurement          (existing_capture->getBuffer().get().back().delta_integr_);
+                    existing_feature->setMeasurementCovariance(existing_capture->getBuffer().get().back().delta_integr_cov_);
+
+                    // Modify existing constraint --------
+                    // Instead of modifying, we remove one ctr, and create a new one.
+                    auto ctr_to_remove  = existing_feature->getConstraintList().back(); // there is only one constraint!
+                    auto new_ctr        = emplaceConstraint(existing_feature, new_capture);
+                    ctr_to_remove       ->remove();  // remove old constraint now (otherwise c->remove() gets propagated to f, C, F, etc.)
+                }
+
+            }
+
+            ////////////////////////////////////////////////////
+            // NOW on with the received data
 
             // integrate data
             integrateOneStep();
 
             // Update state and time stamps
-            last_ptr_->setTimeStamp(incoming_ptr_->getTimeStamp());
+            last_ptr_->setTimeStamp(getCurrentTimeStamp());
+            last_ptr_->getFramePtr()->setTimeStamp(getCurrentTimeStamp());
+            last_ptr_->getFramePtr()->setState(getCurrentState());
+
+            resetDerived(); // TODO see where to put this
+
+            break;
+        }
+        case RUNNING_WITHOUT_PACK :
+        {
+            // integrate data
+            integrateOneStep();
+
+            // Update state and time stamps
+            last_ptr_->setTimeStamp(getCurrentTimeStamp());
             last_ptr_->getFramePtr()->setTimeStamp(getCurrentTimeStamp());
             last_ptr_->getFramePtr()->setState(getCurrentState());
 
@@ -132,19 +199,17 @@ void ProcessorMotion::process2(CaptureBasePtr _incoming_ptr)
                 delta_integrated_cov_   . setZero();
                 jacobian_calib_         . setZero();
 
-                // reset processor origin to the new keyframe's capture
-                origin_ptr_     = last_ptr_;
-                last_ptr_       = new_capture_ptr;
-
                 // reset derived things
                 resetDerived();
+
+                // Update pointers
+                origin_ptr_     = last_ptr_;
+                last_ptr_       = new_capture_ptr;
 
                 // callback to other processors
                 getProblem()->keyFrameCallback(key_frame_ptr, shared_from_this(), time_tolerance_);
             }
 
-
-            postProcess();
 
             // clear incoming just in case
             incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
@@ -154,6 +219,9 @@ void ProcessorMotion::process2(CaptureBasePtr _incoming_ptr)
         default :
             break;
     }
+
+    postProcess();
+
 }
 
 void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
@@ -396,6 +464,9 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 
 bool ProcessorMotion::keyFrameCallback(FrameBasePtr _new_keyframe, const Scalar& _time_tol_other)
 {
+
+//    ProcessorBase::keyFrameCallback(_new_keyframe, _time_tol_other);
+//    return true;
 
     assert(_new_keyframe->getTrajectoryPtr() != nullptr
            && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");
