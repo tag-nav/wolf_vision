@@ -31,9 +31,11 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
         }
         else
         {
-            _feature_list_out.push_back(std::make_shared<FeatureBase>("POINT IMAGE", feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
+            FeatureBasePtr ftr(std::make_shared<FeatureBase>("POINT IMAGE", feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
+            ftr->setTrackId(feat_in_ptr->id());
+            _feature_list_out.push_back(ftr);
             _feature_correspondences[_feature_list_out.back()] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in_ptr,0}));
-            std::cout << "feature " << feat_in_ptr->id() << " tracked to feature " << _feature_list_out.back()->id() << " !" << std::endl;
+            std::cout << "feature " << feat_in_ptr->id() << " tracked to feature " << ftr->id() << " !" << std::endl;
         }
     }
 
@@ -57,9 +59,11 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
     for (unsigned int i = 1; i <= _max_features; i++)
     {
         n_feature_++;
-        new_features_last_.push_back(
+        FeatureBasePtr ftr(
                 std::make_shared<FeatureBase>("POINT IMAGE", n_feature_* Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
-        std::cout << "feature " << new_features_last_.back()->id() << " detected!" << std::endl;
+        new_features_last_.push_back(ftr);
+        ftr->setTrackId(ftr->id());
+        std::cout << "feature " << ftr->id() << " detected!" << std::endl;
     }
     std::cout << new_features_last_.size() << " features detected!" << std::endl;
 
