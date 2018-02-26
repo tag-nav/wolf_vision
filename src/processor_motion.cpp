@@ -710,20 +710,13 @@ void ProcessorMotion::computeProcessingStep()
     switch (step)
     {
         case FIRST_TIME :
-
-            if (selectPack(incoming_ptr_))
-                processing_step_ = FIRST_TIME_WITH_PACK;
-            else // ! last && ! pack(incoming)
-                processing_step_ = FIRST_TIME_WITHOUT_PACK;
-        break;
-
         case SECOND_TIME :
-
-            if (selectPack(last_ptr_))
-                processing_step_ = SECOND_TIME_WITH_PACK;
-            else
-                processing_step_ = SECOND_TIME_WITHOUT_PACK;
-            break;
+            WOLF_WARN ("||*||");
+            WOLF_INFO (" ... It seems you missed something!");
+            WOLF_INFO ("ProcessorMotion received data before being initialized.");
+            WOLF_INFO ("Did you forget to issue a Problem::setPrior()?");
+            WOLF_ERROR("ProcessorMotion received data before being initialized.");
+            throw std::runtime_error("ProcessorMotion received data before being initialized.");
 
         case RUNNING :
         default :
@@ -740,6 +733,7 @@ void ProcessorMotion::computeProcessingStep()
                     WOLF_INFO("  - You issued a problem->setPrior() after all processors are installed ---> ", (getProblem()->priorIsSet() ? "OK" : "NOK"));
                     WOLF_INFO("  - You have configured all your processors with compatible time tolerances");
                     WOLF_ERROR("Pack's KF and last's KF have matching time stamps (i.e. below time tolerances).");
+                    throw std::runtime_error("Pack's KF and last's KF have matching time stamps (i.e. below time tolerances).");
                 }
                 processing_step_ = RUNNING_WITH_PACK;
             }
