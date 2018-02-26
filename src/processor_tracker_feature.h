@@ -128,8 +128,8 @@ class ProcessorTrackerFeature : public ProcessorTracker
         virtual bool voteForKeyFrame() = 0;
 
         // We overload the advance and reset functions to update the lists of matches
-        void advance();
-        void reset();
+        void advanceDerived();
+        void resetDerived();
 
         /**\brief Process new Features
          *

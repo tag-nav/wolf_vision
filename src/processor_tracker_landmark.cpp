@@ -33,7 +33,7 @@ ProcessorTrackerLandmark::~ProcessorTrackerLandmark()
     //    }
 }
 
-void ProcessorTrackerLandmark::advance()
+void ProcessorTrackerLandmark::advanceDerived()
 {
     for (auto match : matches_landmark_from_last_)
     {
@@ -45,7 +45,7 @@ void ProcessorTrackerLandmark::advance()
     //            std::cout << "\t" << match.first->id() << " to " << match.second->landmark_ptr_->id() << std::endl;
 }
 
-void ProcessorTrackerLandmark::reset()
+void ProcessorTrackerLandmark::resetDerived()
 {
     //std::cout << "ProcessorTrackerLandmark::reset" << std::endl;
     for (auto match : matches_landmark_from_last_)

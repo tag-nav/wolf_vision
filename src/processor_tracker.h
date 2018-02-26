@@ -175,7 +175,7 @@ class ProcessorTracker : public ProcessorBase
          * Call this when the tracking and keyframe policy work is done and
          * we need to get ready to accept a new incoming Capture.
          */
-        virtual void advance() = 0;
+        virtual void advanceDerived() = 0;
 
         /**\brief Process new Features or Landmarks
          *
@@ -193,7 +193,7 @@ class ProcessorTracker : public ProcessorBase
 
         /** \brief Reset the tracker using the \b last Capture as the new \b origin.
          */
-        virtual void reset() = 0;
+        virtual void resetDerived() = 0;
 
     public:
 

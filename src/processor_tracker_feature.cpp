@@ -65,7 +65,7 @@ unsigned int ProcessorTrackerFeature::processKnown()
     return matches_last_from_incoming_.size();
 }
 
-void ProcessorTrackerFeature::advance()
+void ProcessorTrackerFeature::advanceDerived()
 {
     //    std::cout << "ProcessorTrackerFeature::advance()" << std::endl;
     // Compose correspondences to get origin_from_incoming
@@ -90,7 +90,7 @@ void ProcessorTrackerFeature::advance()
         ftr->setProblem(getProblem());
 }
 
-void ProcessorTrackerFeature::reset()
+void ProcessorTrackerFeature::resetDerived()
 {
     //    std::cout << "ProcessorTrackerFeature::reset()" << std::endl;
     // We also reset here the list of correspondences, which passes from last--incoming to origin--last.

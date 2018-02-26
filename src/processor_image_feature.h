@@ -87,15 +87,15 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
          */
         void postProcess();
 
-        void advance()
+        void advanceDerived()
         {
-            ProcessorTrackerFeature::advance();
+            ProcessorTrackerFeature::advanceDerived();
             image_last_ = image_incoming_;
         }
 
-        void reset()
+        void resetDerived()
         {
-            ProcessorTrackerFeature::reset();
+            ProcessorTrackerFeature::resetDerived();
             image_last_ = image_incoming_;
         }
 

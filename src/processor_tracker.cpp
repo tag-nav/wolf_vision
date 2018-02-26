@@ -61,7 +61,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             // We only process new features in Last, here last = nullptr, so we do not have anything to do.
 
             // Update pointers
-            reset();
+            resetDerived();
             origin_ptr_ = incoming_ptr_;
             last_ptr_   = incoming_ptr_;
             incoming_ptr_ = nullptr;
@@ -80,7 +80,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             getProblem()->keyFrameCallback(kfrm, shared_from_this(), time_tolerance_);
 
             // Update pointers
-            reset();
+            resetDerived();
             origin_ptr_ = incoming_ptr_;
             last_ptr_   = incoming_ptr_;
             incoming_ptr_ = nullptr;
@@ -99,7 +99,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             processNew(max_new_features_);
 
             // Update pointers
-            reset();
+            resetDerived();
             origin_ptr_ = last_ptr_;
             last_ptr_   = incoming_ptr_;
             incoming_ptr_ = nullptr;
@@ -130,7 +130,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             establishConstraints();
 
             // Update pointers
-            reset();
+            resetDerived();
             origin_ptr_ = last_ptr_;
             last_ptr_   = incoming_ptr_;
             incoming_ptr_ = nullptr;
@@ -161,7 +161,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 establishConstraints();
 
                 // Update pointers
-                reset();
+                resetDerived();
                 origin_ptr_ = last_ptr_;
                 last_ptr_   = incoming_ptr_;
                 incoming_ptr_ = nullptr;
@@ -176,7 +176,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
 
                 // Update pointers
-                advance();
+                advanceDerived();
                 last_ptr_   = incoming_ptr_;
                 incoming_ptr_ = nullptr;
             }
