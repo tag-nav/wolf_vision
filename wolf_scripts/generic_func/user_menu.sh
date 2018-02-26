@@ -44,6 +44,6 @@ fi
 # Useful derivatives
 TYPE_CAP1=$(UpperCaseFirstLetter $TYPE)
 CLASSNAME=$(echo ${NAME##*_})
-CLASSNAME=Processor$(echo "$(echo "$CLASSNAME" | sed 's/.*/\u&/')") 
+CLASSNAME=$TYPE_CAP1$(echo "$(echo "$CLASSNAME" | sed 's/.*/\u&/')") 
 BASECLASSNAME=$(echo ${BASE##*_})
-BASECLASSNAME=Processor$(echo "$(echo "$BASECLASSNAME" | sed 's/.*/\u&/')") 
+BASECLASSNAME=$TYPE_CAP1$(echo "$(echo "$BASECLASSNAME" | sed 's/.*/\u&/')") 
