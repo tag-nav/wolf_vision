@@ -32,11 +32,16 @@ BASE_CAP=$(UpperCase $BASE)
 TYPE=$(LowerCase $TYPE)
 TYPE_CAP=$(UpperCase $TYPE)
 
-if ! [[ $NAME =~ $TYPE ]];
+if ! [[ $NAME =~ $TYPE ]] ;
 then
+  if [[ $BASE =~ .*base*. ]] ;
+  then
+    NAME="$TYPE"_"$NAME";  
+  else
     NAME="$TYPE"_"$BASE"_"$NAME";
+  fi
 fi
-if ! [[ $BASE =~ $TYPE ]];
+if ! [[ $BASE =~ $TYPE ]] ;
 then
     BASE="$TYPE"_"$BASE";
 fi
