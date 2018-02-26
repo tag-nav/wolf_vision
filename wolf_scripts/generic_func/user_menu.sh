@@ -27,10 +27,15 @@ fi
 
 NAME=$(LowerCase $NAME)
 NAME_CAP=$(UpperCase $NAME)
+NAME_CAP1=$(UpperCaseFirstLetter $NAME)
 BASE=$(LowerCase $BASE)
 BASE_CAP=$(UpperCase $BASE)
+BASE_CAP1=$(UpperCaseFirstLetter $BASE)
 TYPE=$(LowerCase $TYPE)
 TYPE_CAP=$(UpperCase $TYPE)
+TYPE_CAP1=$(UpperCaseFirstLetter $TYPE)
+
+CLASSNAME="$TYPE_CAP1$BASE_CAP1$NAME_CAP1"
 
 if ! [[ $NAME =~ $TYPE ]] ;
 then
@@ -47,8 +52,5 @@ then
 fi
 
 # Useful derivatives
-TYPE_CAP1=$(UpperCaseFirstLetter $TYPE)
-CLASSNAME=$(echo ${NAME##*_})
-CLASSNAME=$TYPE_CAP1$(echo "$(echo "$CLASSNAME" | sed 's/.*/\u&/')") 
 BASECLASSNAME=$(echo ${BASE##*_})
 BASECLASSNAME=$TYPE_CAP1$(echo "$(echo "$BASECLASSNAME" | sed 's/.*/\u&/')") 

@@ -4,7 +4,7 @@
 
 askIfGitBranch()
 {
- read -p "- Do you want to create a new git branch(Y/n)?  " ANSWER
+ read -p "Do you want to create a new git branch(Y/n)?  " ANSWER
  DOIT=${ANSWER:-y}
  OK=0
  
@@ -99,8 +99,7 @@ getFilePath()
   then
     echo "$(find "$WOLF_ROOT/src" -name ${1} )"
   else
-    echo "Cannot find $1 file." >&2
-    exit
+    echo ""
   fi
 }
 
@@ -133,17 +132,63 @@ createHCPPFromTemplates()
 
 addAutodiffSpecifics()
 {
-echo "TODO"
-    # Count number of parameters
+  # Number of parameters
+  echo ""
+  echo "To create the class $CLASSNAME, you have to provide some info:"
+  echo "" 
+
+  PROMPT="- What is the size (dimensions) of the residual? (1 integer, followed by [ENTER]):"
+  read -p "${PROMPT}" RESIDUAL_DIM; 
+  if ! [[ "$RESIDUAL_DIM" =~ ^[0-9]+$ ]] ;
+  then
+    echo "Invalid input. Expecting a numeric value. Aborting..."
+    exit 1.
+  fi
+  echo -en "\033[1A\033[2K"
+  echo " \--> Setting residual size to $RESIDUAL_DIM"
+
+  PROMPT="- How many state blocks are going to be considered in the constraint? (1 integer, followed by [ENTER]):"
+  read -p "${PROMPT}" NUM_STATES; 
+  if ! [[ "$NUM_STATES" =~ ^[0-9]+$ ]] ;
+  then
+    echo "Invalid input. Expecting a numeric value. Aborting..."
+    exit 1.
+  fi
+  echo -en "\033[1A\033[2K"
+  echo " \--> Setting $NUM_STATES state blocks"
  
-  #const T* const _p1
+  #NAMES=
+  #SIZES=
+  for (( idx = 0; idx < $NUM_STATES; idx++ )); do
+     PROMPT="- Name of state $((idx+1))? (followed by [ENTER]):"
+     read -p "${PROMPT}" NAME;
+     PROMPT="- Size (dimensions) of state $((idx+1)) (${NAME})? (1 integer, followed by [ENTER]:"
+     read -p "${PROMPT}" SIZE; 
+     if ! [[ "$SIZE" =~ ^[0-9]+$ ]] ;
+     then
+       echo "Invalid input. Expecting a numeric value. Aborting..."
+       exit 1.
+     fi
+     echo -en "\033[1A\033[2K"
+     echo -en "\033[1A\033[2K"
+     NAMES+=( "${NAME}" )
+     SIZES+=( "${SIZE}" )
+  done
+
+  echo -n " \--> Setting state blocks: "
+  for (( idx = 0; idx < ${#NAMES[@]}; idx++ )); do
+    echo -n "${NAMES[$idx]}(${SIZES[$idx]}) "
+    PARAMS+=( "const T* const _${NAMES[idx]},")
+    PARAM_NUMS+=( "${SIZES[idx]},")
+  done
+  echo ""
   
-    # Add () operator
-    #sed -i "/\[base class inherited methods\]/a\ \n\        \/\*\* \brief : compute the residual from the state blocks being iterated by the solver.\n \        \*\*\/\n\        template<typename T>\n\        bool operator ()(aaaa) const;\n" "$NAME_H_PATH"
-    
-#            template<typename T>
-#        bool operator ()(const T* const _p1, const T* const _o1, const T* const _p2, const T* const _o2,
-#   
+  PARAMS[-1]=${PARAMS[-1]%?}
+  PARAM_NUMS[-1]=${PARAM_NUMS[-1]%?}
+
+  sed -i "s/public $BASECLASSNAME/public $BASECLASSNAME<$CLASSNAME, $RESIDUAL_DIM, ${PARAM_NUMS[*]}>/g" "$NAME_H_PATH"
+  sed -i "/virtual \~$CLASSNAME/a\ \n\        \/\*\* \brief : compute the residual from the state blocks being iterated by the solver.\n \        \*\*\/\n\        template<typename T>\n\        bool operator ()(${PARAMS[*]}, const T* const _residuals) const;\n" "$NAME_H_PATH"
+  sed -i "/\} \/\/ namespace wolf/a\ \n\/\/ Include here all headers for this class\n\/\/\#include <YOUR_HEADERS.h>\n\nnamespace wolf\n\{\n\ntemplate<typename T> bool $CLASSNAME::operator ()(${PARAMS[*]}, const T* const _residuals) const\n\{\n  \/\/ TODO: Implement\n  return true;\n\}\n\n\} \/\/ namespace wolf" "$NAME_H_PATH"
 }
 
 fillWithBaseVirtualMethods()
@@ -162,7 +207,7 @@ fillWithBaseVirtualMethods()
     # H file Get Virtual function declarations with help
     sed -e '/./{H;$!d;}' -e 'x;/ = 0;/!d;' "${WOLF_SCRIPTS_PATH}"/class.h > "${WOLF_SCRIPTS_PATH}"/tmp.h
     sed -r 's/'" = 0"'//g' "${WOLF_SCRIPTS_PATH}"/tmp.h > "${WOLF_SCRIPTS_PATH}"/tmp2.h
-    sed -i -e "/\[base class inherited methods\]/r ${WOLF_SCRIPTS_PATH}/tmp2.h" "$NAME_H_PATH" 
+    sed -i -e "/virtual \~$CLASSNAME/r ${WOLF_SCRIPTS_PATH}/tmp2.h" "$NAME_H_PATH" 
     rm "${WOLF_SCRIPTS_PATH}"/tmp.h	
     rm ${WOLF_SCRIPTS_PATH}/tmp2.h
     
@@ -182,7 +227,14 @@ fillWithBaseVirtualMethods()
       TXTCPP_1=$(echo $TXTH | sed 's/'"$TXTCPP_2"'.*//g')
  
       # CPP file
-      sed -i "/\[base class inherited methods\]/a ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}\n\{\n\}\n" "$NAME_CPP_PATH"  
+      sed -i "/\} \/\/ namespace wolf/i ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}" "$NAME_CPP_PATH"  
+      
+      if ! [[ $TXTCPP_1 =~ .*void*. ]]
+      then
+        sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  ${TXTCPP_1}return_var; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
+      else 
+        sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n\}\n" "$NAME_CPP_PATH"
+      fi
     done    
     
     rm "${WOLF_SCRIPTS_PATH}"/class.h

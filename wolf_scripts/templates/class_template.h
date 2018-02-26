@@ -21,8 +21,6 @@ class class_name : public base_class
         /** \brief Class Destructor
          */
         virtual ~class_name();
-
-        // [base class inherited methods]
 };
 
 } // namespace wolf
