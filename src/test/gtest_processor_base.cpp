@@ -233,7 +233,8 @@ TEST(ProcessorBase, KeyFrameCallback)
         capt_trk = make_shared<CaptureVoid>(t, sens_trk);
         proc_trk->process(capt_trk);
 
-        problem->print(4,1,1,0);
+//        problem->print(4,1,1,0);
+        WOLF_INFO("-------------------------------------------------");
 
         // Only odom creating KFs
         ASSERT_TRUE( problem->getLastKeyFramePtr()->getType().compare("PO 2D")==0 );
