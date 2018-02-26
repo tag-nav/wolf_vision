@@ -286,7 +286,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 {
     CaptureMotionPtr capture_motion;
-    if (_ts >= origin_ptr_->getTimeStamp())
+    if (origin_ptr_ && _ts >= origin_ptr_->getTimeStamp())
         // timestamp found in the current processor buffer
         capture_motion = last_ptr_;
     else
@@ -302,8 +302,12 @@ void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
         statePlusDelta(state_0, delta, dt, _x);
     }
     else
+    {
         // We could not find any CaptureMotion for the time stamp requested
-        std::runtime_error("Could not find any Capture for the time stamp requested");
+        WOLF_ERROR("Could not find any Capture for the time stamp requested. ");
+        WOLF_TRACE("Did you forget to call Problem::setPrior() in your application?")
+        throw std::runtime_error("Could not find any Capture for the time stamp requested. Did you forget to call Problem::setPrior() in your application?");
+    }
 }
 
 CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
