@@ -174,6 +174,10 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
         void setTimeTolerance(Scalar _time_tolerance);
 
+    protected:
+        KFPackPtr selectPack(const CaptureBasePtr & _cap);
+
+
 };
 
 }

@@ -74,6 +74,16 @@ void ProcessorBase::remove()
     }
 }
 
+KFPackPtr ProcessorBase::selectPack(const CaptureBasePtr & _cap)
+{
+    if (_cap)
+        return kf_pack_buffer_.selectPack(_cap->getTimeStamp(), time_tolerance_);
+
+    return nullptr;
+}
+
+
+
 /////////////////////////////////////////////////////////////////////////////////////////
 
 void KFPackBuffer::removeUpTo(const TimeStamp& _time_stamp)
@@ -146,5 +156,7 @@ bool KFPackBuffer::checkTimeTolerance(const TimeStamp& _time_stamp1, const Scala
     return pass;
     return (std::fabs(_time_stamp1 - _time_stamp2) <= std::min(_time_tolerance1, _time_tolerance2));
 }
+
+
 
 } // namespace wolf

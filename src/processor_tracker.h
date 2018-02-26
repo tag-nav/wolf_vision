@@ -209,8 +209,6 @@ class ProcessorTracker : public ProcessorBase
 
         void addNewFeatureIncoming(FeatureBasePtr _feature_ptr);
 
-    private:
-        KFPackPtr selectPack(const CaptureBasePtr & _cap);
 };
 
 inline void ProcessorTracker::setMaxNewFeatures(const unsigned int& _max_new_features)

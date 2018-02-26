@@ -203,14 +203,6 @@ void ProcessorTracker::setKeyFrame(CaptureBasePtr _capture_ptr)
     }
 }
 
-KFPackPtr ProcessorTracker::selectPack(const CaptureBasePtr & _cap)
-{
-    if (_cap)
-        return kf_pack_buffer_.selectPack(_cap->getTimeStamp(), time_tolerance_);
-
-    return nullptr;
-}
-
 void ProcessorTracker::computeProcessingStep()
 {
     // First determine the processing phase by checking the status of the tracker pointers
