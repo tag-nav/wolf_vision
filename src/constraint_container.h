@@ -116,16 +116,6 @@ class ConstraintContainer: public ConstraintAutodiff<ConstraintContainer,3,2,1,2
 			return true;
 		}
 
-    /** \brief Returns the jacobians computation method
-     *
-     * Returns the jacobians computation method
-     *
-     **/
-    virtual JacobianMethod getJacobianMethod() const override
-    {
-      return JAC_AUTO;
-    }
-
 
   public:
     static ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,

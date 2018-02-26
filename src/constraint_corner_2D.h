@@ -34,16 +34,6 @@ class ConstraintCorner2D: public ConstraintAutodiff<ConstraintCorner2D, 3,2,1,2,
     bool operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkP,
                      const T* const _landmarkO, T* _residuals) const;
 
-    /** \brief Returns the jacobians computation method
-     *
-     * Returns the jacobians computation method
-     *
-     **/
-    virtual JacobianMethod getJacobianMethod() const override
-    {
-      return JAC_AUTO;
-    }
-
     static ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr, const ProcessorBasePtr& _processor_ptr = nullptr)
     {
       return std::make_shared<ConstraintCorner2D>(_feature_ptr, std::static_pointer_cast<LandmarkCorner2D>(_correspondant_ptr), _processor_ptr);
