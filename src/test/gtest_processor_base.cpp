@@ -191,20 +191,20 @@ TEST(ProcessorBase, KeyFrameCallback)
     ProblemPtr problem = Problem::create("PO 2D");
 
     // Install tracker (sensor and processor)
-    SensorBasePtr sen_tracker = make_shared<SensorBase>("FEATURE", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
-                                             std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
-                                             std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
-    shared_ptr<ProcessorTrackerFeatureDummy> proc_tracker = make_shared<ProcessorTrackerFeatureDummy>(5, 5);
-    proc_tracker->setTimeTolerance(dt/2);
+    SensorBasePtr sens_trk = make_shared<SensorBase>("FEATURE", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
+                                                     std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
+                                                     std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
+    shared_ptr<ProcessorTrackerFeatureDummy> proc_trk = make_shared<ProcessorTrackerFeatureDummy>(5, 5);
+    proc_trk->setTimeTolerance(dt/2);
 
-    problem->addSensor(sen_tracker);
-    sen_tracker->addProcessor(proc_tracker);
+    problem->addSensor(sens_trk);
+    sens_trk->addProcessor(proc_trk);
 
     // Install odometer (sensor and processor)
-    SensorBasePtr sen_odo = problem->installSensor("ODOM 2D", "odometer", Vector3s(0,0,0), "");
+    SensorBasePtr sens_odo = problem->installSensor("ODOM 2D", "odometer", Vector3s(0,0,0), "");
     ProcessorParamsOdom2DPtr proc_odo_params = make_shared<ProcessorParamsOdom2D>();
-    ProcessorBasePtr prc_odo = problem->installProcessor("ODOM 2D", "odometer", sen_odo, proc_odo_params);
-    prc_odo->setTimeTolerance(dt/2);
+    ProcessorBasePtr proc_odo = problem->installProcessor("ODOM 2D", "odometer", sens_odo, proc_odo_params);
+    proc_odo->setTimeTolerance(dt/2);
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
@@ -216,30 +216,28 @@ TEST(ProcessorBase, KeyFrameCallback)
     Matrix3s    P = Matrix3s::Identity() * 0.1;
     problem->setPrior(x, P, t, dt/2);             // KF1
 
-    CaptureOdom2DPtr capture_odo = make_shared<CaptureOdom2D>(t, sen_odo, Vector2s(0.5,0));
+    CaptureOdom2DPtr capt_odo = make_shared<CaptureOdom2D>(t, sens_odo, Vector2s(0.5,0));
 
-    for (size_t ii=0; ii<20; ii++ )
+    // Track
+    CaptureVoidPtr capt_trk(make_shared<CaptureVoid>(t, sens_trk));
+    proc_trk->process(capt_trk);
+
+    for (size_t ii=0; ii<6; ii++ )
     {
-//        WOLF_DEBUG("iter:",ii,"  ts: ", t);
-
         // Move
         t = t+dt;
-        capture_odo->setTimeStamp(t);
-        prc_odo->process(capture_odo);
+        capt_odo->setTimeStamp(t);
+        proc_odo->process(capt_odo);
 
         // Track
-        CaptureVoidPtr cap(make_shared<CaptureVoid>(t, sen_tracker));
-        proc_tracker->process(cap);
+        capt_trk = make_shared<CaptureVoid>(t, sens_trk);
+        proc_trk->process(capt_trk);
 
         problem->print(4,1,1,0);
 
         // Only odom creating KFs
         ASSERT_TRUE( problem->getLastKeyFramePtr()->getType().compare("PO 2D")==0 );
-//        t = t+dt;
     }
-
-    // Print WOLF info
-//    problem->print(2);
 }
 
 int main(int argc, char **argv)
