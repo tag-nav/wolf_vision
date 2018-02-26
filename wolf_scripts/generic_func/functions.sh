@@ -145,8 +145,9 @@ addAutodiffSpecifics()
     exit 1.
   fi
   echo -en "\033[1A\033[2K"
+  echo -en "\033[1A\033[2K"
   echo " \--> Setting residual size to $RESIDUAL_DIM"
-
+  echo ""
   PROMPT="- How many state blocks are going to be considered in the constraint? (1 integer, followed by [ENTER]):"
   read -p "${PROMPT}" NUM_STATES; 
   if ! [[ "$NUM_STATES" =~ ^[0-9]+$ ]] ;
@@ -155,26 +156,29 @@ addAutodiffSpecifics()
     exit 1.
   fi
   echo -en "\033[1A\033[2K"
+  echo -en "\033[1A\033[2K"
   echo " \--> Setting $NUM_STATES state blocks"
- 
+  echo ""
+  
   #NAMES=
   #SIZES=
   for (( idx = 0; idx < $NUM_STATES; idx++ )); do
      PROMPT="- Name of state $((idx+1))? (followed by [ENTER]):"
-     read -p "${PROMPT}" NAME;
-     PROMPT="- Size (dimensions) of state $((idx+1)) (${NAME})? (1 integer, followed by [ENTER]:"
-     read -p "${PROMPT}" SIZE; 
-     if ! [[ "$SIZE" =~ ^[0-9]+$ ]] ;
+     read -p "${PROMPT}" STATENAME;
+     PROMPT="- Size (dimensions) of state $((idx+1)) (${STATENAME})? (1 integer, followed by [ENTER]:"
+     read -p "${PROMPT}" STATESIZE; 
+     if ! [[ "$STATESIZE" =~ ^[0-9]+$ ]] ;
      then
        echo "Invalid input. Expecting a numeric value. Aborting..."
        exit 1.
      fi
      echo -en "\033[1A\033[2K"
      echo -en "\033[1A\033[2K"
-     NAMES+=( "${NAME}" )
-     SIZES+=( "${SIZE}" )
+     NAMES+=( "${STATENAME}" )
+     SIZES+=( "${STATESIZE}" )
   done
 
+  echo -en "\033[1A\033[2K"
   echo -n " \--> Setting state blocks: "
   for (( idx = 0; idx < ${#NAMES[@]}; idx++ )); do
     echo -n "${NAMES[$idx]}(${SIZES[$idx]}) "
@@ -279,28 +283,31 @@ updateCMakeLists()
       fi	  	
     done
   
-    # Add CPP source
-    Hsources=( $(grep -e ".cpp" "${CML_PATH}") )
-    NewCPP="\${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp"
-    Hsources=( "${Hsources[@]}" $NewCPP )
-    IFS=$'\n' 
-    sorted=($(sort <<<"${Hsources[*]}"))
-    unset IFS
-    SET_AFTER_POS=-2
+    if ! [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
+    then
+      # Add CPP source
+      Hsources=( $(grep -e ".cpp" "${CML_PATH}") )
+      NewCPP="\${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp"
+      Hsources=( "${Hsources[@]}" $NewCPP )
+      IFS=$'\n' 
+      sorted=($(sort <<<"${Hsources[*]}"))
+      unset IFS
+      SET_AFTER_POS=-2
    
-    for (( idx = 0; idx < ${#sorted[@]}; idx++ )); do
-      if [ "${sorted[idx]}" == "\${CMAKE_CURRENT_SOURCE_DIR}/"$NAME".cpp" ] ;
-      then
-  	    SET_AFTER_POS=$(( idx-1 ))
-  	    if [ $SET_AFTER_POS == -1 ] ; 
-  	    then
-  	  	  sed -i "\%${sorted[1]}%i \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp" "$CML_PATH"
-  	    else
-  	  	  sed -i "\%${sorted[$SET_AFTER_POS]}%a \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp" "$CML_PATH"
-  	    fi
-      fi	  	
-    done
-    echo "$CML_PATH"
+      for (( idx = 0; idx < ${#sorted[@]}; idx++ )); do
+        if [ "${sorted[idx]}" == "\${CMAKE_CURRENT_SOURCE_DIR}/"$NAME".cpp" ] ;
+        then
+  	      SET_AFTER_POS=$(( idx-1 ))
+  	      if [ $SET_AFTER_POS == -1 ] ; 
+  	      then
+  	  	    sed -i "\%${sorted[1]}%i \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp" "$CML_PATH"
+  	      else
+  	  	    sed -i "\%${sorted[$SET_AFTER_POS]}%a \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp" "$CML_PATH"
+  	      fi
+        fi	  	
+      done
+      echo "$CML_PATH"
+fi  
   else
     echo ""
   fi

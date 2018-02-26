@@ -50,7 +50,7 @@ echo "- Modifying CMakeLists.txt to include CPP and H files."
 DONE=$(updateCMakeLists)
 if [ -z "$DONE" ]
 then
-  echo " \--x [WARN]: Not necessary. CPP and H files already existing in CMakeLists.txt."
+  echo " \--x [WARN]: Not necessary. File entries already existing in CMakeLists.txt."
 else
   echo " \--> Updated ${DONE} file."
 fi
@@ -60,6 +60,7 @@ echo ""
 echo "- Creating gtest for $NAME."
 
 createGtest
+
 echo " \--> Created ${GTEST_PATH} file."
 
 #============================================
@@ -72,13 +73,14 @@ echo "- Modifying CMakeLists.txt to include gtest files."
 DONE=$(updateCMakeListsGTest)
 if [ -z "$DONE" ]
 then
-  echo " \--x [WARN]: Not necessary. gtest file already existing in CMakeLists.txt."
+  echo " \--x [WARN]: Not necessary. gtest file entry already existing in CMakeLists.txt."
 else
   echo " \--> Updated ${DONE} file."
 fi
 
 #============================================
 
+echo ""
 echo "All Done."
 echo ""
 #============================================
