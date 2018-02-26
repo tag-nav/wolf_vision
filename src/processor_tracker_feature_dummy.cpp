@@ -17,8 +17,6 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
 {
     std::cout << "tracking " << _feature_list_in.size() << " features..." << std::endl;
 
-    WOLF_TRACE("List sizes: in: ", _feature_list_in.size(), "; out: ", _feature_list_out.size(), "; correspondences: ", _feature_correspondences.size());
-
     // loosing the track of the first 2 features
     auto features_lost = 0;
     for (auto feat_in_ptr : _feature_list_in)
@@ -32,7 +30,6 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
         else
         {
             FeatureBasePtr ftr(std::make_shared<FeatureBase>("POINT IMAGE", feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
-            ftr->setTrackId(feat_in_ptr->id());
             _feature_list_out.push_back(ftr);
             _feature_correspondences[_feature_list_out.back()] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in_ptr,0}));
             std::cout << "feature " << feat_in_ptr->id() << " tracked to feature " << ftr->id() << " !" << std::endl;
@@ -62,7 +59,6 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
         FeatureBasePtr ftr(
                 std::make_shared<FeatureBase>("POINT IMAGE", n_feature_* Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
         new_features_last_.push_back(ftr);
-        ftr->setTrackId(ftr->id());
         std::cout << "feature " << ftr->id() << " detected!" << std::endl;
     }
     std::cout << new_features_last_.size() << " features detected!" << std::endl;
