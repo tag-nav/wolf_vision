@@ -97,10 +97,10 @@ void ProcessorTrackerFeature::resetDerived()
 
     std::cout << "\tincoming 2 last: " << matches_last_from_incoming_.size() << std::endl;
     for (auto match : matches_last_from_incoming_)
-        std::cout << "inc -> last: \t\t" << match.second->feature_ptr_->id() << " <- " << match.first->id() << std::endl;
+        std::cout << "last <- inc: \t\t" << match.second->feature_ptr_->id() << " <- " << match.first->id() << std::endl;
     std::cout << "\tlast 2 origin: " << std::endl;
     for (auto match : matches_origin_from_last_)
-        std::cout << "ori <- last: \t\t" << match.second->feature_ptr_->id() << match.first->id() << std::endl;
+        std::cout << "ori <- last: \t\t" << match.second->feature_ptr_->id() << " <- " << match.first->id() << std::endl;
 
     matches_origin_from_last_ = std::move(matches_last_from_incoming_);
 
