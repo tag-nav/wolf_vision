@@ -35,11 +35,6 @@ class ConstraintQuaternionAbsolute: public ConstraintAutodiff<ConstraintQuaterni
         template<typename T>
         bool operator ()(const T* const _o, T* _residuals) const;
 
-        virtual JacobianMethod getJacobianMethod() const override
-        {
-            return JAC_AUTO;
-        }
-
 };
 
 template<typename T>
