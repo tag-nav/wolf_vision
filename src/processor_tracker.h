@@ -187,10 +187,6 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual void establishConstraints()=0;
 
-        /**\brief set key Frame to the provided Capture's frame
-         */
-        virtual void setKeyFrame(CaptureBasePtr _capture_ptr);
-
         /** \brief Reset the tracker using the \b last Capture as the new \b origin.
          */
         virtual void resetDerived() = 0;

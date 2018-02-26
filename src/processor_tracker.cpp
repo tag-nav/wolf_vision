@@ -155,10 +155,17 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 // process
                 processNew(max_new_features_);
 
-                setKeyFrame(last_ptr_);
+                // Set key
+                last_ptr_->getFramePtr()->setKey();
+
+                // Set state to the keyframe
+                last_ptr_->getFramePtr()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
 
                 // Establish constraints
                 establishConstraints();
+
+                // Call the new keyframe callback in order to let the other processors to establish their constraints
+                getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), std::static_pointer_cast<ProcessorBase>(shared_from_this()), time_tolerance_);
 
                 // Update pointers
                 resetDerived();
@@ -187,20 +194,6 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
     }
 
     postProcess();
-}
-
-void ProcessorTracker::setKeyFrame(CaptureBasePtr _capture_ptr)
-{
-    assert(_capture_ptr != nullptr && _capture_ptr->getFramePtr() != nullptr && "ProcessorTracker::setKeyFrame: null capture or capture without frame");
-    if (!_capture_ptr->getFramePtr()->isKey())
-    {
-        // Set key
-        _capture_ptr->getFramePtr()->setKey();
-        // Set state to the keyframe
-        _capture_ptr->getFramePtr()->setState(getProblem()->getState(_capture_ptr->getTimeStamp()));
-        // Call the new keyframe callback in order to let the other processors to establish their constraints
-        getProblem()->keyFrameCallback(_capture_ptr->getFramePtr(), std::static_pointer_cast<ProcessorBase>(shared_from_this()), time_tolerance_);
-    }
 }
 
 void ProcessorTracker::computeProcessingStep()
