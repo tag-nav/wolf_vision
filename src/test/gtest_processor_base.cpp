@@ -225,7 +225,7 @@ TEST(ProcessorBase, KeyFrameCallback)
         // Move
         t = t+dt;
         capture_odo->setTimeStamp(t);
-        sen_odo->process(capture_odo);
+        prc_odo->process(capture_odo);
 
         // Track
         CaptureVoidPtr cap(make_shared<CaptureVoid>(t, sen_tracker));
