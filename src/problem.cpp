@@ -633,7 +633,7 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
     if ( ! prior_is_set_ )
     {
         // Create origin frame
-        FrameBasePtr origin_frame_ptr = emplaceFrame(KEY_FRAME, _prior_state, _ts);
+        FrameBasePtr origin_keyframe = emplaceFrame(KEY_FRAME, _prior_state, _ts);
 
         // create origin capture with the given state as data
         // Capture fix only takes 3D position and Quaternion orientation
@@ -643,22 +643,34 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
         else
             init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state, _prior_cov);
 
-        origin_frame_ptr->addCapture(init_capture);
+        origin_keyframe->addCapture(init_capture);
 
         // emplace feature and constraint
         init_capture->emplaceFeatureAndConstraint();
 
-        // notify all motion processors about the origin keyframe
-        for (auto sensor_ptr : hardware_ptr_->getSensorList())
-            for (auto processor_ptr : sensor_ptr->getProcessorList())
-                if (processor_ptr->isMotion())
-                    (std::static_pointer_cast<ProcessorMotion>(processor_ptr))->setOrigin(origin_frame_ptr);
+        // Notify all processors about the prior KF
+        for (auto sensor : hardware_ptr_->getSensorList())
+            for (auto processor : sensor->getProcessorList())
+                if (processor->isMotion())
+                    // Motion processors will set its origin at the KF
+                    (std::static_pointer_cast<ProcessorMotion>(processor))->setOrigin(origin_keyframe);
+                else
+                    // Other processors will join the KF or not depending on their received data's time stamp and tolerances
+                    processor->keyFrameCallback(origin_keyframe, _time_tolerance);
+
 
         prior_is_set_ = true;
 
-        keyFrameCallback(origin_frame_ptr, nullptr, _time_tolerance);
+//        keyFrameCallback(origin_keyframe, nullptr, _time_tolerance);
 
-        return origin_frame_ptr;
+        // Notify all other processors about the origin KF --> they will join it or not depending on their received data
+//        for (auto sensor : hardware_ptr_->getSensorList())
+//            for (auto processor : sensor->getProcessorList())
+//                if ( !processor->isMotion() )
+//                    processor->keyFrameCallback(origin_keyframe, _time_tolerance);
+
+
+        return origin_keyframe;
     }
     else
         throw std::runtime_error("Origin already set!");
