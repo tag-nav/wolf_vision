@@ -11,30 +11,27 @@
 namespace wolf
 {
 
+unsigned int ProcessorTrackerFeatureDummy::count_ = 0;
+
 unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& _feature_list_in,
                                                          FeatureBaseList& _feature_list_out,
                                                          FeatureMatchMap& _feature_correspondences)
 {
     WOLF_INFO("tracking " , _feature_list_in.size() , " features...");
 
-    // loosing the track of the first 2 features
-    auto features_lost = 0;
-    for (auto feat_in_ptr : _feature_list_in)
+    for (auto feat_in : _feature_list_in)
     {
-
-        if ( rand() % static_cast<int>(101) < 30 )
+        if (++count_ % 3 == 2) // lose one every 3 tracks
         {
-            features_lost++;
-
-            WOLF_INFO("track: " , feat_in_ptr->trackId() , " feature: " , feat_in_ptr->id() , " lost!");
+            WOLF_INFO("track: " , feat_in->trackId() , " feature: " , feat_in->id() , " lost!");
         }
         else
         {
-            FeatureBasePtr ftr(std::make_shared<FeatureBase>("POINT IMAGE", feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
+            FeatureBasePtr ftr(std::make_shared<FeatureBase>("POINT IMAGE", feat_in->getMeasurement(), feat_in->getMeasurementCovariance()));
             _feature_list_out.push_back(ftr);
-            _feature_correspondences[_feature_list_out.back()] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in_ptr,0}));
+            _feature_correspondences[_feature_list_out.back()] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in,0}));
 
-            WOLF_INFO("track: " , feat_in_ptr->trackId() , " last: " , feat_in_ptr->id() , " inc: " , ftr->id() , " !" );
+            WOLF_INFO("track: " , feat_in->trackId() , " last: " , feat_in->id() , " inc: " , ftr->id() , " !" );
         }
     }
 

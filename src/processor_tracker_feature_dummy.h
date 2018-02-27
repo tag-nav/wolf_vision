@@ -27,6 +27,7 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
 
     protected:
 
+        static unsigned int count_;
         unsigned int n_feature_, min_feat_for_keyframe_;
 
 //        virtual void preProcess() { }
