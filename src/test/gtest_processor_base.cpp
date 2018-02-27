@@ -222,7 +222,7 @@ TEST(ProcessorBase, KeyFrameCallback)
     CaptureVoidPtr capt_trk(make_shared<CaptureVoid>(t, sens_trk));
     proc_trk->process(capt_trk);
 
-    for (size_t ii=0; ii<6; ii++ )
+    for (size_t ii=0; ii<10; ii++ )
     {
         // Move
         t = t+dt;

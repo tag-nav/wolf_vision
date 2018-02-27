@@ -15,7 +15,7 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
                                                          FeatureBaseList& _feature_list_out,
                                                          FeatureMatchMap& _feature_correspondences)
 {
-    std::cout << "tracking " << _feature_list_in.size() << " features..." << std::endl;
+    WOLF_INFO("tracking " , _feature_list_in.size() , " features...");
 
     // loosing the track of the first 2 features
     auto features_lost = 0;
@@ -25,14 +25,16 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
         if ( rand() % static_cast<int>(101) < 30 )
         {
             features_lost++;
-            std::cout << "feature " << feat_in_ptr->id() << " lost!" << std::endl;
+
+            WOLF_INFO("track: " , feat_in_ptr->trackId() , " feature: " , feat_in_ptr->id() , " lost!");
         }
         else
         {
             FeatureBasePtr ftr(std::make_shared<FeatureBase>("POINT IMAGE", feat_in_ptr->getMeasurement(), feat_in_ptr->getMeasurementCovariance()));
             _feature_list_out.push_back(ftr);
             _feature_correspondences[_feature_list_out.back()] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in_ptr,0}));
-            std::cout << "feature " << feat_in_ptr->id() << " tracked to feature " << ftr->id() << " !" << std::endl;
+
+            WOLF_INFO("track: " , feat_in_ptr->trackId() , " last: " , feat_in_ptr->id() , " inc: " , ftr->id() , " !" );
         }
     }
 
@@ -41,27 +43,32 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
 
 bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
 {
-    std::cout << "N features: " << incoming_ptr_->getFeatureList().size() << std::endl;
+    WOLF_INFO("Nbr. of active feature tracks: " , incoming_ptr_->getFeatureList().size() );
+
     bool vote = incoming_ptr_->getFeatureList().size() < min_feat_for_keyframe_;
-    std::cout << (vote ? "Vote ": "Not vote ") << "for KF" << std::endl;
+
+    WOLF_INFO( (vote ? "Vote ": "Do not vote ") , "for KF" );
 
     return incoming_ptr_->getFeatureList().size() < min_feat_for_keyframe_;
 }
 
 unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features)
 {
-    std::cout << "Detecting " << _max_features << " new features..." << std::endl;
+    WOLF_INFO("Detecting " , _max_features , " new features..." );
 
     // detecting new features
     for (unsigned int i = 1; i <= _max_features; i++)
     {
         n_feature_++;
-        FeatureBasePtr ftr(
-                std::make_shared<FeatureBase>("POINT IMAGE", n_feature_* Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
+        FeatureBasePtr ftr(std::make_shared<FeatureBase>("POINT IMAGE",
+                                                         n_feature_* Eigen::Vector1s::Ones(),
+                                                         Eigen::MatrixXs::Ones(1, 1)));
         new_features_last_.push_back(ftr);
-        std::cout << "feature " << ftr->id() << " detected!" << std::endl;
+
+        WOLF_INFO("feature " , ftr->id() , " detected!" );
     }
-    std::cout << new_features_last_.size() << " features detected!" << std::endl;
+
+    WOLF_INFO(new_features_last_.size() , " features detected!");
 
     return new_features_last_.size();
 }
@@ -69,11 +76,11 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
 ConstraintBasePtr ProcessorTrackerFeatureDummy::createConstraint(FeatureBasePtr _feature_ptr,
                                                                  FeatureBasePtr _feature_other_ptr)
 {
-    std::cout << "creating constraint: last feature " << _feature_ptr->id()
-                          << " with origin feature " << _feature_other_ptr->id() << std::endl;
+    WOLF_INFO( "creating constraint: track " , _feature_other_ptr->trackId() , " last feature " , _feature_ptr->id()
+               , " with origin feature " , _feature_other_ptr->id() );
+
     auto ctr = std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr, shared_from_this());
-    //    _feature_ptr->addConstraint(ctr);
-    //    _feature_other_ptr->addConstrainedBy(ctr);
+
     return ctr;
 }
 
