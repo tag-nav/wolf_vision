@@ -25,4 +25,4 @@ class class_name : public base_class
 
 } // namespace wolf
 
-#endif /* PROCESSOR_CLASS_H_ */
+#endif /* _name_cap_H_ */
