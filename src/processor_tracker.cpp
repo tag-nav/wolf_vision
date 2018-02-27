@@ -114,6 +114,8 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
             WOLF_DEBUG( "PT: KF" , pack->key_frame->id() , " callback received at ts= " , pack->key_frame->getTimeStamp().get() );
 
+            processKnown();
+
             // Capture last_ is added to the new keyframe
             FrameBasePtr last_old_frame = last_ptr_->getFramePtr();
             last_old_frame->unlinkCapture(last_ptr_);
