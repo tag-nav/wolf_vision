@@ -200,7 +200,7 @@ addAutodiffSpecifics()
 
   sed -i "s/public $BASECLASSNAME/public $BASECLASSNAME<$CLASSNAME, $RESIDUAL_DIM, ${PARAM_NUMS[*]}>/g" "$NAME_H_PATH"
   sed -i "/virtual \~$CLASSNAME/a\ \n\        \/\*\* \brief : compute the residual from the state blocks being iterated by the solver.\n \        \*\*\/\n\        template<typename T>\n\        bool operator ()(${PARAMS[*]}, const T* const _residuals) const;\n" "$NAME_H_PATH"
-  sed -i "/\} \/\/ namespace wolf/a\ \n\/\/ Include here all headers for this class\n\/\/\#include <YOUR_HEADERS.h>\n\nnamespace wolf\n\{\n\ntemplate<typename T> bool $CLASSNAME::operator ()(${PARAMS[*]}, const T* const _residuals) const\n\{\n  \/\/ TODO: Implement\n  return true;\n\}\n\n\} \/\/ namespace wolf" "$NAME_H_PATH"
+  sed -i "/\} \/\/ namespace wolf/a\ \n\/\/ Include here all headers for this class\n\/\/\#include <YOUR_HEADERS.h>\n\nnamespace wolf\n\{\n\ntemplate<typename T> bool $CLASSNAME::operator ()(${PARAMS[*]}, const T* const _residuals) const\n\{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::operator () is empty.\" << std::endl;\n  \/\/ TODO: Implement\n  return true;\n\}\n\n\} \/\/ namespace wolf" "$NAME_H_PATH"
 }
 
 fillWithBaseVirtualMethods()
@@ -243,9 +243,9 @@ fillWithBaseVirtualMethods()
       
       if ! [[ $TXTCPP_1 =~ .*void*. ]]
       then
-        sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  ${TXTCPP_1}return_var; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
+        sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
       else 
-        sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n\}\n" "$NAME_CPP_PATH"
+        sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n\}\n" "$NAME_CPP_PATH"
       fi
     done    
     
@@ -341,7 +341,7 @@ createGtest()
     TMP=$(echo $TMP | sed -r 's/'" = 0"'/ /g')
     TMP=${TMP%$TMP##*[![:space:]]}
     TMP=$(echo $TMP | sed 's/(.*//g' | sed 's/.* //g')
-    sed -i "/\[Class methods\]/a TEST_F($CLASSNAME, $TMP)\n\{\n\}\n" "${TEMPLATES_PATH}"/tmp2.cpp 
+    sed -i "/\[Class methods\]/a TEST_F($CLASSNAME, $TMP)\n\{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m gtest for ${CLASSNAME} ${TMP} is empty.\" << std::endl;\n\}\n" "${TEMPLATES_PATH}"/tmp2.cpp 
   done
 
   GTEST_PATH="${WOLF_ROOT}"/src/test/gtest_${NAME}.cpp

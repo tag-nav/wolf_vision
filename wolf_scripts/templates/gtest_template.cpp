@@ -19,10 +19,12 @@ class class_name : public testing::Test{
 
 TEST_F(class_name, Constructor)
 {
+  std::cout << "\033[1;33m [WARN]:\033[0m gtest for class_name Constructor is empty." << std::endl;
 }
 
 TEST_F(class_name, Destructor)
 {
+  std::cout << "\033[1;33m [WARN]:\033[0m gtest for class_name Destructor is empty." << std::endl;
 }
 
 //[Class methods]
