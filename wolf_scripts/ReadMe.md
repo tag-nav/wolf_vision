@@ -2,26 +2,37 @@
 
 Helpful scripts to create WOLF tree elements (e.g. processors)
 
-## Installation and usage
+## Installation
 
-  * Move to the scripts folder   
-  `cd $WOLF_ROOT/wolf_scripts`  
+#### Dependencies
 
-  * Run the following line to set your `bashrc`. This will allow you to execute the scripts from any console path.  
-  ``echo "source $WOLF_ROOT/wolf_scripts/setup.bash" >> ~/.bashrc``
+  * __RealPath__ (Required): Install with the following command.
+  
+  ..*`sudo apt-get install realpath`
+  
+#### SCRIPTS installation  
 
-## Main scripts
+  * Move to the scripts folder
+  
+  ..*`cd $WOLF_ROOT/wolf_scripts`  
 
-#### Create a new processor
+  * Run the following line to set your `bashrc`. This will allow you to execute the scripts from any console path.
+  
+  ..*`echo "source $WOLF_ROOT/wolf_scripts/setup.bash" >> ~/.bashrc`
 
-Creates the main structure of a new processor, including .cpp and .h files, doxygen files and a gtest for that processor in `test/processors/`. 
+## Usage
+
+#### Create a new derived class
+
+Creates the main structure including .cpp and .h files, and a gtest for the new derived class (all in corresponding folders of WOLF directory. 
 
   * Example of usage  
-  `create_wolf_processor.sh -n example -b tracker` 
+  `create_wolf_processor.sh -t processor -n example -b tracker` 
 
   * Options:
-    - n: Processor name
-    - b: Processor base class (inherited from this class)
+    - t: Type (e.g. sensor, processor, constraint, ...)
+    - n: Name 
+    - b: Base class (inherited from this class)
     - h: Help
 
 
