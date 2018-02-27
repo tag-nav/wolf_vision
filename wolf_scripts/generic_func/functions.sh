@@ -2,9 +2,17 @@
 
 # ===== FUNCTIONS =====
 
+# Bash colors
+RED=$(tput setaf 1)
+GREEN=$(tput setaf 2)
+YELLOW=$(tput setaf 3)
+BLUE=$(tput setaf 4)
+CYAN=$(tput setaf 6)
+NC=$(tput sgr 0) # No Color
+
 askIfGitBranch()
 {
- read -p "Do you want to create a new git branch(Y/n)?  " ANSWER
+ read -p "${CYAN}Do you want to create a new git branch(Y/n)?  ${NC}" ANSWER
  DOIT=${ANSWER:-y}
  OK=0
  
@@ -21,7 +29,7 @@ askIfGitBranch()
        ;; 
      *)
        OK=0
-       echo "Incorrect answer. Please type y or n"
+       echo "${RED}Incorrect answer.${NC} Please type y or n"
        exit
        ;;
   esac
@@ -31,11 +39,11 @@ if [ "$DOIT" == "y" ];
 then
   if [ -z "$1" ]
   then
-    echo "No argument supplied"
+    echo "${RED}No argument supplied.${NC}"
   fi
   cd $WOLF_ROOT 
   git checkout -b $1
-  echo " \--> Created git branch $1"
+  echo "${GREEN} \--> Created git branch $1${NC}"
 fi
 echo ""    
 }
@@ -45,7 +53,7 @@ getEnvVariable()
   local var=`echo "${!1}"`
   if [ -z "${var}" ]
   then
-    echo "The environment variable ${1} has not been defined. Please see the wiki documentation for instructions on how to create it." >&2
+    echo "${RED}The environment variable ${1} has not been defined.${NC} Please see the wiki documentation for instructions on how to create it." >&2
     exit
   fi
   echo $var
@@ -54,12 +62,12 @@ getEnvVariable()
 showHelp() 
 {
   echo "******************************************"  
-  echo "Script to generate a WOLF $1 class"
+  echo "${BLUE}Script to generate a WOLF $1 class${NC}"
   echo "******************************************"
-  echo "Options:"
-  echo "  -t: type"
-  echo "  -n: name"
-  echo "  -b: base class (inheritance)"
+  echo " Options:"
+  echo "  -${CYAN}t${NC}: type"
+  echo "  -${CYAN}n${NC}: name"
+  echo "  -${CYAN}b${NC}: base class (inheritance)"
   echo ""  
   echo "Example of usage:"
   echo "wolf_create.sh -t processor -n processor_example -b processor_tracker" 
@@ -72,7 +80,7 @@ LowerCase()
 	then
   		echo $1 | tr '[:upper:]' '[:lower:]'
 	else
-  		echo "No $1 provided, aborting ..."
+  		echo "${RED}No $1 provided, aborting ...${NC}"
   		exit
 	fi
 }
@@ -83,7 +91,7 @@ UpperCase()
 	then
   		echo $1 | tr '[:lower:]' '[:upper:]'
 	else
-  		echo "No $1 provided, aborting ..."
+  		echo "${RED}No $1 provided, aborting ...${NC}"
   		exit
 	fi
 }
@@ -134,42 +142,42 @@ addAutodiffSpecifics()
 {
   # Number of parameters
   echo ""
-  echo "To create the class $CLASSNAME, you have to provide some info:"
+  echo "${CYAN}To create the class $CLASSNAME, you have to provide some info:${NC}"
   echo "" 
 
-  PROMPT="- What is the size (dimensions) of the residual? (1 integer, followed by [ENTER]):"
+  PROMPT="${CYAN}- What is the size (dimensions) of the residual?${NC} (1 integer, followed by [ENTER]):"
   read -p "${PROMPT}" RESIDUAL_DIM; 
   if ! [[ "$RESIDUAL_DIM" =~ ^[0-9]+$ ]] ;
   then
-    echo "Invalid input. Expecting a numeric value. Aborting..."
+    echo "${RED}Invalid input.${NC} Expecting a numeric value. Aborting..."
     exit 1.
   fi
   echo -en "\033[1A\033[2K"
   echo -en "\033[1A\033[2K"
-  echo " \--> Setting residual size to $RESIDUAL_DIM"
+  echo "${GREEN} \--> Setting residual size to $RESIDUAL_DIM.${NC}"
   echo ""
-  PROMPT="- How many state blocks are going to be considered in the constraint? (1 integer, followed by [ENTER]):"
+  PROMPT="${CYAN}- How many state blocks are going to be considered in the constraint?${NC} (1 integer, followed by [ENTER]):"
   read -p "${PROMPT}" NUM_STATES; 
   if ! [[ "$NUM_STATES" =~ ^[0-9]+$ ]] ;
   then
-    echo "Invalid input. Expecting a numeric value. Aborting..."
+    echo "${RED}Invalid input.${NC} Expecting a numeric value. Aborting..."
     exit 1.
   fi
   echo -en "\033[1A\033[2K"
   echo -en "\033[1A\033[2K"
-  echo " \--> Setting $NUM_STATES state blocks"
+  echo "${GREEN} \--> Setting $NUM_STATES state blocks.${NC}"
   echo ""
   
   #NAMES=
   #SIZES=
   for (( idx = 0; idx < $NUM_STATES; idx++ )); do
-     PROMPT="- Name of state $((idx+1))? (followed by [ENTER]):"
+     PROMPT="${CYAN}- Name of state $((idx+1))?${NC} (1 string, followed by [ENTER]):"
      read -p "${PROMPT}" STATENAME;
-     PROMPT="- Size (dimensions) of state $((idx+1)) (${STATENAME})? (1 integer, followed by [ENTER]:"
+     PROMPT="${CYAN}- Size (dimensions) of state $((idx+1)) (${STATENAME})?${NC} (1 integer, followed by [ENTER]:"
      read -p "${PROMPT}" STATESIZE; 
      if ! [[ "$STATESIZE" =~ ^[0-9]+$ ]] ;
      then
-       echo "Invalid input. Expecting a numeric value. Aborting..."
+       echo "${RED}Invalid input.${NC} Expecting a numeric value. Aborting..."
        exit 1.
      fi
      echo -en "\033[1A\033[2K"
@@ -179,9 +187,9 @@ addAutodiffSpecifics()
   done
 
   echo -en "\033[1A\033[2K"
-  echo -n " \--> Setting state blocks: "
+  echo -n "${GREEN} \--> Setting state blocks: ${NC}"
   for (( idx = 0; idx < ${#NAMES[@]}; idx++ )); do
-    echo -n "${NAMES[$idx]}(${SIZES[$idx]}) "
+    echo -n "${GREEN}${NAMES[$idx]}(${SIZES[$idx]}) ${NC}"
     PARAMS+=( "const T* const _${NAMES[idx]},")
     PARAM_NUMS+=( "${SIZES[idx]},")
   done

@@ -17,7 +17,7 @@ fi
 #============================================
 echo ""
 echo "==========================================================================================================================="
-echo "     Creating new class and methods for $NAME derived from $BASE"
+echo "${BLUE}     Creating new class and methods for $NAME derived from $BASE ${NC}"
 echo "==========================================================================================================================="
 echo ""
 #============================================
@@ -39,8 +39,8 @@ createHCPPFromTemplates $NAME_H_PATH $NAME_CPP_PATH
 # Copy all pure virtual methods from base class to derived class
 fillWithBaseVirtualMethods
 
-echo " \--> Created $NAME_H_PATH file."
-echo " \--> Created $NAME_CPP_PATH file."
+echo "${GREEN} \--> Created $NAME_H_PATH file.${NC}"
+echo "${GREEN} \--> Created $NAME_CPP_PATH file.${NC}"
 #============================================
 
 # ===== Modify CMakeLists.txt =====
@@ -50,9 +50,9 @@ echo "- Modifying CMakeLists.txt to include CPP and H files."
 DONE=$(updateCMakeLists)
 if [ -z "$DONE" ]
 then
-  echo " \--x [WARN]: Not necessary. File entries already existing in CMakeLists.txt."
+  echo "${YELLOW} \--x [WARN]: Not necessary. File entries already existing in CMakeLists.txt.${NC}"
 else
-  echo " \--> Updated ${DONE} file."
+  echo "${GREEN} \--> Updated ${DONE} file.${NC}"
 fi
 
 # ===== Create gtest =====
@@ -61,7 +61,7 @@ echo "- Creating gtest for $NAME."
 
 createGtest
 
-echo " \--> Created ${GTEST_PATH} file."
+echo "${GREEN} \--> Created ${GTEST_PATH} file.${NC}"
 
 #============================================
 
@@ -73,9 +73,9 @@ echo "- Modifying CMakeLists.txt to include gtest files."
 DONE=$(updateCMakeListsGTest)
 if [ -z "$DONE" ]
 then
-  echo " \--x [WARN]: Not necessary. gtest file entry already existing in CMakeLists.txt."
+  echo "${YELLOW} \--x [WARN]: Not necessary. gtest file entry already existing in CMakeLists.txt.${NC}"
 else
-  echo " \--> Updated ${DONE} file."
+  echo "${GREEN} \--> Updated ${DONE} file.${NC}"
 fi
 
 #============================================
