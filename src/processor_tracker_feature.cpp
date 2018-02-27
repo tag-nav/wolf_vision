@@ -151,6 +151,12 @@ void ProcessorTrackerFeature::establishConstraints()
         match.first->addConstraint(ctr);
         match.second->feature_ptr_->addConstrainedBy(ctr);
     }
+    for (auto match : matches_origin_from_last_)
+    {
+        WOLF_DEBUG( "Constraint: track: " , match.second->feature_ptr_->trackId() ,
+                    " origin: " , match.second->feature_ptr_->id() ,
+                    " from last: " , match.first->id() );
+    }
 }
 
 } // namespace wolf

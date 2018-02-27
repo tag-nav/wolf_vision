@@ -26,11 +26,11 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
 
     if ( isKey() )
     {
-        WOLF_INFO("constructed +KF", this->id() );
+        WOLF_DEBUG("New KF", this->id() );
     }
     else
     {
-        WOLF_INFO("constructed + F", this->id() );
+        WOLF_DEBUG("New F", this->id() );
     }
 }
 
@@ -49,11 +49,11 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
 
     if ( isKey() )
     {
-        WOLF_INFO("constructed +KF", this->id() );
+        WOLF_DEBUG("New KF", this->id() );
     }
     else
     {
-        WOLF_INFO("constructed + F", this->id() );
+        WOLF_DEBUG("New F", this->id() );
     }
 }
                 
@@ -132,6 +132,8 @@ void FrameBase::setKey()
             getTrajectoryPtr()->setLastKeyFramePtr(shared_from_this());
 
         getTrajectoryPtr()->sortFrame(shared_from_this());
+
+        WOLF_DEBUG("Set KF", this->id());
     }
 }
 
