@@ -64,6 +64,10 @@ target_link_libraries(gtest_frame_base ${PROJECT_NAME})
 wolf_add_gtest(gtest_imu_tools gtest_imu_tools.cpp)
 # target_link_libraries(gtest_imu_tools ${PROJECT_NAME}) // WOLF library not needed
 
+# IMU tools test
+wolf_add_gtest(gtest_KF_pack_buffer gtest_KF_pack_buffer.cpp)
+target_link_libraries(gtest_KF_pack_buffer ${PROJECT_NAME})
+
 # LocalParametrizationXxx classes test
 wolf_add_gtest(gtest_local_param gtest_local_param.cpp)
 target_link_libraries(gtest_local_param ${PROJECT_NAME})
