@@ -112,7 +112,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             KFPackPtr pack = selectPack( last_ptr_ );
             kf_pack_buffer_.removeUpTo( last_ptr_->getTimeStamp() );
 
-            WOLF_DEBUG( "PT: KF" , pack->key_frame->id() , " callback received at ts= " , pack->key_frame->getTimeStamp().get() );
+            WOLF_DEBUG( "PT: KF" , pack->key_frame->id() , " callback received with ts= " , pack->key_frame->getTimeStamp().get() );
 
             processKnown();
 

@@ -33,7 +33,7 @@ unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_fe
     for (auto ftr : new_features_last_)
     {
         ftr->setTrackId( ftr->id() );
-        WOLF_DEBUG("New track: ", ftr->trackId(), ", last: ", ftr->id());
+        WOLF_DEBUG("Det track: ", ftr->trackId(), ", last: ", ftr->id());
     }
 
     // Track new features from last to incoming. This will append new correspondences to matches_last_incoming
@@ -44,12 +44,6 @@ unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_fe
 
         // Print new tracked features
         WOLF_DEBUG("New track: ", ftr->trackId(), ", last: ", matches_last_from_incoming_[ftr]->feature_ptr_->id(), ", inc: ", ftr->id());
-    }
-
-    // Print all tracks
-    for (auto match : matches_last_from_incoming_)
-    {
-        WOLF_DEBUG("New total track: ", match.first->trackId(), ", last: ", match.second->feature_ptr_->id(), ", inc: ", match.first->id());
     }
 
     // Append all new Features to the incoming Captures' list of Features
@@ -100,7 +94,7 @@ unsigned int ProcessorTrackerFeature::processKnown()
     // Print resulting list of matches
     for (auto match : matches_last_from_incoming_)
     {
-        WOLF_DEBUG("Known total track: ", match.first->trackId(), ", last: ", match.second->feature_ptr_->id(), ", inc: ", match.first->id());
+        WOLF_DEBUG("Known track: ", match.first->trackId(), ", last: ", match.second->feature_ptr_->id(), ", inc: ", match.first->id());
     }
 
     return matches_last_from_incoming_.size();
