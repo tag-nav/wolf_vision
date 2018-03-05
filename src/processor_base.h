@@ -50,9 +50,11 @@ class KFPackBuffer
         /**\brief Select a Pack from the buffer
          *
          *  Select from the buffer the closest pack (w.r.t. time stamp),
-         * respecting a defined time tolerance
+         * respecting a defined time tolerances
          */
         KFPackPtr selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
+
+        KFPackPtr selectPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
 
         /**\brief Buffer size
          *

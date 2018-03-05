@@ -144,6 +144,68 @@ TEST_F(KFPackBufferTest, selectPack)
     }
 }
 
+TEST_F(KFPackBufferTest, selectPackBefore)
+{
+    kfpackbuffer.clear();
+
+    kfpackbuffer.add(f10, tt10);
+    kfpackbuffer.add(f20, tt20);
+    kfpackbuffer.add(f21, tt21);
+
+    // input time stamps
+    std::vector<TimeStamp> q_ts = {9.5, 9.995, 10.005, 19.5, 20.5, 21.5};
+    Scalar tt = 0.01;
+
+    // Solution matrix
+    // q_ts  |  pack
+    //=================
+    // first time
+    //-----------------
+    // 9.5      nullptr
+    // 9.995    10
+    // 10,005   10
+    // 19.5     10
+    // 20.5     10
+    // 21.5     10
+    // second time
+    //-----------------
+    // 9.5      nullptr
+    // 9.995    null
+    // 10,005   null
+    // 19.5     null
+    // 20.5     20
+    // 21.5     20
+    // third time
+    //-----------------
+    // 9.5      nullptr
+    // 9.995    null
+    // 10,005   null
+    // 19.5     null
+    // 20.5     null
+    // 21.5     21
+
+    Eigen::MatrixXs truth(3,6), res(3,6);
+    truth << 0,10,10,10,10,10,  0,0,0,0,20,20,  0,0,0,0,0,21;
+    res.setZero();
+
+    for (int i=0; i<3; i++)
+    {
+        KFPackPtr packQ;
+        int j = 0;
+        for (auto ts : q_ts)
+        {
+            packQ = kfpackbuffer.selectPackBefore(ts, tt);
+            if (packQ)
+                res(i,j) = packQ->key_frame->getTimeStamp().get();
+
+            j++;
+        }
+        kfpackbuffer.removeUpTo(packQ->key_frame->getTimeStamp());
+    }
+
+    ASSERT_MATRIX_APPROX(res, truth, 1e-6);
+}
+
 TEST_F(KFPackBufferTest, removeUpTo)
 {
     // Small time tolerance for all test asserts

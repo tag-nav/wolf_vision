@@ -137,6 +137,31 @@ KFPackPtr KFPackBuffer::selectPack(const TimeStamp& _time_stamp, const Scalar& _
     return nullptr;
 }
 
+KFPackPtr KFPackBuffer::selectPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance)
+{
+    if (container_.empty())
+        return nullptr;
+
+    KFPackBuffer::Iterator post = container_.upper_bound(_time_stamp);
+
+    bool prev_exists = (post != container_.begin());
+
+    if (prev_exists)
+        return container_.begin()->second;
+
+    else
+    {
+        bool post_exists = (post != container_.end());
+        bool post_ok     = post_exists && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance);
+
+        if (post_ok)
+            return post->second;
+    }
+
+    return nullptr;
+}
+
+
 void KFPackBuffer::print(void)
 {
     std::cout << "[ ";
