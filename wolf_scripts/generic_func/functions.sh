@@ -147,9 +147,13 @@ createHCPPFromTemplates()
 
 fillWithBaseConstructorParameters()
 {
-  if ! [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
+  if [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
   then
+    cp "${TEMPLATES_PATH}"/class_template.h "${TEMPLATES_PATH}"/tmp.h
+    cp "${TEMPLATES_PATH}"/class_template.cpp "${TEMPLATES_PATH}"/tmp.cpp 
   
+  else
+    
     # Header: class constructor with base class parameters	
     H_TXT=$(cat $BASE_H_PATH)
     H_TXT="${H_TXT##*class $BASECLASSNAME :}"
@@ -157,7 +161,10 @@ fillWithBaseConstructorParameters()
     PARAMS="${BASECLASS_TXT#*$BASECLASSNAME(}"
     PARAMS="${PARAMS%%\);*}"
 	OLD=" class_name();"
- 	NEW="\        ${CLASSNAME}(${PARAMS});"
+ 	NEW="        ${CLASSNAME}(${PARAMS});"
+    NEW=${NEW//$'\n'/} # Remove all newlines.
+    NEW=${NEW%$'\n'}   # Remove a trailing newline.
+    NEW=$(echo $NEW | sed 's/^ *//g' | sed 's/ *$//g') # remove extra whitespaces
     sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/class_template.h > "${TEMPLATES_PATH}"/tmp.h   
 
     # CPP: class constructor with base class parameters	
@@ -167,7 +174,11 @@ fillWithBaseConstructorParameters()
     PARAMS="${PARAMS::-1}" # remove , from the end
 	OLD="class_name::class_name() :"
  	NEW="class_name::class_name(${PARAMS}) :"
+    NEW=${NEW//$'\n'/} # Remove all newlines.
+    NEW=${NEW%$'\n'}   # Remove a trailing newline.
+    NEW=$(echo $NEW | sed 's/^ *//g' | sed 's/ *$//g') # remove extra whitespaces
     sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/class_template.cpp > "${TEMPLATES_PATH}"/tmp.cpp           
+
 	# get only the variable names
 	PARAMS_CLEAN=$(echo $PARAMS | sed -r 's/'","'/ /g')
 	ar=($PARAMS_CLEAN)
@@ -290,13 +301,15 @@ fillWithBaseVirtualMethods()
  
       # CPP file
       sed -i "/\} \/\/ namespace wolf/i ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}" "$NAME_CPP_PATH"  
-      
+      TXTCPP_3=$(echo "$TXTCPP_3" | sed -r 's/\*\*+/XXXX/g') ## remove **
       if ! [[ $TXTCPP_1 =~ .*void*. ]]
       then
-        sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
+        #sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3} /a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var = 0; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
+        sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3} /a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var = 0; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
       else 
         sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n\}\n" "$NAME_CPP_PATH"
       fi
+      sed -i -r 's/'"XXXX"'/'"**"'/g' "$NAME_CPP_PATH" # add again **
     done    
     
     rm "${WOLF_SCRIPTS_PATH}"/class.h
@@ -391,7 +404,7 @@ createGtest()
     TMP=$(echo $TMP | sed -r 's/'" = 0"'/ /g')
     TMP=${TMP%$TMP##*[![:space:]]}
     TMP=$(echo $TMP | sed 's/(.*//g' | sed 's/.* //g')
-    sed -i "/\[Class methods\]/a TEST_F($CLASSNAME, $TMP)\n\{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m gtest for ${CLASSNAME} ${TMP} is empty.\" << std::endl;\n\}\n" "${TEMPLATES_PATH}"/tmp2.cpp 
+    sed -i "/\[Class methods\]/a TEST($CLASSNAME, $TMP)\n\{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m gtest for ${CLASSNAME} ${TMP} is empty.\" << std::endl;\n\}\n" "${TEMPLATES_PATH}"/tmp2.cpp 
   done
 
   GTEST_PATH="${WOLF_ROOT}"/src/test/gtest_${NAME}.cpp
