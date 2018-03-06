@@ -118,24 +118,74 @@ createHCPPFromTemplates()
 
   # ===== Create HEADER and CPP files =====
 
-  #Set the TYPE and class names on the template files
-  sed 's/header_file/'"${NAME}.h"'/g' "${TEMPLATES_PATH}"/class_template.cpp > "${TEMPLATES_PATH}"/tmp.cpp
-  sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp
-  rm "${TEMPLATES_PATH}"/tmp.cpp
+  # Pick initialization parameters from base class
+  fillWithBaseConstructorParameters
 
-  sed 's/base_header_file/'"${BASE}.h"'/g' "${TEMPLATES_PATH}"/class_template.h > "${TEMPLATES_PATH}"/tmp.h
-  sed 's/name_cap/'"${TYPE_CAP}_${BASE_CAP}_${NAME_CAP}"'/g' "${TEMPLATES_PATH}"/tmp.h > "${TEMPLATES_PATH}"/tmp2.h
-  sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp2.h > "${TEMPLATES_PATH}"/tmp3.h
-  sed 's/base_class/'"${BASECLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.h > "${TEMPLATES_PATH}"/tmp4.h
+  #Set the TYPE and class names on the template files
+  sed 's/header_file/'"${NAME}.h"'/g' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp
+  sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp2.cpp > "${TEMPLATES_PATH}"/tmp3.cpp
+  sed 's/base_class/'"${BASECLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.cpp > "${TEMPLATES_PATH}"/tmp4.cpp
+  rm "${TEMPLATES_PATH}"/tmp.cpp
+  rm "${TEMPLATES_PATH}"/tmp2.cpp
+  rm "${TEMPLATES_PATH}"/tmp3.cpp
+ 
+  sed 's/base_header_file/'"${BASE}.h"'/g' "${TEMPLATES_PATH}"/tmp.h > "${TEMPLATES_PATH}"/tmp2.h
+  sed 's/name_cap/'"${TYPE_CAP}_${BASE_CAP}_${NAME_CAP}"'/g' "${TEMPLATES_PATH}"/tmp2.h > "${TEMPLATES_PATH}"/tmp3.h
+  sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.h > "${TEMPLATES_PATH}"/tmp4.h
+  sed 's/base_class/'"${BASECLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp4.h > "${TEMPLATES_PATH}"/tmp5.h
   rm "${TEMPLATES_PATH}"/tmp.h
   rm "${TEMPLATES_PATH}"/tmp2.h
   rm "${TEMPLATES_PATH}"/tmp3.h
+  rm "${TEMPLATES_PATH}"/tmp4.h
   
   # Rename and move files
   NAME_H_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".h
   NAME_CPP_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".cpp
-  mv "${TEMPLATES_PATH}"/tmp4.h "$NAME_H_PATH"
-  mv "${TEMPLATES_PATH}"/tmp2.cpp "$NAME_CPP_PATH"
+  mv "${TEMPLATES_PATH}"/tmp5.h "$NAME_H_PATH"
+  mv "${TEMPLATES_PATH}"/tmp4.cpp "$NAME_CPP_PATH"
+}
+
+fillWithBaseConstructorParameters()
+{
+  if ! [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
+  then
+  
+    # Header: class constructor with base class parameters	
+    H_TXT=$(cat $BASE_H_PATH)
+    H_TXT="${H_TXT##*class $BASECLASSNAME :}"
+    BASECLASS_TXT="${H_TXT%%\n\};*}"
+    PARAMS="${BASECLASS_TXT#*$BASECLASSNAME(}"
+    PARAMS="${PARAMS%%\);*}"
+	OLD=" class_name();"
+ 	NEW="\        ${CLASSNAME}(${PARAMS});"
+    sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/class_template.h > "${TEMPLATES_PATH}"/tmp.h   
+
+    # CPP: class constructor with base class parameters	
+    PARAMS="$PARAMS," # add , at the end to ease things
+    PARAMS=$(echo "$PARAMS" | sed 's/\ =.*,\ /,\ /g')
+    PARAMS=$(echo "$PARAMS" | sed 's/\ =.*,/,/g')    
+    PARAMS="${PARAMS::-1}" # remove , from the end
+	OLD="class_name::class_name() :"
+ 	NEW="class_name::class_name(${PARAMS}) :"
+    sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/class_template.cpp > "${TEMPLATES_PATH}"/tmp.cpp           
+	# get only the variable names
+	PARAMS_CLEAN=$(echo $PARAMS | sed -r 's/'","'/ /g')
+	ar=($PARAMS_CLEAN)
+	PARAMS_OBJ=
+	for el in "${ar[@]}"; do
+        if [[ $el == _* ]] 
+        then
+          PARAMS_OBJ+=", ${el}"
+        fi
+    done
+	PARAMS_OBJ=${PARAMS_OBJ#","}
+	OLD="\        base_class()"
+ 	NEW="\        base_class(${PARAMS_OBJ} )"
+    sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp 
+    rm "${TEMPLATES_PATH}"/tmp.cpp
+    mv "${TEMPLATES_PATH}"/tmp2.cpp "${TEMPLATES_PATH}"/tmp.cpp
+
+  fi
 }
 
 addAutodiffSpecifics()

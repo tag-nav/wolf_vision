@@ -10,7 +10,7 @@ namespace wolf
 
 WOLF_PTR_TYPEDEFS(class_name);
 
-class class_name : public base_class()
+class class_name : public base_class
 {
     public:
 

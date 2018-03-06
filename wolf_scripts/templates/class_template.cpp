@@ -3,7 +3,8 @@
 namespace wolf {
 
 // Constructor
-class_name::class_name()
+class_name::class_name() :
+        base_class()
 {
 }
 
