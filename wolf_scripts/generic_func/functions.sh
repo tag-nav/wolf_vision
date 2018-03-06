@@ -309,7 +309,7 @@ fillWithBaseVirtualMethods()
       sed -i "/\} \/\/ namespace wolf/i ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}" "$NAME_CPP_PATH"
       if ! [[ $TXTCPP_1 =~ .*void*. ]]
       then
-        sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var = 0; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
+        sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var\{\}; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
       else 
         sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n\}\n" "$NAME_CPP_PATH"
       fi
