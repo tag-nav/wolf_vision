@@ -711,7 +711,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                 {
                     if (i==0) cout << "    Extr " << (S->isExtrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
                     if (i==2) cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
-                    auto sb = S->getStateBlockPtrAuto(i);
+                    auto sb = S->getStateBlockPtrDynamic(i);
                     if (sb)
                     {
                         cout << (sb->isFixed() ? " Fix( " : " Est( ") << sb->getState().transpose() << " )";
