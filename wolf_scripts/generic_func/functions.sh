@@ -65,7 +65,7 @@ showHelp()
   echo "${BLUE}Script to generate a WOLF $1 class${NC}"
   echo "******************************************"
   echo " Options:"
-  echo "  -${CYAN}t${NC}: type"
+  echo "  -${CYAN}t${NC}: type. Any of the following [ ${CYAN}capture${NC} | ${CYAN}constraint${NC} | ${CYAN}feature${NC} | ${CYAN}processor${NC} | ${CYAN}sensor${NC}]"
   echo "  -${CYAN}n${NC}: name"
   echo "  -${CYAN}b${NC}: base class (inheritance)"
   echo ""  

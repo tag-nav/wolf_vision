@@ -25,6 +25,15 @@ then
    exit
 fi
 
+if ! [ "$TYPE" == "capture" ] || ! [ "$TYPE" == "constraint" ] || ! [ "$TYPE" == "feature" ] || ! [ "$TYPE" == "processor" ] || ! [ "$TYPE" == "sensor" ]
+then
+   echo ""
+   echo "${RED} --> Incorrect type \"$TYPE\". Please check the following instructions: ${NC}"
+   echo ""
+   showHelp
+   exit 1
+fi
+
 NAME=$(LowerCase $NAME)
 NAME_CAP=$(UpperCase $NAME)
 NAME_CAP1=$(UpperCaseFirstLetter $NAME)
