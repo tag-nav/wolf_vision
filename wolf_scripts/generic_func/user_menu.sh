@@ -25,7 +25,7 @@ then
    exit
 fi
 
-if ! [ "$TYPE" == "capture" ] || ! [ "$TYPE" == "constraint" ] || ! [ "$TYPE" == "feature" ] || ! [ "$TYPE" == "processor" ] || ! [ "$TYPE" == "sensor" ]
+if ! [ "$TYPE" == "capture" ] && ! [ "$TYPE" == "constraint" ] && ! [ "$TYPE" == "feature" ] && ! [ "$TYPE" == "processor" ] && ! [ "$TYPE" == "sensor" ]
 then
    echo ""
    echo "${RED} --> Incorrect type \"$TYPE\". Please check the following instructions: ${NC}"
