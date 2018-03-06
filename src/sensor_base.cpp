@@ -232,9 +232,8 @@ CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
             if (capture)
                 // found the most recent Capture made by this sensor !
                 break;
-
-            frame_rev_it++;
         }
+        frame_rev_it++;
     }
     return capture;
 }
