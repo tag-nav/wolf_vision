@@ -417,7 +417,10 @@ createGtest()
     TMP=$(echo $TMP | sed -r 's/'" = 0"'/ /g')
     TMP=${TMP%$TMP##*[![:space:]]}
     TMP=$(echo $TMP | sed 's/(.*//g' | sed 's/.* //g')
-    sed -i "/\[Class methods\]/a TEST($CLASSNAME, $TMP)\n\{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m gtest for ${CLASSNAME} ${TMP} is empty.\" << std::endl;\n\}\n" "${TEMPLATES_PATH}"/tmp2.cpp 
+    if ! grep -q "$TMP" "${TEMPLATES_PATH}"/tmp2.cpp
+    then
+      sed -i "/\[Class methods\]/a TEST($CLASSNAME, $TMP)\n\{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m gtest for ${CLASSNAME} ${TMP} is empty.\" << std::endl;\n\}\n" "${TEMPLATES_PATH}"/tmp2.cpp
+    fi
   done
 
   GTEST_PATH="${WOLF_ROOT}"/src/test/gtest_${NAME}.cpp
