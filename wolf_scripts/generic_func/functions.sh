@@ -111,40 +111,6 @@ getFilePath()
   fi
 }
 
-createHCPPFromTemplates()
-{
-  # Templates path
-  TEMPLATES_PATH=${WOLF_SCRIPTS_PATH}/templates
-
-  # ===== Create HEADER and CPP files =====
-
-  # Pick initialization parameters from base class
-  fillWithBaseConstructorParameters
-
-  #Set the TYPE and class names on the template files
-  sed 's/header_file/'"${NAME}.h"'/g' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp
-  sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp2.cpp > "${TEMPLATES_PATH}"/tmp3.cpp
-  sed 's/base_class/'"${BASECLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.cpp > "${TEMPLATES_PATH}"/tmp4.cpp
-  rm "${TEMPLATES_PATH}"/tmp.cpp
-  rm "${TEMPLATES_PATH}"/tmp2.cpp
-  rm "${TEMPLATES_PATH}"/tmp3.cpp
- 
-  sed 's/base_header_file/'"${BASE}.h"'/g' "${TEMPLATES_PATH}"/tmp.h > "${TEMPLATES_PATH}"/tmp2.h
-  sed 's/name_cap/'"${TYPE_CAP}_${BASE_CAP}_${NAME_CAP}"'/g' "${TEMPLATES_PATH}"/tmp2.h > "${TEMPLATES_PATH}"/tmp3.h
-  sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.h > "${TEMPLATES_PATH}"/tmp4.h
-  sed 's/base_class/'"${BASECLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp4.h > "${TEMPLATES_PATH}"/tmp5.h
-  rm "${TEMPLATES_PATH}"/tmp.h
-  rm "${TEMPLATES_PATH}"/tmp2.h
-  rm "${TEMPLATES_PATH}"/tmp3.h
-  rm "${TEMPLATES_PATH}"/tmp4.h
-  
-  # Rename and move files
-  NAME_H_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".h
-  NAME_CPP_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".cpp
-  mv "${TEMPLATES_PATH}"/tmp5.h "$NAME_H_PATH"
-  mv "${TEMPLATES_PATH}"/tmp4.cpp "$NAME_CPP_PATH"
-}
-
 fillWithBaseConstructorParameters()
 {
   if [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
@@ -161,7 +127,7 @@ fillWithBaseConstructorParameters()
     PARAMS="${BASECLASS_TXT#*$BASECLASSNAME(}"
     PARAMS="${PARAMS%%\);*}"
 	OLD=" class_name();"
- 	NEW="        ${CLASSNAME}(${PARAMS});"
+ 	NEW="\ \ \ \ \ \ \ \ ${CLASSNAME}(${PARAMS});"
     NEW=${NEW//$'\n'/} # Remove all newlines.
     NEW=${NEW%$'\n'}   # Remove a trailing newline.
     NEW=$(echo $NEW | sed 's/^ *//g' | sed 's/ *$//g') # remove extra whitespaces
@@ -198,6 +164,42 @@ fillWithBaseConstructorParameters()
 
   fi
 }
+
+createHCPPFromTemplates()
+{
+  # Templates path
+  TEMPLATES_PATH=${WOLF_SCRIPTS_PATH}/templates
+
+  # ===== Create HEADER and CPP files =====
+
+  # Pick initialization parameters from base class
+  fillWithBaseConstructorParameters
+
+  #Set the TYPE and class names on the template files
+  sed 's/header_file/'"${NAME}.h"'/g' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp
+  sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp2.cpp > "${TEMPLATES_PATH}"/tmp3.cpp
+  sed 's/base_class/'"${BASECLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.cpp > "${TEMPLATES_PATH}"/tmp4.cpp
+  rm "${TEMPLATES_PATH}"/tmp.cpp
+  rm "${TEMPLATES_PATH}"/tmp2.cpp
+  rm "${TEMPLATES_PATH}"/tmp3.cpp
+ 
+  sed 's/base_header_file/'"${BASE}.h"'/g' "${TEMPLATES_PATH}"/tmp.h > "${TEMPLATES_PATH}"/tmp2.h
+  sed 's/name_cap/'"${TYPE_CAP}_${BASE_CAP}_${NAME_CAP}"'/g' "${TEMPLATES_PATH}"/tmp2.h > "${TEMPLATES_PATH}"/tmp3.h
+  sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.h > "${TEMPLATES_PATH}"/tmp4.h
+  sed 's/base_class/'"${BASECLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp4.h > "${TEMPLATES_PATH}"/tmp5.h
+  rm "${TEMPLATES_PATH}"/tmp.h
+  rm "${TEMPLATES_PATH}"/tmp2.h
+  rm "${TEMPLATES_PATH}"/tmp3.h
+  rm "${TEMPLATES_PATH}"/tmp4.h
+  
+  # Rename and move files
+  NAME_H_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".h
+  NAME_CPP_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".cpp
+  mv "${TEMPLATES_PATH}"/tmp5.h "$NAME_H_PATH"
+  mv "${TEMPLATES_PATH}"/tmp4.cpp "$NAME_CPP_PATH"
+}
+
+
 
 addAutodiffSpecifics()
 {
@@ -286,6 +288,8 @@ fillWithBaseVirtualMethods()
     
     # CPP file  
     FuncInBase=$(grep -e " = 0;" -e "=0;" "${WOLF_SCRIPTS_PATH}/class.h")
+    rm "${WOLF_SCRIPTS_PATH}"/class.h
+    
     D=";"   #Multi Character Delimiter
     FuncList=($(echo $FuncInBase | sed -e 's/'"$D"'/\n/g' | while read line; do echo $line | sed 's/[\t ]/'"$D"'/g'; done))
 
@@ -300,19 +304,18 @@ fillWithBaseVirtualMethods()
       TXTCPP_1=$(echo $TXTH | sed 's/'"$TXTCPP_2"'.*//g')
  
       # CPP file
-      sed -i "/\} \/\/ namespace wolf/i ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}" "$NAME_CPP_PATH"  
       TXTCPP_3=$(echo "$TXTCPP_3" | sed -r 's/\*\*+/XXXX/g') ## remove **
+      TXTCPP_3=$(echo "$TXTCPP_3" | sed -r 's/\*+/YYYY/g') ## remove *
+      sed -i "/\} \/\/ namespace wolf/i ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}" "$NAME_CPP_PATH"
       if ! [[ $TXTCPP_1 =~ .*void*. ]]
       then
-        #sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3} /a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var = 0; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
-        sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3} /a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var = 0; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
+        sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var = 0; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
       else 
-        sed -i "/${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n\}\n" "$NAME_CPP_PATH"
+        sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n\}\n" "$NAME_CPP_PATH"
       fi
       sed -i -r 's/'"XXXX"'/'"**"'/g' "$NAME_CPP_PATH" # add again **
+      sed -i -r 's/'"YYYY"'/'"*"'/g' "$NAME_CPP_PATH" # add again *
     done    
-    
-    rm "${WOLF_SCRIPTS_PATH}"/class.h
   fi
 }
 
@@ -332,7 +335,7 @@ updateCMakeLists()
      EXISTS=1
    fi
   done
-  
+
   if [ $EXISTS == 0 ] ;
   then
     Hsources=( "${Hsources[@]}" $NewH )
@@ -340,14 +343,19 @@ updateCMakeLists()
     sorted=($(sort <<<"${Hsources[*]}"))
     unset IFS
     SET_AFTER_POS=-2
-   
+     
     for (( idx = 0; idx < ${#sorted[@]}; idx++ )); do
       if [ "${sorted[idx]}" == "\${CMAKE_CURRENT_SOURCE_DIR}/"$NAME".h" ] ;
       then
   	    SET_AFTER_POS=$(( idx-1 ))
   	    if [ $SET_AFTER_POS == -1 ] ; 
   	    then
-  	  	  sed -i "\%${sorted[1]}%i \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.h" "$CML_PATH"
+  	      if [ ${#sorted[@]} == 1 ] ;
+  	      then 
+  	        sed -i "\%HDRS_CONSTRAINT%a \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.h" "$CML_PATH"
+  	      else
+    	    sed -i "\%${sorted[1]}%i \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.h" "$CML_PATH"
+    	  fi
   	    else
   	  	  sed -i "\%${sorted[$SET_AFTER_POS]}%a \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.h" "$CML_PATH"
   	    fi
@@ -364,21 +372,26 @@ updateCMakeLists()
       sorted=($(sort <<<"${Hsources[*]}"))
       unset IFS
       SET_AFTER_POS=-2
-   
+      
       for (( idx = 0; idx < ${#sorted[@]}; idx++ )); do
         if [ "${sorted[idx]}" == "\${CMAKE_CURRENT_SOURCE_DIR}/"$NAME".cpp" ] ;
         then
-  	      SET_AFTER_POS=$(( idx-1 ))
+          SET_AFTER_POS=$(( idx-1 ))
   	      if [ $SET_AFTER_POS == -1 ] ; 
   	      then
-  	  	    sed -i "\%${sorted[1]}%i \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp" "$CML_PATH"
+  	        if [ ${#sorted[@]} == 1 ] ;
+  	        then 
+  	          sed -i "\%SRCS_CONSTRAINT%a \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp" "$CML_PATH"
+  	        else
+    	      sed -i "\%${sorted[1]}%i \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp" "$CML_PATH"
+    	    fi
   	      else
   	  	    sed -i "\%${sorted[$SET_AFTER_POS]}%a \  \${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp" "$CML_PATH"
   	      fi
         fi	  	
       done
       echo "$CML_PATH"
-fi  
+    fi  
   else
     echo ""
   fi
