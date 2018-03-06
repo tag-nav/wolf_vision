@@ -322,6 +322,7 @@ TEST(Odom2D, KF_callback)
     Matrix3s unmeasured_cov = params->unmeasured_perturbation_std_*params->unmeasured_perturbation_std_*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
+    processor_odom2d->setTimeTolerance(dt/2);
 
     // Ceres wrapper
     CeresManager ceres_manager(problem);
@@ -390,7 +391,11 @@ TEST(Odom2D, KF_callback)
     FrameBasePtr keyframe_2 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
 
     ASSERT_TRUE(problem->check(0));
-    processor_odom2d->keyFrameCallback(keyframe_2, 0);
+    processor_odom2d->keyFrameCallback(keyframe_2, dt/2);
+    ASSERT_TRUE(problem->check(0));
+    t += dt;
+    capture->setTimeStamp(t);
+    processor_odom2d->process(capture);
     ASSERT_TRUE(problem->check(0));
 
     CaptureMotionPtr key_capture_n = std::static_pointer_cast<CaptureMotion>(keyframe_2->getCaptureList().front());
@@ -416,7 +421,11 @@ TEST(Odom2D, KF_callback)
     FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
 
     ASSERT_TRUE(problem->check(0));
-    processor_odom2d->keyFrameCallback(keyframe_1, 0);
+    processor_odom2d->keyFrameCallback(keyframe_1, dt/2);
+    ASSERT_TRUE(problem->check(0));
+    t += dt;
+    capture->setTimeStamp(t);
+    processor_odom2d->process(capture);
     ASSERT_TRUE(problem->check(0));
 
     CaptureMotionPtr key_capture_m = std::static_pointer_cast<CaptureMotion>(keyframe_1->getCaptureList().front());
@@ -429,7 +438,6 @@ TEST(Odom2D, KF_callback)
     keyframe_2->setState(Vector3s(3,1,2));
 
     report = ceres_manager.solve(1);
-//    std::cout << report << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
     // check the split KF
