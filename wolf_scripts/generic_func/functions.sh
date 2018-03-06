@@ -124,7 +124,7 @@ createHCPPFromTemplates()
   rm "${TEMPLATES_PATH}"/tmp.cpp
 
   sed 's/base_header_file/'"${BASE}.h"'/g' "${TEMPLATES_PATH}"/class_template.h > "${TEMPLATES_PATH}"/tmp.h
-  sed 's/name_cap/'"${NAME_CAP}"'/g' "${TEMPLATES_PATH}"/tmp.h > "${TEMPLATES_PATH}"/tmp2.h
+  sed 's/name_cap/'"${TYPE_CAP}_${BASE_CAP}_${NAME_CAP}"'/g' "${TEMPLATES_PATH}"/tmp.h > "${TEMPLATES_PATH}"/tmp2.h
   sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp2.h > "${TEMPLATES_PATH}"/tmp3.h
   sed 's/base_class/'"${BASECLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.h > "${TEMPLATES_PATH}"/tmp4.h
   rm "${TEMPLATES_PATH}"/tmp.h
@@ -391,7 +391,7 @@ updateCMakeListsGTest()
         fi
       fi	  	
     done
-    sed -i "\%${sorted[$SET_BEFORE_POS]}%i # $New test\nwolf_add_gtest(gtest_$NAME gtest_$NAME.cpp\ntarget_link_libraries(gtest_$NAME \$\{PROJECT_NAME\}\n" "${CML_GTEST_PATH}"
+    sed -i "\%${sorted[$SET_BEFORE_POS]}%i # $New test\nwolf_add_gtest(gtest_$NAME gtest_$NAME.cpp)\ntarget_link_libraries(gtest_$NAME \$\{PROJECT_NAME\})\n" "${CML_GTEST_PATH}"
     echo "$CML_GTEST_PATH"
   else
     echo ""

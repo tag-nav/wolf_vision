@@ -10,19 +10,19 @@ using namespace wolf;
 using std::static_pointer_cast;
 
 // Use the following in case you want to initialize tests with predefines variables or methods.
-class class_name : public testing::Test{
-    public:
-        virtual void SetUp()
-        {
-        }
-};
+//class class_name_class : public testing::Test{
+//    public:
+//        virtual void SetUp()
+//        {
+//        }
+//};
 
-TEST_F(class_name, Constructor)
+TEST(class_name, Constructor)
 {
   std::cout << "\033[1;33m [WARN]:\033[0m gtest for class_name Constructor is empty." << std::endl;
 }
 
-TEST_F(class_name, Destructor)
+TEST(class_name, Destructor)
 {
   std::cout << "\033[1;33m [WARN]:\033[0m gtest for class_name Destructor is empty." << std::endl;
 }
