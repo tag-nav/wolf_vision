@@ -101,12 +101,10 @@ class ProcessorMotion : public ProcessorBase
 {
     public:
         typedef enum {
-            FIRST_TIME_WITH_PACK,
-            FIRST_TIME_WITHOUT_PACK,
-            SECOND_TIME_WITH_PACK,
-            SECOND_TIME_WITHOUT_PACK,
-            RUNNING_WITH_PACK,
-            RUNNING_WITHOUT_PACK
+            RUNNING_WITHOUT_PACK,
+            RUNNING_WITH_PACK_BEFORE_ORIGIN,
+            RUNNING_WITH_PACK_ON_ORIGIN,
+            RUNNING_WITH_PACK_AFTER_ORIGIN
         } ProcessingStep ;
 
     protected:
@@ -235,9 +233,9 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual void postProcess() { };
 
-        KFPackPtr selectPack(const CaptureBasePtr & _cap);
+        KFPackPtr selectPackBefore(const CaptureBasePtr & _cap);
 
-        void computeProcessingStep();
+        KFPackPtr computeProcessingStep();
 
 
         // These are the pure virtual functions doing the mathematics
