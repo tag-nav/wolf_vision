@@ -655,21 +655,14 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
                 if (processor->isMotion())
                     // Motion processors will set its origin at the KF
                     (std::static_pointer_cast<ProcessorMotion>(processor))->setOrigin(origin_keyframe);
-                else
-                    // Other processors will join the KF or not depending on their received data's time stamp and tolerances
-                    processor->keyFrameCallback(origin_keyframe, _time_tolerance);
-
 
         prior_is_set_ = true;
 
-//        keyFrameCallback(origin_keyframe, nullptr, _time_tolerance);
-
         // Notify all other processors about the origin KF --> they will join it or not depending on their received data
-//        for (auto sensor : hardware_ptr_->getSensorList())
-//            for (auto processor : sensor->getProcessorList())
-//                if ( !processor->isMotion() )
-//                    processor->keyFrameCallback(origin_keyframe, _time_tolerance);
-
+        for (auto sensor : hardware_ptr_->getSensorList())
+            for (auto processor : sensor->getProcessorList())
+                if ( !processor->isMotion() )
+                    processor->keyFrameCallback(origin_keyframe, _time_tolerance);
 
         return origin_keyframe;
     }
