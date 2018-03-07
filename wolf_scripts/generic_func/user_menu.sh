@@ -19,6 +19,11 @@ do
        ;;
   esac
 done
+if [ -z "$TYPE" ] || [ -z "$NAME" ] || [ -z "$BASE" ]
+then
+   showHelp	
+   exit
+fi
 if [ -z "$TYPE" ] ;
 then
    echo ""
