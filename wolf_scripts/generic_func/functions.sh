@@ -390,8 +390,8 @@ updateCMakeLists()
   	      fi
         fi	  	
       done
-      echo "$CML_PATH"
     fi  
+    echo "$CML_PATH"
   else
     echo ""
   fi
