@@ -106,10 +106,6 @@ target_link_libraries(gtest_trajectory ${PROJECT_NAME})
 wolf_add_gtest(gtest_constraint_absolute gtest_constraint_absolute.cpp)
 target_link_libraries(gtest_constraint_absolute ${PROJECT_NAME})
 
-# ConstraintAutodiffExample test
-wolf_add_gtest(gtest_constraint_autodiff_example gtest_constraint_autodiff_example.cpp)
-target_link_libraries(gtest_constraint_autodiff_example ${PROJECT_NAME})
-
 # ConstraintOdom3D class test
 wolf_add_gtest(gtest_constraint_odom_3D gtest_constraint_odom_3D.cpp)
 target_link_libraries(gtest_constraint_odom_3D ${PROJECT_NAME})
@@ -133,10 +129,6 @@ target_link_libraries(gtest_IMU ${PROJECT_NAME})
 # Pinhole test
 wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
 target_link_libraries(gtest_pinhole ${PROJECT_NAME})
-
-# ProcessorBaseExample test
-wolf_add_gtest(gtest_processor_example gtest_processor_example.cpp)
-target_link_libraries(gtest_processor_example ${PROJECT_NAME})
 
 # ProcessorFrameNearestNeighborFilter class test
 wolf_add_gtest(gtest_processor_frame_nearest_neighbor_filter_2D gtest_processor_frame_nearest_neighbor_filter_2D.cpp)
