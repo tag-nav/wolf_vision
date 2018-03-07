@@ -147,6 +147,7 @@ fillWithBaseConstructorParameters()
     H_TXT="${H_TXT##*class $BASECLASSNAME :}"
     BASECLASS_TXT="${H_TXT%%\n\};*}"
     PARAMS="${BASECLASS_TXT#*$BASECLASSNAME(}"
+    PARAMS="${PARAMS%%\) :*}" # in case of inheritance
     PARAMS="${PARAMS%%\);*}"
 	OLD=" class_name();"
  	NEW="\ \ \ \ \ \ \ \ ${CLASSNAME}(${PARAMS});"
