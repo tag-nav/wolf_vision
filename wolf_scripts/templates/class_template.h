@@ -16,6 +16,7 @@ class class_name : public base_class
 
         /** \brief Class constructor
          */
+        // TODO Modify this default API to suit your class needs
         class_name();
 
         /** \brief Class Destructor
