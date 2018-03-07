@@ -195,7 +195,10 @@ fillWithBaseConstructorParameters()
         fi
     done
 	PARAMS_OBJ=${PARAMS_OBJ#","}
-	PARAMS_OBJ="\"$NAME_STR\", $PARAMS_OBJ"
+	if ! [[ -z $NAME_STR ]] ;
+	then
+	  PARAMS_OBJ="\"$NAME_STR\", $PARAMS_OBJ"
+    fi
 	OLD="\        base_class()"
  	NEW="\        base_class(${PARAMS_OBJ} )"
     sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp 
