@@ -495,7 +495,7 @@ updateCMakeListsGTest()
     unset IFS
     SET_BEFORE_POS=-2
     for (( idx = 0; idx < ${#sorted[@]}; idx++ )); do
-      if [ "${sorted[idx]}" == $New ] ;
+      if [ "${sorted[idx]}" == "$New" ] ;
       then
         SET_BEFORE_POS=$(( idx+1 ))
         if [ $SET_BEFORE_POS == ${#sorted[@]} ] ; 
