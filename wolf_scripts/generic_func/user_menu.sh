@@ -35,11 +35,27 @@ then
 fi
 
 NAME=$(LowerCase $NAME)
+if [[ $NAME = *"2d"* ]]; 
+then
+  NAME=$(echo "${NAME/2d/2D}")
+elif [[ $NAME = *"3d"* ]];
+then
+  NAME=$(echo "${NAME/3d/3D}")
+fi
 NAME_CAP=$(UpperCase $NAME)
 NAME_CAP1=$(UpperCaseFirstLetter $NAME)
+
 BASE=$(LowerCase $BASE)
+if [[ $BASE = *"2d"* ]]; 
+then
+  BASE=$(echo "${BASE/2d/2D}")
+elif [[ $BASE = *"3d"* ]];
+then
+  BASE=$(echo "${BASE/3d/3D}")
+fi
 BASE_CAP=$(UpperCase $BASE)
 BASE_CAP1=$(UpperCaseFirstLetter $BASE)
+
 TYPE=$(LowerCase $TYPE)
 TYPE_CAP=$(UpperCase $TYPE)
 TYPE_CAP1=$(UpperCaseFirstLetter $TYPE)
