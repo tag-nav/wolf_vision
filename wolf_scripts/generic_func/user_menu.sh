@@ -19,8 +19,28 @@ do
        ;;
   esac
 done
-if [ -z "$TYPE" ] || [ -z "$NAME" ] || [ -z "$BASE" ]
+if [ -z "$TYPE" ] ;
 then
+   echo ""
+   echo "${RED}  [ERROR]: Missing TYPE value (-t).${NC}"
+   echo ""
+   showHelp	
+   exit
+fi
+
+if [ -z "$NAME" ] ;
+then
+   echo ""
+   echo "${RED}  [ERROR]: Missing NAME value (-n).${NC}"
+   echo ""
+   showHelp	
+   exit
+fi
+if [ -z "$BASE" ] ;
+then
+   echo ""
+   echo "${RED}  [ERROR]: Missing BASE value (-b).${NC}"
+   echo ""
    showHelp	
    exit
 fi
