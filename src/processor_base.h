@@ -156,6 +156,7 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
          *   - Add the provided capture on it.
          */
         FrameBasePtr emplaceFrame(FrameType _type, CaptureBasePtr _capture_ptr);
+
         /**\brief make a Frame with the provided Capture
          *
          * Provide the following functionality:
@@ -165,8 +166,6 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
          *   - Add the provided capture on it.
          */
         FrameBasePtr emplaceFrame(FrameType _type, CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state);
-
-//        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tolerance) = 0;
 
         void keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
 
