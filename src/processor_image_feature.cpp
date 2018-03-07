@@ -214,8 +214,6 @@ unsigned int ProcessorImageFeature::trackFeatures(const FeatureBaseList& _featur
                 incoming_point_ptr->setIsKnown(feature_ptr->isKnown());
                 _feature_list_out.push_back(incoming_point_ptr);
 
-                incoming_point_ptr->setTrackId(feature_ptr->trackId());
-
                 _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_base_ptr, normalized_score}));
             }
             else
@@ -321,7 +319,6 @@ unsigned int ProcessorImageFeature::detectNewFeatures(const unsigned int& _max_n
                             new_descriptors.row(index),
                             Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
                     point_ptr->setIsKnown(false);
-                    point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);
                     active_search_grid_.hitCell(new_keypoints[0]);
 
@@ -369,10 +366,10 @@ unsigned int ProcessorImageFeature::detect(cv::Mat _image, cv::Rect& _roi, std::
     detector_descriptor_ptr_->detect(_image_roi, _new_keypoints);
     detector_descriptor_ptr_->compute(_image_roi, _new_keypoints, new_descriptors);
 
-    for (unsigned int i = 0; i < _new_keypoints.size(); i++)
+    for (auto point : _new_keypoints)
     {
-        _new_keypoints[i].pt.x = _new_keypoints[i].pt.x + _roi.x;
-        _new_keypoints[i].pt.y = _new_keypoints[i].pt.y + _roi.y;
+        point.pt.x += _roi.x;
+        point.pt.y += _roi.y;
     }
     return _new_keypoints.size();
 }

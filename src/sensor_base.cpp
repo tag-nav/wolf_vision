@@ -218,6 +218,23 @@ void SensorBase::setNoiseCov(const Eigen::MatrixXs& _noise_cov) {
     noise_cov_ = _noise_cov;
 }
 
+CaptureBasePtr SensorBase::lastCapture(void)
+{
+    // we search for the most recent Capture of this sensor
+    CaptureBasePtr capture = nullptr;
+    FrameBaseList frame_list = getProblem()->getTrajectoryPtr()->getFrameList();
+    FrameBaseRevIter frame_rev_it = frame_list.rbegin();
+    while (frame_rev_it != frame_list.rend())
+    {
+        CaptureBasePtr capture = (*frame_rev_it)->getCaptureOf(shared_from_this());
+        if (capture)
+            // found the most recent Capture made by this sensor !
+            break;
+        frame_rev_it++;
+    }
+    return capture;
+}
+
 CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
 {
     // we search for the most recent Capture of this sensor before _ts
@@ -232,9 +249,8 @@ CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
             if (capture)
                 // found the most recent Capture made by this sensor !
                 break;
-
-            frame_rev_it++;
         }
+        frame_rev_it++;
     }
     return capture;
 }
@@ -256,44 +272,17 @@ StateBlockPtr SensorBase::getIntrinsicPtr(const TimeStamp _ts)
 
 StateBlockPtr SensorBase::getPPtr()
 {
-    ProblemPtr P = getProblem();
-    if (P)
-    {
-        FrameBasePtr KF = P->getLastKeyFramePtr();
-        if (KF)
-        {
-            return getPPtr(KF->getTimeStamp());
-        }
-    }
-    return state_block_vec_[0];
+    return getStateBlockPtrDynamic(0);
 }
 
 StateBlockPtr SensorBase::getOPtr()
 {
-    ProblemPtr P = getProblem();
-    if (P)
-    {
-        FrameBasePtr KF = P->getLastKeyFramePtr();
-        if (KF)
-        {
-            return getOPtr(KF->getTimeStamp());
-        }
-    }
-    return state_block_vec_[1];
+    return getStateBlockPtrDynamic(1);
 }
 
 StateBlockPtr SensorBase::getIntrinsicPtr()
 {
-    ProblemPtr P = getProblem();
-    if (P)
-    {
-        FrameBasePtr KF = P->getLastKeyFramePtr();
-        if (KF)
-        {
-            return getIntrinsicPtr(KF->getTimeStamp());
-        }
-    }
-    return state_block_vec_[2];
+    return getStateBlockPtrDynamic(2);
 }
 
 wolf::Size SensorBase::computeCalibSize() const
@@ -347,30 +336,32 @@ ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
     return _proc_ptr;
 }
 
-StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts)
+StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i)
 {
-    assert(_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
-    if (((_i < 2) && extrinsicsInCaptures()) || ((_i >= 2) && intrinsicsInCaptures()))
+    if ((_i<2 && this->extrinsicsInCaptures()) || (_i>=2 && intrinsicsInCaptures()))
     {
-        CaptureBasePtr cap = lastCapture(_ts);
-        return cap->getStateBlockPtr(_i);
+        CaptureBasePtr cap = lastCapture();
+        if (cap)
+            return cap->getStateBlockPtr(_i);
+        else
+            return getStateBlockPtrStatic(_i);
     }
     else
-        return state_block_vec_[_i];
+        return getStateBlockPtrStatic(_i);
 }
 
-StateBlockPtr SensorBase::getStateBlockPtrAuto(unsigned int _i)
+StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts)
 {
-    ProblemPtr P = getProblem();
-    if (P)
+    if ((_i<2 && this->extrinsicsInCaptures()) || (_i>=2 && intrinsicsInCaptures()))
     {
-        FrameBasePtr KF = P->getLastKeyFramePtr();
-        if (KF)
-        {
-            return getStateBlockPtrDynamic(_i, KF->getTimeStamp());
-        }
+        CaptureBasePtr cap = lastCapture(_ts);
+        if (cap)
+            return cap->getStateBlockPtr(_i);
+        else
+            return getStateBlockPtrStatic(_i);
     }
-    return state_block_vec_[_i];
+    else
+        return getStateBlockPtrStatic(_i);
 }
 
 } // namespace wolf

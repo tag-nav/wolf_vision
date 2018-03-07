@@ -96,12 +96,12 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
         virtual void preProcess();
 //        virtual void postProcess() { }
 
-        void advance()
+        void advanceDerived()
         {
             //std::cout << "\tProcessorTrackerLandmarkCorner::advance:" << std::endl;
             //std::cout << "\t\tcorners_last: " << corners_last_.size() << std::endl;
             //std::cout << "\t\tcorners_incoming_: " << corners_incoming_.size() << std::endl;
-            ProcessorTrackerLandmark::advance();
+            ProcessorTrackerLandmark::advanceDerived();
             while (!corners_last_.empty())
             {
                 corners_last_.front()->remove();
@@ -110,12 +110,12 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
             corners_last_ = std::move(corners_incoming_);
         }
 
-        void reset()
+        void resetDerived()
         {
             //std::cout << "\tProcessorTrackerLandmarkCorner::reset:" << std::endl;
             //std::cout << "\t\tcorners_last: " << corners_last_.size() << std::endl;
             //std::cout << "\t\tcorners_incoming_: " << corners_incoming_.size() << std::endl;
-            ProcessorTrackerLandmark::reset();
+            ProcessorTrackerLandmark::resetDerived();
             corners_last_ = std::move(corners_incoming_);
         }
 

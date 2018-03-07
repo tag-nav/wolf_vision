@@ -72,7 +72,7 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
 
         virtual void preProcess();
 
-        void advance();
+        void advanceDerived();
 
         /** \brief Track provided features from \b last to \b incoming
          * \param _feature_list_in input list of features in \b last to track

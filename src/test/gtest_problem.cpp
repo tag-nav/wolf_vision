@@ -103,7 +103,7 @@ TEST(Problem, SetOrigin_PO_2D)
     Eigen::VectorXs x0(3); x0 << 1,2,3;
     Eigen::MatrixXs P0(3,3); P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
 
-    P->setPrior(x0, P0, t0);
+    P->setPrior(x0, P0, t0, 1.0);
 
     // check that no sensor has been added
     ASSERT_EQ(P->getHardwarePtr()->getSensorList().size(), 0);
@@ -142,7 +142,7 @@ TEST(Problem, SetOrigin_PO_3D)
     Eigen::VectorXs x0(7); x0 << 1,2,3,4,5,6,7;
     Eigen::MatrixXs P0(6,6); P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
 
-    P->setPrior(x0, P0, t0);
+    P->setPrior(x0, P0, t0, 1.0);
 
     // check that no sensor has been added
     ASSERT_EQ(P->getHardwarePtr()->getSensorList().size(), 0);

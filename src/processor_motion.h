@@ -99,6 +99,17 @@ namespace wolf
  */
 class ProcessorMotion : public ProcessorBase
 {
+    public:
+        typedef enum {
+            RUNNING_WITHOUT_PACK,
+            RUNNING_WITH_PACK_BEFORE_ORIGIN,
+            RUNNING_WITH_PACK_ON_ORIGIN,
+            RUNNING_WITH_PACK_AFTER_ORIGIN
+        } ProcessingStep ;
+
+    protected:
+        ProcessingStep processing_step_;        ///< State machine controlling the processing step
+
     private:
         enum
         {
@@ -119,6 +130,7 @@ class ProcessorMotion : public ProcessorBase
 
         // Instructions to the processor:
 
+        void process2(CaptureBasePtr _incoming_ptr);
         void process(CaptureBasePtr _incoming_ptr);
         virtual void resetDerived();
 
@@ -182,8 +194,6 @@ class ProcessorMotion : public ProcessorBase
          */
         FrameBasePtr setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin);
 
-        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol);
-
         MotionBuffer& getBuffer();
         const MotionBuffer& getBuffer() const;
 
@@ -191,7 +201,7 @@ class ProcessorMotion : public ProcessorBase
         // Helper functions:
     protected:
 
-        void updateDt();
+        Scalar updateDt();
         void integrateOneStep();
         void splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part);
         void reintegrateBuffer(CaptureMotionPtr _capture_ptr);
@@ -220,6 +230,8 @@ class ProcessorMotion : public ProcessorBase
          *   - drawing / printing / logging the results of the processing
          */
         virtual void postProcess() { };
+
+        KFPackPtr computeProcessingStep();
 
 
         // These are the pure virtual functions doing the mathematics
@@ -498,9 +510,9 @@ inline bool ProcessorMotion::isMotion()
     return true;
 }
 
-inline void ProcessorMotion::updateDt()
+inline Scalar ProcessorMotion::updateDt()
 {
-    dt_ = incoming_ptr_->getTimeStamp() - getBuffer().get().back().ts_;
+    return dt_ = incoming_ptr_->getTimeStamp() - getBuffer().get().back().ts_;
 }
 
 inline const MotionBuffer& ProcessorMotion::getBuffer() const

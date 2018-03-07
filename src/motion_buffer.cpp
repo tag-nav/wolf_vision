@@ -73,6 +73,7 @@ MotionBuffer::MotionBuffer(Size _data_size,
         calib_size_(_calib_size),
         calib_preint_(_calib_size)
 {
+    container_.clear();
 }
 
 const Motion& MotionBuffer::getMotion(const TimeStamp& _ts) const

@@ -110,7 +110,7 @@ protected:
 
   virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion) override;
 
-  bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol) override;
+//  bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol) override;
 
 public:
 

@@ -63,9 +63,9 @@ void ProcessorTrackerFeatureCorner::preProcess()
     t_current_prev_ = R_world_sensor_.transpose() * (t_world_sensor_prev_ - t_world_sensor_);
 }
 
-void ProcessorTrackerFeatureCorner::advance()
+void ProcessorTrackerFeatureCorner::advanceDerived()
 {
-    ProcessorTrackerFeature::advance();
+    ProcessorTrackerFeature::advanceDerived();
     corners_last_ = std::move(corners_incoming_);
 }
 
