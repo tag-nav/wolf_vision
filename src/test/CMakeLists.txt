@@ -130,7 +130,7 @@ target_link_libraries(gtest_processor_frame_nearest_neighbor_filter_2D ${PROJECT
 wolf_add_gtest(gtest_processor_IMU gtest_processor_IMU.cpp)
 target_link_libraries(gtest_processor_IMU ${PROJECT_NAME})
 
-# ProcessorIMU_jacobians test
+# ProcessorIMUJacobians test
 wolf_add_gtest(gtest_processor_IMU_jacobians gtest_processor_IMU_jacobians.cpp)
 target_link_libraries(gtest_processor_IMU_jacobians ${PROJECT_NAME})
 
