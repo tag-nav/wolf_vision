@@ -1,4 +1,4 @@
-# SCRIPTS
+# SCRIPTS for DEVELOPERS
 
 Helpful scripts to create WOLF tree elements (e.g. processors)
 
@@ -30,9 +30,6 @@ Creates the main structure including .cpp and .h files, and a gtest for the new 
   `create_wolf_processor.sh -t processor -n example -b tracker` 
 
   * Options:
-    - t: Type (e.g. sensor, processor, constraint, ...)
+    - t: Type. Any of the following [ capture | constraint | feature | processor | sensor ]"
     - n: Name 
     - b: Base class (inherited from this class)
-    - h: Help
-
-
