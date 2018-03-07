@@ -156,6 +156,14 @@ fillWithBaseConstructorParameters()
     
     PARAMS="${PARAMS%%\) :*}" # in case of inheritance
     PARAMS="${PARAMS%%\);*}"
+    
+    if [[ "$PARAMS" == *"const std::string& _type"* ]] ;
+    then
+    	PARAMS="${PARAMS#*_type,}"
+    	NAME_STR="${NAME#${TYPE}_}"
+    	NAME_STR=$(UpperCase $NAME_STR)
+    fi
+        
 	OLD=" class_name();"
  	NEW="\ \ \ \ \ \ \ \ ${CLASSNAME}(${PARAMS});"
     NEW=${NEW//$'\n'/} # Remove all newlines.
@@ -168,6 +176,7 @@ fillWithBaseConstructorParameters()
     PARAMS=$(echo "$PARAMS" | sed 's/\ =.*,\ /,\ /g')
     PARAMS=$(echo "$PARAMS" | sed 's/\ =.*,/,/g')    
     PARAMS="${PARAMS::-1}" # remove , from the end
+    
 	OLD="class_name::class_name() :"
  	NEW="class_name::class_name(${PARAMS}) :"
     NEW=${NEW//$'\n'/} # Remove all newlines.
@@ -186,6 +195,7 @@ fillWithBaseConstructorParameters()
         fi
     done
 	PARAMS_OBJ=${PARAMS_OBJ#","}
+	PARAMS_OBJ="\"$NAME_STR\", $PARAMS_OBJ"
 	OLD="\        base_class()"
  	NEW="\        base_class(${PARAMS_OBJ} )"
     sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp 
