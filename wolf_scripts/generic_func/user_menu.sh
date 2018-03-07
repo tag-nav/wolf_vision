@@ -19,7 +19,7 @@ do
        ;;
   esac
 done
-if [ -z "$TYPE" ] || [ -z "$NAME" ] || [ -z "$BASE" ]
+if [ -z "$TYPE" ] && [ -z "$NAME" ] && [ -z "$BASE" ]
 then
    showHelp	
    exit
