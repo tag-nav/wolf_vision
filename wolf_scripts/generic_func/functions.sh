@@ -296,7 +296,7 @@ addAutodiffSpecifics()
 
 fillWithBaseVirtualMethods()
 {
-  if [ $BASE_DERIVES_FROM_AUTODIFF=="TRUE" ] ;
+  if ! [ -z $BASE_DERIVES_FROM_AUTODIFF ] ;
   then
     echo "${YELLOW} [ WARN]: Base class $BASECLASSNAME derives from AUTODIFF template. New .h and .cpp files are left without inherited functions."
   else
