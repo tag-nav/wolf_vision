@@ -95,6 +95,9 @@ class Process_Constraint_IMU : public testing::Test
             sensor_imu    = static_pointer_cast<SensorIMU>   (sensor);
             processor_imu = static_pointer_cast<ProcessorIMU>(processor);
 
+            dt = 0.01;
+            processor_imu->setTimeTolerance(dt/2);
+
             // Some initializations
             bias_null   .setZero();
             x0          .resize(10);
@@ -374,7 +377,7 @@ class Process_Constraint_IMU : public testing::Test
             FrameBasePtr KF = problem->emplaceFrame(KEY_FRAME, x1_exact, t);
 
             // ===================================== IMU CALLBACK
-            processor_imu->keyFrameCallback(KF, 0.01);
+            processor_imu->keyFrameCallback(KF, dt/2);
 
 
 
@@ -490,6 +493,7 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
         // Wolf objects
         SensorOdom3DPtr     sensor_odo;
         ProcessorOdom3DPtr  processor_odo;
+        CaptureOdom3DPtr    capture_odo;
 
         virtual void SetUp( ) override
         {
@@ -504,6 +508,7 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
             ProcessorBasePtr processor  = problem->installProcessor("ODOM 3D", "Odometer", "Odometer"                            , wolf_root + "/src/examples/processor_odom_3D.yaml");
             sensor_odo      = static_pointer_cast<SensorOdom3D>(sensor);
             processor_odo   = static_pointer_cast<ProcessorOdom3D>(processor);
+            processor_odo->setTimeTolerance(dt/2);
 
             // prevent this processor from voting by setting high thresholds :
             processor_odo->setAngleTurned(2.0);
@@ -537,6 +542,11 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
 
             // ===================================== ODO
             processor_odo->keyFrameCallback(KF_1, 0.1);
+
+            data = Vector6s::Zero();
+            capture_odo = make_shared<CaptureOdom3D>(t+dt, sensor_odo, data, sensor_odo->getNoiseCov());
+            processor_odo->process(capture_odo);
+
         }
 
 };
@@ -550,7 +560,6 @@ TEST_F(Process_Constraint_IMU, MotionConstant_PQV_b__PQV_b) // F_ixed___e_stimat
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -596,7 +605,6 @@ TEST_F(Process_Constraint_IMU, test_capture) // F_ixed___e_stimated
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -645,7 +653,6 @@ TEST_F(Process_Constraint_IMU, MotionConstant_pqv_b__PQV_b) // F_ixed___e_stimat
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -692,7 +699,6 @@ TEST_F(Process_Constraint_IMU, MotionConstant_pqV_b__PQv_b) // F_ixed___e_stimat
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -739,7 +745,6 @@ TEST_F(Process_Constraint_IMU, MotionRandom_PQV_b__PQV_b) // F_ixed___e_stimated
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -786,7 +791,6 @@ TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__PQv_b) // F_ixed___e_stimated
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -832,7 +836,6 @@ TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__pQV_b) // F_ixed___e_stimated
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -878,7 +881,6 @@ TEST_F(Process_Constraint_IMU, MotionConstant_NonNullState_PQV_b__PQV_b) // F_ix
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -924,7 +926,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__PQV_b) // F_ixe
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -970,7 +971,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__PQv_b) // F_ixe
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -1016,7 +1016,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__Pqv_b) // F_ixe
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -1045,9 +1044,14 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__Pqv_b) // F_ixe
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+//    string report = runAll(1);
+    configureAll();
+    integrateAll();
+    buildProblem();
+    problem->print(4,1,1,1);
+    string report = solveProblem(1);
 
-    //    printAll(report);
+    printAll(report);
 
     assertAll();
 
@@ -1062,7 +1066,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__pQv_b) // F_ixe
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -1108,7 +1111,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__pqv_b) // F_ixe
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -1154,7 +1156,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqv_b__pqV_b) // F_ixed___e_st
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -1200,7 +1201,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_st
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -1246,7 +1246,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PQV_b__pqv_b) // F_ixed___e_stim
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
@@ -1292,7 +1291,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PqV_b__pqV_b) // F_ixed___e_stim
     //
     // ---------- time
     t0                  = 0;
-    dt                  = 0.01;
     num_integrations    = 50;
 
     // ---------- initial pose
