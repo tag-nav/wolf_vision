@@ -62,7 +62,7 @@ class SensorIMU : public SensorBase
          * \param _a_w_biases_ptr StateBlock pointer to the vector of acc and gyro biases
          *
          **/
-        SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPtr params);
+        SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPtr _params);
 
         Scalar getGyroNoise() const;
         Scalar getAccelNoise() const;
