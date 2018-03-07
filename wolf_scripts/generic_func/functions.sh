@@ -110,15 +110,15 @@ capitalizeDiminutives()
   fi
   if [[ $1 =~ .*"3d"*. ]] ;
   then
-    RES=$(echo "${1/3d/3D}")
+    RES=$(echo "${RES/3d/3D}")
   fi
   if [[ $1 =~ .*"gps"*. ]] ;
   then
-    RES=$(echo "${1/gps/GPS}")
+    RES=$(echo "${RES/gps/GPS}")
   fi  
   if [[ $1 =~ .*"imu"*. ]] ;
   then
-    RES=$(echo "${1/imu/IMU}")    
+    RES=$(echo "${RES/imu/IMU}")    
   fi
   echo $RES
 }
