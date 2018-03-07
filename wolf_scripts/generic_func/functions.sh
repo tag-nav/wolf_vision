@@ -147,6 +147,13 @@ fillWithBaseConstructorParameters()
     H_TXT="${H_TXT##*class $BASECLASSNAME :}"
     BASECLASS_TXT="${H_TXT%%\n\};*}"
     PARAMS="${BASECLASS_TXT#*$BASECLASSNAME(}"
+    
+    BASE_DERIVES_FROM_AUTODIFF=""
+    if [[ $PARAMS =~ .*ConstraintAutodiff*. ]] ;
+    then
+      BASE_DERIVES_FROM_AUTODIFF="TRUE"
+    fi    
+    
     PARAMS="${PARAMS%%\) :*}" # in case of inheritance
     PARAMS="${PARAMS%%\);*}"
 	OLD=" class_name();"
@@ -222,8 +229,6 @@ createHCPPFromTemplates()
   mv "${TEMPLATES_PATH}"/tmp4.cpp "$NAME_CPP_PATH"
 }
 
-
-
 addAutodiffSpecifics()
 {
   # Number of parameters
@@ -291,55 +296,61 @@ addAutodiffSpecifics()
 
 fillWithBaseVirtualMethods()
 {
-  if [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
+  if [ $BASE_DERIVES_FROM_AUTODIFF=="TRUE" ] ;
   then
-    addAutodiffSpecifics
+    echo "${YELLOW} [ WARN]: Base class $BASECLASSNAME derives from AUTODIFF template. New .h and .cpp files are left without inherited functions."
   else
-    # Get base class	
-    H_TXT=$(cat $BASE_H_PATH)
-    H_TXT="${H_TXT##*class $BASECLASSNAME :}"
-    BASECLASS_TXT="${H_TXT%%\n\};*}"
+  
+    if [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
+    then
+      addAutodiffSpecifics
+    else
+      # Get base class	
+      H_TXT=$(cat $BASE_H_PATH)
+      H_TXT="${H_TXT##*class $BASECLASSNAME :}"
+      BASECLASS_TXT="${H_TXT%%\n\};*}"
 
-    echo "class $BASECLASSNAME :$BASECLASS_TXT };" > "${WOLF_SCRIPTS_PATH}"/class.h
+      echo "class $BASECLASSNAME :$BASECLASS_TXT };" > "${WOLF_SCRIPTS_PATH}"/class.h
 
-    # H file Get Virtual function declarations with help
-    sed -e '/./{H;$!d;}' -e 'x;/ = 0;/!d;' "${WOLF_SCRIPTS_PATH}"/class.h > "${WOLF_SCRIPTS_PATH}"/tmp.h
-    sed -r 's/'" = 0"'//g' "${WOLF_SCRIPTS_PATH}"/tmp.h > "${WOLF_SCRIPTS_PATH}"/tmp2.h
-    sed -i -e "/virtual \~$CLASSNAME/r ${WOLF_SCRIPTS_PATH}/tmp2.h" "$NAME_H_PATH" 
-    rm "${WOLF_SCRIPTS_PATH}"/tmp.h	
-    rm ${WOLF_SCRIPTS_PATH}/tmp2.h
+      # H file Get Virtual function declarations with help
+      sed -e '/./{H;$!d;}' -e 'x;/ = 0;/!d;' "${WOLF_SCRIPTS_PATH}"/class.h > "${WOLF_SCRIPTS_PATH}"/tmp.h
+      sed -r 's/'" = 0"'//g' "${WOLF_SCRIPTS_PATH}"/tmp.h > "${WOLF_SCRIPTS_PATH}"/tmp2.h
+      sed -i -e "/virtual \~$CLASSNAME/r ${WOLF_SCRIPTS_PATH}/tmp2.h" "$NAME_H_PATH" 
+      rm "${WOLF_SCRIPTS_PATH}"/tmp.h	
+      rm ${WOLF_SCRIPTS_PATH}/tmp2.h
     
-    # CPP file  
-    FuncInBase=$(grep -e " = 0;" -e "=0;" "${WOLF_SCRIPTS_PATH}/class.h")
-    rm "${WOLF_SCRIPTS_PATH}"/class.h
+      # CPP file  
+      FuncInBase=$(grep -e " = 0;" -e "=0;" "${WOLF_SCRIPTS_PATH}/class.h")
+      rm "${WOLF_SCRIPTS_PATH}"/class.h
     
-    D=";"   #Multi Character Delimiter
-    FuncList=($(echo $FuncInBase | sed -e 's/'"$D"'/\n/g' | while read line; do echo $line | sed 's/[\t ]/'"$D"'/g'; done))
+      D=";"   #Multi Character Delimiter
+      FuncList=($(echo $FuncInBase | sed -e 's/'"$D"'/\n/g' | while read line; do echo $line | sed 's/[\t ]/'"$D"'/g'; done))
 
-    for (( idx = $((${#FuncList[@]}-1)); idx > -1; idx-- )); do
-  	  TMP=$(echo ${FuncList[idx]} | sed -r 's/'"$D"'/ /g')
-      TMP=$(echo $TMP | sed -r 's/'"virtual"'/ /g')
-      TMP=$(echo $TMP | sed -r 's/'"=0"'/ /g')
-      TMP=$(echo $TMP | sed -r 's/'" = 0"'/ /g')
-      TXTH=${TMP%$TMP##*[![:space:]]}
-      TXTCPP_3=$(echo $TXTH | sed 's/.*(//g')
-      TXTCPP_2=$(echo $TXTH | sed 's/(.*//g' | sed 's/.* //g')
-      TXTCPP_1=$(echo $TXTH | sed 's/'"$TXTCPP_2"'.*//g')
+      for (( idx = $((${#FuncList[@]}-1)); idx > -1; idx-- )); do
+  	    TMP=$(echo ${FuncList[idx]} | sed -r 's/'"$D"'/ /g')
+        TMP=$(echo $TMP | sed -r 's/'"virtual"'/ /g')
+        TMP=$(echo $TMP | sed -r 's/'"=0"'/ /g')
+        TMP=$(echo $TMP | sed -r 's/'" = 0"'/ /g')
+        TXTH=${TMP%$TMP##*[![:space:]]}
+        TXTCPP_3=$(echo $TXTH | sed 's/.*(//g')
+        TXTCPP_2=$(echo $TXTH | sed 's/(.*//g' | sed 's/.* //g')
+        TXTCPP_1=$(echo $TXTH | sed 's/'"$TXTCPP_2"'.*//g')
  
-      # CPP file
-      TXTCPP_3=$(echo "$TXTCPP_3" | sed -r 's/\*\*+/XXXX/g') ## remove **
-      TXTCPP_3=$(echo "$TXTCPP_3" | sed -r 's/\*+/YYYY/g') ## remove *
-      sed -i "/\} \/\/ namespace wolf/i ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}" "$NAME_CPP_PATH"
-      if ! [[ $TXTCPP_1 =~ .*void*. ]]
-      then
-        sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var\{\}; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
-      else 
-        sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n\}\n" "$NAME_CPP_PATH"
-      fi
-      sed -i -r 's/'"XXXX"'/'"**"'/g' "$NAME_CPP_PATH" # add again **
-      sed -i -r 's/'"YYYY"'/'"*"'/g' "$NAME_CPP_PATH" # add again *
-    done    
-  fi
+        # CPP file
+        TXTCPP_3=$(echo "$TXTCPP_3" | sed -r 's/\*\*+/XXXX/g') ## remove **
+        TXTCPP_3=$(echo "$TXTCPP_3" | sed -r 's/\*+/YYYY/g') ## remove *
+        sed -i "/\} \/\/ namespace wolf/i ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}" "$NAME_CPP_PATH"
+        if ! [[ $TXTCPP_1 =~ .*void*. ]]
+        then
+          sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var\{\}; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
+        else 
+          sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n\}\n" "$NAME_CPP_PATH"
+        fi
+        sed -i -r 's/'"XXXX"'/'"**"'/g' "$NAME_CPP_PATH" # add again **
+        sed -i -r 's/'"YYYY"'/'"*"'/g' "$NAME_CPP_PATH" # add again *
+      done    
+    fi
+  fi  
 }
 
 updateCMakeLists()
