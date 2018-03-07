@@ -114,7 +114,7 @@ target_link_libraries(gtest_constraint_pose_3D ${PROJECT_NAME})
 wolf_add_gtest(gtest_feature_IMU gtest_feature_IMU.cpp)
 target_link_libraries(gtest_feature_IMU ${PROJECT_NAME})
 
-# IMU Bias + estimation tests
+# IMUTest (Bias + estimation)
 wolf_add_gtest(gtest_IMU gtest_IMU.cpp)
 target_link_libraries(gtest_IMU ${PROJECT_NAME})
 
