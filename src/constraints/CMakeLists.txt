@@ -3,6 +3,7 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 # Forward var to parent scope
 
 SET(HDRS_CONSTRAINT ${HDRS_CONSTRAINT}
+  ${CMAKE_CURRENT_SOURCE_DIR}/constraint_autodiff_example.h
   ${CMAKE_CURRENT_SOURCE_DIR}/constraint_diff_drive.h 
   PARENT_SCOPE)
 

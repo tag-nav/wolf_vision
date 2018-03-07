@@ -135,77 +135,68 @@ getFilePath()
 
 fillWithBaseConstructorParameters()
 {
-  if [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
+  # Header: class constructor with base class parameters	
+  H_TXT=$(cat $BASE_H_PATH)
+  H_TXT="${H_TXT#*class $BASECLASSNAME :}"
+  BASECLASS_TXT="${H_TXT%%\n\};*}"
+  PARAMS="${BASECLASS_TXT#*$BASECLASSNAME(}"
+
+  BASE_DERIVES_FROM_AUTODIFF=""
+  if [[ $PARAMS =~ .*ConstraintAutodiff*. ]] && ! [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
   then
-    cp "${TEMPLATES_PATH}"/class_template.h "${TEMPLATES_PATH}"/tmp.h
-    cp "${TEMPLATES_PATH}"/class_template.cpp "${TEMPLATES_PATH}"/tmp.cpp 
-  
-  else
-    
-    # Header: class constructor with base class parameters	
-    H_TXT=$(cat $BASE_H_PATH)
-    H_TXT="${H_TXT##*class $BASECLASSNAME :}"
-    BASECLASS_TXT="${H_TXT%%\n\};*}"
-    PARAMS="${BASECLASS_TXT#*$BASECLASSNAME(}"
-    
-    BASE_DERIVES_FROM_AUTODIFF=""
-    if [[ $PARAMS =~ .*ConstraintAutodiff*. ]] ;
-    then
-      BASE_DERIVES_FROM_AUTODIFF="TRUE"
-    fi    
-    
-    PARAMS="${PARAMS%%\) :*}" # in case of inheritance
-    PARAMS="${PARAMS%%\);*}"
-    
-    if [[ "$PARAMS" == *"const std::string& _type"* ]] ;
-    then
-    	PARAMS="${PARAMS#*_type,}"
-    	NAME_STR="${NAME#${TYPE}_}"
-    	NAME_STR=$(UpperCase $NAME_STR)
-    fi
-        
-	OLD=" class_name();"
- 	NEW="\ \ \ \ \ \ \ \ ${CLASSNAME}(${PARAMS});"
-    NEW=${NEW//$'\n'/} # Remove all newlines.
-    NEW=${NEW%$'\n'}   # Remove a trailing newline.
-    NEW=$(echo $NEW | sed 's/^ *//g' | sed 's/ *$//g') # remove extra whitespaces
-    sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/class_template.h > "${TEMPLATES_PATH}"/tmp.h   
+    BASE_DERIVES_FROM_AUTODIFF="TRUE"
+  fi    
 
-    # CPP: class constructor with base class parameters	
-    PARAMS="$PARAMS," # add , at the end to ease things
-    PARAMS=$(echo "$PARAMS" | sed 's/\ =.*,\ /,\ /g')
-    PARAMS=$(echo "$PARAMS" | sed 's/\ =.*,/,/g')    
-    PARAMS="${PARAMS::-1}" # remove , from the end
-    
-	OLD="class_name::class_name() :"
- 	NEW="class_name::class_name(${PARAMS}) :"
-    NEW=${NEW//$'\n'/} # Remove all newlines.
-    NEW=${NEW%$'\n'}   # Remove a trailing newline.
-    NEW=$(echo $NEW | sed 's/^ *//g' | sed 's/ *$//g') # remove extra whitespaces
-    sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/class_template.cpp > "${TEMPLATES_PATH}"/tmp.cpp           
+  PARAMS="${PARAMS%%\) :*}" # in case of inheritance
+  PARAMS="${PARAMS%%\);*}"
 
-	# get only the variable names
-	PARAMS_CLEAN=$(echo $PARAMS | sed -r 's/'","'/ /g')
-	ar=($PARAMS_CLEAN)
-	PARAMS_OBJ=
-	for el in "${ar[@]}"; do
-        if [[ $el == _* ]] 
-        then
-          PARAMS_OBJ+=", ${el}"
-        fi
-    done
-	PARAMS_OBJ=${PARAMS_OBJ#","}
-	if ! [[ -z $NAME_STR ]] ;
-	then
-	  PARAMS_OBJ="\"$NAME_STR\", $PARAMS_OBJ"
-    fi
-	OLD="\        base_class()"
- 	NEW="\        base_class(${PARAMS_OBJ} )"
-    sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp 
-    rm "${TEMPLATES_PATH}"/tmp.cpp
-    mv "${TEMPLATES_PATH}"/tmp2.cpp "${TEMPLATES_PATH}"/tmp.cpp
-
+  if [[ "$PARAMS" == *"const std::string& _type"* ]] ;
+  then
+  	PARAMS="${PARAMS#*_type,}"
+   	NAME_STR="${NAME#${TYPE}_}"
+   	NAME_STR=$(UpperCase $NAME_STR)
   fi
+
+  OLD=" class_name();"
+  NEW="\ \ \ \ \ \ \ \ ${CLASSNAME}(${PARAMS});"
+  NEW=${NEW//$'\n'/} # Remove all newlines.
+  NEW=${NEW%$'\n'}   # Remove a trailing newline.
+  NEW=$(echo $NEW | sed 's/^ *//g' | sed 's/ *$//g') # remove extra whitespaces
+  sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/class_template.h > "${TEMPLATES_PATH}"/tmp.h
+
+  # CPP: class constructor with base class parameters	
+  PARAMS="$PARAMS," # add , at the end to ease things
+  PARAMS=$(echo "$PARAMS" | sed 's/\ =.*,\ /,\ /g')
+  PARAMS=$(echo "$PARAMS" | sed 's/\ =.*,/,/g')    
+  PARAMS="${PARAMS::-1}" # remove , from the end
+
+  OLD="class_name::class_name() :"
+  NEW="class_name::class_name(${PARAMS}) :"
+  NEW=${NEW//$'\n'/} # Remove all newlines.
+  NEW=${NEW%$'\n'}   # Remove a trailing newline.
+  NEW=$(echo $NEW | sed 's/^ *//g' | sed 's/ *$//g') # remove extra whitespaces
+  sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/class_template.cpp > "${TEMPLATES_PATH}"/tmp.cpp           
+
+  # get only the variable names
+  PARAMS_CLEAN=$(echo $PARAMS | sed -r 's/'","'/ /g')
+  ar=($PARAMS_CLEAN)
+  PARAMS_OBJ=
+  for el in "${ar[@]}"; do
+    if [[ $el == _* ]] 
+    then
+      PARAMS_OBJ+=", ${el}"
+    fi
+  done
+  PARAMS_OBJ=${PARAMS_OBJ#","}
+  if ! [[ -z $NAME_STR ]] ;
+  then
+    PARAMS_OBJ="\"$NAME_STR\", $PARAMS_OBJ"
+  fi
+  OLD="\        base_class()"
+  NEW="\        base_class(${PARAMS_OBJ} )"
+  sed '/'"${OLD}"'/c'"${NEW}"'' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp 
+  rm "${TEMPLATES_PATH}"/tmp.cpp
+  mv "${TEMPLATES_PATH}"/tmp2.cpp "${TEMPLATES_PATH}"/tmp.cpp
 }
 
 createHCPPFromTemplates()
@@ -272,8 +263,6 @@ addAutodiffSpecifics()
   echo "${GREEN} \--> Setting $NUM_STATES state blocks.${NC}"
   echo ""
   
-  #NAMES=
-  #SIZES=
   for (( idx = 0; idx < $NUM_STATES; idx++ )); do
      PROMPT="${CYAN}- Name of state $((idx+1))?${NC} (1 string, followed by [ENTER]):"
      read -p "${PROMPT}" STATENAME;
@@ -292,6 +281,7 @@ addAutodiffSpecifics()
 
   echo -en "\033[1A\033[2K"
   echo -n "${GREEN} \--> Setting state blocks: ${NC}"
+  PARAMS=
   for (( idx = 0; idx < ${#NAMES[@]}; idx++ )); do
     echo -n "${GREEN}${NAMES[$idx]}(${SIZES[$idx]}) ${NC}"
     PARAMS+=( "const T* const _${NAMES[idx]},")
