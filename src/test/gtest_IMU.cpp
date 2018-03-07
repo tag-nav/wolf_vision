@@ -1540,7 +1540,7 @@ int main(int argc, char **argv)
     testing::InitGoogleTest(&argc, argv);
     //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU.*";
     //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.*";
-    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.RecoverTrajectory_MotionRandom_PqV_b__pqV_b";
+    //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.RecoverTrajectory_MotionRandom_PqV_b__pqV_b";
 
     return RUN_ALL_TESTS();
 }
