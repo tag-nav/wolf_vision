@@ -29,7 +29,7 @@ askIfGitBranch()
        ;; 
      *)
        OK=0
-       echo "${RED}Incorrect answer.${NC} Please type y or n"
+       echo "${RED}  [ERROR]: Incorrect answer.${NC} Please type y or n"
        exit
        ;;
   esac
@@ -39,7 +39,7 @@ if [ "$DOIT" == "y" ];
 then
   if [ -z "$1" ]
   then
-    echo "${RED}No argument supplied.${NC}"
+    echo "${RED}  [ERROR]: No argument supplied.${NC}"
   fi
   cd $WOLF_ROOT 
   git checkout -b $1
@@ -53,7 +53,7 @@ getEnvVariable()
   local var=`echo "${!1}"`
   if [ -z "${var}" ]
   then
-    echo "${RED}The environment variable ${1} has not been defined.${NC} Please see the wiki documentation for instructions on how to create it." >&2
+    echo "${RED}  [ERROR]: The environment variable ${1} has not been defined.${NC} Please see the wiki documentation for instructions on how to create it." >&2
     exit
   fi
   echo $var
@@ -80,7 +80,7 @@ LowerCase()
 	then
   		echo $1 | tr '[:upper:]' '[:lower:]'
 	else
-  		echo "${RED}No $1 provided, aborting ...${NC}"
+  		echo "${RED}  [ERROR]: No $1 provided, aborting ...${NC}"
   		exit
 	fi
 }
@@ -91,7 +91,7 @@ UpperCase()
 	then
   		echo $1 | tr '[:lower:]' '[:upper:]'
 	else
-  		echo "${RED}No $1 provided, aborting ...${NC}"
+  		echo "${RED}  [ERROR]: No $1 provided, aborting ...${NC}"
   		exit
 	fi
 }
@@ -212,7 +212,7 @@ addAutodiffSpecifics()
   read -p "${PROMPT}" RESIDUAL_DIM; 
   if ! [[ "$RESIDUAL_DIM" =~ ^[0-9]+$ ]] ;
   then
-    echo "${RED}Invalid input.${NC} Expecting a numeric value. Aborting..."
+    echo "${RED}  [ERROR]: Invalid input.${NC} Expecting a numeric value. Aborting..."
     exit 1.
   fi
   echo -en "\033[1A\033[2K"
@@ -223,7 +223,7 @@ addAutodiffSpecifics()
   read -p "${PROMPT}" NUM_STATES; 
   if ! [[ "$NUM_STATES" =~ ^[0-9]+$ ]] ;
   then
-    echo "${RED}Invalid input.${NC} Expecting a numeric value. Aborting..."
+    echo "${RED}  [ERROR]: Invalid input.${NC} Expecting a numeric value. Aborting..."
     exit 1.
   fi
   echo -en "\033[1A\033[2K"
@@ -240,7 +240,7 @@ addAutodiffSpecifics()
      read -p "${PROMPT}" STATESIZE; 
      if ! [[ "$STATESIZE" =~ ^[0-9]+$ ]] ;
      then
-       echo "${RED}Invalid input.${NC} Expecting a numeric value. Aborting..."
+       echo "${RED}  [ERROR]: Invalid input.${NC} Expecting a numeric value. Aborting..."
        exit 1.
      fi
      echo -en "\033[1A\033[2K"

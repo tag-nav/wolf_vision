@@ -31,7 +31,13 @@ echo "- Generating CPP and H files."
 
 # Find base class files
 BASE_H_PATH=$(getFilePath $BASE.h)
-#BASE_CPP_PATH=$(getFilePath $BASE.cpp)
+if [ -z "$BASE_H_PATH" ]
+then
+  echo ""
+  echo "${RED}  [ERROR]: Cannot find header file for base class ${BASE}.${NC}"
+  echo ""
+  exit
+fi
 
 # Create Header and CPP files
 createHCPPFromTemplates $NAME_H_PATH $NAME_CPP_PATH
