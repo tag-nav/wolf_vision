@@ -53,8 +53,10 @@ class KFPackBuffer
          * respecting a defined time tolerances
          */
         KFPackPtr selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
+        KFPackPtr selectPack(const CaptureBasePtr _capture, const Scalar& _time_tolerance);
 
         KFPackPtr selectPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
+        KFPackPtr selectPackBefore(const CaptureBasePtr _capture, const Scalar& _time_tolerance);
 
         /**\brief Buffer size
          *
@@ -175,10 +177,6 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
         virtual bool isMotion();
 
         void setTimeTolerance(Scalar _time_tolerance);
-
-    protected:
-        KFPackPtr selectPack(const CaptureBasePtr & _cap);
-
 
 };
 

@@ -50,7 +50,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
     {
         case FIRST_TIME_WITH_PACK :
         {
-            KFPackPtr pack = selectPack( incoming_ptr_);
+            KFPackPtr pack = kf_pack_buffer_.selectPack( incoming_ptr_, time_tolerance_);
             kf_pack_buffer_.removeUpTo( incoming_ptr_->getTimeStamp() );
 
             WOLF_DEBUG( "PT: KF" , pack->key_frame->id() , " callback received with ts= " , pack->key_frame->getTimeStamp().get() );
@@ -109,7 +109,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
         case RUNNING_WITH_PACK :
         {
-            KFPackPtr pack = selectPack( last_ptr_ );
+            KFPackPtr pack = kf_pack_buffer_.selectPack( last_ptr_ , time_tolerance_);
             kf_pack_buffer_.removeUpTo( last_ptr_->getTimeStamp() );
 
             WOLF_DEBUG( "PT: KF" , pack->key_frame->id() , " callback received with ts= " , pack->key_frame->getTimeStamp().get() );
@@ -217,7 +217,7 @@ void ProcessorTracker::computeProcessingStep()
     {
         case FIRST_TIME :
 
-            if (selectPack(incoming_ptr_))
+            if (kf_pack_buffer_.selectPack(incoming_ptr_, time_tolerance_))
                 processing_step_ = FIRST_TIME_WITH_PACK;
             else // ! last && ! pack(incoming)
                 processing_step_ = FIRST_TIME_WITHOUT_PACK;
@@ -225,7 +225,7 @@ void ProcessorTracker::computeProcessingStep()
 
         case SECOND_TIME :
 
-            if (selectPack(last_ptr_))
+            if (kf_pack_buffer_.selectPack(last_ptr_, time_tolerance_))
                 processing_step_ = SECOND_TIME_WITH_PACK;
             else
                 processing_step_ = SECOND_TIME_WITHOUT_PACK;
@@ -234,7 +234,7 @@ void ProcessorTracker::computeProcessingStep()
         case RUNNING :
         default :
 
-            if (selectPack(last_ptr_))
+            if (kf_pack_buffer_.selectPack(last_ptr_, time_tolerance_))
             {
                 if (last_ptr_->getFramePtr()->isKey())
                 {

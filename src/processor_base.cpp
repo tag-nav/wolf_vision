@@ -74,14 +74,6 @@ void ProcessorBase::remove()
     }
 }
 
-KFPackPtr ProcessorBase::selectPack(const CaptureBasePtr & _cap)
-{
-    if (_cap)
-        return kf_pack_buffer_.selectPack(_cap->getTimeStamp(), time_tolerance_);
-
-    return nullptr;
-}
-
 
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -136,6 +128,10 @@ KFPackPtr KFPackBuffer::selectPack(const TimeStamp& _time_stamp, const Scalar& _
 
     return nullptr;
 }
+KFPackPtr KFPackBuffer::selectPack(const CaptureBasePtr _capture, const Scalar& _time_tolerance)
+{
+    return selectPack(_capture->getTimeStamp(), _time_tolerance);
+}
 
 KFPackPtr KFPackBuffer::selectPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance)
 {
@@ -161,6 +157,10 @@ KFPackPtr KFPackBuffer::selectPackBefore(const TimeStamp& _time_stamp, const Sca
     return nullptr;
 }
 
+KFPackPtr KFPackBuffer::selectPackBefore(const CaptureBasePtr _capture, const Scalar& _time_tolerance)
+{
+    return selectPackBefore(_capture->getTimeStamp(), _time_tolerance);
+}
 
 void KFPackBuffer::print(void)
 {

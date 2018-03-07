@@ -194,8 +194,6 @@ class ProcessorMotion : public ProcessorBase
          */
         FrameBasePtr setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin);
 
-        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol);
-
         MotionBuffer& getBuffer();
         const MotionBuffer& getBuffer() const;
 
@@ -232,8 +230,6 @@ class ProcessorMotion : public ProcessorBase
          *   - drawing / printing / logging the results of the processing
          */
         virtual void postProcess() { };
-
-        KFPackPtr selectPackBefore(const CaptureBasePtr & _cap);
 
         KFPackPtr computeProcessingStep();
 
