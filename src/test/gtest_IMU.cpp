@@ -68,6 +68,10 @@ class Process_Constraint_IMU : public testing::Test
         VectorXs        D_optim_imu,     x1_optim_imu;      // corrected with imu_tools using optimized bias
         VectorXs                         x0_optim;          // optimized using constraint_imu
 
+        // Trajectory matrices
+        MatrixXs Trj_D_exact, Trj_D_preint_imu, Trj_D_preint_prc, Trj_D_corrected_imu, Trj_D_corrected_prc;
+        MatrixXs Trj_x_exact, Trj_x_preint_imu, Trj_x_preint_prc, Trj_x_corrected_imu, Trj_x_corrected_prc;
+
         // Delta correction Jacobian and step
         Matrix<Scalar,9,6>  J_D_bias;                           // Jacobian of pre-integrated delta w
         Vector9s            step;
@@ -235,26 +239,26 @@ class Process_Constraint_IMU : public testing::Test
         {
             MotionBuffer trajectory(6, 10, 9, 6);
             VectorXs    Delta(10);
-            MatrixXs    dummy(0,0);
+            MatrixXs    M9(9,9), M6(6,6), J9(9,9), J96(9,6), V10(10,1), V6(6,1);
             Quaternions q;
 
             Delta   = imu::identity();
             J_D_b   .setZero();
             q       = q0;
             TimeStamp t(0);
+//            trajectory.get().push_back(processor_imu->motionZero(t));
             for (int n = 0; n < motion.cols(); n++)
             {
                 t += dt;
                 integrateOneStep(motion.col(n), bias_real, bias_preint, dt, q, Delta, &J_D_b);
-                trajectory.setCalibrationPreint(bias_preint);
-                trajectory.get().emplace_back(t, motion.col(n), dummy, dummy, dummy, Delta, dummy, dummy, dummy, J_D_b);
+                trajectory.get().emplace_back(t, motion.col(n), M6, V10, M9, Delta, M9, J9, J9, J_D_b);
             }
             return trajectory;
         }
 
 
 
-        void integrateWithProcessor(int N, const TimeStamp& t0, const Quaternions q0, const MatrixXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, VectorXs& D_preint, VectorXs& D_corrected)
+        MotionBuffer integrateWithProcessor(int N, const TimeStamp& t0, const Quaternions q0, const MatrixXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, VectorXs& D_preint, VectorXs& D_corrected)
         {
             Vector6s      motion_now;
             data        = imu::motion2data(motion.col(0), q0, bias_real);
@@ -279,6 +283,7 @@ class Process_Constraint_IMU : public testing::Test
                 D_preint    = processor_imu->getLastPtr()->getDeltaPreint();
                 D_corrected = processor_imu->getLastPtr()->getDeltaCorrected(bias_real);
             }
+            return processor_imu->getBuffer();
         }
 
 
@@ -358,42 +363,87 @@ class Process_Constraint_IMU : public testing::Test
 
 
         // Integrate Trajectories all methods
-//        virtual void integrateAllTrajectories()
-//        {
-//            size_t cols = motion.cols();
-//            MatrixXs Trj_D_exact(10,cols), Trj_D_preint_imu(10,cols), Trj_D_preint(10,cols), Trj_D_corrected(10,cols), Trj_D_corrected_imu(10,cols);
-//            MatrixXs Trj_x_exact(10,cols), Trj_x_preint_imu(10,cols), Trj_x_preint(10,cols), Trj_x_corrected(10,cols), Trj_x_corrected_imu(10,cols);
-//            // ===================================== INTEGRATE EXACTLY WITH IMU_TOOLS with no bias at all
-//            if (motion.cols() == 1)
-//                Trj_D_exact = integrateDelta(num_integrations, q0, motion, bias_null, bias_null, dt);
-//            else
-//                Trj_D_exact = integrateDeltaTrajectory(q0, motion, bias_null, bias_null, dt, J_D_bias);
-//            Trj_x_exact = imu::composeOverState(x0, D_exact, DT );
-//
-//
-//            // ===================================== INTEGRATE USING IMU_TOOLS
-//            // pre-integrate
-//            if (motion.cols() == 1)
-//                Trj_D_preint_imu = integrateDelta(num_integrations, q0, motion, bias_real, bias_preint, dt, J_D_bias);
-//            else
-//                Trj_D_preint_imu = integrateDeltaTrajectory(q0, motion, bias_real, bias_preint, dt, J_D_bias);
-//
-//            // correct perturbated
-//            step             = J_D_bias * (bias_real - bias_preint);
-//            Trj_D_corrected_imu  = imu::plus(D_preint_imu, step);
-//
-//            // compose states
-//            x1_preint_imu    = imu::composeOverState(x0, D_preint_imu    , DT );
-//            x1_corrected_imu = imu::composeOverState(x0, D_corrected_imu , DT );
-//
-//            // ===================================== INTEGRATE USING PROCESSOR_IMU
-//
-//            integrateWithProcessor(num_integrations, t0, q0, motion, bias_real, bias_preint, dt, D_preint, D_corrected);
-//
-//            // compose states
-//            x1_preint        = imu::composeOverState(x0, D_preint        , DT );
-//            x1_corrected     = imu::composeOverState(x0, D_corrected     , DT );
-//        }
+        virtual void integrateAllTrajectories()
+        {
+            Size cols = motion.cols();
+            Trj_D_exact.resize(10,cols); Trj_D_preint_imu.resize(10,cols); Trj_D_preint_prc.resize(10,cols); Trj_D_corrected_imu.resize(10,cols); Trj_D_corrected_prc.resize(10,cols);
+            Trj_x_exact.resize(10,cols); Trj_x_preint_imu.resize(10,cols); Trj_x_preint_prc.resize(10,cols); Trj_x_corrected_imu.resize(10,cols); Trj_x_corrected_prc.resize(10,cols);
+
+
+            // ===================================== INTEGRATE EXACTLY WITH IMU_TOOLS with no bias at all
+            MotionBuffer Buf_exact = integrateDeltaTrajectory(q0, motion, bias_null, bias_null, dt, J_D_bias);
+
+            // Build exact trajectories
+            int col = 0;
+            for (auto m : Buf_exact.get())
+            {
+                Trj_D_exact.col(col) = m.delta_integr_;
+                Trj_x_exact.col(col) = imu::composeOverState(x0, m.delta_integr_, DT );
+                col ++;
+            }
+
+            // set
+            D_exact          = Trj_D_exact.col(cols-1);
+            x1_exact         = Trj_x_exact.col(cols-1);
+
+            // ===================================== INTEGRATE USING IMU_TOOLS
+            // pre-integrate
+            MotionBuffer Buf_preint_imu = integrateDeltaTrajectory(q0, motion, bias_real, bias_preint, dt, J_D_bias);
+
+            // Build trajectories preintegrated and corrected with imu_tools
+            col = 0;
+            for (auto m : Buf_preint_imu.get())
+            {
+                // preint
+                Trj_D_preint_imu.col(col) = m.delta_integr_;
+                Trj_x_preint_imu.col(col) = imu::composeOverState(x0, Trj_D_preint_imu.col(col), DT );
+
+                // corrected
+                MatrixXs J_D_bias            = m.jacobian_calib_;
+                VectorXs step                = J_D_bias * (bias_real - bias_preint);
+                Trj_D_corrected_imu.col(col) = imu::plus(m.delta_integr_, step) ;
+                Trj_x_corrected_imu.col(col) = imu::composeOverState(x0, Trj_D_corrected_imu.col(col), DT );
+                col ++;
+            }
+
+            D_preint_imu     = Trj_D_preint_imu.col(cols-1);
+
+            // correct perturbated
+            step             = J_D_bias * (bias_real - bias_preint);
+            D_corrected_imu  = imu::plus(D_preint_imu, step);
+
+            // compose states
+            x1_preint_imu    = imu::composeOverState(x0, D_preint_imu    , DT );
+            x1_corrected_imu = imu::composeOverState(x0, D_corrected_imu , DT );
+
+            // ===================================== INTEGRATE USING PROCESSOR_IMU
+
+            MotionBuffer Buf_D_preint_prc = integrateWithProcessor(num_integrations, t0, q0, motion, bias_real, bias_preint, dt, D_preint, D_corrected);
+
+
+            // Build trajectories preintegrated and corrected with processorIMU
+            col = -1;
+            for (auto m : Buf_D_preint_prc.get())
+            {
+                if (col != -1)
+                {
+                    // preint
+                    Trj_D_preint_prc.col(col) = m.delta_integr_;
+                    Trj_x_preint_prc.col(col) = imu::composeOverState(x0, Trj_D_preint_prc.col(col), DT );
+
+                    // corrected
+                    MatrixXs J_D_bias            = m.jacobian_calib_;
+                    VectorXs step                = J_D_bias * (bias_real - bias_preint);
+                    Trj_D_corrected_prc.col(col) = imu::plus(m.delta_integr_, step) ;
+                    Trj_x_corrected_prc.col(col) = imu::composeOverState(x0, Trj_D_corrected_prc.col(col), DT );
+                }
+                col ++;
+            }
+
+            // compose states
+            x1_preint        = imu::composeOverState(x0, D_preint        , DT );
+            x1_corrected     = imu::composeOverState(x0, D_corrected     , DT );
+        }
 
 
 
@@ -1371,6 +1421,9 @@ TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PqV_b__pqV_b) // F_ixed___e_stim
     a                  = Matrix<Scalar, 3, 50>::Random();
     w                  = Matrix<Scalar, 3, 50>::Random();
 
+    a = Matrix<Scalar,3,50>::Identity();
+    w = Matrix<Scalar,3,50>::Identity();
+
     // ---------- fix boundaries
     p0_fixed       = true;
     q0_fixed       = false;
@@ -1386,7 +1439,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PqV_b__pqV_b) // F_ixed___e_stim
     // ===================================== RUN ALL
     string report = runAll(1);
 
-    // printAll(report);
+    printAll(report);
 
     assertAll();
 
@@ -1416,6 +1469,9 @@ TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) 
     a                  = Matrix<Scalar, 3, 50>::Random();
     w                  = Matrix<Scalar, 3, 50>::Random();
 
+    a = Matrix<Scalar,3,50>::Identity();
+    w = Matrix<Scalar,3,50>::Identity();
+
     // ---------- fix boundaries
     p0_fixed       = true;
     q0_fixed       = false;
@@ -1430,11 +1486,12 @@ TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) 
 
     // ===================================== RUN ALL
     configureAll();
+//    integrateAllTrajectories();
     integrateAll();
     buildProblem();
     string report = solveProblem(1);
 
-    // printAll(report);
+    printAll(report);
 
     assertAll();
 
@@ -1445,7 +1502,7 @@ int main(int argc, char **argv)
     testing::InitGoogleTest(&argc, argv);
 //        ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU.*";
     //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.*";
-    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.RecoverTrajectory_MotionRandom_PqV_b__pqV_b";
+    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.*MotionRandom_PqV_b__pqV_b";
 
     return RUN_ALL_TESTS();
 }
