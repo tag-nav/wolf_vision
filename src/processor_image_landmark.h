@@ -101,15 +101,15 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          */
         void preProcess();
 
-        void advance()
+        void advanceDerived()
         {
-            ProcessorTrackerLandmark::advance();
+            ProcessorTrackerLandmark::advanceDerived();
             image_last_ = image_incoming_;
         }
 
-        void reset()
+        void resetDerived()
         {
-            ProcessorTrackerLandmark::reset();
+            ProcessorTrackerLandmark::resetDerived();
             image_last_ = image_incoming_;
         }
 

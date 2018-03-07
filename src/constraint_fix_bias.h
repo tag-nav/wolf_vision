@@ -33,16 +33,6 @@ class ConstraintFixBias: public ConstraintAutodiff<ConstraintFixBias,6,3,3>
         template<typename T>
         bool operator ()(const T* const _ab, const T* const _wb, T* _residuals) const;
 
-        /** \brief Returns the jacobians computation method
-         *
-         * Returns the jacobians computation method
-         *
-         **/
-        virtual JacobianMethod getJacobianMethod() const override
-        {
-            return JAC_AUTO;
-        }
-
 };
 
 template<typename T>

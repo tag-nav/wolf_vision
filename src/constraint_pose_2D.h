@@ -30,16 +30,6 @@ class ConstraintPose2D: public ConstraintAutodiff<ConstraintPose2D,3,2,1>
         template<typename T>
         bool operator ()(const T* const _p, const T* const _o, T* _residuals) const;
 
-        /** \brief Returns the jacobians computation method
-         *
-         * Returns the jacobians computation method
-         *
-         **/
-        virtual JacobianMethod getJacobianMethod() const override
-        {
-            return JAC_AUTO;
-        }
-
 };
 
 template<typename T>

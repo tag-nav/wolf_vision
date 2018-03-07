@@ -57,7 +57,7 @@ public:
   virtual void process(CaptureBasePtr _incoming_ptr) override;
 
   virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr,
-                                const Scalar& _time_tol_other) override;
+                                const Scalar& _time_tol_other) ;
 
   const std::vector<FrameBasePtr>& getCandidates() const noexcept;
 

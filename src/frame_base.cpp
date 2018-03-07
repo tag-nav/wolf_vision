@@ -23,11 +23,15 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _v_ptr;
-    //
-//    if (isKey())
-//        std::cout << "constructed +KF" << id() << std::endl;
+
+//    if ( isKey() )
+//    {
+//        WOLF_DEBUG("New KF", this->id() );
+//    }
 //    else
-//        std::cout << "constructed  +F" << id() << std::endl;
+//    {
+//        WOLF_DEBUG("New F", this->id() );
+//    }
 }
 
 FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
@@ -43,10 +47,14 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _v_ptr;
 
-//    if (isKey())
-//        std::cout << "constructed +KF" << id() << std::endl;
+//    if ( isKey() )
+//    {
+//        WOLF_DEBUG("New KF", this->id() );
+//    }
 //    else
-//        std::cout << "constructed  +F" << id() << std::endl;
+//    {
+//        WOLF_DEBUG("New F", this->id() );
+//    }
 }
                 
 FrameBase::~FrameBase()
@@ -124,6 +132,8 @@ void FrameBase::setKey()
             getTrajectoryPtr()->setLastKeyFramePtr(shared_from_this());
 
         getTrajectoryPtr()->sortFrame(shared_from_this());
+
+        WOLF_DEBUG("Set KF", this->id());
     }
 }
 

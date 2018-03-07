@@ -22,6 +22,18 @@ ProcessorRangeBearing::ProcessorRangeBearing(const SensorRangeBearingPtr _sensor
 
 void ProcessorRangeBearing::process(CaptureBasePtr _capture)
 {
+
+    if ( !kf_pack_buffer_.empty() )
+    {
+        // Select using incoming_ptr
+        KFPackPtr pack = kf_pack_buffer_.selectPack( _capture->getTimeStamp(), time_tolerance_ );
+
+        if (pack!=nullptr)
+            keyFrameCallback(pack->key_frame,pack->time_tolerance);
+
+        kf_pack_buffer_.removeUpTo( _capture->getTimeStamp() );
+    }
+
     CaptureRangeBearingPtr capture = std::static_pointer_cast<CaptureRangeBearing>(_capture);
 
     // 1. get KF -- we assume a KF is available to hold this _capture (checked in assert below)

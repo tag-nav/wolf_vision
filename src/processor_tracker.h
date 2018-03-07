@@ -67,7 +67,18 @@ struct ProcessorParamsTracker : public ProcessorParamsBase
  */
 class ProcessorTracker : public ProcessorBase
 {
+    public:
+        typedef enum {
+            FIRST_TIME_WITH_PACK,
+            FIRST_TIME_WITHOUT_PACK,
+            SECOND_TIME_WITH_PACK,
+            SECOND_TIME_WITHOUT_PACK,
+            RUNNING_WITH_PACK,
+            RUNNING_WITHOUT_PACK
+        } ProcessingStep ;
+
     protected:
+        ProcessingStep processing_step_;        ///< State machine controlling the processing step
         CaptureBasePtr origin_ptr_;             ///< Pointer to the origin of the tracker.
         CaptureBasePtr last_ptr_;               ///< Pointer to the last tracked capture.
         CaptureBasePtr incoming_ptr_;           ///< Pointer to the incoming capture being processed.
@@ -89,7 +100,12 @@ class ProcessorTracker : public ProcessorBase
         void setMaxNewFeatures(const unsigned int& _max_new_features);
         unsigned int getMaxNewFeatures();
 
-        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
+//        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
+
+        bool checkTimeTolerance(const TimeStamp& _ts1, const TimeStamp& _ts2);
+        bool checkTimeTolerance(const CaptureBasePtr _cap, const TimeStamp& _ts);
+        bool checkTimeTolerance(const FrameBasePtr _frm, const TimeStamp& _ts);
+        bool checkTimeTolerance(const FrameBasePtr _frm, const CaptureBasePtr _cap);
 
         virtual CaptureBasePtr getOriginPtr();
         virtual CaptureBasePtr getLastPtr();
@@ -159,7 +175,7 @@ class ProcessorTracker : public ProcessorBase
          * Call this when the tracking and keyframe policy work is done and
          * we need to get ready to accept a new incoming Capture.
          */
-        virtual void advance() = 0;
+        virtual void advanceDerived() = 0;
 
         /**\brief Process new Features or Landmarks
          *
@@ -171,13 +187,9 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual void establishConstraints() = 0;
 
-        /**\brief set key Frame to the provided Capture's frame
-         */
-        virtual void setKeyFrame(CaptureBasePtr _capture_ptr);
-
         /** \brief Reset the tracker using the \b last Capture as the new \b origin.
          */
-        virtual void reset() = 0;
+        virtual void resetDerived() = 0;
 
     public:
 
@@ -185,11 +197,14 @@ class ProcessorTracker : public ProcessorBase
 
     protected:
 
+        void computeProcessingStep();
+
         void addNewFeatureLast(FeatureBasePtr _feature_ptr);
 
         FeatureBaseList& getNewFeaturesListIncoming();
 
         void addNewFeatureIncoming(FeatureBasePtr _feature_ptr);
+
 };
 
 inline void ProcessorTracker::setMaxNewFeatures(const unsigned int& _max_new_features)
@@ -215,6 +230,26 @@ inline void ProcessorTracker::addNewFeatureLast(FeatureBasePtr _feature_ptr)
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
 {
     return new_features_incoming_;
+}
+
+inline bool ProcessorTracker::checkTimeTolerance(const TimeStamp& _ts1, const TimeStamp& _ts2)
+{
+    return (std::fabs(_ts2 - _ts2) < time_tolerance_);
+}
+
+inline bool ProcessorTracker::checkTimeTolerance(const CaptureBasePtr _cap, const TimeStamp& _ts)
+{
+    return checkTimeTolerance(_cap->getTimeStamp(), _ts);
+}
+
+inline bool ProcessorTracker::checkTimeTolerance(const FrameBasePtr _frm, const TimeStamp& _ts)
+{
+    return checkTimeTolerance(_frm->getTimeStamp(), _ts);
+}
+
+inline bool ProcessorTracker::checkTimeTolerance(const FrameBasePtr _frm, const CaptureBasePtr _cap)
+{
+    return checkTimeTolerance(_frm->getTimeStamp(), _cap->getTimeStamp());
 }
 
 inline void ProcessorTracker::addNewFeatureIncoming(FeatureBasePtr _feature_ptr)

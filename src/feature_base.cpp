@@ -58,7 +58,7 @@ ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
     if (getProblem() != nullptr)
         getProblem()->addConstraintPtr(_co_ptr);
     else
-        std::cout << "WARNING: ADDING CONSTRAINT TO A FEATURE NOT CONNECTED WITH PROBLEM." << std::endl;
+        WOLF_TRACE("WARNING: ADDING CONSTRAINT ", _co_ptr->id(), " TO FEATURE ", this->id(), " NOT CONNECTED WITH PROBLEM.");
     return _co_ptr;
 }
 

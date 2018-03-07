@@ -19,11 +19,45 @@ ProcessorTrackerFeature::~ProcessorTrackerFeature()
 {
 }
 
+unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_features)
+{
+    /* Rationale: A keyFrame will be created using the last Capture.
+     * First, we work on the last Capture to detect new Features,
+     * When done, we need to track these new Features to the incoming Capture.
+     * At the end, all new Features are appended to the lists of known Features in
+     * the last and incoming Captures.
+     */
+
+    // Populate the last Capture with new Features. The result is in new_features_last_.
+    unsigned int n = detectNewFeatures(_max_new_features);
+    for (auto ftr : new_features_last_)
+    {
+        ftr->setTrackId( ftr->id() );
+        WOLF_DEBUG("Det track: ", ftr->trackId(), ", last: ", ftr->id());
+    }
+
+    // Track new features from last to incoming. This will append new correspondences to matches_last_incoming
+    trackFeatures(new_features_last_, new_features_incoming_, matches_last_from_incoming_);
+    for (auto ftr : new_features_incoming_)
+    {
+        ftr->setTrackId(matches_last_from_incoming_[ftr]->feature_ptr_->trackId());
+
+        // Print new tracked features
+        WOLF_DEBUG("New track: ", ftr->trackId(), ", last: ", matches_last_from_incoming_[ftr]->feature_ptr_->id(), ", inc: ", ftr->id());
+    }
+
+    // Append all new Features to the incoming Captures' list of Features
+    incoming_ptr_->addFeatureList(new_features_incoming_);
+
+    // Append all new Features to the last Captures' list of Features
+    last_ptr_->addFeatureList(new_features_last_);
+
+    // return the number of new features detected in \b last
+    return n;
+}
+
 unsigned int ProcessorTrackerFeature::processKnown()
 {
-
-//    std::cout << "ProcessorTrackerFeature::processKnown()" << std::endl;
-
     assert(incoming_ptr_->getFeatureList().size() == 0
             && "In ProcessorTrackerFeature::processKnown(): incoming_ptr_ feature list must be empty before processKnown()");
     assert(matches_last_from_incoming_.size() == 0
@@ -31,8 +65,8 @@ unsigned int ProcessorTrackerFeature::processKnown()
 
     // Track features from last_ptr_ to incoming_ptr_
     trackFeatures(last_ptr_->getFeatureList(), known_features_incoming_, matches_last_from_incoming_);
-
-//    std::cout << "Tracked: " << known_features_incoming_.size() << std::endl;
+    for (auto match : matches_last_from_incoming_)
+        match.first->setTrackId( match.second->feature_ptr_->trackId() );
 
     // Check/correct incoming-origin correspondences
     if (origin_ptr_ != nullptr)
@@ -53,16 +87,21 @@ unsigned int ProcessorTrackerFeature::processKnown()
                 known_incoming_feature_it++;
         }
     }
-    // Append not destructed incoming features -> this empties known_features_incoming_
+
     incoming_ptr_->addFeatureList(known_features_incoming_);
-    std::cout << "Added to incoming features: " << incoming_ptr_->getFeatureList().size() << std::endl;
+    known_features_incoming_.clear();
+
+    // Print resulting list of matches
+    for (auto match : matches_last_from_incoming_)
+    {
+        WOLF_DEBUG("Known track: ", match.first->trackId(), ", last: ", match.second->feature_ptr_->id(), ", inc: ", match.first->id());
+    }
 
     return matches_last_from_incoming_.size();
 }
 
-void ProcessorTrackerFeature::advance()
+void ProcessorTrackerFeature::advanceDerived()
 {
-    //    std::cout << "ProcessorTrackerFeature::advance()" << std::endl;
     // Compose correspondences to get origin_from_incoming
     for (auto match : matches_last_from_incoming_)
     {
@@ -70,53 +109,32 @@ void ProcessorTrackerFeature::advance()
                 matches_origin_from_last_[matches_last_from_incoming_[match.first]->feature_ptr_];
     }
     matches_origin_from_last_ = std::move(matches_last_from_incoming_);
-    //    std::cout << "advanced correspondences: " << std::endl;
-    //    std::cout << "\tincoming 2 last: " << matches_last_from_incoming_.size() << std::endl;
-    //    std::cout << "\tlast 2 origin: " << std::endl;
-    //    for (auto match : matches_origin_from_last_)
-    //        std::cout << "\t\t" << match.first->getMeasurement() << " to " << match.second.feature_ptr_->getMeasurement() << std::endl;
+
+    // We set problem here because we could not determine Problem from incoming capture at the time of adding the features to incoming's feature list.
+    for (auto ftr : incoming_ptr_->getFeatureList())
+        ftr->setProblem(getProblem());
+
+    // Print resulting list
+    for (auto match: matches_origin_from_last_)
+    {
+        WOLF_DEBUG("Matches advanced: track: ", match.first->trackId(), "-", match.second->feature_ptr_->trackId(), " origin: ", match.second->feature_ptr_->id(), " last: ", match.first->id());
+    }
 }
 
-void ProcessorTrackerFeature::reset()
+void ProcessorTrackerFeature::resetDerived()
 {
-    //    std::cout << "ProcessorTrackerFeature::reset()" << std::endl;
     // We also reset here the list of correspondences, which passes from last--incoming to origin--last.
     matches_origin_from_last_ = std::move(matches_last_from_incoming_);
-}
 
-unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_features)
-{
-    //    std::cout << "ProcessorTrackerFeature::processNew()" << std::endl;
+    // Update features according to the move above.
+    for (auto match: matches_origin_from_last_)
+        match.first->setProblem(getProblem()); // Since these features were in incoming_, they had no Problem assigned.
 
-    /* Rationale: A keyFrame will be created using the last Capture.
-     * First, we create the constraints from the existing Features in last,
-     * because the ones that we want to detect later on will not be constrained by anyone yet.
-     * Then, we work on this last Capture to detect new Features,
-     * When done, we need to track these new Features to the incoming Capture.
-     * At the end, all new Features are appended to the lists of known Features in
-     * the last and incoming Captures.
-     */
-
-
-    // Populate the last Capture with new Features. The result is in new_features_last_.
-    unsigned int n = detectNewFeatures(_max_new_features);
-
-    //  std::cout << "detected " << n << " new features!" << std::endl;
-
-    // Track new features from last to incoming. This will append new correspondences to matches_last_incoming
-    if (incoming_ptr_ != last_ptr_ && incoming_ptr_ != nullptr) // we do not do it the first time.
+    // Print resulting list
+    for (auto match: matches_origin_from_last_)
     {
-        trackFeatures(new_features_last_, new_features_incoming_, matches_last_from_incoming_);
-
-        // Append all new Features to the incoming Captures' list of Features
-        incoming_ptr_->addFeatureList(new_features_incoming_);
+        WOLF_DEBUG("Matches reset: track: ", match.first->trackId(), "-", match.second->feature_ptr_->trackId(), " origin: ", match.second->feature_ptr_->id(), " last: ", match.first->id());
     }
-
-    // Append all new Features to the last Captures' list of Features
-    last_ptr_->addFeatureList(new_features_last_);
-
-    // return the number of new features detected in \b last
-    return n;
 }
 
 void ProcessorTrackerFeature::establishConstraints()
@@ -126,6 +144,12 @@ void ProcessorTrackerFeature::establishConstraints()
         auto ctr = createConstraint(match.first, match.second->feature_ptr_);
         match.first->addConstraint(ctr);
         match.second->feature_ptr_->addConstrainedBy(ctr);
+    }
+    for (auto match : matches_origin_from_last_)
+    {
+        WOLF_DEBUG( "Constraint: track: " , match.second->feature_ptr_->trackId() ,
+                    " origin: " , match.second->feature_ptr_->id() ,
+                    " from last: " , match.first->id() );
     }
 }
 

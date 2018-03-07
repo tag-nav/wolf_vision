@@ -51,12 +51,13 @@ class FeatureIMU_test : public testing::Test
     // Set the origin
         Eigen::VectorXs x0(10);
         x0 << 0,0,0,  0,0,0,1,  0,0,0;
-        origin_frame = problem->getProcessorMotionPtr()->setOrigin(x0, t);  //create a keyframe at origin
+        MatrixXs P0; P0.setIdentity(9,9);
+        origin_frame = problem->setPrior(x0, P0, 0.0, 0.01);
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     // give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
         imu_ptr = std::make_shared<CaptureIMU>(t, sensor_ptr, data_, Eigen::Matrix6s::Identity(), Eigen::Vector6s::Zero());
-        imu_ptr->setFramePtr(origin_frame); //to get ptr to Frm ni processorIMU and then get biases
+        imu_ptr->setFramePtr(origin_frame); //to get ptr to Frm in processorIMU and then get biases
 
     //process data
         data_ << 2, 0, 9.8, 0, 0, 0;
