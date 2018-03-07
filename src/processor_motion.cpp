@@ -136,19 +136,20 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         {
             // extract pack elements
             FrameBasePtr keyframe_from_callback = pack->key_frame;
-            TimeStamp ts_from_callback = keyframe_from_callback->getTimeStamp();
+            TimeStamp    ts_from_callback       = keyframe_from_callback->getTimeStamp();
 
             // Find the frame acting as the capture's origin
             auto keyframe_origin = last_ptr_->getOriginFramePtr();
 
             // emplace a new motion capture to the new keyframe
+            VectorXs calib = last_ptr_->getCalibration();
             auto capture_for_keyframe_callback = emplaceCapture(keyframe_from_callback,
                                                                 getSensorPtr(),
                                                                 ts_from_callback,
                                                                 Eigen::VectorXs::Zero(data_size_),
                                                                 last_ptr_->getDataCovariance(),
-                                                                last_ptr_->getCalibration(),
-                                                                last_ptr_->getCalibration(),
+                                                                calib,
+                                                                calib,
                                                                 keyframe_origin);
 
             // split the buffer
