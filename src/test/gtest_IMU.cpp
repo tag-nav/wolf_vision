@@ -124,7 +124,7 @@ class Process_Constraint_IMU : public testing::Test
          *   Delta: the preintegrated delta
          *   J_D_b_ptr: a pointer to the Jacobian of Delta wrt bias. Defaults to nullptr.
          */
-        static void integrateOneStep(const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Quaternions& q_real, VectorXs& Delta, Matrix<Scalar, 9, 6>* J_D_d_ptr = nullptr)
+        static void integrateOneStep(const VectorXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, Quaternions& q_real, VectorXs& Delta, Matrix<Scalar, 9, 6>* J_D_b_ptr = nullptr)
         {
             VectorXs delta(10), data(6);
             VectorXs Delta_plus(10);
@@ -134,7 +134,7 @@ class Process_Constraint_IMU : public testing::Test
             data                = imu::motion2data(motion, q_real, bias_real);
             q_real              = q_real*exp_q(motion.tail(3)*dt);
             Vector6s body       = data - bias_preint;
-            if (J_D_d_ptr == nullptr)
+            if (J_D_b_ptr == nullptr)
             {
                 delta           = imu::body2delta(body, dt);
                 Delta_plus      = imu::compose(Delta, delta, dt);
@@ -143,10 +143,10 @@ class Process_Constraint_IMU : public testing::Test
             {
                 imu::body2delta(body, dt, delta, J_d_d);
                 imu::compose(Delta, delta, dt, Delta_plus, J_D_D, J_D_d);
-                J_D_b           = *J_D_d_ptr;
+                J_D_b           = *J_D_b_ptr;
                 J_d_b           = - J_d_d;
                 J_D_b           = J_D_D*J_D_b + J_D_d*J_d_b;
-                *J_D_d_ptr      = J_D_b;
+                *J_D_b_ptr      = J_D_b;
             }
             Delta               = Delta_plus;
         }
