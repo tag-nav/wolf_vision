@@ -1044,14 +1044,9 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__Pqv_b) // F_ixe
 
 
     // ===================================== RUN ALL
-//    string report = runAll(1);
-    configureAll();
-    integrateAll();
-    buildProblem();
-    problem->print(4,1,1,1);
-    string report = solveProblem(1);
+    string report = runAll(1);
 
-    printAll(report);
+    // printAll(report);
 
     assertAll();
 
