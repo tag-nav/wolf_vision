@@ -6,10 +6,10 @@
  */
 
 
+#include <capture_IMU.h>
 #include "problem.h"
 #include "sensor_odom_2D.h"
 #include "processor_odom_3D.h"
-#include "capture_imu.h"
 #include "map_base.h"
 #include "landmark_base.h"
 #include "ceres_wrapper/ceres_manager.h"

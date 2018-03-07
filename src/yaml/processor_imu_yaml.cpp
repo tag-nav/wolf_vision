@@ -6,10 +6,10 @@
  */
 
 // wolf yaml
+#include <processor_IMU.h>
 #include "yaml_conversion.h"
 
 // wolf
-#include "../processor_imu.h"
 #include "../factory.h"
 
 // yaml-cpp library

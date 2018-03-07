@@ -101,6 +101,25 @@ UpperCaseFirstLetter()
   echo "$(echo "$1" | sed 's/.*/\u&/')"
 }
 
+capitalizeDiminutives()
+{
+  RES=$1
+  if [[ $1 = *"2d"* ]]; 
+  then
+    RES=$(echo "${1/2d/2D}")
+  elif [[ $1 = *"3d"* ]];
+  then
+    RES=$(echo "${1/3d/3D}")
+  elif [[ $1 = *"gps"* ]];
+  then
+    RES=$(echo "${1/gps/GPS}")  
+  elif [[ $1 = *"imu"* ]];
+  then
+    RES=$(echo "${1/imu/IMU}")    
+  fi
+  echo $RES
+}
+
 getFilePath()
 {
   if find $WOLF_ROOT -name "${1}" -print -quit | grep -q '^'; 

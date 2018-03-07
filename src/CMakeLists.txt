@@ -231,8 +231,8 @@ SET(HDRS_BASE
 
 SET(HDRS
     capture_pose.h
-    capture_gps_fix.h
-    capture_imu.h
+    capture_GPS_fix.h
+    capture_IMU.h
     capture_odom_2D.h
     capture_odom_3D.h
     capture_void.h
@@ -241,11 +241,11 @@ SET(HDRS
     constraint_corner_2D.h
     constraint_AHP.h
     constraint_epipolar.h
-    constraint_imu.h
+    constraint_IMU.h
     constraint_fix_bias.h
-    constraint_gps_2D.h
-    constraint_gps_pseudorange_3D.h
-    constraint_gps_pseudorange_2D.h
+    constraint_GPS_2D.h
+    constraint_GPS_pseudorange_3D.h
+    constraint_GPS_pseudorange_2D.h
     constraint_odom_2D.h
     constraint_odom_2D_analytic.h
     constraint_odom_3D.h
@@ -256,9 +256,9 @@ SET(HDRS
     constraint_quaternion_absolute.h
     constraint_relative_2D_analytic.h
     feature_corner_2D.h
-    feature_gps_fix.h
-    feature_gps_pseudorange.h
-    feature_imu.h
+    feature_GPS_fix.h
+    feature_GPS_pseudorange.h
+    feature_IMU.h
     feature_odom_2D.h
     feature_polyline_2D.h
     feature_pose.h
@@ -269,16 +269,16 @@ SET(HDRS
     local_parametrization_polyline_extreme.h
     processor_frame_nearest_neighbor_filter.h
     processor_image_params.h
-    processor_imu.h
-    test/processor_imu_UnitTester.h
+    processor_IMU.h
+    test/processor_IMU_UnitTester.h
     processor_odom_2D.h
     processor_odom_3D.h
     processor_tracker_feature_dummy.h
     processor_tracker_landmark_dummy.h
     sensor_camera.h
-    sensor_gps.h
-    sensor_gps_fix.h
-    sensor_imu.h
+    sensor_GPS.h
+    sensor_GPS_fix.h
+    sensor_IMU.h
     sensor_odom_2D.h
     sensor_odom_3D.h
     )
@@ -322,16 +322,16 @@ SET(SRCS_BASE
     )
 
 SET(SRCS
-    capture_gps_fix.cpp
-    capture_imu.cpp
+    capture_GPS_fix.cpp
+    capture_IMU.cpp
     capture_odom_2D.cpp
     capture_odom_3D.cpp
     capture_pose.cpp
     capture_void.cpp
     feature_corner_2D.cpp
-    feature_gps_fix.cpp
-    feature_gps_pseudorange.cpp
-    feature_imu.cpp
+    feature_GPS_fix.cpp
+    feature_GPS_pseudorange.cpp
+    feature_IMU.cpp
     feature_odom_2D.cpp
     feature_polyline_2D.cpp
     feature_pose.cpp
@@ -341,16 +341,16 @@ SET(SRCS
     landmark_polyline_2D.cpp
     local_parametrization_polyline_extreme.cpp
     processor_frame_nearest_neighbor_filter.cpp
-    processor_imu.cpp
-    test/processor_imu_UnitTester.cpp
+    processor_IMU.cpp
+    test/processor_IMU_UnitTester.cpp
     processor_odom_2D.cpp
     processor_odom_3D.cpp
     processor_tracker_feature_dummy.cpp
     processor_tracker_landmark_dummy.cpp
     sensor_camera.cpp
-    sensor_gps.cpp
-    sensor_gps_fix.cpp
-    sensor_imu.cpp
+    sensor_GPS.cpp
+    sensor_GPS_fix.cpp
+    sensor_IMU.cpp
     sensor_odom_2D.cpp
     sensor_odom_3D.cpp
     )
@@ -403,12 +403,12 @@ ENDIF(laser_scan_utils_FOUND)
 
 IF (raw_gps_utils_FOUND)
     SET(HDRS ${HDRS}
-        capture_gps.h
-        processor_gps.h
+        capture_GPS.h
+        processor_GPS.h
         )
     SET(SRCS ${SRCS}
-        capture_gps.cpp
-        processor_gps.cpp
+        capture_GPS.cpp
+        processor_GPS.cpp
         )
 ENDIF(raw_gps_utils_FOUND)
 
@@ -420,7 +420,7 @@ IF (OpenCV_FOUND)
         constraint_AHP.h
         feature_point_image.h
         landmark_AHP.h
-        landmark_point_3d.h
+        landmark_point_3D.h
         processor_image_feature.h
         processor_image_landmark.h
         )
@@ -429,7 +429,7 @@ IF (OpenCV_FOUND)
         capture_image.cpp
         feature_point_image.cpp
         landmark_AHP.cpp
-        landmark_point_3d.cpp
+        landmark_point_3D.cpp
         processor_image_feature.cpp
         processor_image_landmark.cpp
         )
@@ -471,10 +471,10 @@ IF(YAMLCPP_FOUND)
     # sources
     SET(SRCS ${SRCS}
         yaml/processor_odom_3D_yaml.cpp
-        yaml/processor_imu_yaml.cpp
+        yaml/processor_IMU_yaml.cpp
         yaml/sensor_camera_yaml.cpp
         yaml/sensor_odom_3D_yaml.cpp
-        yaml/sensor_imu_yaml.cpp
+        yaml/sensor_IMU_yaml.cpp
         )
     IF(laser_scan_utils_FOUND)
         SET(SRCS ${SRCS}

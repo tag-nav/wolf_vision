@@ -2,10 +2,11 @@
 // Created by ptirindelli on 16/12/15.
 //
 
-#include "processor_gps.h"
+#include <constraint_GPS_pseudorange_2D.h>
+#include <feature_GPS_pseudorange.h>
+#include <processor_GPS.h>
+
 #include "capture_gps.h"
-#include "feature_gps_pseudorange.h"
-#include "constraint_gps_pseudorange_2D.h"
 
 namespace wolf
 {

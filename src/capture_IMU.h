@@ -2,8 +2,8 @@
 #define CAPTURE_IMU_H
 
 //Wolf includes
+#include <IMU_tools.h>
 #include "capture_motion.h"
-#include "imu_tools.h"
 
 namespace wolf {
     

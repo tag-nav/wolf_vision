@@ -1,4 +1,4 @@
-#include "feature_gps_fix.h"
+#include <feature_GPS_fix.h>
 
 namespace wolf {
 

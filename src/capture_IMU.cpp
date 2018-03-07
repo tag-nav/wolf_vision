@@ -1,5 +1,5 @@
-#include "sensor_imu.h"
-#include "capture_imu.h"
+#include <capture_IMU.h>
+#include <sensor_IMU.h>
 #include "state_quaternion.h"
 
 namespace wolf {

@@ -60,24 +60,12 @@ then
 fi
 
 NAME=$(LowerCase $NAME)
-if [[ $NAME = *"2d"* ]]; 
-then
-  NAME=$(echo "${NAME/2d/2D}")
-elif [[ $NAME = *"3d"* ]];
-then
-  NAME=$(echo "${NAME/3d/3D}")
-fi
+NAME=$(capitalizeDiminutives $NAME)
 NAME_CAP=$(UpperCase $NAME)
 NAME_CAP1=$(UpperCaseFirstLetter $NAME)
 
 BASE=$(LowerCase $BASE)
-if [[ $BASE = *"2d"* ]]; 
-then
-  BASE=$(echo "${BASE/2d/2D}")
-elif [[ $BASE = *"3d"* ]];
-then
-  BASE=$(echo "${BASE/3d/3D}")
-fi
+BASE=$(capitalizeDiminutives $BASE)
 BASE_CAP=$(UpperCase $BASE)
 BASE_CAP1=$(UpperCaseFirstLetter $BASE)
 
@@ -86,6 +74,10 @@ TYPE_CAP=$(UpperCase $TYPE)
 TYPE_CAP1=$(UpperCaseFirstLetter $TYPE)
 
 CLASSNAME="$TYPE_CAP1$BASE_CAP1$NAME_CAP1"
+CLASSNAME=$(echo ${CLASSNAME} | sed 's/_\(.\)/\U\1/g') # remove "_" and capitalize next character
+
+BASECLASSNAME=$(echo ${BASE} | sed 's/_\(.\)/\U\1/g') # remove "_" and capitalize next character
+BASECLASSNAME=$TYPE_CAP1$(echo "$(echo "$BASECLASSNAME" | sed 's/.*/\u&/')") 
 
 if ! [[ $NAME =~ $TYPE ]] ;
 then
@@ -100,7 +92,3 @@ if ! [[ $BASE =~ $TYPE ]] ;
 then
     BASE="$TYPE"_"$BASE";
 fi
-
-# Useful derivatives
-BASECLASSNAME=$(echo ${BASE##*_})
-BASECLASSNAME=$TYPE_CAP1$(echo "$(echo "$BASECLASSNAME" | sed 's/.*/\u&/')") 

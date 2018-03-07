@@ -1,4 +1,4 @@
-#include "sensor_gps_fix.h"
+#include <sensor_GPS_fix.h>
 #include "state_block.h"
 #include "state_quaternion.h"
 

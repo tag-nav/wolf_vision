@@ -2,8 +2,8 @@
 #define FEATURE_IMU_H_
 
 //Wolf includes
+#include <capture_IMU.h>
 #include "feature_base.h"
-#include "capture_imu.h"
 #include "wolf.h"
 
 //std includes

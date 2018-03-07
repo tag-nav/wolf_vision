@@ -2,13 +2,13 @@
 #define CERES_MANAGER_H_
 
 //wolf includes
+#include <constraint_GPS_2D.h>
 #include "../wolf.h"
 #include "../state_block.h"
 #include "../state_point.h"
 #include "../state_complex_angle.h"
 #include "../state_theta.h"
 #include "../constraint_sparse.h"
-#include "../constraint_gps_2D.h"
 #include "../constraint_odom_2D_theta.h"
 #include "../constraint_odom_2D_complex_angle.h"
 #include "../constraint_corner_2D_theta.h"

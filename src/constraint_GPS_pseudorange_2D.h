@@ -4,7 +4,7 @@
 #define LIGHT_SPEED_ 299792458
 
 //Wolf includes
-#include "sensor_gps.h"
+#include <sensor_GPS.h>
 #include "feature_gps_pseudorange.h"
 #include "constraint_autodiff.h"
 

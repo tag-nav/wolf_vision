@@ -2,9 +2,9 @@
 #define PROCESSOR_IMU_H
 
 // Wolf
+#include <capture_IMU.h>
+#include <feature_IMU.h>
 #include "processor_motion.h"
-#include "capture_imu.h"
-#include "feature_imu.h"
 
 
 namespace wolf {
@@ -103,10 +103,10 @@ class ProcessorIMU : public ProcessorMotion{
 /////////////////////////////////////////////////////////
 
 // Wolf
-#include "constraint_imu.h"
+#include <constraint_IMU.h>
 #include "state_block.h"
 #include "rotations.h"
-#include "imu_tools.h"
+#include <IMU_tools.h>
 
 
 namespace wolf{

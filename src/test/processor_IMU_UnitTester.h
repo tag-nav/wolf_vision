@@ -3,7 +3,7 @@
 #define PROCESSOR_IMU_UNITTESTER_H
 
 // Wolf
-#include "processor_imu.h"
+#include <processor_IMU.h>
 #include "processor_motion.h"
 
 namespace wolf {

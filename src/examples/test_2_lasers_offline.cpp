@@ -1,4 +1,5 @@
 //std includes
+#include <sensor_GPS_fix.h>
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -21,7 +22,6 @@
 #include "../processor_odom_2D.h"
 #include "../sensor_laser_2D.h"
 #include "../sensor_odom_2D.h"
-#include "../sensor_gps_fix.h"
 #include "../ceres_wrapper/ceres_manager.h"
 
 // laserscanutils
