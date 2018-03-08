@@ -1,5 +1,5 @@
-#ifndef PROCESSOR_TRACKER_TRIFOCAL_TENSOR_H
-#define PROCESSOR_TRACKER_TRIFOCAL_TENSOR_H
+#ifndef PROCESSOR_TRACKER_FEATURE_IMAGE_H
+#define PROCESSOR_TRACKER_FEATURE_IMAGE_H
 
 // Wolf includes
 #include "sensor_camera.h"
@@ -9,7 +9,7 @@
 #include "state_quaternion.h"
 #include "processor_tracker_feature.h"
 #include "constraint_epipolar.h"
-#include "processor_image_params.h"
+#include "processor_params_image.h"
 
 // Vision utils
 #include <vision_utils.h>
@@ -25,10 +25,10 @@
 namespace wolf
 {
 
-WOLF_PTR_TYPEDEFS(ProcessorTrackerTrifocalTensor);
+WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureImage);
 
 //class
-class ProcessorTrackerTrifocalTensor : public ProcessorTrackerFeature
+class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
 {
     protected:
 
@@ -61,8 +61,8 @@ class ProcessorTrackerTrifocalTensor : public ProcessorTrackerFeature
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
 
-        ProcessorTrackerTrifocalTensor(ProcessorParamsImage _params);
-        virtual ~ProcessorTrackerTrifocalTensor();
+        ProcessorTrackerFeatureImage(ProcessorParamsImage _params);
+        virtual ~ProcessorTrackerFeatureImage();
 
         virtual void setup(SensorCameraPtr _camera_ptr);
 
@@ -160,11 +160,11 @@ class ProcessorTrackerTrifocalTensor : public ProcessorTrackerFeature
 
 };
 
-inline bool ProcessorTrackerTrifocalTensor::voteForKeyFrame()
+inline bool ProcessorTrackerFeatureImage::voteForKeyFrame()
 {
     return (incoming_ptr_->getFeatureList().size() < params_.algorithm.min_features_for_keyframe);
 }
 
 } // namespace wolf
 
-#endif // PROCESSOR_TRACKER_TRIFOCAL_TENSOR_H
+#endif // PROCESSOR_TRACKER_FEATURE_IMAGE_H

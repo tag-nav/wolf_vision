@@ -258,7 +258,7 @@ SET(HDRS
     landmark_polyline_2D.h
     local_parametrization_polyline_extreme.h
     processor_frame_nearest_neighbor_filter.h
-    processor_image_params.h
+    processor_params_image.h
     processor_IMU.h
     test/processor_IMU_UnitTester.h
     processor_odom_2D.h
@@ -410,16 +410,16 @@ IF (vision_utils_FOUND)
         feature_point_image.h
         landmark_AHP.h
         landmark_point_3D.h
-        processor_image_feature.h
-        processor_image_landmark.h
+        processor_tracker_feature_image.h
+        processor_tracker_landmark_image.h
         )
     SET(SRCS ${SRCS}
         capture_image.cpp
         feature_point_image.cpp
         landmark_AHP.cpp
         landmark_point_3D.cpp
-        processor_image_feature.cpp
-        processor_image_landmark.cpp
+        processor_tracker_feature_image.cpp
+        processor_tracker_landmark_image.cpp
         )
 ENDIF(vision_utils_FOUND)
 
