@@ -76,7 +76,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
 
         /** \brief Constructor with type
          */
-        ProcessorTrackerFeature(const std::string& _type, const unsigned int _max_new_features = 0);
+        ProcessorTrackerFeature(const std::string& _type, const Scalar _time_tolerance, const unsigned int _max_new_features);
         virtual ~ProcessorTrackerFeature();
 
     protected:

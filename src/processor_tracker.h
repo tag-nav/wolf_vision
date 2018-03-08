@@ -87,7 +87,7 @@ class ProcessorTracker : public ProcessorBase
         FeatureBaseList new_features_incoming_; ///< list of the new features of \b last successfully tracked in \b incoming
 
     public:
-        ProcessorTracker(const std::string& _type, const unsigned int _max_new_features = 0, const Scalar& _time_tolerance = 0.1);
+        ProcessorTracker(const std::string& _type, const Scalar& _time_tolerance, const unsigned int _max_new_features);
         virtual ~ProcessorTracker();
 
         /** \brief Full processing of an incoming Capture.

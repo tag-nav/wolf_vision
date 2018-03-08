@@ -106,9 +106,6 @@ class KFPackBuffer
  */
 struct ProcessorParamsBase
 {
-    ProcessorParamsBase()          {time_tolerance = 0;};
-    virtual ~ProcessorParamsBase() = default;
-
     std::string type;
     std::string name;
     Scalar time_tolerance;
@@ -129,7 +126,7 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
         static unsigned int processor_id_count_;
 
     public:
-        ProcessorBase(const std::string& _type, const Scalar& _time_tolerance = 0);
+        ProcessorBase(const std::string& _type, const Scalar& _time_tolerance);
         virtual ~ProcessorBase();
         void remove();
 

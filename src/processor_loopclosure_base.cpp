@@ -10,8 +10,8 @@
 namespace wolf
 {
 
-ProcessorLoopClosureBase::ProcessorLoopClosureBase(const std::string& _type):
-  ProcessorBase(_type)
+ProcessorLoopClosureBase::ProcessorLoopClosureBase(const std::string& _type, const Scalar _time_tolerance):
+  ProcessorBase(_type, _time_tolerance)
 {
   //
 }
