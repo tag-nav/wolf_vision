@@ -42,8 +42,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
                     SensorBasePtr _sensor_ptr   = nullptr,
                     StateBlockPtr _p_ptr        = nullptr,
                     StateBlockPtr _o_ptr        = nullptr,
-                    StateBlockPtr _intr_ptr     = nullptr
-                    );
+                    StateBlockPtr _intr_ptr     = nullptr);
 
         virtual ~CaptureBase();
         void remove();

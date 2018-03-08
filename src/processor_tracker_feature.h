@@ -108,8 +108,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
          * \param _feature_list_out returned list of features found in \b incoming
          * \param _feature_correspondences returned map of correspondences: _feature_correspondences[feature_out_ptr] = feature_in_ptr
          */
-        virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
-                                           FeatureMatchMap& _feature_correspondences) = 0;
+        virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureMatchMap& _feature_correspondences) = 0;
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
          * \param _origin_feature input feature in origin capture tracked

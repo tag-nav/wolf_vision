@@ -5,11 +5,11 @@
  *      \author: Dinesh Atchuthan
  */
 
+#include <processor_IMU.h>
+#include <sensor_IMU.h>
 #include "wolf.h"
 #include "problem.h"
 #include "ceres_wrapper/ceres_manager.h"
-#include "sensor_imu.h"
-#include "processor_imu.h"
 #include "sensor_odom_3D.h"
 #include "processor_odom_3D.h"
 

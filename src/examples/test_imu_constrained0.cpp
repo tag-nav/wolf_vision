@@ -1,13 +1,13 @@
 //Wolf
+#include <capture_IMU.h>
+#include <processor_IMU.h>
+#include <sensor_IMU.h>
 #include "wolf.h"
 #include "problem.h"
-#include "sensor_imu.h"
 #include "sensor_odom_3D.h"
-#include "capture_imu.h"
 #include "constraint_odom_3D.h"
 #include "state_block.h"
 #include "state_quaternion.h"
-#include "processor_imu.h"
 #include "processor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"
 

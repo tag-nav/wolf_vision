@@ -16,7 +16,7 @@ namespace wolf {
 
 //template class ConstraintAutodiff
 template <class CtrT, unsigned int RES, unsigned int B0, unsigned int B1 = 0, unsigned int B2 = 0, unsigned int B3 = 0, unsigned int B4 = 0, unsigned int B5 = 0, unsigned int B6 = 0, unsigned int B7 = 0, unsigned int B8 = 0, unsigned int B9 = 0>
-class ConstraintAutodiff: public ConstraintBase
+class ConstraintAutodiff : public ConstraintBase
 {
     public:
 

@@ -6,15 +6,11 @@
  */
 
  //Wolf
+#include <capture_IMU.h>
 #include "wolf.h"
 #include "problem.h"
-#include "sensor_imu.h"
-#include "capture_imu.h"
 #include "state_block.h"
 #include "state_quaternion.h"
-#include "processor_imu.h"
-
-//std
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -22,6 +18,8 @@
 #include <cmath>
 #include <termios.h>
 #include <fcntl.h>
+#include <processor_IMU.h>
+#include <sensor_IMU.h>
 
 #define DEBUG_RESULTS
 #define FROM_FILE
