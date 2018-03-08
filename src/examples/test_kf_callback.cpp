@@ -25,7 +25,7 @@ int main()
     prc_odo->setTimeTolerance(0.1);
 
     SensorBasePtr sen_ftr    = problem->installSensor   ("ODOM 2D", "other odometer", (Vector3s()<<0,0,0).finished(),"");
-    shared_ptr<ProcessorTrackerFeatureDummy> prc_ftr = make_shared<ProcessorTrackerFeatureDummy>(7, 4);
+    shared_ptr<ProcessorTrackerFeatureDummy> prc_ftr = make_shared<ProcessorTrackerFeatureDummy>(0.5, 7, 4);
     prc_ftr->setName("tracker");
     sen_ftr->addProcessor(prc_ftr);
     prc_ftr->setTimeTolerance(0.1);
