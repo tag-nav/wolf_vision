@@ -242,16 +242,11 @@ FeatureBasePtr ProcessorDiffDrive::createFeature(CaptureMotionPtr _capture_motio
     return key_feature_ptr;
 }
 
-//bool ProcessorDiffDrive::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol)
-//{
-//  return ProcessorMotion::keyFrameCallback(_keyframe_ptr, _time_tol);
-//}
-
 ProcessorBasePtr ProcessorDiffDrive::create(const std::string& _unique_name,
                                             const ProcessorParamsBasePtr _params,
                                             const SensorBasePtr _sensor_ptr)
 {
-  const auto params = std::dynamic_pointer_cast<ProcessorParamsDiffDrive>(_params);
+  const auto params = std::static_pointer_cast<ProcessorParamsDiffDrive>(_params);
 
   if (params == nullptr)
   {
