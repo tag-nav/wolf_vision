@@ -72,8 +72,6 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
                       const Eigen::MatrixBase<D1> &     _wb2,
                       Eigen::MatrixBase<D3> &           _res) const;
 
-        virtual JacobianMethod getJacobianMethod() const override;
-
         /* Function expectation(...)
          * params :
          * Vector3s _p1 : position in imu frame
@@ -272,7 +270,7 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
      *
      * NOTE: See optimization report at the end of this file for comparisons of both methods.
      */
-//#define METHOD_1 // if commented, then METHOD_2 will be applied
+#define METHOD_1 // if commented, then METHOD_2 will be applied
 
 
     //needed typedefs
@@ -449,13 +447,6 @@ inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> &        _p1,
 {
     imu::betweenStates(_p1, _q1, _v1, _p2, _q2, _v2, _dt, _pe, _qe, _ve);
 }
-
-inline JacobianMethod ConstraintIMU::getJacobianMethod() const
-{
-    return JAC_AUTO;
-}
-
-
 
 
 } // namespace wolf

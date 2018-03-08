@@ -26,16 +26,6 @@ class ConstraintGPS2D : public ConstraintAutodiff<ConstraintGPS2D, 2, 2>
         template<typename T>
         bool operator ()(const T* const _x, T* _residuals) const;
 
-        /** \brief Returns the jacobians computation method
-         *
-         * Returns the jacobians computation method
-         *
-         **/
-        virtual JacobianMethod getJacobianMethod() const override
-        {
-            return JAC_AUTO;
-        }
-
 };
 
 template<typename T>

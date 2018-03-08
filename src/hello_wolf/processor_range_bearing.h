@@ -45,7 +45,7 @@ class ProcessorRangeBearing : public ProcessorBase
         // Implementation of pure virtuals from ProcessorBase
         virtual void process            (CaptureBasePtr _capture) override;
         virtual bool voteForKeyFrame    () override {return false;}
-        virtual bool keyFrameCallback   (FrameBasePtr _key_frame, const Scalar& _time_tolerance) override;
+        virtual bool keyFrameCallback   (FrameBasePtr _key_frame, const Scalar& _time_tolerance) ;
 
         // landmark observation models -- they would be better off in a separate library e.g. range_bearing_tools.h
         Eigen::Vector2s observe     (const Eigen::Vector2s& lmk_w) const;

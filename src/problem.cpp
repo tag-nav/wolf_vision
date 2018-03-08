@@ -31,7 +31,7 @@ Problem::Problem(const std::string& _frame_structure) :
         trajectory_ptr_(std::make_shared<TrajectoryBase>(_frame_structure)),
         map_ptr_(std::make_shared<MapBase>()),
         processor_motion_ptr_(),
-        origin_is_set_(false),
+        prior_is_set_(false),
         state_size_(0),
         state_cov_size_(0)
 {
@@ -121,7 +121,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     _corresponding_sensor_ptr->addProcessor(prc_ptr);
 
     // setting the origin in all processor motion if origin already setted
-    if (prc_ptr->isMotion() && origin_is_set_)
+    if (prc_ptr->isMotion() && prior_is_set_)
         (std::static_pointer_cast<ProcessorMotion>(prc_ptr))->setOrigin(getLastKeyFramePtr());
 
     // setting the main processor motion
@@ -330,10 +330,18 @@ bool Problem::permitKeyFrame(ProcessorBasePtr _processor_ptr)
 
 void Problem::keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _processor_ptr, const Scalar& _time_tolerance)
 {
-    //std::cout << "Problem::keyFrameCallback: processor " << _processor_ptr->getName() << std::endl;
+    if (_processor_ptr)
+    {
+        WOLF_DEBUG((_processor_ptr->isMotion() ? "PM " : "PT "), _processor_ptr->getName(), ": KF", _keyframe_ptr->id(), " Callback emitted with ts = ", _keyframe_ptr->getTimeStamp());
+    }
+    else
+    {
+        WOLF_DEBUG("External callback: KF", _keyframe_ptr->id(), " Callback emitted with ts = ", _keyframe_ptr->getTimeStamp());
+    }
+
     for (auto sensor : hardware_ptr_->getSensorList())
-    	for (auto processor : sensor->getProcessorList())
-    		if (processor && (processor != _processor_ptr) )
+        for (auto processor : sensor->getProcessorList())
+            if (processor && (processor != _processor_ptr) )
                 processor->keyFrameCallback(_keyframe_ptr, _time_tolerance);
 }
 
@@ -628,12 +636,12 @@ StateBlockList& Problem::getStateBlockList()
 
 
 
-FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov, const TimeStamp& _ts)
+FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov, const TimeStamp& _ts, const Scalar _time_tolerance)
 {
-    if (!origin_is_set_)
+    if ( ! prior_is_set_ )
     {
         // Create origin frame
-        FrameBasePtr origin_frame_ptr = emplaceFrame(KEY_FRAME, _prior_state, _ts);
+        FrameBasePtr origin_keyframe = emplaceFrame(KEY_FRAME, _prior_state, _ts);
 
         // create origin capture with the given state as data
         // Capture fix only takes 3D position and Quaternion orientation
@@ -643,20 +651,27 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
         else
             init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state, _prior_cov);
 
-        origin_frame_ptr->addCapture(init_capture);
+        origin_keyframe->addCapture(init_capture);
 
         // emplace feature and constraint
         init_capture->emplaceFeatureAndConstraint();
 
-        // notify all motion processors about the origin keyframe
-        for (auto sensor_ptr : hardware_ptr_->getSensorList())
-            for (auto processor_ptr : sensor_ptr->getProcessorList())
-                if (processor_ptr->isMotion())
-                    (std::static_pointer_cast<ProcessorMotion>(processor_ptr))->setOrigin(origin_frame_ptr);
+        // Notify all processors about the prior KF
+        for (auto sensor : hardware_ptr_->getSensorList())
+            for (auto processor : sensor->getProcessorList())
+                if (processor->isMotion())
+                    // Motion processors will set its origin at the KF
+                    (std::static_pointer_cast<ProcessorMotion>(processor))->setOrigin(origin_keyframe);
 
-        origin_is_set_ = true;
+        prior_is_set_ = true;
 
-        return origin_frame_ptr;
+        // Notify all other processors about the origin KF --> they will join it or not depending on their received data
+        for (auto sensor : hardware_ptr_->getSensorList())
+            for (auto processor : sensor->getProcessorList())
+                if ( !processor->isMotion() )
+                    processor->keyFrameCallback(origin_keyframe, _time_tolerance);
+
+        return origin_keyframe;
     }
     else
         throw std::runtime_error("Origin already set!");
@@ -696,7 +711,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                 {
                     if (i==0) cout << "    Extr " << (S->isExtrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
                     if (i==2) cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
-                    auto sb = S->getStateBlockPtrAuto(i);
+                    auto sb = S->getStateBlockPtrDynamic(i);
                     if (sb)
                     {
                         cout << (sb->isFixed() ? " Fix( " : " Est( ") << sb->getState().transpose() << " )";
@@ -735,10 +750,10 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         std::cout << "    pm" << p->id() << " " << p->getType() << endl;
                         ProcessorMotionPtr pm = std::static_pointer_cast<ProcessorMotion>(p);
                         if (pm->getOriginPtr())
-                            cout << "      o: C" << pm->getOriginPtr()->id() << " - F"
+                            cout << "      o: C" << pm->getOriginPtr()->id() << " - " << (pm->getOriginPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
                             << pm->getOriginPtr()->getFramePtr()->id() << endl;
                         if (pm->getLastPtr())
-                            cout << "      l: C" << pm->getLastPtr()->id() << " - F"
+                            cout << "      l: C" << pm->getLastPtr()->id() << " - " << (pm->getLastPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
                             << pm->getLastPtr()->getFramePtr()->id() << endl;
                         if (pm->getIncomingPtr())
                             cout << "      i: C" << pm->getIncomingPtr()->id() << endl;
@@ -750,10 +765,10 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         if (pt)
                         {
                             if (pt->getOriginPtr())
-                                cout << "      o: C" << pt->getOriginPtr()->id() << " - F"
+                                cout << "      o: C" << pt->getOriginPtr()->id() << " - " << (pt->getOriginPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
                                 << pt->getOriginPtr()->getFramePtr()->id() << endl;
                             if (pt->getLastPtr())
-                                cout << "      l: C" << pt->getLastPtr()->id() << " - F"
+                                cout << "      l: C" << pt->getLastPtr()->id() << " - " << (pt->getLastPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
                                 << pt->getLastPtr()->getFramePtr()->id() << endl;
                             if (pt->getIncomingPtr())
                                 cout << "      i: C" << pt->getIncomingPtr()->id() << endl;
@@ -833,9 +848,9 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         try
                         {
                             CaptureMotionPtr CM = std::static_pointer_cast<CaptureMotion>(C);
+                            cout << "      buffer size  :  " << CM->getBuffer().get().size() << endl;
                             if ( CM->getCalibSize() > 0 && ! CM->getBuffer().get().empty())
                             {
-                                cout << "      buffer size  :  " << CM->getBuffer().get().size() << endl;
                                 cout << "      delta preint : (" << CM->getDeltaPreint().transpose() << ")" << endl;
                                 cout << "      calib preint : (" << CM->getCalibrationPreint().transpose() << ")" << endl;
                                 cout << "      jacob preint : (" << CM->getJacobianCalib().row(0) << ")" << endl;
@@ -853,7 +868,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         // Features
                         for (auto f : C->getFeatureList())
                         {
-                            cout << "      f" << f->id() << " " << f->getType() << ((depth < 4) ? " -- " + std::to_string(f->getConstraintList().size()) + "c  " : "");
+                            cout << "      f" << f->id() << " trk" << f->trackId() << " " << f->getType() << ((depth < 4) ? " -- " + std::to_string(f->getConstraintList().size()) + "c  " : "");
                             if (constr_by)
                             {
                                 cout << "  <--\t";

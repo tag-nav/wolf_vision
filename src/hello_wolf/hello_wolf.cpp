@@ -167,7 +167,7 @@ int main()
     TimeStamp   t(0.0);
     Vector3s    x(0,0,0);
     Matrix3s    P = Matrix3s::Identity() * 0.1;
-    problem->setPrior(x, P, t);             // KF1
+    problem->setPrior(x, P, t, 0.5);             // KF1
 
     // observe lmks
     ids.resize(1); ranges.resize(1); bearings.resize(1);

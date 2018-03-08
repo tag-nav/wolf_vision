@@ -44,7 +44,8 @@ class ProcessorMotion_test : public ProcessorOdom2D, public testing::Test{
             capture = std::make_shared<CaptureMotion>(0.0, sensor, data, data_cov, 3, 3, nullptr);
 
             Vector3s x0; x0 << 0, 0, 0;
-            processor->setOrigin(x0, 0.0);
+            Matrix3s P0; P0.setIdentity();
+            problem->setPrior(x0, P0, 0.0, 0.01);
         }
 
         virtual void TearDown(){}

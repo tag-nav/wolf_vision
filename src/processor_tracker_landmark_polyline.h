@@ -126,9 +126,9 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
         void computeTransformations(const TimeStamp& _ts);
         virtual void postProcess();
 
-        void advance();
+        void advanceDerived();
 
-        void reset();
+        void resetDerived();
 
         /** \brief Find provided landmarks in the incoming capture
          * \param _landmark_list_in input list of landmarks to be found in incoming
@@ -219,24 +219,24 @@ inline unsigned int ProcessorTrackerLandmarkPolyline::detectNewFeatures(const un
     return new_features_last_.size();
 }
 
-inline void ProcessorTrackerLandmarkPolyline::advance()
+inline void ProcessorTrackerLandmarkPolyline::advanceDerived()
 {
     //std::cout << "\tProcessorTrackerLandmarkPolyline::advance:" << std::endl;
     //std::cout << "\t\tcorners_last: " << polylines_last_.size() << std::endl;
     //std::cout << "\t\tcorners_incoming_: " << polylines_incoming_.size() << std::endl;
-    ProcessorTrackerLandmark::advance();
+    ProcessorTrackerLandmark::advanceDerived();
     for (auto polyline : polylines_last_)
         polyline->remove();
     polylines_last_ = std::move(polylines_incoming_);
     //std::cout << "advanced" << std::endl;
 }
 
-inline void ProcessorTrackerLandmarkPolyline::reset()
+inline void ProcessorTrackerLandmarkPolyline::resetDerived()
 {
     //std::cout << "\tProcessorTrackerLandmarkPolyline::reset:" << std::endl;
     //std::cout << "\t\tcorners_last: " << corners_last_.size() << std::endl;
     //std::cout << "\t\tcorners_incoming_: " << polylines_incoming_.size() << std::endl;
-    ProcessorTrackerLandmark::reset();
+    ProcessorTrackerLandmark::resetDerived();
     polylines_last_ = std::move(polylines_incoming_);
 }
 

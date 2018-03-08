@@ -127,7 +127,7 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     CeresManager ceres_manager(Pr);
 
     // KF0 and absolute prior
-    FrameBasePtr        F0 = Pr->setPrior(x0, P0,t0);
+    FrameBasePtr        F0 = Pr->setPrior(x0, P0,t0, dt/2);
 
     // KF1 and motion from KF0
     t += dt;
@@ -210,7 +210,7 @@ TEST(Odom2D, VoteForKfAndSolve)
     CeresManager ceres_manager(problem);
 
     // Origin Key Frame
-    FrameBasePtr origin_frame = problem->setPrior(x0, P0, t0);
+    FrameBasePtr origin_frame = problem->setPrior(x0, P0, t0, dt/2);
     ceres_manager.solve(0);
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
@@ -322,12 +322,13 @@ TEST(Odom2D, KF_callback)
     Matrix3s unmeasured_cov = params->unmeasured_perturbation_std_*params->unmeasured_perturbation_std_*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
+    processor_odom2d->setTimeTolerance(dt/2);
 
     // Ceres wrapper
     CeresManager ceres_manager(problem);
 
     // Origin Key Frame
-    FrameBasePtr keyframe_0 = problem->setPrior(x0, x0_cov, t0);
+    FrameBasePtr keyframe_0 = problem->setPrior(x0, x0_cov, t0, dt/2);
 
     // Check covariance values
     Eigen::Vector3s integrated_pose = x0;
@@ -390,7 +391,11 @@ TEST(Odom2D, KF_callback)
     FrameBasePtr keyframe_2 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
 
     ASSERT_TRUE(problem->check(0));
-    processor_odom2d->keyFrameCallback(keyframe_2, 0);
+    processor_odom2d->keyFrameCallback(keyframe_2, dt/2);
+    ASSERT_TRUE(problem->check(0));
+    t += dt;
+    capture->setTimeStamp(t);
+    processor_odom2d->process(capture);
     ASSERT_TRUE(problem->check(0));
 
     CaptureMotionPtr key_capture_n = std::static_pointer_cast<CaptureMotion>(keyframe_2->getCaptureList().front());
@@ -402,7 +407,7 @@ TEST(Odom2D, KF_callback)
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
-    ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance()       , integrated_cov_vector [n_split], 1e-6);
+    ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance()      , integrated_cov_vector [n_split], 1e-6);
 
     ////////////////////////////////////////////////////////////////
     // Split between keyframes, exact timestamp
@@ -410,11 +415,17 @@ TEST(Odom2D, KF_callback)
     t_split = t0 + m_split*dt;
 //    std::cout << "-----------------------------\nSplit between KFs; time: " << t_split - t0 << std::endl;
 
+    problem->print(4,1,1,1);
+
     x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_1 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
 
     ASSERT_TRUE(problem->check(0));
-    processor_odom2d->keyFrameCallback(keyframe_1, 0);
+    processor_odom2d->keyFrameCallback(keyframe_1, dt/2);
+    ASSERT_TRUE(problem->check(0));
+    t += dt;
+    capture->setTimeStamp(t);
+    processor_odom2d->process(capture);
     ASSERT_TRUE(problem->check(0));
 
     CaptureMotionPtr key_capture_m = std::static_pointer_cast<CaptureMotion>(keyframe_1->getCaptureList().front());
@@ -427,7 +438,6 @@ TEST(Odom2D, KF_callback)
     keyframe_2->setState(Vector3s(3,1,2));
 
     report = ceres_manager.solve(1);
-//    std::cout << report << std::endl;
     ceres_manager.computeCovariances(ALL_MARGINALS);
 
     // check the split KF

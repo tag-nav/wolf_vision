@@ -91,16 +91,6 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 //            jacobians[3] << 0, 0, 1;
 //            jacobians[3] = getMeasurementSquareRootInformationUpper() * jacobians[0];
 //        }
-//
-//        /** \brief Returns the jacobians computation method
-//         *
-//         * Returns the jacobians computation method
-//         *
-//         **/
-//        virtual JacobianMethod getJacobianMethod() const
-//        {
-//            return AUTO;
-//        }
 
 
     public:

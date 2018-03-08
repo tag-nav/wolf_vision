@@ -6,16 +6,99 @@ namespace wolf{
 class SensorBase;
 }
 
-//Wolf includes
+// Wolf includes
 #include "wolf.h"
 #include "node_base.h"
+#include "time_stamp.h"
 
 // std
 #include <memory>
+#include <map>
 
 namespace wolf {
 
+/** \brief Key frame class pack
+ *
+ * To store a key_frame with an associated time tolerance.
+ */
+class KFPack
+{
+    public:
+        KFPack(const FrameBasePtr _key_frame, const Scalar _time_tolerance) : key_frame(_key_frame), time_tolerance(_time_tolerance) {};
+        ~KFPack(){};
+        FrameBasePtr key_frame;
+        Scalar time_tolerance;
+};
 
+WOLF_PTR_TYPEDEFS(KFPack);
+
+
+
+/** \brief Buffer of Key frame class objects
+ *
+ * Object and functions to manage a buffer of KFPack objects.
+ */
+class KFPackBuffer
+{
+    public:
+
+        typedef std::map<TimeStamp,KFPackPtr>::iterator Iterator; // buffer iterator
+
+        KFPackBuffer(void);
+        ~KFPackBuffer(void);
+
+        /**\brief Select a Pack from the buffer
+         *
+         *  Select from the buffer the closest pack (w.r.t. time stamp),
+         * respecting a defined time tolerances
+         */
+        KFPackPtr selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
+        KFPackPtr selectPack(const CaptureBasePtr _capture, const Scalar& _time_tolerance);
+
+        KFPackPtr selectPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
+        KFPackPtr selectPackBefore(const CaptureBasePtr _capture, const Scalar& _time_tolerance);
+
+        /**\brief Buffer size
+         *
+         */
+        size_t size(void);
+
+        /**\brief Add a pack to the buffer
+         *
+         */
+        void add(const FrameBasePtr& _key_frame, const Scalar& _time_tolerance);
+
+        /**\brief Remove all packs in the buffer with a time stamp older than the specified
+         *
+         */
+        void removeUpTo(const TimeStamp& _time_stamp);
+
+        /**\brief Check time tolerance
+         *
+         * Check if the time distance between two time stamps is smaller than
+         * the minimum time tolerance of the two frames.
+         */
+        bool checkTimeTolerance(const TimeStamp& _time_stamp1, const Scalar& _time_tolerance1, const TimeStamp& _time_stamp2, const Scalar& _time_tolerance2);
+
+        /**\brief Clear the buffer
+         *
+         */
+        void clear();
+
+        /**\brief Empty the buffer
+         *
+         */
+        bool empty();
+
+        /**\brief Print buffer information
+         *
+         */
+        void print();
+
+    private:
+
+        std::map<TimeStamp,KFPackPtr> container_; // Main buffer container
+};
 
 /** \brief base struct for processor parameters
  *
@@ -34,6 +117,11 @@ struct ProcessorParamsBase
 //class ProcessorBase
 class ProcessorBase : public NodeBase, public std::enable_shared_from_this<ProcessorBase>
 {
+    protected:
+        unsigned int processor_id_;
+        Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
+        KFPackBuffer kf_pack_buffer_;
+
     private:
         SensorBaseWPtr sensor_ptr_;
 
@@ -78,7 +166,9 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
          */
         FrameBasePtr emplaceFrame(FrameType _type, CaptureBasePtr _capture_ptr, const Eigen::VectorXs& _state);
 
-        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tolerance) = 0;
+//        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tolerance) = 0;
+
+        void keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
 
         SensorBasePtr getSensorPtr();
         const SensorBasePtr getSensorPtr() const;
@@ -88,9 +178,6 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
         void setTimeTolerance(Scalar _time_tolerance);
 
-    protected:
-        unsigned int processor_id_;
-        Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
 };
 
 }
@@ -123,6 +210,31 @@ inline const SensorBasePtr ProcessorBase::getSensorPtr() const
 inline void ProcessorBase::setTimeTolerance(Scalar _time_tolerance)
 {
     time_tolerance_ = _time_tolerance;
+}
+
+inline KFPackBuffer::KFPackBuffer(void)
+{
+
+}
+
+inline KFPackBuffer::~KFPackBuffer(void)
+{
+
+}
+
+inline void KFPackBuffer::clear()
+{
+    container_.clear();
+}
+
+inline bool KFPackBuffer::empty()
+{
+    return container_.empty();
+}
+
+inline size_t KFPackBuffer::size(void)
+{
+    return container_.size();
 }
 
 } // namespace wolf

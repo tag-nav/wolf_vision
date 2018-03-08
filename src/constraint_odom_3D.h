@@ -28,8 +28,6 @@ class ConstraintOdom3D : public ConstraintAutodiff<ConstraintOdom3D,6,3,4,3,4>
 
         virtual ~ConstraintOdom3D() = default;
 
-        JacobianMethod getJacobianMethod() const override {return JAC_AUTO;}
-
         template<typename T>
                 bool operator ()(const T* const _p_current,
                                  const T* const _q_current,

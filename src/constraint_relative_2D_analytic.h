@@ -91,12 +91,6 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
          **/
         virtual void evaluatePureJacobians(std::vector<Eigen::MatrixXs>& jacobians) const override;
 
-        /** \brief Returns the jacobians computation method
-         **/
-        virtual JacobianMethod getJacobianMethod() const override
-        {
-            return JAC_AUTO;
-        }
 };
 
 

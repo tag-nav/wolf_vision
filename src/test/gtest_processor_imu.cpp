@@ -29,6 +29,7 @@ class ProcessorIMUt : public testing::Test
         wolf::SensorBasePtr sensor_ptr;
         wolf::TimeStamp t;
         wolf::Scalar mti_clock, tmp;
+        wolf::Scalar dt;
         Vector6s data;
         Matrix6s data_cov;
         VectorXs x0;
@@ -148,7 +149,8 @@ TEST(ProcessorIMU, voteForKeyFrame)
     VectorXs x0(10);
     TimeStamp t(0);
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
-    problem->getProcessorMotionPtr()->setOrigin(x0, t); //this also creates a keyframe at origin
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     //data variable and covariance matrix
     // since we integrate only a few times, give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
@@ -211,8 +213,8 @@ TEST_F(ProcessorIMUt, interpolate)
 
     t.set(0);
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     data << 2, 0, 0, 0, 0, 0; // only acc_x
     cap_imu_ptr->setData(data);
@@ -257,8 +259,8 @@ TEST_F(ProcessorIMUt, acc_x)
 {
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     data << 2, 0, 9.806, 0, 0, 0; // only acc_x, but measure gravity!
 
@@ -283,8 +285,8 @@ TEST_F(ProcessorIMUt, acc_y)
 
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     data << 0, 20, 9.806, 0, 0, 0; // only acc_y, but measure gravity!
 
@@ -320,8 +322,8 @@ TEST_F(ProcessorIMUt, acc_z)
 {
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     data << 0, 0, 9.806 + 2.0, 0, 0, 0; // only acc_z, but measure gravity!
 
@@ -358,8 +360,8 @@ TEST_F(ProcessorIMUt, check_Covariance)
 {
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     data << 2, 0, 9.806, 0, 0, 0; // only acc_x, but measure gravity!
 
@@ -379,8 +381,8 @@ TEST_F(ProcessorIMUt, gyro_x)
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
     data << 0, 0, 9.806, rate_of_turn, 0, 0; // measure gravity
@@ -430,9 +432,10 @@ TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
     Vector3s acc_bias = bias.head(3);
     // state
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
+    MatrixXs P0(9,9); P0.setIdentity();
 
     // init things
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    problem->setPrior(x0, P0, t, 0.01);
 
     std::static_pointer_cast<wolf::CaptureMotion>(problem->getProcessorMotionPtr()->getOriginPtr())->setCalibration(bias);
     problem->getProcessorMotionPtr()->getLastPtr()->setCalibrationPreint(bias);
@@ -484,10 +487,12 @@ TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
     t.set(0); // clock in 0,1 ms ticks
     wolf::Scalar abx(0.002), aby(0.01);
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
+
     Vector6s bias; bias << abx,aby,0,  0,0,0;
     Vector3s acc_bias = bias.head(3);
 
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
     std::static_pointer_cast<wolf::CaptureMotion>(problem->getProcessorMotionPtr()->getOriginPtr())->setCalibration(bias);
     problem->getProcessorMotionPtr()->getLastPtr()->setCalibrationPreint(bias);
 
@@ -534,8 +539,8 @@ TEST_F(ProcessorIMUt, gyro_z)
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
     data << -wolf::gravity(), 0, 0, rate_of_turn; // measure gravity!
@@ -572,8 +577,8 @@ TEST_F(ProcessorIMUt, gyro_xyz)
 {
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     Vector3s tmp_vec; //will be used to store rate of turn data
     Quaternions quat_comp(Quaternions::Identity());
@@ -659,8 +664,8 @@ TEST_F(ProcessorIMUt, gyro_z_ConstVelocity)
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  2,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
     data << -wolf::gravity(), 0, 0, rate_of_turn; // measure gravity!
@@ -698,8 +703,8 @@ TEST_F(ProcessorIMUt, gyro_x_ConstVelocity)
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  2,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
     data << 0, 0, 9.806, rate_of_turn, 0, 0; // measure gravity
@@ -742,8 +747,8 @@ TEST_F(ProcessorIMUt, gyro_xy_ConstVelocity)
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  2,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
     data << 0, 0, 9.806, 0, rate_of_turn, 0; // measure gravity
@@ -786,8 +791,8 @@ TEST_F(ProcessorIMUt, gyro_y_ConstVelocity)
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  2,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
     data << 0, 0, 9.806, 0, rate_of_turn, 0; // measure gravity
@@ -829,8 +834,8 @@ TEST_F(ProcessorIMUt, gyro_xyz_ConstVelocity)
 {
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  2,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     Vector3s tmp_vec; //will be used to store rate of turn data
     Quaternions quat_comp(Quaternions::Identity());
@@ -918,8 +923,8 @@ TEST_F(ProcessorIMUt, gyro_x_acc_x)
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
     data << 1, 0, -wolf::gravity()(2), rate_of_turn, 0, 0; // measure gravity
@@ -967,8 +972,8 @@ TEST_F(ProcessorIMUt, gyro_y_acc_y)
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
     data << 0, 1, -wolf::gravity()(2), 0, rate_of_turn, 0; // measure gravity
@@ -1016,8 +1021,8 @@ TEST_F(ProcessorIMUt, gyro_z_acc_z)
     wolf::Scalar dt(0.001);
     t.set(0); // clock in 0,1 ms ticks
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
-
-    problem->getProcessorMotionPtr()->setOrigin(x0, t);
+    MatrixXs P0(9,9); P0.setIdentity();
+    problem->setPrior(x0, P0, t, 0.01);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;
     data << 0, 0, -wolf::gravity()(2) + 1, 0, 0, rate_of_turn; // measure gravity
