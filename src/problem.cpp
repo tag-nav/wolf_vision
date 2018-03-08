@@ -330,11 +330,18 @@ bool Problem::permitKeyFrame(ProcessorBasePtr _processor_ptr)
 
 void Problem::keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _processor_ptr, const Scalar& _time_tolerance)
 {
-    WOLF_DEBUG((_processor_ptr->isMotion() ? "PM " : "PT "), _processor_ptr->getName(), ": KF", _keyframe_ptr->id(), " Callback emitted with ts = ", _keyframe_ptr->getTimeStamp());
+    if (_processor_ptr)
+    {
+        WOLF_DEBUG((_processor_ptr->isMotion() ? "PM " : "PT "), _processor_ptr->getName(), ": KF", _keyframe_ptr->id(), " Callback emitted with ts = ", _keyframe_ptr->getTimeStamp());
+    }
+    else
+    {
+        WOLF_DEBUG("External callback: KF", _keyframe_ptr->id(), " Callback emitted with ts = ", _keyframe_ptr->getTimeStamp());
+    }
 
     for (auto sensor : hardware_ptr_->getSensorList())
-    	for (auto processor : sensor->getProcessorList())
-    		if (processor && (processor != _processor_ptr) )
+        for (auto processor : sensor->getProcessorList())
+            if (processor && (processor != _processor_ptr) )
                 processor->keyFrameCallback(_keyframe_ptr, _time_tolerance);
 }
 
