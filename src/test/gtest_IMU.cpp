@@ -503,11 +503,9 @@ class Process_Constraint_IMU : public testing::Test
             FrameBasePtr KF = problem->emplaceFrame(KEY_FRAME, x1_exact, t);
 
             // ===================================== IMU CALLBACK
-            processor_imu->keyFrameCallback(KF, dt/2);
+            problem->keyFrameCallback(KF, nullptr, dt/2);
 
-
-
-
+            // Process IMU for the callback to take effect
             data = Vector6s::Zero();
             capture_imu = make_shared<CaptureIMU>(t+dt, sensor_imu, data, sensor_imu->getNoiseCov());
             processor_imu->process(capture_imu);
@@ -685,8 +683,7 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
             Process_Constraint_IMU::buildProblem();
 
             // ===================================== ODO
-            processor_odo->keyFrameCallback(KF_1, 0.1);
-
+            // Process ODO for the callback to take effect
             data = Vector6s::Zero();
             capture_odo = make_shared<CaptureOdom3D>(t+dt, sensor_odo, data, sensor_odo->getNoiseCov());
             processor_odo->process(capture_odo);
@@ -1540,7 +1537,7 @@ int main(int argc, char **argv)
     testing::InitGoogleTest(&argc, argv);
     //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU.*";
     //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.*";
-    //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.RecoverTrajectory_MotionRandom_PqV_b__pqV_b";
+        ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.RecoverTrajectory_MotionRandom_PqV_b__pqV_b";
 
     return RUN_ALL_TESTS();
 }
