@@ -1523,11 +1523,11 @@ TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) 
     // printAll(report);
 
     WOLF_INFO("------------------------------------");
-    WOLF_INFO("Exact x0 \n", x0.transpose());
-    WOLF_INFO("Optim x0 \n", x0_optim.transpose());
+    WOLF_INFO("Exact x0 \n", x0         .transpose());
+    WOLF_INFO("Optim x0 \n", x0_optim   .transpose());
     WOLF_INFO("Optim x  \n", Trj_x_optim.transpose());
-    WOLF_INFO("Optim x1 \n", x1_optim.transpose());
-    WOLF_INFO("Exact x1 \n", x1_exact.transpose());
+    WOLF_INFO("Optim x1 \n", x1_optim   .transpose());
+    WOLF_INFO("Exact x1 \n", x1_exact   .transpose());
     WOLF_INFO("------------------------------------");
 
 }
