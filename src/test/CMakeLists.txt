@@ -61,8 +61,8 @@ wolf_add_gtest(gtest_frame_base gtest_frame_base.cpp)
 target_link_libraries(gtest_frame_base ${PROJECT_NAME})
 
 # IMU tools test
-wolf_add_gtest(gtest_imu_tools gtest_imu_tools.cpp)
-# target_link_libraries(gtest_imu_tools ${PROJECT_NAME}) // WOLF library not needed
+wolf_add_gtest(gtest_IMU_tools gtest_IMU_tools.cpp)
+# target_link_libraries(gtest_IMU_tools ${PROJECT_NAME}) // WOLF library not needed
 
 # IMU tools test
 wolf_add_gtest(gtest_KF_pack_buffer gtest_KF_pack_buffer.cpp)
@@ -119,10 +119,10 @@ wolf_add_gtest(gtest_constraint_pose_3D gtest_constraint_pose_3D.cpp)
 target_link_libraries(gtest_constraint_pose_3D ${PROJECT_NAME})
 
 # FeatureIMU test
-wolf_add_gtest(gtest_feature_imu gtest_feature_imu.cpp)
-target_link_libraries(gtest_feature_imu ${PROJECT_NAME})
+wolf_add_gtest(gtest_feature_IMU gtest_feature_IMU.cpp)
+target_link_libraries(gtest_feature_IMU ${PROJECT_NAME})
 
-# IMU Bias + estimation tests
+# IMUTest (Bias + estimation)
 wolf_add_gtest(gtest_IMU gtest_IMU.cpp)
 target_link_libraries(gtest_IMU ${PROJECT_NAME})
 
@@ -135,12 +135,12 @@ wolf_add_gtest(gtest_processor_frame_nearest_neighbor_filter_2D gtest_processor_
 target_link_libraries(gtest_processor_frame_nearest_neighbor_filter_2D ${PROJECT_NAME})
 
 # ProcessorIMU class test
-wolf_add_gtest(gtest_processor_imu gtest_processor_imu.cpp)
-target_link_libraries(gtest_processor_imu ${PROJECT_NAME})
+wolf_add_gtest(gtest_processor_IMU gtest_processor_IMU.cpp)
+target_link_libraries(gtest_processor_IMU ${PROJECT_NAME})
 
-# ProcessorIMU_jacobians test
-wolf_add_gtest(gtest_processorIMU_jacobians gtest_processorIMU_jacobians.cpp)
-target_link_libraries(gtest_processorIMU_jacobians ${PROJECT_NAME})
+# ProcessorIMUJacobians test
+wolf_add_gtest(gtest_processor_IMU_jacobians gtest_processor_IMU_jacobians.cpp)
+target_link_libraries(gtest_processor_IMU_jacobians ${PROJECT_NAME})
 
 # ProcessorMotion in 2D
 wolf_add_gtest(gtest_odom_2D gtest_odom_2D.cpp)

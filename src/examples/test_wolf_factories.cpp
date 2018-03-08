@@ -5,8 +5,9 @@
  *      \author: jsola
  */
 
+#include <processor_IMU.h>
+#include <sensor_GPS_fix.h>
 #include "../hardware_base.h"
-#include "../sensor_gps_fix.h"
 #include "../sensor_camera.h"
 #include "../sensor_odom_2D.h"
 #include "../sensor_imu.h"
@@ -14,8 +15,6 @@
 
 #include "../processor_odom_2D.h"
 #include "../processor_odom_3D.h"
-#include "../processor_imu.h"
-//#include "../processor_gps.h"
 #include "../processor_image_feature.h"
 
 #include "../problem.h"

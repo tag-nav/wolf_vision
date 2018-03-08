@@ -1,3 +1,4 @@
+#include <sensor_GPS.h>
 #include "problem.h"
 #include "constraint_base.h"
 #include "state_block.h"
@@ -8,7 +9,6 @@
 #include "processor_motion.h"
 #include "processor_tracker.h"
 #include "sensor_base.h"
-#include "sensor_gps.h"
 #include "factory.h"
 #include "sensor_factory.h"
 #include "processor_factory.h"
