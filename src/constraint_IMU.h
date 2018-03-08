@@ -270,7 +270,7 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
      *
      * NOTE: See optimization report at the end of this file for comparisons of both methods.
      */
-//#define METHOD_1 // if commented, then METHOD_2 will be applied
+#define METHOD_1 // if commented, then METHOD_2 will be applied
 
 
     //needed typedefs
