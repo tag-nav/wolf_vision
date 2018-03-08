@@ -1520,6 +1520,7 @@ TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) 
         i  ++;
     }
 
+    // Get optimal trajectory via getState()
     i = 0;
     t = 0;
     MatrixXs Trj_x_optim_prc(10,Trj_D_preint_prc.cols());
@@ -1531,21 +1532,20 @@ TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) 
 
     // printAll(report);
 
-    WOLF_INFO("------------------------------------");
-    WOLF_INFO("Exact x0 \n", x0         .transpose());
-    WOLF_INFO("Optim x0 \n", x0_optim   .transpose());
-    WOLF_INFO("Optim x  \n", Trj_x_optim.transpose());
-    WOLF_INFO("Optim x1 \n", x1_optim   .transpose());
-    WOLF_INFO("Exact x1 \n", x1_exact   .transpose());
-    WOLF_INFO("------------------------------------");
+//    WOLF_INFO("------------------------------------");
+//    WOLF_INFO("Exact x0 \n", x0         .transpose());
+//    WOLF_INFO("Optim x0 \n", x0_optim   .transpose());
+//    WOLF_INFO("Optim x  \n", Trj_x_optim_prc.transpose());
+//    WOLF_INFO("Optim x1 \n", x1_optim   .transpose());
+//    WOLF_INFO("Exact x1 \n", x1_exact   .transpose());
+//    WOLF_INFO("------------------------------------");
 
-    WOLF_INFO("------------------------------------");
-    WOLF_INFO("Exact x0 \n", x0         .transpose());
-    WOLF_INFO("Optim x0 \n", x0_optim   .transpose());
-    WOLF_INFO("Optim_prc x  \n", Trj_x_optim_prc.transpose());
-    WOLF_INFO("Optim x1 \n", x1_optim   .transpose());
-    WOLF_INFO("Exact x1 \n", x1_exact   .transpose());
-    WOLF_INFO("------------------------------------");
+    // The Mother of Asserts !!!
+    ASSERT_MATRIX_APPROX(Trj_x_optim, Trj_x_optim_prc, 1e-6);
+
+    // First and last trj states match known extrema
+    ASSERT_MATRIX_APPROX(Trj_x_optim_prc.leftCols (1), x0,       1e-6);
+    ASSERT_MATRIX_APPROX(Trj_x_optim_prc.rightCols(1), x1_exact, 1e-6);
 
 }
 
