@@ -4,7 +4,7 @@ namespace wolf
 {
 
 ProcessorFrameNearestNeighborFilter::ProcessorFrameNearestNeighborFilter(const Params& _params):
-    ProcessorLoopClosureBase("FRAME NEAREST NEIGHBOR FILTER"),
+    ProcessorLoopClosureBase("FRAME NEAREST NEIGHBOR FILTER", _params.time_tolerance),
     params_(_params)
 {
   // area of ellipse based on the Chi-Square Probabilities

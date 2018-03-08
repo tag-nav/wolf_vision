@@ -17,7 +17,8 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsDiffDrive);
 
 struct ProcessorParamsDiffDrive : public ProcessorParamsBase
 {
-  ProcessorParamsDiffDrive(const Scalar _dist_travel_th,
+  ProcessorParamsDiffDrive(const Scalar _time_tolerance,
+                           const Scalar _dist_travel_th,
                            const Scalar _theta_traveled_th,
                            const Scalar _cov_det_th,
                            const Scalar _unmeasured_perturbation_std = 0.0001) :
@@ -26,7 +27,7 @@ struct ProcessorParamsDiffDrive : public ProcessorParamsBase
     cov_det_th_(_cov_det_th),
     unmeasured_perturbation_std_(_unmeasured_perturbation_std)
   {
-    //
+      time_tolerance = _time_tolerance;
   }
 
   Scalar dist_traveled_th_;
@@ -109,8 +110,6 @@ protected:
                                               CaptureBasePtr _capture_origin) override;
 
   virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion) override;
-
-//  bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol) override;
 
 public:
 

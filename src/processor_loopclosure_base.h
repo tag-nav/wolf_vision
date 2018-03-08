@@ -45,7 +45,7 @@ protected:
 
 public:
 
-  ProcessorLoopClosureBase(const std::string& _type);
+  ProcessorLoopClosureBase(const std::string& _type, const Scalar _time_tolerance);
 
   virtual ~ProcessorLoopClosureBase() = default;
 
