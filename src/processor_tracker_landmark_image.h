@@ -1,5 +1,5 @@
-#ifndef PROCESSOR_IMAGE_LANDMARK_H
-#define PROCESSOR_IMAGE_LANDMARK_H
+#ifndef PROCESSOR_TRACKER_LANDMARK_IMAGE_H
+#define PROCESSOR_TRACKER_LANDMARK_IMAGE_H
 
 // Wolf includes
 #include "sensor_camera.h"
@@ -25,10 +25,10 @@
 
 namespace wolf {
 
-WOLF_PTR_TYPEDEFS(ProcessorImageLandmark);
+WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmarkImage);
     
 //Class
-class ProcessorImageLandmark : public ProcessorTrackerLandmark
+class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
 {
     protected:
 
@@ -75,8 +75,8 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         std::list<cv::Point> tracker_target_;
         FeatureBaseList feat_lmk_found_;
 
-        ProcessorImageLandmark(const ProcessorParamsImage& _params);
-        virtual ~ProcessorImageLandmark();
+        ProcessorTrackerLandmarkImage(const ProcessorParamsImage& _params);
+        virtual ~ProcessorTrackerLandmarkImage();
 
         virtual void setup(SensorCameraPtr _camera_ptr);
 
@@ -191,4 +191,4 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 } // namespace wolf
 
 
-#endif // PROCESSOR_IMAGE_LANDMARK_H
+#endif // PROCESSOR_TRACKER_LANDMARK_IMAGE_H

@@ -6,7 +6,6 @@
 #include "wolf.h"
 #include "problem.h"
 #include "state_block.h"
-#include "processor_image_landmark.h"
 #include "processor_odom_3D.h"
 #include "sensor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"
@@ -16,6 +15,7 @@
 #include <vision_utils/sensors.h>
 #include <vision_utils/common_class/buffer.h>
 #include <vision_utils/common_class/frame.h>
+#include "../processor_tracker_landmark_image.h"
 
 using Eigen::Vector3s;
 using Eigen::Vector4s;
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sensor_base);
     camera->setImgWidth(img_width);
     camera->setImgHeight(img_height);
-    ProcessorImageLandmarkPtr prc_img_ptr = std::static_pointer_cast<ProcessorImageLandmark>( problem->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml") );
+    ProcessorImageLandmarkPtr prc_img_ptr = std::static_pointer_cast<ProcessorTrackerLandmarkImage>( problem->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml") );
     //=====================================================
 
     //=====================================================

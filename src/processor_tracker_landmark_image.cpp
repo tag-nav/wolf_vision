@@ -1,4 +1,4 @@
-#include "processor_image_landmark.h"
+#include "processor_tracker_landmark_image.h"
 
 #include "landmark_corner_2D.h"
 #include "landmark_AHP.h"
@@ -15,7 +15,7 @@
 namespace wolf
 {
 
-ProcessorImageLandmark::ProcessorImageLandmark(const ProcessorParamsImage& _params) :
+ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(const ProcessorParamsImage& _params) :
     ProcessorTrackerLandmark("IMAGE LANDMARK", _params.algorithm.max_new_features, _params.algorithm.time_tolerance),
     params_(_params),
 //    active_search_grid_(),
@@ -98,12 +98,12 @@ ProcessorImageLandmark::ProcessorImageLandmark(const ProcessorParamsImage& _para
     active_search_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmACTIVESEARCH>(alg_ptr);
 }
 
-ProcessorImageLandmark::~ProcessorImageLandmark()
+ProcessorTrackerLandmarkImage::~ProcessorTrackerLandmarkImage()
 {
     //
 }
 
-void ProcessorImageLandmark::setup(SensorCameraPtr _camera_ptr)
+void ProcessorTrackerLandmarkImage::setup(SensorCameraPtr _camera_ptr)
 {
     image_.width_ = _camera_ptr->getImgWidth();
     image_.height_ = _camera_ptr->getImgHeight();
@@ -111,7 +111,7 @@ void ProcessorImageLandmark::setup(SensorCameraPtr _camera_ptr)
     active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight(), det_ptr_->getPatternRadius());
 }
 
-void ProcessorImageLandmark::preProcess()
+void ProcessorTrackerLandmarkImage::preProcess()
 {
     image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
 
@@ -121,13 +121,13 @@ void ProcessorImageLandmark::preProcess()
     feat_lmk_found_.clear();
 }
 
-void ProcessorImageLandmark::postProcess()
+void ProcessorTrackerLandmarkImage::postProcess()
 {
     detector_roi_.clear();
     feat_lmk_found_.clear();
 }
 
-unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _landmark_list_in,
+unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList& _landmark_list_in,
                                                          FeatureBaseList&  _feature_list_out,
                                                          LandmarkMatchMap& _feature_landmark_correspondences)
 {
@@ -202,13 +202,13 @@ unsigned int ProcessorImageLandmark::findLandmarks(const LandmarkBaseList& _land
     return _feature_list_out.size();
 }
 
-bool ProcessorImageLandmark::voteForKeyFrame()
+bool ProcessorTrackerLandmarkImage::voteForKeyFrame()
 {
     return false;
 //    return landmarks_tracked_ < params_.algorithm.min_features_for_keyframe;
 }
 
-unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_features)
+unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int& _max_features)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -261,7 +261,7 @@ unsigned int ProcessorImageLandmark::detectNewFeatures(const unsigned int& _max_
     return n_new_features;
 }
 
-LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_ptr)
+LandmarkBasePtr ProcessorTrackerLandmarkImage::createLandmark(FeatureBasePtr _feature_ptr)
 {
 
     FeaturePointImagePtr feat_point_image_ptr = std::static_pointer_cast<FeaturePointImage>( _feature_ptr);
@@ -291,7 +291,7 @@ LandmarkBasePtr ProcessorImageLandmark::createLandmark(FeatureBasePtr _feature_p
     return lmk_ahp_ptr;
 }
 
-ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
+ConstraintBasePtr ProcessorTrackerLandmarkImage::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
 
     if ((std::static_pointer_cast<LandmarkAHP>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFramePtr())
@@ -314,7 +314,7 @@ ConstraintBasePtr ProcessorImageLandmark::createConstraint(FeatureBasePtr _featu
 
 // ==================================================================== My own functions
 
-void ProcessorImageLandmark::landmarkInCurrentCamera(const Eigen::VectorXs& _current_state,
+void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorXs& _current_state,
                                                      const LandmarkAHPPtr   _landmark,
                                                      Eigen::Vector4s&       _point3D_hmg)
 {
@@ -374,21 +374,21 @@ void ProcessorImageLandmark::landmarkInCurrentCamera(const Eigen::VectorXs& _cur
     _point3D_hmg = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
 }
 
-Scalar ProcessorImageLandmark::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
+Scalar ProcessorTrackerLandmarkImage::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
 {
     mat_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
     Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/(des_ptr_->getSize()*8);
     return normalized_score;
 }
 
-unsigned int ProcessorImageLandmark::detect(const cv::Mat _image, cv::Rect& _roi, KeyPointVector& _new_keypoints, cv::Mat& new_descriptors)
+unsigned int ProcessorTrackerLandmarkImage::detect(const cv::Mat _image, cv::Rect& _roi, KeyPointVector& _new_keypoints, cv::Mat& new_descriptors)
 {
     _new_keypoints = det_ptr_->detect(_image, _roi);
     new_descriptors = des_ptr_->getDescriptor(_image, _new_keypoints);
     return _new_keypoints.size();
 }
 
-void ProcessorImageLandmark::drawTrackerRoi(cv::Mat _image, cv::Scalar _color)
+void ProcessorTrackerLandmarkImage::drawTrackerRoi(cv::Mat _image, cv::Scalar _color)
 {
     CaptureImagePtr _capture = std::static_pointer_cast<CaptureImage>(last_ptr_);
     if (last_ptr_!=nullptr)
@@ -398,7 +398,7 @@ void ProcessorImageLandmark::drawTrackerRoi(cv::Mat _image, cv::Scalar _color)
     }
 }
 
-void ProcessorImageLandmark::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
+void ProcessorTrackerLandmarkImage::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color)
 {
     if (last_ptr_!=nullptr)
     {
@@ -407,7 +407,7 @@ void ProcessorImageLandmark::drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_li
     }
 }
 
-void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
+void ProcessorTrackerLandmarkImage::drawFeaturesFromLandmarks(cv::Mat _image)
 {
     if (last_ptr_!=nullptr)
     {
@@ -427,7 +427,7 @@ void ProcessorImageLandmark::drawFeaturesFromLandmarks(cv::Mat _image)
     }
 }
 
-void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
+void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
 {
     if (last_ptr_!=nullptr)
     {
@@ -478,9 +478,9 @@ void ProcessorImageLandmark::drawLandmarks(cv::Mat _image)
 
 //namespace wolf{
 
-ProcessorBasePtr ProcessorImageLandmark::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
+ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
-    ProcessorImageLandmarkPtr prc_ptr = std::make_shared<ProcessorImageLandmark>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
+    ProcessorImageLandmarkPtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkImage>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
     prc_ptr->setup(std::static_pointer_cast<SensorCamera>(_sen_ptr));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
@@ -492,6 +492,6 @@ ProcessorBasePtr ProcessorImageLandmark::create(const std::string& _unique_name,
 // Register in the SensorFactory
 #include "processor_factory.h"
 namespace wolf {
-WOLF_REGISTER_PROCESSOR("IMAGE LANDMARK", ProcessorImageLandmark)
+WOLF_REGISTER_PROCESSOR("IMAGE LANDMARK", ProcessorTrackerLandmarkImage)
 } // namespace wolf
 
