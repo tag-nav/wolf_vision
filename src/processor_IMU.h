@@ -8,9 +8,9 @@
 
 
 namespace wolf {
-WOLF_STRUCT_PTR_TYPEDEFS(ProcessorIMUParams);
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsIMU);
 
-struct ProcessorIMUParams : public ProcessorParamsBase
+struct ProcessorParamsIMU : public ProcessorParamsBase
 {
         Scalar max_time_span;
         Size   max_buff_length;
@@ -19,7 +19,7 @@ struct ProcessorIMUParams : public ProcessorParamsBase
         bool voting_active; //IMU will not vote for key Frames to be created
 
 
-        ProcessorIMUParams() :
+        ProcessorParamsIMU() :
             max_time_span(0.5),
             max_buff_length(10),
             dist_traveled(5),
@@ -36,7 +36,7 @@ WOLF_PTR_TYPEDEFS(ProcessorIMU);
 //class
 class ProcessorIMU : public ProcessorMotion{
     public:
-        ProcessorIMU(ProcessorIMUParamsPtr _params = nullptr);
+        ProcessorIMU(ProcessorParamsIMUPtr _params = nullptr);
         virtual ~ProcessorIMU();
 
     protected:

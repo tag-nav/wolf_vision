@@ -34,7 +34,7 @@ static ProcessorParamsBasePtr createProcessorIMUParams(const std::string & _file
 
         YAML::Node kf_vote = config["keyframe vote"];
 
-        ProcessorIMUParamsPtr params = std::make_shared<ProcessorIMUParams>();
+        ProcessorParamsIMUPtr params = std::make_shared<ProcessorParamsIMU>();
 
         params->type                = processor_type;
         params->name                = processor_name;

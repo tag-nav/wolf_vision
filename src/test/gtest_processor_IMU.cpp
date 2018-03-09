@@ -91,7 +91,7 @@ TEST(ProcessorIMU_constructors, ALL)
     ASSERT_EQ(prc0->getAngleTurned(), 0.2);
 
     //constructor with ProcessorIMUParamsPtr argument only
-    ProcessorIMUParamsPtr param_ptr = std::make_shared<ProcessorIMUParams>();
+    ProcessorParamsIMUPtr param_ptr = std::make_shared<ProcessorParamsIMU>();
     param_ptr->max_time_span = 2.0;
     param_ptr->max_buff_length = 20000;
     param_ptr->dist_traveled = 2.0;
@@ -137,7 +137,7 @@ TEST(ProcessorIMU, voteForKeyFrame)
     ProblemPtr problem = Problem::create("POV 3D");
     Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
     SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
-    ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
+    ProcessorParamsIMUPtr prc_imu_params = std::make_shared<ProcessorParamsIMU>();
     prc_imu_params->max_time_span = 1;
     prc_imu_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
     prc_imu_params->dist_traveled = 1000000000;
