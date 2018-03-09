@@ -1472,7 +1472,7 @@ TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) 
     //
     // ---------- time
     t0                  = 0;
-    num_integrations    = 50;
+    num_integrations    = 25;
 
     // ---------- initial pose
     p0                 << 0,0,0;
@@ -1484,8 +1484,8 @@ TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) 
     bias_preint         = -bias_real;
 
     // ---------- motion params
-    a  = Matrix<Scalar, 3, 50>::Ones() + 0.1 * Matrix<Scalar, 3, 50>::Random();
-    w  = Matrix<Scalar, 3, 50>::Ones() + 0.1 * Matrix<Scalar, 3, 50>::Random();
+    a  = Matrix<Scalar, 3, 25>::Ones() + 0.1 * Matrix<Scalar, 3, 25>::Random();
+    w  = Matrix<Scalar, 3, 25>::Ones() + 0.1 * Matrix<Scalar, 3, 25>::Random();
 
     // ---------- fix boundaries
     p0_fixed       = true;
@@ -1520,15 +1520,32 @@ TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) 
         i  ++;
     }
 
+    // Get optimal trajectory via getState()
+    i = 0;
+    t = 0;
+    MatrixXs Trj_x_optim_prc(10,Trj_D_preint_prc.cols());
+    for (int i = 0; i < Trj_x_optim_prc.cols(); i++)
+    {
+        Trj_x_optim_prc.col(i) = problem->getState(t);
+        t += dt;
+    }
+
     // printAll(report);
 
-    WOLF_INFO("------------------------------------");
-    WOLF_INFO("Exact x0 \n", x0.transpose());
-    WOLF_INFO("Optim x0 \n", x0_optim.transpose());
-    WOLF_INFO("Optim x  \n", Trj_x_optim.transpose());
-    WOLF_INFO("Optim x1 \n", x1_optim.transpose());
-    WOLF_INFO("Exact x1 \n", x1_exact.transpose());
-    WOLF_INFO("------------------------------------");
+//    WOLF_INFO("------------------------------------");
+//    WOLF_INFO("Exact x0 \n", x0         .transpose());
+//    WOLF_INFO("Optim x0 \n", x0_optim   .transpose());
+//    WOLF_INFO("Optim x  \n", Trj_x_optim_prc.transpose());
+//    WOLF_INFO("Optim x1 \n", x1_optim   .transpose());
+//    WOLF_INFO("Exact x1 \n", x1_exact   .transpose());
+//    WOLF_INFO("------------------------------------");
+
+    // The Mother of Asserts !!!
+    ASSERT_MATRIX_APPROX(Trj_x_optim, Trj_x_optim_prc, 1e-6);
+
+    // First and last trj states match known extrema
+    ASSERT_MATRIX_APPROX(Trj_x_optim_prc.leftCols (1), x0,       1e-6);
+    ASSERT_MATRIX_APPROX(Trj_x_optim_prc.rightCols(1), x1_exact, 1e-6);
 
 }
 
@@ -1537,7 +1554,7 @@ int main(int argc, char **argv)
     testing::InitGoogleTest(&argc, argv);
     //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU.*";
     //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.*";
-        ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.RecoverTrajectory_MotionRandom_PqV_b__pqV_b";
+    //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.RecoverTrajectory_MotionRandom_PqV_b__pqV_b";
 
     return RUN_ALL_TESTS();
 }
