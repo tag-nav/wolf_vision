@@ -17,18 +17,6 @@ struct ProcessorParamsIMU : public ProcessorParamsBase
         Scalar dist_traveled    = 5;
         Scalar angle_turned     = 0.5;
         bool voting_active      = false; //IMU will not vote for key Frames to be created
-
-
-//        ProcessorParamsIMU() :
-//            max_time_span(0.5),
-//            max_buff_length(10),
-//            dist_traveled(5),
-//            angle_turned(.5),
-//            voting_active(false)
-//        {
-//            type = "IMU";
-//            name = "";
-//        }
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorIMU);
