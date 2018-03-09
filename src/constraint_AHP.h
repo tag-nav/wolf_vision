@@ -5,8 +5,8 @@
 #include "constraint_autodiff.h"
 #include "landmark_AHP.h"
 #include "sensor_camera.h"
-#include "pinholeTools.h"
 #include "feature_point_image.h"
+#include "pinhole_tools.h"
 
 #include <iomanip> //setprecision
 

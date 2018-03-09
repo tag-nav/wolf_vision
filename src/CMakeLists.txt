@@ -207,7 +207,7 @@ SET(HDRS_BASE
     map_base.h
     motion_buffer.h
     node_base.h
-    pinholeTools.h
+    pinhole_tools.h
     problem.h
     processor_base.h
     processor_capture_holder.h
