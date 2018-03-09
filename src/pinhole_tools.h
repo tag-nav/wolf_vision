@@ -2,7 +2,7 @@
 #define PINHOLETOOLS_H
 
 /**
- * \file pinholeTools.h
+ * \file pinhole_tools.h
  *
  * \date 06/04/2010
  * \author jsola
