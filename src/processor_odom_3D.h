@@ -18,25 +18,14 @@
 
 namespace wolf {
     
-WOLF_STRUCT_PTR_TYPEDEFS(ProcessorOdom3DParams);
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsOdom3D);
 
-struct ProcessorOdom3DParams : public ProcessorParamsBase
+struct ProcessorParamsOdom3D : public ProcessorParamsBase
 {
-        Scalar max_time_span;
-        Size   max_buff_length;
-        Scalar dist_traveled;
-        Scalar angle_turned;
-
-
-        ProcessorOdom3DParams() :
-            max_time_span(0),
-            max_buff_length(0),
-            dist_traveled(0),
-            angle_turned(0)
-        {
-            type = "ODOM 3D";
-            name = "";
-        }
+        Scalar max_time_span    = 1.0;
+        Size   max_buff_length  = 10;
+        Scalar dist_traveled    = 1.0;
+        Scalar angle_turned     = 0.5;
 };
 
 
@@ -67,7 +56,7 @@ WOLF_PTR_TYPEDEFS(ProcessorOdom3D);
 class ProcessorOdom3D : public ProcessorMotion
 {
     public:
-        ProcessorOdom3D(ProcessorOdom3DParamsPtr _params = nullptr, SensorOdom3DPtr _sensor_ptr = nullptr);
+        ProcessorOdom3D(const ProcessorParamsOdom3D& _params = ProcessorParamsOdom3D(), SensorOdom3DPtr _sensor_ptr = nullptr);
         virtual ~ProcessorOdom3D();
         void setup(SensorOdom3DPtr sen_ptr);
 

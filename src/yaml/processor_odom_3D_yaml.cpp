@@ -34,7 +34,7 @@ static ProcessorParamsBasePtr createProcessorOdom3DParams(const std::string & _f
 
         YAML::Node kf_vote = config["keyframe vote"];
 
-        ProcessorOdom3DParamsPtr params = std::make_shared<ProcessorOdom3DParams>();
+        ProcessorParamsOdom3DPtr params = std::make_shared<ProcessorParamsOdom3D>();
 
         params->type                = processor_type;
         params->name                = processor_name;
