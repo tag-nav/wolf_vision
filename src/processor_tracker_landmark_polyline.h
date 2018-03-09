@@ -78,13 +78,12 @@ struct LandmarkPolylineMatch : public LandmarkMatch
         }
 };
 
-struct ProcessorParamsPolyline : public ProcessorParamsBase
+struct ProcessorParamsPolyline : public ProcessorParamsTracker
 {
         laserscanutils::LineFinderIterativeParams line_finder_params;
         Scalar position_error_th;
         unsigned int new_features_th;
         unsigned int loop_frames_th;
-        Scalar time_tolerance;
 
         // These values below are constant and defined within the class -- provide a setter or accept them at construction time if you need to configure them
         //        Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
@@ -205,7 +204,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 };
 
 inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(const ProcessorParamsPolyline& _params) :
-        ProcessorTrackerLandmark("TRACKER LANDMARK POLYLINE", 0, _params.time_tolerance),
+        ProcessorTrackerLandmark("TRACKER LANDMARK POLYLINE", _params.time_tolerance, _params.max_new_features),
         line_finder_(_params.line_finder_params),
         params_(_params),
         extrinsics_transformation_computed_(false)
