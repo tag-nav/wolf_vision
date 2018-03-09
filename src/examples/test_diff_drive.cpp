@@ -190,7 +190,7 @@ int main(int argc, char** argv)
   const auto scalar_max = std::numeric_limits<Scalar>::max();
 
   ProcessorParamsBasePtr processor_params =
-      std::make_shared<ProcessorParamsDiffDrive>(scalar_max, scalar_max, scalar_max);
+      std::make_shared<ProcessorParamsDiffDrive>(0.01, scalar_max, scalar_max, scalar_max);
 
   SensorBasePtr sensor_ptr =
       wolf_problem_ptr_->installSensor("DIFF DRIVE", sensor_name, extrinsics, intrinsics);
