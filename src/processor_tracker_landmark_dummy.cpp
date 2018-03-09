@@ -13,7 +13,9 @@ namespace wolf
 {
 
 ProcessorTrackerLandmarkDummy::ProcessorTrackerLandmarkDummy(const Scalar _time_tolerance, const unsigned int& _max_new_features) :
-        ProcessorTrackerLandmark("TRACKER LANDMARK DUMMY", _time_tolerance, _max_new_features, 0.1), n_feature_(0), landmark_idx_non_visible_(0)
+        ProcessorTrackerLandmark("TRACKER LANDMARK DUMMY", _time_tolerance, _max_new_features),
+        n_feature_(0),
+        landmark_idx_non_visible_(0)
 {
     //
 
