@@ -3,13 +3,13 @@
 
 namespace wolf {
 
-ProcessorIMU::ProcessorIMU(ProcessorParamsIMUPtr _params) :
+ProcessorIMU::ProcessorIMU(const ProcessorParamsIMU& _params) :
         ProcessorMotion("IMU", 10, 10, 9, 6, 0.01, 6),
-        max_time_span_  (_params ? _params    ->max_time_span   : 1.0  ),
-        max_buff_length_(_params ? _params    ->max_buff_length : 10000   ),
-        dist_traveled_  (_params ? _params    ->dist_traveled   : 1.0  ),
-        angle_turned_   (_params ? _params    ->angle_turned    : 0.2  ),
-        voting_active_  (_params ? _params    ->voting_active    : false  )
+        max_time_span_  (_params.max_time_span   ),
+        max_buff_length_(_params.max_buff_length ),
+        dist_traveled_  (_params.dist_traveled   ),
+        angle_turned_   (_params.angle_turned    ),
+        voting_active_  (_params.voting_active   )
 {
     // Set constant parts of Jacobians
     jacobian_delta_preint_.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
@@ -24,12 +24,22 @@ ProcessorIMU::~ProcessorIMU()
 
 ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
-    // cast inputs to the correct type
-    std::shared_ptr<ProcessorParamsIMU> prc_imu_params = std::static_pointer_cast<ProcessorParamsIMU>(_params);
+    if (_params)
+    {
+        // cast inputs to the correct type
+        std::shared_ptr<ProcessorParamsIMU> prc_imu_params = std::static_pointer_cast<ProcessorParamsIMU>(_params);
 
-    ProcessorIMUPtr prc_ptr = std::make_shared<ProcessorIMU>(prc_imu_params);
-    prc_ptr->setName(_unique_name);
-    return prc_ptr;
+        ProcessorIMUPtr prc_ptr = std::make_shared<ProcessorIMU>(*prc_imu_params);
+        prc_ptr->setName(_unique_name);
+        return prc_ptr;
+    }
+    else
+    {
+        ProcessorIMUPtr prc_ptr = std::make_shared<ProcessorIMU>();
+
+        prc_ptr->setName(_unique_name);
+        return prc_ptr;
+    }
 }
 
 bool ProcessorIMU::voteForKeyFrame()

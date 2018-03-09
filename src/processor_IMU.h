@@ -12,23 +12,23 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsIMU);
 
 struct ProcessorParamsIMU : public ProcessorParamsBase
 {
-        Scalar max_time_span;
-        Size   max_buff_length;
-        Scalar dist_traveled;
-        Scalar angle_turned;
-        bool voting_active; //IMU will not vote for key Frames to be created
+        Scalar max_time_span    = 0.5;
+        Size   max_buff_length  = 10;
+        Scalar dist_traveled    = 5;
+        Scalar angle_turned     = 0.5;
+        bool voting_active      = false; //IMU will not vote for key Frames to be created
 
 
-        ProcessorParamsIMU() :
-            max_time_span(0.5),
-            max_buff_length(10),
-            dist_traveled(5),
-            angle_turned(.5),
-            voting_active(false)
-        {
-            type = "IMU";
-            name = "";
-        }
+//        ProcessorParamsIMU() :
+//            max_time_span(0.5),
+//            max_buff_length(10),
+//            dist_traveled(5),
+//            angle_turned(.5),
+//            voting_active(false)
+//        {
+//            type = "IMU";
+//            name = "";
+//        }
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorIMU);
@@ -36,7 +36,7 @@ WOLF_PTR_TYPEDEFS(ProcessorIMU);
 //class
 class ProcessorIMU : public ProcessorMotion{
     public:
-        ProcessorIMU(ProcessorParamsIMUPtr _params = nullptr);
+        ProcessorIMU(const ProcessorParamsIMU& _params = ProcessorParamsIMU());
         virtual ~ProcessorIMU();
 
     protected:
