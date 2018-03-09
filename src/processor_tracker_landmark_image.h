@@ -9,7 +9,7 @@
 #include "state_quaternion.h"
 #include "processor_tracker_landmark.h"
 #include "landmark_AHP.h"
-#include "processor_image_params.h"
+#include "processor_params_image.h"
 #include "constraint_AHP.h"
 
 // Vision utils

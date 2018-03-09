@@ -8,7 +8,7 @@ namespace wolf
 {
 
 ProcessorTrackerFeatureImage::ProcessorTrackerFeatureImage(ProcessorParamsImage _params) :
-    ProcessorTrackerFeature("IMAGE", _params.algorithm.max_new_features),
+    ProcessorTrackerFeature("IMAGE", _params.time_tolerance, _params.algorithm.max_new_features),
     params_(_params)
 {
 	// Detector
@@ -378,7 +378,7 @@ void ProcessorTrackerFeatureImage::drawFeatures(cv::Mat _image)
 
 ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
 {
-    ProcessorTrackerTrifocalTensorPtr prc_ptr = std::make_shared<ProcessorTrackerFeatureImage>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
+    ProcessorTrackerFeatureImagePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureImage>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
