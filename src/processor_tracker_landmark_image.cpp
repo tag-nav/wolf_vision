@@ -16,7 +16,7 @@ namespace wolf
 {
 
 ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(const ProcessorParamsImage& _params) :
-    ProcessorTrackerLandmark("IMAGE LANDMARK", _params.algorithm.max_new_features, _params.algorithm.time_tolerance),
+    ProcessorTrackerLandmark("IMAGE LANDMARK", _params.algorithm.time_tolerance, _params.algorithm.max_new_features),
     params_(_params),
 //    active_search_grid_(),
     n_feature_(0),

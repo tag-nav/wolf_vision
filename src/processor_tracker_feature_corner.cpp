@@ -13,7 +13,7 @@ namespace wolf
 
 ProcessorTrackerFeatureCorner::ProcessorTrackerFeatureCorner(
         const laserscanutils::LineFinderIterativeParams& _line_finder_params, const unsigned int& _n_corners_th) :
-        ProcessorTrackerFeature("TRACKER FEATURE CORNER", 0), line_finder_(_line_finder_params), n_tracks_th_(
+        ProcessorTrackerFeature("TRACKER FEATURE CORNER", 0, 0), line_finder_(_line_finder_params), n_tracks_th_(
                 _n_corners_th), R_world_sensor_(Eigen::Matrix3s::Identity()), R_robot_sensor_(
                 Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(false)
 {
