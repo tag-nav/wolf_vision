@@ -37,6 +37,10 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         vision_utils::MatcherBasePtr mat_ptr_;
         vision_utils::AlgorithmACTIVESEARCHPtr active_search_ptr_;  // Active Search
 
+        int cell_width_; ///< Active search cell width
+        int cell_height_; ///< Active search cell height
+        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_activesearch_ptr_; ///< Active search parameters
+
     protected:
         ProcessorParamsImage params_;           // Struct with parameters of the processors
 

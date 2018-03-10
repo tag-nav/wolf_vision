@@ -32,17 +32,19 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
 {
     protected:
 
-        // Add all vars related to middle capture
-        CaptureBasePtr middle_ptr_;             ///< Pointer to the middle capture of the tracker.
-        FeatureBaseList new_features_middle_;   ///< List of new features in \b middle for new key-frame creation.
+        vision_utils::DetectorBasePtr det_ptr_;
+        vision_utils::DescriptorBasePtr des_ptr_;
+        vision_utils::MatcherBasePtr mat_ptr_;
+        vision_utils::AlgorithmACTIVESEARCHPtr active_search_ptr_;  // Active Search
 
-		vision_utils::DetectorBasePtr det_ptr_;
-		vision_utils::DescriptorBasePtr des_ptr_;
-		vision_utils::MatcherBasePtr mat_ptr_;
-		vision_utils::AlgorithmACTIVESEARCHPtr active_search_ptr_;  // Active Search
+        int cell_width_; ///< Active search cell width
+        int cell_height_; ///< Active search cell height
+        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_activesearch_ptr_; ///< Active search parameters
 
-		ProcessorParamsImage params_;           // Struct with parameters of the processors
-        cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
+    protected:
+
+		ProcessorParamsImage params_;           ///< Struct with parameters of the processors
+        cv::Mat image_last_, image_incoming_;   ///< Images of the "last" and "incoming" Captures
 
         struct
         {

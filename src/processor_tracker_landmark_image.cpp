@@ -108,7 +108,12 @@ void ProcessorTrackerLandmarkImage::setup(SensorCameraPtr _camera_ptr)
     image_.width_ = _camera_ptr->getImgWidth();
     image_.height_ = _camera_ptr->getImgHeight();
 
-    active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight(), det_ptr_->getPatternRadius());
+    active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight() );
+
+    params_activesearch_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmParamsACTIVESEARCH>( active_search_ptr_->getParams() );
+
+    cell_width_ = image_.width_ / params_activesearch_ptr_->n_cells_h;
+    cell_height_ = image_.height_ / params_activesearch_ptr_->n_cells_v;
 }
 
 void ProcessorTrackerLandmarkImage::preProcess()
@@ -154,7 +159,7 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList
 
         if(pinhole::isInImage(pixel, image_.width_, image_.height_))
         {
-            cv::Rect roi = vision_utils::setRoi(pixel[0], pixel[1], mat_ptr_->getParams()->roi_width, mat_ptr_->getParams()->roi_height);
+            cv::Rect roi = vision_utils::setRoi(pixel[0], pixel[1], cell_width_, cell_height_);
 
             active_search_ptr_->hitCell(pixel);
 
@@ -164,7 +169,7 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList
             {
                 Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
 
-                if (normalized_score > mat_ptr_->getParams()->min_norm_score)
+                if (normalized_score > params_activesearch_ptr_->matcher_min_norm_score )
                 {
                     FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                             candidate_keypoints[cv_matches[0].trainIdx],
@@ -232,7 +237,7 @@ unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int
                         index = i;
                 }
 
-                if(new_keypoints[0].response > active_search_ptr_->getParams()->min_response_new_feature)
+                if(new_keypoints[0].response > params_activesearch_ptr_->min_response_new_feature)
                 {
                     list_response_.push_back(new_keypoints[0].response);
                     FeaturePointImagePtr point_ptr = std::make_shared<FeaturePointImage>(

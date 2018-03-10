@@ -98,7 +98,12 @@ void ProcessorTrackerFeatureImage::setup(SensorCameraPtr _camera_ptr)
     image_.width_ = _camera_ptr->getImgWidth();
     image_.height_ = _camera_ptr->getImgHeight();
 
-    active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight(), det_ptr_->getPatternRadius());
+    active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight() );
+
+    params_activesearch_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmParamsACTIVESEARCH>( active_search_ptr_->getParams() );
+
+    cell_width_ = image_.width_ / params_activesearch_ptr_->n_cells_h;
+    cell_height_ = image_.height_ / params_activesearch_ptr_->n_cells_v;
 }
 
 void ProcessorTrackerFeatureImage::preProcess()
@@ -131,7 +136,7 @@ unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& 
     {
         FeaturePointImagePtr feature_ptr = std::static_pointer_cast<FeaturePointImage>(feature_base_ptr);
 
-        cv::Rect roi = vision_utils::setRoi(feature_ptr->getKeypoint().pt.x, feature_ptr->getKeypoint().pt.y, mat_ptr_->getParams()->roi_width, mat_ptr_->getParams()->roi_height);
+        cv::Rect roi = vision_utils::setRoi(feature_ptr->getKeypoint().pt.x, feature_ptr->getKeypoint().pt.y, cell_width_, cell_height_);
 
         active_search_ptr_->hitCell(feature_ptr->getKeypoint());
 
@@ -145,7 +150,7 @@ unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& 
         if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
         {
             Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
-            if (normalized_score > mat_ptr_->getParams()->min_norm_score)
+            if ( normalized_score > params_activesearch_ptr_->matcher_min_norm_score )
             {
                 FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
@@ -189,14 +194,14 @@ bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _ori
 
     Scalar normalized_score = match(origin_descriptor,incoming_descriptor,matches_mat);
 
-    if(normalized_score > mat_ptr_->getParams()->min_norm_score)
+    if(normalized_score > params_activesearch_ptr_->matcher_min_norm_score)
         return true;
     else
     {
         /* CORRECT */
 
-        unsigned int roi_width = mat_ptr_->getParams()->roi_width;
-        unsigned int roi_heigth = mat_ptr_->getParams()->roi_height;
+        unsigned int roi_width = cell_width_;
+        unsigned int roi_heigth = cell_height_;
         unsigned int roi_x;
         unsigned int roi_y;
 
@@ -215,7 +220,7 @@ bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _ori
         if (detect(image_incoming_, roi, correction_keypoints, correction_descriptors))
         {
             Scalar normalized_score_correction = match(origin_descriptor,correction_descriptors,correction_matches);
-            if(normalized_score_correction > mat_ptr_->getParams()->min_norm_score)
+            if(normalized_score_correction > params_activesearch_ptr_->matcher_min_norm_score )
             {
                 feat_incoming_ptr->setKeypoint(correction_keypoints[correction_matches[0].trainIdx]);
                 feat_incoming_ptr->setDescriptor(correction_descriptors.row(correction_matches[0].trainIdx));
@@ -254,7 +259,7 @@ unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int&
                     if(list_keypoints[i].pt == new_keypoints[0].pt)
                         index = i;
                 }
-                if(new_keypoints[0].response > active_search_ptr_->getParams()->min_response_new_feature)
+                if(new_keypoints[0].response > params_activesearch_ptr_->min_response_new_feature)
                 {
                     std::cout << "response: " << new_keypoints[0].response << std::endl;
                     FeaturePointImagePtr point_ptr = std::make_shared<FeaturePointImage>(
