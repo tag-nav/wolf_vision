@@ -62,13 +62,21 @@ void ConstraintBase::remove()
         if (getProblem() != nullptr)
             getProblem()->removeConstraintPtr(shared_from_this());
 
-        // remove other: {Frame, feature, Landmark}
+        // remove other: {Frame, Capture, Feature, Landmark}
         FrameBasePtr frm_o = frame_other_ptr_.lock();
         if (frm_o)
         {
             frm_o->getConstrainedByList().remove(shared_from_this());
             if (frm_o->getConstrainedByList().empty() && frm_o->getCaptureList().empty())
                 frm_o->remove();
+        }
+
+        CaptureBasePtr cap_o = capture_other_ptr_.lock();
+        if (cap_o)
+        {
+            cap_o->getConstrainedByList().remove(shared_from_this());
+            if (cap_o->getConstrainedByList().empty() && cap_o->getFeatureList().empty())
+                cap_o->remove();
         }
 
         FeatureBasePtr ftr_o = feature_other_ptr_.lock();
