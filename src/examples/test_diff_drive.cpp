@@ -187,10 +187,17 @@ int main(int argc, char** argv)
   intrinsics_diff_drive->left_gain_        = 0.01;
   intrinsics_diff_drive->right_gain_       = 0.01;
 
+  // Time and data variables
+  TimeStamp t;
+  Scalar stamp_secs(0);
+//  Scalar period_secs(0.010); //100Hz
+  Scalar period_secs(0.020); //50Hz
+  Eigen::Vector2s data_; data_ << 0,0;
+
   const auto scalar_max = std::numeric_limits<Scalar>::max();
 
   ProcessorParamsBasePtr processor_params =
-      std::make_shared<ProcessorParamsDiffDrive>(0.01, scalar_max, scalar_max, scalar_max);
+      std::make_shared<ProcessorParamsDiffDrive>(period_secs/2, scalar_max, scalar_max, scalar_max);
 
   SensorBasePtr sensor_ptr =
       wolf_problem_ptr_->installSensor("DIFF DRIVE", sensor_name, extrinsics, intrinsics);
@@ -202,13 +209,6 @@ int main(int argc, char** argv)
   wolf_problem_ptr_->installProcessor("DIFF DRIVE", "Diffential Drive processor", sensor_ptr, processor_params);
 
   WOLF_INFO("Processor 'DIFF DRIVE' installed.");
-
-  // Time and data variables
-  TimeStamp t;
-  Scalar stamp_secs(0);
-//  Scalar period_secs(0.010); //100Hz
-  Scalar period_secs(0.020); //50Hz
-  Eigen::Vector2s data_; data_ << 0,0;
 
   // Get initial wheel data
   if (WHEEL_DATA)
