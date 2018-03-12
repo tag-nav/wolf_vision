@@ -47,8 +47,8 @@ public:
    */
   virtual bool voteForKeyFrame() override { return false; }
 
-  virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr,
-                                const Scalar& _time_tolerance) ;
+  virtual void keyFrameCallback(FrameBasePtr _keyframe_ptr,
+                                const Scalar& _time_tolerance) override;
 
   /**
    * \brief Finds the capture that contains the closest previous motion of _ts

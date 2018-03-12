@@ -38,10 +38,10 @@ void ProcessorLoopClosureBase::process(CaptureBasePtr _incoming_ptr)
 }
 
 //##############################################################################
-bool ProcessorLoopClosureBase::keyFrameCallback(FrameBasePtr /*_keyframe_ptr*/,
+void ProcessorLoopClosureBase::keyFrameCallback(FrameBasePtr /*_keyframe_ptr*/,
                                                 const Scalar& /*_time_tol_other*/)
 {
-  return false;
+    //
 }
 
 }// namespace wolf

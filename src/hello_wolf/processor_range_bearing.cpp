@@ -149,9 +149,9 @@ Eigen::Vector2s ProcessorRangeBearing::polar(const Eigen::Vector2s& rect) const
     return polar;
 }
 
-bool ProcessorRangeBearing::keyFrameCallback(FrameBasePtr _key_frame, const Scalar& _time_tolerance)
+void ProcessorRangeBearing::keyFrameCallback(FrameBasePtr _key_frame, const Scalar& _time_tolerance)
 {
-    return true;
+    //
 }
 
 Eigen::Vector2s ProcessorRangeBearing::rect(Scalar range, Scalar bearing) const

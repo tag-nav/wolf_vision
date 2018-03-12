@@ -7,8 +7,8 @@
 
 #include "wolf.h"
 #include "frame_base.h"
+#include "pinhole_tools.h"
 #include "sensor_camera.h"
-#include "pinholeTools.h"
 #include "rotations.h"
 #include "capture_image.h"
 #include "landmark_AHP.h"

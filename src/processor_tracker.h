@@ -100,8 +100,6 @@ class ProcessorTracker : public ProcessorBase
         void setMaxNewFeatures(const unsigned int& _max_new_features);
         unsigned int getMaxNewFeatures();
 
-//        virtual bool keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other);
-
         bool checkTimeTolerance(const TimeStamp& _ts1, const TimeStamp& _ts2);
         bool checkTimeTolerance(const CaptureBasePtr _cap, const TimeStamp& _ts);
         bool checkTimeTolerance(const FrameBasePtr _frm, const TimeStamp& _ts);

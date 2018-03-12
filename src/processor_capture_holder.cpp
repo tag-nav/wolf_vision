@@ -22,7 +22,7 @@ void ProcessorCaptureHolder::process(CaptureBasePtr _capture_ptr)
   buffer_.push_back(_capture_ptr);
 }
 
-bool ProcessorCaptureHolder::keyFrameCallback(FrameBasePtr _keyframe_ptr,
+void ProcessorCaptureHolder::keyFrameCallback(FrameBasePtr _keyframe_ptr,
                                               const Scalar& _time_tolerance)
 {
   assert(_keyframe_ptr->getTrajectoryPtr() != nullptr
@@ -37,7 +37,7 @@ bool ProcessorCaptureHolder::keyFrameCallback(FrameBasePtr _keyframe_ptr,
   if (existing_capture == nullptr)
   {
     WOLF_WARN("Could not find a capture at ts : ", new_ts.get());
-    return false;
+    return;
   }
 
   WOLF_DEBUG("ProcessorCaptureHolder::keyFrameCallback", _time_tolerance);
@@ -63,7 +63,7 @@ bool ProcessorCaptureHolder::keyFrameCallback(FrameBasePtr _keyframe_ptr,
     // Remove as we don't want duplicates
     buffer_.remove(existing_capture);
 
-    return true;
+    return;
   }
   else
   {
@@ -71,7 +71,7 @@ bool ProcessorCaptureHolder::keyFrameCallback(FrameBasePtr _keyframe_ptr,
                std::abs(new_ts - existing_capture->getTimeStamp()),
                " vs ", _time_tolerance);
 
-    return false;
+    return;
   }
 }
 

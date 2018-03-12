@@ -5,7 +5,7 @@
  *      \author: jsola
  */
 
-#include "pinholeTools.h"
+#include "pinhole_tools.h"
 #include "yaml/yaml_conversion.h"
 #include "processor_image_feature.h"
 #include "factory.h"
