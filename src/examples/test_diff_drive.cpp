@@ -190,7 +190,7 @@ int main(int argc, char** argv)
   const auto scalar_max = std::numeric_limits<Scalar>::max();
 
   ProcessorParamsBasePtr processor_params =
-      std::make_shared<ProcessorParamsDiffDrive>(scalar_max, scalar_max, scalar_max);
+      std::make_shared<ProcessorParamsDiffDrive>(0.1, scalar_max, scalar_max, scalar_max);
 
   SensorBasePtr sensor_ptr =
       wolf_problem_ptr_->installSensor("DIFF DRIVE", sensor_name, extrinsics, intrinsics);
@@ -219,6 +219,7 @@ int main(int argc, char** argv)
   t.set(stamp_secs);
   auto processor_diff_drive_ptr =
       std::static_pointer_cast<ProcessorDiffDrive>(wolf_problem_ptr_->getProcessorMotionPtr());
+  processor_diff_drive_ptr->setTimeTolerance(period_secs/2); // overwrite time tolerance based on new evidence
 
   // Set the origin
   // Create one capture to store the Odometry data.
