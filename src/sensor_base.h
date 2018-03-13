@@ -102,7 +102,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
         ProcessorBaseList& getProcessorList();
 
-        CaptureBasePtr lastCapture(void);
+        CaptureBasePtr lastKeyCapture(void);
         CaptureBasePtr lastCapture(const TimeStamp& _ts);
 
         bool process(const CaptureBasePtr capture_ptr);
