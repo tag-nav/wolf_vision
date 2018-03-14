@@ -439,10 +439,10 @@ inline void diff(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1, const
                  MatrixBase<D7>& diff_p, MatrixBase<D8>& diff_o, MatrixBase<D9>& diff_v ,
                  MatrixBase<D10>& J_do_dq1, MatrixBase<D11>& J_do_dq2)
 {
+    diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v);
+
     J_do_dq1    = - jac_SO3_left_inv(diff_o);
     J_do_dq2    =   jac_SO3_right_inv(diff_o);
-
-    diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v);
 }
 
 
@@ -483,6 +483,8 @@ inline void diff(const MatrixBase<D1>& d1,
 
     Matrix<typename D4::Scalar, 3, 3> J_do_dq1, J_do_dq2;
 
+    diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v, J_do_dq1, J_do_dq2);
+
     /* d = diff(d1, d2) is
      *   dp = dp2 - dp1
      *   do = Log(dq1.conj * dq2)
@@ -498,9 +500,6 @@ inline void diff(const MatrixBase<D1>& d1,
 
     J_diff_d2.setIdentity();                                    // d(R1.tr*R2) / d(R2) =   Identity
     J_diff_d2.block(3,3,3,3) = J_do_dq2;      // d(R1.tr*R2) / d(R1) =   J_r_inv(theta)
-
-
-    diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v, J_do_dq1, J_do_dq2);
 }
 
 template<typename D1, typename D2>
