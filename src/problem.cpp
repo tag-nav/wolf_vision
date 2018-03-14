@@ -822,6 +822,12 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     }
                     else
                         cout << " -> S-";
+                    if (C->isMotion())
+                    {
+                        auto CM = std::static_pointer_cast<CaptureMotion>(C);
+                        if (CM->getOriginFramePtr())
+                            cout << " -> OF" << CM->getOriginFramePtr()->id();
+                    }
 
                     cout << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "");
                     if (constr_by)

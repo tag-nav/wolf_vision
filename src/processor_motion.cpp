@@ -267,12 +267,23 @@ void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
         // We need to search in previous keyframes for the capture containing a motion buffer with the queried time stamp
         capture_motion = getCaptureMotionContainingTimeStamp(_ts);
 
-    if (capture_motion)
+    if (capture_motion)  // We found a CaptureMotion whose buffer contains the time stamp
     {
-        // We found a CaptureMotion whose buffer contains the time stamp
-        VectorXs state_0 = capture_motion->getOriginFramePtr()->getState();
-        VectorXs delta = capture_motion->getDeltaCorrected(origin_ptr_->getCalibration(), _ts);
-        Scalar dt = _ts - capture_motion->getBuffer().get().front().ts_;
+        // Get origin state and calibration
+        VectorXs state_0          = capture_motion->getOriginFramePtr()->getState();
+        CaptureBasePtr cap_orig   = capture_motion->getOriginFramePtr()->getCaptureOf(getSensorPtr());
+        VectorXs calib            = cap_orig->getCalibration();
+
+        // Get delta and correct it with new bias
+        VectorXs calib_preint     = capture_motion->getBuffer().getCalibrationPreint();
+        Motion   motion           = capture_motion->getBuffer().getMotion(_ts);
+        
+        VectorXs delta_step       = motion.jacobian_calib_ * (calib - calib_preint);
+        VectorXs delta            = capture_motion->correctDelta( motion.delta_integr_, delta_step);
+
+        // Compose on top of origin state using the buffered time stamp, not the query time stamp
+        // TODO Interpolate the delta to produce a state at the query time stamp _ts
+        Scalar dt = motion.ts_ - capture_motion->getBuffer().get().front().ts_; // = _ts - capture_motion->getOriginPtr()->getTimeStamp();
         statePlusDelta(state_0, delta, dt, _x);
     }
     else
