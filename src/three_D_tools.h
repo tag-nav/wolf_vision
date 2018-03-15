@@ -13,32 +13,24 @@
 #include "rotations.h"
 
 /*
- * Most functions in this file are explained in the document:
+ * The functions in this file are related to manipulations of Delta motion magnitudes used in 3D motion.
  *
- *   Joan Sola, "IMU pre-integration", 2015-2017 IRI-CSIC
- *
- * They relate manipulations of Delta motion magnitudes used for IMU pre-integration.
- *
- * The Delta is defined as
- *     Delta = [Dp, Dq, Dv]
+ * The Delta is defined as a simple 3D pose with the rotation expressed in quaternion form,
+ *     Delta = [Dp, Dq]
  * with
  *     Dp : position delta
  *     Dq : quaternion delta
- *     Dv : velocity delta
  *
- * They are listed below:
+ * The functions are listed below:
  *
- *   - identity: I = Delta at the origin, with Dp = [0,0,0]; Dq = [0,0,0,1], Dv = [0,0,0]
- *   - inverse: so that D (+) D.inv = I
- *   - compose: Dc = D1 (+) D2
- *   - between: Db = D2 (-) D1, so that D2 = D1 (+) Db
- *   - composeOverState: x2 = x1 (+) D
- *   - betweenStates: D = x2 (-) x1, so that x2 = x1 (+) D
- *   - lift: got from Delta manifold to tangent space (equivalent to log() in rotations)
- *   - retract: go from tangent space to delta manifold (equivalent to exp() in rotations)
- *   - plus: D2 = D1 (+) retract(d)
- *   - diff: d = lift( D2 (-) D1 )
- *   - body2delta: construct a delta from body magnitudes of linAcc and angVel
+ *   - compose:     Dc = D1 (+) D2
+ *   - identity:    I  = Delta at the origin, with Dp = [0,0,0]; Dq = [0,0,0,1], so that D (+) I = I (+) D = D
+ *   - inverse:     so that D (+) D.inv = D.inv (+) D = I
+ *   - between:     Db = D2 (-) D1 := D1.inv (+) D2, so that D2 = D1 (+) Db
+ *   - lift:        go from Delta manifold to tangent space (equivalent to log() in rotations)
+ *   - retract:     go from tangent space to delta manifold (equivalent to exp() in rotations)
+ *   - plus:        D2 = D1 (+) retract(d)
+ *   - diff:        d  = lift( D2 (-) D1 )
  */
 
 
@@ -80,8 +72,8 @@ inline void inverse(const MatrixBase<D1>& dp, const QuaternionBase<D2>& dq,
     MatrixSizeCheck<3, 1>::check(dp);
     MatrixSizeCheck<3, 1>::check(idp);
 
-    idp = - ( dq.conjugate() * dp );
-    idq =     dq.conjugate();
+    idp = - dq.conjugate() * dp ;
+    idq =   dq.conjugate() ;
 }
 
 template<typename D1, typename D2>
@@ -108,7 +100,7 @@ inline Matrix<typename D::Scalar, 7, 1> inverse(const MatrixBase<D>& d)
     return id;
 }
 
-template<typename D1, typename D2, typename D4, typename D5, typename D7, typename D8, typename D6>
+template<typename D1, typename D2, typename D4, typename D5, typename D7, typename D8>
 inline void compose(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1,
                     const MatrixBase<D4>& dp2, const QuaternionBase<D5>& dq2,
                     MatrixBase<D7>& sum_p, QuaternionBase<D8>& sum_q )
@@ -180,17 +172,17 @@ inline void compose(const MatrixBase<D1>& d1,
     compose(d1, d2, sum);
 }
 
-template<typename D1, typename D2, typename D4, typename D5, typename D7, typename D8, typename D6>
+template<typename D1, typename D2, typename D4, typename D5, typename D7, typename D8>
 inline void between(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1,
                     const MatrixBase<D4>& dp2, const QuaternionBase<D5>& dq2,
-                    MatrixBase<D7>& diff_p, QuaternionBase<D8>& diff_q)
+                    MatrixBase<D7>& dp12, QuaternionBase<D8>& dq12)
 {
         MatrixSizeCheck<3, 1>::check(dp1);
         MatrixSizeCheck<3, 1>::check(dp2);
-        MatrixSizeCheck<3, 1>::check(diff_p);
+        MatrixSizeCheck<3, 1>::check(dp12);
 
-        diff_p = dq1.conjugate() * ( dp2 - dp1 );
-        diff_q = dq1.conjugate() *   dq2;
+        dp12 = dq1.conjugate() * ( dp2 - dp1 );
+        dq12 = dq1.conjugate() *   dq2;
 }
 
 template<typename D1, typename D2, typename D3>
@@ -206,20 +198,20 @@ inline void between(const MatrixBase<D1>& d1,
     Map<const Quaternion<typename D1::Scalar> >     dq1    ( & d1(3) );
     Map<const Matrix<typename D2::Scalar, 3, 1> >   dp2    ( & d2(0) );
     Map<const Quaternion<typename D2::Scalar> >     dq2    ( & d2(3) );
-    Map<Matrix<typename D3::Scalar, 3, 1> >         diff_p ( & d2_minus_d1(0) );
-    Map<Quaternion<typename D3::Scalar> >           diff_q ( & d2_minus_d1(3) );
+    Map<Matrix<typename D3::Scalar, 3, 1> >         dp12 ( & d2_minus_d1(0) );
+    Map<Quaternion<typename D3::Scalar> >           dq12 ( & d2_minus_d1(3) );
 
-    between(dp1, dq1, dp2, dq2, diff_p, diff_q);
+    between(dp1, dq1, dp2, dq2, dp12, dq12);
 }
 
 
 template<typename D1, typename D2>
 inline Matrix<typename D1::Scalar, 7, 1> between(const MatrixBase<D1>& d1,
-                                                  const MatrixBase<D2>& d2 )
+                                                 const MatrixBase<D2>& d2 )
 {
-    Matrix<typename D1::Scalar, 7, 1> diff;
-    between(d1, d2, diff);
-    return diff;
+    Matrix<typename D1::Scalar, 7, 1> d12;
+    between(d1, d2, d12);
+    return d12;
 }
 
 template<typename Derived>
@@ -258,7 +250,7 @@ Matrix<typename Derived::Scalar, 7, 1> retract(const MatrixBase<Derived>& d_in)
     return ret;
 }
 
-template<typename D1, typename D2, typename D4, typename D5, typename D7, typename D8, typename D6>
+template<typename D1, typename D2, typename D4, typename D5, typename D7, typename D8>
 inline void plus(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1,
                  const MatrixBase<D4>& dp2, const MatrixBase<D5>& do2,
                  MatrixBase<D7>& plus_p, QuaternionBase<D8>& plus_q)
@@ -270,25 +262,25 @@ inline void plus(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1,
 template<typename D1, typename D2, typename D3>
 inline void plus(const MatrixBase<D1>& d1,
                  const MatrixBase<D2>& d2,
-                 MatrixBase<D3>& d_pert)
+                 MatrixBase<D3>& d_plus)
 {
     Map<const Matrix<typename D1::Scalar, 3, 1> >   dp1    ( & d1(0) );
     Map<const Quaternion<typename D1::Scalar> >     dq1    ( & d1(3) );
     Map<const Matrix<typename D2::Scalar, 3, 1> >   dp2    ( & d2(0) );
     Map<const Matrix<typename D2::Scalar, 3, 1> >   do2    ( & d2(3) );
-    Map<Matrix<typename D3::Scalar, 3, 1> >         dp_p ( & d_pert(0) );
-    Map<Quaternion<typename D3::Scalar> >           dq_p ( & d_pert(3) );
+    Map<Matrix<typename D3::Scalar, 3, 1> >         dp_p ( & d_plus(0) );
+    Map<Quaternion<typename D3::Scalar> >           dq_p ( & d_plus(3) );
 
     plus(dp1, dq1, dp2, do2, dp_p, dq_p);
 }
 
 template<typename D1, typename D2>
 inline Matrix<typename D1::Scalar, 7, 1> plus(const MatrixBase<D1>& d1,
-                                               const MatrixBase<D2>& d2)
+                                              const MatrixBase<D2>& d2)
 {
-    Matrix<typename D1::Scalar, 7, 1> ret;
-    plus(d1, d2, ret);
-    return ret;
+    Matrix<typename D1::Scalar, 7, 1> d_plus;
+    plus(d1, d2, d_plus);
+    return d_plus;
 }
 
 template<typename D1, typename D2, typename D4, typename D5, typename D7, typename D8>
@@ -362,7 +354,7 @@ inline void diff(const MatrixBase<D1>& d1,
     J_diff_d1 = - Matrix<typename D4::Scalar, 6, 6>::Identity();// d(p2  - p1) / d(p1) = - Identity
     J_diff_d1.block(3,3,3,3) = J_do_dq1;       // d(R1.tr*R2) / d(R1) = - J_l_inv(theta)
 
-    J_diff_d2.setIdentity();                                    // d(R1.tr*R2) / d(R2) =   Identity
+    J_diff_d2.setIdentity(6,6);                                    // d(R1.tr*R2) / d(R2) =   Identity
     J_diff_d2.block(3,3,3,3) = J_do_dq2;      // d(R1.tr*R2) / d(R1) =   J_r_inv(theta)
 }
 
