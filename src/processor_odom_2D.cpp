@@ -6,8 +6,9 @@ ProcessorOdom2D::ProcessorOdom2D(const Scalar& _dist_traveled_th,
                                  const Scalar& _theta_traveled_th,
                                  const Scalar& _cov_det_th,
                                  const Scalar& _elapsed_time_th,
-                                 const Scalar& _unmeasured_perturbation_std) :
-        ProcessorMotion("ODOM 2D", 3, 3, 3, 2),
+                                 const Scalar& _unmeasured_perturbation_std,
+                                 const Scalar& _time_tolerance) :
+        ProcessorMotion("ODOM 2D", 3, 3, 3, 2, 0, _time_tolerance),
         dist_traveled_th_(_dist_traveled_th),
         theta_traveled_th_(_theta_traveled_th),
         cov_det_th_(_cov_det_th),

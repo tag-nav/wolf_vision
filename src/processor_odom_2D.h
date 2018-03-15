@@ -35,7 +35,8 @@ class ProcessorOdom2D : public ProcessorMotion
                         const Scalar& _theta_traveled_th            = 0.17,
                         const Scalar& _cov_det_th                   = 1.0,
                         const Scalar& _elapsed_time_th              = 1.0,
-                        const Scalar& _unmeasured_perturbation_std  = 0.001);
+                        const Scalar& _unmeasured_perturbation_std  = 0.001,
+                        const Scalar& _time_tolerance               = 0.01);
         virtual ~ProcessorOdom2D();
         virtual bool voteForKeyFrame() override;
 

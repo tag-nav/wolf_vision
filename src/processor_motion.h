@@ -110,13 +110,6 @@ class ProcessorMotion : public ProcessorBase
     protected:
         ProcessingStep processing_step_;        ///< State machine controlling the processing step
 
-    private:
-        enum
-        {
-            IDLE,
-            RUNNING
-        } status_;
-
     // This is the main public interface
     public:
         ProcessorMotion(const std::string& _type,
@@ -124,8 +117,8 @@ class ProcessorMotion : public ProcessorBase
                         Size _delta_size,
                         Size _delta_cov_size,
                         Size _data_size,
-                        Scalar _time_tolerance = 0.1,
-                        Size _calib_size = 0);
+                        Size _calib_size = 0,
+                        Scalar _time_tolerance = 0.1);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
