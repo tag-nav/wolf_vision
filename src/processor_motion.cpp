@@ -264,7 +264,7 @@ void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
         capture_motion = last_ptr_;
     else
         // We need to search in previous keyframes for the capture containing a motion buffer with the queried time stamp
-        capture_motion = getCaptureMotionContainingTimeStamp(_ts);
+        capture_motion = findCaptureContainingTimeStamp(_ts);
 
     if (capture_motion)  // We found a CaptureMotion whose buffer contains the time stamp
     {
@@ -294,34 +294,34 @@ void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
     }
 }
 
-CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
-{
-    //std::cout << "ProcessorMotion::findCaptureContainingTimeStamp: ts = " << _ts.getSeconds() << "." << _ts.getNanoSeconds() << std::endl;
-    CaptureMotionPtr capture_ptr = last_ptr_;
-    while (capture_ptr != nullptr)
-    {
-        // capture containing motion previous than the ts found:
-        if (capture_ptr->getBuffer().get().front().ts_ < _ts)
-            return capture_ptr;
-        else
-        {
-            // go to the previous motion capture
-            if (capture_ptr == last_ptr_)
-                capture_ptr = origin_ptr_;
-            else if (capture_ptr->getOriginFramePtr() == nullptr)
-                return nullptr;
-            else
-            {
-                CaptureBasePtr capture_base_ptr = capture_ptr->getOriginFramePtr()->getCaptureOf(getSensorPtr());
-                if (capture_base_ptr == nullptr)
-                    return nullptr;
-                else
-                    capture_ptr = std::static_pointer_cast<CaptureMotion>(capture_base_ptr);
-            }
-        }
-    }
-    return capture_ptr;
-}
+//CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
+//{
+//    //std::cout << "ProcessorMotion::findCaptureContainingTimeStamp: ts = " << _ts.getSeconds() << "." << _ts.getNanoSeconds() << std::endl;
+//    CaptureMotionPtr capture_ptr = last_ptr_;
+//    while (capture_ptr != nullptr)
+//    {
+//        // capture containing motion previous than the ts found:
+//        if (capture_ptr->getBuffer().get().front().ts_ < _ts)
+//            return capture_ptr;
+//        else
+//        {
+//            // go to the previous motion capture
+//            if (capture_ptr == last_ptr_)
+//                capture_ptr = origin_ptr_;
+//            else if (capture_ptr->getOriginFramePtr() == nullptr)
+//                return nullptr;
+//            else
+//            {
+//                CaptureBasePtr capture_base_ptr = capture_ptr->getOriginFramePtr()->getCaptureOf(getSensorPtr());
+//                if (capture_base_ptr == nullptr)
+//                    return nullptr;
+//                else
+//                    capture_ptr = std::static_pointer_cast<CaptureMotion>(capture_base_ptr);
+//            }
+//        }
+//    }
+//    return capture_ptr;
+//}
 
 FrameBasePtr ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
@@ -515,27 +515,28 @@ Motion ProcessorMotion::interpolate(const Motion& _ref, Motion& _second, TimeSta
 
 }
 
-CaptureMotionPtr ProcessorMotion::getCaptureMotionContainingTimeStamp(const TimeStamp& _ts)
+CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
 {
     // We need to search in previous keyframes for the capture containing a motion buffer with the queried time stamp
     // Note: since the buffer goes from a FK through the past until the previous KF, we need to:
     //  1. See that the KF contains a CaptureMotion
     //  2. See that the TS is smaller than the KF's TS
     //  3. See that the TS is bigger than the KF's first Motion in the CaptureMotion's buffer
-    FrameBasePtr frame = nullptr;
-    CaptureBasePtr capture = nullptr;
+    FrameBasePtr     frame          = nullptr;
+    CaptureBasePtr   capture        = nullptr;
     CaptureMotionPtr capture_motion = nullptr;
-    for (auto frame_iter = getProblem()->getTrajectoryPtr()->getFrameList().rbegin();
-            frame_iter != getProblem()->getTrajectoryPtr()->getFrameList().rend(); ++frame_iter)
+    for (auto frame_rev_iter = getProblem()->getTrajectoryPtr()->getFrameList().rbegin();
+            frame_rev_iter != getProblem()->getTrajectoryPtr()->getFrameList().rend();
+            ++frame_rev_iter)
     {
-        frame = *frame_iter;
+        frame   = *frame_rev_iter;
         capture = frame->getCaptureOf(getSensorPtr());
         if (capture != nullptr)
         {
             // We found a Capture belonging to this processor's Sensor ==> it is a CaptureMotion
             capture_motion = std::static_pointer_cast<CaptureMotion>(capture);
             if (_ts >= capture_motion->getBuffer().get().front().ts_)
-                // Found time stamp satisfying rule 3 above !!
+                // Found time stamp satisfying rule 3 above !! ==> break for loop
                 break;
         }
     }

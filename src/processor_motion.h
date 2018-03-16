@@ -397,7 +397,6 @@ class ProcessorMotion : public ProcessorBase
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin) = 0;
 
         Motion motionZero(const TimeStamp& _ts);
-        CaptureMotionPtr getCaptureMotionContainingTimeStamp(const TimeStamp& _ts);
 
     public:
         virtual CaptureMotionPtr getOriginPtr();
