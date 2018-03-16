@@ -90,6 +90,10 @@ void CaptureBase::remove()
         {
             feature_list_.front()->remove(); // remove downstream
         }
+        while (!constrained_by_list_.empty())
+        {
+            constrained_by_list_.front()->remove(); // remove constrained by
+        }
     }
 }
 
@@ -146,7 +150,7 @@ void CaptureBase::removeStateBlocks()
 {
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        auto sbp = state_block_vec_[i];
         if (sbp != nullptr)
         {
             if (getProblem() != nullptr)

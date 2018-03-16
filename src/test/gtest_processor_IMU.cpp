@@ -438,7 +438,7 @@ TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
     // init things
     problem->setPrior(x0, P0, t, 0.01);
 
-    std::static_pointer_cast<wolf::CaptureMotion>(problem->getProcessorMotionPtr()->getOriginPtr())->setCalibration(bias);
+    problem->getProcessorMotionPtr()->getOriginPtr()->setCalibration(bias);
     problem->getProcessorMotionPtr()->getLastPtr()->setCalibrationPreint(bias);
 //    WOLF_DEBUG("calib: ", cap_imu_ptr->getCalibration().transpose());
 
@@ -494,7 +494,7 @@ TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
     Vector6s bias; bias << abx,aby,0,  0,0,0;
     Vector3s acc_bias = bias.head(3);
 
-    std::static_pointer_cast<wolf::CaptureMotion>(problem->getProcessorMotionPtr()->getOriginPtr())->setCalibration(bias);
+    problem->getProcessorMotionPtr()->getOriginPtr()->setCalibration(bias);
     problem->getProcessorMotionPtr()->getLastPtr()->setCalibrationPreint(bias);
 
     wolf::Scalar rate_of_turn = 5 * M_PI/180.0;

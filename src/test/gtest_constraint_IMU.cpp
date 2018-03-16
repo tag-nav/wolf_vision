@@ -979,9 +979,9 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
 
                 sensor_odo->process(capture_odo);
 
-//                WOLF_TRACE("Jac calib: ", std::static_pointer_cast<CaptureMotion>(processor_imu->getOriginPtr())->getJacobianCalib().row(0));
+//                WOLF_TRACE("Jac calib: ", processor_imu->getOriginPtr()->getJacobianCalib().row(0));
 //                WOLF_TRACE("orig calib: ", processor_imu->getOriginPtr()->getCalibration().transpose());
-//                WOLF_TRACE("orig calib preint: ", std::static_pointer_cast<CaptureMotion>(processor_imu->getOriginPtr())->getCalibrationPreint().transpose());
+//                WOLF_TRACE("orig calib preint: ", processor_imu->getOriginPtr()->getCalibrationPreint().transpose());
 
                 //prepare next odometry measurement
                 quat_odo = Eigen::Quaternions::Identity(); //set to identity to have next odom relative to this last KF

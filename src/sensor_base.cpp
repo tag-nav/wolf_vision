@@ -218,18 +218,21 @@ void SensorBase::setNoiseCov(const Eigen::MatrixXs& _noise_cov) {
     noise_cov_ = _noise_cov;
 }
 
-CaptureBasePtr SensorBase::lastCapture(void)
+CaptureBasePtr SensorBase::lastKeyCapture(void)
 {
-    // we search for the most recent Capture of this sensor
+    // we search for the most recent Capture of this sensor which belongs to a KeyFrame
     CaptureBasePtr capture = nullptr;
     FrameBaseList frame_list = getProblem()->getTrajectoryPtr()->getFrameList();
     FrameBaseRevIter frame_rev_it = frame_list.rbegin();
     while (frame_rev_it != frame_list.rend())
     {
-        CaptureBasePtr capture = (*frame_rev_it)->getCaptureOf(shared_from_this());
-        if (capture)
-            // found the most recent Capture made by this sensor !
-            break;
+        if ((*frame_rev_it)->isKey())
+        {
+            capture = (*frame_rev_it)->getCaptureOf(shared_from_this());
+            if (capture)
+                // found the most recent Capture made by this sensor !
+                break;
+        }
         frame_rev_it++;
     }
     return capture;
@@ -340,7 +343,7 @@ StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i)
 {
     if ((_i<2 && this->extrinsicsInCaptures()) || (_i>=2 && intrinsicsInCaptures()))
     {
-        CaptureBasePtr cap = lastCapture();
+        CaptureBasePtr cap = lastKeyCapture();
         if (cap)
             return cap->getStateBlockPtr(_i);
         else

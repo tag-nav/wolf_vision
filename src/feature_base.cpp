@@ -30,6 +30,8 @@ void FeatureBase::remove()
     {
         is_removing_ = true;
         FeatureBasePtr this_f = shared_from_this(); // keep this alive while removing it
+
+        // remove from upstream
         CaptureBasePtr C = capture_ptr_.lock();
         if (C)
         {
@@ -37,6 +39,8 @@ void FeatureBase::remove()
             if (C->getFeatureList().empty())
                 C->remove(); // remove upstream
         }
+
+        // remove downstream
         while (!constraint_list_.empty())
         {
             constraint_list_.front()->remove(); // remove downstream
@@ -45,7 +49,6 @@ void FeatureBase::remove()
         {
             constrained_by_list_.front()->remove(); // remove constrained
         }
-//        std::cout << "Removed           f" << id() << std::endl;
     }
 }
 

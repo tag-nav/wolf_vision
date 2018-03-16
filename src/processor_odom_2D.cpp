@@ -3,11 +3,11 @@ namespace wolf
 {
 
 ProcessorOdom2D::ProcessorOdom2D(const ProcessorParamsOdom2D& _params) :
-            ProcessorMotion("ODOM 2D", 3, 3, 3, 2),
-            dist_traveled_th_(_params.dist_traveled_th_),
-            theta_traveled_th_(_params.theta_traveled_th_),
-            cov_det_th_(_params.cov_det_th_),
-            elapsed_time_th_(_params.elapsed_time_th_)
+                ProcessorMotion("ODOM 2D", 3, 3, 3, 2, 0, _params.time_tolerance),
+                dist_traveled_th_(_params.dist_traveled_th_),
+                theta_traveled_th_(_params.theta_traveled_th_),
+                cov_det_th_(_params.cov_det_th_),
+                elapsed_time_th_(_params.elapsed_time_th_)
 {
     unmeasured_perturbation_cov_ = _params.unmeasured_perturbation_std_ * _params.unmeasured_perturbation_std_ * Matrix3s::Identity();
 }

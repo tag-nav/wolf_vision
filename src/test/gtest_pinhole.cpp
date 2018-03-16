@@ -5,9 +5,9 @@
  *      Author: jsola
  */
 
+#include "pinhole_tools.h"
 #include "utils_gtest.h"
 
-#include "../pinholeTools.h"
 
 using namespace Eigen;
 using namespace wolf;

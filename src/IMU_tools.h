@@ -220,8 +220,8 @@ inline void between(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1, co
         MatrixSizeCheck<3, 1>::check(diff_v);
 
         diff_p = dq1.conjugate() * ( dp2 - dp1 - dv1*dt );
-        diff_q = dq1.conjugate() *   dq2;
         diff_v = dq1.conjugate() * ( dv2 - dv1 );
+        diff_q = dq1.conjugate() *   dq2;
 }
 
 template<typename D1, typename D2, typename D3, class T>
@@ -307,8 +307,8 @@ inline void betweenStates(const MatrixBase<D1>& p1, const QuaternionBase<D2>& q1
         MatrixSizeCheck<3, 1>::check(dv);
 
         dp = q1.conjugate() * ( p2 - p1 - v1*dt - (T)0.5*gravity().cast<T>()*(T)dt*(T)dt );
-        dq = q1.conjugate() *   q2;
         dv = q1.conjugate() * ( v2 - v1         -     gravity().cast<T>()*(T)dt );
+        dq = q1.conjugate() *   q2;
 }
 
 template<typename D1, typename D2, typename D3, class T>
@@ -359,8 +359,8 @@ Matrix<typename Derived::Scalar, 9, 1> lift(const MatrixBase<Derived>& delta_in)
     Map<Matrix<typename Derived::Scalar, 3, 1> >         dv_ret ( & ret(6) );
 
     dp_ret = dp_in;
-    do_ret = log_q(dq_in);
     dv_ret = dv_in;
+    do_ret = log_q(dq_in);
 
     return ret;
 }
@@ -380,8 +380,8 @@ Matrix<typename Derived::Scalar, 10, 1> retract(const MatrixBase<Derived>& d_in)
     Map<Matrix<typename Derived::Scalar, 3, 1> >         dv     ( &  ret(7) );
 
     dp = dp_in;
-    dq = exp_q(do_in);
     dv = dv_in;
+    dq = exp_q(do_in);
 
     return ret;
 }
@@ -392,8 +392,8 @@ inline void plus(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1, const
                  MatrixBase<D7>& plus_p, QuaternionBase<D8>& plus_q, MatrixBase<D9>& plus_v )
 {
         plus_p = dp1 + dp2;
-        plus_q = dq1 * exp_q(do2);
         plus_v = dv1 + dv2;
+        plus_q = dq1 * exp_q(do2);
 }
 
 template<typename D1, typename D2, typename D3>
@@ -429,8 +429,8 @@ inline void diff(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1, const
                  MatrixBase<D7>& diff_p, MatrixBase<D8>& diff_o, MatrixBase<D9>& diff_v )
 {
         diff_p = dp2 - dp1;
-        diff_o = log_q(dq1.conjugate() * dq2);
         diff_v = dv2 - dv1;
+        diff_o = log_q(dq1.conjugate() * dq2);
 }
 
 template<typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
@@ -485,7 +485,6 @@ inline void diff(const MatrixBase<D1>& d1,
 
     diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v, J_do_dq1, J_do_dq2);
 
-
     /* d = diff(d1, d2) is
      *   dp = dp2 - dp1
      *   do = Log(dq1.conj * dq2)
@@ -501,7 +500,6 @@ inline void diff(const MatrixBase<D1>& d1,
 
     J_diff_d2.setIdentity();                                    // d(R1.tr*R2) / d(R2) =   Identity
     J_diff_d2.block(3,3,3,3) = J_do_dq2;      // d(R1.tr*R2) / d(R1) =   J_r_inv(theta)
-
 }
 
 template<typename D1, typename D2>
@@ -528,8 +526,8 @@ inline void body2delta(const MatrixBase<D1>& a,
     MatrixSizeCheck<3,1>::check(dv);
 
     dp = 0.5 * a * dt * dt;
-    dq = exp_q(w * dt);
     dv =       a * dt;
+    dq = exp_q(w * dt);
 }
 
 template<typename D1>

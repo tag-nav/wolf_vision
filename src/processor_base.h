@@ -20,6 +20,8 @@ namespace wolf {
 /** \brief Key frame class pack
  *
  * To store a key_frame with an associated time tolerance.
+ *
+ * Used in keyframe callbacks as the minimal pack of information needed by the processor receiving the callback.
  */
 class KFPack
 {
