@@ -400,7 +400,7 @@ class ProcessorMotion : public ProcessorBase
         CaptureMotionPtr getCaptureMotionContainingTimeStamp(const TimeStamp& _ts);
 
     public:
-        virtual CaptureBasePtr getOriginPtr();
+        virtual CaptureMotionPtr getOriginPtr();
         virtual CaptureMotionPtr getLastPtr();
         virtual CaptureMotionPtr getIncomingPtr();
 
@@ -412,7 +412,7 @@ class ProcessorMotion : public ProcessorBase
         Size delta_size_;       ///< the size of the deltas
         Size delta_cov_size_;   ///< the size of the delta covariances matrix
         Size calib_size_;       ///< size of the extra parameters (TBD in derived classes)
-        CaptureBasePtr origin_ptr_;
+        CaptureMotionPtr origin_ptr_;
         CaptureMotionPtr last_ptr_;
         CaptureMotionPtr incoming_ptr_;
 
@@ -534,7 +534,7 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
     );
 }
 
-inline CaptureBasePtr ProcessorMotion::getOriginPtr()
+inline CaptureMotionPtr ProcessorMotion::getOriginPtr()
 {
     return origin_ptr_;
 }

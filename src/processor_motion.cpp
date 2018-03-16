@@ -307,7 +307,7 @@ CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp
         {
             // go to the previous motion capture
             if (capture_ptr == last_ptr_)
-                capture_ptr = std::static_pointer_cast<CaptureMotion>(origin_ptr_);
+                capture_ptr = origin_ptr_;
             else if (capture_ptr->getOriginFramePtr() == nullptr)
                 return nullptr;
             else
