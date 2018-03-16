@@ -7,8 +7,8 @@ ProcessorMotion::ProcessorMotion(const std::string& _type,
                                  Size _delta_size,
                                  Size _delta_cov_size,
                                  Size _data_size,
-                                 Scalar _time_tolerance,
-                                 Size _calib_size) :
+                                 Size _calib_size,
+                                 Scalar _time_tolerance) :
         ProcessorBase(_type, _time_tolerance),
         processing_step_(RUNNING_WITHOUT_PACK),
         x_size_(_state_size),
@@ -30,7 +30,6 @@ ProcessorMotion::ProcessorMotion(const std::string& _type,
         jacobian_delta_(delta_cov_size_, delta_cov_size_),
         jacobian_calib_(delta_size_, calib_size_)
 {
-    status_ = IDLE;
     //
 }
 
@@ -308,7 +307,7 @@ CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp
         {
             // go to the previous motion capture
             if (capture_ptr == last_ptr_)
-                capture_ptr = std::static_pointer_cast<CaptureMotion>(origin_ptr_);
+                capture_ptr = origin_ptr_;
             else if (capture_ptr->getOriginFramePtr() == nullptr)
                 return nullptr;
             else
