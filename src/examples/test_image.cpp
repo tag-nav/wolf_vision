@@ -3,7 +3,7 @@
 //Wolf includes
 #include "sensor_camera.h"
 #include "capture_image.h"
-#include "processor_image_feature.h"
+#include "processor_tracker_feature_image.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 // Vision utils includes
@@ -122,7 +122,7 @@ int main(int argc, char** argv)
 
     // PROCESSOR
     // one-liner API
-    ProcessorTrackerTrifocalTensorPtr prc_img_ptr = std::static_pointer_cast<ProcessorImageFeature>( wolf_problem_->installProcessor("IMAGE FEATURE", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml") );
+    ProcessorTrackerFeatureImagePtr prc_img_ptr = std::static_pointer_cast<ProcessorTrackerFeatureImage>( wolf_problem_->installProcessor("IMAGE FEATURE", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml") );
     prc_img_ptr->setup(camera_ptr);
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================

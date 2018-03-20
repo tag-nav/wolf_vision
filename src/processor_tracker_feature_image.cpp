@@ -9,6 +9,7 @@ namespace wolf
 
 ProcessorTrackerFeatureImage::ProcessorTrackerFeatureImage(ProcessorParamsImage _params) :
     ProcessorTrackerFeature("IMAGE", _params.time_tolerance, _params.algorithm.max_new_features),
+    cell_width_(0), cell_height_(0), // These will need to be initialized via function setup()
     params_(_params)
 {
 	// Detector
@@ -98,7 +99,7 @@ void ProcessorTrackerFeatureImage::setup(SensorCameraPtr _camera_ptr)
     image_.width_ = _camera_ptr->getImgWidth();
     image_.height_ = _camera_ptr->getImgHeight();
 
-    active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight() );
+    active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight() , det_ptr_->getPatternRadius());
 
     params_activesearch_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmParamsACTIVESEARCH>( active_search_ptr_->getParams() );
 
@@ -150,7 +151,7 @@ unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& 
         if (detect(image_incoming_, roi, candidate_keypoints, candidate_descriptors))
         {
             Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
-            if ( normalized_score > params_activesearch_ptr_->matcher_min_norm_score )
+            if ( normalized_score > mat_ptr_->getParams()->min_norm_score )
             {
                 FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
@@ -194,7 +195,7 @@ bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _ori
 
     Scalar normalized_score = match(origin_descriptor,incoming_descriptor,matches_mat);
 
-    if(normalized_score > params_activesearch_ptr_->matcher_min_norm_score)
+    if(normalized_score > mat_ptr_->getParams()->min_norm_score)
         return true;
     else
     {
@@ -220,7 +221,7 @@ bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _ori
         if (detect(image_incoming_, roi, correction_keypoints, correction_descriptors))
         {
             Scalar normalized_score_correction = match(origin_descriptor,correction_descriptors,correction_matches);
-            if(normalized_score_correction > params_activesearch_ptr_->matcher_min_norm_score )
+            if(normalized_score_correction > mat_ptr_->getParams()->min_norm_score )
             {
                 feat_incoming_ptr->setKeypoint(correction_keypoints[correction_matches[0].trainIdx]);
                 feat_incoming_ptr->setDescriptor(correction_descriptors.row(correction_matches[0].trainIdx));
@@ -381,9 +382,10 @@ void ProcessorTrackerFeatureImage::drawFeatures(cv::Mat _image)
 }
 
 
-ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
+ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sensor_ptr)
 {
     ProcessorTrackerFeatureImagePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureImage>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
+    prc_ptr->setup(std::static_pointer_cast<SensorCamera>(_sensor_ptr));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

@@ -5,7 +5,7 @@
 #include "constraint_corner_2D.h"
 #include "constraint_AHP.h"
 #include "sensor_camera.h"
-#include "pinholeTools.h"
+#include "pinhole_tools.h"
 #include "trajectory_base.h"
 #include "map_base.h"
 
@@ -108,7 +108,7 @@ void ProcessorTrackerLandmarkImage::setup(SensorCameraPtr _camera_ptr)
     image_.width_ = _camera_ptr->getImgWidth();
     image_.height_ = _camera_ptr->getImgHeight();
 
-    active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight() );
+    active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight(), det_ptr_->getPatternRadius() );
 
     params_activesearch_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmParamsACTIVESEARCH>( active_search_ptr_->getParams() );
 
@@ -169,7 +169,7 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList
             {
                 Scalar normalized_score = match(target_descriptor,candidate_descriptors,cv_matches);
 
-                if (normalized_score > params_activesearch_ptr_->matcher_min_norm_score )
+                if (normalized_score > mat_ptr_->getParams()->min_norm_score )
                 {
                     FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                             candidate_keypoints[cv_matches[0].trainIdx],

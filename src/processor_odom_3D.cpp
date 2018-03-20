@@ -2,7 +2,7 @@
 namespace wolf
 {
 
-ProcessorOdom3D::ProcessorOdom3D(ProcessorOdom3DParamsPtr _params, SensorOdom3DPtr _sensor_ptr) :
+ProcessorOdom3D::ProcessorOdom3D(ProcessorParamsOdom3DPtr _params, SensorOdom3DPtr _sensor_ptr) :
                 ProcessorMotion("ODOM 3D", 7, 7, 6, 6, 0, (_params ? _params->time_tolerance : 0.01) ),
                 max_time_span_  (_params ? _params    ->max_time_span   : 1.0  ),
                 max_buff_length_(_params ? _params    ->max_buff_length : 10   ),
@@ -261,7 +261,7 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion_s
 ProcessorBasePtr ProcessorOdom3D::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
     // cast inputs to the correct type
-    std::shared_ptr<ProcessorOdom3DParams> prc_odo_params = std::static_pointer_cast<ProcessorOdom3DParams>(_params);
+    std::shared_ptr<ProcessorParamsOdom3> prc_odo_params = std::static_pointer_cast<ProcessorParamsOdom3>(_params);
 
     SensorOdom3DPtr sen_odo =std::static_pointer_cast<SensorOdom3D>(_sen_ptr);
 

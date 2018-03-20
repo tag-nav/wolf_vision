@@ -89,7 +89,7 @@ int main(int argc, char** argv)
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sensor_base);
     camera->setImgWidth(img_width);
     camera->setImgHeight(img_height);
-    ProcessorImageLandmarkPtr prc_img_ptr = std::static_pointer_cast<ProcessorTrackerLandmarkImage>( problem->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml") );
+    ProcessorTrackerLandmarkImagePtr prc_img_ptr = std::static_pointer_cast<ProcessorTrackerLandmarkImage>( problem->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml") );
     //=====================================================
 
     //=====================================================

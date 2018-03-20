@@ -142,6 +142,10 @@ target_link_libraries(gtest_processor_IMU ${PROJECT_NAME})
 wolf_add_gtest(gtest_processor_IMU_jacobians gtest_processor_IMU_jacobians.cpp)
 target_link_libraries(gtest_processor_IMU_jacobians ${PROJECT_NAME})
 
+# ProcessorIMUJacobians test
+wolf_add_gtest(gtest_processor_tracker_feature_trifocal gtest_processor_tracker_feature_trifocal.cpp)
+target_link_libraries(gtest_processor_tracker_feature_trifocal ${PROJECT_NAME})
+
 # ProcessorMotion in 2D
 wolf_add_gtest(gtest_odom_2D gtest_odom_2D.cpp)
 target_link_libraries(gtest_odom_2D ${PROJECT_NAME})

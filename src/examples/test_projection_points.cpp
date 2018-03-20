@@ -14,8 +14,8 @@ int main(int argc, char** argv)
 
     std::cout << std::endl << " ========= ProjectPoints test ===========" << std::endl << std::endl;
 
-    Eigen::MatrixXf points3D(2,3);
-    Eigen::Vector3f point3D;
+    Eigen::MatrixXs points3D(2,3);
+    Eigen::Vector3s point3D;
     point3D[0] = 2.0;
     point3D[1] = 5.0;
     point3D[2] = 6.0;
@@ -25,18 +25,18 @@ int main(int argc, char** argv)
     point3D[2] = 1.0;
     points3D.row(1)= point3D;
 
-    Eigen::Vector3f cam_ext_rot_mat = Eigen::Vector3f::Zero();
-    Eigen::Vector3f cam_ext_trans_mat = Eigen::Vector3f::Ones();
+    Eigen::Vector3s cam_ext_rot_mat = Eigen::Vector3s::Zero();
+    Eigen::Vector3s cam_ext_trans_mat = Eigen::Vector3s::Ones();
 
-    Eigen::Matrix3f cam_intr_mat;
-    cam_intr_mat = Eigen::Matrix3f::Identity();
+    Eigen::Matrix3s cam_intr_mat;
+    cam_intr_mat = Eigen::Matrix3s::Identity();
     cam_intr_mat(0,2)=2;
     cam_intr_mat(1,2)=2;
 
-    Eigen::VectorXf dist_coef(5);
+    Eigen::VectorXs dist_coef(5);
     dist_coef << 0,0,0,0,0;
 
-    Eigen::MatrixXf points2D = vision_utils::projectPoints(points3D, cam_ext_rot_mat, cam_ext_trans_mat, cam_intr_mat, dist_coef);
+    Eigen::MatrixXs points2D = vision_utils::projectPoints(points3D, cam_ext_rot_mat, cam_ext_trans_mat, cam_intr_mat, dist_coef);
 
     for (int ii = 0; ii < points3D.rows(); ++ii)
         std::cout << "points2D- X: " << points2D(ii,0) << "; Y: " << points2D(ii,1) << std::endl;
