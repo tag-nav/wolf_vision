@@ -4,7 +4,7 @@
 namespace wolf {
 
 ProcessorIMU::ProcessorIMU(ProcessorIMUParamsPtr _params) :
-        ProcessorMotion("IMU", 10, 10, 9, 6, 0.01, 6),
+        ProcessorMotion("IMU", 10, 10, 9, 6, 6, 0.01),
         max_time_span_  (_params ? _params    ->max_time_span   : 1.0  ),
         max_buff_length_(_params ? _params    ->max_buff_length : 10000   ),
         dist_traveled_  (_params ? _params    ->dist_traveled   : 1.0  ),

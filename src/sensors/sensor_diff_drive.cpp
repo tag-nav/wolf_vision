@@ -103,24 +103,22 @@ SensorBasePtr SensorDiffDrive::create(const std::string& _unique_name,
 // problem->installSensor() return a SensorBasePtr.
 //bool SensorDiffDrive::addCapture(CaptureBasePtr _capture_ptr)
 //{
-//  std::shared_ptr<CaptureMotion> capture_ptr = std::static_pointer_cast<CaptureMotion>(_capture_ptr);
-
 //  if (intrinsics_.data_is_position_)
 //  {
-//    Eigen::Vector2s data = capture_ptr->getData();
+//    Eigen::Vector2s data = _capture_ptr->getData();
 
 //    // dt is set to one as we are dealing with wheel position
 //    data = pose_inc_(data, intrinsics_.left_radius_, intrinsics_.right_radius_,
 //                     intrinsics_.separation_, 1);
 
-//    capture_ptr->setData(data);
+//    _capture_ptr->setData(data);
 
 //    Eigen::Matrix2s data_cov;
 //    data_cov << 0.00001, 0, 0, 0.00001; // Todo
 
 //    computeDataCov(data, data_cov);
 
-//    capture_ptr->setDataCovariance(data_cov);
+//    _capture_ptr->setDataCovariance(data_cov);
 //  }
 
 //  /// @todo tofix

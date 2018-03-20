@@ -110,16 +110,16 @@ libglog.so will be installed at **/usr/local/lib**
     
 -   Git clone the source:
 
-        $ git clone https://ceres-solver.googlesource.com/ceres-solver
-        
+        $ git clone https://ceres-solver.googlesource.com/ceres-solver
+          
 -   Build and install with:
 
-        $ cd ceres-solver
-        $ mkdir build
-        $ cd build
-        $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" ..
-        $ make
-        $ sudo make install 
+        $ cd ceres-solver
+        $ mkdir build
+        $ cd build
+        $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" ..
+        $ make
+        $ sudo make install 
     
 libceres.a will be installed at **/usr/local/lib** and headers at **/usr/local/include/ceres**
 

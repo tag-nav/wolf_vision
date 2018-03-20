@@ -110,13 +110,6 @@ class ProcessorMotion : public ProcessorBase
     protected:
         ProcessingStep processing_step_;        ///< State machine controlling the processing step
 
-    private:
-        enum
-        {
-            IDLE,
-            RUNNING
-        } status_;
-
     // This is the main public interface
     public:
         ProcessorMotion(const std::string& _type,
@@ -124,8 +117,8 @@ class ProcessorMotion : public ProcessorBase
                         Size _delta_size,
                         Size _delta_cov_size,
                         Size _data_size,
-                        Scalar _time_tolerance = 0.1,
-                        Size _calib_size = 0);
+                        Size _calib_size = 0,
+                        Scalar _time_tolerance = 0.1);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -404,10 +397,9 @@ class ProcessorMotion : public ProcessorBase
         virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin) = 0;
 
         Motion motionZero(const TimeStamp& _ts);
-        CaptureMotionPtr getCaptureMotionContainingTimeStamp(const TimeStamp& _ts);
 
     public:
-        virtual CaptureBasePtr getOriginPtr();
+        virtual CaptureMotionPtr getOriginPtr();
         virtual CaptureMotionPtr getLastPtr();
         virtual CaptureMotionPtr getIncomingPtr();
 
@@ -419,7 +411,7 @@ class ProcessorMotion : public ProcessorBase
         Size delta_size_;       ///< the size of the deltas
         Size delta_cov_size_;   ///< the size of the delta covariances matrix
         Size calib_size_;       ///< size of the extra parameters (TBD in derived classes)
-        CaptureBasePtr origin_ptr_;
+        CaptureMotionPtr origin_ptr_;
         CaptureMotionPtr last_ptr_;
         CaptureMotionPtr incoming_ptr_;
 
@@ -541,7 +533,7 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
     );
 }
 
-inline CaptureBasePtr ProcessorMotion::getOriginPtr()
+inline CaptureMotionPtr ProcessorMotion::getOriginPtr()
 {
     return origin_ptr_;
 }

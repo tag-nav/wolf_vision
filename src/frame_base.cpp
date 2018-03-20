@@ -69,12 +69,15 @@ void FrameBase::remove()
     {
         is_removing_ = true;
         FrameBasePtr this_F = shared_from_this(); // keep this alive while removing it
+
+        // remove from upstream
         TrajectoryBasePtr T = trajectory_ptr_.lock();
         if (T)
         {
             T->getFrameList().remove(this_F); // remove from upstream
         }
 
+        // remove downstream
         while (!capture_list_.empty())
         {
             capture_list_.front()->remove(); // remove downstream

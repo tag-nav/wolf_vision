@@ -697,7 +697,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
     cout << "Hardware" << ((depth < 1) ? ("   -- " + std::to_string(getHardwarePtr()->getSensorList().size()) + "S") : "")  << endl;
     if (depth >= 1)
     {
-        // Sensors
+        // Sensors =======================================================================================
         for (auto S : getHardwarePtr()->getSensorList())
         {
             cout << "  S" << S->id() << " " << S->getType();
@@ -742,7 +742,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             }
             if (depth >= 2)
             {
-                // Processors
+                // Processors =======================================================================================
                 for (auto p : S->getProcessorList())
                 {
                     if (p->isMotion())
@@ -781,7 +781,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
     cout << "Trajectory" << ((depth < 1) ? (" -- " + std::to_string(getTrajectoryPtr()->getFrameList().size()) + "F") : "")  << endl;
     if (depth >= 1)
     {
-        // Frames
+        // Frames =======================================================================================
         for (auto F : getTrajectoryPtr()->getFrameList())
         {
             cout << (F->isKey() ? "  KF" : "  F") << F->id() << ((depth < 2) ? " -- " + std::to_string(F->getCaptureList().size()) + "C  " : "");
@@ -809,7 +809,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             }
             if (depth >= 2)
             {
-                // Captures
+                // Captures =======================================================================================
                 for (auto C : F->getCaptureList())
                 {
                     cout << "    C" << (C->isMotion() ? "M" : "") << C->id() << " " << C->getType();
@@ -822,6 +822,12 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     }
                     else
                         cout << " -> S-";
+                    if (C->isMotion())
+                    {
+                        auto CM = std::static_pointer_cast<CaptureMotion>(C);
+                        if (CM->getOriginFramePtr())
+                            cout << " -> OF" << CM->getOriginFramePtr()->id();
+                    }
 
                     cout << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "");
                     if (constr_by)
@@ -865,7 +871,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
 
                     if (depth >= 3)
                     {
-                        // Features
+                        // Features =======================================================================================
                         for (auto f : C->getFeatureList())
                         {
                             cout << "      f" << f->id() << " trk" << f->trackId() << " " << f->getType() << ((depth < 4) ? " -- " + std::to_string(f->getConstraintList().size()) + "c  " : "");
@@ -881,7 +887,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                                         << " )" << endl;
                             if (depth >= 4)
                             {
-                                // Constraints
+                                // Constraints =======================================================================================
                                 for (auto c : f->getConstraintList())
                                 {
                                     cout << "        c" << c->id() << " " << c->getType() << " -->";
@@ -907,7 +913,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
     cout << "Map" << ((depth < 1) ? ("        -- " + std::to_string(getMapPtr()->getLandmarkList().size()) + "L") : "") << endl;
     if (depth >= 1)
     {
-        // Landmarks
+        // Landmarks =======================================================================================
         for (auto L : getMapPtr()->getLandmarkList())
         {
             cout << "  L" << L->id() << " " << L->getType();
@@ -967,6 +973,8 @@ bool Problem::check(int verbose_level)
     }
     // check pointer to Problem
     is_consistent = is_consistent && (H->getProblem().get() == P_raw);
+
+    // Sensors =======================================================================================
     for (auto S : H->getSensorList())
     {
         if (verbose_level > 0)
@@ -989,6 +997,8 @@ bool Problem::check(int verbose_level)
         // check problem and hardware pointers
         is_consistent = is_consistent && (S->getProblem().get() == P_raw);
         is_consistent = is_consistent && (S->getHardwarePtr() == H);
+
+        // Processors =======================================================================================
         for (auto p : S->getProcessorList())
         {
             if (verbose_level > 0)
@@ -1012,6 +1022,8 @@ bool Problem::check(int verbose_level)
     }
     // check pointer to Problem
     is_consistent = is_consistent && (T->getProblem().get() == P_raw);
+
+    // Frames =======================================================================================
     for (auto F : T->getFrameList())
     {
         if (verbose_level > 0)
@@ -1057,6 +1069,8 @@ bool Problem::check(int verbose_level)
                 }
             }
         }
+
+        // Captures =======================================================================================
         for (auto C : F->getCaptureList())
         {
             if (verbose_level > 0)
@@ -1082,6 +1096,8 @@ bool Problem::check(int verbose_level)
             // check problem and frame pointers
             is_consistent = is_consistent && (C->getProblem().get() == P_raw);
             is_consistent = is_consistent && (C->getFramePtr() == F);
+
+            // Features =======================================================================================
             for (auto f : C->getFeatureList())
             {
                 if (verbose_level > 0)
@@ -1104,6 +1120,8 @@ bool Problem::check(int verbose_level)
                     // check constrained_by pointer to this feature
                     is_consistent = is_consistent && (cby->getFeatureOtherPtr() == f);
                 }
+
+                // Constraints =======================================================================================
                 for (auto c : f->getConstraintList())
                 {
                     if (verbose_level > 0)
@@ -1267,6 +1285,8 @@ bool Problem::check(int verbose_level)
         cout << "M @ " << M.get() << endl;
     // check pointer to Problem
     is_consistent = is_consistent && (M->getProblem().get() == P_raw);
+
+    // Landmarks =======================================================================================
     for (auto L : M->getLandmarkList())
     {
         if (verbose_level > 0)
