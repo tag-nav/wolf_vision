@@ -83,7 +83,7 @@ int main(int argc, char** argv)
 
     // SENSOR + PROCESSOR IMU
     SensorBasePtr sen0_ptr = wolf_problem_ptr_->installSensor("IMU", "Main IMU", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_imu.yaml");
-    ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
+    ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorParamsIMU>();
     prc_imu_params->max_time_span = 10;
     prc_imu_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
     prc_imu_params->dist_traveled = 1000000000;
