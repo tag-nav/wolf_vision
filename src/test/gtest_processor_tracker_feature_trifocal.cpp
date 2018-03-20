@@ -3,8 +3,12 @@
 #include "wolf.h"
 #include "logging.h"
 
+#include "vision_utils/vision_utils.h"
+
 #include "processors/processor_tracker_feature_trifocal.h"
 #include "processor_odom_3D.h"
+#include "capture_image.h"
+#include "sensor_camera.h"
 
 using namespace Eigen;
 using namespace wolf;
@@ -56,7 +60,7 @@ using std::static_pointer_cast;
 //  std::cout << "033[1;33m [WARN]:033[0m gtest for ProcessorTrackerFeatureTrifocal createConstraint is empty." << std::endl;
 //}
 
-TEST(ProcessorBase, KeyFrameCallback)
+TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
 {
 
     using namespace wolf;
@@ -71,10 +75,16 @@ TEST(ProcessorBase, KeyFrameCallback)
     ProblemPtr problem = Problem::create("PO 3D");
 
     // Install tracker (sensor and processor)
-    SensorBasePtr sens_trk = make_shared<SensorBase>("FEATURE", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
-                                                     std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
-                                                     std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
-    shared_ptr<ProcessorTrackerFeatureTrifocal> proc_trk = make_shared<ProcessorTrackerFeatureTrifocal>(dt/2, 5, 5);
+    IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
+    SensorCameraPtr sens_trk = make_shared<SensorCamera>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(),
+                                                         intr);
+
+    ProcessorParamsTrackerFeatureTrifocal params_trifocal;
+    params_trifocal.time_tolerance = dt/2;
+    params_trifocal.max_new_features = 5;
+    params_trifocal.min_features_for_keyframe = 5;
+
+    ProcessorTrackerFeatureTrifocalPtr proc_trk = make_shared<ProcessorTrackerFeatureTrifocal>(params_trifocal);
 
     problem->addSensor(sens_trk);
     sens_trk->addProcessor(proc_trk);
@@ -92,17 +102,18 @@ TEST(ProcessorBase, KeyFrameCallback)
 
     // initialize
     TimeStamp   t(0.0);
-    Vector3s    x(0,0,0);
-    Matrix3s    P = Matrix3s::Identity() * 0.1;
+    Vector7s    x; x << 0,0,0, 0,0,0,1;
+    Matrix6s    P = Matrix6s::Identity() * 0.1;
     problem->setPrior(x, P, t, dt/2);             // KF1
 
-    CaptureOdom3DPtr capt_odo = make_shared<CaptureOdom3D>(t, sens_odo, Vector2s(0.5,0));
+    CaptureOdom3DPtr capt_odo = make_shared<CaptureOdom3D>(t, sens_odo, Vector6s::Zero());
 
     // Track
-    CaptureVoidPtr capt_trk(make_shared<CaptureVoid>(t, sens_trk));
+    cv::Mat image(640,480, CV_32F);
+    CaptureImagePtr capt_trk = make_shared<CaptureImage>(t, sens_trk, image);
     proc_trk->process(capt_trk);
 
-    for (size_t ii=0; ii<10; ii++ )
+    for (size_t ii=0; ii<32; ii++ )
     {
         // Move
         t = t+dt;
@@ -112,10 +123,12 @@ TEST(ProcessorBase, KeyFrameCallback)
         proc_odo->process(capt_odo);
 
         // Track
-        capt_trk = make_shared<CaptureVoid>(t, sens_trk);
+        capt_trk = make_shared<CaptureImage>(t, sens_trk, image);
         proc_trk->process(capt_trk);
 
-//        problem->print(4,1,1,0);
+        CaptureBasePtr prev = proc_trk->getPrevOriginPtr();
+        WOLF_INFO("PTrifocal prev: C", (prev ? prev->id() : 0), " KF", (prev ? prev->getFramePtr()->id(): 0));
+        problem->print(2,0,0,0);
 
         // Only odom creating KFs
         ASSERT_TRUE( problem->getLastKeyFramePtr()->getType().compare("PO 3D")==0 );
