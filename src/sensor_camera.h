@@ -9,6 +9,7 @@ namespace wolf
 
 /** Struct of intrinsic camera parameters
  */
+WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsCamera);
 struct IntrinsicsCamera : public IntrinsicsBase
 {
         unsigned int width;                 ///< Image width in pixels
