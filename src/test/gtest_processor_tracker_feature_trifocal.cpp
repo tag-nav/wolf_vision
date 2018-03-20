@@ -80,7 +80,8 @@ TEST(ProcessorBase, KeyFrameCallback)
     sens_trk->addProcessor(proc_trk);
 
     // Install odometer (sensor and processor)
-    SensorBasePtr sens_odo = problem->installSensor("ODOM 3D", "odometer", Vector3s(0,0,0), "");
+    IntrinsicsOdom3DPtr params = std::make_shared<IntrinsicsOdom3D>();
+    SensorBasePtr sens_odo = problem->installSensor("ODOM 3D", "odometer", (Vector7s() << 0,0,0,  0,0,0,1).finished(), params);
     ProcessorParamsOdom3DPtr proc_odo_params = make_shared<ProcessorParamsOdom3D>();
     ProcessorBasePtr proc_odo = problem->installProcessor("ODOM 3D", "odometer", sens_odo, proc_odo_params);
     proc_odo->setTimeTolerance(dt/2);

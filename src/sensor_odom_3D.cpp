@@ -12,13 +12,13 @@
 
 namespace wolf {
 
-SensorOdom3D::SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _o_ptr, IntrinsicsOdom3DPtr params) :
+SensorOdom3D::SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _o_ptr, const IntrinsicsOdom3D& _params) :
         SensorBase("ODOM 3D", _p_ptr, _o_ptr, nullptr, 6),
-        k_disp_to_disp_(params->k_disp_to_disp),
-        k_disp_to_rot_(params->k_disp_to_rot),
-        k_rot_to_rot_(params->k_rot_to_rot),
-        min_disp_var_(params->min_disp_var),
-        min_rot_var_(params->min_rot_var)
+        k_disp_to_disp_(_params.k_disp_to_disp),
+        k_disp_to_rot_(_params.k_disp_to_rot),
+        k_rot_to_rot_(_params.k_rot_to_rot),
+        min_disp_var_(_params.min_disp_var),
+        min_rot_var_(_params.min_rot_var)
 {
     noise_cov_ = (Eigen::Vector6s() << min_disp_var_, min_disp_var_, min_disp_var_, min_rot_var_, min_rot_var_, min_rot_var_).finished().asDiagonal();
     setNoiseCov(noise_cov_); // sets also noise_std_
@@ -31,7 +31,7 @@ SensorOdom3D::~SensorOdom3D()
 
 // Define the factory method
 SensorBasePtr SensorOdom3D::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_po,
-                                 const IntrinsicsBasePtr _intrinsics)
+                                   const IntrinsicsBasePtr _intrinsics)
 {
     // decode extrinsics vector
     assert(_extrinsics_po.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
@@ -39,7 +39,7 @@ SensorBasePtr SensorOdom3D::create(const std::string& _unique_name, const Eigen:
     StateQuaternionPtr ori_ptr = std::make_shared<StateQuaternion>(_extrinsics_po.tail(4), true);
     // cast intrinsics into derived type
     IntrinsicsOdom3DPtr params = std::static_pointer_cast<IntrinsicsOdom3D>(_intrinsics);
-    SensorBasePtr odo = std::make_shared<SensorOdom3D>(pos_ptr, ori_ptr, params);
+    SensorBasePtr odo = std::make_shared<SensorOdom3D>(pos_ptr, ori_ptr, *params);
     odo->setName(_unique_name);
     return odo;
 }

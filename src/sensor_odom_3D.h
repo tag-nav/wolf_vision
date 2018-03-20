@@ -17,19 +17,11 @@ WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsOdom3D);
 
 struct IntrinsicsOdom3D : public IntrinsicsBase
 {
-        Scalar k_disp_to_disp; ///< ratio of displacement variance to displacement, for odometry noise calculation
-        Scalar k_disp_to_rot; ///< ratio of displacement variance to rotation, for odometry noise calculation
-        Scalar k_rot_to_rot; ///< ratio of rotation variance to rotation, for odometry noise calculation
-        Scalar min_disp_var;
-        Scalar min_rot_var;
-
-        IntrinsicsOdom3D() :
-            k_disp_to_disp(0),
-            k_disp_to_rot(0),
-            k_rot_to_rot(0),
-            min_disp_var(0),
-            min_rot_var(0)
-        {}
+        Scalar k_disp_to_disp ; ///< ratio of displacement variance to displacement, for odometry noise calculation
+        Scalar k_disp_to_rot  ; ///< ratio of displacement variance to rotation, for odometry noise calculation
+        Scalar k_rot_to_rot   ; ///< ratio of rotation variance to rotation, for odometry noise calculation
+        Scalar min_disp_var   ;
+        Scalar min_rot_var    ;
 };
 
 WOLF_PTR_TYPEDEFS(SensorOdom3D);
@@ -51,7 +43,7 @@ class SensorOdom3D : public SensorBase
          * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
          * \param _params shared_ptr to a struct with parameters
          **/
-        SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _q_ptr, IntrinsicsOdom3DPtr params);
+        SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _q_ptr, const IntrinsicsOdom3D& _params);
 
         virtual ~SensorOdom3D();
 
