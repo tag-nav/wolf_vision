@@ -100,7 +100,14 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          */
         virtual void establishConstraints();
 
+        CaptureBasePtr getPrevOriginPtr();
+
 };
+
+inline wolf::CaptureBasePtr ProcessorTrackerFeatureTrifocal::getPrevOriginPtr()
+{
+    return prev_origin_ptr_;
+}
 
 } // namespace wolf
 
