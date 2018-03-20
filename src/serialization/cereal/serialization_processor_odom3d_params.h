@@ -8,7 +8,7 @@
 namespace cereal {
 
 template <class Archive>
-void serialize(Archive& ar, wolf::ProcessorOdom3DParams& o,
+void serialize(Archive& ar, wolf::ProcessorParamsOdom3D& o,
                std::uint32_t const /*version*/)
 {
   ar( cereal::make_nvp("ProcessorParamsBase",
@@ -22,6 +22,6 @@ void serialize(Archive& ar, wolf::ProcessorOdom3DParams& o,
 
 } // namespace cereal
 
-CEREAL_REGISTER_TYPE_WITH_NAME(wolf::ProcessorOdom3DParams, "ProcessorOdom3DParams")
+CEREAL_REGISTER_TYPE_WITH_NAME(wolf::ProcessorParamsOdom3D, "ProcessorOdom3DParams")
 
 #endif /* _WOLF_SERIALIZATION_CEREAL_PROCESSOR_ODOM3D_PARAMS_H_ */

@@ -110,7 +110,7 @@ struct ProcessorParamsBase
 {
     std::string type;
     std::string name;
-    Scalar time_tolerance;
+    Scalar time_tolerance; ///< maximum time difference between a Keyframe time stamp and a particular Capture of this processor to allow assigning this Capture to the Keyframe.
 };
 
 //class ProcessorBase

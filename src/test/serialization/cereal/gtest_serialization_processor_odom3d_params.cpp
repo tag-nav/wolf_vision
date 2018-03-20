@@ -31,7 +31,7 @@ public:
 
   const std::string path_to_io = "/tmp/";
 
-  wolf::ProcessorOdom3DParams nb_;
+  wolf::ProcessorParamsOdom3D nb_;
 };
 
 TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
@@ -39,7 +39,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 {
   const std::string filename(path_to_io + "params_odom3d_serialization.xml");
 
-  wolf::ProcessorOdom3DParams nb_save;
+  wolf::ProcessorParamsOdom3D nb_save;
   nb_save.name = "NAME2";
   //nb_.type = "ODOM 3D";
 
@@ -51,7 +51,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
   ASSERT_NO_THROW( wolf::save( filename, nb_, nb_save, 10 ) );
 
   {
-    wolf::ProcessorOdom3DParams nb_load;
+    wolf::ProcessorParamsOdom3D nb_load;
 
     ASSERT_NO_THROW( wolf::load( filename, nb_load ) );
 
@@ -62,7 +62,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
     ASSERT_EQ(nb_load.dist_traveled,   nb_.dist_traveled);
     ASSERT_EQ(nb_load.angle_turned,    nb_.angle_turned);
 
-    wolf::ProcessorOdom3DParams nb_load0, nb_load1;
+    wolf::ProcessorParamsOdom3D nb_load0, nb_load1;
     int myint;
     ASSERT_NO_THROW( wolf::load( filename, nb_load0, nb_load1, myint ) );
 
@@ -95,7 +95,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 
   {
     wolf::ProcessorParamsBasePtr nb =
-        std::make_shared<wolf::ProcessorOdom3DParams>(nb_);
+        std::make_shared<wolf::ProcessorParamsOdom3D>(nb_);
 
     ASSERT_NO_THROW( wolf::save( filename, nb ) );
   }
@@ -106,7 +106,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
     ASSERT_NO_THROW( wolf::load( filename, nb ) );
 
     wolf::ProcessorOdom3DParamsPtr nb_cast =
-        std::dynamic_pointer_cast<wolf::ProcessorOdom3DParams>(nb);
+        std::dynamic_pointer_cast<wolf::ProcessorParamsOdom3D>(nb);
 
     ASSERT_TRUE(nb_cast != nullptr);
 
@@ -130,7 +130,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 
   ASSERT_NO_THROW( wolf::save( filename, nb_ ) );
 
-  wolf::ProcessorOdom3DParams nb_load;
+  wolf::ProcessorParamsOdom3D nb_load;
 
   ASSERT_NO_THROW( wolf::load( filename, nb_load ) );
 
@@ -153,7 +153,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 
   {
     wolf::ProcessorParamsBasePtr nb =
-        std::make_shared<wolf::ProcessorOdom3DParams>(nb_);
+        std::make_shared<wolf::ProcessorParamsOdom3D>(nb_);
 
     ASSERT_NO_THROW( wolf::save( filename, nb ) );
   }
@@ -164,7 +164,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
     ASSERT_NO_THROW( wolf::load( filename, nb ) );
 
     wolf::ProcessorOdom3DParamsPtr nb_cast =
-        std::dynamic_pointer_cast<wolf::ProcessorOdom3DParams>(nb);
+        std::dynamic_pointer_cast<wolf::ProcessorParamsOdom3D>(nb);
 
     ASSERT_TRUE(nb_cast != nullptr);
 
@@ -188,7 +188,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 
   ASSERT_NO_THROW( wolf::save( filename, nb_ ) );
 
-  wolf::ProcessorOdom3DParams nb_load;
+  wolf::ProcessorParamsOdom3D nb_load;
 
   ASSERT_NO_THROW( wolf::load( filename, nb_load ) );
 
@@ -211,7 +211,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 
   {
     wolf::ProcessorParamsBasePtr nb =
-        std::make_shared<wolf::ProcessorOdom3DParams>(nb_);
+        std::make_shared<wolf::ProcessorParamsOdom3D>(nb_);
 
     ASSERT_NO_THROW( wolf::save( filename, nb ) );
   }
@@ -222,7 +222,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
     ASSERT_NO_THROW( wolf::load( filename, nb ) );
 
     wolf::ProcessorOdom3DParamsPtr nb_cast =
-        std::dynamic_pointer_cast<wolf::ProcessorOdom3DParams>(nb);
+        std::dynamic_pointer_cast<wolf::ProcessorParamsOdom3D>(nb);
 
     ASSERT_TRUE(nb_cast != nullptr);
 

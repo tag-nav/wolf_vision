@@ -8,7 +8,7 @@ namespace wolf{
 
 struct ProcessorParamsLoopClosure : public ProcessorParamsBase
 {
-  virtual ~ProcessorParamsLoopClosure() = default;
+//  virtual ~ProcessorParamsLoopClosure() = default;
 
   // add neccesery parameters for loop closure initialisation here and initialize
   // them in constructor

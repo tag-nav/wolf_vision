@@ -39,7 +39,7 @@ class FeatureIMU_test : public testing::Test
         IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
         IntrinsicsIMUPtr sen_imu_params = std::make_shared<IntrinsicsIMU>();
         SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", IMU_extrinsics, sen_imu_params);
-        ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
+        ProcessorParamsIMUPtr prc_imu_params = std::make_shared<ProcessorParamsIMU>();
         processor_ptr_ = problem->installProcessor("IMU", "IMU pre-integrator", sensor_ptr, prc_imu_params);
 
     // Time and data variables

@@ -21,23 +21,19 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsOdom2D);
 
 struct ProcessorParamsOdom2D : public ProcessorParamsBase
 {
-    Scalar dist_traveled_th_            = 1.0;
-    Scalar theta_traveled_th_           = 0.17;
-    Scalar cov_det_th_                  = 1.0;
-    Scalar elapsed_time_th_             = 1.0;
-    Scalar unmeasured_perturbation_std_ = 0.001;
+    Scalar dist_traveled_th_            = 1.0;      // 1m
+    Scalar theta_traveled_th_           = 0.17;     // 90 degrees
+    Scalar cov_det_th_                  = 1.0;      // 1 rad^2
+    Scalar elapsed_time_th_             = 1.0;      // 1s
+    Scalar unmeasured_perturbation_std_ = 0.001;    // no particular dimension: the same for displacement and angle
 };
 
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:
-        ProcessorOdom2D(const Scalar& _traveled_dist_th             = 1.0,
-                        const Scalar& _theta_traveled_th            = 0.17,
-                        const Scalar& _cov_det_th                   = 1.0,
-                        const Scalar& _elapsed_time_th              = 1.0,
-                        const Scalar& _unmeasured_perturbation_std  = 0.001,
-                        const Scalar& _time_tolerance               = 0.01);
+        ProcessorOdom2D(const ProcessorParamsOdom2D& _params = ProcessorParamsOdom2D());
         virtual ~ProcessorOdom2D();
+
         virtual bool voteForKeyFrame() override;
 
     protected:

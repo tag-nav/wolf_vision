@@ -85,19 +85,20 @@ TEST(ProcessorIMU_constructors, ALL)
 
     //constructor without any argument
     ProcessorIMUPtr prc0 = std::make_shared<ProcessorIMU>();
-    ASSERT_EQ(prc0->getMaxTimeSpan(), 1.0);
-    ASSERT_EQ(prc0->getMaxBuffLength(), 10000);
-    ASSERT_EQ(prc0->getDistTraveled(), 1.0);
-    ASSERT_EQ(prc0->getAngleTurned(), 0.2);
+    ProcessorParamsIMU params_default;
+    ASSERT_EQ(prc0->getMaxTimeSpan(),   params_default.max_time_span);
+    ASSERT_EQ(prc0->getMaxBuffLength(), params_default.max_buff_length);
+    ASSERT_EQ(prc0->getDistTraveled(),  params_default.dist_traveled);
+    ASSERT_EQ(prc0->getAngleTurned(),   params_default.angle_turned);
 
     //constructor with ProcessorIMUParamsPtr argument only
-    ProcessorIMUParamsPtr param_ptr = std::make_shared<ProcessorIMUParams>();
-    param_ptr->max_time_span = 2.0;
+    ProcessorParamsIMUPtr param_ptr = std::make_shared<ProcessorParamsIMU>();
+    param_ptr->max_time_span =   2.0;
     param_ptr->max_buff_length = 20000;
-    param_ptr->dist_traveled = 2.0;
-    param_ptr->angle_turned = 2.0;
+    param_ptr->dist_traveled =   2.0;
+    param_ptr->angle_turned =    2.0;
 
-    ProcessorIMUPtr prc1 = std::make_shared<ProcessorIMU>(param_ptr);
+    ProcessorIMUPtr prc1 = std::make_shared<ProcessorIMU>(*param_ptr);
     ASSERT_EQ(prc1->getMaxTimeSpan(), param_ptr->max_time_span);
     ASSERT_EQ(prc1->getMaxBuffLength(), param_ptr->max_buff_length);
     ASSERT_EQ(prc1->getDistTraveled(), param_ptr->dist_traveled);
@@ -109,17 +110,17 @@ TEST(ProcessorIMU_constructors, ALL)
     Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
     SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics, wolf_root + "/src/examples/sensor_imu.yaml");
     ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
-    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan(), 1.0);
-    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxBuffLength(), 10000);
-    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getDistTraveled(), 1.0);
-    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getAngleTurned(), 0.2);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan(),   params_default.max_time_span);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxBuffLength(), params_default.max_buff_length);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getDistTraveled(),  params_default.dist_traveled);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getAngleTurned(),   params_default.angle_turned);
 
     //Factory constructor with yaml
     processor_ptr = problem->installProcessor("IMU", "Sec IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu.yaml");
-    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan(), 2.0);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan(),   2.0);
     ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxBuffLength(), 20000);
-    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getDistTraveled(), 2.0);
-    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getAngleTurned(), 0.2);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getDistTraveled(),  2.0);
+    ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getAngleTurned(),   0.2);
 }
 
 TEST(ProcessorIMU, voteForKeyFrame)
@@ -137,7 +138,7 @@ TEST(ProcessorIMU, voteForKeyFrame)
     ProblemPtr problem = Problem::create("POV 3D");
     Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
     SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
-    ProcessorIMUParamsPtr prc_imu_params = std::make_shared<ProcessorIMUParams>();
+    ProcessorParamsIMUPtr prc_imu_params = std::make_shared<ProcessorParamsIMU>();
     prc_imu_params->max_time_span = 1;
     prc_imu_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
     prc_imu_params->dist_traveled = 1000000000;

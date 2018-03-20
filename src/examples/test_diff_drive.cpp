@@ -219,6 +219,7 @@ int main(int argc, char** argv)
   t.set(stamp_secs);
   auto processor_diff_drive_ptr =
       std::static_pointer_cast<ProcessorDiffDrive>(wolf_problem_ptr_->getProcessorMotionPtr());
+  processor_diff_drive_ptr->setTimeTolerance(period_secs/2); // overwrite time tolerance based on new evidence
 
   // Set the origin
   // Create one capture to store the Odometry data.

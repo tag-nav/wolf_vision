@@ -887,7 +887,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         WOLF_TRACE("IMU cov: ", sensor_imu->getNoiseCov().diagonal().transpose());
         WOLF_TRACE("ODO cov: ", sensor_odo->getNoiseCov().diagonal().transpose());
 
-        ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
+        ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorParamsOdom3D>();
         prc_odom3D_params->max_time_span    = 0.0099;
         prc_odom3D_params->max_buff_length  = 1000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled    = 1000;
@@ -1064,7 +1064,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
 
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
-        ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
+        ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorParamsOdom3D>();
         prc_odom3D_params->max_time_span = 0.9999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
@@ -1205,7 +1205,7 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
 
         // SENSOR + PROCESSOR ODOM 3D
         SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D_HQ.yaml");
-        ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorOdom3DParams>();
+        ProcessorOdom3DParamsPtr prc_odom3D_params = std::make_shared<ProcessorParamsOdom3D>();
         prc_odom3D_params->max_time_span = 0.9999;
         prc_odom3D_params->max_buff_length = 1000000000; //make it very high so that this condition will not pass
         prc_odom3D_params->dist_traveled = 1000000000;
