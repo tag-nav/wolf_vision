@@ -53,14 +53,18 @@ int main (int argc, char** argv)
     CeresManager ceres_manager(problem, ceres_options);
 
     SensorBasePtr sen = problem->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
-    problem->installProcessor("ODOM 3D", "odometry integrator", "odom");
-    problem->getProcessorMotionPtr()->setOrigin((Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
+    ProcessorParamsOdom3DPtr proc_params = std::make_shared<ProcessorParamsOdom3D>();
+    problem->installProcessor("ODOM 3D", "odometry integrator", sen, proc_params);
 
+    // Time and prior
+    Scalar dt = 0.1;
+
+    problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity() * 1e-8, TimeStamp(0), dt/2);
+
+    // Motion data
     Scalar dx = .1;
     Scalar dyaw = 2*M_PI/5;
     Vector6s data((Vector6s() << dx*cos(dyaw/2),dx*sin(dyaw/2),0,0,0,dyaw).finished()); // will integrate this data repeatedly
-
-    Scalar dt = 0.1;
 
     CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(0), sen, data, 7, 6, nullptr);
 

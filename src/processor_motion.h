@@ -113,17 +113,16 @@ class ProcessorMotion : public ProcessorBase
     // This is the main public interface
     public:
         ProcessorMotion(const std::string& _type,
+                        Scalar _time_tolerance,
                         Size _state_size,
                         Size _delta_size,
                         Size _delta_cov_size,
                         Size _data_size,
-                        Size _calib_size = 0,
-                        Scalar _time_tolerance = 0.1);
+                        Size _calib_size = 0);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
 
-        void process2(CaptureBasePtr _incoming_ptr);
         void process(CaptureBasePtr _incoming_ptr);
         virtual void resetDerived();
 
@@ -398,10 +397,12 @@ class ProcessorMotion : public ProcessorBase
 
         Motion motionZero(const TimeStamp& _ts);
 
+        bool hasCalibration() {return calib_size_ > 0;}
+
     public:
-        virtual CaptureMotionPtr getOriginPtr();
-        virtual CaptureMotionPtr getLastPtr();
-        virtual CaptureMotionPtr getIncomingPtr();
+        CaptureMotionPtr getOriginPtr();
+        CaptureMotionPtr getLastPtr();
+        CaptureMotionPtr getIncomingPtr();
 
 
     protected:

@@ -54,7 +54,7 @@ TEST(Problem, Processor)
     ASSERT_FALSE(P->getProcessorMotionPtr());
 
     // add a motion sensor and processor
-    SensorBasePtr Sm = std::make_shared<SensorOdom3D>(nullptr, nullptr, IntrinsicsOdom3D()); // with dummy intrinsics
+    SensorBasePtr Sm = std::make_shared<SensorOdom3D>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(), IntrinsicsOdom3D()); // with dummy intrinsics
     P->addSensor(Sm);
 
     // add motion processor

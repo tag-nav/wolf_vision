@@ -7,10 +7,12 @@
 
 namespace wolf {
 
-WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsOdom2D)
+WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsOdom2D);
 
 struct IntrinsicsOdom2D : public IntrinsicsBase
 {
+        virtual ~IntrinsicsOdom2D() = default;
+
         Scalar k_disp_to_disp; ///< ratio of displacement variance to displacement, for odometry noise calculation
         Scalar k_rot_to_rot; ///< ratio of rotation variance to rotation, for odometry noise calculation
 };
@@ -33,7 +35,9 @@ class SensorOdom2D : public SensorBase
          * \param _rot_noise_factor rotation noise factor
          * 
          **/
-		SensorOdom2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Scalar& _disp_noise_factor, const Scalar&  _rot_noise_factor);
+        SensorOdom2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Scalar& _disp_noise_factor, const Scalar&  _rot_noise_factor);
+        SensorOdom2D(Eigen::VectorXs _extrinsics, const IntrinsicsOdom2D& _intrinsics);
+        SensorOdom2D(Eigen::VectorXs _extrinsics, IntrinsicsOdom2DPtr _intrinsics);
 
         virtual ~SensorOdom2D();
         

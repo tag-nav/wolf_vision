@@ -21,7 +21,10 @@ int main()
     ProblemPtr problem = Problem::create("PO 2D");
 
     SensorBasePtr sen_odo    = problem->installSensor   ("ODOM 2D", "main odometer", (Vector3s()<<0,0,0).finished(),"");
-    ProcessorBasePtr prc_odo = problem->installProcessor("ODOM 2D", "odometry integrator", "main odometer", "");
+    ProcessorParamsOdom2DPtr params_odo = std::make_shared<ProcessorParamsOdom2D>();
+    params_odo->elapsed_time_th_ = 2;
+    params_odo->theta_traveled_th_ = M_PI; // 180 degrees turn
+    ProcessorBasePtr prc_odo = problem->installProcessor("ODOM 2D", "odometry integrator", sen_odo, params_odo);
     prc_odo->setTimeTolerance(0.1);
 
     SensorBasePtr sen_ftr    = problem->installSensor   ("ODOM 2D", "other odometer", (Vector3s()<<0,0,0).finished(),"");
@@ -34,29 +37,32 @@ int main()
     cout << "Motion processor : " << problem->getProcessorMotionPtr()->getName() << endl;
 
     TimeStamp t(0);
+    cout << "=======================\n>> TIME: " << t.get() << endl;
     Vector3s x({0,0,0});
-    problem->getProcessorMotionPtr()->setOrigin(x, t);
+    Matrix3s P; P.setZero();
+    problem->setPrior(x, P, t, 0.01);
 
-    cout << "x(0) = " << problem->getCurrentState().transpose() << endl;
+    cout << "x(" << t.get() << ") = " << problem->getCurrentState().transpose() << endl;
 
-    Vector2s odo_data;  odo_data << .1, (M_PI / 2);
+    Vector2s odo_data;  odo_data << .1, (M_PI / 10);
 
-    problem->print(2, false, true, false); // print(level, constr_by, metric, state_blocks)
+    problem->print(2, false, true, true); // print(level, constr_by, metric, state_blocks)
 
     Scalar dt = 1;
     for (auto i = 0; i < 4; i++)
     {
-        t += dt;
-        cout << "=======================\n>> TIME: " << t.get() << endl;
 
         cout << "Tracker----------------" << endl;
         sen_ftr->process(make_shared<CaptureVoid>(t, sen_ftr));
-        problem->print(2, false, true, false); // print(level, constr_by, metric, state_blocks)
+        problem->print(2, false, true, true); // print(level, constr_by, metric, state_blocks)
+
+        t += dt;
+        cout << "=======================\n>> TIME: " << t.get() << endl;
 
         cout << "Motion-----------------" << endl;
         sen_odo->process(make_shared<CaptureMotion>(t, sen_odo, odo_data, 3, 3, nullptr));
         cout << "x(" << t.get() << ") = " << problem->getCurrentState().transpose() << endl;
-        problem->print(2, false, true, false); // print(level, constr_by, metric, state_blocks)
+        problem->print(2, false, true, true); // print(level, constr_by, metric, state_blocks)
 
     }
 
