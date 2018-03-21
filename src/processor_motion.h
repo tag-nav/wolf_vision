@@ -397,6 +397,8 @@ class ProcessorMotion : public ProcessorBase
 
         Motion motionZero(const TimeStamp& _ts);
 
+        bool hasCalibration() {return calib_size_ > 0;}
+
     public:
         CaptureMotionPtr getOriginPtr();
         CaptureMotionPtr getLastPtr();

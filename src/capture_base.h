@@ -92,6 +92,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void fixIntrinsics();
         void unfixIntrinsics();
 
+        bool hasCalibration() {return calib_size_ > 0;}
         Size getCalibSize() const;
         virtual Eigen::VectorXs getCalibration() const;
         void setCalibration(const Eigen::VectorXs& _calib);
