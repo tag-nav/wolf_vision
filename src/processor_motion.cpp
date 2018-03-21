@@ -404,11 +404,8 @@ void ProcessorMotion::integrateOneStep()
                    jacobian_delta_);
 
     // integrate Jacobian wrt calib
-    if (calib_size_ > 0)
-    {
+    if ( hasCalibration() )
         jacobian_calib_ = jacobian_delta_preint_ * getBuffer().get().back().jacobian_calib_ + jacobian_delta_ * jacobian_delta_calib_;
-        // WOLF_TRACE("jac calib: ", jacobian_calib_.row(0));
-    }
 
     // Integrate covariance
     delta_integrated_cov_ = jacobian_delta_preint_ * getBuffer().get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
@@ -461,7 +458,7 @@ void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
                        motion_it->jacobian_delta_);
 
         // integrate Jacobian wrt calib
-        if (calib_size_ > 0)
+        if ( hasCalibration() )
             motion_it->jacobian_calib_ = motion_it->jacobian_delta_integr_ * prev_motion_it->jacobian_calib_ + motion_it->jacobian_delta_ * jacobian_delta_calib_;
 
         // Integrate covariance
