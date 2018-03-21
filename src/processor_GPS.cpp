@@ -11,8 +11,8 @@
 namespace wolf
 {
 
-ProcessorGPS::ProcessorGPS() :
-        ProcessorBase("GPS"),
+ProcessorGPS::ProcessorGPS(Scalar time_tolerance_) :
+        ProcessorBase("GPS", time_tolerance_),
         capture_gps_ptr_(nullptr)
 {
     gps_covariance_ = 10;

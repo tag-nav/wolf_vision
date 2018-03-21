@@ -3,7 +3,7 @@ namespace wolf
 {
 
 ProcessorOdom2D::ProcessorOdom2D(const ProcessorParamsOdom2D& _params) :
-                ProcessorMotion("ODOM 2D", 3, 3, 3, 2, 0, _params.time_tolerance),
+                ProcessorMotion("ODOM 2D", _params.time_tolerance, 3, 3, 3, 2, 0),
                 dist_traveled_th_(_params.dist_traveled_th_),
                 theta_traveled_th_(_params.theta_traveled_th_),
                 cov_det_th_(_params.cov_det_th_),

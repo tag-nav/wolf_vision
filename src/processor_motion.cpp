@@ -3,12 +3,12 @@ namespace wolf
 {
 
 ProcessorMotion::ProcessorMotion(const std::string& _type,
+                                 Scalar _time_tolerance,
                                  Size _state_size,
                                  Size _delta_size,
                                  Size _delta_cov_size,
                                  Size _data_size,
-                                 Size _calib_size,
-                                 Scalar _time_tolerance) :
+                                 Size _calib_size) :
         ProcessorBase(_type, _time_tolerance),
         processing_step_(RUNNING_WITHOUT_PACK),
         x_size_(_state_size),
