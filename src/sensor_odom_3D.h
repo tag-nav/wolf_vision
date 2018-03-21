@@ -23,13 +23,8 @@ struct IntrinsicsOdom3D : public IntrinsicsBase
         Scalar min_disp_var;
         Scalar min_rot_var;
 
-        IntrinsicsOdom3D() :
-            k_disp_to_disp(0),
-            k_disp_to_rot(0),
-            k_rot_to_rot(0),
-            min_disp_var(0),
-            min_rot_var(0)
-        {}
+        virtual ~IntrinsicsOdom3D() = default;
+
 };
 
 WOLF_PTR_TYPEDEFS(SensorOdom3D);
@@ -52,6 +47,8 @@ class SensorOdom3D : public SensorBase
          * \param _params shared_ptr to a struct with parameters
          **/
         SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _q_ptr, IntrinsicsOdom3DPtr params);
+        SensorOdom3D(const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsOdom3D& params);
+        SensorOdom3D(const Eigen::VectorXs& _extrinsics_pq, IntrinsicsOdom3DPtr params);
 
         virtual ~SensorOdom3D();
 

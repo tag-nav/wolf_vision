@@ -17,6 +17,8 @@ WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsLaser2D);
 
 struct IntrinsicsLaser2D : public IntrinsicsBase
 {
+        virtual ~IntrinsicsLaser2D() = default;
+
         laserscanutils::LaserScanParams scan_params;
 };
 
@@ -52,6 +54,8 @@ class SensorLaser2D : public SensorBase
          *
          **/
         SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const laserscanutils::LaserScanParams& _params);
+        SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const IntrinsicsLaser2D& _params);
+        SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsLaser2DPtr _params);
 
         virtual ~SensorLaser2D();
         

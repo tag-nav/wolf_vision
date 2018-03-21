@@ -15,18 +15,23 @@ SensorCamera::SensorCamera(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBloc
     //
 }
 
-SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const std::shared_ptr<IntrinsicsCamera> _intrinsics_ptr) :
-                SensorBase("CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(_intrinsics_ptr->pinhole_model, true), 1),
-                img_width_(_intrinsics_ptr->width), //
-                img_height_(_intrinsics_ptr->height), //
-                distortion_(_intrinsics_ptr->distortion), //
+SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsCamera& _intrinsics) :
+                SensorBase("CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(_intrinsics.pinhole_model, true), 1),
+                img_width_(_intrinsics.width), //
+                img_height_(_intrinsics.height), //
+                distortion_(_intrinsics.distortion), //
                 correction_(distortion_.size()+2) // make correction vector of the same size as distortion vector
 {
     assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3D");
-    K_ = setIntrinsicMatrix(_intrinsics_ptr->pinhole_model);
+    K_ = setIntrinsicMatrix(_intrinsics.pinhole_model);
     pinhole::computeCorrectionModel(getIntrinsicPtr()->getState(), distortion_, correction_);
 }
 
+SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, IntrinsicsCameraPtr _intrinsics_ptr) :
+        SensorCamera(_extrinsics, *_intrinsics_ptr)
+{
+    //
+}
 
 SensorCamera::~SensorCamera()
 {
@@ -57,13 +62,6 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
     std::shared_ptr<IntrinsicsCamera> intrinsics_ptr = std::static_pointer_cast<IntrinsicsCamera>(_intrinsics);
     SensorCameraPtr sen_ptr = std::make_shared<SensorCamera>(_extrinsics_pq, intrinsics_ptr);
     sen_ptr->setName(_unique_name);
-
-//    std::cout << "Created camera:\n\tintrinsics   : " << sen_ptr->getIntrinsicPtr()->getState().transpose() << std::endl;
-//    std::cout << "\tintrinsic matrix  : " << K_ << std::endl;
-//    std::cout << "\tdistortion  : " << distortion_.transpose() << std::endl;
-//    std::cout << "\tcorrection  : " << correction_.transpose() << std::endl;
-//    std::cout << "\tposition     : " << sen_ptr->getPPtr()->getState().transpose() << std::endl;
-//    std::cout << "\torientation  : " << sen_ptr->getOPtr()->getState().transpose() << std::endl;
 
     return sen_ptr;
 }

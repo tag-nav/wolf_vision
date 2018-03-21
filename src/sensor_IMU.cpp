@@ -4,16 +4,40 @@
 
 namespace wolf {
 
-SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPtr params) :
-        SensorBase("IMU", _p_ptr, _o_ptr, std::make_shared<StateBlock>(6, false, nullptr), (Eigen::Vector6s()<<params->a_noise,params->a_noise,params->a_noise,params->w_noise,params->w_noise,params->w_noise).finished(), false, true),
-        a_noise(params->a_noise),
-        w_noise(params->w_noise),
-        ab_initial_stdev(params->ab_initial_stdev),
-        wb_initial_stdev(params->wb_initial_stdev),
-        ab_rate_stdev(params->ab_rate_stdev),
-        wb_rate_stdev(params->wb_rate_stdev)
+SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const IntrinsicsIMU& _params) :
+        SensorBase("IMU", _p_ptr, _o_ptr, std::make_shared<StateBlock>(6, false, nullptr), (Eigen::Vector6s()<<_params.a_noise,_params.a_noise,_params.a_noise,_params.w_noise,_params.w_noise,_params.w_noise).finished(), false, true),
+        a_noise(_params.a_noise),
+        w_noise(_params.w_noise),
+        ab_initial_stdev(_params.ab_initial_stdev),
+        wb_initial_stdev(_params.wb_initial_stdev),
+        ab_rate_stdev(_params.ab_rate_stdev),
+        wb_rate_stdev(_params.wb_rate_stdev)
 {
     //
+}
+
+SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPtr _params) :
+        SensorIMU(_p_ptr, _o_ptr, *_params)
+{
+    //
+}
+
+SensorIMU::SensorIMU(const Eigen::VectorXs& _extrinsics, IntrinsicsIMUPtr _params) :
+        SensorIMU(_extrinsics, *_params)
+{
+    //
+}
+
+SensorIMU::SensorIMU(const Eigen::VectorXs& _extrinsics, const IntrinsicsIMU& _params) :
+        SensorBase("IMU", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(6, false, nullptr), (Eigen::Vector6s()<<_params.a_noise,_params.a_noise,_params.a_noise,_params.w_noise,_params.w_noise,_params.w_noise).finished(), false, true),
+        a_noise(_params.a_noise),
+        w_noise(_params.w_noise),
+        ab_initial_stdev(_params.ab_initial_stdev),
+        wb_initial_stdev(_params.wb_initial_stdev),
+        ab_rate_stdev(_params.ab_rate_stdev),
+        wb_rate_stdev(_params.wb_rate_stdev)
+{
+    assert(_extrinsics.size() == 7 && "Wrong extrinsics vector size! Should be 7 for 2D.");
 }
 
 
@@ -29,11 +53,8 @@ SensorBasePtr SensorIMU::create(const std::string& _unique_name, const Eigen::Ve
     // decode extrinsics vector
     assert(_extrinsics_pq.size() == 7 && "Bad extrinsics vector length. Should be 7 for 3D.");
 
-    StateBlockPtr pos_ptr  = std::make_shared<StateBlock>(_extrinsics_pq.head(3), true);
-    StateBlockPtr ori_ptr  = std::make_shared<StateQuaternion>(_extrinsics_pq.tail(4), true);
-
     IntrinsicsIMUPtr params = std::static_pointer_cast<IntrinsicsIMU>(_intrinsics);
-    SensorIMUPtr sen = std::make_shared<SensorIMU>(pos_ptr, ori_ptr, params);
+    SensorIMUPtr sen = std::make_shared<SensorIMU>(_extrinsics_pq, params);
     sen->setName(_unique_name);
     return sen;
 }
