@@ -11,7 +11,7 @@ SensorGPSFix::SensorGPSFix(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const dou
 }
 
 SensorGPSFix::SensorGPSFix(const Eigen::VectorXs & _extrinsics, const IntrinsicsGPSFix& _intrinsics) :
-        SensorBase("GPS FIX", std::make_shared<StateBlock>(_extrinsics.head(3)), std::make_shared<StateQuaternion>(_extrinsics.tail(4)), nullptr, _intrinsics.noise_std)
+        SensorBase("GPS FIX", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), nullptr, _intrinsics.noise_std)
 {
     assert((_extrinsics.size() == 2 || _extrinsics.size() == 3)
            && "Bad extrinsic vector size. Should be 2 for 2D, 3 for 3D.");
