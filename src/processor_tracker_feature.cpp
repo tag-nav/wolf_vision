@@ -33,7 +33,7 @@ unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_fe
     for (auto ftr : new_features_last_)
     {
         ftr->setTrackId( ftr->id() );
-        WOLF_DEBUG("Det track: ", ftr->trackId(), ", last: ", ftr->id());
+//        WOLF_DEBUG("Det track: ", ftr->trackId(), ", last: ", ftr->id());
     }
 
     // Track new features from last to incoming. This will append new correspondences to matches_last_incoming
@@ -43,7 +43,7 @@ unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_fe
         ftr->setTrackId(matches_last_from_incoming_[ftr]->feature_ptr_->trackId());
 
         // Print new tracked features
-        WOLF_DEBUG("New track: ", ftr->trackId(), ", last: ", matches_last_from_incoming_[ftr]->feature_ptr_->id(), ", inc: ", ftr->id());
+//        WOLF_DEBUG("New track: ", ftr->trackId(), ", last: ", matches_last_from_incoming_[ftr]->feature_ptr_->id(), ", inc: ", ftr->id());
     }
 
     // Append all new Features to the incoming Captures' list of Features
@@ -94,7 +94,7 @@ unsigned int ProcessorTrackerFeature::processKnown()
     // Print resulting list of matches
     for (auto match : matches_last_from_incoming_)
     {
-        WOLF_DEBUG("Known track: ", match.first->trackId(), ", last: ", match.second->feature_ptr_->id(), ", inc: ", match.first->id());
+//        WOLF_DEBUG("Known track: ", match.first->trackId(), ", last: ", match.second->feature_ptr_->id(), ", inc: ", match.first->id());
     }
 
     return matches_last_from_incoming_.size();
@@ -117,7 +117,7 @@ void ProcessorTrackerFeature::advanceDerived()
     // Print resulting list
     for (auto match: matches_origin_from_last_)
     {
-        WOLF_DEBUG("Matches advanced: track: ", match.first->trackId(), "-", match.second->feature_ptr_->trackId(), " origin: ", match.second->feature_ptr_->id(), " last: ", match.first->id());
+//        WOLF_DEBUG("Matches advanced: track: ", match.first->trackId(), "-", match.second->feature_ptr_->trackId(), " origin: ", match.second->feature_ptr_->id(), " last: ", match.first->id());
     }
 }
 
@@ -133,7 +133,7 @@ void ProcessorTrackerFeature::resetDerived()
     // Print resulting list
     for (auto match: matches_origin_from_last_)
     {
-        WOLF_DEBUG("Matches reset: track: ", match.first->trackId(), "-", match.second->feature_ptr_->trackId(), " origin: ", match.second->feature_ptr_->id(), " last: ", match.first->id());
+//        WOLF_DEBUG("Matches reset: track: ", match.first->trackId(), "-", match.second->feature_ptr_->trackId(), " origin: ", match.second->feature_ptr_->id(), " last: ", match.first->id());
     }
 }
 
@@ -147,9 +147,9 @@ void ProcessorTrackerFeature::establishConstraints()
     }
     for (auto match : matches_origin_from_last_)
     {
-        WOLF_DEBUG( "Constraint: track: " , match.second->feature_ptr_->trackId() ,
-                    " origin: " , match.second->feature_ptr_->id() ,
-                    " from last: " , match.first->id() );
+//        WOLF_DEBUG( "Constraint: track: " , match.second->feature_ptr_->trackId() ,
+//                    " origin: " , match.second->feature_ptr_->id() ,
+//                    " from last: " , match.first->id() );
     }
 }
 

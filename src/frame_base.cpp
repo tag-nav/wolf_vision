@@ -136,7 +136,7 @@ void FrameBase::setKey()
 
         getTrajectoryPtr()->sortFrame(shared_from_this());
 
-        WOLF_DEBUG("Set KF", this->id());
+//        WOLF_DEBUG("Set KF", this->id());
     }
 }
 
