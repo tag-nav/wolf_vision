@@ -15,6 +15,8 @@ ProcessorIMU::ProcessorIMU(const ProcessorParamsIMU& _params) :
     jacobian_delta_preint_.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
     jacobian_delta_.setIdentity(9,9);                                           //
     jacobian_calib_.setZero(9,6);
+
+    setVotingActive(_params.voting_active );
 }
 
 ProcessorIMU::~ProcessorIMU()
@@ -44,7 +46,7 @@ ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const Pro
 
 bool ProcessorIMU::voteForKeyFrame()
 {
-    if(!voting_active_)
+    if(!isVotingActive())
         return false;
     // time span
     if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)

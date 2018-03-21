@@ -12,7 +12,8 @@ ProcessorBase::ProcessorBase(const std::string& _type, const Scalar& _time_toler
         processor_id_(++processor_id_count_),
         time_tolerance_(_time_tolerance),
         sensor_ptr_(),
-        is_removing_(false)
+        is_removing_(false),
+        voting_active_(true)
 {
 //    WOLF_DEBUG("constructed    +p" , id());
 }
@@ -24,7 +25,7 @@ ProcessorBase::~ProcessorBase()
 
 bool ProcessorBase::permittedKeyFrame()
 {
-    return getProblem()->permitKeyFrame(shared_from_this());
+    return isVotingActive() && getProblem()->permitKeyFrame(shared_from_this());
 }
 
 FrameBasePtr ProcessorBase::emplaceFrame(FrameType _type, CaptureBasePtr _capture_ptr)
