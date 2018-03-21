@@ -7,6 +7,7 @@
 namespace wolf
 {
 
+WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsCamera);
 /** Struct of intrinsic camera parameters
  */
 struct IntrinsicsCamera : public IntrinsicsBase
@@ -38,7 +39,8 @@ class SensorCamera : public SensorBase
          **/
         SensorCamera(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, int _img_width, int _img_height);
 
-        SensorCamera(const Eigen::VectorXs & _extrinsics, const std::shared_ptr<IntrinsicsCamera> _intrinsics_ptr);
+        SensorCamera(const Eigen::VectorXs & _extrinsics, const IntrinsicsCamera& _intrinsics);
+        SensorCamera(const Eigen::VectorXs & _extrinsics, IntrinsicsCameraPtr _intrinsics_ptr);
 
         virtual ~SensorCamera();
 

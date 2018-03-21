@@ -12,8 +12,10 @@
 
 namespace wolf {
 
+WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsGPSFix);
 struct IntrinsicsGPSFix : public IntrinsicsBase
 {
+        Eigen::Vector3s noise_std;
         // Empty -- it acts only as a typedef for IntrinsicsBase, but allows future extension with parameters
         virtual ~IntrinsicsGPSFix() = default;
 };
@@ -32,6 +34,8 @@ class SensorGPSFix : public SensorBase
          * 
          **/
 		SensorGPSFix(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const double& _noise);
+        SensorGPSFix(const Eigen::VectorXs & _extrinsics, const IntrinsicsGPSFix& _intrinsics);
+        SensorGPSFix(const Eigen::VectorXs & _extrinsics, IntrinsicsGPSFixPtr _intrinsics_ptr);
 
         virtual ~SensorGPSFix();
         

@@ -23,6 +23,19 @@ SensorLaser2D::SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const l
     //
 }
 
+SensorLaser2D::SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const IntrinsicsLaser2D& _params) :
+        SensorBase("LASER 2D", _p_ptr, _o_ptr, nullptr, 8),
+        scan_params_(_params.scan_params)
+{
+    //
+}
+
+SensorLaser2D::SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsLaser2DPtr _params) :
+        SensorLaser2D(_p_ptr, _o_ptr, *_params)
+{
+    //
+}
+
 SensorLaser2D::~SensorLaser2D()
 {
     //

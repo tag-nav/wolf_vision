@@ -54,6 +54,8 @@ class SensorLaser2D : public SensorBase
          *
          **/
         SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const laserscanutils::LaserScanParams& _params);
+        SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const IntrinsicsLaser2D& _params);
+        SensorLaser2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsLaser2DPtr _params);
 
         virtual ~SensorLaser2D();
         

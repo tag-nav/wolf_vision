@@ -56,6 +56,9 @@ class SensorIMU : public SensorBase
          *
          **/
         SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPtr _params);
+        SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const IntrinsicsIMU& _params);
+        SensorIMU(const Eigen::VectorXs& _extrinsics, const IntrinsicsIMU& _params);
+        SensorIMU(const Eigen::VectorXs& _extrinsics, IntrinsicsIMUPtr _params);
 
         Scalar getGyroNoise() const;
         Scalar getAccelNoise() const;
