@@ -849,23 +849,20 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                                 cout << endl;
                             }
 
-                    if (C->isMotion() && metric)
+                    if (C->isMotion() )
                     {
-                        try
+                        CaptureMotionPtr CM = std::dynamic_pointer_cast<CaptureMotion>(C);
+                        cout << "      buffer size  :  " << CM->getBuffer().get().size() << endl;
+                        if ( metric && ! CM->getBuffer().get().empty())
                         {
-                            CaptureMotionPtr CM = std::static_pointer_cast<CaptureMotion>(C);
-                            cout << "      buffer size  :  " << CM->getBuffer().get().size() << endl;
-                            if ( CM->getCalibSize() > 0 && ! CM->getBuffer().get().empty())
+                            cout << "      delta preint : (" << CM->getDeltaPreint().transpose() << ")" << endl;
+                            if (CM->hasCalibration())
                             {
-                                cout << "      delta preint : (" << CM->getDeltaPreint().transpose() << ")" << endl;
                                 cout << "      calib preint : (" << CM->getCalibrationPreint().transpose() << ")" << endl;
                                 cout << "      jacob preint : (" << CM->getJacobianCalib().row(0) << ")" << endl;
                                 cout << "      calib current: (" << CM->getCalibration().transpose() << ")" << endl;
                                 cout << "      delta correct: (" << CM->getDeltaCorrected(CM->getCalibration()).transpose() << ")" << endl;
                             }
-                        }
-                        catch  (std::runtime_error& e)
-                        {
                         }
                     }
 
