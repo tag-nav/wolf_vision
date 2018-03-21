@@ -92,3 +92,8 @@ if ! [[ $BASE =~ $TYPE ]] ;
 then
     BASE="$TYPE"_"$BASE";
 fi
+
+if ! [[ $CLASSNAME =~ .*BASE*. ]] ;
+then
+	CLASSNAME=${CLASSNAME//Base}  # Replace Base with nothing
+fi
