@@ -13,7 +13,7 @@ namespace wolf
 {
 
 ProcessorDiffDrive::ProcessorDiffDrive(const ProcessorParamsDiffDrive &params) :
-  ProcessorMotion("DIFF DRIVE", 3, 3, 3, 2, 3, 0.15),
+  ProcessorMotion("DIFF DRIVE", 0.15, 3, 3, 3, 2, 3),
   unmeasured_perturbation_cov_(Matrix3s::Identity()*
                                params.unmeasured_perturbation_std_*
                                params.unmeasured_perturbation_std_),
