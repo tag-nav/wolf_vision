@@ -123,7 +123,6 @@ class ProcessorMotion : public ProcessorBase
 
         // Instructions to the processor:
 
-        void process2(CaptureBasePtr _incoming_ptr);
         void process(CaptureBasePtr _incoming_ptr);
         virtual void resetDerived();
 
@@ -399,9 +398,9 @@ class ProcessorMotion : public ProcessorBase
         Motion motionZero(const TimeStamp& _ts);
 
     public:
-        virtual CaptureMotionPtr getOriginPtr();
-        virtual CaptureMotionPtr getLastPtr();
-        virtual CaptureMotionPtr getIncomingPtr();
+        CaptureMotionPtr getOriginPtr();
+        CaptureMotionPtr getLastPtr();
+        CaptureMotionPtr getIncomingPtr();
 
 
     protected:
