@@ -12,7 +12,7 @@ NC=$(tput sgr 0) # No Color
 
 askIfGitBranch()
 {
- read -p "${CYAN}Do you want to create a new git branch(Y/n)?  ${NC}" ANSWER
+ read -p "${CYAN}Do you want to create a new git branch (y/n)?  ${NC}" ANSWER
  DOIT=${ANSWER:-y}
  OK=0
  
