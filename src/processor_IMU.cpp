@@ -8,7 +8,7 @@ ProcessorIMU::ProcessorIMU(const ProcessorParamsIMU& _params) :
         max_time_span_  (_params.max_time_span   ),
         max_buff_length_(_params.max_buff_length ),
         dist_traveled_  (_params.dist_traveled   ),
-        angle_turned_   (_params.angle_turned    ),
+        angle_turned_   (_params.angle_turned    )
 {
     // Set constant parts of Jacobians
     jacobian_delta_preint_.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
