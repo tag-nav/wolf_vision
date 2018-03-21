@@ -20,6 +20,7 @@ namespace wolf {
 struct IntrinsicsGPS : public IntrinsicsBase
 {
         // add GPS parameters here
+        virtual ~IntrinsicsGPS() = default;
 };
 
 WOLF_PTR_TYPEDEFS(SensorGPS);

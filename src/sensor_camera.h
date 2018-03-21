@@ -15,6 +15,8 @@ struct IntrinsicsCamera : public IntrinsicsBase
         unsigned int height;                ///< Image height in pixels
         Eigen::Vector4s pinhole_model;      ///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
         Eigen::VectorXs distortion;         ///< d = [d_1, d_2, d_3, ...] radial distortion coefficients
+
+        virtual ~IntrinsicsCamera() = default;
 };
 
 WOLF_PTR_TYPEDEFS(SensorCamera);

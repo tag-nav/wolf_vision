@@ -17,6 +17,8 @@ WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsLaser2D);
 
 struct IntrinsicsLaser2D : public IntrinsicsBase
 {
+        virtual ~IntrinsicsLaser2D() = default;
+
         laserscanutils::LaserScanParams scan_params;
 };
 

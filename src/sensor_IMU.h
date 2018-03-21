@@ -15,25 +15,18 @@ WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsIMU);
 struct IntrinsicsIMU : public IntrinsicsBase
 {
         //noise std dev
-        wolf::Scalar w_noise; //standard deviation of Gyroscope noise (same for all the axis) in rad/sec/ sqrt(s)
-        wolf::Scalar a_noise; //standard deviation of Acceleration noise (same for all the axis) in m/s2/sqrt(s)
+        wolf::Scalar w_noise = 0.001; //standard deviation of Gyroscope noise (same for all the axis) in rad/sec/ sqrt(s)
+        wolf::Scalar a_noise = 0.04; //standard deviation of Acceleration noise (same for all the axis) in m/s2/sqrt(s)
 
         //Initial biases std dev
-        wolf::Scalar ab_initial_stdev; //accelerometer micro_g/sec
-        wolf::Scalar wb_initial_stdev; //gyroscope rad/sec
+        wolf::Scalar ab_initial_stdev = 0.01; //accelerometer micro_g/sec
+        wolf::Scalar wb_initial_stdev = 0.01; //gyroscope rad/sec
 
         // bias rate of change std dev
-        Scalar ab_rate_stdev;
-        Scalar wb_rate_stdev;
+        Scalar ab_rate_stdev = 0.00001;
+        Scalar wb_rate_stdev = 0.00001;
 
-        IntrinsicsIMU() :
-            w_noise(0.001),
-            a_noise(0.04),
-            ab_initial_stdev(0.00001),
-            wb_initial_stdev(0.00001),
-            ab_rate_stdev(0.00001),
-            wb_rate_stdev(0.00001)
-        {}
+        virtual ~IntrinsicsIMU() = default;
 };
 
 WOLF_PTR_TYPEDEFS(SensorIMU);

@@ -15,6 +15,7 @@ namespace wolf {
 struct IntrinsicsGPSFix : public IntrinsicsBase
 {
         // Empty -- it acts only as a typedef for IntrinsicsBase, but allows future extension with parameters
+        virtual ~IntrinsicsGPSFix() = default;
 };
 
 WOLF_PTR_TYPEDEFS(SensorGPSFix);

@@ -7,10 +7,12 @@
 
 namespace wolf {
 
-WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsOdom2D)
+WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsOdom2D);
 
 struct IntrinsicsOdom2D : public IntrinsicsBase
 {
+        virtual ~IntrinsicsOdom2D() = default;
+
         Scalar k_disp_to_disp; ///< ratio of displacement variance to displacement, for odometry noise calculation
         Scalar k_rot_to_rot; ///< ratio of rotation variance to rotation, for odometry noise calculation
 };
