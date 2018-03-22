@@ -16,7 +16,6 @@ struct ProcessorParamsIMU : public ProcessorParamsBase
         Size   max_buff_length  = 10;
         Scalar dist_traveled    = 5;
         Scalar angle_turned     = 0.5;
-        bool voting_active      = false; //IMU will not vote for key Frames to be created
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorIMU);
@@ -71,7 +70,6 @@ class ProcessorIMU : public ProcessorMotion{
         Size   max_buff_length_;// maximum buffer size before keyframe
         Scalar dist_traveled_;  // maximum linear motion between keyframes
         Scalar angle_turned_;   // maximum rotation between keyframes
-        bool voting_active_;    // IMU will be voting for KeyFrame only if this is true
 
 
     public:
