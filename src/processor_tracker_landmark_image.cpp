@@ -9,6 +9,13 @@
 #include "trajectory_base.h"
 #include "map_base.h"
 
+// vision_utils
+#include <vision_utils/detectors.h>
+#include <vision_utils/descriptors.h>
+#include <vision_utils/matchers.h>
+#include <vision_utils/algorithms.h>
+
+
 #include <Eigen/Geometry>
 #include <iomanip> //setprecision
 
