@@ -208,17 +208,10 @@ inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p_current, const
     dq.z() = expected(5);
     dq.w() = expected(6);
 
-//    std::cout << "operator dp: " << dp(0) << std::endl << dp(1) << std::endl << dp(2) << std::endl;
-//    std::cout << "operator dq: " << dq.x() << std::endl << dq.y() << std::endl << dq.z() << std::endl << dq.w() << std::endl;
-
     residuals.head(3) = dp_m - dp; // being a residual, rotating it has no implications, so we skip the product by dq.conj
     residuals.tail(3) = q2v(dq.conjugate() * dq_m);
 
     residuals = getMeasurementSquareRootInformationUpper().cast<T>() * residuals;
-
-    //Eigen::Matrix<T,6,1> r = residuals;
-
-    //printRes(r);
 
     return true;
 }
