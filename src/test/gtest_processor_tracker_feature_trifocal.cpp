@@ -69,6 +69,8 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     using std::static_pointer_cast;
     using Eigen::Vector2s;
 
+    std::string wolf_root = _WOLF_ROOT_DIR;
+
     Scalar dt = 0.01;
 
     // Wolf problem
@@ -83,6 +85,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     params_trifocal.time_tolerance = dt/2;
     params_trifocal.max_new_features = 5;
     params_trifocal.min_features_for_keyframe = 5;
+    params_trifocal.yaml_file_params_vision_utils = wolf_root + "/src/examples/ACTIVESEARCH.yaml";
 
     ProcessorTrackerFeatureTrifocalPtr proc_trk = make_shared<ProcessorTrackerFeatureTrifocal>(params_trifocal);
 

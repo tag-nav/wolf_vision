@@ -5,6 +5,13 @@
 #include "wolf.h"
 #include "processor_tracker_feature.h"
 
+// Vision utils
+#include <vision_utils.h>
+#include <vision_utils/detectors.h>
+#include <vision_utils/descriptors.h>
+#include <vision_utils/matchers.h>
+#include <vision_utils/algorithms.h>
+
 namespace wolf
 {
 
@@ -17,7 +24,6 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTracker
         unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
 
         Scalar pixel_noise_std; ///< std noise of the pixel
-        Scalar pixel_noise_var; ///< var noise of the pixel
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureTrifocal);
@@ -25,10 +31,23 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureTrifocal);
 class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 {
 
-    public: // TODO make private
+        // Parameters for vision_utils
+    protected:
+        vision_utils::DetectorBasePtr det_ptr_;
+        vision_utils::DescriptorBasePtr des_ptr_;
+        vision_utils::MatcherBasePtr mat_ptr_;
+        vision_utils::AlgorithmACTIVESEARCHPtr active_search_ptr_;  // Active Search
+
+        int cell_width_; ///< Active search cell width
+        int cell_height_; ///< Active search cell height
+        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_activesearch_ptr_; ///< Active search parameters
+
+
+    private:
+        ProcessorParamsTrackerFeatureTrifocal params_;      ///< Configuration parameters
         CaptureBasePtr prev_origin_ptr_;                    ///< Capture previous to origin_ptr_ for the third focus of the trifocal.
-        bool initialized_;                                  ///< flags the situation where three focus are available: prev_origin, origin, and last.
         FeatureMatchMap matches_prev_origin_from_origin_;   ///< matches between prev_origin and origin.
+        bool initialized_;                                  ///< Flags the situation where three focus are available: prev_origin, origin, and last.
 
     public:
 
