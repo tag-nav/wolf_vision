@@ -100,7 +100,7 @@ ConstraintBasePtr ProcessorTrackerFeatureTrifocal::createConstraint(FeatureBaseP
   return return_var;
 }
 
-unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_features)
+unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features)
 {
   std::cout << "033[1;33m [WARN]:033[0m ProcessorTrackerFeatureTrifocal::detectNewFeatures is empty." << std::endl;
   unsigned int return_var{}; //TODO: fill this variable

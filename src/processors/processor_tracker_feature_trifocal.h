@@ -91,7 +91,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          *
          * The function sets the member new_features_last_, the list of newly detected features.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features);
 
         /** \brief Create a new constraint and link it to the wolf tree
          * \param _feature_ptr pointer to the parent Feature
