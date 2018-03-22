@@ -174,61 +174,6 @@ bool ProcessorTrackerFeatureTrifocal::voteForKeyFrame()
 
 bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
 {
-//    DMatchVector matches_mat;
-//    FeaturePointImagePtr feat_incoming_ptr = std::static_pointer_cast<FeaturePointImage>(_incoming_feature);
-//    FeaturePointImagePtr feat_origin_ptr = std::static_pointer_cast<FeaturePointImage>(_origin_feature);
-//
-//    cv::Mat origin_descriptor   = feat_origin_ptr->getDescriptor();
-//    cv::Mat incoming_descriptor = feat_incoming_ptr->getDescriptor();
-//
-//    KeyPointVector origin_keypoint;
-//    origin_keypoint.push_back(feat_origin_ptr->getKeypoint());
-//
-//    Scalar normalized_score = mat_ptr_->match(origin_descriptor,incoming_descriptor,matches_mat);
-//
-//    if(normalized_score > mat_ptr_->getParams()->min_norm_score)
-//        return true;
-//    else
-//    {
-//        /* CORRECT */
-//
-//        unsigned int roi_width = cell_width_;
-//        unsigned int roi_heigth = cell_height_;
-//        unsigned int roi_x;
-//        unsigned int roi_y;
-//
-//        KeyPointVector correction_keypoints;
-//        cv::Mat correction_descriptors;
-//        DMatchVector correction_matches;
-//
-//        FeaturePointImagePtr feat_last_ptr = std::static_pointer_cast<FeaturePointImage>(_last_feature);
-//
-//        active_search_ptr_->hitCell(feat_last_ptr->getKeypoint());
-//
-//        roi_x = (feat_last_ptr->getKeypoint().pt.x) - (roi_heigth / 2);
-//        roi_y = (feat_last_ptr->getKeypoint().pt.y) - (roi_width / 2);
-//        cv::Rect roi(roi_x, roi_y, roi_width, roi_heigth);
-//
-//        KeyPointVector kps = det_ptr_->detect       (image_incoming_, roi);
-//
-//        if (kps.size() > 0)
-//        {
-//            cv::Mat desc = des_ptr_->getDescriptor(image_incoming_, kps);;
-//
-//            Scalar normalized_score_correction = mat_ptr_->match(origin_descriptor,correction_descriptors,correction_matches);
-//            if(normalized_score_correction > mat_ptr_->getParams()->min_norm_score )
-//            {
-//                feat_incoming_ptr->setKeypoint(correction_keypoints[correction_matches[0].trainIdx]);
-//                feat_incoming_ptr->setDescriptor(correction_descriptors.row(correction_matches[0].trainIdx));
-//                return true;
-//            }
-//            else
-//            {
-//                return false;
-//            }
-//        }
-//        return false;
-//    }
     return true;
 }
 
