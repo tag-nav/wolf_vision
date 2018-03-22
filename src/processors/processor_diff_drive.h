@@ -58,6 +58,7 @@ public:
   ProcessorDiffDrive(const ProcessorParamsDiffDrive& params);
 
   virtual ~ProcessorDiffDrive() = default;
+  virtual void configure(SensorBasePtr _sensor) { }
 
   virtual bool voteForKeyFrame() override;
 

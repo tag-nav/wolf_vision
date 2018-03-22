@@ -33,6 +33,7 @@ class ProcessorOdom2D : public ProcessorMotion
     public:
         ProcessorOdom2D(const ProcessorParamsOdom2D& _params = ProcessorParamsOdom2D());
         virtual ~ProcessorOdom2D();
+        virtual void configure(SensorBasePtr _sensor) { };
 
         virtual bool voteForKeyFrame() override;
 

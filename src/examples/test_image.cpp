@@ -92,7 +92,6 @@ int main(int argc, char** argv)
 //
 //        ProcessorTrackerTrifocalTensorPtr prc_image = std::make_shared<ProcessorImageFeature>(tracker_params);
 ////        camera_ptr->addProcessor(prc_image);
-//        prc_image->setup(camera_ptr);
 //        std::cout << "sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================
 
@@ -123,7 +122,6 @@ int main(int argc, char** argv)
     // PROCESSOR
     // one-liner API
     ProcessorTrackerFeatureImagePtr prc_img_ptr = std::static_pointer_cast<ProcessorTrackerFeatureImage>( wolf_problem_->installProcessor("IMAGE FEATURE", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml") );
-    prc_img_ptr->setup(camera_ptr);
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
     //=====================================================
 

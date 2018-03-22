@@ -1,11 +1,13 @@
 #include "processor_tracker_feature_trifocal.h"
  
+#include "sensor_camera.h"
 namespace wolf {
 
 // Constructor
 // TODO Modify this default API to suit your class needs
 ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(const ProcessorParamsTrackerFeatureTrifocal& _params) :
         ProcessorTrackerFeature("TRACKER_FEATURE_TRIFOCAL", _params.time_tolerance, _params.max_new_features ),
+        cell_width_(0), cell_height_(0), // These will be initialized to proper values taken from the sensor via function configure()
         prev_origin_ptr_(nullptr),
         initialized_(false)
 {
@@ -105,6 +107,18 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
         //                                " from last: " , match.first->id() );
         //                }
     }
+}
+
+void ProcessorTrackerFeatureTrifocal::configure(SensorBasePtr _sensor)
+{
+    SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(_sensor);
+
+    active_search_ptr_->initAlg(camera->getImgWidth(), camera->getImgHeight() , det_ptr_->getPatternRadius());
+
+    params_activesearch_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmParamsACTIVESEARCH>( active_search_ptr_->getParams() );
+
+    cell_width_  = camera->getImgWidth()  / params_activesearch_ptr_->n_cells_h;
+    cell_height_ = camera->getImgHeight() / params_activesearch_ptr_->n_cells_v;
 }
 
 } // namespace wolf

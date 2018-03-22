@@ -82,7 +82,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         ProcessorTrackerLandmarkImage(const ProcessorParamsImage& _params);
         virtual ~ProcessorTrackerLandmarkImage();
 
-        virtual void setup(SensorCameraPtr _camera_ptr);
+        virtual void configure(SensorBasePtr _sensor) ;
 
     protected:
 

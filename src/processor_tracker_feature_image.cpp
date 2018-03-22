@@ -9,7 +9,7 @@ namespace wolf
 
 ProcessorTrackerFeatureImage::ProcessorTrackerFeatureImage(ProcessorParamsImage _params) :
     ProcessorTrackerFeature("IMAGE", _params.time_tolerance, _params.algorithm.max_new_features),
-    cell_width_(0), cell_height_(0), // These will need to be initialized via function setup()
+    cell_width_(0), cell_height_(0),  // These will be initialized to proper values taken from the sensor via function configure()
     params_(_params)
 {
 	// Detector
@@ -94,12 +94,14 @@ ProcessorTrackerFeatureImage::~ProcessorTrackerFeatureImage()
     //
 }
 
-void ProcessorTrackerFeatureImage::setup(SensorCameraPtr _camera_ptr)
+void ProcessorTrackerFeatureImage::configure(SensorBasePtr _sensor)
 {
-    image_.width_ = _camera_ptr->getImgWidth();
-    image_.height_ = _camera_ptr->getImgHeight();
+    SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(_sensor);
 
-    active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight() , det_ptr_->getPatternRadius());
+    image_.width_ = camera->getImgWidth();
+    image_.height_ = camera->getImgHeight();
+
+    active_search_ptr_->initAlg(camera->getImgWidth(), camera->getImgHeight() , det_ptr_->getPatternRadius());
 
     params_activesearch_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmParamsACTIVESEARCH>( active_search_ptr_->getParams() );
 
@@ -385,7 +387,6 @@ void ProcessorTrackerFeatureImage::drawFeatures(cv::Mat _image)
 ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sensor_ptr)
 {
     ProcessorTrackerFeatureImagePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureImage>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
-    prc_ptr->setup(std::static_pointer_cast<SensorCamera>(_sensor_ptr));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

@@ -20,6 +20,7 @@ class ProcessorTrackerLandmarkDummy : public ProcessorTrackerLandmark
     public:
         ProcessorTrackerLandmarkDummy(const Scalar _time_tolerance, const unsigned int& _max_new_features);
         virtual ~ProcessorTrackerLandmarkDummy();
+        virtual void configure(SensorBasePtr _sensor) { };
 
     protected:
 

@@ -103,12 +103,13 @@ ProcessorTrackerLandmarkImage::~ProcessorTrackerLandmarkImage()
     //
 }
 
-void ProcessorTrackerLandmarkImage::setup(SensorCameraPtr _camera_ptr)
+void ProcessorTrackerLandmarkImage::configure(SensorBasePtr _sensor)
 {
-    image_.width_ = _camera_ptr->getImgWidth();
-    image_.height_ = _camera_ptr->getImgHeight();
+    SensorCameraPtr camera(std::static_pointer_cast<SensorCamera>(_sensor));
+    image_.width_ = camera->getImgWidth();
+    image_.height_ = camera->getImgHeight();
 
-    active_search_ptr_->initAlg(_camera_ptr->getImgWidth(), _camera_ptr->getImgHeight(), det_ptr_->getPatternRadius() );
+    active_search_ptr_->initAlg(camera->getImgWidth(), camera->getImgHeight(), det_ptr_->getPatternRadius() );
 
     params_activesearch_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmParamsACTIVESEARCH>( active_search_ptr_->getParams() );
 
@@ -486,7 +487,6 @@ void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
 ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
     ProcessorTrackerLandmarkImagePtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkImage>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
-    prc_ptr->setup(std::static_pointer_cast<SensorCamera>(_sen_ptr));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

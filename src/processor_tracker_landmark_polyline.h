@@ -116,6 +116,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
         ProcessorTrackerLandmarkPolyline(const ProcessorParamsPolyline& _params);
 
         virtual ~ProcessorTrackerLandmarkPolyline();
+        virtual void configure(SensorBasePtr _sensor) { };
 
         const FeatureBaseList& getLastPolylines() const;
 

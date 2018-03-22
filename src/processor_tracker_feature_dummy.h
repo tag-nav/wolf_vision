@@ -24,6 +24,7 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
     public:
         ProcessorTrackerFeatureDummy(const Scalar _time_tolerance, const unsigned int _max_new_features, const unsigned int _min_feat_for_keyframe);
         virtual ~ProcessorTrackerFeatureDummy();
+        virtual void configure(SensorBasePtr _sensor) { };
 
     protected:
 

@@ -130,6 +130,7 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
     public:
         ProcessorBase(const std::string& _type, const Scalar& _time_tolerance);
         virtual ~ProcessorBase();
+        virtual void configure(SensorBasePtr _sensor) = 0;
         void remove();
 
         unsigned int id();

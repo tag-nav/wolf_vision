@@ -40,6 +40,7 @@ struct ProcessorParamsFrameNearestNeighborFilter : public ProcessorParamsLoopClo
   }
 
   virtual ~ProcessorParamsFrameNearestNeighborFilter() = default;
+  virtual void configure(SensorBasePtr _sensor) { };
 
   int buffer_size_;
   int sample_step_degree_;

@@ -39,6 +39,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         /** \brief Class Destructor
          */
         virtual ~ProcessorTrackerFeatureTrifocal();
+        virtual void configure(SensorBasePtr _sensor);
 
         /** \brief Track provided features from \b last to \b incoming
          * \param _feature_list_in input list of features in \b last to track

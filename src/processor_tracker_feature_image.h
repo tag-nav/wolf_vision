@@ -66,7 +66,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
         ProcessorTrackerFeatureImage(ProcessorParamsImage _params);
         virtual ~ProcessorTrackerFeatureImage();
 
-        virtual void setup(SensorCameraPtr _camera_ptr);
+        virtual void configure(SensorBasePtr _sensor) ;
 
     protected:
 

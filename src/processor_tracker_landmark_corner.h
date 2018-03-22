@@ -90,6 +90,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
                                        const unsigned int& _new_corners_th, const unsigned int& _loop_frames_th);
 
         virtual ~ProcessorTrackerLandmarkCorner();
+        virtual void configure(SensorBasePtr _sensor) { };
 
     protected:
 

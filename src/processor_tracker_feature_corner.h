@@ -67,6 +67,7 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
         ProcessorTrackerFeatureCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
                                       const unsigned int& _n_corners_th);
         virtual ~ProcessorTrackerFeatureCorner();
+        virtual void configure(SensorBasePtr _sensor) { };
 
     protected:
 

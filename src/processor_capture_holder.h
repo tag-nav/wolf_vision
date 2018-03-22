@@ -35,6 +35,7 @@ public:
 
   ProcessorCaptureHolder(const Scalar& _buffer_size = 1);
   virtual ~ProcessorCaptureHolder() = default;
+  virtual void configure(SensorBasePtr _sensor) { };
 
   virtual void process(CaptureBasePtr _capture_ptr) override;
 
