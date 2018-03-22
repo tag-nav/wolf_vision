@@ -40,7 +40,6 @@ struct ProcessorParamsFrameNearestNeighborFilter : public ProcessorParamsLoopClo
   }
 
   virtual ~ProcessorParamsFrameNearestNeighborFilter() = default;
-  virtual void configure(SensorBasePtr _sensor) { };
 
   int buffer_size_;
   int sample_step_degree_;
@@ -65,8 +64,8 @@ public:
   using DistanceType = Params::DistanceType;
 
   ProcessorFrameNearestNeighborFilter(const Params& _params);
-
   virtual ~ProcessorFrameNearestNeighborFilter() = default;
+  virtual void configure(SensorBasePtr _sensor) { };
 
   inline DistanceType getDistanceType() const noexcept {return params_.distance_type_;}
 
