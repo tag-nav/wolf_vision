@@ -52,9 +52,6 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
                 unsigned int height_; ///< height of the image
         } image_;
 
-        unsigned int complete_target_size_ = 1;
-        unsigned int target_size_ = 1;
-
     public:
 
         // Lists to store values to debug

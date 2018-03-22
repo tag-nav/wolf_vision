@@ -143,7 +143,6 @@ unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& 
 
         active_search_ptr_->hitCell(feature_ptr->getKeypoint());
 
-        complete_target_size_++;
         cv::Mat target_descriptor = feature_ptr->getDescriptor();
 
         //lists used to debug
@@ -373,13 +372,6 @@ void ProcessorTrackerFeatureImage::drawFeatures(cv::Mat _image)
                         cv:: FONT_HERSHEY_SIMPLEX, 0.4, cv::Scalar(255.0, 255.0, 0.0));
         }
         std::cout << "\nKnown: " << known_feature_counter << "\tNew: " << new_feature_counter << std::endl;
-        std::cout << "Known features tracked: " << known_feature_counter << "/" << target_size_ << std::endl;
-        std::cout << "Percentage known: " << ((float)known_feature_counter/(float)target_size_)*100 << "%" << std::endl;
-        std::cout << "Features tracked: " << (last_ptr_->getFeatureList()).size() << "/" << complete_target_size_ << std::endl;
-        std::cout << "Percentage: " << ((float)(last_ptr_->getFeatureList()).size()/(float)complete_target_size_)*100 << "%" << std::endl;
-
-        target_size_ = (last_ptr_->getFeatureList()).size();
-        complete_target_size_ = 0;
     }
 }
 
