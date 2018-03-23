@@ -71,6 +71,10 @@ class FeatureTrackMap
             else
                 return nullptr;
         }
+        CaptureBasePtr getFirstCapture(size_t _track_id)
+        {
+            return getFirstFeature(_track_id)->getCapturePtr();
+        }
 
     private:
         std::map<unsigned int, std::deque<FeatureBasePtr> > container_;
