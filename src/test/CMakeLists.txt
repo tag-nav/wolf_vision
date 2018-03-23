@@ -97,6 +97,10 @@ wolf_add_gtest(gtest_time_stamp gtest_time_stamp.cpp)
 target_link_libraries(gtest_time_stamp ${PROJECT_NAME})
 
 # TrajectoryBase class test
+wolf_add_gtest(gtest_feature_track_map gtest_feature_track_map.cpp)
+target_link_libraries(gtest_feature_track_map ${PROJECT_NAME})
+
+# TrajectoryBase class test
 wolf_add_gtest(gtest_trajectory gtest_trajectory.cpp)
 target_link_libraries(gtest_trajectory ${PROJECT_NAME})
 
