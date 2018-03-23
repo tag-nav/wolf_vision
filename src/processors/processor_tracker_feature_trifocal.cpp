@@ -167,9 +167,16 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
 
 bool ProcessorTrackerFeatureTrifocal::voteForKeyFrame()
 {
-  std::cout << "033[1;33m [WARN]:033[0m ProcessorTrackerFeatureTrifocal::voteForKeyFrame is empty." << std::endl;
-  bool return_var{}; //TODO: fill this variable
-  return return_var;
+    bool vote = true;
+
+    // list of conditions with AND logic (all need to be satisfied)
+
+    // 1. vote if we had enough features before
+    vote = vote && getNewFeaturesListLast().size() >= params_.min_features_for_keyframe;
+    // 2. vote if we have not enough features now
+    vote = vote && getNewFeaturesListIncoming().size() < params_.min_features_for_keyframe;
+
+    return vote;
 }
 
 bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
@@ -221,14 +228,6 @@ void ProcessorTrackerFeatureTrifocal::resetDerived()
 {
     // We also reset here the list of correspondences, which passes from origin--last to prev_origin--origin.
     matches_prev_origin_from_origin_ = std::move(matches_origin_from_last_);
-    // Print resulting list
-    for (auto match : matches_prev_origin_from_origin_)
-    {
-        WOLF_DEBUG("Matches reset prev <-- orig: track: ",
-                   match.first->trackId(), "-", match.second->feature_ptr_->trackId(),
-                   " origin: ", match.second->feature_ptr_->id(),
-                   " last: ", match.first->id());
-    }
 
     // Call parent class method
     ProcessorTrackerFeature::resetDerived();
@@ -238,6 +237,18 @@ void ProcessorTrackerFeatureTrifocal::resetDerived()
     {
         prev_origin_ptr_ = origin_ptr_;
     }
+
+
+
+    // Print resulting list
+    for (auto match : matches_prev_origin_from_origin_)
+    {
+        WOLF_DEBUG("Matches reset prev <-- orig: track: ",
+                   match.first->trackId(), "-", match.second->feature_ptr_->trackId(),
+                   " prev: ", match.second->feature_ptr_->id(),
+                   " origin: ", match.first->id());
+    }
+
 }
 
 void ProcessorTrackerFeatureTrifocal::preProcess()
@@ -256,19 +267,21 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
 {
     if (initialized_)
     {
-        // From ProcessorTrackerFeature::establishConstraints() :
-        //                for (auto match : matches_origin_from_last_)
-        //                {
-        //                    auto ctr = createConstraint(match.first, match.second->feature_ptr_);
-        //                    match.first->addConstraint(ctr);
-        //                    match.second->feature_ptr_->addConstrainedBy(ctr);
-        //                }
-        //                for (auto match : matches_origin_from_last_)
-        //                {
-        //                    WOLF_DEBUG( "Constraint: track: " , match.second->feature_ptr_->trackId() ,
-        //                                " origin: " , match.second->feature_ptr_->id() ,
-        //                                " from last: " , match.first->id() );
-        //                }
+         // From ProcessorTrackerFeature::establishConstraints() :
+//        matche
+//                        for (auto match : matches_origin_from_last_)
+//                        {
+//                            auto ctr = createConstraint(match.first, match.second->feature_ptr_);
+//                            match.first->addConstraint(ctr);
+//                            match.second->feature_ptr_->addConstrainedBy(ctr);
+//                        }
+//
+//                        for (auto match : matches_origin_from_last_)
+//                        {
+//                            WOLF_DEBUG( "Constraint: track: " , match.second->feature_ptr_->trackId() ,
+//                                        " origin: " , match.second->feature_ptr_->id() ,
+//                                        " from last: " , match.first->id() );
+//                        }
     }
 }
 
