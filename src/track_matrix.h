@@ -23,7 +23,8 @@ using std::shared_ptr;
 typedef map<TimeStamp, FeatureBasePtr>          TrackType;
 typedef map<unsigned long int, FeatureBasePtr > SnapshotType;
 
-/* This class implements the following data structure:
+/** \brief Matrix of tracked features, by track and by snapshot (Captures or time stamps)
+ * This class implements the following data structure:
  *
  * Snapshots at each capture Cx:
  *      C1     C2     C3     C4     C5
@@ -40,8 +41,13 @@ typedef map<unsigned long int, FeatureBasePtr > SnapshotType;
  *
  * This structure allows accessing all the history of matched features with two different accesses:
  *
- *      Track:    track-wise:   a track of features matches along a timely sequence of Captures
- *      Snapshot: capture-wise: a set of features tracked in a single Capture
+ *      Track:    track-wise:   a track of features matches along a timely sequence of Captures, indexed by time stamp.
+ *
+ *                              map<TimeStamp ts, FeatureBasePtr f>
+ *
+ *      Snapshot: capture-wise: a set of features tracked in a single Capture, indexed by track id:
+ *
+ *                              map<size_t track_id, FeatureBasePtr f>
  *
  * The class makes sure that both accesses are consistent each time some addition or removal of features is performed.
  *
@@ -52,8 +58,12 @@ typedef map<unsigned long int, FeatureBasePtr > SnapshotType;
  *
  * so e.g.
  *
- *      getTrack   (f->trackId()) ;       // returns all the track for feature f.
+ *      getTrack   (f->trackId()) ;       // returns all the track where feature f is.
  *      getSnapshot(f->getCapturePtr()) ; // returns all the features in the same capture of f.
+ *
+ * When adding a feature to the track matrix, this must be already added to a Capture, with capture.addFeature(feature_ptr).
+ * Failure to do so may result in unpredicted behavior.
+ *
  */
 
 class TrackMatrix
