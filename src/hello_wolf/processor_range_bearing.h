@@ -35,7 +35,7 @@ class ProcessorRangeBearing : public ProcessorBase
 
         ProcessorRangeBearing(const SensorRangeBearingPtr _sensor_ptr, const Scalar& _time_tolerance = 0);
         virtual ~ProcessorRangeBearing() {/* empty */}
-        virtual void configure(SensorBasePtr _sensor) { }
+        virtual void configure(SensorBasePtr _sensor) override { }
 
         // Factory method for high level API
         static ProcessorBasePtr create(const std::string& _unique_name,

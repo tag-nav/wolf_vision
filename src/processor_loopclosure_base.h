@@ -48,7 +48,7 @@ public:
   ProcessorLoopClosureBase(const std::string& _type, const Scalar _time_tolerance);
 
   virtual ~ProcessorLoopClosureBase() = default;
-  virtual void configure(SensorBasePtr _sensor) { };
+  virtual void configure(SensorBasePtr _sensor) override { };
 
   /** \brief Full processing of an incoming Capture.
      *

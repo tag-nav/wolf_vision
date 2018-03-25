@@ -25,7 +25,7 @@ class ProcessorIMU : public ProcessorMotion{
     public:
         ProcessorIMU(const ProcessorParamsIMU& _params = ProcessorParamsIMU());
         virtual ~ProcessorIMU();
-        virtual void configure(SensorBasePtr _sensor) { };
+        virtual void configure(SensorBasePtr _sensor) override { };
 
     protected:
         virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
