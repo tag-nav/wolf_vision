@@ -216,6 +216,7 @@ SET(HDRS_BASE
     state_homogeneous_3D.h
     state_quaternion.h
     time_stamp.h
+    track_matrix.h
     trajectory_base.h
     wolf.h
     )
@@ -307,6 +308,7 @@ SET(SRCS_BASE
     processor_tracker_feature.cpp
     processor_tracker_landmark.cpp
     sensor_base.cpp
+    track_matrix.cpp
     time_stamp.cpp
     trajectory_base.cpp
     )

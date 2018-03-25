@@ -56,6 +56,10 @@ target_link_libraries(gtest_eigen_predicates ${PROJECT_NAME})
 wolf_add_gtest(gtest_feature_base gtest_feature_base.cpp)
 target_link_libraries(gtest_feature_base ${PROJECT_NAME})
 
+# TrajectoryBase class test
+wolf_add_gtest(gtest_feature_track_map gtest_feature_track_map.cpp)
+target_link_libraries(gtest_feature_track_map ${PROJECT_NAME})
+
 # FrameBase classes test
 wolf_add_gtest(gtest_frame_base gtest_frame_base.cpp)
 target_link_libraries(gtest_frame_base ${PROJECT_NAME})
@@ -97,8 +101,8 @@ wolf_add_gtest(gtest_time_stamp gtest_time_stamp.cpp)
 target_link_libraries(gtest_time_stamp ${PROJECT_NAME})
 
 # TrajectoryBase class test
-wolf_add_gtest(gtest_feature_track_map gtest_feature_track_map.cpp)
-target_link_libraries(gtest_feature_track_map ${PROJECT_NAME})
+wolf_add_gtest(gtest_track_matrix gtest_track_matrix.cpp)
+target_link_libraries(gtest_track_matrix ${PROJECT_NAME})
 
 # TrajectoryBase class test
 wolf_add_gtest(gtest_trajectory gtest_trajectory.cpp)
