@@ -32,7 +32,7 @@ class TrackMatrixTest : public testing::Test
             f1 = std::make_shared<FeatureBase>("BASE", m, m_cov);
             f2 = std::make_shared<FeatureBase>("BASE", m, m_cov);
 
-            /*  C0   C1   C2
+            /*  C0   C1   C2   snapshots
              *
              *  f0---f1        trk 0
              *  |
@@ -65,7 +65,7 @@ TEST_F(TrackMatrixTest, numTracks)
     track_matrix.add(C0, f0);
     track_matrix.add(C1, f1);
 
-    /*  C0   C1   C2
+    /*  C0   C1   C2   snapshots
      *
      *  f0---f1        trk 0
      */
@@ -83,7 +83,7 @@ TEST_F(TrackMatrixTest, trackSize)
     track_matrix.add(C1, f1);
     track_matrix.add(C0, f2);
 
-    /*  C0   C1   C2
+    /*  C0   C1   C2   snapshots
      *
      *  f0---f1        trk 0
      *  |
@@ -94,13 +94,13 @@ TEST_F(TrackMatrixTest, trackSize)
     ASSERT_EQ(track_matrix.trackSize(f2->trackId()), 1);
 }
 
-TEST_F(TrackMatrixTest, getXxxFeature)
+TEST_F(TrackMatrixTest, first_last_Feature)
 {
     f0->setTrackId(0);
     f1->setTrackId(0);
     f2->setTrackId(0);
 
-    /*  C0  C1  C2
+    /*  C0  C1  C2   snapshots
      *
      *  f0--f1--f2  trk 0
      */
@@ -118,13 +118,48 @@ TEST_F(TrackMatrixTest, getXxxFeature)
     ASSERT_EQ(track_matrix.feature (99, 2), nullptr);
 }
 
-TEST_F(TrackMatrixTest, remove)
+TEST_F(TrackMatrixTest, remove_ftr)
 {
     track_matrix.add(C0, f0);
     track_matrix.add(C1, f1);
     track_matrix.add(C0, f2);
 
-    /*  C0   C1   C2
+    /*  C0   C1   C2   snapshots
+     *
+     *  f0---f1        trk 0
+     *  |
+     *  f2             trk 1
+     */
+
+    ASSERT_EQ(track_matrix.numTracks(), 2);
+
+    track_matrix.remove(f0);
+    /*  C0   C1   C2   snapshots
+     *
+     *       f1        trk 0
+     *
+     *  f2             trk 1
+     */
+    ASSERT_EQ(track_matrix.numTracks(), 2);
+    ASSERT_EQ(track_matrix.firstFeature(0), f1);
+    ASSERT_EQ(track_matrix.firstFeature(1), f2);
+    ASSERT_EQ(track_matrix.snapshot(C0).size(), 1);
+    ASSERT_EQ(track_matrix.snapshot(C0).at(1), f2);
+    ASSERT_EQ(track_matrix.snapshot(C1).size(), 1);
+    ASSERT_EQ(track_matrix.snapshot(C1).at(0), f1);
+
+    track_matrix.remove(f1);
+    ASSERT_EQ(track_matrix.numTracks(), 1);
+    ASSERT_EQ(track_matrix.firstFeature(f2->trackId()), f2);
+}
+
+TEST_F(TrackMatrixTest, remove_trk)
+{
+    track_matrix.add(C0, f0);
+    track_matrix.add(C1, f1);
+    track_matrix.add(C0, f2);
+
+    /*  C0   C1   C2   snapshots
      *
      *  f0---f1        trk 0
      *  |
@@ -141,13 +176,40 @@ TEST_F(TrackMatrixTest, remove)
     ASSERT_EQ(track_matrix.numTracks(), 0);
 }
 
+TEST_F(TrackMatrixTest, remove_snapshot)
+{
+    track_matrix.add(C0, f0);
+    track_matrix.add(C1, f1);
+    track_matrix.add(C0, f2);
+
+    /*  C0   C1   C2   snapshots
+     *
+     *  f0---f1        trk 0
+     *  |
+     *  f2             trk 1
+     */
+
+    ASSERT_EQ(track_matrix.numTracks(), 2);
+
+    track_matrix.remove(C0);
+    /*  C1   C2   snapshots
+     *
+     *  f1        trk 0
+     */
+    ASSERT_EQ(track_matrix.numTracks(), 1);
+    ASSERT_EQ(track_matrix.firstFeature(f1->trackId()), f1);
+
+    track_matrix.remove(C1);
+    ASSERT_EQ(track_matrix.numTracks(), 0);
+}
+
 TEST_F(TrackMatrixTest, trackAsVector)
 {
     track_matrix.add(C0, f0);
     track_matrix.add(C1, f1);
     track_matrix.add(C2, f2);
 
-    /*  C0   C1   C2
+    /*  C0   C1   C2   snapshots
      *
      *  f0---f1        trk 0
      *  |
@@ -167,7 +229,7 @@ TEST_F(TrackMatrixTest, track)
     track_matrix.add(C1, f1);
     track_matrix.add(C0, f2);
 
-    /*  C0   C1   C2
+    /*  C0   C1   C2   snapshots
      *
      *  f0---f1        trk 0
      *  |
@@ -191,7 +253,7 @@ TEST_F(TrackMatrixTest, snapshot)
     track_matrix.add(C1, f1);
     track_matrix.add(C0, f2);
 
-    /*  C0   C1   C2
+    /*  C0   C1   C2   snapshots
      *
      *  f0---f1        trk 0
      *  |

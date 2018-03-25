@@ -38,6 +38,8 @@ SnapshotType TrackMatrix::snapshot(CaptureBasePtr _capture)
 
 void TrackMatrix::add(CaptureBasePtr _cap, FeatureBasePtr _ftr)
 {
+    if (_cap != _ftr->getCapturePtr())
+        _cap->addFeature(_ftr);
     tracks_[_ftr->trackId()].emplace(_cap->getTimeStamp(), _ftr); // will create new track    if _track_id is not present
     snapshots_[_cap->id()].emplace(_ftr->trackId(), _ftr);        // will create new snapshot if _cap_id   is not present
 }
@@ -55,9 +57,15 @@ void TrackMatrix::remove(size_t _track_id)
 void TrackMatrix::remove(CaptureBasePtr _cap)
 {
     // remove features in all tracks
+    TimeStamp ts = _cap->getTimeStamp();
     for (auto pair_time_ftr : snapshots_.at(_cap->id()))
-        for (auto pair_trkid_track : tracks_)
-            pair_trkid_track.second.erase(_cap->getTimeStamp());
+    {
+        size_t trk_id = pair_time_ftr.first;
+        tracks_.at(trk_id).erase(ts);
+        if (tracks_.at(trk_id).empty())
+            tracks_.erase(trk_id);
+    }
+
     // remove snapshot
     snapshots_.erase(_cap->id());
 }
@@ -68,7 +76,12 @@ void TrackMatrix::remove(FeatureBasePtr _ftr)
         if (auto cap = _ftr->getCapturePtr())
         {
             tracks_   .at(_ftr->trackId()).erase(cap->getTimeStamp());
+            if (tracks_.at(_ftr->trackId()).empty())
+                tracks_.erase(_ftr->trackId());
+
             snapshots_.at(cap->id())      .erase(_ftr->trackId());
+            if (snapshots_.at(cap->id()).empty())
+                snapshots_.erase(cap->id());
         }
 }
 
