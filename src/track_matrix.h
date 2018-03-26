@@ -13,15 +13,17 @@
 
 #include <map>
 #include <vector>
+#include <list>
 
 namespace wolf
 {
 using std::map;
 using std::vector;
+using std::list;
 using std::shared_ptr;
 
 typedef map<TimeStamp, FeatureBasePtr>          TrackType;
-typedef map<unsigned long int, FeatureBasePtr > SnapshotType;
+typedef map<size_t, FeatureBasePtr > SnapshotType;
 
 /** \brief Matrix of tracked features, by track and by snapshot (Captures or time stamps)
  * This class implements the following data structure:
@@ -29,13 +31,13 @@ typedef map<unsigned long int, FeatureBasePtr > SnapshotType;
  * Snapshots at each capture Cx:
  *      C1     C2     C3     C4     C5
  *                                       Tracks for each matched feature:
- *      f ---- f ---- f ---- f ---- f    <-- track 1, of corresponding features in different captures
+ *      f1 --- f3 --- f7 --- f11 -- f14    <-- track 1, of corresponding features in different captures
  *      |      |      |      |      |
- *      |      f ---- f ---- f ---- f    <-- track 2
+ *      |      f4 --- f8 --- f12 -- f15    <-- track 2
  *      |      |      |      |
- *      |      f ---- f ---- f           <-- track 3
+ *      |      f5 --- f9 --- f13           <-- track 3
  *      |      |      |
- *      f ---- f ---- f                  <-- track 4
+ *      f2 --- f6 --- f10                  <-- track 4
  *
  *      Each 'f' is a feature pointer of the type FeatureBasePtr
  *
@@ -56,13 +58,14 @@ typedef map<unsigned long int, FeatureBasePtr > SnapshotType;
  *      Tracks are identified with the track ID in           f->trackId()
  *      Snapshots are identified with the Capture pointer in f->getCapturePtr()
  *
- * so e.g.
+ * these fields of FeatureBase are initialized each time a feature is added to the track matrix:
+ *
+ *      add(Cap, track_id, f) will set f.capture_ptr = C and f.traci_id = traci_id.
+ *
+ * so e.g. given a feature f,
  *
  *      getTrack   (f->trackId()) ;       // returns all the track where feature f is.
  *      getSnapshot(f->getCapturePtr()) ; // returns all the features in the same capture of f.
- *
- * When adding a feature to the track matrix, this must be already added to a Capture, with capture.addFeature(feature_ptr).
- * Failure to do so may result in unpredicted behavior.
  *
  */
 
@@ -72,29 +75,33 @@ class TrackMatrix
         TrackMatrix();
         virtual ~TrackMatrix();
 
-        TrackType       track(size_t _track_id);
-        SnapshotType    snapshot(CaptureBasePtr _capture);
-        void            add(CaptureBasePtr _cap, size_t _track_id, FeatureBasePtr _ftr);
-        void            remove(FeatureBasePtr _ftr);
-        void            remove(size_t _track_id);
-        void            remove(CaptureBasePtr _cap);
-        size_t          numTracks();
-        size_t          trackSize(size_t _track_id);
-        FeatureBasePtr  firstFeature(size_t _track_id);
-        FeatureBasePtr  lastFeature(size_t _track_id);
-        std::vector<FeatureBasePtr>
+        void            newTrack    (CaptureBasePtr _cap, FeatureBasePtr _ftr);
+        void            add         (size_t _track_id, CaptureBasePtr _cap, FeatureBasePtr _ftr);
+        void            remove      (FeatureBasePtr _ftr);
+        void            remove      (size_t _track_id);
+        void            remove      (CaptureBasePtr _cap);
+        size_t          numTracks   ();
+        size_t          trackSize   (size_t _track_id);
+        TrackType       track       (size_t _track_id);
+        SnapshotType    snapshot    (CaptureBasePtr _capture);
+        vector<FeatureBasePtr>
                         trackAsVector(size_t _track_id);
-        FeatureBasePtr  feature(CaptureBasePtr _cap, size_t _track_id);
-        FeatureBasePtr  feature(size_t _track_id, size_t _position);
+        list<FeatureBasePtr>
+                        snapshotAsList(CaptureBasePtr _cap);
+        FeatureBasePtr  firstFeature(size_t _track_id);
+        FeatureBasePtr  lastFeature (size_t _track_id);
+        FeatureBasePtr  feature     (size_t _track_id, CaptureBasePtr _cap);
         CaptureBasePtr  firstCapture(size_t _track_id);
 
     private:
 
+        static size_t track_id_count_;
+
         // Along track: maps of Feature pointers indexed by time stamp.
-        std::map<size_t, TrackType > tracks_;       // map indexed by track_Id   of ( maps indexed by TimeStamp  of ( features ) )
+        map<size_t, TrackType > tracks_;       // map indexed by track_Id   of ( maps indexed by TimeStamp  of ( features ) )
 
         // Across track: maps of Feature pointers indexed by Feature Id.
-        std::map<size_t, SnapshotType > snapshots_; // map indexed by capture_Id of ( maps indexed by track_Id of ( features ) )
+        map<size_t, SnapshotType > snapshots_; // map indexed by capture_Id of ( maps indexed by track_Id of ( features ) )
 };
 
 } /* namespace wolf */

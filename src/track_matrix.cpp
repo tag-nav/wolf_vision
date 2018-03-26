@@ -10,6 +10,8 @@
 namespace wolf
 {
 
+size_t TrackMatrix::track_id_count_ = 0;
+
 TrackMatrix::TrackMatrix()
 {
     //
@@ -36,12 +38,20 @@ SnapshotType TrackMatrix::snapshot(CaptureBasePtr _capture)
         return SnapshotType();
 }
 
-void TrackMatrix::add(CaptureBasePtr _cap, size_t _track_id, FeatureBasePtr _ftr)
+void TrackMatrix::newTrack(CaptureBasePtr _cap, FeatureBasePtr _ftr)
 {
+    track_id_count_ ++;
+    add(track_id_count_, _cap, _ftr);
+}
+
+void TrackMatrix::add(size_t _track_id, CaptureBasePtr _cap, FeatureBasePtr _ftr)
+{
+    assert( (_track_id > 0) && (_track_id <= track_id_count_) && "Provided track ID does not exist. Use newTrack() instead.");
+
     _ftr->setTrackId(_track_id);
     if (_cap != _ftr->getCapturePtr())
         _ftr->setCapturePtr(_cap);
-    tracks_[_track_id].emplace(_cap->getTimeStamp(), _ftr); // will create new track    if _track_id is not present
+    tracks_[_track_id].emplace(_cap->getTimeStamp(), _ftr);
     snapshots_[_cap->id()].emplace(_track_id, _ftr);        // will create new snapshot if _cap_id   is not present
 }
 
@@ -64,9 +74,9 @@ void TrackMatrix::remove(CaptureBasePtr _cap)
 {
     // remove snapshot features from all tracks
     TimeStamp ts = _cap->getTimeStamp();
-    for (auto const& pair_time_ftr : snapshots_.at(_cap->id()))
+    for (auto const& pair_trkid_ftr : snapshots_.at(_cap->id()))
     {
-        size_t trk_id = pair_time_ftr.first;
+        size_t trk_id = pair_trkid_ftr.first;
         tracks_.at(trk_id).erase(ts);
         if (tracks_.at(trk_id).empty())
             tracks_.erase(trk_id);
@@ -129,17 +139,19 @@ vector<FeatureBasePtr> TrackMatrix::trackAsVector(size_t _track_id)
     return vec;
 }
 
-FeatureBasePtr  TrackMatrix::feature(CaptureBasePtr _cap, size_t _track_id)
+std::list<FeatureBasePtr> TrackMatrix::snapshotAsList(CaptureBasePtr _cap)
 {
-    return snapshot(_cap).at(_track_id);
+    std::list<FeatureBasePtr> lst;
+    for (auto const& pair_trkid_ftr : snapshots_.at(_cap->id()))
+    {
+        lst.push_back(pair_trkid_ftr.second);
+    }
+    return lst;
 }
 
-FeatureBasePtr TrackMatrix::feature(size_t _track_id, size_t _position)
+FeatureBasePtr TrackMatrix::feature(size_t _track_id, CaptureBasePtr _cap)
 {
-    if (tracks_.count(_track_id) > 0 && _position <= trackSize(_track_id))
-        return trackAsVector(_track_id).at(_position);
-    else
-        return nullptr;
+    return snapshot(_cap).at(_track_id);
 }
 
 CaptureBasePtr TrackMatrix::firstCapture(size_t _track_id)
