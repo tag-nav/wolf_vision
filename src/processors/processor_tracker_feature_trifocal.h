@@ -54,7 +54,6 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
     private:
         CaptureBasePtr prev_origin_ptr_;                    ///< Capture previous to origin_ptr_ for the third focus of the trifocal.
-        FeatureMatchMap matches_prev_origin_from_origin_;   ///< matches between prev_origin and origin.
         bool initialized_;                                  ///< Flags the situation where three focus are available: prev_origin, origin, and last.
 
     public:

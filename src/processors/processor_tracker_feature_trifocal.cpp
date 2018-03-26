@@ -224,28 +224,25 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
 
 void ProcessorTrackerFeatureTrifocal::resetDerived()
 {
-    // We also reset here the list of correspondences, which passes from origin--last to prev_origin--origin.
-    matches_prev_origin_from_origin_ = std::move(matches_origin_from_last_);
-
     // Call parent class method
     ProcessorTrackerFeature::resetDerived();
 
     // Conditionally assign the prev_origin pointer
     if (initialized_)
-    {
         prev_origin_ptr_ = origin_ptr_;
-    }
 
 
-
-    // Print resulting list
-    for (auto match : matches_prev_origin_from_origin_)
-    {
-        WOLF_DEBUG("Matches reset prev <-- orig: track: ",
-                   match.first->trackId(), "-", match.second->feature_ptr_->trackId(),
-                   " prev: ", match.second->feature_ptr_->id(),
-                   " origin: ", match.first->id());
-    }
+//    // Print resulting list
+//    TrackMatches matches_prevorig_origin = track_matrix_.matches(prev_origin_ptr_, origin_ptr_);
+//    for (auto const & pair_trkid_pair : matches_prevorig_origin)
+//    {
+//        FeatureBasePtr feature_in_prev   = pair_trkid_pair.second.first;
+//        FeatureBasePtr feature_in_origin = pair_trkid_pair.second.second;
+//
+//        WOLF_DEBUG("Matches reset prev <-- orig: track: ", pair_trkid_pair.first,
+//                   " prev: ", feature_in_prev->id(),
+//                   " origin: ", feature_in_origin->id());
+//    }
 
 }
 
