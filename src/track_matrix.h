@@ -84,6 +84,7 @@ class TrackMatrix
         FeatureBasePtr  lastFeature(size_t _track_id);
         std::vector<FeatureBasePtr>
                         trackAsVector(size_t _track_id);
+        FeatureBasePtr  feature(CaptureBasePtr _cap, size_t _track_id);
         FeatureBasePtr  feature(size_t _track_id, size_t _position);
         CaptureBasePtr  firstCapture(size_t _track_id);
 

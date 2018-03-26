@@ -129,6 +129,11 @@ vector<FeatureBasePtr> TrackMatrix::trackAsVector(size_t _track_id)
     return vec;
 }
 
+FeatureBasePtr  TrackMatrix::feature(CaptureBasePtr _cap, size_t _track_id)
+{
+    return snapshot(_cap).at(_track_id);
+}
+
 FeatureBasePtr TrackMatrix::feature(size_t _track_id, size_t _position)
 {
     if (tracks_.count(_track_id) > 0 && _position <= trackSize(_track_id))
