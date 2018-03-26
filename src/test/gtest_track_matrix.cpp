@@ -7,7 +7,7 @@
 
 #include "utils_gtest.h"
 
-#include "/Users/jsola/dev/wolf/src/track_matrix.h"
+#include "track_matrix.h"
 
 using namespace wolf;
 
