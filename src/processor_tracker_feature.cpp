@@ -31,19 +31,14 @@ unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_fe
     // Populate the last Capture with new Features. The result is in new_features_last_.
     unsigned int n = detectNewFeatures(_max_new_features);
     for (auto ftr : new_features_last_)
-    {
-        ftr->setTrackId( ftr->id() );
-//        WOLF_DEBUG("Det track: ", ftr->trackId(), ", last: ", ftr->id());
-    }
+        track_matrix_.newTrack(last_ptr_, ftr);
 
     // Track new features from last to incoming. This will append new correspondences to matches_last_incoming
     trackFeatures(new_features_last_, new_features_incoming_, matches_last_from_incoming_);
     for (auto ftr : new_features_incoming_)
     {
-        ftr->setTrackId(matches_last_from_incoming_[ftr]->feature_ptr_->trackId());
-
-        // Print new tracked features
-//        WOLF_DEBUG("New track: ", ftr->trackId(), ", last: ", matches_last_from_incoming_[ftr]->feature_ptr_->id(), ", inc: ", ftr->id());
+        size_t trk_id_from_last = matches_last_from_incoming_[ftr]->feature_ptr_->trackId();
+        track_matrix_.add(trk_id_from_last, incoming_ptr_, ftr);
     }
 
     // Append all new Features to the incoming Captures' list of Features
@@ -66,91 +61,89 @@ unsigned int ProcessorTrackerFeature::processKnown()
     // Track features from last_ptr_ to incoming_ptr_
     trackFeatures(last_ptr_->getFeatureList(), known_features_incoming_, matches_last_from_incoming_);
     for (auto match : matches_last_from_incoming_)
-        match.first->setTrackId( match.second->feature_ptr_->trackId() );
+    {
+        size_t trk_id_from_last = match.second->feature_ptr_->trackId();
+        track_matrix_.add(trk_id_from_last, incoming_ptr_, match.first);
+    }
 
     // Check/correct incoming-origin correspondences
     if (origin_ptr_ != nullptr)
     {
-        auto known_incoming_feature_it = known_features_incoming_.begin();
-        while (known_incoming_feature_it != known_features_incoming_.end())
+        for (auto feature_in_incoming : known_features_incoming_)
         {
-            if (!correctFeatureDrift(matches_origin_from_last_[matches_last_from_incoming_[*known_incoming_feature_it]->feature_ptr_]->feature_ptr_,                                   matches_last_from_incoming_[*known_incoming_feature_it]->feature_ptr_,*known_incoming_feature_it))
+            size_t         track_id          = feature_in_incoming->trackId();
+            FeatureBasePtr feature_in_last   = track_matrix_.feature(track_id, last_ptr_);
+            FeatureBasePtr feature_in_origin = track_matrix_.feature(track_id, origin_ptr_);
+            if (!(correctFeatureDrift(feature_in_origin, feature_in_last, feature_in_incoming)))
             {
-                // Correspondence not confirmed -> Remove correspondence and destruct incoming feature
-                matches_last_from_incoming_.erase(*known_incoming_feature_it);
-                // Destruct the feature
-                (*known_incoming_feature_it)->remove();
-                // Remove from known_features_incoming
-                known_incoming_feature_it = known_features_incoming_.erase(known_incoming_feature_it);
+                // Remove this feature from many places:
+                matches_last_from_incoming_ .erase (feature_in_incoming); // remove match
+                track_matrix_               .remove(feature_in_incoming); // remove from track matrix
+                known_features_incoming_    .remove(feature_in_incoming); // remove from known features list
+                feature_in_incoming        ->remove();                    // remove from wolf tree
             }
-            else
-                known_incoming_feature_it++;
         }
     }
 
+    // Add to wolf tree and clear
     incoming_ptr_->addFeatureList(known_features_incoming_);
     known_features_incoming_.clear();
 
     // Print resulting list of matches
-    for (auto match : matches_last_from_incoming_)
-    {
+//    for (auto match : matches_last_from_incoming_)
 //        WOLF_DEBUG("Known track: ", match.first->trackId(), ", last: ", match.second->feature_ptr_->id(), ", inc: ", match.first->id());
-    }
 
     return matches_last_from_incoming_.size();
 }
 
 void ProcessorTrackerFeature::advanceDerived()
 {
-    // Compose correspondences to get origin_from_incoming
-    for (auto match : matches_last_from_incoming_)
-    {
-        matches_last_from_incoming_[match.first] =
-                matches_origin_from_last_[matches_last_from_incoming_[match.first]->feature_ptr_];
-    }
-    matches_origin_from_last_ = std::move(matches_last_from_incoming_);
+    // Reset here the list of correspondences.
+    matches_last_from_incoming_.clear();
 
     // We set problem here because we could not determine Problem from incoming capture at the time of adding the features to incoming's feature list.
     for (auto ftr : incoming_ptr_->getFeatureList())
         ftr->setProblem(getProblem());
 
-    // Print resulting list
-    for (auto match: matches_origin_from_last_)
-    {
-//        WOLF_DEBUG("Matches advanced: track: ", match.first->trackId(), "-", match.second->feature_ptr_->trackId(), " origin: ", match.second->feature_ptr_->id(), " last: ", match.first->id());
-    }
+    // remove last from track matrix
+    track_matrix_.remove(last_ptr_);
 }
 
 void ProcessorTrackerFeature::resetDerived()
 {
-    // We also reset here the list of correspondences, which passes from last--incoming to origin--last.
-    matches_origin_from_last_ = std::move(matches_last_from_incoming_);
+    // Reset here the list of correspondences.
+    matches_last_from_incoming_.clear();
 
     // Update features according to the move above.
-    for (auto match: matches_origin_from_last_)
-        match.first->setProblem(getProblem()); // Since these features were in incoming_, they had no Problem assigned.
+    TrackMatches matches_origin_last = track_matrix_.matches(origin_ptr_, last_ptr_);
 
-    // Print resulting list
-    for (auto match: matches_origin_from_last_)
+    for (auto const & pair_trkid_pair : matches_origin_last)
     {
-//        WOLF_DEBUG("Matches reset: track: ", match.first->trackId(), "-", match.second->feature_ptr_->trackId(), " origin: ", match.second->feature_ptr_->id(), " last: ", match.first->id());
+        FeatureBasePtr feature_in_origin = pair_trkid_pair.second.first;
+        FeatureBasePtr feature_in_last   = pair_trkid_pair.second.second;
+        feature_in_last->setProblem(getProblem()); // Since these features were in incoming_, they had no Problem assigned.
+
+        WOLF_DEBUG("Matches reset: track: ", pair_trkid_pair.first, " origin: ", feature_in_origin->id(), " last: ", feature_in_last->id());
     }
 }
 
 void ProcessorTrackerFeature::establishConstraints()
 {
-    for (auto match : matches_origin_from_last_)
+    TrackMatches matches_origin_last = track_matrix_.matches(origin_ptr_, last_ptr_);
+
+    for (auto const & pair_trkid_pair : matches_origin_last)
     {
-        auto ctr = createConstraint(match.first, match.second->feature_ptr_);
-        match.first->addConstraint(ctr);
-        match.second->feature_ptr_->addConstrainedBy(ctr);
+        FeatureBasePtr feature_in_origin = pair_trkid_pair.second.first;
+        FeatureBasePtr feature_in_last   = pair_trkid_pair.second.second;
+
+        auto constraint  = createConstraint(feature_in_last, feature_in_origin);
+        feature_in_last  ->addConstraint(constraint);
+        feature_in_origin->addConstrainedBy(constraint);
+
+        WOLF_DEBUG( "Constraint: track: " , feature_in_last->trackId(),
+                    " origin: "           , feature_in_origin->id() ,
+                    " from last: "        , feature_in_last->id() );
     }
-//    for (auto match : matches_origin_from_last_)
-//    {
-//        WOLF_DEBUG( "Constraint: track: " , match.second->feature_ptr_->trackId() ,
-//                    " origin: " , match.second->feature_ptr_->id() ,
-//                    " from last: " , match.first->id() );
-//    }
 }
 
 } // namespace wolf

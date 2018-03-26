@@ -12,6 +12,7 @@
 #include "processor_tracker.h"
 #include "capture_base.h"
 #include "feature_match.h"
+#include "track_matrix.h"
 #include "wolf.h"
 
 namespace wolf
@@ -80,10 +81,10 @@ class ProcessorTrackerFeature : public ProcessorTracker
         virtual ~ProcessorTrackerFeature();
 
     protected:
+        TrackMatrix track_matrix_;
 
         FeatureBaseList known_features_incoming_;
         FeatureMatchMap matches_last_from_incoming_;
-        FeatureMatchMap matches_origin_from_last_;
 
         /** \brief Process known Features
          * \return The number of successful matches.
