@@ -221,7 +221,7 @@ bool ProcessorTrackerLandmarkImage::voteForKeyFrame()
 //    return landmarks_tracked_ < params_.algorithm.min_features_for_keyframe;
 }
 
-unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int& _max_features)
+unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -255,7 +255,7 @@ unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int
                     point_ptr->setIsKnown(false);
                     point_ptr->setTrackId(point_ptr->id());
                     point_ptr->setExpectation(Eigen::Vector2s(new_keypoints[0].pt.x,new_keypoints[0].pt.y));
-                    addNewFeatureLast(point_ptr);
+                    _feature_list_out.push_back(point_ptr);
 
                     active_search_ptr_->hitCell(new_keypoints[0]);
 

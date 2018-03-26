@@ -29,7 +29,7 @@ unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_fe
      */
 
     // Populate the last Capture with new Features. The result is in new_features_last_.
-    unsigned int n = detectNewFeatures(_max_new_features);
+    unsigned int n = detectNewFeatures(_max_new_features, new_features_last_);
     for (auto ftr : new_features_last_)
         track_matrix_.newTrack(last_ptr_, ftr);
 

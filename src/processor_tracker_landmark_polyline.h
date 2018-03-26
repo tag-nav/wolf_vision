@@ -157,7 +157,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out);
 
         /** \brief Creates a landmark for each of new_features_last_
          **/
@@ -212,11 +212,11 @@ inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(const 
 {
 }
 
-inline unsigned int ProcessorTrackerLandmarkPolyline::detectNewFeatures(const unsigned int& _max_features)
+inline unsigned int ProcessorTrackerLandmarkPolyline::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
 {
     // already computed since each scan is computed in preprocess()
-    new_features_last_ = std::move(polylines_last_);
-    return new_features_last_.size();
+    _feature_list_out = std::move(polylines_last_);
+    return _feature_list_out.size();
 }
 
 inline void ProcessorTrackerLandmarkPolyline::advanceDerived()

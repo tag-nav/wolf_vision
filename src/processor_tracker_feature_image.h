@@ -118,7 +118,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          *
          * \return The number of detected Features.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out);
 
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 

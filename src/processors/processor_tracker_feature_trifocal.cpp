@@ -110,7 +110,7 @@ ConstraintBasePtr ProcessorTrackerFeatureTrifocal::createConstraint(FeatureBaseP
   return return_var;
 }
 
-unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features)
+unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out)
 {
     unsigned int n_new_features = 0;
 
@@ -146,7 +146,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
                             desc.row(index),
                             Eigen::Matrix2s::Identity() * params_.pixel_noise_std * params_.pixel_noise_std);
                     point->setIsKnown(false);
-                    addNewFeatureLast(point);
+                    _feature_list_out.push_back(point);
 
                     active_search_ptr_->hitCell(kps[0]);
 
