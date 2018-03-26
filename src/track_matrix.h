@@ -74,7 +74,7 @@ class TrackMatrix
 
         TrackType       track(size_t _track_id);
         SnapshotType    snapshot(CaptureBasePtr _capture);
-        void            add(CaptureBasePtr _cap, FeatureBasePtr _ftr);
+        void            add(CaptureBasePtr _cap, size_t _track_id, FeatureBasePtr _ftr);
         void            remove(FeatureBasePtr _ftr);
         void            remove(size_t _track_id);
         void            remove(CaptureBasePtr _cap);

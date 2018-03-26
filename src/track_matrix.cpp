@@ -36,12 +36,13 @@ SnapshotType TrackMatrix::snapshot(CaptureBasePtr _capture)
         return SnapshotType();
 }
 
-void TrackMatrix::add(CaptureBasePtr _cap, FeatureBasePtr _ftr)
+void TrackMatrix::add(CaptureBasePtr _cap, size_t _track_id, FeatureBasePtr _ftr)
 {
+    _ftr->setTrackId(_track_id);
     if (_cap != _ftr->getCapturePtr())
-        _cap->addFeature(_ftr);
-    tracks_[_ftr->trackId()].emplace(_cap->getTimeStamp(), _ftr); // will create new track    if _track_id is not present
-    snapshots_[_cap->id()].emplace(_ftr->trackId(), _ftr);        // will create new snapshot if _cap_id   is not present
+        _ftr->setCapturePtr(_cap);
+    tracks_[_track_id].emplace(_cap->getTimeStamp(), _ftr); // will create new track    if _track_id is not present
+    snapshots_[_cap->id()].emplace(_track_id, _ftr);        // will create new snapshot if _cap_id   is not present
 }
 
 void TrackMatrix::remove(size_t _track_id)

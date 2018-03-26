@@ -11,13 +11,13 @@
 
 using namespace wolf;
 
-Eigen::Vector2s m;
-Eigen::Matrix2s m_cov;
-
 class TrackMatrixTest : public testing::Test
 {
     public:
         TrackMatrix track_matrix;
+
+        Eigen::Vector2s m;
+        Eigen::Matrix2s m_cov;
 
         CaptureBasePtr C0, C1, C2;
         FeatureBasePtr f0, f1, f2;
@@ -47,23 +47,27 @@ class TrackMatrixTest : public testing::Test
 
 TEST(TrackMatrix, add)
 {
+    Eigen::Vector2s m;
+    Eigen::Matrix2s m_cov;
+
     TrackMatrix track_matrix;
 
     CaptureBasePtr C = std::make_shared<CaptureBase>("BASE", 0.0);
 
     FeatureBasePtr f = std::make_shared<FeatureBase>("BASE", m, m_cov);
-    f->setTrackId(f->id());
+//    f->setTrackId(f->id());
 
-    track_matrix.add(C, f);
+    track_matrix.add(C, f->id(), f);
 
     ASSERT_EQ(track_matrix.trackSize(f->trackId()), 1);
+    ASSERT_EQ(f->trackId(), f->id());
 }
 
 TEST_F(TrackMatrixTest, numTracks)
 {
 
-    track_matrix.add(C0, f0);
-    track_matrix.add(C1, f1);
+    track_matrix.add(C0, 0, f0);
+    track_matrix.add(C1, 0, f1);
 
     /*  C0   C1   C2   snapshots
      *
@@ -72,16 +76,16 @@ TEST_F(TrackMatrixTest, numTracks)
 
     ASSERT_EQ(track_matrix.numTracks(), 1);
 
-    track_matrix.add(C0, f2);
+    track_matrix.add(C0, 1, f2);
 
     ASSERT_EQ(track_matrix.numTracks(), 2);
 }
 
 TEST_F(TrackMatrixTest, trackSize)
 {
-    track_matrix.add(C0, f0);
-    track_matrix.add(C1, f1);
-    track_matrix.add(C0, f2);
+    track_matrix.add(C0, 0, f0);
+    track_matrix.add(C1, 0, f1);
+    track_matrix.add(C0, 1, f2);
 
     /*  C0   C1   C2   snapshots
      *
@@ -105,9 +109,9 @@ TEST_F(TrackMatrixTest, first_last_Feature)
      *  f0--f1--f2  trk 0
      */
 
-    track_matrix.add(C0, f0);
-    track_matrix.add(C1, f1);
-    track_matrix.add(C2, f2);
+    track_matrix.add(C0, 0, f0);
+    track_matrix.add(C1, 0, f1);
+    track_matrix.add(C2, 0, f2);
 
     ASSERT_EQ(track_matrix.firstFeature(0), f0);
     ASSERT_EQ(track_matrix.lastFeature (0), f2);
@@ -120,9 +124,9 @@ TEST_F(TrackMatrixTest, first_last_Feature)
 
 TEST_F(TrackMatrixTest, remove_ftr)
 {
-    track_matrix.add(C0, f0);
-    track_matrix.add(C1, f1);
-    track_matrix.add(C0, f2);
+    track_matrix.add(C0, 0, f0);
+    track_matrix.add(C1, 0, f1);
+    track_matrix.add(C0, 1, f2);
 
     /*  C0   C1   C2   snapshots
      *
@@ -155,9 +159,9 @@ TEST_F(TrackMatrixTest, remove_ftr)
 
 TEST_F(TrackMatrixTest, remove_trk)
 {
-    track_matrix.add(C0, f0);
-    track_matrix.add(C1, f1);
-    track_matrix.add(C0, f2);
+    track_matrix.add(C0, 0, f0);
+    track_matrix.add(C1, 0, f1);
+    track_matrix.add(C0, 1, f2);
 
     /*  C0   C1   C2   snapshots
      *
@@ -178,9 +182,9 @@ TEST_F(TrackMatrixTest, remove_trk)
 
 TEST_F(TrackMatrixTest, remove_snapshot)
 {
-    track_matrix.add(C0, f0);
-    track_matrix.add(C1, f1);
-    track_matrix.add(C0, f2);
+    track_matrix.add(C0, 0, f0);
+    track_matrix.add(C1, 0, f1);
+    track_matrix.add(C0, 1, f2);
 
     /*  C0   C1   C2   snapshots
      *
@@ -205,9 +209,9 @@ TEST_F(TrackMatrixTest, remove_snapshot)
 
 TEST_F(TrackMatrixTest, trackAsVector)
 {
-    track_matrix.add(C0, f0);
-    track_matrix.add(C1, f1);
-    track_matrix.add(C2, f2);
+    track_matrix.add(C0, 0, f0);
+    track_matrix.add(C1, 0, f1);
+    track_matrix.add(C0, 1, f2);
 
     /*  C0   C1   C2   snapshots
      *
@@ -225,9 +229,9 @@ TEST_F(TrackMatrixTest, trackAsVector)
 
 TEST_F(TrackMatrixTest, track)
 {
-    track_matrix.add(C0, f0);
-    track_matrix.add(C1, f1);
-    track_matrix.add(C0, f2);
+    track_matrix.add(C0, 0, f0);
+    track_matrix.add(C1, 0, f1);
+    track_matrix.add(C0, 1, f2);
 
     /*  C0   C1   C2   snapshots
      *
@@ -249,9 +253,9 @@ TEST_F(TrackMatrixTest, track)
 
 TEST_F(TrackMatrixTest, snapshot)
 {
-    track_matrix.add(C0, f0);
-    track_matrix.add(C1, f1);
-    track_matrix.add(C0, f2);
+    track_matrix.add(C0, 0, f0);
+    track_matrix.add(C1, 0, f1);
+    track_matrix.add(C0, 1, f2);
 
     /*  C0   C1   C2   snapshots
      *
