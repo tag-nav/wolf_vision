@@ -31,17 +31,6 @@ class TrackMatrixTest : public testing::Test
             f0 = std::make_shared<FeatureBase>("BASE", m, m_cov);
             f1 = std::make_shared<FeatureBase>("BASE", m, m_cov);
             f2 = std::make_shared<FeatureBase>("BASE", m, m_cov);
-
-            /*  C0   C1   C2   snapshots
-             *
-             *  f0---f1        trk 0
-             *  |
-             *  f2             trk 1
-             */
-            f0->setTrackId(0);
-            f1->setTrackId(0);
-            f2->setTrackId(1);
-
         }
 };
 
@@ -65,7 +54,6 @@ TEST(TrackMatrix, add)
 
 TEST_F(TrackMatrixTest, numTracks)
 {
-
     track_matrix.add(C0, 0, f0);
     track_matrix.add(C1, 0, f1);
 
@@ -100,24 +88,25 @@ TEST_F(TrackMatrixTest, trackSize)
 
 TEST_F(TrackMatrixTest, first_last_Feature)
 {
-    f0->setTrackId(0);
-    f1->setTrackId(0);
-    f2->setTrackId(0);
-
     /*  C0  C1  C2   snapshots
      *
-     *  f0--f1--f2  trk 0
+     *  f0--f1      trk 0
+     *      |
+     *      f2      trk 1
      */
 
     track_matrix.add(C0, 0, f0);
     track_matrix.add(C1, 0, f1);
-    track_matrix.add(C2, 0, f2);
+    track_matrix.add(C1, 1, f2);
 
     ASSERT_EQ(track_matrix.firstFeature(0), f0);
-    ASSERT_EQ(track_matrix.lastFeature (0), f2);
+    ASSERT_EQ(track_matrix.lastFeature (0), f1);
+    ASSERT_EQ(track_matrix.feature (C0, 0 ), f0);
+    ASSERT_EQ(track_matrix.feature (C1, 0 ), f1);
+    ASSERT_EQ(track_matrix.feature (C1, 1 ), f2);
     ASSERT_EQ(track_matrix.feature (0, 0 ), f0);
     ASSERT_EQ(track_matrix.feature (0, 1 ), f1);
-    ASSERT_EQ(track_matrix.feature (0, 2 ), f2);
+    ASSERT_EQ(track_matrix.feature (1, 0 ), f2);
     ASSERT_EQ(track_matrix.feature (0, 99), nullptr);
     ASSERT_EQ(track_matrix.feature (99, 2), nullptr);
 }
