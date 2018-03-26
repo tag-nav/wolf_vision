@@ -186,7 +186,6 @@ SET(HDRS_BASE
     factory.h
     feature_base.h
     feature_match.h
-    feature_track_map.h
     frame_base.h
     hardware_base.h
     landmark_base.h
