@@ -47,19 +47,24 @@ void TrackMatrix::add(CaptureBasePtr _cap, size_t _track_id, FeatureBasePtr _ftr
 
 void TrackMatrix::remove(size_t _track_id)
 {
-    // Remove from all Snapshots
-    for (auto pair_time_ftr : tracks_.at(_track_id))
-        for (auto pair_cap_snapshot : snapshots_)
-            pair_cap_snapshot.second.erase(pair_time_ftr.second->trackId());
+    // Remove track features from all Snapshots
+    for (auto const& pair_time_ftr : tracks_.at(_track_id))
+    {
+        size_t cap_id = pair_time_ftr.second->getCapturePtr()->id();
+        snapshots_.at(cap_id).erase(_track_id);
+        if (snapshots_.at(cap_id).empty())
+            snapshots_.erase(cap_id);
+    }
+
     // Remove track
     tracks_.erase(_track_id);
 }
 
 void TrackMatrix::remove(CaptureBasePtr _cap)
 {
-    // remove features in all tracks
+    // remove snapshot features from all tracks
     TimeStamp ts = _cap->getTimeStamp();
-    for (auto pair_time_ftr : snapshots_.at(_cap->id()))
+    for (auto const& pair_time_ftr : snapshots_.at(_cap->id()))
     {
         size_t trk_id = pair_time_ftr.first;
         tracks_.at(trk_id).erase(ts);
@@ -73,6 +78,7 @@ void TrackMatrix::remove(CaptureBasePtr _cap)
 
 void TrackMatrix::remove(FeatureBasePtr _ftr)
 {
+    // assumes _ftr->getCapturePtr() and _ftr->trackId() are valid
     if (_ftr)
         if (auto cap = _ftr->getCapturePtr())
         {
@@ -114,12 +120,11 @@ FeatureBasePtr TrackMatrix::lastFeature(size_t _track_id)
 
 vector<FeatureBasePtr> TrackMatrix::trackAsVector(size_t _track_id)
 {
-    vector<FeatureBasePtr> vec(trackSize(_track_id));
-    size_t i = 0;
-    for (auto pair_time_ftr : tracks_.at(_track_id))
+    vector<FeatureBasePtr> vec;
+    vec.reserve(trackSize(_track_id));
+    for (auto const& pair_time_ftr : tracks_.at(_track_id))
     {
-        vec[i] = pair_time_ftr.second;
-        i++;
+        vec.push_back(pair_time_ftr.second);
     }
     return vec;
 }
