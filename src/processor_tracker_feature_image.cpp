@@ -167,8 +167,6 @@ unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& 
                 incoming_point_ptr->setIsKnown(feature_ptr->isKnown());
                 _feature_list_out.push_back(incoming_point_ptr);
 
-                incoming_point_ptr->setTrackId(feature_ptr->trackId());
-
                 _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_base_ptr, normalized_score}));
             }
             else
@@ -276,7 +274,6 @@ unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int&
                             new_descriptors.row(index),
                             Eigen::Matrix2s::Identity()*params_.noise.pixel_noise_var);
                     point_ptr->setIsKnown(false);
-                    point_ptr->setTrackId(point_ptr->id());
                     addNewFeatureLast(point_ptr);
 
                     active_search_ptr_->hitCell(new_keypoints[0]);

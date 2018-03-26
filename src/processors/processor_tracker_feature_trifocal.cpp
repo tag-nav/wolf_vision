@@ -146,7 +146,6 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
                             desc.row(index),
                             Eigen::Matrix2s::Identity() * params_.pixel_noise_std * params_.pixel_noise_std);
                     point->setIsKnown(false);
-                    point->setTrackId(point->id());
                     addNewFeatureLast(point);
 
                     active_search_ptr_->hitCell(kps[0]);
@@ -214,7 +213,6 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
                         candidate_keypoints[cv_match.trainIdx], (candidate_descriptors.row(cv_match.trainIdx)),
                         Eigen::Matrix2s::Identity() * params_.pixel_noise_std * params_.pixel_noise_std);
                 incoming_point_ptr->setIsKnown(feature_ptr->isKnown());
-                incoming_point_ptr->setTrackId(feature_ptr->trackId());
                 _feature_list_out.push_back(incoming_point_ptr);
 
                 _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_base_ptr, normalized_score}));
