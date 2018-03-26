@@ -14,16 +14,19 @@
 #include <map>
 #include <vector>
 #include <list>
+#include <utility>
 
 namespace wolf
 {
 using std::map;
 using std::vector;
 using std::list;
+using std::pair;
 using std::shared_ptr;
 
-typedef map<TimeStamp, FeatureBasePtr>          TrackType;
-typedef map<size_t, FeatureBasePtr > SnapshotType;
+typedef map<TimeStamp, FeatureBasePtr>                      Track;
+typedef map<size_t, FeatureBasePtr >                        Snapshot;
+typedef map<size_t, pair<FeatureBasePtr, FeatureBasePtr> >  TrackMatches; // matched feature pairs indexed by track_id
 
 /** \brief Matrix of tracked features, by track and by snapshot (Captures or time stamps)
  * This class implements the following data structure:
@@ -82,12 +85,13 @@ class TrackMatrix
         void            remove      (CaptureBasePtr _cap);
         size_t          numTracks   ();
         size_t          trackSize   (size_t _track_id);
-        TrackType       track       (size_t _track_id);
-        SnapshotType    snapshot    (CaptureBasePtr _capture);
+        Track       track       (size_t _track_id);
+        Snapshot    snapshot    (CaptureBasePtr _capture);
         vector<FeatureBasePtr>
                         trackAsVector(size_t _track_id);
         list<FeatureBasePtr>
                         snapshotAsList(CaptureBasePtr _cap);
+        TrackMatches    matches     (CaptureBasePtr _cap_1, CaptureBasePtr _cap_2);
         FeatureBasePtr  firstFeature(size_t _track_id);
         FeatureBasePtr  lastFeature (size_t _track_id);
         FeatureBasePtr  feature     (size_t _track_id, CaptureBasePtr _cap);
@@ -98,10 +102,10 @@ class TrackMatrix
         static size_t track_id_count_;
 
         // Along track: maps of Feature pointers indexed by time stamp.
-        map<size_t, TrackType > tracks_;       // map indexed by track_Id   of ( maps indexed by TimeStamp  of ( features ) )
+        map<size_t, Track > tracks_;       // map indexed by track_Id   of ( maps indexed by TimeStamp  of ( features ) )
 
         // Across track: maps of Feature pointers indexed by Feature Id.
-        map<size_t, SnapshotType > snapshots_; // map indexed by capture_Id of ( maps indexed by track_Id of ( features ) )
+        map<size_t, Snapshot > snapshots_; // map indexed by capture_Id of ( maps indexed by track_Id of ( features ) )
 };
 
 } /* namespace wolf */

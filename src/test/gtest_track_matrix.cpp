@@ -19,18 +19,22 @@ class TrackMatrixTest : public testing::Test
         Eigen::Vector2s m;
         Eigen::Matrix2s m_cov;
 
-        CaptureBasePtr C0, C1, C2;
-        FeatureBasePtr f0, f1, f2;
+        CaptureBasePtr C0, C1, C2, C3, C4;
+        FeatureBasePtr f0, f1, f2, f3, f4;
 
         virtual void SetUp()
         {
             C0 = std::make_shared<CaptureBase>("BASE", 0.0);
             C1 = std::make_shared<CaptureBase>("BASE", 1.0);
             C2 = std::make_shared<CaptureBase>("BASE", 2.0);
+            C3 = std::make_shared<CaptureBase>("BASE", 3.0);
+            C4 = std::make_shared<CaptureBase>("BASE", 4.0);
 
             f0 = std::make_shared<FeatureBase>("BASE", m, m_cov);
             f1 = std::make_shared<FeatureBase>("BASE", m, m_cov);
             f2 = std::make_shared<FeatureBase>("BASE", m, m_cov);
+            f3 = std::make_shared<FeatureBase>("BASE", m, m_cov);
+            f4 = std::make_shared<FeatureBase>("BASE", m, m_cov);
         }
 };
 
@@ -216,8 +220,8 @@ TEST_F(TrackMatrixTest, track)
      *  f2             trk 1
      */
 
-    TrackType t0 = track_matrix.track(f0->trackId());
-    TrackType t2 = track_matrix.track(f2->trackId());
+    Track t0 = track_matrix.track(f0->trackId());
+    Track t2 = track_matrix.track(f2->trackId());
 
     ASSERT_EQ(t0.size(), 2);
     ASSERT_EQ(t0.at(C0->getTimeStamp()), f0);
@@ -240,8 +244,8 @@ TEST_F(TrackMatrixTest, snapshot)
      *  f2             trk 1
      */
 
-    SnapshotType s0 = track_matrix.snapshot(C0);
-    SnapshotType s1 = track_matrix.snapshot(C1);
+    Snapshot s0 = track_matrix.snapshot(C0);
+    Snapshot s1 = track_matrix.snapshot(C1);
 
     ASSERT_EQ(s0.size(), 2);
     ASSERT_EQ(s0.at(f0->trackId()), f0);
@@ -289,6 +293,32 @@ TEST_F(TrackMatrixTest, snapshotAsList)
     ASSERT_EQ(lt0.size() , 2);
     ASSERT_EQ(lt0.front(), f0);
     ASSERT_EQ(lt0.back() , f2);
+}
+
+TEST_F(TrackMatrixTest, matches)
+{
+    track_matrix.newTrack(C0, f0);
+    track_matrix.add(f0->trackId(), C1, f1);
+    track_matrix.add(f0->trackId(), C2, f2);
+    track_matrix.newTrack(C0, f3);
+    track_matrix.add(f3->trackId(), C1, f4);
+
+    /*  C0   C1   C2   C3   snapshots
+     *
+     *  f0---f1---f2        trk 0
+     *  |    |
+     *  f3---f4             trk 1
+     */
+
+    TrackMatches pairs = track_matrix.matches(C0, C2);
+
+    ASSERT_EQ(pairs.size(), 1);
+    ASSERT_EQ(pairs.at(f0->trackId()).first, f0);
+    ASSERT_EQ(pairs.at(f0->trackId()).second, f2);
+
+    pairs = track_matrix.matches(C2, C3);
+
+    ASSERT_EQ(pairs.size(), 0);
 }
 
 int main(int argc, char **argv)
