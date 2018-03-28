@@ -284,12 +284,15 @@ void ProcessorTrackerFeatureTrifocal::configure(SensorBasePtr _sensor)
 {
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(_sensor);
 
+    camera->setNoiseStd(Vector2s::Ones() * params_.pixel_noise_std);
+
     active_search_ptr_->initAlg(camera->getImgWidth(), camera->getImgHeight() , det_ptr_->getPatternRadius());
 
     params_activesearch_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmParamsACTIVESEARCH>( active_search_ptr_->getParams() );
 
     cell_width_  = camera->getImgWidth()  / params_activesearch_ptr_->n_cells_h;
     cell_height_ = camera->getImgHeight() / params_activesearch_ptr_->n_cells_v;
+
 }
 
 } // namespace wolf
