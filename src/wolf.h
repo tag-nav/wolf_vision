@@ -229,7 +229,8 @@ typedef enum
     CTR_IMU,                    ///< IMU constraint
     CTR_DIFF_DRIVE,             ///< Diff-drive constraint
     CTR_BEARING_2D,             ///< 2D bearing 
-    CTR_BLOCK_ABS               ///< absolute constraint to Poisition or Velocity depending on argument StateBlockPtr (for priors) 
+    CTR_BLOCK_ABS,              ///< absolute constraint to Poisition or Velocity depending on argument StateBlockPtr (for priors)
+    CTR_TRIFOCAL_PLP            ///< Trifocal tensor constraint of the type point-line-point
 } ConstraintType;
 
 /** \brief Enumeration of constraint status
