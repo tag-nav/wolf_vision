@@ -19,9 +19,6 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerFeatureTrifocal);
 struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTracker
 {
         std::string yaml_file_params_vision_utils;
-
-        unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
-
         Scalar pixel_noise_std; ///< std noise of the pixel
 };
 
