@@ -18,7 +18,6 @@ WOLF_PTR_TYPEDEFS(ProcessorTracker);
 struct ProcessorParamsTracker : public ProcessorParamsBase
 {
         unsigned int max_new_features;
-        unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
 };
 
 /** \brief General tracker processor

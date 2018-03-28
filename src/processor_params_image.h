@@ -14,12 +14,14 @@
 namespace wolf
 {
 
-struct ProcessorParamsImage : public ProcessorParamsTracker
+struct ProcessorParamsImage : public ProcessorParamsBase
 {
 		std::string yaml_file_params_vision_utils;
 
         struct Algorithm
         {
+                unsigned int max_new_features; ///< Max nbr. of features to detect in one frame
+                unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
                 float min_response_for_new_features; ///< minimum value of the response to create a new feature
                 Scalar time_tolerance;
                 Scalar distance;
