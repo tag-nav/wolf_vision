@@ -264,10 +264,9 @@ inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _w
     vision_utils::TrifocalTensorBase<T> tensor;
     tensor.computeTensorFromProjectionMat(P2, P3);
 
-    // compute essential matrices c2c1 and c3c2
-    Eigen::Matrix<T, 3, 3> c2Ec1, c3Ec2;
-    c2Ec1 = c1Rc2.transpose()*skew(c1tc2);
-    c3Ec2 = c2Rc3.transpose()*skew(c2tc3);
+    // compute essential matrices c2c1 and c3c1
+    _c2Ec1 = c1Rc2.transpose()*skew(c1tc2);
+    _c3Ec1 = c1Rc3.transpose()*skew(c1tc3);
 }
 
 template<typename T, typename D1, typename D2>
@@ -385,7 +384,7 @@ inline void ConstraintAutodiffTrifocal::residual(const vision_utils::TrifocalTen
     // PLP trilinearity error
     Matrix<T,3,1> m3e;
     Matrix<T,3,3> J_m3e_p2;
-    m3e      << p2(0) * T0m1 , p2(1) * T1m1 , p2(2) * T2m1;
+    m3e      =  p2(0) * T0m1 + p2(1) * T1m1 + p2(2) * T2m1;
     J_m3e_p2 << T0m1, T1m1, T2m1;
 
     T J_m3e_T0m1 = p2(0); // scalar times identity
