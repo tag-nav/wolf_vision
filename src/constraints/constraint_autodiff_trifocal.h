@@ -261,8 +261,7 @@ inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _w
     P3.block(0,3,3,1) = -c1Rc3.transpose()*c1tc3;
 
     // compute tensor
-    vision_utils::TrifocalTensorBase<T> tensor;
-    tensor.computeTensorFromProjectionMat(P2, P3);
+    _tensor.computeTensorFromProjectionMat(P2, P3);
 
     // compute essential matrices c2c1 and c3c1
     _c2Ec1 = c1Rc2.transpose()*skew(c1tc2);
