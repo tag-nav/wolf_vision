@@ -70,15 +70,15 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
         void residual(const vision_utils::TrifocalTensorBase<TT>& _tensor,
                       const MatrixBase<D1>& _c2Ec1,
                       const MatrixBase<D2>& _c3Ec1,
-                      MatrixBase<D3>& J_e1_m1,
-                      MatrixBase<D4>& J_e1_m2,
-                      MatrixBase<D5>& J_e1_m3,
-                      MatrixBase<D6>& J_e2_m1,
-                      MatrixBase<D7>& J_e2_m2,
-                      MatrixBase<D8>& J_e2_m3,
-                      MatrixBase<D9>& J_e3_m1,
-                      MatrixBase<D10>& J_e3_m2,
-                      MatrixBase<D11>& J_e3_m3);
+                      MatrixBase<D3>& _J_e1_m1,
+                      MatrixBase<D4>& _J_e1_m2,
+                      MatrixBase<D5>& _J_e1_m3,
+                      MatrixBase<D6>& _J_e2_m1,
+                      MatrixBase<D7>& _J_e2_m2,
+                      MatrixBase<D8>& _J_e2_m3,
+                      MatrixBase<D9>& _J_e3_m1,
+                      MatrixBase<D10>& _J_e3_m2,
+                      MatrixBase<D11>& _J_e3_m3);
 
 
     private:
@@ -322,15 +322,15 @@ template<class TT, typename D1, typename D2, typename D3, typename D4, typename 
 inline void ConstraintAutodiffTrifocal::residual(const vision_utils::TrifocalTensorBase<TT>& _tensor,
               const MatrixBase<D1>& _c2Ec1,
               const MatrixBase<D2>& _c3Ec1,
-              MatrixBase<D3>& J_e1_m1,
-              MatrixBase<D4>& J_e1_m2,
-              MatrixBase<D5>& J_e1_m3,
-              MatrixBase<D6>& J_e2_m1,
-              MatrixBase<D7>& J_e2_m2,
-              MatrixBase<D8>& J_e2_m3,
-              MatrixBase<D9>& J_e3_m1,
-              MatrixBase<D10>& J_e3_m2,
-              MatrixBase<D11>& J_e3_m3)
+              MatrixBase<D3>& _J_e1_m1,
+              MatrixBase<D4>& _J_e1_m2,
+              MatrixBase<D5>& _J_e1_m3,
+              MatrixBase<D6>& _J_e2_m1,
+              MatrixBase<D7>& _J_e2_m2,
+              MatrixBase<D8>& _J_e2_m3,
+              MatrixBase<D9>& _J_e3_m1,
+              MatrixBase<D10>& _J_e3_m2,
+              MatrixBase<D11>& _J_e3_m3)
 {
 
     typedef typename D1::Scalar T;
@@ -397,13 +397,13 @@ inline void ConstraintAutodiffTrifocal::residual(const vision_utils::TrifocalTen
 
     // Jacobians of PLP by the chain rule
     Matrix<T,2,3> J_e1_m3e = J_e1_u3e * J_u3e_m3e;
-    J_e1_m1 =
+    _J_e1_m1 =
             J_e1_m3e * J_m3e_T0m1 * J_T0m1_m1 +
             J_e1_m3e * J_m3e_T1m1 * J_T1m1_m1 +
             J_e1_m3e * J_m3e_T2m1 * J_T2m1_m1 +
             J_e1_m3e * J_m3e_p2   * J_p2_l2   * J_l2_m1;
-    J_e1_m2 = J_e1_m3e * J_m3e_p2 * J_p2_m2;
-    J_e1_m3 = J_e1_u3  * J_u3_m3;
+    _J_e1_m2 = J_e1_m3e * J_m3e_p2 * J_p2_m2;
+    _J_e1_m3 = J_e1_u3  * J_u3_m3;
 
 
     // 3. EPIPOLARS
@@ -412,12 +412,12 @@ inline void ConstraintAutodiffTrifocal::residual(const vision_utils::TrifocalTen
     Matrix<T,1,3> J_e3_l3;
     // T e2 = vision_utils::distancePointLine(m2, l2, J_e2_m2, J_e2_l2);
     // T e3 = vision_utils::distancePointLine(m3, l3, J_e3_m3, J_e3_l3);
-    vision_utils::distancePointLine(m2, l2, J_e2_m2, J_e2_l2);
-    vision_utils::distancePointLine(m3, l3, J_e3_m3, J_e3_l3);
+    vision_utils::distancePointLine(m2, l2, _J_e2_m2, J_e2_l2);
+    vision_utils::distancePointLine(m3, l3, _J_e3_m3, J_e3_l3);
 
     // chain rule
-    J_e2_m1 = J_e2_l2 * J_l2_m1;
-    J_e3_m1 = J_e3_l3 * J_l3_m1;
+    _J_e2_m1 = J_e2_l2 * J_l2_m1;
+    _J_e3_m1 = J_e3_l3 * J_l3_m1;
 }
 
 
