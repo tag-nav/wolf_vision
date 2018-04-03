@@ -64,7 +64,7 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
         template<typename T, typename D1, typename D2>
         Matrix<T, 4, 1> residual(const vision_utils::TrifocalTensorBase<T>& _tensor,
                                  const MatrixBase<D1>& _c2Ec1,
-                                 const MatrixBase<D2>& _c3Ec1);
+                                 const MatrixBase<D2>& _c3Ec1) const;
 
     private:
         // Helper functions to be used by the above
@@ -272,7 +272,7 @@ inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _w
 template<typename T, typename D1, typename D2>
 inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::TrifocalTensorBase<T>& _tensor,
                                                             const MatrixBase<D1>& _c2Ec1,
-                                                            const MatrixBase<D2>& _c3Ec1)
+                                                            const MatrixBase<D2>& _c3Ec1) const
 {
     // m1, m2, m3: canonical pixels in cams 1,2,3 -- canonical means m = K.inv * u, with _u_ a homogeneous pixel [ux; uy; 1].
     Matrix<T,3,1> m1(pixel_canonical_prev_);
