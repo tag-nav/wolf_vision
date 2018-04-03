@@ -109,19 +109,20 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
 
 TEST_F(ConstraintAutodiffTrifocalTest, ground_truth)
 {
-    Vector4s residual;
+    Vector4s resid;
 
     // Constraint with exact states should give zero residual
     c123->operator ()(pos1.data(), quat1.coeffs().data(),
                       pos2.data(), quat2.coeffs().data(),
                       pos3.data(), quat3.coeffs().data(),
                       pos_cam.data(), quat_cam.coeffs().data(),
-                      residual.data());
+                      resid.data());
 
-    problem->print(4,1,1,1);
+//    problem->print(4,1,1,1);
 //    ASSERT_TRUE(problem->check()); // cannot pass this test!
-    WOLF_DEBUG("residuals: ", residual.transpose());
-    ASSERT_MATRIX_APPROX(residual, Vector4s::Zero(), 1e-16);
+
+    WOLF_DEBUG("residuals: ", resid.transpose());
+    ASSERT_MATRIX_APPROX(resid, Vector4s::Zero(), 1e-8);
 }
 
 //[Class methods]
