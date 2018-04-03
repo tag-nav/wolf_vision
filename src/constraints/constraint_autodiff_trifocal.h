@@ -32,6 +32,8 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
          */
         virtual ~ConstraintAutodiffTrifocal();
 
+        FeatureBasePtr getFeaturePrevPtr();
+
         /** brief : compute the residual from the state blocks being iterated by the solver.
          **/
         template<typename T>
@@ -165,21 +167,21 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
     Matrix<Scalar,1,2> J_e3_u3 = J_e3_m3 * J_m_u;
 
     // Covariances
-    Matrix2s Q1 = J_e1_u1 * feature_prev_ptr_.lock()->getMeasurementCovariance()  * J_e1_u1.transpose()
-               + J_e1_u2  * feature_other_ptr_.lock()->getMeasurementCovariance() * J_e1_u2.transpose()
-               + J_e1_u3  * getFeaturePtr()->getMeasurementCovariance()           * J_e1_u3.transpose();
+    Matrix2s Q1 = J_e1_u1 * getFeaturePrevPtr()->getMeasurementCovariance()  * J_e1_u1.transpose()
+               + J_e1_u2  * getFeatureOtherPtr()->getMeasurementCovariance() * J_e1_u2.transpose()
+               + J_e1_u3  * getFeaturePtr()->getMeasurementCovariance()      * J_e1_u3.transpose();
 
-    Matrix1s Q2 = J_e2_u1 * feature_prev_ptr_.lock()->getMeasurementCovariance()  * J_e2_u1.transpose()
-                + J_e2_u2 * feature_other_ptr_.lock()->getMeasurementCovariance() * J_e2_u2.transpose();
+    Matrix1s Q2 = J_e2_u1 * getFeaturePrevPtr()->getMeasurementCovariance()  * J_e2_u1.transpose()
+                + J_e2_u2 * getFeatureOtherPtr()->getMeasurementCovariance() * J_e2_u2.transpose();
 
-    Matrix1s Q3 = J_e3_u1 * feature_prev_ptr_.lock()->getMeasurementCovariance()  * J_e3_u1.transpose()
-                + J_e3_u3 * getFeaturePtr()->getMeasurementCovariance()           * J_e3_u3.transpose();
+    Matrix1s Q3 = J_e3_u1 * getFeaturePrevPtr()->getMeasurementCovariance()  * J_e3_u1.transpose()
+                + J_e3_u3 * getFeaturePtr()->getMeasurementCovariance()      * J_e3_u3.transpose();
 
     // sqrt info
     Eigen::LLT<Eigen::MatrixXs> llt_of_info(Q1.inverse()); // Cholesky decomposition
     sqrt_information_upper.block(0,0,2,2) = llt_of_info.matrixU();
-    sqrt_information_upper(2,2)             = 1 / sqrt(Q2(0));
-    sqrt_information_upper(3,3)             = 1 / sqrt(Q3(0));
+    sqrt_information_upper(2,2)           = 1 / sqrt(Q2(0));
+    sqrt_information_upper(3,3)           = 1 / sqrt(Q3(0));
 
 }
 
@@ -187,6 +189,12 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
 ConstraintAutodiffTrifocal::~ConstraintAutodiffTrifocal()
 {
 }
+
+inline FeatureBasePtr ConstraintAutodiffTrifocal::getFeaturePrevPtr()
+{
+    return feature_prev_ptr_.lock();
+}
+
 
 template<typename T>
 bool ConstraintAutodiffTrifocal::operator ()( const T* const _prev_pos, const T* const _prev_quat, const T* const _origin_pos, const T* const _origin_quat, const T* const _last_pos, const T* const _last_quat, const T* const _sen_pos, const T* const _sen_quat, T* _residuals) const
