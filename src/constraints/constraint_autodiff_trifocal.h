@@ -69,7 +69,7 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
     private:
         // Helper functions to be used by the above
         template<class TT, typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
-        void residual(const vision_utils::TrifocalTensorBase<TT>& _tensor,
+        void residual_jacobians(const vision_utils::TrifocalTensorBase<TT>& _tensor,
                       const MatrixBase<D1>& _c2Ec1,
                       const MatrixBase<D2>& _c3Ec1,
                       MatrixBase<D3>& _J_e1_m1,
@@ -155,7 +155,7 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
     // residual and Jacobians
     Matrix<Scalar,2,3> J_e1_m1, J_e1_m2, J_e1_m3;
     Matrix<Scalar,1,3> J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3;
-    residual(tensor, c2Ec1, c3Ec1, J_e1_m1, J_e1_m2, J_e1_m3, J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3);
+    residual_jacobians(tensor, c2Ec1, c3Ec1, J_e1_m1, J_e1_m2, J_e1_m3, J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3);
 
     // chain rule
     Matrix2s J_e1_u1 = J_e1_m1 * J_m_u;
@@ -327,18 +327,18 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
 
 // Helper functions to be used by the above
 template<class TT, typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
-inline void ConstraintAutodiffTrifocal::residual(const vision_utils::TrifocalTensorBase<TT>& _tensor,
-              const MatrixBase<D1>& _c2Ec1,
-              const MatrixBase<D2>& _c3Ec1,
-              MatrixBase<D3>& _J_e1_m1,
-              MatrixBase<D4>& _J_e1_m2,
-              MatrixBase<D5>& _J_e1_m3,
-              MatrixBase<D6>& _J_e2_m1,
-              MatrixBase<D7>& _J_e2_m2,
-              MatrixBase<D8>& _J_e2_m3,
-              MatrixBase<D9>& _J_e3_m1,
-              MatrixBase<D10>& _J_e3_m2,
-              MatrixBase<D11>& _J_e3_m3)
+inline void ConstraintAutodiffTrifocal::residual_jacobians(const vision_utils::TrifocalTensorBase<TT>& _tensor,
+                                                           const MatrixBase<D1>& _c2Ec1,
+                                                           const MatrixBase<D2>& _c3Ec1,
+                                                           MatrixBase<D3>& _J_e1_m1,
+                                                           MatrixBase<D4>& _J_e1_m2,
+                                                           MatrixBase<D5>& _J_e1_m3,
+                                                           MatrixBase<D6>& _J_e2_m1,
+                                                           MatrixBase<D7>& _J_e2_m2,
+                                                           MatrixBase<D8>& _J_e2_m3,
+                                                           MatrixBase<D9>& _J_e3_m1,
+                                                           MatrixBase<D10>& _J_e3_m2,
+                                                           MatrixBase<D11>& _J_e3_m3)
 {
     typedef typename D1::Scalar T;
 
