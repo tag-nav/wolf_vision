@@ -47,7 +47,7 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
                           const T* const _sen_quat,
                           T*             _residuals) const;
 
-    private:
+    public:
         template<typename D1, typename D2, typename D3, typename D4>
         void expectation(const MatrixBase<D1>&     _wtr1,
                          const QuaternionBase<D2>& _wqr1,
@@ -340,7 +340,6 @@ inline void ConstraintAutodiffTrifocal::residual(const vision_utils::TrifocalTen
               MatrixBase<D10>& _J_e3_m2,
               MatrixBase<D11>& _J_e3_m3)
 {
-
     typedef typename D1::Scalar T;
 
     // 1. COMMON COMPUTATIONS
