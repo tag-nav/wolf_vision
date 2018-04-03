@@ -512,11 +512,11 @@ updateCMakeListsGTest()
         fi
       fi	  	
     done
-    if [[ $SET_BEFORE_POS < $(( ${#sorted[@]}-1 )) ]] ;
+    if [[ $SET_BEFORE_POS = $(( ${#sorted[@]}-1 )) ]] ;    
     then
-      sed -i "\%${sorted[$SET_BEFORE_POS]}%i # $New test\nwolf_add_gtest(gtest_$NAME gtest_$NAME.cpp)\ntarget_link_libraries(gtest_$NAME \$\{PROJECT_NAME\})\n" "${CML_GTEST_PATH}"
-    else
       sed -i "\%------- Now Core classes Serialization ----------%i # $New test\nwolf_add_gtest(gtest_$NAME gtest_$NAME.cpp)\ntarget_link_libraries(gtest_$NAME \$\{PROJECT_NAME\})\n" "${CML_GTEST_PATH}"
+    else
+      sed -i "\%${sorted[$SET_BEFORE_POS]}%i # $New test\nwolf_add_gtest(gtest_$NAME gtest_$NAME.cpp)\ntarget_link_libraries(gtest_$NAME \$\{PROJECT_NAME\})\n" "${CML_GTEST_PATH}"
     fi
     echo "$CML_GTEST_PATH"
   else
