@@ -82,20 +82,6 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
 
 
     private:
-        // Helper functions --- To be moved elsewhere in a vision_tools.h file or to an external library e.g. vision_utils
-        template<typename D1>
-        Matrix<typename D1::Scalar, 2, 1> euclidean(const MatrixBase<D1>& _homog);
-
-        template<typename D1, typename D2>
-        Matrix<typename D1::Scalar, 2, 1> euclidean(const MatrixBase<D1>& _homog, MatrixBase<D2>& _J_e_h);
-
-        template<typename D1, typename D2>
-        typename D1::Scalar distancePointLine(const MatrixBase<D1>& _point, const MatrixBase<D2>& _line);
-
-        template<typename D1, typename D2, typename D3, typename D4>
-        typename D1::Scalar distancePointLine(const MatrixBase<D1>& _point, const MatrixBase<D2>& _line, MatrixBase<D3>& _J_d_p, MatrixBase<D4>& _J_d_l );
-
-    private:
         FeatureBaseWPtr feature_prev_ptr_;  // To look for measurements
         SensorCameraPtr camera_ptr_;        // To look for intrinsics
         Vector3s pixel_canonical_prev_, pixel_canonical_origin_, pixel_canonical_last_;
@@ -314,14 +300,14 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     T J_m3e_T2m1 = p2(2); // scalar times identity
 
     // Go to Euclidean plane
-    Matrix<T,2,1> u3e = euclidean(m3e);
-    Matrix<T,2,1> u3  = euclidean(m3);
+    Matrix<T,2,1> u3e = vision_utils::euclidean(m3e);
+    Matrix<T,2,1> u3  = vision_utils::euclidean(m3);
 
     Matrix<T,2,1> e1   = u3 - u3e;
 
     /////// epipolars
-    T e2 = distancePointLine(m2, l2);
-    T e3 = distancePointLine(m3, l3);
+    T e2 = vision_utils::distancePointLine(m2, l2);
+    T e3 = vision_utils::distancePointLine(m3, l3);
 
     // residuals
     Matrix<T,4,1> errors, residual;
@@ -399,13 +385,13 @@ inline void ConstraintAutodiffTrifocal::residual(const vision_utils::TrifocalTen
 
     // Go to Euclidean plane
     Matrix<T,2,3> J_u3e_m3e, J_u3_m3;
-//            Matrix<T,2,1> u3e = euclidean(m3e, J_u3e_m3e);
-//            Matrix<T,2,1> u3  = euclidean(m3, J_u3_m3);
-    euclidean(m3e, J_u3e_m3e);
-    euclidean(m3, J_u3_m3);
+    // Matrix<T,2,1> u3e = vision_utils::euclidean(m3e, J_u3e_m3e);
+    // Matrix<T,2,1> u3  = vision_utils::euclidean(m3, J_u3_m3);
+    vision_utils::euclidean(m3e, J_u3e_m3e);
+    vision_utils::euclidean(m3, J_u3_m3);
 
     // compute trilinearity PLP error
-//            Matrix<T,2,1> e1   = u3 - u3e;
+    // Matrix<T,2,1> e1   = u3 - u3e;
     T J_e1_u3  = (T)1;  // scalar times identity
     T J_e1_u3e = (T)-1; // scalar times identity
 
@@ -424,81 +410,15 @@ inline void ConstraintAutodiffTrifocal::residual(const vision_utils::TrifocalTen
 
     Matrix<T,1,3> J_e2_l2;
     Matrix<T,1,3> J_e3_l3;
-//            T e2 = distancePointLine(m2, l2, J_e2_m2, J_e2_l2);
-//            T e3 = distancePointLine(m3, l3, J_e3_m3, J_e3_l3);
-    distancePointLine(m2, l2, J_e2_m2, J_e2_l2);
-    distancePointLine(m3, l3, J_e3_m3, J_e3_l3);
+    // T e2 = vision_utils::distancePointLine(m2, l2, J_e2_m2, J_e2_l2);
+    // T e3 = vision_utils::distancePointLine(m3, l3, J_e3_m3, J_e3_l3);
+    vision_utils::distancePointLine(m2, l2, J_e2_m2, J_e2_l2);
+    vision_utils::distancePointLine(m3, l3, J_e3_m3, J_e3_l3);
 
     // chain rule
     J_e2_m1 = J_e2_l2 * J_l2_m1;
     J_e3_m1 = J_e3_l3 * J_l3_m1;
 }
-
-
-
-// Helper functions --- To be moved elsewhere in a vision_tools.h file or to an external library e.g. vision_utils
-template<typename D1>
-inline Eigen::Matrix<typename D1::Scalar,2,1> ConstraintAutodiffTrifocal::euclidean(const MatrixBase<D1>& _homog)
-{
-    Matrix<typename D1::Scalar,2,1> euc = _homog.head(2) / _homog(2);
-    return euc;
-}
-
-template<typename D1, typename D2>
-inline Matrix<typename D1::Scalar, 2, 1> ConstraintAutodiffTrifocal::euclidean(const MatrixBase<D1>& _homog, MatrixBase<D2>& _J_e_h)
-{
-    Matrix<typename D1::Scalar, 2, 1> euc = euclidean(_homog);
-    _J_e_h.block(0,0,2,2) = Matrix<typename D1::Scalar,2,2>::Identity() / _homog(2);
-    _J_e_h.block(0,2,2,1) = - euc / _homog(2);
-
-    return euc;
-}
-
-template<typename D1, typename D2>
-inline typename D1::Scalar ConstraintAutodiffTrifocal::distancePointLine(const MatrixBase<D1>& _point, const MatrixBase<D2>& _line)
-{
-    typedef typename D1::Scalar T;
-
-    T nn2   = _line.head(2).squaredNorm();
-    T nn    = sqrt(nn2);
-    T nn3   = nn2 * nn;
-    T ltp   = _line.dot(_point);
-    T p2nn  = _point(2) * nn;
-    T p2nn3 = _point(2) * nn3;
-
-    Matrix<T,2,1> u = _point.head(2)/_point(2); // euclidean point
-    Matrix<T,2,1> l = _line .head(2)/_point(2); // director vector
-
-    T d     = ltp / p2nn;
-
-    return d;
-}
-
-template<typename D1, typename D2, typename D3, typename D4>
-inline typename D1::Scalar ConstraintAutodiffTrifocal::distancePointLine(const MatrixBase<D1>& _point, const MatrixBase<D2>& _line, MatrixBase<D3>& _J_d_p, MatrixBase<D4>& _J_d_l )
-{
-    typedef typename D1::Scalar T;
-
-    T nn2   = _line.head(2).squaredNorm();
-    T nn    = sqrt(nn2);
-    T nn3   = nn2 * nn;
-    T ltp   = _line.dot(_point);
-    T p2nn  = _point(2) * nn;
-    T p2nn3 = _point(2) * nn3;
-
-    Matrix<T,2,1> u = _point.head(2)/_point(2); // euclidean point
-    Matrix<T,2,1> l = _line .head(2)/_point(2); // director vector
-
-    T d     = ltp / p2nn;
-
-    _J_d_p << l(0)/nn               , l(1)/nn               ,  l(2)/nn - ltp/(_point(2)*_point(2)*nn);
-
-    _J_d_l << u(0)/nn - ltp*l(0)/nn3, u(1)/nn - ltp*l(1)/nn3,  1/nn                                  ;
-
-    return d;
-}
-
-
 
 
 }    // namespace wolf
