@@ -300,11 +300,7 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
 
     // PLP trilinearity error
     Matrix<T,3,1> m3e;
-    m3e      << p2(0) * T0m1 , p2(1) * T1m1 , p2(2) * T2m1;
-
-    T J_m3e_T0m1 = p2(0); // scalar times identity
-    T J_m3e_T1m1 = p2(1); // scalar times identity
-    T J_m3e_T2m1 = p2(2); // scalar times identity
+    m3e      << p2(0) * T0m1 + p2(1) * T1m1 + p2(2) * T2m1;
 
     // Go to Euclidean plane
     Matrix<T,2,1> u3e = vision_utils::euclidean(m3e);
