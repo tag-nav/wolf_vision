@@ -22,6 +22,7 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(const Processor
         prev_origin_ptr_(nullptr),
         initialized_(false)
 {
+    assert(!(params_.yaml_file_params_vision_utils.empty()) && "Missing YAML file with vision_utils parameters!");
     // Detector
     std::string det_name = vision_utils::readYamlType(params_.yaml_file_params_vision_utils, "detector");
     det_ptr_ = vision_utils::setupDetector(det_name, det_name + " detector", params_.yaml_file_params_vision_utils);
