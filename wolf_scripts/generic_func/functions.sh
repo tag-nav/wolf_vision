@@ -209,14 +209,21 @@ createHCPPFromTemplates()
   # Pick initialization parameters from base class
   fillWithBaseConstructorParameters
 
-  #Set the TYPE and class names on the template files
-  sed 's/header_file/'"${NAME}.h"'/g' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp
-  sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp2.cpp > "${TEMPLATES_PATH}"/tmp3.cpp
-  sed 's/base_class/'"${BASECLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.cpp > "${TEMPLATES_PATH}"/tmp4.cpp
-  rm "${TEMPLATES_PATH}"/tmp.cpp
-  rm "${TEMPLATES_PATH}"/tmp2.cpp
-  rm "${TEMPLATES_PATH}"/tmp3.cpp
- 
+  # CPP only for non-autodiff
+  if ! [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
+  then
+    #Set the TYPE and class names on the template files
+    sed 's/header_file/'"${NAME}.h"'/g' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp
+    sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp2.cpp > "${TEMPLATES_PATH}"/tmp3.cpp
+    sed 's/base_class/'"${BASECLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.cpp > "${TEMPLATES_PATH}"/tmp4.cpp
+    rm "${TEMPLATES_PATH}"/tmp.cpp
+    rm "${TEMPLATES_PATH}"/tmp2.cpp
+    rm "${TEMPLATES_PATH}"/tmp3.cpp
+    # Rename and move files
+    NAME_CPP_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".cpp
+    mv "${TEMPLATES_PATH}"/tmp4.cpp "$NAME_CPP_PATH"
+  fi
+  
   sed 's/base_header_file/'"${BASE}.h"'/g' "${TEMPLATES_PATH}"/tmp.h > "${TEMPLATES_PATH}"/tmp2.h
   sed 's/name_cap/'"${TYPE_CAP}_${BASE_CAP}_${NAME_CAP}"'/g' "${TEMPLATES_PATH}"/tmp2.h > "${TEMPLATES_PATH}"/tmp3.h
   sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.h > "${TEMPLATES_PATH}"/tmp4.h
@@ -228,9 +235,7 @@ createHCPPFromTemplates()
   
   # Rename and move files
   NAME_H_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".h
-  NAME_CPP_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".cpp
   mv "${TEMPLATES_PATH}"/tmp5.h "$NAME_H_PATH"
-  mv "${TEMPLATES_PATH}"/tmp4.cpp "$NAME_CPP_PATH"
 }
 
 addAutodiffSpecifics()
