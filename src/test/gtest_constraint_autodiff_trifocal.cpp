@@ -102,8 +102,6 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             f3->addConstraint(c123);
             f1->addConstrainedBy(c123);
             f2->addConstrainedBy(c123);
-            F1->addConstrainedBy(c123);
-            F2->addConstrainedBy(c123);
         }
 };
 
@@ -118,8 +116,8 @@ TEST_F(ConstraintAutodiffTrifocalTest, ground_truth)
                       pos_cam.data(), quat_cam.coeffs().data(),
                       resid.data());
 
-//    problem->print(4,1,1,1);
-//    ASSERT_TRUE(problem->check()); // cannot pass this test!
+    problem->print(4,1,1,1);
+//    ASSERT_TRUE(problem->check(1)); // cannot pass this test!
 
     WOLF_DEBUG("residuals: ", resid.transpose());
     ASSERT_MATRIX_APPROX(resid, Vector4s::Zero(), 1e-8);
