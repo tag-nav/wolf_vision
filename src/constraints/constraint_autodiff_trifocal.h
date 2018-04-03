@@ -281,14 +281,19 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
                                                             const MatrixBase<D1>& _c2Ec1,
                                                             const MatrixBase<D2>& _c3Ec1) const
 {
+    // 1. COMMON COMPUTATIONS
+
     // m1, m2, m3: canonical pixels in cams 1,2,3 -- canonical means m = K.inv * u, with _u_ a homogeneous pixel [ux; uy; 1].
     Matrix<T,3,1> m1(pixel_canonical_prev_  .cast<T>());
     Matrix<T,3,1> m2(pixel_canonical_origin_.cast<T>());
     Matrix<T,3,1> m3(pixel_canonical_last_  .cast<T>());
 
     // l2 and l3: epipolar lines of m1 in cam 2 and cam 3
-    Matrix<T,3,1> l2        = _c2Ec1*m1;
-    Matrix<T,3,1> l3        = _c3Ec1*m1;
+    Matrix<T,3,1> l2 = _c2Ec1*m1;
+    Matrix<T,3,1> l3 = _c3Ec1*m1;
+
+
+    // 2. TRILINEARITY PLP
 
     // p2: line in cam 2 perpendicular to epipolar
     Matrix<T,3,1> p2;
@@ -306,23 +311,25 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     T1m1 = T1*m1;
     T2m1 = T2*m1;
 
-    // PLP trilinearity error
-    Matrix<T,3,1> m3e;
-    m3e      << p2(0) * T0m1 + p2(1) * T1m1 + p2(2) * T2m1;
+    // PLP trilinearity pixel in cam 2
+    Matrix<T,3,1> m3e = p2(0) * T0m1 + p2(1) * T1m1 + p2(2) * T2m1;
 
     // Go to Euclidean plane
     Matrix<T,2,1> u3e = vision_utils::euclidean(m3e);
     Matrix<T,2,1> u3  = vision_utils::euclidean(m3);
 
-    Matrix<T,2,1> e1   = u3 - u3e;
+    // PLP trilinearity error
+    Matrix<T,2,1> e1  = u3 - u3e;
 
-    /////// epipolars
+
+    // 3. EPIPOLARS
+
     T e2 = vision_utils::distancePointLine(m2, l2);
     T e3 = vision_utils::distancePointLine(m3, l3);
 
     // residuals
     Matrix<T,4,1> errors, residual;
-    errors << e1, e2, e3;
+    errors  << e1, e2, e3;
     residual = sqrt_information_upper * errors;
 
     return residual;
@@ -353,19 +360,19 @@ inline void ConstraintAutodiffTrifocal::residual_jacobians(const vision_utils::T
     Matrix<T,3,1> m3(pixel_canonical_last_);
 
     // l2 and l3: epipolar lines of m1 in cam 2 and cam 3
-    Matrix<T,3,1> l2        = _c2Ec1*m1;
-    Matrix<T,3,3> J_l2_m1   = _c2Ec1;
-    Matrix<T,3,1> l3        = _c3Ec1*m1;
-    Matrix<T,3,3> J_l3_m1   = _c3Ec1;
+    Matrix<T,3,1> l2      = _c2Ec1*m1;
+    Matrix<T,3,3> J_l2_m1 = _c2Ec1;
+    Matrix<T,3,1> l3      = _c3Ec1*m1;
+    Matrix<T,3,3> J_l3_m1 = _c3Ec1;
 
 
     // 2. TRILINEARITY PLP
 
     // p2: line in cam 2 perpendicular to epipolar
     Matrix<T,3,1> p2;
-    p2(0) = l2(1);
-    p2(1) = -l2(0);
-    p2(2) = -m2(0)*l2(1) + m2(1)*l2(0);
+    p2(0)                 = l2(1);
+    p2(1)                 = -l2(0);
+    p2(2)                 = -m2(0)*l2(1) + m2(1)*l2(0);
     Matrix<T,3,3> J_p2_m2 = (Matrix<T,3,3>() << (T)0, (T)0, (T)0, (T)0, (T)0, (T)0, -l2(1), l2(0), (T)0).finished();
     Matrix<T,3,3> J_p2_l2 = (Matrix<T,3,3>() << (T)0, (T)1, (T)0, (T)-1, (T)0, (T)0, m2(1), -m2(0), (T)0).finished();
 
@@ -383,11 +390,10 @@ inline void ConstraintAutodiffTrifocal::residual_jacobians(const vision_utils::T
     Matrix<T,3,3> J_T1m1_m1 = T1;
     Matrix<T,3,3> J_T2m1_m1 = T2;
 
-    // PLP trilinearity error
-    Matrix<T,3,1> m3e;
+    // PLP trilinearity pixel in cam 2
+    Matrix<T,3,1> m3e =  p2(0) * T0m1 + p2(1) * T1m1 + p2(2) * T2m1;
     Matrix<T,3,3> J_m3e_p2;
-    m3e      =  p2(0) * T0m1 + p2(1) * T1m1 + p2(2) * T2m1;
-    J_m3e_p2 << T0m1, T1m1, T2m1;
+    J_m3e_p2         << T0m1, T1m1, T2m1;
 
     T J_m3e_T0m1 = p2(0); // scalar times identity
     T J_m3e_T1m1 = p2(1); // scalar times identity
