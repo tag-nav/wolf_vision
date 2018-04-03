@@ -48,7 +48,7 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
                           T*             _residuals) const;
 
     public:
-        template<typename D1, typename D2, typename D3, typename D4>
+        template<typename D1, typename D2, class T, typename D3, typename D4>
         void expectation(const MatrixBase<D1>&     _wtr1,
                          const QuaternionBase<D2>& _wqr1,
                          const MatrixBase<D1>&     _wtr2,
@@ -57,7 +57,7 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
                          const QuaternionBase<D2>& _wqr3,
                          const MatrixBase<D1>&     _rtc,
                          const QuaternionBase<D2>& _rqc,
-                         vision_utils::TrifocalTensorBase<typename D1::Scalar>& _tensor,
+                         vision_utils::TrifocalTensorBase<T>& _tensor,
                          MatrixBase<D3>&           _c2Ec1,
                          MatrixBase<D4>&           _c3Ec1) const;
 
@@ -68,8 +68,8 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
 
     private:
         // Helper functions to be used by the above
-        template<class TT, typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
-        void residual_jacobians(const vision_utils::TrifocalTensorBase<TT>& _tensor,
+        template<class T, typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
+        void residual_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
                       const MatrixBase<D1>& _c2Ec1,
                       const MatrixBase<D2>& _c3Ec1,
                       MatrixBase<D3>& _J_e1_m1,
@@ -233,7 +233,7 @@ bool ConstraintAutodiffTrifocal::operator ()( const T* const _prev_pos,
     return true;
 }
 
-template<typename D1, typename D2, typename D3, typename D4>
+template<typename D1, typename D2, class T, typename D3, typename D4>
 inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _wtr1,
                                                     const QuaternionBase<D2>& _wqr1,
                                                     const MatrixBase<D1>&     _wtr2,
@@ -242,13 +242,10 @@ inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _w
                                                     const QuaternionBase<D2>& _wqr3,
                                                     const MatrixBase<D1>&     _rtc,
                                                     const QuaternionBase<D2>& _rqc,
-                                                    vision_utils::TrifocalTensorBase<typename D1::Scalar>& _tensor,
+                                                    vision_utils::TrifocalTensorBase<T>& _tensor,
                                                     MatrixBase<D3>&     _c2Ec1,
                                                     MatrixBase<D4>&     _c3Ec1) const
 {
-    // compute tensor
-    typedef typename D1::Scalar T;
-
     // absolute camera poses in PQ format
     Quaternion<T> wqc1, wqc2, wqc3;
     Matrix<T,3,1> wtc1, wtc2, wtc3;
@@ -345,8 +342,8 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
 }
 
 // Helper functions to be used by the above
-template<class TT, typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
-inline void ConstraintAutodiffTrifocal::residual_jacobians(const vision_utils::TrifocalTensorBase<TT>& _tensor,
+template<class T, typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
+inline void ConstraintAutodiffTrifocal::residual_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
                                                            const MatrixBase<D1>& _c2Ec1,
                                                            const MatrixBase<D2>& _c3Ec1,
                                                            MatrixBase<D3>& _J_e1_m1,
@@ -359,8 +356,6 @@ inline void ConstraintAutodiffTrifocal::residual_jacobians(const vision_utils::T
                                                            MatrixBase<D10>& _J_e3_m2,
                                                            MatrixBase<D11>& _J_e3_m3)
 {
-    typedef typename D1::Scalar T;
-
     // 1. COMMON COMPUTATIONS
 
     // m1, m2, m3: canonical pixels in cams 1,2,3 -- canonical means m = K.inv * u, with _u_ a homogeneous pixel [ux; uy; 1].
@@ -386,7 +381,7 @@ inline void ConstraintAutodiffTrifocal::residual_jacobians(const vision_utils::T
     Matrix<T,3,3> J_p2_l2 = (Matrix<T,3,3>() << (T)0, (T)1, (T)0, (T)-1, (T)0, (T)0, m2(1), -m2(0), (T)0).finished();
 
     // Tensor slices
-    Matrix<TT,3,3> T0, T1, T2;
+    Matrix<T,3,3> T0, T1, T2;
     _tensor.getLayers(T0, T1, T2);
 
     // freedom for catalonia
