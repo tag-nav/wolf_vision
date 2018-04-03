@@ -197,7 +197,15 @@ inline FeatureBasePtr ConstraintAutodiffTrifocal::getFeaturePrevPtr()
 
 
 template<typename T>
-bool ConstraintAutodiffTrifocal::operator ()( const T* const _prev_pos, const T* const _prev_quat, const T* const _origin_pos, const T* const _origin_quat, const T* const _last_pos, const T* const _last_quat, const T* const _sen_pos, const T* const _sen_quat, T* _residuals) const
+bool ConstraintAutodiffTrifocal::operator ()( const T* const _prev_pos,
+                                              const T* const _prev_quat,
+                                              const T* const _origin_pos,
+                                              const T* const _origin_quat,
+                                              const T* const _last_pos,
+                                              const T* const _last_quat,
+                                              const T* const _sen_pos,
+                                              const T* const _sen_quat,
+                                              T* _residuals) const
 {
 
     // MAPS
@@ -209,12 +217,12 @@ bool ConstraintAutodiffTrifocal::operator ()( const T* const _prev_pos, const T*
     Map<const Quaternion<T> > wqr3(_last_quat);
     Map<const Matrix<T,3,1> > rtc (_sen_pos);
     Map<const Quaternion<T> > rqc (_sen_quat);
-    Map<Matrix<T,4,1> >      res (_residuals);
+    Map<Matrix<T,4,1> >       res (_residuals);
 
     vision_utils::TrifocalTensorBase<T> tensor;
     Matrix<T, 3, 3> c2Ec1, c3Ec1;
     expectation(wtr1, wqr1, wtr2, wqr2, wtr3, wqr3, rtc, rqc, tensor, c2Ec1, c3Ec1);
-    //    res = residual(expect);
+    res = residual(tensor, c2Ec1, c3Ec1);
     return true;
 }
 
