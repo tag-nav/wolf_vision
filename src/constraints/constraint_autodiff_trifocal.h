@@ -150,17 +150,24 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
     Matrix3s    c2Ec1, c3Ec1;
 
     // expectation
-    expectation(wtr1, wqr1, wtr2, wqr2, wtr3, wqr3, rtc, rqc, tensor, c2Ec1, c3Ec1);
+    expectation(wtr1, wqr1,
+                wtr2, wqr2,
+                wtr3, wqr3,
+                rtc, rqc,
+                tensor, c2Ec1, c3Ec1);
 
     // residual and Jacobians
     Matrix<Scalar,2,3> J_e1_m1, J_e1_m2, J_e1_m3;
     Matrix<Scalar,1,3> J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3;
-    residual_jacobians(tensor, c2Ec1, c3Ec1, J_e1_m1, J_e1_m2, J_e1_m3, J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3);
+    residual_jacobians(tensor, c2Ec1, c3Ec1,
+                       J_e1_m1, J_e1_m2, J_e1_m3,
+                       J_e2_m1, J_e2_m2, J_e2_m3,
+                       J_e3_m1, J_e3_m2, J_e3_m3);
 
     // chain rule
-    Matrix2s J_e1_u1 = J_e1_m1 * J_m_u;
-    Matrix2s J_e1_u2 = J_e1_m2 * J_m_u;
-    Matrix2s J_e1_u3 = J_e1_m3 * J_m_u;
+    Matrix2s           J_e1_u1 = J_e1_m1 * J_m_u;
+    Matrix2s           J_e1_u2 = J_e1_m2 * J_m_u;
+    Matrix2s           J_e1_u3 = J_e1_m3 * J_m_u;
     Matrix<Scalar,1,2> J_e2_u1 = J_e2_m1 * J_m_u;
     Matrix<Scalar,1,2> J_e2_u2 = J_e2_m2 * J_m_u;
     Matrix<Scalar,1,2> J_e3_u1 = J_e3_m1 * J_m_u;
@@ -168,8 +175,8 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
 
     // Covariances
     Matrix2s Q1 = J_e1_u1 * getFeaturePrevPtr()->getMeasurementCovariance()  * J_e1_u1.transpose()
-               + J_e1_u2  * getFeatureOtherPtr()->getMeasurementCovariance() * J_e1_u2.transpose()
-               + J_e1_u3  * getFeaturePtr()->getMeasurementCovariance()      * J_e1_u3.transpose();
+                + J_e1_u2 * getFeatureOtherPtr()->getMeasurementCovariance() * J_e1_u2.transpose()
+                + J_e1_u3 * getFeaturePtr()->getMeasurementCovariance()      * J_e1_u3.transpose();
 
     Matrix1s Q2 = J_e2_u1 * getFeaturePrevPtr()->getMeasurementCovariance()  * J_e2_u1.transpose()
                 + J_e2_u2 * getFeatureOtherPtr()->getMeasurementCovariance() * J_e2_u2.transpose();
@@ -327,7 +334,9 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     T e2 = vision_utils::distancePointLine(m2, l2);
     T e3 = vision_utils::distancePointLine(m3, l3);
 
-    // residuals
+
+    // 4. RESIDUAL
+
     Matrix<T,4,1> errors, residual;
     errors  << e1, e2, e3;
     residual = sqrt_information_upper * errors;
