@@ -44,6 +44,7 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
         intrinsics_cam->pinhole_model[1] = intrinsic[5];
         intrinsics_cam->pinhole_model[2] = intrinsic[0];
         intrinsics_cam->pinhole_model[3] = intrinsic[4];
+        assert (distortion.size() == 5 && "Distortion size must be size 5!");
         assert (distortion(2) == 0 && distortion(3) == 0 && "Cannot handle tangential distortion. Please re-calibrate without tangential distortion!");
         if (distortion(4) == 0)
             intrinsics_cam->distortion = distortion.head<2>();
