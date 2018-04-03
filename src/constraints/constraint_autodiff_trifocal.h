@@ -242,24 +242,24 @@ inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _w
     // compute tensor
     typedef typename D1::Scalar T;
 
-    Matrix<T,3,3> wRc1, wRc2, wRc3;
+    // absolute camera poses in PQ format
+    Quaternion<T> wqc1, wqc2, wqc3;
     Matrix<T,3,1> wtc1, wtc2, wtc3;
-    wtc1 = _wtr1 + _wqr1*_rtc;
-    wtc2 = _wtr2 + _wqr2*_rtc;
-    wtc3 = _wtr3 + _wqr3*_rtc;
-    wRc1 = (_wqr1 * _rqc).matrix();
-    wRc2 = (_wqr2 * _rqc).matrix();
-    wRc3 = (_wqr3 * _rqc).matrix();
+    wtc1 = _wtr1 + _wqr1 * _rtc;
+    wtc2 = _wtr2 + _wqr2 * _rtc;
+    wtc3 = _wtr3 + _wqr3 * _rtc;
+    wqc1 =         _wqr1 * _rqc;
+    wqc2 =         _wqr2 * _rqc;
+    wqc3 =         _wqr3 * _rqc;
 
-    // Relative transforms between cameras
+    // Relative transforms between cameras in PR format
     Matrix<T,3,1> c1tc2, c1tc3, c2tc3;
-    Matrix<T,3,3> c1Rc2, c1Rc3, c2Rc3;
-    c1tc2 = wRc1.transpose() * (wtc2 - wtc1);
-    c1tc3 = wRc1.transpose() * (wtc3 - wtc1);
-    c2tc3 = wRc2.transpose() * (wtc3 - wtc2);
-    c1Rc2 = wRc1.transpose() * wRc2;
-    c1Rc3 = wRc1.transpose() * wRc3;
-    c2Rc3 = wRc2.transpose() * wRc3;
+    Matrix<T,3,3> c1Rc2, c1Rc3;
+    c1tc2 =  wqc1.conjugate() * (wtc2 - wtc1);
+    c1tc3 =  wqc1.conjugate() * (wtc3 - wtc1);
+    c2tc3 =  wqc2.conjugate() * (wtc3 - wtc2);
+    c1Rc2 = (wqc1.conjugate() * wqc2).matrix();
+    c1Rc3 = (wqc1.conjugate() * wqc3).matrix();
 
     // Projection matrices (canonic cameras with origin in c1)
     Matrix<T,3,4> P2, P3;
