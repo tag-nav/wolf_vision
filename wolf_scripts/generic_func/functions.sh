@@ -209,14 +209,21 @@ createHCPPFromTemplates()
   # Pick initialization parameters from base class
   fillWithBaseConstructorParameters
 
-  #Set the TYPE and class names on the template files
-  sed 's/header_file/'"${NAME}.h"'/g' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp
-  sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp2.cpp > "${TEMPLATES_PATH}"/tmp3.cpp
-  sed 's/base_class/'"${BASECLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.cpp > "${TEMPLATES_PATH}"/tmp4.cpp
-  rm "${TEMPLATES_PATH}"/tmp.cpp
-  rm "${TEMPLATES_PATH}"/tmp2.cpp
-  rm "${TEMPLATES_PATH}"/tmp3.cpp
- 
+  # CPP only for non-autodiff
+  if ! [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
+  then
+    #Set the TYPE and class names on the template files
+    sed 's/header_file/'"${NAME}.h"'/g' "${TEMPLATES_PATH}"/tmp.cpp > "${TEMPLATES_PATH}"/tmp2.cpp
+    sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp2.cpp > "${TEMPLATES_PATH}"/tmp3.cpp
+    sed 's/base_class/'"${BASECLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.cpp > "${TEMPLATES_PATH}"/tmp4.cpp
+    rm "${TEMPLATES_PATH}"/tmp.cpp
+    rm "${TEMPLATES_PATH}"/tmp2.cpp
+    rm "${TEMPLATES_PATH}"/tmp3.cpp
+    # Rename and move files
+    NAME_CPP_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".cpp
+    mv "${TEMPLATES_PATH}"/tmp4.cpp "$NAME_CPP_PATH"
+  fi
+  
   sed 's/base_header_file/'"${BASE}.h"'/g' "${TEMPLATES_PATH}"/tmp.h > "${TEMPLATES_PATH}"/tmp2.h
   sed 's/name_cap/'"${TYPE_CAP}_${BASE_CAP}_${NAME_CAP}"'/g' "${TEMPLATES_PATH}"/tmp2.h > "${TEMPLATES_PATH}"/tmp3.h
   sed 's/class_name/'"${CLASSNAME}"'/g' "${TEMPLATES_PATH}"/tmp3.h > "${TEMPLATES_PATH}"/tmp4.h
@@ -228,9 +235,7 @@ createHCPPFromTemplates()
   
   # Rename and move files
   NAME_H_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".h
-  NAME_CPP_PATH="$WOLF_ROOT"/src/"$TYPE"s/"$NAME".cpp
   mv "${TEMPLATES_PATH}"/tmp5.h "$NAME_H_PATH"
-  mv "${TEMPLATES_PATH}"/tmp4.cpp "$NAME_CPP_PATH"
 }
 
 addAutodiffSpecifics()
@@ -293,8 +298,8 @@ addAutodiffSpecifics()
   PARAM_NUMS[-1]=${PARAM_NUMS[-1]%?}
 
   sed -i "s/public $BASECLASSNAME/public $BASECLASSNAME<$CLASSNAME, $RESIDUAL_DIM, ${PARAM_NUMS[*]}>/g" "$NAME_H_PATH"
-  sed -i "/virtual \~$CLASSNAME/a\ \n\        \/\*\* \brief : compute the residual from the state blocks being iterated by the solver.\n \        \*\*\/\n\        template<typename T>\n\        bool operator ()(${PARAMS[*]}, const T* const _residuals) const;\n" "$NAME_H_PATH"
-  sed -i "/\} \/\/ namespace wolf/a\ \n\/\/ Include here all headers for this class\n\/\/\#include <YOUR_HEADERS.h>\n\nnamespace wolf\n\{\n\ntemplate<typename T> bool $CLASSNAME::operator ()(${PARAMS[*]}, const T* const _residuals) const\n\{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::operator () is empty.\" << std::endl;\n  \/\/ TODO: Implement\n  return true;\n\}\n\n\} \/\/ namespace wolf" "$NAME_H_PATH"
+  sed -i "/virtual \~$CLASSNAME/a\ \n\        \/\*\* \brief : compute the residual from the state blocks being iterated by the solver.\n \        \*\*\/\n\        template<typename T>\n\        bool operator ()(${PARAMS[*]}, T* _residuals) const;\n" "$NAME_H_PATH"
+  sed -i "/\} \/\/ namespace wolf/a\ \n\/\/ Include here all headers for this class\n\/\/\#include <YOUR_HEADERS.h>\n\nnamespace wolf\n\{\n\ntemplate<typename T> bool $CLASSNAME::operator ()(${PARAMS[*]}, T* _residuals) const\n\{\n    std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::operator () is empty.\" << std::endl;\n    \/\/ TODO: Implement\n    return true;\n\}\n\n\} \/\/ namespace wolf" "$NAME_H_PATH"
 }
 
 fillWithBaseVirtualMethods()
@@ -507,7 +512,12 @@ updateCMakeListsGTest()
         fi
       fi	  	
     done
-    sed -i "\%${sorted[$SET_BEFORE_POS]}%i # $New test\nwolf_add_gtest(gtest_$NAME gtest_$NAME.cpp)\ntarget_link_libraries(gtest_$NAME \$\{PROJECT_NAME\})\n" "${CML_GTEST_PATH}"
+    if [[ $SET_BEFORE_POS = $(( ${#sorted[@]}-1 )) ]] ;    
+    then
+      sed -i "\%------- Now Core classes Serialization ----------%i # $New test\nwolf_add_gtest(gtest_$NAME gtest_$NAME.cpp)\ntarget_link_libraries(gtest_$NAME \$\{PROJECT_NAME\})\n" "${CML_GTEST_PATH}"
+    else
+      sed -i "\%${sorted[$SET_BEFORE_POS]}%i # $New test\nwolf_add_gtest(gtest_$NAME gtest_$NAME.cpp)\ntarget_link_libraries(gtest_$NAME \$\{PROJECT_NAME\})\n" "${CML_GTEST_PATH}"
+    fi
     echo "$CML_GTEST_PATH"
   else
     echo ""

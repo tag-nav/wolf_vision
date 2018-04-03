@@ -19,12 +19,12 @@ using std::static_pointer_cast;
 
 TEST(class_name, Constructor)
 {
-  std::cout << "\033[1;33m [WARN]:\033[0m gtest for class_name Constructor is empty." << std::endl;
+    std::cout << "\033[1;33m [WARN]:\033[0m gtest for class_name Constructor is empty." << std::endl;
 }
 
 TEST(class_name, Destructor)
 {
-  std::cout << "\033[1;33m [WARN]:\033[0m gtest for class_name Destructor is empty." << std::endl;
+    std::cout << "\033[1;33m [WARN]:\033[0m gtest for class_name Destructor is empty." << std::endl;
 }
 
 //[Class methods]
