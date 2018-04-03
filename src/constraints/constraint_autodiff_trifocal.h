@@ -127,6 +127,7 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
                                     camera_ptr_(std::static_pointer_cast<SensorCamera>(_processor_ptr->getSensorPtr())),
                                     sqrt_information_upper(Matrix4s::Zero())
 {
+    setFeaturePtr(_feature_last_ptr);
     Matrix3s K_inv   = camera_ptr_->getIntrinsicMatrix().inverse();
     pixel_canonical_prev_   = K_inv * Vector3s(_feature_prev_ptr  ->getMeasurement(0), _feature_prev_ptr  ->getMeasurement(1), 1.0);
     pixel_canonical_origin_ = K_inv * Vector3s(_feature_origin_ptr->getMeasurement(0), _feature_origin_ptr->getMeasurement(1), 1.0);
