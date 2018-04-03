@@ -274,9 +274,9 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
                                                             const MatrixBase<D2>& _c3Ec1) const
 {
     // m1, m2, m3: canonical pixels in cams 1,2,3 -- canonical means m = K.inv * u, with _u_ a homogeneous pixel [ux; uy; 1].
-    Matrix<T,3,1> m1(pixel_canonical_prev_);
-    Matrix<T,3,1> m2(pixel_canonical_origin_);
-    Matrix<T,3,1> m3(pixel_canonical_last_);
+    Matrix<T,3,1> m1(pixel_canonical_prev_  .cast<T>());
+    Matrix<T,3,1> m2(pixel_canonical_origin_.cast<T>());
+    Matrix<T,3,1> m3(pixel_canonical_last_  .cast<T>());
 
     // l2 and l3: epipolar lines of m1 in cam 2 and cam 3
     Matrix<T,3,1> l2        = _c2Ec1*m1;
