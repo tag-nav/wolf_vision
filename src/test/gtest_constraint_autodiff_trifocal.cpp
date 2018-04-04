@@ -130,10 +130,10 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
 
     Vector4s res;
 
-    c123->operator ()(F1->getPPtr()->getState().data(), F1->getOPtr()->getState().data(),
-                      F2->getPPtr()->getState().data(), F2->getOPtr()->getState().data(),
-                      F3->getPPtr()->getState().data(), F3->getOPtr()->getState().data(),
-                      S->getPPtr()->getState().data(), S->getOPtr()->getState().data(),
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
     WOLF_INFO("Initial state:   ", F3->getState().transpose());
@@ -146,10 +146,10 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
     pose_perturbated.segment(3,4).normalize();
     F3->setState(pose_perturbated);
 
-    c123->operator ()(F1->getPPtr()->getState().data(), F1->getOPtr()->getState().data(),
-                      F2->getPPtr()->getState().data(), F2->getOPtr()->getState().data(),
-                      F3->getPPtr()->getState().data(), F3->getOPtr()->getState().data(),
-                      S ->getPPtr()->getState().data(), S ->getOPtr()->getState().data(),
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
     WOLF_INFO("perturbed state: ", pose_perturbated.transpose());
@@ -164,10 +164,10 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
 
     std::string report = ceres_manager->solve(1);
 
-    c123->operator ()(pos1.data(), quat1.coeffs().data(),
-                      pos2.data(), quat2.coeffs().data(),
-                      pos3.data(), quat3.coeffs().data(),
-                      pos_cam.data(), quat_cam.coeffs().data(),
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
     WOLF_INFO("solved state:    ", F3->getState().transpose());
