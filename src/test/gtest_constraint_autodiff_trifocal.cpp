@@ -159,14 +159,15 @@ TEST_F(ConstraintAutodiffTrifocalTest, expectation)
     Tm.col(1) = T2*m1;
     Tm.col(2) = T3*m1;
 
-    Vector3s _l2(1,0,0), _p2(0,1,0), _l3(0,1,0), _p3(1,0,0); // ground truth
+    // Projective line: l = (nx ny dn), with (nx ny): normal vector; dn: distance to origin times norm(nx,ny)
+    Vector3s _l2(0,1,0), _p2(1,0,0), _l3(1,0,0), _p3(0,1,0); // ground truth
     Vector3s l2, l3;
     l2 = c2Ec1 * m1;
     l3 = c3Ec1 * m1;
 
     // check epipolar lines (check only director vectors for equal direction)
-    ASSERT_MATRIX_APPROX(l2.normalized(), _l2.normalized(), 1e-8);
-    ASSERT_MATRIX_APPROX(l3.normalized(), _l3.normalized(), 1e-8);
+    ASSERT_MATRIX_APPROX(l2/l2(1), _l2/_l2(1), 1e-8);
+    ASSERT_MATRIX_APPROX(l3/l3(0), _l3/_l3(0), 1e-8);
 
     // check perpendicular lines (check only director vectors for orthogonal direction)
     ASSERT_NEAR(l2(0)*_p2(0) + l2(1)*_p2(1), 0, 1e-8);
@@ -191,8 +192,8 @@ TEST_F(ConstraintAutodiffTrifocalTest, expectation)
     ASSERT_MATRIX_APPROX(ppp, Matrix3s::Zero(), 1e-8);
 
     // check epipolars
-    ASSERT_MATRIX_APPROX(c2Ec1, _c2Ec1, 1e-8);
-    ASSERT_MATRIX_APPROX(c3Ec1, _c3Ec1, 1e-8);
+    ASSERT_MATRIX_APPROX(c2Ec1/c2Ec1(0,1), _c2Ec1/_c2Ec1(0,1), 1e-8);
+    ASSERT_MATRIX_APPROX(c3Ec1/c3Ec1(0,1), _c3Ec1/_c3Ec1(0,1), 1e-8);
 }
 
 TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
