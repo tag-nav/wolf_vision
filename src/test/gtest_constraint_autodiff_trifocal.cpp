@@ -26,6 +26,7 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
         SensorCameraPtr camera;
         ProcessorTrackerFeatureTrifocalPtr proc_trifocal;
 
+        SensorBasePtr S;
         FrameBasePtr F1, F2, F3;
         CaptureImagePtr I1, I2, I3;
         FeatureBasePtr f1, f2, f3;
@@ -49,6 +50,7 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             quat3 = e2q(euler3);
 
             // camera at the robot origin looking forward
+            pos_cam << 0,0,0;
             euler_cam << -90, 0, -90; euler_cam *= M_TORAD;
             quat_cam = e2q(euler_cam);
 
@@ -63,8 +65,11 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             ceres_manager = std::make_shared<CeresManager>(problem);
 
             // Install sensor and processor
-            SensorBasePtr sen = problem->installSensor("CAMERA", "canonical", pose_cam, wolf_root + "/src/examples/camera_params_canonical.yaml");
-            camera = std::static_pointer_cast<SensorCamera>(sen);
+            S = problem->installSensor("CAMERA", "canonical", pose_cam, wolf_root + "/src/examples/camera_params_canonical.yaml");
+            camera = std::static_pointer_cast<SensorCamera>(S);
+
+            WOLF_DEBUG("cam state spec : ", pose_cam.transpose());
+            WOLF_DEBUG("cam state query: ", S->getPPtr()->getState().transpose(), " ", S->getOPtr()->getState().transpose());
 
             ProcessorParamsTrackerFeatureTrifocalPtr params_trifocal = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
             params_trifocal->time_tolerance = 1.0/2;
@@ -107,23 +112,72 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
 
 TEST_F(ConstraintAutodiffTrifocalTest, ground_truth)
 {
-    Vector4s resid;
+    Vector4s res;
 
     // Constraint with exact states should give zero residual
     c123->operator ()(pos1.data(), quat1.coeffs().data(),
                       pos2.data(), quat2.coeffs().data(),
                       pos3.data(), quat3.coeffs().data(),
                       pos_cam.data(), quat_cam.coeffs().data(),
-                      resid.data());
+                      res.data());
 
-    problem->print(4,1,1,1);
-//    ASSERT_TRUE(problem->check(1)); // cannot pass this test!
-
-    WOLF_DEBUG("residuals: ", resid.transpose());
-    ASSERT_MATRIX_APPROX(resid, Vector4s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(res, Vector4s::Zero(), 1e-8);
 }
 
-//[Class methods]
+TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
+{
+    // Residual with prior
+
+    Vector4s res;
+
+    c123->operator ()(F1->getPPtr()->getState().data(), F1->getOPtr()->getState().data(),
+                      F2->getPPtr()->getState().data(), F2->getOPtr()->getState().data(),
+                      F3->getPPtr()->getState().data(), F3->getOPtr()->getState().data(),
+                      S->getPPtr()->getState().data(), S->getOPtr()->getState().data(),
+                      res.data());
+
+    WOLF_INFO("Initial state:   ", F3->getState().transpose());
+    WOLF_INFO("residual before perturbing: ", res.transpose());
+    ASSERT_MATRIX_APPROX(res, Vector4s::Zero(), 1e-8);
+
+    // Residual with perturbated state
+
+    Vector7s pose_perturbated = F3->getState() + 0.1 * Vector7s::Random();
+    pose_perturbated.segment(3,4).normalize();
+    F3->setState(pose_perturbated);
+
+    c123->operator ()(F1->getPPtr()->getState().data(), F1->getOPtr()->getState().data(),
+                      F2->getPPtr()->getState().data(), F2->getOPtr()->getState().data(),
+                      F3->getPPtr()->getState().data(), F3->getOPtr()->getState().data(),
+                      S ->getPPtr()->getState().data(), S ->getOPtr()->getState().data(),
+                      res.data());
+
+    WOLF_INFO("perturbed state: ", pose_perturbated.transpose());
+    WOLF_INFO("residual before solve:      ", res.transpose());
+    ASSERT_NEAR(res(2), 0, 1e-8); // Epipolar c2-c1 should be respected when perturbing F3
+
+    // Residual with solved state
+
+    S ->fix();
+    F1->fix();
+    F2->fix();
+
+    std::string report = ceres_manager->solve(1);
+
+    c123->operator ()(pos1.data(), quat1.coeffs().data(),
+                      pos2.data(), quat2.coeffs().data(),
+                      pos3.data(), quat3.coeffs().data(),
+                      pos_cam.data(), quat_cam.coeffs().data(),
+                      res.data());
+
+    WOLF_INFO("solved state:    ", F3->getState().transpose());
+    WOLF_INFO("residual after solve:       ", res.transpose());
+
+    WOLF_INFO(report);
+
+    ASSERT_MATRIX_APPROX(res, Vector4s::Zero(), 1e-8);
+
+}
 
 int main(int argc, char **argv)
 {

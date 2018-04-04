@@ -190,6 +190,9 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
     sqrt_information_upper(2,2)           = 1 / sqrt(Q2(0));
     sqrt_information_upper(3,3)           = 1 / sqrt(Q3(0));
 
+    WOLF_TRACE("\ncov_sigmas: "    , Q1.diagonal().transpose().array().sqrt(), " ", sqrt(Q2(0)), " ", sqrt(Q3(0)));
+    WOLF_TRACE("\nsqrt_info_diag: ", sqrt_information_upper.diagonal().transpose());
+
 }
 
 // Destructor
@@ -226,6 +229,11 @@ bool ConstraintAutodiffTrifocal::operator ()( const T* const _prev_pos,
     Map<const Quaternion<T> > rqc (_sen_quat);
     Map<Matrix<T,4,1> >       res (_residuals);
 
+    WOLF_DEBUG(wtr1.transpose(), " ", wqr1.coeffs().transpose());
+    WOLF_DEBUG(wtr2.transpose(), " ", wqr2.coeffs().transpose());
+    WOLF_DEBUG(wtr3.transpose(), " ", wqr3.coeffs().transpose());
+    WOLF_DEBUG(rtc .transpose(), " ", rqc .coeffs().transpose());
+
     vision_utils::TrifocalTensorBase<T> tensor;
     Matrix<T, 3, 3> c2Ec1, c3Ec1;
     expectation(wtr1, wqr1, wtr2, wqr2, wtr3, wqr3, rtc, rqc, tensor, c2Ec1, c3Ec1);
@@ -246,6 +254,11 @@ inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _w
                                                     MatrixBase<D3>&     _c2Ec1,
                                                     MatrixBase<D4>&     _c3Ec1) const
 {
+        WOLF_DEBUG(_wtr1.transpose(), " ", _wqr1.coeffs().transpose());
+        WOLF_DEBUG(_wtr2.transpose(), " ", _wqr2.coeffs().transpose());
+        WOLF_DEBUG(_wtr3.transpose(), " ", _wqr3.coeffs().transpose());
+        WOLF_DEBUG(_rtc .transpose(), " ", _rqc .coeffs().transpose());
+
     // absolute camera poses in PQ format
     Quaternion<T> wqc1, wqc2, wqc3;
     Matrix<T,3,1> wtc1, wtc2, wtc3;
@@ -256,14 +269,22 @@ inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _w
     wqc2 =         _wqr2 * _rqc;
     wqc3 =         _wqr3 * _rqc;
 
+    WOLF_DEBUG(wtc1.transpose(), " ", wqc1.coeffs().transpose());
+    WOLF_DEBUG(wtc2.transpose(), " ", wqc2.coeffs().transpose());
+    WOLF_DEBUG(wtc3.transpose(), " ", wqc3.coeffs().transpose());
+
     // Relative transforms between cameras in PR format
-    Matrix<T,3,1> c1tc2, c1tc3, c2tc3;
+    Matrix<T,3,1> c1tc2, c1tc3;//, c2tc3;
     Matrix<T,3,3> c1Rc2, c1Rc3;
     c1tc2 =  wqc1.conjugate() * (wtc2 - wtc1);
     c1tc3 =  wqc1.conjugate() * (wtc3 - wtc1);
-    c2tc3 =  wqc2.conjugate() * (wtc3 - wtc2);
+//    c2tc3 =  wqc2.conjugate() * (wtc3 - wtc2);
     c1Rc2 = (wqc1.conjugate() * wqc2).matrix();
     c1Rc3 = (wqc1.conjugate() * wqc3).matrix();
+
+    WOLF_DEBUG(c1tc2.transpose(), " ", Quaternion<T>(c1Rc2).coeffs().transpose());
+    WOLF_DEBUG(c1tc3.transpose(), " ", Quaternion<T>(c1Rc3).coeffs().transpose());
+//    WOLF_DEBUG(c2tc3.transpose());
 
     // Projection matrices (canonic cameras with origin in c1)
     Matrix<T,3,4> P2, P3;
@@ -271,6 +292,9 @@ inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _w
     P2.block(0,3,3,1) = -c1Rc2.transpose()*c1tc2;
     P3.block(0,0,3,3) = c1Rc3.transpose();
     P3.block(0,3,3,1) = -c1Rc3.transpose()*c1tc3;
+
+    WOLF_DEBUG("P2: \n", P2);
+    WOLF_DEBUG("P3: \n", P3);
 
     // compute tensor
     _tensor.computeTensorFromProjectionMat(P2, P3);
@@ -296,6 +320,9 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     Matrix<T,3,1> l2 = _c2Ec1*m1;
     Matrix<T,3,1> l3 = _c3Ec1*m1;
 
+    WOLF_DEBUG("l2: ", l2.transpose());
+    WOLF_DEBUG("l3: ", l3.transpose());
+
 
     // 2. TRILINEARITY PLP
 
@@ -305,9 +332,15 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     p2(1) = -l2(0);
     p2(2) = -m2(0)*l2(1) + m2(1)*l2(0);
 
+    WOLF_DEBUG("p2: ", p2.transpose());
+
     // Tensor slices
     Matrix<T,3,3> T0, T1, T2;
     _tensor.getLayers(T0, T1, T2);
+
+    WOLF_DEBUG("T0: \n", T0);
+    WOLF_DEBUG("T1: \n", T1);
+    WOLF_DEBUG("T2: \n", T2);
 
     // freedom for catalonia
     Matrix<T,3,1> T0m1, T1m1, T2m1;
@@ -317,13 +350,18 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
 
     // PLP trilinearity pixel in cam 2
     Matrix<T,3,1> m3e = p2(0) * T0m1 + p2(1) * T1m1 + p2(2) * T2m1;
+    WOLF_DEBUG("m3e: ", m3e.transpose());
+    WOLF_DEBUG("m3 : ", m3e.transpose());
 
     // Go to Euclidean plane
     Matrix<T,2,1> u3e = vision_utils::euclidean(m3e);
     Matrix<T,2,1> u3  = vision_utils::euclidean(m3);
+    WOLF_DEBUG("u3e: ", u3e.transpose());
+    WOLF_DEBUG("u3 : ", u3 .transpose());
 
     // PLP trilinearity error
     Matrix<T,2,1> e1  = u3 - u3e;
+    WOLF_DEBUG("e1 : ", e1.transpose());
 
 
     // 3. EPIPOLARS
