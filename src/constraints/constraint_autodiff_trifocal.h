@@ -254,54 +254,66 @@ inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _w
                                                     MatrixBase<D3>&     _c2Ec1,
                                                     MatrixBase<D4>&     _c3Ec1) const
 {
-        WOLF_DEBUG(_wtr1.transpose(), " ", _wqr1.coeffs().transpose());
-        WOLF_DEBUG(_wtr2.transpose(), " ", _wqr2.coeffs().transpose());
-        WOLF_DEBUG(_wtr3.transpose(), " ", _wqr3.coeffs().transpose());
-        WOLF_DEBUG(_rtc .transpose(), " ", _rqc .coeffs().transpose());
+        // Relative camera transforms
 
-    // absolute camera poses in PQ format
-    Quaternion<T> wqc1, wqc2, wqc3;
-    Matrix<T,3,1> wtc1, wtc2, wtc3;
-    wtc1 = _wtr1 + _wqr1 * _rtc;
-    wtc2 = _wtr2 + _wqr2 * _rtc;
-    wtc3 = _wtr3 + _wqr3 * _rtc;
-    wqc1 =         _wqr1 * _rqc;
-    wqc2 =         _wqr2 * _rqc;
-    wqc3 =         _wqr3 * _rqc;
+        typedef Translation<T, 3> TranslationType;
+        typedef Eigen::Transform<T, 3, Eigen::Affine> TransformType;
 
-    WOLF_DEBUG(wtc1.transpose(), " ", wqc1.coeffs().transpose());
-    WOLF_DEBUG(wtc2.transpose(), " ", wqc2.coeffs().transpose());
-    WOLF_DEBUG(wtc3.transpose(), " ", wqc3.coeffs().transpose());
+        TransformType wHr1 = TranslationType(_wtr1) * _wqr1;
+        TransformType wHr2 = TranslationType(_wtr2) * _wqr2;
+        TransformType wHr3 = TranslationType(_wtr3) * _wqr3;
+        TransformType rHc  = TranslationType(_rtc)  * _rqc ;
 
-    // Relative transforms between cameras in PR format
-    Matrix<T,3,1> c1tc2, c1tc3;//, c2tc3;
-    Matrix<T,3,3> c1Rc2, c1Rc3;
-    c1tc2 =  wqc1.conjugate() * (wtc2 - wtc1);
-    c1tc3 =  wqc1.conjugate() * (wtc3 - wtc1);
-//    c2tc3 =  wqc2.conjugate() * (wtc3 - wtc2);
-    c1Rc2 = (wqc1.conjugate() * wqc2).matrix();
-    c1Rc3 = (wqc1.conjugate() * wqc3).matrix();
+        TransformType c1Hc2 = rHc.inverse() * wHr1.inverse() * wHr2 * rHc;
+        TransformType c1Hc3 = rHc.inverse() * wHr1.inverse() * wHr3 * rHc;
 
-    WOLF_DEBUG(c1tc2.transpose(), " ", Quaternion<T>(c1Rc2).coeffs().transpose());
-    WOLF_DEBUG(c1tc3.transpose(), " ", Quaternion<T>(c1Rc3).coeffs().transpose());
-//    WOLF_DEBUG(c2tc3.transpose());
+        WOLF_DEBUG("c1Hc2\n", c1Hc2.matrix());
+        WOLF_DEBUG("c1Hc3\n", c1Hc3.matrix());
 
-    // Projection matrices (canonic cameras with origin in c1)
-    Matrix<T,3,4> P2, P3;
-    P2.block(0,0,3,3) = c1Rc2.transpose();
-    P2.block(0,3,3,1) = -c1Rc2.transpose()*c1tc2;
-    P3.block(0,0,3,3) = c1Rc3.transpose();
-    P3.block(0,3,3,1) = -c1Rc3.transpose()*c1tc3;
+        // Trifocal tensor
+        _tensor.computeTensorFromProjectionMat(c1Hc2.inverse().affine(), c1Hc3.inverse().affine());
 
-    WOLF_DEBUG("P2: \n", P2);
-    WOLF_DEBUG("P3: \n", P3);
+        /* Essential matrix convention disambiguation
+         *
+         * C1 is the origin
+         * C2 is the other cam
+         * C2 is specified by R and T wrt C1 so that
+         *   T is the position    of C2 wrt C1
+         *   R is the orientation of C2 wrt C1
+         * There is a 3D point P as P1 expressed in C1 and P2 expressed in C2
+         *   P1 = T + R * P2
+         *
+         * Coplanarity condition: a' * (b x c) = 0 with {a,b,c} three coplanar vectors.
+         *
+         * The three vectors are:
+         *
+         *   baseline: b  = T
+         *   ray 1   : r1 = P1
+         *   ray 2   : r2 = P1 - T = R*P2;
+         *
+         * so,
+         *
+         *   (r1)' * (b x r2) = 0 , which develops as:
+         *
+         *   P1' * (T x (R*P2))  = 0
+         *   P1' * [T]x * R * P2 = 0
+         *   P1' * c1Ec2 * P2    = 0 <--- Epipolar constraint
+         *
+         * therefore:
+         *   c1Ec2 = [T]x * R
+         *
+         * or, if we prefer the constraint P2' * c2Ec1 * P1 = 0,
+         *   c2Ec1 = R' * [T]x (we obviate the sign change)
+         */
+        _c2Ec1 =  c1Hc2.rotation().transpose() * skew(c1Hc2.translation()) ;
+        _c3Ec1 =  c1Hc3.rotation().transpose() * skew(c1Hc3.translation()) ;
 
-    // compute tensor
-    _tensor.computeTensorFromProjectionMat(P2, P3);
+        // test TODO remove if fails
+//        _c2Ec1 =  c1Hc2.rotation() * skew(c1Hc2.translation()) ;
+//        _c3Ec1 =  c1Hc3.rotation() * skew(c1Hc3.translation()) ;
 
-    // compute essential matrices c2c1 and c3c1
-    _c2Ec1 = c1Rc2.transpose()*skew(c1tc2);
-    _c3Ec1 = c1Rc3.transpose()*skew(c1tc3);
+//        _c2Ec1 = _c2Ec1.transpose().eval();
+//        _c3Ec1 = _c3Ec1.transpose().eval();
 }
 
 template<typename T, typename D1, typename D2>
@@ -317,8 +329,8 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     Matrix<T,3,1> m3(pixel_canonical_last_  .cast<T>());
 
     // l2 and l3: epipolar lines of m1 in cam 2 and cam 3
-    Matrix<T,3,1> l2 = _c2Ec1*m1;
-    Matrix<T,3,1> l3 = _c3Ec1*m1;
+    Matrix<T,3,1> l2 = _c2Ec1 * m1;
+    Matrix<T,3,1> l3 = _c3Ec1 * m1;
 
     WOLF_DEBUG("l2: ", l2.transpose());
     WOLF_DEBUG("l3: ", l3.transpose());

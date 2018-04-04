@@ -42,16 +42,16 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             pos1 << 1,0,0;
             pos2 << 0,1,0;
             pos3 << 0,0,1;
-            euler1 << 0, 0, 180; euler1 *= M_TORAD;
-            euler2 << 0, 0, -90; euler2 *= M_TORAD;
-            euler3 << 0, 90, 0 ; euler3 *= M_TORAD;
+            euler1 << 0, 0, M_PI; //euler1 *= M_TORAD;
+            euler2 << 0, 0, -M_PI_2; //euler2 *= M_TORAD;
+            euler3 <<0, M_PI_2, M_PI ;// euler3 *= M_TORAD;
             quat1 = e2q(euler1);
             quat2 = e2q(euler2);
             quat3 = e2q(euler3);
 
             // camera at the robot origin looking forward
             pos_cam << 0,0,0;
-            euler_cam << -90, 0, -90; euler_cam *= M_TORAD;
+            euler_cam << -M_PI_2, 0, -M_PI_2;// euler_cam *= M_TORAD;
             quat_cam = e2q(euler_cam);
 
             // build all pose vectors
@@ -122,6 +122,77 @@ TEST_F(ConstraintAutodiffTrifocalTest, ground_truth)
                       res.data());
 
     ASSERT_MATRIX_APPROX(res, Vector4s::Zero(), 1e-8);
+}
+
+TEST_F(ConstraintAutodiffTrifocalTest, expectation)
+{
+    // ground truth tensor
+
+
+    // ground truth epipolars
+    Matrix3s _c2Ec1;
+    _c2Ec1 <<
+     2.35514e-16,            1, -2.35514e-16,
+               1, -1.57009e-16,           -1,
+    -7.85046e-17,            1,  7.85046e-17;
+
+    Matrix3s _c3Ec1;
+    _c3Ec1 <<
+     3.14018e-16,            1,            1,
+               1, -4.59869e-17, -1.57009e-16,
+               1, -1.57009e-16, -2.68032e-16;
+
+
+    // expected values
+    vision_utils::TrifocalTensor tensor;
+    Matrix3s c2Ec1, c3Ec1;
+    c123->expectation(pos1, quat1, pos2, quat2, pos3, quat3, pos_cam, quat_cam, tensor, c2Ec1, c3Ec1);
+
+    // check trilinearities
+
+    // Elements computed using the tensor
+    Eigen::Matrix3s T1, T2, T3;
+    tensor.getLayers(T1,T2,T3);
+    Eigen::Matrix3s Tm(3,3);
+    Vector3s m1 (0,0,1), m2 (0,0,1), m3 (0,0,1);
+    Tm.col(0) = T1*m1;
+    Tm.col(1) = T2*m1;
+    Tm.col(2) = T3*m1;
+
+    Vector3s _l2(1,0,0), _p2(0,1,0), _l3(0,1,0), _p3(1,0,0); // ground truth
+    Vector3s l2, l3;
+    l2 = c2Ec1 * m1;
+    l3 = c3Ec1 * m1;
+
+    // check epipolar lines (check only director vectors for equal direction)
+    ASSERT_MATRIX_APPROX(l2.normalized(), _l2.normalized(), 1e-8);
+    ASSERT_MATRIX_APPROX(l3.normalized(), _l3.normalized(), 1e-8);
+
+    // check perpendicular lines (check only director vectors for orthogonal direction)
+    ASSERT_NEAR(l2(0)*_p2(0) + l2(1)*_p2(1), 0, 1e-8);
+    ASSERT_NEAR(l3(0)*_p3(0) + l3(1)*_p3(1), 0, 1e-8);
+
+    // Verify trilinearities
+
+    // Point-line-line
+    Eigen::Matrix1s pll = _p2.transpose() * Tm * _p3;
+    ASSERT_TRUE(pll(0)<1e-5);
+
+    // Point-line-point
+    Eigen::Vector3s plp = _p2.transpose() * Tm * wolf::skew(m3);
+    ASSERT_MATRIX_APPROX(plp, Vector3s::Zero(), 1e-8);
+
+    // Point-point-line
+    Eigen::Vector3s ppl = wolf::skew(m2) * Tm * _p3;
+    ASSERT_MATRIX_APPROX(ppl, Vector3s::Zero(), 1e-8);
+
+    // Point-point-point
+    Eigen::Matrix3s ppp = wolf::skew(m2) * Tm * wolf::skew(m3);
+    ASSERT_MATRIX_APPROX(ppp, Matrix3s::Zero(), 1e-8);
+
+    // check epipolars
+    ASSERT_MATRIX_APPROX(c2Ec1, _c2Ec1, 1e-8);
+    ASSERT_MATRIX_APPROX(c3Ec1, _c3Ec1, 1e-8);
 }
 
 TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
