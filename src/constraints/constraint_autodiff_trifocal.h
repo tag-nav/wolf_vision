@@ -348,10 +348,14 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     T1m1 = T1*m1;
     T2m1 = T2*m1;
 
+    WOLF_DEBUG("T0m1: \n", T0m1.transpose());
+    WOLF_DEBUG("T1m1: \n", T1m1.transpose());
+    WOLF_DEBUG("T2m1: \n", T2m1.transpose());
+
     // PLP trilinearity pixel in cam 2
     Matrix<T,3,1> m3e = p2(0) * T0m1 + p2(1) * T1m1 + p2(2) * T2m1;
     WOLF_DEBUG("m3e: ", m3e.transpose());
-    WOLF_DEBUG("m3 : ", m3e.transpose());
+    WOLF_DEBUG("m3 : ", m3 .transpose());
 
     // Go to Euclidean plane
     Matrix<T,2,1> u3e = vision_utils::euclidean(m3e);
@@ -368,6 +372,7 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
 
     T e2 = vision_utils::distancePointLine(m2, l2);
     T e3 = vision_utils::distancePointLine(m3, l3);
+    WOLF_DEBUG("e2, e3 : ", e2, ", ", e3);
 
 
     // 4. RESIDUAL
