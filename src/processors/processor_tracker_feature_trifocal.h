@@ -65,21 +65,21 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         /** \brief Class Destructor
          */
         virtual ~ProcessorTrackerFeatureTrifocal();
-        virtual void configure(SensorBasePtr _sensor);
+        virtual void configure(SensorBasePtr _sensor) override;
 
         /** \brief Track provided features from \b last to \b incoming
          * \param _feature_list_in input list of features in \b last to track
          * \param _feature_list_out returned list of features found in \b incoming
          * \param _feature_matches returned map of correspondences: _feature_matches[feature_out_ptr] = feature_in_ptr
          */
-        virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureMatchMap& _feature_matches);
+        virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureMatchMap& _feature_matches) override;
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
          * \param _origin_feature input feature in origin capture tracked
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature);
+        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature) override;
 
         /** \brief Vote for KeyFrame generation
          *
@@ -88,7 +88,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          *
          * WARNING! This function only votes! It does not create KeyFrames!
          */
-        virtual bool voteForKeyFrame();
+        virtual bool voteForKeyFrame() override;
 
         /** \brief Detect new Features
          * \param _max_features maximum number of features detected
@@ -98,7 +98,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          *
          * The function sets the member new_features_last_, the list of newly detected features.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out) override;
 
         /** \brief Create a new constraint and link it to the wolf tree
          * \param _feature_ptr pointer to the parent Feature
@@ -108,7 +108,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          *
          * This function creates a constraint of the appropriate type for the derived processor.
          */
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
+        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -116,16 +116,16 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         /** \brief reset pointers and match lists at KF creation
          *
          */
-        virtual void resetDerived();
+        virtual void resetDerived() override;
 
         /** \brief Pre-process: check if all captures (prev-origin, origin, last) are initialized to allow constraints creation
          *
          */
-        virtual void preProcess();
+        virtual void preProcess() override;
 
         /** \brief Establish constraints between features in Captures \b last and \b origin
          */
-        virtual void establishConstraints();
+        virtual void establishConstraints() override;
 
         CaptureBasePtr getPrevOriginPtr();
 

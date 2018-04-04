@@ -1,9 +1,10 @@
 
 // wolf
 #include "processor_tracker_feature_trifocal.h"
- 
+
 #include "sensor_camera.h"
 #include "feature_point_image.h"
+#include "constraints/constraint_autodiff_trifocal.h"
 
 // vision_utils
 #include <vision_utils/detectors.h>
@@ -102,13 +103,6 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(const Processor
 // Destructor
 ProcessorTrackerFeatureTrifocal::~ProcessorTrackerFeatureTrifocal()
 {
-}
-
-ConstraintBasePtr ProcessorTrackerFeatureTrifocal::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
-{
-  std::cout << "033[1;33m [WARN]:033[0m ProcessorTrackerFeatureTrifocal::createConstraint is empty." << std::endl;
-  ConstraintBasePtr return_var{}; //TODO: fill this variable
-  return return_var;
 }
 
 unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out)
@@ -259,25 +253,43 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
     }
 }
 
+ConstraintBasePtr ProcessorTrackerFeatureTrifocal::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
+{
+    // NOTE: This function cannot be implemented because the API lacks an input to feature_prev_origin.
+    // Therefore, we implement establishConstraints() instead and do all the job there.
+    // This function remains empty, and with a warning or even an error issued in case someone calls it.
+    std::cout << "033[1;33m [WARN]:033[0m ProcessorTrackerFeatureTrifocal::createConstraint is empty." << std::endl;
+    ConstraintBasePtr return_var{}; //TODO: fill this variable
+    return return_var;
+}
+
 void ProcessorTrackerFeatureTrifocal::establishConstraints()
 {
     if (initialized_)
     {
-         // From ProcessorTrackerFeature::establishConstraints() :
-//        matche
-//                        for (auto match : matches_origin_from_last_)
-//                        {
-//                            auto ctr = createConstraint(match.first, match.second->feature_ptr_);
-//                            match.first->addConstraint(ctr);
-//                            match.second->feature_ptr_->addConstrainedBy(ctr);
-//                        }
-//
-//                        for (auto match : matches_origin_from_last_)
-//                        {
-//                            WOLF_DEBUG( "Constraint: track: " , match.second->feature_ptr_->trackId() ,
-//                                        " origin: " , match.second->feature_ptr_->id() ,
-//                                        " from last: " , match.first->id() );
-//                        }
+        // get tracks between prev, origin and last
+        TrackMatches matches = track_matrix_.matches(prev_origin_ptr_, last_ptr_); // it's guaranteed by construction that the track also includes origin
+
+        for (auto pair_trkid_match : matches) // OMG this will add potentially a loooot of constraints! TODO see a smarter way of adding constraints
+        {
+            // get track ID
+            size_t trk_id = pair_trkid_match.first;
+
+            // get the three features for this track
+            // FeatureBasePtr ftr_prev = track_matrix_.feature(trk_id, prev_origin_ptr_); // left here for ref, but implemented in a quicker way below
+            // FeatureBasePtr ftr_last = track_matrix_.feature(trk_id, last_ptr_); // same here
+            FeatureBasePtr ftr_prev = pair_trkid_match.second.first;
+            FeatureBasePtr ftr_orig = track_matrix_.feature(trk_id, origin_ptr_); // because it's a tracker, this feature in the middle of prev and last exists for sure!
+            FeatureBasePtr ftr_last = pair_trkid_match.second.second;
+
+            // make constraint
+            ConstraintAutodiffTrifocalPtr ctr = std::make_shared<ConstraintAutodiffTrifocal>(ftr_prev, ftr_orig, ftr_last, shared_from_this(), false, CTR_ACTIVE);
+
+            // link to wolf tree
+            ftr_last->addConstraint(ctr);
+            ftr_orig->addConstrainedBy(ctr);
+            ftr_prev->addConstrainedBy(ctr);
+        }
     }
 }
 
