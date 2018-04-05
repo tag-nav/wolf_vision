@@ -127,7 +127,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, residual_jacobians)
     Matrix3s c2Ec1, c3Ec1;
     Vector4s residual, residual_pert;
     Vector3s pix0, pert, pix_pert;
-    Scalar epsilon = 1e-6;
+    Scalar epsilon = 1e-8;
 
     // Nominal values
     c123->expectation(pos1, quat1, pos2, quat2, pos3, quat3, pos_cam, quat_cam, tensor, c2Ec1, c3Ec1);
@@ -138,11 +138,23 @@ TEST_F(ConstraintAutodiffTrifocalTest, residual_jacobians)
     Matrix<Scalar,1,3> J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3;
 
     c123->residual_jacobians(tensor, c2Ec1, c3Ec1, J_e1_m1, J_e1_m2, J_e1_m3, J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3);
+    Matrix<Scalar, 4, 3> J_e_m1, J_e_m2, J_e_m3, J_r_m1, J_r_m2, J_r_m3;
+    J_e_m1.topRows(2) = J_e1_m1;
+    J_e_m1.row(2)     = J_e2_m1;
+    J_e_m1.row(3)     = J_e3_m1;
+    J_r_m1            = c123->getSqrtInformationUpper() * J_e_m1;
+    J_e_m2.topRows(2) = J_e1_m2;
+    J_e_m2.row(2)     = J_e2_m2;
+    J_e_m2.row(3)     = J_e3_m2;
+    J_r_m2            = c123->getSqrtInformationUpper() * J_e_m2;
+    J_e_m3.topRows(2) = J_e1_m3;
+    J_e_m3.row(2)     = J_e2_m3;
+    J_e_m3.row(3)     = J_e3_m3;
+    J_r_m3            = c123->getSqrtInformationUpper() * J_e_m3;
 
     // numerical jacs
     Matrix<Scalar,2,3> Jn_e1_m1, Jn_e1_m2, Jn_e1_m3;
-    Matrix<Scalar,1,3> Jn_e2_m1, Jn_e2_m2, Jn_e2_m3, Jn_e3_m1, Jn_e3_m2, Jn_e3_m3;
-    Matrix<Scalar,4,3> Jn_e_m1, Jn_e_m2, Jn_e_m3;
+    Matrix<Scalar,4,3> Jn_e_m1, Jn_e_m2, Jn_e_m3, Jn_r_m1, Jn_r_m2, Jn_r_m3;
 
     // jacs wrt m1
     pix0 = c123->getPixelCanonicalPrev();
@@ -154,21 +166,57 @@ TEST_F(ConstraintAutodiffTrifocalTest, residual_jacobians)
         c123->setPixelCanonicalPrev(pix_pert); // m1
         residual_pert = c123->residual(tensor, c2Ec1, c3Ec1);
 
-        Jn_e_m1.col(i) = (residual_pert - residual) / epsilon;
+        Jn_r_m1.col(i) = (residual_pert - residual) / epsilon;
     }
+    c123->setPixelCanonicalPrev(pix0);
 
-    // NOTE: Falta que residual_jacobians() consideri la sqrt_information_upper, com si que fa residual(), per aixo hi ha dif entre la numerica i l'analitica.
+    WOLF_DEBUG(" ");
+    WOLF_DEBUG(" J_r_m1: \n",  J_r_m1);
+    WOLF_DEBUG("Jn_r_m1: \n", Jn_r_m1);
 
-    Jn_e1_m1 = Jn_e_m1.topRows(2);
-    Jn_e2_m1 = Jn_e_m1.row(2);
-    Jn_e3_m1 = Jn_e_m1.row(3);
+//    ASSERT_MATRIX_APPROX(J_r_m1, Jn_r_m1, 1e-6);
 
-    WOLF_DEBUG(" J_e1_m1: \n",  J_e1_m1);
-    WOLF_DEBUG("Jn_e1_m1: \n", Jn_e1_m1);
-    WOLF_DEBUG(" J_e2_m1: \n",  J_e2_m1);
-    WOLF_DEBUG("Jn_e2_m1: \n", Jn_e2_m1);
-    WOLF_DEBUG(" J_e3_m1: \n",  J_e3_m1);
-    WOLF_DEBUG("Jn_e3_m1: \n", Jn_e3_m1);
+
+    // jacs wrt m2
+    pix0 = c123->getPixelCanonicalOrigin();
+    for (int i=0; i<3; i++)
+    {
+        pert.setZero();
+        pert(i)  = epsilon;
+        pix_pert = pix0 + pert;
+        c123->setPixelCanonicalOrigin(pix_pert); // m2
+        residual_pert = c123->residual(tensor, c2Ec1, c3Ec1);
+
+        Jn_r_m2.col(i) = (residual_pert - residual) / epsilon;
+    }
+    c123->setPixelCanonicalOrigin(pix0);
+
+    WOLF_DEBUG(" ");
+    WOLF_DEBUG(" J_r_m2: \n",  J_r_m2);
+    WOLF_DEBUG("Jn_r_m2: \n", Jn_r_m2);
+
+//    ASSERT_MATRIX_APPROX(J_r_m2, Jn_r_m2, 1e-6);
+
+
+    // jacs wrt m3
+    pix0 = c123->getPixelCanonicalLast();
+    for (int i=0; i<3; i++)
+    {
+        pert.setZero();
+        pert(i)  = epsilon;
+        pix_pert = pix0 + pert;
+        c123->setPixelCanonicalLast(pix_pert); // m3
+        residual_pert = c123->residual(tensor, c2Ec1, c3Ec1);
+
+        Jn_r_m3.col(i) = (residual_pert - residual) / epsilon;
+    }
+    c123->setPixelCanonicalLast(pix0);
+
+    WOLF_DEBUG(" ");
+    WOLF_DEBUG(" J_r_m3: \n",  J_r_m3);
+    WOLF_DEBUG("Jn_r_m3: \n", Jn_r_m3);
+
+//    ASSERT_MATRIX_APPROX(J_r_m3, Jn_r_m3, 1e-6);
 
 }
 
