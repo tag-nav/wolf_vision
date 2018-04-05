@@ -64,6 +64,11 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
             pixel_canonical_prev_ = pixelCanonicalPrev;
         }
 
+        const Matrix4s& getSqrtInformationUpper() const
+        {
+            return sqrt_information_upper;
+        }
+
         /** brief : compute the residual from the state blocks being iterated by the solver.
          **/
         template<typename T>
@@ -346,9 +351,9 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     Matrix<T,3,1> m1(pixel_canonical_prev_  .cast<T>());
     Matrix<T,3,1> m2(pixel_canonical_origin_.cast<T>());
     Matrix<T,3,1> m3(pixel_canonical_last_  .cast<T>());
-    WOLF_TRACE("m1 : ", m1 .transpose());
-    WOLF_TRACE("m2 : ", m2 .transpose());
-    WOLF_TRACE("m3 : ", m3 .transpose());
+//    WOLF_TRACE("m1 : ", m1 .transpose());
+//    WOLF_TRACE("m2 : ", m2 .transpose());
+//    WOLF_TRACE("m3 : ", m3 .transpose());
 
     // l2 and l3: epipolar lines of m1 in cam 2 and cam 3
     Matrix<T,3,1> l2 = _c2Ec1 * m1;
@@ -364,7 +369,7 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     p2(1) = -m2(2) * l2(0);
     p2(2) =  m2(1) * l2(0) - m2(0) * l2(1);
 
-    WOLF_TRACE("p2: ", p2.transpose());
+//    WOLF_TRACE("p2: ", p2.transpose());
 
     // Tensor slices
     Matrix<T,3,3> T0, T1, T2;
@@ -375,21 +380,21 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
 
     // PLP trilinearity: expected pixel in cam 2
     Matrix<T,3,1> m3e = m1T * p2;
-    WOLF_TRACE("m3e: ", m3e.transpose());
+//    WOLF_TRACE("m3e: ", m3e.transpose());
 
     // Go to Euclidean plane
     Matrix<T,2,1> u3e = vision_utils::euclidean(m3e);
     Matrix<T,2,1> u3  = vision_utils::euclidean(m3);
     // PLP trilinearity error
     Matrix<T,2,1> e1  = u3 - u3e;
-    WOLF_TRACE("e1 : ", e1.transpose());
+//    WOLF_TRACE("e1 : ", e1.transpose());
 
 
     // 3. EPIPOLARS
 
     T e2 = vision_utils::distancePointLine(m2, l2);
     T e3 = vision_utils::distancePointLine(m3, l3);
-    WOLF_TRACE("e2, e3 : ", e2, ", ", e3);
+//    WOLF_TRACE("e2, e3 : ", e2, ", ", e3);
 
 
     // 4. RESIDUAL
@@ -422,9 +427,9 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual_jacobians(const visi
     Matrix<T,3,1> m1(pixel_canonical_prev_);
     Matrix<T,3,1> m2(pixel_canonical_origin_);
     Matrix<T,3,1> m3(pixel_canonical_last_);
-    WOLF_TRACE("m1 : ", m1 .transpose());
-    WOLF_TRACE("m2 : ", m2 .transpose());
-    WOLF_TRACE("m3 : ", m3 .transpose());
+//    WOLF_TRACE("m1 : ", m1 .transpose());
+//    WOLF_TRACE("m2 : ", m2 .transpose());
+//    WOLF_TRACE("m3 : ", m3 .transpose());
 
     // l2 and l3: epipolar lines of m1 in cam 2 and cam 3
     Matrix<T,3,1> l2      = _c2Ec1*m1;
@@ -448,7 +453,7 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual_jacobians(const visi
                                                -m2(2),  (T)0 , (T)0,
                                                 m2(1), -m2(0), (T)0 ).finished();
 
-    WOLF_TRACE("p2: ", p2.transpose());
+//    WOLF_TRACE("p2: ", p2.transpose());
 
     // Tensor slices
     Matrix<T,3,3> T0, T1, T2;
@@ -477,7 +482,7 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual_jacobians(const visi
 
     Matrix<T,3,1> m3e = m1(0) * T0tp2 + m1(1) * T1tp2 + m1(2) * T2tp2 ;
 
-    WOLF_TRACE("m3e: ", m3e.transpose());
+//    WOLF_TRACE("m3e: ", m3e.transpose());
 
     T J_m3e_T0tp2 = m1(0); // scalar times identity
     T J_m3e_T1tp2 = m1(1); // scalar times identity
@@ -491,7 +496,7 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual_jacobians(const visi
 //    vision_utils::euclidean(m3e, J_u3e_m3e);
 //    vision_utils::euclidean(m3 , J_u3_m3);
      Matrix<T,2,1> e1  = u3 - u3e;
-     WOLF_TRACE("e1 : ", e1.transpose());
+//     WOLF_TRACE("e1 : ", e1.transpose());
 
     // compute trilinearity PLP error
     // Matrix<T,2,1> e1   = u3 - u3e;
@@ -525,7 +530,7 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual_jacobians(const visi
      T e3 = vision_utils::distancePointLine(m3, l3, _J_e3_m3, J_e3_l3);
 //    vision_utils::distancePointLine(m2, l2, _J_e2_m2, J_e2_l2);
 //    vision_utils::distancePointLine(m3, l3, _J_e3_m3, J_e3_l3);
-     WOLF_TRACE("e2, e3 : ", e2, ", ", e3);
+//     WOLF_TRACE("e2, e3 : ", e2, ", ", e3);
 
     // chain rule
     _J_e2_m1 = J_e2_l2 * J_l2_m1;
