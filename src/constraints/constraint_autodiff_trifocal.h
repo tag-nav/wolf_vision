@@ -103,7 +103,7 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
 
         // Helper functions to be used by the above
         template<class T, typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
-        Matrix<T, 4, 1> residual_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
+        Matrix<T, 4, 1> error_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
                                            const MatrixBase<D1>& _c2Ec1,
                                            const MatrixBase<D2>& _c3Ec1,
                                            MatrixBase<D3>& _J_e1_m1,
@@ -193,10 +193,10 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
     // residual and Jacobians
     Matrix<Scalar,2,3> J_e1_m1, J_e1_m2, J_e1_m3;
     Matrix<Scalar,1,3> J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3;
-    residual_jacobians(tensor, c2Ec1, c3Ec1,
-                       J_e1_m1, J_e1_m2, J_e1_m3,
-                       J_e2_m1, J_e2_m2, J_e2_m3,
-                       J_e3_m1, J_e3_m2, J_e3_m3);
+    error_jacobians(tensor, c2Ec1, c3Ec1,
+                    J_e1_m1, J_e1_m2, J_e1_m3,
+                    J_e2_m1, J_e2_m2, J_e2_m3,
+                    J_e3_m1, J_e3_m2, J_e3_m3);
 
     // chain rule
     Matrix2s           J_e1_u1 = J_e1_m1 * J_m_u;
@@ -408,7 +408,7 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
 
 // Helper functions to be used by the above
 template<class T, typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
-inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
+inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
                                                                       const MatrixBase<D1>& _c2Ec1,
                                                                       const MatrixBase<D2>& _c3Ec1,
                                                                       MatrixBase<D3>& _J_e1_m1,
@@ -427,9 +427,6 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual_jacobians(const visi
     Matrix<T,3,1> m1(pixel_canonical_prev_);
     Matrix<T,3,1> m2(pixel_canonical_origin_);
     Matrix<T,3,1> m3(pixel_canonical_last_);
-//    WOLF_TRACE("m1 : ", m1 .transpose());
-//    WOLF_TRACE("m2 : ", m2 .transpose());
-//    WOLF_TRACE("m3 : ", m3 .transpose());
 
     // l2 and l3: epipolar lines of m1 in cam 2 and cam 3
     Matrix<T,3,1> l2      = _c2Ec1*m1;
@@ -452,8 +449,6 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual_jacobians(const visi
     Matrix<T,3,3> J_p2_l2 = (Matrix<T,3,3>() << (T)0 ,  m2(2), (T)0,
                                                -m2(2),  (T)0 , (T)0,
                                                 m2(1), -m2(0), (T)0 ).finished();
-
-//    WOLF_TRACE("p2: ", p2.transpose());
 
     // Tensor slices
     Matrix<T,3,3> T0, T1, T2;
@@ -482,8 +477,6 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual_jacobians(const visi
 
     Matrix<T,3,1> m3e = m1(0) * T0tp2 + m1(1) * T1tp2 + m1(2) * T2tp2 ;
 
-//    WOLF_TRACE("m3e: ", m3e.transpose());
-
     T J_m3e_T0tp2 = m1(0); // scalar times identity
     T J_m3e_T1tp2 = m1(1); // scalar times identity
     T J_m3e_T2tp2 = m1(2); // scalar times identity
@@ -491,12 +484,9 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual_jacobians(const visi
 
     // Go to Euclidean plane
     Matrix<T,2,3> J_u3e_m3e, J_u3_m3;
-     Matrix<T,2,1> u3e = vision_utils::euclidean(m3e, J_u3e_m3e);
-     Matrix<T,2,1> u3  = vision_utils::euclidean(m3, J_u3_m3);
-//    vision_utils::euclidean(m3e, J_u3e_m3e);
-//    vision_utils::euclidean(m3 , J_u3_m3);
-     Matrix<T,2,1> e1  = u3 - u3e;
-//     WOLF_TRACE("e1 : ", e1.transpose());
+    Matrix<T,2,1> u3e = vision_utils::euclidean(m3e, J_u3e_m3e);
+    Matrix<T,2,1> u3  = vision_utils::euclidean(m3, J_u3_m3);
+    Matrix<T,2,1> e1  = u3 - u3e;
 
     // compute trilinearity PLP error
     // Matrix<T,2,1> e1   = u3 - u3e;
@@ -526,11 +516,8 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual_jacobians(const visi
 
     Matrix<T,1,3> J_e2_l2;
     Matrix<T,1,3> J_e3_l3;
-     T e2 = vision_utils::distancePointLine(m2, l2, _J_e2_m2, J_e2_l2);
-     T e3 = vision_utils::distancePointLine(m3, l3, _J_e3_m3, J_e3_l3);
-//    vision_utils::distancePointLine(m2, l2, _J_e2_m2, J_e2_l2);
-//    vision_utils::distancePointLine(m3, l3, _J_e3_m3, J_e3_l3);
-//     WOLF_TRACE("e2, e3 : ", e2, ", ", e3);
+    T e2 = vision_utils::distancePointLine(m2, l2, _J_e2_m2, J_e2_l2);
+    T e3 = vision_utils::distancePointLine(m3, l3, _J_e3_m3, J_e3_l3);
 
     // chain rule
     _J_e2_m1 = J_e2_l2 * J_l2_m1;
@@ -538,11 +525,10 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual_jacobians(const visi
 
     // 4. RESIDUAL
 
-    Matrix<T,4,1> errors, residual;
+    Matrix<T,4,1> errors;
     errors  << e1, e2, e3;
-    residual = sqrt_information_upper * errors;
 
-    return residual;
+    return errors;
 
 }
 

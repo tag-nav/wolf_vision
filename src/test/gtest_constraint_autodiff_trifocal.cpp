@@ -137,7 +137,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, residual_jacobians)
     Matrix<Scalar,2,3> J_e1_m1, J_e1_m2, J_e1_m3;
     Matrix<Scalar,1,3> J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3;
 
-    c123->residual_jacobians(tensor, c2Ec1, c3Ec1, J_e1_m1, J_e1_m2, J_e1_m3, J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3);
+    c123->error_jacobians(tensor, c2Ec1, c3Ec1, J_e1_m1, J_e1_m2, J_e1_m3, J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3);
     Matrix<Scalar, 4, 3> J_e_m1, J_e_m2, J_e_m3, J_r_m1, J_r_m2, J_r_m3;
     J_e_m1.topRows(2) = J_e1_m1;
     J_e_m1.row(2)     = J_e2_m1;
@@ -174,7 +174,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, residual_jacobians)
     WOLF_DEBUG(" J_r_m1: \n",  J_r_m1);
     WOLF_DEBUG("Jn_r_m1: \n", Jn_r_m1);
 
-//    ASSERT_MATRIX_APPROX(J_r_m1, Jn_r_m1, 1e-6);
+    ASSERT_MATRIX_APPROX(J_r_m1, Jn_r_m1, 1e-6);
 
 
     // jacs wrt m2
@@ -195,7 +195,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, residual_jacobians)
     WOLF_DEBUG(" J_r_m2: \n",  J_r_m2);
     WOLF_DEBUG("Jn_r_m2: \n", Jn_r_m2);
 
-//    ASSERT_MATRIX_APPROX(J_r_m2, Jn_r_m2, 1e-6);
+    ASSERT_MATRIX_APPROX(J_r_m2, Jn_r_m2, 1e-6);
 
 
     // jacs wrt m3
@@ -216,7 +216,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, residual_jacobians)
     WOLF_DEBUG(" J_r_m3: \n",  J_r_m3);
     WOLF_DEBUG("Jn_r_m3: \n", Jn_r_m3);
 
-//    ASSERT_MATRIX_APPROX(J_r_m3, Jn_r_m3, 1e-6);
+    ASSERT_MATRIX_APPROX(J_r_m3, Jn_r_m3, 1e-6);
 
 }
 
