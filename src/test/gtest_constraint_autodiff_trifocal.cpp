@@ -285,7 +285,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("Initial state:   ", F3->getState().transpose());
+    WOLF_INFO("Initial state:              ", F3->getState().transpose());
     WOLF_INFO("residual before perturbing: ", res.transpose());
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 
@@ -301,7 +301,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("perturbed state: ", pose_perturbated.transpose());
+    WOLF_INFO("perturbed state:            ", pose_perturbated.transpose());
     WOLF_INFO("residual before solve:      ", res.transpose());
     ASSERT_NEAR(res(2), 0, 1e-8); // Epipolar c2-c1 should be respected when perturbing F3
 
@@ -310,6 +310,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
     S ->fix();
     F1->fix();
     F2->fix();
+    F3->unfix();
 
     std::string report = ceres_manager->solve(1);
 
@@ -319,7 +320,65 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("solved state:    ", F3->getState().transpose());
+    WOLF_INFO("solved state:               ", F3->getState().transpose());
+    WOLF_INFO("residual after solve:       ", res.transpose());
+
+    WOLF_INFO(report, " AND UNION");
+
+    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+
+}
+
+TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
+{
+    // Residual with prior
+
+    Vector3s res;
+
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                      res.data());
+
+    WOLF_INFO("Initial state:              ", S->getPPtr()->getState().transpose(), " ", S->getOPtr()->getState().transpose());
+    WOLF_INFO("residual before perturbing: ", res.transpose());
+    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+
+    // Residual with perturbated state
+
+    Vector3s pos_perturbated = S->getPPtr()->getState() + 0.1 * Vector3s::Random();
+    Vector4s ori_perturbated = S->getOPtr()->getState() + 0.1 * Vector4s::Random();
+    ori_perturbated.normalize();
+    Vector7s pose_perturbated; pose_perturbated << pos_perturbated, ori_perturbated;
+    S->getPPtr()->setState(pos_perturbated);
+    S->getOPtr()->setState(ori_perturbated);
+
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                      res.data());
+
+    WOLF_INFO("perturbed state:            ", pose_perturbated.transpose());
+    WOLF_INFO("residual before solve:      ", res.transpose());
+
+    // Residual with solved state
+
+    S ->unfix();
+    F1->fix();
+    F2->fix();
+    F3->fix();
+
+    std::string report = ceres_manager->solve(1);
+
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                      res.data());
+
+    WOLF_INFO("solved state:               ", S->getPPtr()->getState().transpose(), " ", S->getOPtr()->getState().transpose());
     WOLF_INFO("residual after solve:       ", res.transpose());
 
     WOLF_INFO(report, " AND UNION");
