@@ -107,106 +107,6 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
         }
 };
 
-TEST_F(ConstraintAutodiffTrifocalTest, ground_truth)
-{
-    Vector4s res;
-
-    // Constraint with exact states should give zero residual
-    c123->operator ()(pos1.data(), quat1.coeffs().data(),
-                      pos2.data(), quat2.coeffs().data(),
-                      pos3.data(), quat3.coeffs().data(),
-                      pos_cam.data(), quat_cam.coeffs().data(),
-                      res.data());
-
-    ASSERT_MATRIX_APPROX(res, Vector4s::Zero(), 1e-8);
-}
-
-TEST_F(ConstraintAutodiffTrifocalTest, residual_jacobians)
-{
-    vision_utils::TrifocalTensor tensor;
-    Matrix3s c2Ec1, c3Ec1;
-    Vector4s residual, residual_pert;
-    Vector3s pix0, pert, pix_pert;
-    Scalar epsilon = 1e-8;
-
-    // Nominal values
-    c123->expectation(pos1, quat1, pos2, quat2, pos3, quat3, pos_cam, quat_cam, tensor, c2Ec1, c3Ec1);
-    residual = c123->residual(tensor, c2Ec1, c3Ec1);
-
-    Matrix<Scalar, 4, 3> J_e_m1, J_e_m2, J_e_m3, J_r_m1, J_r_m2, J_r_m3;
-    Vector4s errors   = c123->error_jacobians(tensor, c2Ec1, c3Ec1, J_e_m1, J_e_m2, J_e_m3);
-    J_r_m1            = c123->getSqrtInformationUpper() * J_e_m1;
-    J_r_m2            = c123->getSqrtInformationUpper() * J_e_m2;
-    J_r_m3            = c123->getSqrtInformationUpper() * J_e_m3;
-    WOLF_DEBUG("errors: ",  errors.transpose());
-
-    // numerical jacs
-    Matrix<Scalar,4,3> Jn_r_m1, Jn_r_m2, Jn_r_m3;
-
-    // jacs wrt m1
-    pix0 = c123->getPixelCanonicalPrev();
-    for (int i=0; i<3; i++)
-    {
-        pert.setZero();
-        pert(i)  = epsilon;
-        pix_pert = pix0 + pert;
-        c123->setPixelCanonicalPrev(pix_pert); // m1
-        residual_pert = c123->residual(tensor, c2Ec1, c3Ec1);
-
-        Jn_r_m1.col(i) = (residual_pert - residual) / epsilon;
-    }
-    c123->setPixelCanonicalPrev(pix0);
-
-    WOLF_DEBUG(" ");
-    WOLF_DEBUG(" J_r_m1: \n",  J_r_m1);
-    WOLF_DEBUG("Jn_r_m1: \n", Jn_r_m1);
-
-    ASSERT_MATRIX_APPROX(J_r_m1, Jn_r_m1, 1e-6);
-
-
-    // jacs wrt m2
-    pix0 = c123->getPixelCanonicalOrigin();
-    for (int i=0; i<3; i++)
-    {
-        pert.setZero();
-        pert(i)  = epsilon;
-        pix_pert = pix0 + pert;
-        c123->setPixelCanonicalOrigin(pix_pert); // m2
-        residual_pert = c123->residual(tensor, c2Ec1, c3Ec1);
-
-        Jn_r_m2.col(i) = (residual_pert - residual) / epsilon;
-    }
-    c123->setPixelCanonicalOrigin(pix0);
-
-    WOLF_DEBUG(" ");
-    WOLF_DEBUG(" J_r_m2: \n",  J_r_m2);
-    WOLF_DEBUG("Jn_r_m2: \n", Jn_r_m2);
-
-    ASSERT_MATRIX_APPROX(J_r_m2, Jn_r_m2, 1e-6);
-
-
-    // jacs wrt m3
-    pix0 = c123->getPixelCanonicalLast();
-    for (int i=0; i<3; i++)
-    {
-        pert.setZero();
-        pert(i)  = epsilon;
-        pix_pert = pix0 + pert;
-        c123->setPixelCanonicalLast(pix_pert); // m3
-        residual_pert = c123->residual(tensor, c2Ec1, c3Ec1);
-
-        Jn_r_m3.col(i) = (residual_pert - residual) / epsilon;
-    }
-    c123->setPixelCanonicalLast(pix0);
-
-    WOLF_DEBUG(" ");
-    WOLF_DEBUG(" J_r_m3: \n",  J_r_m3);
-    WOLF_DEBUG("Jn_r_m3: \n", Jn_r_m3);
-
-    ASSERT_MATRIX_APPROX(J_r_m3, Jn_r_m3, 1e-6);
-
-}
-
 TEST_F(ConstraintAutodiffTrifocalTest, expectation)
 {
     // ground truth essential matrices
@@ -226,27 +126,11 @@ TEST_F(ConstraintAutodiffTrifocalTest, expectation)
 
     Matrix3s _c2Ec1 = _c1Ec2.transpose();
 
-    //    Homogeneous transform C3 wrt C1
-    Matrix4s _c1Hc3; _c1Hc3 <<
-               1,  0, 0,  0,
-               0,  0, 1, -1,
-               0, -1, 0,  1,
-               0,  0, 0,  1;
-
-    Matrix3s _c1Rc3 = _c1Hc3.block(0,0,3,3);
-
-    Vector3s _c1Tc3 = _c1Hc3.block(0,3,3,1);
-
-    Matrix3s _c1Ec3 = wolf::skew(_c1Tc3) * _c1Rc3;
-
-    Matrix3s _c3Ec1 = _c1Ec3.transpose();
-
-
 
     // expected values
     vision_utils::TrifocalTensor tensor;
-    Matrix3s c2Ec1, c3Ec1;
-    c123->expectation(pos1, quat1, pos2, quat2, pos3, quat3, pos_cam, quat_cam, tensor, c2Ec1, c3Ec1);
+    Matrix3s c2Ec1;
+    c123->expectation(pos1, quat1, pos2, quat2, pos3, quat3, pos_cam, quat_cam, tensor, c2Ec1);
 
     // check trilinearities
 
@@ -257,29 +141,17 @@ TEST_F(ConstraintAutodiffTrifocalTest, expectation)
     Matrix3s m1Tt = _m1(0)*T0.transpose() + _m1(1)*T1.transpose() + _m1(2)*T2.transpose();
 
     // Projective line: l = (nx ny dn), with (nx ny): normal vector; dn: distance to origin times norm(nx,ny)
-    Vector3s _l2(0,1,0), _p2(1,0,0), _l3(1,0,0), _p3(0,1,0); // ground truth
-    Vector3s l2, l3;
+    Vector3s _l2(0,1,0), _p2(1,0,0), _p3(0,1,0); // ground truth
+    Vector3s l2;
     l2 = c2Ec1 * _m1;
-    l3 = c3Ec1 * _m1;
 
     // check epipolar lines (check only director vectors for equal direction)
     ASSERT_MATRIX_APPROX(l2/l2(1), _l2/_l2(1), 1e-8);
-    ASSERT_MATRIX_APPROX(l3/l3(0), _l3/_l3(0), 1e-8);
 
     // check perpendicular lines (check only director vectors for orthogonal direction)
     ASSERT_NEAR(l2(0)*_p2(0) + l2(1)*_p2(1), 0, 1e-8);
-    ASSERT_NEAR(l3(0)*_p3(0) + l3(1)*_p3(1), 0, 1e-8);
 
     // Verify trilinearities
-
-    // Induced point in C3
-    Vector3s m3e = m1Tt * _p2;
-
-    WOLF_DEBUG("_l2: ", _l2.transpose());
-    WOLF_DEBUG(" l2: ",  l2.transpose());
-    WOLF_DEBUG("_p2: ", _p2.transpose());
-    WOLF_DEBUG("_m3: ", _m3.transpose());
-    WOLF_DEBUG("m3e: ", m3e.transpose());
 
     // Point-line-line
     Eigen::Matrix1s pll = _p3.transpose() * m1Tt * _p2;
@@ -299,14 +171,113 @@ TEST_F(ConstraintAutodiffTrifocalTest, expectation)
 
     // check epipolars
     ASSERT_MATRIX_APPROX(c2Ec1/c2Ec1(0,1), _c2Ec1/_c2Ec1(0,1), 1e-8);
-    ASSERT_MATRIX_APPROX(c3Ec1/c3Ec1(0,1), _c3Ec1/_c3Ec1(0,1), 1e-8);
+}
+
+TEST_F(ConstraintAutodiffTrifocalTest, residual)
+{
+    vision_utils::TrifocalTensor tensor;
+    Matrix3s c2Ec1;
+    Vector3s residual;
+
+    // Nominal values
+    c123->expectation(pos1, quat1, pos2, quat2, pos3, quat3, pos_cam, quat_cam, tensor, c2Ec1);
+    residual = c123->residual(tensor, c2Ec1);
+
+    ASSERT_MATRIX_APPROX(residual, Vector3s::Zero(), 1e-8);
+}
+
+TEST_F(ConstraintAutodiffTrifocalTest, error_jacobians)
+{
+    vision_utils::TrifocalTensor tensor;
+    Matrix3s c2Ec1;
+    Vector3s residual, residual_pert;
+    Vector3s pix0, pert, pix_pert;
+    Scalar epsilon = 1e-8;
+
+    // Nominal values
+    c123->expectation(pos1, quat1, pos2, quat2, pos3, quat3, pos_cam, quat_cam, tensor, c2Ec1);
+    residual = c123->residual(tensor, c2Ec1);
+
+    Matrix<Scalar, 3, 3> J_e_m1, J_e_m2, J_e_m3, J_r_m1, J_r_m2, J_r_m3;
+    c123->error_jacobians(tensor, c2Ec1, J_e_m1, J_e_m2, J_e_m3);
+    J_r_m1            = c123->getSqrtInformationUpper() * J_e_m1;
+    J_r_m2            = c123->getSqrtInformationUpper() * J_e_m2;
+    J_r_m3            = c123->getSqrtInformationUpper() * J_e_m3;
+
+    // numerical jacs
+    Matrix<Scalar,3,3> Jn_r_m1, Jn_r_m2, Jn_r_m3;
+
+    // jacs wrt m1
+    pix0 = c123->getPixelCanonicalPrev();
+    for (int i=0; i<3; i++)
+    {
+        pert.setZero();
+        pert(i)  = epsilon;
+        pix_pert = pix0 + pert;
+        c123->setPixelCanonicalPrev(pix_pert); // m1
+        residual_pert = c123->residual(tensor, c2Ec1);
+
+        Jn_r_m1.col(i) = (residual_pert - residual) / epsilon;
+    }
+    c123->setPixelCanonicalPrev(pix0);
+
+    ASSERT_MATRIX_APPROX(J_r_m1, Jn_r_m1, 1e-6);
+
+
+    // jacs wrt m2
+    pix0 = c123->getPixelCanonicalOrigin();
+    for (int i=0; i<3; i++)
+    {
+        pert.setZero();
+        pert(i)  = epsilon;
+        pix_pert = pix0 + pert;
+        c123->setPixelCanonicalOrigin(pix_pert); // m2
+        residual_pert = c123->residual(tensor, c2Ec1);
+
+        Jn_r_m2.col(i) = (residual_pert - residual) / epsilon;
+    }
+    c123->setPixelCanonicalOrigin(pix0);
+
+    ASSERT_MATRIX_APPROX(J_r_m2, Jn_r_m2, 1e-6);
+
+
+    // jacs wrt m3
+    pix0 = c123->getPixelCanonicalLast();
+    for (int i=0; i<3; i++)
+    {
+        pert.setZero();
+        pert(i)  = epsilon;
+        pix_pert = pix0 + pert;
+        c123->setPixelCanonicalLast(pix_pert); // m3
+        residual_pert = c123->residual(tensor, c2Ec1);
+
+        Jn_r_m3.col(i) = (residual_pert - residual) / epsilon;
+    }
+    c123->setPixelCanonicalLast(pix0);
+
+    ASSERT_MATRIX_APPROX(J_r_m3, Jn_r_m3, 1e-6);
+
+}
+
+TEST_F(ConstraintAutodiffTrifocalTest, operator_parenthesis)
+{
+    Vector3s res;
+
+    // Constraint with exact states should give zero residual
+    c123->operator ()(pos1.data(), quat1.coeffs().data(),
+                      pos2.data(), quat2.coeffs().data(),
+                      pos3.data(), quat3.coeffs().data(),
+                      pos_cam.data(), quat_cam.coeffs().data(),
+                      res.data());
+
+    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 }
 
 TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
 {
     // Residual with prior
 
-    Vector4s res;
+    Vector3s res;
 
     c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
                       F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
@@ -316,7 +287,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
 
     WOLF_INFO("Initial state:   ", F3->getState().transpose());
     WOLF_INFO("residual before perturbing: ", res.transpose());
-    ASSERT_MATRIX_APPROX(res, Vector4s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 
     // Residual with perturbated state
 
@@ -351,16 +322,16 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
     WOLF_INFO("solved state:    ", F3->getState().transpose());
     WOLF_INFO("residual after solve:       ", res.transpose());
 
-    WOLF_INFO(report);
+    WOLF_INFO(report, " AND UNION");
 
-    ASSERT_MATRIX_APPROX(res, Vector4s::Zero(), 1e-8);
+    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 
 }
 
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
-    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.residual_jacobians";
+//    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.residual_jacobians";
     return RUN_ALL_TESTS();
 }
 

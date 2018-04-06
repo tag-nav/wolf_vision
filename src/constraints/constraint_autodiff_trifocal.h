@@ -15,7 +15,7 @@ WOLF_PTR_TYPEDEFS(ConstraintAutodiffTrifocal);
 
 using namespace Eigen;
 
-class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffTrifocal, 4, 3, 4, 3, 4, 3, 4, 3, 4>
+class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffTrifocal, 3, 3, 4, 3, 4, 3, 4, 3, 4>
 {
     public:
 
@@ -64,7 +64,7 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
             pixel_canonical_prev_ = pixelCanonicalPrev;
         }
 
-        const Matrix4s& getSqrtInformationUpper() const
+        const Matrix3s& getSqrtInformationUpper() const
         {
             return sqrt_information_upper;
         }
@@ -83,7 +83,7 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
                           T*             _residuals) const;
 
     public:
-        template<typename D1, typename D2, class T, typename D3, typename D4>
+        template<typename D1, typename D2, class T, typename D3>
         void expectation(const MatrixBase<D1>&     _wtr1,
                          const QuaternionBase<D2>& _wqr1,
                          const MatrixBase<D1>&     _wtr2,
@@ -93,29 +93,26 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
                          const MatrixBase<D1>&     _rtc,
                          const QuaternionBase<D2>& _rqc,
                          vision_utils::TrifocalTensorBase<T>& _tensor,
-                         MatrixBase<D3>&           _c2Ec1,
-                         MatrixBase<D4>&           _c3Ec1) const;
+                         MatrixBase<D3>&           _c2Ec1) const;
 
-        template<typename T, typename D1, typename D2>
-        Matrix<T, 4, 1> residual(const vision_utils::TrifocalTensorBase<T>& _tensor,
-                                 const MatrixBase<D1>& _c2Ec1,
-                                 const MatrixBase<D2>& _c3Ec1) const;
+        template<typename T, typename D1>
+        Matrix<T, 3, 1> residual(const vision_utils::TrifocalTensorBase<T>& _tensor,
+                                 const MatrixBase<D1>& _c2Ec1) const;
 
         // Helper functions to be used by the above
-        template<class T, typename D1, typename D2, typename D3, typename D4, typename D5>
-        Matrix<T, 4, 1> error_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
+        template<class T, typename D1, typename D2, typename D3, typename D4>
+        Matrix<T, 3, 1> error_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
                                         const MatrixBase<D1>& _c2Ec1,
-                                        const MatrixBase<D2>& _c3Ec1,
-                                        MatrixBase<D3>& _J_e_m1,
-                                        MatrixBase<D4>& _J_e_m2,
-                                        MatrixBase<D5>& _J_e_m3);
+                                        MatrixBase<D2>& _J_e_m1,
+                                        MatrixBase<D3>& _J_e_m2,
+                                        MatrixBase<D4>& _J_e_m3);
 
 
     private:
         FeatureBaseWPtr feature_prev_ptr_;  // To look for measurements
         SensorCameraPtr camera_ptr_;        // To look for intrinsics
         Vector3s pixel_canonical_prev_, pixel_canonical_origin_, pixel_canonical_last_;
-        Matrix4s sqrt_information_upper;
+        Matrix3s sqrt_information_upper;
 };
 
 } // namespace wolf
@@ -155,7 +152,7 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
                                                         _feature_last_ptr->getCapturePtr()->getSensorOPtr() ),
                                     feature_prev_ptr_(_feature_prev_ptr),
                                     camera_ptr_(std::static_pointer_cast<SensorCamera>(_processor_ptr->getSensorPtr())),
-                                    sqrt_information_upper(Matrix4s::Zero())
+                                    sqrt_information_upper(Matrix3s::Zero())
 {
     setFeaturePtr(_feature_last_ptr);
     Matrix3s K_inv   = camera_ptr_->getIntrinsicMatrix().inverse();
@@ -175,53 +172,34 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
     Vector3s    rtc  =             _feature_last_ptr->getCapturePtr()->getSensorPPtr()->getState();
     Quaternions rqc  = Quaternions(_feature_last_ptr->getCapturePtr()->getSensorOPtr()->getState().data() );
     vision_utils::TrifocalTensorBase<Scalar> tensor;
-    Matrix3s    c2Ec1, c3Ec1;
+    Matrix3s    c2Ec1;
 
     // expectation
     expectation(wtr1, wqr1,
                 wtr2, wqr2,
                 wtr3, wqr3,
                 rtc, rqc,
-                tensor, c2Ec1, c3Ec1);
+                tensor, c2Ec1);
 
     // residual and Jacobians
-    Matrix<Scalar,4,3> J_e_m1, J_e_m2, J_e_m3;
-    error_jacobians(tensor, c2Ec1, c3Ec1, J_e_m1, J_e_m2, J_e_m3);
-    WOLF_TRACE("J_e_m1: \n"    , J_e_m1 );
-    WOLF_TRACE("J_e_m2: \n"    , J_e_m2 );
-    WOLF_TRACE("J_e_m3: \n"    , J_e_m3 );
-    WOLF_TRACE("J_m_u : \n"    , J_m_u );
+    Matrix<Scalar,3,3> J_e_m1, J_e_m2, J_e_m3;
+    error_jacobians(tensor, c2Ec1, J_e_m1, J_e_m2, J_e_m3);
 
     // chain rule
-    Matrix<Scalar,4,2>           J_e_u1 = J_e_m1 * J_m_u;
-    Matrix<Scalar,4,2>           J_e_u2 = J_e_m2 * J_m_u;
-    Matrix<Scalar,4,2>           J_e_u3 = J_e_m3 * J_m_u;
-
-    WOLF_TRACE("J_e_u1: \n"    , J_e_u1 );
-    WOLF_TRACE("J_e_u2: \n"    , J_e_u2 );
-    WOLF_TRACE("J_e_u3: \n"    , J_e_u3 );
+    Matrix<Scalar,3,2>           J_e_u1 = J_e_m1 * J_m_u;
+    Matrix<Scalar,3,2>           J_e_u2 = J_e_m2 * J_m_u;
+    Matrix<Scalar,3,2>           J_e_u3 = J_e_m3 * J_m_u;
 
     // Covariances
-    Matrix4s Q1 = J_e_u1 * getFeaturePrevPtr() ->getMeasurementCovariance() * J_e_u1.transpose();
-    Matrix4s Q2 = J_e_u2 * getFeatureOtherPtr()->getMeasurementCovariance() * J_e_u2.transpose();
-    Matrix4s Q3 = J_e_u3 * getFeaturePtr()     ->getMeasurementCovariance() * J_e_u3.transpose();
+    Matrix3s Q1 = J_e_u1 * getFeaturePrevPtr() ->getMeasurementCovariance() * J_e_u1.transpose();
+    Matrix3s Q2 = J_e_u2 * getFeatureOtherPtr()->getMeasurementCovariance() * J_e_u2.transpose();
+    Matrix3s Q3 = J_e_u3 * getFeaturePtr()     ->getMeasurementCovariance() * J_e_u3.transpose();
 
-    WOLF_TRACE("Q1: \n", Q1 );
-    WOLF_TRACE("Q2: \n", Q2 );
-    WOLF_TRACE("Q3: \n", Q3 );
-
-    Matrix4s Q = Q1 + Q2 + Q3;
-
-    // hack make Q block diagonal
-    Q(0,3) = Q(3,0) = 0.0;
+    Matrix3s Q = Q1 + Q2 + Q3;
 
     // sqrt info
     Eigen::LLT<Eigen::MatrixXs> llt_of_info(Q.inverse()); // Cholesky decomposition
     sqrt_information_upper = llt_of_info.matrixU();
-
-    WOLF_TRACE("Covariance: \n", Q );
-    WOLF_TRACE("Sqrt_info : \n", sqrt_information_upper);
-
 }
 
 // Destructor
@@ -256,16 +234,16 @@ bool ConstraintAutodiffTrifocal::operator ()( const T* const _prev_pos,
     Map<const Quaternion<T> > wqr3(_last_quat);
     Map<const Matrix<T,3,1> > rtc (_sen_pos);
     Map<const Quaternion<T> > rqc (_sen_quat);
-    Map<Matrix<T,4,1> >       res (_residuals);
+    Map<Matrix<T,3,1> >       res (_residuals);
 
     vision_utils::TrifocalTensorBase<T> tensor;
-    Matrix<T, 3, 3> c2Ec1, c3Ec1;
-    expectation(wtr1, wqr1, wtr2, wqr2, wtr3, wqr3, rtc, rqc, tensor, c2Ec1, c3Ec1);
-    res = residual(tensor, c2Ec1, c3Ec1);
+    Matrix<T, 3, 3> c2Ec1;
+    expectation(wtr1, wqr1, wtr2, wqr2, wtr3, wqr3, rtc, rqc, tensor, c2Ec1);
+    res = residual(tensor, c2Ec1);
     return true;
 }
 
-template<typename D1, typename D2, class T, typename D3, typename D4>
+template<typename D1, typename D2, class T, typename D3>
 inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _wtr1,
                                                     const QuaternionBase<D2>& _wqr1,
                                                     const MatrixBase<D1>&     _wtr2,
@@ -275,8 +253,7 @@ inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _w
                                                     const MatrixBase<D1>&     _rtc,
                                                     const QuaternionBase<D2>& _rqc,
                                                     vision_utils::TrifocalTensorBase<T>& _tensor,
-                                                    MatrixBase<D3>&     _c2Ec1,
-                                                    MatrixBase<D4>&     _c3Ec1) const
+                                                    MatrixBase<D3>&     _c2Ec1) const
 {
 
         typedef Translation<T, 3> TranslationType;
@@ -332,13 +309,11 @@ inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _w
          *   c2Ec1 = c1Ec2' = R' * [T]x (we obviate the sign change)
          */
         _c2Ec1 =  c1Hc2.rotation().transpose() * skew(c1Hc2.translation()) ;
-        _c3Ec1 =  c1Hc3.rotation().transpose() * skew(c1Hc3.translation()) ;
 }
 
-template<typename T, typename D1, typename D2>
-inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::TrifocalTensorBase<T>& _tensor,
-                                                            const MatrixBase<D1>& _c2Ec1,
-                                                            const MatrixBase<D2>& _c3Ec1) const
+template<typename T, typename D1>
+inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::TrifocalTensorBase<T>& _tensor,
+                                                            const MatrixBase<D1>& _c2Ec1) const
 {
     // 1. COMMON COMPUTATIONS
 
@@ -346,13 +321,9 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     Matrix<T,3,1> m1(pixel_canonical_prev_  .cast<T>());
     Matrix<T,3,1> m2(pixel_canonical_origin_.cast<T>());
     Matrix<T,3,1> m3(pixel_canonical_last_  .cast<T>());
-//    WOLF_TRACE("m1 : ", m1 .transpose());
-//    WOLF_TRACE("m2 : ", m2 .transpose());
-//    WOLF_TRACE("m3 : ", m3 .transpose());
 
     // l2 and l3: epipolar lines of m1 in cam 2 and cam 3
     Matrix<T,3,1> l2 = _c2Ec1 * m1;
-    Matrix<T,3,1> l3 = _c3Ec1 * m1;
 
     // 2. TRILINEARITY PLP
 
@@ -364,8 +335,6 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     p2(1) = -m2(2) * l2(0);
     p2(2) =  m2(1) * l2(0) - m2(0) * l2(1);
 
-//    WOLF_TRACE("p2: ", p2.transpose());
-
     // Tensor slices
     Matrix<T,3,3> T0, T1, T2;
     _tensor.getLayers(T0, T1, T2);
@@ -375,40 +344,35 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
 
     // PLP trilinearity: expected pixel in cam 2
     Matrix<T,3,1> m3e = m1T * p2;
-//    WOLF_TRACE("m3e: ", m3e.transpose());
 
     // Go to Euclidean plane
     Matrix<T,2,1> u3e = vision_utils::euclidean(m3e);
     Matrix<T,2,1> u3  = vision_utils::euclidean(m3);
     // PLP trilinearity error
     Matrix<T,2,1> e1  = u3 - u3e;
-//    WOLF_TRACE("e1 : ", e1.transpose());
 
 
-    // 3. EPIPOLARS
+    // 3. EPIPOLAR
 
     T e2 = vision_utils::distancePointLine(m2, l2);
-    T e3 = vision_utils::distancePointLine(m3, l3);
-//    WOLF_TRACE("e2, e3 : ", e2, ", ", e3);
 
 
     // 4. RESIDUAL
 
-    Matrix<T,4,1> errors, residual;
-    errors  << e1, e2, e3;
+    Matrix<T,3,1> errors, residual;
+    errors  << e1, e2;
     residual = sqrt_information_upper * errors;
 
     return residual;
 }
 
 // Helper functions to be used by the above
-template<class T, typename D1, typename D2, typename D3, typename D4, typename D5>
-inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
+template<class T, typename D1, typename D2, typename D3, typename D4>
+inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
                                                                    const MatrixBase<D1>& _c2Ec1,
-                                                                   const MatrixBase<D2>& _c3Ec1,
-                                                                   MatrixBase<D3>& _J_e_m1,
-                                                                   MatrixBase<D4>& _J_e_m2,
-                                                                   MatrixBase<D5>& _J_e_m3)
+                                                                   MatrixBase<D2>& _J_e_m1,
+                                                                   MatrixBase<D3>& _J_e_m2,
+                                                                   MatrixBase<D4>& _J_e_m3)
 {
     // 1. COMMON COMPUTATIONS
 
@@ -419,10 +383,8 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_
 
     // l2 and l3: epipolar lines of m1 in cam 2 and cam 3
     Matrix<T,3,1> l2      = _c2Ec1*m1;
-    Matrix<T,3,1> l3      = _c3Ec1*m1;
 
     Matrix<T,3,3> J_l2_m1 = _c2Ec1;
-    Matrix<T,3,3> J_l3_m1 = _c3Ec1;
 
 
     // 2. TRILINEARITY PLP
@@ -494,7 +456,6 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_
 
     Matrix<T,2,3> J_e1_m1, J_e1_m2, J_e1_m3;
     Matrix<T,1,3> J_e2_m1, J_e2_m2, J_e2_m3;
-    Matrix<T,1,3> J_e3_m1, J_e3_m2, J_e3_m3;
 
     J_e1_m1 =
             J_e1_m3e * J_m3e_p2 * J_p2_m1 +
@@ -505,35 +466,28 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_
     J_e1_m3 = J_e1_u3  * J_u3_m3;
 
 
-    // 3. EPIPOLARS
+    // 3. EPIPOLAR
 
     Matrix<T,1,3> J_e2_l2;
-    Matrix<T,1,3> J_e3_l3;
 
     T e2 = vision_utils::distancePointLine(m2, l2, J_e2_m2, J_e2_l2);
-    T e3 = vision_utils::distancePointLine(m3, l3, J_e3_m3, J_e3_l3);
 
     // chain rule
     J_e2_m1 = J_e2_l2 * J_l2_m1;
     J_e2_m3.setZero();
-    J_e3_m1 = J_e3_l3 * J_l3_m1;
-    J_e3_m2.setZero();
 
     // Compact Jacobians
     _J_e_m1.topRows(2) = J_e1_m1;
     _J_e_m1.row(2)     = J_e2_m1;
-    _J_e_m1.row(3)     = J_e3_m1;
     _J_e_m2.topRows(2) = J_e1_m2;
     _J_e_m2.row(2)     = J_e2_m2;
-    _J_e_m2.row(3)     = J_e3_m2;
     _J_e_m3.topRows(2) = J_e1_m3;
     _J_e_m3.row(2)     = J_e2_m3;
-    _J_e_m3.row(3)     = J_e3_m3;
 
     // 4. ERRORS
 
-    Matrix<T,4,1> errors;
-    errors  << e1, e2, e3;
+    Matrix<T,3,1> errors;
+    errors  << e1, e2;
 
     return errors;
 
