@@ -133,28 +133,15 @@ TEST_F(ConstraintAutodiffTrifocalTest, residual_jacobians)
     c123->expectation(pos1, quat1, pos2, quat2, pos3, quat3, pos_cam, quat_cam, tensor, c2Ec1, c3Ec1);
     residual = c123->residual(tensor, c2Ec1, c3Ec1);
 
-    // analytic jacs
-    Matrix<Scalar,2,3> J_e1_m1, J_e1_m2, J_e1_m3;
-    Matrix<Scalar,1,3> J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3;
-
-    c123->error_jacobians(tensor, c2Ec1, c3Ec1, J_e1_m1, J_e1_m2, J_e1_m3, J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3);
     Matrix<Scalar, 4, 3> J_e_m1, J_e_m2, J_e_m3, J_r_m1, J_r_m2, J_r_m3;
-    J_e_m1.topRows(2) = J_e1_m1;
-    J_e_m1.row(2)     = J_e2_m1;
-    J_e_m1.row(3)     = J_e3_m1;
+    Vector4s errors   = c123->error_jacobians(tensor, c2Ec1, c3Ec1, J_e_m1, J_e_m2, J_e_m3);
     J_r_m1            = c123->getSqrtInformationUpper() * J_e_m1;
-    J_e_m2.topRows(2) = J_e1_m2;
-    J_e_m2.row(2)     = J_e2_m2;
-    J_e_m2.row(3)     = J_e3_m2;
     J_r_m2            = c123->getSqrtInformationUpper() * J_e_m2;
-    J_e_m3.topRows(2) = J_e1_m3;
-    J_e_m3.row(2)     = J_e2_m3;
-    J_e_m3.row(3)     = J_e3_m3;
     J_r_m3            = c123->getSqrtInformationUpper() * J_e_m3;
+    WOLF_DEBUG("errors: ",  errors.transpose());
 
     // numerical jacs
-    Matrix<Scalar,2,3> Jn_e1_m1, Jn_e1_m2, Jn_e1_m3;
-    Matrix<Scalar,4,3> Jn_e_m1, Jn_e_m2, Jn_e_m3, Jn_r_m1, Jn_r_m2, Jn_r_m3;
+    Matrix<Scalar,4,3> Jn_r_m1, Jn_r_m2, Jn_r_m3;
 
     // jacs wrt m1
     pix0 = c123->getPixelCanonicalPrev();

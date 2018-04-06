@@ -102,19 +102,13 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
                                  const MatrixBase<D2>& _c3Ec1) const;
 
         // Helper functions to be used by the above
-        template<class T, typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
+        template<class T, typename D1, typename D2, typename D3, typename D4, typename D5>
         Matrix<T, 4, 1> error_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
-                                           const MatrixBase<D1>& _c2Ec1,
-                                           const MatrixBase<D2>& _c3Ec1,
-                                           MatrixBase<D3>& _J_e1_m1,
-                                           MatrixBase<D4>& _J_e1_m2,
-                                           MatrixBase<D5>& _J_e1_m3,
-                                           MatrixBase<D6>& _J_e2_m1,
-                                           MatrixBase<D7>& _J_e2_m2,
-                                           MatrixBase<D8>& _J_e2_m3,
-                                           MatrixBase<D9>& _J_e3_m1,
-                                           MatrixBase<D10>& _J_e3_m2,
-                                           MatrixBase<D11>& _J_e3_m3);
+                                        const MatrixBase<D1>& _c2Ec1,
+                                        const MatrixBase<D2>& _c3Ec1,
+                                        MatrixBase<D3>& _J_e_m1,
+                                        MatrixBase<D4>& _J_e_m2,
+                                        MatrixBase<D5>& _J_e_m3);
 
 
     private:
@@ -191,41 +185,42 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
                 tensor, c2Ec1, c3Ec1);
 
     // residual and Jacobians
-    Matrix<Scalar,2,3> J_e1_m1, J_e1_m2, J_e1_m3;
-    Matrix<Scalar,1,3> J_e2_m1, J_e2_m2, J_e2_m3, J_e3_m1, J_e3_m2, J_e3_m3;
-    error_jacobians(tensor, c2Ec1, c3Ec1,
-                    J_e1_m1, J_e1_m2, J_e1_m3,
-                    J_e2_m1, J_e2_m2, J_e2_m3,
-                    J_e3_m1, J_e3_m2, J_e3_m3);
+    Matrix<Scalar,4,3> J_e_m1, J_e_m2, J_e_m3;
+    error_jacobians(tensor, c2Ec1, c3Ec1, J_e_m1, J_e_m2, J_e_m3);
+    WOLF_TRACE("J_e_m1: \n"    , J_e_m1 );
+    WOLF_TRACE("J_e_m2: \n"    , J_e_m2 );
+    WOLF_TRACE("J_e_m3: \n"    , J_e_m3 );
+    WOLF_TRACE("J_m_u : \n"    , J_m_u );
 
     // chain rule
-    Matrix2s           J_e1_u1 = J_e1_m1 * J_m_u;
-    Matrix2s           J_e1_u2 = J_e1_m2 * J_m_u;
-    Matrix2s           J_e1_u3 = J_e1_m3 * J_m_u;
-    Matrix<Scalar,1,2> J_e2_u1 = J_e2_m1 * J_m_u;
-    Matrix<Scalar,1,2> J_e2_u2 = J_e2_m2 * J_m_u;
-    Matrix<Scalar,1,2> J_e3_u1 = J_e3_m1 * J_m_u;
-    Matrix<Scalar,1,2> J_e3_u3 = J_e3_m3 * J_m_u;
+    Matrix<Scalar,4,2>           J_e_u1 = J_e_m1 * J_m_u;
+    Matrix<Scalar,4,2>           J_e_u2 = J_e_m2 * J_m_u;
+    Matrix<Scalar,4,2>           J_e_u3 = J_e_m3 * J_m_u;
+
+    WOLF_TRACE("J_e_u1: \n"    , J_e_u1 );
+    WOLF_TRACE("J_e_u2: \n"    , J_e_u2 );
+    WOLF_TRACE("J_e_u3: \n"    , J_e_u3 );
 
     // Covariances
-    Matrix2s Q1 = J_e1_u1 * getFeaturePrevPtr()->getMeasurementCovariance()  * J_e1_u1.transpose()
-                + J_e1_u2 * getFeatureOtherPtr()->getMeasurementCovariance() * J_e1_u2.transpose()
-                + J_e1_u3 * getFeaturePtr()->getMeasurementCovariance()      * J_e1_u3.transpose();
+    Matrix4s Q1 = J_e_u1 * getFeaturePrevPtr() ->getMeasurementCovariance() * J_e_u1.transpose();
+    Matrix4s Q2 = J_e_u2 * getFeatureOtherPtr()->getMeasurementCovariance() * J_e_u2.transpose();
+    Matrix4s Q3 = J_e_u3 * getFeaturePtr()     ->getMeasurementCovariance() * J_e_u3.transpose();
 
-    Matrix1s Q2 = J_e2_u1 * getFeaturePrevPtr()->getMeasurementCovariance()  * J_e2_u1.transpose()
-                + J_e2_u2 * getFeatureOtherPtr()->getMeasurementCovariance() * J_e2_u2.transpose();
+    WOLF_TRACE("Q1: \n", Q1 );
+    WOLF_TRACE("Q2: \n", Q2 );
+    WOLF_TRACE("Q3: \n", Q3 );
 
-    Matrix1s Q3 = J_e3_u1 * getFeaturePrevPtr()->getMeasurementCovariance()  * J_e3_u1.transpose()
-                + J_e3_u3 * getFeaturePtr()->getMeasurementCovariance()      * J_e3_u3.transpose();
+    Matrix4s Q = Q1 + Q2 + Q3;
+
+    // hack make Q block diagonal
+    Q(0,3) = Q(3,0) = 0.0;
 
     // sqrt info
-    Eigen::LLT<Eigen::MatrixXs> llt_of_info(Q1.inverse()); // Cholesky decomposition
-    sqrt_information_upper.block(0,0,2,2) = llt_of_info.matrixU();
-    sqrt_information_upper(2,2)           = 1 / sqrt(Q2(0));
-    sqrt_information_upper(3,3)           = 1 / sqrt(Q3(0));
+    Eigen::LLT<Eigen::MatrixXs> llt_of_info(Q.inverse()); // Cholesky decomposition
+    sqrt_information_upper = llt_of_info.matrixU();
 
-    WOLF_TRACE("\ncov_sigmas: "    , Q1.diagonal().transpose().array().sqrt(), " ", sqrt(Q2(0)), " ", sqrt(Q3(0)));
-//    WOLF_TRACE("\nsqrt_info_diag: ", sqrt_information_upper.diagonal().transpose());
+    WOLF_TRACE("Covariance: \n", Q );
+    WOLF_TRACE("Sqrt_info : \n", sqrt_information_upper);
 
 }
 
@@ -407,19 +402,13 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
 }
 
 // Helper functions to be used by the above
-template<class T, typename D1, typename D2, typename D3, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9, typename D10, typename D11>
+template<class T, typename D1, typename D2, typename D3, typename D4, typename D5>
 inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
-                                                                      const MatrixBase<D1>& _c2Ec1,
-                                                                      const MatrixBase<D2>& _c3Ec1,
-                                                                      MatrixBase<D3>& _J_e1_m1,
-                                                                      MatrixBase<D4>& _J_e1_m2,
-                                                                      MatrixBase<D5>& _J_e1_m3,
-                                                                      MatrixBase<D6>& _J_e2_m1,
-                                                                      MatrixBase<D7>& _J_e2_m2,
-                                                                      MatrixBase<D8>& _J_e2_m3,
-                                                                      MatrixBase<D9>& _J_e3_m1,
-                                                                      MatrixBase<D10>& _J_e3_m2,
-                                                                      MatrixBase<D11>& _J_e3_m3)
+                                                                   const MatrixBase<D1>& _c2Ec1,
+                                                                   const MatrixBase<D2>& _c3Ec1,
+                                                                   MatrixBase<D3>& _J_e_m1,
+                                                                   MatrixBase<D4>& _J_e_m2,
+                                                                   MatrixBase<D5>& _J_e_m3)
 {
     // 1. COMMON COMPUTATIONS
 
@@ -503,27 +492,45 @@ inline Matrix<T, 4, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_
 
     Matrix<T,2,3> J_e1_m3e = J_e1_u3e * J_u3e_m3e;
 
-    _J_e1_m1 =
+    Matrix<T,2,3> J_e1_m1, J_e1_m2, J_e1_m3;
+    Matrix<T,1,3> J_e2_m1, J_e2_m2, J_e2_m3;
+    Matrix<T,1,3> J_e3_m1, J_e3_m2, J_e3_m3;
+
+    J_e1_m1 =
             J_e1_m3e * J_m3e_p2 * J_p2_m1 +
             J_e1_m3e * J_m3e_m1;
 
-    _J_e1_m2 = J_e1_m3e * J_m3e_p2 * J_p2_m2;
+    J_e1_m2 = J_e1_m3e * J_m3e_p2 * J_p2_m2;
 
-    _J_e1_m3 = J_e1_u3  * J_u3_m3;
+    J_e1_m3 = J_e1_u3  * J_u3_m3;
 
 
     // 3. EPIPOLARS
 
     Matrix<T,1,3> J_e2_l2;
     Matrix<T,1,3> J_e3_l3;
-    T e2 = vision_utils::distancePointLine(m2, l2, _J_e2_m2, J_e2_l2);
-    T e3 = vision_utils::distancePointLine(m3, l3, _J_e3_m3, J_e3_l3);
+
+    T e2 = vision_utils::distancePointLine(m2, l2, J_e2_m2, J_e2_l2);
+    T e3 = vision_utils::distancePointLine(m3, l3, J_e3_m3, J_e3_l3);
 
     // chain rule
-    _J_e2_m1 = J_e2_l2 * J_l2_m1;
-    _J_e3_m1 = J_e3_l3 * J_l3_m1;
+    J_e2_m1 = J_e2_l2 * J_l2_m1;
+    J_e2_m3.setZero();
+    J_e3_m1 = J_e3_l3 * J_l3_m1;
+    J_e3_m2.setZero();
 
-    // 4. RESIDUAL
+    // Compact Jacobians
+    _J_e_m1.topRows(2) = J_e1_m1;
+    _J_e_m1.row(2)     = J_e2_m1;
+    _J_e_m1.row(3)     = J_e3_m1;
+    _J_e_m2.topRows(2) = J_e1_m2;
+    _J_e_m2.row(2)     = J_e2_m2;
+    _J_e_m2.row(3)     = J_e3_m2;
+    _J_e_m3.topRows(2) = J_e1_m3;
+    _J_e_m3.row(2)     = J_e2_m3;
+    _J_e_m3.row(3)     = J_e3_m3;
+
+    // 4. ERRORS
 
     Matrix<T,4,1> errors;
     errors  << e1, e2, e3;
