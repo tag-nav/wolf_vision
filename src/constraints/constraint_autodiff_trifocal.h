@@ -323,40 +323,14 @@ inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     Matrix<T,3,1> m2(pixel_canonical_origin_.cast<T>());
     Matrix<T,3,1> m3(pixel_canonical_last_  .cast<T>());
 
-    // l2 and l3: epipolar line of m1 in cam 2
-    Matrix<T,3,1> l2 = _c2Ec1 * m1;
-
     // 2. TRILINEARITY PLP
 
-    // p2: line in cam 2 perpendicular to epipolar passing through m2. It must satisfy:
-    //        orthogonality   l2(0:1) * p2(0:1) = 0 // dot product
-    //        adjacency       p2 * m2 = 0
-    Matrix<T,3,1> p2;
-    p2(0) =  m2(2) * l2(1);
-    p2(1) = -m2(2) * l2(0);
-    p2(2) =  m2(1) * l2(0) - m2(0) * l2(1);
-
-    // Tensor slices
-    Matrix<T,3,3> T0, T1, T2;
-    _tensor.getLayers(T0, T1, T2);
-
-    // freedom for catalonia
-    Matrix<T,3,3> m1T = m1(0)*T0.transpose() + m1(1)*T1.transpose() + m1(2)*T2.transpose();
-
-    // PLP trilinearity: expected pixel in cam 3
-    Matrix<T,3,1> m3e = m1T * p2;
-
-    // Go to Euclidean plane
-    Matrix<T,2,1> u3e = vision_utils::euclidean(m3e);
-    Matrix<T,2,1> u3  = vision_utils::euclidean(m3);
-    // PLP trilinearity error
-    Matrix<T,2,1> e1  = u3 - u3e;
-
+    Matrix<T,2,1> e1;
+    vision_utils::errorTrifocalPLP(m1, m2, m3, _tensor, _c2Ec1, e1);
 
     // 3. EPIPOLAR
-
-    T e2 = vision_utils::distancePointLine(m2, l2);
-
+    T e2;
+    vision_utils::errorEpipolar(m1, m2, _c2Ec1, e2);
 
     // 4. RESIDUAL
 
@@ -382,99 +356,22 @@ inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_
     Matrix<T,3,1> m2(pixel_canonical_origin_);
     Matrix<T,3,1> m3(pixel_canonical_last_);
 
-    // l2: epipolar line of m1 in cam 2
-    Matrix<T,3,1> l2      = _c2Ec1*m1;
-
-    Matrix<T,3,3> J_l2_m1 = _c2Ec1;
-
-
     // 2. TRILINEARITY PLP
 
-    // p2: line in cam 2 perpendicular to epipolar l2
-    Matrix<T,3,1> p2;
-    p2(0)                 =  m2(2) * l2(1);
-    p2(1)                 = -m2(2) * l2(0);
-    p2(2)                 =  m2(1) * l2(0) - m2(0) * l2(1);
-    Matrix<T,3,3> J_p2_m2 = (Matrix<T,3,3>() << (T)0 , (T)0 ,  l2(1),
-                                                (T)0 , (T)0 , -l2(0),
-                                               -l2(1), l2(0),  (T)0 ).finished();
-    Matrix<T,3,3> J_p2_l2 = (Matrix<T,3,3>() << (T)0 ,  m2(2), (T)0,
-                                               -m2(2),  (T)0 , (T)0,
-                                                m2(1), -m2(0), (T)0 ).finished();
-
-    // Tensor slices
-    Matrix<T,3,3> T0, T1, T2;
-    _tensor.getLayers(T0, T1, T2);
-
-
-    // freedom for catalan prisoners
-    /*
-     * We have the following formula, used in residual() above:
-     *   m3e = sum_i (m1_i * T_i.tr) * p2
-     *
-     * which develops as
-     *   m3e = (m1_0 * T0.tr) * p2 + (m1_1 * T1.tr) * p2 + (m1_2 * T2.tr) * p2
-     *       = m1_0 * (T0.tr * p2) + m1_1 * (T1.tr * p2) + m1_2 * (T2.tr * p2)
-     *
-     * the second form is better for partial Jacobian computations
-     */
-    Matrix<T,3,1> T0tp2, T1tp2, T2tp2;
-    T0tp2 = T0.transpose() * p2;
-    T1tp2 = T1.transpose() * p2;
-    T2tp2 = T2.transpose() * p2;
-
-    Matrix<T,3,3> J_T0tp2_p2 = T0.transpose();
-    Matrix<T,3,3> J_T1tp2_p2 = T1.transpose();
-    Matrix<T,3,3> J_T2tp2_p2 = T2.transpose();
-
-    Matrix<T,3,1> m3e = m1(0) * T0tp2 + m1(1) * T1tp2 + m1(2) * T2tp2 ;
-
-    T J_m3e_T0tp2 = m1(0); // scalar times identity
-    T J_m3e_T1tp2 = m1(1); // scalar times identity
-    T J_m3e_T2tp2 = m1(2); // scalar times identity
-    Matrix<T,3,3> J_m3e_m1; J_m3e_m1 << T0tp2, T1tp2, T2tp2;
-
-    // Go to Euclidean plane
-    Matrix<T,2,3> J_u3e_m3e, J_u3_m3;
-    Matrix<T,2,1> u3e = vision_utils::euclidean(m3e, J_u3e_m3e);
-    Matrix<T,2,1> u3  = vision_utils::euclidean(m3, J_u3_m3);
-
-    // compute trilinearity PLP error
-    Matrix<T,2,1> e1  = u3 - u3e;
-    T J_e1_u3         = (T)1;  // scalar times identity
-    T J_e1_u3e        = (T)-1; // scalar times identity
-
-    // Jacobians of PLP by the chain rule
-    Matrix<T,3,3> J_p2_m1  = J_p2_l2 * J_l2_m1;
-
-    Matrix<T,3,3> J_m3e_p2 =
-            J_m3e_T0tp2 * J_T0tp2_p2 +
-            J_m3e_T1tp2 * J_T1tp2_p2 +
-            J_m3e_T2tp2 * J_T2tp2_p2;
-
-    Matrix<T,2,3> J_e1_m3e = J_e1_u3e * J_u3e_m3e;
-
     Matrix<T,2,3> J_e1_m1, J_e1_m2, J_e1_m3;
-    Matrix<T,1,3> J_e2_m1, J_e2_m2, J_e2_m3;
+    Matrix<T,2,1> e1;
 
-    J_e1_m1 =
-            J_e1_m3e * J_m3e_p2 * J_p2_m1 +
-            J_e1_m3e * J_m3e_m1;
-
-    J_e1_m2 = J_e1_m3e * J_m3e_p2 * J_p2_m2;
-
-    J_e1_m3 = J_e1_u3  * J_u3_m3;
-
+    vision_utils::errorTrifocalPLP(m1, m2, m3, _tensor, _c2Ec1, e1, J_e1_m1, J_e1_m2, J_e1_m3);
 
     // 3. EPIPOLAR
 
-    Matrix<T,1,3> J_e2_l2;
+    T e2;
+    Matrix<T,1,3> J_e2_m1, J_e2_m2, J_e2_m3;
 
-    T e2 = vision_utils::distancePointLine(m2, l2, J_e2_m2, J_e2_l2);
+    vision_utils::errorEpipolar(m1, m2, _c2Ec1, e2, J_e2_m1, J_e2_m2);
 
-    // chain rule
-    J_e2_m1 = J_e2_l2 * J_l2_m1;
-    J_e2_m3.setZero();
+    J_e2_m3.setZero(); // Not involved in epipolar c1->c2
+
 
     // Compact Jacobians
     _J_e_m1.topRows(2) = J_e1_m1;
