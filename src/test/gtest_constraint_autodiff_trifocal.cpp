@@ -37,6 +37,53 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             std::string wolf_root = _WOLF_ROOT_DIR;
 
             // configuration
+            /*
+             * We have three robot poses, in three frames, with cameras C1, C2, C3 looking towards the origin of coordinates:
+             *
+             *              Z
+             *              |
+             *           ________  C3
+             *          /   |   /
+             *         ---------           /| C2
+             *              |             / |
+             *              |____________/_ | ___ Y
+             *             /             |  /
+             *            /              | /
+             *      --------- C1         |/
+             *      |   /   |
+             *      ---------
+             *        /
+             *       Y
+             *
+             * Each robot pose is at one axis, facing the origin:
+             *   F1: pos = (1,0,0), ori = (0,0,pi)
+             *   F2: pos = (0,1,0), ori = (0,0,-pi/2)
+             *   F3: pos = (0,0,1), ori = (0,pi/2,pi)
+             *
+             * The robot has a camera looking forward
+             *   S: pos = (0,0,0), ori = (-pi/1, 0, -pi/1)
+             *
+             * There is a point at the origin
+             *   P: pos = (0,0,0)
+             *
+             * The camera is canonical
+             *   K = Id.
+             *
+             * Therefore, P projects exactly at the origin on each camera, creating three features:
+             *   f1: p1 = (0,0)
+             *   f2: p2 = (0,0)
+             *   f3: p3 = (0,0)
+             *
+             * We form a Wolf tree with three frames, three captures, three features, and one trifocal constraint:
+             *
+             *   Frame F1, Capture C1, feature f1
+             *   Frame F2, Capture C2, feature f2
+             *   Frame F3, Capture C3, feature f3, constraint c123
+             *
+             * The three frame poses F1, F2, F3 and the camera pose S in the robot frame are variables subject to optimization
+             *
+             * We perform a number of tests based on this configuration.
+             */
 
             // all frames look to the origin
             pos1 << 1,0,0;
@@ -109,8 +156,6 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
 
 TEST_F(ConstraintAutodiffTrifocalTest, expectation)
 {
-    // ground truth essential matrices
-
     //    Homogeneous transform C2 wrt C1
     Matrix4s _c1Hc2; _c1Hc2 <<
                0,  0, -1,  1,
@@ -118,16 +163,15 @@ TEST_F(ConstraintAutodiffTrifocalTest, expectation)
                1,  0,  0,  1,
                0,  0,  0,  1;
 
+    // rotation and translation
     Matrix3s _c1Rc2 = _c1Hc2.block(0,0,3,3);
-
     Vector3s _c1Tc2 = _c1Hc2.block(0,3,3,1);
 
+    // Essential matrix, ground truth (fwd and bkwd)
     Matrix3s _c1Ec2 = wolf::skew(_c1Tc2) * _c1Rc2;
-
     Matrix3s _c2Ec1 = _c1Ec2.transpose();
 
-
-    // expected values
+    // Expected values
     vision_utils::TrifocalTensor tensor;
     Matrix3s c2Ec1;
     c123->expectation(pos1, quat1, pos2, quat2, pos3, quat3, pos_cam, quat_cam, tensor, c2Ec1);
