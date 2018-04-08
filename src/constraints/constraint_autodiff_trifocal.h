@@ -329,13 +329,8 @@ inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     vision_utils::errorTrifocalPLP(m1, m2, m3, _tensor, _c2Ec1, e1);
 
     // 3. EPIPOLAR
-//    T e2;
-//    vision_utils::errorEpipolar(m1, m2, m3, e2);
-
-    // l2 and l3: epipolar lines of m1 in cam 2 and cam 3
-    Matrix<T,3,1> l2 = _c2Ec1 * m1;
-
-    T e2 = vision_utils::distancePointLine(m2, l2);
+    T e2;
+    vision_utils::errorEpipolar(m1, m2, _c2Ec1, e2);
 
     // 4. RESIDUAL
 
@@ -370,28 +365,13 @@ inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_
 
     // 3. EPIPOLAR
 
-//    T e2;
-//    Matrix<T,1,3> J_e2_m1, J_e2_m2, J_e2_m3;
-//
-//    vision_utils::errorEpipolar(m1, m2, m3, e2, J_e2_m1, J_e2_m2);
-//
-//    J_e2_m3.setZero(); // Not involved in epipolar c1->c2
-
-
-    // l2 and l3: epipolar lines of m1 in cam 2 and cam 3
-    Matrix<T,3,1> l2      = _c2Ec1*m1;
-
-    Matrix<T,3,3> J_l2_m1 = _c2Ec1;
-
+    T e2;
     Matrix<T,1,3> J_e2_m1, J_e2_m2, J_e2_m3;
 
-    Matrix<T,1,3> J_e2_l2;
+    vision_utils::errorEpipolar(m1, m2, _c2Ec1, e2, J_e2_m1, J_e2_m2);
 
-    T e2 = vision_utils::distancePointLine(m2, l2, J_e2_m2, J_e2_l2);
+    J_e2_m3.setZero(); // Not involved in epipolar c1->c2
 
-    // chain rule
-    J_e2_m1 = J_e2_l2 * J_l2_m1;
-    J_e2_m3.setZero();
 
     // Compact Jacobians
     _J_e_m1.topRows(2) = J_e1_m1;
