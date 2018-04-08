@@ -318,8 +318,134 @@ TEST_F(ConstraintAutodiffTrifocalTest, operator_parenthesis)
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 }
 
+TEST_F(ConstraintAutodiffTrifocalTest, solve_F1)
+{
+    F1->setState(pose1);
+    F2->setState(pose2);
+    F3->setState(pose3);
+    S ->getPPtr()->setState(pos_cam);
+    S ->getOPtr()->setState(quat_cam.coeffs());
+    // Residual with prior
+
+    Vector3s res;
+
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                      res.data());
+
+    WOLF_INFO("Initial state:              ", F1->getState().transpose());
+    WOLF_INFO("residual before perturbing: ", res.transpose());
+    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+
+    // Residual with perturbated state
+
+    Vector7s pose_perturbated = F1->getState() + 0.1 * Vector7s::Random();
+    pose_perturbated.segment(3,4).normalize();
+    F1->setState(pose_perturbated);
+
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                      res.data());
+
+    WOLF_INFO("perturbed state:            ", pose_perturbated.transpose());
+    WOLF_INFO("residual before solve:      ", res.transpose());
+
+    // Residual with solved state
+
+    S ->fix();
+    F1->unfix();
+    F2->fix();
+    F3->fix();
+
+    std::string report = ceres_manager->solve(1);
+
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                      res.data());
+
+    WOLF_INFO("solved state:               ", F1->getState().transpose());
+    WOLF_INFO("residual after solve:       ", res.transpose());
+
+    WOLF_INFO(report, " AND UNION");
+
+    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+
+}
+
+TEST_F(ConstraintAutodiffTrifocalTest, solve_F2)
+{
+    F1->setState(pose1);
+    F2->setState(pose2);
+    F3->setState(pose3);
+    S ->getPPtr()->setState(pos_cam);
+    S ->getOPtr()->setState(quat_cam.coeffs());
+    // Residual with prior
+
+    Vector3s res;
+
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                      res.data());
+
+    WOLF_INFO("Initial state:              ", F2->getState().transpose());
+    WOLF_INFO("residual before perturbing: ", res.transpose());
+    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+
+    // Residual with perturbated state
+
+    Vector7s pose_perturbated = F2->getState() + 0.1 * Vector7s::Random();
+    pose_perturbated.segment(3,4).normalize();
+    F2->setState(pose_perturbated);
+
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                      res.data());
+
+    WOLF_INFO("perturbed state:            ", pose_perturbated.transpose());
+    WOLF_INFO("residual before solve:      ", res.transpose());
+
+    // Residual with solved state
+
+    S ->fix();
+    F1->fix();
+    F2->unfix();
+    F3->fix();
+
+    std::string report = ceres_manager->solve(1);
+
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                      res.data());
+
+    WOLF_INFO("solved state:               ", F2->getState().transpose());
+    WOLF_INFO("residual after solve:       ", res.transpose());
+
+    WOLF_INFO(report, " AND UNION");
+
+    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+
+}
+
 TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
 {
+    F1->setState(pose1);
+    F2->setState(pose2);
+    F3->setState(pose3);
+    S ->getPPtr()->setState(pos_cam);
+    S ->getOPtr()->setState(quat_cam.coeffs());
+
     // Residual with prior
 
     Vector3s res;
@@ -376,6 +502,12 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
 
 TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
 {
+    F1->setState(pose1);
+    F2->setState(pose2);
+    F3->setState(pose3);
+    S ->getPPtr()->setState(pos_cam);
+    S ->getOPtr()->setState(quat_cam.coeffs());
+
     // Residual with prior
 
     Vector3s res;
@@ -435,7 +567,10 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
-//    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.residual_jacobians";
+//    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F1";
+//    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F2";
+//    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F3";
+    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_S";
     return RUN_ALL_TESTS();
 }
 
