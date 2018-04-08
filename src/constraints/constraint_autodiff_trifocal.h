@@ -7,6 +7,7 @@
 #include "sensor_camera.h"
 
 #include <vision_utils/common_class/trifocaltensor.h>
+#include <vision_utils/vision_utils.h>
 
 namespace wolf
 {
@@ -155,49 +156,49 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
                                     sqrt_information_upper(Matrix3s::Zero())
 {
     setFeaturePtr(_feature_last_ptr);
-    Matrix3s K_inv   = camera_ptr_->getIntrinsicMatrix().inverse();
-    pixel_canonical_prev_   = K_inv * Vector3s(_feature_prev_ptr  ->getMeasurement(0), _feature_prev_ptr  ->getMeasurement(1), 1.0);
-    pixel_canonical_origin_ = K_inv * Vector3s(_feature_origin_ptr->getMeasurement(0), _feature_origin_ptr->getMeasurement(1), 1.0);
-    pixel_canonical_last_   = K_inv * Vector3s(_feature_last_ptr  ->getMeasurement(0), _feature_last_ptr  ->getMeasurement(1), 1.0);
-    Matrix<Scalar,3,2> J_m_u;
-    J_m_u << K_inv.block(0,0,3,2);
+    Matrix3s K_inv           = camera_ptr_->getIntrinsicMatrix().inverse();
+    pixel_canonical_prev_    = K_inv * Vector3s(_feature_prev_ptr  ->getMeasurement(0), _feature_prev_ptr  ->getMeasurement(1), 1.0);
+    pixel_canonical_origin_  = K_inv * Vector3s(_feature_origin_ptr->getMeasurement(0), _feature_origin_ptr->getMeasurement(1), 1.0);
+    pixel_canonical_last_    = K_inv * Vector3s(_feature_last_ptr  ->getMeasurement(0), _feature_last_ptr  ->getMeasurement(1), 1.0);
+    Matrix<Scalar,3,2> J_m_u = K_inv.block(0,0,3,2);
 
     // extract relevant states
-    Vector3s    wtr1 =             _feature_prev_ptr->getFramePtr()->getPPtr()->getState();
-    Quaternions wqr1 = Quaternions(_feature_prev_ptr->getFramePtr()->getOPtr()->getState().data() );
-    Vector3s    wtr2 =             _feature_origin_ptr->getFramePtr()->getPPtr()->getState();
-    Quaternions wqr2 = Quaternions(_feature_origin_ptr->getFramePtr()->getOPtr()->getState().data() );
-    Vector3s    wtr3 =             _feature_last_ptr->getFramePtr()->getPPtr()->getState();
-    Quaternions wqr3 = Quaternions(_feature_last_ptr->getFramePtr()->getOPtr()->getState().data() );
-    Vector3s    rtc  =             _feature_last_ptr->getCapturePtr()->getSensorPPtr()->getState();
-    Quaternions rqc  = Quaternions(_feature_last_ptr->getCapturePtr()->getSensorOPtr()->getState().data() );
-    vision_utils::TrifocalTensorBase<Scalar> tensor;
-    Matrix3s    c2Ec1;
+    Vector3s    wtr1 =             _feature_prev_ptr  ->getFramePtr()  ->getPPtr()      ->getState();
+    Quaternions wqr1 = Quaternions(_feature_prev_ptr  ->getFramePtr()  ->getOPtr()      ->getState().data() );
+    Vector3s    wtr2 =             _feature_origin_ptr->getFramePtr()  ->getPPtr()      ->getState();
+    Quaternions wqr2 = Quaternions(_feature_origin_ptr->getFramePtr()  ->getOPtr()      ->getState().data() );
+    Vector3s    wtr3 =             _feature_last_ptr  ->getFramePtr()  ->getPPtr()      ->getState();
+    Quaternions wqr3 = Quaternions(_feature_last_ptr  ->getFramePtr()  ->getOPtr()      ->getState().data() );
+    Vector3s    rtc  =             _feature_last_ptr  ->getCapturePtr()->getSensorPPtr()->getState();
+    Quaternions rqc  = Quaternions(_feature_last_ptr  ->getCapturePtr()->getSensorOPtr()->getState().data() );
 
     // expectation
+    vision_utils::TrifocalTensorBase<Scalar> tensor;
+    Matrix3s    c2Ec1;
     expectation(wtr1, wqr1,
                 wtr2, wqr2,
                 wtr3, wqr3,
                 rtc, rqc,
                 tensor, c2Ec1);
 
-    // residual and Jacobians
+    // error Jacobians
     Matrix<Scalar,3,3> J_e_m1, J_e_m2, J_e_m3;
     error_jacobians(tensor, c2Ec1, J_e_m1, J_e_m2, J_e_m3);
 
-    // chain rule
-    Matrix<Scalar,3,2>           J_e_u1 = J_e_m1 * J_m_u;
-    Matrix<Scalar,3,2>           J_e_u2 = J_e_m2 * J_m_u;
-    Matrix<Scalar,3,2>           J_e_u3 = J_e_m3 * J_m_u;
+    // chain rule to go from homogeneous pixel to Euclidean pixel
+    Matrix<Scalar,3,2> J_e_u1 = J_e_m1 * J_m_u;
+    Matrix<Scalar,3,2> J_e_u2 = J_e_m2 * J_m_u;
+    Matrix<Scalar,3,2> J_e_u3 = J_e_m3 * J_m_u;
 
-    // Covariances
+    // Error covariances induced by each of the measurement covariance
     Matrix3s Q1 = J_e_u1 * getFeaturePrevPtr() ->getMeasurementCovariance() * J_e_u1.transpose();
     Matrix3s Q2 = J_e_u2 * getFeatureOtherPtr()->getMeasurementCovariance() * J_e_u2.transpose();
     Matrix3s Q3 = J_e_u3 * getFeaturePtr()     ->getMeasurementCovariance() * J_e_u3.transpose();
 
+    // Total error covariance
     Matrix3s Q = Q1 + Q2 + Q3;
 
-    // sqrt info
+    // Sqrt of information matrix
     Eigen::LLT<Eigen::MatrixXs> llt_of_info(Q.inverse()); // Cholesky decomposition
     sqrt_information_upper = llt_of_info.matrixU();
 }
