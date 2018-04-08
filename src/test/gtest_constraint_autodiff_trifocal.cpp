@@ -19,6 +19,7 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
         Vector3s pos1, pos2, pos3, pos_cam, point;
         Vector3s euler1, euler2, euler3, euler_cam;
         Quaternions quat1, quat2, quat3, quat_cam;
+        Vector7s pose1, pose2, pose3, pose_cam;
 
         ProblemPtr problem;
         CeresManagerPtr ceres_manager;
@@ -102,10 +103,10 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             quat_cam = e2q(euler_cam);
 
             // build all pose vectors
-            Vector7s pose1;    pose1    << pos1, quat1.coeffs();
-            Vector7s pose2;    pose2    << pos2, quat2.coeffs();
-            Vector7s pose3;    pose3    << pos3, quat3.coeffs();
-            Vector7s pose_cam; pose_cam << pos_cam, quat_cam.coeffs();
+            pose1    << pos1, quat1.coeffs();
+            pose2    << pos2, quat2.coeffs();
+            pose3    << pos3, quat3.coeffs();
+            pose_cam << pos_cam, quat_cam.coeffs();
 
             // Build problem
             problem = Problem::create("PO 3D");
