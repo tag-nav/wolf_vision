@@ -96,16 +96,14 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             quat1 = e2q(euler1);
             quat2 = e2q(euler2);
             quat3 = e2q(euler3);
+            pose1    << pos1, quat1.coeffs();
+            pose2    << pos2, quat2.coeffs();
+            pose3    << pos3, quat3.coeffs();
 
             // camera at the robot origin looking forward
             pos_cam << 0,0,0;
             euler_cam << -M_PI_2, 0, -M_PI_2;// euler_cam *= M_TORAD;
             quat_cam = e2q(euler_cam);
-
-            // build all pose vectors
-            pose1    << pos1, quat1.coeffs();
-            pose2    << pos2, quat2.coeffs();
-            pose3    << pos3, quat3.coeffs();
             pose_cam << pos_cam, quat_cam.coeffs();
 
             // Build problem
