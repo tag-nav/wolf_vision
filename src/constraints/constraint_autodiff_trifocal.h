@@ -323,7 +323,7 @@ inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     Matrix<T,3,1> m2(pixel_canonical_origin_.cast<T>());
     Matrix<T,3,1> m3(pixel_canonical_last_  .cast<T>());
 
-    // l2 and l3: epipolar lines of m1 in cam 2 and cam 3
+    // l2 and l3: epipolar line of m1 in cam 2
     Matrix<T,3,1> l2 = _c2Ec1 * m1;
 
     // 2. TRILINEARITY PLP
@@ -343,7 +343,7 @@ inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
     // freedom for catalonia
     Matrix<T,3,3> m1T = m1(0)*T0.transpose() + m1(1)*T1.transpose() + m1(2)*T2.transpose();
 
-    // PLP trilinearity: expected pixel in cam 2
+    // PLP trilinearity: expected pixel in cam 3
     Matrix<T,3,1> m3e = m1T * p2;
 
     // Go to Euclidean plane
