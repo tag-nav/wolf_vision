@@ -333,8 +333,8 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F1)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("Initial state:              ", F1->getState().transpose());
-    WOLF_INFO("residual before perturbing: ", res.transpose());
+    WOLF_DEBUG("Initial state:              ", F1->getState().transpose());
+    WOLF_DEBUG("residual before perturbing: ", res.transpose());
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 
     // Residual with perturbated state
@@ -349,12 +349,12 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F1)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("perturbed state:            ", pose_perturbated.transpose());
-    WOLF_INFO("residual before solve:      ", res.transpose());
+    WOLF_DEBUG("perturbed state:            ", pose_perturbated.transpose());
+    WOLF_DEBUG("residual before solve:      ", res.transpose());
 
     // Residual with solved state
 
-    S ->fix();
+    S ->fixExtrinsics();
     F1->unfix();
     F2->fix();
     F3->fix();
@@ -367,10 +367,10 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F1)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("solved state:               ", F1->getState().transpose());
-    WOLF_INFO("residual after solve:       ", res.transpose());
+    WOLF_DEBUG("solved state:               ", F1->getState().transpose());
+    WOLF_DEBUG("residual after solve:       ", res.transpose());
 
-    WOLF_INFO(report, " AND UNION");
+    WOLF_DEBUG(report, " AND UNION");
 
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 
@@ -393,8 +393,8 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("Initial state:              ", F2->getState().transpose());
-    WOLF_INFO("residual before perturbing: ", res.transpose());
+    WOLF_DEBUG("Initial state:              ", F2->getState().transpose());
+    WOLF_DEBUG("residual before perturbing: ", res.transpose());
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 
     // Residual with perturbated state
@@ -409,12 +409,12 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("perturbed state:            ", pose_perturbated.transpose());
-    WOLF_INFO("residual before solve:      ", res.transpose());
+    WOLF_DEBUG("perturbed state:            ", pose_perturbated.transpose());
+    WOLF_DEBUG("residual before solve:      ", res.transpose());
 
     // Residual with solved state
 
-    S ->fix();
+    S ->fixExtrinsics();
     F1->fix();
     F2->unfix();
     F3->fix();
@@ -427,10 +427,10 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("solved state:               ", F2->getState().transpose());
-    WOLF_INFO("residual after solve:       ", res.transpose());
+    WOLF_DEBUG("solved state:               ", F2->getState().transpose());
+    WOLF_DEBUG("residual after solve:       ", res.transpose());
 
-    WOLF_INFO(report, " AND UNION");
+    WOLF_DEBUG(report, " AND UNION");
 
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 
@@ -454,8 +454,8 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("Initial state:              ", F3->getState().transpose());
-    WOLF_INFO("residual before perturbing: ", res.transpose());
+    WOLF_DEBUG("Initial state:              ", F3->getState().transpose());
+    WOLF_DEBUG("residual before perturbing: ", res.transpose());
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 
     // Residual with perturbated state
@@ -470,13 +470,13 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("perturbed state:            ", pose_perturbated.transpose());
-    WOLF_INFO("residual before solve:      ", res.transpose());
+    WOLF_DEBUG("perturbed state:            ", pose_perturbated.transpose());
+    WOLF_DEBUG("residual before solve:      ", res.transpose());
     ASSERT_NEAR(res(2), 0, 1e-8); // Epipolar c2-c1 should be respected when perturbing F3
 
     // Residual with solved state
 
-    S ->fix();
+    S ->fixExtrinsics();
     F1->fix();
     F2->fix();
     F3->unfix();
@@ -489,10 +489,10 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("solved state:               ", F3->getState().transpose());
-    WOLF_INFO("residual after solve:       ", res.transpose());
+    WOLF_DEBUG("solved state:               ", F3->getState().transpose());
+    WOLF_DEBUG("residual after solve:       ", res.transpose());
 
-    WOLF_INFO(report, " AND UNION");
+    WOLF_DEBUG(report, " AND UNION");
 
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 
@@ -516,8 +516,8 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("Initial state:              ", S->getPPtr()->getState().transpose(), " ", S->getOPtr()->getState().transpose());
-    WOLF_INFO("residual before perturbing: ", res.transpose());
+    WOLF_DEBUG("Initial state:              ", S->getPPtr()->getState().transpose(), " ", S->getOPtr()->getState().transpose());
+    WOLF_DEBUG("residual before perturbing: ", res.transpose());
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 
     // Residual with perturbated state
@@ -535,12 +535,12 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("perturbed state:            ", pose_perturbated.transpose());
-    WOLF_INFO("residual before solve:      ", res.transpose());
+    WOLF_DEBUG("perturbed state:            ", pose_perturbated.transpose());
+    WOLF_DEBUG("residual before solve:      ", res.transpose());
 
     // Residual with solved state
 
-    S ->unfix();
+    S ->unfixExtrinsics();
     F1->fix();
     F2->fix();
     F3->fix();
@@ -553,10 +553,10 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
 
-    WOLF_INFO("solved state:               ", S->getPPtr()->getState().transpose(), " ", S->getOPtr()->getState().transpose());
-    WOLF_INFO("residual after solve:       ", res.transpose());
+    WOLF_DEBUG("solved state:               ", S->getPPtr()->getState().transpose(), " ", S->getOPtr()->getState().transpose());
+    WOLF_DEBUG("residual after solve:       ", res.transpose());
 
-    WOLF_INFO(report, " AND UNION");
+    WOLF_DEBUG(report, " AND UNION");
 
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
 
@@ -568,7 +568,7 @@ int main(int argc, char **argv)
 //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F1";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F2";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F3";
-    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_S";
+//    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_S";
     return RUN_ALL_TESTS();
 }
 
