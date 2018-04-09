@@ -19,6 +19,7 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
         Vector3s pos1, pos2, pos3, pos_cam, point;
         Vector3s euler1, euler2, euler3, euler_cam;
         Quaternions quat1, quat2, quat3, quat_cam;
+        Vector4s vquat1, vquat2, vquat3, vquat_cam; // quaternions as vectors
         Vector7s pose1, pose2, pose3, pose_cam;
 
         ProblemPtr problem;
@@ -27,10 +28,10 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
         SensorCameraPtr camera;
         ProcessorTrackerFeatureTrifocalPtr proc_trifocal;
 
-        SensorBasePtr S;
-        FrameBasePtr F1, F2, F3;
+        SensorBasePtr   S;
+        FrameBasePtr    F1, F2, F3;
         CaptureImagePtr I1, I2, I3;
-        FeatureBasePtr f1, f2, f3;
+        FeatureBasePtr  f1, f2, f3;
         ConstraintAutodiffTrifocalPtr c123;
 
         virtual void SetUp()
@@ -39,7 +40,8 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
 
             // configuration
             /*
-             * We have three robot poses, in three frames, with cameras C1, C2, C3 looking towards the origin of coordinates:
+             * We have three robot poses, in three frames, with cameras C1, C2, C3
+             * looking towards the origin of coordinates:
              *
              *              Z
              *              |
@@ -70,41 +72,48 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
              * The camera is canonical
              *   K = Id.
              *
-             * Therefore, P projects exactly at the origin on each camera, creating three features:
+             * Therefore, P projects exactly at the origin on each camera,
+             * creating three features:
              *   f1: p1 = (0,0)
              *   f2: p2 = (0,0)
              *   f3: p3 = (0,0)
              *
-             * We form a Wolf tree with three frames, three captures, three features, and one trifocal constraint:
+             * We form a Wolf tree with three frames, three captures,
+             * three features, and one trifocal constraint:
              *
              *   Frame F1, Capture C1, feature f1
              *   Frame F2, Capture C2, feature f2
              *   Frame F3, Capture C3, feature f3, constraint c123
              *
-             * The three frame poses F1, F2, F3 and the camera pose S in the robot frame are variables subject to optimization
+             * The three frame poses F1, F2, F3 and the camera pose S
+             * in the robot frame are variables subject to optimization
              *
              * We perform a number of tests based on this configuration.
              */
 
             // all frames look to the origin
-            pos1 << 1,0,0;
-            pos2 << 0,1,0;
-            pos3 << 0,0,1;
+            pos1   << 1, 0, 0;
+            pos2   << 0, 1, 0;
+            pos3   << 0, 0, 1;
             euler1 << 0, 0, M_PI; //euler1 *= M_TORAD;
             euler2 << 0, 0, -M_PI_2; //euler2 *= M_TORAD;
-            euler3 <<0, M_PI_2, M_PI ;// euler3 *= M_TORAD;
-            quat1 = e2q(euler1);
-            quat2 = e2q(euler2);
-            quat3 = e2q(euler3);
-            pose1    << pos1, quat1.coeffs();
-            pose2    << pos2, quat2.coeffs();
-            pose3    << pos3, quat3.coeffs();
+            euler3 << 0, M_PI_2, M_PI ;// euler3 *= M_TORAD;
+            quat1  =  e2q(euler1);
+            quat2  =  e2q(euler2);
+            quat3  =  e2q(euler3);
+            vquat1 = quat1.coeffs();
+            vquat2 = quat2.coeffs();
+            vquat3 = quat3.coeffs();
+            pose1  << pos1, vquat1;
+            pose2  << pos2, vquat2;
+            pose3  << pos3, vquat3;
 
             // camera at the robot origin looking forward
             pos_cam << 0,0,0;
             euler_cam << -M_PI_2, 0, -M_PI_2;// euler_cam *= M_TORAD;
             quat_cam = e2q(euler_cam);
-            pose_cam << pos_cam, quat_cam.coeffs();
+            vquat_cam = quat_cam.coeffs();
+            pose_cam << pos_cam, vquat_cam;
 
             // Build problem
             problem = Problem::create("PO 3D");
@@ -315,10 +324,10 @@ TEST_F(ConstraintAutodiffTrifocalTest, operator_parenthesis)
     Vector3s res;
 
     // Constraint with exact states should give zero residual
-    c123->operator ()(pos1.data(), quat1.coeffs().data(),
-                      pos2.data(), quat2.coeffs().data(),
-                      pos3.data(), quat3.coeffs().data(),
-                      pos_cam.data(), quat_cam.coeffs().data(),
+    c123->operator ()(pos1.data(), vquat1.data(),
+                      pos2.data(), vquat2.data(),
+                      pos3.data(), vquat3.data(),
+                      pos_cam.data(), vquat_cam.data(),
                       res.data());
 
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
@@ -330,7 +339,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F1)
     F2->setState(pose2);
     F3->setState(pose3);
     S ->getPPtr()->setState(pos_cam);
-    S ->getOPtr()->setState(quat_cam.coeffs());
+    S ->getOPtr()->setState(vquat_cam);
     // Residual with prior
 
     Vector3s res;
@@ -390,7 +399,8 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2)
     F2->setState(pose2);
     F3->setState(pose3);
     S ->getPPtr()->setState(pos_cam);
-    S ->getOPtr()->setState(quat_cam.coeffs());
+    S ->getOPtr()->setState(vquat_cam);
+
     // Residual with prior
 
     Vector3s res;
@@ -450,7 +460,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
     F2->setState(pose2);
     F3->setState(pose3);
     S ->getPPtr()->setState(pos_cam);
-    S ->getOPtr()->setState(quat_cam.coeffs());
+    S ->getOPtr()->setState(vquat_cam);
 
     // Residual with prior
 
@@ -512,7 +522,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
     F2->setState(pose2);
     F3->setState(pose3);
     S ->getPPtr()->setState(pos_cam);
-    S ->getOPtr()->setState(quat_cam.coeffs());
+    S ->getOPtr()->setState(vquat_cam);
 
     // Residual with prior
 
@@ -530,8 +540,8 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
 
     // Residual with perturbated state
 
-    Vector3s pos_perturbated = S->getPPtr()->getState() + 0.1 * Vector3s::Random();
-    Vector4s ori_perturbated = S->getOPtr()->getState() + 0.1 * Vector4s::Random();
+    Vector3s pos_perturbated = pos_cam   + 0.1 * Vector3s::Random();
+    Vector4s ori_perturbated = vquat_cam + 0.1 * Vector4s::Random();
     ori_perturbated.normalize();
     Vector7s pose_perturbated; pose_perturbated << pos_perturbated, ori_perturbated;
     S->getPPtr()->setState(pos_perturbated);
@@ -570,13 +580,13 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
 
 }
 
-TEST_F(ConstraintAutodiffTrifocalTest, solve_F2_F3)
+TEST_F(ConstraintAutodiffTrifocalTest, solve_multi_point)
 {
     F1->setState(pose1);
     F2->setState(pose2);
     F3->setState(pose3);
     S ->getPPtr()->setState(pos_cam);
-    S ->getOPtr()->setState(quat_cam.coeffs());
+    S ->getOPtr()->setState(vquat_cam);
 
 
     Eigen::Matrix<Scalar, 2, 8> c1p_can;
@@ -634,11 +644,12 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2_F3)
     ASSERT_MATRIX_APPROX(F3->getState(), pose3, 1e-10);
 
     // 2. Perturbate states, keep scale
-    F1->getPPtr()->setState(Vector3s(1,0,0));
-    F2->getPPtr()->setState(Vector3s(0,1,0));
-    F2->getOPtr()->setState((F2->getOPtr()->getState() + 0.2*Vector4s::Random()).normalized());
-    F3->getPPtr()->setState( F3->getPPtr()->getState() + 0.2*Vector3s::Random());
-    F3->getOPtr()->setState((F3->getOPtr()->getState() + 0.2*Vector4s::Random()).normalized());
+    F1->getPPtr()->setState( pos1   );
+    F1->getOPtr()->setState( vquat1 );
+    F2->getPPtr()->setState( pos2   );
+    F2->getOPtr()->setState((vquat2 + 0.2*Vector4s::Random()).normalized());
+    F3->getPPtr()->setState( pos3   + 0.2*Vector3s::Random());
+    F3->getOPtr()->setState((vquat3 + 0.2*Vector4s::Random()).normalized());
 
     report = ceres_manager->solve(1);
     WOLF_DEBUG("report: ", report);
@@ -646,10 +657,11 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2_F3)
     // Print states
     problem->print(1,0,1,0);
 
-    ASSERT_MATRIX_APPROX(F2->getPPtr()->getState(), pos2          , 1e-10);
-    ASSERT_MATRIX_APPROX(F2->getOPtr()->getState(), quat2.coeffs(), 1e-10);
-    ASSERT_MATRIX_APPROX(F3->getPPtr()->getState(), pos3          , 1e-10);
-    ASSERT_MATRIX_APPROX(F3->getOPtr()->getState(), quat3.coeffs(), 1e-10);
+    // Evaluate final states
+    ASSERT_MATRIX_APPROX(F2->getPPtr()->getState(), pos2  , 1e-10);
+    ASSERT_MATRIX_APPROX(F2->getOPtr()->getState(), vquat2, 1e-10);
+    ASSERT_MATRIX_APPROX(F3->getPPtr()->getState(), pos3  , 1e-10);
+    ASSERT_MATRIX_APPROX(F3->getOPtr()->getState(), vquat3, 1e-10);
 
     // evaluate residuals
     Vector3s res;
@@ -672,11 +684,12 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2_F3)
 
 
     // 3. Perturbate states, change scale
-    F1->getPPtr()->setState(Vector3s(2,0,0));
-    F2->getPPtr()->setState(Vector3s(0,2,0));
-    F2->getOPtr()->setState((F2->getOPtr()->getState() + 0.2*Vector4s::Random()).normalized());
-    F3->getPPtr()->setState( F3->getPPtr()->getState() + 0.2*Vector3s::Random());
-    F3->getOPtr()->setState((F3->getOPtr()->getState() + 0.2*Vector4s::Random()).normalized());
+    F1->getPPtr()->setState( 2 * pos1 );
+    F1->getOPtr()->setState(   vquat1 );
+    F2->getPPtr()->setState( 2 * pos2 );
+    F2->getOPtr()->setState((  vquat2 + 0.2*Vector4s::Random()).normalized());
+    F3->getPPtr()->setState( 2 * pos3 + 0.2*Vector3s::Random());
+    F3->getOPtr()->setState((  vquat3 + 0.2*Vector4s::Random()).normalized());
 
     report = ceres_manager->solve(1);
     WOLF_DEBUG("report: ", report);
@@ -684,10 +697,11 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2_F3)
     // Print states
     problem->print(1,0,1,0);
 
-    ASSERT_MATRIX_APPROX(F2->getPPtr()->getState(), 2*pos2        , 1e-8);
-    ASSERT_MATRIX_APPROX(F2->getOPtr()->getState(), quat2.coeffs(), 1e-8);
-    ASSERT_MATRIX_APPROX(F3->getPPtr()->getState(), 2*pos3        , 1e-8);
-    ASSERT_MATRIX_APPROX(F3->getOPtr()->getState(), quat3.coeffs(), 1e-8);
+    // Evaluate final states
+    ASSERT_MATRIX_APPROX(F2->getPPtr()->getState(), 2 * pos2, 1e-8);
+    ASSERT_MATRIX_APPROX(F2->getOPtr()->getState(),   vquat2, 1e-8);
+    ASSERT_MATRIX_APPROX(F3->getPPtr()->getState(), 2 * pos3, 1e-8);
+    ASSERT_MATRIX_APPROX(F3->getOPtr()->getState(),   vquat3, 1e-8);
 
     // evaluate residuals
     c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
@@ -695,7 +709,9 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2_F3)
                       F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
                       S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
                       res.data());
+
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+
     for (size_t i=0; i<8; i++)
     {
         cv123.at(i)->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
@@ -711,11 +727,11 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2_F3)
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
-//    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F1";
-//    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F2";
-//    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F3";
+    //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F1";
+    //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F2";
+    //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F3";
     //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_S";
-//        ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F2_F3";
+    //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_multi_point";
     return RUN_ALL_TESTS();
 }
 
