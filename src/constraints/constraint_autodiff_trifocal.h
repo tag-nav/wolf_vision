@@ -352,9 +352,9 @@ inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_
     // 1. COMMON COMPUTATIONS
 
     // m1, m2, m3: canonical pixels in cams 1,2,3 -- canonical means m = K.inv * u, with _u_ a homogeneous pixel [ux; uy; 1].
-    Matrix<T,3,1> m1(pixel_canonical_prev_);
-    Matrix<T,3,1> m2(pixel_canonical_origin_);
-    Matrix<T,3,1> m3(pixel_canonical_last_);
+    Matrix<T,3,1> m1(pixel_canonical_prev_.cast<T>());
+    Matrix<T,3,1> m2(pixel_canonical_origin_.cast<T>());
+    Matrix<T,3,1> m3(pixel_canonical_last_.cast<T>());
 
     // 2. TRILINEARITY PLP
 
