@@ -309,7 +309,10 @@ inline void ConstraintAutodiffTrifocal::expectation(const MatrixBase<D1>&     _w
          * or, if we prefer the constraint P2' * c2Ec1 * P1 = 0,
          *   c2Ec1 = c1Ec2' = R' * [T]x (we obviate the sign change)
          */
-        _c2Ec1 =  c1Hc2.rotation().transpose() * skew(c1Hc2.translation()) ;
+        Matrix<T,3,3> Rtr = c1Hc2.matrix().block(0,0,3,3).transpose();
+        Matrix<T,3,1> t   = c1Hc2.matrix().block(0,3,3,1);
+        _c2Ec1 = Rtr * skew(t);
+//        _c2Ec1 =  c1Hc2.rotation().transpose() * skew(c1Hc2.translation()) ;
 }
 
 template<typename T, typename D1>
