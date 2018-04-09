@@ -336,7 +336,7 @@ inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::residual(const vision_utils::
 
     Matrix<T,3,1> errors, residual;
     errors  << e1, e2;
-    residual = sqrt_information_upper * errors;
+    residual = sqrt_information_upper.cast<T>() * errors;
 
     return residual;
 }
