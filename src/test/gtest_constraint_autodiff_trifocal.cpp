@@ -108,7 +108,15 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
 
             // Build problem
             problem = Problem::create("PO 3D");
-            ceres_manager = std::make_shared<CeresManager>(problem);
+            ceres::Solver::Options options;
+//            options.function_tolerance  = 1e-16;
+//            options.max_num_iterations  = 500;
+//            options.parameter_tolerance = 1e-16;
+//            options.max_linear_solver_iterations = 500;
+//            options.min_linear_solver_iterations = 20;
+//            options.use_inner_iterations = true;
+//            options.gradient_tolerance = 1e-16;
+            ceres_manager = std::make_shared<CeresManager>(problem, options);
 
             // Install sensor and processor
             S = problem->installSensor("CAMERA", "canonical", pose_cam, wolf_root + "/src/examples/camera_params_canonical.yaml");
@@ -120,8 +128,8 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             params_trifocal->min_features_for_keyframe = 5;
             params_trifocal->yaml_file_params_vision_utils = wolf_root + "/src/examples/vision_utils_active_search.yaml";
 
-            ProcessorTrackerFeatureTrifocalPtr proc_trk = std::make_shared<ProcessorTrackerFeatureTrifocal>(*params_trifocal);
-            camera->addProcessor(proc_trk);
+            proc_trifocal = std::make_shared<ProcessorTrackerFeatureTrifocal>(*params_trifocal);
+            camera->addProcessor(proc_trifocal);
 
             // Add three viewpoints with frame, capture and feature
             Vector2s pix(0,0);
@@ -146,7 +154,7 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             I3->addFeature(f3);
 
             // trifocal constraint
-            c123 = std::make_shared<ConstraintAutodiffTrifocal>(f1, f2, f3, proc_trk, false, CTR_ACTIVE);
+            c123 = std::make_shared<ConstraintAutodiffTrifocal>(f1, f2, f3, proc_trifocal, false, CTR_ACTIVE);
             f3->addConstraint(c123);
             f1->addConstrainedBy(c123);
             f2->addConstrainedBy(c123);
@@ -562,13 +570,152 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
 
 }
 
+TEST_F(ConstraintAutodiffTrifocalTest, solve_F2_F3)
+{
+    F1->setState(pose1);
+    F2->setState(pose2);
+    F3->setState(pose3);
+    S ->getPPtr()->setState(pos_cam);
+    S ->getOPtr()->setState(quat_cam.coeffs());
+
+
+    Eigen::Matrix<Scalar, 2, 8> c1p_can;
+    c1p_can <<
+       -1/3.00,   -1/3.00,    1/3.00,    1/3.00,   -1.0000,   -1.0000, 1.0000,    1.0000,
+        1/3.00,   -1/3.00,    1/3.00,   -1/3.00,    1.0000,   -1.0000, 1.0000,   -1.0000;
+
+    Eigen::Matrix<Scalar, 2, 8> c2p_can;
+    c2p_can <<
+        1/3.00,    1/3.00,    1.0000,    1.0000,   -1/3.00,   -1/3.00,   -1.0000,   -1.0000,
+        1/3.00,   -1/3.00,    1.0000,   -1.0000,    1/3.00,   -1/3.00,    1.0000,   -1.0000;
+
+    Eigen::Matrix<Scalar, 2, 8> c3p_can;
+    c3p_can <<
+       -1/3.00,   -1.0000,    1/3.00,    1.0000,   -1/3.00,   -1.0000,   1/3.00,    1.0000,
+       -1/3.00,   -1.0000,   -1/3.00,   -1.0000,    1/3.00,    1.0000,   1/3.00,    1.0000;
+
+    std::vector<FeatureBasePtr> fv1, fv2, fv3;
+    std::vector<ConstraintAutodiffTrifocalPtr> cv123;
+    Matrix2s pix_cov; pix_cov.setIdentity(); //pix_cov *= 1e-4;
+
+    for (size_t i=0; i<c1p_can.cols() ; i++)
+    {
+        fv1.push_back(std::make_shared<FeatureBase>("PIXEL", c1p_can.col(i), pix_cov));
+        I1->addFeature(fv1.at(i));
+
+        fv2.push_back(std::make_shared<FeatureBase>("PIXEL", c2p_can.col(i), pix_cov));
+        I2->addFeature(fv2.at(i));
+
+        fv3.push_back(std::make_shared<FeatureBase>("PIXEL", c3p_can.col(i), pix_cov));
+        I3->addFeature(fv3.at(i));
+
+        cv123.push_back(std::make_shared<ConstraintAutodiffTrifocal>(fv1.at(i), fv2.at(i), fv3.at(i), proc_trifocal, false, CTR_ACTIVE));
+        fv3.at(i)->addConstraint(cv123.at(i));
+        fv1.at(i)->addConstrainedBy(cv123.at(i));
+        fv2.at(i)->addConstrainedBy(cv123.at(i));
+
+    }
+
+    S ->getPPtr()->fix(); // do not calibrate sensor pos
+    S ->getOPtr()->fix(); // do not calibrate sensor ori
+    F1->getPPtr()->fix(); // Cam 1 acts as reference
+    F1->getOPtr()->fix(); // Cam 1 acts as reference
+    F2->getPPtr()->fix(); // This fixes the scale
+    F2->getOPtr()->unfix(); // Estimate Cam 2 ori
+    F3->getPPtr()->unfix(); // Estimate Cam 3 pos
+    F3->getOPtr()->unfix(); // Estimate Cam 3 ori
+
+    // 1. Solve from exact priors
+    std::string report = ceres_manager->solve(1);
+    WOLF_DEBUG("report: ", report);
+    problem->print(1,0,1,0);
+
+    ASSERT_MATRIX_APPROX(F2->getState(), pose2, 1e-10);
+    ASSERT_MATRIX_APPROX(F3->getState(), pose3, 1e-10);
+
+    // 2. Perturbate states, keep scale
+    F1->getPPtr()->setState(Vector3s(1,0,0));
+    F2->getPPtr()->setState(Vector3s(0,1,0));
+    F2->getOPtr()->setState((F2->getOPtr()->getState() + 0.2*Vector4s::Random()).normalized());
+    F3->getPPtr()->setState( F3->getPPtr()->getState() + 0.2*Vector3s::Random());
+    F3->getOPtr()->setState((F3->getOPtr()->getState() + 0.2*Vector4s::Random()).normalized());
+
+    report = ceres_manager->solve(1);
+    WOLF_DEBUG("report: ", report);
+
+    // Print states
+    problem->print(1,0,1,0);
+
+    ASSERT_MATRIX_APPROX(F2->getPPtr()->getState(), pos2          , 1e-10);
+    ASSERT_MATRIX_APPROX(F2->getOPtr()->getState(), quat2.coeffs(), 1e-10);
+    ASSERT_MATRIX_APPROX(F3->getPPtr()->getState(), pos3          , 1e-10);
+    ASSERT_MATRIX_APPROX(F3->getOPtr()->getState(), quat3.coeffs(), 1e-10);
+
+    // evaluate residuals
+    Vector3s res;
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                      res.data());
+    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-10);
+    for (size_t i=0; i<8; i++)
+    {
+        cv123.at(i)->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                                 F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                                 F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                                 S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                                 res.data());
+
+        ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-10);
+    }
+
+
+    // 3. Perturbate states, change scale
+    F1->getPPtr()->setState(Vector3s(2,0,0));
+    F2->getPPtr()->setState(Vector3s(0,2,0));
+    F2->getOPtr()->setState((F2->getOPtr()->getState() + 0.2*Vector4s::Random()).normalized());
+    F3->getPPtr()->setState( F3->getPPtr()->getState() + 0.2*Vector3s::Random());
+    F3->getOPtr()->setState((F3->getOPtr()->getState() + 0.2*Vector4s::Random()).normalized());
+
+    report = ceres_manager->solve(1);
+    WOLF_DEBUG("report: ", report);
+
+    // Print states
+    problem->print(1,0,1,0);
+
+    ASSERT_MATRIX_APPROX(F2->getPPtr()->getState(), 2*pos2        , 1e-8);
+    ASSERT_MATRIX_APPROX(F2->getOPtr()->getState(), quat2.coeffs(), 1e-8);
+    ASSERT_MATRIX_APPROX(F3->getPPtr()->getState(), 2*pos3        , 1e-8);
+    ASSERT_MATRIX_APPROX(F3->getOPtr()->getState(), quat3.coeffs(), 1e-8);
+
+    // evaluate residuals
+    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                      res.data());
+    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+    for (size_t i=0; i<8; i++)
+    {
+        cv123.at(i)->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                                 F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                                 F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                                 S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                                 res.data());
+
+        ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+    }
+}
+
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
 //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F1";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F2";
 //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F3";
-//    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_S";
+    //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_S";
+//        ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F2_F3";
     return RUN_ALL_TESTS();
 }
 
