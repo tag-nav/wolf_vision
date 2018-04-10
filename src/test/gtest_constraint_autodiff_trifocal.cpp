@@ -766,8 +766,8 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
      *
      * C1 is not optimized as it acts as the reference
      * S  is not optimized either as observability is compromised
-     * C2.pos is fixed to set the unobservable scale
-     * C2.ori and all C3 are optimized
+     * C2 and C3 are optimized
+     * The scale is observed through a distance constraint
      *
      */
 
