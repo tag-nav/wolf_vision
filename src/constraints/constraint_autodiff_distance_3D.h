@@ -49,11 +49,23 @@ class ConstraintAutodiffDistance3D : public ConstraintAutodiff<ConstraintAutodif
 
             Map<const Matrix<T,3,1>> pos1(_pos1);
             Map<const Matrix<T,3,1>> pos2(_pos2);
+            Map<Matrix<T,1,1>> res(_residual);
 
-            T dist_exp  = sqrt( ( pos2 - pos1 ).squaredNorm() );
-            T dist_meas = getMeasurement().cast<T>();
+            Matrix<T,1,1> dist_exp ( sqrt( ( pos2 - pos1 ).squaredNorm() ) );
+            Matrix<T,1,1> dist_meas (getMeasurement().cast<T>() );
+            Matrix<T,1,1> sqrt_info_upper = getMeasurementSquareRootInformationUpper().cast<T>();
 
-            *_residual  = getMeasurementSquareRootInformationUpper().cast<T>() * (dist_meas - dist_exp);
+            WOLF_DEBUG("pos1: ", pos1);
+            WOLF_DEBUG("pos2: ", pos2);
+            WOLF_DEBUG("vect: ", pos2-pos1);
+            WOLF_DEBUG("exp dist: ", dist_exp);
+            WOLF_DEBUG("meas dist: ", dist_meas);
+            WOLF_DEBUG("error: ", dist_meas - dist_exp);
+
+            res  = sqrt_info_upper * (dist_meas - dist_exp);
+            WOLF_DEBUG("residual: ", res);
+
+            return true;
         }
 };
 
