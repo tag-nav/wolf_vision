@@ -582,6 +582,16 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
 
 TEST_F(ConstraintAutodiffTrifocalTest, solve_multi_point)
 {
+    /*
+     * In this test we add 8 more points and perform optimization on the camera frames.
+     *
+     * C1 is not optimized as it acts as the reference
+     * S  is not optimized either as observability is compromised
+     * C2.pos is fixed to set the unobservable scale
+     * C2.ori and all C3 are optimized
+     *
+     */
+
     F1->setState(pose1);
     F2->setState(pose2);
     F3->setState(pose3);
@@ -646,7 +656,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_multi_point)
     // 2. Perturbate states, keep scale
     F1->getPPtr()->setState( pos1   );
     F1->getOPtr()->setState( vquat1 );
-    F2->getPPtr()->setState( pos2   );
+    F2->getPPtr()->setState( pos2   ); // this fixes the scale
     F2->getOPtr()->setState((vquat2 + 0.2*Vector4s::Random()).normalized());
     F3->getPPtr()->setState( pos3   + 0.2*Vector3s::Random());
     F3->getOPtr()->setState((vquat3 + 0.2*Vector4s::Random()).normalized());
