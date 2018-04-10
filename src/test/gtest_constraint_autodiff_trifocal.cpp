@@ -34,7 +34,7 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
         FeatureBasePtr  f1, f2, f3;
         ConstraintAutodiffTrifocalPtr c123;
 
-        virtual void SetUp()
+        virtual void SetUp() override
         {
             std::string wolf_root = _WOLF_ROOT_DIR;
 
@@ -580,7 +580,71 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
 
 }
 
-TEST_F(ConstraintAutodiffTrifocalTest, solve_multi_point)
+class ConstraintAutodiffTrifocalMultiPointTest : public ConstraintAutodiffTrifocalTest
+{
+        /*
+         * In this test class we add 8 more points and perform optimization on the camera frames.
+         *
+         * C1 is not optimized as it acts as the reference
+         * S  is not optimized either as observability is compromised
+         * C2.pos is fixed to set the unobservable scale
+         * C2.ori and all C3 are optimized
+         *
+         */
+
+
+    public:
+        std::vector<FeatureBasePtr> fv1, fv2, fv3;
+        std::vector<ConstraintAutodiffTrifocalPtr> cv123;
+
+        virtual void SetUp() override
+        {
+            ConstraintAutodiffTrifocalTest::SetUp();
+
+            Eigen::Matrix<Scalar, 2, 9> c1p_can;
+            c1p_can <<
+                    0,   -1/3.00,   -1/3.00,    1/3.00,    1/3.00,   -1.0000,   -1.0000, 1.0000,    1.0000,
+                    0,    1/3.00,   -1/3.00,    1/3.00,   -1/3.00,    1.0000,   -1.0000, 1.0000,   -1.0000;
+
+            Eigen::Matrix<Scalar, 2, 9> c2p_can;
+            c2p_can <<
+                    0,    1/3.00,    1/3.00,    1.0000,    1.0000,   -1/3.00,   -1/3.00,   -1.0000,   -1.0000,
+                    0,    1/3.00,   -1/3.00,    1.0000,   -1.0000,    1/3.00,   -1/3.00,    1.0000,   -1.0000;
+
+            Eigen::Matrix<Scalar, 2, 9> c3p_can;
+            c3p_can <<
+                    0,   -1/3.00,   -1.0000,    1/3.00,    1.0000,   -1/3.00,   -1.0000,   1/3.00,    1.0000,
+                    0,   -1/3.00,   -1.0000,   -1/3.00,   -1.0000,    1/3.00,    1.0000,   1/3.00,    1.0000;
+
+            Matrix2s pix_cov; pix_cov.setIdentity(); //pix_cov *= 1e-4;
+
+            // for i==0 we already have them
+            fv1.push_back(f1);
+            fv2.push_back(f2);
+            fv3.push_back(f3);
+            cv123.push_back(c123);
+            for (size_t i=1; i<c1p_can.cols() ; i++)
+            {
+                fv1.push_back(std::make_shared<FeatureBase>("PIXEL", c1p_can.col(i), pix_cov));
+                I1->addFeature(fv1.at(i));
+
+                fv2.push_back(std::make_shared<FeatureBase>("PIXEL", c2p_can.col(i), pix_cov));
+                I2->addFeature(fv2.at(i));
+
+                fv3.push_back(std::make_shared<FeatureBase>("PIXEL", c3p_can.col(i), pix_cov));
+                I3->addFeature(fv3.at(i));
+
+                cv123.push_back(std::make_shared<ConstraintAutodiffTrifocal>(fv1.at(i), fv2.at(i), fv3.at(i), proc_trifocal, false, CTR_ACTIVE));
+                fv3.at(i)->addConstraint(cv123.at(i));
+                fv1.at(i)->addConstrainedBy(cv123.at(i));
+                fv2.at(i)->addConstrainedBy(cv123.at(i));
+            }
+
+        }
+
+};
+
+TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point)
 {
     /*
      * In this test we add 8 more points and perform optimization on the camera frames.
@@ -592,49 +656,6 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_multi_point)
      *
      */
 
-    F1->setState(pose1);
-    F2->setState(pose2);
-    F3->setState(pose3);
-    S ->getPPtr()->setState(pos_cam);
-    S ->getOPtr()->setState(vquat_cam);
-
-
-    Eigen::Matrix<Scalar, 2, 8> c1p_can;
-    c1p_can <<
-       -1/3.00,   -1/3.00,    1/3.00,    1/3.00,   -1.0000,   -1.0000, 1.0000,    1.0000,
-        1/3.00,   -1/3.00,    1/3.00,   -1/3.00,    1.0000,   -1.0000, 1.0000,   -1.0000;
-
-    Eigen::Matrix<Scalar, 2, 8> c2p_can;
-    c2p_can <<
-        1/3.00,    1/3.00,    1.0000,    1.0000,   -1/3.00,   -1/3.00,   -1.0000,   -1.0000,
-        1/3.00,   -1/3.00,    1.0000,   -1.0000,    1/3.00,   -1/3.00,    1.0000,   -1.0000;
-
-    Eigen::Matrix<Scalar, 2, 8> c3p_can;
-    c3p_can <<
-       -1/3.00,   -1.0000,    1/3.00,    1.0000,   -1/3.00,   -1.0000,   1/3.00,    1.0000,
-       -1/3.00,   -1.0000,   -1/3.00,   -1.0000,    1/3.00,    1.0000,   1/3.00,    1.0000;
-
-    std::vector<FeatureBasePtr> fv1, fv2, fv3;
-    std::vector<ConstraintAutodiffTrifocalPtr> cv123;
-    Matrix2s pix_cov; pix_cov.setIdentity(); //pix_cov *= 1e-4;
-
-    for (size_t i=0; i<c1p_can.cols() ; i++)
-    {
-        fv1.push_back(std::make_shared<FeatureBase>("PIXEL", c1p_can.col(i), pix_cov));
-        I1->addFeature(fv1.at(i));
-
-        fv2.push_back(std::make_shared<FeatureBase>("PIXEL", c2p_can.col(i), pix_cov));
-        I2->addFeature(fv2.at(i));
-
-        fv3.push_back(std::make_shared<FeatureBase>("PIXEL", c3p_can.col(i), pix_cov));
-        I3->addFeature(fv3.at(i));
-
-        cv123.push_back(std::make_shared<ConstraintAutodiffTrifocal>(fv1.at(i), fv2.at(i), fv3.at(i), proc_trifocal, false, CTR_ACTIVE));
-        fv3.at(i)->addConstraint(cv123.at(i));
-        fv1.at(i)->addConstrainedBy(cv123.at(i));
-        fv2.at(i)->addConstrainedBy(cv123.at(i));
-
-    }
 
     S ->getPPtr()->fix(); // do not calibrate sensor pos
     S ->getOPtr()->fix(); // do not calibrate sensor ori
@@ -645,15 +666,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_multi_point)
     F3->getPPtr()->unfix(); // Estimate Cam 3 pos
     F3->getOPtr()->unfix(); // Estimate Cam 3 ori
 
-    // 1. Solve from exact priors
-    std::string report = ceres_manager->solve(1);
-    WOLF_DEBUG("report: ", report);
-    problem->print(1,0,1,0);
-
-    ASSERT_MATRIX_APPROX(F2->getState(), pose2, 1e-10);
-    ASSERT_MATRIX_APPROX(F3->getState(), pose3, 1e-10);
-
-    // 2. Perturbate states, keep scale
+    // Perturbate states, keep scale
     F1->getPPtr()->setState( pos1   );
     F1->getOPtr()->setState( vquat1 );
     F2->getPPtr()->setState( pos2   ); // this fixes the scale
@@ -661,10 +674,10 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_multi_point)
     F3->getPPtr()->setState( pos3   + 0.2*Vector3s::Random());
     F3->getOPtr()->setState((vquat3 + 0.2*Vector4s::Random()).normalized());
 
-    report = ceres_manager->solve(1);
-    WOLF_DEBUG("report: ", report);
+    std::string report = ceres_manager->solve(1);
 
-    // Print states
+    // Print results
+    WOLF_DEBUG("report: ", report);
     problem->print(1,0,1,0);
 
     // Evaluate final states
@@ -675,13 +688,7 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_multi_point)
 
     // evaluate residuals
     Vector3s res;
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
-                      res.data());
-    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-10);
-    for (size_t i=0; i<8; i++)
+    for (size_t i=0; i<cv123.size(); i++)
     {
         cv123.at(i)->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
                                  F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
@@ -692,8 +699,31 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_multi_point)
         ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-10);
     }
 
+}
 
-    // 3. Perturbate states, change scale
+TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
+{
+    /*
+     * In this test we add 8 more points and perform optimization on the camera frames.
+     *
+     * C1 is not optimized as it acts as the reference
+     * S  is not optimized either as observability is compromised
+     * C2.pos is fixed to set the unobservable scale
+     * C2.ori and all C3 are optimized
+     *
+     */
+
+
+    S ->getPPtr()->fix(); // do not calibrate sensor pos
+    S ->getOPtr()->fix(); // do not calibrate sensor ori
+    F1->getPPtr()->fix(); // Cam 1 acts as reference
+    F1->getOPtr()->fix(); // Cam 1 acts as reference
+    F2->getPPtr()->fix(); // This fixes the scale
+    F2->getOPtr()->unfix(); // Estimate Cam 2 ori
+    F3->getPPtr()->unfix(); // Estimate Cam 3 pos
+    F3->getOPtr()->unfix(); // Estimate Cam 3 ori
+
+    // Perturbate states, change scale
     F1->getPPtr()->setState( 2 * pos1 );
     F1->getOPtr()->setState(   vquat1 );
     F2->getPPtr()->setState( 2 * pos2 );
@@ -701,10 +731,10 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_multi_point)
     F3->getPPtr()->setState( 2 * pos3 + 0.2*Vector3s::Random());
     F3->getOPtr()->setState((  vquat3 + 0.2*Vector4s::Random()).normalized());
 
-    report = ceres_manager->solve(1);
-    WOLF_DEBUG("report: ", report);
+    std::string report = ceres_manager->solve(1);
 
-    // Print states
+    // Print results
+    WOLF_DEBUG("report: ", report);
     problem->print(1,0,1,0);
 
     // Evaluate final states
@@ -714,15 +744,8 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_multi_point)
     ASSERT_MATRIX_APPROX(F3->getOPtr()->getState(),   vquat3, 1e-8);
 
     // evaluate residuals
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
-                      res.data());
-
-    ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
-
-    for (size_t i=0; i<8; i++)
+    Vector3s res;
+    for (size_t i=0; i<cv123.size(); i++)
     {
         cv123.at(i)->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
                                  F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
