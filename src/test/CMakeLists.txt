@@ -114,9 +114,11 @@ target_link_libraries(gtest_trajectory ${PROJECT_NAME})
 wolf_add_gtest(gtest_constraint_absolute gtest_constraint_absolute.cpp)
 target_link_libraries(gtest_constraint_absolute ${PROJECT_NAME})
 
+IF(vision_utils_FOUND)
 # ConstraintAutodiffTrifocal test
 wolf_add_gtest(gtest_constraint_autodiff_trifocal gtest_constraint_autodiff_trifocal.cpp)
 target_link_libraries(gtest_constraint_autodiff_trifocal ${PROJECT_NAME})
+ENDIF(vision_utils_FOUND)
 
 # ConstraintOdom3D class test
 wolf_add_gtest(gtest_constraint_odom_3D gtest_constraint_odom_3D.cpp)
