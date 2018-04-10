@@ -114,6 +114,10 @@ target_link_libraries(gtest_trajectory ${PROJECT_NAME})
 wolf_add_gtest(gtest_constraint_absolute gtest_constraint_absolute.cpp)
 target_link_libraries(gtest_constraint_absolute ${PROJECT_NAME})
 
+# ConstraintAutodiffDistance3D test
+wolf_add_gtest(gtest_constraint_autodiff_distance_3D gtest_constraint_autodiff_distance_3D.cpp)
+target_link_libraries(gtest_constraint_autodiff_distance_3D ${PROJECT_NAME})
+
 # ConstraintAutodiffTrifocal test
 wolf_add_gtest(gtest_constraint_autodiff_trifocal gtest_constraint_autodiff_trifocal.cpp)
 target_link_libraries(gtest_constraint_autodiff_trifocal ${PROJECT_NAME})

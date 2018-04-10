@@ -55,15 +55,16 @@ class ConstraintAutodiffDistance3D : public ConstraintAutodiff<ConstraintAutodif
             Matrix<T,1,1> dist_meas (getMeasurement().cast<T>() );
             Matrix<T,1,1> sqrt_info_upper = getMeasurementSquareRootInformationUpper().cast<T>();
 
-            WOLF_DEBUG("pos1: ", pos1);
-            WOLF_DEBUG("pos2: ", pos2);
-            WOLF_DEBUG("vect: ", pos2-pos1);
-            WOLF_DEBUG("exp dist: ", dist_exp);
-            WOLF_DEBUG("meas dist: ", dist_meas);
-            WOLF_DEBUG("error: ", dist_meas - dist_exp);
+//            WOLF_DEBUG("pos1: ", pos1);
+//            WOLF_DEBUG("pos2: ", pos2);
+//            WOLF_DEBUG("vect: ", pos2-pos1);
+//            WOLF_DEBUG("exp dist: ", dist_exp);
+//            WOLF_DEBUG("meas dist: ", dist_meas);
+//            WOLF_DEBUG("error: ", dist_meas - dist_exp);
+//            WOLF_DEBUG("sqrt info: ", sqrt_info_upper);
 
             res  = sqrt_info_upper * (dist_meas - dist_exp);
-            WOLF_DEBUG("residual: ", res);
+//            WOLF_DEBUG("residual: ", res);
 
             return true;
         }
