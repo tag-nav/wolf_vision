@@ -230,7 +230,8 @@ typedef enum
     CTR_DIFF_DRIVE,             ///< Diff-drive constraint
     CTR_BEARING_2D,             ///< 2D bearing 
     CTR_BLOCK_ABS,              ///< absolute constraint to Poisition or Velocity depending on argument StateBlockPtr (for priors)
-    CTR_TRIFOCAL_PLP            ///< Trifocal tensor constraint of the type point-line-point
+    CTR_TRIFOCAL_PLP,           ///< Trifocal tensor constraint of the type point-line-point
+    CTR_DISTANCE_3D             ///< Distance between two 3D frames
 } ConstraintType;
 
 /** \brief Enumeration of constraint status
