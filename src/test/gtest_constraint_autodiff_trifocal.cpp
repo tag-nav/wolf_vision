@@ -757,77 +757,84 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
     }
 }
 
-//#include "constraints/constraint_autodiff_distance_3D.h"
-//
-//TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
-//{
-//    /*
-//     * In this test we add 8 more points and perform optimization on the camera frames.
-//     *
-//     * C1 is not optimized as it acts as the reference
-//     * S  is not optimized either as observability is compromised
-//     * C2.pos is fixed to set the unobservable scale
-//     * C2.ori and all C3 are optimized
-//     *
-//     */
-//
-//
-//    S ->getPPtr()->fix(); // do not calibrate sensor pos
-//    S ->getOPtr()->fix(); // do not calibrate sensor ori
-//    F1->getPPtr()->fix(); // Cam 1 acts as reference
-//    F1->getOPtr()->fix(); // Cam 1 acts as reference
-//    F2->getPPtr()->fix(); // This fixes the scale
-//    F2->getOPtr()->unfix(); // Estimate Cam 2 ori
-//    F3->getPPtr()->unfix(); // Estimate Cam 3 pos
-//    F3->getOPtr()->unfix(); // Estimate Cam 3 ori
-//
-//    // Perturbate states, change scale
-//    F1->getPPtr()->setState( pos1   );
-//    F1->getOPtr()->setState( vquat1 );
-//    F2->getPPtr()->setState( pos2   );
-//    F2->getOPtr()->setState((vquat2 + 0.2*Vector4s::Random()).normalized());
-//    F3->getPPtr()->setState( pos3   + 0.2*Vector3s::Random());
-//    F3->getOPtr()->setState((vquat3 + 0.2*Vector4s::Random()).normalized());
-//
-//    // Add a distance constraint to fix the scale
-//    Scalar distance = sqrt(2.0);
-//    Scalar distance_var = 0.1 * 0.1;
-//
-//    CaptureBasePtr Cd = std::make_shared<CaptureBase>("DISTANCE", F3->getTimeStamp());
-//    F3->addCapture(Cd);
-//    FeatureBasePtr fd = std::make_shared<FeatureBase>("DISTANCE", Vector1s(distance), Matrix1s(distance_var));
-//    Cd->addFeature(fd);
-//    ConstraintAutodiffDistance3DPtr cd = std::make_shared<ConstraintAutodiffDistance3D>(fd, F1, nullptr, false, CTR_ACTIVE);
-//    fd->addConstraint(cd);
-//    F1->addConstrainedBy(cd);
-//
-//    problem->print(4,1,1,1);
-//
-//    std::string report = ceres_manager->solve(1);
-//
-//    // Print results
-//    WOLF_DEBUG("report: ", report);
-//    problem->print(1,0,1,0);
-//
-//    // Evaluate final states
-//    ASSERT_MATRIX_APPROX(F2->getPPtr()->getState(), pos2  , 1e-8);
-//    ASSERT_MATRIX_APPROX(F2->getOPtr()->getState(), vquat2, 1e-8);
-//    ASSERT_MATRIX_APPROX(F3->getPPtr()->getState(), pos3  , 1e-8);
-//    ASSERT_MATRIX_APPROX(F3->getOPtr()->getState(), vquat3, 1e-8);
-//
-//    // evaluate residuals
-//    Vector3s res;
-//    for (size_t i=0; i<cv123.size(); i++)
-//    {
-//        cv123.at(i)->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-//                                 F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-//                                 F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-//                                 S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
-//                                 res.data());
-//
-//        ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
-//    }
-//}
+#include "constraints/constraint_autodiff_distance_3D.h"
+
+TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
+{
+    /*
+     * In this test we add 8 more points and perform optimization on the camera frames.
+     *
+     * C1 is not optimized as it acts as the reference
+     * S  is not optimized either as observability is compromised
+     * C2.pos is fixed to set the unobservable scale
+     * C2.ori and all C3 are optimized
+     *
+     */
+
+
+    S ->getPPtr()->fix(); // do not calibrate sensor pos
+    S ->getOPtr()->fix(); // do not calibrate sensor ori
+    F1->getPPtr()->fix(); // Cam 1 acts as reference
+    F1->getOPtr()->fix(); // Cam 1 acts as reference
+    F2->getPPtr()->unfix(); // Estimate Cam 2 pos
+    F2->getOPtr()->unfix(); // Estimate Cam 2 ori
+    F3->getPPtr()->unfix(); // Estimate Cam 3 pos
+    F3->getOPtr()->unfix(); // Estimate Cam 3 ori
+
+    // Perturbate states, change scale
+    F1->getPPtr()->setState( pos1   );
+    F1->getOPtr()->setState( vquat1 );
+    F2->getPPtr()->setState( pos2   + 0.2*Vector3s::Random() );
+    F2->getOPtr()->setState((vquat2 + 0.2*Vector4s::Random()).normalized());
+    F3->getPPtr()->setState( pos3   + 0.2*Vector3s::Random());
+    F3->getOPtr()->setState((vquat3 + 0.2*Vector4s::Random()).normalized());
+
+    // Add a distance constraint to fix the scale
+    Scalar distance = sqrt(2.0);
+    Scalar distance_var = 0.1 * 0.1;
+
+    CaptureBasePtr Cd = std::make_shared<CaptureBase>("DISTANCE", F3->getTimeStamp());
+    F3->addCapture(Cd);
+    FeatureBasePtr fd = std::make_shared<FeatureBase>("DISTANCE", Vector1s(distance), Matrix1s(distance_var));
+    Cd->addFeature(fd);
+    ConstraintAutodiffDistance3DPtr cd = std::make_shared<ConstraintAutodiffDistance3D>(fd, F1, nullptr, false, CTR_ACTIVE);
+    fd->addConstraint(cd);
+    F1->addConstrainedBy(cd);
+
+    problem->print(1,0,1,0);
+
+    cd->setStatus(CTR_INACTIVE);
+    std::string report = ceres_manager->solve(1);
+
+    problem->print(1,0,1,0);
+
+    cd->setStatus(CTR_ACTIVE);
+    report = ceres_manager->solve(1);
+
+    // Print results
+    WOLF_DEBUG("report: ", report);
+    problem->print(1,0,1,0);
+
+    // Evaluate final states
+    ASSERT_MATRIX_APPROX(F2->getPPtr()->getState(), pos2  , 1e-8);
+    ASSERT_MATRIX_APPROX(F2->getOPtr()->getState(), vquat2, 1e-8);
+    ASSERT_MATRIX_APPROX(F3->getPPtr()->getState(), pos3  , 1e-8);
+    ASSERT_MATRIX_APPROX(F3->getOPtr()->getState(), vquat3, 1e-8);
+
+
+    // evaluate residuals
+    Vector3s res;
+    for (size_t i=0; i<cv123.size(); i++)
+    {
+        cv123.at(i)->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
+                                 F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
+                                 F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
+                                 S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+                                 res.data());
+
+        ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
+    }
+}
 
 int main(int argc, char **argv)
 {
@@ -837,6 +844,7 @@ int main(int argc, char **argv)
     //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_F3";
     //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_S";
     //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalTest.solve_multi_point";
+    //    ::testing::GTEST_FLAG(filter) = "ConstraintAutodiffTrifocalMultiPointTest.solve_multi_point_distance";
     return RUN_ALL_TESTS();
 }
 
