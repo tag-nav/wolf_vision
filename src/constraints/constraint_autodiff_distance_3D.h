@@ -13,6 +13,8 @@
 namespace wolf
 {
 
+WOLF_PTR_TYPEDEFS(ConstraintAutodiffDistance3D);
+
 class ConstraintAutodiffDistance3D : public ConstraintAutodiff<ConstraintAutodiffDistance3D, 1, 3, 3>
 {
     public:
@@ -39,7 +41,7 @@ class ConstraintAutodiffDistance3D : public ConstraintAutodiff<ConstraintAutodif
         virtual ~ConstraintAutodiffDistance3D() { /* nothing */ }
 
         template<typename T>
-        virtual void operator () (const T* const _pos1,
+        bool operator () (const T* const _pos1,
                                   const T* const _pos2,
                                   T* _residual) const
         {
