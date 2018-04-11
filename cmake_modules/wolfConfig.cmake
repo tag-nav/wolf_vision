@@ -143,6 +143,7 @@ list(APPEND wolf_INCLUDE_DIRS ${wolf_INCLUDE_DIR})
 set(wolf_VERSION 0.0.1)
 
 # Eigen.
+
 # Flag set during configuration and build of wolf.
 set(wolf_EIGEN_VERSION @EIGEN_VERSION@)
 # Append the locations of Eigen when wolf was built to the search path hints.
@@ -150,8 +151,12 @@ list(APPEND EIGEN_INCLUDE_DIR_HINTS /usr/include/eigen3)
 # Search quietly to control the timing of the error message if not found. The
 # search should be for an exact match, but for usability reasons do a soft
 # match and reject with an explanation below.
-find_package(Eigen ${wolf_EIGEN_VERSION} QUIET)
-if (EIGEN_FOUND)
+
+find_package(Eigen3 ${wolf_EIGEN_VERSION} QUIET)
+
+# Flag set with currently found Eigen version.
+set(EIGEN_VERSION @EIGEN_VERSION@)
+if (EIGEN3_FOUND)
   if (NOT EIGEN_VERSION VERSION_EQUAL wolf_EIGEN_VERSION)
     # CMake's VERSION check in FIND_PACKAGE() will accept any version >= the
     # specified version. However, only version = is supported. Improve
@@ -164,13 +169,13 @@ if (EIGEN_FOUND)
       "for more details")
   endif ()
   message(STATUS "Found required wolf dependency: "
-    "Eigen version ${wolf_EIGEN_VERSION} in ${EIGEN_INCLUDE_DIRS}")
-else (EIGEN_FOUND)
+    "Eigen version ${wolf_EIGEN_VERSION} in ${EIGEN3_INCLUDE_DIR}")
+else (EIGEN3_FOUND)
   wolf_report_not_found("Missing required wolf "
     "dependency: Eigen version ${wolf_EIGEN_VERSION}, please set "
-    "EIGEN_INCLUDE_DIR.")
-endif (EIGEN_FOUND)
-list(APPEND wolf_INCLUDE_DIRS ${EIGEN_INCLUDE_DIRS})
+    "EIGEN3_INCLUDE_DIR.")
+endif (EIGEN3_FOUND)
+list(APPEND wolf_INCLUDE_DIRS ${EIGEN3_INCLUDE_DIR})
 
 # Import exported wolf targets, if they have not already been imported.
 if (NOT TARGET wolf AND NOT wolf_BINARY_DIR)
