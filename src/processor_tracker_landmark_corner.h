@@ -70,9 +70,9 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
 
         // These values are constant -- provide a setter or accept them at construction time if you need to configure them
         Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
-        Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
-        Scalar position_error_th_ = 1;
-        Scalar min_features_ratio_th_ = 0.5;
+//        Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
+//        Scalar position_error_th_ = 1;
+//        Scalar min_features_ratio_th_ = 0.5;
 
         Eigen::Matrix3s R_sensor_world_, R_world_sensor_;
         Eigen::Matrix3s R_robot_sensor_;
@@ -87,7 +87,9 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
         ProcessorTrackerLandmarkCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-                                       const unsigned int& _new_corners_th, const unsigned int& _loop_frames_th);
+                                       const Scalar& _time_tolerance,
+                                       const unsigned int& _new_corners_th,
+                                       const unsigned int& _loop_frames_th);
 
         virtual ~ProcessorTrackerLandmarkCorner();
         virtual void configure(SensorBasePtr _sensor) { };

@@ -359,7 +359,7 @@ Eigen::VectorXs ProcessorTrackerLandmarkCorner::computeSquaredMahalanobisDistanc
 ProcessorBasePtr ProcessorTrackerLandmarkCorner::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
 {
     ProcessorParamsLaserPtr params = std::static_pointer_cast<ProcessorParamsLaser>(_params);
-    ProcessorTrackerLandmarkCornerPtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkCorner>(params->line_finder_params_, params->new_corners_th, params->loop_frames_th);
+    ProcessorTrackerLandmarkCornerPtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkCorner>(params->line_finder_params_, _params->time_tolerance,  params->new_corners_th, params->loop_frames_th);
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }
@@ -407,13 +407,20 @@ ProcessorTrackerLandmarkCorner::~ProcessorTrackerLandmarkCorner()
 }
 
 ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(
-        const laserscanutils::LineFinderIterativeParams& _line_finder_params, const unsigned int& _new_corners_th,
+        const laserscanutils::LineFinderIterativeParams& _line_finder_params,
+        const Scalar& _time_tolerance,
+        const unsigned int& _new_corners_th,
         const unsigned int& _loop_frames_th) :
-        ProcessorTrackerLandmark("TRACKER LANDMARK CORNER", 0, 0), line_finder_(_line_finder_params), new_corners_th_(
-                _new_corners_th), loop_frames_th_(_loop_frames_th), R_sensor_world_(Eigen::Matrix3s::Identity()), R_world_sensor_(
-                Eigen::Matrix3s::Identity()), R_robot_sensor_(Eigen::Matrix3s::Identity()), extrinsics_transformation_computed_(
-                false)
+                ProcessorTrackerLandmark("TRACKER LANDMARK CORNER", _time_tolerance, 0),
+                line_finder_(_line_finder_params),
+                new_corners_th_(_new_corners_th),
+                loop_frames_th_(_loop_frames_th),
+                R_sensor_world_(Eigen::Matrix3s::Identity()),
+                R_world_sensor_(Eigen::Matrix3s::Identity()),
+                R_robot_sensor_(Eigen::Matrix3s::Identity()),
+                extrinsics_transformation_computed_(false)
 {
+    //
 }
 
 }        //namespace wolf
