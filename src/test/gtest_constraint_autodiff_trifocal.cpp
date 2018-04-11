@@ -790,12 +790,12 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
     F3->getOPtr()->setState((vquat3 + 0.2*Vector4s::Random()).normalized());
 
     // Add a distance constraint to fix the scale
-    Scalar distance = sqrt(2.0);
-    Scalar distance_var = 0.1 * 0.1;
+    Scalar distance     = sqrt(2.0);
+    Scalar distance_std = 0.1;
 
     CaptureBasePtr Cd = std::make_shared<CaptureBase>("DISTANCE", F3->getTimeStamp());
     F3->addCapture(Cd);
-    FeatureBasePtr fd = std::make_shared<FeatureBase>("DISTANCE", Vector1s(distance), Matrix1s(distance_var));
+    FeatureBasePtr fd = std::make_shared<FeatureBase>("DISTANCE", Vector1s(distance), Matrix1s(distance_std * distance_std));
     Cd->addFeature(fd);
     ConstraintAutodiffDistance3DPtr cd = std::make_shared<ConstraintAutodiffDistance3D>(fd, F1, nullptr, false, CTR_ACTIVE);
     fd->addConstraint(cd);
