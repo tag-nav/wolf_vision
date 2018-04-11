@@ -477,7 +477,7 @@ Scalar ProcessorTrackerLandmarkPolyline::sqDistPointToLine(const Eigen::Vector3s
     return (_A.head<2>() - _B.head<2>()).squaredNorm();
 }
 
-void ProcessorTrackerLandmarkPolyline::createNewLandmarks(LandmarkBaseList& _new_landmarks)
+void ProcessorTrackerLandmarkPolyline::createNewLandmarks()
 {
     //std::cout << "ProcessorTrackerLandmarkPolyline::createNewLandmarks" << std::endl;
     FeaturePolyline2DPtr polyline_ft_ptr;
@@ -488,7 +488,7 @@ void ProcessorTrackerLandmarkPolyline::createNewLandmarks(LandmarkBaseList& _new
         new_lmk_ptr = createLandmark(new_feature_ptr);
         //std::cout << "\tfeature: " << new_feature_ptr->id() << std::endl;
         //std::cout << "\tnew_landmark: " << new_lmk_ptr->id() << ": "<< ((LandmarkPolyline2D*)new_lmk_ptr)->getNPoints() << " points" << std::endl;
-        _new_landmarks.push_back(new_lmk_ptr);
+        new_landmarks_.push_back(new_lmk_ptr);
         // cast
         polyline_ft_ptr = std::static_pointer_cast<FeaturePolyline2D>(new_feature_ptr);
         // create new correspondence

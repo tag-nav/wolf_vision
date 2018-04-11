@@ -160,7 +160,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 
         /** \brief Creates a landmark for each of new_features_last_
          **/
-        virtual void createNewLandmarks(LandmarkBaseList& _new_landmarks);
+        virtual void createNewLandmarks();
 
         /** \brief Create one landmark
          *

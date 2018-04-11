@@ -51,7 +51,7 @@ void SensorLaser2D::setDefaultScanParams()
     scan_params_.range_max_ = 100;
     scan_params_.range_std_dev_ = 0.01;
     
-    setNoise(Eigen::VectorXs::Constant(1,scan_params_.range_std_dev_));
+    setNoiseStd(Eigen::VectorXs::Constant(1,scan_params_.range_std_dev_));
 }
 
 void SensorLaser2D::setScanParams(const laserscanutils::LaserScanParams & _params)
