@@ -65,6 +65,7 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
         ProcessorTrackerFeatureCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
+                                      const Scalar& _time_tolerance,
                                       const unsigned int& _n_corners_th);
         virtual ~ProcessorTrackerFeatureCorner();
 
@@ -87,7 +88,7 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
          * \param _incoming_feature input/output feature in incoming capture to be corrected
          * \return false if the the process discards the correspondence with origin's feature
          */
-        virtual bool correctFeatureDrift(const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature);
+        virtual bool correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature);
 
         /** \brief Vote for KeyFrame generation
          *
@@ -118,7 +119,7 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
 
 };
 
-inline bool ProcessorTrackerFeatureCorner::correctFeatureDrift(const FeatureBasePtr _last_feature,
+inline bool ProcessorTrackerFeatureCorner::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature,
                                                               FeatureBasePtr _incoming_feature)
 {
     return true;
