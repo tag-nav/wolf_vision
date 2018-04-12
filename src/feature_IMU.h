@@ -2,7 +2,7 @@
 #define FEATURE_IMU_H_
 
 //Wolf includes
-#include <capture_IMU.h>
+#include "capture_IMU.h"
 #include "feature_base.h"
 #include "wolf.h"
 

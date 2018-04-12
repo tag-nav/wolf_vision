@@ -253,6 +253,7 @@ SET(HDRS
     feature_odom_2D.h
     feature_polyline_2D.h
     feature_pose.h
+    IMU_tools.h
     landmark_corner_2D.h
     landmark_container.h
     landmark_line_2D.h
@@ -407,7 +408,6 @@ ENDIF(raw_gps_utils_FOUND)
 IF (vision_utils_FOUND)
     SET(HDRS ${HDRS}
         capture_image.h
-        constraint_AHP.h
         feature_point_image.h
         landmark_AHP.h
         landmark_point_3D.h

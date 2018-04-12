@@ -2,8 +2,8 @@
 #define CONSTRAINT_IMU_THETA_H_
 
 //Wolf includes
-#include <feature_IMU.h>
-#include <sensor_IMU.h>
+#include "feature_IMU.h"
+#include "sensor_IMU.h"
 #include "constraint_autodiff.h"
 #include "rotations.h"
 
