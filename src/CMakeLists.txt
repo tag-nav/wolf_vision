@@ -474,6 +474,7 @@ IF(YAMLCPP_FOUND)
     IF(vision_utils_FOUND)
         SET(SRCS ${SRCS}
         	yaml/processor_image_yaml.cpp
+        	yaml/processor_tracker_feature_trifocal_yaml.cpp
             )
     ENDIF(vision_utils_FOUND)
 ENDIF(YAMLCPP_FOUND)
