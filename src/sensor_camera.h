@@ -10,7 +10,6 @@ namespace wolf
 WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsCamera);
 /** Struct of intrinsic camera parameters
  */
-WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsCamera);
 struct IntrinsicsCamera : public IntrinsicsBase
 {
         unsigned int width;                 ///< Image width in pixels
@@ -21,8 +20,8 @@ struct IntrinsicsCamera : public IntrinsicsBase
         virtual ~IntrinsicsCamera() = default;
 };
 
-WOLF_PTR_TYPEDEFS(SensorCamera);
 
+WOLF_PTR_TYPEDEFS(SensorCamera);
 /**Pin-hole camera sensor
  */
 class SensorCamera : public SensorBase
