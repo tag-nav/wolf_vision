@@ -128,6 +128,12 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         CaptureBasePtr getPrevOriginPtr();
 
+    public:
+
+        /// @brief Factory method
+        static ProcessorBasePtr create(const std::string& _unique_name,
+                                       const ProcessorParamsBasePtr _params,
+                                       const SensorBasePtr _sensor_ptr);
 };
 
 inline wolf::CaptureBasePtr ProcessorTrackerFeatureTrifocal::getPrevOriginPtr()
