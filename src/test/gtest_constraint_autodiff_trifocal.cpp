@@ -801,10 +801,9 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
     fd->addConstraint(cd);
     F1->addConstrainedBy(cd);
 
-    problem->print(1,0,1,0);
-
     cd->setStatus(CTR_INACTIVE);
     std::string report = ceres_manager->solve(1);
+    WOLF_DEBUG("DISTANCE CONSTRAINT INACTIVE: \n", report);
 
     problem->print(1,0,1,0);
 
@@ -812,7 +811,7 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
     report = ceres_manager->solve(1);
 
     // Print results
-    WOLF_DEBUG("report: ", report);
+    WOLF_DEBUG("DISTANCE CONSTRAINT ACTIVE: \n", report);
     problem->print(1,0,1,0);
 
     // Evaluate final states
