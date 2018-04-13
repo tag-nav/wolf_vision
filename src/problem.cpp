@@ -118,6 +118,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     }
 
     ProcessorBasePtr prc_ptr = ProcessorFactory::get().create(uppercase(_prc_type), _unique_processor_name, _prc_params, _corresponding_sensor_ptr);
+    prc_ptr->configure(_corresponding_sensor_ptr);
     _corresponding_sensor_ptr->addProcessor(prc_ptr);
 
     // setting the origin in all processor motion if origin already setted

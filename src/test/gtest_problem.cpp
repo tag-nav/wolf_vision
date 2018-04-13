@@ -54,7 +54,7 @@ TEST(Problem, Processor)
     ASSERT_FALSE(P->getProcessorMotionPtr());
 
     // add a motion sensor and processor
-    SensorBasePtr Sm = std::make_shared<SensorOdom3D>(nullptr, nullptr, std::make_shared<IntrinsicsOdom3D>());
+    SensorBasePtr Sm = std::make_shared<SensorOdom3D>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(), IntrinsicsOdom3D()); // with dummy intrinsics
     P->addSensor(Sm);
 
     // add motion processor
@@ -81,7 +81,6 @@ TEST(Problem, Installers)
     // install processor tracker (dummy installation under an Odometry sensor -- it's OK for this test)
     ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(0.1, 5, 10));
     S->addProcessor(pt);
-
 
     // check motion processor IS NOT set
     ASSERT_FALSE(P->getProcessorMotionPtr());

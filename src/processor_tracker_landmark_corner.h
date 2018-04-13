@@ -92,6 +92,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
                                        const unsigned int& _loop_frames_th);
 
         virtual ~ProcessorTrackerLandmarkCorner();
+        virtual void configure(SensorBasePtr _sensor) { };
 
     protected:
 
@@ -148,7 +149,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out);
 
         /** \brief Create one landmark
          *

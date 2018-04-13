@@ -12,13 +12,13 @@
 
 namespace wolf {
 
-SensorOdom3D::SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _o_ptr, IntrinsicsOdom3DPtr params) :
+SensorOdom3D::SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _o_ptr, IntrinsicsOdom3DPtr _params) :
         SensorBase("ODOM 3D", _p_ptr, _o_ptr, nullptr, 6),
-        k_disp_to_disp_(params->k_disp_to_disp),
-        k_disp_to_rot_(params->k_disp_to_rot),
-        k_rot_to_rot_(params->k_rot_to_rot),
-        min_disp_var_(params->min_disp_var),
-        min_rot_var_(params->min_rot_var)
+        k_disp_to_disp_(_params->k_disp_to_disp),
+        k_disp_to_rot_(_params->k_disp_to_rot),
+        k_rot_to_rot_(_params->k_rot_to_rot),
+        min_disp_var_(_params->min_disp_var),
+        min_rot_var_(_params->min_rot_var)
 {
     noise_cov_ = (Eigen::Vector6s() << min_disp_var_, min_disp_var_, min_disp_var_, min_rot_var_, min_rot_var_, min_rot_var_).finished().asDiagonal();
     setNoiseCov(noise_cov_); // sets also noise_std_

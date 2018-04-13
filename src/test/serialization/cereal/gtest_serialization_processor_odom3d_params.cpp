@@ -89,7 +89,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 }
 
 TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
-       CerealSerializationProcessorOdom3DParamsPtrXML)
+       CerealSerializationProcessorParamsOdom3DPtrXML)
 {
   const std::string filename(path_to_io + "params_odom3d_ptr_serialization.xml");
 
@@ -105,7 +105,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 
     ASSERT_NO_THROW( wolf::load( filename, nb ) );
 
-    wolf::ProcessorOdom3DParamsPtr nb_cast =
+    wolf::ProcessorParamsOdom3DPtr nb_cast =
         std::dynamic_pointer_cast<wolf::ProcessorParamsOdom3D>(nb);
 
     ASSERT_TRUE(nb_cast != nullptr);
@@ -120,7 +120,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 
   PRINTF("All good at "
          "WolfTestCerealSerializationProcessorOdom3DParams::"
-         "CerealSerializationProcessorOdom3DParamsPtrXML !\n");
+         "CerealSerializationProcessorParamsOdom3DPtrXML !\n");
 }
 
 TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
@@ -147,7 +147,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 }
 
 TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
-       CerealSerializationProcessorOdom3DParamsPtrJSON)
+       CerealSerializationProcessorParamsOdom3DPtrJSON)
 {
   const std::string filename(path_to_io + "params_odom3d_ptr_serialization.json");
 
@@ -163,7 +163,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 
     ASSERT_NO_THROW( wolf::load( filename, nb ) );
 
-    wolf::ProcessorOdom3DParamsPtr nb_cast =
+    wolf::ProcessorParamsOdom3DPtr nb_cast =
         std::dynamic_pointer_cast<wolf::ProcessorParamsOdom3D>(nb);
 
     ASSERT_TRUE(nb_cast != nullptr);
@@ -178,7 +178,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 
   PRINTF("All good at "
          "WolfTestCerealSerializationProcessorOdom3DParams::"
-         "CerealSerializationProcessorOdom3DParamsPtrJSON !\n");
+         "CerealSerializationProcessorParamsOdom3DPtrJSON !\n");
 }
 
 TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
@@ -205,7 +205,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 }
 
 TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
-       CerealSerializationProcessorOdom3DParamsPtrBinary)
+       CerealSerializationProcessorParamsOdom3DPtrBinary)
 {
   const std::string filename(path_to_io + "params_odom3d_ptr_serialization.bin");
 
@@ -221,7 +221,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 
     ASSERT_NO_THROW( wolf::load( filename, nb ) );
 
-    wolf::ProcessorOdom3DParamsPtr nb_cast =
+    wolf::ProcessorParamsOdom3DPtr nb_cast =
         std::dynamic_pointer_cast<wolf::ProcessorParamsOdom3D>(nb);
 
     ASSERT_TRUE(nb_cast != nullptr);
@@ -236,7 +236,7 @@ TEST_F(WolfTestCerealSerializationProcessorOdom3DParams,
 
   PRINTF("All good at "
          "WolfTestCerealSerializationProcessorOdom3DParams::"
-         "CerealSerializationProcessorOdom3DParamsPtrBinary !\n");
+         "CerealSerializationProcessorParamsOdom3DPtrBinary !\n");
 }
 
 int main(int argc, char **argv)

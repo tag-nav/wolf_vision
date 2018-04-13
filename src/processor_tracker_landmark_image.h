@@ -1,5 +1,5 @@
-#ifndef PROCESSOR_IMAGE_LANDMARK_H
-#define PROCESSOR_IMAGE_LANDMARK_H
+#ifndef PROCESSOR_TRACKER_LANDMARK_IMAGE_H
+#define PROCESSOR_TRACKER_LANDMARK_IMAGE_H
 
 // Wolf includes
 #include "sensor_camera.h"
@@ -7,56 +7,44 @@
 #include "feature_point_image.h"
 #include "state_block.h"
 #include "state_quaternion.h"
-#include "active_search.h"
 #include "processor_tracker_landmark.h"
 #include "landmark_AHP.h"
-#include "processor_image_params.h"
+#include "processor_params_image.h"
 #include "constraint_AHP.h"
 
-// OpenCV includes
-#if defined (HAVE_OPENCV3)
-	#include <opencv2/features2d.hpp>
-	#include <opencv2/highgui.hpp>
-	#include <opencv2/core.hpp>
-	#include <opencv2/imgproc.hpp>
-#else
-	#include <opencv2/features2d/features2d.hpp>
-	#include <opencv2/highgui/highgui.hpp>
-	#include <opencv2/core/core.hpp>
-#endif
+// Vision utils
+#include <vision_utils/detectors/detector_base.h>
+#include <vision_utils/descriptors/descriptor_base.h>
+#include <vision_utils/matchers/matcher_base.h>
+#include <vision_utils/algorithms/activesearch/alg_activesearch.h>
 
 // General includes
 #include <cmath>
 #include <complex>      // std::complex, std::norm
 
-
 namespace wolf {
 
+WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmarkImage);
 
-WOLF_PTR_TYPEDEFS(ProcessorImageLandmark);
-    
 //Class
-class ProcessorImageLandmark : public ProcessorTrackerLandmark
+class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
 {
     protected:
 
-#if defined (HAVE_OPENCV3)
-        cv::Ptr<cv::DescriptorMatcher> matcher_ptr_;
-        cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
-#else
-        std::shared_ptr<cv::DescriptorMatcher> matcher_ptr_;
-        std::shared_ptr<cv::Feature2D> detector_descriptor_ptr_;
-#endif
+        vision_utils::DetectorBasePtr det_ptr_;
+        vision_utils::DescriptorBasePtr des_ptr_;
+        vision_utils::MatcherBasePtr mat_ptr_;
+        vision_utils::AlgorithmACTIVESEARCHPtr active_search_ptr_;  // Active Search
+
+        int cell_width_; ///< Active search cell width
+        int cell_height_; ///< Active search cell height
+        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_activesearch_ptr_; ///< Active search parameters
 
     protected:
         ProcessorParamsImage params_;           // Struct with parameters of the processors
-        ActiveSearchGrid active_search_grid_;   // Active Search
+
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
-        struct
-        {
-                unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
-                unsigned int size_bits_; ///< length of the descriptor vector in bits
-        }detector_descriptor_params_;
+
         struct
         {
                 unsigned int width_; ///< width of the image
@@ -77,22 +65,23 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         Eigen::Vector3s cam2world_translation_;
         Eigen::Vector4s cam2world_orientation_;
 
-        // Lists to store values to debug
-        std::list<cv::Rect> tracker_roi_;
-        std::list<cv::Rect> detector_roi_;
-        std::list<cv::Point> tracker_target_;
-        FeatureBaseList feat_lmk_found_;
-
         unsigned int n_feature_;
         unsigned int landmark_idx_non_visible_;
 
         std::list<float> list_response_;
 
     public:
-        ProcessorImageLandmark(const ProcessorParamsImage& _params);
-        virtual ~ProcessorImageLandmark();
 
-        virtual void setup(SensorCameraPtr _camera_ptr);
+        // Lists to store values to debug
+        std::list<cv::Rect> tracker_roi_;
+        std::list<cv::Rect> detector_roi_;
+        std::list<cv::Point> tracker_target_;
+        FeatureBaseList feat_lmk_found_;
+
+        ProcessorTrackerLandmarkImage(const ProcessorParamsImage& _params);
+        virtual ~ProcessorTrackerLandmarkImage();
+
+        virtual void configure(SensorBasePtr _sensor) ;
 
     protected:
 
@@ -147,7 +136,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          *
          * \return The number of detected Features.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out);
 
         /** \brief Create one landmark
          *
@@ -166,10 +155,6 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          */
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 
-
-
-
-
         //Other functions
     private:
 
@@ -182,27 +167,6 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
          * \return the number of detected features
          */
         unsigned int detect(const cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,cv::Mat& new_descriptors);
-
-    private:
-        /**
-         * \brief Trims the roi of a matrix which exceeds the boundaries of the image
-         * \param _roi input/output roi to be trimmed if necessary
-         */
-        void trimRoi(cv::Rect& _roi);
-
-        /**
-         * \brief Augments the designed roi so that the detector and descriptor analize the whole region of interest
-         * \param _roi input/output roi to be inflated the necessary amount
-         */
-        void inflateRoi(cv::Rect& _roi);
-
-        /**
-         * \brief Adapts a certain roi to maximize its performance and assign it to the image. It's composed by inflateRoi and trimRoi.
-         * \param _image_roi output image to be applied the adapted roi
-         * \param _image input image (incoming or last) in which the roi will be applied to obtain \b _image_roi
-         * \param _roi input roi to be adapted
-         */
-        void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
 
         /**
          * \brief Does the match between a target descriptor and (potentially) multiple candidate descriptors of a Feature.
@@ -222,7 +186,7 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
         void drawLandmarks(cv::Mat _image);
         void drawFeaturesFromLandmarks(cv::Mat _image);
         void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
-        void drawRoi(cv::Mat _image, CaptureImagePtr _capture, cv::Scalar _color);
+        void drawTrackerRoi(cv::Mat _image, cv::Scalar _color);
 
 };
 
@@ -230,4 +194,4 @@ class ProcessorImageLandmark : public ProcessorTrackerLandmark
 } // namespace wolf
 
 
-#endif // PROCESSOR_IMAGE_LANDMARK_H
+#endif // PROCESSOR_TRACKER_LANDMARK_IMAGE_H

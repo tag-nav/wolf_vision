@@ -87,14 +87,22 @@ target_link_libraries(gtest_processor_base ${PROJECT_NAME})
 # ProcessorMotion class test
 wolf_add_gtest(gtest_processor_motion gtest_processor_motion.cpp)
 target_link_libraries(gtest_processor_motion ${PROJECT_NAME})
-
+  
 # Rotation test
 wolf_add_gtest(gtest_rotation gtest_rotation.cpp)
 target_link_libraries(gtest_rotation ${PROJECT_NAME})
 
+# SensorBase test
+wolf_add_gtest(gtest_sensor_base gtest_sensor_base.cpp)
+target_link_libraries(gtest_sensor_base ${PROJECT_NAME})
+
 # TimeStamp class test
 wolf_add_gtest(gtest_time_stamp gtest_time_stamp.cpp)
 target_link_libraries(gtest_time_stamp ${PROJECT_NAME})
+
+# TrackMatrix class test
+wolf_add_gtest(gtest_track_matrix gtest_track_matrix.cpp)
+target_link_libraries(gtest_track_matrix ${PROJECT_NAME})
 
 # TrajectoryBase class test
 wolf_add_gtest(gtest_trajectory gtest_trajectory.cpp)
@@ -105,6 +113,16 @@ target_link_libraries(gtest_trajectory ${PROJECT_NAME})
 # ConstraintAbs(P/O/V) classes test
 wolf_add_gtest(gtest_constraint_absolute gtest_constraint_absolute.cpp)
 target_link_libraries(gtest_constraint_absolute ${PROJECT_NAME})
+
+# ConstraintAutodiffDistance3D test
+wolf_add_gtest(gtest_constraint_autodiff_distance_3D gtest_constraint_autodiff_distance_3D.cpp)
+target_link_libraries(gtest_constraint_autodiff_distance_3D ${PROJECT_NAME})
+
+IF(vision_utils_FOUND)
+# ConstraintAutodiffTrifocal test
+wolf_add_gtest(gtest_constraint_autodiff_trifocal gtest_constraint_autodiff_trifocal.cpp)
+target_link_libraries(gtest_constraint_autodiff_trifocal ${PROJECT_NAME})
+ENDIF(vision_utils_FOUND)
 
 # ConstraintOdom3D class test
 wolf_add_gtest(gtest_constraint_odom_3D gtest_constraint_odom_3D.cpp)
@@ -142,6 +160,12 @@ target_link_libraries(gtest_processor_IMU ${PROJECT_NAME})
 wolf_add_gtest(gtest_processor_IMU_jacobians gtest_processor_IMU_jacobians.cpp)
 target_link_libraries(gtest_processor_IMU_jacobians ${PROJECT_NAME})
 
+IF(vision_utils_FOUND)
+# ProcessorIMUJacobians test
+wolf_add_gtest(gtest_processor_tracker_feature_trifocal gtest_processor_tracker_feature_trifocal.cpp)
+target_link_libraries(gtest_processor_tracker_feature_trifocal ${PROJECT_NAME})
+ENDIF(vision_utils_FOUND)
+
 # ProcessorMotion in 2D
 wolf_add_gtest(gtest_odom_2D gtest_odom_2D.cpp)
 target_link_libraries(gtest_odom_2D ${PROJECT_NAME})
@@ -154,12 +178,7 @@ target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
 wolf_add_gtest(gtest_constraint_autodiff gtest_constraint_autodiff.cpp)
 target_link_libraries(gtest_constraint_autodiff ${PROJECT_NAME})
 
-# ROI test
-IF(OpenCV_FOUND)
-  wolf_add_gtest(gtest_roi_ORB gtest_roi_ORB.cpp)
-  target_link_libraries(gtest_roi_ORB ${PROJECT_NAME})
-ENDIF(OpenCV_FOUND)
-
 # ------- Now Core classes Serialization ----------
 
 add_subdirectory(serialization)
+

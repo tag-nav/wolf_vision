@@ -1,0 +1,15 @@
+processor type: "TRACKER FEATURE TRIFOCAL"
+processor name: "tracker feature trifocal example"
+
+vision_utils:
+    YAML file params: ACTIVESEARCH.yaml
+
+algorithm:
+    time tolerance: 0.01
+    voting active: true
+    minimum features for keyframe: 40
+    maximum new features: 40
+    
+noise:
+    pixel noise std: 1 # pixels
+    

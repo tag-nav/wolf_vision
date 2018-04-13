@@ -11,7 +11,7 @@ ProcessorOdom3D::ProcessorOdom3D(const ProcessorParamsOdom3D& _params, SensorOdo
                 p1_(nullptr), p2_(nullptr), p_out_(nullptr),
                 q1_(nullptr), q2_(nullptr), q_out_(nullptr)
         {
-            setup(_sensor_ptr);
+            configure(_sensor_ptr);
             delta_ = deltaZero();
             delta_integrated_ = deltaZero();
             jacobian_delta_preint_.setZero(delta_cov_size_, delta_cov_size_);
@@ -23,10 +23,11 @@ ProcessorOdom3D::~ProcessorOdom3D()
 {
 }
 
-void ProcessorOdom3D::setup(SensorOdom3DPtr sen_ptr)
+void ProcessorOdom3D::configure(SensorBasePtr _sensor)
 {
-    if (sen_ptr)
+    if (_sensor)
     {
+        SensorOdom3DPtr sen_ptr = std::static_pointer_cast<SensorOdom3D>(_sensor);
         // we steal the parameters from the provided odom3D sensor.
         k_disp_to_disp_ = sen_ptr->getDispVarToDispNoiseFactor();
         k_disp_to_rot_ = sen_ptr->getDispVarToRotNoiseFactor();

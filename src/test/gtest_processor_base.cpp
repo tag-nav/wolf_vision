@@ -50,8 +50,8 @@ TEST(ProcessorBase, KeyFrameCallback)
     // Install odometer (sensor and processor)
     SensorBasePtr sens_odo = problem->installSensor("ODOM 2D", "odometer", Vector3s(0,0,0), "");
     ProcessorParamsOdom2DPtr proc_odo_params = make_shared<ProcessorParamsOdom2D>();
+    proc_odo_params->time_tolerance = dt/2;
     ProcessorBasePtr proc_odo = problem->installProcessor("ODOM 2D", "odometer", sens_odo, proc_odo_params);
-    proc_odo->setTimeTolerance(dt/2);
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 

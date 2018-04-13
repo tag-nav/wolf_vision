@@ -83,13 +83,13 @@ libglog.so will be installed at **/usr/local/lib**
 
 -   Tourbleshooting:
 
-    * ./autogen.sh fails with './autogen.sh: autoreconf: not found'
+    * If ./autogen.sh fails with './autogen.sh: autoreconf: not found'
 
     In a fresh installation you will probably need to install autoreconf running
     
-        $ sudo make install dh-autoreconf 
+        $ sudo apt-get install dh-autoreconf 
 
-    * `make` command fails with the error: `/bin/bash: aclocal-1.14: command not found`
+    * If `make` command fails with the error: `/bin/bash: aclocal-1.14: command not found`
     
     Install Glog with the following commands:
         
@@ -154,6 +154,23 @@ Wolf used spdlog macros. To install it:
         $ make
         $ sudo make install 
 
+#### Optional: Vision Utils (Install only if you want to use IRI's vision utils)
+
+**(1)** Git clone the source:
+
+        $ git clone ssh://git@gitlab.iri.upc.edu:2202/asantamaria/vision_utils.git
+    
+**(2)** Build and install:
+
+        $ cd vision_utils/build
+        $ cmake ..
+        $ make
+        $ sudo make install
+        
+**(3)** Optionally run tests
+
+        $ ctest
+        
 #### Optional: Laser Scan Utils (Install only if you want to use IRI's laser scan utils)
 
 **(1)** Git clone the source:
@@ -162,11 +179,11 @@ Wolf used spdlog macros. To install it:
     
 **(2)** Build and install:
 
-        $ cd laser_scan_utils/trunk/build
+        $ cd laser_scan_utils/build
         $ cmake ..
         $ make
         $ sudo make install
-    
+            
 #### Optional: Raw GPS Utils (Install only if you want to use IRI's raw gps utils)
 
 **(1)** Git clone the source:

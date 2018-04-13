@@ -515,6 +515,22 @@ inline  Eigen::Matrix<typename D2::Scalar, 3, 1> diff(const Eigen::QuaternionBas
     return minus(q1, q2);
 }
 
+template<typename D>
+inline Eigen::Quaternion<typename D::Scalar> e2q(const Eigen::MatrixBase<D>& _euler)
+{
+    MatrixSizeCheck<3,1>::check(_euler);
+
+    typedef typename D::Scalar T;
+
+    const Eigen::AngleAxis<T> ax = Eigen::AngleAxis<T>(_euler(0), Eigen::Matrix<T, 3, 1>::UnitX());
+    const Eigen::AngleAxis<T> ay = Eigen::AngleAxis<T>(_euler(1), Eigen::Matrix<T, 3, 1>::UnitY());
+    const Eigen::AngleAxis<T> az = Eigen::AngleAxis<T>(_euler(2), Eigen::Matrix<T, 3, 1>::UnitZ());
+
+    return Eigen::Quaternion<T>(az * ay * ax);
+}
+
+
+
 template<typename T>
 inline Eigen::Matrix<T, 3, 3> matrixRollPitchYaw(const T roll,
                                                  const T pitch,

@@ -26,6 +26,7 @@ class ProcessorGPS : public ProcessorBase
     public:
         ProcessorGPS();
         virtual ~ProcessorGPS(Scalar time_tolerance_);
+        virtual void configure(SensorBasePtr _sensor) { };
         virtual void init(CaptureBasePtr _capture_ptr);
         virtual void process(CaptureBasePtr _capture_ptr);
         virtual bool voteForKeyFrame();

@@ -20,6 +20,7 @@ class ProcessorTrackerLandmarkDummy : public ProcessorTrackerLandmark
     public:
         ProcessorTrackerLandmarkDummy(const Scalar _time_tolerance, const unsigned int& _max_new_features);
         virtual ~ProcessorTrackerLandmarkDummy();
+        virtual void configure(SensorBasePtr _sensor) { };
 
     protected:
 
@@ -55,7 +56,7 @@ class ProcessorTrackerLandmarkDummy : public ProcessorTrackerLandmark
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out);
 
         /** \brief Create one landmark
          *

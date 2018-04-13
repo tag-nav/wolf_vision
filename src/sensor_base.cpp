@@ -205,12 +205,7 @@ void SensorBase::registerNewStateBlocks()
 
 void SensorBase::setNoiseStd(const Eigen::VectorXs& _noise_std) {
     noise_std_ = _noise_std;
-    noise_cov_.setZero();
-    for (unsigned int i=0; i<_noise_std.size(); i++)
-    {
-        Scalar var_i = _noise_std(i) * _noise_std(i);
-        noise_cov_(i,i) = var_i;
-    }
+    noise_cov_ = _noise_std.array().square().matrix().asDiagonal();
 }
 
 void SensorBase::setNoiseCov(const Eigen::MatrixXs& _noise_cov) {

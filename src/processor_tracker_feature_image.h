@@ -1,27 +1,21 @@
-#ifndef PROCESSOR_IMAGE_FEATURE_H
-#define PROCESSOR_IMAGE_FEATURE_H
+#ifndef PROCESSOR_TRACKER_FEATURE_IMAGE_H
+#define PROCESSOR_TRACKER_FEATURE_IMAGE_H
 
 // Wolf includes
 #include "sensor_camera.h"
 #include "capture_image.h"
 #include "feature_point_image.h"
 #include "state_block.h"
-#include "active_search.h"
+#include "state_quaternion.h"
 #include "processor_tracker_feature.h"
 #include "constraint_epipolar.h"
-#include "processor_image_params.h"
+#include "processor_params_image.h"
 
-// OpenCV includes
-#if defined (HAVE_OPENCV3)
-#include <opencv2/features2d.hpp>
-#include <opencv2/highgui.hpp>
-#include <opencv2/core.hpp>
-#include <opencv2/imgproc.hpp>
-#else
-#include <opencv2/features2d/features2d.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/core/core.hpp>
-#endif
+// Vision utils
+#include <vision_utils/detectors/detector_base.h>
+#include <vision_utils/descriptors/descriptor_base.h>
+#include <vision_utils/matchers/matcher_base.h>
+#include <vision_utils/algorithms/activesearch/alg_activesearch.h>
 
 // General includes
 #include <cmath>
@@ -30,48 +24,45 @@
 namespace wolf
 {
 
-WOLF_PTR_TYPEDEFS(ProcessorImageFeature);
+WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureImage);
 
 //class
-class ProcessorImageFeature : public ProcessorTrackerFeature
+class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
 {
     protected:
-#if defined (HAVE_OPENCV3)
-        cv::Ptr<cv::DescriptorMatcher> matcher_ptr_;
-        cv::Ptr<cv::FeatureDetector> detector_descriptor_ptr_;
-#else
-        std::shared_ptr<cv::DescriptorMatcher> matcher_ptr_;
-        std::shared_ptr<cv::Feature2D> detector_descriptor_ptr_;
-#endif
+
+        vision_utils::DetectorBasePtr det_ptr_;
+        vision_utils::DescriptorBasePtr des_ptr_;
+        vision_utils::MatcherBasePtr mat_ptr_;
+        vision_utils::AlgorithmACTIVESEARCHPtr active_search_ptr_;  // Active Search
+
+        int cell_width_; ///< Active search cell width
+        int cell_height_; ///< Active search cell height
+        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_activesearch_ptr_; ///< Active search parameters
 
     protected:
-        ProcessorParamsImage params_;           // Struct with parameters of the processors
-        ActiveSearchGrid active_search_grid_;   // Active Search
-        cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
-        struct
-        {
-                unsigned int pattern_radius_; ///< radius of the pattern used to detect a key-point at pattern_scale = 1.0 and octaves = 0
-                unsigned int size_bits_; ///< length of the descriptor vector in bits
-        } detector_descriptor_params_;
+
+		ProcessorParamsImage params_;           ///< Struct with parameters of the processors
+        cv::Mat image_last_, image_incoming_;   ///< Images of the "last" and "incoming" Captures
+
         struct
         {
                 unsigned int width_; ///< width of the image
                 unsigned int height_; ///< height of the image
         } image_;
 
+    public:
+
         // Lists to store values to debug
         std::list<cv::Rect> tracker_roi_;
         std::list<cv::Rect> tracker_roi_inflated_;
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
-        unsigned int complete_target_size_ = 1;
-        unsigned int target_size_ = 1;
 
-    public:
-        ProcessorImageFeature(ProcessorParamsImage _params);
-        virtual ~ProcessorImageFeature();
+        ProcessorTrackerFeatureImage(ProcessorParamsImage _params);
+        virtual ~ProcessorTrackerFeatureImage();
 
-        virtual void setup(SensorCameraPtr _camera_ptr);
+        virtual void configure(SensorBasePtr _sensor) ;
 
     protected:
 
@@ -127,7 +118,7 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
          *
          * \return The number of detected Features.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out);
 
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
@@ -142,28 +133,7 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
          * \return the number of detected features
          */
         virtual unsigned int detect(cv::Mat _image, cv::Rect& _roi, std::vector<cv::KeyPoint>& _new_keypoints,
-                                    cv::Mat& new_descriptors);
-
-    private:
-        /**
-         * \brief Trims the roi of a matrix which exceeds the boundaries of the image
-         * \param _roi input/output roi to be trimmed if necessary
-         */
-        virtual void trimRoi(cv::Rect& _roi);
-
-        /**
-         * \brief Augments the designed roi so that the detector and descriptor analize the whole region of interest
-         * \param _roi input/output roi to be inflated the necessary amount
-         */
-        virtual void inflateRoi(cv::Rect& _roi);
-
-        /**
-         * \brief Adapts a certain roi to maximize its performance and assign it to the image. It's composed by inflateRoi and trimRoi.
-         * \param _image_roi output image to be applied the adapted roi
-         * \param _image input image (incoming or last) in which the roi will be applied to obtain \b _image_roi
-         * \param _roi input roi to be adapted
-         */
-        virtual void adaptRoi(cv::Mat& _image_roi, cv::Mat _image, cv::Rect& _roi);
+                                    cv::Mat& _new_descriptors);
 
         /**
          * \brief Does the match between a target descriptor and (potentially) multiple candidate descriptors of a Feature.
@@ -188,11 +158,11 @@ class ProcessorImageFeature : public ProcessorTrackerFeature
 
 };
 
-inline bool ProcessorImageFeature::voteForKeyFrame()
+inline bool ProcessorTrackerFeatureImage::voteForKeyFrame()
 {
     return (incoming_ptr_->getFeatureList().size() < params_.algorithm.min_features_for_keyframe);
 }
 
 } // namespace wolf
 
-#endif // PROCESSOR_IMAGE_FEATURE_H
+#endif // PROCESSOR_TRACKER_FEATURE_IMAGE_H

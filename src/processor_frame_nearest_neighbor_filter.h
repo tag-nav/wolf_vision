@@ -64,8 +64,8 @@ public:
   using DistanceType = Params::DistanceType;
 
   ProcessorFrameNearestNeighborFilter(const Params& _params);
-
   virtual ~ProcessorFrameNearestNeighborFilter() = default;
+  virtual void configure(SensorBasePtr _sensor) { };
 
   inline DistanceType getDistanceType() const noexcept {return params_.distance_type_;}
 

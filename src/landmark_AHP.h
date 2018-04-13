@@ -7,8 +7,9 @@
 // yaml
 #include <yaml-cpp/yaml.h>
 
-//OpenCV includes
-#include "opencv2/features2d/features2d.hpp"
+// Vision utils
+#include <vision_utils.h>
+
 
 namespace wolf {
     

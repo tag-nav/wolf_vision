@@ -137,7 +137,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features) = 0;
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out) = 0;
 
         /** \brief Creates a landmark for each of new_features_last_
          **/
@@ -160,7 +160,6 @@ class ProcessorTrackerLandmark : public ProcessorTracker
         /** \brief Establish constraints between features in Capture \b last and landmarks
          */
         virtual void establishConstraints();
-
 };
 
 }// namespace wolf

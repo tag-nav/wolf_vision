@@ -24,7 +24,6 @@ struct IntrinsicsOdom3D : public IntrinsicsBase
         Scalar min_rot_var;
 
         virtual ~IntrinsicsOdom3D() = default;
-
 };
 
 WOLF_PTR_TYPEDEFS(SensorOdom3D);

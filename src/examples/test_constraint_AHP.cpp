@@ -43,7 +43,7 @@ int main()
 
     // PROCESSOR
     // one-liner API
-    ProcessorBasePtr processor_ptr = wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_ORB.yaml");
+    ProcessorBasePtr processor_ptr = wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml");
 
 
     // create the current frame
