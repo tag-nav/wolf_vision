@@ -269,14 +269,14 @@ Using the `catkin_tools` package
 
 -   Installing on Ubuntu with `apt-get`
 
-    $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
-    $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
-    $ sudo apt-get update
-    $ sudo apt-get install python-catkin-tools
+        $ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" > /etc/apt/sources.list.d/ros-latest.list'
+        $ wget http://packages.ros.org/ros.key -O - | sudo apt-key add -
+        $ sudo apt-get update
+        $ sudo apt-get install python-catkin-tools
     
 -   Installing with [`pip`](https://pip.pypa.io/en/stable/installing/)
 
-    $ sudo pip install -U catkin_tools
+        $ sudo pip install -U catkin_tools
     
 **(2)**  Create a `catkin workspace` :
 
