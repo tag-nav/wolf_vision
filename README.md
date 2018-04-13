@@ -158,14 +158,18 @@ Wolf used spdlog macros. To install it:
 
 **(1)** Git clone the source:
 
-        $ git clone https://github.com/angelsantamaria/vision_utils.git
+        $ git clone ssh://git@gitlab.iri.upc.edu:2202/asantamaria/vision_utils.git
     
 **(2)** Build and install:
 
-        $ cd vision_utils/trunk/build
+        $ cd vision_utils/build
         $ cmake ..
         $ make
         $ sudo make install
+        
+**(3)** Optionally run tests
+
+        $ ctest
         
 #### Optional: Laser Scan Utils (Install only if you want to use IRI's laser scan utils)
 
@@ -175,11 +179,11 @@ Wolf used spdlog macros. To install it:
     
 **(2)** Build and install:
 
-        $ cd laser_scan_utils/trunk/build
+        $ cd laser_scan_utils/build
         $ cmake ..
         $ make
         $ sudo make install
-    
+            
 #### Optional: Raw GPS Utils (Install only if you want to use IRI's raw gps utils)
 
 **(1)** Git clone the source:
