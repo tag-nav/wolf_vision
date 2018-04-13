@@ -41,7 +41,7 @@ Dependencies
 
 [Eigen](http://eigen.tuxfamily.org). Linear algebra, header library. Eigen 3.2 is also a depencency of ROS-Hydro. In case you don't have ROS in your machine, you can install Eigen by typing:
 
-    $ sudo apt-get install libeigen3-dev
+    $ sudo apt-get install libeigen3-dev
     
 #### Ceres (5 steps)
 
@@ -53,16 +53,16 @@ Dependencies
 
 -   Git clone the source:
 
-        $ git clone https://github.com/gflags/gflags.git
+        $ git clone https://github.com/gflags/gflags.git
     
 -   Build and install with:
 
-        $ cd gflags
-        $ mkdir build
-        $ cd build
-        $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" -DGFLAGS_NAMESPACE="google" ..
-        $ make
-        $ sudo make install 
+        $ cd gflags
+        $ mkdir build
+        $ cd build
+        $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" -DGFLAGS_NAMESPACE="google" ..
+        $ make
+        $ sudo make install 
     
 libgflags.a will be installed at **/usr/local/lib**
 
@@ -70,7 +70,7 @@ libgflags.a will be installed at **/usr/local/lib**
 
 -   Git clone the source:
 
-        $ git clone https://github.com/google/glog.git
+        $ git clone https://github.com/google/glog.git
     
 -   Build and install with:
 
@@ -93,18 +93,18 @@ libglog.so will be installed at **/usr/local/lib**
     
     Install Glog with the following commands:
         
-        $ cd glog
-        $ sudo apt-get install autoconf
-        $ autoreconf --force --install
-        $ ./configure --with-gflags=/usr/local/
-        $ make
-        $ sudo make install
+        $ cd glog
+        $ sudo apt-get install autoconf
+        $ autoreconf --force --install
+        $ ./configure --with-gflags=/usr/local/
+        $ make
+        $ sudo make install
     
 **(4) SUITESPARSE**
 
 -   Easy way!:
 
-        $ sudo apt-get install libsuitesparse-dev
+        $ sudo apt-get install libsuitesparse-dev
     
 **(5) CERES**
     
@@ -129,11 +129,11 @@ Wolf uses YAML files for configuration and for saving and loading workspaces. To
 
 -   Ubuntu:
 
-        $ sudo apt-get install libyaml-cpp-dev
+        $ sudo apt-get install libyaml-cpp-dev
     
 -   Mac:
 
-        $ brew install yaml-cpp
+        $ brew install yaml-cpp
         
 We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it at `[wolf]/cmake_modules/FindYamlCpp.cmake`
 
@@ -143,29 +143,29 @@ Wolf used spdlog macros. To install it:
 
 -   Git clone the source:
 
-        $ git clone https://github.com/gabime/spdlog.git
+        $ git clone https://github.com/gabime/spdlog.git
         
 -   Build and install with:
 
-        $ cd spdlog
-        $ mkdir build
-        $ cd build
-        $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" ..
-        $ make
-        $ sudo make install 
+        $ cd spdlog
+        $ mkdir build
+        $ cd build
+        $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" ..
+        $ make
+        $ sudo make install 
 
 #### Optional: Vision Utils (Install only if you want to use IRI's vision utils)
 
 **(1)** Git clone the source:
 
-        $ git clone ssh://git@gitlab.iri.upc.edu:2202/asantamaria/vision_utils.git
+        $ git clone ssh://git@gitlab.iri.upc.edu:2202/asantamaria/vision_utils.git
     
 **(2)** Build and install:
 
-        $ cd vision_utils/build
-        $ cmake ..
-        $ make
-        $ sudo make install
+        $ cd vision_utils/build
+        $ cmake ..
+        $ make
+        $ sudo make install
         
 **(3)** Optionally run tests
 
@@ -175,27 +175,27 @@ Wolf used spdlog macros. To install it:
 
 **(1)** Git clone the source:
 
-        $ git clone https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git
+        $ git clone https://gitlab.iri.upc.edu/mobile_robotics/laser_scan_utils.git
     
 **(2)** Build and install:
 
-        $ cd laser_scan_utils/build
-        $ cmake ..
-        $ make
-        $ sudo make install
+        $ cd laser_scan_utils/build
+        $ cmake ..
+        $ make
+        $ sudo make install
             
 #### Optional: Raw GPS Utils (Install only if you want to use IRI's raw gps utils)
 
 **(1)** Git clone the source:
 
-    $ git clone https://github.com/pt07/raw_gps_utils.git
+    $ git clone https://github.com/pt07/raw_gps_utils.git
     
 **(2)** Build and install:
 
-    $ cd raw_gps_utils/build
-    $ cmake ..
-    $ make
-    $ sudo make install
+    $ cd raw_gps_utils/build
+    $ cmake ..
+    $ make
+    $ sudo make install
     
 Download and build
 ------------------
@@ -204,61 +204,23 @@ Download and build
 
 **Download:**
     
-    $ git clone https://gitlab.iri.upc.edu/mobile_robotics/wolf.git
+    $ git clone https://gitlab.iri.upc.edu/mobile_robotics/wolf.git
     
 **Build:**
 
-    $ cd wolf
-    $ mkdir build
-    $ cd build
-    $ cmake ..
-    $ make
-    $ sudo make install  //optional in case you want to install wolf library
+    $ cd wolf
+    $ mkdir build
+    $ cd build
+    $ cmake ..
+    $ make
+    $ sudo make install //optional in case you want to install wolf library
     
-**Set the WOLF_ROOT environment variable**
-
-We need a platform-independent way to specify where is the WOLF project, so that code can locate relevant files at run-time.
-For example, if we want to use YAML files for configuring sensors, `YAML::LoadFile(filename)` needs an absolute path to a `filename`. This name is platform-specific, and many times user-specific.
-
-Usually, these files are out of the WOLF project. But for testing purposes, some of these files exist within the WOLF directories.
-
-Proceed as follows:
-
-**(1)** To run from __Terminal__ (the default), you need to create an environment variable WOLF_ROOT pointing to where the wolf project is.
-    
-Edit file `~/.bashrc`, or `~/.bash_profile`, and add this line: `export WOLF_ROOT="/abs/path/to/wolf" `
-    
-Then you need to source the file to get effect, 
-      
-    source ~/.bash_profile    // or ~/.bashrc, of course
-    
-**(2)** If you are using Eclipse or other __GUIs__ and you want this environment variable to be accessed by them, edit the file `/etc/environment` (you need to use `sudo`) and add this line: `WOLF_ROOT="/abs/path/to/wolf"`
-
-Then reboot your machine.  
-    
-Alternatively, you can set up the environment variables in your GUIs only. Follow these guidelines:
-    
-- If you run your application from __eclipse__, do:  
-    - Menu Run > Run configurations...  
-    - Add, or edit, a run configuration for the executable you want to run  
-    - Click on tab 'Environment'  
-    - Add a variable named `WOLF_ROOT`, with value `/abs/path/to/wolf`  
-    
-- If you run from __QtCreator__  
-    - Click on Left bar > Projects > Tab 'Build'  
-    - Under 'Build Environment', click 'Details'  
-    - Add variable `WOLF_ROOT` with value `/abs/path/to/wolf`  
-    - Click on Tab 'Run'  
-    - Select your Run configuration  
-    - Under 'Run Environment', make sure it says 'Use Build Environment'  
-    - If not, click on 'Details'   
-    - Under 'Base environment for this run configuration', select 'Build Environment'  
 
 #### Wolf ROS Node
 
 -   Git clone the source (inside your ROS workspace):
 
-    $ git clone https://github.com/IRI-MobileRobotics/wolf_ros.git
+    $ git clone https://github.com/IRI-MobileRobotics/wolf_ros.git
 
 Using the `catkin_tools` package
 --------------------------------
@@ -361,22 +323,22 @@ Kcachegrind is a graphical frontend for profiling your program and optimizing yo
 
 Get the programs with
 
-    $ sudo apt-get install valgrind kcachegrind
+    $ sudo apt-get install valgrind kcachegrind
 
 - Mac OSX
 
 In Mac, you can use qcachegrind instead. To get it through Homebrew, type
 
-    $ brew install valgrind qcachegrind
+    $ brew install valgrind qcachegrind
 
 I don't know if these packages are available through MacPorts. Try
 
-    $ ports search --name valgrind
-    $ ports search --name qcachegrind
+    $ ports search --name valgrind
+    $ ports search --name qcachegrind
 
 If they are available, just do
 
-    $ sudo port install valgrind qcachegrind
+    $ sudo port install valgrind qcachegrind
 
 #### Do the profiling and watch the reports
 
@@ -386,21 +348,21 @@ anywhere, and in the reports you will mostly see the overhead of the DEBUG mode.
 
 Type in your `wolf/bin/` directory:
 
-    $ cd bin/
-    $ valgrind --tool=callgrind ./my_program <my_prg_params>
+    $ cd bin/
+    $ valgrind --tool=callgrind ./my_program <my_prg_params>
 
 this produces a log report called `callgrind.out.XXXX`, where XXXX is a number. Then type 
 
 - Ubuntu
 
     ```shell
-    $ kcachegrind callgrind.out.XXXX
+    $ kcachegrind callgrind.out.XXXX
     ```
 
 - Mac OSX
 
     ```shell
-    $ qcachegrind callgrind.out.XXXX
+    $ qcachegrind callgrind.out.XXXX
     ```
 
 and enjoy.
