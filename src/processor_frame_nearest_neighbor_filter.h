@@ -53,7 +53,7 @@ private:
 
   // area of the computed covariance ellipse.
   // depends on how many percent of data should be considered.
-  wolf::Scalar area_;
+  Scalar area_;
 
   ProcessorParamsFrameNearestNeighborFilter params_;
 

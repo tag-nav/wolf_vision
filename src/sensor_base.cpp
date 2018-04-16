@@ -283,7 +283,7 @@ StateBlockPtr SensorBase::getIntrinsicPtr()
     return getStateBlockPtrDynamic(2);
 }
 
-wolf::Size SensorBase::computeCalibSize() const
+Size SensorBase::computeCalibSize() const
 {
     Size sz = 0;
     for (Size i = 0; i < state_block_vec_.size(); i++)

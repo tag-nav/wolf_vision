@@ -57,7 +57,7 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
          * Vector3s _p2 : position in current frame
          * Vector4s _q2 : orientation quaternion in current frame
          * Vector3s _v2 : velocity in current frame
-         * Matrix<9,1, wolf::Scalar> _res : to retrieve residuals (POV) O is rotation vector... NOT A QUATERNION
+         * Matrix<9,1, Scalar> _res : to retrieve residuals (POV) O is rotation vector... NOT A QUATERNION
         */
         template<typename D1, typename D2, typename D3>
         bool residual(const Eigen::MatrixBase<D1> &     _p1,
@@ -120,8 +120,8 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
         Eigen::Matrix3s dDq_dwb_;
 
         /// Metrics
-        const wolf::Scalar dt_; ///< delta-time and delta-time-squared between keyframes
-        const wolf::Scalar ab_rate_stdev_, wb_rate_stdev_; //stdev for standard_deviation (= sqrt(variance))
+        const Scalar dt_; ///< delta-time and delta-time-squared between keyframes
+        const Scalar ab_rate_stdev_, wb_rate_stdev_; //stdev for standard_deviation (= sqrt(variance))
         
         /* bias covariance and bias residuals
          *
@@ -420,10 +420,10 @@ inline Eigen::VectorXs ConstraintIMU::expectation() const
     const Eigen::Vector3s frame_previous_vel   = (frm_previous->getVPtr()->getState());
 
     // Define results vector and Map bits over it
-    Eigen::Matrix<wolf::Scalar, 10, 1> exp;
-    Eigen::Map<Eigen::Matrix<wolf::Scalar, 3, 1> >   pe(exp.data()    );
-    Eigen::Map<Eigen::Quaternion<wolf::Scalar> >     qe(exp.data() + 3);
-    Eigen::Map<Eigen::Matrix<wolf::Scalar, 3, 1> >   ve(exp.data() + 7);
+    Eigen::Matrix<Scalar, 10, 1> exp;
+    Eigen::Map<Eigen::Matrix<Scalar, 3, 1> >   pe(exp.data()    );
+    Eigen::Map<Eigen::Quaternion<Scalar> >     qe(exp.data() + 3);
+    Eigen::Map<Eigen::Matrix<Scalar, 3, 1> >   ve(exp.data() + 7);
 
     expectation(frame_previous_pos, frame_previous_ori, frame_previous_vel,
                 frame_current_pos, frame_current_ori, frame_current_vel,

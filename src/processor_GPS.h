@@ -24,13 +24,13 @@ class ProcessorGPS : public ProcessorBase
         Scalar gps_covariance_;
 
     public:
-        ProcessorGPS();
-        virtual ~ProcessorGPS(Scalar time_tolerance_);
+        ProcessorGPS(Scalar time_tolerance_);
+        virtual ~ProcessorGPS();
         virtual void configure(SensorBasePtr _sensor) { };
         virtual void init(CaptureBasePtr _capture_ptr);
         virtual void process(CaptureBasePtr _capture_ptr);
         virtual bool voteForKeyFrame();
-        virtual bool keyFrameCallback(wolf::FrameBasePtr, const Scalar& _time_tol);
+        virtual void keyFrameCallback(FrameBasePtr, const Scalar& _time_tol);
 
     public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);

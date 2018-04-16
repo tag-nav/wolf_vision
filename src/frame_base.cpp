@@ -98,6 +98,13 @@ void FrameBase::remove()
     }
 }
 
+void FrameBase::setTimeStamp(const TimeStamp& _ts)
+{
+    time_stamp_ = _ts;
+    if (isKey() && getTrajectoryPtr() != nullptr)
+        getTrajectoryPtr()->sortFrame(shared_from_this());
+}
+
 void FrameBase::registerNewStateBlocks()
 {
     if (getProblem() != nullptr)
@@ -332,6 +339,12 @@ CaptureBaseList FrameBase::getCapturesOf(const SensorBasePtr _sensor_ptr)
     return captures;
 }
 
+void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
+{
+    _cap_ptr->unlinkFromFrame();
+    capture_list_.remove(_cap_ptr);
+}
+
 ConstraintBasePtr FrameBase::getConstraintOf(const ProcessorBasePtr _processor_ptr, const std::string& type)
 {
     for (const ConstraintBasePtr& constaint_ptr : getConstrainedByList())
@@ -346,6 +359,12 @@ ConstraintBasePtr FrameBase::getConstraintOf(const ProcessorBasePtr _processor_p
         if (constaint_ptr->getProcessor() == _processor_ptr)
             return constaint_ptr;
     return nullptr;
+}
+
+void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
+{
+    for (auto c_ptr : getCaptureList())
+        c_ptr->getConstraintList(_ctr_list);
 }
 
 ConstraintBasePtr FrameBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)

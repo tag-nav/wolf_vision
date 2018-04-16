@@ -183,7 +183,7 @@ inline bool ConstraintAHP::operator ()(const T* const _current_frame_p,
     return true;
 }
 
-inline wolf::ConstraintAHPPtr ConstraintAHP::create(const FeatureBasePtr&   _ftr_ptr,
+inline ConstraintAHPPtr ConstraintAHP::create(const FeatureBasePtr&   _ftr_ptr,
                                                     const LandmarkAHPPtr&   _lmk_ahp_ptr,
                                                     const ProcessorBasePtr& _processor_ptr,
                                                     bool             _apply_loss_function,

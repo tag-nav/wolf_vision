@@ -117,6 +117,19 @@ void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
     feature_list_.splice(feature_list_.end(), _new_ft_list);
 }
 
+void CaptureBase::getConstraintList(ConstraintBaseList& _ctr_list)
+{
+    for (auto f_ptr : getFeatureList())
+        f_ptr->getConstraintList(_ctr_list);
+}
+
+ConstraintBasePtr CaptureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+{
+    constrained_by_list_.push_back(_ctr_ptr);
+    _ctr_ptr->setCaptureOtherPtr(shared_from_this());
+    return _ctr_ptr;
+}
+
 StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
 {
     if (getSensorPtr())
@@ -264,7 +277,7 @@ void CaptureBase::registerNewStateBlocks()
     }
 }
 
-wolf::Size CaptureBase::computeCalibSize() const
+Size CaptureBase::computeCalibSize() const
 {
     Size sz = 0;
     for (Size i = 0; i < state_block_vec_.size(); i++)

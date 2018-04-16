@@ -133,4 +133,19 @@ void ConstraintBase::setStatus(ConstraintStatus _status)
     status_ = _status;
 }
 
+void ConstraintBase::setApplyLossFunction(const bool _apply)
+{
+    if (apply_loss_function_ != _apply)
+    {
+        if (getProblem() == nullptr)
+            std::cout << "constraint not linked with Problem, apply loss function change not notified" << std::endl;
+        else
+        {
+            ConstraintBasePtr this_c = shared_from_this();
+            getProblem()->removeConstraintPtr(this_c);
+            getProblem()->addConstraintPtr(this_c);
+        }
+    }
+}
+
 } // namespace wolf

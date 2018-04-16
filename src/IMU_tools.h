@@ -67,7 +67,7 @@ inline void identity(MatrixBase<D1>& p, MatrixBase<D2>& q, MatrixBase<D3>& v)
     v << T3(0), T3(0), T3(0);
 }
 
-template<typename T = wolf::Scalar>
+template<typename T = Scalar>
 inline Matrix<T, 10, 1> identity()
 {
     Matrix<T, 10, 1> ret;

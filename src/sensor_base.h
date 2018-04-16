@@ -250,7 +250,7 @@ inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
     hardware_ptr_ = _hw_ptr;
 }
 
-inline wolf::Size SensorBase::getCalibSize() const
+inline Size SensorBase::getCalibSize() const
 {
     return calib_size_;
 }

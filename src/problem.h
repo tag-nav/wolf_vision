@@ -15,6 +15,7 @@ struct ProcessorParamsBase;
 
 //wolf includes
 #include "wolf.h"
+#include "frame_base.h"
 
 // std includes
 
@@ -325,7 +326,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 namespace wolf
 {
 
-inline wolf::ProcessorMotionPtr& Problem::getProcessorMotionPtr()
+inline ProcessorMotionPtr& Problem::getProcessorMotionPtr()
 {
     return processor_motion_ptr_;
 }

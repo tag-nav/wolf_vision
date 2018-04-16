@@ -60,7 +60,7 @@ class ConstraintGPSPseudorange3D: public ConstraintAutodiff<ConstraintGPSPseudor
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
-        static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
+        static ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
                                             NodeBasePtr _correspondant_ptr = nullptr)
         {
             return std::make_shared<ConstraintGPSPseudorange3D>(_feature_ptr);

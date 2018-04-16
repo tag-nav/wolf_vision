@@ -14,6 +14,26 @@ class FeatureBase;
 
 namespace wolf {
 
+/** \brief Enumeration of constraint status
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ */
+typedef enum
+{
+    CTR_INACTIVE = 0,   ///< Constraint established with a frame (odometry).
+    CTR_ACTIVE = 1      ///< Constraint established with absolute reference.
+} ConstraintStatus;
+
+/** \brief Enumeration of jacobian computation method
+ *
+ * You may add items to this list as needed. Be concise with names, and document your entries.
+ */
+typedef enum
+{
+    JAC_AUTO = 1,   ///< Auto differentiation (AutoDiffCostFunctionWrapper or ceres::NumericDiffCostFunction).
+    JAC_NUMERIC,    ///< Numeric differentiation (ceres::NumericDiffCostFunction).
+    JAC_ANALYTIC    ///< Analytic jacobians.
+} JacobianMethod;
 
 //class ConstraintBase
 class ConstraintBase : public NodeBase, public std::enable_shared_from_this<ConstraintBase>
@@ -156,11 +176,11 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
          */
         void setProcessor(const ProcessorBasePtr& _processor_ptr);
 
-    protected:
-        template<typename D>
-        void print(const std::string& name, const Eigen::MatrixBase<D>& mat) const; // Do nothing if input Scalar type is ceres::Jet
-        template<int R, int C>
-        void print(const std::string& name, const Eigen::Matrix<Scalar, R, C>& mat) const; // Normal print if Scalar type is wolf::Scalar
+//    protected:
+//        template<typename D>
+//        void print(const std::string& name, const Eigen::MatrixBase<D>& mat) const; // Do nothing if input Scalar type is ceres::Jet
+//        template<int R, int C>
+//        void print(const std::string& name, const Eigen::Matrix<Scalar, R, C>& mat) const; // Normal print if Scalar type is wolf::Scalar
 };
 
 
@@ -176,24 +196,24 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 
 namespace wolf{
 
-template<typename D>
-inline void ConstraintBase::print(const std::string& name, const Eigen::MatrixBase<D>& mat) const {} // Do nothing if input Scalar type is ceres::Jet
-template<int R, int C>
-inline void ConstraintBase::print(const std::string& name, const Eigen::Matrix<Scalar, R, C>& mat) const // Normal print if Scalar type is wolf::Scalar
-{
-    if (mat.cols() == 1)
-    {
-        WOLF_TRACE(name, ": ", mat.transpose());
-    }
-    else if (mat.rows() == 1)
-    {
-        WOLF_TRACE(name, ": ", mat);
-    }
-    else
-    {
-        WOLF_TRACE(name, ":\n", mat);
-    }
-}
+//template<typename D>
+//inline void ConstraintBase::print(const std::string& name, const Eigen::MatrixBase<D>& mat) const {} // Do nothing if input Scalar type is ceres::Jet
+//template<int R, int C>
+//inline void ConstraintBase::print(const std::string& name, const Eigen::Matrix<Scalar, R, C>& mat) const // Normal print if Scalar type is wolf::Scalar
+//{
+//    if (mat.cols() == 1)
+//    {
+//        WOLF_TRACE(name, ": ", mat.transpose());
+//    }
+//    else if (mat.rows() == 1)
+//    {
+//        WOLF_TRACE(name, ": ", mat);
+//    }
+//    else
+//    {
+//        WOLF_TRACE(name, ":\n", mat);
+//    }
+//}
 
 inline unsigned int ConstraintBase::id() const
 {
@@ -213,21 +233,6 @@ inline ConstraintStatus ConstraintBase::getStatus() const
 inline bool ConstraintBase::getApplyLossFunction()
 {
     return apply_loss_function_;
-}
-
-inline void ConstraintBase::setApplyLossFunction(const bool _apply)
-{
-    if (apply_loss_function_ != _apply)
-    {
-        if (getProblem() == nullptr)
-            std::cout << "constraint not linked with Problem, apply loss function change not notified" << std::endl;
-        else
-        {
-            ConstraintBasePtr this_c = shared_from_this();
-            getProblem()->removeConstraintPtr(this_c);
-            getProblem()->addConstraintPtr(this_c);
-        }
-    }
 }
 
 inline ProcessorBasePtr ConstraintBase::getProcessor() const

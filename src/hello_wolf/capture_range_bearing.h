@@ -27,8 +27,8 @@ class CaptureRangeBearing : public CaptureBase
         const int&              getId           (int _i)    const;
         const Eigen::VectorXs&  getRanges       ()          const;
         const Eigen::VectorXs&  getBearings     ()          const;
-        const wolf::Scalar&     getRange        (int _i)    const;
-        const wolf::Scalar&     getBearing      (int _i)    const;
+        const Scalar&           getRange        (int _i)    const;
+        const Scalar&           getBearing      (int _i)    const;
         Eigen::Vector2s         getRangeBearing (int _i)    const;
         Eigen::Matrix<double, Dynamic, 2> getRangeBearing() const;
 
@@ -58,12 +58,12 @@ inline const Eigen::VectorXs& CaptureRangeBearing::getBearings() const
     return bearings_;
 }
 
-inline const wolf::Scalar& CaptureRangeBearing::getRange(int _i) const
+inline const Scalar& CaptureRangeBearing::getRange(int _i) const
 {
     return ranges_(_i);
 }
 
-inline const wolf::Scalar& CaptureRangeBearing::getBearing(int _i) const
+inline const Scalar& CaptureRangeBearing::getBearing(int _i) const
 {
     return bearings_(_i);
 }

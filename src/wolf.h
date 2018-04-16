@@ -195,36 +195,6 @@ struct MatrixSizeCheck
 // End of check matrix sizes /////////////////////////////////////////////////
 
 
-/** \brief Enumeration of frame types: key-frame or non-key-frame
- */
-typedef enum
-{
-    NON_KEY_FRAME = 0,  ///< regular frame. It does play at optimizations but it will be discarded from the window once a newer frame arrives.
-    KEY_FRAME = 1       ///< key frame. It will stay in the frames window and play at optimizations.
-} FrameType;
-
-/** \brief Enumeration of constraint status
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    CTR_INACTIVE = 0,   ///< Constraint established with a frame (odometry).
-    CTR_ACTIVE = 1      ///< Constraint established with absolute reference.
-} ConstraintStatus;
-
-/** \brief Enumeration of jacobian computation method
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    JAC_AUTO = 1,   ///< Auto differentiation (AutoDiffCostFunctionWrapper or ceres::NumericDiffCostFunction).
-    JAC_NUMERIC,    ///< Numeric differentiation (ceres::NumericDiffCostFunction).
-    JAC_ANALYTIC    ///< Analytic jacobians.
-} JacobianMethod;
-
-
 /////////////////////////////////////////////////////////////////////////
 //      TYPEDEFS FOR POINTERS, LISTS AND ITERATORS IN THE WOLF TREE
 /////////////////////////////////////////////////////////////////////////

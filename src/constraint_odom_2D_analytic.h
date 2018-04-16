@@ -95,7 +95,7 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 
 
     public:
-        static wolf::ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,
+        static ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,
                                               const NodeBasePtr& _correspondant_ptr,
                                               const ProcessorBasePtr& _processor_ptr = nullptr)
         {

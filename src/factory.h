@@ -347,8 +347,10 @@ inline std::string LandmarkFactory::getClass()
 }
 
 // Frames
-class FrameBase;
 class TimeStamp;
+} // namespace wolf
+#include "frame_base.h"
+namespace wolf{
 typedef Factory<FrameBase, const FrameType&, const TimeStamp&, const Eigen::VectorXs&> FrameFactory;
 template<>
 inline std::string FrameFactory::getClass()
