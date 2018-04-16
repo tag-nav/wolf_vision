@@ -26,7 +26,6 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 
     protected:
         unsigned int constraint_id_;
-        ConstraintType type_id_;                        ///< type of constraint (types defined at wolf.h)
         ConstraintStatus status_;                       ///< status of constraint (types defined at wolf.h)
         bool apply_loss_function_;                      ///< flag for applying loss function to this constraint
         FrameBaseWPtr frame_other_ptr_;                 ///< FrameBase pointer (for category CTR_FRAME)
@@ -39,13 +38,13 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 
         /** \brief Constructor of category CTR_ABSOLUTE
          **/
-        ConstraintBase(ConstraintType _tp,
+        ConstraintBase(const std::string&  _tp,
                        bool _apply_loss_function = false,
                        ConstraintStatus _status = CTR_ACTIVE);
 
         /** \brief Constructor valid for all categories (FRAME, FEATURE, LANDMARK)
          **/
-        ConstraintBase(ConstraintType _tp,
+        ConstraintBase(const std::string&  _tp,
                        const FrameBasePtr& _frame_other_ptr,
                        const CaptureBasePtr& _capture_other_ptr,
                        const FeatureBasePtr& _feature_other_ptr,
@@ -59,10 +58,6 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
         void remove();
 
         unsigned int id() const;
-
-        /** \brief Returns the constraint type
-         **/
-        ConstraintType getTypeId() const;
 
         /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
         **/
@@ -205,20 +200,10 @@ inline unsigned int ConstraintBase::id() const
     return constraint_id_;
 }
 
-inline ConstraintType ConstraintBase::getTypeId() const
-{
-    return type_id_;
-}
-
 inline FeatureBasePtr ConstraintBase::getFeaturePtr() const
 {
     return feature_ptr_.lock();
 }
-
-//inline ConstraintCategory ConstraintBase::getCategory() const
-//{
-//    return category_;
-//}
 
 inline ConstraintStatus ConstraintBase::getStatus() const
 {

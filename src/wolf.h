@@ -203,37 +203,6 @@ typedef enum
     KEY_FRAME = 1       ///< key frame. It will stay in the frames window and play at optimizations.
 } FrameType;
 
-/** \brief Enumeration of all possible constraints
- *
- * You may add items to this list as needed. Be concise with names, and document your entries.
- */
-typedef enum
-{
-    CTR_GPS_FIX_2D = 1,         ///< 2D GPS Fix constraint.
-    CTR_GPS_PR_2D,              ///< 2D GPS Pseudorange constraint.
-    CTR_GPS_PR_3D,              ///< 3D GPS Pseudorange constraint.
-    CTR_POSE_2D,                ///< Pose constraint (for priors) in 2D.
-    CTR_POSE_3D,                ///< Pose constraint (for priors) in 3D.
-    CTR_FIX_BIAS,               ///< Fix constraint (for priors) on bias.
-    CTR_ODOM_2D,                ///< 2D Odometry constraint .
-    CTR_ODOM_3D,                ///< 3D Odometry constraint .
-    CTR_CORNER_2D,              ///< 2D corner constraint .
-    CTR_POINT_2D,               ///< 2D point constraint .
-    CTR_POINT_TO_LINE_2D,       ///< 2D point constraint .
-    CTR_CONTAINER,              ///< 2D container constraint .
-    CTR_IMG_PNT_TO_EP,          ///< constraint from a image point to a Euclidean 3D point landmark (EP). See https://hal.archives-ouvertes.fr/hal-00451778/document
-    CTR_IMG_PNT_TO_HP,          ///< constraint from a image point to a Homogeneous 3D point landmark (HP). See https://hal.archives-ouvertes.fr/hal-00451778/document
-    CTR_EPIPOLAR,               ///< Epipolar constraint
-    CTR_AHP,                    ///< Anchored Homogeneous Point constraint
-    CTR_AHP_NL,                 ///< Anchored Homogeneous Point constraint (temporal, to be removed)
-    CTR_IMU,                    ///< IMU constraint
-    CTR_DIFF_DRIVE,             ///< Diff-drive constraint
-    CTR_BEARING_2D,             ///< 2D bearing 
-    CTR_BLOCK_ABS,              ///< absolute constraint to Poisition or Velocity depending on argument StateBlockPtr (for priors)
-    CTR_TRIFOCAL_PLP,           ///< Trifocal tensor constraint of the type point-line-point
-    CTR_DISTANCE_3D             ///< Distance between two 3D frames
-} ConstraintType;
-
 /** \brief Enumeration of constraint status
  *
  * You may add items to this list as needed. Be concise with names, and document your entries.

@@ -77,7 +77,7 @@ inline ConstraintOdom3D::ConstraintOdom3D(const FeatureBasePtr& _ftr_current_ptr
                                           const ProcessorBasePtr& _processor_ptr,
                                           bool _apply_loss_function,
                                           ConstraintStatus _status) :
-        ConstraintAutodiff<ConstraintOdom3D, 6, 3, 4, 3, 4>(CTR_ODOM_3D,        // type
+        ConstraintAutodiff<ConstraintOdom3D, 6, 3, 4, 3, 4>("ODOM 3D",        // type
                                         _frame_past_ptr,    // frame other
                                         nullptr,            // capture other
                                         nullptr,            // feature other
@@ -90,8 +90,6 @@ inline ConstraintOdom3D::ConstraintOdom3D(const FeatureBasePtr& _ftr_current_ptr
                                         _frame_past_ptr->getPPtr(), // past frame P
                                         _frame_past_ptr->getOPtr()) // past frame Q
 {
-    setType("ODOM 3D");
-
 //    WOLF_TRACE("Constr ODOM 3D  (f", _ftr_current_ptr->id(),
 //               " F", _ftr_current_ptr->getCapturePtr()->getFramePtr()->id(),
 //               ") (Fo", _frame_past_ptr->id(), ")");

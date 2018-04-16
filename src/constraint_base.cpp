@@ -6,12 +6,13 @@ namespace wolf {
 
 unsigned int ConstraintBase::constraint_id_count_ = 0;
 
-ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status) :
-    NodeBase("CONSTRAINT", "Base"),
+ConstraintBase::ConstraintBase(const std::string&  _tp,
+                               bool _apply_loss_function,
+                               ConstraintStatus _status) :
+    NodeBase("CONSTRAINT", _tp),
     feature_ptr_(), // nullptr
     is_removing_(false),
     constraint_id_(++constraint_id_count_),
-    type_id_(_tp),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
     frame_other_ptr_(), // nullptr
@@ -22,18 +23,17 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
 //    std::cout << "constructed        +c" << id() << std::endl;
 }
 
-ConstraintBase::ConstraintBase(ConstraintType _tp,
+ConstraintBase::ConstraintBase(const std::string&  _tp,
                                const FrameBasePtr& _frame_other_ptr,
                                const CaptureBasePtr& _capture_other_ptr,
                                const FeatureBasePtr& _feature_other_ptr,
                                const LandmarkBasePtr& _landmark_other_ptr,
                                const ProcessorBasePtr& _processor_ptr,
                                bool _apply_loss_function, ConstraintStatus _status) :
-    NodeBase("CONSTRAINT", "Base"),
+    NodeBase("CONSTRAINT", _tp),
     feature_ptr_(),
     is_removing_(false),
     constraint_id_(++constraint_id_count_),
-    type_id_(_tp),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
     frame_other_ptr_(_frame_other_ptr),

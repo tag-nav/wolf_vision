@@ -148,7 +148,7 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
                                     bool                    _apply_loss_function,
                                     ConstraintStatus        _status) :
                 ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>( // ...
-                        CTR_IMU,
+                        "IMU",
                         _cap_origin_ptr->getFramePtr(),
                         _cap_origin_ptr,
                         nullptr,
@@ -180,7 +180,7 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
         sqrt_A_r_dt_inv((Eigen::Matrix3s::Identity() * ab_rate_stdev_ * sqrt(dt_)).inverse()),
         sqrt_W_r_dt_inv((Eigen::Matrix3s::Identity() * wb_rate_stdev_ * sqrt(dt_)).inverse())
 {
-    setType("IMU");
+    //
 }
 
 

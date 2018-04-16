@@ -32,20 +32,20 @@ std::shared_ptr<ceres::NumericDiffCostFunction<T, ceres::CENTRAL, T::residualSiz
 
 inline std::shared_ptr<ceres::CostFunction> createNumericDiffCostFunction(ConstraintBasePtr _ctr_ptr)
 {
-    switch (_ctr_ptr->getTypeId())
-    {
-        // just for testing
-        case CTR_ODOM_2D:
-            return createNumericDiffCostFunctionCeres<ConstraintOdom2D>(_ctr_ptr);
-
-        /* For adding a new constraint, add the #include and a case:
-        case CTR_ENUM:
-            return createNumericDiffCostFunctionCeres<ConstraintType>(_ctr_ptr);
-         */
-
-        default:
+//    switch (_ctr_ptr->getTypeId())
+//    {
+//        // just for testing
+//        case CTR_ODOM_2D:
+//            return createNumericDiffCostFunctionCeres<ConstraintOdom2D>(_ctr_ptr);
+//
+//        /* For adding a new constraint, add the #include and a case:
+//        case CTR_ENUM:
+//            return createNumericDiffCostFunctionCeres<ConstraintType>(_ctr_ptr);
+//         */
+//
+//        default:
             throw std::invalid_argument( "Unknown constraint type! Please add it in the file: ceres_wrapper/create_Numeric_diff_cost_function.h" );
-    }
+//    }
 }
 
 } // namespace wolf
