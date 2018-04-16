@@ -136,7 +136,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
                                        const SensorBasePtr _sensor_ptr);
 };
 
-inline wolf::CaptureBasePtr ProcessorTrackerFeatureTrifocal::getPrevOriginPtr()
+inline CaptureBasePtr ProcessorTrackerFeatureTrifocal::getPrevOriginPtr()
 {
     return prev_origin_ptr_;
 }

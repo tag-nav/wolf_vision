@@ -77,7 +77,7 @@ inline ConstraintOdom3D::ConstraintOdom3D(const FeatureBasePtr& _ftr_current_ptr
                                           const ProcessorBasePtr& _processor_ptr,
                                           bool _apply_loss_function,
                                           ConstraintStatus _status) :
-        ConstraintAutodiff<ConstraintOdom3D, 6, 3, 4, 3, 4>(CTR_ODOM_3D,        // type
+        ConstraintAutodiff<ConstraintOdom3D, 6, 3, 4, 3, 4>("ODOM 3D",        // type
                                         _frame_past_ptr,    // frame other
                                         nullptr,            // capture other
                                         nullptr,            // feature other
@@ -90,8 +90,6 @@ inline ConstraintOdom3D::ConstraintOdom3D(const FeatureBasePtr& _ftr_current_ptr
                                         _frame_past_ptr->getPPtr(), // past frame P
                                         _frame_past_ptr->getOPtr()) // past frame Q
 {
-    setType("ODOM 3D");
-
 //    WOLF_TRACE("Constr ODOM 3D  (f", _ftr_current_ptr->id(),
 //               " F", _ftr_current_ptr->getCapturePtr()->getFramePtr()->id(),
 //               ") (Fo", _frame_past_ptr->id(), ")");
@@ -103,7 +101,7 @@ inline ConstraintOdom3D::ConstraintOdom3D(const FeatureBasePtr& _ftr_current_ptr
 }
 
 template<typename T>
-inline bool wolf::ConstraintOdom3D::expectation(const T* const _p_current, const T* const _q_current, const T* const _p_past,
+inline bool ConstraintOdom3D::expectation(const T* const _p_current, const T* const _q_current, const T* const _p_past,
                                                 const T* const _q_past, T* _expectation_dp, T* _expectation_dq) const
 {
     Eigen::Map<const Eigen::Matrix<T,3,1> > p_current(_p_current);
@@ -129,7 +127,7 @@ inline bool wolf::ConstraintOdom3D::expectation(const T* const _p_current, const
     return true;
 }
 
-inline Eigen::VectorXs wolf::ConstraintOdom3D::expectation() const
+inline Eigen::VectorXs ConstraintOdom3D::expectation() const
 {
     Eigen::VectorXs exp(7);
     FrameBasePtr frm_current = getFeaturePtr()->getFramePtr();
@@ -152,7 +150,7 @@ inline Eigen::VectorXs wolf::ConstraintOdom3D::expectation() const
 }
 
 template<typename T>
-inline bool wolf::ConstraintOdom3D::operator ()(const T* const _p_current, const T* const _q_current, const T* const _p_past,
+inline bool ConstraintOdom3D::operator ()(const T* const _p_current, const T* const _q_current, const T* const _p_past,
                                                 const T* const _q_past, T* _residuals) const
 {
 

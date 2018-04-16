@@ -29,7 +29,8 @@ class ConstraintGPSPseudorange3D: public ConstraintAutodiff<ConstraintGPSPseudor
         ConstraintGPSPseudorange3D(FeatureBasePtr _ftr_ptr, 
                                    bool _apply_loss_function = false, 
                                    ConstraintStatus _status = CTR_ACTIVE) :
-             ConstraintAutodiff<ConstraintGPSPseudorange3D, 1, 3, 4, 3, 1, 3, 4>(CTR_GPS_PR_3D, nullptr, nullptr, nullptr, _apply_loss_function, _status,
+             ConstraintAutodiff<ConstraintGPSPseudorange3D, 1, 3, 4, 3, 1, 3, 4>("GPS PR 3D",
+                                                                                 nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status,
                             _ftr_ptr->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to map frame
                             _ftr_ptr->getFramePtr()->getOPtr(), // orientation of the vehicle's frame wrt map frame
                             _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to base frame
@@ -38,7 +39,6 @@ class ConstraintGPSPseudorange3D: public ConstraintAutodiff<ConstraintGPSPseudor
                             (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getMapPPtr(), // initial vehicle position wrt ecef frame
                             (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getMapOPtr())  // initial vehicle orientation wrt ecef frame
         {
-            setType("GPS PR 3D");
             sat_position_ = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getSatPosition();
             pseudorange_  = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getPseudorange();
 
@@ -60,7 +60,7 @@ class ConstraintGPSPseudorange3D: public ConstraintAutodiff<ConstraintGPSPseudor
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
-        static wolf::ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
+        static ConstraintBasePtr create(FeatureBasePtr _feature_ptr, //
                                             NodeBasePtr _correspondant_ptr = nullptr)
         {
             return std::make_shared<ConstraintGPSPseudorange3D>(_feature_ptr);

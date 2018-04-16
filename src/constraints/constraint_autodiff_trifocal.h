@@ -135,7 +135,7 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
         const FeatureBasePtr& _feature_last_ptr,
         const ProcessorBasePtr& _processor_ptr,
         bool _apply_loss_function,
-        ConstraintStatus _status) : ConstraintAutodiff( CTR_TRIFOCAL_PLP,
+        ConstraintStatus _status) : ConstraintAutodiff( "TRIFOCAL PLP",
                                                         nullptr,
                                                         nullptr,
                                                         _feature_origin_ptr,
@@ -155,7 +155,6 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
                                     camera_ptr_(std::static_pointer_cast<SensorCamera>(_processor_ptr->getSensorPtr())),
                                     sqrt_information_upper(Matrix3s::Zero())
 {
-    setType("AUTODIFF TRIFOCAL");
     setFeaturePtr(_feature_last_ptr);
     Matrix3s K_inv           = camera_ptr_->getIntrinsicMatrix().inverse();
     pixel_canonical_prev_    = K_inv * Vector3s(_feature_prev_ptr  ->getMeasurement(0), _feature_prev_ptr  ->getMeasurement(1), 1.0);

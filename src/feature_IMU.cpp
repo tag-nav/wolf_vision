@@ -5,7 +5,7 @@ namespace wolf {
 FeatureIMU::FeatureIMU(const Eigen::VectorXs& _delta_preintegrated,
                        const Eigen::MatrixXs& _delta_preintegrated_covariance,
                        const Eigen::Vector6s& _bias,
-                       const Eigen::Matrix<wolf::Scalar,9,6>& _dD_db_jacobians,
+                       const Eigen::Matrix<Scalar,9,6>& _dD_db_jacobians,
                        CaptureMotionPtr _cap_imu_ptr) :
     FeatureBase("IMU", _delta_preintegrated, _delta_preintegrated_covariance),
     acc_bias_preint_(_bias.head<3>()),

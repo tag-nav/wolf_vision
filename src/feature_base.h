@@ -105,7 +105,7 @@ inline unsigned int FeatureBase::getHits() const
     return constrained_by_list_.size();
 }
 
-inline wolf::ConstraintBaseList& FeatureBase::getConstrainedByList()
+inline ConstraintBaseList& FeatureBase::getConstrainedByList()
 {
     return constrained_by_list_;
 }

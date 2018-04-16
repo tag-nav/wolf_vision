@@ -8,7 +8,7 @@ namespace wolf {
 ////////// LOCAL PERTURBATION //////////////
 
 template <>
-bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::plus(Eigen::Map<const Eigen::VectorXs>& _q,
+bool LocalParametrizationQuaternion<DQ_LOCAL>::plus(Eigen::Map<const Eigen::VectorXs>& _q,
                                                           Eigen::Map<const Eigen::VectorXs>& _delta_theta,
                                                           Eigen::Map<Eigen::VectorXs>& _q_plus_delta_theta) const
 {
@@ -27,7 +27,7 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::plus(Eigen::Map<const Eigen
 }
 
 template <>
-bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::computeJacobian(Eigen::Map<const Eigen::VectorXs>& _q,
+bool LocalParametrizationQuaternion<DQ_LOCAL>::computeJacobian(Eigen::Map<const Eigen::VectorXs>& _q,
                                                                      Eigen::Map<Eigen::MatrixXs>& _jacobian) const
 {
     assert(_q.size() == global_size_ && "Wrong size of input quaternion.");
@@ -43,7 +43,7 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::computeJacobian(Eigen::Map<
 }
 
 template <>
-bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::minus(Eigen::Map<const Eigen::VectorXs>& _q1,
+bool LocalParametrizationQuaternion<DQ_LOCAL>::minus(Eigen::Map<const Eigen::VectorXs>& _q1,
                                                            Eigen::Map<const Eigen::VectorXs>& _q2,
                                                            Eigen::Map<Eigen::VectorXs>& _q2_minus_q1)
 {
@@ -61,7 +61,7 @@ bool LocalParametrizationQuaternion<wolf::DQ_LOCAL>::minus(Eigen::Map<const Eige
 ////////// GLOBAL PERTURBATION //////////////
 
 template <>
-bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::plus(Eigen::Map<const Eigen::VectorXs>& _q,
+bool LocalParametrizationQuaternion<DQ_GLOBAL>::plus(Eigen::Map<const Eigen::VectorXs>& _q,
                                                            Eigen::Map<const Eigen::VectorXs>& _delta_theta,
                                                            Eigen::Map<Eigen::VectorXs>& _q_plus_delta_theta) const
 {
@@ -80,7 +80,7 @@ bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::plus(Eigen::Map<const Eige
 }
 
 template <>
-bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::computeJacobian(Eigen::Map<const Eigen::VectorXs>& _q,
+bool LocalParametrizationQuaternion<DQ_GLOBAL>::computeJacobian(Eigen::Map<const Eigen::VectorXs>& _q,
                                                                      Eigen::Map<Eigen::MatrixXs>& _jacobian) const
 {
     assert(_q.size() == global_size_ && "Wrong size of input quaternion.");
@@ -96,7 +96,7 @@ bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::computeJacobian(Eigen::Map
 }
 
 template <>
-bool LocalParametrizationQuaternion<wolf::DQ_GLOBAL>::minus(Eigen::Map<const Eigen::VectorXs>& _q1,
+bool LocalParametrizationQuaternion<DQ_GLOBAL>::minus(Eigen::Map<const Eigen::VectorXs>& _q1,
                                                             Eigen::Map<const Eigen::VectorXs>& _q2,
                                                             Eigen::Map<Eigen::VectorXs>& _q2_minus_q1)
 {

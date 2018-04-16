@@ -10,6 +10,7 @@ class LocalParametrizationBase;
 
 //Wolf includes
 #include "wolf.h"
+#include "local_parametrization_base.h"
 
 //std includes
 #include <iostream>
@@ -107,6 +108,7 @@ class StateBlock
 
 // IMPLEMENTATION
 #include "local_parametrization_base.h"
+
 namespace wolf {
 
 inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :

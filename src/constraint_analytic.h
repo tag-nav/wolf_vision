@@ -23,7 +23,9 @@ class ConstraintAnalytic: public ConstraintBase
          * Constructor of category CTR_ABSOLUTE
          *
          **/
-        ConstraintAnalytic(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status,
+        ConstraintAnalytic(const std::string&  _tp,
+                           bool _apply_loss_function,
+                           ConstraintStatus _status,
                            StateBlockPtr _state0Ptr,
                            StateBlockPtr _state1Ptr = nullptr,
                            StateBlockPtr _state2Ptr = nullptr,
@@ -36,7 +38,7 @@ class ConstraintAnalytic: public ConstraintBase
                            StateBlockPtr _state9Ptr = nullptr ) ;
 
 
-        ConstraintAnalytic(ConstraintType _tp,
+        ConstraintAnalytic(const std::string&  _tp,
                            const FrameBasePtr& _frame_other_ptr,
                            const CaptureBasePtr& _capture_other_ptr,
                            const FeatureBasePtr& _feature_other_ptr,

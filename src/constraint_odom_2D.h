@@ -19,7 +19,7 @@ class ConstraintOdom2D : public ConstraintAutodiff<ConstraintOdom2D, 3, 2, 1, 2,
                          const FrameBasePtr& _frame_other_ptr,
                          const ProcessorBasePtr& _processor_ptr = nullptr,
                          bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-             ConstraintAutodiff<ConstraintOdom2D, 3, 2, 1, 2, 1>(CTR_ODOM_2D,
+             ConstraintAutodiff<ConstraintOdom2D, 3, 2, 1, 2, 1>("ODOM 2D",
                                                                  _frame_other_ptr, nullptr, nullptr, nullptr,
                                                                  _processor_ptr,
                                                                  _apply_loss_function, _status,
@@ -28,7 +28,7 @@ class ConstraintOdom2D : public ConstraintAutodiff<ConstraintOdom2D, 3, 2, 1, 2,
                                                                  _ftr_ptr->getFramePtr()->getPPtr(),
                                                                  _ftr_ptr->getFramePtr()->getOPtr())
         {
-            setType("ODOM 2D");
+            //
         }
 
         virtual ~ConstraintOdom2D() = default;
@@ -38,7 +38,7 @@ class ConstraintOdom2D : public ConstraintAutodiff<ConstraintOdom2D, 3, 2, 1, 2,
                          T* _residuals) const;
 
     public:
-        static wolf::ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr, const ProcessorBasePtr& _processor_ptr)
+        static ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr, const ProcessorBasePtr& _processor_ptr)
         {
             return std::make_shared<ConstraintOdom2D>(_feature_ptr, std::static_pointer_cast<FrameBase>(_correspondant_ptr), _processor_ptr);
         }

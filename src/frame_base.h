@@ -18,6 +18,14 @@ class StateBlock;
 
 namespace wolf {
 
+/** \brief Enumeration of frame types: key-frame or non-key-frame
+ */
+typedef enum
+{
+    NON_KEY_FRAME = 0,  ///< Regular frame. It does not play at optimization.
+    KEY_FRAME = 1       ///< key frame. It plays at optimizations.
+} FrameType;
+
 
 //class FrameBase
 class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase>
@@ -169,13 +177,6 @@ inline bool FrameBase::isKey() const
     return (type_ == KEY_FRAME);
 }
 
-inline void FrameBase::setTimeStamp(const TimeStamp& _ts)
-{
-    time_stamp_ = _ts;
-    if (isKey() && getTrajectoryPtr() != nullptr)
-        getTrajectoryPtr()->sortFrame(shared_from_this());
-}
-
 inline void FrameBase::getTimeStamp(TimeStamp& _ts) const
 {
     _ts = time_stamp_;
@@ -250,18 +251,6 @@ inline void FrameBase::resizeStateBlockVec(int _size)
 {
     if (_size > state_block_vec_.size())
         state_block_vec_.resize(_size);
-}
-
-inline void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
-{
-    _cap_ptr->unlinkFromFrame();
-    capture_list_.remove(_cap_ptr);
-}
-
-inline void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
-{
-    for (auto c_ptr : getCaptureList())
-        c_ptr->getConstraintList(_ctr_list);
 }
 
 inline unsigned int FrameBase::getHits() const

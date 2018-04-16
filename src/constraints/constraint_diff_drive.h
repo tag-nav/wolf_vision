@@ -44,7 +44,7 @@ public:
                       const ProcessorBasePtr& _processor_ptr = nullptr,
                       const bool _apply_loss_function = false,
                       const ConstraintStatus _status = CTR_ACTIVE) :
-    Base(CTR_DIFF_DRIVE, _capture_origin_ptr->getFramePtr(), _capture_origin_ptr,
+    Base("DIFF DRIVE", _capture_origin_ptr->getFramePtr(), _capture_origin_ptr,
          nullptr, nullptr, _processor_ptr,
          _apply_loss_function, _status,
          _frame_ptr->getPPtr(), _frame_ptr->getOPtr(),
@@ -58,7 +58,7 @@ public:
          _ftr_ptr->getCapturePtr()->getSensorIntrinsicPtr()),
     J_delta_calib_(_ftr_ptr->getJacobianFactor())
   {
-    setType("DIFF DRIVE");
+    //
   }
 
   /**

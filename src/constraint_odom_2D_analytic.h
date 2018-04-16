@@ -18,9 +18,10 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
                                  const ProcessorBasePtr& _processor_ptr = nullptr,
                                  bool _apply_loss_function = false,
                                  ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintRelative2DAnalytic(_ftr_ptr, CTR_ODOM_2D, _frame_ptr, _processor_ptr, _apply_loss_function, _status)
+            ConstraintRelative2DAnalytic("ODOM_2D", _ftr_ptr,
+                                         _frame_ptr, _processor_ptr, _apply_loss_function, _status)
         {
-            setType("ODOM 2D ANALYTIC");
+            //
         }
 
         virtual ~ConstraintOdom2DAnalytic() = default;
@@ -94,7 +95,7 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 
 
     public:
-        static wolf::ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,
+        static ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,
                                               const NodeBasePtr& _correspondant_ptr,
                                               const ProcessorBasePtr& _processor_ptr = nullptr)
         {

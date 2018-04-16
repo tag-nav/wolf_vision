@@ -176,7 +176,7 @@ protected:
 //  //SensorLaser2DPtr laser_ptr_; //specific pointer to sensor laser 2D object
 //};
 
-//using CaptureDiffDriveWheelJointPosition = wolf::CaptureWheelJointPosition<wolf::DiffDriveController>;
+//using CaptureDiffDriveWheelJointPosition = CaptureWheelJointPosition<DiffDriveController>;
 
 
 } // namespace wolf

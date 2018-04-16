@@ -15,12 +15,12 @@ WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsIMU);
 struct IntrinsicsIMU : public IntrinsicsBase
 {
         //noise std dev
-        wolf::Scalar w_noise = 0.001; //standard deviation of Gyroscope noise (same for all the axis) in rad/sec/ sqrt(s)
-        wolf::Scalar a_noise = 0.04; //standard deviation of Acceleration noise (same for all the axis) in m/s2/sqrt(s)
+        Scalar w_noise = 0.001; //standard deviation of Gyroscope noise (same for all the axis) in rad/sec/ sqrt(s)
+        Scalar a_noise = 0.04; //standard deviation of Acceleration noise (same for all the axis) in m/s2/sqrt(s)
 
         //Initial biases std dev
-        wolf::Scalar ab_initial_stdev = 0.01; //accelerometer micro_g/sec
-        wolf::Scalar wb_initial_stdev = 0.01; //gyroscope rad/sec
+        Scalar ab_initial_stdev = 0.01; //accelerometer micro_g/sec
+        Scalar wb_initial_stdev = 0.01; //gyroscope rad/sec
 
         // bias rate of change std dev
         Scalar ab_rate_stdev = 0.00001;
@@ -35,14 +35,14 @@ class SensorIMU : public SensorBase
 {
 
     protected:
-        wolf::Scalar a_noise; //Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
-        wolf::Scalar w_noise; //Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
+        Scalar a_noise; //Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
+        Scalar w_noise; //Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
 
         //This is a trial to constraint how much can the bias change in 1 sec at most
-        wolf::Scalar ab_initial_stdev; //accelerometer micro_g/sec
-        wolf::Scalar wb_initial_stdev; //gyroscope rad/sec
-        wolf::Scalar ab_rate_stdev; //accelerometer micro_g/sec
-        wolf::Scalar wb_rate_stdev; //gyroscope rad/sec
+        Scalar ab_initial_stdev; //accelerometer micro_g/sec
+        Scalar wb_initial_stdev; //gyroscope rad/sec
+        Scalar ab_rate_stdev; //accelerometer micro_g/sec
+        Scalar wb_rate_stdev; //gyroscope rad/sec
 
     public:
 

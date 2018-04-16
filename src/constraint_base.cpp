@@ -6,12 +6,13 @@ namespace wolf {
 
 unsigned int ConstraintBase::constraint_id_count_ = 0;
 
-ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, ConstraintStatus _status) :
-    NodeBase("CONSTRAINT", "Base"),
+ConstraintBase::ConstraintBase(const std::string&  _tp,
+                               bool _apply_loss_function,
+                               ConstraintStatus _status) :
+    NodeBase("CONSTRAINT", _tp),
     feature_ptr_(), // nullptr
     is_removing_(false),
     constraint_id_(++constraint_id_count_),
-    type_id_(_tp),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
     frame_other_ptr_(), // nullptr
@@ -22,18 +23,17 @@ ConstraintBase::ConstraintBase(ConstraintType _tp, bool _apply_loss_function, Co
 //    std::cout << "constructed        +c" << id() << std::endl;
 }
 
-ConstraintBase::ConstraintBase(ConstraintType _tp,
+ConstraintBase::ConstraintBase(const std::string&  _tp,
                                const FrameBasePtr& _frame_other_ptr,
                                const CaptureBasePtr& _capture_other_ptr,
                                const FeatureBasePtr& _feature_other_ptr,
                                const LandmarkBasePtr& _landmark_other_ptr,
                                const ProcessorBasePtr& _processor_ptr,
                                bool _apply_loss_function, ConstraintStatus _status) :
-    NodeBase("CONSTRAINT", "Base"),
+    NodeBase("CONSTRAINT", _tp),
     feature_ptr_(),
     is_removing_(false),
     constraint_id_(++constraint_id_count_),
-    type_id_(_tp),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
     frame_other_ptr_(_frame_other_ptr),
@@ -131,6 +131,21 @@ void ConstraintBase::setStatus(ConstraintStatus _status)
             getProblem()->removeConstraintPtr(shared_from_this());
     }
     status_ = _status;
+}
+
+void ConstraintBase::setApplyLossFunction(const bool _apply)
+{
+    if (apply_loss_function_ != _apply)
+    {
+        if (getProblem() == nullptr)
+            std::cout << "constraint not linked with Problem, apply loss function change not notified" << std::endl;
+        else
+        {
+            ConstraintBasePtr this_c = shared_from_this();
+            getProblem()->removeConstraintPtr(this_c);
+            getProblem()->addConstraintPtr(this_c);
+        }
+    }
 }
 
 } // namespace wolf

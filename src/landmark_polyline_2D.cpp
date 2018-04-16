@@ -240,9 +240,12 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
     ConstraintBasePtr new_ctr_ptr = nullptr;
     for (auto ctr_ptr : old_constraints_list)
     {
-        if (ctr_ptr->getTypeId() == CTR_POINT_2D)
+        ConstraintPoint2DPtr ctr_point_ptr;
+        ConstraintPointToLine2DPtr ctr_point_line_ptr;
+        if ( (ctr_point_ptr = std::dynamic_pointer_cast<ConstraintPoint2D>(ctr_ptr)))
+//        if (ctr_ptr->getTypeId() == CTR_POINT_2D)
         {
-            ConstraintPoint2DPtr ctr_point_ptr = std::static_pointer_cast<ConstraintPoint2D>(ctr_ptr);
+//            ConstraintPoint2DPtr ctr_point_ptr = std::static_pointer_cast<ConstraintPoint2D>(ctr_ptr);
 
             // If landmark point constrained -> new constraint
             if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
@@ -254,30 +257,31 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
                                                                   ctr_point_ptr->getApplyLossFunction(),
                                                                   ctr_point_ptr->getStatus());
         }
-        else if  (ctr_ptr->getTypeId() == CTR_POINT_TO_LINE_2D)
+        else if ((ctr_point_line_ptr = std::dynamic_pointer_cast<ConstraintPointToLine2D>(ctr_ptr)))
+//        else if  (ctr_ptr->getTypeId() == CTR_POINT_TO_LINE_2D)
         {
-            ConstraintPointToLine2DPtr ctr_point_ptr = std::static_pointer_cast<ConstraintPointToLine2D>(ctr_ptr);
+//            ConstraintPointToLine2DPtr ctr_point_line_ptr = std::static_pointer_cast<ConstraintPointToLine2D>(ctr_ptr);
 
             // If landmark point constrained -> new constraint
-            if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
+            if (ctr_point_line_ptr->getLandmarkPointId() == _remove_id)
                 new_ctr_ptr = std::make_shared<ConstraintPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
                                                                         std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
-                                                                        ctr_point_ptr->getProcessor(),
-                                                                        ctr_point_ptr->getFeaturePointId(),
+                                                                        ctr_point_line_ptr->getProcessor(),
+                                                                        ctr_point_line_ptr->getFeaturePointId(),
                                                                         _remain_id,
-                                                                        ctr_point_ptr->getLandmarkPointAuxId(),
+                                                                        ctr_point_line_ptr->getLandmarkPointAuxId(),
                                                                         ctr_point_ptr->getApplyLossFunction(),
-                                                                        ctr_point_ptr->getStatus());
+                                                                        ctr_point_line_ptr->getStatus());
             // If landmark point is aux point -> new constraint
-            else if (ctr_point_ptr->getLandmarkPointAuxId() == _remove_id)
+            else if (ctr_point_line_ptr->getLandmarkPointAuxId() == _remove_id)
                 new_ctr_ptr = std::make_shared<ConstraintPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
                                                                         std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
-                                                                        ctr_point_ptr->getProcessor(),
-                                                                        ctr_point_ptr->getFeaturePointId(),
-                                                                        ctr_point_ptr->getLandmarkPointId(),
+                                                                        ctr_point_line_ptr->getProcessor(),
+                                                                        ctr_point_line_ptr->getFeaturePointId(),
+                                                                        ctr_point_line_ptr->getLandmarkPointId(),
                                                                         _remain_id,
-                                                                        ctr_point_ptr->getApplyLossFunction(),
-                                                                        ctr_point_ptr->getStatus());
+                                                                        ctr_point_line_ptr->getApplyLossFunction(),
+                                                                        ctr_point_line_ptr->getStatus());
         }
         else
             throw std::runtime_error ("polyline constraint of unknown type");

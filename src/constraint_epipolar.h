@@ -49,7 +49,7 @@ class ConstraintEpipolar : public ConstraintBase
         virtual std::vector<unsigned int> getStateSizes() const override {return std::vector<unsigned int>({1});}
 
     public:
-        static wolf::ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,
+        static ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,
                                               const NodeBasePtr& _correspondant_ptr,
                                               const ProcessorBasePtr& _processor_ptr = nullptr);
 
@@ -58,12 +58,12 @@ class ConstraintEpipolar : public ConstraintBase
 inline ConstraintEpipolar::ConstraintEpipolar(const FeatureBasePtr& /*_feature_ptr*/, const FeatureBasePtr& _feature_other_ptr,
                                               const ProcessorBasePtr& _processor_ptr,
                                               bool _apply_loss_function, ConstraintStatus _status) :
-        ConstraintBase(CTR_EPIPOLAR, nullptr, nullptr, _feature_other_ptr, nullptr, _processor_ptr, _apply_loss_function, _status)
+        ConstraintBase("EPIPOLAR", nullptr, nullptr, _feature_other_ptr, nullptr, _processor_ptr, _apply_loss_function, _status)
 {
-    setType("EPIPOLAR");
+    //
 }
 
-inline wolf::ConstraintBasePtr ConstraintEpipolar::create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr,
+inline ConstraintBasePtr ConstraintEpipolar::create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr,
                                                           const ProcessorBasePtr& _processor_ptr)
 {
     return std::make_shared<ConstraintEpipolar>(_feature_ptr, std::static_pointer_cast<FeatureBase>(_correspondant_ptr), _processor_ptr);

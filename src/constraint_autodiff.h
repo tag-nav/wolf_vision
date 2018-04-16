@@ -58,7 +58,7 @@ class ConstraintAutodiff : public ConstraintBase
     public:
         /** \brief Constructor valid for all categories (ABSOLUTE, FRAME, FEATURE, LANDMARK)
          **/
-        ConstraintAutodiff(ConstraintType _tp,
+        ConstraintAutodiff(const std::string&  _tp,
                            const FrameBasePtr& _frame_other_ptr,
                            const CaptureBasePtr& _capture_other_ptr,
                            const FeatureBasePtr& _feature_other_ptr,
@@ -364,7 +364,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
 
    public:
 
-       ConstraintAutodiff(ConstraintType _tp,
+       ConstraintAutodiff(const std::string&  _tp,
                           const FrameBasePtr& _frame_other_ptr,
                           const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
@@ -629,7 +629,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
 
    public:
 
-       ConstraintAutodiff(ConstraintType _tp,
+       ConstraintAutodiff(const std::string&  _tp,
                           const FrameBasePtr& _frame_other_ptr,
                           const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
@@ -882,7 +882,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
 
    public:
 
-       ConstraintAutodiff(ConstraintType _tp,
+       ConstraintAutodiff(const std::string&  _tp,
                           const FrameBasePtr& _frame_other_ptr,
                           const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
@@ -1123,7 +1123,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
 
    public:
 
-       ConstraintAutodiff(ConstraintType _tp,
+       ConstraintAutodiff(const std::string&  _tp,
                           const FrameBasePtr& _frame_other_ptr,
                           const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
@@ -1347,7 +1347,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
 
    public:
 
-       ConstraintAutodiff(ConstraintType _tp,
+       ConstraintAutodiff(const std::string&  _tp,
                           const FrameBasePtr& _frame_other_ptr,
                           const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
@@ -1559,7 +1559,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
 
    public:
 
-       ConstraintAutodiff(ConstraintType _tp,
+       ConstraintAutodiff(const std::string&  _tp,
                           const FrameBasePtr& _frame_other_ptr,
                           const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
@@ -1763,7 +1763,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
 
    public:
 
-       ConstraintAutodiff(ConstraintType _tp,
+       ConstraintAutodiff(const std::string&  _tp,
                           const FrameBasePtr& _frame_other_ptr,
                           const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
@@ -1955,7 +1955,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
 
    public:
 
-       ConstraintAutodiff(ConstraintType _tp,
+       ConstraintAutodiff(const std::string&  _tp,
                           const FrameBasePtr& _frame_other_ptr,
                           const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,
@@ -2135,7 +2135,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
 
    public:
 
-       ConstraintAutodiff(ConstraintType _tp,
+       ConstraintAutodiff(const std::string&  _tp,
                           const FrameBasePtr& _frame_other_ptr,
                           const CaptureBasePtr& _capture_other_ptr,
                           const FeatureBasePtr& _feature_other_ptr,

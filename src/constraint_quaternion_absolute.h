@@ -25,9 +25,10 @@ class ConstraintQuaternionAbsolute: public ConstraintAutodiff<ConstraintQuaterni
     public:
 
         ConstraintQuaternionAbsolute(StateBlockPtr _sb_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAutodiff<ConstraintQuaternionAbsolute,3,4>(CTR_BLOCK_ABS, nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _sb_ptr)
+            ConstraintAutodiff<ConstraintQuaternionAbsolute,3,4>("QUATERNION ABS",
+                    nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _sb_ptr)
         {
-            setType("FIX Q");
+            //
         }
 
         virtual ~ConstraintQuaternionAbsolute() = default;
