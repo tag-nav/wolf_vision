@@ -1,20 +1,24 @@
-#include <sensor_GPS.h>
+// wolf includes
 #include "problem.h"
-#include "constraint_base.h"
-#include "state_block.h"
-#include "state_quaternion.h"
 #include "hardware_base.h"
 #include "trajectory_base.h"
 #include "map_base.h"
-#include "processor_motion.h"
-#include "processor_tracker.h"
 #include "sensor_base.h"
 #include "factory.h"
 #include "sensor_factory.h"
 #include "processor_factory.h"
+#include "constraint_base.h"
+#include "state_block.h"
+#include "processor_motion.h"
 
-#include <algorithm>
+#include "processor_tracker.h"
 #include "capture_pose.h"
+
+// IRI libs includes
+#include <sensor_GPS.h>
+
+// C++ includes
+#include <algorithm>
 
 namespace wolf
 {
@@ -149,7 +153,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     }
 }
 
-wolf::SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)
+SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)
 {
     auto sen_it = std::find_if(getHardwarePtr()->getSensorList().begin(),
                                getHardwarePtr()->getSensorList().end(),
@@ -942,7 +946,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
     cout << endl;
 }
 
-FrameBasePtr wolf::Problem::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
+FrameBasePtr Problem::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
 {
     return trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
 }

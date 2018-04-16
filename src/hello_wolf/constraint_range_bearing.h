@@ -26,7 +26,7 @@ class ConstraintRangeBearing : public ConstraintAutodiff<ConstraintRangeBearing,
                                bool _apply_loss_function,               // apply loss function to residual?
                                ConstraintStatus _status) :              // active constraint?
                     ConstraintAutodiff<ConstraintRangeBearing, 2, 2, 1, 2, 1, 2>( // sizes of: residual, rob pos, rob ori, sen pos, sen ori, lmk pos
-                            CTR_BEARING_2D,                             // constraint type enum (see wolf.h)
+                            "RANGE BEARING",                             // constraint type enum (see wolf.h)
                             nullptr,                                    // other frame's pointer
                             nullptr,                                    // other capture's pointer
                             nullptr,                                    // other feature's pointer
@@ -40,7 +40,7 @@ class ConstraintRangeBearing : public ConstraintAutodiff<ConstraintRangeBearing,
                             _capture_own->getSensorPtr()->getOPtr(),    // sensor orientation state block
                             _landmark_other_ptr->getPPtr())             // landmark position state block
         {
-            setType("RANGE BEARING");                                   // constraint type text (for eventual ConstraintFactory and visualization)
+            //
         }
 
         virtual ~ConstraintRangeBearing()

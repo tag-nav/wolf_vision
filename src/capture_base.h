@@ -104,7 +104,15 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void updateCalibSize();
 };
 
-inline wolf::Size CaptureBase::getCalibSize() const
+}
+
+#include "sensor_base.h"
+#include "frame_base.h"
+#include "feature_base.h"
+
+namespace wolf{
+
+inline Size CaptureBase::getCalibSize() const
 {
     return calib_size_;
 }
@@ -113,14 +121,6 @@ inline void CaptureBase::updateCalibSize()
 {
     calib_size_ = computeCalibSize();
 }
-
-}
-
-#include "sensor_base.h"
-#include "frame_base.h"
-#include "feature_base.h"
-
-namespace wolf{
 
 inline const std::vector<StateBlockPtr>& CaptureBase::getStateBlockVec() const
 {
@@ -172,19 +172,6 @@ inline void CaptureBase::setFramePtr(const FrameBasePtr _frm_ptr)
 inline FeatureBaseList& CaptureBase::getFeatureList()
 {
     return feature_list_;
-}
-
-inline void CaptureBase::getConstraintList(ConstraintBaseList& _ctr_list)
-{
-    for (auto f_ptr : getFeatureList())
-        f_ptr->getConstraintList(_ctr_list);
-}
-
-inline ConstraintBasePtr CaptureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
-{
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setCaptureOtherPtr( shared_from_this() );
-    return _ctr_ptr;
 }
 
 inline unsigned int CaptureBase::getHits() const

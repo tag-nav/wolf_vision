@@ -15,7 +15,7 @@ namespace wolf
 
 WOLF_PTR_TYPEDEFS(FeatureRangeBearing);
 
-class FeatureRangeBearing : public wolf::FeatureBase
+class FeatureRangeBearing : public FeatureBase
 {
     public:
         FeatureRangeBearing(const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_covariance);

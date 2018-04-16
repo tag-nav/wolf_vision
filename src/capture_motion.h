@@ -126,12 +126,12 @@ inline void CaptureMotion::setDataCovariance(const Eigen::MatrixXs& _data_cov)
     data_cov_ = _data_cov;
 }
 
-inline const wolf::MotionBuffer& CaptureMotion::getBuffer() const
+inline const MotionBuffer& CaptureMotion::getBuffer() const
 {
     return buffer_;
 }
 
-inline wolf::MotionBuffer& CaptureMotion::getBuffer()
+inline MotionBuffer& CaptureMotion::getBuffer()
 {
     return buffer_;
 }
@@ -152,7 +152,7 @@ inline Eigen::VectorXs CaptureMotion::correctDelta(const VectorXs& _delta, const
     return _delta + _delta_error;
 }
 
-inline wolf::FrameBasePtr CaptureMotion::getOriginFramePtr()
+inline FrameBasePtr CaptureMotion::getOriginFramePtr()
 {
     return origin_frame_ptr_;
 }

@@ -54,14 +54,14 @@ bool ProcessorGPS::voteForKeyFrame()
     return false;
 }
 
-bool ProcessorGPS::keyFrameCallback(wolf::FrameBasePtr, const Scalar& _time_tol)
+void ProcessorGPS::keyFrameCallback(FrameBasePtr, const Scalar& _time_tol)
 {
-    return false;
+    //
 }
 
-wolf::ProcessorBasePtr ProcessorGPS::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
+ProcessorBasePtr ProcessorGPS::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
 {
-    ProcessorGPSPtr prc_ptr = std::make_shared<ProcessorGPS>();
+    ProcessorGPSPtr prc_ptr = std::make_shared<ProcessorGPS>(_params->time_tolerance);
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

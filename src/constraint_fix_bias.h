@@ -21,10 +21,10 @@ class ConstraintFixBias: public ConstraintAutodiff<ConstraintFixBias,6,3,3>
 {
     public:
         ConstraintFixBias(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-                ConstraintAutodiff<ConstraintFixBias, 6, 3, 3>(CTR_FIX_BIAS, nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, std::static_pointer_cast<CaptureIMU>(_ftr_ptr->getCapturePtr())->getAccBiasPtr(),
+                ConstraintAutodiff<ConstraintFixBias, 6, 3, 3>("FIX BIAS",
+                        nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, std::static_pointer_cast<CaptureIMU>(_ftr_ptr->getCapturePtr())->getAccBiasPtr(),
                                           std::static_pointer_cast<CaptureIMU>(_ftr_ptr->getCapturePtr())->getGyroBiasPtr())
         {
-            setType("FIX BIAS");
             // std::cout << "created ConstraintFixBias " << std::endl;
         }
 

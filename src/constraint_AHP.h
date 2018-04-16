@@ -65,7 +65,7 @@ inline ConstraintAHP::ConstraintAHP(const FeatureBasePtr&   _ftr_ptr,
                                     const ProcessorBasePtr& _processor_ptr,
                                     bool             _apply_loss_function,
                                     ConstraintStatus _status) :
-        ConstraintAutodiff<ConstraintAHP, 2, 3, 4, 3, 4, 4>(CTR_AHP,
+        ConstraintAutodiff<ConstraintAHP, 2, 3, 4, 3, 4, 4>("AHP",
                                                             _landmark_ptr->getAnchorFrame(),
                                                             nullptr,
                                                             nullptr,
@@ -82,8 +82,6 @@ inline ConstraintAHP::ConstraintAHP(const FeatureBasePtr&   _ftr_ptr,
         anchor_sensor_extrinsics_o_(_ftr_ptr->getCapturePtr()->getSensorOPtr()->getState()),
         intrinsic_(_ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr()->getState())
 {
-    setType("AHP");
-
     // obtain some intrinsics from provided sensor
     distortion_ = (std::static_pointer_cast<SensorCamera>(_ftr_ptr->getCapturePtr()->getSensorPtr()))->getDistortionVector();
 }
@@ -185,7 +183,7 @@ inline bool ConstraintAHP::operator ()(const T* const _current_frame_p,
     return true;
 }
 
-inline wolf::ConstraintAHPPtr ConstraintAHP::create(const FeatureBasePtr&   _ftr_ptr,
+inline ConstraintAHPPtr ConstraintAHP::create(const FeatureBasePtr&   _ftr_ptr,
                                                     const LandmarkAHPPtr&   _lmk_ahp_ptr,
                                                     const ProcessorBasePtr& _processor_ptr,
                                                     bool             _apply_loss_function,

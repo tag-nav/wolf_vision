@@ -141,7 +141,7 @@ class ProcessorMotion : public ProcessorBase
          * \return the state vector
          */
         Eigen::VectorXs getCurrentState();
-        wolf::TimeStamp getCurrentTimeStamp();
+        TimeStamp getCurrentTimeStamp();
 
         /** \brief Fill the state corresponding to the provided time-stamp
          * \param _ts the time stamp
@@ -462,7 +462,7 @@ inline Eigen::VectorXs ProcessorMotion::getState(const TimeStamp& _ts)
     return x;
 }
 
-inline wolf::TimeStamp ProcessorMotion::getCurrentTimeStamp()
+inline TimeStamp ProcessorMotion::getCurrentTimeStamp()
 {
     return getBuffer().get().back().ts_;
 }

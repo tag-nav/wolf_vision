@@ -13,6 +13,8 @@
 
 namespace wolf {
 
+//WOLF_PTR_TYPEDEFS(LocalParametrizationBase);
+
 class LocalParametrizationBase{
     protected:
         unsigned int global_size_;

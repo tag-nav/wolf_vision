@@ -105,16 +105,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
 namespace wolf{
 
-inline bool LandmarkBase::getCovariance(Eigen::MatrixXs& _cov) const
-{
-    return getProblem()->getLandmarkCovariance(shared_from_this(), _cov);
-}
-
-inline Eigen::MatrixXs LandmarkBase::getCovariance() const
-{
-    return getProblem()->getLandmarkCovariance(shared_from_this());
-}
-
 inline MapBasePtr LandmarkBase::getMapPtr()
 {
     return map_ptr_.lock();

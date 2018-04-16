@@ -23,12 +23,12 @@ class ConstraintContainer: public ConstraintAutodiff<ConstraintContainer,3,2,1,2
                           const ProcessorBasePtr& _processor_ptr,
                           const unsigned int _corner,
                           bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAutodiff<ConstraintContainer,3,2,1,2,1>(CTR_CONTAINER, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
+            ConstraintAutodiff<ConstraintContainer,3,2,1,2,1>("CONTAINER",
+                                                              nullptr, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(),_ftr_ptr->getFramePtr()->getOPtr(), _lmk_ptr->getPPtr(), _lmk_ptr->getOPtr()),
 			lmk_ptr_(_lmk_ptr),
 			corner_(_corner)
 		{
             assert(/*_corner >= 0 &&*/ _corner <= 3 && "Wrong corner id in constraint container constructor");
-            setType("CONTAINER");
 
             std::cout << "new constraint container: corner idx = " << corner_ << std::endl;
 		}

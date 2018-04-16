@@ -55,7 +55,7 @@ Eigen::Vector3s LandmarkAHP::point() const
     return point_hmg.head<3>()/point_hmg(3);
 }
 
-wolf::LandmarkBasePtr LandmarkAHP::create(const YAML::Node& _node)
+LandmarkBasePtr LandmarkAHP::create(const YAML::Node& _node)
 {
     unsigned int        id          = _node["id"]           .as< unsigned int     >();
     Eigen::VectorXs     pos_homog   = _node["position"]     .as< Eigen::VectorXs  >();

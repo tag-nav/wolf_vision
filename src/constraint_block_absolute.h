@@ -23,9 +23,10 @@ class ConstraintBlockAbsolute: public ConstraintAutodiff<ConstraintBlockAbsolute
     public:
 
         ConstraintBlockAbsolute(StateBlockPtr _sb_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAutodiff<ConstraintBlockAbsolute,3,3>(CTR_BLOCK_ABS, nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _sb_ptr)
+            ConstraintAutodiff<ConstraintBlockAbsolute,3,3>("BLOCK ABS",
+                                                            nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _sb_ptr)
         {
-            setType("FIX SB");
+            //
         }
 
         virtual ~ConstraintBlockAbsolute() = default;

@@ -17,8 +17,8 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 
         /** \brief Constructor of category CTR_FRAME
          **/
-        ConstraintRelative2DAnalytic(const FeatureBasePtr& _ftr_ptr,
-                                     const ConstraintType& _tp,
+        ConstraintRelative2DAnalytic(const std::string& _tp,
+                                     const FeatureBasePtr& _ftr_ptr,
                                      const FrameBasePtr& _frame_ptr,
                                      const ProcessorBasePtr& _processor_ptr = nullptr,
                                      bool _apply_loss_function = false,
@@ -30,8 +30,8 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 
         /** \brief Constructor of category CTR_FEATURE
          **/
-        ConstraintRelative2DAnalytic(const FeatureBasePtr& _ftr_ptr,
-                                     const ConstraintType& _tp,
+        ConstraintRelative2DAnalytic(const std::string& _tp,
+                                     const FeatureBasePtr& _ftr_ptr,
                                      const FeatureBasePtr& _ftr_other_ptr,
                                      const ProcessorBasePtr& _processor_ptr = nullptr,
                                      bool _apply_loss_function = false,
@@ -43,8 +43,8 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
 
         /** \brief Constructor of category CTR_LANDMARK
          **/
-        ConstraintRelative2DAnalytic(const FeatureBasePtr& _ftr_ptr,
-                                     const ConstraintType& _tp,
+        ConstraintRelative2DAnalytic(const std::string& _tp,
+                                     const FeatureBasePtr& _ftr_ptr,
                                      const LandmarkBasePtr& _landmark_ptr,
                                      const ProcessorBasePtr& _processor_ptr = nullptr,
                                      bool _apply_loss_function = false,

@@ -5,10 +5,8 @@
 //wolf includes
 #include "wolf.h"
 
-#include <sys/time.h>
-
-
 //C, std
+#include <sys/time.h>
 #include <iostream>
 
 

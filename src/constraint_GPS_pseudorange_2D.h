@@ -30,18 +30,22 @@ class ConstraintGPSPseudorange2D : public ConstraintAutodiff<ConstraintGPSPseudo
         ConstraintGPSPseudorange2D(const FeatureBasePtr& _ftr_ptr,
                                    bool _apply_loss_function = false, 
                                    ConstraintStatus _status = CTR_ACTIVE) :
-           ConstraintAutodiff<ConstraintGPSPseudorange2D, 1, 2, 1, 3, 1, 3, 1>(CTR_GPS_PR_2D,
-                                                  _apply_loss_function,
-                                                  _status,
-                                                  _ftr_ptr->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to the initial pos frame
-                                                  _ftr_ptr->getFramePtr()->getOPtr(), // orientation of the vehicle's frame
-                                                  _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to the vehicle frame
-                                                                                              // orientation of antenna is not needed, because omnidirectional
-                                                  _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter = receiver time bias
-                                                  (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapPPtr()), // map position with respect to ecef
-                                                  (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapOPtr())) // map orientation with respect to ecef
+           ConstraintAutodiff<ConstraintGPSPseudorange2D, 1, 2, 1, 3, 1, 3, 1>("GPS PR 2D",
+                                                                               nullptr,
+                                                                               nullptr,
+                                                                               nullptr,
+                                                                               nullptr,
+                                                                               nullptr,
+                                                                               _apply_loss_function,
+                                                                               _status,
+                                                                               _ftr_ptr->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to the initial pos frame
+                                                                               _ftr_ptr->getFramePtr()->getOPtr(), // orientation of the vehicle's frame
+                                                                               _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to the vehicle frame
+                                                                                                                           // orientation of antenna is not needed, because omnidirectional
+                                                                               _ftr_ptr->getCapturePtr()->getSensorPtr()->getIntrinsicPtr(), //intrinsic parameter = receiver time bias
+                                                                               (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapPPtr()), // map position with respect to ecef
+                                                                               (std::static_pointer_cast<SensorGPS>(_ftr_ptr->getCapturePtr()->getSensorPtr())->getMapOPtr())) // map orientation with respect to ecef
         {
-            setType("GPS PR 2D");
             sat_position_ = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getSatPosition();
             pseudorange_  = (std::static_pointer_cast<FeatureGPSPseudorange>(_ftr_ptr))->getPseudorange();
             //std::cout << "ConstraintGPSPseudorange2D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;

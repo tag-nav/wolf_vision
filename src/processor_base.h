@@ -10,6 +10,7 @@ class SensorBase;
 #include "wolf.h"
 #include "node_base.h"
 #include "time_stamp.h"
+#include "frame_base.h"
 
 // std
 #include <memory>

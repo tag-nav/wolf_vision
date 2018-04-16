@@ -18,9 +18,9 @@ class ConstraintPose3D: public ConstraintAutodiff<ConstraintPose3D,6,3,4>
     public:
 
         ConstraintPose3D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAutodiff<ConstraintPose3D,6,3,4>(CTR_POSE_3D, nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
+            ConstraintAutodiff<ConstraintPose3D,6,3,4>("POSE 3D", nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _ftr_ptr->getFramePtr()->getPPtr(), _ftr_ptr->getFramePtr()->getOPtr())
         {
-            setType("FIX3D");
+            //
         }
 
         virtual ~ConstraintPose3D() = default;
