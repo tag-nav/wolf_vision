@@ -22,3 +22,7 @@ src/examples/map_polyline_example_write.yaml
 
 *.graffle
 /Default/
+
+src/CMakeCache.txt
+
+src/CMakeFiles/cmake.check_cache
