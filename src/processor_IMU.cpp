@@ -299,7 +299,7 @@ void ProcessorIMU::statePlusDelta(const Eigen::VectorXs& _x,
     assert(_x.size() == 10 && "Wrong _x vector size");
     assert(_delta.size() == 10 && "Wrong _delta vector size");
     assert(_x_plus_delta.size() == 10 && "Wrong _x_plus_delta vector size");
-    assert(_dt >= 0 && "Time interval _Dt is negative!");
+    assert(_dt >= 0 && "Time interval _dt is negative!");
 
     _x_plus_delta = imu::composeOverState(_x, _delta, _dt);
 }

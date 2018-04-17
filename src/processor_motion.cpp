@@ -382,6 +382,7 @@ void ProcessorMotion::integrateOneStep()
 {
     // Set dt
     dt_ = updateDt();
+    assert(dt_ >= 0 && "Time interval _dt is negative!");
 
     // get vector of parameters to calibrate
     calib_ = getBuffer().getCalibrationPreint();
