@@ -99,10 +99,10 @@ SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
                                      const Eigen::VectorXs& _extrinsics, //
                                      const std::string& _intrinsics_filename)
 {
-    assert(file_exists(_intrinsics_filename) && "Cannot install sensor: intrinsics' YAML file does not exist.");
 
     if (_intrinsics_filename != "")
     {
+        assert(file_exists(_intrinsics_filename) && "Cannot install sensor: intrinsics' YAML file does not exist.");
         IntrinsicsBasePtr intr_ptr = IntrinsicsFactory::get().create(_sen_type, _intrinsics_filename);
         return installSensor(_sen_type, _unique_sensor_name, _extrinsics, intr_ptr);
     }
@@ -143,8 +143,6 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
                                            const std::string& _corresponding_sensor_name, //
                                            const std::string& _params_filename)
 {
-    assert(file_exists(_params_filename) && "Cannot install processor: parameters' YAML file does not exist.");
-
     SensorBasePtr sen_ptr = getSensorPtr(_corresponding_sensor_name);
     if (sen_ptr == nullptr)
         throw std::runtime_error("Sensor not found. Cannot bind Processor.");
@@ -152,6 +150,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
         return installProcessor(_prc_type, _unique_processor_name, sen_ptr, nullptr);
     else
     {
+        assert(file_exists(_params_filename) && "Cannot install processor: parameters' YAML file does not exist.");
         ProcessorParamsBasePtr prc_params = ProcessorParamsFactory::get().create(_prc_type, _params_filename);
         return installProcessor(_prc_type, _unique_processor_name, sen_ptr, prc_params);
     }
