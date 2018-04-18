@@ -12,6 +12,7 @@
 #include "processor_motion.h"
 
 #include "processor_tracker.h"
+//#include "processors/processor_tracker_feature_trifocal.h"
 #include "capture_pose.h"
 
 // IRI libs includes
@@ -769,6 +770,13 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         ProcessorTrackerPtr pt = std::dynamic_pointer_cast<ProcessorTracker>(p);
                         if (pt)
                         {
+//                            ProcessorTrackerFeatureTrifocalPtr ptt = std::dynamic_pointer_cast<ProcessorTrackerFeatureTrifocal>(pt);
+//                            if (ptt)
+//                            {
+//                                if (ptt->getPrevOriginPtr())
+//                                    cout << "      p: C" << ptt->getPrevOriginPtr()->id() << " - " << (ptt->getPrevOriginPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
+//                                    << ptt->getPrevOriginPtr()->getFramePtr()->id() << endl;
+//                            }
                             if (pt->getOriginPtr())
                                 cout << "      o: C" << pt->getOriginPtr()->id() << " - " << (pt->getOriginPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
                                 << pt->getOriginPtr()->getFramePtr()->id() << endl;
