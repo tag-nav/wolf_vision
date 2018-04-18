@@ -41,7 +41,7 @@ static ProcessorParamsBasePtr createProcessorParamsTrackerFeatureTrifocal(const 
         params->yaml_file_params_vision_utils = vision_utils["YAML file params"].as<std::string>();
 
         // relative to global path for Vision Utils YAML
-        assert(params->yaml_file_params_vision_utils.find("..") != std::string::npos && params->yaml_file_params_vision_utils.find('/') == std::string::npos && "The parameter -YAML file params- must be specified with a path relative to the processor YAML file. ");
+        assert(params->yaml_file_params_vision_utils.at(0) != ('/') && "The parameter YAML FILE PARAMS (in processor params YAML file) must be specified with a path relative to the processor YAML file.");
         unsigned first = _filename_dot_yaml.find("/");
         unsigned last = _filename_dot_yaml.find_last_of("/");
         std::string strNew = _filename_dot_yaml.substr (first,last-first);
