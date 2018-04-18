@@ -53,7 +53,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             KFPackPtr pack = kf_pack_buffer_.selectPack( incoming_ptr_, time_tolerance_);
             kf_pack_buffer_.removeUpTo( incoming_ptr_->getTimeStamp() );
 
-            WOLF_DEBUG( "PT: KF" , pack->key_frame->id() , " callback received with ts= " , pack->key_frame->getTimeStamp().get() );
+            WOLF_DEBUG( "PT ", getName(), ": KF" , pack->key_frame->id() , " callback unpacked with ts= " , pack->key_frame->getTimeStamp().get() );
 
             // Append incoming to KF
             pack->key_frame->addCapture(incoming_ptr_);
@@ -89,6 +89,10 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             break;
         }
         case SECOND_TIME_WITH_PACK :
+        {
+            KFPackPtr pack = kf_pack_buffer_.selectPack( incoming_ptr_, time_tolerance_);
+            WOLF_DEBUG( "PT ", getName(), ": KF" , pack->key_frame->id() , " callback unpacked with ts= " , pack->key_frame->getTimeStamp().get() );
+        }
         case SECOND_TIME_WITHOUT_PACK :
         {
             FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
@@ -112,7 +116,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             KFPackPtr pack = kf_pack_buffer_.selectPack( last_ptr_ , time_tolerance_);
             kf_pack_buffer_.removeUpTo( last_ptr_->getTimeStamp() );
 
-            WOLF_DEBUG( "PT: KF" , pack->key_frame->id() , " callback received with ts= " , pack->key_frame->getTimeStamp().get() );
+            WOLF_DEBUG( "PT ", getName(), ": KF" , pack->key_frame->id() , " callback unpacked with ts= " , pack->key_frame->getTimeStamp().get() );
 
             processKnown();
 

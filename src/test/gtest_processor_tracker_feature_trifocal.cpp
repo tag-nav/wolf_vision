@@ -84,6 +84,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
                                                          intr);
 
     ProcessorParamsTrackerFeatureTrifocal params_trifocal;
+    params_trifocal.name = "trifocal";
     params_trifocal.time_tolerance = dt/2;
     params_trifocal.max_new_features = 5;
     params_trifocal.min_features_for_keyframe = 5;
