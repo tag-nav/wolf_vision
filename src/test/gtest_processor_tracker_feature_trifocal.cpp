@@ -133,7 +133,6 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
         proc_trk->process(capt_trk);
 
         CaptureBasePtr prev = proc_trk->getPrevOriginPtr();
-        WOLF_INFO("PTrifocal prev: C", (prev ? prev->id() : 0), " KF", (prev ? prev->getFramePtr()->id(): 0));
         problem->print(2,0,0,0);
 
         // Only odom creating KFs
