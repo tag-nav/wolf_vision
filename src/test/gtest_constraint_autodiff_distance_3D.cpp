@@ -50,7 +50,7 @@ class ConstraintAutodiffDistance3D_Test : public testing::Test
             pose2  << pos2, vquat2;
 
             dist = Vector1s(sqrt(2.0));
-            dist_cov(0.01);
+            dist_cov = Matrix1s(0.01);
 
             problem = Problem::create("PO 3D");
             ceres_manager = std::make_shared<CeresManager>(problem);
@@ -79,7 +79,7 @@ TEST_F(ConstraintAutodiffDistance3D_Test, ground_truth)
     ASSERT_NEAR(res, 0.0, 1e-8);
 }
 
-TEST_F(ConstraintAutodiffDistance3D_Test, inexact)
+TEST_F(ConstraintAutodiffDistance3D_Test, expected_residual)
 {
     Scalar measurement = 1.400;
 
@@ -91,6 +91,17 @@ TEST_F(ConstraintAutodiffDistance3D_Test, inexact)
     c2->operator ()(pos1.data(), pos2.data(), &res);
 
     ASSERT_NEAR(res, res_expected, 1e-8);
+}
+
+TEST_F(ConstraintAutodiffDistance3D_Test, solve)
+{
+    Scalar measurement = 1.400;
+    f2->setMeasurement(Vector1s(measurement));
+
+    std::string report = ceres_manager->solve(2);
+
+    // Check distance between F1 and F2 positions -- must match the measurement
+    ASSERT_NEAR( (F1->getPPtr()->getState() - F2->getPPtr()->getState()).norm(), measurement, 1e-10);
 }
 
 int main(int argc, char **argv)
