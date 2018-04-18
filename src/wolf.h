@@ -23,6 +23,9 @@
 #include <map>
 #include <memory> // shared_ptr and weak_ptr
 
+// System specifics
+#include <sys/stat.h>
+
 namespace wolf {
 
 /**
@@ -281,6 +284,12 @@ WOLF_PTR_TYPEDEFS(LocalParametrizationBase);
 
 // ==================================================
 // Some dangling functions
+
+inline bool file_exists(const std::string& _name)
+{
+    struct stat buffer;
+    return (stat (_name.c_str(), &buffer) == 0);
+}
 
 inline const Eigen::Vector3s gravity(void) {
     return Eigen::Vector3s(0,0,-9.806);
