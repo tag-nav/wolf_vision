@@ -19,7 +19,7 @@ CeresManager::CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Option
     #else
     covariance_options.algorithm_type = ceres::SPARSE_QR;//ceres::DENSE_SVD;
     #endif
-    covariance_options.num_threads = 8;
+    covariance_options.num_threads = 1;
     covariance_options.apply_loss_function = false;
     //covariance_options.null_space_rank = -1;
     covariance_ = new ceres::Covariance(covariance_options);
