@@ -43,6 +43,7 @@ using namespace Eigen;
 template<typename D1, typename D2>
 inline void identity(MatrixBase<D1>& p, QuaternionBase<D2>& q)
 {
+    MatrixSizeCheck<3, 1>::check(p);
     p = MatrixBase<D1>::Zero(3,1);
     q = QuaternionBase<D2>::Identity();
 }
@@ -50,6 +51,8 @@ inline void identity(MatrixBase<D1>& p, QuaternionBase<D2>& q)
 template<typename D1, typename D2>
 inline void identity(MatrixBase<D1>& p, MatrixBase<D2>& q)
 {
+    MatrixSizeCheck<3, 1>::check(p);
+    MatrixSizeCheck<4, 1>::check(q);
     typedef typename D1::Scalar T1;
     typedef typename D2::Scalar T2;
     p << T1(0), T1(0), T1(0);
@@ -134,7 +137,7 @@ inline void compose(const MatrixBase<D1>& d1,
 
 template<typename D1, typename D2>
 inline Matrix<typename D1::Scalar, 7, 1> compose(const MatrixBase<D1>& d1,
-                                                  const MatrixBase<D2>& d2 )
+                                                 const MatrixBase<D2>& d2 )
 {
     Matrix<typename D1::Scalar, 7, 1>  ret;
     compose(d1, d2, ret);
@@ -209,6 +212,8 @@ template<typename D1, typename D2>
 inline Matrix<typename D1::Scalar, 7, 1> between(const MatrixBase<D1>& d1,
                                                  const MatrixBase<D2>& d2 )
 {
+    MatrixSizeCheck<7, 1>::check(d1);
+    MatrixSizeCheck<7, 1>::check(d2);
     Matrix<typename D1::Scalar, 7, 1> d12;
     between(d1, d2, d12);
     return d12;
@@ -255,8 +260,11 @@ inline void plus(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1,
                  const MatrixBase<D4>& dp2, const MatrixBase<D5>& do2,
                  MatrixBase<D7>& plus_p, QuaternionBase<D8>& plus_q)
 {
-        plus_p = dp1 + dp2;
-        plus_q = dq1 * exp_q(do2);
+    MatrixSizeCheck<3, 1>::check(dp1);
+    MatrixSizeCheck<3, 1>::check(dp2);
+    MatrixSizeCheck<3, 1>::check(plus_p);
+    plus_p = dp1 + dp2;
+    plus_q = dq1 * exp_q(do2);
 }
 
 template<typename D1, typename D2, typename D3>
