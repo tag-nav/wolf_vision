@@ -122,6 +122,11 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          */
         virtual void preProcess() override;
 
+        /** \brief Post-process
+         *
+         */
+        virtual void postProcess() override;
+
         /** \brief Establish constraints between features in Captures \b last and \b origin
          */
         virtual void establishConstraints() override;

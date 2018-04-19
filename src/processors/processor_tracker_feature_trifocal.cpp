@@ -6,6 +6,7 @@
 #include "feature_point_image.h"
 #include "constraints/constraint_autodiff_trifocal.h"
 #include "capture_image.h"
+#include "feature_point_image.h"
 
 // vision_utils
 #include <vision_utils/vision_utils.h>
@@ -247,27 +248,6 @@ void ProcessorTrackerFeatureTrifocal::resetDerived()
 //                   " prev: ", feature_in_prev->id(),
 //                   " origin: ", feature_in_origin->id());
 //    }
-
-    // DEBUG
-    std::vector<vision_utils::KeyPointEnhanced> kps_e;
-    TrackMatches matches_prevorig_last = track_matrix_.matches(prev_origin_ptr_, last_ptr_);
-    for (auto const & pair_trkid_pair : matches_prevorig_last)
-    {
-        FeatureBasePtr feature_in_last = pair_trkid_pair.second.second;
-        Eigen::Vector2s pt = feature_in_last->getMeasurement();
-        cv::KeyPoint kp(pt(0), pt(1), CV_32F);
-        unsigned int id = feature_in_last->id();
-        unsigned int track_id = feature_in_last->getTrackId();
-        Eigen::Matrix4s cov = feature_in_last->getMeasurementCovariance();
-        vision_utils::KeyPointEnhanced kp_e(kp, id, track_id, 3, cov);
-
-        kps_e.push_back(kp_e);
-    }
-    cv::Mat img = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
-    cv::Mat img_proc = vision_utils::buildImageProcessed(img, kps_e);
-
-    cv::imshow("DEBUG VIEW", img_proc);
-    cv::waitKey(1);
 }
 
 void ProcessorTrackerFeatureTrifocal::preProcess()
@@ -280,6 +260,27 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
         if (prev_origin_ptr_ && origin_ptr_ && last_ptr_ && prev_origin_ptr_ != origin_ptr_)
             initialized_ = true;
     }
+}
+
+void ProcessorTrackerFeatureTrifocal::postProcess()
+{
+    // DEBUG
+    std::vector<vision_utils::KeyPointEnhanced> kps_e;
+    for (auto const & feat_base : last_ptr_->getFeatureList())
+    {
+        FeaturePointImagePtr feat = std::static_pointer_cast<FeaturePointImage>(feat_base);
+        unsigned int id = feat->id();
+        unsigned int track_id = feat->getTrackId();
+        Eigen::Matrix4s cov = feat->getMeasurementCovariance();
+        vision_utils::KeyPointEnhanced kp_e(feat->getKeypoint(), id, track_id, track_matrix_.trackSize(track_id), cov);
+        kps_e.push_back(kp_e);
+    }
+
+    cv::Mat img = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
+    cv::Mat img_proc = vision_utils::buildImageProcessed(img, kps_e);
+
+    cv::imshow("DEBUG VIEW", img_proc);
+    cv::waitKey(1);
 }
 
 ConstraintBasePtr ProcessorTrackerFeatureTrifocal::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
