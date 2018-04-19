@@ -7,11 +7,11 @@
 #include "constraints/constraint_autodiff_trifocal.h"
 
 // vision_utils
+#include <vision_utils/vision_utils.h>
 #include <vision_utils/detectors.h>
 #include <vision_utils/descriptors.h>
 #include <vision_utils/matchers.h>
 #include <vision_utils/algorithms.h>
-
 
 namespace wolf {
 
@@ -101,11 +101,16 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(const Processor
     // Active search grid
     vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_.yaml_file_params_vision_utils);
     active_search_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmACTIVESEARCH>(alg_ptr);
+
+    // DEBUG VIEW
+    cv::startWindowThread();
+    cv::namedWindow("DEBUG VIEW", cv::WINDOW_NORMAL);
 }
 
 // Destructor
 ProcessorTrackerFeatureTrifocal::~ProcessorTrackerFeatureTrifocal()
 {
+    cv::destroyAllWindows();
 }
 
 unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out)
@@ -242,6 +247,27 @@ void ProcessorTrackerFeatureTrifocal::resetDerived()
 //                   " origin: ", feature_in_origin->id());
 //    }
 
+    // DEBUG
+    std::vector<vision_utils::KeyPointEnhanced> kps_e;
+    TrackMatches matches_prevorig_last = track_matrix_.matches(prev_origin_ptr_, last_ptr_);
+    for (auto const & pair_trkid_pair : matches_prevorig_last)
+    {
+        FeatureBasePtr feature_in_last = pair_trkid_pair.second.second;
+        Eigen::Vector2s pt = feature_in_last->getMeasurement();
+        cv::KeyPoint kp(pt(0), pt(1), CV_32F);
+        unsigned int id = feature_in_last->id();
+        unsigned int track_id = feature_in_last->track_id_();
+        Eigen::Matrix4s cov = feature_in_last->getMeasurementCovariance();
+
+        vision_utils::KeyPointEnhanced kp_e(kp, id, track_id, 3);
+
+        kps_e.push_back(kp_e);
+    }
+    cv::Mat img = (static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
+    cv::Mat img_proc = vision_utils::buildImageProcessed(img, kps_e);
+
+    cv::imshow("DEBUG VIEW", img_proc);
+    cv::waitKey(1);
 }
 
 void ProcessorTrackerFeatureTrifocal::preProcess()
