@@ -15,6 +15,8 @@
 #include <vision_utils/matchers.h>
 #include <vision_utils/algorithms.h>
 
+#include <memory>
+
 namespace wolf {
 
 // Constructor
@@ -270,7 +272,7 @@ void ProcessorTrackerFeatureTrifocal::postProcess()
     {
         FeaturePointImagePtr feat = std::static_pointer_cast<FeaturePointImage>(feat_base);
         unsigned int id = feat->id();
-        unsigned int track_id = feat->getTrackId();
+        unsigned int track_id = feat->trackId();
         Eigen::Matrix4s cov = feat->getMeasurementCovariance();
         vision_utils::KeyPointEnhanced kp_e(feat->getKeypoint(), id, track_id, track_matrix_.trackSize(track_id), cov);
         kps_e.push_back(kp_e);
