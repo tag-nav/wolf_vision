@@ -105,14 +105,14 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(const Processor
     active_search_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmACTIVESEARCH>(alg_ptr);
 
     // DEBUG VIEW
-    cv::startWindowThread();
-    cv::namedWindow("DEBUG VIEW", cv::WINDOW_NORMAL);
+//    cv::startWindowThread();
+//    cv::namedWindow("DEBUG VIEW", cv::WINDOW_NORMAL);
 }
 
 // Destructor
 ProcessorTrackerFeatureTrifocal::~ProcessorTrackerFeatureTrifocal()
 {
-    cv::destroyAllWindows();
+//    cv::destroyAllWindows();
 }
 
 unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out)
@@ -264,23 +264,23 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
 
 void ProcessorTrackerFeatureTrifocal::postProcess()
 {
-    // DEBUG
-    std::vector<vision_utils::KeyPointEnhanced> kps_e;
-    for (auto const & feat_base : last_ptr_->getFeatureList())
-    {
-        FeaturePointImagePtr feat = std::static_pointer_cast<FeaturePointImage>(feat_base);
-        unsigned int id = feat->id();
-        unsigned int track_id = feat->getTrackId();
-        Eigen::Matrix4s cov = feat->getMeasurementCovariance();
-        vision_utils::KeyPointEnhanced kp_e(feat->getKeypoint(), id, track_id, track_matrix_.trackSize(track_id), cov);
-        kps_e.push_back(kp_e);
-    }
-
-    cv::Mat img = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
-    cv::Mat img_proc = vision_utils::buildImageProcessed(img, kps_e);
-
-    cv::imshow("DEBUG VIEW", img_proc);
-    cv::waitKey(1);
+//    // DEBUG
+//    std::vector<vision_utils::KeyPointEnhanced> kps_e;
+//    for (auto const & feat_base : last_ptr_->getFeatureList())
+//    {
+//        FeaturePointImagePtr feat = std::static_pointer_cast<FeaturePointImage>(feat_base);
+//        unsigned int id = feat->id();
+//        unsigned int track_id = feat->getTrackId();
+//        Eigen::Matrix4s cov = feat->getMeasurementCovariance();
+//        vision_utils::KeyPointEnhanced kp_e(feat->getKeypoint(), id, track_id, track_matrix_.trackSize(track_id), cov);
+//        kps_e.push_back(kp_e);
+//    }
+//
+//    cv::Mat img = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
+//    cv::Mat img_proc = vision_utils::buildImageProcessed(img, kps_e);
+//
+//    cv::imshow("DEBUG VIEW", img_proc);
+//    cv::waitKey(1);
 }
 
 ConstraintBasePtr ProcessorTrackerFeatureTrifocal::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
