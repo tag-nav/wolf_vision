@@ -5,6 +5,7 @@
 #include "sensor_camera.h"
 #include "feature_point_image.h"
 #include "constraints/constraint_autodiff_trifocal.h"
+#include "capture_image.h"
 
 // vision_utils
 #include <vision_utils/vision_utils.h>
@@ -256,14 +257,13 @@ void ProcessorTrackerFeatureTrifocal::resetDerived()
         Eigen::Vector2s pt = feature_in_last->getMeasurement();
         cv::KeyPoint kp(pt(0), pt(1), CV_32F);
         unsigned int id = feature_in_last->id();
-        unsigned int track_id = feature_in_last->track_id_();
+        unsigned int track_id = feature_in_last->getTrackId();
         Eigen::Matrix4s cov = feature_in_last->getMeasurementCovariance();
-
-        vision_utils::KeyPointEnhanced kp_e(kp, id, track_id, 3);
+        vision_utils::KeyPointEnhanced kp_e(kp, id, track_id, 3, cov);
 
         kps_e.push_back(kp_e);
     }
-    cv::Mat img = (static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
+    cv::Mat img = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
     cv::Mat img_proc = vision_utils::buildImageProcessed(img, kps_e);
 
     cv::imshow("DEBUG VIEW", img_proc);

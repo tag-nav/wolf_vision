@@ -52,6 +52,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         unsigned int id();
         unsigned int trackId(){return track_id_;}
         void setTrackId(unsigned int _tr_id){track_id_ = _tr_id;}
+        unsigned int getTrackId(){return track_id_;}
         unsigned int landmarkId(){return landmark_id_;}
         void setLandmarkId(unsigned int _lmk_id){landmark_id_ = _lmk_id;}
 
