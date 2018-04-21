@@ -128,6 +128,8 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
     cv::Mat new_descriptors;
     cv::KeyPointsFilter keypoint_filter;
 
+    image_last_ = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
+
     for (unsigned int n_iterations = 0; _max_new_features == 0 || n_iterations < _max_new_features; n_iterations++)
     {
         if (active_search_ptr_->pickEmptyRoi(roi))
@@ -145,6 +147,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
                     if(list_keypoints[i].pt == kps[0].pt)
                         index = i;
                 }
+
                 if(kps[0].response > params_activesearch_ptr_->min_response_new_feature)
                 {
                     std::cout << "response: " << kps[0].response << std::endl;
@@ -194,9 +197,9 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
 {
     KeyPointVector kps;
     cv::Mat desc;
-    KeyPointVector candidate_keypoints;
-    cv::Mat candidate_descriptors;
     cv::DMatch cv_match;
+
+    image_incoming_ = (std::static_pointer_cast<CaptureImage>(incoming_ptr_))->getImage();
 
     for (auto feature_base_ptr : _feature_list_in)
     {
@@ -217,15 +220,18 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
             if ( normalized_score > mat_ptr_->getParams()->min_norm_score )
             {
                 FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
-                        candidate_keypoints[cv_match.trainIdx], (candidate_descriptors.row(cv_match.trainIdx)),
+                        feature_ptr->getKeypoint(), feature_ptr->getDescriptor(),
                         Eigen::Matrix2s::Identity() * params_.pixel_noise_std * params_.pixel_noise_std);
+
                 incoming_point_ptr->setIsKnown(feature_ptr->isKnown());
+
                 _feature_list_out.push_back(incoming_point_ptr);
 
                 _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_base_ptr, normalized_score}));
             }
         }
     }
+
     return _feature_list_out.size();
 }
 
@@ -273,8 +279,7 @@ void ProcessorTrackerFeatureTrifocal::postProcess()
         FeaturePointImagePtr feat = std::static_pointer_cast<FeaturePointImage>(feat_base);
         unsigned int id = feat->id();
         unsigned int track_id = feat->trackId();
-        Eigen::Matrix4s cov = feat->getMeasurementCovariance();
-        vision_utils::KeyPointEnhanced kp_e(feat->getKeypoint(), id, track_id, track_matrix_.trackSize(track_id), cov);
+        vision_utils::KeyPointEnhanced kp_e(feat->getKeypoint(), id, track_id, track_matrix_.trackSize(track_id), feat->getMeasurementCovariance());
         kps_e.push_back(kp_e);
     }
 
@@ -337,7 +342,6 @@ void ProcessorTrackerFeatureTrifocal::configure(SensorBasePtr _sensor)
 
     cell_width_  = camera->getImgWidth()  / params_activesearch_ptr_->n_cells_h;
     cell_height_ = camera->getImgHeight() / params_activesearch_ptr_->n_cells_v;
-
 }
 
 ProcessorBasePtr ProcessorTrackerFeatureTrifocal::create(const std::string& _unique_name,
