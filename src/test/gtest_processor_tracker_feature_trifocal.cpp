@@ -12,7 +12,6 @@
 
 using namespace Eigen;
 using namespace wolf;
-using std::static_pointer_cast;
 
 // Use the following in case you want to initialize tests with predefines variables or methods.
 //class ProcessorTrackerFeatureTrifocal_class : public testing::Test{
@@ -21,7 +20,6 @@ using std::static_pointer_cast;
 //        {
 //        }
 //};
-
 
 
 //TEST(ProcessorTrackerFeatureTrifocal, Constructor)
@@ -77,7 +75,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     ProblemPtr problem = Problem::create("PO 3D");
 
     // Install tracker (sensor and processor)
-    IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
+    IntrinsicsCameraPtr intr = make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
     intr->width  = 640;
     intr->height = 480;
     SensorCameraPtr sens_trk = make_shared<SensorCamera>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(),
@@ -116,7 +114,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     CaptureOdom3DPtr capt_odo = make_shared<CaptureOdom3D>(t, sens_odo, Vector6s::Zero(), P);
 
     // Track
-    cv::Mat image(640,480, CV_32F);
+    cv::Mat image(intr->width, intr->height, CV_32F);
     CaptureImagePtr capt_trk = make_shared<CaptureImage>(t, sens_trk, image);
     proc_trk->process(capt_trk);
 

@@ -199,6 +199,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
     cv::Mat desc;
     cv::DMatch cv_match;
 
+    // get image
     image_incoming_ = (std::static_pointer_cast<CaptureImage>(incoming_ptr_))->getImage();
 
     for (auto feature_base_ptr : _feature_list_in)
