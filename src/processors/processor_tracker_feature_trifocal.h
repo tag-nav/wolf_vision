@@ -51,6 +51,9 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
                 unsigned int height_; ///< height of the image
         } image_;
 
+        // Debug
+        std::vector<vision_utils::ROIEnhanced> debug_roi_enh_;
+
     private:
         CaptureBasePtr prev_origin_ptr_;                    ///< Capture previous to origin_ptr_ for the third focus of the trifocal.
         bool initialized_;                                  ///< Flags the situation where three focus are available: prev_origin, origin, and last.
