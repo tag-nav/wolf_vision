@@ -18,7 +18,17 @@
 
 namespace wolf
 {
-    
+
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsMotion);
+
+struct ProcessorParamsMotion : public ProcessorParamsBase
+{
+        Scalar max_time_span    = 0.5;
+        Size   max_buff_length  = 10;
+        Scalar dist_traveled    = 5;
+        Scalar angle_turned     = 0.5;
+};
+
 /** \brief class for Motion processors
  *
  * This processor integrates motion data into vehicle states.
@@ -108,17 +118,18 @@ class ProcessorMotion : public ProcessorBase
         } ProcessingStep ;
 
     protected:
+        ProcessorParamsMotionPtr params_motion_;
         ProcessingStep processing_step_;        ///< State machine controlling the processing step
 
     // This is the main public interface
     public:
         ProcessorMotion(const std::string& _type,
-                        Scalar _time_tolerance,
                         Size _state_size,
                         Size _delta_size,
                         Size _delta_cov_size,
                         Size _data_size,
-                        Size _calib_size = 0);
+                        Size _calib_size,
+                        ProcessorParamsMotionPtr _params_motion);
         virtual ~ProcessorMotion();
 
         // Instructions to the processor:
@@ -400,9 +411,21 @@ class ProcessorMotion : public ProcessorBase
         bool hasCalibration() {return calib_size_ > 0;}
 
     public:
+        //getters
         CaptureMotionPtr getOriginPtr();
         CaptureMotionPtr getLastPtr();
         CaptureMotionPtr getIncomingPtr();
+
+        Scalar getMaxTimeSpan() const;
+        Scalar getMaxBuffLength() const;
+        Scalar getDistTraveled() const;
+        Scalar getAngleTurned() const;
+
+        void setMaxTimeSpan(const Scalar& _max_time_span);
+        void setMaxBuffLength(const Scalar& _max_buff_length);
+        void setDistTraveled(const Scalar& _dist_traveled);
+        void setAngleTurned(const Scalar& _angle_turned);
+
 
 
     protected:
@@ -451,7 +474,6 @@ inline void ProcessorMotion::resetDerived()
 
 inline bool ProcessorMotion::voteForKeyFrame()
 {
-
     return false;
 }
 
@@ -548,6 +570,44 @@ inline CaptureMotionPtr ProcessorMotion::getIncomingPtr()
 {
     return incoming_ptr_;
 }
+
+inline Scalar ProcessorMotion::getMaxTimeSpan() const
+{
+    return params_motion_->max_time_span;
+}
+
+inline Scalar ProcessorMotion::getMaxBuffLength() const
+{
+    return params_motion_->max_buff_length;
+}
+
+inline Scalar ProcessorMotion::getDistTraveled() const
+{
+    return params_motion_->dist_traveled;
+}
+
+inline Scalar ProcessorMotion::getAngleTurned() const
+{
+    return params_motion_->angle_turned;
+}
+
+inline void ProcessorMotion::setMaxTimeSpan(const Scalar& _max_time_span)
+{
+    params_motion_->max_time_span = _max_time_span;
+}
+inline void ProcessorMotion::setMaxBuffLength(const Scalar& _max_buff_length)
+{
+    params_motion_->max_buff_length = _max_buff_length;
+}
+inline void ProcessorMotion::setDistTraveled(const Scalar& _dist_traveled)
+{
+    params_motion_->dist_traveled = _dist_traveled;
+}
+inline void ProcessorMotion::setAngleTurned(const Scalar& _angle_turned)
+{
+    params_motion_->angle_turned = _angle_turned;
+}
+
 
 
 } // namespace wolf

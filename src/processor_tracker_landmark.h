@@ -16,6 +16,14 @@
 namespace wolf
 {
 
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerLandmark);
+
+struct ProcessorParamsTrackerLandmark : public ProcessorParamsTracker
+{
+    //
+};
+
+
 WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmark);
     
 /** \brief Landmark tracker processor
@@ -72,11 +80,13 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmark);
 class ProcessorTrackerLandmark : public ProcessorTracker
 {
     public:
-        ProcessorTrackerLandmark(const std::string& _type, const Scalar& _time_tolerance, const unsigned int& _min_features_for_keyframe, const unsigned int& _max_new_features);
+        ProcessorTrackerLandmark(const std::string& _type,
+                                 ProcessorParamsTrackerLandmarkPtr _params_tracker_landmark);
         virtual ~ProcessorTrackerLandmark();
 
     protected:
 
+        ProcessorParamsTrackerLandmarkPtr params_tracker_landmark_;
         LandmarkBaseList new_landmarks_;        ///< List of new detected landmarks
         LandmarkMatchMap matches_landmark_from_incoming_;
         LandmarkMatchMap matches_landmark_from_last_;

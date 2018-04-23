@@ -11,13 +11,9 @@
 namespace wolf
 {
 
-ProcessorTrackerFeatureCorner::ProcessorTrackerFeatureCorner(
-        const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-        const Scalar& _time_tolerance,
-        const unsigned int& _n_corners_th) :
-                ProcessorTrackerFeature("TRACKER FEATURE CORNER", _time_tolerance, 0),
-                line_finder_(_line_finder_params),
-                n_tracks_th_(_n_corners_th),
+ProcessorTrackerFeatureCorner::ProcessorTrackerFeatureCorner(ProcessorParamsTrackerFeatureCornerPtr _params_tracker_feature_corner) :
+                ProcessorTrackerFeature("TRACKER FEATURE CORNER", _params_tracker_feature_corner),
+                params_tracker_feature_corner_(_params_tracker_feature_corner),
                 R_world_sensor_(Eigen::Matrix3s::Identity()),
                 R_robot_sensor_(Eigen::Matrix3s::Identity()),
                 extrinsics_transformation_computed_(false)
@@ -89,7 +85,7 @@ unsigned int ProcessorTrackerFeatureCorner::trackFeatures(const FeatureBaseList&
         auto feat_out_it = feat_out_next++; // next is used to obtain the next iterator after splice
         while (feat_out_it != corners_incoming_.end()) //runs over extracted feature
         {
-            if (((*feat_out_it)->getMeasurement().head<3>() - expected_feature_pose).squaredNorm() > position_error_th_*position_error_th_)
+            if (((*feat_out_it)->getMeasurement().head<3>() - expected_feature_pose).squaredNorm() > params_tracker_feature_corner_->position_error_th*params_tracker_feature_corner_->position_error_th)
             {
                 // match
                 _feature_correspondences[*feat_out_it] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in_ptr,0}));
@@ -108,7 +104,7 @@ unsigned int ProcessorTrackerFeatureCorner::trackFeatures(const FeatureBaseList&
 
 bool ProcessorTrackerFeatureCorner::voteForKeyFrame()
 {
-    return incoming_ptr_->getFeatureList().size() < n_tracks_th_;
+    return incoming_ptr_->getFeatureList().size() < params_tracker_feature_corner_->n_corners_th;
 }
 
 unsigned int ProcessorTrackerFeatureCorner::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
@@ -152,7 +148,7 @@ void ProcessorTrackerFeatureCorner::extractCorners(CaptureLaser2DPtr _capture_la
     std::list<laserscanutils::CornerPoint> corners;
 
     std::cout << "Extracting corners..." << std::endl;
-    corner_finder_.findCorners(_capture_laser_ptr->getScan(), (std::static_pointer_cast<SensorLaser2D>(getSensorPtr()))->getScanParams(), line_finder_, corners);
+    corner_finder_.findCorners(_capture_laser_ptr->getScan(), (std::static_pointer_cast<SensorLaser2D>(getSensorPtr()))->getScanParams(), params_tracker_feature_corner_->line_finder_params, corners);
 
     Eigen::Vector4s measurement;
     for (auto corner : corners)

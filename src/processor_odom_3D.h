@@ -20,12 +20,9 @@ namespace wolf {
     
 WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsOdom3D);
 
-struct ProcessorParamsOdom3D : public ProcessorParamsBase
+struct ProcessorParamsOdom3D : public ProcessorParamsMotion
 {
-        Scalar max_time_span    = 1.0;
-        Size   max_buff_length  = 10;
-        Scalar dist_traveled    = 1.0;
-        Scalar angle_turned     = 0.5;
+        //
 };
 
 
@@ -56,7 +53,7 @@ WOLF_PTR_TYPEDEFS(ProcessorOdom3D);
 class ProcessorOdom3D : public ProcessorMotion
 {
     public:
-        ProcessorOdom3D(const ProcessorParamsOdom3D& _params = ProcessorParamsOdom3D(), SensorOdom3DPtr _sensor_ptr = nullptr);
+        ProcessorOdom3D(ProcessorParamsOdom3DPtr _params, SensorOdom3DPtr _sensor_ptr = nullptr);
         virtual ~ProcessorOdom3D();
         virtual void configure(SensorBasePtr _sensor) override;
 
@@ -97,18 +94,14 @@ class ProcessorOdom3D : public ProcessorMotion
         virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion) override;
 
     protected:
+        ProcessorParamsOdom3DPtr params_odom_3D_;
+
         // noise parameters (stolen from owner SensorOdom3D)
         Scalar k_disp_to_disp_; // displacement variance growth per meter of linear motion
         Scalar k_disp_to_rot_;  // orientation  variance growth per meter of linear motion
         Scalar k_rot_to_rot_;   // orientation  variance growth per radian of rotational motion
         Scalar min_disp_var_;   // floor displacement variance when no  motion
         Scalar min_rot_var_;    // floor orientation variance when no motion
-
-        // keyframe voting parameters
-        Scalar max_time_span_;  // maximum time between keyframes
-        Size   max_buff_length_;// maximum buffer size before keyframe
-        Scalar dist_traveled_;  // maximum linear motion between keyframes
-        Scalar angle_turned_;   // maximum rotation between keyframes
 
         // Eigen::Map helpers
         Eigen::Map<const Eigen::Vector3s> p1_, p2_;
@@ -122,26 +115,6 @@ class ProcessorOdom3D : public ProcessorMotion
         static ProcessorBasePtr create(const std::string& _unique_name,
                                        const ProcessorParamsBasePtr _params,
                                        const SensorBasePtr sensor_ptr = nullptr);
-
-        void setAngleTurned(Scalar angleTurned)
-        {
-            angle_turned_ = angleTurned;
-        }
-
-        void setDistTraveled(Scalar distTraveled)
-        {
-            dist_traveled_ = distTraveled;
-        }
-
-        void setMaxBuffLength(Size maxBuffLength)
-        {
-            max_buff_length_ = maxBuffLength;
-        }
-
-        void setMaxTimeSpan(Scalar maxTimeSpan)
-        {
-            max_time_span_ = maxTimeSpan;
-        }
 };
 
 inline Eigen::VectorXs ProcessorOdom3D::deltaZero() const

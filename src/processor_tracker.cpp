@@ -15,18 +15,15 @@ namespace wolf
 {
 
 ProcessorTracker::ProcessorTracker(const std::string& _type,
-								   const Scalar& _time_tolerance,
-								   const unsigned int& _min_features_for_keyframe,
-								   const unsigned int& _max_new_features) :
-        ProcessorBase(_type, _time_tolerance),
+                                   ProcessorParamsTrackerPtr _params_tracker) :
+        ProcessorBase(_type, _params_tracker),
+        params_tracker_(_params_tracker),
         processing_step_(FIRST_TIME_WITHOUT_PACK),
         origin_ptr_(nullptr),
         last_ptr_(nullptr),
         incoming_ptr_(nullptr)
 {
-    params_tracker_ = std::make_shared<ProcessorParamsTracker>();
-    params_tracker_->min_features_for_keyframe = _min_features_for_keyframe;
-    params_tracker_->max_new_features = _max_new_features;
+    //
 }
 
 ProcessorTracker::~ProcessorTracker()
@@ -54,7 +51,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
     {
         case FIRST_TIME_WITH_PACK :
         {
-            KFPackPtr pack = kf_pack_buffer_.selectPack( incoming_ptr_, time_tolerance_);
+            KFPackPtr pack = kf_pack_buffer_.selectPack( incoming_ptr_, params_tracker_->time_tolerance);
             kf_pack_buffer_.removeUpTo( incoming_ptr_->getTimeStamp() );
 
             WOLF_DEBUG( "PT ", getName(), ": KF" , pack->key_frame->id() , " callback unpacked with ts= " , pack->key_frame->getTimeStamp().get() );
@@ -82,7 +79,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             // We only process new features in Last, here last = nullptr, so we do not have anything to do.
 
             // Issue KF callback with new KF
-            getProblem()->keyFrameCallback(kfrm, shared_from_this(), time_tolerance_);
+            getProblem()->keyFrameCallback(kfrm, shared_from_this(), params_tracker_->time_tolerance);
 
             // Update pointers
             resetDerived();
@@ -95,7 +92,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         case SECOND_TIME_WITH_PACK :
         {
         	// No-break case only for debug. Next case will be executed too.
-            KFPackPtr pack = kf_pack_buffer_.selectPack( incoming_ptr_, time_tolerance_);
+            KFPackPtr pack = kf_pack_buffer_.selectPack( incoming_ptr_, params_tracker_->time_tolerance);
             WOLF_DEBUG( "PT ", getName(), ": KF" , pack->key_frame->id() , " callback unpacked with ts= " , pack->key_frame->getTimeStamp().get() );
         }
         case SECOND_TIME_WITHOUT_PACK :
@@ -118,7 +115,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
         case RUNNING_WITH_PACK :
         {
-            KFPackPtr pack = kf_pack_buffer_.selectPack( last_ptr_ , time_tolerance_);
+            KFPackPtr pack = kf_pack_buffer_.selectPack( last_ptr_ , params_tracker_->time_tolerance);
             kf_pack_buffer_.removeUpTo( last_ptr_->getTimeStamp() );
 
             WOLF_DEBUG( "PT ", getName(), ": KF" , pack->key_frame->id() , " callback unpacked with ts= " , pack->key_frame->getTimeStamp().get() );
@@ -177,7 +174,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 establishConstraints();
 
                 // Call the new keyframe callback in order to let the other processors to establish their constraints
-                getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), std::static_pointer_cast<ProcessorBase>(shared_from_this()), time_tolerance_);
+                getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), std::static_pointer_cast<ProcessorBase>(shared_from_this()), params_tracker_->time_tolerance);
 
                 // Update pointers
                 resetDerived();
@@ -233,7 +230,7 @@ void ProcessorTracker::computeProcessingStep()
     {
         case FIRST_TIME :
 
-            if (kf_pack_buffer_.selectPack(incoming_ptr_, time_tolerance_))
+            if (kf_pack_buffer_.selectPack(incoming_ptr_, params_tracker_->time_tolerance))
                 processing_step_ = FIRST_TIME_WITH_PACK;
             else // ! last && ! pack(incoming)
                 processing_step_ = FIRST_TIME_WITHOUT_PACK;
@@ -241,7 +238,7 @@ void ProcessorTracker::computeProcessingStep()
 
         case SECOND_TIME :
 
-            if (kf_pack_buffer_.selectPack(last_ptr_, time_tolerance_))
+            if (kf_pack_buffer_.selectPack(last_ptr_, params_tracker_->time_tolerance))
                 processing_step_ = SECOND_TIME_WITH_PACK;
             else
                 processing_step_ = SECOND_TIME_WITHOUT_PACK;
@@ -250,7 +247,7 @@ void ProcessorTracker::computeProcessingStep()
         case RUNNING :
         default :
 
-            if (kf_pack_buffer_.selectPack(last_ptr_, time_tolerance_))
+            if (kf_pack_buffer_.selectPack(last_ptr_, params_tracker_->time_tolerance))
             {
                 if (last_ptr_->getFramePtr()->isKey())
                 {

@@ -10,12 +10,9 @@
 namespace wolf {
 WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsIMU);
 
-struct ProcessorParamsIMU : public ProcessorParamsBase
+struct ProcessorParamsIMU : public ProcessorParamsMotion
 {
-        Scalar max_time_span    = 0.5;
-        Size   max_buff_length  = 10;
-        Scalar dist_traveled    = 5;
-        Scalar angle_turned     = 0.5;
+        //
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorIMU);
@@ -23,7 +20,7 @@ WOLF_PTR_TYPEDEFS(ProcessorIMU);
 //class
 class ProcessorIMU : public ProcessorMotion{
     public:
-        ProcessorIMU(const ProcessorParamsIMU& _params = ProcessorParamsIMU());
+        ProcessorIMU(ProcessorParamsIMUPtr _params_motion_IMU);
         virtual ~ProcessorIMU();
         virtual void configure(SensorBasePtr _sensor) override { };
 
@@ -64,21 +61,16 @@ class ProcessorIMU : public ProcessorMotion{
                                                     CaptureBasePtr _capture_origin) override;
 
     protected:
+        ProcessorParamsIMUPtr params_motion_IMU_;
 
         // keyframe voting parameters
-        Scalar max_time_span_;  // maximum time between keyframes
-        Size   max_buff_length_;// maximum buffer size before keyframe
-        Scalar dist_traveled_;  // maximum linear motion between keyframes
-        Scalar angle_turned_;   // maximum rotation between keyframes
+//        Scalar max_time_span_;  // maximum time between keyframes
+//        Size   max_buff_length_;// maximum buffer size before keyframe
+//        Scalar dist_traveled_;  // maximum linear motion between keyframes
+//        Scalar angle_turned_;   // maximum rotation between keyframes
 
 
     public:
-        //getters
-        Scalar getMaxTimeSpan() const;
-        Scalar getMaxBuffLength() const;
-        Scalar getDistTraveled() const;
-        Scalar getAngleTurned() const;
-
         //for factory
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 };
@@ -101,26 +93,6 @@ namespace wolf{
 inline Eigen::VectorXs ProcessorIMU::deltaZero() const
 {
     return (Eigen::VectorXs(10) << 0,0,0,  0,0,0,1,  0,0,0 ).finished(); // p, q, v
-}
-
-inline Scalar ProcessorIMU::getMaxTimeSpan() const
-{
-    return max_time_span_;
-}
-
-inline Scalar ProcessorIMU::getMaxBuffLength() const
-{
-    return max_buff_length_;
-}
-
-inline Scalar ProcessorIMU::getDistTraveled() const
-{
-    return dist_traveled_;
-}
-
-inline Scalar ProcessorIMU::getAngleTurned() const
-{
-    return angle_turned_;
 }
 
 } // namespace wolf

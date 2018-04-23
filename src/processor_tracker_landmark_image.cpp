@@ -2,6 +2,7 @@
 
 #include "landmark_corner_2D.h"
 #include "landmark_AHP.h"
+#include "feature_point_image.h"
 #include "constraint_corner_2D.h"
 #include "constraint_AHP.h"
 #include "sensor_camera.h"
@@ -22,17 +23,17 @@
 namespace wolf
 {
 
-ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(const ProcessorParamsImage& _params) :
-    ProcessorTrackerLandmark("IMAGE LANDMARK", _params.algorithm.time_tolerance, _params.algorithm.min_features_for_keyframe, _params.algorithm.max_new_features),
+ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(ProcessorParamsTrackerLandmarkImagePtr _params_tracker_landmark_image) :
+    ProcessorTrackerLandmark("IMAGE LANDMARK", _params_tracker_landmark_image),
     cell_width_(0),
     cell_height_(0),
-    params_tracker_landmark_image_(_params),
+    params_tracker_landmark_image_(_params_tracker_landmark_image),
     n_feature_(0),
     landmark_idx_non_visible_(0)
 {
     // Detector
-    std::string det_name = vision_utils::readYamlType(params_tracker_landmark_image_.yaml_file_params_vision_utils, "detector");
-    det_ptr_ = vision_utils::setupDetector(det_name, det_name + " detector", params_tracker_landmark_image_.yaml_file_params_vision_utils);
+    std::string det_name = vision_utils::readYamlType(params_tracker_landmark_image_->yaml_file_params_vision_utils, "detector");
+    det_ptr_ = vision_utils::setupDetector(det_name, det_name + " detector", params_tracker_landmark_image_->yaml_file_params_vision_utils);
 
     if (det_name.compare("ORB") == 0)
         det_ptr_ = std::static_pointer_cast<vision_utils::DetectorORB>(det_ptr_);
@@ -60,8 +61,8 @@ ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(const ProcessorPara
         det_ptr_ = std::static_pointer_cast<vision_utils::DetectorAGAST>(det_ptr_);
 
     // Descriptor
-    std::string des_name = vision_utils::readYamlType(params_tracker_landmark_image_.yaml_file_params_vision_utils, "descriptor");
-    des_ptr_ = vision_utils::setupDescriptor(des_name, des_name + " descriptor", params_tracker_landmark_image_.yaml_file_params_vision_utils);
+    std::string des_name = vision_utils::readYamlType(params_tracker_landmark_image_->yaml_file_params_vision_utils, "descriptor");
+    des_ptr_ = vision_utils::setupDescriptor(des_name, des_name + " descriptor", params_tracker_landmark_image_->yaml_file_params_vision_utils);
 
     if (des_name.compare("ORB") == 0)
         des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorORB>(des_ptr_);
@@ -87,8 +88,8 @@ ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(const ProcessorPara
         des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorLUCID>(des_ptr_);
 
     // Matcher
-    std::string mat_name = vision_utils::readYamlType(params_tracker_landmark_image_.yaml_file_params_vision_utils, "matcher");
-    mat_ptr_ = vision_utils::setupMatcher(mat_name, mat_name + " matcher", params_tracker_landmark_image_.yaml_file_params_vision_utils);
+    std::string mat_name = vision_utils::readYamlType(params_tracker_landmark_image_->yaml_file_params_vision_utils, "matcher");
+    mat_ptr_ = vision_utils::setupMatcher(mat_name, mat_name + " matcher", params_tracker_landmark_image_->yaml_file_params_vision_utils);
 
     if (mat_name.compare("FLANNBASED") == 0)
         mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherFLANNBASED>(mat_ptr_);
@@ -102,7 +103,7 @@ ProcessorTrackerLandmarkImage::ProcessorTrackerLandmarkImage(const ProcessorPara
         mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING_2>(mat_ptr_);
 
     // Active search grid
-    vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_tracker_landmark_image_.yaml_file_params_vision_utils);
+    vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_tracker_landmark_image_->yaml_file_params_vision_utils);
     active_search_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmACTIVESEARCH>(alg_ptr);
 }
 
@@ -183,7 +184,7 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList
                     FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                             candidate_keypoints[cv_matches[0].trainIdx],
                             candidate_descriptors.row(cv_matches[0].trainIdx),
-                            Eigen::Matrix2s::Identity()*params_tracker_landmark_image_.noise.pixel_noise_var);
+                            Eigen::Matrix2s::Identity()*params_tracker_landmark_image_->pixel_noise_var);
 
                     incoming_point_ptr->setTrackId(landmark_in_ptr->id());
                     incoming_point_ptr->setLandmarkId(landmark_in_ptr->id());
@@ -219,7 +220,7 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList
 bool ProcessorTrackerLandmarkImage::voteForKeyFrame()
 {
     return false;
-//    return landmarks_tracked_ < params_tracker_landmark_image_.algorithm.min_features_for_keyframe;
+//    return landmarks_tracked_ < params_tracker_landmark_image_->min_features_for_keyframe;
 }
 
 unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
@@ -252,7 +253,7 @@ unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int
                     FeaturePointImagePtr point_ptr = std::make_shared<FeaturePointImage>(
                             new_keypoints[0],
                             new_descriptors.row(index),
-                            Eigen::Matrix2s::Identity()*params_tracker_landmark_image_.noise.pixel_noise_var);
+                            Eigen::Matrix2s::Identity()*params_tracker_landmark_image_->pixel_noise_var);
                     point_ptr->setIsKnown(false);
                     point_ptr->setTrackId(point_ptr->id());
                     point_ptr->setExpectation(Eigen::Vector2s(new_keypoints[0].pt.x,new_keypoints[0].pt.y));
@@ -285,7 +286,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkImage::createLandmark(FeatureBasePtr _fe
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
     point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
 
-    Scalar distance = params_tracker_landmark_image_.algorithm.distance; // arbitrary value
+    Scalar distance = params_tracker_landmark_image_->distance; // arbitrary value
     Eigen::Vector4s vec_homogeneous;
 
     point2D = pinhole::depixellizePoint(getSensorPtr()->getIntrinsicPtr()->getState(),point2D);
@@ -494,7 +495,7 @@ void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
 
 ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
-    ProcessorTrackerLandmarkImagePtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkImage>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
+    ProcessorTrackerLandmarkImagePtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkImage>(std::static_pointer_cast<ProcessorParamsTrackerLandmarkImage>(_params));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

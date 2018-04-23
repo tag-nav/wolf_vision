@@ -19,19 +19,16 @@ namespace wolf {
 WOLF_PTR_TYPEDEFS(ProcessorOdom2D);
 WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsOdom2D);
 
-struct ProcessorParamsOdom2D : public ProcessorParamsBase
+struct ProcessorParamsOdom2D : public ProcessorParamsMotion
 {
-    Scalar dist_traveled_th_            = 1.0;      // 1m
-    Scalar theta_traveled_th_           = 0.17;     // 90 degrees
-    Scalar cov_det_th_                  = 1.0;      // 1 rad^2
-    Scalar elapsed_time_th_             = 1.0;      // 1s
-    Scalar unmeasured_perturbation_std_ = 0.001;    // no particular dimension: the same for displacement and angle
+    Scalar cov_det                  = 1.0;      // 1 rad^2
+    Scalar unmeasured_perturbation_std = 0.001;    // no particular dimension: the same for displacement and angle
 };
 
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:
-        ProcessorOdom2D(const ProcessorParamsOdom2D& _params = ProcessorParamsOdom2D());
+        ProcessorOdom2D(ProcessorParamsOdom2DPtr _params);
         virtual ~ProcessorOdom2D();
         virtual void configure(SensorBasePtr _sensor) override { };
 
@@ -74,11 +71,8 @@ class ProcessorOdom2D : public ProcessorMotion
                                                     CaptureBasePtr _capture_origin) override;
 
     protected:
-        Scalar dist_traveled_th_;
-        Scalar theta_traveled_th_;
-        Scalar cov_det_th_;
-        Scalar elapsed_time_th_;
-        Matrix3s unmeasured_perturbation_cov_; ///< Covariance to be added to the unmeasured perturbation
+        ProcessorParamsOdom2DPtr params_odom_2D_;
+        MatrixXs unmeasured_perturbation_cov_;
 
         // Factory method
     public:

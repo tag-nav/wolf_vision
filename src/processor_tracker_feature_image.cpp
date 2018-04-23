@@ -14,14 +14,14 @@
 namespace wolf
 {
 
-ProcessorTrackerFeatureImage::ProcessorTrackerFeatureImage(ProcessorParamsImage _params) :
-    ProcessorTrackerFeature("IMAGE", _params.time_tolerance, _params.algorithm.min_features_for_keyframe, _params.algorithm.max_new_features),
+ProcessorTrackerFeatureImage::ProcessorTrackerFeatureImage(ProcessorParamsTrackerFeatureImagePtr _params_tracker_feature_image) :
+    ProcessorTrackerFeature("IMAGE", _params_tracker_feature_image),
     cell_width_(0), cell_height_(0),  // These will be initialized to proper values taken from the sensor via function configure()
-    params_tracker_feature_image_(_params)
+    params_tracker_feature_image_(_params_tracker_feature_image)
 {
 	// Detector
-    std::string det_name = vision_utils::readYamlType(params_tracker_feature_image_.yaml_file_params_vision_utils, "detector");
-    det_ptr_ = vision_utils::setupDetector(det_name, det_name + " detector", params_tracker_feature_image_.yaml_file_params_vision_utils);
+    std::string det_name = vision_utils::readYamlType(params_tracker_feature_image_->yaml_file_params_vision_utils, "detector");
+    det_ptr_ = vision_utils::setupDetector(det_name, det_name + " detector", params_tracker_feature_image_->yaml_file_params_vision_utils);
 
     if (det_name.compare("ORB") == 0)
     	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorORB>(det_ptr_);
@@ -49,8 +49,8 @@ ProcessorTrackerFeatureImage::ProcessorTrackerFeatureImage(ProcessorParamsImage 
     	det_ptr_ = std::static_pointer_cast<vision_utils::DetectorAGAST>(det_ptr_);
 
     // Descriptor
-    std::string des_name = vision_utils::readYamlType(params_tracker_feature_image_.yaml_file_params_vision_utils, "descriptor");
-    des_ptr_ = vision_utils::setupDescriptor(des_name, des_name + " descriptor", params_tracker_feature_image_.yaml_file_params_vision_utils);
+    std::string des_name = vision_utils::readYamlType(params_tracker_feature_image_->yaml_file_params_vision_utils, "descriptor");
+    des_ptr_ = vision_utils::setupDescriptor(des_name, des_name + " descriptor", params_tracker_feature_image_->yaml_file_params_vision_utils);
 
     if (des_name.compare("ORB") == 0)
     	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorORB>(des_ptr_);
@@ -76,8 +76,8 @@ ProcessorTrackerFeatureImage::ProcessorTrackerFeatureImage(ProcessorParamsImage 
     	des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorLUCID>(des_ptr_);
 
     // Matcher
-    std::string mat_name = vision_utils::readYamlType(params_tracker_feature_image_.yaml_file_params_vision_utils, "matcher");
-    mat_ptr_ = vision_utils::setupMatcher(mat_name, mat_name + " matcher", params_tracker_feature_image_.yaml_file_params_vision_utils);
+    std::string mat_name = vision_utils::readYamlType(params_tracker_feature_image_->yaml_file_params_vision_utils, "matcher");
+    mat_ptr_ = vision_utils::setupMatcher(mat_name, mat_name + " matcher", params_tracker_feature_image_->yaml_file_params_vision_utils);
 
     if (mat_name.compare("FLANNBASED") == 0)
     	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherFLANNBASED>(mat_ptr_);
@@ -91,7 +91,7 @@ ProcessorTrackerFeatureImage::ProcessorTrackerFeatureImage(ProcessorParamsImage 
        	mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING_2>(mat_ptr_);
 
     // Active search grid
-    vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_tracker_feature_image_.yaml_file_params_vision_utils);
+    vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_tracker_feature_image_->yaml_file_params_vision_utils);
     active_search_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmACTIVESEARCH>(alg_ptr);
 }
 
@@ -163,7 +163,7 @@ unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& 
             {
                 FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                         candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
-                        Eigen::Matrix2s::Identity()*params_tracker_feature_image_.noise.pixel_noise_var);
+                        Eigen::Matrix2s::Identity()*params_tracker_feature_image_->pixel_noise_var);
                 incoming_point_ptr->setIsKnown(feature_ptr->isKnown());
                 _feature_list_out.push_back(incoming_point_ptr);
 
@@ -272,7 +272,7 @@ unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int&
                     FeaturePointImagePtr point_ptr = std::make_shared<FeaturePointImage>(
                             new_keypoints[0],
                             new_descriptors.row(index),
-                            Eigen::Matrix2s::Identity()*params_tracker_feature_image_.noise.pixel_noise_var);
+                            Eigen::Matrix2s::Identity()*params_tracker_feature_image_->pixel_noise_var);
                     point_ptr->setIsKnown(false);
                     _feature_list_out.push_back(point_ptr);
 
@@ -382,7 +382,7 @@ void ProcessorTrackerFeatureImage::drawFeatures(cv::Mat _image)
 
 ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sensor_ptr)
 {
-    ProcessorTrackerFeatureImagePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureImage>(*(std::static_pointer_cast<ProcessorParamsImage>(_params)));
+    ProcessorTrackerFeatureImagePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureImage>(std::static_pointer_cast<ProcessorParamsTrackerFeatureImage>(_params));
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

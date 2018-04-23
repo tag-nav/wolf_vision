@@ -20,20 +20,20 @@
 namespace wolf {
 
 // Constructor
-ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(const ProcessorParamsTrackerFeatureTrifocal& _params) :
-        ProcessorTrackerFeature("TRACKER FEATURE TRIFOCAL", _params.time_tolerance, _params.min_features_for_keyframe, _params.max_new_features ),
+ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ProcessorParamsTrackerFeatureTrifocalPtr _params_tracker_feature_trifocal) :
+        ProcessorTrackerFeature("TRACKER FEATURE TRIFOCAL", _params_tracker_feature_trifocal ),
         cell_width_(0), cell_height_(0), // These will be initialized to proper values taken from the sensor via function configure()
-        params_tracker_feature_trifocal_(_params),
+        params_tracker_feature_trifocal_(_params_tracker_feature_trifocal),
         prev_origin_ptr_(nullptr),
         initialized_(false)
 {
-    setName(_params.name);
-    assert(!(params_tracker_feature_trifocal_.yaml_file_params_vision_utils.empty()) && "Missing YAML file with vision_utils parameters!");
-    assert(file_exists(params_tracker_feature_trifocal_.yaml_file_params_vision_utils) && "Cannot setup processor: vision_utils' YAML file does not exist.");
+    setName(_params_tracker_feature_trifocal->name);
+    assert(!(params_tracker_feature_trifocal_->yaml_file_params_vision_utils.empty()) && "Missing YAML file with vision_utils parameters!");
+    assert(file_exists(params_tracker_feature_trifocal_->yaml_file_params_vision_utils) && "Cannot setup processor: vision_utils' YAML file does not exist.");
 
     // Detector
-    std::string det_name = vision_utils::readYamlType(params_tracker_feature_trifocal_.yaml_file_params_vision_utils, "detector");
-    det_ptr_ = vision_utils::setupDetector(det_name, det_name + " detector", params_tracker_feature_trifocal_.yaml_file_params_vision_utils);
+    std::string det_name = vision_utils::readYamlType(params_tracker_feature_trifocal_->yaml_file_params_vision_utils, "detector");
+    det_ptr_ = vision_utils::setupDetector(det_name, det_name + " detector", params_tracker_feature_trifocal_->yaml_file_params_vision_utils);
 
     if (det_name.compare("ORB") == 0)
         det_ptr_ = std::static_pointer_cast<vision_utils::DetectorORB>(det_ptr_);
@@ -61,8 +61,8 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(const Processor
         det_ptr_ = std::static_pointer_cast<vision_utils::DetectorAGAST>(det_ptr_);
 
     // Descriptor
-    std::string des_name = vision_utils::readYamlType(params_tracker_feature_trifocal_.yaml_file_params_vision_utils, "descriptor");
-    des_ptr_ = vision_utils::setupDescriptor(des_name, des_name + " descriptor", params_tracker_feature_trifocal_.yaml_file_params_vision_utils);
+    std::string des_name = vision_utils::readYamlType(params_tracker_feature_trifocal_->yaml_file_params_vision_utils, "descriptor");
+    des_ptr_ = vision_utils::setupDescriptor(des_name, des_name + " descriptor", params_tracker_feature_trifocal_->yaml_file_params_vision_utils);
 
     if (des_name.compare("ORB") == 0)
         des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorORB>(des_ptr_);
@@ -88,8 +88,8 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(const Processor
         des_ptr_ = std::static_pointer_cast<vision_utils::DescriptorLUCID>(des_ptr_);
 
     // Matcher
-    std::string mat_name = vision_utils::readYamlType(params_tracker_feature_trifocal_.yaml_file_params_vision_utils, "matcher");
-    mat_ptr_ = vision_utils::setupMatcher(mat_name, mat_name + " matcher", params_tracker_feature_trifocal_.yaml_file_params_vision_utils);
+    std::string mat_name = vision_utils::readYamlType(params_tracker_feature_trifocal_->yaml_file_params_vision_utils, "matcher");
+    mat_ptr_ = vision_utils::setupMatcher(mat_name, mat_name + " matcher", params_tracker_feature_trifocal_->yaml_file_params_vision_utils);
 
     if (mat_name.compare("FLANNBASED") == 0)
         mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherFLANNBASED>(mat_ptr_);
@@ -103,7 +103,7 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(const Processor
         mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING_2>(mat_ptr_);
 
     // Active search grid
-    vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_tracker_feature_trifocal_.yaml_file_params_vision_utils);
+    vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_tracker_feature_trifocal_->yaml_file_params_vision_utils);
     active_search_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmACTIVESEARCH>(alg_ptr);
 
     // DEBUG VIEW
@@ -162,7 +162,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
                     FeaturePointImagePtr point = std::make_shared<FeaturePointImage>(
                             kps[0],
                             desc.row(index),
-                            Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_.pixel_noise_std * params_tracker_feature_trifocal_.pixel_noise_std);
+                            Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
                     point->setIsKnown(true);
                     _feature_list_out.push_back(point);
 
@@ -217,16 +217,16 @@ bool ProcessorTrackerFeatureTrifocal::voteForKeyFrame()
 	// A. crossing voting threshold with ascending number of features
 	bool vote_up = true;
 	// 1. vote if we did not have enough features before
-	vote_up = vote_up && (getNewFeaturesListLast().size() < params_tracker_feature_trifocal_.min_features_for_keyframe);
+	vote_up = vote_up && (getNewFeaturesListLast().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
     // 2. vote if we have enough features now
-    vote_up = vote_up && (getNewFeaturesListIncoming().size() >= params_tracker_feature_trifocal_.min_features_for_keyframe);
+    vote_up = vote_up && (getNewFeaturesListIncoming().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
 
 	// B. crossing voting threshold with descending number of features
     bool vote_down = true;
     // 1. vote if we had enough features before
-    vote_down = vote_down && (getNewFeaturesListLast().size() >= params_tracker_feature_trifocal_.min_features_for_keyframe);
+    vote_down = vote_down && (getNewFeaturesListLast().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
     // 2. vote if we have not enough features now
-    vote_down = vote_down && (getNewFeaturesListIncoming().size() < params_tracker_feature_trifocal_.min_features_for_keyframe);
+    vote_down = vote_down && (getNewFeaturesListIncoming().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
 
     return vote_up || vote_down;
 }
@@ -272,7 +272,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
 
                 FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                         tracked_kp, tracked_desc,
-                        Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_.pixel_noise_std * params_tracker_feature_trifocal_.pixel_noise_std);
+                        Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
 
                 incoming_point_ptr->setIsKnown(target_feature->isKnown());
 
@@ -400,7 +400,7 @@ void ProcessorTrackerFeatureTrifocal::configure(SensorBasePtr _sensor)
 {
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(_sensor);
 
-    camera->setNoiseStd(Vector2s::Ones() * params_tracker_feature_trifocal_.pixel_noise_std);
+    camera->setNoiseStd(Vector2s::Ones() * params_tracker_feature_trifocal_->pixel_noise_std);
 
     active_search_ptr_->initAlg(camera->getImgWidth(), camera->getImgHeight() , det_ptr_->getPatternRadius());
 
@@ -416,7 +416,7 @@ ProcessorBasePtr ProcessorTrackerFeatureTrifocal::create(const std::string& _uni
 {
   const auto params = std::static_pointer_cast<ProcessorParamsTrackerFeatureTrifocal>(_params);
 
-  ProcessorBasePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureTrifocal>(*params);
+  ProcessorBasePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureTrifocal>(params);
   prc_ptr->setName(_unique_name);
   prc_ptr->configure(_sensor_ptr);
   return prc_ptr;

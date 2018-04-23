@@ -11,7 +11,7 @@
 #include "constraint_epipolar.h"
 #include "processor_params_image.h"
 
-// Vision utils
+
 #include <vision_utils/detectors/detector_base.h>
 #include <vision_utils/descriptors/descriptor_base.h>
 #include <vision_utils/matchers/matcher_base.h>
@@ -29,6 +29,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureImage);
 //class
 class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
 {
+        // vision utils params
     protected:
 
         vision_utils::DetectorBasePtr det_ptr_;
@@ -42,7 +43,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
 
     protected:
 
-		ProcessorParamsImage params_tracker_feature_image_;           ///< Struct with parameters of the processors
+        ProcessorParamsTrackerFeatureImagePtr params_tracker_feature_image_;           ///< Struct with parameters of the processors
         cv::Mat image_last_, image_incoming_;   ///< Images of the "last" and "incoming" Captures
 
         struct
@@ -59,7 +60,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
         std::list<cv::Rect> detector_roi_;
         std::list<cv::Point> tracker_target_;
 
-        ProcessorTrackerFeatureImage(ProcessorParamsImage _params);
+        ProcessorTrackerFeatureImage(ProcessorParamsTrackerFeatureImagePtr _params_image);
         virtual ~ProcessorTrackerFeatureImage();
 
         virtual void configure(SensorBasePtr _sensor) ;
@@ -160,7 +161,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
 
 inline bool ProcessorTrackerFeatureImage::voteForKeyFrame()
 {
-    return (incoming_ptr_->getFeatureList().size() < params_tracker_feature_image_.algorithm.min_features_for_keyframe);
+    return (incoming_ptr_->getFeatureList().size() < params_tracker_feature_image_->min_features_for_keyframe);
 }
 
 } // namespace wolf

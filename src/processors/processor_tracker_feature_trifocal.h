@@ -15,7 +15,7 @@ namespace wolf
 
 WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerFeatureTrifocal);
 
-struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTracker
+struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeature
 {
         std::string yaml_file_params_vision_utils;
 
@@ -39,8 +39,8 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         vision_utils::AlgorithmParamsACTIVESEARCHPtr params_tracker_feature_trifocal_activesearch_ptr_; ///< Active search parameters
 
     protected:
-        ProcessorParamsTrackerFeatureTrifocal params_tracker_feature_trifocal_;      ///< Configuration parameters
 
+        ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_;      ///< Configuration parameters
         cv::Mat image_last_, image_incoming_;   ///< Images of the "last" and "incoming" Captures
 
         struct
@@ -60,7 +60,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         /** \brief Class constructor
          */
-        ProcessorTrackerFeatureTrifocal( const ProcessorParamsTrackerFeatureTrifocal& _params );
+        ProcessorTrackerFeatureTrifocal( ProcessorParamsTrackerFeatureTrifocalPtr _params_tracker_feature_trifocal );
 
         /** \brief Class Destructor
          */

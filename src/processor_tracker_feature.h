@@ -17,6 +17,13 @@
 
 namespace wolf
 {
+
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerFeature);
+
+struct ProcessorParamsTrackerFeature : public ProcessorParamsTracker
+{
+    //
+};
     
 WOLF_PTR_TYPEDEFS(ProcessorTrackerFeature);
 
@@ -78,12 +85,11 @@ class ProcessorTrackerFeature : public ProcessorTracker
         /** \brief Constructor with type
          */
         ProcessorTrackerFeature(const std::string& _type,
-                                const Scalar& _time_tolerance,
-                                const unsigned int& _min_features_for_keyframe,
-                                const unsigned int& _max_new_features);
+                                ProcessorParamsTrackerFeaturePtr _params_tracker_feature);
         virtual ~ProcessorTrackerFeature();
 
     protected:
+        ProcessorParamsTrackerFeaturePtr params_tracker_feature_;
         TrackMatrix track_matrix_;
 
         FeatureBaseList known_features_incoming_;

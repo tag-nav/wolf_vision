@@ -18,7 +18,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmarkDummy);
 class ProcessorTrackerLandmarkDummy : public ProcessorTrackerLandmark
 {
     public:
-        ProcessorTrackerLandmarkDummy(const Scalar _time_tolerance, const unsigned int& _min_features_for_keyframe, const unsigned int& _max_new_features);
+        ProcessorTrackerLandmarkDummy(ProcessorParamsTrackerLandmarkPtr _params_tracker_landmark);
         virtual ~ProcessorTrackerLandmarkDummy();
         virtual void configure(SensorBasePtr _sensor) { };
 

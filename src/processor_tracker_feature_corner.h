@@ -28,29 +28,36 @@
 
 namespace wolf
 {
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerFeatureCorner);
+
+struct ProcessorParamsTrackerFeatureCorner : public ProcessorParamsTrackerFeature
+{
+        laserscanutils::LineFinderIterativeParams line_finder_params;
+        unsigned int n_corners_th;
+        const Scalar position_error_th = 1;
+};
     
 WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureCorner);
     
 
 //some consts.. TODO: this tuning params should be grouped in a struct and passed to the class from ros node, at constructor level
-const Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
-const Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
-const Scalar position_error_th_ = 1;
-const Scalar min_features_ratio_th_ = 0.5;
+//const Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
+//const Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
+//const Scalar position_error_th_ = 1;
+//const Scalar min_features_ratio_th_ = 0.5;
 
 class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
 {
     private:
+        ProcessorParamsTrackerFeatureCornerPtr params_tracker_feature_corner_;
         //laserscanutils::ScanParams scan_params_;
         //laserscanutils::ExtractCornerParams corner_alg_params_;
         //laserscanutils::LaserScan laser_data_;
-        laserscanutils::LineFinderIterative line_finder_;
-        laserscanutils::CornerFinder corner_finder_;
+        //laserscanutils::CornerFinder corner_finder_;
         //TODO: add corner_finder_params
 
         FeatureBaseList corners_incoming_;
         FeatureBaseList corners_last_;
-        unsigned int n_tracks_th_;
 
         Eigen::Matrix3s R_world_sensor_, R_world_sensor_prev_;
         Eigen::Matrix3s R_robot_sensor_;
@@ -64,9 +71,7 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
-        ProcessorTrackerFeatureCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-                                      const Scalar& _time_tolerance,
-                                      const unsigned int& _n_corners_th);
+        ProcessorTrackerFeatureCorner(ProcessorParamsTrackerFeatureCornerPtr _params_tracker_feature_corner);
         virtual ~ProcessorTrackerFeatureCorner();
         virtual void configure(SensorBasePtr _sensor) { };
 

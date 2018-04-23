@@ -6,6 +6,8 @@
 
 namespace wolf{
 
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsLoopClosure);
+
 struct ProcessorParamsLoopClosure : public ProcessorParamsBase
 {
 //  virtual ~ProcessorParamsLoopClosure() = default;
@@ -33,6 +35,9 @@ class ProcessorLoopClosureBase : public ProcessorBase
 {
 protected:
 
+
+  ProcessorParamsLoopClosurePtr params_loop_closure_;
+
   // Frames that are possible loop closure candidates according to
   // findLoopClosure()
   std::vector<FrameBasePtr> loop_closure_candidates;
@@ -45,7 +50,7 @@ protected:
 
 public:
 
-  ProcessorLoopClosureBase(const std::string& _type, const Scalar _time_tolerance);
+  ProcessorLoopClosureBase(const std::string& _type, ProcessorParamsLoopClosurePtr _params_loop_closure);
 
   virtual ~ProcessorLoopClosureBase() = default;
   virtual void configure(SensorBasePtr _sensor) override { };

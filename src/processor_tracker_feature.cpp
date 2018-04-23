@@ -11,10 +11,9 @@ namespace wolf
 {
 
 ProcessorTrackerFeature::ProcessorTrackerFeature(const std::string& _type,
-                                                 const Scalar& _time_tolerance,
-                                                 const unsigned int& _min_features_for_keyframe,
-                                                 const unsigned int& _max_new_features) :
-            ProcessorTracker(_type, _time_tolerance, _min_features_for_keyframe, _max_new_features)
+                                                 ProcessorParamsTrackerFeaturePtr _params_tracker_feature) :
+            ProcessorTracker(_type, _params_tracker_feature),
+            params_tracker_feature_(_params_tracker_feature)
 {
 }
 

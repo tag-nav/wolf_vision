@@ -22,17 +22,14 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
 {
 
     public:
-        ProcessorTrackerFeatureDummy(const Scalar _time_tolerance, const unsigned int _max_new_features, const unsigned int _min_feat_for_keyframe);
+        ProcessorTrackerFeatureDummy(ProcessorParamsTrackerFeaturePtr _params_tracker_feature);
         virtual ~ProcessorTrackerFeatureDummy();
         virtual void configure(SensorBasePtr _sensor) { };
 
     protected:
 
         static unsigned int count_;
-        unsigned int n_feature_, min_feat_for_keyframe_;
-
-//        virtual void preProcess() { }
-//        virtual void postProcess() { }
+        unsigned int n_feature_;
 
         /** \brief Track provided features from \b last to \b incoming
          * \param _feature_list_in input list of features in \b last to track
@@ -74,10 +71,9 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
 
 };
 
-inline ProcessorTrackerFeatureDummy::ProcessorTrackerFeatureDummy(const Scalar _time_tolerance, const unsigned int _max_new_features, const unsigned int _min_feat_for_keyframe) :
-        ProcessorTrackerFeature("TRACKER FEATURE DUMMY", _time_tolerance, _min_feat_for_keyframe, _max_new_features),
-        n_feature_(0),
-        min_feat_for_keyframe_(_min_feat_for_keyframe)
+inline ProcessorTrackerFeatureDummy::ProcessorTrackerFeatureDummy(ProcessorParamsTrackerFeaturePtr _params_tracker_feature) :
+        ProcessorTrackerFeature("TRACKER FEATURE DUMMY", _params_tracker_feature),
+        n_feature_(0)
 {
     //
 }

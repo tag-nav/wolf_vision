@@ -14,9 +14,12 @@
 namespace wolf
 {
 
-ProcessorTrackerLandmark::ProcessorTrackerLandmark(const std::string& _type, const Scalar& _time_tolerance, const unsigned int& _min_features_for_keyframe, const unsigned int& _max_new_features) :
-    ProcessorTracker(_type, _time_tolerance, _min_features_for_keyframe, _max_new_features)
+ProcessorTrackerLandmark::ProcessorTrackerLandmark(const std::string& _type,
+                                                   ProcessorParamsTrackerLandmarkPtr _params_tracker_landmark) :
+    ProcessorTracker(_type, _params_tracker_landmark),
+    params_tracker_landmark_(_params_tracker_landmark)
 {
+    //
 }
 
 ProcessorTrackerLandmark::~ProcessorTrackerLandmark()

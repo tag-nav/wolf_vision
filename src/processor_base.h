@@ -112,7 +112,7 @@ struct ProcessorParamsBase
     std::string type;
     std::string name;
     Scalar time_tolerance; ///< maximum time difference between a Keyframe time stamp and a particular Capture of this processor to allow assigning this Capture to the Keyframe.
-    bool voting_active;
+    bool voting_active = true;
 };
 
 //class ProcessorBase
@@ -120,19 +120,18 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 {
     protected:
         unsigned int processor_id_;
-        Scalar time_tolerance_;         ///< self time tolerance for adding a capture into a frame
+        ProcessorParamsBasePtr params_;
         KFPackBuffer kf_pack_buffer_;
 
     private:
         SensorBaseWPtr sensor_ptr_;
 
         bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
-        bool voting_active_; ///< A flag for allowing the processor to vote for KF or not.
 
         static unsigned int processor_id_count_;
 
     public:
-        ProcessorBase(const std::string& _type, const Scalar& _time_tolerance);
+        ProcessorBase(const std::string& _type, ProcessorParamsBasePtr _params);
         virtual ~ProcessorBase();
         virtual void configure(SensorBasePtr _sensor) = 0;
         void remove();
@@ -188,12 +187,12 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
 inline bool ProcessorBase::isVotingActive() const
 {
-    return voting_active_;
+    return params_->voting_active;
 }
 
 inline void ProcessorBase::setVotingActive(bool _voting_active)
 {
-    voting_active_ = _voting_active;
+    params_->voting_active = _voting_active;
 }
 
 }
@@ -225,7 +224,7 @@ inline const SensorBasePtr ProcessorBase::getSensorPtr() const
 
 inline void ProcessorBase::setTimeTolerance(Scalar _time_tolerance)
 {
-    time_tolerance_ = _time_tolerance;
+    params_->time_tolerance = _time_tolerance;
 }
 
 inline KFPackBuffer::KFPackBuffer(void)

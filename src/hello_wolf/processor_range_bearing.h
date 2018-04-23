@@ -33,7 +33,7 @@ class ProcessorRangeBearing : public ProcessorBase
     public:
         typedef Eigen::Transform<Scalar, 2, Eigen::Affine> Trf;
 
-        ProcessorRangeBearing(const SensorRangeBearingPtr _sensor_ptr, const Scalar& _time_tolerance = 0);
+        ProcessorRangeBearing(const SensorRangeBearingPtr _sensor_ptr, ProcessorParamsBasePtr _params);
         virtual ~ProcessorRangeBearing() {/* empty */}
         virtual void configure(SensorBasePtr _sensor) override { }
 

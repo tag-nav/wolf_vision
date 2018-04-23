@@ -9,8 +9,8 @@
 #include "state_quaternion.h"
 #include "processor_tracker_landmark.h"
 #include "landmark_AHP.h"
-#include "processor_params_image.h"
 #include "constraint_AHP.h"
+#include "processor_params_image.h"
 
 // Vision utils
 #include <vision_utils/detectors/detector_base.h>
@@ -41,7 +41,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         vision_utils::AlgorithmParamsACTIVESEARCHPtr params_tracker_landmark_image_activesearch_ptr_; ///< Active search parameters
 
     protected:
-        ProcessorParamsImage params_tracker_landmark_image_;           // Struct with parameters of the processors
+        ProcessorParamsTrackerLandmarkImagePtr params_tracker_landmark_image_;           // Struct with parameters of the processors
 
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
 
@@ -77,7 +77,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         std::list<cv::Point> tracker_target_;
         FeatureBaseList feat_lmk_found_;
 
-        ProcessorTrackerLandmarkImage(const ProcessorParamsImage& _params);
+        ProcessorTrackerLandmarkImage(ProcessorParamsTrackerLandmarkImagePtr _params_tracker_landmark_image);
         virtual ~ProcessorTrackerLandmarkImage();
 
         virtual void configure(SensorBasePtr _sensor) ;

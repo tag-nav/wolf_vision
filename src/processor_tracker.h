@@ -91,9 +91,7 @@ class ProcessorTracker : public ProcessorBase
 
     public:
         ProcessorTracker(const std::string& _type,
-                         const Scalar& _time_tolerance,
-                         const unsigned int& _min_features_for_keyframe,
-                         const unsigned int& _max_new_features);
+                         ProcessorParamsTrackerPtr _params_tracker);
         virtual ~ProcessorTracker();
 
         /** \brief Full processing of an incoming Capture.
@@ -225,7 +223,7 @@ inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
 
 inline bool ProcessorTracker::checkTimeTolerance(const TimeStamp& _ts1, const TimeStamp& _ts2)
 {
-    return (std::fabs(_ts2 - _ts2) < time_tolerance_);
+    return (std::fabs(_ts2 - _ts2) < params_tracker_->time_tolerance);
 }
 
 inline bool ProcessorTracker::checkTimeTolerance(const CaptureBasePtr _cap, const TimeStamp& _ts)
