@@ -114,7 +114,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     CaptureOdom3DPtr capt_odo = make_shared<CaptureOdom3D>(t, sens_odo, Vector6s::Zero(), P);
 
     // Track
-    cv::Mat image(intr->width, intr->height, CV_32F);
+    cv::Mat image(intr->height, intr->width, CV_8UC3); // OpenCV cv::Mat(rows, cols)
     CaptureImagePtr capt_trk = make_shared<CaptureImage>(t, sens_trk, image);
     proc_trk->process(capt_trk);
 
