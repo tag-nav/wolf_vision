@@ -6,7 +6,7 @@
 #include "feature_base.h"
 
 // Vision Utils includes
-#include <vision_utils.h>
+#include <vision_utils/vision_utils.h>
 
 namespace wolf {
 
