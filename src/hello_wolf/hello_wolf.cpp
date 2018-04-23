@@ -123,11 +123,11 @@ int main()
 
     // processor odometer 2D
     ProcessorParamsOdom2DPtr params_odo     = std::make_shared<ProcessorParamsOdom2D>();
-    params_odo->elapsed_time_th_            = 999;
-    params_odo->dist_traveled_th_           = 0.95; // Will make KFs automatically every 1m displacement
-    params_odo->theta_traveled_th_          = 999;
-    params_odo->cov_det_th_                 = 999;
-    params_odo->unmeasured_perturbation_std_ = 0.001;
+    params_odo->max_time_span               = 999;
+    params_odo->dist_traveled               = 0.95; // Will make KFs automatically every 1m displacement
+    params_odo->angle_turned                = 999;
+    params_odo->cov_det                     = 999;
+    params_odo->unmeasured_perturbation_std = 0.001;
     ProcessorBasePtr processor              = problem->installProcessor("ODOM 2D", "processor odo", sensor_odo, params_odo);
     ProcessorOdom2DPtr processor_odo        = std::static_pointer_cast<ProcessorOdom2D>(processor);
 

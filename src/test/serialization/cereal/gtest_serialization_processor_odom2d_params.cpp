@@ -25,9 +25,9 @@ public:
 
     nb_.dist_traveled_th_            = 0.17;
     nb_.theta_traveled_th_           = 0.3;
-    nb_.cov_det_th_                  = 0.4;
+    nb_.cov_det                  = 0.4;
     nb_.elapsed_time_th_             = 1.5;
-    nb_.unmeasured_perturbation_std_ = 1e-5;
+    nb_.unmeasured_perturbation_std = 1e-5;
   }
 
   const std::string path_to_io = "/tmp/";
@@ -58,9 +58,9 @@ TEST_F(WolfTestCerealSerializationProcessorParamsOdom2D,
     ASSERT_EQ(nb_load.name,               nb_.name)               << full_path;
     ASSERT_EQ(nb_load.dist_traveled_th_,  nb_.dist_traveled_th_)  << full_path;
     ASSERT_EQ(nb_load.theta_traveled_th_, nb_.theta_traveled_th_) << full_path;
-    ASSERT_EQ(nb_load.cov_det_th_,        nb_.cov_det_th_)        << full_path;
-    ASSERT_EQ(nb_load.unmeasured_perturbation_std_,
-              nb_.unmeasured_perturbation_std_)                   << full_path;
+    ASSERT_EQ(nb_load.cov_det,        nb_.cov_det)        << full_path;
+    ASSERT_EQ(nb_load.unmeasured_perturbation_std,
+              nb_.unmeasured_perturbation_std)                   << full_path;
 
     /// Testing BasePtr
 
@@ -90,9 +90,9 @@ TEST_F(WolfTestCerealSerializationProcessorParamsOdom2D,
       ASSERT_EQ(nb_cast->name,               nb_.name)               << full_path;
       ASSERT_EQ(nb_cast->dist_traveled_th_,  nb_.dist_traveled_th_)  << full_path;
       ASSERT_EQ(nb_cast->theta_traveled_th_, nb_.theta_traveled_th_) << full_path;
-      ASSERT_EQ(nb_cast->cov_det_th_,        nb_.cov_det_th_)        << full_path;
-      ASSERT_EQ(nb_cast->unmeasured_perturbation_std_,
-                nb_.unmeasured_perturbation_std_)                    << full_path;
+      ASSERT_EQ(nb_cast->cov_det,        nb_.cov_det)        << full_path;
+      ASSERT_EQ(nb_cast->unmeasured_perturbation_std,
+                nb_.unmeasured_perturbation_std)                    << full_path;
     }
   }
 

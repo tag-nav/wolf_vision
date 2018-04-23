@@ -14,12 +14,12 @@ void serialize(Archive& ar, wolf::ProcessorParamsOdom2D& o,
   ar( cereal::make_nvp("ProcessorParamsBase",
         cereal::base_class<wolf::ProcessorParamsBase>(&o)) );
 
-  ar( cereal::make_nvp("cov_det_th_",        o.cov_det_th_)        );
+  ar( cereal::make_nvp("cov_det_th_",        o.cov_det)        );
   ar( cereal::make_nvp("dist_traveled_th_",  o.dist_traveled_th_)  );
   ar( cereal::make_nvp("elapsed_time_th_",   o.elapsed_time_th_)   );
   ar( cereal::make_nvp("theta_traveled_th_", o.theta_traveled_th_) );
   ar( cereal::make_nvp("unmeasured_perturbation_std_",
-                       o.unmeasured_perturbation_std_)   );
+                       o.unmeasured_perturbation_std)   );
 }
 
 } // namespace cereal
