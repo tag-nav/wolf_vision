@@ -38,11 +38,11 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
 
         int cell_width_; ///< Active search cell width
         int cell_height_; ///< Active search cell height
-        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_activesearch_ptr_; ///< Active search parameters
+        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_tracker_feature_image_activesearch_ptr_; ///< Active search parameters
 
     protected:
 
-		ProcessorParamsImage params_;           ///< Struct with parameters of the processors
+		ProcessorParamsImage params_tracker_feature_image_;           ///< Struct with parameters of the processors
         cv::Mat image_last_, image_incoming_;   ///< Images of the "last" and "incoming" Captures
 
         struct
@@ -160,7 +160,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
 
 inline bool ProcessorTrackerFeatureImage::voteForKeyFrame()
 {
-    return (incoming_ptr_->getFeatureList().size() < params_.algorithm.min_features_for_keyframe);
+    return (incoming_ptr_->getFeatureList().size() < params_tracker_feature_image_.algorithm.min_features_for_keyframe);
 }
 
 } // namespace wolf

@@ -127,13 +127,13 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             S      = problem->installSensor("CAMERA", "canonical", pose_cam, wolf_root + "/src/examples/camera_params_canonical.yaml");
             camera = std::static_pointer_cast<SensorCamera>(S);
 
-            ProcessorParamsTrackerFeatureTrifocalPtr params_trifocal = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
-            params_trifocal->time_tolerance                = 1.0/2;
-            params_trifocal->max_new_features              = 5;
-            params_trifocal->min_features_for_keyframe     = 5;
-            params_trifocal->yaml_file_params_vision_utils = wolf_root + "/src/examples/vision_utils_active_search.yaml";
+            ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_trifocal = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
+            params_tracker_feature_trifocal_trifocal->time_tolerance                = 1.0/2;
+            params_tracker_feature_trifocal_trifocal->max_new_features              = 5;
+            params_tracker_feature_trifocal_trifocal->min_features_for_keyframe     = 5;
+            params_tracker_feature_trifocal_trifocal->yaml_file_params_vision_utils = wolf_root + "/src/examples/vision_utils_active_search.yaml";
 
-            proc_trifocal = std::make_shared<ProcessorTrackerFeatureTrifocal>(*params_trifocal);
+            proc_trifocal = std::make_shared<ProcessorTrackerFeatureTrifocal>(*params_tracker_feature_trifocal_trifocal);
             camera->addProcessor(proc_trifocal);
 
             // Add three viewpoints with frame, capture and feature

@@ -19,8 +19,6 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTracker
 {
         std::string yaml_file_params_vision_utils;
 
-        unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
-
         Scalar pixel_noise_std; ///< std noise of the pixel
 };
 
@@ -38,10 +36,10 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         int cell_width_; ///< Active search cell width
         int cell_height_; ///< Active search cell height
-        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_activesearch_ptr_; ///< Active search parameters
+        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_tracker_feature_trifocal_activesearch_ptr_; ///< Active search parameters
 
     protected:
-        ProcessorParamsTrackerFeatureTrifocal params_;      ///< Configuration parameters
+        ProcessorParamsTrackerFeatureTrifocal params_tracker_feature_trifocal_;      ///< Configuration parameters
 
         cv::Mat image_last_, image_incoming_;   ///< Images of the "last" and "incoming" Captures
 

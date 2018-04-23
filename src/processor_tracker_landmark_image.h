@@ -38,10 +38,10 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
 
         int cell_width_; ///< Active search cell width
         int cell_height_; ///< Active search cell height
-        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_activesearch_ptr_; ///< Active search parameters
+        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_tracker_landmark_image_activesearch_ptr_; ///< Active search parameters
 
     protected:
-        ProcessorParamsImage params_;           // Struct with parameters of the processors
+        ProcessorParamsImage params_tracker_landmark_image_;           // Struct with parameters of the processors
 
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
 
@@ -54,7 +54,6 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         unsigned int landmarks_tracked_ = 0;
 
         /* pinhole params */
-//        Eigen::Vector4s k_parameters_;
         Eigen::Vector2s distortion_;
         Eigen::Vector2s correction_;
 

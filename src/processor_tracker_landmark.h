@@ -72,7 +72,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmark);
 class ProcessorTrackerLandmark : public ProcessorTracker
 {
     public:
-        ProcessorTrackerLandmark(const std::string& _type, const Scalar& _time_tolerance, const unsigned int& _max_new_features);
+        ProcessorTrackerLandmark(const std::string& _type, const Scalar& _time_tolerance, const unsigned int& _min_features_for_keyframe, const unsigned int& _max_new_features);
         virtual ~ProcessorTrackerLandmark();
 
     protected:

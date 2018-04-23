@@ -14,15 +14,19 @@
 namespace wolf
 {
 
-ProcessorTracker::ProcessorTracker(const std::string& _type, const Scalar& _time_tolerance, const unsigned int _max_new_features) :
+ProcessorTracker::ProcessorTracker(const std::string& _type,
+								   const Scalar& _time_tolerance,
+								   const unsigned int& _min_features_for_keyframe,
+								   const unsigned int& _max_new_features) :
         ProcessorBase(_type, _time_tolerance),
         processing_step_(FIRST_TIME_WITHOUT_PACK),
         origin_ptr_(nullptr),
         last_ptr_(nullptr),
-        incoming_ptr_(nullptr),
-        max_new_features_(_max_new_features)
+        incoming_ptr_(nullptr)
 {
-    //
+    params_tracker_ = std::make_shared<ProcessorParamsTracker>();
+    params_tracker_->min_features_for_keyframe = _min_features_for_keyframe;
+    params_tracker_->max_new_features = _max_new_features;
 }
 
 ProcessorTracker::~ProcessorTracker()
@@ -90,6 +94,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
         case SECOND_TIME_WITH_PACK :
         {
+        	// No-break case only for debug. Next case will be executed too.
             KFPackPtr pack = kf_pack_buffer_.selectPack( incoming_ptr_, time_tolerance_);
             WOLF_DEBUG( "PT ", getName(), ": KF" , pack->key_frame->id() , " callback unpacked with ts= " , pack->key_frame->getTimeStamp().get() );
         }
@@ -101,7 +106,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             // We have a last_ Capture with no features, so we do not process known features, and we do not vote for KF.
 
             // Process info
-            processNew(max_new_features_);
+            processNew(params_tracker_->max_new_features);
 
             // Update pointers
             resetDerived();
@@ -131,7 +136,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             frm->addCapture(incoming_ptr_);
 
             // Detect new Features, initialize Landmarks, create Constraints, ...
-            processNew(max_new_features_);
+            processNew(params_tracker_->max_new_features);
 
             // Establish constraints
             establishConstraints();
@@ -160,7 +165,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 frm->addCapture(incoming_ptr_);
 
                 // process
-                processNew(max_new_features_);
+                processNew(params_tracker_->max_new_features);
 
                 // Set key
                 last_ptr_->getFramePtr()->setKey();
@@ -189,6 +194,13 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's last Frame
                 last_ptr_->remove();
                 incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
+
+                if (last_ptr_->getFeatureList().size() < params_tracker_->min_features_for_keyframe)
+                {
+                    // process
+                    processNew(params_tracker_->max_new_features);
+
+                }
 
                 // Update pointers
                 advanceDerived();
