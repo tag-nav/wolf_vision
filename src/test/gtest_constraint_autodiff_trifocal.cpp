@@ -133,7 +133,7 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             params_tracker_feature_trifocal_trifocal->min_features_for_keyframe     = 5;
             params_tracker_feature_trifocal_trifocal->yaml_file_params_vision_utils = wolf_root + "/src/examples/vision_utils_active_search.yaml";
 
-            proc_trifocal = std::make_shared<ProcessorTrackerFeatureTrifocal>(*params_tracker_feature_trifocal_trifocal);
+            proc_trifocal = std::make_shared<ProcessorTrackerFeatureTrifocal>(params_tracker_feature_trifocal_trifocal);
             camera->addProcessor(proc_trifocal);
 
             // Add three viewpoints with frame, capture and feature

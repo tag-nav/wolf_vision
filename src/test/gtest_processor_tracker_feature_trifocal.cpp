@@ -81,12 +81,12 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     SensorCameraPtr sens_trk = make_shared<SensorCamera>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(),
                                                          intr);
 
-    ProcessorParamsTrackerFeatureTrifocal params_tracker_feature_trifocal;
-    params_tracker_feature_trifocal.name = "trifocal";
-    params_tracker_feature_trifocal.time_tolerance = dt/2;
-    params_tracker_feature_trifocal.max_new_features = 5;
-    params_tracker_feature_trifocal.min_features_for_keyframe = 5;
-    params_tracker_feature_trifocal.yaml_file_params_vision_utils = wolf_root + "/src/examples/ACTIVESEARCH.yaml";
+    ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
+    params_tracker_feature_trifocal->name = "trifocal";
+    params_tracker_feature_trifocal->time_tolerance = dt/2;
+    params_tracker_feature_trifocal->max_new_features = 5;
+    params_tracker_feature_trifocal->min_features_for_keyframe = 5;
+    params_tracker_feature_trifocal->yaml_file_params_vision_utils = wolf_root + "/src/examples/ACTIVESEARCH.yaml";
 
     ProcessorTrackerFeatureTrifocalPtr proc_trk = make_shared<ProcessorTrackerFeatureTrifocal>(params_tracker_feature_trifocal);
     proc_trk->configure(sens_trk);
