@@ -9,11 +9,12 @@
 #include "yaml_conversion.h"
 
 // wolf
-#include "../processor_params_image.h"
 #include "../factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
+
+#include "../processor_params_image.h"
 
 namespace wolf
 {
@@ -24,7 +25,7 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
     using std::string;
     using YAML::Node;
 
-    std::shared_ptr<ProcessorParamsImage> p = std::make_shared<ProcessorParamsImage>();
+    std::shared_ptr<ProcessorParamsTrackerFeatureImage> p = std::make_shared<ProcessorParamsTrackerFeatureImage>();
 
     Node params = YAML::LoadFile(_filename_dot_yaml);
 
@@ -45,15 +46,15 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
    	    }
 
         Node alg = params["algorithm"];
-        p->algorithm.max_new_features = alg["maximum new features"].as<unsigned int>();
-        p->algorithm.min_features_for_keyframe = alg["minimum features for new keyframe"].as<unsigned int>();
-        p->algorithm.min_response_for_new_features = alg["minimum response for new features"].as<float>();
-        p->algorithm.time_tolerance= alg["time tolerance"].as<Scalar>();
-        p->algorithm.distance= alg["distance"].as<Scalar>();
+        p->max_new_features = alg["maximum new features"].as<unsigned int>();
+        p->min_features_for_keyframe = alg["minimum features for new keyframe"].as<unsigned int>();
+        p->min_response_for_new_features = alg["minimum response for new features"].as<float>();
+        p->time_tolerance= alg["time tolerance"].as<Scalar>();
+        p->distance= alg["distance"].as<Scalar>();
 
         Node noi = params["noise"];
-        p->noise.pixel_noise_std = noi["pixel noise std"].as<Scalar>();
-        p->noise.pixel_noise_var = p->noise.pixel_noise_std * p->noise.pixel_noise_std;
+        p->pixel_noise_std = noi["pixel noise std"].as<Scalar>();
+        p->pixel_noise_var = p->pixel_noise_std * p->pixel_noise_std;
     }
 
     return p;
