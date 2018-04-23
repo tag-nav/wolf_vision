@@ -115,6 +115,11 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        /** \brief advance pointers
+         *
+         */
+        virtual void advanceDerived() override;
+
         /** \brief reset pointers and match lists at KF creation
          *
          */

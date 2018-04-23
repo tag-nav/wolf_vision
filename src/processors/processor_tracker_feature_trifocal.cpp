@@ -128,21 +128,18 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
     cv::Mat new_descriptors;
     cv::KeyPointsFilter keypoint_filter;
 
-    image_last_ = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
-
-    //FIX: Should this be here?
-    active_search_ptr_->renew();
-
     // Debug
     int feat_det = 0;
     int roi_empty = 0;
     int non_good_features = 0;
-    debug_roi_enh_.clear();
 
     for (unsigned int n_iterations = 0; _max_new_features == 0 || n_iterations < _max_new_features; n_iterations++)
     {
         if (active_search_ptr_->pickEmptyRoi(roi))
         {
+            // Debug ROI
+            cv::Rect roi_original = roi;
+
             kps  = det_ptr_->detect       (image_last_, roi);
             desc = des_ptr_->getDescriptor(image_last_, kps);
 
@@ -172,13 +169,21 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
                     active_search_ptr_->hitCell(kps[0]);
 
                     // Debug ROI
-                    vision_utils::ROIEnhanced roi_e(roi,true);
+                    vision_utils::ROIEnhanced roi_e(roi_original,true);
                     debug_roi_enh_.push_back(roi_e);
 
                     n_new_features++;
                 }
                 else
+                {
+                    active_search_ptr_->blockCell(roi);
+
+                    // Debug ROI
+                    vision_utils::ROIEnhanced roi_e(roi_original,false);
+                    debug_roi_enh_.push_back(roi_e);
+
                     non_good_features++;
+                }
             }
             else
             {
@@ -186,12 +191,15 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
                 active_search_ptr_->blockCell(roi);
 
                 // Debug ROI
-                vision_utils::ROIEnhanced roi_e(roi,false);
+                vision_utils::ROIEnhanced roi_e(roi_original,false);
                 debug_roi_enh_.push_back(roi_e);
             }
         }
         else
+        {
+            WOLF_TRACE("Cannot pick roi. n_iterations: ", n_iterations);
             break;
+        }
     }
 
     WOLF_TRACE("Empty ROIs: ",roi_empty);
@@ -224,9 +232,6 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
 {
     KeyPointVector kps;
     cv::Mat desc;
-
-    // get image
-    image_incoming_ = (std::static_pointer_cast<CaptureImage>(incoming_ptr_))->getImage();
 
     for (auto feature_base_ptr : _feature_list_in)
     {
@@ -273,10 +278,18 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
     return _feature_list_out.size();
 }
 
+void ProcessorTrackerFeatureTrifocal::advanceDerived()
+{
+    ProcessorTrackerFeature::advanceDerived();
+    image_last_ = image_incoming_;
+}
+
 void ProcessorTrackerFeatureTrifocal::resetDerived()
 {
     // Call parent class method
     ProcessorTrackerFeature::resetDerived();
+
+    image_last_ = image_incoming_;
 
     // Conditionally assign the prev_origin pointer
     if (initialized_)
@@ -306,6 +319,25 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
         if (prev_origin_ptr_ && origin_ptr_ && last_ptr_ && prev_origin_ptr_ != origin_ptr_)
             initialized_ = true;
     }
+
+    WOLF_TRACE("");
+
+//    image_last_     = std::static_pointer_cast<CaptureImage>(last_ptr_)->getImage();
+//
+//    WOLF_TRACE("");
+//
+    image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
+
+    WOLF_TRACE("");
+
+    active_search_ptr_->renew();
+
+    WOLF_TRACE("");
+
+    //The visualization functions and variables
+    debug_roi_enh_.clear();
+
+    WOLF_TRACE("");
 }
 
 void ProcessorTrackerFeatureTrifocal::postProcess()
