@@ -60,7 +60,7 @@ bool ProcessorIMU::voteForKeyFrame()
         return true;
     }
     // angle turned
-    Scalar angle = 2.0 * asin(delta_integrated_.segment(4,3).norm());
+    Scalar angle = 2.0 * asin(delta_integrated_.segment(3,3).norm());
     if (angle > angle_turned_)
     {
         WOLF_DEBUG( "PM: vote: angle turned" );
