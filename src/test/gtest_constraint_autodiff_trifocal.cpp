@@ -114,13 +114,6 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             // Build problem
             problem = Problem::create("PO 3D");
             ceres::Solver::Options options;
-//            options.function_tolerance  = 1e-16;
-//            options.max_num_iterations  = 500;
-//            options.parameter_tolerance = 1e-16;
-//            options.max_linear_solver_iterations = 500;
-//            options.min_linear_solver_iterations = 20;
-//            options.use_inner_iterations = true;
-//            options.gradient_tolerance = 1e-16;
             ceres_manager = std::make_shared<CeresManager>(problem, options);
 
             // Install sensor and processor
@@ -133,8 +126,8 @@ class ConstraintAutodiffTrifocalTest : public testing::Test{
             params_tracker_feature_trifocal_trifocal->min_features_for_keyframe     = 5;
             params_tracker_feature_trifocal_trifocal->yaml_file_params_vision_utils = wolf_root + "/src/examples/vision_utils_active_search.yaml";
 
-            proc_trifocal = std::make_shared<ProcessorTrackerFeatureTrifocal>(params_tracker_feature_trifocal_trifocal);
-            camera->addProcessor(proc_trifocal);
+            ProcessorBasePtr proc = problem->installProcessor("TRACKER FEATURE TRIFOCAL", "trifocal", camera, params_tracker_feature_trifocal_trifocal);
+            proc_trifocal = std::static_pointer_cast<ProcessorTrackerFeatureTrifocal>(proc);
 
             // Add three viewpoints with frame, capture and feature
             Vector2s pix(0,0);
