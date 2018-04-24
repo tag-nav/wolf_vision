@@ -53,7 +53,8 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
         //laserscanutils::ScanParams scan_params_;
         //laserscanutils::ExtractCornerParams corner_alg_params_;
         //laserscanutils::LaserScan laser_data_;
-        //laserscanutils::CornerFinder corner_finder_;
+        laserscanutils::LineFinderIterative line_finder_;
+        laserscanutils::CornerFinder corner_finder_;
         //TODO: add corner_finder_params
 
         FeatureBaseList corners_incoming_;

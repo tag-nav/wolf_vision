@@ -142,13 +142,16 @@ ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr
 }
 
 void ProcessorTrackerFeatureCorner::extractCorners(CaptureLaser2DPtr _capture_laser_ptr,
-                                                  FeatureBaseList& _corner_list)
+                                                   FeatureBaseList& _corner_list)
 {
     // TODO: sort corners by bearing
     std::list<laserscanutils::CornerPoint> corners;
 
     std::cout << "Extracting corners..." << std::endl;
-    corner_finder_.findCorners(_capture_laser_ptr->getScan(), (std::static_pointer_cast<SensorLaser2D>(getSensorPtr()))->getScanParams(), params_tracker_feature_corner_->line_finder_params, corners);
+    corner_finder_.findCorners(_capture_laser_ptr->getScan(),
+                               (std::static_pointer_cast<SensorLaser2D>(getSensorPtr()))->getScanParams(),
+                               line_finder_,
+                               corners);
 
     Eigen::Vector4s measurement;
     for (auto corner : corners)
