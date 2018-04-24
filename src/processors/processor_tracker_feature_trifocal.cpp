@@ -158,7 +158,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
 
                 if(kps[0].response > params_tracker_feature_trifocal_activesearch_ptr_->min_response_new_feature)
                 {
-                    std::cout << "response: " << kps[0].response << std::endl;
+//                    std::cout << "response: " << kps[0].response << std::endl;
                     FeaturePointImagePtr point = std::make_shared<FeaturePointImage>(
                             kps[0],
                             desc.row(index),
@@ -205,7 +205,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
     WOLF_TRACE("Empty ROIs: ",roi_empty);
     WOLF_TRACE("NUM Detected Features: ",feat_det);
     WOLF_TRACE("Non Good features: ",non_good_features);
-    WOLF_TRACE( "DetectNewFeatures - Number of new features detected: " , n_new_features );
+    WOLF_TRACE("DetectNewFeatures - Number of new features detected: " , n_new_features );
 
     return n_new_features;
 }
