@@ -47,7 +47,7 @@ FrameBasePtr ProcessorBase::emplaceFrame(FrameType _type, CaptureBasePtr _captur
 
 void ProcessorBase::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
-    WOLF_DEBUG("P", isMotion() ? "M" : "T ", getName(), ": KF", _keyframe_ptr->id(), " callback received with ts = ", _keyframe_ptr->getTimeStamp());
+    WOLF_DEBUG("P", isMotion() ? "M " : "T ", getName(), ": KF", _keyframe_ptr->id(), " callback received with ts = ", _keyframe_ptr->getTimeStamp());
     if (_keyframe_ptr != nullptr)
         kf_pack_buffer_.add(_keyframe_ptr,_time_tol_other);
 }
