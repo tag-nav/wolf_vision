@@ -187,17 +187,14 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             {
                 // We do not create a KF
 
+                // eventually add more features
+                if (last_ptr_->getFeatureList().size() < params_tracker_->min_features_for_keyframe)
+                    processNew(params_tracker_->max_new_features);
+
                 // Advance this
                 last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's last Frame
                 last_ptr_->remove();
                 incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
-
-                if (last_ptr_->getFeatureList().size() < params_tracker_->min_features_for_keyframe)
-                {
-                    // process
-                    processNew(params_tracker_->max_new_features);
-
-                }
 
                 // Update pointers
                 advanceDerived();
