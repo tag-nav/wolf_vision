@@ -15,25 +15,21 @@ namespace wolf {
 
 WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsDiffDrive);
 
-struct ProcessorParamsDiffDrive : public ProcessorParamsBase
+struct ProcessorParamsDiffDrive : public ProcessorParamsMotion
 {
-  ProcessorParamsDiffDrive(const Scalar _time_tolerance,
-                           const Scalar _dist_travel_th,
-                           const Scalar _theta_traveled_th,
-                           const Scalar _cov_det_th,
-                           const Scalar _unmeasured_perturbation_std = 0.0001) :
-    dist_traveled_th_(_dist_travel_th),
-    theta_traveled_th_(_theta_traveled_th),
-    cov_det_th_(_cov_det_th),
-    unmeasured_perturbation_std_(_unmeasured_perturbation_std)
-  {
-      time_tolerance = _time_tolerance;
-  }
-
-  Scalar dist_traveled_th_;
-  Scalar theta_traveled_th_;
-  Scalar cov_det_th_;
-  Scalar unmeasured_perturbation_std_ = 0.0001;
+//  ProcessorParamsDiffDrive(const Scalar _time_tolerance,
+//                           const Scalar _dist_travel_th,
+//                           const Scalar _theta_traveled_th,
+//                           const Scalar _cov_det_th,
+//                           const Scalar _unmeasured_perturbation_std = 0.0001) :
+//    dist_traveled_th_(_dist_travel_th),
+//    theta_traveled_th_(_theta_traveled_th),
+//    cov_det_th_(_cov_det_th),
+//    unmeasured_perturbation_std_(_unmeasured_perturbation_std)
+//  {
+//      time_tolerance = _time_tolerance;
+//  }
+  Scalar unmeasured_perturbation_std = 0.0001;
 };
 
 /**
@@ -55,7 +51,7 @@ class ProcessorDiffDrive : public ProcessorMotion
 {
 public:
 
-  ProcessorDiffDrive(const ProcessorParamsDiffDrive& params);
+  ProcessorDiffDrive(ProcessorParamsDiffDrivePtr _params);
 
   virtual ~ProcessorDiffDrive() = default;
   virtual void configure(SensorBasePtr _sensor) override { }
@@ -64,11 +60,9 @@ public:
 
 protected:
 
-  /// @brief Covariance to be added to the unmeasured perturbation.
-  Matrix3s unmeasured_perturbation_cov_;
-
   /// @brief Intrinsic params
-  ProcessorParamsDiffDrive params_;
+  ProcessorParamsDiffDrivePtr params_motion_diff_drive_;
+  MatrixXs unmeasured_perturbation_cov_;
 
   virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
                                    const Eigen::MatrixXs& _data_cov,
