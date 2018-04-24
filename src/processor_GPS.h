@@ -7,7 +7,7 @@
 
 // Wolf includes
 #include "processor_base.h"
-#include "capture_gps.h"
+#include "capture_GPS.h"
 
 // Std includes
 
@@ -24,7 +24,7 @@ class ProcessorGPS : public ProcessorBase
         Scalar gps_covariance_;
 
     public:
-        ProcessorGPS(Scalar time_tolerance_);
+        ProcessorGPS(ProcessorParamsBasePtr _params);
         virtual ~ProcessorGPS();
         virtual void configure(SensorBasePtr _sensor) { };
         virtual void init(CaptureBasePtr _capture_ptr);
