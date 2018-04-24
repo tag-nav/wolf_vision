@@ -107,8 +107,8 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ProcessorParams
     active_search_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmACTIVESEARCH>(alg_ptr);
 
     // DEBUG VIEW
-    cv::startWindowThread();
-    cv::namedWindow("DEBUG VIEW", cv::WINDOW_NORMAL);
+//    cv::startWindowThread();
+//    cv::namedWindow("DEBUG VIEW", cv::WINDOW_NORMAL);
 }
 
 // Destructor
@@ -333,6 +333,10 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
     active_search_ptr_->renew();
 
     //The visualization functions and variables
+
+
+
+
     debug_roi_enh_.clear();
 }
 
@@ -352,8 +356,8 @@ void ProcessorTrackerFeatureTrifocal::postProcess()
     cv::Mat img = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
     cv::Mat img_proc = vision_utils::buildImageProcessed(img, kps_e, debug_roi_enh_);
 
-    cv::imshow("DEBUG VIEW", img_proc);
-    cv::waitKey(1);
+//    cv::imshow("DEBUG VIEW", img_proc);
+//    cv::waitKey(1);
 }
 
 ConstraintBasePtr ProcessorTrackerFeatureTrifocal::createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr)
