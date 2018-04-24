@@ -66,7 +66,11 @@ int main()
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
                                              std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
 
-    std::shared_ptr<ProcessorTrackerLandmarkDummy> processor_ptr_ = std::make_shared< ProcessorTrackerLandmarkDummy>(.25, 5);
+    ProcessorParamsTrackerLandmarkPtr params_trk = std::make_shared<ProcessorParamsTrackerLandmark>();
+    params_trk->max_new_features = 5;
+    params_trk->min_features_for_keyframe = 7;
+    params_trk->time_tolerance = 0.25;
+    std::shared_ptr<ProcessorTrackerLandmarkDummy> processor_ptr_ = std::make_shared< ProcessorTrackerLandmarkDummy>(params_trk);
 
     wolf_problem_ptr_->addSensor(sensor_ptr_);
     sensor_ptr_->addProcessor(processor_ptr_);
