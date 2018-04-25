@@ -117,6 +117,20 @@ ProcessorTrackerFeatureTrifocal::~ProcessorTrackerFeatureTrifocal()
 //    cv::destroyAllWindows();
 }
 
+void matchFeatures(const cv::Mat &query, const cv::Mat &target,
+                   std::vector<cv::DMatch> &goodMatches) {
+    std::vector<std::vector<cv::DMatch>> matches;
+    cv::Ptr<cv::FlannBasedMatcher> matcher = cv::FlannBasedMatcher::create();
+    // Find 2 best matches for each descriptor to make later the second neighbor test.
+    matcher->knnMatch(query, target, matches, 2);
+    // Second neighbor ratio test.
+    for (unsigned int i = 0; i < matches.size(); ++i) {
+        if (matches[i][0].distance < matches[i][1].distance * 0.75)
+            goodMatches.push_back(matches[i][0]);
+    }
+}
+
+
 unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out)
 {
     // DEBUG
@@ -130,41 +144,82 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
     cv::Mat new_descriptors;
     cv::KeyPointsFilter keypoint_filter;
 
+    debug_tTmp = clock();
+    KeyPointVector kps_test;
+    cv::Mat desc_test;
+    kps_test  = det_ptr_->detect(image_last_);
+    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+    WOLF_TRACE("--> FLIPA '''''' TIME: detect new features: detect ",debug_comp_time_);
+    debug_tTmp = clock();
+    desc_test = des_ptr_->getDescriptor(image_last_, kps_test);
+    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+    WOLF_TRACE("--> FLIPA '''''' TIME: detect new features: descript ",debug_comp_time_);
+    WOLF_TRACE("kps_test_size: ", kps_test.size(), " ", desc_test.rows);
+
+    debug_tTmp = clock();
+    KeyPointVector kps_test_i;
+    cv::Mat desc_test_i;
+    kps_test_i  = det_ptr_->detect(image_incoming_);
+    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+    WOLF_TRACE("--> FLIPA MANDARINES '''''' TIME: detect new features: detect ",debug_comp_time_);
+    debug_tTmp = clock();
+    desc_test_i = des_ptr_->getDescriptor(image_incoming_, kps_test_i);
+    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+    WOLF_TRACE("--> FLIPA MANDARINES '''''' TIME: detect new features: descript ",debug_comp_time_);
+    WOLF_TRACE("kps_test_size: ", kps_test_i.size(), " ", desc_test_i.rows);
+
+    debug_tTmp = clock();
+    //Matching descriptor vectors using FLANN matcher
+    cv::FlannBasedMatcher matcher = cv::FlannBasedMatcher(cv::makePtr<cv::flann::LshIndexParams>(12, 20, 2));
+    std::vector< cv::DMatch > matches;
+
+    if(desc_test.type()!=CV_32F)
+        desc_test.convertTo(desc_test, CV_32F);
+
+    if(desc_test_i.type()!=CV_32F)
+        desc_test_i.convertTo(desc_test_i, CV_32F);
+
+    matchFeatures( desc_test, desc_test_i, matches );
+    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+    WOLF_TRACE("--> FLIPA LLIMONES '''''' TIME: detect new features: match ",debug_comp_time_);
+    WOLF_TRACE("--> num matches ",matches.size());
+
     unsigned int n_new_features = 0;
 
     for (unsigned int n_iterations = 0; _max_new_features == 0 || n_iterations < _max_new_features; n_iterations++)
     {
         if (active_search_ptr_->pickEmptyRoi(roi))
         {
+            // DEBUG
+            debug_tTmp = clock();
+
             kps  = det_ptr_->detect       (image_last_, roi);
 
             // DEBUG
-            debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
+            debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
             WOLF_TRACE("--> TIME: detect new features: detect ",debug_comp_time_);
-
-            desc = des_ptr_->getDescriptor(image_last_, kps);
-
-            // DEBUG
-            debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
-            WOLF_TRACE("--> TIME: detect new features: detect + descript ",debug_comp_time_);
 
             if (kps.size() > 0)
             {
-                KeyPointVector list_keypoints = kps;
-                unsigned int index = 0;
                 keypoint_filter.retainBest(kps,1);
-                for(unsigned int i = 0; i < list_keypoints.size(); i++)
-                {
-                    if(list_keypoints[i].pt == kps[0].pt)
-                        index = i;
-                }
+
+                // DEBUG
+                WOLF_TRACE("response: " , kps[0].response );
 
                 if(kps[0].response > params_tracker_feature_trifocal_activesearch_ptr_->min_response_new_feature)
                 {
-//                    std::cout << "response: " << kps[0].response << std::endl;
+                    // DEBUG
+                    debug_tTmp = clock();
+
+                    desc = des_ptr_->getDescriptor(image_last_, kps);
+
+                    // DEBUG
+                    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+                    WOLF_TRACE("--> TIME: detect new features: descript ",debug_comp_time_);
+
                     FeaturePointImagePtr point = std::make_shared<FeaturePointImage>(
                             kps[0],
-                            desc.row(index),
+                            desc.row(0),
                             Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
                     point->setIsKnown(true);
                     _feature_list_out.push_back(point);
@@ -263,20 +318,26 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
         // Set ROI
         cv::Rect roi = vision_utils::setRoi(target_feature->getKeypoint().pt.x, target_feature->getKeypoint().pt.y, cell_width_, cell_height_);
 
+        // DEBUG
+        debug_tTmp = clock();
+
         // Detect features in ROI
         kps = det_ptr_->detect(image_incoming_, roi);
 
         // DEBUG
-        debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
+        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
         WOLF_TRACE("--> TIME: track: detect ",debug_comp_time_);
 
         if (kps.size() > 0)
         {
+            // DEBUG
+            debug_tTmp = clock();
+
             // New descriptors in ROI
             desc = des_ptr_->getDescriptor(image_incoming_, kps);
 
             // DEBUG
-            debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
+            debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
             WOLF_TRACE("--> TIME: track: descript ",debug_comp_time_);
 
             // Match

@@ -29,7 +29,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 {
 
         // DEBUG
-        clock_t debug_tStart;
+        clock_t debug_tStart, debug_tTmp;
         double debug_comp_time_;
 
 
