@@ -5,6 +5,7 @@
 #include "../processor_tracker_feature.h"
 
 // Vision utils
+#include <vision_utils/vision_utils.h>
 #include <vision_utils/detectors/detector_base.h>
 #include <vision_utils/descriptors/descriptor_base.h>
 #include <vision_utils/matchers/matcher_base.h>
@@ -26,6 +27,11 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureTrifocal);
 
 class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 {
+
+        // DEBUG
+        clock_t debug_tStart;
+        double debug_comp_time_;
+
 
         // Parameters for vision_utils
     protected:
