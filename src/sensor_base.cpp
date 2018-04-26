@@ -197,9 +197,21 @@ void SensorBase::registerNewStateBlocks()
 {
     if (getProblem() != nullptr)
     {
-        for (auto sbp : getStateBlockVec())
-            if (sbp != nullptr)
-                getProblem()->addStateBlock(sbp);
+        for (int i = 0; i < getStateBlockVec().size(); i++)
+        {
+            if (i < 2 && !isExtrinsicDynamic())
+            {
+                auto sbp = getStateBlockPtrStatic(i);
+                if (sbp != nullptr)
+                    getProblem()->addStateBlock(sbp);
+            }
+            if (i >= 2 && !isIntrinsicDynamic())
+            {
+                auto sbp = getStateBlockPtrStatic(i);
+                if (sbp != nullptr)
+                    getProblem()->addStateBlock(sbp);
+            }
+        }
     }
 }
 

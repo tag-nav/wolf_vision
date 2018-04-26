@@ -311,6 +311,7 @@ CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
     capture_list_.push_back(_capt_ptr);
     _capt_ptr->setFramePtr(shared_from_this());
     _capt_ptr->setProblem(getProblem());
+    _capt_ptr->registerNewStateBlocks();
     return _capt_ptr;
 }
 
