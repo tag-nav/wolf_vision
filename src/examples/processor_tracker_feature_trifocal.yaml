@@ -9,6 +9,9 @@ algorithm:
     voting active: true
     minimum features for keyframe: 40
     maximum new features: 40
+    grid horiz cells: 10
+    grid vert cells: 10
+    min response new features: 50    
     
 noise:
     pixel noise std: 1 # pixels

@@ -22,7 +22,7 @@ namespace wolf {
 // Constructor
 ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ProcessorParamsTrackerFeatureTrifocalPtr _params_tracker_feature_trifocal) :
         ProcessorTrackerFeature("TRACKER FEATURE TRIFOCAL", _params_tracker_feature_trifocal ),
-        cell_width_(0), cell_height_(0), // These will be initialized to proper values taken from the sensor via function configure()
+        //cell_width_(0), cell_height_(0), // These will be initialized to proper values taken from the sensor via function configure()
         params_tracker_feature_trifocal_(_params_tracker_feature_trifocal),
         prev_origin_ptr_(nullptr),
         initialized_(false)
@@ -102,9 +102,9 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ProcessorParams
     if (mat_name.compare("BRUTEFORCE_HAMMING_2") == 0)
         mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING_2>(mat_ptr_);
 
-    // Active search grid
-    vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_tracker_feature_trifocal_->yaml_file_params_vision_utils);
-    active_search_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmACTIVESEARCH>(alg_ptr);
+//    // Active search grid
+//    vision_utils::AlgorithmBasePtr alg_ptr = vision_utils::setupAlgorithm("ACTIVESEARCH", "ACTIVESEARCH algorithm", params_tracker_feature_trifocal_->yaml_file_params_vision_utils);
+//    active_search_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmACTIVESEARCH>(alg_ptr);
 
 //    // DEBUG VIEW
 //    cv::startWindowThread();
@@ -130,144 +130,271 @@ void matchFeatures(const cv::Mat &query, const cv::Mat &target,
     }
 }
 
+void ProcessorTrackerFeatureTrifocal::fillGrid(const vision_utils::FeatureIdxGridPtr _grid, const unsigned int& _max_new_features, const std::vector<cv::KeyPoint>& _kps, const cv::Mat& _desc, std::vector<cv::KeyPoint>& _new_kps, cv::Mat& _new_desc)
+{
+    // Get KeyPoints and descriptors sorted by response and cutting at min_response_new_feature
+    std::vector<cv::KeyPoint> kpsSorted;
+    cv::Mat desSorted;
+    vision_utils::sortByResponse(_kps, kpsSorted, _desc, desSorted, CV_SORT_DESCENDING, params_tracker_feature_trifocal_->min_response_new_feature);
+
+    // Set number of point to keep depending on max: (existing num. kps) or (max new features)
+    int numRetPoints;
+    if (_kps.size() >= _max_new_features)
+        numRetPoints = _max_new_features;
+    else
+        numRetPoints = _kps.size();
+
+    float tolerance = 1e-6; // tolerance of the number of return points
+
+    // ANMS via SSC: Adaptive Non-Maximal Suppression via Square Covering
+    // Bailo, Oleksandr, et al. "Efficient adaptive non-maximal suppression algorithms for homogeneous spatial keypoint distribution"
+    // Pattern Recognition Letters 2018.
+    vision_utils::Ssc(kpsSorted, _new_kps, desSorted, _new_desc, numRetPoints, tolerance, image_last_.cols, image_last_.rows);
+
+    // Fill grid
+    _grid->insert(_new_kps);
+}
+
+void ProcessorTrackerFeatureTrifocal::getCandidatesFromGrid(const int& _cell_col, const int& _cell_row, const vision_utils::FeatureIdxGridPtr _grid, const std::vector<cv::KeyPoint>& _kps, const cv::Mat& _desc, std::vector<cv::KeyPoint>& _candidate_kps, cv::Mat& _candidate_desc)
+{
+    WOLF_TRACE("INside getCandidatesFromGrid");
+    // Four surrounding cells
+    std::vector<int> idx_rows(3), idx_cols(3);
+    for (int ii=-1;ii<2;++ii)
+    {
+        WOLF_TRACE("ii: ",ii);
+        idx_cols.at(ii+1) = _cell_col+ii;
+        idx_rows.at(ii+1) = _cell_row+ii;
+    }
+
+    for (auto col : idx_cols)
+    {
+        for (auto row : idx_rows)
+        {
+            if (col>=0 && row>=0 &&
+                col<params_tracker_feature_trifocal_->n_cells_h && row<params_tracker_feature_trifocal_->n_cells_v)
+            {
+                WOLF_TRACE("Doing CELL: ",col,"x",row);
+
+                // Select candidate cell
+                vision_utils::FeatureIdxMap cell_fm_xy = grid_incoming_-> getFeatureIdxMap(col,row);
+
+                WOLF_TRACE("Feature Map in CELL, size:", cell_fm_xy.size());
+
+                WOLF_TRACE("size of input kps: ", _kps.size());
+
+                // Push candidate KeyPoints and descriptors
+                for (auto fm : cell_fm_xy)
+                {
+                    WOLF_TRACE("pushing ",fm.second);
+                    _candidate_kps.push_back(_kps[fm.second]);
+                    _candidate_desc.push_back(_desc.row(fm.second));
+                }
+            }
+        }
+    }
+}
 
 unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out)
 {
-    // DEBUG
+    // DEBUG =====================================
     debug_tStart = clock();
-    WOLF_TRACE("======== detectNewFeatures =========");
+    WOLF_TRACE("======== DetectNewFeatures =========");
+    // ===========================================
 
     KeyPointVector kps;
     cv::Mat desc;
-    cv::Rect roi;
-    KeyPointVector new_keypoints;
-    cv::Mat new_descriptors;
-    cv::KeyPointsFilter keypoint_filter;
 
+    // DEBUG =====================================
     debug_tTmp = clock();
-    KeyPointVector kps_test;
-    cv::Mat desc_test;
-    kps_test  = det_ptr_->detect(image_last_);
+    // ===========================================
+
+    // Detect KeyPoints
+    kps  = det_ptr_->detect(image_last_);
+
+    // DEBUG =====================================
     debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-    WOLF_TRACE("--> FLIPA '''''' TIME: detect new features: detect ",debug_comp_time_);
-    debug_tTmp = clock();
-    desc_test = des_ptr_->getDescriptor(image_last_, kps_test);
-    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-    WOLF_TRACE("--> FLIPA '''''' TIME: detect new features: descript ",debug_comp_time_);
-    WOLF_TRACE("kps_test_size: ", kps_test.size(), " ", desc_test.rows);
+    WOLF_TRACE("--> TIME: Detect New Features: detect ",debug_comp_time_);
+    // ===========================================
 
-    debug_tTmp = clock();
-    KeyPointVector kps_test_i;
-    cv::Mat desc_test_i;
-    kps_test_i  = det_ptr_->detect(image_incoming_);
-    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-    WOLF_TRACE("--> FLIPA MANDARINES '''''' TIME: detect new features: detect ",debug_comp_time_);
-    debug_tTmp = clock();
-    desc_test_i = des_ptr_->getDescriptor(image_incoming_, kps_test_i);
-    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-    WOLF_TRACE("--> FLIPA MANDARINES '''''' TIME: detect new features: descript ",debug_comp_time_);
-    WOLF_TRACE("kps_test_size: ", kps_test_i.size(), " ", desc_test_i.rows);
+    // New classes to be filled
+    KeyPointVector new_kps;
+    cv::Mat new_desc;
 
-    debug_tTmp = clock();
-    //Matching descriptor vectors using FLANN matcher
-    cv::FlannBasedMatcher matcher = cv::FlannBasedMatcher(cv::makePtr<cv::flann::LshIndexParams>(12, 20, 2));
-    std::vector< cv::DMatch > matches;
-
-    if(desc_test.type()!=CV_32F)
-        desc_test.convertTo(desc_test, CV_32F);
-
-    if(desc_test_i.type()!=CV_32F)
-        desc_test_i.convertTo(desc_test_i, CV_32F);
-
-    matchFeatures( desc_test, desc_test_i, matches );
-    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-    WOLF_TRACE("--> FLIPA LLIMONES '''''' TIME: detect new features: match ",debug_comp_time_);
-    WOLF_TRACE("--> num matches ",matches.size());
-
-    unsigned int n_new_features = 0;
-
-    for (unsigned int n_iterations = 0; _max_new_features == 0 || n_iterations < _max_new_features; n_iterations++)
+    if (kps.size()>0)
     {
-        if (active_search_ptr_->pickEmptyRoi(roi))
+        // DEBUG =====================================
+        debug_tTmp = clock();
+        // ===========================================
+
+        // Get descriptors
+        desc = des_ptr_->getDescriptor(image_last_, kps);
+
+        // DEBUG =====================================
+        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+        WOLF_TRACE("--> TIME: Detect New Features: descript ",debug_comp_time_);
+        // ===========================================
+
+        // DEBUG =====================================
+        debug_tTmp = clock();
+        // ===========================================
+
+        // Get KeyPoints and descriptors
+        // sort them by response
+        // cut them at min_response_new_feature
+        // And finally filling the grid
+        fillGrid(grid_last_, _max_new_features, kps, desc, new_kps, new_desc);
+
+        // Create all WOLF features
+        for (int ii=0; ii<new_kps.size(); ++ii)
         {
-            // DEBUG
-            debug_tTmp = clock();
+            FeaturePointImagePtr point = std::make_shared<FeaturePointImage>(
+                                         new_kps.at(ii),
+                                         new_desc.row(0),
+                                         Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
+                                         point->setIsKnown(true);
+            _feature_list_out.push_back(point);
+        }
 
-            kps  = det_ptr_->detect       (image_last_, roi);
+        // DEBUG =====================================
+        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+        WOLF_TRACE("--> TIME: Detect New Features: Sort, Cut and Fill grid ",debug_comp_time_);
+        // ===========================================
+    }
 
-            // DEBUG
-            debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-            WOLF_TRACE("--> TIME: detect new features: detect ",debug_comp_time_);
+    return new_kps.size();
 
-            if (kps.size() > 0)
-            {
-                keypoint_filter.retainBest(kps,1);
-
-                // DEBUG
-                WOLF_TRACE("response: " , kps[0].response );
-
-                if(kps[0].response > params_tracker_feature_trifocal_activesearch_ptr_->min_response_new_feature)
-                {
-                    // DEBUG
-                    debug_tTmp = clock();
-
-                    desc = des_ptr_->getDescriptor(image_last_, kps);
-
-                    // DEBUG
-                    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-                    WOLF_TRACE("--> TIME: detect new features: descript ",debug_comp_time_);
-
-                    FeaturePointImagePtr point = std::make_shared<FeaturePointImage>(
-                            kps[0],
-                            desc.row(0),
-                            Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
-                    point->setIsKnown(true);
-                    _feature_list_out.push_back(point);
-
-                    active_search_ptr_->hitCell(kps[0]);
-
-                    // Debug ROI
-                    vision_utils::trimRoi(image_incoming_.cols, image_incoming_.rows, roi);
-                    vision_utils::ROIEnhanced roi_e(roi,true);
-                    debug_roi_enh_.push_back(roi_e);
-
-                    n_new_features++;
-                }
-                else
-                {
-                    active_search_ptr_->blockCell(roi);
+//    KeyPointVector kps;
+//    cv::Mat desc;
+//    cv::Rect roi;
+//    KeyPointVector new_keypoints;
+//    cv::Mat new_descriptors;
+//    cv::KeyPointsFilter keypoint_filter;
+//
+//    debug_tTmp = clock();
+//    KeyPointVector kps_test;
+//    cv::Mat desc_test;
+//    kps_test  = det_ptr_->detect(image_last_);
+//    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+//    WOLF_TRACE("--> FLIPA '''''' TIME: detect new features: detect ",debug_comp_time_);
+//    debug_tTmp = clock();
+//    desc_test = des_ptr_->getDescriptor(image_last_, kps_test);
+//    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+//    WOLF_TRACE("--> FLIPA '''''' TIME: detect new features: descript ",debug_comp_time_);
+//    WOLF_TRACE("kps_test_size: ", kps_test.size(), " ", desc_test.rows);
+//
+//    debug_tTmp = clock();
+//    KeyPointVector kps_test_i;
+//    cv::Mat desc_test_i;
+//    kps_test_i  = det_ptr_->detect(image_incoming_);
+//    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+//    WOLF_TRACE("--> FLIPA MANDARINES '''''' TIME: detect new features: detect ",debug_comp_time_);
+//    debug_tTmp = clock();
+//    desc_test_i = des_ptr_->getDescriptor(image_incoming_, kps_test_i);
+//    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+//    WOLF_TRACE("--> FLIPA MANDARINES '''''' TIME: detect new features: descript ",debug_comp_time_);
+//    WOLF_TRACE("kps_test_size: ", kps_test_i.size(), " ", desc_test_i.rows);
+//
+//    debug_tTmp = clock();
+//    //Matching descriptor vectors using FLANN matcher
+//    cv::FlannBasedMatcher matcher = cv::FlannBasedMatcher(cv::makePtr<cv::flann::LshIndexParams>(12, 20, 2));
+//    std::vector< cv::DMatch > matches;
+//
+//    if(desc_test.type()!=CV_32F)
+//        desc_test.convertTo(desc_test, CV_32F);
+//
+//    if(desc_test_i.type()!=CV_32F)
+//        desc_test_i.convertTo(desc_test_i, CV_32F);
+//
+//    matchFeatures( desc_test, desc_test_i, matches );
+//    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+//    WOLF_TRACE("--> FLIPA LLIMONES '''''' TIME: detect new features: match ",debug_comp_time_);
+//    WOLF_TRACE("--> num matches ",matches.size());
+//
+//    unsigned int n_new_features = 0;
+//
+//    for (unsigned int n_iterations = 0; _max_new_features == 0 || n_iterations < _max_new_features; n_iterations++)
+//    {
+//        if (active_search_ptr_->pickEmptyRoi(roi))
+//        {
+//            // DEBUG
+//            debug_tTmp = clock();
+//
+//            kps  = det_ptr_->detect       (image_last_, roi);
+//
+//            // DEBUG
+//            debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+//            WOLF_TRACE("--> TIME: detect new features: detect ",debug_comp_time_);
+//
+//            if (kps.size() > 0)
+//            {
+//                keypoint_filter.retainBest(kps,1);
+//
+//                // DEBUG
+//                WOLF_TRACE("response: " , kps[0].response );
+//
+//                if(kps[0].response > params_tracker_feature_trifocal_activesearch_ptr_->min_response_new_feature)
+//                {
+//                    // DEBUG
+//                    debug_tTmp = clock();
+//
+//                    desc = des_ptr_->getDescriptor(image_last_, kps);
+//
+//                    // DEBUG
+//                    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+//                    WOLF_TRACE("--> TIME: detect new features: descript ",debug_comp_time_);
+//
+//                    FeaturePointImagePtr point = std::make_shared<FeaturePointImage>(
+//                            kps[0],
+//                            desc.row(0),
+//                            Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
+//                    point->setIsKnown(true);
+//                    _feature_list_out.push_back(point);
+//
+//                    active_search_ptr_->hitCell(kps[0]);
 //
 //                    // Debug ROI
 //                    vision_utils::trimRoi(image_incoming_.cols, image_incoming_.rows, roi);
-//                    vision_utils::ROIEnhanced roi_e(roi,false);
+//                    vision_utils::ROIEnhanced roi_e(roi,true);
 //                    debug_roi_enh_.push_back(roi_e);
-                }
-            }
-            else
-            {
-                active_search_ptr_->blockCell(roi);
 //
-//                // Debug ROI
-//                vision_utils::trimRoi(image_incoming_.cols, image_incoming_.rows, roi);
-//                vision_utils::ROIEnhanced roi_e(roi,false);
-//                debug_roi_enh_.push_back(roi_e);
-            }
-        }
-        else
-        {
-            WOLF_TRACE("Cannot pick roi. n_iterations: ", n_iterations);
-            break;
-        }
-    }
-
-    WOLF_TRACE("DetectNewFeatures - Number of new features detected: " , n_new_features );
-
-    // DEBUG
-    debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
-    WOLF_TRACE("--> TIME: detect new features: TOTAL ",debug_comp_time_);
-    WOLF_TRACE("======== ========= =========");
-
-    return n_new_features;
+//                    n_new_features++;
+//                }
+//                else
+//                {
+//                    active_search_ptr_->blockCell(roi);
+////
+////                    // Debug ROI
+////                    vision_utils::trimRoi(image_incoming_.cols, image_incoming_.rows, roi);
+////                    vision_utils::ROIEnhanced roi_e(roi,false);
+////                    debug_roi_enh_.push_back(roi_e);
+//                }
+//            }
+//            else
+//            {
+//                active_search_ptr_->blockCell(roi);
+////
+////                // Debug ROI
+////                vision_utils::trimRoi(image_incoming_.cols, image_incoming_.rows, roi);
+////                vision_utils::ROIEnhanced roi_e(roi,false);
+////                debug_roi_enh_.push_back(roi_e);
+//            }
+//        }
+//        else
+//        {
+//            WOLF_TRACE("Cannot pick roi. n_iterations: ", n_iterations);
+//            break;
+//        }
+//    }
+//
+//    WOLF_TRACE("DetectNewFeatures - Number of new features detected: " , n_new_features );
+//
+//    // DEBUG
+//    debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
+//    WOLF_TRACE("--> TIME: detect new features: TOTAL ",debug_comp_time_);
+//    WOLF_TRACE("======== ========= =========");
+//
+//    return n_new_features;
 }
 
 bool ProcessorTrackerFeatureTrifocal::voteForKeyFrame()
@@ -298,101 +425,236 @@ bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _
 
 unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureMatchMap& _feature_matches)
 {
+    // DEBUG =====================================
+    debug_tStart = clock();
+    WOLF_TRACE("======== TrackFeatures =========");
+    // ===========================================
+
+    // DEBUG =====================================
+    debug_tTmp = clock();
+    // ===========================================
+
     KeyPointVector kps;
     cv::Mat desc;
 
-//    // Debug
-//    debug_roi_enh_.clear();
-    debug_tStart = clock();
-    WOLF_TRACE("======== trackFeatures =========");
+    // Detect KeyPoints
+    kps  = det_ptr_->detect(image_incoming_);
 
-    for (auto feature_base_ptr : _feature_list_in)
+    // DEBUG =====================================
+    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+    WOLF_TRACE("--> TIME: Track: detect ",debug_comp_time_);
+    // ===========================================
+
+    if (kps.size() > 0)
     {
-        // Feature and descriptor
-        FeaturePointImagePtr target_feature = std::static_pointer_cast<FeaturePointImage>(feature_base_ptr);
-        cv::Mat target_descriptor = target_feature->getDescriptor();
-
-        // Hit cell
-        active_search_ptr_->hitCell(target_feature->getKeypoint());
-
-        // Set ROI
-        cv::Rect roi = vision_utils::setRoi(target_feature->getKeypoint().pt.x, target_feature->getKeypoint().pt.y, cell_width_, cell_height_);
-
-        // DEBUG
+        // DEBUG =====================================
         debug_tTmp = clock();
+        // ===========================================
 
-        // Detect features in ROI
-        kps = det_ptr_->detect(image_incoming_, roi);
+        // Get descriptors
+        desc = des_ptr_->getDescriptor(image_incoming_, kps);
 
-        // DEBUG
+        // DEBUG =====================================
         debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-        WOLF_TRACE("--> TIME: track: detect ",debug_comp_time_);
+        WOLF_TRACE("--> TIME: Track: descript ",debug_comp_time_);
+        // ===========================================
 
-        if (kps.size() > 0)
+        // DEBUG =====================================
+        debug_tTmp = clock();
+        // ===========================================
+
+        KeyPointVector new_kps;
+        cv::Mat new_desc;
+
+        // Get KeyPoints and descriptors
+        // sort them by response
+        // cut them at min_response_new_feature
+        // And finally filling the grid
+        fillGrid(grid_incoming_, params_tracker_feature_trifocal_->max_new_features, kps, desc, new_kps, new_desc);
+
+        // DEBUG =====================================
+        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+        WOLF_TRACE("--> TIME: Track: Fill grid ",debug_comp_time_);
+        // ===========================================
+
+        // DEBUG =====================================
+        debug_tTmp = clock();
+        // ===========================================
+
+        for (auto feature_base_ptr : _feature_list_in)
         {
-            // DEBUG
-            debug_tTmp = clock();
+            WOLF_TRACE("");
 
-            // New descriptors in ROI
-            desc = des_ptr_->getDescriptor(image_incoming_, kps);
+            // Feature and descriptor
+            FeaturePointImagePtr target_feature = std::static_pointer_cast<FeaturePointImage>(feature_base_ptr);
+            cv::KeyPoint target_keypoint = target_feature->getKeypoint();
+            cv::Mat target_descriptor = target_feature->getDescriptor();
 
-            // DEBUG
-            debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-            WOLF_TRACE("--> TIME: track: descript ",debug_comp_time_);
+            WOLF_TRACE("target feature ",target_keypoint.pt.x, "x", target_keypoint.pt.y);
 
-            // Match
-            cv::DMatch cv_match;
-            Scalar normalized_score = mat_ptr_->match(target_descriptor, desc, des_ptr_->getSize(), cv_match);
+            // get target cell
+            Eigen::Vector2i target_cell = grid_incoming_->getCell(target_keypoint);
 
-            if ( normalized_score > mat_ptr_->getParams()->min_norm_score )
+            WOLF_TRACE("target_cell: ",target_cell);
+
+            // Augment candidates features to surrounding cells;
+            // Get candidate KeyPoints and descriptors of surroinding cells
+            KeyPointVector candidate_kps;
+            cv::Mat candidate_desc;
+
+            WOLF_TRACE("PREV get candidates");
+
+
+            getCandidatesFromGrid(target_cell(0), target_cell(1), grid_incoming_, kps, desc, candidate_kps, candidate_desc);
+
+            WOLF_TRACE("AFTER get candidates");
+            WOLF_TRACE("Size candidates kps: ", candidate_kps.size(), "  desc: ", candidate_desc.rows);
+
+            if (candidate_kps.size() > 0)
             {
-                cv::KeyPoint tracked_kp = kps[cv_match.trainIdx];
-                cv::Mat tracked_desc = desc(cv::Rect(0,cv_match.trainIdx,desc.cols,1));
+                // Try to match with candidates
 
-                FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
-                        tracked_kp, tracked_desc,
-                        Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
+                cv::DMatch cv_match;
+                Scalar normalized_score = mat_ptr_->match(target_descriptor, candidate_desc, des_ptr_->getSize(), cv_match);
 
-                incoming_point_ptr->setIsKnown(target_feature->isKnown());
+                WOLF_TRACE("MATCH");
 
-                _feature_list_out.push_back(incoming_point_ptr);
+                if ( normalized_score > mat_ptr_->getParams()->min_norm_score )
+                {
+                    WOLF_TRACE("");
 
-                _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_base_ptr, normalized_score}));
+                    cv::KeyPoint tracked_kp = candidate_kps[cv_match.trainIdx];
 
-//                // Debug ROI
-//                vision_utils::trimRoi(image_incoming_.cols, image_incoming_.rows, roi);
-//                vision_utils::ROIEnhanced roi_e(roi,true);
-//                debug_roi_enh_.push_back(roi_e);
+                    WOLF_TRACE("candidate cols", candidate_desc.cols);
+
+                    cv::Mat tracked_desc = candidate_desc(cv::Rect(0,cv_match.trainIdx,candidate_desc.cols,1));
+
+                    WOLF_TRACE("");
+
+                    FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
+                            tracked_kp, tracked_desc,
+                            Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
+
+                    WOLF_TRACE("");
+
+                    incoming_point_ptr->setIsKnown(target_feature->isKnown());
+
+                    _feature_list_out.push_back(incoming_point_ptr);
+
+                    _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_base_ptr, normalized_score}));
+
+                    //                // Debug ROI
+                    //                vision_utils::trimRoi(image_incoming_.cols, image_incoming_.rows, roi);
+                    //                vision_utils::ROIEnhanced roi_e(roi,true);
+                    //                debug_roi_enh_.push_back(roi_e);
+                }
+                WOLF_TRACE("DONE WOLF struct FEAT");
             }
-//            else
-//            {
-//                // Debug ROI
-//                vision_utils::trimRoi(image_incoming_.cols, image_incoming_.rows, roi);
-//                vision_utils::ROIEnhanced roi_e(roi,false);
-//                debug_roi_enh_.push_back(roi_e);
-//            }
         }
-//        else
-//        {
-//            // Debug ROI
-//            vision_utils::trimRoi(image_incoming_.cols, image_incoming_.rows, roi);
-//            vision_utils::ROIEnhanced roi_e(roi,false);
-//            debug_roi_enh_.push_back(roi_e);
-//        }
+
+        // DEBUG =====================================
+        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+        WOLF_TRACE("--> TIME: Track: Match selecting surr. cells",debug_comp_time_);
+        // ===========================================
     }
-
-    // DEBUG
-    debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
-    WOLF_TRACE("--> TIME: track: ",debug_comp_time_);
-    WOLF_TRACE("======== ========= =========");
-
     return _feature_list_out.size();
+
+//    KeyPointVector kps;
+//    cv::Mat desc;
+//
+////    // Debug
+////    debug_roi_enh_.clear();
+//    debug_tStart = clock();
+//    WOLF_TRACE("======== trackFeatures =========");
+//
+//    for (auto feature_base_ptr : _feature_list_in)
+//    {
+//        // Feature and descriptor
+//        FeaturePointImagePtr target_feature = std::static_pointer_cast<FeaturePointImage>(feature_base_ptr);
+//        cv::Mat target_descriptor = target_feature->getDescriptor();
+//
+//        // Hit cell
+//        active_search_ptr_->hitCell(target_feature->getKeypoint());
+//
+//        // Set ROI
+//        cv::Rect roi = vision_utils::setRoi(target_feature->getKeypoint().pt.x, target_feature->getKeypoint().pt.y, cell_width_, cell_height_);
+//
+//        // DEBUG
+//        debug_tTmp = clock();
+//
+//        // Detect features in ROI
+//        kps = det_ptr_->detect(image_incoming_, roi);
+//
+//        // DEBUG
+//        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+//        WOLF_TRACE("--> TIME: track: detect ",debug_comp_time_);
+//
+//        if (kps.size() > 0)
+//        {
+//            // DEBUG
+//            debug_tTmp = clock();
+//
+//            // New descriptors in ROI
+//            desc = des_ptr_->getDescriptor(image_incoming_, kps);
+//
+//            // DEBUG
+//            debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+//            WOLF_TRACE("--> TIME: track: descript ",debug_comp_time_);
+//
+//            // Match
+//            cv::DMatch cv_match;
+//            Scalar normalized_score = mat_ptr_->match(target_descriptor, desc, des_ptr_->getSize(), cv_match);
+//
+//            if ( normalized_score > mat_ptr_->getParams()->min_norm_score )
+//            {
+//                cv::KeyPoint tracked_kp = kps[cv_match.trainIdx];
+//                cv::Mat tracked_desc = desc(cv::Rect(0,cv_match.trainIdx,desc.cols,1));
+//
+//                FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
+//                        tracked_kp, tracked_desc,
+//                        Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
+//
+//                incoming_point_ptr->setIsKnown(target_feature->isKnown());
+//
+//                _feature_list_out.push_back(incoming_point_ptr);
+//
+//                _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_base_ptr, normalized_score}));
+//
+////                // Debug ROI
+////                vision_utils::trimRoi(image_incoming_.cols, image_incoming_.rows, roi);
+////                vision_utils::ROIEnhanced roi_e(roi,true);
+////                debug_roi_enh_.push_back(roi_e);
+//            }
+////            else
+////            {
+////                // Debug ROI
+////                vision_utils::trimRoi(image_incoming_.cols, image_incoming_.rows, roi);
+////                vision_utils::ROIEnhanced roi_e(roi,false);
+////                debug_roi_enh_.push_back(roi_e);
+////            }
+//        }
+////        else
+////        {
+////            // Debug ROI
+////            vision_utils::trimRoi(image_incoming_.cols, image_incoming_.rows, roi);
+////            vision_utils::ROIEnhanced roi_e(roi,false);
+////            debug_roi_enh_.push_back(roi_e);
+////        }
+//    }
+//
+//    // DEBUG
+//    debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
+//    WOLF_TRACE("--> TIME: track: ",debug_comp_time_);
+//    WOLF_TRACE("======== ========= =========");
+//
+//    return _feature_list_out.size();
 }
 
 void ProcessorTrackerFeatureTrifocal::advanceDerived()
 {
     ProcessorTrackerFeature::advanceDerived();
     image_last_ = image_incoming_;
+    grid_last_ = grid_incoming_;
 }
 
 void ProcessorTrackerFeatureTrifocal::resetDerived()
@@ -401,6 +663,7 @@ void ProcessorTrackerFeatureTrifocal::resetDerived()
     ProcessorTrackerFeature::resetDerived();
 
     image_last_ = image_incoming_;
+    grid_last_ = grid_incoming_;
 
     // Conditionally assign the prev_origin pointer
     if (initialized_)
@@ -432,7 +695,9 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
 
     image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
 
-    active_search_ptr_->renew();
+    grid_incoming_ = std::make_shared<vision_utils::FeatureIdxGrid>(image_incoming_.cols, image_incoming_.rows, params_tracker_feature_trifocal_->n_cells_h, params_tracker_feature_trifocal_->n_cells_v);
+
+//    active_search_ptr_->renew();
 
 //    // Debug
 //    debug_roi_enh_.clear();
@@ -451,8 +716,9 @@ void ProcessorTrackerFeatureTrifocal::postProcess()
         kps_e.push_back(kp_e);
     }
 
-    cv::Mat img = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
-    cv::Mat img_proc = vision_utils::buildImageProcessed(img, kps_e, debug_roi_enh_);
+    // DEBUG
+//    cv::Mat img = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
+//    cv::Mat img_proc = vision_utils::buildImageProcessed(img, kps_e, debug_roi_enh_);
 //
 //    cv::imshow("DEBUG VIEW", img_proc);
 //    cv::waitKey(1);
@@ -504,12 +770,12 @@ void ProcessorTrackerFeatureTrifocal::configure(SensorBasePtr _sensor)
 
     camera->setNoiseStd(Vector2s::Ones() * params_tracker_feature_trifocal_->pixel_noise_std);
 
-    active_search_ptr_->initAlg(camera->getImgWidth(), camera->getImgHeight() , det_ptr_->getPatternRadius());
-
-    params_tracker_feature_trifocal_activesearch_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmParamsACTIVESEARCH>( active_search_ptr_->getParams() );
-
-    cell_width_  = camera->getImgWidth()  / params_tracker_feature_trifocal_activesearch_ptr_->n_cells_h;
-    cell_height_ = camera->getImgHeight() / params_tracker_feature_trifocal_activesearch_ptr_->n_cells_v;
+//    active_search_ptr_->initAlg(camera->getImgWidth(), camera->getImgHeight() , det_ptr_->getPatternRadius());
+//
+//    params_tracker_feature_trifocal_activesearch_ptr_ = std::static_pointer_cast<vision_utils::AlgorithmParamsACTIVESEARCH>( active_search_ptr_->getParams() );
+//
+//    cell_width_  = camera->getImgWidth()  / params_tracker_feature_trifocal_activesearch_ptr_->n_cells_h;
+//    cell_height_ = camera->getImgHeight() / params_tracker_feature_trifocal_activesearch_ptr_->n_cells_v;
 }
 
 ProcessorBasePtr ProcessorTrackerFeatureTrifocal::create(const std::string& _unique_name,
