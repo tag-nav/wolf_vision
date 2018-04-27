@@ -155,7 +155,9 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
         if (capture_last_->grid_features_->pickEmptyCell(cell_last))
         {
             // Get best keypoint in cell
-            vision_utils::FeatureIdxMap cell_feat_map = capture_last_->grid_features_->getFeatureIdxMap(cell_last(0), cell_last(1), params_tracker_feature_trifocal_->min_response_new_feature);
+            vision_utils::FeatureIdxMap cell_feat_map = capture_last_->grid_features_->getFeatureIdxMap(cell_last(0),
+                                                                                                        cell_last(1),
+                                                                                                        params_tracker_feature_trifocal_->min_response_new_feature);
 
             bool found_feature_in_cell = false;
 
