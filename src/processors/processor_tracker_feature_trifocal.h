@@ -32,10 +32,6 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureTrifocal);
 
 class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 {
-        // DEBUG
-        clock_t debug_tStart, debug_tTmp;
-        double debug_comp_time_;
-
         // Parameters for vision_utils
     protected:
         vision_utils::DetectorBasePtr   det_ptr_;

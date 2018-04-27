@@ -141,6 +141,8 @@ bool ProcessorTrackerFeatureTrifocal::isInlier(const cv::KeyPoint& _kp_last, con
 unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out)
 {
     // DEBUG =====================================
+    clock_t debug_tStart;
+    double debug_comp_time_;
     debug_tStart = clock();
     WOLF_TRACE("======== DetectNewFeatures =========");
     // ===========================================
@@ -238,6 +240,8 @@ bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _
 unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureMatchMap& _feature_matches)
 {
     // DEBUG =====================================
+    clock_t debug_tStart;
+    double debug_comp_time_;
     debug_tStart = clock();
     WOLF_TRACE("======== TrackFeatures =========");
     // ===========================================
