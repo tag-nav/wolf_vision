@@ -140,7 +140,7 @@ int main(int argc, char** argv)
 
                 if(keypoints.size() != 0)
                 {
-                    mat_ptr->match(target_descriptor, descriptors, cv_matches);
+                    mat_ptr->match(target_descriptor, descriptors, des_ptr->getSize(), cv_matches);
                     Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/(des_ptr->getSize()*8);
                     std::cout << "pixel: " << keypoints[cv_matches[0].trainIdx].pt + roi_up_left_corner << std::endl;
                     std::cout << "normalized score: " << normalized_score << std::endl;
