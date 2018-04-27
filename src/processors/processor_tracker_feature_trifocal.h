@@ -3,6 +3,7 @@
 
 //Wolf includes
 #include "../processor_tracker_feature.h"
+#include "../capture_image.h"
 
 // Vision utils
 #include <vision_utils/vision_utils.h>
@@ -23,7 +24,7 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
         int n_cells_h;
         int n_cells_v;
         int min_response_new_feature;
-
+        Scalar max_euclidean_distance;
         Scalar pixel_noise_std; ///< std noise of the pixel
 };
 
@@ -32,7 +33,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureTrifocal);
 class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 {
         // DEBUG
-        clock_t debug_tTmp;
+        clock_t debug_tStart, debug_tTmp;
         double debug_comp_time_;
 
         // Parameters for vision_utils
@@ -41,13 +42,12 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         vision_utils::DescriptorBasePtr des_ptr_;
         vision_utils::MatcherBasePtr    mat_ptr_;
 
-        vision_utils::FeatureIdxGridPtr grid_last_;
-        vision_utils::FeatureIdxGridPtr grid_incoming_;
-
     protected:
 
         ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_;      ///< Configuration parameters
-        cv::Mat image_last_, image_incoming_;   ///< Images of the "last" and "incoming" Captures
+
+        CaptureImagePtr capture_last_;
+        CaptureImagePtr capture_incoming_;
 
     private:
         CaptureBasePtr prev_origin_ptr_;                    ///< Capture previous to origin_ptr_ for the third focus of the trifocal.
@@ -136,10 +136,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         CaptureBasePtr getPrevOriginPtr();
 
-        void fillGrid(const vision_utils::FeatureIdxGridPtr _grid, const unsigned int& _max_new_features, const std::vector<cv::KeyPoint>& _kps, const cv::Mat& _desc, std::vector<cv::KeyPoint>& _new_kps, cv::Mat& _new_desc);
-
-        void getCandidatesFromGrid(const std::vector<int>& _idx_cols, const std::vector<int>& _idx_rows, const vision_utils::FeatureIdxGridPtr _grid, const std::vector<cv::KeyPoint>& _kps, const cv::Mat& _desc, std::vector<cv::KeyPoint>& _candidate_kps, cv::Mat& _candidate_desc);
-        void get3x3CellNeighCandidatesFromGrid(const int& _cell_col, const int& _cell_row, const vision_utils::FeatureIdxGridPtr _grid, const std::vector<cv::KeyPoint>& _kps, const cv::Mat& _desc, std::vector<cv::KeyPoint>& _candidate_kps, cv::Mat& _candidate_desc);
+        bool isInlier(const cv::KeyPoint& _kp_incoming, const cv::KeyPoint& _kp_last);
 
     public:
 

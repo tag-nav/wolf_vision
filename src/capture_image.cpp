@@ -3,7 +3,14 @@
 namespace wolf {
 
 CaptureImage::CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv::Mat _data_cv) :
-    CaptureBase("IMAGE", _ts, _camera_ptr), frame_(_data_cv)
+    CaptureBase("IMAGE", _ts, _camera_ptr),
+    frame_(_data_cv),
+    grid_features_(nullptr),
+    keypoints_(KeyPointVector()),
+    descriptors_(cv::Mat()),
+    matches_from_precedent_(DMatchVector()),
+    matches_normalized_scores_(std::vector<Scalar>()),
+    map_index_to_next_(std::map<int, int>())
 {
     //
 }

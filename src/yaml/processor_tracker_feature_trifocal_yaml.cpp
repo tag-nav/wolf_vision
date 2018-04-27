@@ -55,6 +55,7 @@ static ProcessorParamsBasePtr createProcessorParamsTrackerFeatureTrifocal(const 
         params->n_cells_h                 = algorithm["grid horiz cells"]             .as<int>();
         params->n_cells_v                 = algorithm["grid vert cells"]              .as<int>();
         params->min_response_new_feature  = algorithm["min response new features"]    .as<int>();
+        params->max_euclidean_distance    = algorithm["max euclidean distance"]       .as<Scalar>();
 
         YAML::Node noise                      = config["noise"];
         params->pixel_noise_std               = noise ["pixel noise std"].as<Scalar>();

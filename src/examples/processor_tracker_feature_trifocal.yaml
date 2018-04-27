@@ -11,7 +11,8 @@ algorithm:
     maximum new features: 40
     grid horiz cells: 10
     grid vert cells: 10
-    min response new features: 50    
+    min response new features: 50   
+    max euclidean distance: 20 
     
 noise:
     pixel noise std: 1 # pixels

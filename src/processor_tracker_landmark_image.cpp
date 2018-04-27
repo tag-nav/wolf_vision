@@ -183,6 +183,7 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList
                 {
                     FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                             candidate_keypoints[cv_matches[0].trainIdx],
+                            cv_matches[0].trainIdx,
                             candidate_descriptors.row(cv_matches[0].trainIdx),
                             Eigen::Matrix2s::Identity()*params_tracker_landmark_image_->pixel_noise_var);
 
@@ -252,6 +253,7 @@ unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int
                     list_response_.push_back(new_keypoints[0].response);
                     FeaturePointImagePtr point_ptr = std::make_shared<FeaturePointImage>(
                             new_keypoints[0],
+                            0,
                             new_descriptors.row(index),
                             Eigen::Matrix2s::Identity()*params_tracker_landmark_image_->pixel_noise_var);
                     point_ptr->setIsKnown(false);

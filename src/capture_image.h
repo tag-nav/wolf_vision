@@ -27,6 +27,14 @@ class CaptureImage : public CaptureBase
         vision_utils::Frame frame_;
 
     public:
+        vision_utils::FeatureIdxGridPtr grid_features_;
+        KeyPointVector                  keypoints_;
+        cv::Mat                         descriptors_;
+        DMatchVector                    matches_from_precedent_;
+        std::vector<Scalar>             matches_normalized_scores_;
+        std::map<int, int>              map_index_to_next_;
+
+    public:
         CaptureImage(const TimeStamp& _ts, SensorCameraPtr _camera_ptr, cv::Mat _data_cv);
         virtual ~CaptureImage();
 

@@ -162,7 +162,9 @@ unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& 
             if ( normalized_score > mat_ptr_->getParams()->min_norm_score )
             {
                 FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
-                        candidate_keypoints[cv_matches[0].trainIdx], (candidate_descriptors.row(cv_matches[0].trainIdx)),
+                        candidate_keypoints[cv_matches[0].trainIdx],
+                        cv_matches[0].trainIdx,
+                        (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         Eigen::Matrix2s::Identity()*params_tracker_feature_image_->pixel_noise_var);
                 incoming_point_ptr->setIsKnown(feature_ptr->isKnown());
                 _feature_list_out.push_back(incoming_point_ptr);
@@ -271,6 +273,7 @@ unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int&
                     std::cout << "response: " << new_keypoints[0].response << std::endl;
                     FeaturePointImagePtr point_ptr = std::make_shared<FeaturePointImage>(
                             new_keypoints[0],
+                            0,
                             new_descriptors.row(index),
                             Eigen::Matrix2s::Identity()*params_tracker_feature_image_->pixel_noise_var);
                     point_ptr->setIsKnown(false);
