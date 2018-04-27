@@ -175,7 +175,6 @@ void ProcessorTrackerFeatureTrifocal::getCandidatesFromGrid(const std::vector<in
 
 void ProcessorTrackerFeatureTrifocal::get3x3CellNeighCandidatesFromGrid(const int& _cell_col, const int& _cell_row, const vision_utils::FeatureIdxGridPtr _grid, const std::vector<cv::KeyPoint>& _kps, const cv::Mat& _desc, std::vector<cv::KeyPoint>& _candidate_kps, cv::Mat& _candidate_desc)
 {
-    WOLF_TRACE("INside getCandidatesFromGrid");
     // Four surrounding cells
     std::vector<int> idx_rows(3), idx_cols(3);
     for (int ii=-1;ii<2;++ii)
