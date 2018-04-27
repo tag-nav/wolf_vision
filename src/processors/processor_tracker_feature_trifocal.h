@@ -32,7 +32,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureTrifocal);
 class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 {
         // DEBUG
-        clock_t debug_tStart, debug_tTmp;
+        clock_t debug_tTmp;
         double debug_comp_time_;
 
         // Parameters for vision_utils
@@ -44,24 +44,10 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         vision_utils::FeatureIdxGridPtr grid_last_;
         vision_utils::FeatureIdxGridPtr grid_incoming_;
 
-//        vision_utils::AlgorithmACTIVESEARCHPtr active_search_ptr_;  // Active Search
-//        int cell_width_; ///< Active search cell width
-//        int cell_height_; ///< Active search cell height
-//        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_tracker_feature_trifocal_activesearch_ptr_; ///< Active search parameters
-
     protected:
 
         ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_;      ///< Configuration parameters
         cv::Mat image_last_, image_incoming_;   ///< Images of the "last" and "incoming" Captures
-
-//        struct
-//        {
-//                unsigned int width_;  ///< width of the image
-//                unsigned int height_; ///< height of the image
-//        } image_;
-
-//        // Debug
-//        std::vector<vision_utils::ROIEnhanced> debug_roi_enh_;
 
     private:
         CaptureBasePtr prev_origin_ptr_;                    ///< Capture previous to origin_ptr_ for the third focus of the trifocal.
@@ -152,7 +138,8 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         void fillGrid(const vision_utils::FeatureIdxGridPtr _grid, const unsigned int& _max_new_features, const std::vector<cv::KeyPoint>& _kps, const cv::Mat& _desc, std::vector<cv::KeyPoint>& _new_kps, cv::Mat& _new_desc);
 
-        void getCandidatesFromGrid(const int& _cell_col, const int& _cell_row, const vision_utils::FeatureIdxGridPtr _grid, const std::vector<cv::KeyPoint>& _kps, const cv::Mat& _desc, std::vector<cv::KeyPoint>& _candidate_kps, cv::Mat& _candidate_desc);
+        void getCandidatesFromGrid(const std::vector<int>& _idx_cols, const std::vector<int>& _idx_rows, const vision_utils::FeatureIdxGridPtr _grid, const std::vector<cv::KeyPoint>& _kps, const cv::Mat& _desc, std::vector<cv::KeyPoint>& _candidate_kps, cv::Mat& _candidate_desc);
+        void get3x3CellNeighCandidatesFromGrid(const int& _cell_col, const int& _cell_row, const vision_utils::FeatureIdxGridPtr _grid, const std::vector<cv::KeyPoint>& _kps, const cv::Mat& _desc, std::vector<cv::KeyPoint>& _candidate_kps, cv::Mat& _candidate_desc);
 
     public:
 
