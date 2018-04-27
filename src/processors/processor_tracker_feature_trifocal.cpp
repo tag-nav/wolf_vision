@@ -194,40 +194,36 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
     WOLF_TRACE("======== DetectNewFeatures =========");
     // ===========================================
 
-//    // DEBUG =====================================
-//    debug_tTmp = clock();
-//    // ===========================================
-
     // Detect KeyPoints
     KeyPointVector detected_kps_last;
     detected_kps_last  = det_ptr_->detect(image_last_);
 
-//    // DEBUG =====================================
-//    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-//    WOLF_TRACE("--> TIME: Detect New Features: detect ",debug_comp_time_);
-//    // ===========================================
+    // DEBUG =====================================
+    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+    WOLF_TRACE("--> TIME: Detect New Features: detect ",debug_comp_time_);
+    // ===========================================
 
     // Return var
     KeyPointVector selected_kps_last;
 
     if (detected_kps_last.size()>0)
     {
-//        // DEBUG =====================================
-//        debug_tTmp = clock();
-//        // ===========================================
+        // DEBUG =====================================
+        debug_tTmp = clock();
+        // ===========================================
 
         // Get descriptors
         cv::Mat detected_desc_last;
         detected_desc_last = des_ptr_->getDescriptor(image_last_, detected_kps_last);
 
-//        // DEBUG =====================================
-//        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-//        WOLF_TRACE("--> TIME: Detect New Features: descript ",debug_comp_time_);
-//        // ===========================================
+        // DEBUG =====================================
+        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+        WOLF_TRACE("--> TIME: Detect New Features: descript ",debug_comp_time_);
+        // ===========================================
 
-//        // DEBUG =====================================
-//        debug_tTmp = clock();
-//        // ===========================================
+        // DEBUG =====================================
+        debug_tTmp = clock();
+        // ===========================================
 
         // Fill the grid with selected kps and desc
         // 1) sort detected kps (and desc) by response
@@ -236,6 +232,15 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
         // Note: selected kps and desc are stored in a class object to keep them for tracking
         cv::Mat selected_desc_last;
         fillGrid(grid_last_, _max_new_features, detected_kps_last, detected_desc_last, selected_kps_last, selected_desc_last);
+
+        // DEBUG =====================================
+        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+        WOLF_TRACE("--> TIME: Detect New Features: Sort, Cut and Fill grid ",debug_comp_time_);
+        // ===========================================
+
+        // DEBUG =====================================
+        debug_tTmp = clock();
+        // ===========================================
 
         // Create all WOLF features
         for (int ii=0; ii<selected_kps_last.size(); ++ii)
@@ -248,10 +253,10 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
             _feature_list_out.push_back(point);
         }
 
-//        // DEBUG =====================================
-//        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-//        WOLF_TRACE("--> TIME: Detect New Features: Sort, Cut and Fill grid ",debug_comp_time_);
-//        // ===========================================
+        // DEBUG =====================================
+        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+        WOLF_TRACE("--> TIME: Detect New Features: Fill WOLF feature ",debug_comp_time_);
+        // ===========================================
     }
 
     // DEBUG =====================================
@@ -295,37 +300,33 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
     WOLF_TRACE("======== TrackFeatures =========");
     // ===========================================
 
-//    // DEBUG =====================================
-//    debug_tTmp = clock();
-//    // ===========================================
-
     // Detect KeyPoints
     KeyPointVector kps_incoming;
     kps_incoming  = det_ptr_->detect(image_incoming_);
 
-//    // DEBUG =====================================
-//    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-//    WOLF_TRACE("--> TIME: Track: detect ",debug_comp_time_);
-//    // ===========================================
+    // DEBUG =====================================
+    debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+    WOLF_TRACE("--> TIME: Track: detect ",debug_comp_time_);
+    // ===========================================
 
     if (kps_incoming.size() > 0)
     {
-//        // DEBUG =====================================
-//        debug_tTmp = clock();
-//        // ===========================================
+        // DEBUG =====================================
+        debug_tTmp = clock();
+        // ===========================================
 
         // Get descriptors
         cv::Mat desc_incoming;
         desc_incoming = des_ptr_->getDescriptor(image_incoming_, kps_incoming);
 
-//        // DEBUG =====================================
-//        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-//        WOLF_TRACE("--> TIME: Track: descript ",debug_comp_time_);
-//        // ===========================================
+        // DEBUG =====================================
+        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+        WOLF_TRACE("--> TIME: Track: descript ",debug_comp_time_);
+        // ===========================================
 
-//        // DEBUG =====================================
-//        debug_tTmp = clock();
-//        // ===========================================
+        // DEBUG =====================================
+        debug_tTmp = clock();
+        // ===========================================
 
         KeyPointVector selected_kps_incoming;
         cv::Mat selected_desc_incoming;
@@ -336,14 +337,14 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
         // And finally filling the grid
         fillGrid(grid_incoming_, params_tracker_feature_trifocal_->max_new_features, kps_incoming, desc_incoming, selected_kps_incoming, selected_desc_incoming);
 
-//        // DEBUG =====================================
-//        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-//        WOLF_TRACE("--> TIME: Track: Fill grid ",debug_comp_time_);
-//        // ===========================================
+        // DEBUG =====================================
+        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+        WOLF_TRACE("--> TIME: Track: Fill grid ",debug_comp_time_);
+        // ===========================================
 
-//        // DEBUG =====================================
-//        debug_tTmp = clock();
-//        // ===========================================
+        // DEBUG =====================================
+        debug_tTmp = clock();
+        // ===========================================
 
         std::vector<FeaturePointImagePtr> f_img_vec;
         KeyPointVector selected_kps_last;
@@ -361,25 +362,25 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
         std::vector<Scalar> normalized_score = mat_ptr_->match(selected_desc_last, selected_desc_incoming, des_ptr_->getSize(), matches);
 
         // DEBUG =====================================
-//        //-- Draw only "good" matches
-//        cv::Mat img_matches;
-//        cv::drawMatches( image_last_, selected_kps_last, image_incoming_, selected_kps_incoming,
-//                     matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1),
-//                     vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
-//        //-- Show detected matches
-//        cv::imshow("DEBUG VIEW", img_matches);
-//        cv::waitKey(1);
+        //-- Draw only "good" matches
+        cv::Mat img_matches;
+        cv::drawMatches( image_last_, selected_kps_last, image_incoming_, selected_kps_incoming,
+                     matches, img_matches, cv::Scalar::all(-1), cv::Scalar::all(-1),
+                     vector<char>(), cv::DrawMatchesFlags::NOT_DRAW_SINGLE_POINTS );
+        //-- Show detected matches
+        cv::imshow("DEBUG VIEW", img_matches);
+        cv::waitKey(1);
         // ===========================================
 
-//        // DEBUG =====================================
-//        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-//        WOLF_TRACE("--> TIME: Track: Match ",debug_comp_time_);
-//        // ===========================================
+        // DEBUG =====================================
+        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+        WOLF_TRACE("--> TIME: Track: Match ",debug_comp_time_);
+        // ===========================================
 
 
-//        // DEBUG =====================================
-//        debug_tTmp = clock();
-//        // ===========================================
+        // DEBUG =====================================
+        debug_tTmp = clock();
+        // ===========================================
 
         for (unsigned int ii = 0; ii < matches.size(); ++ii)
         {
@@ -401,10 +402,10 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
             }
         }
 
-//        // DEBUG =====================================
-//        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
-//        WOLF_TRACE("--> TIME: Track: Fill WOLF struct ",debug_comp_time_);
-//        // ===========================================
+        // DEBUG =====================================
+        debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
+        WOLF_TRACE("--> TIME: Track: Fill WOLF struct ",debug_comp_time_);
+        // ===========================================
     }
 
 
