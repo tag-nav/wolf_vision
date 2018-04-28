@@ -7,7 +7,7 @@
 #include "ceres_wrapper/ceres_manager.h"
 
 // Vision utils includes
-#include <vision_utils.h>
+#include <vision_utils/vision_utils.h>
 #include <vision_utils/sensors.h>
 #include <vision_utils/common_class/buffer.h>
 #include <vision_utils/common_class/frame.h>

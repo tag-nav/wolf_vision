@@ -16,7 +16,7 @@
 #include "ceres_wrapper/ceres_manager.h"
 
 // Vision utils
-#include <vision_utils.h>
+#include <vision_utils/vision_utils.h>
 
 /**
  * This test simulates the following situation:

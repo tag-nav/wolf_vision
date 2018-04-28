@@ -6,7 +6,6 @@
 #include "feature_point_image.h"
 #include "constraints/constraint_autodiff_trifocal.h"
 #include "capture_image.h"
-#include "feature_point_image.h"
 
 // vision_utils
 #include <vision_utils/vision_utils.h>
