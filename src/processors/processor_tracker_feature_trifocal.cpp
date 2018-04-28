@@ -140,25 +140,20 @@ bool ProcessorTrackerFeatureTrifocal::isInlier(const cv::KeyPoint& _kp_last, con
 
 unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out)
 {
-    // DEBUG =====================================
-    clock_t debug_tStart;
-    double debug_comp_time_;
-    debug_tStart = clock();
-    WOLF_TRACE("======== DetectNewFeatures =========");
-    // ===========================================
-
-    unsigned int n_new_features = 0;
+//    // DEBUG =====================================
+//    clock_t debug_tStart;
+//    double debug_comp_time_;
+//    debug_tStart = clock();
+//    WOLF_TRACE("======== DetectNewFeatures =========");
+//    // ===========================================
 
     for (unsigned int n_iterations = 0; n_iterations < _max_new_features; ++n_iterations)
     {
         Eigen::Vector2i cell_last;
-        if (capture_last_->grid_features_->pickEmptyCell(cell_last))
+        if (capture_last_->grid_features_->pickEmptyTrackingCell(cell_last))
         {
             // Get best keypoint in cell
-            vision_utils::FeatureIdxMap cell_feat_map = capture_last_->grid_features_->getFeatureIdxMap(cell_last(0),
-                                                                                                        cell_last(1),
-                                                                                                        params_tracker_feature_trifocal_->min_response_new_feature);
-
+            vision_utils::FeatureIdxMap cell_feat_map = capture_last_->grid_features_->getFeatureIdxMap(cell_last(0), cell_last(1));
             bool found_feature_in_cell = false;
 
             for (auto target_last_pair_response_idx : cell_feat_map)
@@ -186,9 +181,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
                         _feature_list_out.push_back(last_point_ptr);
 
                         // hit cell to acknowledge there's a tracked point in that cell
-                        capture_last_->grid_features_->hitOccupancyGrid(kp_last);
-
-                        n_new_features++;
+                        capture_last_->grid_features_->hitTrackingCell(kp_last);
 
                         found_feature_in_cell = true;
 
@@ -197,41 +190,73 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
                 }
             }
             if (!found_feature_in_cell)
-                capture_last_->grid_features_->blockCell(cell_last);
+                capture_last_->grid_features_->blockTrackingCell(cell_last);
         }
         else
             break; // There are no empty cells
     }
 
-    WOLF_TRACE("DetectNewFeatures - Number of new features detected: " , n_new_features );
+    WOLF_TRACE("DetectNewFeatures - Number of new features detected: " , _feature_list_out.size() );
 
-    // DEBUG
-    debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
-    WOLF_TRACE("--> TIME: detect new features: TOTAL ",debug_comp_time_);
-    WOLF_TRACE("======== ========= =========");
+//    // DEBUG
+//    debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
+//    WOLF_TRACE("--> TIME: detect new features: TOTAL ",debug_comp_time_);
+//    WOLF_TRACE("======== ========= =========");
 
-    return n_new_features;
+    return _feature_list_out.size();
 }
 
-bool ProcessorTrackerFeatureTrifocal::voteForKeyFrame()
+unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureMatchMap& _feature_matches)
 {
-    // List of conditions
+//    // DEBUG =====================================
+//    clock_t debug_tStart;
+//    double debug_comp_time_;
+//    debug_tStart = clock();
+//    WOLF_TRACE("======== TrackFeatures =========");
+//    // ===========================================
 
-	// A. crossing voting threshold with ascending number of features
-	bool vote_up = true;
-	// 1. vote if we did not have enough features before
-	vote_up = vote_up && (getNewFeaturesListLast().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
-    // 2. vote if we have enough features now
-    vote_up = vote_up && (getNewFeaturesListIncoming().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
+    for (auto feature_base_last_ : _feature_list_in)
+    {
 
-	// B. crossing voting threshold with descending number of features
-    bool vote_down = true;
-    // 1. vote if we had enough features before
-    vote_down = vote_down && (getNewFeaturesListLast().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
-    // 2. vote if we have not enough features now
-    vote_down = vote_down && (getNewFeaturesListIncoming().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
+        FeaturePointImagePtr feature_last_ = std::static_pointer_cast<FeaturePointImage>(feature_base_last_);
 
-    return vote_up || vote_down;
+        if ( capture_last_->map_index_to_next_.count(feature_last_->getIndexKeyPoint()) )
+        {
+            int index_kp_incoming = capture_last_->map_index_to_next_[feature_last_->getIndexKeyPoint()];
+
+            if (capture_incoming_->matches_normalized_scores_.at(index_kp_incoming) > mat_ptr_->getParams()->min_norm_score )
+            {
+                // Check Euclidean distance between keypoints
+                cv::KeyPoint kp_incoming = capture_incoming_->keypoints_.at(index_kp_incoming);
+                cv::KeyPoint kp_last = capture_last_->keypoints_.at(feature_last_->getIndexKeyPoint());
+
+                if (isInlier(kp_last, kp_incoming))
+                {
+                    FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
+                            kp_incoming,
+                            index_kp_incoming,
+                            capture_incoming_->descriptors_.row(index_kp_incoming),
+                            Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
+
+                    _feature_list_out.push_back(incoming_point_ptr);
+
+                    _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_last_, capture_incoming_->matches_normalized_scores_.at(index_kp_incoming)}));
+
+                    // hit cell to acknowledge there's a tracked point in that cell
+                    capture_incoming_->grid_features_->hitTrackingCell(kp_incoming);
+                }
+            }
+        }
+    }
+
+//    // DEBUG
+//    debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
+//    WOLF_TRACE("--> TIME: track: ",debug_comp_time_);
+//    WOLF_TRACE("======== ========= =========");
+
+    WOLF_TRACE("TrAckFeatures - Number of features tracked: " , _feature_list_out.size() );
+
+    return _feature_list_out.size();
 }
 
 bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
@@ -239,79 +264,45 @@ bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _
     return true;
 }
 
-unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureMatchMap& _feature_matches)
+bool ProcessorTrackerFeatureTrifocal::voteForKeyFrame()
 {
-    // DEBUG =====================================
-    clock_t debug_tStart;
-    double debug_comp_time_;
-    debug_tStart = clock();
-    WOLF_TRACE("======== TrackFeatures =========");
-    // ===========================================
+    // List of conditions
 
-    for (auto feature_base_last_ : _feature_list_in)
-    {
+//    // A. crossing voting threshold with ascending number of features
+//    bool vote_up = true;
+//    // 1. vote if we did not have enough features before
+//    vote_up = vote_up && (last_ptr_->getFeatureList().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
+//    // 2. vote if we have enough features now
+//    vote_up = vote_up && (incoming_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
+//
+//    // B. crossing voting threshold with descending number of features
+//    bool vote_down = true;
+//    // 1. vote if we had enough features before
+//    vote_down = vote_down && (last_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
+//    // 2. vote if we have not enough features now
+//    vote_down = vote_down && (incoming_ptr_->getFeatureList().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
+//
 
-        WOLF_TRACE("");
-
-
-        FeaturePointImagePtr feature_last_ = std::static_pointer_cast<FeaturePointImage>(feature_base_last_);
-
-        WOLF_TRACE("");
-
-        if ( capture_last_->map_index_to_next_.count(feature_last_->getIndexKeyPoint()) )
-        {
-            int index_kp_incoming = capture_last_->map_index_to_next_[feature_last_->getIndexKeyPoint()];
-
-            WOLF_TRACE("");
-
-            if (capture_incoming_->matches_normalized_scores_.at(index_kp_incoming) > mat_ptr_->getParams()->min_norm_score )
-            {
-
-                WOLF_TRACE("");
-
-                // Check Euclidean distance between keypoints
-                cv::KeyPoint kp_incoming = capture_incoming_->keypoints_.at(index_kp_incoming);
-                cv::KeyPoint kp_last = capture_last_->keypoints_.at(feature_last_->getIndexKeyPoint());
-
-                WOLF_TRACE("");
-
-                if (isInlier(kp_last, kp_incoming))
-                {
-                    WOLF_TRACE("");
-
-                    FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
-                            kp_incoming,
-                            index_kp_incoming,
-                            capture_incoming_->descriptors_.row(index_kp_incoming),
-                            Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
-
-                    WOLF_TRACE("");
-
-                    _feature_list_out.push_back(incoming_point_ptr);
+//    FIX: This LIST are ALWAYS empty.
+//    WOLF_TRACE("getNewFeaturesListLast().size() ", getNewFeaturesListLast().size());
+//    WOLF_TRACE("getNewFeaturesListIncoming().size() ", getNewFeaturesListIncoming().size());
 
 
-                    WOLF_TRACE("index_kp_incoming ", index_kp_incoming);
-                    WOLF_TRACE("capture_incoming_->matches_normalized_scores_ ", capture_last_->matches_normalized_scores_.size());
+    // A. crossing voting threshold with ascending number of features
+    bool vote_up = true;
+    // 1. vote if we did not have enough features before
+    vote_up = vote_up && (getNewFeaturesListLast().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
+    // 2. vote if we have enough features now
+    vote_up = vote_up && (getNewFeaturesListIncoming().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
 
-                    _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_last_, capture_incoming_->matches_normalized_scores_.at(index_kp_incoming)}));
+    // B. crossing voting threshold with descending number of features
+    bool vote_down = true;
+    // 1. vote if we had enough features before
+    vote_down = vote_down && (getNewFeaturesListLast().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
+    // 2. vote if we have not enough features now
+    vote_down = vote_down && (getNewFeaturesListIncoming().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
 
-                    WOLF_TRACE("");
-
-                    // hit cell to acknowledge there's a tracked point in that cell
-                    capture_incoming_->grid_features_->hitOccupancyGrid(kp_incoming);
-
-                    WOLF_TRACE("");
-                }
-            }
-        }
-    }
-
-    // DEBUG
-    debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
-    WOLF_TRACE("--> TIME: track: ",debug_comp_time_);
-    WOLF_TRACE("======== ========= =========");
-
-    return _feature_list_out.size();
+    return vote_up || vote_down;
 }
 
 void ProcessorTrackerFeatureTrifocal::advanceDerived()
