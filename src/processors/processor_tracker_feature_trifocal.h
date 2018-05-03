@@ -6,11 +6,11 @@
 #include "../capture_image.h"
 
 // Vision utils
-#include <vision_utils/vision_utils.h>
-#include <vision_utils/detectors/detector_base.h>
-#include <vision_utils/descriptors/descriptor_base.h>
-#include <vision_utils/matchers/matcher_base.h>
-#include <vision_utils/algorithms/activesearch/alg_activesearch.h>
+#include <vision_utils.h>
+#include <detectors/detector_base.h>
+#include <descriptors/descriptor_base.h>
+#include <matchers/matcher_base.h>
+#include <algorithms/activesearch/alg_activesearch.h>
 
 namespace wolf
 {

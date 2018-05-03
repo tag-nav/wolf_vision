@@ -6,8 +6,8 @@
 #include "constraint_autodiff.h"
 #include "sensor_camera.h"
 
-#include <vision_utils/common_class/trifocaltensor.h>
-#include <vision_utils/vision_utils.h>
+#include <common_class/trifocaltensor.h>
+#include <vision_utils.h>
 
 namespace wolf
 {
