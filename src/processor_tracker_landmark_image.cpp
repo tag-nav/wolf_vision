@@ -1,14 +1,17 @@
 #include "processor_tracker_landmark_image.h"
 
-#include "landmark_corner_2D.h"
-#include "landmark_AHP.h"
-#include "feature_point_image.h"
-#include "constraint_corner_2D.h"
+#include "capture_image.h"
 #include "constraint_AHP.h"
-#include "sensor_camera.h"
-#include "pinhole_tools.h"
-#include "trajectory_base.h"
+#include "feature_base.h"
+#include "feature_point_image.h"
+#include "frame_base.h"
+#include "logging.h"
 #include "map_base.h"
+#include "pinhole_tools.h"
+#include "problem.h"
+#include "sensor_camera.h"
+#include "state_block.h"
+#include "time_stamp.h"
 
 // vision_utils
 #include <detectors.h>

@@ -1,18 +1,21 @@
 //std
 #include <iostream>
 
-#include "../capture_pose.h"
+#include "processor_tracker_landmark_image.h"
+
 //Wolf
 #include "wolf.h"
 #include "problem.h"
 #include "state_block.h"
 #include "processor_odom_3D.h"
 #include "sensor_odom_3D.h"
+#include "sensor_camera.h"
+#include "capture_image.h"
+#include "capture_pose.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 // Vision utils includes
 #include <vision_utils.h>
-#include "../processor_tracker_landmark_image.h"
 #include <sensors.h>
 #include <common_class/buffer.h>
 #include <common_class/frame.h>

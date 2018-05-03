@@ -2,24 +2,26 @@
 #define PROCESSOR_TRACKER_LANDMARK_IMAGE_H
 
 // Wolf includes
-#include "sensor_camera.h"
-#include "capture_image.h"
-#include "feature_point_image.h"
-#include "state_block.h"
-#include "state_quaternion.h"
-#include "processor_tracker_landmark.h"
+
 #include "landmark_AHP.h"
-#include "constraint_AHP.h"
+#include "landmark_match.h"
 #include "processor_params_image.h"
+#include "processor_tracker_landmark.h"
+#include "wolf.h"
+
 #include <algorithms/activesearch/alg_activesearch.h>
 #include <descriptors/descriptor_base.h>
 #include <detectors/detector_base.h>
 #include <matchers/matcher_base.h>
 
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
+#include <opencv2/core/types.hpp>
 
-// General includes
-#include <cmath>
-#include <complex>      // std::complex, std::norm
+#include <list>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace wolf {
 
