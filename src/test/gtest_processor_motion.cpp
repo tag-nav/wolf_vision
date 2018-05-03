@@ -43,7 +43,7 @@ class ProcessorMotion_test : public ProcessorOdom2D, public testing::Test{
             params->unmeasured_perturbation_std = 0.001;
             sensor = static_pointer_cast<SensorOdom2D>(problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0)));
             processor = static_pointer_cast<ProcessorOdom2D>(problem->installProcessor("ODOM 2D", "odom", sensor, params));
-            capture = std::make_shared<CaptureMotion>(0.0, sensor, data, data_cov, 3, 3, nullptr);
+            capture = std::make_shared<CaptureMotion>("ODOM 2D", 0.0, sensor, data, data_cov, 3, 3, nullptr);
 
             Vector3s x0; x0 << 0, 0, 0;
             Matrix3s P0; P0.setIdentity();

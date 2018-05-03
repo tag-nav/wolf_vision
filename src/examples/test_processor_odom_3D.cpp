@@ -66,7 +66,7 @@ int main (int argc, char** argv)
     Scalar dyaw = 2*M_PI/5;
     Vector6s data((Vector6s() << dx*cos(dyaw/2),dx*sin(dyaw/2),0,0,0,dyaw).finished()); // will integrate this data repeatedly
 
-    CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>(TimeStamp(0), sen, data, 7, 6, nullptr);
+    CaptureMotionPtr cap_odo = std::make_shared<CaptureMotion>("ODOM 3D", TimeStamp(0), sen, data, 7, 6, nullptr);
 
     cout << "t: " << std::setprecision(2) << 0 << "  \t x = ( " << problem->getCurrentState().transpose() << ")" << endl;
 
