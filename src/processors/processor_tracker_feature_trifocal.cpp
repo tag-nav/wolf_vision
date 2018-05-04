@@ -266,41 +266,24 @@ bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _
 
 bool ProcessorTrackerFeatureTrifocal::voteForKeyFrame()
 {
-    // List of conditions
-
-//    // A. crossing voting threshold with ascending number of features
-//    bool vote_up = true;
-//    // 1. vote if we did not have enough features before
-//    vote_up = vote_up && (last_ptr_->getFeatureList().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
-//    // 2. vote if we have enough features now
-//    vote_up = vote_up && (incoming_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
-//
-//    // B. crossing voting threshold with descending number of features
-//    bool vote_down = true;
-//    // 1. vote if we had enough features before
-//    vote_down = vote_down && (last_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
-//    // 2. vote if we have not enough features now
-//    vote_down = vote_down && (incoming_ptr_->getFeatureList().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
-//
-
-//    FIX: This LIST are ALWAYS empty.
-//    WOLF_TRACE("getNewFeaturesListLast().size() ", getNewFeaturesListLast().size());
-//    WOLF_TRACE("getNewFeaturesListIncoming().size() ", getNewFeaturesListIncoming().size());
-
-
     // A. crossing voting threshold with ascending number of features
     bool vote_up = true;
     // 1. vote if we did not have enough features before
-    vote_up = vote_up && (getNewFeaturesListLast().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
+    vote_up = vote_up && (previousNumberOfTracks() < params_tracker_feature_trifocal_->min_features_for_keyframe);
     // 2. vote if we have enough features now
-    vote_up = vote_up && (getNewFeaturesListIncoming().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
+    vote_up = vote_up && (incoming_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
 
     // B. crossing voting threshold with descending number of features
     bool vote_down = true;
     // 1. vote if we had enough features before
-    vote_down = vote_down && (getNewFeaturesListLast().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
+    vote_down = vote_down && (last_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
     // 2. vote if we have not enough features now
-    vote_down = vote_down && (getNewFeaturesListIncoming().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
+    vote_down = vote_down && (incoming_ptr_->getFeatureList().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
+
+    if (vote_up)
+        WOLF_TRACE("VOTE UP");
+    if (vote_down)
+        WOLF_TRACE("VOTE DOWN");
 
     return vote_up || vote_down;
 }
