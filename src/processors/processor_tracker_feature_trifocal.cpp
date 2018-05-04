@@ -317,6 +317,8 @@ void ProcessorTrackerFeatureTrifocal::resetDerived()
 
 void ProcessorTrackerFeatureTrifocal::preProcess()
 {
+    WOLF_TRACE("-------- Image ", getIncomingPtr()->id(), " -- t = ", getIncomingPtr()->getTimeStamp(), " s ----------");
+
     if (!initialized_)
     {
         if (origin_ptr_ && last_ptr_ && (last_ptr_ != origin_ptr_) && prev_origin_ptr_ == nullptr)
@@ -348,7 +350,18 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
 
         // Match full image (faster)
         // We exchange the order of the descriptors to fill better the map hereafter (map does not allow a single key)
-        capture_incoming_->matches_normalized_scores_ = mat_ptr_->match(capture_incoming_->descriptors_, capture_last_->descriptors_, des_ptr_->getSize(), capture_incoming_->matches_from_precedent_);
+        DMatchVector matches;
+        if(mat_ptr_->getMatchType()==1) // MATCH
+            capture_incoming_->matches_normalized_scores_ = mat_ptr_->match(capture_incoming_->descriptors_, capture_last_->descriptors_, des_ptr_->getSize(), matches);
+        else // KNN // RADIUS
+        {
+            std::vector<DMatchVector> matches_vec;
+            capture_incoming_->matches_normalized_scores_ = mat_ptr_->match(capture_incoming_->descriptors_, capture_last_->descriptors_, des_ptr_->getSize(), matches_vec);
+            for (auto m : matches_vec)
+                if (m.size()>0)
+                    matches.push_back(m[0]);
+        }
+        capture_incoming_->matches_from_precedent_ = matches;
 
         // Set capture map of match indices
         for (auto match : capture_incoming_->matches_from_precedent_)
