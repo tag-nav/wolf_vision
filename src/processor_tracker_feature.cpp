@@ -112,8 +112,8 @@ void ProcessorTrackerFeature::advanceDerived()
     for (auto ftr : incoming_ptr_->getFeatureList())
         ftr->setProblem(getProblem());
 
-    // remove last from track matrix
-    track_matrix_.remove(last_ptr_);
+    // // remove last from track matrix in case you want to have only KF in the track matrix
+    // track_matrix_.remove(last_ptr_);
 }
 
 void ProcessorTrackerFeature::resetDerived()
