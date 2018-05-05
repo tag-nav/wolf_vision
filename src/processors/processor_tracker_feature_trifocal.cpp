@@ -431,6 +431,11 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
     }
 }
 
+void ProcessorTrackerFeatureTrifocal::setParams(const ProcessorParamsTrackerFeatureTrifocalPtr _params)
+{
+    params_tracker_feature_trifocal_ = _params;
+}
+
 void ProcessorTrackerFeatureTrifocal::configure(SensorBasePtr _sensor)
 {
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(_sensor);

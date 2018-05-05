@@ -134,6 +134,8 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         bool isInlier(const cv::KeyPoint& _kp_incoming, const cv::KeyPoint& _kp_last);
 
+        void setParams(const ProcessorParamsTrackerFeatureTrifocalPtr _params);
+
     public:
 
         /// @brief Factory method
