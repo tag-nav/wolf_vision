@@ -409,24 +409,27 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
         TrackMatches matches = track_matrix_.matches(prev_origin_ptr_, last_ptr_); // it's guaranteed by construction that the track also includes origin
 
         for (auto pair_trkid_match : matches) // OMG this will add potentially a loooot of constraints! TODO see a smarter way of adding constraints
-        {
+        {                                     // Currently reduced by creating constraints for large tracks
             // get track ID
             size_t trk_id = pair_trkid_match.first;
 
-            // get the three features for this track
-            // FeatureBasePtr ftr_prev = track_matrix_.feature(trk_id, prev_origin_ptr_); // left here for ref, but implemented in a quicker way below
-            // FeatureBasePtr ftr_last = track_matrix_.feature(trk_id, last_ptr_); // same here
-            FeatureBasePtr ftr_prev = pair_trkid_match.second.first;
-            FeatureBasePtr ftr_orig = track_matrix_.feature(trk_id, origin_ptr_); // because it's a tracker, this feature in the middle of prev and last exists for sure!
-            FeatureBasePtr ftr_last = pair_trkid_match.second.second;
+            if (track_matrix_.trackSize(trk_id)>params_tracker_feature_trifocal_->min_track_length_for_constraint)
+            {
+                // get the three features for this track
+                // FeatureBasePtr ftr_prev = track_matrix_.feature(trk_id, prev_origin_ptr_); // left here for ref, but implemented in a quicker way below
+                // FeatureBasePtr ftr_last = track_matrix_.feature(trk_id, last_ptr_); // same here
+                FeatureBasePtr ftr_prev = pair_trkid_match.second.first;
+                FeatureBasePtr ftr_orig = track_matrix_.feature(trk_id, origin_ptr_); // because it's a tracker, this feature in the middle of prev and last exists for sure!
+                FeatureBasePtr ftr_last = pair_trkid_match.second.second;
 
-            // make constraint
-            ConstraintAutodiffTrifocalPtr ctr = std::make_shared<ConstraintAutodiffTrifocal>(ftr_prev, ftr_orig, ftr_last, shared_from_this(), false, CTR_ACTIVE);
+                // make constraint
+                ConstraintAutodiffTrifocalPtr ctr = std::make_shared<ConstraintAutodiffTrifocal>(ftr_prev, ftr_orig, ftr_last, shared_from_this(), false, CTR_ACTIVE);
 
-            // link to wolf tree
-            ftr_last->addConstraint(ctr);
-            ftr_orig->addConstrainedBy(ctr);
-            ftr_prev->addConstrainedBy(ctr);
+                // link to wolf tree
+                ftr_last->addConstraint(ctr);
+                ftr_orig->addConstrainedBy(ctr);
+                ftr_prev->addConstrainedBy(ctr);
+            }
         }
     }
 }

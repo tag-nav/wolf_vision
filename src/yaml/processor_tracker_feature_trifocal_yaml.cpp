@@ -47,15 +47,17 @@ static ProcessorParamsBasePtr createProcessorParamsTrackerFeatureTrifocal(const 
         std::string strNew = _filename_dot_yaml.substr (first,last-first);
         params->yaml_file_params_vision_utils = _filename_dot_yaml.substr (first,last-first) + "/" + params->yaml_file_params_vision_utils;
 
-        YAML::Node algorithm              = config   ["algorithm"];
-        params->time_tolerance            = algorithm["time tolerance"]               .as<Scalar>();
-        params->voting_active             = algorithm["voting active"]                .as<bool>();
-        params->min_features_for_keyframe = algorithm["minimum features for keyframe"].as<unsigned int>();
-        params->max_new_features          = algorithm["maximum new features"]         .as<unsigned int>();
-        params->n_cells_h                 = algorithm["grid horiz cells"]             .as<int>();
-        params->n_cells_v                 = algorithm["grid vert cells"]              .as<int>();
-        params->min_response_new_feature  = algorithm["min response new features"]    .as<int>();
-        params->max_euclidean_distance    = algorithm["max euclidean distance"]       .as<Scalar>();
+        YAML::Node algorithm                    = config   ["algorithm"];
+        params->time_tolerance                  = algorithm["time tolerance"]                 .as<Scalar>();
+        params->voting_active                   = algorithm["voting active"]                  .as<bool>();
+        params->min_features_for_keyframe       = algorithm["minimum features for keyframe"]  .as<unsigned int>();
+        params->max_new_features                = algorithm["maximum new features"]           .as<unsigned int>();
+        params->n_cells_h                       = algorithm["grid horiz cells"]               .as<int>();
+        params->n_cells_v                       = algorithm["grid vert cells"]                .as<int>();
+        params->min_response_new_feature        = algorithm["min response new features"]      .as<int>();
+        params->max_euclidean_distance          = algorithm["max euclidean distance"]         .as<Scalar>();
+        params->min_track_length_for_constraint = algorithm["min track length for constraint"].as<int>();
+
 
         YAML::Node noise                      = config["noise"];
         params->pixel_noise_std               = noise ["pixel noise std"].as<Scalar>();
