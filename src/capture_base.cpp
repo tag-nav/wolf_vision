@@ -57,6 +57,8 @@ CaptureBase::CaptureBase(const std::string& _type,
         WOLF_ERROR("Provided sensor parameters but no sensor pointer");
     }
     updateCalibSize();
+
+    WOLF_TRACE("New Capture ", id(), " -- type ", getType(), " -- t = ", getTimeStamp(), " s");
 }
 
 

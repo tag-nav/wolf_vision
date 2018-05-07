@@ -3,7 +3,7 @@
 #include "wolf.h"
 #include "logging.h"
 
-#include "vision_utils/vision_utils.h"
+#include "vision_utils.h"
 
 #include "processors/processor_tracker_feature_trifocal.h"
 #include "processor_odom_3D.h"

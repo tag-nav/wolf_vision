@@ -70,7 +70,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerFeature);
  *   - establishConstraints() : which calls the pure virtual:
  *     - createConstraint() : create constraint of the correct derived type         <=== IMPLEMENT
  *
- * Should you need extra functionality for your derived types, you can overload these two methods,
+ * Should you need extra functionality for your derived types, you can override these two methods,
  *
  *   -  preProcess() { }
  *   -  postProcess() { }

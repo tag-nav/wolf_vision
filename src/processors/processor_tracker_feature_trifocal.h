@@ -6,11 +6,11 @@
 #include "../capture_image.h"
 
 // Vision utils
-#include <vision_utils/vision_utils.h>
-#include <vision_utils/detectors/detector_base.h>
-#include <vision_utils/descriptors/descriptor_base.h>
-#include <vision_utils/matchers/matcher_base.h>
-#include <vision_utils/algorithms/activesearch/alg_activesearch.h>
+#include <vision_utils.h>
+#include <detectors/detector_base.h>
+#include <descriptors/descriptor_base.h>
+#include <matchers/matcher_base.h>
+#include <algorithms/activesearch/alg_activesearch.h>
 
 namespace wolf
 {
@@ -26,6 +26,7 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
         int min_response_new_feature;
         Scalar max_euclidean_distance;
         Scalar pixel_noise_std; ///< std noise of the pixel
+        int min_track_length_for_constraint; ///< Minimum track length of a matched feature to create a constraint
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureTrifocal);
@@ -133,6 +134,8 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         CaptureBasePtr getPrevOriginPtr();
 
         bool isInlier(const cv::KeyPoint& _kp_incoming, const cv::KeyPoint& _kp_last);
+
+        void setParams(const ProcessorParamsTrackerFeatureTrifocalPtr _params);
 
     public:
 

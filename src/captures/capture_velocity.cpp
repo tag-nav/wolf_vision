@@ -7,10 +7,10 @@ CaptureVelocity::CaptureVelocity(const TimeStamp& _ts,
                                  const Eigen::VectorXs& _velocity,
                                  Size _delta_size, Size _delta_cov_size,
                                  FrameBasePtr _origin_frame_ptr) :
-  CaptureMotion(_ts, _sensor_ptr, _velocity,
+  CaptureMotion("VELOCITY", _ts, _sensor_ptr, _velocity,
                 _delta_size, _delta_cov_size, _origin_frame_ptr)
 {
-  setType("VELOCITY");
+  //
 }
 
 CaptureVelocity::CaptureVelocity(const TimeStamp& _ts,
@@ -22,11 +22,11 @@ CaptureVelocity::CaptureVelocity(const TimeStamp& _ts,
                                  StateBlockPtr _p_ptr,
                                  StateBlockPtr _o_ptr,
                                  StateBlockPtr _intr_ptr) :
-  CaptureMotion(_ts, _sensor_ptr, _velocity, _velocity_cov,
+  CaptureMotion("VELOCITY", _ts, _sensor_ptr, _velocity, _velocity_cov,
                 _delta_size, _delta_cov_size, _origin_frame_ptr,
                 _p_ptr, _o_ptr, _intr_ptr)
 {
-  setType("VELOCITY");
+  //
 }
 
 const Eigen::VectorXs& CaptureVelocity::getVelocity() const

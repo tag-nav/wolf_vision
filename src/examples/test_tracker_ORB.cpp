@@ -2,13 +2,13 @@
 #include <iostream>
 
 // Vision utils
-#include <vision_utils/vision_utils.h>
-#include <vision_utils/sensors.h>
-#include <vision_utils/common_class/buffer.h>
-#include <vision_utils/common_class/frame.h>
-#include <vision_utils/detectors/orb/detector_orb.h>
-#include <vision_utils/descriptors/orb/descriptor_orb.h>
-#include <vision_utils/matchers/bruteforce_hamming_2/matcher_bruteforce_hamming_2.h>
+#include <vision_utils.h>
+#include <sensors.h>
+#include <common_class/buffer.h>
+#include <common_class/frame.h>
+#include <detectors/orb/detector_orb.h>
+#include <descriptors/orb/descriptor_orb.h>
+#include <matchers/bruteforce_hamming_2/matcher_bruteforce_hamming_2.h>
 
 //Wolf
 #include "../processor_tracker_landmark_image.h"

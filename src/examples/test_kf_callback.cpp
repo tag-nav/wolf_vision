@@ -64,7 +64,7 @@ int main()
         cout << "=======================\n>> TIME: " << t.get() << endl;
 
         cout << "Motion-----------------" << endl;
-        sen_odo->process(make_shared<CaptureMotion>(t, sen_odo, odo_data, 3, 3, nullptr));
+        sen_odo->process(make_shared<CaptureMotion>("ODOM 2D", t, sen_odo, odo_data, 3, 3, nullptr));
         cout << "x(" << t.get() << ") = " << problem->getCurrentState().transpose() << endl;
         problem->print(2, false, true, true); // print(level, constr_by, metric, state_blocks)
 
