@@ -28,11 +28,6 @@ SensorGPSFix::~SensorGPSFix()
     //
 }
 
-Scalar SensorGPSFix::getNoise() const
-{
-    return noise_std_(0);
-}
-
 // Define the factory method
 SensorBasePtr SensorGPSFix::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics,
                                  const IntrinsicsBasePtr _intrinsics)

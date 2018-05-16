@@ -38,14 +38,7 @@ class SensorGPSFix : public SensorBase
         SensorGPSFix(const Eigen::VectorXs & _extrinsics, IntrinsicsGPSFixPtr _intrinsics_ptr);
 
         virtual ~SensorGPSFix();
-        
-        /** \brief Returns noise standard deviation
-         * 
-         * Returns noise standard deviation
-         * 
-         **/        
-        Scalar getNoise() const;
-        
+
     public:
         static SensorBasePtr create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBasePtr _intrinsics);
 
