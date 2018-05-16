@@ -149,6 +149,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void setNoiseCov(const Eigen::MatrixXs & _noise_std);
         Eigen::VectorXs getNoiseStd();
         Eigen::MatrixXs getNoiseCov();
+        void setExtrinsicDynamic(bool _extrinsic_dynamic);
+        void setIntrinsicDynamic(bool _intrinsic_dynamic);
 
     protected:
         Size computeCalibSize() const;
@@ -258,6 +260,16 @@ inline Size SensorBase::getCalibSize() const
 inline void SensorBase::updateCalibSize()
 {
     calib_size_ = computeCalibSize();
+}
+
+inline void SensorBase::setExtrinsicDynamic(bool _extrinsic_dynamic)
+{
+    extrinsic_dynamic_ = _extrinsic_dynamic;
+}
+
+inline void SensorBase::setIntrinsicDynamic(bool _intrinsic_dynamic)
+{
+    intrinsic_dynamic_ = _intrinsic_dynamic;
 }
 
 
