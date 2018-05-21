@@ -60,13 +60,6 @@ class ConstraintAnalytic: public ConstraintBase
 
         virtual ~ConstraintAnalytic() = default;
 
-        /** \brief Returns a vector of pointers to the state blocks
-         *
-         * Returns a vector of pointers to the state blocks in which this constraint depends
-         *
-         **/
-        virtual std::vector<Scalar*> getStateScalarPtrVector() const override;
-
         /** \brief Returns a vector of pointers to the states
          *
          * Returns a vector of pointers to the state in which this constraint depends

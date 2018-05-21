@@ -91,10 +91,6 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
          **/
         virtual JacobianMethod getJacobianMethod() const = 0;
 
-        /** \brief Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint
-         **/
-        virtual std::vector<Scalar*> getStateScalarPtrVector() const = 0;
-
         /** \brief Returns a vector of pointers to the states in which this constraint depends
          **/
         virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const = 0;

@@ -32,10 +32,6 @@ class ConstraintEpipolar : public ConstraintBase
          **/
         virtual JacobianMethod getJacobianMethod() const override {return JAC_ANALYTIC;}
 
-        /** \brief Returns a vector of scalar pointers to the first element of all state blocks involved in the constraint
-         **/
-        virtual std::vector<Scalar*> getStateScalarPtrVector() const override {return std::vector<Scalar*>(0);}
-
         /** \brief Returns a vector of pointers to the states in which this constraint depends
          **/
         virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const override {return std::vector<StateBlockPtr>(0);}

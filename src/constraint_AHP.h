@@ -92,14 +92,15 @@ inline Eigen::VectorXs ConstraintAHP::expectation() const
     FrameBasePtr frm_anchor  = getFrameOtherPtr();
     LandmarkBasePtr lmk      = getLandmarkOtherPtr();
 
-    const Scalar* const frame_current_pos   = frm_current->getPPtr()->getPtr();
-    const Scalar* const frame_current_ori   = frm_current->getOPtr()->getPtr();
-    const Scalar* const frame_anchor_pos    = frm_anchor ->getPPtr()->getPtr();
-    const Scalar* const frame_anchor_ori    = frm_anchor ->getOPtr()->getPtr();
-    const Scalar* const lmk_pos_hmg         = lmk        ->getPPtr()->getPtr();
+    const Eigen::MatrixXs frame_current_pos = frm_current->getPPtr()->getState();
+    const Eigen::MatrixXs frame_current_ori = frm_current->getOPtr()->getState();
+    const Eigen::MatrixXs frame_anchor_pos  = frm_anchor ->getPPtr()->getState();
+    const Eigen::MatrixXs frame_anchor_ori  = frm_anchor ->getOPtr()->getState();
+    const Eigen::MatrixXs lmk_pos_hmg       = lmk        ->getPPtr()->getState();
 
     Eigen::Vector2s exp;
-    expectation(frame_current_pos, frame_current_ori, frame_anchor_pos, frame_anchor_ori, lmk_pos_hmg, exp.data());
+    expectation(frame_current_pos.data(), frame_current_ori.data(), frame_anchor_pos.data(),
+                frame_anchor_ori.data(), lmk_pos_hmg.data(), exp.data());
 
     return exp;
 }
@@ -138,7 +139,7 @@ inline void ConstraintAHP::expectation(const T* const _current_frame_p,
     // current robot to current camera transform
     CaptureBasePtr      current_capture = this->getFeaturePtr()->getCapturePtr();
     Translation<T, 3>   t_r1_c1  (current_capture->getSensorPPtr()->getState().cast<T>());
-    Quaternions         q_r1_c1_s(current_capture->getSensorOPtr()->getPtr());
+    Quaternions         q_r1_c1_s(Eigen::Vector4s(current_capture->getSensorOPtr()->getState()));
     Quaternion<T>       q_r1_c1 = q_r1_c1_s.cast<T>();
     TransformType       T_R1_C1 = t_r1_c1 * q_r1_c1;
 
