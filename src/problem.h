@@ -29,11 +29,7 @@ enum Notification
     REMOVE,
     UPDATE
 };
-struct StateBlockNotification
-{
-    Notification notification_;
-    StateBlockPtr state_block_ptr_;
-};
+
 struct ConstraintNotification
 {
     Notification notification_;
@@ -53,10 +49,10 @@ class Problem : public std::enable_shared_from_this<Problem>
         ProcessorMotionPtr  processor_motion_ptr_;
         StateBlockList      state_block_list_;
         std::map<std::pair<StateBlockPtr, StateBlockPtr>, Eigen::MatrixXs> covariances_;
-        std::list<StateBlockNotification> state_block_notification_list_;
         std::list<ConstraintNotification> constraint_notification_list_;
         bool prior_is_set_;
         Size state_size_, state_cov_size_;
+        StateBlockList notified_state_block_list_;
 
     private: // CAUTION: THESE METHODS ARE PRIVATE, DO NOT MAKE THEM PUBLIC !!
         Problem(const std::string& _frame_structure); // USE create() below !!
@@ -278,10 +274,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         void removeStateBlockPtr(StateBlockPtr _state_ptr);
 
-        /** \brief Gets a queue of state blocks notification to be handled by the solver
+        /** \brief Gets a list of state blocks which state has been changed to be handled by the solver
          */
-        std::list<StateBlockNotification>& getStateBlockNotificationList();
-
+        StateBlockList& getNotifiedStateBlockList();
 
         /** \brief Gets a queue of constraint notification to be handled by the solver
          */
@@ -331,16 +326,15 @@ inline ProcessorMotionPtr& Problem::getProcessorMotionPtr()
     return processor_motion_ptr_;
 }
 
-inline std::list<StateBlockNotification>& Problem::getStateBlockNotificationList()
-{
-    return state_block_notification_list_;
-}
-
 inline std::list<ConstraintNotification>& Problem::getConstraintNotificationList()
 {
     return constraint_notification_list_;
 }
 
+inline StateBlockList& Problem::getNotifiedStateBlockList()
+{
+    return notified_state_block_list_;
+}
 
 } // namespace wolf
 
