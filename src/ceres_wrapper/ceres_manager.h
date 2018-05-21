@@ -9,7 +9,7 @@
 #include "glog/logging.h"
 
 //wolf includes
-#include "solver_manager.h"
+#include "../solver/solver_manager.h"
 #include "cost_function_wrapper.h"
 #include "local_parametrization_wrapper.h"
 #include "create_numeric_diff_cost_function.h"
@@ -33,21 +33,25 @@ protected:
   std::map<ConstraintBasePtr, ceres::ResidualBlockId> ctr_2_residual_idx_;
   std::map<ConstraintBasePtr, ceres::CostFunctionPtr> ctr_2_costfunction_;
 
+  std::map<StateBlockPtr, LocalParametrizationWrapperPtr> state_blocks_local_param_;
+
   ceres::Solver::Options ceres_options_;
   ceres::Solver::Summary summary_;
   std::unique_ptr<ceres::Problem> ceres_problem_;
   std::unique_ptr<ceres::Covariance> covariance_;
 
 public:
-  CeresManager(ProblemPtr _wolf_problem, const ceres::Solver::Options& _ceres_options = ceres::Solver::Options());
+
+  CeresManager(ProblemPtr& _wolf_problem,
+               const ceres::Solver::Options& _ceres_options
+                = ceres::Solver::Options());
 
   ~CeresManager();
 
-  virtual std::string solve(const unsigned int& _report_level);
-
   ceres::Solver::Summary getSummary();
 
-  virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS);
+  virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks
+                                  = CovarianceBlocksToBeComputed::ROBOT_LANDMARKS);
 
   virtual void computeCovariances(const StateBlockList& st_list);
 
@@ -55,17 +59,19 @@ public:
 
 private:
 
-  virtual void addConstraint(ConstraintBasePtr _ctr_ptr);
+  std::string solveImpl(const ReportVerbosity report_level) override;
 
-  virtual void removeConstraint(ConstraintBasePtr _ctr_ptr);
+  void addConstraint(const ConstraintBasePtr& ctr_ptr) override;
 
-  virtual void addStateBlock(StateBlockPtr _st_ptr);
+  void removeConstraint(const ConstraintBasePtr& ctr_ptr) override;
 
-  virtual void removeStateBlock(StateBlockPtr _st_ptr);
+  void addStateBlock(const StateBlockPtr& state_ptr) override;
 
-  virtual void updateStateBlockStatus(StateBlockPtr _st_ptr);
+  void removeStateBlock(const StateBlockPtr& state_ptr) override;
 
-  ceres::CostFunctionPtr createCostFunction(ConstraintBasePtr _ctr_ptr);
+  void updateStateBlockStatus(const StateBlockPtr& state_ptr) override;
+
+  ceres::CostFunctionPtr createCostFunction(const ConstraintBasePtr& _ctr_ptr);
 };
 
 inline ceres::Solver::Summary CeresManager::getSummary()
