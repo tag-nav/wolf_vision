@@ -17,6 +17,63 @@
 
 using namespace wolf;
 
+struct DummyNotificationProcessor
+{
+  DummyNotificationProcessor(ProblemPtr _problem)
+    : problem_(_problem)
+  {
+    //
+  }
+
+  void update()
+  {
+    if (problem_ == nullptr)
+    {
+      FAIL() << "problem_ is nullptr !";
+    }
+
+    StateBlockList& states = problem_->getNotifiedStateBlockList();
+
+    for (StateBlockPtr& state : states)
+    {
+      const auto notifications = state->consumeNotifications();
+
+      for (const auto notif : notifications)
+      {
+        switch (notif)
+        {
+          case StateBlock::Notification::ADD:
+          {
+            break;
+          }
+          case StateBlock::Notification::STATE_UPDATE:
+          {
+            break;
+          }
+          case StateBlock::Notification::FIX_UPDATE:
+          {
+            break;
+          }
+          case StateBlock::Notification::REMOVE:
+          {
+            break;
+          }
+          default:
+            throw std::runtime_error("SolverManager::update: State Block notification "
+                                     "must be ADD, STATE_UPDATE, FIX_UPDATE, REMOVE or ENABLED.");
+        }
+      }
+
+      ASSERT_FALSE(state->hasNotifications());
+    }
+
+    states.clear();
+  }
+
+  ProblemPtr problem_;
+};
+
+
 /// Set to true if you want debug info
 bool debug = false;
 
@@ -63,6 +120,8 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     ProblemPtr P = Problem::create("PO 2D");
     TrajectoryBasePtr T = P->getTrajectoryPtr();
 
+    DummyNotificationProcessor N(P);
+
     // Trajectory status:
     //  kf1   kf2    f3      frames
     //   1     2     3       time stamps
@@ -77,29 +136,31 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), 1);
     ASSERT_EQ(P->getStateBlockList().            size(), 2);
-    ASSERT_EQ(P->getStateBlockNotificationList().size(), 2);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 2);
 
     T->addFrame(f2); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), 2);
     ASSERT_EQ(P->getStateBlockList().            size(), 4);
-    ASSERT_EQ(P->getStateBlockNotificationList().size(), 4);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 4);
 
     T->addFrame(f3); // F
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), 3);
     ASSERT_EQ(P->getStateBlockList().            size(), 4);
-    ASSERT_EQ(P->getStateBlockNotificationList().size(), 4);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 4);
 
     ASSERT_EQ(T->getLastFramePtr()->id(), f3->id());
     ASSERT_EQ(T->getLastKeyFramePtr()->id(), f2->id());
+
+    N.update();
 
     // remove frames and keyframes
     f2->remove(); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), 2);
     ASSERT_EQ(P->getStateBlockList().            size(), 2);
-    ASSERT_EQ(P->getStateBlockNotificationList().size(), 2);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 2);
 
     ASSERT_EQ(T->getLastFramePtr()->id(), f3->id());
     ASSERT_EQ(T->getLastKeyFramePtr()->id(), f1->id());
@@ -108,7 +169,7 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), 1);
     ASSERT_EQ(P->getStateBlockList().            size(), 2);
-    ASSERT_EQ(P->getStateBlockNotificationList().size(), 2);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 2);
 
     ASSERT_EQ(T->getLastKeyFramePtr()->id(), f1->id());
 
@@ -116,8 +177,11 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), 0);
     ASSERT_EQ(P->getStateBlockList().            size(), 0);
-    ASSERT_EQ(P->getStateBlockNotificationList().size(), 0);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 4);
 
+    N.update();
+
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 0);
 }
 
 TEST(TrajectoryBase, KeyFramesAreSorted)

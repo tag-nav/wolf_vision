@@ -214,7 +214,7 @@ int main()
 
     // SOLVE with exact initial guess
     WOLF_TRACE("======== SOLVE PROBLEM WITH EXACT PRIORS =======")
-    std::string report = ceres->solve(2);
+    std::string report = ceres->solve(wolf::SolverManager::ReportVerbosity::FULL);
     WOLF_TRACE(report);                     // should show a very low iteration number (possibly 1)
     problem->print(4,1,1,1);
 
@@ -232,13 +232,13 @@ int main()
 
     // SOLVE again
     WOLF_TRACE("======== SOLVE PROBLEM WITH PERTURBED PRIORS =======")
-    report = ceres->solve(2);
+    report = ceres->solve(wolf::SolverManager::ReportVerbosity::FULL);
     WOLF_TRACE(report);                     // should show a very high iteration number (more than 10, or than 100!)
     problem->print(4,1,1,1);
 
     // GET COVARIANCES of all states
     WOLF_TRACE("======== COVARIANCES OF SOLVED PROBLEM =======")
-    ceres->computeCovariances(ALL_MARGINALS);
+    ceres->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         if (kf->isKey())
             WOLF_TRACE("KF", kf->id(), "_cov = \n", kf->getCovariance());

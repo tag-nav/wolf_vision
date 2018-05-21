@@ -291,11 +291,11 @@ int main(int argc, char** argv)
 
 			// SOLVE
 			// solution
-			bl_summary = bl_ceres_manager->solve(1);
+      bl_summary = bl_ceres_manager->solve(SolverManager::ReportVerbosity::FULL);
 		    std::cout << bl_summary << std::endl;
 
 			// covariance
-		    bl_ceres_manager->computeCovariances(ALL);//ALL_MARGINALS
+        bl_ceres_manager->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL);//ALL_MARGINALS
 
 
 	//		t1 = clock();

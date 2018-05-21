@@ -240,8 +240,8 @@ int main(int argc, char** argv)
 
     // ___Solve + compute covariances___
     problem->print(4,0,1,0);
-    std::string report = ceres_manager->solve(1); // 0: nothing, 1: BriefReport, 2: FullReport
-    ceres_manager->computeCovariances(ALL_MARGINALS);
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF); // 0: nothing, 1: BriefReport, 2: FullReport
+    ceres_manager->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
     problem->print(1,0,1,0);
 
     //#################################################### RESULTS PART
