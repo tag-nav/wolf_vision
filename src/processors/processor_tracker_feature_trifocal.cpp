@@ -216,7 +216,6 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
 
     for (auto feature_base_last_ : _feature_list_in)
     {
-
         FeaturePointImagePtr feature_last_ = std::static_pointer_cast<FeaturePointImage>(feature_base_last_);
 
         if ( capture_last_->map_index_to_next_.count(feature_last_->getIndexKeyPoint()) )
@@ -349,24 +348,16 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
 
         // Match full image (faster)
         // We exchange the order of the descriptors to fill better the map hereafter (map does not allow a single key)
-        DMatchVector matches;
-        if(mat_ptr_->getMatchType()==1) // MATCH
-            capture_incoming_->matches_normalized_scores_ = mat_ptr_->match(capture_incoming_->descriptors_,
-                                                                            capture_last_->descriptors_,
-                                                                            des_ptr_->getSize(),
-                                                                            matches);
-        else // KNN // RADIUS
-        {
-            std::vector<DMatchVector> matches_vec;
-            capture_incoming_->matches_normalized_scores_ = mat_ptr_->match(capture_incoming_->descriptors_,
-                                                                            capture_last_->descriptors_,
-                                                                            des_ptr_->getSize(),
-                                                                            matches_vec);
-            for (auto m : matches_vec)
-                if (m.size()>0)
-                    matches.push_back(m[0]);
-        }
-        capture_incoming_->matches_from_precedent_ = matches;
+        DMatchVector matches_incoming_from_last;
+
+        capture_incoming_->matches_normalized_scores_ = mat_ptr_->robustMatch(capture_incoming_->keypoints_,
+                                                                              capture_last_->keypoints_,
+                                                                              capture_incoming_->descriptors_,
+                                                                              capture_last_->descriptors_,
+                                                                              des_ptr_->getSize(),
+                                                                              matches_incoming_from_last);
+
+        capture_incoming_->matches_from_precedent_ = matches_incoming_from_last;
 
         // Set capture map of match indices
         for (auto match : capture_incoming_->matches_from_precedent_)
