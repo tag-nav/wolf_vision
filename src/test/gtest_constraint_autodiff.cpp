@@ -74,7 +74,14 @@ TEST(CaptureAutodiff, ResidualOdom2d)
     fr1_ptr->addConstrainedBy(constraint_ptr);
 
     // EVALUATE
-    std::vector<Scalar*> states_ptr({fr1_ptr->getPPtr()->getPtr(), fr1_ptr->getOPtr()->getPtr(), fr2_ptr->getPPtr()->getPtr(), fr2_ptr->getOPtr()->getPtr()});
+
+    Eigen::VectorXs fr1_pstate = fr1_ptr->getPPtr()->getState();
+    Eigen::VectorXs fr1_ostate = fr1_ptr->getOPtr()->getState();
+    Eigen::VectorXs fr2_pstate = fr2_ptr->getPPtr()->getState();
+    Eigen::VectorXs fr2_ostate = fr2_ptr->getOPtr()->getState();
+
+    std::vector<Scalar*> states_ptr({fr1_pstate.data(), fr1_ostate.data(), fr2_pstate.data(), fr2_ostate.data()});
+
     double const* const* parameters = states_ptr.data();
     Eigen::VectorXs residuals(constraint_ptr->getSize());
     constraint_ptr->evaluate(parameters, residuals.data(), nullptr);
@@ -111,7 +118,14 @@ TEST(CaptureAutodiff, JacobianOdom2d)
     fr1_ptr->addConstrainedBy(constraint_ptr);
 
     // COMPUTE JACOBIANS
-    std::vector<const Scalar*> states_ptr({fr1_ptr->getPPtr()->getPtr(), fr1_ptr->getOPtr()->getPtr(), fr2_ptr->getPPtr()->getPtr(), fr2_ptr->getOPtr()->getPtr()});
+
+    const Eigen::VectorXs fr1_pstate = fr1_ptr->getPPtr()->getState();
+    const Eigen::VectorXs fr1_ostate = fr1_ptr->getOPtr()->getState();
+    const Eigen::VectorXs fr2_pstate = fr2_ptr->getPPtr()->getState();
+    const Eigen::VectorXs fr2_ostate = fr2_ptr->getOPtr()->getState();
+
+    std::vector<const Scalar*> states_ptr({fr1_pstate.data(), fr1_ostate.data(), fr2_pstate.data(), fr2_ostate.data()});
+
     std::vector<Eigen::MatrixXs> Jauto;
     Eigen::VectorXs residuals(constraint_ptr->getSize());
     constraint_ptr->evaluate(states_ptr, residuals, Jauto);
@@ -186,7 +200,14 @@ TEST(CaptureAutodiff, AutodiffVsAnalytic)
     fr1_ptr->addConstrainedBy(ctr_analytic_ptr);
 
     // COMPUTE JACOBIANS
-    std::vector<const Scalar*> states_ptr({fr1_ptr->getPPtr()->getPtr(), fr1_ptr->getOPtr()->getPtr(), fr2_ptr->getPPtr()->getPtr(), fr2_ptr->getOPtr()->getPtr()});
+
+    const Eigen::VectorXs fr1_pstate = fr1_ptr->getPPtr()->getState();
+    const Eigen::VectorXs fr1_ostate = fr1_ptr->getOPtr()->getState();
+    const Eigen::VectorXs fr2_pstate = fr2_ptr->getPPtr()->getState();
+    const Eigen::VectorXs fr2_ostate = fr2_ptr->getOPtr()->getState();
+
+    std::vector<const Scalar*> states_ptr({fr1_pstate.data(), fr1_ostate.data(), fr2_pstate.data(), fr2_ostate.data()});
+
     std::vector<Eigen::MatrixXs> Jautodiff, Janalytic;
     Eigen::VectorXs residuals(ctr_autodiff_ptr->getSize());
     clock_t t = clock();
