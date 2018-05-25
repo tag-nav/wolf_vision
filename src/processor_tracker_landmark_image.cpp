@@ -370,7 +370,7 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
 
     // world to anchor robot frame
     Translation<Scalar,3>  t_w_r0(_landmark->getAnchorFrame()->getPPtr()->getState()); // sadly we cannot put a Map over a translation
-    Map<const Quaternions> q_w_r0(_landmark->getAnchorFrame()->getOPtr()->getPtr());
+    const Quaternions q_w_r0(Eigen::Vector4s(_landmark->getAnchorFrame()->getOPtr()->getState()));
     T_W_R0 = t_w_r0 * q_w_r0;
 
     // world to current robot frame
@@ -380,12 +380,12 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
 
     // anchor robot to anchor camera
     Translation<Scalar,3>  t_r0_c0(_landmark->getAnchorSensor()->getPPtr()->getState());
-    Map<const Quaternions> q_r0_c0(_landmark->getAnchorSensor()->getOPtr()->getPtr());
+    const Quaternions q_r0_c0(Eigen::Vector4s(_landmark->getAnchorSensor()->getOPtr()->getState()));
     T_R0_C0 = t_r0_c0 * q_r0_c0;
 
     // current robot to current camera
     Translation<Scalar,3>  t_r1_c1(this->getSensorPtr()->getPPtr()->getState());
-    Map<const Quaternions> q_r1_c1(this->getSensorPtr()->getOPtr()->getPtr());
+    const Quaternions q_r1_c1(Eigen::Vector4s(this->getSensorPtr()->getOPtr()->getState()));
     T_R1_C1 = t_r1_c1 * q_r1_c1;
 
     // Transform lmk from c0 to c1 and exit

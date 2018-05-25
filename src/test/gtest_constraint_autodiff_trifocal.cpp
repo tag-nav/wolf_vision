@@ -339,10 +339,19 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F1)
 
     Vector3s res;
 
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+    Eigen::VectorXs F1_p = F1->getPPtr()->getState();
+    Eigen::VectorXs F1_o = F1->getOPtr()->getState();
+    Eigen::VectorXs F2_p = F2->getPPtr()->getState();
+    Eigen::VectorXs F2_o = F2->getOPtr()->getState();
+    Eigen::VectorXs F3_p = F3->getPPtr()->getState();
+    Eigen::VectorXs F3_o = F3->getOPtr()->getState();
+    Eigen::VectorXs S_p  = S ->getPPtr()->getState();
+    Eigen::VectorXs S_o  = S ->getOPtr()->getState();
+
+    c123->operator ()(F1_p.data(), F1_o.data(),
+                      F2_p.data(), F2_o.data(),
+                      F3_p.data(), F3_o.data(),
+                      S_p. data(), S_o. data(),
                       res.data());
 
     WOLF_DEBUG("Initial state:              ", F1->getState().transpose());
@@ -355,10 +364,13 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F1)
     pose_perturbated.segment(3,4).normalize();
     F1->setState(pose_perturbated);
 
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+    F1_p = F1->getPPtr()->getState();
+    F1_o = F1->getOPtr()->getState();
+
+    c123->operator ()(F1_p.data(), F1_o.data(),
+                      F2_p.data(), F2_o.data(),
+                      F3_p.data(), F3_o.data(),
+                      S_p. data(), S_o. data(),
                       res.data());
 
     WOLF_DEBUG("perturbed state:            ", pose_perturbated.transpose());
@@ -371,12 +383,21 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F1)
     F2->fix();
     F3->fix();
 
-    std::string report = ceres_manager->solve(1);
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
 
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+    F1_p = F1->getPPtr()->getState();
+    F1_o = F1->getOPtr()->getState();
+    F2_p = F2->getPPtr()->getState();
+    F2_o = F2->getOPtr()->getState();
+    F3_p = F3->getPPtr()->getState();
+    F3_o = F3->getOPtr()->getState();
+    S_p  = S ->getPPtr()->getState();
+    S_o  = S ->getOPtr()->getState();
+
+    c123->operator ()(F1_p.data(), F1_o.data(),
+                      F2_p.data(), F2_o.data(),
+                      F3_p.data(), F3_o.data(),
+                      S_p. data(), S_o. data(),
                       res.data());
 
     WOLF_DEBUG("solved state:               ", F1->getState().transpose());
@@ -400,10 +421,19 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2)
 
     Vector3s res;
 
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+    Eigen::VectorXs F1_p = F1->getPPtr()->getState();
+    Eigen::VectorXs F1_o = F1->getOPtr()->getState();
+    Eigen::VectorXs F2_p = F2->getPPtr()->getState();
+    Eigen::VectorXs F2_o = F2->getOPtr()->getState();
+    Eigen::VectorXs F3_p = F3->getPPtr()->getState();
+    Eigen::VectorXs F3_o = F3->getOPtr()->getState();
+    Eigen::VectorXs S_p  = S ->getPPtr()->getState();
+    Eigen::VectorXs S_o  = S ->getOPtr()->getState();
+
+    c123->operator ()(F1_p.data(), F1_o.data(),
+                      F2_p.data(), F2_o.data(),
+                      F3_p.data(), F3_o.data(),
+                      S_p. data(), S_o. data(),
                       res.data());
 
     WOLF_DEBUG("Initial state:              ", F2->getState().transpose());
@@ -416,10 +446,13 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2)
     pose_perturbated.segment(3,4).normalize();
     F2->setState(pose_perturbated);
 
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+    F2_p = F2->getPPtr()->getState();
+    F2_o = F2->getOPtr()->getState();
+
+    c123->operator ()(F1_p.data(), F1_o.data(),
+                      F2_p.data(), F2_o.data(),
+                      F3_p.data(), F3_o.data(),
+                      S_p. data(), S_o. data(),
                       res.data());
 
     WOLF_DEBUG("perturbed state:            ", pose_perturbated.transpose());
@@ -432,12 +465,21 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F2)
     F2->unfix();
     F3->fix();
 
-    std::string report = ceres_manager->solve(1);
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
 
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+    F1_p = F1->getPPtr()->getState();
+    F1_o = F1->getOPtr()->getState();
+    F2_p = F2->getPPtr()->getState();
+    F2_o = F2->getOPtr()->getState();
+    F3_p = F3->getPPtr()->getState();
+    F3_o = F3->getOPtr()->getState();
+    S_p  = S ->getPPtr()->getState();
+    S_o  = S ->getOPtr()->getState();
+
+    c123->operator ()(F1_p.data(), F1_o.data(),
+                      F2_p.data(), F2_o.data(),
+                      F3_p.data(), F3_o.data(),
+                      S_p. data(), S_o. data(),
                       res.data());
 
     WOLF_DEBUG("solved state:               ", F2->getState().transpose());
@@ -461,10 +503,19 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
 
     Vector3s res;
 
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+    Eigen::VectorXs F1_p = F1->getPPtr()->getState();
+    Eigen::VectorXs F1_o = F1->getOPtr()->getState();
+    Eigen::VectorXs F2_p = F2->getPPtr()->getState();
+    Eigen::VectorXs F2_o = F2->getOPtr()->getState();
+    Eigen::VectorXs F3_p = F3->getPPtr()->getState();
+    Eigen::VectorXs F3_o = F3->getOPtr()->getState();
+    Eigen::VectorXs S_p  = S ->getPPtr()->getState();
+    Eigen::VectorXs S_o  = S ->getOPtr()->getState();
+
+    c123->operator ()(F1_p.data(), F1_o.data(),
+                      F2_p.data(), F2_o.data(),
+                      F3_p.data(), F3_o.data(),
+                      S_p. data(), S_o. data(),
                       res.data());
 
     WOLF_DEBUG("Initial state:              ", F3->getState().transpose());
@@ -477,10 +528,13 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
     pose_perturbated.segment(3,4).normalize();
     F3->setState(pose_perturbated);
 
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+    F3_p = F3->getPPtr()->getState();
+    F3_o = F3->getOPtr()->getState();
+
+    c123->operator ()(F1_p.data(), F1_o.data(),
+                      F2_p.data(), F2_o.data(),
+                      F3_p.data(), F3_o.data(),
+                      S_p. data(), S_o. data(),
                       res.data());
 
     WOLF_DEBUG("perturbed state:            ", pose_perturbated.transpose());
@@ -494,12 +548,21 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F3)
     F2->fix();
     F3->unfix();
 
-    std::string report = ceres_manager->solve(1);
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
 
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+    F1_p = F1->getPPtr()->getState();
+    F1_o = F1->getOPtr()->getState();
+    F2_p = F2->getPPtr()->getState();
+    F2_o = F2->getOPtr()->getState();
+    F3_p = F3->getPPtr()->getState();
+    F3_o = F3->getOPtr()->getState();
+    S_p  = S ->getPPtr()->getState();
+    S_o  = S ->getOPtr()->getState();
+
+    c123->operator ()(F1_p.data(), F1_o.data(),
+                      F2_p.data(), F2_o.data(),
+                      F3_p.data(), F3_o.data(),
+                      S_p. data(), S_o. data(),
                       res.data());
 
     WOLF_DEBUG("solved state:               ", F3->getState().transpose());
@@ -523,10 +586,19 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
 
     Vector3s res;
 
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+    Eigen::VectorXs F1_p = F1->getPPtr()->getState();
+    Eigen::VectorXs F1_o = F1->getOPtr()->getState();
+    Eigen::VectorXs F2_p = F2->getPPtr()->getState();
+    Eigen::VectorXs F2_o = F2->getOPtr()->getState();
+    Eigen::VectorXs F3_p = F3->getPPtr()->getState();
+    Eigen::VectorXs F3_o = F3->getOPtr()->getState();
+    Eigen::VectorXs S_p  = S ->getPPtr()->getState();
+    Eigen::VectorXs S_o  = S ->getOPtr()->getState();
+
+    c123->operator ()(F1_p.data(), F1_o.data(),
+                      F2_p.data(), F2_o.data(),
+                      F3_p.data(), F3_o.data(),
+                      S_p. data(), S_o. data(),
                       res.data());
 
     WOLF_DEBUG("Initial state:              ", S->getPPtr()->getState().transpose(), " ", S->getOPtr()->getState().transpose());
@@ -542,10 +614,13 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
     S->getPPtr()->setState(pos_perturbated);
     S->getOPtr()->setState(ori_perturbated);
 
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+    S_p = S->getPPtr()->getState();
+    S_o = S->getOPtr()->getState();
+
+    c123->operator ()(F1_p.data(), F1_o.data(),
+                      F2_p.data(), F2_o.data(),
+                      F3_p.data(), F3_o.data(),
+                      S_p. data(), S_o. data(),
                       res.data());
 
     WOLF_DEBUG("perturbed state:            ", pose_perturbated.transpose());
@@ -558,12 +633,21 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_S)
     F2->fix();
     F3->fix();
 
-    std::string report = ceres_manager->solve(1);
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
 
-    c123->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                      F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                      F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                      S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+    F1_p = F1->getPPtr()->getState();
+    F1_o = F1->getOPtr()->getState();
+    F2_p = F2->getPPtr()->getState();
+    F2_o = F2->getOPtr()->getState();
+    F3_p = F3->getPPtr()->getState();
+    F3_o = F3->getOPtr()->getState();
+    S_p  = S ->getPPtr()->getState();
+    S_o  = S ->getOPtr()->getState();
+
+    c123->operator ()(F1_p.data(), F1_o.data(),
+                      F2_p.data(), F2_o.data(),
+                      F3_p.data(), F3_o.data(),
+                      S_p. data(), S_o. data(),
                       res.data());
 
     WOLF_DEBUG("solved state:               ", S->getPPtr()->getState().transpose(), " ", S->getOPtr()->getState().transpose());
@@ -669,7 +753,7 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point)
     F3->getPPtr()->setState( pos3   + 0.2*Vector3s::Random());
     F3->getOPtr()->setState((vquat3 + 0.2*Vector4s::Random()).normalized());
 
-    std::string report = ceres_manager->solve(1);
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
 
     // Print results
     WOLF_DEBUG("report: ", report);
@@ -681,14 +765,23 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point)
     ASSERT_MATRIX_APPROX(F3->getPPtr()->getState(), pos3  , 1e-10);
     ASSERT_MATRIX_APPROX(F3->getOPtr()->getState(), vquat3, 1e-10);
 
+    Eigen::VectorXs F1_p = F1->getPPtr()->getState();
+    Eigen::VectorXs F1_o = F1->getOPtr()->getState();
+    Eigen::VectorXs F2_p = F2->getPPtr()->getState();
+    Eigen::VectorXs F2_o = F2->getOPtr()->getState();
+    Eigen::VectorXs F3_p = F3->getPPtr()->getState();
+    Eigen::VectorXs F3_o = F3->getOPtr()->getState();
+    Eigen::VectorXs S_p  = S ->getPPtr()->getState();
+    Eigen::VectorXs S_o  = S ->getOPtr()->getState();
+
     // evaluate residuals
     Vector3s res;
     for (size_t i=0; i<cv123.size(); i++)
     {
-        cv123.at(i)->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                                 F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                                 F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                                 S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+        cv123.at(i)->operator ()(F1_p.data(), F1_o.data(),
+                                 F2_p.data(), F2_o.data(),
+                                 F3_p.data(), F3_o.data(),
+                                 S_p. data(), S_o. data(),
                                  res.data());
 
         ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-10);
@@ -726,7 +819,7 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
     F3->getPPtr()->setState( 2 * pos3 + 0.2*Vector3s::Random());
     F3->getOPtr()->setState((  vquat3 + 0.2*Vector4s::Random()).normalized());
 
-    std::string report = ceres_manager->solve(1);
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
 
     // Print results
     WOLF_DEBUG("report: ", report);
@@ -738,14 +831,23 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
     ASSERT_MATRIX_APPROX(F3->getPPtr()->getState(), 2 * pos3, 1e-8);
     ASSERT_MATRIX_APPROX(F3->getOPtr()->getState(),   vquat3, 1e-8);
 
+    Eigen::VectorXs F1_p = F1->getPPtr()->getState();
+    Eigen::VectorXs F1_o = F1->getOPtr()->getState();
+    Eigen::VectorXs F2_p = F2->getPPtr()->getState();
+    Eigen::VectorXs F2_o = F2->getOPtr()->getState();
+    Eigen::VectorXs F3_p = F3->getPPtr()->getState();
+    Eigen::VectorXs F3_o = F3->getOPtr()->getState();
+    Eigen::VectorXs S_p  = S ->getPPtr()->getState();
+    Eigen::VectorXs S_o  = S ->getOPtr()->getState();
+
     // evaluate residuals
     Vector3s res;
     for (size_t i=0; i<cv123.size(); i++)
     {
-        cv123.at(i)->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                                 F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                                 F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                                 S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+        cv123.at(i)->operator ()(F1_p.data(), F1_o.data(),
+                                 F2_p.data(), F2_o.data(),
+                                 F3_p.data(), F3_o.data(),
+                                 S_p. data(), S_o. data(),
                                  res.data());
 
         ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
@@ -797,13 +899,13 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
     F1->addConstrainedBy(cd);
 
     cd->setStatus(CTR_INACTIVE);
-    std::string report = ceres_manager->solve(1);
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
     WOLF_DEBUG("DISTANCE CONSTRAINT INACTIVE: \n", report);
 
     problem->print(1,0,1,0);
 
     cd->setStatus(CTR_ACTIVE);
-    report = ceres_manager->solve(1);
+    report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
 
     // Print results
     WOLF_DEBUG("DISTANCE CONSTRAINT ACTIVE: \n", report);
@@ -815,15 +917,23 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
     ASSERT_MATRIX_APPROX(F3->getPPtr()->getState(), pos3  , 1e-8);
     ASSERT_MATRIX_APPROX(F3->getOPtr()->getState(), vquat3, 1e-8);
 
+    Eigen::VectorXs F1_p = F1->getPPtr()->getState();
+    Eigen::VectorXs F1_o = F1->getOPtr()->getState();
+    Eigen::VectorXs F2_p = F2->getPPtr()->getState();
+    Eigen::VectorXs F2_o = F2->getOPtr()->getState();
+    Eigen::VectorXs F3_p = F3->getPPtr()->getState();
+    Eigen::VectorXs F3_o = F3->getOPtr()->getState();
+    Eigen::VectorXs S_p  = S ->getPPtr()->getState();
+    Eigen::VectorXs S_o  = S ->getOPtr()->getState();
 
     // evaluate residuals
     Vector3s res;
     for (size_t i=0; i<cv123.size(); i++)
     {
-        cv123.at(i)->operator ()(F1->getPPtr()->getPtr(), F1->getOPtr()->getPtr(),
-                                 F2->getPPtr()->getPtr(), F2->getOPtr()->getPtr(),
-                                 F3->getPPtr()->getPtr(), F3->getOPtr()->getPtr(),
-                                 S ->getPPtr()->getPtr(), S ->getOPtr()->getPtr(),
+        cv123.at(i)->operator ()(F1_p.data(), F1_o.data(),
+                                 F2_p.data(), F2_o.data(),
+                                 F3_p.data(), F3_o.data(),
+                                 S_p. data(), S_o. data(),
                                  res.data());
 
         ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);

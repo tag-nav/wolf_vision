@@ -226,6 +226,7 @@ TEST(Problem, StateBlocks)
     params->max_new_features          = 5;
     params->min_features_for_keyframe = 10;
     ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
+
     St->addProcessor(pt);
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
@@ -260,6 +261,7 @@ TEST(Problem, Covariances)
     params->max_new_features          = 5;
     params->min_features_for_keyframe = 10;
     ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
+
     St->addProcessor(pt);
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
