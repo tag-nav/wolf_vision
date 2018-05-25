@@ -49,7 +49,7 @@ public:
 
   virtual ~SolverManager() = default;
 
-  std::string solve(const ReportVerbosity report_level);
+  std::string solve(const ReportVerbosity report_level = ReportVerbosity::QUIET);
 
   virtual void computeCovariances(const CovarianceBlocksToBeComputed blocks) = 0;
 
