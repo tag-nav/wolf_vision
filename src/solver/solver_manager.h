@@ -2,9 +2,9 @@
 #define _WOLF_SOLVER_MANAGER_H_
 
 //wolf includes
-#include "wolf.h"
-#include "state_block.h"
-#include "constraint_base.h"
+#include "../wolf.h"
+#include "../state_block.h"
+#include "../constraint_base.h"
 
 namespace wolf {
 
