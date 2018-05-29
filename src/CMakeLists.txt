@@ -203,6 +203,7 @@ SET(HDRS_BASE
     processor_base.h
     processor_capture_holder.h
     processor_factory.h
+    processor_logging.h
     processor_loopclosure_base.h
     processor_motion.h
     processor_tracker.h
