@@ -74,6 +74,11 @@ public:
          **/
         StateBlock(const Eigen::VectorXs& _state, bool _fixed = false, LocalParametrizationBasePtr _local_param_ptr = nullptr);
 
+        ///< Explicitly not copyable/movable
+        StateBlock(const StateBlock& o) = delete;
+        StateBlock(StateBlock&& o) = delete;
+        StateBlock& operator=(const StateBlock& o) = delete;
+
         /** \brief Destructor
          **/
         virtual ~StateBlock();
