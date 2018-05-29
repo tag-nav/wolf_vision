@@ -194,6 +194,7 @@ SET(HDRS_BASE
     local_parametrization_quaternion.h
     local_parametrization_homogeneous.h
     logging.h
+    make_unique.h
     map_base.h
     motion_buffer.h
     node_base.h

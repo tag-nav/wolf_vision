@@ -3,6 +3,7 @@
 #include "../trajectory_base.h"
 #include "../map_base.h"
 #include "../landmark_base.h"
+#include "../make_unique.h"
 
 namespace wolf {
 

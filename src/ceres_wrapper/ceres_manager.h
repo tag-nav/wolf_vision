@@ -1,8 +1,6 @@
 #ifndef CERES_MANAGER_H_
 #define CERES_MANAGER_H_
 
-#include "../make_unique.h"
-
 //Ceres includes
 #include "ceres/jet.h"
 #include "ceres/ceres.h"
