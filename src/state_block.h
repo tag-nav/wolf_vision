@@ -14,6 +14,7 @@ class LocalParametrizationBase;
 
 //std includes
 #include <iostream>
+#include <mutex>
 
 
 namespace wolf {
@@ -50,7 +51,10 @@ public:
 
         bool fixed_; ///< Key to indicate whether the state is fixed or not
 
+        std::atomic<int> state_size_; ///< State vector size
         Eigen::VectorXs state_; ///< State vector storing the state values
+        mutable std::mutex mut_state_; ///< State vector mutex
+
         LocalParametrizationBasePtr local_param_ptr_; ///< Local parametrization useful for optimizing in the tangent space to the manifold
 
     public:
@@ -132,6 +136,7 @@ inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalP
 //        notifications_{Notification::ADD},
         node_ptr_(), // nullptr
         fixed_(_fixed),
+        state_size_(_state.size()),
         state_(_state),
         local_param_ptr_(_local_param_ptr)
 {
@@ -142,6 +147,7 @@ inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParame
 //        notifications_{Notification::ADD},
         node_ptr_(), // nullptr
         fixed_(_fixed),
+        state_size_(_size),
         state_(Eigen::VectorXs::Zero(_size)),
         local_param_ptr_(_local_param_ptr)
 {
@@ -156,26 +162,33 @@ inline StateBlock::~StateBlock()
 
 inline Eigen::VectorXs StateBlock::getState() const
 {
+    std::lock_guard<std::mutex> lock(mut_state_);
     return state_;
 }
 
 inline void StateBlock::setState(const Eigen::VectorXs& _state)
 {
     assert(_state.size() == state_.size());
-    state_ = _state;
+
+    {
+      std::lock_guard<std::mutex> lock(mut_state_);
+      state_ = _state;
+      state_size_ = state_.size();
+    }
+
     addNotification(Notification::STATE_UPDATE);
 }
 
 inline unsigned int StateBlock::getSize() const
 {
-    return state_.size();
+    return state_size_.load();
 }
 
 inline Size StateBlock::getLocalSize() const
 {
     if(local_param_ptr_)
         return local_param_ptr_->getLocalSize();
-    return state_.size();
+    return getSize();
 }
 
 inline bool StateBlock::isFixed() const
