@@ -69,7 +69,7 @@ TEST(ConstraintOdom3D, fix_0_solve)
     frm1->setState(x1);
 
     // solve for frm1
-    std::string report = ceres_mgr.solve(1);
+    std::string report = ceres_mgr.solve(SolverManager::ReportVerbosity::BRIEF);
 
     ASSERT_MATRIX_APPROX(frm1->getState(), delta, 1e-6);
 
@@ -83,7 +83,7 @@ TEST(ConstraintOdom3D, fix_1_solve)
     frm0->setState(x0);
 
     // solve for frm0
-    std::string brief_report = ceres_mgr.solve(1);
+    std::string brief_report = ceres_mgr.solve(SolverManager::ReportVerbosity::BRIEF);
 
     ASSERT_MATRIX_APPROX(frm0->getState(), problem->zeroState(), 1e-6);
 }

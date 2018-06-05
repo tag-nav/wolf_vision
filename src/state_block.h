@@ -29,14 +29,30 @@ namespace wolf {
  */
 class StateBlock
 {
+public:
+
+  enum class Notification : std::size_t
+  {
+    ADD = 0,
+    REMOVE,
+    STATE_UPDATE,
+    FIX_UPDATE
+  };
+
+  using Notifications = std::list<Notification>;
+
     protected:
+
+        mutable Notifications notifications_;
+        mutable std::mutex notifictions_mut_;
+
         NodeBaseWPtr node_ptr_; //< pointer to the wolf Node owning this StateBlock
 
         bool fixed_; ///< Key to indicate whether the state is fixed or not
 
         Eigen::VectorXs state_; ///< State vector storing the state values
         LocalParametrizationBasePtr local_param_ptr_; ///< Local parametrization useful for optimizing in the tangent space to the manifold
-        
+
     public:
         /** \brief Constructor from size
          *
@@ -53,18 +69,14 @@ class StateBlock
          * \param _local_param_ptr pointer to the local parametrization for the block
          **/
         StateBlock(const Eigen::VectorXs& _state, bool _fixed = false, LocalParametrizationBasePtr _local_param_ptr = nullptr);
-        
+
         /** \brief Destructor
          **/
         virtual ~StateBlock();
 
-        /** \brief Returns the pointer to the first element of the state
-         **/
-        Scalar* getPtr();
-        
         /** \brief Returns the state vector
          **/
-        const Eigen::VectorXs& getState() const;
+        Eigen::VectorXs getState() const;
 
         /** \brief Sets the state vector
          **/
@@ -94,14 +106,19 @@ class StateBlock
 
         void setFixed(bool _fixed);
 
-        bool hasLocalParametrization();
+        bool hasLocalParametrization() const;
 
-        LocalParametrizationBasePtr getLocalParametrizationPtr();
+        LocalParametrizationBasePtr getLocalParametrizationPtr() const;
 
         void setLocalParametrizationPtr(LocalParametrizationBasePtr _local_param);
 
         void removeLocalParametrization();
 
+        void addNotification(const StateBlock::Notification _new_notification);
+
+        StateBlock::Notifications consumeNotifications() const;
+
+        bool hasNotifications() const;
 };
 
 } // namespace wolf
@@ -112,6 +129,7 @@ class StateBlock
 namespace wolf {
 
 inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
+//        notifications_{Notification::ADD},
         node_ptr_(), // nullptr
         fixed_(_fixed),
         state_(_state),
@@ -121,6 +139,7 @@ inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalP
 }
 
 inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
+//        notifications_{Notification::ADD},
         node_ptr_(), // nullptr
         fixed_(_fixed),
         state_(Eigen::VectorXs::Zero(_size)),
@@ -135,12 +154,7 @@ inline StateBlock::~StateBlock()
 //    std::cout << "destructed            -sb" << std::endl;
 }
 
-inline Scalar* StateBlock::getPtr()
-{
-    return state_.data();
-}
-
-inline const Eigen::VectorXs& StateBlock::getState() const
+inline Eigen::VectorXs StateBlock::getState() const
 {
     return state_;
 }
@@ -149,6 +163,7 @@ inline void StateBlock::setState(const Eigen::VectorXs& _state)
 {
     assert(_state.size() == state_.size());
     state_ = _state;
+    addNotification(Notification::STATE_UPDATE);
 }
 
 inline unsigned int StateBlock::getSize() const
@@ -170,25 +185,26 @@ inline bool StateBlock::isFixed() const
 
 inline void StateBlock::fix()
 {
-    fixed_ = true;
+    setFixed(true);
 }
 
 inline void StateBlock::unfix()
 {
-    fixed_ = false;
+    setFixed(false);
 }
 
 inline void StateBlock::setFixed(bool _fixed)
 {
     fixed_ = _fixed;
+    addNotification(Notification::FIX_UPDATE);
 }
 
-inline bool StateBlock::hasLocalParametrization()
+inline bool StateBlock::hasLocalParametrization() const
 {
     return (local_param_ptr_ != nullptr);
 }
 
-inline LocalParametrizationBasePtr StateBlock::getLocalParametrizationPtr()
+inline LocalParametrizationBasePtr StateBlock::getLocalParametrizationPtr() const
 {
     return local_param_ptr_;
 }
@@ -203,6 +219,24 @@ inline void StateBlock::setLocalParametrizationPtr(LocalParametrizationBasePtr _
 {
 	assert(_local_param != nullptr && "setting a null local parametrization");
     local_param_ptr_ = _local_param;
+}
+
+inline void StateBlock::addNotification(const StateBlock::Notification _new_notification)
+{
+  std::lock_guard<std::mutex> lock(notifictions_mut_);
+  notifications_.emplace_back(_new_notification);
+}
+
+inline StateBlock::Notifications StateBlock::consumeNotifications() const
+{
+  std::lock_guard<std::mutex> lock(notifictions_mut_);
+  return std::move(notifications_);
+}
+
+inline bool StateBlock::hasNotifications() const
+{
+  std::lock_guard<std::mutex> lock(notifictions_mut_);
+  return !notifications_.empty();
 }
 
 } // namespace wolf

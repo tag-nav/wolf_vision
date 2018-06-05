@@ -21,7 +21,7 @@ class LocalParametrizationWrapper : public ceres::LocalParameterization
 
         LocalParametrizationWrapper(LocalParametrizationBasePtr _local_parametrization_ptr);
 
-        virtual ~LocalParametrizationWrapper();
+        virtual ~LocalParametrizationWrapper() = default;
 
         virtual bool Plus(const double* x_raw, const double* delta_raw, double* x_plus_delta_raw) const;
 
@@ -32,6 +32,8 @@ class LocalParametrizationWrapper : public ceres::LocalParameterization
         virtual int LocalSize() const;
 };
 
+using LocalParametrizationWrapperPtr = std::shared_ptr<LocalParametrizationWrapper>;
+
 } // namespace wolf
 
 #include "../local_parametrization_base.h"
@@ -40,10 +42,6 @@ namespace wolf {
 
 inline LocalParametrizationWrapper::LocalParametrizationWrapper(LocalParametrizationBasePtr _local_parametrization_ptr) :
         local_parametrization_ptr_(_local_parametrization_ptr)
-{
-}
-
-inline LocalParametrizationWrapper::~LocalParametrizationWrapper()
 {
 }
 

@@ -59,7 +59,7 @@ TEST(ConstraintPose2D, solve)
     frm0->setState(x0);
 
     // solve for frm0
-    std::string report = ceres_mgr.solve(0); // 0: nothing, 1: BriefReport, 2: FullReport
+    std::string report = ceres_mgr.solve(SolverManager::ReportVerbosity::QUIET); // 0: nothing, 1: BriefReport, 2: FullReport
 
     ASSERT_MATRIX_APPROX(frm0->getState(), pose, 1e-6);
 

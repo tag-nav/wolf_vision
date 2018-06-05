@@ -521,7 +521,7 @@ class Process_Constraint_IMU : public testing::Test
 
 
 
-        string solveProblem(int verbose = 1)
+        string solveProblem(SolverManager::ReportVerbosity verbose = SolverManager::ReportVerbosity::BRIEF)
         {
             string report   = ceres_manager->solve(verbose);
 
@@ -544,7 +544,7 @@ class Process_Constraint_IMU : public testing::Test
 
 
 
-        string runAll(int verbose)
+        string runAll(SolverManager::ReportVerbosity verbose)
         {
             configureAll();
             integrateAll();
@@ -731,7 +731,7 @@ TEST_F(Process_Constraint_IMU, MotionConstant_PQV_b__PQV_b) // F_ixed___e_stimat
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
 //    printAll(report);
 
@@ -824,7 +824,7 @@ TEST_F(Process_Constraint_IMU, MotionConstant_pqv_b__PQV_b) // F_ixed___e_stimat
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
     //    printAll(report);
 
@@ -870,7 +870,7 @@ TEST_F(Process_Constraint_IMU, MotionConstant_pqV_b__PQv_b) // F_ixed___e_stimat
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
     //    printAll(report);
 
@@ -916,7 +916,7 @@ TEST_F(Process_Constraint_IMU, MotionRandom_PQV_b__PQV_b) // F_ixed___e_stimated
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
 //    printAll(report);
 
@@ -962,7 +962,7 @@ TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__PQv_b) // F_ixed___e_stimated
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
 //    printAll(report);
 
@@ -1007,7 +1007,7 @@ TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__pQV_b) // F_ixed___e_stimated
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
     // printAll(report);
 
@@ -1052,7 +1052,7 @@ TEST_F(Process_Constraint_IMU, MotionConstant_NonNullState_PQV_b__PQV_b) // F_ix
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
 //    printAll(report);
 
@@ -1097,7 +1097,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__PQV_b) // F_ixe
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
     //    printAll(report);
 
@@ -1142,7 +1142,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__PQv_b) // F_ixe
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
     //    printAll(report);
 
@@ -1187,7 +1187,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__Pqv_b) // F_ixe
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
     // printAll(report);
 
@@ -1232,7 +1232,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__pQv_b) // F_ixe
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
     //    printAll(report);
 
@@ -1277,7 +1277,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__pqv_b) // F_ixe
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
     //    printAll(report);
 
@@ -1322,7 +1322,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqv_b__pqV_b) // F_ixed___e_st
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
 //    printAll(report);
 
@@ -1367,7 +1367,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_st
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
 //    printAll(report);
 
@@ -1412,7 +1412,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PQV_b__pqv_b) // F_ixed___e_stim
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
     // printAll(report);
 
@@ -1457,7 +1457,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PqV_b__pqV_b) // F_ixed___e_stim
 
 
     // ===================================== RUN ALL
-    string report = runAll(1);
+    string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
 //    printAll(report);
 
@@ -1505,7 +1505,7 @@ TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) 
     configureAll();
     integrateAllTrajectories();
     buildProblem();
-    string report = solveProblem(1);
+    string report = solveProblem(SolverManager::ReportVerbosity::BRIEF);
 
     assertAll();
 

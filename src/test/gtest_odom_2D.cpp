@@ -153,10 +153,10 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     F0->setState(Vector3s(1,2,3));
     F1->setState(Vector3s(2,3,1));
     F2->setState(Vector3s(3,1,2));
-    std::string report = ceres_manager.solve(1);
+    std::string report = ceres_manager.solve(SolverManager::ReportVerbosity::FULL);
 //    std::cout << report << std::endl;
 
-    ceres_manager.computeCovariances(ALL_MARGINALS);
+    ceres_manager.computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
 //    show(Pr);
 
     Matrix3s P1, P2;
@@ -211,8 +211,8 @@ TEST(Odom2D, VoteForKfAndSolve)
 
     // Origin Key Frame
     FrameBasePtr origin_frame = problem->setPrior(x0, P0, t0, dt/2);
-    ceres_manager.solve(0);
-    ceres_manager.computeCovariances(ALL_MARGINALS);
+    ceres_manager.solve(SolverManager::ReportVerbosity::BRIEF);
+    ceres_manager.computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
 
     //    std::cout << "Initial pose : " << problem->getCurrentState().transpose() << std::endl;
     //    std::cout << "Initial covariance : " << std::endl << problem->getLastKeyFrameCovariance() << std::endl;
@@ -284,9 +284,9 @@ TEST(Odom2D, VoteForKfAndSolve)
     }
 
     // Solve
-    std::string report = ceres_manager.solve(1);
+    std::string report = ceres_manager.solve(SolverManager::ReportVerbosity::BRIEF);
 //    std::cout << report << std::endl;
-    ceres_manager.computeCovariances(ALL_MARGINALS);
+    ceres_manager.computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
 
     ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance() , integrated_cov_vector[5], 1e-6);
 }
@@ -406,9 +406,9 @@ TEST(Odom2D, KF_callback)
 
     MotionBuffer key_buffer_n = key_capture_n->getBuffer();
 
-    std::string report = ceres_manager.solve(1);
+    std::string report = ceres_manager.solve(SolverManager::ReportVerbosity::BRIEF);
 //    std::cout << report << std::endl;
-    ceres_manager.computeCovariances(ALL_MARGINALS);
+    ceres_manager.computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
 
     ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
     ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance()      , integrated_cov_vector [n_split], 1e-6);
@@ -441,8 +441,8 @@ TEST(Odom2D, KF_callback)
     keyframe_1->setState(Vector3s(2,3,1));
     keyframe_2->setState(Vector3s(3,1,2));
 
-    report = ceres_manager.solve(1);
-    ceres_manager.computeCovariances(ALL_MARGINALS);
+    report = ceres_manager.solve(SolverManager::ReportVerbosity::BRIEF);
+    ceres_manager.computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
 
     // check the split KF
     ASSERT_POSE2D_APPROX(keyframe_1->getState()                  , integrated_pose_vector[m_split], 1e-6);
@@ -459,7 +459,7 @@ TEST(Odom2D, KF_callback)
         t += dt;
         //        WOLF_DEBUG("   estimated(", t, ") = ", problem->getState(t).transpose());
         //        WOLF_DEBUG("ground truth(", t, ") = ", integrated_pose_vector[n].transpose());
-        ASSERT_MATRIX_APPROX(problem->getState(t), integrated_pose_vector[n], 1e-6);
+        EXPECT_POSE2D_APPROX(problem->getState(t), integrated_pose_vector[n], 1e-6);
     }
 }
 

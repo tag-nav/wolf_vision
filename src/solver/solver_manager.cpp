@@ -1,245 +1,181 @@
-#include "ceres_manager.h"
+#include "solver_manager.h"
+#include "../trajectory_base.h"
+#include "../map_base.h"
+#include "../landmark_base.h"
 
-SolverManager::SolverManager()
+namespace wolf {
+
+SolverManager::SolverManager(const ProblemPtr& _wolf_problem) :
+  wolf_problem_(_wolf_problem)
 {
-
+  assert(_wolf_problem != nullptr && "Passed a nullptr ProblemPtr.");
 }
 
-SolverManager::~SolverManager()
+void SolverManager::update()
 {
-	removeAllStateUnits();
+  // REMOVE CONSTRAINTS
+  auto ctr_notification_it = wolf_problem_->getConstraintNotificationList().begin();
+  while ( ctr_notification_it != wolf_problem_->getConstraintNotificationList().end() )
+  {
+    if (ctr_notification_it->notification_ == REMOVE)
+    {
+      removeConstraint(ctr_notification_it->constraint_ptr_);
+      ctr_notification_it = wolf_problem_->getConstraintNotificationList().erase(ctr_notification_it);
+    }
+    else
+      ctr_notification_it++;
+  }
+
+  StateBlockList& states = wolf_problem_->getNotifiedStateBlockList();
+
+  for (StateBlockPtr& state : states)
+  {
+    const auto notifications = state->consumeNotifications();
+
+    for (const auto notif : notifications)
+    {
+      switch (notif)
+      {
+      case StateBlock::Notification::ADD:
+      {
+        const bool registered = state_blocks_.find(state)!=state_blocks_.end();
+
+//        const auto p = state_blocks_.emplace(state, state->getState());
+
+        // call addStateBlock only if first time added.
+        if (!registered)
+        {
+          state_blocks_.emplace(state, state->getState());
+          addStateBlock(state);
+        }
+
+        WOLF_DEBUG_COND(registered, "Tried adding an already registered StateBlock.");
+
+        break;
+      }
+      case StateBlock::Notification::STATE_UPDATE:
+      {
+        const bool registered = state_blocks_.find(state)!=state_blocks_.end();
+
+        WOLF_DEBUG_COND(!registered,
+                        "Updating the state of an unregistered StateBlock !");
+
+        // This will throw if StateBlock wasn't registered
+//        state_blocks_.at(state) = state->getState();
+
+//        state_blocks_[state] = state->getState();
+
+//        if (!registered)
+//        {
+//          addStateBlock(state);
+//        }
+
+//        assert(state_blocks_.find(state)!=state_blocks_.end() &&
+//            "Updating the state of an unregistered StateBlock !");
+
+        break;
+      }
+      case StateBlock::Notification::FIX_UPDATE:
+      {
+        WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
+                        "Updating the fix state of an unregistered StateBlock !");
+
+        assert(state_blocks_.find(state)!=state_blocks_.end() &&
+            "Updating the fix state of an unregistered StateBlock !");
+
+        updateStateBlockStatus(state);
+
+        break;
+      }
+      case StateBlock::Notification::REMOVE:
+      {
+        WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
+                        "Tried to remove a StateBlock that was not added !");
+
+        if (state_blocks_.erase(state) > 0)
+          removeStateBlock(state);
+
+        break;
+      }
+      default:
+        throw std::runtime_error("SolverManager::update: State Block notification "
+                                 "must be ADD, STATE_UPDATE, FIX_UPDATE or REMOVE.");
+      }
+    }
+  }
+
+  states.clear();
+
+  // ADD CONSTRAINTS
+  while (!wolf_problem_->getConstraintNotificationList().empty())
+  {
+    switch (wolf_problem_->getConstraintNotificationList().front().notification_)
+    {
+    case Notification::ADD:
+    {
+      addConstraint(wolf_problem_->getConstraintNotificationList().front().constraint_ptr_);
+
+      break;
+    }
+    default:
+      throw std::runtime_error("SolverManager::update:"
+                               " Constraint notification must be ADD or REMOVE.");
+    }
+
+    wolf_problem_->getConstraintNotificationList().pop_front();
+  }
+
+  assert(wolf_problem_->getConstraintNotificationList().empty() &&
+         "wolf problem's constraints notification list not empty after update");
+  assert(wolf_problem_->getNotifiedStateBlockList().empty() &&
+         "wolf problem's state_blocks notification list not empty after update");
 }
 
-void SolverManager::solve()
+wolf::ProblemPtr SolverManager::getProblemPtr()
 {
-
+  return wolf_problem_;
 }
 
-//void SolverManager::computeCovariances(WolfProblemPtr _problem_ptr)
-//{
-//}
-
-void SolverManager::update(const WolfProblemPtr _problem_ptr)
+std::string SolverManager::solve(const ReportVerbosity report_level)
 {
-	// IF REALLOCATION OF STATE, REMOVE EVERYTHING AND BUILD THE PROBLEM AGAIN
-	if (_problem_ptr->isReallocated())
-	{
-	    // todo: reallocate x
-	}
-	else
-	{
-		// ADD/UPDATE STATE UNITS
-		for(auto state_unit_it = _problem_ptr->getStateList().begin(); state_unit_it!=_problem_ptr->getStateList().end(); state_unit_it++)
-		{
-			if ((*state_unit_it)->getPendingStatus() == ADD_PENDING)
-				addStateUnit(*state_unit_it);
+  // update problem
+  update();
 
-			else if((*state_unit_it)->getPendingStatus() == UPDATE_PENDING)
-				updateStateUnitStatus(*state_unit_it);
-		}
-		//std::cout << "state units updated!" << std::endl;
+  std::string report = solveImpl(report_level);
 
-		// REMOVE STATE UNITS
-		while (!_problem_ptr->getRemovedStateList().empty())
-		{
-			// TODO: remove state unit
-			//_problem_ptr->getRemovedStateList().pop_front();
-		}
-		//std::cout << "state units removed!" << std::endl;
+  // update StateBlocks with optimized state value.
+  /// @todo whatif someone has changed the state notification during opti ??
 
-		// ADD CONSTRAINTS
-		ConstraintBaseList ctr_list;
-		_problem_ptr->getTrajectoryPtr()->getConstraintList(ctr_list);
-		//std::cout << "ctr_list.size() = " << ctr_list.size() << std::endl;
-		for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
-			if ((*ctr_it)->getPendingStatus() == ADD_PENDING)
-				addConstraint(*ctr_it);
+  std::map<StateBlockPtr, Eigen::VectorXs>::iterator it = state_blocks_.begin(),
+                                                     it_end = state_blocks_.end();
+  for (; it != it_end; ++it)
+  {
+    // Avoid usuless copies
+    if (!it->first->isFixed())
+      it->first->setState(it->second);
+  }
 
-		//std::cout << "constraints updated!" << std::endl;
-	}
+  return report;
 }
 
-void SolverManager::addConstraint(ConstraintBasePtr _corr_ptr)
+Eigen::VectorXs& SolverManager::getAssociatedMemBlock(const StateBlockPtr& state_ptr)
 {
-	//TODO MatrixXs J; Vector e;
-    // getResidualsAndJacobian(_corr_ptr, J, e);
-    // solverQR->addConstraint(_corr_ptr, J, e);
+  auto it = state_blocks_.find(state_ptr);
 
-//	constraint_map_[_corr_ptr->id()] = blockIdx;
-	_corr_ptr->setPendingStatus(NOT_PENDING);
+  if (it == state_blocks_.end())
+    throw std::runtime_error("Tried to retrieve the memory block of an unregistered StateBlock !");
+
+  return it->second;
 }
 
-void SolverManager::removeConstraint(const unsigned int& _corr_idx)
+Scalar* SolverManager::getAssociatedMemBlockPtr(const StateBlockPtr& state_ptr)
 {
-    // TODO
+  auto it = state_blocks_.find(state_ptr);
+
+  if (it == state_blocks_.end())
+    throw std::runtime_error("Tried to retrieve the memory block of an unregistered StateBlock !");
+
+  return it->second.data();
 }
 
-void SolverManager::addStateUnit(StateBlockPtr _st_ptr)
-{
-	//std::cout << "Adding State Unit " << _st_ptr->id() << std::endl;
-	//_st_ptr->print();
-
-	switch (_st_ptr->getStateType())
-	{
-		case ST_COMPLEX_ANGLE:
-		{
-		    // TODO
-			//std::cout << "Adding Complex angle Local Parametrization to the List... " << std::endl;
-			//ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateComplexAngle*)_st_ptr)->BLOCK_SIZE, new ComplexAngleParameterization);
-			break;
-		}
-		case ST_THETA:
-		{
-			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlockPtr)_st_ptr)->BLOCK_SIZE, nullptr);
-			break;
-		}
-		case ST_POINT_1D:
-		{
-			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint1D*)_st_ptr)->BLOCK_SIZE, nullptr);
-			break;
-		}
-		case ST_VECTOR:
-		{
-			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlockPtr)_st_ptr)->BLOCK_SIZE, nullptr);
-			break;
-		}
-		case ST_POINT_3D:
-		{
-			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlockPtr)_st_ptr)->BLOCK_SIZE, nullptr);
-			break;
-		}
-		default:
-			std::cout << "Unknown  Local Parametrization type!" << std::endl;
-	}
-	if (_st_ptr->isFixed())
-		updateStateUnitStatus(_st_ptr);
-
-	_st_ptr->setPendingStatus(NOT_PENDING);
-}
-
-void SolverManager::removeAllStateUnits()
-{
-	std::vector<double*> parameter_blocks;
-
-	ceres_problem_->GetParameterBlocks(&parameter_blocks);
-
-	for (unsigned int i = 0; i< parameter_blocks.size(); i++)
-		ceres_problem_->RemoveParameterBlock(parameter_blocks[i]);
-}
-
-void SolverManager::updateStateUnitStatus(StateBlockPtr _st_ptr)
-{
-    // TODO
-
-//	if (!_st_ptr->isFixed())
-//		ceres_problem_->SetParameterBlockVariable(_st_ptr->getPtr());
-//	else if (_st_ptr->isFixed())
-//		ceres_problem_->SetParameterBlockConstant(_st_ptr->getPtr());
-//	else
-//		printf("\nERROR: Update state unit status with unknown status");
-//
-//	_st_ptr->setPendingStatus(NOT_PENDING);
-}
-
-ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPtr)
-{
-	//std::cout << "adding ctr " << _corrPtr->id() << std::endl;
-	//_corrPtr->print();
-
-	switch (_corrPtr->getConstraintType())
-	{
-		case CTR_GPS_FIX_2D:
-		{
-			ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintGPS2D,
-													specific_ptr->residualSize,
-													specific_ptr->block0Size,
-													specific_ptr->block1Size,
-													specific_ptr->block2Size,
-													specific_ptr->block3Size,
-													specific_ptr->block4Size,
-													specific_ptr->block5Size,
-													specific_ptr->block6Size,
-													specific_ptr->block7Size,
-													specific_ptr->block8Size,
-													specific_ptr->block9Size>(specific_ptr);
-			break;
-		}
-		case CTR_ODOM_2D_COMPLEX_ANGLE:
-		{
-			ConstraintOdom2DComplexAngle* specific_ptr = (ConstraintOdom2DComplexAngle*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintOdom2DComplexAngle,
-													specific_ptr->residualSize,
-													specific_ptr->block0Size,
-													specific_ptr->block1Size,
-													specific_ptr->block2Size,
-													specific_ptr->block3Size,
-													specific_ptr->block4Size,
-													specific_ptr->block5Size,
-													specific_ptr->block6Size,
-													specific_ptr->block7Size,
-													specific_ptr->block8Size,
-													specific_ptr->block9Size>(specific_ptr);
-			break;
-		}
-		case CTR_ODOM_2D:
-		{
-			ConstraintOdom2D* specific_ptr = (ConstraintOdom2D*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintOdom2D,
-													specific_ptr->residualSize,
-													specific_ptr->block0Size,
-													specific_ptr->block1Size,
-													specific_ptr->block2Size,
-													specific_ptr->block3Size,
-													specific_ptr->block4Size,
-													specific_ptr->block5Size,
-													specific_ptr->block6Size,
-													specific_ptr->block7Size,
-													specific_ptr->block8Size,
-													specific_ptr->block9Size>(specific_ptr);
-			break;
-		}
-		case CTR_CORNER_2D:
-		{
-			ConstraintCorner2D* specific_ptr = (ConstraintCorner2D*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintCorner2D,
-													specific_ptr->residualSize,
-													specific_ptr->block0Size,
-													specific_ptr->block1Size,
-													specific_ptr->block2Size,
-													specific_ptr->block3Size,
-													specific_ptr->block4Size,
-													specific_ptr->block5Size,
-													specific_ptr->block6Size,
-													specific_ptr->block7Size,
-													specific_ptr->block8Size,
-													specific_ptr->block9Size>(specific_ptr);
-			break;
-		}
-		case CTR_IMU:
-		{
-			ConstraintIMU* specific_ptr = (ConstraintIMU*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintIMU,
-													specific_ptr->residualSize,
-													specific_ptr->block0Size,
-													specific_ptr->block1Size,
-													specific_ptr->block2Size,
-													specific_ptr->block3Size,
-													specific_ptr->block4Size,
-													specific_ptr->block5Size,
-													specific_ptr->block6Size,
-													specific_ptr->block7Size,
-													specific_ptr->block8Size,
-													specific_ptr->block9Size>(specific_ptr);
-			break;
-		}
-		default:
-			std::cout << "Unknown constraint type! Please add it in the CeresWrapper::createCostFunction()" << std::endl;
-
-			return nullptr;
-	}
-}
+} // namespace wolf

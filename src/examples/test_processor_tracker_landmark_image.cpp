@@ -232,7 +232,7 @@ int main(int argc, char** argv)
         if (problem->getTrajectoryPtr()->getFrameList().size() > number_of_KFs)
         {
             number_of_KFs = problem->getTrajectoryPtr()->getFrameList().size();
-            std::string summary = ceres_manager.solve(1);// 0: nothing, 1: BriefReport, 2: FullReport
+            std::string summary = ceres_manager.solve(SolverManager::ReportVerbosity::BRIEF);// 0: nothing, 1: BriefReport, 2: FullReport
             std::cout << summary << std::endl;
         }
 

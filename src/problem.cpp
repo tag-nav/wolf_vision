@@ -373,8 +373,13 @@ StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 
     // add the state unit to the list
     state_block_list_.push_back(_state_ptr);
+
     // queue for solver manager
-    state_block_notification_list_.push_back(StateBlockNotification({ADD,_state_ptr}));
+    _state_ptr->addNotification(StateBlock::Notification::ADD);
+    notified_state_block_list_.push_back(_state_ptr);
+    notified_state_block_list_.sort();
+    notified_state_block_list_.unique();
+
     return _state_ptr;
 }
 
@@ -383,7 +388,10 @@ void Problem::updateStateBlockPtr(StateBlockPtr _state_ptr)
     //std::cout << "Problem::updateStateBlockPtr " << _state_ptr.get() << std::endl;
 
     // queue for solver manager
-    state_block_notification_list_.push_back(StateBlockNotification({UPDATE,_state_ptr}));
+    _state_ptr->addNotification(StateBlock::Notification::FIX_UPDATE);
+    notified_state_block_list_.push_back(_state_ptr);
+    notified_state_block_list_.sort();
+    notified_state_block_list_.unique();
 }
 
 void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
@@ -393,19 +401,11 @@ void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
     // add the state unit to the list
     state_block_list_.remove(_state_ptr);
 
-    // Check if the state addition is still as a notification
-    auto state_notif_it = state_block_notification_list_.begin();
-    for (; state_notif_it != state_block_notification_list_.end(); state_notif_it++)
-        if (state_notif_it->notification_ == ADD && state_notif_it->state_block_ptr_ == _state_ptr)
-            break;
-
-    // Remove addition notification
-    if (state_notif_it != state_block_notification_list_.end())
-    	state_block_notification_list_.erase(state_notif_it);
     // Add remove notification
-    else
-    	state_block_notification_list_.push_back(StateBlockNotification({REMOVE, _state_ptr}));
-
+    _state_ptr->addNotification(StateBlock::Notification::REMOVE);
+    notified_state_block_list_.push_back(_state_ptr);
+    notified_state_block_list_.sort();
+    notified_state_block_list_.unique();
 }
 
 ConstraintBasePtr Problem::addConstraintPtr(ConstraintBasePtr _constraint_ptr)

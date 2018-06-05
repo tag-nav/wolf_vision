@@ -1,49 +1,84 @@
-#ifndef CERES_MANAGER_H_
-#define CERES_MANAGER_H_
+#ifndef _WOLF_SOLVER_MANAGER_H_
+#define _WOLF_SOLVER_MANAGER_H_
 
 //wolf includes
-#include <constraint_GPS_2D.h>
 #include "../wolf.h"
 #include "../state_block.h"
-#include "../state_point.h"
-#include "../state_complex_angle.h"
-#include "../state_theta.h"
-#include "../constraint_sparse.h"
-#include "../constraint_odom_2D_theta.h"
-#include "../constraint_odom_2D_complex_angle.h"
-#include "../constraint_corner_2D_theta.h"
+#include "../constraint_base.h"
 
-/** \brief solver manager for WOLF
- *
+namespace wolf {
+
+WOLF_PTR_TYPEDEFS(SolverManager)
+
+/**
+ * \brief Solver manager for WOLF
  */
-
 class SolverManager
 {
-	protected:
+public:
 
+  /** \brief Enumeration of covariance blocks to be computed
+   *
+   * Enumeration of covariance blocks to be computed
+   *
+   */
+  enum class CovarianceBlocksToBeComputed : std::size_t
+  {
+    ALL, ///< All blocks and all cross-covariances
+    ALL_MARGINALS, ///< All marginals
+    ROBOT_LANDMARKS ///< marginals of landmarks and current robot pose plus cross covariances of current robot and all landmarks
+  };
 
-	public:
-		SolverManager(ceres::Problem::Options _options);
+  /**
+   * \brief Enumeration for the verbosity of the solver report.
+   */
+  enum class ReportVerbosity : std::size_t
+  {
+    QUIET = 0,
+    BRIEF,
+    FULL
+  };
 
-		~SolverManager();
+protected:
 
-		ceres::Solver::Summary solve(const ceres::Solver::Options& _ceres_options);
+  ProblemPtr wolf_problem_;
 
-		//void computeCovariances(WolfProblemPtr _problem_ptr);
+public:
 
-		void update(const WolfProblemPtr _problem_ptr);
+  SolverManager(const ProblemPtr& wolf_problem);
 
-		void addConstraint(ConstraintBasePtr _corr_ptr);
+  virtual ~SolverManager() = default;
 
-		void removeConstraint(const unsigned int& _corr_idx);
+  std::string solve(const ReportVerbosity report_level = ReportVerbosity::QUIET);
 
-		void addStateUnit(StateBlockPtr _st_ptr);
+  virtual void computeCovariances(const CovarianceBlocksToBeComputed blocks) = 0;
 
-		void removeAllStateUnits();
+  virtual void computeCovariances(const StateBlockList& st_list) = 0;
 
-		void updateStateUnitStatus(StateBlockPtr _st_ptr);
+  virtual void update();
 
-		ceres::CostFunction* createCostFunction(ConstraintBasePtr _corrPtr);
+  ProblemPtr getProblemPtr();
+
+protected:
+
+  std::map<StateBlockPtr, Eigen::VectorXs> state_blocks_;
+
+  virtual Eigen::VectorXs& getAssociatedMemBlock(const StateBlockPtr& state_ptr);
+  virtual Scalar* getAssociatedMemBlockPtr(const StateBlockPtr& state_ptr);
+
+  virtual std::string solveImpl(const ReportVerbosity report_level) = 0;
+
+  virtual void addConstraint(const ConstraintBasePtr& ctr_ptr) = 0;
+
+  virtual void removeConstraint(const ConstraintBasePtr& ctr_ptr) = 0;
+
+  virtual void addStateBlock(const StateBlockPtr& state_ptr) = 0;
+
+  virtual void removeStateBlock(const StateBlockPtr& state_ptr) = 0;
+
+  virtual void updateStateBlockStatus(const StateBlockPtr& state_ptr) = 0;
 };
 
-#endif
+} // namespace wolf
+
+#endif /* _WOLF_SOLVER_MANAGER_H_ */

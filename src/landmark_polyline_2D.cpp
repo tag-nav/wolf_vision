@@ -60,7 +60,7 @@ void LandmarkPolyline2D::setLast(const Eigen::VectorXs& _point, bool _defined)
     	defineExtreme(true);
 }
 
-const Eigen::VectorXs& LandmarkPolyline2D::getPointVector(int _i) const
+const Eigen::VectorXs LandmarkPolyline2D::getPointVector(int _i) const
 {
 	//std::cout << "LandmarkPolyline2D::getPointVector: " << _i << std::endl;
 	//std::cout << "First: " << first_id_ << " - size: " << point_state_ptr_vector_.size() << std::endl;

@@ -70,7 +70,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p_solve)
     frm0->setState(x0);
 
     // solve for frm0
-    std::string brief_report = ceres_mgr.solve(1);
+    std::string brief_report = ceres_mgr.solve(wolf::SolverManager::ReportVerbosity::BRIEF);
 
     //only orientation is constrained
     ASSERT_MATRIX_APPROX(frm0->getState().head<3>(), pose10.head<3>(), 1e-6);
@@ -97,7 +97,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_v_solve)
     frm0->setState(x0);
 
     // solve for frm0
-    std::string brief_report = ceres_mgr.solve(1);
+    std::string brief_report = ceres_mgr.solve(wolf::SolverManager::ReportVerbosity::BRIEF);
 
     //only velocity is constrained
     ASSERT_MATRIX_APPROX(frm0->getState().tail<3>(), pose10.tail<3>(), 1e-6);
@@ -124,7 +124,7 @@ TEST(ConstraintQuatAbs, ctr_block_abs_o_solve)
     frm0->setState(x0);
 
     // solve for frm0
-    std::string brief_report = ceres_mgr.solve(1);
+    std::string brief_report = ceres_mgr.solve(wolf::SolverManager::ReportVerbosity::BRIEF);
 
     //only velocity is constrained
     ASSERT_MATRIX_APPROX(frm0->getState().segment<4>(3), pose10.segment<4>(3), 1e-6);
