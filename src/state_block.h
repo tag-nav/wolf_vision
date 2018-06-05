@@ -49,7 +49,7 @@ public:
 
         NodeBaseWPtr node_ptr_; //< pointer to the wolf Node owning this StateBlock
 
-        bool fixed_; ///< Key to indicate whether the state is fixed or not
+        std::atomic_bool fixed_; ///< Key to indicate whether the state is fixed or not
 
         std::atomic<int> state_size_; ///< State vector size
         Eigen::VectorXs state_; ///< State vector storing the state values
@@ -198,7 +198,7 @@ inline Size StateBlock::getLocalSize() const
 
 inline bool StateBlock::isFixed() const
 {
-    return fixed_;
+    return fixed_.load();
 }
 
 inline void StateBlock::fix()
@@ -213,7 +213,7 @@ inline void StateBlock::unfix()
 
 inline void StateBlock::setFixed(bool _fixed)
 {
-    fixed_ = _fixed;
+    fixed_.store(_fixed);
     addNotification(Notification::FIX_UPDATE);
 }
 
