@@ -389,9 +389,8 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
 
 Scalar ProcessorTrackerLandmarkImage::match(const cv::Mat _target_descriptor, const cv::Mat _candidate_descriptors, DMatchVector& _cv_matches)
 {
-    mat_ptr_->match(_target_descriptor, _candidate_descriptors, _cv_matches);
-    Scalar normalized_score = 1 - (Scalar)(_cv_matches[0].distance)/(des_ptr_->getSize()*8);
-    return normalized_score;
+    std::vector<Scalar> normalized_scores = mat_ptr_->match(_target_descriptor, _candidate_descriptors, des_ptr_->getSize(), _cv_matches);
+    return normalized_scores[0];
 }
 
 unsigned int ProcessorTrackerLandmarkImage::detect(const cv::Mat _image, cv::Rect& _roi, KeyPointVector& _new_keypoints, cv::Mat& new_descriptors)
