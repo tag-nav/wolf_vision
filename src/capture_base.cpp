@@ -50,7 +50,6 @@ CaptureBase::CaptureBase(const std::string& _type,
         }
 
         getSensorPtr()->setHasCapture();
-        registerNewStateBlocks();
     }
     else if (_p_ptr || _o_ptr || _intr_ptr)
     {
