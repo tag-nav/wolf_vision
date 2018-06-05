@@ -29,20 +29,18 @@ ConstraintAnalytic::ConstraintAnalytic(const std::string&  _tp,
 {
     resizeVectors();
 }
-
-
-std::vector<Scalar*> ConstraintAnalytic::getStateScalarPtrVector() const
+/*
+ConstraintAnalytic::ConstraintAnalytic(ConstraintType _tp, const LandmarkBasePtr& _landmark_ptr, const ProcessorBasePtr& _processor_ptr,
+                                       bool _apply_loss_function, ConstraintStatus _status,
+                                       StateBlockPtr _state0Ptr, StateBlockPtr _state1Ptr, StateBlockPtr _state2Ptr, StateBlockPtr _state3Ptr, StateBlockPtr _state4Ptr,
+                                       StateBlockPtr _state5Ptr, StateBlockPtr _state6Ptr, StateBlockPtr _state7Ptr, StateBlockPtr _state8Ptr, StateBlockPtr _state9Ptr ) :
+            ConstraintBase( _tp, nullptr, nullptr, _landmark_ptr, _processor_ptr, _apply_loss_function, _status),
+            state_ptr_vector_({_state0Ptr, _state1Ptr, _state2Ptr, _state3Ptr, _state4Ptr,
+                               _state5Ptr, _state6Ptr, _state7Ptr, _state8Ptr, _state9Ptr})
 {
-    assert(state_ptr_vector_.size() > 0 && state_ptr_vector_.size() <= 10 && "Wrong state vector size in constraint, it should be between 1 and 10");
-
-    std::vector<Scalar*> state_scalar_ptr_vector(state_ptr_vector_.size());
-
-    for (auto i = 0; i < state_scalar_ptr_vector.size(); i++)
-        state_scalar_ptr_vector[i] = state_ptr_vector_[i]->getPtr();
-
-    return state_scalar_ptr_vector;
+    resizeVectors();
 }
-
+*/
 std::vector<StateBlockPtr> ConstraintAnalytic::getStateBlockPtrVector() const
 {
     return state_ptr_vector_;

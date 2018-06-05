@@ -1,12 +1,9 @@
-SET(HDRS_SOLVER
-    ccolamd_ordering.h 
-    cost_function_base.h
-    cost_function_sparse_base.h
-    cost_function_sparse.h
-    qr_solver.h
-    solver_manager.h
-    solver_QR.h
-    sparse_utils.h)
-SET(SRCS_SOLVER
-    solver_manager.cpp
-    )
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+# Forward var to parent scope
+
+SET(HDRS_SOLVER ${HDRS_SOLVER}
+                ${CMAKE_CURRENT_SOURCE_DIR}/solver_manager.h PARENT_SCOPE)
+
+SET(SRCS_SOLVER ${SRCS_SOLVER}
+                ${CMAKE_CURRENT_SOURCE_DIR}/solver_manager.cpp PARENT_SCOPE)

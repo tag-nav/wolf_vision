@@ -242,7 +242,7 @@ int main(int argc, char** argv)
     CeresManager ceres_manager(problem, ceres_options);
 
 
-    std::string summary = ceres_manager.solve(2);// 0: nothing, 1: BriefReport, 2: FullReport
+    std::string summary = ceres_manager.solve(SolverManager::ReportVerbosity::FULL);// 0: nothing, 1: BriefReport, 2: FullReport
     std::cout << summary << std::endl;
 
     // Test of convergence over the lmk params

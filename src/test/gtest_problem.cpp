@@ -79,7 +79,7 @@ TEST(Problem, Installers)
     SensorBasePtr    S = P->installSensor   ("ODOM 3D", "odometer",        xs,         wolf_root + "/src/examples/sensor_odom_3D.yaml");
 
     // install processor tracker (dummy installation under an Odometry sensor -- it's OK for this test)
-    ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(0.1, 5, 10));
+    ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(0.1, 5, 10);
     S->addProcessor(pt);
 
     // check motion processor IS NOT set
@@ -210,21 +210,21 @@ TEST(Problem, StateBlocks)
     // 2 state blocks, fixed
     SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
     ASSERT_EQ(P->getStateBlockList().size(),                2);
-    ASSERT_EQ(P->getStateBlockNotificationList().size(),    2);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(),    2);
 
     // 3 state blocks, fixed
     SensorBasePtr    St = P->installSensor   ("CAMERA", "camera",   xs, wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
     ASSERT_EQ(P->getStateBlockList().size(),                2 + 3);
-    ASSERT_EQ(P->getStateBlockNotificationList().size(),    2 + 3);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(),    2 + 3);
 
-    ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(0.1, 5, 10));
+    ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(0.1, 5, 10);
     St->addProcessor(pt);
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
     // 2 state blocks, estimated
     P->emplaceFrame("PO 3D", KEY_FRAME, xs, 0);
     ASSERT_EQ(P->getStateBlockList().size(),                2 + 3 + 2);
-    ASSERT_EQ(P->getStateBlockNotificationList().size(),    2 + 3 + 2);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(),    2 + 3 + 2);
 
 
     //    P->print(4,1,1,1);
@@ -232,7 +232,7 @@ TEST(Problem, StateBlocks)
     // change some SB properties
     St->unfixExtrinsics();
     ASSERT_EQ(P->getStateBlockList().size(),                2 + 3 + 2);
-    ASSERT_EQ(P->getStateBlockNotificationList().size(),    2 + 3 + 2 + 2); // XXX: 2 more notifications on the same SB!
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(),    2 + 3 + 2 /*+ 2*/); // XXX: 2 more notifications on the same SB!
 
     //    P->print(4,1,1,1);
 }
@@ -246,7 +246,7 @@ TEST(Problem, Covariances)
 
     SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
     SensorBasePtr    St = P->installSensor   ("CAMERA", "camera",   xs, wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
-    ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(0.1, 5, 10));
+    ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(0.1, 5, 10);
     St->addProcessor(pt);
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 

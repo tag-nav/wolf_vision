@@ -194,6 +194,7 @@ SET(HDRS_BASE
     local_parametrization_quaternion.h
     local_parametrization_homogeneous.h
     logging.h
+    make_unique.h
     map_base.h
     motion_buffer.h
     node_base.h
@@ -202,6 +203,7 @@ SET(HDRS_BASE
     processor_base.h
     processor_capture_holder.h
     processor_factory.h
+    processor_logging.h
     processor_loopclosure_base.h
     processor_motion.h
     processor_tracker.h
@@ -354,11 +356,14 @@ SET(SRCS_DTASSC
     data_association/association_nnls.cpp
     )
 
+# Add the solver sub-directory
+add_subdirectory(solver)
+
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
     SET(HDRS_WRAPPER
         ceres_wrapper/sparse_utils.h
-        ceres_wrapper/solver_manager.h
+        #ceres_wrapper/solver_manager.h
         ceres_wrapper/ceres_manager.h
         #ceres_wrapper/qr_manager.h
         ceres_wrapper/cost_function_wrapper.h
@@ -366,7 +371,7 @@ IF (Ceres_FOUND)
         ceres_wrapper/local_parametrization_wrapper.h 
         )
     SET(SRCS_WRAPPER
-        ceres_wrapper/solver_manager.cpp
+        #ceres_wrapper/solver_manager.cpp
         ceres_wrapper/ceres_manager.cpp
         #ceres_wrapper/qr_manager.cpp
         ceres_wrapper/local_parametrization_wrapper.cpp 
@@ -447,9 +452,9 @@ IF (cereal_FOUND)
   ADD_SUBDIRECTORY(serialization/cereal)
 ENDIF(cereal_FOUND)
 
-#IF (Suitesparse_FOUND)
-#    ADD_SUBDIRECTORY(solver)
-#ENDIF(Suitesparse_FOUND)
+IF (Suitesparse_FOUND)
+    ADD_SUBDIRECTORY(solver_suitesparse)
+ENDIF(Suitesparse_FOUND)
 
 # LEAVE YAML FILES ALWAYS IN THE LAST POSITION !!
 IF(YAMLCPP_FOUND)
@@ -490,6 +495,7 @@ ADD_LIBRARY(${PROJECT_NAME}
             ${SRCS_SENSOR}
             ${SRCS_PROCESSOR}
             #${SRCS_DTASSC} 
+            ${SRCS_SOLVER}
             ${SRCS_WRAPPER}
             )
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
@@ -550,11 +556,12 @@ INSTALL(FILES ${HDRS_PROCESSOR}
     DESTINATION include/iri-algorithms/wolf/processors)
 INSTALL(FILES ${HDRS_WRAPPER}
     DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
-#INSTALL(FILES ${HDRS_SOLVER}
-#    DESTINATION include/iri-algorithms/wolf/solver)
+#INSTALL(FILES ${HDRS_SOLVER_SUITESPARSE}
+#    DESTINATION include/iri-algorithms/wolf/solver_suitesparse)
+INSTALL(FILES ${HDRS_SOLVER}
+    DESTINATION include/iri-algorithms/wolf/solver)
 INSTALL(FILES ${HDRS_SERIALIZATION}
     DESTINATION include/iri-algorithms/wolf/serialization)
-
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf.cmake"
     DESTINATION "lib/cmake/${PROJECT_NAME}")
 

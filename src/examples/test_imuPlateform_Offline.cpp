@@ -201,9 +201,9 @@ int main(int argc, char** argv)
     origin_KF->getVPtr()->fix();
     
     std::cout << "\t\t\t ______solving______" << std::endl;
-    std::string report = ceres_manager_wolf_diff->solve(2);// 0: nothing, 1: BriefReport, 2: FullReport
+    std::string report = ceres_manager_wolf_diff->solve(SolverManager::ReportVerbosity::FULL);// 0: nothing, 1: BriefReport, 2: FullReport
     std::cout << report << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL);
+    ceres_manager_wolf_diff->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL);
     std::cout << "\t\t\t ______solved______" << std::endl;
 
     wolf_problem_ptr_->print(4,1,1,1);

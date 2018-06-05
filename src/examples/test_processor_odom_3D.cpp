@@ -93,7 +93,7 @@ int main (int argc, char** argv)
 //        frm->setState(problem->zeroState());
 //    }
 //    problem->print(1,0,1,0);
-    std::string brief_report = ceres_manager.solve(1);// 0, 1 or 2
+    std::string brief_report = ceres_manager.solve(SolverManager::ReportVerbosity::FULL);
     std::cout << brief_report << std::endl;
     problem->print(1,0,1,0);
 

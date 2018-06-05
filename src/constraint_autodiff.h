@@ -270,26 +270,6 @@ class ConstraintAutodiff : public ConstraintBase
 //               std::cout << jacobians_[i] << std::endl << std::endl;
         }
 
-        /** \brief Returns a vector of pointers to the state blocks
-         *
-         * Returns a vector of pointers to the state blocks in which this constraint depends
-         *
-         **/
-        virtual std::vector<Scalar*> getStateScalarPtrVector() const
-        {
-            return std::vector<Scalar*>({state_ptrs_[0]->getPtr(),
-                                         state_ptrs_[1]->getPtr(),
-                                         state_ptrs_[2]->getPtr(),
-                                         state_ptrs_[3]->getPtr(),
-                                         state_ptrs_[4]->getPtr(),
-                                         state_ptrs_[5]->getPtr(),
-                                         state_ptrs_[6]->getPtr(),
-                                         state_ptrs_[7]->getPtr(),
-                                         state_ptrs_[8]->getPtr(),
-                                         state_ptrs_[9]->getPtr()
-                                         });
-        }
-
         /** \brief Returns a vector of pointers to the states
          *
          * Returns a vector of pointers to the state in which this constraint depends
@@ -556,20 +536,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
-       virtual std::vector<Scalar*> getStateScalarPtrVector() const
-       {
-           return std::vector<Scalar*>({state_ptrs_[0]->getPtr(),
-                                        state_ptrs_[1]->getPtr(),
-                                        state_ptrs_[2]->getPtr(),
-                                        state_ptrs_[3]->getPtr(),
-                                        state_ptrs_[4]->getPtr(),
-                                        state_ptrs_[5]->getPtr(),
-                                        state_ptrs_[6]->getPtr(),
-                                        state_ptrs_[7]->getPtr(),
-                                        state_ptrs_[8]->getPtr()
-                                        });
-       }
-
        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const
        {
            return state_ptrs_;
@@ -811,19 +777,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
-       virtual std::vector<Scalar*> getStateScalarPtrVector() const
-       {
-           return std::vector<Scalar*>({state_ptrs_[0]->getPtr(),
-                                        state_ptrs_[1]->getPtr(),
-                                        state_ptrs_[2]->getPtr(),
-                                        state_ptrs_[3]->getPtr(),
-                                        state_ptrs_[4]->getPtr(),
-                                        state_ptrs_[5]->getPtr(),
-                                        state_ptrs_[6]->getPtr(),
-                                        state_ptrs_[7]->getPtr()
-                                        });
-       }
-
        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const
        {
            return state_ptrs_;
@@ -1054,18 +1007,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
-       virtual std::vector<Scalar*> getStateScalarPtrVector() const
-       {
-           return std::vector<Scalar*>({state_ptrs_[0]->getPtr(),
-                                        state_ptrs_[1]->getPtr(),
-                                        state_ptrs_[2]->getPtr(),
-                                        state_ptrs_[3]->getPtr(),
-                                        state_ptrs_[4]->getPtr(),
-                                        state_ptrs_[5]->getPtr(),
-                                        state_ptrs_[6]->getPtr()
-                                        });
-       }
-
        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const
        {
            return state_ptrs_;
@@ -1281,17 +1222,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
                                  jacobians_[i].data() + row * state_block_sizes_.at(i));
        }
 
-       virtual std::vector<Scalar*> getStateScalarPtrVector() const
-       {
-           return std::vector<Scalar*>({state_ptrs_[0]->getPtr(),
-                                        state_ptrs_[1]->getPtr(),
-                                        state_ptrs_[2]->getPtr(),
-                                        state_ptrs_[3]->getPtr(),
-                                        state_ptrs_[4]->getPtr(),
-                                        state_ptrs_[5]->getPtr()
-                                        });
-       }
-
        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const
        {
            return state_ptrs_;
@@ -1495,16 +1425,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
                                  jacobians_[i].data() + row * state_block_sizes_.at(i));
        }
 
-       virtual std::vector<Scalar*> getStateScalarPtrVector() const
-       {
-           return std::vector<Scalar*>({state_ptrs_[0]->getPtr(),
-                                        state_ptrs_[1]->getPtr(),
-                                        state_ptrs_[2]->getPtr(),
-                                        state_ptrs_[3]->getPtr(),
-                                        state_ptrs_[4]->getPtr(),
-                                        });
-       }
-
        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const
        {
            return state_ptrs_;
@@ -1701,15 +1621,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
-       virtual std::vector<Scalar*> getStateScalarPtrVector() const
-       {
-           return std::vector<Scalar*>({state_ptrs_[0]->getPtr(),
-                                        state_ptrs_[1]->getPtr(),
-                                        state_ptrs_[2]->getPtr(),
-                                        state_ptrs_[3]->getPtr()
-                                        });
-       }
-
        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const
        {
            return state_ptrs_;
@@ -1895,14 +1806,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
-       virtual std::vector<Scalar*> getStateScalarPtrVector() const
-       {
-           return std::vector<Scalar*>({state_ptrs_[0]->getPtr(),
-                                        state_ptrs_[1]->getPtr(),
-                                        state_ptrs_[2]->getPtr()
-                                        });
-       }
-
        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const
        {
            return state_ptrs_;
@@ -2077,13 +1980,6 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
-       virtual std::vector<Scalar*> getStateScalarPtrVector() const
-       {
-           return std::vector<Scalar*>({state_ptrs_[0]->getPtr(),
-                                        state_ptrs_[1]->getPtr()
-                                        });
-       }
-
        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const
        {
            return state_ptrs_;
@@ -2245,12 +2141,6 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
           // print jacobian matrices
 //           for (auto i = 0; i < n_blocks; i++)
 //               std::cout << jacobians_[i] << std::endl << std::endl;
-       }
-
-       virtual std::vector<Scalar*> getStateScalarPtrVector() const
-       {
-           return std::vector<Scalar*>({state_ptrs_[0]->getPtr()
-                                        });
        }
 
        virtual std::vector<StateBlockPtr> getStateBlockPtrVector() const

@@ -98,7 +98,7 @@ TEST_F(ConstraintAutodiffDistance3D_Test, solve)
     Scalar measurement = 1.400;
     f2->setMeasurement(Vector1s(measurement));
 
-    std::string report = ceres_manager->solve(2);
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::QUIET);
 
     // Check distance between F1 and F2 positions -- must match the measurement
     ASSERT_NEAR( (F1->getPPtr()->getState() - F2->getPPtr()->getState()).norm(), measurement, 1e-10);

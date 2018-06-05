@@ -111,18 +111,32 @@ inline bool ConstraintOdom3D::expectation(const T* const _p_current, const T* co
     Eigen::Map<Eigen::Matrix<T,3,1> > expectation_dp(_expectation_dp);
     Eigen::Map<Eigen::Quaternion<T> > expectation_dq(_expectation_dq);
 
-
-//     std::cout << "p_current: " << p_current(0) << std::endl << p_current(1) << std::endl << p_current(2) << std::endl;
-//     std::cout << "q_current: " << q_current.x() << std::endl << q_current.y() << std::endl << q_current.z() << std::endl << q_current.w() << std::endl;
-//     std::cout << "p_past: " << p_past(0) << std::endl << p_past(1) << std::endl << p_past(2) << std::endl;
-//     std::cout << "q_past: " << q_past.x() << std::endl << q_past.y() << std::endl << q_past.z() << std::endl << q_past.w() << std::endl;
+//     std::cout << "p_current: " << p_current(0) << " "
+//                                << p_current(1) << " "
+//                                << p_current(2) << "\n";
+//     std::cout << "q_current: " << q_current.coeffs()(0) << " "
+//                                << q_current.coeffs()(1) << " "
+//                                << q_current.coeffs()(2) << " "
+//                                << q_current.coeffs()(3) << "\n";
+//     std::cout << "p_past: " << p_past(0) << " "
+//                             << p_past(1) << " "
+//                             << p_past(2) << "\n";
+//     std::cout << "q_past: " << q_past.coeffs()(0) << " "
+//                             << q_past.coeffs()(1) << " "
+//                             << q_past.coeffs()(2) << " "
+//                             << q_past.coeffs()(3) << "\n";
 
     // estimate motion increment, dp, dq;
     expectation_dp = q_past.conjugate() * (p_current - p_past);
-    expectation_dq =  q_past.conjugate() * q_current;
+    expectation_dq = q_past.conjugate() * q_current;
 
-//    std::cout << "exp_p: " << expectation_dp(0) << std::endl << expectation_dp(1) << std::endl << expectation_dp(2) << std::endl;
-//    std::cout << "exp_q: " << expectation(3) << std::endl << expectation(4) << std::endl << expectation(5) << std::endl << expectation(6) << std::endl;
+//    std::cout << "exp_p: " << expectation_dp(0) << " "
+//                           << expectation_dp(1) << " "
+//                           << expectation_dp(2) << "\n";
+//    std::cout << "exp_q: " << expectation_dq.coeffs()(0) << " "
+//                           << expectation_dq.coeffs()(1) << " "
+//                           << expectation_dq.coeffs()(2) << " "
+//                           << expectation_dq.coeffs()(3) << "\n";
 
     return true;
 }
@@ -132,18 +146,18 @@ inline Eigen::VectorXs ConstraintOdom3D::expectation() const
     Eigen::VectorXs exp(7);
     FrameBasePtr frm_current = getFeaturePtr()->getFramePtr();
     FrameBasePtr frm_past = getFrameOtherPtr();
-    const Scalar * const frame_current_pos  = frm_current->getPPtr()->getState().data();
-    const Scalar * const frame_current_ori  = frm_current->getOPtr()->getState().data();
-    const Scalar * const frame_past_pos     = frm_past->getPPtr()->getState().data();
-    const Scalar * const frame_past_ori     = frm_past->getOPtr()->getState().data();
+    const Eigen::VectorXs frame_current_pos  = frm_current->getPPtr()->getState();
+    const Eigen::VectorXs frame_current_ori  = frm_current->getOPtr()->getState();
+    const Eigen::VectorXs frame_past_pos     = frm_past->getPPtr()->getState();
+    const Eigen::VectorXs frame_past_ori     = frm_past->getOPtr()->getState();
 
-//    std::cout << "frame_current_pos: " << frm_current->getPPtr()->getVector().transpose() << std::endl;
-//    std::cout << "frame_past_pos: " << frm_past->getPPtr()->getVector().transpose() << std::endl;
+//    std::cout << "frame_current_pos: " << frm_current->getPPtr()->getState().transpose() << std::endl;
+//    std::cout << "frame_past_pos: " << frm_past->getPPtr()->getState().transpose() << std::endl;
 
-    expectation(frame_current_pos,
-                frame_current_ori,
-                frame_past_pos,
-                frame_past_ori,
+    expectation(frame_current_pos.data(),
+                frame_current_ori.data(),
+                frame_past_pos.data(),
+                frame_past_ori.data(),
                 exp.data(),
                 exp.data()+3);
     return exp;

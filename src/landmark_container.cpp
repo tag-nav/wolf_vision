@@ -30,16 +30,17 @@ LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,
                 M_PI / 4,     3 * M_PI / 4,-3 * M_PI / 4,-M_PI / 4;
 
     // Computing center
-    std::cout << "Container constructor: Computing center pose... " << std::endl;
-    Eigen::Map<Eigen::Vector2s> container_position(getPPtr()->getPtr());
-    Eigen::Map<Eigen::Vector1s> container_orientation(getOPtr()->getPtr());
+    WOLF_DEBUG( "Container constructor: Computing center pose... " );
+    Eigen::Vector2s container_position(getPPtr()->getState());
+    Eigen::Vector1s container_orientation(getOPtr()->getState());
 
-    std::cout << "Container constructor: _corner_1_idx " << _corner_1_idx << "_corner_2_idx " << _corner_2_idx << std::endl;
+    WOLF_DEBUG( "Container constructor: _corner_1_idx ", _corner_1_idx,
+                "_corner_2_idx ", _corner_2_idx );
 
     // Large side detected (A & B)
     if ( (_corner_1_idx == 0 && _corner_2_idx == 1) || (_corner_1_idx == 1 && _corner_2_idx == 0) )
     {
-        std::cout << "Large side detected" << std::endl;
+        WOLF_DEBUG( "Large side detected" );
         Eigen::Vector2s AB = (_corner_1_idx == 0 ? _corner_2_pose.head(2) - _corner_1_pose.head(2) : _corner_1_pose.head(2) - _corner_2_pose.head(2));
         Eigen::Vector2s perpendicularAB;
         perpendicularAB << -AB(1)/AB.norm(), AB(0)/AB.norm();
@@ -50,7 +51,7 @@ LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,
     // Short side detected (B & C)
     else if ( (_corner_1_idx == 1 && _corner_2_idx == 2) || (_corner_1_idx == 2 && _corner_2_idx == 1) )
     {
-        std::cout << "Short side detected" << std::endl;
+        WOLF_DEBUG( "Short side detected" );
         Eigen::Vector2s BC = (_corner_1_idx == 1 ? _corner_2_pose.head(2) - _corner_1_pose.head(2) : _corner_1_pose.head(2) - _corner_2_pose.head(2));
         Eigen::Vector2s perpendicularBC;
         perpendicularBC << -BC(1)/BC.norm(), BC(0)/BC.norm();
@@ -62,7 +63,7 @@ LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,
     // A & C
     else if ( (_corner_1_idx == 0 && _corner_2_idx == 2) || (_corner_1_idx == 2 && _corner_2_idx == 0) )
     {
-        std::cout << "diagonal AC detected" << std::endl;
+        WOLF_DEBUG( "diagonal AC detected" );
         Eigen::Vector2s AC = (_corner_1_idx == 0 ? _corner_2_pose.head(2) - _corner_1_pose.head(2) : _corner_1_pose.head(2) - _corner_2_pose.head(2));
         container_position = (_corner_1_idx == 0 ? _corner_1_pose.head(2) : _corner_2_pose.head(2)) + AC / 2;
         container_orientation(0) = atan2(AC(1),AC(0)) - atan2(_witdh,_length);
@@ -70,7 +71,7 @@ LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,
     // B & D
     else if ( (_corner_1_idx == 1 && _corner_2_idx == 3) || (_corner_1_idx == 3 && _corner_2_idx == 1) )
     {
-        std::cout << "diagonal BD detected" << std::endl;
+        WOLF_DEBUG( "diagonal BD detected" );
         Eigen::Vector2s BD = (_corner_1_idx == 1 ? _corner_2_pose.head(2) - _corner_1_pose.head(2) : _corner_1_pose.head(2) - _corner_2_pose.head(2));
         container_position = (_corner_1_idx == 1 ? _corner_1_pose.head(2) : _corner_2_pose.head(2)) + BD / 2;
         container_orientation(0) = atan2(BD(1),BD(0)) + atan2(_witdh,_length);
@@ -78,9 +79,12 @@ LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,
     else
         assert(0 && "index corners combination not implemented!");
 
-    std::cout << "_corner_1_pose... " << _corner_1_pose.transpose() << std::endl;
-    std::cout << "_corner_2_pose... " << _corner_2_pose.transpose() << std::endl;
-    std::cout << "Container center pose... " << container_position.transpose() << " " << container_orientation.transpose() << std::endl;
+    WOLF_DEBUG( "_corner_1_pose... ", _corner_1_pose.transpose() );
+    WOLF_DEBUG( "_corner_2_pose... ", _corner_2_pose.transpose() );
+    WOLF_DEBUG( "Container center pose... ", container_position.transpose(), " ", container_orientation.transpose() );
+
+    getPPtr()->setState(container_position);
+    getOPtr()->setState(container_orientation);
 }
 
 //LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const Scalar& _witdh, const Scalar& _length) :

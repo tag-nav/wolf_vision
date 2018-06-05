@@ -259,16 +259,16 @@ int main(int argc, char** argv)
 
     
     std::cout << "\t\t\t ______solving______" << std::endl;
-    std::string report = ceres_manager_wolf_diff->solve(2); //0: nothing, 1: BriefReport, 2: FullReport
+    std::string report = ceres_manager_wolf_diff->solve(SolverManager::ReportVerbosity::FULL); //0: nothing, 1: BriefReport, 2: FullReport
     std::cout << report << std::endl;
 
     last_KF->getAccBiasPtr()->fix();
     last_KF->getGyroBiasPtr()->fix();
 
     std::cout << "\t\t\t solving after fixBias" << std::endl;
-    report = ceres_manager_wolf_diff->solve(1); //0: nothing, 1: BriefReport, 2: FullReport
+    report = ceres_manager_wolf_diff->solve(SolverManager::ReportVerbosity::BRIEF); //0: nothing, 1: BriefReport, 2: FullReport
     std::cout << report << std::endl;
-    ceres_manager_wolf_diff->computeCovariances(ALL);
+    ceres_manager_wolf_diff->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL);
     std::cout << "\t\t\t ______solved______" << std::endl;
 
     wolf_problem_ptr_->print(4,1,1,1);

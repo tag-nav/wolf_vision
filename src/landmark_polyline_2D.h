@@ -72,7 +72,7 @@ class LandmarkPolyline2D : public LandmarkBase
 		int getFirstId() const;
 		int getLastId() const;
 
-        const Eigen::VectorXs& getPointVector(int _i) const;
+        const Eigen::VectorXs getPointVector(int _i) const;
 
         StateBlockPtr getPointStateBlockPtr(int _i);
 
