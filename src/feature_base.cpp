@@ -89,40 +89,69 @@ void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 {
-    if (_meas_cov.determinant() < Constants::EPS_SMALL)
-    {
-        Eigen::MatrixXs eps = Eigen::MatrixXs::Identity(_meas_cov.rows(), _meas_cov.cols()) * 1e-10;
-        measurement_covariance_ = _meas_cov + eps; // avoid singular covariance
-    }
-    else
-        measurement_covariance_ = _meas_cov;
+    // Check symmetry (soft)
+    assert((_meas_cov - _meas_cov.transpose()).cwiseAbs().maxCoeff() < Constants::EPS && "Not symmetric measurement covariance");
 
-	measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_cov);
+    // set (ensuring strong symmetry)
+    measurement_covariance_ = _meas_cov.selfadjointView<Eigen::Upper>();
+
+    // Avoid singular covariance
+    avoidSingleCovariance();
+
+	// compute square root information upper matrix
+	measurement_sqrt_information_upper_ = computeSqrtUpper(measurement_covariance_.inverse());
 }
 
 void FeatureBase::setMeasurementInfo(const Eigen::MatrixXs & _meas_info)
 {
-    assert(_meas_info.determinant() > 0 && "Not positive definite measurement information");
+    assert(_meas_info.determinant() > Constants::EPS_SMALL && "Not positive definite measurement information");
+    assert((_meas_info - _meas_info.transpose()).cwiseAbs().maxCoeff() < Constants::EPS && "Not symmetric measurement information");
 
-    measurement_covariance_ = _meas_info.inverse();
-    measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_info.inverse());
+    // set (ensuring strong symmetry)
+    measurement_covariance_ = _meas_info.inverse().selfadjointView<Eigen::Upper>();
+
+    // Avoid singular covariance
+    avoidSingleCovariance();
+
+    // compute square root information upper matrix
+    measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_info);
 }
 
-Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _covariance) const
+Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) const
 {
-    if (_covariance.determinant() < Constants::EPS_SMALL)
+    assert(_info.determinant() > Constants::EPS_SMALL && "Matrix is not positive definite!");
+    assert((_info - _info.transpose()).cwiseAbs().maxCoeff() < Constants::EPS && "Matrix is not symmetric!");
+
+    // impose symmetry
+    Eigen::MatrixXs info = ((_info + _info.transpose()) / 2);
+    info = info.selfadjointView<Eigen::Upper>();
+
+    // Normal Cholesky factorization
+    Eigen::LLT<Eigen::MatrixXs> llt_of_info(info);
+    Eigen::MatrixXs R = llt_of_info.matrixU();
+
+    // Good factorization
+    if ((R.transpose() * R - info).cwiseAbs().maxCoeff() < Constants::EPS)
+        return R;
+
+    // Not good factorization: SelfAdjointEigenSolver
+    Eigen::SelfAdjointEigenSolver<Eigen::MatrixXs> es(info);
+    Eigen::VectorXs eval = es.eigenvalues().real().cwiseMax(0);
+
+    R = eval.cwiseSqrt().asDiagonal() * es.eigenvectors().real().transpose();
+
+    return R;
+}
+
+void FeatureBase::avoidSingleCovariance()
+{
+    Scalar eps_scalar = 1e-10;
+    while (measurement_covariance_.determinant() < Constants::EPS_SMALL && eps_scalar < 1e-3)
     {
-        // Avoid singular covariances matrix
-        Eigen::MatrixXs cov = _covariance + 1e-8 * Eigen::MatrixXs::Identity(_covariance.rows(), _covariance.cols());
-        Eigen::LLT<Eigen::MatrixXs> llt_of_info(cov.inverse());
-        return llt_of_info.matrixU();
+        measurement_covariance_ += Eigen::MatrixXs::Identity(measurement_covariance_.rows(), measurement_covariance_.cols()) * eps_scalar; // avoid singular covariance
+        eps_scalar*=10;
     }
-    else
-    {
-        // Normal operation
-        Eigen::LLT<Eigen::MatrixXs> llt_of_info(_covariance.inverse());
-        return llt_of_info.matrixU();
-    }
+    assert(measurement_covariance_.determinant() > Constants::EPS_SMALL && "Couldn't avoid singular covariance");
 }
 
 } // namespace wolf
