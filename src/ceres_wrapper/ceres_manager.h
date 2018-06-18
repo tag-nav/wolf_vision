@@ -40,7 +40,7 @@ protected:
 
 public:
 
-  CeresManager(ProblemPtr& _wolf_problem,
+  CeresManager(const ProblemPtr& _wolf_problem,
                const ceres::Solver::Options& _ceres_options
                 = ceres::Solver::Options());
 

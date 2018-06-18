@@ -7,7 +7,7 @@
 
 namespace wolf {
 
-CeresManager::CeresManager(ProblemPtr& _wolf_problem,
+CeresManager::CeresManager(const ProblemPtr& _wolf_problem,
                            const ceres::Solver::Options& _ceres_options) :
   SolverManager(_wolf_problem),
   ceres_options_(_ceres_options)
