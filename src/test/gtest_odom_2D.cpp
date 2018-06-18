@@ -193,6 +193,7 @@ TEST(Odom2D, VoteForKfAndSolve)
     ProblemPtr problem = Problem::create("PO 2D");
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
+    params->voting_active   = true;
     params->dist_traveled   = 100;
     params->angle_turned    = 6.28;
     params->max_time_span   = 2.5*dt; // force KF at every third process()
