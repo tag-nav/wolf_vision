@@ -5,7 +5,7 @@
 
 //Wolf includes
 #include <sensor_GPS.h>
-#include "feature_gps_pseudorange.h"
+#include "feature_GPS_pseudorange.h"
 #include "constraint_autodiff.h"
 
 //std
