@@ -64,7 +64,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         const Eigen::VectorXs& getMeasurement() const;
         void setMeasurement(const Eigen::VectorXs& _meas);
         void setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov);
-        void setMeasurementInfo(const Eigen::MatrixXs & _meas_info);
+        void setMeasurementInformation(const Eigen::MatrixXs & _meas_info);
         const Eigen::MatrixXs& getMeasurementCovariance() const;
         Eigen::MatrixXs getMeasurementInformation() const;
         const Eigen::MatrixXs& getMeasurementSquareRootInformationUpper() const;

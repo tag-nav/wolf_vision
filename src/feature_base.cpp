@@ -102,7 +102,7 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 	measurement_sqrt_information_upper_ = computeSqrtUpper(measurement_covariance_.inverse());
 }
 
-void FeatureBase::setMeasurementInfo(const Eigen::MatrixXs & _meas_info)
+void FeatureBase::setMeasurementInformation(const Eigen::MatrixXs & _meas_info)
 {
     assert(_meas_info.determinant() > Constants::EPS_SMALL && "Not positive definite measurement information");
     assert((_meas_info - _meas_info.transpose()).cwiseAbs().maxCoeff() < Constants::EPS && "Not symmetric measurement information");
