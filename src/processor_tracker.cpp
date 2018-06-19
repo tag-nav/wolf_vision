@@ -21,7 +21,8 @@ ProcessorTracker::ProcessorTracker(const std::string& _type,
         processing_step_(FIRST_TIME_WITHOUT_PACK),
         origin_ptr_(nullptr),
         last_ptr_(nullptr),
-        incoming_ptr_(nullptr)
+        incoming_ptr_(nullptr),
+        number_of_tracks_(0)
 {
     //
 }
