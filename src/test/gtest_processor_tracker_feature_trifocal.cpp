@@ -121,6 +121,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
 
     // Track
     cv::Mat image(intr->height, intr->width, CV_8UC3); // OpenCV cv::Mat(rows, cols)
+    image *= 0; // TODO see if we want to use a real image
     CaptureImagePtr capt_trk = make_shared<CaptureImage>(t, sens_trk, image);
     proc_trk->process(capt_trk);
 
