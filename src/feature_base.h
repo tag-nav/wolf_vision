@@ -91,7 +91,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
     private:
         Eigen::MatrixXs computeSqrtUpper(const Eigen::MatrixXs& _M) const;
 
-        void avoidSingleCovariance();
+        void avoidSingularCovariance();
 
 };
 

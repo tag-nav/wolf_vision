@@ -96,7 +96,7 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
     measurement_covariance_ = _meas_cov.selfadjointView<Eigen::Upper>();
 
     // Avoid singular covariance
-    avoidSingleCovariance();
+    avoidSingularCovariance();
 
 	// compute square root information upper matrix
 	measurement_sqrt_information_upper_ = computeSqrtUpper(measurement_covariance_.inverse());
@@ -111,7 +111,7 @@ void FeatureBase::setMeasurementInformation(const Eigen::MatrixXs & _meas_info)
     measurement_covariance_ = _meas_info.inverse().selfadjointView<Eigen::Upper>();
 
     // Avoid singular covariance
-    avoidSingleCovariance();
+    avoidSingularCovariance();
 
     // compute square root information upper matrix
     measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_info);
@@ -119,9 +119,6 @@ void FeatureBase::setMeasurementInformation(const Eigen::MatrixXs & _meas_info)
 
 Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) const
 {
-    assert(_info.determinant() > Constants::EPS_SMALL && "Matrix is not positive definite!");
-    assert((_info - _info.transpose()).cwiseAbs().maxCoeff() < Constants::EPS && "Matrix is not symmetric!");
-
     // impose symmetry
     Eigen::MatrixXs info = ((_info + _info.transpose()) / 2);
     info = info.selfadjointView<Eigen::Upper>();
@@ -143,15 +140,30 @@ Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) con
     return R;
 }
 
-void FeatureBase::avoidSingleCovariance()
+void FeatureBase::avoidSingularCovariance()
 {
-    Scalar eps_scalar = 1e-10;
+    Eigen::SelfAdjointEigenSolver<Eigen::MatrixXs> eigensolver(measurement_covariance_);
+
+    if (eigensolver.info() == Eigen::Success)
+    {
+        // All eigenvalues must be >= 0:
+        //std::cout << "pre\n" << measurement_covariance_ << std::endl;
+        if ((eigensolver.eigenvalues().array() < Constants::EPS).all())
+            measurement_covariance_= eigensolver.eigenvectors() *
+                                     (eigensolver.eigenvalues().array() > Constants::EPS).select(eigensolver.eigenvalues(), Constants::EPS).asDiagonal() *
+                                     eigensolver.eigenvectors().transpose();
+        //std::cout << "post\n" << measurement_covariance_ << std::endl;
+    }
+    else
+        WOLF_ERROR("Couldn't compute covariance eigen decomposition");
+
+    /*Scalar eps_scalar = 1e-10;
     while (measurement_covariance_.determinant() < Constants::EPS_SMALL && eps_scalar < 1e-3)
     {
         measurement_covariance_ += Eigen::MatrixXs::Identity(measurement_covariance_.rows(), measurement_covariance_.cols()) * eps_scalar; // avoid singular covariance
         eps_scalar*=10;
-    }
-    assert(measurement_covariance_.determinant() > Constants::EPS_SMALL && "Couldn't avoid singular covariance");
+    }*/
+    assert(measurement_covariance_.determinant() > 0 && "Couldn't avoid singular covariance");
 }
 
 } // namespace wolf
