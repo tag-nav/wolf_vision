@@ -91,11 +91,11 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 {
     WOLF_ASSERT_COVARIANCE_MATRIX(_meas_cov);
 
-    // set (ensuring strong symmetry)
+    // set (ensuring symmetry)
     measurement_covariance_ = _meas_cov.selfadjointView<Eigen::Upper>();
 
     // Avoid singular covariance
-    avoidSingularCovariance();
+    //avoidSingularCovariance();
 
 	// compute square root information upper matrix
 	measurement_sqrt_information_upper_ = computeSqrtUpper(measurement_covariance_.inverse());
@@ -105,12 +105,12 @@ void FeatureBase::setMeasurementInformation(const Eigen::MatrixXs & _meas_info)
 {
     WOLF_ASSERT_INFORMATION_MATRIX(_meas_info);
 
-    // set (ensuring strong symmetry)
+    // set (ensuring symmetry)
     measurement_covariance_ = _meas_info.inverse().selfadjointView<Eigen::Upper>();
     WOLF_ASSERT_COVARIANCE_MATRIX(measurement_covariance_);
 
     // Avoid singular covariance
-    avoidSingularCovariance();
+    //avoidSingularCovariance();
 
     // compute square root information upper matrix
     measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_info);
@@ -119,8 +119,7 @@ void FeatureBase::setMeasurementInformation(const Eigen::MatrixXs & _meas_info)
 Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) const
 {
     // impose symmetry
-    Eigen::MatrixXs info = ((_info + _info.transpose()) / 2);
-    info = info.selfadjointView<Eigen::Upper>();
+    Eigen::MatrixXs info = _info.selfadjointView<Eigen::Upper>();
 
     // Normal Cholesky factorization
     Eigen::LLT<Eigen::MatrixXs> llt_of_info(info);
