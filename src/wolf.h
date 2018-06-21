@@ -310,7 +310,7 @@ bool isPositiveSemiDefinite(const Eigen::Matrix<T, N, N, RC>& M, const T& eps = 
   if (eigensolver.info() == Eigen::Success)
   {
     // All eigenvalues must be >= 0:
-    return (eigensolver.eigenvalues().array() >= T(eps)).all();
+    return (eigensolver.eigenvalues().array() >= eps).all();
   }
 
   return false;
