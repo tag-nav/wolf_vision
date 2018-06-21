@@ -7,7 +7,7 @@
 
 // Wolf includes
 #include "processor_base.h"
-#include "capture_gps.h"
+#include "capture_GPS.h"
 
 // Std includes
 
