@@ -114,6 +114,12 @@ target_link_libraries(gtest_trajectory ${PROJECT_NAME})
 
 # ------- Now Derived classes ----------
 
+IF (Ceres_FOUND)
+# CeresManager test
+wolf_add_gtest(gtest_ceres_manager gtest_ceres_manager.cpp)
+target_link_libraries(gtest_ceres_manager ${PROJECT_NAME})
+ENDIF(Ceres_FOUND)
+
 # ConstraintAbs(P/O/V) classes test
 wolf_add_gtest(gtest_constraint_absolute gtest_constraint_absolute.cpp)
 target_link_libraries(gtest_constraint_absolute ${PROJECT_NAME})

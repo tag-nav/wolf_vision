@@ -1,5 +1,5 @@
 /*
- * gtest_solver_manager.cpp
+ * gtest_ceres_manager.cpp
  *
  *  Created on: Jun, 2018
  *      Author: jvallve
@@ -14,80 +14,64 @@
 #include "../capture_void.h"
 #include "../constraint_pose_2D.h"
 #include "../solver/solver_manager.h"
+#include "../ceres_wrapper/ceres_manager.h"
+
+#include "ceres/ceres.h"
 
 #include <iostream>
 
 using namespace wolf;
 using namespace Eigen;
 
-WOLF_PTR_TYPEDEFS(SolverManagerWrapper);
-class SolverManagerWrapper : public SolverManager
+WOLF_PTR_TYPEDEFS(CeresManagerWrapper);
+class CeresManagerWrapper : public CeresManager
 {
     public:
-        std::list<ConstraintBasePtr> constraints_;
-        std::map<StateBlockPtr,bool> state_block_fixed_;
-
-        SolverManagerWrapper(const ProblemPtr& wolf_problem) :
-            SolverManager(wolf_problem)
+        CeresManagerWrapper(const ProblemPtr& wolf_problem) :
+            CeresManager(wolf_problem)
         {
         };
 
-        bool isStateBlockRegistered(const StateBlockPtr& st) const
+        bool isStateBlockRegisteredCeresManager(const StateBlockPtr& st)
+        {
+            return ceres_problem_->HasParameterBlock(SolverManager::getAssociatedMemBlockPtr(st));
+        };
+
+        bool isStateBlockRegisteredSolverManager(const StateBlockPtr& st)
         {
             return state_blocks_.find(st)!=state_blocks_.end();
         };
 
-        bool isStateBlockFixed(const StateBlockPtr& st) const
+        bool isStateBlockFixed(const StateBlockPtr& st)
         {
-            return state_block_fixed_.at(st);
+            return ceres_problem_->IsParameterBlockConstant(SolverManager::getAssociatedMemBlockPtr(st));
+        };
+
+        int numStateBlocks()
+        {
+            return ceres_problem_->NumParameterBlocks();
         };
 
         bool isConstraintRegistered(const ConstraintBasePtr& ctr_ptr) const
         {
-            return std::find(constraints_.begin(), constraints_.end(), ctr_ptr) != constraints_.end();
+            return ctr_2_residual_idx_.find(ctr_ptr) != ctr_2_residual_idx_.end() && ctr_2_costfunction_.find(ctr_ptr) != ctr_2_costfunction_.end();
         };
 
-        virtual void computeCovariances(const CovarianceBlocksToBeComputed blocks){};
-        virtual void computeCovariances(const StateBlockList& st_list){};
-
-    protected:
-
-        virtual std::string solveImpl(const ReportVerbosity report_level){ return std::string("");};
-        virtual void addConstraint(const ConstraintBasePtr& ctr_ptr)
-        {
-            constraints_.push_back(ctr_ptr);
-        };
-        virtual void removeConstraint(const ConstraintBasePtr& ctr_ptr)
-        {
-            constraints_.remove(ctr_ptr);
-        };
-        virtual void addStateBlock(const StateBlockPtr& state_ptr)
-        {
-            state_block_fixed_[state_ptr] = state_ptr->isFixed();
-        };
-        virtual void removeStateBlock(const StateBlockPtr& state_ptr)
-        {
-            state_block_fixed_.erase(state_ptr);
-        };
-        virtual void updateStateBlockStatus(const StateBlockPtr& state_ptr)
-        {
-            state_block_fixed_[state_ptr] = state_ptr->isFixed();
-        };
 };
 
 TEST(SolverManager, Create)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // check double ointers to branches
-    ASSERT_EQ(P, solver_manager_ptr->getProblemPtr());
+    ASSERT_EQ(P, ceres_manager_ptr->getProblemPtr());
 }
 
 TEST(SolverManager, AddStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
     Vector2s state; state << 1, 2;
@@ -97,16 +81,17 @@ TEST(SolverManager, AddStateBlock)
     P->addStateBlock(sb_ptr);
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // check stateblock
-    ASSERT_TRUE(solver_manager_ptr->isStateBlockRegistered(sb_ptr));
+    ASSERT_TRUE(ceres_manager_ptr->isStateBlockRegisteredSolverManager(sb_ptr));
+    ASSERT_TRUE(ceres_manager_ptr->isStateBlockRegisteredCeresManager(sb_ptr));
 }
 
 TEST(SolverManager, DoubleAddStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
     Vector2s state; state << 1, 2;
@@ -116,22 +101,23 @@ TEST(SolverManager, DoubleAddStateBlock)
     P->addStateBlock(sb_ptr);
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // add stateblock again
     P->addStateBlock(sb_ptr);
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // check stateblock
-    ASSERT_TRUE(solver_manager_ptr->isStateBlockRegistered(sb_ptr));
+    ASSERT_TRUE(ceres_manager_ptr->isStateBlockRegisteredSolverManager(sb_ptr));
+    ASSERT_TRUE(ceres_manager_ptr->isStateBlockRegisteredCeresManager(sb_ptr));
 }
 
 TEST(SolverManager, UpdateStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
     Vector2s state; state << 1, 2;
@@ -141,10 +127,10 @@ TEST(SolverManager, UpdateStateBlock)
     P->addStateBlock(sb_ptr);
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // check stateblock unfixed
-    ASSERT_FALSE(solver_manager_ptr->isStateBlockFixed(sb_ptr));
+    ASSERT_FALSE(ceres_manager_ptr->isStateBlockFixed(sb_ptr));
 
     // Fix frame
     sb_ptr->fix();
@@ -153,16 +139,16 @@ TEST(SolverManager, UpdateStateBlock)
     P->updateStateBlockPtr(sb_ptr);
 
     // update solver manager
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // check stateblock fixed
-    ASSERT_TRUE(solver_manager_ptr->isStateBlockFixed(sb_ptr));
+    ASSERT_TRUE(ceres_manager_ptr->isStateBlockFixed(sb_ptr));
 }
 
 TEST(SolverManager, AddUpdateStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
     Vector2s state; state << 1, 2;
@@ -178,17 +164,18 @@ TEST(SolverManager, AddUpdateStateBlock)
     P->updateStateBlockPtr(sb_ptr);
 
     // update solver manager
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // check stateblock fixed
-    ASSERT_TRUE(solver_manager_ptr->isStateBlockRegistered(sb_ptr));
-    ASSERT_TRUE(solver_manager_ptr->isStateBlockFixed(sb_ptr));
+    ASSERT_TRUE(ceres_manager_ptr->isStateBlockRegisteredSolverManager(sb_ptr));
+    ASSERT_TRUE(ceres_manager_ptr->isStateBlockRegisteredCeresManager(sb_ptr));
+    ASSERT_TRUE(ceres_manager_ptr->isStateBlockFixed(sb_ptr));
 }
 
 TEST(SolverManager, RemoveStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
     Vector2s state; state << 1, 2;
@@ -198,22 +185,26 @@ TEST(SolverManager, RemoveStateBlock)
     P->addStateBlock(sb_ptr);
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
+
+    ASSERT_TRUE(ceres_manager_ptr->isStateBlockRegisteredSolverManager(sb_ptr));
+    ASSERT_TRUE(ceres_manager_ptr->isStateBlockRegisteredCeresManager(sb_ptr));
 
     // remove state_block
     P->removeStateBlockPtr(sb_ptr);
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // check stateblock
-    ASSERT_FALSE(solver_manager_ptr->isStateBlockRegistered(sb_ptr));
+    ASSERT_FALSE(ceres_manager_ptr->isStateBlockRegisteredSolverManager(sb_ptr));
+    ASSERT_TRUE(ceres_manager_ptr->numStateBlocks() == 0);
 }
 
 TEST(SolverManager, AddRemoveStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
     Vector2s state; state << 1, 2;
@@ -226,16 +217,17 @@ TEST(SolverManager, AddRemoveStateBlock)
     P->removeStateBlockPtr(sb_ptr);
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
-    // check stateblock
-    ASSERT_FALSE(solver_manager_ptr->isStateBlockRegistered(sb_ptr));
+    // check no stateblocks
+    ASSERT_FALSE(ceres_manager_ptr->isStateBlockRegisteredSolverManager(sb_ptr));
+    ASSERT_TRUE(ceres_manager_ptr->numStateBlocks() == 0);
 }
 
 TEST(SolverManager, RemoveUpdateStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
     Vector2s state; state << 1, 2;
@@ -244,11 +236,14 @@ TEST(SolverManager, RemoveUpdateStateBlock)
     // add stateblock
     P->addStateBlock(sb_ptr);
 
+    // update solver
+    ceres_manager_ptr->update();
+
     // remove state_block
     P->removeStateBlockPtr(sb_ptr);
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // Fix state block
     sb_ptr->fix();
@@ -258,14 +253,14 @@ TEST(SolverManager, RemoveUpdateStateBlock)
         P->updateStateBlockPtr(sb_ptr);
 
         // update solver manager
-        solver_manager_ptr->update();
+        ceres_manager_ptr->update();
     },"");
 }
 
 TEST(SolverManager, DoubleRemoveStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
     Vector2s state; state << 1, 2;
@@ -278,19 +273,19 @@ TEST(SolverManager, DoubleRemoveStateBlock)
     P->removeStateBlockPtr(sb_ptr);
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // remove state_block
     P->removeStateBlockPtr(sb_ptr);
 
     // update solver manager
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 }
 
 TEST(SolverManager, AddConstraint)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
     Vector2s state; state << 1, 2;
@@ -303,16 +298,16 @@ TEST(SolverManager, AddConstraint)
     ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // check constraint
-    ASSERT_TRUE(solver_manager_ptr->isConstraintRegistered(c));
+    ASSERT_TRUE(ceres_manager_ptr->isConstraintRegistered(c));
 }
 
 TEST(SolverManager, RemoveConstraint)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
     Vector2s state; state << 1, 2;
@@ -325,22 +320,22 @@ TEST(SolverManager, RemoveConstraint)
     ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // add constraint
     P->removeConstraintPtr(c);
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // check constraint
-    ASSERT_FALSE(solver_manager_ptr->isConstraintRegistered(c));
+    ASSERT_FALSE(ceres_manager_ptr->isConstraintRegistered(c));
 }
 
 TEST(SolverManager, AddRemoveConstraint)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
     Vector2s state; state << 1, 2;
@@ -360,16 +355,16 @@ TEST(SolverManager, AddRemoveConstraint)
     ASSERT_TRUE(P->getConstraintNotificationList().empty());
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // check constraint
-    ASSERT_FALSE(solver_manager_ptr->isConstraintRegistered(c));
+    ASSERT_FALSE(ceres_manager_ptr->isConstraintRegistered(c));
 }
 
 TEST(SolverManager, DoubleRemoveConstraint)
 {
     ProblemPtr P = Problem::create("PO 2D");
-    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+    CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
     Vector2s state; state << 1, 2;
@@ -382,22 +377,23 @@ TEST(SolverManager, DoubleRemoveConstraint)
     ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // remove constraint
     P->removeConstraintPtr(c);
 
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();
 
     // remove constraint
     P->removeConstraintPtr(c);
 
+    ASSERT_DEATH({
     // update solver
-    solver_manager_ptr->update();
+    ceres_manager_ptr->update();},"");
 
     // check constraint
-    ASSERT_FALSE(solver_manager_ptr->isConstraintRegistered(c));
+    ASSERT_FALSE(ceres_manager_ptr->isConstraintRegistered(c));
 }
 
 int main(int argc, char **argv)
