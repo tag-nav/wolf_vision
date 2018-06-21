@@ -89,8 +89,7 @@ void FeatureBase::getConstraintList(ConstraintBaseList & _ctr_list)
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 {
-    // Check symmetry (soft)
-    assert((_meas_cov - _meas_cov.transpose()).cwiseAbs().maxCoeff() < Constants::EPS && "Not symmetric measurement covariance");
+    WOLF_ASSERT_COVARIANCE_MATRIX(_meas_cov);
 
     // set (ensuring strong symmetry)
     measurement_covariance_ = _meas_cov.selfadjointView<Eigen::Upper>();
@@ -104,11 +103,11 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
 
 void FeatureBase::setMeasurementInformation(const Eigen::MatrixXs & _meas_info)
 {
-    assert(_meas_info.determinant() > Constants::EPS_SMALL && "Not positive definite measurement information");
-    assert((_meas_info - _meas_info.transpose()).cwiseAbs().maxCoeff() < Constants::EPS && "Not symmetric measurement information");
+    WOLF_ASSERT_INFORMATION_MATRIX(_meas_info);
 
     // set (ensuring strong symmetry)
     measurement_covariance_ = _meas_info.inverse().selfadjointView<Eigen::Upper>();
+    WOLF_ASSERT_COVARIANCE_MATRIX(measurement_covariance_);
 
     // Avoid singular covariance
     avoidSingularCovariance();
@@ -128,12 +127,12 @@ Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) con
     Eigen::MatrixXs R = llt_of_info.matrixU();
 
     // Good factorization
-    if ((R.transpose() * R - info).cwiseAbs().maxCoeff() < Constants::EPS)
+    if (info.isApprox(R.transpose() * R, Constants::EPS))
         return R;
 
     // Not good factorization: SelfAdjointEigenSolver
     Eigen::SelfAdjointEigenSolver<Eigen::MatrixXs> es(info);
-    Eigen::VectorXs eval = es.eigenvalues().real().cwiseMax(0);
+    Eigen::VectorXs eval = es.eigenvalues().real().cwiseMax(Constants::EPS);
 
     R = eval.cwiseSqrt().asDiagonal() * es.eigenvectors().real().transpose();
 
@@ -150,7 +149,7 @@ void FeatureBase::avoidSingularCovariance()
         //std::cout << "pre\n" << measurement_covariance_ << std::endl;
         if ((eigensolver.eigenvalues().array() < Constants::EPS).all())
             measurement_covariance_= eigensolver.eigenvectors() *
-                                     (eigensolver.eigenvalues().array() > Constants::EPS).select(eigensolver.eigenvalues(), Constants::EPS).asDiagonal() *
+                                     eigensolver.eigenvalues().cwiseMax(Constants::EPS).asDiagonal() *
                                      eigensolver.eigenvectors().transpose();
         //std::cout << "post\n" << measurement_covariance_ << std::endl;
     }
