@@ -2,14 +2,15 @@
 namespace wolf
 {
 
-ProcessorOdom2D::ProcessorOdom2D(const ProcessorParamsOdom2D& _params) :
-                ProcessorMotion("ODOM 2D", _params.time_tolerance, 3, 3, 3, 2, 0),
-                dist_traveled_th_(_params.dist_traveled_th_),
-                theta_traveled_th_(_params.theta_traveled_th_),
-                cov_det_th_(_params.cov_det_th_),
-                elapsed_time_th_(_params.elapsed_time_th_)
+ProcessorOdom2D::ProcessorOdom2D(ProcessorParamsOdom2DPtr _params) :
+                ProcessorMotion("ODOM 2D", 3, 3, 3, 2, 0, _params),
+                params_odom_2D_(_params)
+//                dist_traveled_th_(_params.dist_traveled_th_),
+//                theta_traveled_th_(_params.theta_traveled_th_),
+//                cov_det_th_(_params->cov_det_th)//,
+//                elapsed_time_th_(_params.elapsed_time_th_)
 {
-    unmeasured_perturbation_cov_ = _params.unmeasured_perturbation_std_ * _params.unmeasured_perturbation_std_ * Matrix3s::Identity();
+    unmeasured_perturbation_cov_ = _params->unmeasured_perturbation_std * _params->unmeasured_perturbation_std * Matrix3s::Identity();
 }
 
 ProcessorOdom2D::~ProcessorOdom2D()
@@ -121,21 +122,22 @@ Motion ProcessorOdom2D::interpolate(const Motion& _ref, Motion& _second, TimeSta
 bool ProcessorOdom2D::voteForKeyFrame()
 {
     // Distance criterion
-    if (getBuffer().get().back().delta_integr_.head<2>().norm() > dist_traveled_th_)
+    if (getBuffer().get().back().delta_integr_.head<2>().norm() > params_odom_2D_->dist_traveled)
     {
         return true;
     }
-    if (getBuffer().get().back().delta_integr_.tail<1>().norm() > theta_traveled_th_)
+    if (getBuffer().get().back().delta_integr_.tail<1>().norm() > params_odom_2D_->angle_turned)
     {
         return true;
     }
     // Uncertainty criterion
-    if (getBuffer().get().back().delta_integr_cov_.determinant() > cov_det_th_)
+    if (getBuffer().get().back().delta_integr_cov_.determinant() > params_odom_2D_->cov_det)
     {
         return true;
     }
     // Time criterion
-    if (getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() > elapsed_time_th_)
+    WOLF_TRACE("orig t: ", origin_ptr_->getFramePtr()->getTimeStamp().get(), " current t: ", getBuffer().get().back().ts_.get() , " dt: ", getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get());
+    if (getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() > params_odom_2D_->max_time_span)
     {
         return true;
     }
@@ -172,19 +174,13 @@ ProcessorBasePtr ProcessorOdom2D::create(const std::string& _unique_name, const 
 
     ProcessorOdom2DPtr prc_ptr;
 
+    std::shared_ptr<ProcessorParamsOdom2D> params;
     if (_params)
-    {
-        std::shared_ptr<ProcessorParamsOdom2D> params = std::static_pointer_cast<ProcessorParamsOdom2D>(_params);
-
-        prc_ptr = std::make_shared<ProcessorOdom2D>(*params);
-    }
+        params = std::static_pointer_cast<ProcessorParamsOdom2D>(_params);
     else
-    {
-        std::cout << __FILE__ << ":" << __FUNCTION__ << "() : No parameters provided. Using default set." << std::endl;
+        params = std::make_shared<ProcessorParamsOdom2D>();
 
-        prc_ptr = std::make_shared<ProcessorOdom2D>();
-    }
-
+    prc_ptr = std::make_shared<ProcessorOdom2D>(params);
     prc_ptr->setName(_unique_name);
 
     return prc_ptr;

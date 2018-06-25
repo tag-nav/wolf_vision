@@ -6,8 +6,8 @@
 #include "constraint_autodiff.h"
 #include "sensor_camera.h"
 
-#include <vision_utils/common_class/trifocaltensor.h>
-#include <vision_utils/vision_utils.h>
+#include <common_class/trifocaltensor.h>
+#include <vision_utils.h>
 
 namespace wolf
 {
@@ -172,7 +172,7 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
     Vector3s    rtc  =             _feature_last_ptr  ->getCapturePtr()->getSensorPPtr()->getState();
     Quaternions rqc  = Quaternions(_feature_last_ptr  ->getCapturePtr()->getSensorOPtr()->getState().data() );
 
-    // expectation
+    // expectation // canonical units
     vision_utils::TrifocalTensorBase<Scalar> tensor;
     Matrix3s    c2Ec1;
     expectation(wtr1, wqr1,
@@ -181,7 +181,7 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
                 rtc, rqc,
                 tensor, c2Ec1);
 
-    // error Jacobians
+    // error Jacobians // canonical units
     Matrix<Scalar,3,3> J_e_m1, J_e_m2, J_e_m3;
     error_jacobians(tensor, c2Ec1, J_e_m1, J_e_m2, J_e_m3);
 
@@ -190,17 +190,21 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
     Matrix<Scalar,3,2> J_e_u2 = J_e_m2 * J_m_u;
     Matrix<Scalar,3,2> J_e_u3 = J_e_m3 * J_m_u;
 
-    // Error covariances induced by each of the measurement covariance
+    // Error covariances induced by each of the measurement covariance // canonical units
     Matrix3s Q1 = J_e_u1 * getFeaturePrevPtr() ->getMeasurementCovariance() * J_e_u1.transpose();
     Matrix3s Q2 = J_e_u2 * getFeatureOtherPtr()->getMeasurementCovariance() * J_e_u2.transpose();
     Matrix3s Q3 = J_e_u3 * getFeaturePtr()     ->getMeasurementCovariance() * J_e_u3.transpose();
 
-    // Total error covariance
+    // Total error covariance // canonical units
     Matrix3s Q = Q1 + Q2 + Q3;
 
-    // Sqrt of information matrix
+    // Sqrt of information matrix // canonical units
     Eigen::LLT<Eigen::MatrixXs> llt_of_info(Q.inverse()); // Cholesky decomposition
     sqrt_information_upper = llt_of_info.matrixU();
+
+    // Re-write info matrix (for debug only)
+    //    Scalar pix_noise = 1.0;
+    //    sqrt_information_upper = pow(1.0/pix_noise, 2) * Matrix3s::Identity(); // one PLP (2D) and one epipolar (1D) constraint
 }
 
 // Destructor

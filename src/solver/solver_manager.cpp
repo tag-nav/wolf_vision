@@ -55,9 +55,7 @@ void SolverManager::update()
       }
       case StateBlock::Notification::STATE_UPDATE:
       {
-        const bool registered = state_blocks_.find(state)!=state_blocks_.end();
-
-        WOLF_DEBUG_COND(!registered,
+        WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
                         "Updating the state of an unregistered StateBlock !");
 
         // This will throw if StateBlock wasn't registered
@@ -92,8 +90,11 @@ void SolverManager::update()
         WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
                         "Tried to remove a StateBlock that was not added !");
 
-        if (state_blocks_.erase(state) > 0)
-          removeStateBlock(state);
+        if (state_blocks_.find(state)!=state_blocks_.end())
+        {
+            removeStateBlock(state);
+            state_blocks_.erase(state);
+        }
 
         break;
       }

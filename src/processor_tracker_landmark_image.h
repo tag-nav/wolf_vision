@@ -2,25 +2,26 @@
 #define PROCESSOR_TRACKER_LANDMARK_IMAGE_H
 
 // Wolf includes
-#include "sensor_camera.h"
-#include "capture_image.h"
-#include "feature_point_image.h"
-#include "state_block.h"
-#include "state_quaternion.h"
-#include "processor_tracker_landmark.h"
+
 #include "landmark_AHP.h"
+#include "landmark_match.h"
 #include "processor_params_image.h"
-#include "constraint_AHP.h"
+#include "processor_tracker_landmark.h"
+#include "wolf.h"
 
-// Vision utils
-#include <vision_utils/detectors/detector_base.h>
-#include <vision_utils/descriptors/descriptor_base.h>
-#include <vision_utils/matchers/matcher_base.h>
-#include <vision_utils/algorithms/activesearch/alg_activesearch.h>
+#include <algorithms/activesearch/alg_activesearch.h>
+#include <descriptors/descriptor_base.h>
+#include <detectors/detector_base.h>
+#include <matchers/matcher_base.h>
 
-// General includes
-#include <cmath>
-#include <complex>      // std::complex, std::norm
+#include <opencv2/core/mat.hpp>
+#include <opencv2/core/mat.inl.hpp>
+#include <opencv2/core/types.hpp>
+
+#include <list>
+#include <memory>
+#include <string>
+#include <vector>
 
 namespace wolf {
 
@@ -38,10 +39,10 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
 
         int cell_width_; ///< Active search cell width
         int cell_height_; ///< Active search cell height
-        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_activesearch_ptr_; ///< Active search parameters
+        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_tracker_landmark_image_activesearch_ptr_; ///< Active search parameters
 
     protected:
-        ProcessorParamsImage params_;           // Struct with parameters of the processors
+        ProcessorParamsTrackerLandmarkImagePtr params_tracker_landmark_image_;           // Struct with parameters of the processors
 
         cv::Mat image_last_, image_incoming_;   // Images of the "last" and "incoming" Captures
 
@@ -54,7 +55,6 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         unsigned int landmarks_tracked_ = 0;
 
         /* pinhole params */
-//        Eigen::Vector4s k_parameters_;
         Eigen::Vector2s distortion_;
         Eigen::Vector2s correction_;
 
@@ -78,7 +78,7 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
         std::list<cv::Point> tracker_target_;
         FeatureBaseList feat_lmk_found_;
 
-        ProcessorTrackerLandmarkImage(const ProcessorParamsImage& _params);
+        ProcessorTrackerLandmarkImage(ProcessorParamsTrackerLandmarkImagePtr _params_tracker_landmark_image);
         virtual ~ProcessorTrackerLandmarkImage();
 
         virtual void configure(SensorBasePtr _sensor) ;

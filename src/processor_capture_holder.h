@@ -23,7 +23,7 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsCaptureHolder);
  */
 struct ProcessorParamsCaptureHolder : public ProcessorParamsBase
 {
-  Scalar buffer_size_ = 30;
+  Scalar buffer_size = 30;
 };
 
 /**
@@ -33,7 +33,7 @@ class ProcessorCaptureHolder : public ProcessorBase
 {
 public:
 
-  ProcessorCaptureHolder(const Scalar& _buffer_size = 1);
+  ProcessorCaptureHolder(ProcessorParamsCaptureHolderPtr _params_capture_holder);
   virtual ~ProcessorCaptureHolder() = default;
   virtual void configure(SensorBasePtr _sensor) override { };
 
@@ -59,6 +59,7 @@ public:
 
 protected:
 
+  ProcessorParamsCaptureHolderPtr params_capture_holder_;
   CaptureBuffer buffer_;
 
 public:

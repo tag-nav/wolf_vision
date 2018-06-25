@@ -7,13 +7,12 @@ namespace wolf {
 
 unsigned int ProcessorBase::processor_id_count_ = 0;
 
-ProcessorBase::ProcessorBase(const std::string& _type, const Scalar& _time_tolerance) :
-        NodeBase("PROCESSOR", _type),
+ProcessorBase::ProcessorBase(const std::string& _type, ProcessorParamsBasePtr _params) :
+        NodeBase("PROCESSOR", _type, _params->name),
         processor_id_(++processor_id_count_),
-        time_tolerance_(_time_tolerance),
+        params_(_params),
         sensor_ptr_(),
-        is_removing_(false),
-        voting_active_(true)
+        is_removing_(false)
 {
 //    WOLF_DEBUG("constructed    +p" , id());
 }
@@ -48,7 +47,7 @@ FrameBasePtr ProcessorBase::emplaceFrame(FrameType _type, CaptureBasePtr _captur
 
 void ProcessorBase::keyFrameCallback(FrameBasePtr _keyframe_ptr, const Scalar& _time_tol_other)
 {
-    WOLF_DEBUG("P", isMotion() ? "M" : "T ", getName(), ": KF", _keyframe_ptr->id(), " callback received with ts = ", _keyframe_ptr->getTimeStamp());
+    WOLF_DEBUG("P", isMotion() ? "M " : "T ", getName(), ": KF", _keyframe_ptr->id(), " callback received with ts = ", _keyframe_ptr->getTimeStamp());
     if (_keyframe_ptr != nullptr)
         kf_pack_buffer_.add(_keyframe_ptr,_time_tol_other);
 }

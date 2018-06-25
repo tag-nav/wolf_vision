@@ -33,7 +33,7 @@ matcher:
     
 algorithm:
   type: "ACTIVESEARCH"   
-  draw results: true
+  draw results: false
   grid horiz cells: 12
   grid vert cells: 8
   separation: 10

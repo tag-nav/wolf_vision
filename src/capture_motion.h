@@ -46,13 +46,17 @@ class CaptureMotion : public CaptureBase
         // public interface:
 
     public:
-        CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr,
+        CaptureMotion(const std::string & _type,
+                      const TimeStamp& _ts,
+                      SensorBasePtr _sensor_ptr,
                       const Eigen::VectorXs& _data,
                       Size _delta_size,
                       Size _delta_cov_size,
                       FrameBasePtr _origin_frame_ptr);
 
-        CaptureMotion(const TimeStamp& _ts, SensorBasePtr _sensor_ptr,
+        CaptureMotion(const std::string & _type,
+                      const TimeStamp& _ts,
+                      SensorBasePtr _sensor_ptr,
                       const Eigen::VectorXs& _data, const Eigen::MatrixXs& _data_cov,
                       Size _delta_size,
                       Size _delta_cov_size,

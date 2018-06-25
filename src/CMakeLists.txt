@@ -17,7 +17,7 @@ ENDIF()
 option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
 option(BUILD_EXAMPLES "Build examples" OFF)
-
+set(BUILD_TESTS true)
 
 # Does this has any other interest
 # but for the examples ?
@@ -582,12 +582,10 @@ export(PACKAGE ${PROJECT_NAME})
 ## Testing ##
 #############
 IF (GLOG_FOUND)
-    if(BUILD_TESTS)
-    
+    IF(BUILD_TESTS)
         MESSAGE("Building tests.")
         add_subdirectory(test)
-
-    endif(BUILD_TESTS)
+    ENDIF(BUILD_TESTS)
 ENDIF (GLOG_FOUND)
 
 IF(BUILD_EXAMPLES)

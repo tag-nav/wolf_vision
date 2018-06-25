@@ -29,19 +29,21 @@ class ProcessorMotion_test : public ProcessorOdom2D, public testing::Test{
         Vector2s            data;
         Matrix2s            data_cov;
 
+        ProcessorMotion_test() : ProcessorOdom2D(std::make_shared<ProcessorParamsOdom2D>()) { }
+
         virtual void SetUp()
         {
             dt                          = 1.0;
             problem = Problem::create("PO 2D");
             ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
-            params->dist_traveled_th_   = 100;
-            params->theta_traveled_th_  = 6.28;
-            params->elapsed_time_th_    = 2.5*dt; // force KF at every third process()
-            params->cov_det_th_         = 100;
-            params->unmeasured_perturbation_std_ = 0.001;
+            params->dist_traveled   = 100;
+            params->angle_turned    = 6.28;
+            params->max_time_span   = 2.5*dt; // force KF at every third process()
+            params->cov_det         = 100;
+            params->unmeasured_perturbation_std = 0.001;
             sensor = static_pointer_cast<SensorOdom2D>(problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0)));
             processor = static_pointer_cast<ProcessorOdom2D>(problem->installProcessor("ODOM 2D", "odom", sensor, params));
-            capture = std::make_shared<CaptureMotion>(0.0, sensor, data, data_cov, 3, 3, nullptr);
+            capture = std::make_shared<CaptureMotion>("ODOM 2D", 0.0, sensor, data, data_cov, 3, 3, nullptr);
 
             Vector3s x0; x0 << 0, 0, 0;
             Matrix3s P0; P0.setIdentity();

@@ -76,7 +76,7 @@ int main()
     cv::KeyPoint kp; kp.pt = {10,20};
     cv::Mat desc;
 
-    FeaturePointImagePtr feat_point_image_ptr = std::make_shared<FeaturePointImage>(kp, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_point_image_ptr = std::make_shared<FeaturePointImage>(kp, 0, desc, Eigen::Matrix2s::Identity());
     image_ptr->addFeature(feat_point_image_ptr);
 
     FrameBasePtr anchor_frame = std::make_shared< FrameBase>(t,std::make_shared<StateBlock>(frame_val.head(3)), std::make_shared<StateQuaternion>(frame_val.tail(4)));

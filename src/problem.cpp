@@ -36,9 +36,9 @@ Problem::Problem(const std::string& _frame_structure) :
         trajectory_ptr_(std::make_shared<TrajectoryBase>(_frame_structure)),
         map_ptr_(std::make_shared<MapBase>()),
         processor_motion_ptr_(),
-        prior_is_set_(false),
         state_size_(0),
-        state_cov_size_(0)
+        state_cov_size_(0),
+        prior_is_set_(false)
 {
     if (_frame_structure == "PO 2D")
     {
@@ -63,9 +63,9 @@ Problem::Problem(const std::string& _frame_structure) :
 
 void Problem::setup()
 {
-    hardware_ptr_->setProblem(shared_from_this());
-    trajectory_ptr_->setProblem(shared_from_this());
-    map_ptr_->setProblem(shared_from_this());
+    hardware_ptr_  -> setProblem(shared_from_this());
+    trajectory_ptr_-> setProblem(shared_from_this());
+    map_ptr_       -> setProblem(shared_from_this());
 }
 
 ProblemPtr Problem::create(const std::string& _frame_structure)
@@ -287,18 +287,15 @@ void Problem::getState(const TimeStamp& _ts, Eigen::VectorXs& state)
     assert(state.size() == getFrameStructureSize() && "Problem::getStateAtTimeStamp: bad state size");
 
     if (processor_motion_ptr_ != nullptr)
-    {
         processor_motion_ptr_->getState(_ts, state);
-    }
+
     else
     {
         FrameBasePtr closest_frame = trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
         if (closest_frame != nullptr)
-        {
             closest_frame->getState(state);
-        }else{
+        else
             state = zeroState();
-        }
     }
 }
 
@@ -316,7 +313,7 @@ Size Problem::getFrameStructureSize() const
 
 void Problem::getFrameStructureSize(Size& _x_size, Size& _cov_size) const
 {
-    _x_size = state_size_;
+    _x_size   = state_size_;
     _cov_size = state_cov_size_;
 }
 
@@ -334,6 +331,11 @@ Eigen::VectorXs Problem::zeroState()
 
 bool Problem::permitKeyFrame(ProcessorBasePtr _processor_ptr)
 {
+    // This should implement a black list of processors that have forbidden keyframe creation
+    // This decision is made at problem level, not at processor configuration level.
+    // If you want to configure a processor for not creating keyframes, see Processor::voting_active_ and its accessors.
+
+    // Currently allowing all processors to vote:
     return true;
 }
 

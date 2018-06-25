@@ -18,7 +18,7 @@
 // Dummy class so that it is no pur virtual
 struct DummyLoopCloser : public wolf::ProcessorFrameNearestNeighborFilter
 {
-  DummyLoopCloser(const Params& _params) :
+  DummyLoopCloser(ParamsPtr _params) :
     wolf::ProcessorFrameNearestNeighborFilter(_params) { }
 
   bool confirmLoopClosure() override { return false; }
@@ -217,7 +217,7 @@ int main(int argc, char **argv)
   processor_params_point2d->buffer_size_ = 0;         // just exclude identical frameIDs
   processor_params_point2d->distance_type_ = wolf::LoopclosureDistanceType::LC_POINT_ELLIPSE;
 
-  processor_ptr_point2d = std::make_shared<DummyLoopCloser>(*processor_params_point2d);
+  processor_ptr_point2d = std::make_shared<DummyLoopCloser>(processor_params_point2d);
   processor_ptr_point2d->setName("processor2Dpoint");
 
   sensor_ptr->addProcessor(processor_ptr_point2d);
@@ -226,7 +226,7 @@ int main(int argc, char **argv)
   processor_params_ellipse2d->buffer_size_ = 0;         // just exclude identical frameIDs
   processor_params_ellipse2d->distance_type_ = wolf::LoopclosureDistanceType::LC_ELLIPSE_ELLIPSE;
 
-  processor_ptr_ellipse2d = std::make_shared<DummyLoopCloser>(*processor_params_ellipse2d);
+  processor_ptr_ellipse2d = std::make_shared<DummyLoopCloser>(processor_params_ellipse2d);
   processor_ptr_ellipse2d->setName("processor2Dellipse");
 
   sensor_ptr->addProcessor(processor_ptr_ellipse2d);

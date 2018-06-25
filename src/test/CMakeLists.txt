@@ -48,6 +48,10 @@ target_link_libraries(gtest_capture_base ${PROJECT_NAME})
 #wolf_add_gtest(gtest_constraint_sparse gtest_constraint_sparse.cpp)
 #target_link_libraries(gtest_constraint_sparse ${PROJECT_NAME})
 
+# ConstraintAutodiff class test
+wolf_add_gtest(gtest_constraint_autodiff gtest_constraint_autodiff.cpp)
+target_link_libraries(gtest_constraint_autodiff ${PROJECT_NAME})
+
 # FeatureBase classes test
 wolf_add_gtest(gtest_eigen_predicates gtest_eigen_predicates.cpp)
 target_link_libraries(gtest_eigen_predicates ${PROJECT_NAME})
@@ -96,6 +100,10 @@ target_link_libraries(gtest_rotation ${PROJECT_NAME})
 wolf_add_gtest(gtest_sensor_base gtest_sensor_base.cpp)
 target_link_libraries(gtest_sensor_base ${PROJECT_NAME})
 
+# SolverManager test
+wolf_add_gtest(gtest_solver_manager gtest_solver_manager.cpp)
+target_link_libraries(gtest_solver_manager ${PROJECT_NAME})
+
 # TimeStamp class test
 wolf_add_gtest(gtest_time_stamp gtest_time_stamp.cpp)
 target_link_libraries(gtest_time_stamp ${PROJECT_NAME})
@@ -109,6 +117,12 @@ wolf_add_gtest(gtest_trajectory gtest_trajectory.cpp)
 target_link_libraries(gtest_trajectory ${PROJECT_NAME})
 
 # ------- Now Derived classes ----------
+
+IF (Ceres_FOUND)
+# CeresManager test
+wolf_add_gtest(gtest_ceres_manager gtest_ceres_manager.cpp)
+target_link_libraries(gtest_ceres_manager ${PROJECT_NAME})
+ENDIF(Ceres_FOUND)
 
 # ConstraintAbs(P/O/V) classes test
 wolf_add_gtest(gtest_constraint_absolute gtest_constraint_absolute.cpp)
@@ -173,10 +187,6 @@ target_link_libraries(gtest_odom_2D ${PROJECT_NAME})
 # ProcessorOdom3D class test
 wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
 target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
-
-# ConstraintAutodiff class test
-wolf_add_gtest(gtest_constraint_autodiff gtest_constraint_autodiff.cpp)
-target_link_libraries(gtest_constraint_autodiff ${PROJECT_NAME})
 
 # ------- Now Core classes Serialization ----------
 

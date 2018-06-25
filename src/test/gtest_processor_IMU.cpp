@@ -51,7 +51,7 @@ class ProcessorIMUt : public testing::Test
         problem = Problem::create("POV 3D");
         Vector7s extrinsics = (Vector7s() << 0,0,0, 0,0,0,1).finished();
         sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
-        ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
+        ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu.yaml");
 
         // Time and data variables
         data = Vector6s::Zero();
@@ -83,13 +83,6 @@ TEST(ProcessorIMU_constructors, ALL)
 {
     using namespace wolf;
 
-    //constructor without any argument
-    ProcessorIMUPtr prc0 = std::make_shared<ProcessorIMU>();
-    ProcessorParamsIMU params_default;
-    ASSERT_EQ(prc0->getMaxTimeSpan(),   params_default.max_time_span);
-    ASSERT_EQ(prc0->getMaxBuffLength(), params_default.max_buff_length);
-    ASSERT_EQ(prc0->getDistTraveled(),  params_default.dist_traveled);
-    ASSERT_EQ(prc0->getAngleTurned(),   params_default.angle_turned);
 
     //constructor with ProcessorIMUParamsPtr argument only
     ProcessorParamsIMUPtr param_ptr = std::make_shared<ProcessorParamsIMU>();
@@ -98,7 +91,7 @@ TEST(ProcessorIMU_constructors, ALL)
     param_ptr->dist_traveled =   2.0;
     param_ptr->angle_turned =    2.0;
 
-    ProcessorIMUPtr prc1 = std::make_shared<ProcessorIMU>(*param_ptr);
+    ProcessorIMUPtr prc1 = std::make_shared<ProcessorIMU>(param_ptr);
     ASSERT_EQ(prc1->getMaxTimeSpan(), param_ptr->max_time_span);
     ASSERT_EQ(prc1->getMaxBuffLength(), param_ptr->max_buff_length);
     ASSERT_EQ(prc1->getDistTraveled(), param_ptr->dist_traveled);
@@ -110,6 +103,7 @@ TEST(ProcessorIMU_constructors, ALL)
     Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
     SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics, wolf_root + "/src/examples/sensor_imu.yaml");
     ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
+    ProcessorParamsIMU params_default;
     ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxTimeSpan(),   params_default.max_time_span);
     ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getMaxBuffLength(), params_default.max_buff_length);
     ASSERT_EQ(std::static_pointer_cast<ProcessorIMU>(processor_ptr)->getDistTraveled(),  params_default.dist_traveled);
@@ -238,9 +232,10 @@ TEST_F(ProcessorIMUt, interpolate)
 
 //    problem->getProcessorMotionPtr()->getBuffer().print(0,1,1,0);
 
-class P : wolf::ProcessorIMU
+class P : public wolf::ProcessorIMU
 {
     public:
+        P() : ProcessorIMU(std::make_shared<ProcessorParamsIMU>()) {}
         Motion interp(const Motion& ref, Motion& sec, TimeStamp ts)
         {
             return ProcessorIMU::interpolate(ref, sec, ts);

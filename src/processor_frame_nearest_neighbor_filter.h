@@ -55,7 +55,7 @@ private:
   // depends on how many percent of data should be considered.
   Scalar area_;
 
-  ProcessorParamsFrameNearestNeighborFilter params_;
+  ProcessorParamsFrameNearestNeighborFilterPtr params_NNF;
 
 public:
 
@@ -63,11 +63,11 @@ public:
   using ParamsPtr = ProcessorParamsFrameNearestNeighborFilterPtr;
   using DistanceType = Params::DistanceType;
 
-  ProcessorFrameNearestNeighborFilter(const Params& _params);
+  ProcessorFrameNearestNeighborFilter(ParamsPtr _params_NNF);
   virtual ~ProcessorFrameNearestNeighborFilter() = default;
   virtual void configure(SensorBasePtr _sensor) { };
 
-  inline DistanceType getDistanceType() const noexcept {return params_.distance_type_;}
+  inline DistanceType getDistanceType() const noexcept {return params_NNF->distance_type_;}
 
 protected:
 

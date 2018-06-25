@@ -16,7 +16,7 @@
 #include "ceres_wrapper/ceres_manager.h"
 
 // Vision utils
-#include <vision_utils.h>
+#include <vision_utils/vision_utils.h>
 
 /**
  * This test simulates the following situation:
@@ -144,15 +144,15 @@ int main(int argc, char** argv)
     cv::Mat desc;
 
     cv::KeyPoint kp_0;
-    FeaturePointImagePtr feat_0 = std::make_shared<FeaturePointImage>(kp_0, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_0 = std::make_shared<FeaturePointImage>(kp_0, 0, desc, Eigen::Matrix2s::Identity());
     image_0->addFeature(feat_0);
 
     cv::KeyPoint kp_1;
-    FeaturePointImagePtr feat_1 = std::make_shared<FeaturePointImage>(kp_1, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_1 = std::make_shared<FeaturePointImage>(kp_1, 0, desc, Eigen::Matrix2s::Identity());
     image_1->addFeature(feat_1);
 
     cv::KeyPoint kp_2;
-    FeaturePointImagePtr feat_2 = std::make_shared<FeaturePointImage>(kp_2, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_2 = std::make_shared<FeaturePointImage>(kp_2, 0, desc, Eigen::Matrix2s::Identity());
     image_2->addFeature(feat_2);
 
     // Landmark--------------------
@@ -193,10 +193,10 @@ int main(int argc, char** argv)
     //======== now we want to estimate a new lmk ===============
     //
     // Features -----------------
-    FeaturePointImagePtr feat_3 = std::make_shared<FeaturePointImage>(kp_1, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_3 = std::make_shared<FeaturePointImage>(kp_1, 0, desc, Eigen::Matrix2s::Identity());
     image_1->addFeature(feat_3);
 
-    FeaturePointImagePtr feat_4 = std::make_shared<FeaturePointImage>(kp_2, desc, Eigen::Matrix2s::Identity());
+    FeaturePointImagePtr feat_4 = std::make_shared<FeaturePointImage>(kp_2, 0, desc, Eigen::Matrix2s::Identity());
     image_2->addFeature(feat_4);
 
 

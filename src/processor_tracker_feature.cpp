@@ -10,8 +10,10 @@
 namespace wolf
 {
 
-ProcessorTrackerFeature::ProcessorTrackerFeature(const std::string& _type, const Scalar _time_tolerance, const unsigned int _max_new_features) :
-        ProcessorTracker(_type, _time_tolerance, _max_new_features)
+ProcessorTrackerFeature::ProcessorTrackerFeature(const std::string& _type,
+                                                 ProcessorParamsTrackerFeaturePtr _params_tracker_feature) :
+            ProcessorTracker(_type, _params_tracker_feature),
+            params_tracker_feature_(_params_tracker_feature)
 {
 }
 
@@ -37,6 +39,7 @@ unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_fe
     trackFeatures(new_features_last_, new_features_incoming_, matches_last_from_incoming_);
     for (auto ftr : new_features_incoming_)
     {
+        ftr->setProblem(this->getProblem());
         size_t trk_id_from_last = matches_last_from_incoming_[ftr]->feature_ptr_->trackId();
         track_matrix_.add(trk_id_from_last, incoming_ptr_, ftr);
     }
@@ -74,7 +77,11 @@ unsigned int ProcessorTrackerFeature::processKnown()
             size_t         track_id          = feature_in_incoming->trackId();
             FeatureBasePtr feature_in_last   = track_matrix_.feature(track_id, last_ptr_);
             FeatureBasePtr feature_in_origin = track_matrix_.feature(track_id, origin_ptr_);
-            if (!(correctFeatureDrift(feature_in_origin, feature_in_last, feature_in_incoming)))
+            if (correctFeatureDrift(feature_in_origin, feature_in_last, feature_in_incoming))
+            {
+                feature_in_incoming->setProblem(this->getProblem());
+            }
+            else
             {
                 // Remove this feature from many places:
                 matches_last_from_incoming_ .erase (feature_in_incoming); // remove match
@@ -105,8 +112,8 @@ void ProcessorTrackerFeature::advanceDerived()
     for (auto ftr : incoming_ptr_->getFeatureList())
         ftr->setProblem(getProblem());
 
-    // remove last from track matrix
-    track_matrix_.remove(last_ptr_);
+    // // remove last from track matrix in case you want to have only KF in the track matrix
+    // track_matrix_.remove(last_ptr_);
 }
 
 void ProcessorTrackerFeature::resetDerived()

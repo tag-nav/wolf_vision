@@ -167,7 +167,7 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
 
                     // All squared distances should be witin a threshold
                     // Choose the most overlapped one
-                    if ((dist2 < params_.position_error_th*params_.position_error_th).all() && (best_match == nullptr ||
+                    if ((dist2 < params_->position_error_th*params_->position_error_th).all() && (best_match == nullptr ||
                                                                                   (N_overlapped >= best_match->feature_match_to_id_-best_match->feature_match_from_id_+1 &&
                                                                                    dist2.mean() < best_match->normalized_score_ )))
                     {
@@ -244,7 +244,7 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
 
                     // All squared distances should be witin a threshold
                     // Choose the most overlapped one
-                    if ((dist2 < params_.position_error_th*params_.position_error_th).all() && (best_match == nullptr || dist2.mean() < best_match->normalized_score_ ))
+                    if ((dist2 < params_->position_error_th*params_->position_error_th).all() && (best_match == nullptr || dist2.mean() < best_match->normalized_score_ ))
                     {
                         //std::cout << "BEST MATCH" << std::endl;
                         best_match = std::make_shared<LandmarkPolylineMatch>();
@@ -296,7 +296,7 @@ bool ProcessorTrackerLandmarkPolyline::voteForKeyFrame()
     //std::cout << "------------- ProcessorTrackerLandmarkPolyline::voteForKeyFrame:" << std::endl;
     //std::cout << "polylines_last_.size():" << polylines_last_.size()<< std::endl;
     // option 1: more than TH new features in last
-    if (polylines_last_.size() >= params_.new_features_th)
+    if (polylines_last_.size() >= params_->new_features_th)
     {
         std::cout << "------------- NEW KEY FRAME: Option 1 - Enough new features" << std::endl;
         //std::cout << "\tnew features in last = " << corners_last_.size() << std::endl;
@@ -305,7 +305,7 @@ bool ProcessorTrackerLandmarkPolyline::voteForKeyFrame()
     // option 2: loop closure (if the newest frame from which a matched landmark was observed is old enough)
     for (auto new_ftr : new_features_last_)
     {
-        if (last_ptr_->getFramePtr()->id() - matches_landmark_from_last_[new_ftr]->landmark_ptr_->getConstrainedByList().back()->getCapturePtr()->getFramePtr()->id() > params_.loop_frames_th)
+        if (last_ptr_->getFramePtr()->id() - matches_landmark_from_last_[new_ftr]->landmark_ptr_->getConstrainedByList().back()->getCapturePtr()->getFramePtr()->id() > params_->loop_frames_th)
         {
             std::cout << "------------- NEW KEY FRAME: Option 2 - Loop closure" << std::endl;
             return true;
@@ -609,9 +609,9 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
                 for (int id_lmk = lmk_last_defined_point; id_lmk > polyline_match->landmark_match_to_id_; id_lmk--)
                 {
                     //std::cout << "\t\tid_lmk " << id_lmk << std::endl;
-                    //std::cout << "\t\td2 = " << (points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() << " (th = " << params_.position_error_th*params_.position_error_th << std::endl;
+                    //std::cout << "\t\td2 = " << (points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() << " (th = " << params_->position_error_th*params_->position_error_th << std::endl;
 
-                    if ((points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() < params_.position_error_th*params_.position_error_th)
+                    if ((points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() < params_->position_error_th*params_->position_error_th)
                     {
                         std::cout << "CLOSING POLYLINE" << std::endl;
 
@@ -704,9 +704,9 @@ void ProcessorTrackerLandmarkPolyline::establishConstraints()
                 for (int id_lmk = lmk_first_defined_point; id_lmk < polyline_match->landmark_match_from_id_; id_lmk++)
                 {
                     //std::cout << "\t\tid_lmk " << id_lmk << std::endl;
-                    //std::cout << "\t\td2 = " << (points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() << " (th = " << params_.position_error_th*params_.position_error_th << std::endl;
+                    //std::cout << "\t\td2 = " << (points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() << " (th = " << params_->position_error_th*params_->position_error_th << std::endl;
 
-                    if ((points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() < params_.position_error_th*params_.position_error_th)
+                    if ((points_global.col(feat_point_id_matching)-polyline_landmark->getPointVector(id_lmk)).squaredNorm() < params_->position_error_th*params_->position_error_th)
                     {
                         std::cout << "CLOSING POLYLINE" << std::endl;
 
@@ -892,9 +892,9 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList& _lmk_
             for (unsigned int i = 0; i < object_L.size(); i++)
             {
                 // check configuration 1
-                if(fabs(dAB-object_L[i]) < params_.position_error_th &&
-                   fabs(dBC-object_W[i]) < params_.position_error_th &&
-                   fabs(dAC-object_D[i]) < params_.position_error_th)
+                if(fabs(dAB-object_L[i]) < params_->position_error_th &&
+                   fabs(dBC-object_W[i]) < params_->position_error_th &&
+                   fabs(dAC-object_D[i]) < params_->position_error_th)
                 {
                     configuration = true;
                     classification = i;
@@ -902,9 +902,9 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList& _lmk_
                 }
 
                 // check configuration 2
-                if(fabs(dAB-object_W[i]) < params_.position_error_th &&
-                   fabs(dBC-object_L[i]) < params_.position_error_th &&
-                   fabs(dAC-object_D[i]) < params_.position_error_th)
+                if(fabs(dAB-object_W[i]) < params_->position_error_th &&
+                   fabs(dBC-object_L[i]) < params_->position_error_th &&
+                   fabs(dAC-object_D[i]) < params_->position_error_th)
                 {
                     configuration = false;
                     classification = i;
@@ -925,9 +925,9 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList& _lmk_
                     Scalar dCD = (polyline_ptr->getPointVector(C_id) - polyline_ptr->getPointVector(D_id)).norm();
 
                     // necessary conditions
-                    if (fabs(dAD-dBC) > params_.position_error_th ||
-                        fabs(dBD-dAC) > params_.position_error_th ||
-                        fabs(dCD-dAB) > params_.position_error_th)
+                    if (fabs(dAD-dBC) > params_->position_error_th ||
+                        fabs(dBD-dAC) > params_->position_error_th ||
+                        fabs(dCD-dAB) > params_->position_error_th)
                         continue;
                 }
 
@@ -1012,7 +1012,7 @@ ConstraintBasePtr ProcessorTrackerLandmarkPolyline::createConstraint(FeatureBase
 ProcessorBasePtr ProcessorTrackerLandmarkPolyline::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr)
 {
     ProcessorParamsPolylinePtr params = std::static_pointer_cast<ProcessorParamsPolyline>(_params);
-    ProcessorTrackerLandmarkPolylinePtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkPolyline>(*params);
+    ProcessorTrackerLandmarkPolylinePtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkPolyline>(params);
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

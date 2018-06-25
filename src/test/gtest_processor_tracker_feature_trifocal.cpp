@@ -3,7 +3,7 @@
 #include "wolf.h"
 #include "logging.h"
 
-#include "vision_utils/vision_utils.h"
+#include "vision_utils.h"
 
 #include "processors/processor_tracker_feature_trifocal.h"
 #include "processor_odom_3D.h"
@@ -12,7 +12,6 @@
 
 using namespace Eigen;
 using namespace wolf;
-using std::static_pointer_cast;
 
 // Use the following in case you want to initialize tests with predefines variables or methods.
 //class ProcessorTrackerFeatureTrifocal_class : public testing::Test{
@@ -21,7 +20,6 @@ using std::static_pointer_cast;
 //        {
 //        }
 //};
-
 
 
 //TEST(ProcessorTrackerFeatureTrifocal, Constructor)
@@ -77,20 +75,26 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     ProblemPtr problem = Problem::create("PO 3D");
 
     // Install tracker (sensor and processor)
-    IntrinsicsCameraPtr intr = std::make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
+    IntrinsicsCameraPtr intr = make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML
     intr->width  = 640;
     intr->height = 480;
     SensorCameraPtr sens_trk = make_shared<SensorCamera>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(),
                                                          intr);
 
-    ProcessorParamsTrackerFeatureTrifocal params_trifocal;
-    params_trifocal.name = "trifocal";
-    params_trifocal.time_tolerance = dt/2;
-    params_trifocal.max_new_features = 5;
-    params_trifocal.min_features_for_keyframe = 5;
-    params_trifocal.yaml_file_params_vision_utils = wolf_root + "/src/examples/ACTIVESEARCH.yaml";
+    ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
+    params_tracker_feature_trifocal->name                           = "trifocal";
+    params_tracker_feature_trifocal->pixel_noise_std                = 1.0;
+    params_tracker_feature_trifocal->voting_active                  = true;
+    params_tracker_feature_trifocal->min_features_for_keyframe      = 5;
+    params_tracker_feature_trifocal->time_tolerance                 = dt/2;
+    params_tracker_feature_trifocal->max_new_features               = 5;
+    params_tracker_feature_trifocal->min_response_new_feature       = 25;
+    params_tracker_feature_trifocal->n_cells_h                      = 10;
+    params_tracker_feature_trifocal->n_cells_v                      = 10;
+    params_tracker_feature_trifocal->max_euclidean_distance         = 20;
+    params_tracker_feature_trifocal->yaml_file_params_vision_utils  = wolf_root + "/src/examples/ACTIVESEARCH.yaml";
 
-    ProcessorTrackerFeatureTrifocalPtr proc_trk = make_shared<ProcessorTrackerFeatureTrifocal>(params_trifocal);
+    ProcessorTrackerFeatureTrifocalPtr proc_trk = make_shared<ProcessorTrackerFeatureTrifocal>(params_tracker_feature_trifocal);
     proc_trk->configure(sens_trk);
 
     problem->addSensor(sens_trk);
@@ -116,7 +120,8 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     CaptureOdom3DPtr capt_odo = make_shared<CaptureOdom3D>(t, sens_odo, Vector6s::Zero(), P);
 
     // Track
-    cv::Mat image(640,480, CV_32F);
+    cv::Mat image(intr->height, intr->width, CV_8UC3); // OpenCV cv::Mat(rows, cols)
+    image *= 0; // TODO see if we want to use a real image
     CaptureImagePtr capt_trk = make_shared<CaptureImage>(t, sens_trk, image);
     proc_trk->process(capt_trk);
 

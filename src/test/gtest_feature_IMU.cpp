@@ -40,6 +40,10 @@ class FeatureIMU_test : public testing::Test
         IntrinsicsIMUPtr sen_imu_params = std::make_shared<IntrinsicsIMU>();
         SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", IMU_extrinsics, sen_imu_params);
         ProcessorParamsIMUPtr prc_imu_params = std::make_shared<ProcessorParamsIMU>();
+        prc_imu_params->max_time_span   = 0.5;
+        prc_imu_params->max_buff_length = 10;
+        prc_imu_params->dist_traveled   = 5;
+        prc_imu_params->angle_turned    = 0.5;
         processor_ptr_ = problem->installProcessor("IMU", "IMU pre-integrator", sensor_ptr, prc_imu_params);
 
     // Time and data variables

@@ -11,8 +11,8 @@
 namespace wolf
 {
 
-ProcessorGPS::ProcessorGPS(Scalar time_tolerance_) :
-        ProcessorBase("GPS", time_tolerance_),
+ProcessorGPS::ProcessorGPS(ProcessorParamsBasePtr _params) :
+        ProcessorBase("GPS", _params),
         capture_gps_ptr_(nullptr)
 {
     gps_covariance_ = 10;
@@ -61,7 +61,7 @@ void ProcessorGPS::keyFrameCallback(FrameBasePtr, const Scalar& _time_tol)
 
 ProcessorBasePtr ProcessorGPS::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr)
 {
-    ProcessorGPSPtr prc_ptr = std::make_shared<ProcessorGPS>(_params->time_tolerance);
+    ProcessorGPSPtr prc_ptr = std::make_shared<ProcessorGPS>(_params);
     prc_ptr->setName(_unique_name);
     return prc_ptr;
 }

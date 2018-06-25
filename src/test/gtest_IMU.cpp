@@ -631,14 +631,16 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
             SensorBasePtr    sensor     = problem->installSensor   ("ODOM 3D", "Odometer", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml"   );
             ProcessorBasePtr processor  = problem->installProcessor("ODOM 3D", "Odometer", "Odometer"                            , wolf_root + "/src/examples/processor_odom_3D.yaml");
             sensor_odo      = static_pointer_cast<SensorOdom3D>(sensor);
+
             processor_odo   = static_pointer_cast<ProcessorOdom3D>(processor);
+
             processor_odo->setTimeTolerance(dt/2);
 
             // prevent this processor from voting by setting high thresholds :
-            processor_odo->setAngleTurned(2.0);
-            processor_odo->setDistTraveled(1.0);
-            processor_odo->setMaxBuffLength(10);
-            processor_odo->setMaxTimeSpan(1.0);
+            processor_odo->setAngleTurned(999);
+            processor_odo->setDistTraveled(999);
+            processor_odo->setMaxBuffLength(999);
+            processor_odo->setMaxTimeSpan(999);
         }
 
         virtual void integrateAll() override

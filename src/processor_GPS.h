@@ -24,7 +24,7 @@ class ProcessorGPS : public ProcessorBase
         Scalar gps_covariance_;
 
     public:
-        ProcessorGPS(Scalar time_tolerance_);
+        ProcessorGPS(ProcessorParamsBasePtr _params);
         virtual ~ProcessorGPS();
         virtual void configure(SensorBasePtr _sensor) { };
         virtual void init(CaptureBasePtr _capture_ptr);

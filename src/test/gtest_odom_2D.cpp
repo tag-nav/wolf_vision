@@ -193,12 +193,13 @@ TEST(Odom2D, VoteForKfAndSolve)
     ProblemPtr problem = Problem::create("PO 2D");
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
-    params->dist_traveled_th_   = 100;
-    params->theta_traveled_th_  = 6.28;
-    params->elapsed_time_th_    = 2.5*dt; // force KF at every third process()
-    params->cov_det_th_         = 100;
-    params->unmeasured_perturbation_std_ = 0.001;
-    Matrix3s unmeasured_cov = params->unmeasured_perturbation_std_*params->unmeasured_perturbation_std_*Matrix3s::Identity();
+    params->voting_active   = true;
+    params->dist_traveled   = 100;
+    params->angle_turned    = 6.28;
+    params->max_time_span   = 2.5*dt; // force KF at every third process()
+    params->cov_det         = 100;
+    params->unmeasured_perturbation_std = 0.00;
+    Matrix3s unmeasured_cov = params->unmeasured_perturbation_std*params->unmeasured_perturbation_std*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
 
@@ -262,6 +263,10 @@ TEST(Odom2D, VoteForKfAndSolve)
             integrated_delta_cov = Jx * integrated_delta_cov * Jx.transpose() + Ju * data_cov * Ju.transpose() + unmeasured_cov;
         }
 
+        WOLF_DEBUG("n: ", n, " t:", t);
+        WOLF_DEBUG("wolf delta: ", processor_odom2d->getMotion().delta_integr_.transpose());
+        WOLF_DEBUG("test delta: ", integrated_delta                           .transpose());
+
         ASSERT_POSE2D_APPROX(processor_odom2d->getMotion().delta_integr_, integrated_delta, 1e-6);
         ASSERT_MATRIX_APPROX(odom2d_delta_cov, integrated_delta_cov, 1e-6);
 
@@ -314,12 +319,12 @@ TEST(Odom2D, KF_callback)
     ProblemPtr problem = Problem::create("PO 2D");
     SensorBasePtr sensor_odom2d = problem->installSensor("ODOM 2D", "odom", Vector3s(0,0,0));
     ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
-    params->dist_traveled_th_   = 100;
-    params->theta_traveled_th_  = 6.28;
-    params->elapsed_time_th_    = 100;
-    params->cov_det_th_         = 100;
-    params->unmeasured_perturbation_std_ = 0.001;
-    Matrix3s unmeasured_cov = params->unmeasured_perturbation_std_*params->unmeasured_perturbation_std_*Matrix3s::Identity();
+    params->dist_traveled   = 100;
+    params->angle_turned    = 6.28;
+    params->max_time_span   = 100;
+    params->cov_det         = 100;
+    params->unmeasured_perturbation_std = 0.001;
+    Matrix3s unmeasured_cov = params->unmeasured_perturbation_std*params->unmeasured_perturbation_std*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
     processor_odom2d->setTimeTolerance(dt/2);
@@ -347,7 +352,7 @@ TEST(Odom2D, KF_callback)
 //    std::cout << "\nIntegrating data..." << std::endl;
 
     // Capture to use as container for all incoming data
-    CaptureMotionPtr capture = std::make_shared<CaptureMotion>(t, sensor_odom2d, data, data_cov, 3, 3, nullptr);
+    CaptureMotionPtr capture = std::make_shared<CaptureMotion>("ODOM 2D", t, sensor_odom2d, data, data_cov, 3, 3, nullptr);
 
     for (int n=1; n<=N; n++)
     {

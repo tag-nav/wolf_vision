@@ -3,19 +3,14 @@
 
 namespace wolf {
 
-ProcessorIMU::ProcessorIMU(const ProcessorParamsIMU& _params) :
-        ProcessorMotion("IMU", _params.time_tolerance, 10, 10, 9, 6, 6),
-        max_time_span_  (_params.max_time_span   ),
-        max_buff_length_(_params.max_buff_length ),
-        dist_traveled_  (_params.dist_traveled   ),
-        angle_turned_   (_params.angle_turned    )
+ProcessorIMU::ProcessorIMU(ProcessorParamsIMUPtr _params_motion_IMU) :
+        ProcessorMotion("IMU", 10, 10, 9, 6, 6, _params_motion_IMU),
+        params_motion_IMU_(std::make_shared<ProcessorParamsIMU>(*_params_motion_IMU))
 {
     // Set constant parts of Jacobians
     jacobian_delta_preint_.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
     jacobian_delta_.setIdentity(9,9);                                           //
     jacobian_calib_.setZero(9,6);
-
-    setVotingActive(_params.voting_active );
 }
 
 ProcessorIMU::~ProcessorIMU()
@@ -25,22 +20,15 @@ ProcessorIMU::~ProcessorIMU()
 
 ProcessorBasePtr ProcessorIMU::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
 {
+    std::shared_ptr<ProcessorParamsIMU> prc_imu_params;
     if (_params)
-    {
-        // cast inputs to the correct type
-        std::shared_ptr<ProcessorParamsIMU> prc_imu_params = std::static_pointer_cast<ProcessorParamsIMU>(_params);
-
-        ProcessorIMUPtr prc_ptr = std::make_shared<ProcessorIMU>(*prc_imu_params);
-        prc_ptr->setName(_unique_name);
-        return prc_ptr;
-    }
+        prc_imu_params = std::static_pointer_cast<ProcessorParamsIMU>(_params);
     else
-    {
-        ProcessorIMUPtr prc_ptr = std::make_shared<ProcessorIMU>();
+        prc_imu_params = std::make_shared<ProcessorParamsIMU>();
 
-        prc_ptr->setName(_unique_name);
-        return prc_ptr;
-    }
+    ProcessorIMUPtr prc_ptr = std::make_shared<ProcessorIMU>(prc_imu_params);
+    prc_ptr->setName(_unique_name);
+    return prc_ptr;
 }
 
 bool ProcessorIMU::voteForKeyFrame()
@@ -48,20 +36,20 @@ bool ProcessorIMU::voteForKeyFrame()
     if(!isVotingActive())
         return false;
     // time span
-    if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)
+    if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > params_motion_IMU_->max_time_span)
     {
         WOLF_DEBUG( "PM: vote: time span" );
         return true;
     }
     // buffer length
-    if (getBuffer().get().size() > max_buff_length_)
+    if (getBuffer().get().size() > params_motion_IMU_->max_buff_length)
     {
         WOLF_DEBUG( "PM: vote: buffer length" );
         return true;
     }
     // angle turned
-    Scalar angle = 2.0 * asin(delta_integrated_.segment(4,3).norm());
-    if (angle > angle_turned_)
+    Scalar angle = 2.0 * asin(delta_integrated_.segment(3,3).norm());
+    if (angle > params_motion_IMU_->angle_turned)
     {
         WOLF_DEBUG( "PM: vote: angle turned" );
         return true;

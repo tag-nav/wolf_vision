@@ -78,7 +78,8 @@ struct LandmarkPolylineMatch : public LandmarkMatch
         }
 };
 
-struct ProcessorParamsPolyline : public ProcessorParamsTracker
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsPolyline);
+struct ProcessorParamsPolyline : public ProcessorParamsTrackerLandmark
 {
         laserscanutils::LineFinderIterativeParams line_finder_params;
         Scalar position_error_th;
@@ -96,7 +97,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
 {
     private:
         laserscanutils::LineFinderIterative line_finder_;
-        ProcessorParamsPolyline params_;
+        ProcessorParamsPolylinePtr params_;
 
         FeatureBaseList polylines_incoming_;
         FeatureBaseList polylines_last_;
@@ -113,7 +114,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
-        ProcessorTrackerLandmarkPolyline(const ProcessorParamsPolyline& _params);
+        ProcessorTrackerLandmarkPolyline(ProcessorParamsPolylinePtr _params);
 
         virtual ~ProcessorTrackerLandmarkPolyline();
         virtual void configure(SensorBasePtr _sensor) { };
@@ -204,9 +205,9 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 };
 
-inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(const ProcessorParamsPolyline& _params) :
-        ProcessorTrackerLandmark("TRACKER LANDMARK POLYLINE", _params.time_tolerance, _params.max_new_features),
-        line_finder_(_params.line_finder_params),
+inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(ProcessorParamsPolylinePtr _params) :
+        ProcessorTrackerLandmark("TRACKER LANDMARK POLYLINE", _params),
+        line_finder_(_params->line_finder_params),
         params_(_params),
         extrinsics_transformation_computed_(false)
 {

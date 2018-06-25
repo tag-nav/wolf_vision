@@ -2,12 +2,9 @@
 namespace wolf
 {
 
-ProcessorOdom3D::ProcessorOdom3D(const ProcessorParamsOdom3D& _params, SensorOdom3DPtr _sensor_ptr) :
-                ProcessorMotion("ODOM 3D", _params.time_tolerance, 7, 7, 6, 6, 0 ),
-                max_time_span_  ( _params.max_time_span   ),
-                max_buff_length_( _params.max_buff_length ),
-                dist_traveled_  ( _params.dist_traveled   ),
-                angle_turned_   ( _params.angle_turned    ),
+ProcessorOdom3D::ProcessorOdom3D(ProcessorParamsOdom3DPtr _params, SensorOdom3DPtr _sensor_ptr) :
+                ProcessorMotion("ODOM 3D", 7, 7, 6, 6, 0, _params),
+                params_odom_3D_(_params),
                 p1_(nullptr), p2_(nullptr), p_out_(nullptr),
                 q1_(nullptr), q2_(nullptr), q_out_(nullptr)
         {
@@ -267,7 +264,7 @@ ProcessorBasePtr ProcessorOdom3D::create(const std::string& _unique_name, const 
     SensorOdom3DPtr sen_odo =std::static_pointer_cast<SensorOdom3D>(_sen_ptr);
 
     // construct processor
-    ProcessorOdom3DPtr prc_odo = std::make_shared<ProcessorOdom3D>(*prc_odo_params, sen_odo);
+    ProcessorOdom3DPtr prc_odo = std::make_shared<ProcessorOdom3D>(prc_odo_params, sen_odo);
 
     // setup processor
     prc_odo->setName(_unique_name);
@@ -284,27 +281,27 @@ bool ProcessorOdom3D::voteForKeyFrame()
     //WOLF_DEBUG( "DistTraveled: " , delta_integrated_.head(3).norm() );
     //WOLF_DEBUG( "AngleTurned : " , 2.0 * acos(delta_integrated_(6)) );
     // time span
-    if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > max_time_span_)
+    if (getBuffer().get().back().ts_ - getBuffer().get().front().ts_ > params_odom_3D_->max_time_span)
     {
         WOLF_DEBUG( "PM: vote: time span" );
         return true;
     }
     // buffer length
-    if (getBuffer().get().size() > max_buff_length_)
+    if (getBuffer().get().size() > params_odom_3D_->max_buff_length)
     {
         WOLF_DEBUG( "PM: vote: buffer size" );
         return true;
     }
     // distance traveled
     Scalar dist = getMotion().delta_integr_.head(3).norm();
-    if (dist > dist_traveled_)
+    if (dist > params_odom_3D_->dist_traveled)
     {
         WOLF_DEBUG( "PM: vote: distance traveled" );
         return true;
     }
     // angle turned
     Scalar angle = q2v(Quaternions(getMotion().delta_integr_.data()+3)).norm(); // 2.0 * acos(getMotion().delta_integr_(6));
-    if (angle > angle_turned_)
+    if (angle > params_odom_3D_->angle_turned)
     {
         WOLF_DEBUG( "PM: vote: angle turned" );
         return true;

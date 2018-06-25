@@ -3,13 +3,14 @@ namespace wolf
 {
 
 ProcessorMotion::ProcessorMotion(const std::string& _type,
-                                 Scalar _time_tolerance,
                                  Size _state_size,
                                  Size _delta_size,
                                  Size _delta_cov_size,
                                  Size _data_size,
-                                 Size _calib_size) :
-        ProcessorBase(_type, _time_tolerance),
+                                 Size _calib_size,
+                                 ProcessorParamsMotionPtr _params_motion) :
+        ProcessorBase(_type, _params_motion),
+        params_motion_(_params_motion),
         processing_step_(RUNNING_WITHOUT_PACK),
         x_size_(_state_size),
         data_size_(_data_size),
@@ -244,7 +245,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         last_ptr_       = new_capture_ptr;
 
         // callback to other processors
-        getProblem()->keyFrameCallback(key_frame_ptr, shared_from_this(), time_tolerance_);
+        getProblem()->keyFrameCallback(key_frame_ptr, shared_from_this(), params_motion_->time_tolerance);
     }
 
     resetDerived(); // TODO see where to put this
@@ -582,11 +583,11 @@ KFPackPtr ProcessorMotion::computeProcessingStep()
         throw std::runtime_error("ProcessorMotion received data before being initialized.");
     }
 
-    KFPackPtr pack = kf_pack_buffer_.selectPackBefore(last_ptr_, time_tolerance_);
+    KFPackPtr pack = kf_pack_buffer_.selectPackBefore(last_ptr_, params_motion_->time_tolerance);
 
     if (pack)
     {
-        if (kf_pack_buffer_.checkTimeTolerance(pack->key_frame->getTimeStamp(), pack->time_tolerance, origin_ptr_->getTimeStamp(), time_tolerance_))
+        if (kf_pack_buffer_.checkTimeTolerance(pack->key_frame->getTimeStamp(), pack->time_tolerance, origin_ptr_->getTimeStamp(), params_motion_->time_tolerance))
         {
             WOLF_WARN("||*||");
             WOLF_INFO(" ... It seems you missed something!");
@@ -594,7 +595,7 @@ KFPackPtr ProcessorMotion::computeProcessingStep()
             //            throw std::runtime_error("Pack's KF and origin's KF have matching time stamps (i.e. below time tolerances)");
             processing_step_ = RUNNING_WITH_PACK_ON_ORIGIN;
         }
-        else if (pack->key_frame->getTimeStamp() < origin_ptr_->getTimeStamp() - time_tolerance_)
+        else if (pack->key_frame->getTimeStamp() < origin_ptr_->getTimeStamp() - params_motion_->time_tolerance)
             processing_step_ = RUNNING_WITH_PACK_BEFORE_ORIGIN;
 
         else

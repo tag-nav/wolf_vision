@@ -196,8 +196,13 @@ int main(int argc, char** argv)
 
   const auto scalar_max = std::numeric_limits<Scalar>::max();
 
-  ProcessorParamsBasePtr processor_params =
-      std::make_shared<ProcessorParamsDiffDrive>(period_secs/2, scalar_max, scalar_max, scalar_max);
+  ProcessorParamsDiffDrivePtr processor_params = std::make_shared<ProcessorParamsDiffDrive>();
+  processor_params->time_tolerance  = period_secs/2;
+  processor_params->angle_turned    = scalar_max;
+  processor_params->dist_traveled   = scalar_max;
+  processor_params->max_time_span   = scalar_max;
+  processor_params->max_buff_length = 999;
+  processor_params->unmeasured_perturbation_std = 0.0001;
 
   SensorBasePtr sensor_ptr =
       wolf_problem_ptr_->installSensor("DIFF DRIVE", sensor_name, extrinsics, intrinsics);

@@ -12,14 +12,11 @@
 namespace wolf
 {
 
-ProcessorDiffDrive::ProcessorDiffDrive(const ProcessorParamsDiffDrive &params) :
-  ProcessorMotion("DIFF DRIVE", 0.15, 3, 3, 3, 2, 3),
-  unmeasured_perturbation_cov_(Matrix3s::Identity()*
-                               params.unmeasured_perturbation_std_*
-                               params.unmeasured_perturbation_std_),
-  params_(params)
+ProcessorDiffDrive::ProcessorDiffDrive(ProcessorParamsDiffDrivePtr _params) :
+  ProcessorMotion("DIFF DRIVE", 3, 3, 3, 2, 3, _params),
+  params_motion_diff_drive_(_params)
 {
-  //
+    unmeasured_perturbation_cov_ = Matrix3s::Identity() * params_motion_diff_drive_->unmeasured_perturbation_std * params_motion_diff_drive_->unmeasured_perturbation_std;
 }
 
 void ProcessorDiffDrive::computeCurrentDelta(const Eigen::VectorXs& _data,
@@ -84,27 +81,17 @@ void ProcessorDiffDrive::computeCurrentDelta(const Eigen::VectorXs& _data,
 bool ProcessorDiffDrive::voteForKeyFrame()
 {
   // Distance criterion
-  if (getBuffer().get().back().delta_integr_.head<2>().norm() > params_.dist_traveled_th_)
+  if (getBuffer().get().back().delta_integr_.head<2>().norm() > params_motion_diff_drive_->dist_traveled)
   {
     //WOLF_PROCESSOR_DEBUG("vote for key-frame on distance criterion.");
       return true;
   }
-//  else
-//  {
-//    WOLF_PROCESSOR_DEBUG(getBuffer().get().back().delta_integr_.head<2>().norm(),
-//                         " < ", params_.dist_traveled_th_);
-//  }
 
-  if (std::abs(getBuffer().get().back().delta_integr_.tail<1>()(0)) > params_.theta_traveled_th_)
+  if (std::abs(getBuffer().get().back().delta_integr_.tail<1>()(0)) > params_motion_diff_drive_->angle_turned)
   {
     //WOLF_PROCESSOR_DEBUG("vote for key-frame on rotation criterion.");
     return true;
   }
-//  else
-//  {
-//    WOLF_PROCESSOR_DEBUG(getBuffer().get().back().delta_integr_.tail<1>()(0),
-//                         " < ", params_.theta_traveled_th_);
-//  }
 
   return false;
 }
@@ -264,7 +251,7 @@ ProcessorBasePtr ProcessorDiffDrive::create(const std::string& _unique_name,
     return nullptr;
   }
 
-  ProcessorBasePtr prc_ptr = std::make_shared<ProcessorDiffDrive>(*params);
+  ProcessorBasePtr prc_ptr = std::make_shared<ProcessorDiffDrive>(params);
   prc_ptr->setName(_unique_name);
   return prc_ptr;
 }
