@@ -24,14 +24,8 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _v_ptr;
 
-//    if ( isKey() )
-//    {
-//        WOLF_DEBUG("New KF", this->id() );
-//    }
-//    else
-//    {
-//        WOLF_DEBUG("New F", this->id() );
-//    }
+    if ( isKey() )
+        registerNewStateBlocks();
 }
 
 FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _v_ptr) :
@@ -47,19 +41,13 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _v_ptr;
 
-//    if ( isKey() )
-//    {
-//        WOLF_DEBUG("New KF", this->id() );
-//    }
-//    else
-//    {
-//        WOLF_DEBUG("New F", this->id() );
-//    }
+    if ( isKey() )
+        registerNewStateBlocks();
 }
                 
 FrameBase::~FrameBase()
 {
-    if (type_ == KEY_FRAME)
+    if ( isKey() )
         removeStateBlocks();
 }
 
@@ -88,7 +76,7 @@ void FrameBase::remove()
         }
 
         // Remove Frame State Blocks
-        if (type_ == KEY_FRAME)
+        if ( isKey() )
             removeStateBlocks();
 
         if (getTrajectoryPtr()->getLastKeyFramePtr()->id() == this_F->id())

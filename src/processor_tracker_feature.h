@@ -17,6 +17,13 @@
 
 namespace wolf
 {
+
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerFeature);
+
+struct ProcessorParamsTrackerFeature : public ProcessorParamsTracker
+{
+    //
+};
     
 WOLF_PTR_TYPEDEFS(ProcessorTrackerFeature);
 
@@ -63,7 +70,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerFeature);
  *   - establishConstraints() : which calls the pure virtual:
  *     - createConstraint() : create constraint of the correct derived type         <=== IMPLEMENT
  *
- * Should you need extra functionality for your derived types, you can overload these two methods,
+ * Should you need extra functionality for your derived types, you can override these two methods,
  *
  *   -  preProcess() { }
  *   -  postProcess() { }
@@ -77,10 +84,12 @@ class ProcessorTrackerFeature : public ProcessorTracker
 
         /** \brief Constructor with type
          */
-        ProcessorTrackerFeature(const std::string& _type, const Scalar _time_tolerance, const unsigned int _max_new_features);
+        ProcessorTrackerFeature(const std::string& _type,
+                                ProcessorParamsTrackerFeaturePtr _params_tracker_feature);
         virtual ~ProcessorTrackerFeature();
 
     protected:
+        ProcessorParamsTrackerFeaturePtr params_tracker_feature_;
         TrackMatrix track_matrix_;
 
         FeatureBaseList known_features_incoming_;

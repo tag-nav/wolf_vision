@@ -60,7 +60,7 @@ class ProcessorOdom3DTest : public ProcessorOdom3D
         Scalar& dvar_min() {return min_disp_var_;}
         Scalar& rvar_min() {return min_rot_var_;}
 };
-ProcessorOdom3DTest::ProcessorOdom3DTest() : ProcessorOdom3D()
+ProcessorOdom3DTest::ProcessorOdom3DTest() : ProcessorOdom3D(std::make_shared<ProcessorParamsOdom3D>())
 {
     dvar_min() = 0.5;
     rvar_min() = 0.25;
@@ -165,7 +165,7 @@ TEST(ProcessorOdom3D, Interpolate0) // basic test
      * fin D = id
      */
 
-    ProcessorOdom3D prc;
+    ProcessorOdom3D prc(std::make_shared<ProcessorParamsOdom3D>());
 
     Motion ref(0.0,6,7,6,0), final(0.0,6,7,6,0), interpolated(0.0,6,7,6,0);
 
@@ -205,7 +205,7 @@ TEST(ProcessorOdom3D, Interpolate0) // basic test
 
 TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
 {
-    ProcessorOdom3D prc;
+    ProcessorOdom3D prc(std::make_shared<ProcessorParamsOdom3D>());
 
     /*
      * We create several poses: origin, ref, int, second, final, as follows:
@@ -375,7 +375,7 @@ TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
 
 TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
 {
-    ProcessorOdom3D prc;
+    ProcessorOdom3D prc(std::make_shared<ProcessorParamsOdom3D>());
 
     /*
      * We create several poses: origin, ref, int, second, final, as follows:

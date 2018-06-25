@@ -17,6 +17,7 @@ class FeaturePointImage : public FeatureBase
 {
     private:
         cv::KeyPoint keypoint_; ///< Warning: every write operation to this member needs to write measurement_. See setKeypoint() as an example.
+        unsigned int index_keypoint_;
         cv::Mat descriptor_;
         bool is_known_;
         Scalar score_;
@@ -26,10 +27,12 @@ class FeaturePointImage : public FeatureBase
 
         /// Constructor from Eigen measured pixel
         FeaturePointImage(const Eigen::Vector2s & _measured_pixel,
+                          const unsigned int& _index_keypoint,
                           const cv::Mat& _descriptor,
                           const Eigen::Matrix2s& _meas_covariance) :
                 FeatureBase("POINT IMAGE", _measured_pixel, _meas_covariance),
                 keypoint_(_measured_pixel(0), _measured_pixel(1), 1), // Size 1 is a dummy value
+                index_keypoint_(_index_keypoint),
                 descriptor_( _descriptor),
                 is_known_(false),
                 score_(0)
@@ -40,10 +43,12 @@ class FeaturePointImage : public FeatureBase
 
         /// Constructor from OpenCV measured keypoint
         FeaturePointImage(const cv::KeyPoint& _keypoint,
+                          const unsigned int& _index_keypoint,
                           const cv::Mat& _descriptor,
                           const Eigen::Matrix2s& _meas_covariance) :
                 FeatureBase("POINT IMAGE", Eigen::Vector2s::Zero(), _meas_covariance),
                 keypoint_(_keypoint),
+                index_keypoint_(_index_keypoint),
                 descriptor_(_descriptor),
                 is_known_(false),
                 score_(0)
@@ -59,6 +64,9 @@ class FeaturePointImage : public FeatureBase
 
         const cv::Mat& getDescriptor() const;
         void setDescriptor(const cv::Mat& _descriptor);
+
+        size_t getIndexKeyPoint() const
+        { return index_keypoint_; }
 
         bool isKnown();
         void setIsKnown(bool _is_known);

@@ -10,13 +10,14 @@
 namespace wolf
 {
 
-CaptureMotion::CaptureMotion(const TimeStamp& _ts,
+CaptureMotion::CaptureMotion(const std::string & _type,
+                             const TimeStamp& _ts,
                              SensorBasePtr _sensor_ptr,
                              const Eigen::VectorXs& _data,
                              Size _delta_size,
                              Size _delta_cov_size,
                              FrameBasePtr _origin_frame_ptr) :
-        CaptureBase("MOTION", _ts, _sensor_ptr),
+        CaptureBase(_type, _ts, _sensor_ptr),
         data_(_data),
         data_cov_(_sensor_ptr ? _sensor_ptr->getNoiseCov() : Eigen::MatrixXs::Zero(_data.rows(), _data.rows())), // Someone should test this zero and do something smart accordingly
         buffer_(_data.size(), _delta_size, _delta_cov_size, computeCalibSize()),
@@ -25,7 +26,8 @@ CaptureMotion::CaptureMotion(const TimeStamp& _ts,
     //
 }
 
-CaptureMotion::CaptureMotion(const TimeStamp& _ts,
+CaptureMotion::CaptureMotion(const std::string & _type,
+                             const TimeStamp& _ts,
                              SensorBasePtr _sensor_ptr,
                              const Eigen::VectorXs& _data,
                              const Eigen::MatrixXs& _data_cov,
@@ -35,7 +37,7 @@ CaptureMotion::CaptureMotion(const TimeStamp& _ts,
                              StateBlockPtr _p_ptr ,
                              StateBlockPtr _o_ptr ,
                              StateBlockPtr _intr_ptr ) :
-                CaptureBase("MOTION", _ts, _sensor_ptr, _p_ptr, _o_ptr, _intr_ptr),
+                CaptureBase(_type, _ts, _sensor_ptr, _p_ptr, _o_ptr, _intr_ptr),
                 data_(_data),
                 data_cov_(_data_cov),
                 buffer_(_data.size(), _delta_size, _delta_cov_size, computeCalibSize()),

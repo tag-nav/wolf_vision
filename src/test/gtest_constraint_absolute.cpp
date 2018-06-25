@@ -41,7 +41,7 @@ CeresManager ceres_mgr(problem);
 FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeStamp(0));
 
 // Capture, feature and constraint
-CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>(0, nullptr, pose10, 10, 9, nullptr));
+CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("IMU ABS", 0, nullptr, pose10, 10, 9, nullptr));
 
 ////////////////////////////////////////////////////////
 /* In the tests below, we check that ConstraintBlockAbsolute and ConstraintQuaternionAbsolute are working fine
@@ -51,7 +51,7 @@ CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>(0, nullpt
 
 TEST(ConstraintBlockAbs, ctr_block_abs_p_check)
 {
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSE", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
+    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
     ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
         fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr()))
         );
@@ -60,7 +60,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p_check)
 
 TEST(ConstraintBlockAbs, ctr_block_abs_p_solve)
 {
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSE", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
+    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
     ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
         fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr()))
         );
@@ -78,7 +78,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p_solve)
 
 TEST(ConstraintBlockAbs, ctr_block_abs_v_check)
 {
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSE", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
+    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("VELOCITY", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
     ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
         fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr()))
         );
@@ -87,7 +87,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_v_check)
 
 TEST(ConstraintBlockAbs, ctr_block_abs_v_solve)
 {
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSE", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
+    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("VELOCITY", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
     ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
         fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr()))
         );
@@ -105,7 +105,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_v_solve)
 
 TEST(ConstraintQuatAbs, ctr_block_abs_o_check)
 {
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSE", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
+    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("QUATERNION", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
     ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
         fea0->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(fea0->getFramePtr()->getOPtr()))
         );
@@ -114,7 +114,7 @@ TEST(ConstraintQuatAbs, ctr_block_abs_o_check)
 
 TEST(ConstraintQuatAbs, ctr_block_abs_o_solve)
 {
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSE", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
+    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("QUATERNION", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
     ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
         fea0->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(fea0->getFramePtr()->getOPtr()))
         );

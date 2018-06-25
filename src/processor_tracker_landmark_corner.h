@@ -41,7 +41,7 @@ typedef std::shared_ptr<ProcessorParamsLaser> ProcessorParamsLaserPtr;
 
 WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmarkCorner);
 
-struct ProcessorParamsLaser : public ProcessorParamsBase
+struct ProcessorParamsLaser : public ProcessorParamsTrackerLandmark
 {
         laserscanutils::LineFinderIterativeParams line_finder_params_;
         //TODO: add corner_finder_params
@@ -86,10 +86,7 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
     public:
         EIGEN_MAKE_ALIGNED_OPERATOR_NEW; // to guarantee alignment (see http://eigen.tuxfamily.org/dox-devel/group__TopicStructHavingEigenMembers.html)
 
-        ProcessorTrackerLandmarkCorner(const laserscanutils::LineFinderIterativeParams& _line_finder_params,
-                                       const Scalar& _time_tolerance,
-                                       const unsigned int& _new_corners_th,
-                                       const unsigned int& _loop_frames_th);
+        ProcessorTrackerLandmarkCorner(ProcessorParamsLaserPtr _params_laser);
 
         virtual ~ProcessorTrackerLandmarkCorner();
         virtual void configure(SensorBasePtr _sensor) { };

@@ -3,9 +3,12 @@
 
 // Vision utils
 #include <vision_utils.h>
-#include <vision_utils/sensors.h>
-#include <vision_utils/common_class/buffer.h>
-#include <vision_utils/common_class/frame.h>
+#include <sensors.h>
+#include <common_class/buffer.h>
+#include <common_class/frame.h>
+#include <detectors/orb/detector_orb.h>
+#include <descriptors/orb/descriptor_orb.h>
+#include <matchers/bruteforce_hamming_2/matcher_bruteforce_hamming_2.h>
 
 //Wolf
 #include "../processor_tracker_landmark_image.h"
@@ -137,7 +140,7 @@ int main(int argc, char** argv)
 
                 if(keypoints.size() != 0)
                 {
-                    mat_ptr->match(target_descriptor, descriptors, cv_matches);
+                    mat_ptr->match(target_descriptor, descriptors, des_ptr->getSize(), cv_matches);
                     Scalar normalized_score = 1 - (Scalar)(cv_matches[0].distance)/(des_ptr->getSize()*8);
                     std::cout << "pixel: " << keypoints[cv_matches[0].trainIdx].pt + roi_up_left_corner << std::endl;
                     std::cout << "normalized score: " << normalized_score << std::endl;

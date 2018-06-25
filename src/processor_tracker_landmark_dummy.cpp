@@ -12,8 +12,8 @@
 namespace wolf
 {
 
-ProcessorTrackerLandmarkDummy::ProcessorTrackerLandmarkDummy(const Scalar _time_tolerance, const unsigned int& _max_new_features) :
-        ProcessorTrackerLandmark("TRACKER LANDMARK DUMMY", _time_tolerance, _max_new_features),
+ProcessorTrackerLandmarkDummy::ProcessorTrackerLandmarkDummy(ProcessorParamsTrackerLandmarkPtr _params_tracker_landmark) :
+        ProcessorTrackerLandmark("TRACKER LANDMARK DUMMY", _params_tracker_landmark),
         n_feature_(0),
         landmark_idx_non_visible_(0)
 {
@@ -44,11 +44,10 @@ unsigned int ProcessorTrackerLandmarkDummy::findLandmarks(const LandmarkBaseList
         }
         else
         {
-            _feature_list_out.push_back(
-                    std::make_shared<FeatureBase>(
-                            "POINT IMAGE",
-                            landmark_in_ptr->getDescriptor(),
-                            Eigen::MatrixXs::Ones(1, 1)));
+            _feature_list_out.push_back(std::make_shared<FeatureBase>(
+                    "POINT IMAGE",
+                    landmark_in_ptr->getDescriptor(),
+                    Eigen::MatrixXs::Identity(1,1)));
             _feature_landmark_correspondences[_feature_list_out.back()] = std::make_shared<LandmarkMatch>(landmark_in_ptr, 1);
             std::cout << "\t\tlandmark " << landmark_in_ptr->getDescriptor() << " found!" << std::endl;
         }

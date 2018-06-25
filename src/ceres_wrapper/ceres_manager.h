@@ -49,9 +49,9 @@ public:
   ceres::Solver::Summary getSummary();
 
   virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks
-                                  = CovarianceBlocksToBeComputed::ROBOT_LANDMARKS);
+                                  = CovarianceBlocksToBeComputed::ROBOT_LANDMARKS) override;
 
-  virtual void computeCovariances(const StateBlockList& st_list);
+  virtual void computeCovariances(const StateBlockList& st_list) override;
 
   ceres::Solver::Options& getSolverOptions();
 

@@ -8,10 +8,10 @@ CaptureWheelJointPosition::CaptureWheelJointPosition(const TimeStamp& _ts,
                                                      const SensorBasePtr& _sensor_ptr,
                                                      const Eigen::VectorXs& _positions,
                                                      FrameBasePtr _origin_frame_ptr) :
-  CaptureMotion(_ts, _sensor_ptr, _positions, Eigen::Matrix2s::Zero(), 3, 3,
+  CaptureMotion("WHEEL JOINT POSITION", _ts, _sensor_ptr, _positions, Eigen::Matrix2s::Zero(), 3, 3,
                 _origin_frame_ptr/*, nullptr, nullptr, std::make_shared<StateBlock>(3, false)*/)
 {
-//  setType("WHEEL JOINT POSITION");
+//
 
   const IntrinsicsDiffDrive intrinsics =
       *(std::static_pointer_cast<SensorDiffDrive>(getSensorPtr())->getIntrinsics());
@@ -31,10 +31,10 @@ CaptureWheelJointPosition::CaptureWheelJointPosition(const TimeStamp& _ts,
                                                      StateBlockPtr _p_ptr,
                                                      StateBlockPtr _o_ptr,
                                                      StateBlockPtr _intr_ptr) :
-  CaptureMotion(_ts, _sensor_ptr, _positions, _positions_cov, 3, 3,
+  CaptureMotion("WHEEL JOINT POSITION", _ts, _sensor_ptr, _positions, _positions_cov, 3, 3,
                 _origin_frame_ptr, _p_ptr, _o_ptr, _intr_ptr)
 {
-//  setType("WHEEL JOINT POSITION");
+//
 }
 
 Eigen::VectorXs CaptureWheelJointPosition::correctDelta(const VectorXs& _delta,

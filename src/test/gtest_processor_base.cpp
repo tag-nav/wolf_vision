@@ -42,7 +42,12 @@ TEST(ProcessorBase, KeyFrameCallback)
     SensorBasePtr sens_trk = make_shared<SensorBase>("FEATURE", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
                                                      std::make_shared<StateBlock>(Eigen::VectorXs::Zero(1)),
                                                      std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)), 2);
-    shared_ptr<ProcessorTrackerFeatureDummy> proc_trk = make_shared<ProcessorTrackerFeatureDummy>(dt/2, 5, 5);
+
+    ProcessorParamsTrackerFeaturePtr params = std::make_shared<ProcessorParamsTrackerFeature>();
+    params->time_tolerance            = dt/2;
+    params->max_new_features          = 5;
+    params->min_features_for_keyframe = 5;
+    shared_ptr<ProcessorTrackerFeatureDummy> proc_trk = make_shared<ProcessorTrackerFeatureDummy>(params);
 
     problem->addSensor(sens_trk);
     sens_trk->addProcessor(proc_trk);

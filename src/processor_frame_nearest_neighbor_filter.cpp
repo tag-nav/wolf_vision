@@ -3,18 +3,18 @@
 namespace wolf
 {
 
-ProcessorFrameNearestNeighborFilter::ProcessorFrameNearestNeighborFilter(const Params& _params):
-    ProcessorLoopClosureBase("FRAME NEAREST NEIGHBOR FILTER", _params.time_tolerance),
-    params_(_params)
+ProcessorFrameNearestNeighborFilter::ProcessorFrameNearestNeighborFilter(ParamsPtr _params_NNF):
+    ProcessorLoopClosureBase("FRAME NEAREST NEIGHBOR FILTER", _params_NNF),
+    params_NNF(_params_NNF)
 {
   // area of ellipse based on the Chi-Square Probabilities
   // https://people.richland.edu/james/lecture/m170/tbl-chi.html
   // cover both 2D and 3D cases
 
-  if(params_.distance_type_ == DistanceType::LC_POINT_ELLIPSE ||
-     params_.distance_type_ == DistanceType::LC_ELLIPSE_ELLIPSE)
+  if(params_NNF->distance_type_ == DistanceType::LC_POINT_ELLIPSE ||
+     params_NNF->distance_type_ == DistanceType::LC_ELLIPSE_ELLIPSE)
   {
-    switch ((int)(params_.probability_*100))
+    switch ((int)(params_NNF->probability_*100))
     {
     case 900:  area_ = 4.605; // 90% probability
       break;
@@ -26,10 +26,10 @@ ProcessorFrameNearestNeighborFilter::ProcessorFrameNearestNeighborFilter(const P
       break;
     }
   }
-  if (params_.distance_type_ == DistanceType::LC_POINT_ELLIPSOID ||
-      params_.distance_type_ == DistanceType::LC_ELLIPSOID_ELLIPSOID)
+  if (params_NNF->distance_type_ == DistanceType::LC_POINT_ELLIPSOID ||
+      params_NNF->distance_type_ == DistanceType::LC_ELLIPSOID_ELLIPSOID)
   {
-    switch ((int)(params_.probability_*100))
+    switch ((int)(params_NNF->probability_*100))
     {
     case 900:  area_ = 6.251;  // 90% probability
       break;
@@ -97,7 +97,7 @@ bool ProcessorFrameNearestNeighborFilter::findCandidates(const CaptureBasePtr& /
 
       // check if feame is potential candidate for loop closure with
       // chosen distance type
-      switch (params_.distance_type_)
+      switch (params_NNF->distance_type_)
       {
       case LoopclosureDistanceType::LC_POINT_ELLIPSE:
       {
@@ -298,7 +298,7 @@ bool ProcessorFrameNearestNeighborFilter::computeEllipsoid3D(const FrameBasePtr&
 bool ProcessorFrameNearestNeighborFilter::ellipse2DIntersect(const Eigen::VectorXs& ellipse1,
                                                              const Eigen::VectorXs& ellipse2)
 {
-  for (int i = 0 ; i < 360 ; i += params_.sample_step_degree_)
+  for (int i = 0 ; i < 360 ; i += params_NNF->sample_step_degree_)
   {
     // parameterized form of first ellipse gives point on first ellipse
     // https://www.uwgb.edu/dutchs/Geometry/HTMLCanvas/ObliqueEllipses5.HTM
@@ -357,10 +357,10 @@ bool ProcessorFrameNearestNeighborFilter::ellipsoid3DIntersect(const Eigen::Vect
   Eigen::Vector4s point_hom = Eigen::Vector4s::Constant(1);
 
   Scalar omega = 0;
-  for (int i = 0 ; i < 360 ; i += params_.sample_step_degree_)
+  for (int i = 0 ; i < 360 ; i += params_NNF->sample_step_degree_)
   {
     const Scalar theta = Scalar(i) * M_PI / 180.0;
-    for( int j = 0 ; j < 180 ; j += params_.sample_step_degree_)
+    for( int j = 0 ; j < 180 ; j += params_NNF->sample_step_degree_)
     {
       omega = Scalar(j) * M_PI / 180.0;
 
@@ -483,7 +483,7 @@ Scalar ProcessorFrameNearestNeighborFilter::MahalanobisDistance(const FrameBaseP
 bool ProcessorFrameNearestNeighborFilter::frameInsideBuffer(const FrameBasePtr& frame_ptr)
 {
   FrameBasePtr keyframe = getProblem()->getLastKeyFramePtr();
-  if ( (int)frame_ptr->id() < ( (int)keyframe->id() - params_.buffer_size_ ))
+  if ( (int)frame_ptr->id() < ( (int)keyframe->id() - params_NNF->buffer_size_ ))
     return false;
   else
     return true;

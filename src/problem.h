@@ -50,9 +50,9 @@ class Problem : public std::enable_shared_from_this<Problem>
         StateBlockList      state_block_list_;
         std::map<std::pair<StateBlockPtr, StateBlockPtr>, Eigen::MatrixXs> covariances_;
         std::list<ConstraintNotification> constraint_notification_list_;
-        bool prior_is_set_;
         Size state_size_, state_cov_size_;
         StateBlockList notified_state_block_list_;
+        bool prior_is_set_;
 
     private: // CAUTION: THESE METHODS ARE PRIVATE, DO NOT MAKE THEM PUBLIC !!
         Problem(const std::string& _frame_structure); // USE create() below !!
@@ -199,18 +199,17 @@ class Problem : public std::enable_shared_from_this<Problem>
         FrameBasePtr emplaceFrame(FrameType _frame_key_type, //
                                   const TimeStamp& _time_stamp);
 
-        // State getters
-        Eigen::VectorXs getCurrentState();
-        void getCurrentState(Eigen::VectorXs& state);
-        void getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& _ts);
-        Eigen::VectorXs getState(const TimeStamp& _ts);
-        void getState(const TimeStamp& _ts, Eigen::VectorXs& state);
-        FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts);
+        // Frame getters
+        FrameBasePtr    getLastFramePtr         ( );
+        FrameBasePtr    getLastKeyFramePtr      ( );
+        FrameBasePtr    closestKeyFrameToTimeStamp(const TimeStamp& _ts);
 
-        // Zero state provider
-        Eigen::VectorXs zeroState();
 
         /** \brief Give the permission to a processor to create a new keyFrame
+         *
+         * This should implement a black list of processors that have forbidden keyframe creation.
+         *   - This decision is made at problem level, not at processor configuration level.
+         *   - Therefore, if you want to permanently configure a processor for not creating keyframes, see Processor::voting_active_ and its accessors.
          */
         bool permitKeyFrame(ProcessorBasePtr _processor_ptr);
 
@@ -222,14 +221,15 @@ class Problem : public std::enable_shared_from_this<Problem>
                               ProcessorBasePtr _processor_ptr, //
                               const Scalar& _time_tolerance);
 
-        /** \brief Returns a pointer to last frame
-         **/
-        FrameBasePtr getLastFramePtr();
-
-        /** \brief Returns a pointer to last key frame
-         */
-        FrameBasePtr getLastKeyFramePtr();
-
+        // State getters
+        Eigen::VectorXs getCurrentState         ( );
+        void            getCurrentState         (Eigen::VectorXs& state);
+        void            getCurrentStateAndStamp (Eigen::VectorXs& state, TimeStamp& _ts);
+        Eigen::VectorXs getState                (const TimeStamp& _ts);
+        void            getState                (const TimeStamp& _ts, Eigen::VectorXs& state);
+        // Zero state provider
+        Eigen::VectorXs zeroState ( );
+        bool priorIsSet() const;
 
 
 
@@ -308,10 +308,6 @@ class Problem : public std::enable_shared_from_this<Problem>
                    bool state_blocks = false);
         bool check(int verbose_level = 0);
 
-        bool priorIsSet() const
-        {
-            return prior_is_set_;
-        }
 };
 
 } // namespace wolf
@@ -320,6 +316,11 @@ class Problem : public std::enable_shared_from_this<Problem>
 
 namespace wolf
 {
+
+inline bool Problem::priorIsSet() const
+{
+    return prior_is_set_;
+}
 
 inline ProcessorMotionPtr& Problem::getProcessorMotionPtr()
 {

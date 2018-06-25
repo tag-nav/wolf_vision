@@ -89,8 +89,8 @@ int main()
         p.image.height                  = img["height"].as<unsigned int>();
 
         Node alg = params["algorithm"];
-        p.algorithm.max_new_features            = alg["maximum new features"].as<unsigned int>();
-        p.algorithm.min_features_for_keyframe   = alg["minimum features for new keyframe"].as<unsigned int>();
+        p.max_new_features            = alg["maximum new features"].as<unsigned int>();
+        p.min_features_for_keyframe   = alg["minimum features for new keyframe"].as<unsigned int>();
     }
 
 

@@ -14,8 +14,8 @@
 namespace wolf
 {
 
-ProcessorRangeBearing::ProcessorRangeBearing(const SensorRangeBearingPtr _sensor_ptr, const Scalar& _time_tolerance) :
-        ProcessorBase("RANGE BEARING", _time_tolerance)
+ProcessorRangeBearing::ProcessorRangeBearing(const SensorRangeBearingPtr _sensor_ptr, ProcessorParamsBasePtr _params) :
+        ProcessorBase("RANGE BEARING", _params)
 {
     H_r_s   = transform(_sensor_ptr->getPPtr()->getState(), _sensor_ptr->getOPtr()->getState());
 }
@@ -26,7 +26,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
     if ( !kf_pack_buffer_.empty() )
     {
         // Select using incoming_ptr
-        KFPackPtr pack = kf_pack_buffer_.selectPack( _capture->getTimeStamp(), time_tolerance_ );
+        KFPackPtr pack = kf_pack_buffer_.selectPack( _capture->getTimeStamp(), params_->time_tolerance );
 
         if (pack!=nullptr)
             keyFrameCallback(pack->key_frame,pack->time_tolerance);
@@ -38,7 +38,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
 
     // 1. get KF -- we assume a KF is available to hold this _capture (checked in assert below)
     auto kf = getProblem()->closestKeyFrameToTimeStamp(capture->getTimeStamp());
-    assert( (fabs(kf->getTimeStamp() - _capture->getTimeStamp()) < time_tolerance_) && "Could not find a KF close enough to _capture!");
+    assert( (fabs(kf->getTimeStamp() - _capture->getTimeStamp()) < params_->time_tolerance) && "Could not find a KF close enough to _capture!");
 
     // 2. create Capture
     auto cap = std::make_shared<CaptureRangeBearing>(capture->getTimeStamp(),
@@ -111,7 +111,7 @@ ProcessorBasePtr ProcessorRangeBearing::create(const std::string& _unique_name, 
     ProcessorParamsRangeBearingPtr params = std::static_pointer_cast<ProcessorParamsRangeBearing>(_params);
 
     // construct processor
-    ProcessorRangeBearingPtr prc = std::make_shared<ProcessorRangeBearing>(sensor_rb, params->time_tolerance);
+    ProcessorRangeBearingPtr prc = std::make_shared<ProcessorRangeBearing>(sensor_rb, params);
 
     // setup processor
     prc->setName(_unique_name);

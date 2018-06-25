@@ -3,7 +3,7 @@
 namespace wolf {
 
 ProcessorIMU_UnitTester::ProcessorIMU_UnitTester() :
-        ProcessorIMU(),
+        ProcessorIMU(std::make_shared<ProcessorParamsIMU>()),
         Dq_out_(nullptr)
 {}
 

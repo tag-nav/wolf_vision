@@ -10,9 +10,10 @@
 
 namespace wolf {
 
-ProcessorCaptureHolder::ProcessorCaptureHolder(const Scalar& _buffer_size) :
-  ProcessorBase("CAPTURE HOLDER", _buffer_size/2.),
-  buffer_(_buffer_size)
+ProcessorCaptureHolder::ProcessorCaptureHolder(ProcessorParamsCaptureHolderPtr _params_capture_holder) :
+  ProcessorBase("CAPTURE HOLDER", _params_capture_holder),
+  params_capture_holder_(_params_capture_holder),
+  buffer_(_params_capture_holder->buffer_size)
 {
   //
 }
@@ -136,7 +137,7 @@ ProcessorBasePtr ProcessorCaptureHolder::create(const std::string& _unique_name,
   if (params == nullptr)
     params = std::make_shared<ProcessorParamsCaptureHolder>();
 
-  ProcessorCaptureHolderPtr prc_ptr = std::make_shared<ProcessorCaptureHolder>(params->buffer_size_);
+  ProcessorCaptureHolderPtr prc_ptr = std::make_shared<ProcessorCaptureHolder>(params);
   prc_ptr->setName(_unique_name);
 
   return prc_ptr;

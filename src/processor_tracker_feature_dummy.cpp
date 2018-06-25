@@ -42,11 +42,11 @@ bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
 {
     WOLF_INFO("Nbr. of active feature tracks: " , incoming_ptr_->getFeatureList().size() );
 
-    bool vote = incoming_ptr_->getFeatureList().size() < min_feat_for_keyframe_;
+    bool vote = incoming_ptr_->getFeatureList().size() < params_tracker_feature_->min_features_for_keyframe;
 
     WOLF_INFO( (vote ? "Vote ": "Do not vote ") , "for KF" );
 
-    return incoming_ptr_->getFeatureList().size() < min_feat_for_keyframe_;
+    return incoming_ptr_->getFeatureList().size() < params_tracker_feature_->min_features_for_keyframe;
 }
 
 unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)

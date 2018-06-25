@@ -48,6 +48,10 @@ target_link_libraries(gtest_capture_base ${PROJECT_NAME})
 #wolf_add_gtest(gtest_constraint_sparse gtest_constraint_sparse.cpp)
 #target_link_libraries(gtest_constraint_sparse ${PROJECT_NAME})
 
+# ConstraintAutodiff class test
+wolf_add_gtest(gtest_constraint_autodiff gtest_constraint_autodiff.cpp)
+target_link_libraries(gtest_constraint_autodiff ${PROJECT_NAME})
+
 # FeatureBase classes test
 wolf_add_gtest(gtest_eigen_predicates gtest_eigen_predicates.cpp)
 target_link_libraries(gtest_eigen_predicates ${PROJECT_NAME})
@@ -183,10 +187,6 @@ target_link_libraries(gtest_odom_2D ${PROJECT_NAME})
 # ProcessorOdom3D class test
 wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
 target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
-
-# ConstraintAutodiff class test
-wolf_add_gtest(gtest_constraint_autodiff gtest_constraint_autodiff.cpp)
-target_link_libraries(gtest_constraint_autodiff ${PROJECT_NAME})
 
 # ------- Now Core classes Serialization ----------
 

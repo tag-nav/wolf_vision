@@ -13,12 +13,15 @@
 
 namespace wolf {
     
-WOLF_PTR_TYPEDEFS(ProcessorTracker);
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTracker);
 
 struct ProcessorParamsTracker : public ProcessorParamsBase
 {
+        unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
         unsigned int max_new_features;
 };
+
+WOLF_PTR_TYPEDEFS(ProcessorTracker);
 
 /** \brief General tracker processor
  *
@@ -78,16 +81,19 @@ class ProcessorTracker : public ProcessorBase
         } ProcessingStep ;
 
     protected:
+        ProcessorParamsTrackerPtr params_tracker_; ///< parameters for the tracker
         ProcessingStep processing_step_;        ///< State machine controlling the processing step
         CaptureBasePtr origin_ptr_;             ///< Pointer to the origin of the tracker.
         CaptureBasePtr last_ptr_;               ///< Pointer to the last tracked capture.
         CaptureBasePtr incoming_ptr_;           ///< Pointer to the incoming capture being processed.
-        unsigned int max_new_features_;         ///< max features allowed to detect in one iteration. 0 = no limit
         FeatureBaseList new_features_last_;     ///< List of new features in \b last for landmark initialization and new key-frame creation.
         FeatureBaseList new_features_incoming_; ///< list of the new features of \b last successfully tracked in \b incoming
 
+        size_t number_of_tracks_;
+
     public:
-        ProcessorTracker(const std::string& _type, const Scalar& _time_tolerance, const unsigned int _max_new_features);
+        ProcessorTracker(const std::string& _type,
+                         ProcessorParamsTrackerPtr _params_tracker);
         virtual ~ProcessorTracker();
 
         /** \brief Full processing of an incoming Capture.
@@ -96,9 +102,6 @@ class ProcessorTracker : public ProcessorBase
          * Overload it only if you want to alter this algorithm.
          */
         virtual void process(CaptureBasePtr const _incoming_ptr);
-
-        void setMaxNewFeatures(const unsigned int& _max_new_features);
-        unsigned int getMaxNewFeatures();
 
         bool checkTimeTolerance(const TimeStamp& _ts1, const TimeStamp& _ts2);
         bool checkTimeTolerance(const CaptureBasePtr _cap, const TimeStamp& _ts);
@@ -193,6 +196,16 @@ class ProcessorTracker : public ProcessorBase
 
         FeatureBaseList& getNewFeaturesListLast();
 
+        const size_t& previousNumberOfTracks() const
+        {
+            return number_of_tracks_;
+        }
+
+        size_t& previousNumberOfTracks()
+        {
+            return number_of_tracks_;
+        }
+
     protected:
 
         void computeProcessingStep();
@@ -204,16 +217,6 @@ class ProcessorTracker : public ProcessorBase
         void addNewFeatureIncoming(FeatureBasePtr _feature_ptr);
 
 };
-
-inline void ProcessorTracker::setMaxNewFeatures(const unsigned int& _max_new_features)
-{
-    max_new_features_ = _max_new_features;
-}
-
-inline unsigned int ProcessorTracker::getMaxNewFeatures()
-{
-    return max_new_features_;
-}
 
 inline FeatureBaseList& ProcessorTracker::getNewFeaturesListLast()
 {
@@ -232,7 +235,7 @@ inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
 
 inline bool ProcessorTracker::checkTimeTolerance(const TimeStamp& _ts1, const TimeStamp& _ts2)
 {
-    return (std::fabs(_ts2 - _ts2) < time_tolerance_);
+    return (std::fabs(_ts2 - _ts2) < params_tracker_->time_tolerance);
 }
 
 inline bool ProcessorTracker::checkTimeTolerance(const CaptureBasePtr _cap, const TimeStamp& _ts)

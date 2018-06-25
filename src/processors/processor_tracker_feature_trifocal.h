@@ -3,53 +3,48 @@
 
 //Wolf includes
 #include "../processor_tracker_feature.h"
+#include "../capture_image.h"
 
 // Vision utils
-#include <vision_utils/detectors/detector_base.h>
-#include <vision_utils/descriptors/descriptor_base.h>
-#include <vision_utils/matchers/matcher_base.h>
-#include <vision_utils/algorithms/activesearch/alg_activesearch.h>
+#include <vision_utils.h>
+#include <detectors/detector_base.h>
+#include <descriptors/descriptor_base.h>
+#include <matchers/matcher_base.h>
+#include <algorithms/activesearch/alg_activesearch.h>
 
 namespace wolf
 {
 
 WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerFeatureTrifocal);
 
-struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTracker
+struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeature
 {
         std::string yaml_file_params_vision_utils;
 
-        unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
-
+        int n_cells_h;
+        int n_cells_v;
+        int min_response_new_feature;
+        Scalar max_euclidean_distance;
         Scalar pixel_noise_std; ///< std noise of the pixel
+        int min_track_length_for_constraint; ///< Minimum track length of a matched feature to create a constraint
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureTrifocal);
 
 class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 {
-
         // Parameters for vision_utils
     protected:
         vision_utils::DetectorBasePtr   det_ptr_;
         vision_utils::DescriptorBasePtr des_ptr_;
         vision_utils::MatcherBasePtr    mat_ptr_;
-        vision_utils::AlgorithmACTIVESEARCHPtr active_search_ptr_;  // Active Search
-
-        int cell_width_; ///< Active search cell width
-        int cell_height_; ///< Active search cell height
-        vision_utils::AlgorithmParamsACTIVESEARCHPtr params_activesearch_ptr_; ///< Active search parameters
 
     protected:
-        ProcessorParamsTrackerFeatureTrifocal params_;      ///< Configuration parameters
 
-        cv::Mat image_last_, image_incoming_;   ///< Images of the "last" and "incoming" Captures
+        ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_;      ///< Configuration parameters
 
-        struct
-        {
-                unsigned int width_;  ///< width of the image
-                unsigned int height_; ///< height of the image
-        } image_;
+        CaptureImagePtr capture_last_;
+        CaptureImagePtr capture_incoming_;
 
     private:
         CaptureBasePtr prev_origin_ptr_;                    ///< Capture previous to origin_ptr_ for the third focus of the trifocal.
@@ -59,7 +54,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         /** \brief Class constructor
          */
-        ProcessorTrackerFeatureTrifocal( const ProcessorParamsTrackerFeatureTrifocal& _params );
+        ProcessorTrackerFeatureTrifocal( ProcessorParamsTrackerFeatureTrifocalPtr _params_tracker_feature_trifocal );
 
         /** \brief Class Destructor
          */
@@ -112,6 +107,11 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+        /** \brief advance pointers
+         *
+         */
+        virtual void advanceDerived() override;
+
         /** \brief reset pointers and match lists at KF creation
          *
          */
@@ -122,11 +122,20 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          */
         virtual void preProcess() override;
 
+        /** \brief Post-process
+         *
+         */
+        virtual void postProcess() override;
+
         /** \brief Establish constraints between features in Captures \b last and \b origin
          */
         virtual void establishConstraints() override;
 
         CaptureBasePtr getPrevOriginPtr();
+
+        bool isInlier(const cv::KeyPoint& _kp_incoming, const cv::KeyPoint& _kp_last);
+
+        void setParams(const ProcessorParamsTrackerFeatureTrifocalPtr _params);
 
     public:
 
