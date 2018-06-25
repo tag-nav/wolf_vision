@@ -17,7 +17,7 @@ class TrackMatrixTest : public testing::Test
         TrackMatrix track_matrix;
 
         Eigen::Vector2s m;
-        Eigen::Matrix2s m_cov;
+        Eigen::Matrix2s m_cov = Eigen::Matrix2s::Identity()*0.01;
 
         CaptureBasePtr C0, C1, C2, C3, C4;
         FeatureBasePtr f0, f1, f2, f3, f4;

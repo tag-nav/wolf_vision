@@ -303,28 +303,30 @@ bool isSymmetric(const Eigen::Matrix<T, N, N, RC>& M,
 }
 
 template <typename T, int N, int RC>
-bool isPositiveSemiDefinite(const Eigen::Matrix<T, N, N, RC>& M)
+bool isPositiveSemiDefinite(const Eigen::Matrix<T, N, N, RC>& M, const T& eps = Constants::EPS)
 {
   Eigen::SelfAdjointEigenSolver<Eigen::Matrix<T, N, N, RC> > eigensolver(M);
 
   if (eigensolver.info() == Eigen::Success)
   {
     // All eigenvalues must be >= 0:
-    return (eigensolver.eigenvalues().array() >= T(0)).all();
+    return (eigensolver.eigenvalues().array() >= eps).all();
   }
 
   return false;
 }
 
 template <typename T, int N, int RC>
-bool isCovariance(const Eigen::Matrix<T, N, N, RC>& M)
+bool isCovariance(const Eigen::Matrix<T, N, N, RC>& M, const T& eps = Constants::EPS)
 {
-  return isSymmetric(M) && isPositiveSemiDefinite(M);
+  return isSymmetric(M) && isPositiveSemiDefinite(M, eps);
 }
 
 #define WOLF_ASSERT_COVARIANCE_MATRIX(x) \
-  assert(x.determinant() > 0 && "Not positive definite measurement covariance"); \
-  assert(isCovariance(x) && "Not a covariance");
+  assert(isCovariance(x, Constants::EPS_SMALL) && "Not a covariance");
+
+#define WOLF_ASSERT_INFORMATION_MATRIX(x) \
+  assert(isCovariance(x, 0.0) && "Not an information matrix");
 
 //===================================================
 
