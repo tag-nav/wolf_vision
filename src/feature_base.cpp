@@ -144,8 +144,8 @@ void FeatureBase::avoidSingularCovariance()
     if (eigensolver.info() == Eigen::Success)
     {
         // All eigenvalues must be >= 0:
-        Scalar epsilon = Constants::EPS;
-        while ((eigensolver.eigenvalues().array() < Constants::EPS).any())
+        Scalar epsilon = Constants::EPS_SMALL;
+        while ((eigensolver.eigenvalues().array() < Constants::EPS_SMALL).any())
         {
             std::cout << "----- any negative eigenvalue or too close to zero\n";
             std::cout << "previous eigenvalues: " << eigensolver.eigenvalues().transpose() << std::endl;

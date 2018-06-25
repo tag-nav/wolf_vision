@@ -111,7 +111,7 @@ TEST(ProcessorFrameNearestNeighborFilter, PointInEllipseRotated)
                                 0.0, 5.0;
 
   Eigen::Matrix1s orientation_covariance_matrix;
-  orientation_covariance_matrix << 0.0;
+  orientation_covariance_matrix << 0.01;
 
   Eigen::Vector2s tt_covariance_matrix;
   tt_covariance_matrix << 0.0, 0.0;
