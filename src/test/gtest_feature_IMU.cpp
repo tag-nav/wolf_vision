@@ -82,7 +82,7 @@ class FeatureIMU_test : public testing::Test
         
     //create a feature
         delta_preint = problem->getProcessorMotionPtr()->getMotion().delta_integr_;
-        delta_preint_cov = problem->getProcessorMotionPtr()->getMotion().delta_integr_cov_;
+        delta_preint_cov = problem->getProcessorMotionPtr()->getMotion().delta_integr_cov_ + MatrixXs::Identity(9,9)*1e-08;
         VectorXs calib_preint = problem->getProcessorMotionPtr()->getBuffer().getCalibrationPreint();
         dD_db_jacobians = problem->getProcessorMotionPtr()->getMotion().jacobian_calib_;
         feat_imu = std::make_shared<FeatureIMU>(delta_preint,
