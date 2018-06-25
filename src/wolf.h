@@ -323,12 +323,10 @@ bool isCovariance(const Eigen::Matrix<T, N, N, RC>& M, const T& eps = Constants:
 }
 
 #define WOLF_ASSERT_COVARIANCE_MATRIX(x) \
-  assert(x.determinant() > 0 && "Not positive definite measurement covariance"); \
   assert(isCovariance(x, Constants::EPS_SMALL) && "Not a covariance");
 
 #define WOLF_ASSERT_INFORMATION_MATRIX(x) \
-  assert(x.determinant() > 0 && "Not positive definite measurement covariance"); \
-  assert(isCovariance(x, 0.) && "Not an information matrix");
+  assert(isCovariance(x, 0.0) && "Not an information matrix");
 
 //===================================================
 
