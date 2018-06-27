@@ -147,28 +147,22 @@ void FeatureBase::avoidSingularCovariance()
         Scalar epsilon = Constants::EPS_SMALL;
         while ((eigensolver.eigenvalues().array() < Constants::EPS_SMALL).any())
         {
-            std::cout << "----- any negative eigenvalue or too close to zero\n";
-            std::cout << "previous eigenvalues: " << eigensolver.eigenvalues().transpose() << std::endl;
-            std::cout << "previous determinant: " << measurement_covariance_.determinant() << std::endl;
+            //std::cout << "----- any negative eigenvalue or too close to zero\n";
+            //std::cout << "previous eigenvalues: " << eigensolver.eigenvalues().transpose() << std::endl;
+            //std::cout << "previous determinant: " << measurement_covariance_.determinant() << std::endl;
             measurement_covariance_= eigensolver.eigenvectors() *
                                      eigensolver.eigenvalues().cwiseMax(epsilon).asDiagonal() *
                                      eigensolver.eigenvectors().transpose();
             eigensolver.compute(measurement_covariance_);
-            std::cout << "epsilon used: " << epsilon << std::endl;
-            std::cout << "posterior eigenvalues: " << eigensolver.eigenvalues().transpose() << std::endl;
-            std::cout << "posterior determinant: " << measurement_covariance_.determinant() << std::endl;
+            //std::cout << "epsilon used: " << epsilon << std::endl;
+            //std::cout << "posterior eigenvalues: " << eigensolver.eigenvalues().transpose() << std::endl;
+            //std::cout << "posterior determinant: " << measurement_covariance_.determinant() << std::endl;
             epsilon *=10;
         }
     }
     else
         WOLF_ERROR("Couldn't compute covariance eigen decomposition");
 
-    /*Scalar eps_scalar = 1e-10;
-    while (measurement_covariance_.determinant() < Constants::EPS_SMALL && eps_scalar < 1e-3)
-    {
-        measurement_covariance_ += Eigen::MatrixXs::Identity(measurement_covariance_.rows(), measurement_covariance_.cols()) * eps_scalar; // avoid singular covariance
-        eps_scalar*=10;
-    }*/
     WOLF_ASSERT_COVARIANCE_MATRIX(measurement_covariance_);
 }
 
