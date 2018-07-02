@@ -231,7 +231,7 @@ class ConstraintAutodiff : public ConstraintBase
             assert(_states_ptr.size() == n_blocks);
 
             // init jacobian
-            for(auto i = 0; i < n_blocks; ++i)
+            for(unsigned int i = 0; i < n_blocks; ++i)
             {
                Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
                jacobians_.push_back(Ji);
@@ -498,7 +498,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -740,7 +740,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -971,7 +971,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -1191,7 +1191,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -1395,7 +1395,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -1588,7 +1588,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -1774,7 +1774,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -1949,7 +1949,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -2113,7 +2113,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);

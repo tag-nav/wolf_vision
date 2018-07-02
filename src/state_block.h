@@ -51,7 +51,7 @@ public:
 
         std::atomic_bool fixed_; ///< Key to indicate whether the state is fixed or not
 
-        std::atomic<int> state_size_; ///< State vector size
+        std::atomic<Size> state_size_; ///< State vector size
         Eigen::VectorXs state_; ///< State vector storing the state values
         mutable std::mutex mut_state_; ///< State vector mutex
 
@@ -64,7 +64,7 @@ public:
          * \param _fixed Indicates this state is not estimated and thus acts as a fixed parameter
          * \param _local_param_ptr pointer to the local parametrization for the block
          */
-        StateBlock(const unsigned int _size, bool _fixed = false, LocalParametrizationBasePtr _local_param_ptr = nullptr);
+        StateBlock(const Size _size, bool _fixed = false, LocalParametrizationBasePtr _local_param_ptr = nullptr);
 
         /** \brief Constructor from vector
          * 
@@ -93,7 +93,7 @@ public:
 
         /** \brief Returns the state size
          **/
-        unsigned int getSize() const;
+        Size getSize() const;
 
         /**\brief Returns the size of the local parametrization
          *
@@ -148,7 +148,7 @@ inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalP
 //    std::cout << "constructed           +sb" << std::endl;
 }
 
-inline StateBlock::StateBlock(const unsigned int _size, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
+inline StateBlock::StateBlock(const Size _size, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
 //        notifications_{Notification::ADD},
         node_ptr_(), // nullptr
         fixed_(_fixed),
@@ -184,7 +184,7 @@ inline void StateBlock::setState(const Eigen::VectorXs& _state)
     addNotification(Notification::STATE_UPDATE);
 }
 
-inline unsigned int StateBlock::getSize() const
+inline Size StateBlock::getSize() const
 {
     return state_size_.load();
 }

@@ -298,7 +298,7 @@ StateBlockPtr SensorBase::getIntrinsicPtr()
 Size SensorBase::computeCalibSize() const
 {
     Size sz = 0;
-    for (Size i = 0; i < state_block_vec_.size(); i++)
+    for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
         auto sb = state_block_vec_[i];
         if (sb && !sb->isFixed())
@@ -313,7 +313,7 @@ Eigen::VectorXs SensorBase::getCalibration() const
     Size index = 0;
     Size sz = getCalibSize();
     Eigen::VectorXs calib(sz);
-    for (Size i = 0; i < state_block_vec_.size(); i++)
+    for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
         auto sb = getStateBlockPtrStatic(i);
         if (sb && !sb->isFixed())

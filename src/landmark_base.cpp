@@ -151,7 +151,7 @@ void LandmarkBase::getState(Eigen::VectorXs& _state) const
 
     assert(_state.size() == size && "Wrong state vector size");
 
-    unsigned int index = 0;
+    Size index = 0;
 
     for (StateBlockPtr sb : state_block_vec_)
         if (sb)
