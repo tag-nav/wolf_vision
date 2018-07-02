@@ -197,7 +197,7 @@ void SensorBase::registerNewStateBlocks()
 {
     if (getProblem() != nullptr)
     {
-        for (int i = 0; i < getStateBlockVec().size(); i++)
+        for (unsigned int i = 0; i < getStateBlockVec().size(); i++)
         {
             if (i < 2 && !isExtrinsicDynamic())
             {

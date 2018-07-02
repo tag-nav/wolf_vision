@@ -54,16 +54,16 @@ TEST_F(KFPackBufferTest, empty)
 TEST_F(KFPackBufferTest, add)
 {
     kfpackbuffer.add(f10, tt10);
-    ASSERT_EQ(kfpackbuffer.size(),1);
+    ASSERT_EQ(kfpackbuffer.size(), (unsigned int) 1);
     kfpackbuffer.add(f20, tt20);
-    ASSERT_EQ(kfpackbuffer.size(),2);
+    ASSERT_EQ(kfpackbuffer.size(), (unsigned int) 2);
 }
 
 TEST_F(KFPackBufferTest, clear)
 {
     kfpackbuffer.add(f10, tt10);
     kfpackbuffer.add(f20, tt20);
-    ASSERT_EQ(kfpackbuffer.size(),2);
+    ASSERT_EQ(kfpackbuffer.size(), (unsigned int) 2);
     kfpackbuffer.clear();
     ASSERT_TRUE(kfpackbuffer.empty());
 }
@@ -127,13 +127,13 @@ TEST_F(KFPackBufferTest, selectPack)
     res(11) = 20;
 
     // test
-    for (auto ip1=0;ip1<p1.size();++ip1)
+    for (unsigned int ip1=0;ip1<p1.size();++ip1)
     {
-        for (auto ip2=0;ip2<p2.size();++ip2)
+        for (unsigned int ip2=0;ip2<p2.size();++ip2)
         {
             kfpackbuffer.add(f10, p1[ip1]);
             kfpackbuffer.add(f20, p2[ip2]);
-            for (auto iq=0;iq<q.size();++iq)
+            for (unsigned int iq=0;iq<q.size();++iq)
             {
                 KFPackPtr packQ = kfpackbuffer.selectPack(16, q[iq]);
                 if (packQ!=nullptr)
@@ -219,7 +219,7 @@ TEST_F(KFPackBufferTest, removeUpTo)
     // Specifically, only f21 should remain
     KFPackPtr pack20 = std::make_shared<KFPack>(f20,tt20);
     kfpackbuffer.removeUpTo( pack20->key_frame->getTimeStamp() );
-    ASSERT_EQ(kfpackbuffer.size(),1);
+    ASSERT_EQ(kfpackbuffer.size(), (unsigned int) 1);
     ASSERT_TRUE(kfpackbuffer.selectPack(f10->getTimeStamp(),tt)==nullptr);
     ASSERT_TRUE(kfpackbuffer.selectPack(f20->getTimeStamp(),tt)==nullptr);
     ASSERT_TRUE(kfpackbuffer.selectPack(f21->getTimeStamp(),tt)!=nullptr);
@@ -227,11 +227,11 @@ TEST_F(KFPackBufferTest, removeUpTo)
     // Chech removal of an imprecise time stamp
     // Specifically, only f28 should remain
     kfpackbuffer.add(f28, tt28);
-    ASSERT_EQ(kfpackbuffer.size(),2);
+    ASSERT_EQ(kfpackbuffer.size(), (unsigned int) 2);
     FrameBasePtr f22 = std::make_shared<FrameBase>(TimeStamp(22),nullptr,nullptr,nullptr);
     KFPackPtr pack22 = std::make_shared<KFPack>(f22,5);
     kfpackbuffer.removeUpTo( pack22->key_frame->getTimeStamp() );
-    ASSERT_EQ(kfpackbuffer.size(),1);
+    ASSERT_EQ(kfpackbuffer.size(), (unsigned int) 1);
     ASSERT_TRUE(kfpackbuffer.selectPack(f21->getTimeStamp(),tt)==nullptr);
     ASSERT_TRUE(kfpackbuffer.selectPack(f28->getTimeStamp(),tt)!=nullptr);
 }

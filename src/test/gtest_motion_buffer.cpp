@@ -106,8 +106,8 @@ TEST(MotionBuffer, Split)
     TimeStamp t = 1.5; // between m1 and m2
     MB.split(t, MB_old);
 
-    ASSERT_EQ(MB_old.get().size(),      2);
-    ASSERT_EQ(MB    .get().size(),      3);
+    ASSERT_EQ(MB_old.get().size(), (unsigned int) 2);
+    ASSERT_EQ(MB    .get().size(), (unsigned int) 3);
 
     ASSERT_EQ(MB_old.getMotion(t1).ts_, t1);
     ASSERT_EQ(MB_old.getMotion(t2).ts_, t1); // last  ts is t1

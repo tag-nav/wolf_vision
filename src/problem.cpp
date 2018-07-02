@@ -718,7 +718,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             cout << endl;
             if (metric && state_blocks)
             {
-                for (auto i = 0; i < S->getStateBlockVec().size(); i++)
+                for (unsigned int i = 0; i < S->getStateBlockVec().size(); i++)
                 {
                     if (i==0) cout << "    Extr " << (S->isExtrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
                     if (i==2) cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";

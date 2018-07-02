@@ -109,20 +109,20 @@ TEST(Problem, SetOrigin_PO_2D)
     P->setPrior(x0, P0, t0, 1.0);
 
     // check that no sensor has been added
-    ASSERT_EQ(P->getHardwarePtr()->getSensorList().size(), 0);
+    ASSERT_EQ(P->getHardwarePtr()->getSensorList().size(), (unsigned int) 0);
 
     // check that the state is correct
     ASSERT_TRUE((x0 - P->getCurrentState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
 
     // check that we have one frame, one capture, one feature, one constraint
     TrajectoryBasePtr T = P->getTrajectoryPtr();
-    ASSERT_EQ(T->getFrameList().size(), 1);
+    ASSERT_EQ(T->getFrameList().size(), (unsigned int) 1);
     FrameBasePtr F = P->getLastFramePtr();
-    ASSERT_EQ(F->getCaptureList().size(), 1);
+    ASSERT_EQ(F->getCaptureList().size(), (unsigned int) 1);
     CaptureBasePtr C = F->getCaptureList().front();
-    ASSERT_EQ(C->getFeatureList().size(), 1);
+    ASSERT_EQ(C->getFeatureList().size(), (unsigned int) 1);
     FeatureBasePtr f = C->getFeatureList().front();
-    ASSERT_EQ(f->getConstraintList().size(), 1);
+    ASSERT_EQ(f->getConstraintList().size(), (unsigned int) 1);
 
     // check that the constraint is absolute (no pointers to other F, f, or L)
     ConstraintBasePtr c = f->getConstraintList().front();
@@ -148,20 +148,20 @@ TEST(Problem, SetOrigin_PO_3D)
     P->setPrior(x0, P0, t0, 1.0);
 
     // check that no sensor has been added
-    ASSERT_EQ(P->getHardwarePtr()->getSensorList().size(), 0);
+    ASSERT_EQ(P->getHardwarePtr()->getSensorList().size(), (unsigned int) 0);
 
     // check that the state is correct
     ASSERT_TRUE((x0 - P->getCurrentState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
 
     // check that we have one frame, one capture, one feature, one constraint
     TrajectoryBasePtr T = P->getTrajectoryPtr();
-    ASSERT_EQ(T->getFrameList().size(), 1);
+    ASSERT_EQ(T->getFrameList().size(), (unsigned int) 1);
     FrameBasePtr F = P->getLastFramePtr();
-    ASSERT_EQ(F->getCaptureList().size(), 1);
+    ASSERT_EQ(F->getCaptureList().size(), (unsigned int) 1);
     CaptureBasePtr C = F->getCaptureList().front();
-    ASSERT_EQ(C->getFeatureList().size(), 1);
+    ASSERT_EQ(C->getFeatureList().size(), (unsigned int) 1);
     FeatureBasePtr f = C->getFeatureList().front();
-    ASSERT_EQ(f->getConstraintList().size(), 1);
+    ASSERT_EQ(f->getConstraintList().size(), (unsigned int) 1);
 
     // check that the constraint is absolute (no pointers to other F, f, or L)
     ConstraintBasePtr c = f->getConstraintList().front();
@@ -195,7 +195,7 @@ TEST(Problem, emplaceFrame_factory)
     ASSERT_EQ(f2->getType().compare("POV 3D"), 0);
 
     // check that all frames are effectively in the trajectory
-    ASSERT_EQ(P->getTrajectoryPtr()->getFrameList().size(), 3);
+    ASSERT_EQ(P->getTrajectoryPtr()->getFrameList().size(), (unsigned int) 3);
 
     // check that all frames are linked to Problem
     ASSERT_EQ(f0->getProblem(), P);
@@ -213,13 +213,13 @@ TEST(Problem, StateBlocks)
 
     // 2 state blocks, fixed
     SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
-    ASSERT_EQ(P->getStateBlockList().size(),                2);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(),    2);
+    ASSERT_EQ(P->getStateBlockList().size(), (unsigned int) 2);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(), (unsigned int) 2);
 
     // 3 state blocks, fixed
     SensorBasePtr    St = P->installSensor   ("CAMERA", "camera",   xs, wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
-    ASSERT_EQ(P->getStateBlockList().size(),                2 + 3);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(),    2 + 3);
+    ASSERT_EQ(P->getStateBlockList().size(), (unsigned int) (2 + 3));
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(), (unsigned int) (2 + 3));
 
     ProcessorParamsTrackerFeaturePtr params = std::make_shared<ProcessorParamsTrackerFeature>();
     params->time_tolerance            = 0.1;
@@ -232,16 +232,16 @@ TEST(Problem, StateBlocks)
 
     // 2 state blocks, estimated
     P->emplaceFrame("PO 3D", KEY_FRAME, xs, 0);
-    ASSERT_EQ(P->getStateBlockList().size(),                2 + 3 + 2);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(),    2 + 3 + 2);
+    ASSERT_EQ(P->getStateBlockList().size(), (unsigned int)(2 + 3 + 2));
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(), (unsigned int)(2 + 3 + 2));
 
 
     //    P->print(4,1,1,1);
 
     // change some SB properties
     St->unfixExtrinsics();
-    ASSERT_EQ(P->getStateBlockList().size(),                2 + 3 + 2);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(),    2 + 3 + 2 /*+ 2*/); // XXX: 2 more notifications on the same SB!
+    ASSERT_EQ(P->getStateBlockList().size(), (unsigned int)(2 + 3 + 2));
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(),(unsigned int)(2 + 3 + 2 /*+ 2*/)); // XXX: 2 more notifications on the same SB!
 
     //    P->print(4,1,1,1);
 }

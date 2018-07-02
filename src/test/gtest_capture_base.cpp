@@ -86,7 +86,7 @@ TEST(CaptureBase, addFeatureList)
 {
     CaptureBasePtr C(std::make_shared<CaptureBase>("DUMMY", 1.2)); // timestamp = 1.2
     FeatureBasePtr f_first = C->addFeature(std::make_shared<FeatureBase>("DUMMY", Vector2s::Zero(), Matrix2s::Identity()));
-    ASSERT_EQ(C->getFeatureList().size(), 1);
+    ASSERT_EQ(C->getFeatureList().size(), (unsigned int) 1);
 
     // make a list to add
     std::list<FeatureBasePtr> fl;
@@ -97,8 +97,8 @@ TEST(CaptureBase, addFeatureList)
     FeatureBasePtr f_last = fl.back();
 
     C->addFeatureList((fl));
-    ASSERT_EQ(C->getFeatureList().size(), 4);
-    ASSERT_EQ(fl.size(), 0); // features have been moved, not copied
+    ASSERT_EQ(C->getFeatureList().size(), (unsigned int) 4);
+    ASSERT_EQ(fl.size(), (unsigned int) 0); // features have been moved, not copied
     ASSERT_EQ(C->getFeatureList().front(), f_first);
     ASSERT_EQ(C->getFeatureList().back(), f_last);
 }

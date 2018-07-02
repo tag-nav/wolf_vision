@@ -34,7 +34,7 @@ TEST(WolfTestTimeStamp, TimeStampInitScalar)
 
   ASSERT_EQ(start.get(), val);
   ASSERT_EQ(start.getSeconds(), val);
-  ASSERT_EQ(start.getNanoSeconds(), 0);
+  ASSERT_EQ(start.getNanoSeconds(), (unsigned int) 0);
 
   std::stringstream ss;
   start.print(ss);

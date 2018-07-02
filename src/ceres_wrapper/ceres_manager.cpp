@@ -256,7 +256,7 @@ void CeresManager::addConstraint(const ConstraintBasePtr& ctr_ptr)
       ceres_problem_->AddResidualBlock(cost_func_ptr.get(),
                                        loss_func_ptr, res_block_mem);
 
-  assert(ceres_problem_->NumResidualBlocks() == ctr_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
+  assert((unsigned int)(ceres_problem_->NumResidualBlocks()) == ctr_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
 void CeresManager::removeConstraint(const ConstraintBasePtr& _ctr_ptr)
@@ -267,7 +267,7 @@ void CeresManager::removeConstraint(const ConstraintBasePtr& _ctr_ptr)
   ctr_2_residual_idx_.erase(_ctr_ptr);
   ctr_2_costfunction_.erase(_ctr_ptr);
 
-  assert(ceres_problem_->NumResidualBlocks() == ctr_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
+  assert((unsigned int)(ceres_problem_->NumResidualBlocks()) == ctr_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
 void CeresManager::addStateBlock(const StateBlockPtr& state_ptr)

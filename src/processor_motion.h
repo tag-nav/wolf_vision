@@ -24,7 +24,7 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsMotion);
 struct ProcessorParamsMotion : public ProcessorParamsBase
 {
         Scalar max_time_span    = 0.5;
-        Size   max_buff_length  = 10;
+        unsigned int max_buff_length  = 10;
         Scalar dist_traveled    = 5;
         Scalar angle_turned     = 0.5;
 };

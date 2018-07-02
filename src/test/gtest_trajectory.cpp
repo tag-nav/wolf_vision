@@ -134,21 +134,21 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     // add frames and keyframes
     T->addFrame(f1); // KF
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getFrameList().                 size(), 1);
-    ASSERT_EQ(P->getStateBlockList().            size(), 2);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 2);
+    ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
+    ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 2);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 2);
 
     T->addFrame(f2); // KF
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getFrameList().                 size(), 2);
-    ASSERT_EQ(P->getStateBlockList().            size(), 4);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 4);
+    ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
+    ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 4);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 4);
 
     T->addFrame(f3); // F
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getFrameList().                 size(), 3);
-    ASSERT_EQ(P->getStateBlockList().            size(), 4);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 4);
+    ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 3);
+    ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 4);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 4);
 
     ASSERT_EQ(T->getLastFramePtr()->id(), f3->id());
     ASSERT_EQ(T->getLastKeyFramePtr()->id(), f2->id());
@@ -158,30 +158,30 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     // remove frames and keyframes
     f2->remove(); // KF
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getFrameList().                 size(), 2);
-    ASSERT_EQ(P->getStateBlockList().            size(), 2);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 2);
+    ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
+    ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 2);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 2);
 
     ASSERT_EQ(T->getLastFramePtr()->id(), f3->id());
     ASSERT_EQ(T->getLastKeyFramePtr()->id(), f1->id());
 
     f3->remove(); // F
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getFrameList().                 size(), 1);
-    ASSERT_EQ(P->getStateBlockList().            size(), 2);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 2);
+    ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
+    ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 2);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 2);
 
     ASSERT_EQ(T->getLastKeyFramePtr()->id(), f1->id());
 
     f1->remove(); // KF
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getFrameList().                 size(), 0);
-    ASSERT_EQ(P->getStateBlockList().            size(), 0);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 4);
+    ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 0);
+    ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 0);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 4);
 
     N.update();
 
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(), 0);
+    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 0);
 }
 
 TEST(TrajectoryBase, KeyFramesAreSorted)
