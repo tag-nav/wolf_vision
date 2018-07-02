@@ -158,6 +158,10 @@ target_link_libraries(gtest_feature_IMU ${PROJECT_NAME})
 wolf_add_gtest(gtest_IMU gtest_IMU.cpp)
 target_link_libraries(gtest_IMU ${PROJECT_NAME})
 
+# MakePosDef function test
+wolf_add_gtest(gtest_make_posdef gtest_make_posdef.cpp)
+target_link_libraries(gtest_make_posdef ${PROJECT_NAME})
+
 # Pinhole test
 wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
 target_link_libraries(gtest_pinhole ${PROJECT_NAME})

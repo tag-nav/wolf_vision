@@ -328,6 +328,39 @@ bool isCovariance(const Eigen::Matrix<T, N, N, RC>& M, const T& eps = Constants:
 #define WOLF_ASSERT_INFORMATION_MATRIX(x) \
   assert(isCovariance(x, 0.0) && "Not an information matrix");
 
+template <typename T, int N, int RC>
+bool makePosDef(Eigen::Matrix<T,N,N,RC>& M, const T& eps = Constants::EPS)
+{
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix<T,N,N,RC> > eigensolver(M);
+
+    if (eigensolver.info() == Eigen::Success)
+    {
+        // All eigenvalues must be >= 0:
+        Scalar epsilon = eps;
+        while ((eigensolver.eigenvalues().array() < eps).any())
+        {
+            //std::cout << "----- any negative eigenvalue or too close to zero\n";
+            //std::cout << "previous eigenvalues: " << eigensolver.eigenvalues().transpose() << std::endl;
+            //std::cout << "previous determinant: " << M.determinant() << std::endl;
+            M = eigensolver.eigenvectors() *
+                eigensolver.eigenvalues().cwiseMax(epsilon).asDiagonal() *
+                eigensolver.eigenvectors().transpose();
+            eigensolver.compute(M);
+            //std::cout << "epsilon used: " << epsilon << std::endl;
+            //std::cout << "posterior eigenvalues: " << eigensolver.eigenvalues().transpose() << std::endl;
+            //std::cout << "posterior determinant: " << M.determinant() << std::endl;
+            epsilon *=10;
+        }
+        WOLF_ASSERT_COVARIANCE_MATRIX(M);
+
+        return epsilon != eps;
+    }
+    else
+        WOLF_ERROR("Couldn't compute covariance eigen decomposition");
+
+    return false;
+}
+
 //===================================================
 
 } // namespace wolf
