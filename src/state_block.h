@@ -47,8 +47,6 @@ public:
         mutable Notifications notifications_;
         mutable std::mutex notifictions_mut_;
 
-        bool registered_ = false; ///< Indicate whether the state was notified as ADD or not
-
         NodeBaseWPtr node_ptr_; //< pointer to the wolf Node owning this StateBlock
 
         std::atomic_bool fixed_; ///< Key to indicate whether the state is fixed or not
@@ -243,18 +241,9 @@ inline void StateBlock::setLocalParametrizationPtr(LocalParametrizationBasePtr _
 
 inline void StateBlock::addNotification(const StateBlock::Notification _new_notification)
 {
-    std::lock_guard<std::mutex> lock(notifictions_mut_);
-
-    if (registered_ or _new_notification==StateBlock::Notification::ADD)
-    {
-        notifications_.emplace_back(_new_notification);
-    }
-
-    registered_ = (_new_notification==StateBlock::Notification::ADD) ?
-                    true :
-                    (_new_notification==StateBlock::Notification::REMOVE) ?
-                      false : registered_;
-    }
+  std::lock_guard<std::mutex> lock(notifictions_mut_);
+  notifications_.emplace_back(_new_notification);
+}
 
 inline StateBlock::Notifications StateBlock::consumeNotifications() const
 {
