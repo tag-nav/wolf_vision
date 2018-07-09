@@ -163,9 +163,12 @@ ConstraintBasePtr ProcessorOdom2D::emplaceConstraint(FeatureBasePtr _feature, Ca
 
 FeatureBasePtr ProcessorOdom2D::createFeature(CaptureMotionPtr _capture_motion)
 {
-    FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>(
-            "ODOM 2D", _capture_motion->getBuffer().get().back().delta_integr_,
-            _capture_motion->getBuffer().get().back().delta_integr_cov_);
+    Eigen::MatrixXs covariance = _capture_motion->getBuffer().get().back().delta_integr_cov_;
+    makePosDef(covariance);
+
+    FeatureBasePtr key_feature_ptr = std::make_shared<FeatureBase>("ODOM 2D",
+                                                                   _capture_motion->getBuffer().get().back().delta_integr_,
+                                                                   covariance);
     return key_feature_ptr;
 }
 
