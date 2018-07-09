@@ -40,7 +40,7 @@ void SolverManager::update()
       {
         const bool registered = state_blocks_.find(state)!=state_blocks_.end();
 
-//        const auto p = state_blocks_.emplace(state, state->getState());
+        //        const auto p = state_blocks_.emplace(state, state->getState());
 
         // call addStateBlock only if first time added.
         if (!registered)
@@ -53,19 +53,19 @@ void SolverManager::update()
 
         break;
       }
-      case StateBlock::Notification::STATE_UPDATE:
-      {
-        WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
-                        "Updating the state of an unregistered StateBlock !");
-
-        assert(state_blocks_.find(state)!=state_blocks_.end() &&
-            "Updating the state of an unregistered StateBlock !");
-
-        Eigen::VectorXs new_state = state->getState();
-        std::copy(new_state.data(),new_state.data()+new_state.size(),getAssociatedMemBlockPtr(state));
-
-        break;
-      }
+//      case StateBlock::Notification::STATE_UPDATE:
+//      {
+//        WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
+//                        "Updating the state of an unregistered StateBlock !");
+//
+//        assert(state_blocks_.find(state)!=state_blocks_.end() &&
+//            "Updating the state of an unregistered StateBlock !");
+//
+//        Eigen::VectorXs new_state = state->getState();
+//        std::copy(new_state.data(),new_state.data()+new_state.size(),getAssociatedMemBlockPtr(state));
+//
+//        break;
+//      }
       case StateBlock::Notification::FIX_UPDATE:
       {
         WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
@@ -126,6 +126,13 @@ void SolverManager::update()
          "wolf problem's constraints notification list not empty after update");
   assert(wolf_problem_->getNotifiedStateBlockList().empty() &&
          "wolf problem's state_blocks notification list not empty after update");
+
+  // UPDATE ALL STATES
+  for (StateBlockPtr& state : states)
+  {
+      Eigen::VectorXs new_state = state->getState();
+      std::copy(new_state.data(),new_state.data()+new_state.size(),getAssociatedMemBlockPtr(state));
+  }
 }
 
 wolf::ProblemPtr SolverManager::getProblemPtr()

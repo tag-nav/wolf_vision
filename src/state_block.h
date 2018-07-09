@@ -181,7 +181,7 @@ inline void StateBlock::setState(const Eigen::VectorXs& _state)
       state_size_ = state_.size();
     }
 
-    addNotification(Notification::STATE_UPDATE);
+    //addNotification(Notification::STATE_UPDATE);
 }
 
 inline Size StateBlock::getSize() const
