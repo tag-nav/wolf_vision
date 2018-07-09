@@ -59,7 +59,7 @@ class CeresManagerWrapper : public CeresManager
 
 };
 
-TEST(SolverManager, Create)
+TEST(CeresManager, Create)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
@@ -68,7 +68,7 @@ TEST(SolverManager, Create)
     ASSERT_EQ(P, ceres_manager_ptr->getProblemPtr());
 }
 
-TEST(SolverManager, AddStateBlock)
+TEST(CeresManager, AddStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
@@ -88,7 +88,7 @@ TEST(SolverManager, AddStateBlock)
     ASSERT_TRUE(ceres_manager_ptr->isStateBlockRegisteredCeresManager(sb_ptr));
 }
 
-TEST(SolverManager, DoubleAddStateBlock)
+TEST(CeresManager, DoubleAddStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
@@ -114,7 +114,7 @@ TEST(SolverManager, DoubleAddStateBlock)
     ASSERT_TRUE(ceres_manager_ptr->isStateBlockRegisteredCeresManager(sb_ptr));
 }
 
-TEST(SolverManager, UpdateStateBlock)
+TEST(CeresManager, UpdateStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
@@ -145,7 +145,7 @@ TEST(SolverManager, UpdateStateBlock)
     ASSERT_TRUE(ceres_manager_ptr->isStateBlockFixed(sb_ptr));
 }
 
-TEST(SolverManager, AddUpdateStateBlock)
+TEST(CeresManager, AddUpdateStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
@@ -172,7 +172,7 @@ TEST(SolverManager, AddUpdateStateBlock)
     ASSERT_TRUE(ceres_manager_ptr->isStateBlockFixed(sb_ptr));
 }
 
-TEST(SolverManager, RemoveStateBlock)
+TEST(CeresManager, RemoveStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
@@ -201,7 +201,7 @@ TEST(SolverManager, RemoveStateBlock)
     ASSERT_TRUE(ceres_manager_ptr->numStateBlocks() == 0);
 }
 
-TEST(SolverManager, AddRemoveStateBlock)
+TEST(CeresManager, AddRemoveStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
@@ -224,7 +224,7 @@ TEST(SolverManager, AddRemoveStateBlock)
     ASSERT_TRUE(ceres_manager_ptr->numStateBlocks() == 0);
 }
 
-TEST(SolverManager, RemoveUpdateStateBlock)
+TEST(CeresManager, RemoveUpdateStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
@@ -257,7 +257,7 @@ TEST(SolverManager, RemoveUpdateStateBlock)
     },"");
 }
 
-TEST(SolverManager, DoubleRemoveStateBlock)
+TEST(CeresManager, DoubleRemoveStateBlock)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
@@ -282,7 +282,7 @@ TEST(SolverManager, DoubleRemoveStateBlock)
     ceres_manager_ptr->update();
 }
 
-TEST(SolverManager, AddConstraint)
+TEST(CeresManager, AddConstraint)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
@@ -304,7 +304,7 @@ TEST(SolverManager, AddConstraint)
     ASSERT_TRUE(ceres_manager_ptr->isConstraintRegistered(c));
 }
 
-TEST(SolverManager, RemoveConstraint)
+TEST(CeresManager, RemoveConstraint)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
@@ -332,7 +332,7 @@ TEST(SolverManager, RemoveConstraint)
     ASSERT_FALSE(ceres_manager_ptr->isConstraintRegistered(c));
 }
 
-TEST(SolverManager, AddRemoveConstraint)
+TEST(CeresManager, AddRemoveConstraint)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
@@ -361,7 +361,7 @@ TEST(SolverManager, AddRemoveConstraint)
     ASSERT_FALSE(ceres_manager_ptr->isConstraintRegistered(c));
 }
 
-TEST(SolverManager, DoubleRemoveConstraint)
+TEST(CeresManager, DoubleRemoveConstraint)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
