@@ -58,18 +58,11 @@ void SolverManager::update()
         WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
                         "Updating the state of an unregistered StateBlock !");
 
-        // This will throw if StateBlock wasn't registered
-//        state_blocks_.at(state) = state->getState();
+        assert(state_blocks_.find(state)!=state_blocks_.end() &&
+            "Updating the state of an unregistered StateBlock !");
 
-//        state_blocks_[state] = state->getState();
-
-//        if (!registered)
-//        {
-//          addStateBlock(state);
-//        }
-
-//        assert(state_blocks_.find(state)!=state_blocks_.end() &&
-//            "Updating the state of an unregistered StateBlock !");
+        Eigen::VectorXs new_state = state->getState();
+        std::copy(new_state.data(),new_state.data()+new_state.size(),getAssociatedMemBlockPtr(state));
 
         break;
       }
@@ -81,7 +74,10 @@ void SolverManager::update()
         assert(state_blocks_.find(state)!=state_blocks_.end() &&
             "Updating the fix state of an unregistered StateBlock !");
 
-        updateStateBlockStatus(state);
+        if (state_blocks_.find(state)!=state_blocks_.end())
+        {
+            updateStateBlockStatus(state);
+        }
 
         break;
       }
