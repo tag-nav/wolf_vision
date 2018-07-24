@@ -5,9 +5,9 @@
  *      \author: jsola
  */
 
-#include <capture_IMU.h>
-#include <processor_IMU.h>
-#include <sensor_IMU.h>
+#include "capture_IMU.h"
+#include "processor_IMU.h"
+#include "sensor_IMU.h"
 #include "wolf.h"
 
 #include "utils_gtest.h"

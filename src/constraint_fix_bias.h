@@ -3,8 +3,8 @@
 #define CONSTRAINT_FIX_BIAS_H_
 
 //Wolf includes
-#include <capture_IMU.h>
-#include <feature_IMU.h>
+#include "capture_IMU.h"
+#include "feature_IMU.h"
 #include "constraint_autodiff.h"
 #include "frame_base.h"
 #include "rotations.h"

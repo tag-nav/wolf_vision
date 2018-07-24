@@ -10,13 +10,13 @@
 #include "constraint_base.h"
 #include "state_block.h"
 #include "processor_motion.h"
+#include "sensor_GPS.h"
 
 #include "processor_tracker.h"
 //#include "processors/processor_tracker_feature_trifocal.h"
 #include "capture_pose.h"
 
 // IRI libs includes
-#include <sensor_GPS.h>
 
 // C++ includes
 #include <algorithm>

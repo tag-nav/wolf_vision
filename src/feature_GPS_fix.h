@@ -2,7 +2,7 @@
 #define FEATURE_GPS_FIX_H_
 
 //Wolf includes
-#include <constraint_GPS_2D.h>
+#include "constraint_GPS_2D.h"
 #include "feature_base.h"
 
 //std includes
