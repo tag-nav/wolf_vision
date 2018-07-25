@@ -326,7 +326,7 @@ bool isCovariance(const Eigen::Matrix<T, N, N, RC>& M, const T& eps = Constants:
   assert(isCovariance(x, Constants::EPS_SMALL) && "Not a covariance");
 
 #define WOLF_ASSERT_INFORMATION_MATRIX(x) \
-  assert(isCovariance(x, 0.0) && "Not an information matrix");
+  assert(isCovariance(x, Scalar(0.0)) && "Not an information matrix");
 
 template <typename T, int N, int RC>
 bool makePosDef(Eigen::Matrix<T,N,N,RC>& M, const T& eps = Constants::EPS)
