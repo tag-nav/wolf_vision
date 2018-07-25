@@ -81,7 +81,7 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 
         /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
         **/
-        virtual bool evaluate(double const* const* _parameters, double* _residuals, double** _jacobians) const = 0;
+        virtual bool evaluate(Scalar const* const* _parameters, Scalar* _residuals, Scalar** _jacobians) const = 0;
 
         /** Returns a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr and the residual vector
          **/

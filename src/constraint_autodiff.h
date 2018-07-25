@@ -139,7 +139,7 @@ class ConstraintAutodiff : public ConstraintBase
          * Returns the residual and jacobians given the state values
          *
          **/
-        virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+        virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
         {
             // only residuals
             if (jacobians == nullptr)
@@ -160,7 +160,7 @@ class ConstraintAutodiff : public ConstraintBase
             else
             {
                 // update jets real part
-                std::vector<double const*> param_vec;
+                std::vector<Scalar const*> param_vec;
                 param_vec.assign(parameters,parameters+n_blocks);
                 updateJetsRealPart(param_vec);
 
@@ -195,7 +195,7 @@ class ConstraintAutodiff : public ConstraintBase
         /** \brief Updates all jets real part with values of parameters
          *
          **/
-        void updateJetsRealPart(const std::vector<double const*>& parameters) const
+        void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
         {
             // update jets real part
             for (unsigned int i = 0; i < B0; i++)
@@ -416,7 +416,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -436,7 +436,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -467,7 +467,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
            for (unsigned int i = 0; i < B0; i++)
@@ -662,7 +662,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -681,7 +681,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -711,7 +711,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
            for (unsigned int i = 0; i < B0; i++)
@@ -897,7 +897,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -915,7 +915,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -944,7 +944,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
            for (unsigned int i = 0; i < B0; i++)
@@ -1121,7 +1121,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1138,7 +1138,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -1166,7 +1166,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
            for (unsigned int i = 0; i < B0; i++)
@@ -1329,7 +1329,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1345,7 +1345,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -1372,7 +1372,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
            for (unsigned int i = 0; i < B0; i++)
@@ -1526,7 +1526,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1541,7 +1541,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -1567,7 +1567,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
            for (unsigned int i = 0; i < B0; i++)
@@ -1716,7 +1716,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1730,7 +1730,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -1755,7 +1755,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
            for (unsigned int i = 0; i < B0; i++)
@@ -1895,7 +1895,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1908,7 +1908,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -1932,7 +1932,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
            for (unsigned int i = 0; i < B0; i++)
@@ -2063,7 +2063,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -2075,7 +2075,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -2098,7 +2098,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
            for (unsigned int i = 0; i < B0; i++)

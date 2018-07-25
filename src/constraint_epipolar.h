@@ -22,7 +22,7 @@ class ConstraintEpipolar : public ConstraintBase
 
         /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
         **/
-        virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const override {return true;};
+        virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const override {return true;};
 
         /** Returns a residual vector and a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
          **/
