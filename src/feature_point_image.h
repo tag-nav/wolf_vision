@@ -65,7 +65,7 @@ class FeaturePointImage : public FeatureBase
         const cv::Mat& getDescriptor() const;
         void setDescriptor(const cv::Mat& _descriptor);
 
-        size_t getIndexKeyPoint() const
+        SizeStd getIndexKeyPoint() const
         { return index_keypoint_; }
 
         bool isKnown();

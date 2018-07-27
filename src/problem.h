@@ -50,7 +50,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         StateBlockList      state_block_list_;
         std::map<std::pair<StateBlockPtr, StateBlockPtr>, Eigen::MatrixXs> covariances_;
         std::list<ConstraintNotification> constraint_notification_list_;
-        Size state_size_, state_cov_size_;
+        SizeEigen state_size_, state_cov_size_;
         StateBlockList notified_state_block_list_;
         bool prior_is_set_;
 
@@ -63,8 +63,8 @@ class Problem : public std::enable_shared_from_this<Problem>
         virtual ~Problem();
 
         // Properties -----------------------------------------
-        Size getFrameStructureSize() const;
-        void getFrameStructureSize(Size& _x_size, Size& _cov_size) const;
+        SizeEigen getFrameStructureSize() const;
+        void getFrameStructureSize(SizeEigen& _x_size, SizeEigen& _cov_size) const;
 
         // Hardware branch ------------------------------------
         HardwareBasePtr getHardwarePtr();

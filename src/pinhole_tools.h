@@ -203,7 +203,7 @@ T distortionFactor(const MatrixBase<Derived> &  d,
         return (T)1.0;
     T s = (T)1.0;
     T r2i = (T)1.0;
-    for (Size i = 0; i < d.size(); i++)
+    for (SizeEigen i = 0; i < d.size(); i++)
     {                           //   here we are doing:
         r2i = r2i * r2;         //      r2i = r^(2*(i+1))
         s  += d(i) * r2i;       //      s   = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
@@ -253,7 +253,7 @@ Matrix<typename Derived2::Scalar, 2, 1> distortPoint(const MatrixBase<Derived1> 
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived1);
     MatrixSizeCheck<2,1>::check(up);
 
-    Size n = d.size();
+    SizeEigen n = d.size();
     if (n == 0)
         return up;
     else {
@@ -286,7 +286,7 @@ void distortPoint(const MatrixBase<Derived1> &  d,
     Matrix<T, 2, 1> R2_up;
     Matrix<T, 2, 1> S_up;
 
-    Size n = d.size();
+    SizeEigen n = d.size();
     if (n == 0) {
         ud = up;
         UD_up.setIdentity();
@@ -299,7 +299,7 @@ void distortPoint(const MatrixBase<Derived1> &  d,
         T r2im1 = (T) 1.0; //r2*(i-1)
         T S_r2  = (T) 0.0;
 
-        for (Size i = 0; i < n; i++) { //.. here we are doing:
+        for (SizeEigen i = 0; i < n; i++) { //.. here we are doing:
             r2i = r2i * r2; //................. r2i = r^(2*(i+1))
             s += d(i) * r2i; //................ s = 1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + ...
 
@@ -332,7 +332,7 @@ Matrix<typename Derived2::Scalar, 2, 1> undistortPoint(const MatrixBase<Derived1
     EIGEN_STATIC_ASSERT_VECTOR_ONLY(Derived1);
     MatrixSizeCheck<2,1>::check(ud);
 
-    Size n = c.size();
+    SizeEigen n = c.size();
     if (n == 0)
         return ud;
     else {
@@ -354,7 +354,7 @@ void undistortPoint(const MatrixBase<Derived1>& c,
 
     typedef typename Derived1::Scalar T;
 
-    Size n = c.size();
+    SizeEigen n = c.size();
     Matrix<typename Derived4::Scalar, 2, 1> R2_ud;
     Matrix<typename Derived4::Scalar, 2, 1> S_ud;
 
@@ -372,7 +372,7 @@ void undistortPoint(const MatrixBase<Derived1>& c,
         T r2im1 = (T)1.0; //r2*(i-1)
         T S_r2 = (T)0.0;
 
-        for (Size i = 0; i < n; i++)
+        for (SizeEigen i = 0; i < n; i++)
         { //.. here we are doing:
             r2i = r2i * r2; //................. r2i = r^(2*(i+1))
             s += c(i) * r2i; //................ s = 1 + c_0 * r^2 + c_1 * r^4 + c_2 * r^6 + ...
@@ -726,7 +726,7 @@ template<class Vk, class Vd, class Vc>
 void computeCorrectionModel(const Vk & k, const Vd & d, Vc & c)
 
 {
-    Size size = c.size();
+    SizeEigen size = c.size();
 
     if (size != 0)
     {
@@ -734,13 +734,13 @@ void computeCorrectionModel(const Vk & k, const Vd & d, Vc & c)
         Scalar r_max = sqrt(k(0) * k(0) / (k(2) * k(2)) + k(1) * k(1) / (k(3) * k(3)));
         Scalar rd_max = 1.2 * r_max;
 
-        Size N_samples = 200; // number of samples
+        SizeEigen N_samples = 200; // number of samples
         Scalar iN_samples = 1 / (Scalar)N_samples;
         Scalar rd_n, rc_2, rd_2;
         Eigen::VectorXs rd(N_samples + 1), rc(N_samples + 1);
         Eigen::MatrixXs Rd(N_samples + 1, size);
 
-        for (Size sample = 0; sample <= N_samples; sample++)
+        for (SizeEigen sample = 0; sample <= N_samples; sample++)
         {
 
             rc(sample) = sample * rd_max * iN_samples; // sample * rd_max / N_samples
@@ -750,7 +750,7 @@ void computeCorrectionModel(const Vk & k, const Vd & d, Vc & c)
 
             rd_n = rd(sample); // start with rd
 
-            for (Size order = 0; order < size; order++)
+            for (SizeEigen order = 0; order < size; order++)
             {
                 rd_n *= rd_2; // increment:
                 Rd(sample, order) = rd_n; // we have : rd^3, rd^5, rd^7, ...

@@ -5,7 +5,7 @@ namespace wolf {
 CaptureVelocity::CaptureVelocity(const TimeStamp& _ts,
                                  const SensorBasePtr& _sensor_ptr,
                                  const Eigen::VectorXs& _velocity,
-                                 Size _delta_size, Size _delta_cov_size,
+                                 SizeEigen _delta_size, SizeEigen _delta_cov_size,
                                  FrameBasePtr _origin_frame_ptr) :
   CaptureMotion("VELOCITY", _ts, _sensor_ptr, _velocity,
                 _delta_size, _delta_cov_size, _origin_frame_ptr)
@@ -17,7 +17,7 @@ CaptureVelocity::CaptureVelocity(const TimeStamp& _ts,
                                  const SensorBasePtr& _sensor_ptr,
                                  const Eigen::VectorXs& _velocity,
                                  const Eigen::MatrixXs& _velocity_cov,
-                                 Size _delta_size, Size _delta_cov_size,
+                                 SizeEigen _delta_size, SizeEigen _delta_cov_size,
                                  FrameBasePtr _origin_frame_ptr,
                                  StateBlockPtr _p_ptr,
                                  StateBlockPtr _o_ptr,

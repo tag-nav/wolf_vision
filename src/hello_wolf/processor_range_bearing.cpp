@@ -49,7 +49,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
     kf->addCapture(cap);
 
     // 3. explore all observations in the capture
-    for (Size i = 0; i < capture->getIds().size(); i++)
+    for (SizeEigen i = 0; i < capture->getIds().size(); i++)
     {
         // extract info
         int     id      = capture->getId     (i);

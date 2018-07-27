@@ -21,7 +21,7 @@ using namespace Eigen;
 struct Motion
 {
     public:
-        Size data_size_, delta_size_, cov_size_, calib_size_;
+        SizeEigen data_size_, delta_size_, cov_size_, calib_size_;
         TimeStamp ts_;                          ///< Time stamp
         Eigen::VectorXs data_;                  ///< instantaneous motion data
         Eigen::MatrixXs data_cov_;              ///< covariance of the instantaneous data
@@ -34,7 +34,7 @@ struct Motion
         Eigen::MatrixXs jacobian_calib_;        ///< Jacobian of delta_integr wrt extra states (TBD by the derived processors)
     public:
         Motion() = delete; // completely delete unpredictable stuff like this
-        Motion(const TimeStamp& _ts, Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size);
+        Motion(const TimeStamp& _ts, SizeEigen _data_size, SizeEigen _delta_size, SizeEigen _cov_size, SizeEigen _calib_size);
         Motion(const TimeStamp& _ts,
                const VectorXs& _data,
                const MatrixXs& _data_cov,
@@ -47,7 +47,7 @@ struct Motion
                const MatrixXs& _jacobian_calib);// = MatrixXs::Zero(0,0));
         ~Motion();
     private:
-        void resize(Size _data_s, Size _delta_s, Size _delta_cov_s, Size _calib_s);
+        void resize(SizeEigen _data_s, SizeEigen _delta_s, SizeEigen _delta_cov_s, SizeEigen _calib_s);
 
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.
 
@@ -75,9 +75,9 @@ struct Motion
  */
 class MotionBuffer{
     public:
-        Size data_size_, delta_size_, cov_size_, calib_size_;
+        SizeEigen data_size_, delta_size_, cov_size_, calib_size_;
         MotionBuffer() = delete;
-        MotionBuffer(Size _data_size, Size _delta_size, Size _cov_size, Size _calib_size);
+        MotionBuffer(SizeEigen _data_size, SizeEigen _delta_size, SizeEigen _cov_size, SizeEigen _calib_size);
         std::list<Motion>& get();
         const std::list<Motion>& get() const;
         const VectorXs& getCalibrationPreint() const;

@@ -3,11 +3,11 @@ namespace wolf
 {
 
 ProcessorMotion::ProcessorMotion(const std::string& _type,
-                                 Size _state_size,
-                                 Size _delta_size,
-                                 Size _delta_cov_size,
-                                 Size _data_size,
-                                 Size _calib_size,
+                                 SizeEigen _state_size,
+                                 SizeEigen _delta_size,
+                                 SizeEigen _delta_cov_size,
+                                 SizeEigen _data_size,
+                                 SizeEigen _calib_size,
                                  ProcessorParamsMotionPtr _params_motion) :
         ProcessorBase(_type, _params_motion),
         params_motion_(_params_motion),

@@ -39,13 +39,13 @@ int main(int argc, char *argv[])
         std::cout << "EXIT due to bad user input" << std::endl << std::endl;
         return -1;
     }
-    Size size = atoi(argv[1]);
+    SizeEigen size = atoi(argv[1]);
 
-    SparseMatrix<double, ColMajor, Size> A(size, size), Aordered(size, size);
-    CholmodSupernodalLLT < SparseMatrix<double, ColMajor, Size> > solver;
-    PermutationMatrix<Dynamic, Dynamic, Size> perm(size);
-    CCOLAMDOrdering<Size> ordering;
-    Matrix<Size, Dynamic, 1> ordering_constraints = Matrix<Size, Dynamic, 1>::Ones(size);
+    SparseMatrix<double, ColMajor, SizeEigen> A(size, size), Aordered(size, size);
+    CholmodSupernodalLLT < SparseMatrix<double, ColMajor, SizeEigen> > solver;
+    PermutationMatrix<Dynamic, Dynamic, SizeEigen> perm(size);
+    CCOLAMDOrdering<SizeEigen> ordering;
+    Matrix<SizeEigen, Dynamic, 1> ordering_constraints = Matrix<SizeEigen, Dynamic, 1>::Ones(size);
     VectorXd b(size), bordered(size), xordered(size), x(size);
     clock_t t1, t2, t3;
     double time1, time2, time3;
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 
     // SOLVING AND REORDERING ------------------------------------
     t3 = clock();
-    SparseLU<SparseMatrix<double, ColMajor, Size>, CCOLAMDOrdering<Size> > solver2;
+    SparseLU<SparseMatrix<double, ColMajor, SizeEigen>, CCOLAMDOrdering<SizeEigen> > solver2;
     solver2.compute(A);
     if (solver2.info() != Success)
     {

@@ -306,12 +306,12 @@ Eigen::VectorXs Problem::getState(const TimeStamp& _ts)
     return state;
 }
 
-Size Problem::getFrameStructureSize() const
+SizeEigen Problem::getFrameStructureSize() const
 {
     return state_size_;
 }
 
-void Problem::getFrameStructureSize(Size& _x_size, Size& _cov_size) const
+void Problem::getFrameStructureSize(SizeEigen& _x_size, SizeEigen& _cov_size) const
 {
     _x_size   = state_size_;
     _cov_size = state_cov_size_;
@@ -559,7 +559,7 @@ bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& 
 
 Eigen::MatrixXs Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr)
 {
-    Size sz = 0;
+    SizeEigen sz = 0;
     for (const auto& sb : _frame_ptr->getStateBlockVec())
         if (sb)
             sz += sb->getSize();
@@ -604,7 +604,7 @@ bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::M
 
 Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr)
 {
-    Size sz = 0;
+    SizeEigen sz = 0;
     for (const auto& sb : _landmark_ptr->getStateBlockVec())
         if (sb)
             sz += sb->getSize();

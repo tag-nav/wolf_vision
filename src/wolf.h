@@ -49,10 +49,18 @@ typedef double Scalar;        // Use this for double, 64 bit precision
 /**
  * \brief Vector and Matrices size type for the Wolf project
  *
- * We use the default defined in Eigen (int)
+ * We use the default defined in Eigen (std::ptrdiff_t, a signed integer)
  *
  */
-typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE Size;
+typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE SizeEigen;
+
+/**
+ * \brief Other containers size type for the Wolf project
+ *
+ * We use the default defined in std (std::size_t, an unsigned integer)
+ *
+ */
+typedef std::size_t SizeStd;
 
 #define M_TORAD 0.017453292519943295769236907684886127134  // pi / 180
 #define M_TODEG 57.295779513082320876798154814105170332    // 180 / pi

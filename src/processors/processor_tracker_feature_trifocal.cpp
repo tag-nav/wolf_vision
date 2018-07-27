@@ -407,7 +407,7 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
         for (auto pair_trkid_match : matches) // OMG this will add potentially a loooot of constraints! TODO see a smarter way of adding constraints
         {                                     // Currently reduced by creating constraints for large tracks
             // get track ID
-            size_t trk_id = pair_trkid_match.first;
+            SizeStd trk_id = pair_trkid_match.first;
 
             if (track_matrix_.trackSize(trk_id)>params_tracker_feature_trifocal_->min_track_length_for_constraint)
             {

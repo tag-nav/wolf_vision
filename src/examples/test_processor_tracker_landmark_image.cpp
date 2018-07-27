@@ -28,7 +28,7 @@ using Eigen::Vector7s;
 using namespace wolf;
 
 void cleanupMap(const ProblemPtr& _problem, const TimeStamp& _t, Scalar _dt_max,
-                                      Size _min_constraints)
+                                      SizeEigen _min_constraints)
 {
     std::list<LandmarkBasePtr> lmks_to_remove;
     for (auto lmk : _problem->getMapPtr()->getLandmarkList())

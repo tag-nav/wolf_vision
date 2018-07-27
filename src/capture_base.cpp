@@ -276,9 +276,9 @@ void CaptureBase::registerNewStateBlocks()
     }
 }
 
-Size CaptureBase::computeCalibSize() const
+SizeEigen CaptureBase::computeCalibSize() const
 {
-    Size sz = 0;
+    SizeEigen sz = 0;
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
         auto sb = getStateBlockPtr(i);
@@ -291,7 +291,7 @@ Size CaptureBase::computeCalibSize() const
 Eigen::VectorXs CaptureBase::getCalibration() const
 {
     Eigen::VectorXs calib(calib_size_);
-    Size index = 0;
+    SizeEigen index = 0;
     for (unsigned int i = 0; i < getStateBlockVec().size(); i++)
     {
         auto sb = getStateBlockPtr(i);
@@ -308,7 +308,7 @@ void CaptureBase::setCalibration(const VectorXs& _calib)
 {
     updateCalibSize();
     assert(_calib.size() == calib_size_ && "Wrong size of calibration vector");
-    Size index = 0;
+    SizeEigen index = 0;
     for (unsigned int i = 0; i < getStateBlockVec().size(); i++)
     {
         auto sb = getStateBlockPtr(i);

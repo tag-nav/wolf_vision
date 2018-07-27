@@ -51,7 +51,7 @@ public:
 
         std::atomic_bool fixed_; ///< Key to indicate whether the state is fixed or not
 
-        std::atomic<Size> state_size_; ///< State vector size
+        std::atomic<SizeEigen> state_size_; ///< State vector size
         Eigen::VectorXs state_; ///< State vector storing the state values
         mutable std::mutex mut_state_; ///< State vector mutex
 
@@ -64,7 +64,7 @@ public:
          * \param _fixed Indicates this state is not estimated and thus acts as a fixed parameter
          * \param _local_param_ptr pointer to the local parametrization for the block
          */
-        StateBlock(const Size _size, bool _fixed = false, LocalParametrizationBasePtr _local_param_ptr = nullptr);
+        StateBlock(const SizeEigen _size, bool _fixed = false, LocalParametrizationBasePtr _local_param_ptr = nullptr);
 
         /** \brief Constructor from vector
          * 
@@ -93,13 +93,13 @@ public:
 
         /** \brief Returns the state size
          **/
-        Size getSize() const;
+        SizeEigen getSize() const;
 
         /**\brief Returns the size of the local parametrization
          *
          * @return the size of the local parametrization
          */
-        Size getLocalSize() const;
+        SizeEigen getLocalSize() const;
 
         /** \brief Returns if the state is fixed (not estimated)
          **/
@@ -148,7 +148,7 @@ inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalP
 //    std::cout << "constructed           +sb" << std::endl;
 }
 
-inline StateBlock::StateBlock(const Size _size, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
+inline StateBlock::StateBlock(const SizeEigen _size, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
 //        notifications_{Notification::ADD},
         node_ptr_(), // nullptr
         fixed_(_fixed),
@@ -184,12 +184,12 @@ inline void StateBlock::setState(const Eigen::VectorXs& _state)
     //addNotification(Notification::STATE_UPDATE);
 }
 
-inline Size StateBlock::getSize() const
+inline SizeEigen StateBlock::getSize() const
 {
     return state_size_.load();
 }
 
-inline Size StateBlock::getLocalSize() const
+inline SizeEigen StateBlock::getLocalSize() const
 {
     if(local_param_ptr_)
         return local_param_ptr_->getLocalSize();

@@ -83,8 +83,8 @@ class TrackMatrix
         void            remove      (FeatureBasePtr _ftr);
         void            remove      (size_t _track_id);
         void            remove      (CaptureBasePtr _cap);
-        size_t          numTracks   ();
-        size_t          trackSize   (size_t _track_id);
+        SizeStd          numTracks   ();
+        SizeStd          trackSize   (size_t _track_id);
         Track           track       (size_t _track_id);
         Snapshot        snapshot    (CaptureBasePtr _capture);
         vector<FeatureBasePtr>
@@ -99,7 +99,7 @@ class TrackMatrix
 
     private:
 
-        static size_t track_id_count_;
+        static SizeStd track_id_count_;
 
         // Along track: maps of Feature pointers indexed by time stamp.
         map<size_t, Track > tracks_;       // map indexed by track_Id   of ( maps indexed by TimeStamp  of ( features ) )
