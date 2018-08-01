@@ -157,8 +157,9 @@ class ProcessorMotion : public ProcessorBase
         /** \brief Fill the state corresponding to the provided time-stamp
          * \param _ts the time stamp
          * \param _x the returned state
+         * \return if state in the provided time-stamp could be resolved
          */
-        void getState(const TimeStamp& _ts, Eigen::VectorXs& _x);
+        bool getState(const TimeStamp& _ts, Eigen::VectorXs& _x);
 
         /** \brief Get the state corresponding to the provided time-stamp
          * \param _ts the time stamp

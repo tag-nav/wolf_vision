@@ -286,10 +286,8 @@ void Problem::getState(const TimeStamp& _ts, Eigen::VectorXs& state)
 {
     assert(state.size() == getFrameStructureSize() && "Problem::getStateAtTimeStamp: bad state size");
 
-    if (processor_motion_ptr_ != nullptr)
-        processor_motion_ptr_->getState(_ts, state);
-
-    else
+    // try to get the state from processor_motion if any, otherwise...
+    if (processor_motion_ptr_ == nullptr || !processor_motion_ptr_->getState(_ts, state))
     {
         FrameBasePtr closest_frame = trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
         if (closest_frame != nullptr)
