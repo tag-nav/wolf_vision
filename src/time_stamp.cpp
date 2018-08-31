@@ -14,7 +14,7 @@ std::ostream& operator<<(std::ostream& os, const TimeStamp& _ts)
     //    std::streamsize nn;
     //    nn = os.precision(TimeStamp::TIME_STAMP_DIGITS_);
 
-    os << _ts.time_stamp_; // write obj to stream
+    os << _ts.getSeconds() << "." << _ts.getNanoSeconds(); // write obj to stream
     return os;
 }
 
