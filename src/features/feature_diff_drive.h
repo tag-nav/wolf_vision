@@ -26,12 +26,12 @@ public:
 
   virtual ~FeatureDiffDrive() = default;
 
-  const Eigen::VectorXs& getJacobianFactor() const;
+  const Eigen::MatrixXs& getJacobianFactor() const;
 
 protected:
 
   Eigen::VectorXs diff_drive_factors_;
-  Eigen::VectorXs jacobian_diff_drive_factors_;
+  Eigen::MatrixXs jacobian_diff_drive_factors_;
 };
 
 } /* namespace wolf */
