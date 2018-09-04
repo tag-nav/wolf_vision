@@ -14,7 +14,7 @@ std::ostream& operator<<(std::ostream& os, const TimeStamp& _ts)
     //    std::streamsize nn;
     //    nn = os.precision(TimeStamp::TIME_STAMP_DIGITS_);
 
-    os << _ts.getSeconds() << "." << std::setfill('0') << std::setw(9) <<_ts.getNanoSeconds(); // write obj to stream
+    os << _ts.getSeconds() << "." << std::setfill('0') << std::setw(9) << std::right <<_ts.getNanoSeconds(); // write obj to stream
     return os;
 }
 
@@ -35,7 +35,7 @@ TimeStamp::TimeStamp(const TimeStamp& _ts) :
 
 TimeStamp::TimeStamp(const Scalar& _ts) :
         //time_stamp_(_ts)
-        time_stamp_nano_((unsigned long int)(_ts*1e9))
+        time_stamp_nano_(_ts > 0 ? (unsigned long int)(_ts*1e9) : 0)
 {
     //
 }
@@ -90,7 +90,7 @@ void TimeStamp::print(std::ostream & ost) const
     //ost.flags(fmtfl);
     //ost.precision(nn);
 
-    ost << this->getSeconds() << "." << std::setfill('0') << std::setw(9) << this->getNanoSeconds();
+    ost << *this;
 }
 
 } // namespace wolf

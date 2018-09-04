@@ -88,7 +88,8 @@ FrameBasePtr TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
     for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); frm_rit++)
         if ((*frm_rit)->isKey())
         {
-            Scalar dt = std::abs((*frm_rit)->getTimeStamp().get() - _ts.get());
+            Scalar dt = std::fabs((*frm_rit)->getTimeStamp() - _ts);
+            std::cout << "dt " << dt << std::endl;
             if (dt < min_dt)
             {
                 min_dt = dt;

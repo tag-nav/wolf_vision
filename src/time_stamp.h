@@ -179,7 +179,7 @@ class TimeStamp
 inline void TimeStamp::set(const Scalar& ts)
 {
     //time_stamp_ = ts;
-    time_stamp_nano_ = (unsigned long int)(ts*NANOSECS);
+    time_stamp_nano_ = (ts > 0 ? (unsigned long int)(ts*NANOSECS) : 0);
 }
 
 inline void TimeStamp::set(const unsigned long int& sec, const unsigned long int& nanosec)
@@ -267,13 +267,13 @@ inline bool TimeStamp::operator >=(const TimeStamp& ts) const
 inline void TimeStamp::operator +=(const Scalar& dt)
 {
     //time_stamp_ += dt;
-    time_stamp_nano_ += (unsigned long int)(dt*NANOSECS);
+    time_stamp_nano_ += (unsigned long int)(dt*1e9);
 }
 
 inline void TimeStamp::operator -=(const Scalar& dt)
 {
     //time_stamp_ -= dt;
-    time_stamp_nano_ -= (unsigned long int)(dt*NANOSECS);
+    time_stamp_nano_ -= (unsigned long int)(dt*1e9);
 }
 
 inline Scalar TimeStamp::operator -(const TimeStamp& ts) const
