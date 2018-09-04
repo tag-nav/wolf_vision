@@ -73,6 +73,13 @@ TimeStamp TimeStamp::operator -(const Scalar& dt) const
     return ts;
 }
 
+inline void TimeStamp::operator -=(const Scalar& dt)
+{
+    unsigned long int dt_nano = (unsigned long int)(dt*NANOSECS);
+    //time_stamp_ -= dt;
+    time_stamp_nano_ = (dt_nano > time_stamp_nano_ ? 0 : time_stamp_nano_ - dt_nano);
+}
+
 void TimeStamp::print(std::ostream & ost) const
 {
     //std::streamsize nn;

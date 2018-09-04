@@ -267,13 +267,7 @@ inline bool TimeStamp::operator >=(const TimeStamp& ts) const
 inline void TimeStamp::operator +=(const Scalar& dt)
 {
     //time_stamp_ += dt;
-    time_stamp_nano_ += (unsigned long int)(dt*1e9);
-}
-
-inline void TimeStamp::operator -=(const Scalar& dt)
-{
-    //time_stamp_ -= dt;
-    time_stamp_nano_ -= (unsigned long int)(dt*1e9);
+    time_stamp_nano_ += (unsigned long int)(dt*NANOSECS);
 }
 
 inline Scalar TimeStamp::operator -(const TimeStamp& ts) const
