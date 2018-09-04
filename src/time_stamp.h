@@ -8,7 +8,9 @@
 //C, std
 #include <sys/time.h>
 #include <iostream>
+#include <iomanip>
 
+static const unsigned int NANOSECS = 1000000000;
 
 namespace wolf {
 
@@ -19,9 +21,10 @@ namespace wolf {
  */
 class TimeStamp
 {
-    private:
-        Scalar time_stamp_; ///< Time stamp. Expressed in seconds from 1th jan 1970.
-        static const unsigned int TIME_STAMP_DIGITS_ = 10; ///< Number of digits to print time stamp values        
+    protected:
+        unsigned long int time_stamp_nano_; ///< Time stamp. Expressed in nanoseconds from 1th jan 1970.
+        //Scalar time_stamp_; ///< Time stamp. Expressed in seconds from 1th jan 1970.
+        //static const unsigned int TIME_STAMP_DIGITS_ = 10; ///< Number of digits to print time stamp values
 
     public:
         /** \brief Constructor
@@ -31,19 +34,26 @@ class TimeStamp
          */
         TimeStamp();
 
+        /** \brief Copy constructor
+         *
+         * Copy constructor
+         *
+         */
+        TimeStamp(const TimeStamp& _ts);
+
         /** \brief Constructor with argument
          *
          * Constructor with arguments
          *
          */
-        TimeStamp(const Scalar _ts);
+        TimeStamp(const Scalar& _ts);
 
         /** \brief Constructor from sec and nsec
          *
          * Constructor from sec and nsec
          *
          */
-        TimeStamp(const unsigned long int _sec, const unsigned long int _nsec);
+        TimeStamp(const unsigned long int& _sec, const unsigned long int& _nsec);
 
         /** \brief Destructor
          *
@@ -67,14 +77,14 @@ class TimeStamp
          * Sets time stamp to a given value passed as a two-integer (seconds and nanoseconds)
          *
          */
-        void set(const unsigned long int sec, const unsigned long int nanosec);
+        void set(const unsigned long int& sec, const unsigned long int& nanosec);
 
         /** \brief Set time stamp
          *
          * Sets time stamp to a given value passed as a scalar_t (seconds)
          *
          */
-        void set(const Scalar ts);
+        void set(const Scalar& ts);
 
         /** \brief Get time stamp
          *
@@ -129,13 +139,6 @@ class TimeStamp
         bool operator <=(const TimeStamp& ts) const;
         bool operator >=(const TimeStamp& ts) const;
 
-        /** \brief difference operator
-         * 
-         * difference operator that returns a scalar_t (seconds)
-         * 
-         */
-        Scalar operator -(const TimeStamp& ts) const;
-
         /** \brief Add-assign operator given a scalar_t (seconds)
          */
         void operator +=(const Scalar& dt);
@@ -143,6 +146,24 @@ class TimeStamp
         /** \brief Add-assign operator given a scalar_t (seconds)
          */
         TimeStamp operator +(const Scalar& dt) const;
+
+        /** \brief Substraction-assign operator given a scalar_t (seconds)
+         */
+        void operator -=(const Scalar& dt);
+
+        /** \brief difference operator
+         * 
+         * difference operator that returns a scalar_t (seconds)
+         * 
+         */
+        TimeStamp operator -(const Scalar& ts) const;
+
+        /** \brief difference operator
+         *
+         * difference operator that returns a Timestamp (seconds)
+         *
+         */
+        Scalar operator -(const TimeStamp& ts) const;
 
         /** \brief Prints time stamp to a given ostream
          *
@@ -155,79 +176,110 @@ class TimeStamp
 
 };
 
-inline void TimeStamp::set(const Scalar ts)
+inline void TimeStamp::set(const Scalar& ts)
 {
-    time_stamp_ = ts;
+    //time_stamp_ = ts;
+    time_stamp_nano_ = (unsigned long int)(ts*NANOSECS);
 }
 
-inline void TimeStamp::set(const unsigned long int sec, const unsigned long int nanosec)
+inline void TimeStamp::set(const unsigned long int& sec, const unsigned long int& nanosec)
 {
-    time_stamp_ = (Scalar)(sec) + (Scalar)(nanosec) / (Scalar)(1e9);
+    //time_stamp_ = (Scalar)(sec) + (Scalar)(nanosec) / (Scalar)(1e9);
+    time_stamp_nano_ = sec*NANOSECS+nanosec;
 }
 
 inline void TimeStamp::set(const timeval& ts)
 {
-    time_stamp_ = (Scalar)(ts.tv_sec) + (Scalar)(ts.tv_usec) / 1e6;
+    //time_stamp_ = (Scalar)(ts.tv_sec) + (Scalar)(ts.tv_usec) / 1e6;
+    time_stamp_nano_ = (unsigned long int)(ts.tv_sec*NANOSECS) + (unsigned long int)(ts.tv_usec*1000);
 }
 
 inline Scalar TimeStamp::get() const
 {
-    return time_stamp_;
+    //return time_stamp_;
+    return ((Scalar)( time_stamp_nano_))*1e-9;
+}
+
+inline unsigned long int TimeStamp::getSeconds() const
+{
+    //unsigned long int ts;
+    //ts = (unsigned long int)(((floor(time_stamp_))));
+    //return ts;
+    return time_stamp_nano_ / NANOSECS;
+}
+
+inline unsigned long int TimeStamp::getNanoSeconds() const
+{
+    //Scalar ts;
+    //ts = (Scalar)((floor(time_stamp_)));
+    //return (unsigned long int)(((time_stamp_ - ts) * 1e9));
+    return time_stamp_nano_ % NANOSECS;
 }
 
 inline void TimeStamp::operator =(const TimeStamp& ts)
 {
-    time_stamp_ = ts.get();
+    //time_stamp_ = ts.get();
+    time_stamp_nano_ = ts.time_stamp_nano_;
 }
 
 inline void TimeStamp::operator =(const Scalar& ts)
 {
-    time_stamp_ = ts;
+    //time_stamp_ = ts;
+    time_stamp_nano_ = (unsigned long int)(ts*NANOSECS);
 }
 
 inline bool TimeStamp::operator ==(const TimeStamp& ts) const
 {
-    return (time_stamp_ == ts.get());
+    //return (time_stamp_ == ts.get());
+    return (time_stamp_nano_ == ts.time_stamp_nano_);
 }
 
 inline bool TimeStamp::operator !=(const TimeStamp& ts) const
 {
-    return (time_stamp_ != ts.get());
+    //return (time_stamp_ != ts.get());
+    return (time_stamp_nano_ != ts.time_stamp_nano_);
 }
 
 inline bool TimeStamp::operator <(const TimeStamp& ts) const
 {
-    return (time_stamp_ < ts.get());
+    //return (time_stamp_ < ts.get());
+    return (time_stamp_nano_ < ts.time_stamp_nano_);
 }
 
 inline bool TimeStamp::operator >(const TimeStamp& ts) const
 {
-    return (time_stamp_ > ts.get());
+    //return (time_stamp_ > ts.get());
+    return (time_stamp_nano_ > ts.time_stamp_nano_);
 }
 
 inline bool TimeStamp::operator <=(const TimeStamp& ts) const
 {
-    return (time_stamp_ <= ts.get());
+    //return (time_stamp_ <= ts.get());
+    return (time_stamp_nano_ <= ts.time_stamp_nano_);
 }
 
 inline bool TimeStamp::operator >=(const TimeStamp& ts) const
 {
-    return (time_stamp_ >= ts.get());
-}
-
-inline Scalar TimeStamp::operator -(const TimeStamp& ts) const
-{
-    return (time_stamp_ - ts.get());
+    //return (time_stamp_ >= ts.get());
+    return (time_stamp_nano_ >= ts.time_stamp_nano_);
 }
 
 inline void TimeStamp::operator +=(const Scalar& dt)
 {
-    time_stamp_ += dt;
+    //time_stamp_ += dt;
+    time_stamp_nano_ += (unsigned long int)(dt*NANOSECS);
 }
 
-inline TimeStamp TimeStamp::operator +(const Scalar& dt) const
+inline void TimeStamp::operator -=(const Scalar& dt)
 {
-    return TimeStamp(time_stamp_ + dt);
+    //time_stamp_ -= dt;
+    time_stamp_nano_ -= (unsigned long int)(dt*NANOSECS);
+}
+
+inline Scalar TimeStamp::operator -(const TimeStamp& ts) const
+{
+    //return (time_stamp_ - ts.get());
+    return Scalar((long int)(time_stamp_nano_ - ts.time_stamp_nano_))*1e-9; // long int cast fix overflow in case of negative substraction result
 }
 
 static const TimeStamp InvalidStamp(-1,-1);
