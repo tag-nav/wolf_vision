@@ -14,6 +14,9 @@
 
 namespace wolf {
 
+WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsDiffDrive);
+WOLF_STRUCT_PTR_TYPEDEFS(SensorDiffDrive);
+
 struct IntrinsicsDiffDrive : public IntrinsicsBase
 {
   Scalar left_radius_;

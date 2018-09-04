@@ -13,7 +13,7 @@ FeatureDiffDrive::FeatureDiffDrive(const Eigen::VectorXs& _delta_preintegrated,
   //
 }
 
-const Eigen::VectorXs& FeatureDiffDrive::getJacobianFactor() const
+const Eigen::MatrixXs& FeatureDiffDrive::getJacobianFactor() const
 {
   return jacobian_diff_drive_factors_;
 }
