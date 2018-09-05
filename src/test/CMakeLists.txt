@@ -192,6 +192,10 @@ target_link_libraries(gtest_odom_2D ${PROJECT_NAME})
 wolf_add_gtest(gtest_odom_3D gtest_odom_3D.cpp)
 target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
 
+# shared_from_this test
+wolf_add_gtest(gtest_shared_from_this gtest_shared_from_this.cpp)
+target_link_libraries(gtest_shared_from_this ${PROJECT_NAME})
+
 # ------- Now Core classes Serialization ----------
 
 add_subdirectory(serialization)
