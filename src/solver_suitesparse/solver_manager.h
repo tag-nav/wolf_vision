@@ -2,7 +2,7 @@
 #define CERES_MANAGER_H_
 
 //wolf includes
-#include <constraint_GPS_2D.h>
+#include "../constraint_GPS_2D.h"
 #include "../wolf.h"
 #include "../state_block.h"
 #include "../state_point.h"

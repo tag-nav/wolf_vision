@@ -6,8 +6,8 @@
  */
 
 //Wolf
-#include <processor_IMU.h>
-#include <sensor_IMU.h>
+#include "processor_IMU.h"
+#include "sensor_IMU.h"
 #include "wolf.h"
 #include "sensor_odom_3D.h"
 #include "processor_odom_3D.h"
@@ -367,7 +367,7 @@ class Process_Constraint_IMU : public testing::Test
         // Integrate Trajectories all methods
         virtual void integrateAllTrajectories()
         {
-            Size cols = motion.cols() + 1;
+            SizeEigen cols = motion.cols() + 1;
             Trj_D_exact.resize(10,cols); Trj_D_preint_imu.resize(10,cols); Trj_D_preint_prc.resize(10,cols); Trj_D_corrected_imu.resize(10,cols); Trj_D_corrected_prc.resize(10,cols);
             Trj_x_exact.resize(10,cols); Trj_x_preint_imu.resize(10,cols); Trj_x_preint_prc.resize(10,cols); Trj_x_corrected_imu.resize(10,cols); Trj_x_corrected_prc.resize(10,cols);
 
@@ -1512,7 +1512,7 @@ TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) 
     // Build optimal trajectory
     MatrixXs Trj_x_optim(10,Trj_D_preint_prc.cols());
     Scalar Dt = 0;
-    Size i = 0;
+    SizeEigen i = 0;
     for (auto J_D_b : Buf_Jac_preint_prc)
     {
         VectorXs step       = J_D_b * (bias_0 - bias_preint);

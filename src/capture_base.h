@@ -26,7 +26,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         SensorBaseWPtr  sensor_ptr_; ///< Pointer to sensor
         // Deal with sensors with dynamic extrinsics (check dynamic_extrinsic_ in SensorBase)
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, intrinsic.
-        Size calib_size_;           ///< size of the calibration parameters (dynamic or static sensor params that are not fixed)
+        SizeEigen calib_size_;           ///< size of the calibration parameters (dynamic or static sensor params that are not fixed)
 
         static unsigned int capture_id_count_;
         bool is_removing_;          ///< A flag for safely removing nodes from the Wolf tree. See remove().
@@ -93,12 +93,12 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void unfixIntrinsics();
 
         bool hasCalibration() {return calib_size_ > 0;}
-        Size getCalibSize() const;
+        SizeEigen getCalibSize() const;
         virtual Eigen::VectorXs getCalibration() const;
         void setCalibration(const Eigen::VectorXs& _calib);
 
     protected:
-        Size computeCalibSize() const;
+        SizeEigen computeCalibSize() const;
 
     private:
         void updateCalibSize();
@@ -112,7 +112,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
 
 namespace wolf{
 
-inline Size CaptureBase::getCalibSize() const
+inline SizeEigen CaptureBase::getCalibSize() const
 {
     return calib_size_;
 }

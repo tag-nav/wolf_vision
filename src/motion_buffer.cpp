@@ -30,10 +30,10 @@ Motion::Motion(const TimeStamp& _ts,
 }
 
 Motion::Motion(const TimeStamp& _ts,
-               Size _data_size,
-               Size _delta_size,
-               Size _cov_size,
-               Size _calib_size) :
+               SizeEigen _data_size,
+               SizeEigen _delta_size,
+               SizeEigen _cov_size,
+               SizeEigen _calib_size) :
         data_size_(_data_size),
         delta_size_(_delta_size),
         cov_size_(_cov_size),
@@ -47,7 +47,7 @@ Motion::~Motion()
 {
 }
 
-void Motion::resize(Size _data_s, Size _delta_s, Size _delta_cov_s, Size _calib_s)
+void Motion::resize(SizeEigen _data_s, SizeEigen _delta_s, SizeEigen _delta_cov_s, SizeEigen _calib_s)
 {
     data_.resize(_data_s);
     data_cov_.resize(_data_s, _data_s);
@@ -63,10 +63,10 @@ void Motion::resize(Size _data_s, Size _delta_s, Size _delta_cov_s, Size _calib_
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
-MotionBuffer::MotionBuffer(Size _data_size,
-                           Size _delta_size,
-                           Size _cov_size,
-                           Size _calib_size) :
+MotionBuffer::MotionBuffer(SizeEigen _data_size,
+                           SizeEigen _delta_size,
+                           SizeEigen _cov_size,
+                           SizeEigen _calib_size) :
         data_size_(_data_size),
         delta_size_(_delta_size),
         cov_size_(_cov_size),

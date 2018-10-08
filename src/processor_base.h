@@ -64,7 +64,7 @@ class KFPackBuffer
         /**\brief Buffer size
          *
          */
-        size_t size(void);
+        SizeStd size(void);
 
         /**\brief Add a pack to the buffer
          *
@@ -268,7 +268,7 @@ inline bool KFPackBuffer::empty()
     return container_.empty();
 }
 
-inline size_t KFPackBuffer::size(void)
+inline SizeStd KFPackBuffer::size(void)
 {
     return container_.size();
 }

@@ -63,13 +63,6 @@ class ProcessorIMU : public ProcessorMotion{
     protected:
         ProcessorParamsIMUPtr params_motion_IMU_;
 
-        // keyframe voting parameters
-//        Scalar max_time_span_;  // maximum time between keyframes
-//        Size   max_buff_length_;// maximum buffer size before keyframe
-//        Scalar dist_traveled_;  // maximum linear motion between keyframes
-//        Scalar angle_turned_;   // maximum rotation between keyframes
-
-
     public:
         //for factory
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
@@ -80,13 +73,6 @@ class ProcessorIMU : public ProcessorMotion{
 /////////////////////////////////////////////////////////
 // IMPLEMENTATION. Put your implementation includes here
 /////////////////////////////////////////////////////////
-
-// Wolf
-#include "constraint_IMU.h"
-#include "state_block.h"
-#include "rotations.h"
-#include "IMU_tools.h"
-
 
 namespace wolf{
 

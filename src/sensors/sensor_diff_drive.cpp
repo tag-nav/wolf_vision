@@ -33,7 +33,7 @@ SensorBasePtr SensorDiffDrive::create(const std::string& _unique_name,
 
   StateBlockPtr pos_ptr = std::make_shared<StateBlock>(_extrinsics_po.head(2), true);
   StateBlockPtr ori_ptr = std::make_shared<StateBlock>(_extrinsics_po.tail(1), true);
-  StateBlockPtr int_ptr = std::make_shared<StateBlock>(params->factors_,       true);
+  StateBlockPtr int_ptr = std::make_shared<StateBlock>(params->factors_,       false);
 
   SensorBasePtr odo = std::make_shared<SensorDiffDrive>(pos_ptr, ori_ptr, int_ptr, params);
 
@@ -41,7 +41,7 @@ SensorBasePtr SensorDiffDrive::create(const std::string& _unique_name,
 
   /// @todo make calibration optional at creation
   //if (calibrate)
-    odo->unfixIntrinsics();
+  //  odo->unfixIntrinsics();
 
   return odo;
 }

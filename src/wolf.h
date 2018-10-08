@@ -49,10 +49,18 @@ typedef double Scalar;        // Use this for double, 64 bit precision
 /**
  * \brief Vector and Matrices size type for the Wolf project
  *
- * We use the default defined in Eigen (int)
+ * We use the default defined in Eigen (std::ptrdiff_t, a signed integer)
  *
  */
-typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE Size;
+typedef EIGEN_DEFAULT_DENSE_INDEX_TYPE SizeEigen;
+
+/**
+ * \brief Other containers size type for the Wolf project
+ *
+ * We use the default defined in std (std::size_t, an unsigned integer)
+ *
+ */
+typedef std::size_t SizeStd;
 
 #define M_TORAD 0.017453292519943295769236907684886127134  // pi / 180
 #define M_TODEG 57.295779513082320876798154814105170332    // 180 / pi
@@ -326,7 +334,40 @@ bool isCovariance(const Eigen::Matrix<T, N, N, RC>& M, const T& eps = Constants:
   assert(isCovariance(x, Constants::EPS_SMALL) && "Not a covariance");
 
 #define WOLF_ASSERT_INFORMATION_MATRIX(x) \
-  assert(isCovariance(x, 0.0) && "Not an information matrix");
+  assert(isCovariance(x, Scalar(0.0)) && "Not an information matrix");
+
+template <typename T, int N, int RC>
+bool makePosDef(Eigen::Matrix<T,N,N,RC>& M, const T& eps = Constants::EPS)
+{
+    Eigen::SelfAdjointEigenSolver<Eigen::Matrix<T,N,N,RC> > eigensolver(M);
+
+    if (eigensolver.info() == Eigen::Success)
+    {
+        // All eigenvalues must be >= 0:
+        Scalar epsilon = eps;
+        while ((eigensolver.eigenvalues().array() < eps).any())
+        {
+            //std::cout << "----- any negative eigenvalue or too close to zero\n";
+            //std::cout << "previous eigenvalues: " << eigensolver.eigenvalues().transpose() << std::endl;
+            //std::cout << "previous determinant: " << M.determinant() << std::endl;
+            M = eigensolver.eigenvectors() *
+                eigensolver.eigenvalues().cwiseMax(epsilon).asDiagonal() *
+                eigensolver.eigenvectors().transpose();
+            eigensolver.compute(M);
+            //std::cout << "epsilon used: " << epsilon << std::endl;
+            //std::cout << "posterior eigenvalues: " << eigensolver.eigenvalues().transpose() << std::endl;
+            //std::cout << "posterior determinant: " << M.determinant() << std::endl;
+            epsilon *=10;
+        }
+        WOLF_ASSERT_COVARIANCE_MATRIX(M);
+
+        return epsilon != eps;
+    }
+    else
+        WOLF_ERROR("Couldn't compute covariance eigen decomposition");
+
+    return false;
+}
 
 //===================================================
 

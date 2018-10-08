@@ -92,25 +92,25 @@ class ConstraintAutodiff : public ConstraintBase
         {
             // initialize jets
             unsigned int last_jet_idx = 0;
-            for (auto i = 0; i < B0; i++)
+            for (unsigned int i = 0; i < B0; i++)
                (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
-            for (auto i = 0; i < B1; i++)
+            for (unsigned int i = 0; i < B1; i++)
                (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
-            for (auto i = 0; i < B2; i++)
+            for (unsigned int i = 0; i < B2; i++)
                (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
-            for (auto i = 0; i < B3; i++)
+            for (unsigned int i = 0; i < B3; i++)
                (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
-            for (auto i = 0; i < B4; i++)
+            for (unsigned int i = 0; i < B4; i++)
                (*jets_4_)[i] = WolfJet(0, last_jet_idx++);
-            for (auto i = 0; i < B5; i++)
+            for (unsigned int i = 0; i < B5; i++)
                (*jets_5_)[i] = WolfJet(0, last_jet_idx++);
-            for (auto i = 0; i < B6; i++)
+            for (unsigned int i = 0; i < B6; i++)
                (*jets_6_)[i] = WolfJet(0, last_jet_idx++);
-            for (auto i = 0; i < B7; i++)
+            for (unsigned int i = 0; i < B7; i++)
                (*jets_7_)[i] = WolfJet(0, last_jet_idx++);
-            for (auto i = 0; i < B8; i++)
+            for (unsigned int i = 0; i < B8; i++)
                (*jets_8_)[i] = WolfJet(0, last_jet_idx++);
-            for (auto i = 0; i < B9; i++)
+            for (unsigned int i = 0; i < B9; i++)
                 (*jets_9_)[i] = WolfJet(0, last_jet_idx++);
         }
 
@@ -139,7 +139,7 @@ class ConstraintAutodiff : public ConstraintBase
          * Returns the residual and jacobians given the state values
          *
          **/
-        virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+        virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
         {
             // only residuals
             if (jacobians == nullptr)
@@ -160,7 +160,7 @@ class ConstraintAutodiff : public ConstraintBase
             else
             {
                 // update jets real part
-                std::vector<double const*> param_vec;
+                std::vector<Scalar const*> param_vec;
                 param_vec.assign(parameters,parameters+n_blocks);
                 updateJetsRealPart(param_vec);
 
@@ -178,11 +178,11 @@ class ConstraintAutodiff : public ConstraintBase
                                                   residuals_jets_->data());
 
                 // fill the residual array
-                for (auto i = 0; i < RES; i++)
+                for (unsigned int i = 0; i < RES; i++)
                     residuals[i] = (*residuals_jets_)[i].a;
 
                 // fill the jacobian matrices
-                for (auto i = 0; i<n_blocks; i++)
+                for (unsigned int i = 0; i<n_blocks; i++)
                     if (jacobians[i] != nullptr)
                         for (unsigned int row = 0; row < RES; row++)
                             std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -195,28 +195,28 @@ class ConstraintAutodiff : public ConstraintBase
         /** \brief Updates all jets real part with values of parameters
          *
          **/
-        void updateJetsRealPart(const std::vector<double const*>& parameters) const
+        void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
         {
             // update jets real part
-            for (auto i = 0; i < B0; i++)
+            for (unsigned int i = 0; i < B0; i++)
                 (*jets_0_)[i].a = parameters[0][i];
-            for (auto i = 0; i < B1; i++)
+            for (unsigned int i = 0; i < B1; i++)
                 (*jets_1_)[i].a = parameters[1][i];
-            for (auto i = 0; i < B2; i++)
+            for (unsigned int i = 0; i < B2; i++)
                 (*jets_2_)[i].a = parameters[2][i];
-            for (auto i = 0; i < B3; i++)
+            for (unsigned int i = 0; i < B3; i++)
                 (*jets_3_)[i].a = parameters[3][i];
-            for (auto i = 0; i < B4; i++)
+            for (unsigned int i = 0; i < B4; i++)
                 (*jets_4_)[i].a = parameters[4][i];
-            for (auto i = 0; i < B5; i++)
+            for (unsigned int i = 0; i < B5; i++)
                 (*jets_5_)[i].a = parameters[5][i];
-            for (auto i = 0; i < B6; i++)
+            for (unsigned int i = 0; i < B6; i++)
                 (*jets_6_)[i].a = parameters[6][i];
-            for (auto i = 0; i < B7; i++)
+            for (unsigned int i = 0; i < B7; i++)
                 (*jets_7_)[i].a = parameters[7][i];
-            for (auto i = 0; i < B8; i++)
+            for (unsigned int i = 0; i < B8; i++)
                 (*jets_8_)[i].a = parameters[8][i];
-            for (auto i = 0; i < B9; i++)
+            for (unsigned int i = 0; i < B9; i++)
                 (*jets_9_)[i].a = parameters[9][i];
         }
 
@@ -231,7 +231,7 @@ class ConstraintAutodiff : public ConstraintBase
             assert(_states_ptr.size() == n_blocks);
 
             // init jacobian
-            for(auto i = 0; i < n_blocks; ++i)
+            for(unsigned int i = 0; i < n_blocks; ++i)
             {
                Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
                jacobians_.push_back(Ji);
@@ -254,11 +254,11 @@ class ConstraintAutodiff : public ConstraintBase
                                               residuals_jets_->data());
 
             // fill the residual vector
-            for (auto i = 0; i < RES; i++)
+            for (unsigned int i = 0; i < RES; i++)
                 residual_(i) = (*residuals_jets_)[i].a;
 
             // fill the jacobian matrices
-            for (auto i = 0; i<n_blocks; i++)
+            for (unsigned int i = 0; i<n_blocks; i++)
                 if (!state_ptrs_[i]->isFixed())
                     for (unsigned int row = 0; row < RES; row++)
                         std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -266,7 +266,7 @@ class ConstraintAutodiff : public ConstraintBase
                                   jacobians_[i].data() + row * state_block_sizes_.at(i));
 
            // print jacobian matrices
-//           for (auto i = 0; i < n_blocks; i++)
+//           for (unsigned int i = 0; i < n_blocks; i++)
 //               std::cout << jacobians_[i] << std::endl << std::endl;
         }
 
@@ -376,23 +376,23 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
        {
            // initialize jets
            unsigned int last_jet_idx = 0;
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
               (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
               (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
               (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B3; i++)
+           for (unsigned int i = 0; i < B3; i++)
               (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B4; i++)
+           for (unsigned int i = 0; i < B4; i++)
               (*jets_4_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B5; i++)
+           for (unsigned int i = 0; i < B5; i++)
               (*jets_5_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B6; i++)
+           for (unsigned int i = 0; i < B6; i++)
               (*jets_6_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B7; i++)
+           for (unsigned int i = 0; i < B7; i++)
               (*jets_7_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B8; i++)
+           for (unsigned int i = 0; i < B8; i++)
               (*jets_8_)[i] = WolfJet(0, last_jet_idx++);
            state_ptrs_.resize(n_blocks);
        }
@@ -416,7 +416,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -436,7 +436,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -453,11 +453,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
                                                         residuals_jets_->data());
 
                // fill the residual array
-               for (auto i = 0; i < RES; i++)
+               for (unsigned int i = 0; i < RES; i++)
                    residuals[i] = (*residuals_jets_)[i].a;
 
                // fill the jacobian matrices
-               for (auto i = 0; i<n_blocks; i++)
+               for (unsigned int i = 0; i<n_blocks; i++)
                    if (jacobians[i] != nullptr)
                        for (unsigned int row = 0; row < RES; row++)
                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -467,26 +467,26 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
                (*jets_0_)[i].a = parameters[0][i];
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
                (*jets_1_)[i].a = parameters[1][i];
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
                (*jets_2_)[i].a = parameters[2][i];
-           for (auto i = 0; i < B3; i++)
+           for (unsigned int i = 0; i < B3; i++)
                (*jets_3_)[i].a = parameters[3][i];
-           for (auto i = 0; i < B4; i++)
+           for (unsigned int i = 0; i < B4; i++)
                (*jets_4_)[i].a = parameters[4][i];
-           for (auto i = 0; i < B5; i++)
+           for (unsigned int i = 0; i < B5; i++)
                (*jets_5_)[i].a = parameters[5][i];
-           for (auto i = 0; i < B6; i++)
+           for (unsigned int i = 0; i < B6; i++)
                (*jets_6_)[i].a = parameters[6][i];
-           for (auto i = 0; i < B7; i++)
+           for (unsigned int i = 0; i < B7; i++)
                (*jets_7_)[i].a = parameters[7][i];
-           for (auto i = 0; i < B8; i++)
+           for (unsigned int i = 0; i < B8; i++)
                (*jets_8_)[i].a = parameters[8][i];
        }
 
@@ -498,7 +498,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -520,11 +520,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
                                              residuals_jets_->data());
 
            // fill the residual vector
-           for (auto i = 0; i < RES; i++)
+           for (unsigned int i = 0; i < RES; i++)
                residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
-           for (auto i = 0; i<n_blocks; i++)
+           for (unsigned int i = 0; i<n_blocks; i++)
                if (!state_ptrs_[i]->isFixed())
                    for (unsigned int row = 0; row < RES; row++)
                        std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -532,7 +532,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public Constra
                                  jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
-//           for (auto i = 0; i < n_blocks; i++)
+//           for (unsigned int i = 0; i < n_blocks; i++)
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
@@ -625,21 +625,21 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
        {
            // initialize jets
            unsigned int last_jet_idx = 0;
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
               (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
               (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
               (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B3; i++)
+           for (unsigned int i = 0; i < B3; i++)
               (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B4; i++)
+           for (unsigned int i = 0; i < B4; i++)
               (*jets_4_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B5; i++)
+           for (unsigned int i = 0; i < B5; i++)
               (*jets_5_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B6; i++)
+           for (unsigned int i = 0; i < B6; i++)
               (*jets_6_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B7; i++)
+           for (unsigned int i = 0; i < B7; i++)
               (*jets_7_)[i] = WolfJet(0, last_jet_idx++);
            state_ptrs_.resize(n_blocks);
        }
@@ -662,7 +662,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -681,7 +681,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -697,11 +697,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
                                                         residuals_jets_->data());
 
                // fill the residual array
-               for (auto i = 0; i < RES; i++)
+               for (unsigned int i = 0; i < RES; i++)
                    residuals[i] = (*residuals_jets_)[i].a;
 
                // fill the jacobian matrices
-               for (auto i = 0; i<n_blocks; i++)
+               for (unsigned int i = 0; i<n_blocks; i++)
                    if (jacobians[i] != nullptr)
                        for (unsigned int row = 0; row < RES; row++)
                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -711,24 +711,24 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
                (*jets_0_)[i].a = parameters[0][i];
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
                (*jets_1_)[i].a = parameters[1][i];
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
                (*jets_2_)[i].a = parameters[2][i];
-           for (auto i = 0; i < B3; i++)
+           for (unsigned int i = 0; i < B3; i++)
                (*jets_3_)[i].a = parameters[3][i];
-           for (auto i = 0; i < B4; i++)
+           for (unsigned int i = 0; i < B4; i++)
                (*jets_4_)[i].a = parameters[4][i];
-           for (auto i = 0; i < B5; i++)
+           for (unsigned int i = 0; i < B5; i++)
                (*jets_5_)[i].a = parameters[5][i];
-           for (auto i = 0; i < B6; i++)
+           for (unsigned int i = 0; i < B6; i++)
                (*jets_6_)[i].a = parameters[6][i];
-           for (auto i = 0; i < B7; i++)
+           for (unsigned int i = 0; i < B7; i++)
                (*jets_7_)[i].a = parameters[7][i];
        }
 
@@ -740,7 +740,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -761,11 +761,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
                                              residuals_jets_->data());
 
            // fill the residual vector
-           for (auto i = 0; i < RES; i++)
+           for (unsigned int i = 0; i < RES; i++)
                residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
-           for (auto i = 0; i<n_blocks; i++)
+           for (unsigned int i = 0; i<n_blocks; i++)
                if (!state_ptrs_[i]->isFixed())
                    for (unsigned int row = 0; row < RES; row++)
                        std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -773,7 +773,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public Constrai
                                  jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
-//           for (auto i = 0; i < n_blocks; i++)
+//           for (unsigned int i = 0; i < n_blocks; i++)
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
@@ -863,19 +863,19 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
        {
            // initialize jets
            unsigned int last_jet_idx = 0;
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
               (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
               (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
               (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B3; i++)
+           for (unsigned int i = 0; i < B3; i++)
               (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B4; i++)
+           for (unsigned int i = 0; i < B4; i++)
               (*jets_4_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B5; i++)
+           for (unsigned int i = 0; i < B5; i++)
               (*jets_5_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B6; i++)
+           for (unsigned int i = 0; i < B6; i++)
               (*jets_6_)[i] = WolfJet(0, last_jet_idx++);
            state_ptrs_.resize(n_blocks);
        }
@@ -897,7 +897,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -915,7 +915,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -930,11 +930,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
                                                         residuals_jets_->data());
 
                // fill the residual array
-               for (auto i = 0; i < RES; i++)
+               for (unsigned int i = 0; i < RES; i++)
                    residuals[i] = (*residuals_jets_)[i].a;
 
                // fill the jacobian matrices
-               for (auto i = 0; i<n_blocks; i++)
+               for (unsigned int i = 0; i<n_blocks; i++)
                    if (jacobians[i] != nullptr)
                        for (unsigned int row = 0; row < RES; row++)
                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -944,22 +944,22 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
                (*jets_0_)[i].a = parameters[0][i];
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
                (*jets_1_)[i].a = parameters[1][i];
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
                (*jets_2_)[i].a = parameters[2][i];
-           for (auto i = 0; i < B3; i++)
+           for (unsigned int i = 0; i < B3; i++)
                (*jets_3_)[i].a = parameters[3][i];
-           for (auto i = 0; i < B4; i++)
+           for (unsigned int i = 0; i < B4; i++)
                (*jets_4_)[i].a = parameters[4][i];
-           for (auto i = 0; i < B5; i++)
+           for (unsigned int i = 0; i < B5; i++)
                (*jets_5_)[i].a = parameters[5][i];
-           for (auto i = 0; i < B6; i++)
+           for (unsigned int i = 0; i < B6; i++)
                (*jets_6_)[i].a = parameters[6][i];
        }
 
@@ -971,7 +971,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -991,11 +991,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
                                              residuals_jets_->data());
 
            // fill the residual vector
-           for (auto i = 0; i < RES; i++)
+           for (unsigned int i = 0; i < RES; i++)
                residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
-           for (auto i = 0; i<n_blocks; i++)
+           for (unsigned int i = 0; i<n_blocks; i++)
                if (!state_ptrs_[i]->isFixed())
                    for (unsigned int row = 0; row < RES; row++)
                        std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -1003,7 +1003,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public Constrain
                                  jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
-//           for (auto i = 0; i < n_blocks; i++)
+//           for (unsigned int i = 0; i < n_blocks; i++)
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
@@ -1090,17 +1090,17 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
        {
            // initialize jets
            unsigned int last_jet_idx = 0;
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
               (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
               (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
               (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B3; i++)
+           for (unsigned int i = 0; i < B3; i++)
               (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B4; i++)
+           for (unsigned int i = 0; i < B4; i++)
               (*jets_4_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B5; i++)
+           for (unsigned int i = 0; i < B5; i++)
               (*jets_5_)[i] = WolfJet(0, last_jet_idx++);
            state_ptrs_.resize(n_blocks);
        }
@@ -1121,7 +1121,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1138,7 +1138,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -1152,11 +1152,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
                                                         residuals_jets_->data());
 
                // fill the residual array
-               for (auto i = 0; i < RES; i++)
+               for (unsigned int i = 0; i < RES; i++)
                    residuals[i] = (*residuals_jets_)[i].a;
 
                // fill the jacobian matrices
-               for (auto i = 0; i<n_blocks; i++)
+               for (unsigned int i = 0; i<n_blocks; i++)
                    if (jacobians[i] != nullptr)
                        for (unsigned int row = 0; row < RES; row++)
                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -1166,20 +1166,20 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
                (*jets_0_)[i].a = parameters[0][i];
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
                (*jets_1_)[i].a = parameters[1][i];
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
                (*jets_2_)[i].a = parameters[2][i];
-           for (auto i = 0; i < B3; i++)
+           for (unsigned int i = 0; i < B3; i++)
                (*jets_3_)[i].a = parameters[3][i];
-           for (auto i = 0; i < B4; i++)
+           for (unsigned int i = 0; i < B4; i++)
                (*jets_4_)[i].a = parameters[4][i];
-           for (auto i = 0; i < B5; i++)
+           for (unsigned int i = 0; i < B5; i++)
                (*jets_5_)[i].a = parameters[5][i];
        }
 
@@ -1191,7 +1191,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -1210,11 +1210,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public Constraint
                                              residuals_jets_->data());
 
            // fill the residual vector
-           for (auto i = 0; i < RES; i++)
+           for (unsigned int i = 0; i < RES; i++)
                residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
-           for (auto i = 0; i<n_blocks; i++)
+           for (unsigned int i = 0; i<n_blocks; i++)
                if (!state_ptrs_[i]->isFixed())
                    for (unsigned int row = 0; row < RES; row++)
                        std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -1301,15 +1301,15 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
        {
            // initialize jets
            unsigned int last_jet_idx = 0;
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
               (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
               (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
               (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B3; i++)
+           for (unsigned int i = 0; i < B3; i++)
               (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B4; i++)
+           for (unsigned int i = 0; i < B4; i++)
               (*jets_4_)[i] = WolfJet(0, last_jet_idx++);
            state_ptrs_.resize(n_blocks);
        }
@@ -1329,7 +1329,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1345,7 +1345,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -1358,11 +1358,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
                                                         residuals_jets_->data());
 
                // fill the residual array
-               for (auto i = 0; i < RES; i++)
+               for (unsigned int i = 0; i < RES; i++)
                    residuals[i] = (*residuals_jets_)[i].a;
 
                // fill the jacobian matrices
-               for (auto i = 0; i<n_blocks; i++)
+               for (unsigned int i = 0; i<n_blocks; i++)
                    if (jacobians[i] != nullptr)
                        for (unsigned int row = 0; row < RES; row++)
                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -1372,18 +1372,18 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
                (*jets_0_)[i].a = parameters[0][i];
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
                (*jets_1_)[i].a = parameters[1][i];
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
                (*jets_2_)[i].a = parameters[2][i];
-           for (auto i = 0; i < B3; i++)
+           for (unsigned int i = 0; i < B3; i++)
                (*jets_3_)[i].a = parameters[3][i];
-           for (auto i = 0; i < B4; i++)
+           for (unsigned int i = 0; i < B4; i++)
                (*jets_4_)[i].a = parameters[4][i];
        }
 
@@ -1395,7 +1395,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -1413,11 +1413,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public ConstraintB
                                              residuals_jets_->data());
 
            // fill the residual vector
-           for (auto i = 0; i < RES; i++)
+           for (unsigned int i = 0; i < RES; i++)
                residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
-           for (auto i = 0; i<n_blocks; i++)
+           for (unsigned int i = 0; i<n_blocks; i++)
                if (!state_ptrs_[i]->isFixed())
                    for (unsigned int row = 0; row < RES; row++)
                        std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -1501,13 +1501,13 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
        {
            // initialize jets
            unsigned int last_jet_idx = 0;
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
               (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
               (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
               (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B3; i++)
+           for (unsigned int i = 0; i < B3; i++)
               (*jets_3_)[i] = WolfJet(0, last_jet_idx++);
            state_ptrs_.resize(n_blocks);
        }
@@ -1526,7 +1526,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1541,7 +1541,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -1553,11 +1553,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
                                                  residuals_jets_->data());
 
                // fill the residual array
-               for (auto i = 0; i < RES; i++)
+               for (unsigned int i = 0; i < RES; i++)
                    residuals[i] = (*residuals_jets_)[i].a;
 
                // fill the jacobian matrices
-               for (auto i = 0; i<n_blocks; i++)
+               for (unsigned int i = 0; i<n_blocks; i++)
                    if (jacobians[i] != nullptr)
                        for (unsigned int row = 0; row < RES; row++)
                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -1567,16 +1567,16 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
                (*jets_0_)[i].a = parameters[0][i];
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
                (*jets_1_)[i].a = parameters[1][i];
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
                (*jets_2_)[i].a = parameters[2][i];
-           for (auto i = 0; i < B3; i++)
+           for (unsigned int i = 0; i < B3; i++)
                (*jets_3_)[i].a = parameters[3][i];
        }
 
@@ -1588,7 +1588,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -1605,11 +1605,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
                                              residuals_jets_->data());
 
            // fill the residual vector
-           for (auto i = 0; i < RES; i++)
+           for (unsigned int i = 0; i < RES; i++)
                residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
-           for (auto i = 0; i<n_blocks; i++)
+           for (unsigned int i = 0; i<n_blocks; i++)
                if (!state_ptrs_[i]->isFixed())
                    for (unsigned int row = 0; row < RES; row++)
                        std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -1617,7 +1617,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public ConstraintBa
                                  jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
-//           for (auto i = 0; i < n_blocks; i++)
+//           for (unsigned int i = 0; i < n_blocks; i++)
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
@@ -1694,11 +1694,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
        {
            // initialize jets
            unsigned int last_jet_idx = 0;
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
               (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
               (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
               (*jets_2_)[i] = WolfJet(0, last_jet_idx++);
            state_ptrs_.resize(n_blocks);
        }
@@ -1716,7 +1716,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1730,7 +1730,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -1741,11 +1741,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
                                                         residuals_jets_->data());
 
                // fill the residual array
-               for (auto i = 0; i < RES; i++)
+               for (unsigned int i = 0; i < RES; i++)
                    residuals[i] = (*residuals_jets_)[i].a;
 
                // fill the jacobian matrices
-               for (auto i = 0; i<n_blocks; i++)
+               for (unsigned int i = 0; i<n_blocks; i++)
                    if (jacobians[i] != nullptr)
                        for (unsigned int row = 0; row < RES; row++)
                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -1755,14 +1755,14 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
                (*jets_0_)[i].a = parameters[0][i];
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
                (*jets_1_)[i].a = parameters[1][i];
-           for (auto i = 0; i < B2; i++)
+           for (unsigned int i = 0; i < B2; i++)
                (*jets_2_)[i].a = parameters[2][i];
        }
 
@@ -1774,7 +1774,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -1790,11 +1790,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
                                              residuals_jets_->data());
 
            // fill the residual vector
-           for (auto i = 0; i < RES; i++)
+           for (unsigned int i = 0; i < RES; i++)
                residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
-           for (auto i = 0; i<n_blocks; i++)
+           for (unsigned int i = 0; i<n_blocks; i++)
                if (!state_ptrs_[i]->isFixed())
                    for (unsigned int row = 0; row < RES; row++)
                        std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -1802,7 +1802,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public ConstraintBas
                                  jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
-//           for (auto i = 0; i < n_blocks; i++)
+//           for (unsigned int i = 0; i < n_blocks; i++)
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
@@ -1876,9 +1876,9 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
        {
            // initialize jets
            unsigned int last_jet_idx = 0;
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
               (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
               (*jets_1_)[i] = WolfJet(0, last_jet_idx++);
            state_ptrs_.resize(n_blocks);
        }
@@ -1895,7 +1895,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -1908,7 +1908,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -1918,11 +1918,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
                                                  residuals_jets_->data());
 
                // fill the residual array
-               for (auto i = 0; i < RES; i++)
+               for (unsigned int i = 0; i < RES; i++)
                    residuals[i] = (*residuals_jets_)[i].a;
 
                // fill the jacobian matrices
-               for (auto i = 0; i<n_blocks; i++)
+               for (unsigned int i = 0; i<n_blocks; i++)
                    if (jacobians[i] != nullptr)
                        for (unsigned int row = 0; row < RES; row++)
                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -1932,12 +1932,12 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
                (*jets_0_)[i].a = parameters[0][i];
-           for (auto i = 0; i < B1; i++)
+           for (unsigned int i = 0; i < B1; i++)
                (*jets_1_)[i].a = parameters[1][i];
        }
 
@@ -1949,7 +1949,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -1964,11 +1964,11 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
                                              residuals_jets_->data());
 
            // fill the residual vector
-           for (auto i = 0; i < RES; i++)
+           for (unsigned int i = 0; i < RES; i++)
                residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
-           for (auto i = 0; i<n_blocks; i++)
+           for (unsigned int i = 0; i<n_blocks; i++)
                if (!state_ptrs_[i]->isFixed())
                    for (unsigned int row = 0; row < RES; row++)
                        std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -1976,7 +1976,7 @@ class ConstraintAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public ConstraintBase
                                  jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
-//           for (auto i = 0; i < n_blocks; i++)
+//           for (unsigned int i = 0; i < n_blocks; i++)
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 
@@ -2047,7 +2047,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
        {
            // initialize jets
            unsigned int last_jet_idx = 0;
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
               (*jets_0_)[i] = WolfJet(0, last_jet_idx++);
            state_ptrs_.resize(n_blocks);
        }
@@ -2063,7 +2063,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            return JAC_AUTO;
        }
 
-       virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const
+       virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const
        {
            // only residuals
            if (jacobians == nullptr)
@@ -2075,7 +2075,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            else
            {
                // update jets real part
-               std::vector<double const*> param_vec;
+               std::vector<Scalar const*> param_vec;
                param_vec.assign(parameters,parameters+n_blocks);
                updateJetsRealPart(param_vec);
 
@@ -2084,11 +2084,11 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
                                                  residuals_jets_->data());
 
                // fill the residual array
-               for (auto i = 0; i < RES; i++)
+               for (unsigned int i = 0; i < RES; i++)
                    residuals[i] = (*residuals_jets_)[i].a;
 
                // fill the jacobian matrices
-               for (auto i = 0; i<n_blocks; i++)
+               for (unsigned int i = 0; i<n_blocks; i++)
                    if (jacobians[i] != nullptr)
                        for (unsigned int row = 0; row < RES; row++)
                            std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -2098,10 +2098,10 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            return true;
        }
 
-       void updateJetsRealPart(const std::vector<double const*>& parameters) const
+       void updateJetsRealPart(const std::vector<Scalar const*>& parameters) const
        {
            // update jets real part
-           for (auto i = 0; i < B0; i++)
+           for (unsigned int i = 0; i < B0; i++)
                (*jets_0_)[i].a = parameters[0][i];
        }
 
@@ -2113,7 +2113,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
            assert(_states_ptr.size() == n_blocks);
 
            // init jacobian
-           for(auto i = 0; i < n_blocks; ++i)
+           for(unsigned int i = 0; i < n_blocks; ++i)
            {
               Eigen::MatrixXs Ji = Eigen::MatrixXs::Zero(RES, state_block_sizes_[i]);
               jacobians_.push_back(Ji);
@@ -2127,11 +2127,11 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
                                              residuals_jets_->data());
 
            // fill the residual vector
-           for (auto i = 0; i < RES; i++)
+           for (unsigned int i = 0; i < RES; i++)
                residual_(i) = (*residuals_jets_)[i].a;
 
            // fill the jacobian matrices
-           for (auto i = 0; i<n_blocks; i++)
+           for (unsigned int i = 0; i<n_blocks; i++)
                if (!state_ptrs_[i]->isFixed())
                    for (unsigned int row = 0; row < RES; row++)
                        std::copy((*residuals_jets_)[row].v.data() + jacobian_locations_.at(i),
@@ -2139,7 +2139,7 @@ class ConstraintAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public ConstraintBase
                                  jacobians_[i].data() + row * state_block_sizes_.at(i));
 
           // print jacobian matrices
-//           for (auto i = 0; i < n_blocks; i++)
+//           for (unsigned int i = 0; i < n_blocks; i++)
 //               std::cout << jacobians_[i] << std::endl << std::endl;
        }
 

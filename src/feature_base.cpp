@@ -94,9 +94,6 @@ void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)
     // set (ensuring symmetry)
     measurement_covariance_ = _meas_cov.selfadjointView<Eigen::Upper>();
 
-    // Avoid singular covariance
-    //avoidSingularCovariance();
-
 	// compute square root information upper matrix
 	measurement_sqrt_information_upper_ = computeSqrtUpper(measurement_covariance_.inverse());
 }
@@ -109,7 +106,7 @@ void FeatureBase::setMeasurementInformation(const Eigen::MatrixXs & _meas_info)
     measurement_covariance_ = _meas_info.inverse().selfadjointView<Eigen::Upper>();
 
     // Avoid singular covariance
-    avoidSingularCovariance();
+    makePosDef(measurement_covariance_);
 
     // compute square root information upper matrix
     measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_info);
@@ -135,41 +132,6 @@ Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) con
     R = eval.cwiseSqrt().asDiagonal() * es.eigenvectors().real().transpose();
 
     return R;
-}
-
-void FeatureBase::avoidSingularCovariance()
-{
-    Eigen::SelfAdjointEigenSolver<Eigen::MatrixXs> eigensolver(measurement_covariance_);
-
-    if (eigensolver.info() == Eigen::Success)
-    {
-        // All eigenvalues must be >= 0:
-        Scalar epsilon = Constants::EPS_SMALL;
-        while ((eigensolver.eigenvalues().array() < Constants::EPS_SMALL).any())
-        {
-            std::cout << "----- any negative eigenvalue or too close to zero\n";
-            std::cout << "previous eigenvalues: " << eigensolver.eigenvalues().transpose() << std::endl;
-            std::cout << "previous determinant: " << measurement_covariance_.determinant() << std::endl;
-            measurement_covariance_= eigensolver.eigenvectors() *
-                                     eigensolver.eigenvalues().cwiseMax(epsilon).asDiagonal() *
-                                     eigensolver.eigenvectors().transpose();
-            eigensolver.compute(measurement_covariance_);
-            std::cout << "epsilon used: " << epsilon << std::endl;
-            std::cout << "posterior eigenvalues: " << eigensolver.eigenvalues().transpose() << std::endl;
-            std::cout << "posterior determinant: " << measurement_covariance_.determinant() << std::endl;
-            epsilon *=10;
-        }
-    }
-    else
-        WOLF_ERROR("Couldn't compute covariance eigen decomposition");
-
-    /*Scalar eps_scalar = 1e-10;
-    while (measurement_covariance_.determinant() < Constants::EPS_SMALL && eps_scalar < 1e-3)
-    {
-        measurement_covariance_ += Eigen::MatrixXs::Identity(measurement_covariance_.rows(), measurement_covariance_.cols()) * eps_scalar; // avoid singular covariance
-        eps_scalar*=10;
-    }*/
-    WOLF_ASSERT_COVARIANCE_MATRIX(measurement_covariance_);
 }
 
 } // namespace wolf

@@ -84,7 +84,7 @@ class ConstraintAnalytic: public ConstraintBase
         /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
         **/
         // TODO
-        virtual bool evaluate(double const* const* parameters, double* residuals, double** jacobians) const override
+        virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const override
         {
             // load parameters evaluation value
             std::vector<Eigen::Map<const Eigen::VectorXs>> state_blocks_map_;

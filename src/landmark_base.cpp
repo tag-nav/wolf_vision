@@ -131,7 +131,7 @@ void LandmarkBase::removeStateBlocks()
 
 Eigen::VectorXs LandmarkBase::getState() const
 {
-    Size size = 0;
+    SizeEigen size = 0;
     for (StateBlockPtr sb : state_block_vec_)
         if (sb)
             size += sb->getSize();
@@ -144,14 +144,14 @@ Eigen::VectorXs LandmarkBase::getState() const
 
 void LandmarkBase::getState(Eigen::VectorXs& _state) const
 {
-    Size size = 0;
+    SizeEigen size = 0;
     for (StateBlockPtr sb : state_block_vec_)
         if (sb)
             size += sb->getSize();
 
     assert(_state.size() == size && "Wrong state vector size");
 
-    unsigned int index = 0;
+    SizeEigen index = 0;
 
     for (StateBlockPtr sb : state_block_vec_)
         if (sb)

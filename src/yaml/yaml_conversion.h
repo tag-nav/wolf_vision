@@ -66,7 +66,7 @@ struct convert<Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols
             if (node[0].Type() == NodeType::Sequence) // sizes given by YAML
             {
                 if (node.size() == 2 && node[0].size() == 2 && node[1].Type() == NodeType::Sequence
-                        && node[1].size() == node[0][0].as<int>() * node[0][1].as<int>()) // YAML string is well formed
+                        && node[1].size() == node[0][0].as<unsigned int>() * node[0][1].as<unsigned int>()) // YAML string is well formed
                 {
                     int rows = node[0][0].as<int>();
                     int cols = node[0][1].as<int>();
@@ -151,7 +151,7 @@ struct convert<Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols
             }
 
             // final check for good size
-            if (values.size() != matrix.rows() * matrix.cols())
+            if (values.size() != (unsigned int)(matrix.rows() * matrix.cols()))
             {
                 std::cout << "Wrong input size" << std::endl;
                 return false;

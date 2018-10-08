@@ -28,7 +28,7 @@ TEST(FrameBase, GettersAndSetters)
     FrameBasePtr F = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
 
     // getters
-    ASSERT_EQ(F->id(), 1);
+    ASSERT_EQ(F->id(), (unsigned int) 1);
     ASSERT_EQ(F->getTimeStamp(), 1);
     TimeStamp t;
     F->getTimeStamp(t);
@@ -41,9 +41,9 @@ TEST(FrameBase, StateBlocks)
 {
     FrameBasePtr F = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
 
-    ASSERT_EQ(F->getStateBlockVec().size(), 3);
-    ASSERT_EQ(F->getPPtr()->getState().size(), 2);
-    ASSERT_EQ(F->getOPtr()->getState().size(), 1);
+    ASSERT_EQ(F->getStateBlockVec().size(),   (unsigned int) 3);
+    ASSERT_EQ(F->getPPtr()->getState().size(),(unsigned int) 2);
+    ASSERT_EQ(F->getOPtr()->getState().size(),(unsigned int) 1);
     ASSERT_EQ(F->getVPtr(), nullptr);
 }
 
@@ -58,7 +58,7 @@ TEST(FrameBase, LinksBasic)
     ASSERT_FALSE(F->getCaptureOf(make_shared<SensorOdom2D>(nullptr, nullptr, 1,1)));
     ASSERT_TRUE(F->getCaptureList().empty());
     ASSERT_TRUE(F->getConstrainedByList().empty());
-    ASSERT_EQ(F->getHits() , 0);
+    ASSERT_EQ(F->getHits() , (unsigned int) 0);
 }
 
 
@@ -97,12 +97,12 @@ TEST(FrameBase, LinksToTree)
     // F1 has one capture and no constraints-by
     ASSERT_FALSE(F1->getCaptureList().empty());
     ASSERT_TRUE(F1->getConstrainedByList().empty());
-    ASSERT_EQ(F1->getHits() , 0);
+    ASSERT_EQ(F1->getHits() , (unsigned int) 0);
 
     // F2 has no capture and one constraint-by
     ASSERT_TRUE(F2->getCaptureList().empty());
     ASSERT_FALSE(F2->getConstrainedByList().empty());
-    ASSERT_EQ(F2->getHits() , 1);
+    ASSERT_EQ(F2->getHits() , (unsigned int) 1);
 
     // fix and unfix
     F1->fix();

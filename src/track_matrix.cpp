@@ -62,7 +62,7 @@ void TrackMatrix::remove(size_t _track_id)
     {
         for (auto const& pair_time_ftr : tracks_.at(_track_id))
         {
-            size_t cap_id = pair_time_ftr.second->getCapturePtr()->id();
+            SizeStd cap_id = pair_time_ftr.second->getCapturePtr()->id();
             snapshots_.at(cap_id).erase(_track_id);
             if (snapshots_.at(cap_id).empty())
                 snapshots_.erase(cap_id);
@@ -81,7 +81,7 @@ void TrackMatrix::remove(CaptureBasePtr _cap)
         TimeStamp ts = _cap->getTimeStamp();
         for (auto const& pair_trkid_ftr : snapshots_.at(_cap->id()))
         {
-            size_t trk_id = pair_trkid_ftr.first;
+            SizeStd trk_id = pair_trkid_ftr.first;
             tracks_.at(trk_id).erase(ts);
             if (tracks_.at(trk_id).empty())
                 tracks_.erase(trk_id);
@@ -173,7 +173,7 @@ TrackMatches TrackMatrix::matches(CaptureBasePtr _cap_1, CaptureBasePtr _cap_2)
 
     for (auto const & pair_trkid_ftr : s_short)
     {
-        size_t trk_id = pair_trkid_ftr.first;
+        SizeStd trk_id = pair_trkid_ftr.first;
         if (s_long.count(trk_id))
             pairs[trk_id] = pair<FeatureBasePtr, FeatureBasePtr>(s_1.at(trk_id), s_2.at(trk_id));
     }

@@ -197,7 +197,7 @@ void SensorBase::registerNewStateBlocks()
 {
     if (getProblem() != nullptr)
     {
-        for (int i = 0; i < getStateBlockVec().size(); i++)
+        for (unsigned int i = 0; i < getStateBlockVec().size(); i++)
         {
             if (i < 2 && !isExtrinsicDynamic())
             {
@@ -295,10 +295,10 @@ StateBlockPtr SensorBase::getIntrinsicPtr()
     return getStateBlockPtrDynamic(2);
 }
 
-Size SensorBase::computeCalibSize() const
+SizeEigen SensorBase::computeCalibSize() const
 {
-    Size sz = 0;
-    for (Size i = 0; i < state_block_vec_.size(); i++)
+    SizeEigen sz = 0;
+    for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
         auto sb = state_block_vec_[i];
         if (sb && !sb->isFixed())
@@ -310,10 +310,10 @@ Size SensorBase::computeCalibSize() const
 
 Eigen::VectorXs SensorBase::getCalibration() const
 {
-    Size index = 0;
-    Size sz = getCalibSize();
+    SizeEigen index = 0;
+    SizeEigen sz = getCalibSize();
     Eigen::VectorXs calib(sz);
-    for (Size i = 0; i < state_block_vec_.size(); i++)
+    for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
         auto sb = getStateBlockPtrStatic(i);
         if (sb && !sb->isFixed())

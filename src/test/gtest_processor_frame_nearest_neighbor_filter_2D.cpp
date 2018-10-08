@@ -157,8 +157,8 @@ TEST(ProcessorFrameNearestNeighborFilter, PointInEllipseRotated)
   const std::vector<wolf::FrameBasePtr> &testloops =
       processor_ptr_point2d->getCandidates();
 
-  ASSERT_EQ(testloops.size(), 1);
-  ASSERT_EQ(testloops[0]->id(), 2);
+  ASSERT_EQ(testloops.size(),   (unsigned int) 1);
+  ASSERT_EQ(testloops[0]->id(), (unsigned int) 2);
 }
 
 //##############################################################################
@@ -189,16 +189,16 @@ TEST(ProcessorFrameNearestNeighborFilter, EllipseEllipseRotatedCrosscovariance)
   const std::vector<wolf::FrameBasePtr> &testloops =
       processor_ptr_ellipse2d->getCandidates();
 
-  ASSERT_EQ(testloops.size(), 2);
-  ASSERT_EQ(testloops[0]->id(), 1);
-  ASSERT_EQ(testloops[1]->id(), 2);
+  ASSERT_EQ(testloops.size(),   (unsigned int) 2);
+  ASSERT_EQ(testloops[0]->id(), (unsigned int) 1);
+  ASSERT_EQ(testloops[1]->id(), (unsigned int) 2);
 
   // Make 4th frame last Keyframe
   problem->getTrajectoryPtr()->setLastKeyFramePtr(F4);
 
   // trigger search for loopclosure again
   processor_ptr_ellipse2d->process(incomming_dummy);
-  ASSERT_EQ(testloops.size(), 0);
+  ASSERT_EQ(testloops.size(), (unsigned int) 0);
 }
 
 //##############################################################################

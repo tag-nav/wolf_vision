@@ -6,17 +6,18 @@
  */
 
 //Wolf
-#include <capture_IMU.h>
-#include <processor_IMU.h>
-#include <sensor_IMU.h>
+#include "capture_IMU.h"
+#include "constraint_pose_3D.h"
+#include "processor_IMU.h"
+#include "sensor_IMU.h"
 #include "processor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"
+
 #include "utils_gtest.h"
-#include "../src/logging.h"
+#include "logging.h"
 
 #include <iostream>
 #include <fstream>
-#include "../constraint_pose_3D.h"
 
 //#define GET_RESIDUALS
 

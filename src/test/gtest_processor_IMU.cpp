@@ -5,9 +5,9 @@
  *      \author: jsola
  */
 
-#include <capture_IMU.h>
-#include <processor_IMU.h>
-#include <sensor_IMU.h>
+#include "capture_IMU.h"
+#include "processor_IMU.h"
+#include "sensor_IMU.h"
 #include "wolf.h"
 
 #include "utils_gtest.h"
@@ -174,7 +174,7 @@ TEST(ProcessorIMU, voteForKeyFrame)
         - 1 keyframe created by process() in voteForKeyFrame() since conditions to create a keyframe are met
         - 1 frame that would be used by future data
     */
-    ASSERT_EQ(problem->getTrajectoryPtr()->getFrameList().size(),3);
+    ASSERT_EQ(problem->getTrajectoryPtr()->getFrameList().size(),(unsigned int) 3);
 
     /* if max_time_span == 2,  Wolf tree should be
 
@@ -301,7 +301,7 @@ TEST_F(ProcessorIMUt, acc_y)
 
     //do so for 5s
     const unsigned int iter = 1000; //how many ms
-    for(int i = 1; i < iter; i++) //already did one integration above
+    for(unsigned int i = 1; i < iter; i++) //already did one integration above
     {
         cap_imu_ptr->setTimeStamp(i*0.001 + 0.001); //first one will be 0.002 and last will be 5.000
         sensor_ptr->process(cap_imu_ptr);
@@ -338,7 +338,7 @@ TEST_F(ProcessorIMUt, acc_z)
 
     //do so for 5s
     const unsigned int iter = 50; //how 0.1s 
-    for(int i = 1; i < iter; i++) //already did one integration above
+    for(unsigned int i = 1; i < iter; i++) //already did one integration above
     {
         cap_imu_ptr->setTimeStamp(i*0.1 + 0.1); //first one will be 0.2 and last will be 5.0
         sensor_ptr->process(cap_imu_ptr);
@@ -399,7 +399,7 @@ TEST_F(ProcessorIMUt, gyro_x)
 
     //do so for 5s
     const unsigned int iter = 1000; //how many ms 
-    for(int i = 1; i < iter; i++) //already did one integration above
+    for(unsigned int i = 1; i < iter; i++) //already did one integration above
     {
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
@@ -459,7 +459,7 @@ TEST_F(ProcessorIMUt, gyro_x_biasedAbx)
 
     //do so for 5s
     const unsigned int iter = 1000; //how many ms 
-    for(int i = 1; i < iter; i++) //already did one integration above
+    for(unsigned int i = 1; i < iter; i++) //already did one integration above
     {
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
@@ -512,7 +512,7 @@ TEST_F(ProcessorIMUt, gyro_xy_biasedAbxy)
 
     //do so for 5s
     const unsigned int iter = 1000; //how many ms 
-    for(int i = 1; i < iter; i++) //already did one integration above
+    for(unsigned int i = 1; i < iter; i++) //already did one integration above
     {
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
@@ -556,7 +556,7 @@ TEST_F(ProcessorIMUt, gyro_z)
 
     //do so for 5s
     const unsigned int iter = 1000; //how many ms 
-    for(int i = 1; i < iter; i++) //already did one integration above
+    for(unsigned int i = 1; i < iter; i++) //already did one integration above
     {
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
@@ -681,7 +681,7 @@ TEST_F(ProcessorIMUt, gyro_z_ConstVelocity)
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
-    for(int i = 1; i < iter; i++) //already did one integration above
+    for(unsigned int i = 1; i < iter; i++) //already did one integration above
     {
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
@@ -721,7 +721,7 @@ TEST_F(ProcessorIMUt, gyro_x_ConstVelocity)
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
-    for(int i = 1; i < iter; i++) //already did one integration above
+    for(unsigned int i = 1; i < iter; i++) //already did one integration above
     {
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
@@ -765,7 +765,7 @@ TEST_F(ProcessorIMUt, gyro_xy_ConstVelocity)
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
-    for(int i = 1; i < iter; i++) //already did one integration above
+    for(unsigned int i = 1; i < iter; i++) //already did one integration above
     {
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
@@ -809,7 +809,7 @@ TEST_F(ProcessorIMUt, gyro_y_ConstVelocity)
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
-    for(int i = 1; i < iter; i++) //already did one integration above
+    for(unsigned int i = 1; i < iter; i++) //already did one integration above
     {
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
@@ -944,7 +944,7 @@ TEST_F(ProcessorIMUt, gyro_x_acc_x)
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
-    for(int i = 2; i <= iter; i++) //already did one integration above
+    for(unsigned int i = 2; i <= iter; i++) //already did one integration above
     {
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
@@ -993,7 +993,7 @@ TEST_F(ProcessorIMUt, gyro_y_acc_y)
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
-    for(int i = 2; i <= iter; i++) //already did one integration above
+    for(unsigned int i = 2; i <= iter; i++) //already did one integration above
     {
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);
@@ -1041,7 +1041,7 @@ TEST_F(ProcessorIMUt, gyro_z_acc_z)
 
     //do so for 1s
     const unsigned int iter = 1000; //how many ms 
-    for(int i = 2; i <= iter; i++) //already did one integration above
+    for(unsigned int i = 2; i <= iter; i++) //already did one integration above
     {
         // quaternion composition
         quat_comp = quat_comp * wolf::v2q(data.tail(3)*dt);

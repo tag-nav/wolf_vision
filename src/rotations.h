@@ -159,7 +159,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_q(const Eigen::Quaterni
             angle - pi = atan(sin(angle - pi), cos(angle - pi))
                        = atan(-sin(angle), -cos(angle))
         */
-        const T two_angle = T(2.0) * ((cos_angle < 0.0) ? atan2(-sin_angle, -cos_angle) : atan2(sin_angle, cos_angle));
+        const T two_angle = T(2.0) * ((cos_angle < T(0.0)) ? atan2(-sin_angle, -cos_angle) : atan2(sin_angle, cos_angle));
         const T k = two_angle / sin_angle;
         return vec * k;
     }

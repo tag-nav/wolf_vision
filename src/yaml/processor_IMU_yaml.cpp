@@ -6,7 +6,7 @@
  */
 
 // wolf yaml
-#include <processor_IMU.h>
+#include "processor_IMU.h"
 #include "yaml_conversion.h"
 
 // wolf
@@ -39,7 +39,7 @@ static ProcessorParamsBasePtr createProcessorIMUParams(const std::string & _file
         params->type                = processor_type;
         params->name                = processor_name;
         params->max_time_span       = kf_vote["max time span"]      .as<Scalar>();
-        params->max_buff_length     = kf_vote["max buffer length"]  .as<Size  >();
+        params->max_buff_length     = kf_vote["max buffer length"]  .as<SizeEigen  >();
         params->dist_traveled       = kf_vote["dist traveled"]      .as<Scalar>();
         params->angle_turned        = kf_vote["angle turned"]       .as<Scalar>();
         params->voting_active       = kf_vote["voting_active"]      .as<bool>();

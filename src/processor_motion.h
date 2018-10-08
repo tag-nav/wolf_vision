@@ -24,7 +24,7 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsMotion);
 struct ProcessorParamsMotion : public ProcessorParamsBase
 {
         Scalar max_time_span    = 0.5;
-        Size   max_buff_length  = 10;
+        unsigned int max_buff_length  = 10;
         Scalar dist_traveled    = 5;
         Scalar angle_turned     = 0.5;
 };
@@ -124,11 +124,11 @@ class ProcessorMotion : public ProcessorBase
     // This is the main public interface
     public:
         ProcessorMotion(const std::string& _type,
-                        Size _state_size,
-                        Size _delta_size,
-                        Size _delta_cov_size,
-                        Size _data_size,
-                        Size _calib_size,
+                        SizeEigen _state_size,
+                        SizeEigen _delta_size,
+                        SizeEigen _delta_cov_size,
+                        SizeEigen _data_size,
+                        SizeEigen _calib_size,
                         ProcessorParamsMotionPtr _params_motion);
         virtual ~ProcessorMotion();
 
@@ -157,8 +157,9 @@ class ProcessorMotion : public ProcessorBase
         /** \brief Fill the state corresponding to the provided time-stamp
          * \param _ts the time stamp
          * \param _x the returned state
+         * \return if state in the provided time-stamp could be resolved
          */
-        void getState(const TimeStamp& _ts, Eigen::VectorXs& _x);
+        bool getState(const TimeStamp& _ts, Eigen::VectorXs& _x);
 
         /** \brief Get the state corresponding to the provided time-stamp
          * \param _ts the time stamp
@@ -430,11 +431,11 @@ class ProcessorMotion : public ProcessorBase
 
     protected:
         // Attributes
-        Size x_size_;           ///< The size of the state vector
-        Size data_size_;        ///< the size of the incoming data
-        Size delta_size_;       ///< the size of the deltas
-        Size delta_cov_size_;   ///< the size of the delta covariances matrix
-        Size calib_size_;       ///< size of the extra parameters (TBD in derived classes)
+        SizeEigen x_size_;           ///< The size of the state vector
+        SizeEigen data_size_;        ///< the size of the incoming data
+        SizeEigen delta_size_;       ///< the size of the deltas
+        SizeEigen delta_cov_size_;   ///< the size of the delta covariances matrix
+        SizeEigen calib_size_;       ///< size of the extra parameters (TBD in derived classes)
         CaptureMotionPtr origin_ptr_;
         CaptureMotionPtr last_ptr_;
         CaptureMotionPtr incoming_ptr_;

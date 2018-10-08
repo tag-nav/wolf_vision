@@ -10,13 +10,13 @@
 #include "constraint_base.h"
 #include "state_block.h"
 #include "processor_motion.h"
+#include "sensor_GPS.h"
 
 #include "processor_tracker.h"
 //#include "processors/processor_tracker_feature_trifocal.h"
 #include "capture_pose.h"
 
 // IRI libs includes
-#include <sensor_GPS.h>
 
 // C++ includes
 #include <algorithm>
@@ -286,10 +286,8 @@ void Problem::getState(const TimeStamp& _ts, Eigen::VectorXs& state)
 {
     assert(state.size() == getFrameStructureSize() && "Problem::getStateAtTimeStamp: bad state size");
 
-    if (processor_motion_ptr_ != nullptr)
-        processor_motion_ptr_->getState(_ts, state);
-
-    else
+    // try to get the state from processor_motion if any, otherwise...
+    if (processor_motion_ptr_ == nullptr || !processor_motion_ptr_->getState(_ts, state))
     {
         FrameBasePtr closest_frame = trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
         if (closest_frame != nullptr)
@@ -306,12 +304,12 @@ Eigen::VectorXs Problem::getState(const TimeStamp& _ts)
     return state;
 }
 
-Size Problem::getFrameStructureSize() const
+SizeEigen Problem::getFrameStructureSize() const
 {
     return state_size_;
 }
 
-void Problem::getFrameStructureSize(Size& _x_size, Size& _cov_size) const
+void Problem::getFrameStructureSize(SizeEigen& _x_size, SizeEigen& _cov_size) const
 {
     _x_size   = state_size_;
     _cov_size = state_cov_size_;
@@ -559,7 +557,7 @@ bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& 
 
 Eigen::MatrixXs Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr)
 {
-    Size sz = 0;
+    SizeEigen sz = 0;
     for (const auto& sb : _frame_ptr->getStateBlockVec())
         if (sb)
             sz += sb->getSize();
@@ -604,7 +602,7 @@ bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::M
 
 Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr)
 {
-    Size sz = 0;
+    SizeEigen sz = 0;
     for (const auto& sb : _landmark_ptr->getStateBlockVec())
         if (sb)
             sz += sb->getSize();
@@ -718,7 +716,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             cout << endl;
             if (metric && state_blocks)
             {
-                for (auto i = 0; i < S->getStateBlockVec().size(); i++)
+                for (unsigned int i = 0; i < S->getStateBlockVec().size(); i++)
                 {
                     if (i==0) cout << "    Extr " << (S->isExtrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
                     if (i==2) cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";

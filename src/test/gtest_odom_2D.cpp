@@ -354,12 +354,16 @@ TEST(Odom2D, KF_callback)
     // Capture to use as container for all incoming data
     CaptureMotionPtr capture = std::make_shared<CaptureMotion>("ODOM 2D", t, sensor_odom2d, data, data_cov, 3, 3, nullptr);
 
+    std::cout << "t: " << t << std::endl;
     for (int n=1; n<=N; n++)
     {
         t += dt;
 
         // re-use capture with updated timestamp
         capture->setTimeStamp(t);
+        std::cout << "capture ts: " << capture->getTimeStamp() << " - " << capture->getTimeStamp().get();
+        std::cout << "nsec:        " << capture->getTimeStamp().getNanoSeconds() << std::endl;
+        std::cout << "filled nsec: " << std::setfill('0') << std::setw(9) << std::right << capture->getTimeStamp().getNanoSeconds() << std::endl;
 
         // Processor
         sensor_odom2d->process(capture);
@@ -388,9 +392,9 @@ TEST(Odom2D, KF_callback)
     ////////////////////////////////////////////////////////////////
     // Split after the last keyframe, exact timestamp
     int n_split = 8;
-    TimeStamp t_split (t0 + n_split*dt);
+    TimeStamp t_split = t0 + n_split*dt;
 
-//    std::cout << "-----------------------------\nSplit after last KF; time: " << t_split - t0 << std::endl;
+    std::cout << "-----------------------------\nSplit after last KF; time: " << t_split << std::endl;
 
     Vector3s x_split = processor_odom2d->getState(t_split);
     FrameBasePtr keyframe_2 = problem->emplaceFrame(KEY_FRAME, x_split, t_split);
@@ -418,7 +422,7 @@ TEST(Odom2D, KF_callback)
     // Split between keyframes, exact timestamp
     int m_split = 4;
     t_split = t0 + m_split*dt;
-//    std::cout << "-----------------------------\nSplit between KFs; time: " << t_split - t0 << std::endl;
+    std::cout << "-----------------------------\nSplit between KFs; time: " << t_split << std::endl;
 
     problem->print(4,1,1,1);
 
@@ -444,6 +448,8 @@ TEST(Odom2D, KF_callback)
 
     report = ceres_manager.solve(SolverManager::ReportVerbosity::BRIEF);
     ceres_manager.computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
+
+    problem->print(4,1,1,1);
 
     // check the split KF
     ASSERT_POSE2D_APPROX(keyframe_1->getState()                  , integrated_pose_vector[m_split], 1e-6);

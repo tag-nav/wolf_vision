@@ -93,7 +93,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
     protected:
         StateBlockPtr getStateBlockPtr(unsigned int _i) const;
         void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
-        void resizeStateBlockVec(int _size);
+        void resizeStateBlockVec(unsigned int _size);
 
     public:
         StateBlockPtr getPPtr() const;
@@ -247,7 +247,7 @@ inline CaptureBaseList& FrameBase::getCaptureList()
     return capture_list_;
 }
 
-inline void FrameBase::resizeStateBlockVec(int _size)
+inline void FrameBase::resizeStateBlockVec(unsigned int _size)
 {
     if (_size > state_block_vec_.size())
         state_block_vec_.resize(_size);

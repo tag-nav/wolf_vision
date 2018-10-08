@@ -3,11 +3,11 @@ namespace wolf
 {
 
 ProcessorMotion::ProcessorMotion(const std::string& _type,
-                                 Size _state_size,
-                                 Size _delta_size,
-                                 Size _delta_cov_size,
-                                 Size _data_size,
-                                 Size _calib_size,
+                                 SizeEigen _state_size,
+                                 SizeEigen _delta_size,
+                                 SizeEigen _delta_cov_size,
+                                 SizeEigen _data_size,
+                                 SizeEigen _calib_size,
                                  ProcessorParamsMotionPtr _params_motion) :
         ProcessorBase(_type, _params_motion),
         params_motion_(_params_motion),
@@ -257,7 +257,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 }
 
 
-void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
+bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 {
     CaptureMotionPtr capture_motion;
     if (origin_ptr_ && _ts >= origin_ptr_->getTimeStamp())
@@ -291,8 +291,9 @@ void ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
         // We could not find any CaptureMotion for the time stamp requested
         WOLF_ERROR("Could not find any Capture for the time stamp requested. ");
         WOLF_TRACE("Did you forget to call Problem::setPrior() in your application?")
-        throw std::runtime_error("Could not find any Capture for the time stamp requested. Did you forget to call Problem::setPrior() in your application?");
+        return false;
     }
+    return true;
 }
 
 //CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const

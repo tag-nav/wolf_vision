@@ -36,7 +36,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         HardwareBaseWPtr hardware_ptr_;
         ProcessorBaseList processor_list_;
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O, intrinsic.
-        Size calib_size_;
+        SizeEigen calib_size_;
 
         static unsigned int sensor_id_count_; ///< Object counter (acts as simple ID factory)
         bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
@@ -113,7 +113,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         StateBlockPtr getStateBlockPtrDynamic(unsigned int _i);
         StateBlockPtr getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts);
         void setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr);
-        void resizeStateBlockVec(int _size);
+        void resizeStateBlockVec(unsigned int _size);
 
         StateBlockPtr getPPtr(const TimeStamp _ts);
         StateBlockPtr getOPtr(const TimeStamp _ts);
@@ -133,7 +133,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void fixIntrinsics();
         void unfixIntrinsics();
 
-        Size getCalibSize() const;
+        SizeEigen getCalibSize() const;
         Eigen::VectorXs getCalibration() const;
 
         virtual void registerNewStateBlocks();
@@ -153,7 +153,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void setIntrinsicDynamic(bool _intrinsic_dynamic);
 
     protected:
-        Size computeCalibSize() const;
+        SizeEigen computeCalibSize() const;
 
     private:
         void updateCalibSize();
@@ -199,7 +199,7 @@ inline void SensorBase::setStateBlockPtrStatic(unsigned int _i, const StateBlock
     state_block_vec_[_i] = _sb_ptr;
 }
 
-inline void SensorBase::resizeStateBlockVec(int _size)
+inline void SensorBase::resizeStateBlockVec(unsigned int _size)
 {
     if (_size > state_block_vec_.size())
         state_block_vec_.resize(_size);
@@ -252,7 +252,7 @@ inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
     hardware_ptr_ = _hw_ptr;
 }
 
-inline Size SensorBase::getCalibSize() const
+inline SizeEigen SensorBase::getCalibSize() const
 {
     return calib_size_;
 }

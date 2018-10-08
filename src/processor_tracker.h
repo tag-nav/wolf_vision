@@ -89,7 +89,7 @@ class ProcessorTracker : public ProcessorBase
         FeatureBaseList new_features_last_;     ///< List of new features in \b last for landmark initialization and new key-frame creation.
         FeatureBaseList new_features_incoming_; ///< list of the new features of \b last successfully tracked in \b incoming
 
-        size_t number_of_tracks_;
+        SizeStd number_of_tracks_;
 
     public:
         ProcessorTracker(const std::string& _type,
@@ -196,12 +196,12 @@ class ProcessorTracker : public ProcessorBase
 
         FeatureBaseList& getNewFeaturesListLast();
 
-        const size_t& previousNumberOfTracks() const
+        const SizeStd& previousNumberOfTracks() const
         {
             return number_of_tracks_;
         }
 
-        size_t& previousNumberOfTracks()
+        SizeStd& previousNumberOfTracks()
         {
             return number_of_tracks_;
         }
