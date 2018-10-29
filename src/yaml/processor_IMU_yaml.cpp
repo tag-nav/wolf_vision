@@ -36,6 +36,8 @@ static ProcessorParamsBasePtr createProcessorIMUParams(const std::string & _file
 
         ProcessorParamsIMUPtr params = std::make_shared<ProcessorParamsIMU>();
 
+        params->time_tolerance = config["time tolerance"].as<Scalar>();
+
         params->type                = processor_type;
         params->name                = processor_name;
         params->max_time_span       = kf_vote["max time span"]      .as<Scalar>();
