@@ -130,7 +130,7 @@ void ProcessorTrackerFeature::resetDerived()
         FeatureBasePtr feature_in_last   = pair_trkid_pair.second.second;
         feature_in_last->setProblem(getProblem()); // Since these features were in incoming_, they had no Problem assigned.
 
-        WOLF_DEBUG("Matches reset: track: ", pair_trkid_pair.first, " origin: ", feature_in_origin->id(), " last: ", feature_in_last->id());
+        //WOLF_DEBUG("Matches reset: track: ", pair_trkid_pair.first, " origin: ", feature_in_origin->id(), " last: ", feature_in_last->id());
     }
 }
 
