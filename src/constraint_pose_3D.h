@@ -45,7 +45,9 @@ inline bool ConstraintPose3D::operator ()(const T* const _p, const T* const _o, 
     // error
     Eigen::Matrix<T, 6, 1> er;
     er.head(3)        = p_measured.cast<T>() - p;
-    er.tail(3)        = q2v(q.conjugate() * q_measured.cast<T>());
+
+    //    er.tail(3)        = q2v(q.conjugate() * q_measured.cast<T>()); // Local Error
+    er.tail(3)        = q2v(q_measured.cast<T>() * q.conjugate());       // Global Error
 
     // residual
     Eigen::Map<Eigen::Matrix<T, 6, 1>> res(_residuals);
