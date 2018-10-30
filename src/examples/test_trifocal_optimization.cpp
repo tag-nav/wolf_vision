@@ -1,5 +1,8 @@
 // Testing creating wolf tree from imported .graph file
 
+//C includes for sleep, time and main args
+#include "unistd.h"
+
 //std includes
 #include <iostream>
 
@@ -7,10 +10,9 @@
 #include "vision_utils.h"
 
 //Wolf includes
-
-#include "processors/processor_tracker_feature_trifocal.h"
-#include "capture_image.h"
-#include "sensor_camera.h"
+#include "../processors/processor_tracker_feature_trifocal.h"
+#include "../capture_image.h"
+#include "../sensor_camera.h"
 
 int main(int argc, char** argv)
 {

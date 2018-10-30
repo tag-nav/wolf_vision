@@ -135,8 +135,8 @@ IF(vision_utils_FOUND)
     TARGET_LINK_LIBRARIES(test_tracker_ORB ${PROJECT_NAME})
     
     # Trifocal optimization test
-    ADD_EXECUTABLE(test_triocal_optimization test_triocal_optimization.cpp)
-    TARGET_LINK_LIBRARIES(test_triocal_optimization ${PROJECT_NAME})
+    ADD_EXECUTABLE(test_trifocal_optimization test_trifocal_optimization.cpp)
+    TARGET_LINK_LIBRARIES(test_trifocal_optimization ${PROJECT_NAME})
 
 ENDIF(vision_utils_FOUND)
 
