@@ -47,7 +47,7 @@ public:
         mutable Notifications notifications_;
         mutable std::mutex notifictions_mut_;
 
-        NodeBaseWPtr parent_ptr_;    ///< pointer to the wolf Node owning this StateBlock
+        NodeBaseWPtr parent_ptr_;  ///< pointer to the wolf Node owning this StateBlock
         ProblemWPtr  problem_ptr_; ///< pointer to the wolf problem
 
         std::atomic_bool fixed_; ///< Key to indicate whether the state is fixed or not
@@ -102,7 +102,7 @@ public:
 
         /** \brief Return the problem pointer
          */
-        ProblemPtr getProblem() const;
+        ProblemPtr getProblem();
 
         /** \brief Returns the state size
          **/
@@ -147,6 +147,7 @@ public:
 
 // IMPLEMENTATION
 #include "local_parametrization_base.h"
+#include "node_base.h"
 
 namespace wolf {
 
@@ -274,12 +275,12 @@ inline NodeBasePtr StateBlock::getParent() const
     return parent_ptr_.lock();
 }
 
-inline ProblemPtr StateBlock::getProblem() const
+inline ProblemPtr StateBlock::getProblem()
 {
-    if (problem_ptr_ == nullptr)
-        parent_ptr_.lock()->getProblem();
+    if (problem_ptr_.lock() == nullptr)
+        problem_ptr_ = getParent()->getProblem();
 
-    return problem_ptr_;
+    return problem_ptr_.lock();
 }
 
 inline bool StateBlock::hasNotifications() const

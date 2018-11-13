@@ -31,6 +31,10 @@ SensorBase::SensorBase(const std::string& _type,
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _intr_ptr;
     updateCalibSize();
+
+    // Set state block parent pointers
+    for (auto sb : state_block_vec_)
+        if (sb) sb->setParent(shared_from_this());
 }
 
 SensorBase::SensorBase(const std::string& _type,
@@ -57,6 +61,10 @@ SensorBase::SensorBase(const std::string& _type,
     state_block_vec_[2] = _intr_ptr;
     setNoiseStd(_noise_std);
     updateCalibSize();
+
+    // Set state block parent pointers
+    for (auto sb : state_block_vec_)
+        if (sb) sb->setParent(shared_from_this());
 }
 
 SensorBase::~SensorBase()

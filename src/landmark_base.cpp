@@ -18,6 +18,11 @@ LandmarkBase::LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, State
 {
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
+
+    // Set state block parent pointers
+    for (auto sb : state_block_vec_)
+        if (sb) sb->setParent(shared_from_this());
+
 //    std::cout << "constructed  +L" << id() << std::endl;
 }
                 

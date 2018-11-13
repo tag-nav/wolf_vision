@@ -57,6 +57,10 @@ CaptureBase::CaptureBase(const std::string& _type,
     }
     updateCalibSize();
 
+    // Set state block parent pointers
+    for (auto sb : state_block_vec_)
+        if (sb) sb->setParent(shared_from_this());
+
     WOLF_TRACE("New Capture ", id(), " -- type ", getType(), " -- t = ", getTimeStamp(), " s");
 }
 
