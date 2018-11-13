@@ -59,6 +59,8 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void setFramePtr(const FrameBasePtr _frm_ptr);
         void unlinkFromFrame(){frame_ptr_.reset();}
 
+        virtual void setProblem(ProblemPtr _problem) final;
+
         FeatureBasePtr addFeature(FeatureBasePtr _ft_ptr);
         FeatureBaseList& getFeatureList();
         void addFeatureList(FeatureBaseList& _new_ft_list);
@@ -115,6 +117,15 @@ namespace wolf{
 inline SizeEigen CaptureBase::getCalibSize() const
 {
     return calib_size_;
+}
+
+inline void CaptureBase::setProblem(ProblemPtr _problem)
+{
+    NodeBase::setProblem(_problem);
+    for (auto ft : feature_list_)
+        ft->setProblem(_problem);
+    for (auto sb : state_block_vec_)
+        if (sb) sb->setProblem(_problem);
 }
 
 inline void CaptureBase::updateCalibSize()

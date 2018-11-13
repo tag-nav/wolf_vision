@@ -48,6 +48,8 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         virtual ~FeatureBase();
         void remove();
 
+        virtual void setProblem(ProblemPtr _problem) final;
+
         // properties
         unsigned int id();
         unsigned int trackId(){return track_id_;}

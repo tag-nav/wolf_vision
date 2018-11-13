@@ -374,4 +374,13 @@ StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i, const TimeSta
         return getStateBlockPtrStatic(_i);
 }
 
+void SensorBase::setProblem(ProblemPtr _problem)
+{
+    NodeBase::setProblem(_problem);
+    for (auto prc : processor_list_)
+        prc->setProblem(_problem);
+    for (auto sb : state_block_vec_)
+        if (sb) sb->setProblem(_problem);
+}
+
 } // namespace wolf

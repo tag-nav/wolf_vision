@@ -112,6 +112,13 @@ void FeatureBase::setMeasurementInformation(const Eigen::MatrixXs & _meas_info)
     measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_info);
 }
 
+void FeatureBase::setProblem(ProblemPtr _problem)
+{
+    NodeBase::setProblem(_problem);
+    for (auto ctr : constraint_list_)
+        ctr->setProblem(_problem);
+}
+
 Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) const
 {
     // impose symmetry

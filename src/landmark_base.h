@@ -88,6 +88,8 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
 
         // Navigate wolf tree
+        virtual void setProblem(ProblemPtr _problem) final;
+
         ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
         unsigned int getHits() const;
         ConstraintBaseList& getConstrainedByList();
@@ -104,6 +106,13 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 #include "state_block.h"
 
 namespace wolf{
+
+inline void LandmarkBase::setProblem(ProblemPtr _problem)
+{
+    NodeBase::setProblem(_problem);
+    for (auto sb : state_block_vec_)
+        if (sb) sb->setProblem(_problem);
+}
 
 inline MapBasePtr LandmarkBase::getMapPtr()
 {

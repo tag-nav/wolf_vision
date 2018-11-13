@@ -95,6 +95,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
         unsigned int id();
 
+        virtual void setProblem(ProblemPtr _problem) final;
+
         HardwareBasePtr getHardwarePtr();
         void setHardwarePtr(const HardwareBasePtr _hw_ptr);
 
@@ -163,8 +165,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
 #include "problem.h"
 #include "hardware_base.h"
-#include "processor_base.h"
 #include "capture_base.h"
+#include "processor_base.h"
 
 namespace wolf{
 
