@@ -386,7 +386,7 @@ void Problem::updateStateBlockPtr(StateBlockPtr _state_ptr)
     //std::cout << "Problem::updateStateBlockPtr " << _state_ptr.get() << std::endl;
 
     // queue for solver manager
-    _state_ptr->addNotification(StateBlock::Notification::FIX_UPDATE);
+    _state_ptr->addNotification(StateBlock::Notification::UPDATE_FIX);
     notified_state_block_list_.push_back(_state_ptr);
     notified_state_block_list_.sort();
     notified_state_block_list_.unique();

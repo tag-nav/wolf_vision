@@ -36,8 +36,8 @@ public:
   {
     ADD = 0,
     REMOVE,
-    STATE_UPDATE,
-    FIX_UPDATE
+    UPDATE_STATE,
+    UPDATE_FIX
   };
 
   using Notifications = std::list<Notification>;
@@ -214,7 +214,7 @@ inline void StateBlock::unfix()
 inline void StateBlock::setFixed(bool _fixed)
 {
     fixed_.store(_fixed);
-    addNotification(Notification::FIX_UPDATE);
+    addNotification(Notification::UPDATE_FIX);
 }
 
 inline bool StateBlock::hasLocalParametrization() const

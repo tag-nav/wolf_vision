@@ -53,7 +53,7 @@ void SolverManager::update()
 
         break;
       }
-      case StateBlock::Notification::STATE_UPDATE:
+      case StateBlock::Notification::UPDATE_STATE:
       {
         WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
                         "Updating the state of an unregistered StateBlock !");
@@ -67,7 +67,7 @@ void SolverManager::update()
 
         break;
       }
-      case StateBlock::Notification::FIX_UPDATE:
+      case StateBlock::Notification::UPDATE_FIX:
       {
         WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
                         "Updating the fix state of an unregistered StateBlock !");

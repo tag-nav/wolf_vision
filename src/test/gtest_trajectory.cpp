@@ -46,11 +46,11 @@ struct DummyNotificationProcessor
           {
             break;
           }
-          case StateBlock::Notification::STATE_UPDATE:
+          case StateBlock::Notification::UPDATE_STATE:
           {
             break;
           }
-          case StateBlock::Notification::FIX_UPDATE:
+          case StateBlock::Notification::UPDATE_FIX:
           {
             break;
           }
