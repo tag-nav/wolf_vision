@@ -409,7 +409,7 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
             // get track ID
             SizeStd trk_id = pair_trkid_match.first;
 
-            if (track_matrix_.trackSize(trk_id)>params_tracker_feature_trifocal_->min_track_length_for_constraint)
+            if (track_matrix_.trackSize(trk_id)>=params_tracker_feature_trifocal_->min_track_length_for_constraint)
             {
                 // get the three features for this track
                 // FeatureBasePtr ftr_prev = track_matrix_.feature(trk_id, prev_origin_ptr_); // left here for ref, but implemented in a quicker way below

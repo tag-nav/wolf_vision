@@ -92,7 +92,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     params_tracker_feature_trifocal->n_cells_h                      = 10;
     params_tracker_feature_trifocal->n_cells_v                      = 10;
     params_tracker_feature_trifocal->max_euclidean_distance         = 20;
-    params_tracker_feature_trifocal->yaml_file_params_vision_utils  = wolf_root + "/src/examples/ACTIVESEARCH.yaml";
+    params_tracker_feature_trifocal->yaml_file_params_vision_utils  = wolf_root + "/src/examples/vision_utils_active_search.yaml";
 
     ProcessorTrackerFeatureTrifocalPtr proc_trk = make_shared<ProcessorTrackerFeatureTrifocal>(params_tracker_feature_trifocal);
     proc_trk->configure(sens_trk);

@@ -298,6 +298,7 @@ void CeresManager::removeStateBlock(const StateBlockPtr& state_ptr)
 void CeresManager::updateStateBlockStatus(const StateBlockPtr& state_ptr)
 {
   assert(state_ptr != nullptr);
+
   if (state_ptr->isFixed())
     ceres_problem_->SetParameterBlockConstant(getAssociatedMemBlockPtr(state_ptr));
   else

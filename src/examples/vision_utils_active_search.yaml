@@ -2,34 +2,24 @@ sensor:
   type: "USB_CAM"
 
 detector:
-  type: "ORB"         
-  nfeatures: 100
-  scale factor: 1.2
-  nlevels: 8
-  edge threshold: 8   # 16
-  first level: 0 
-  WTA_K: 2            # See: http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html#a180ae17d3300cf2c619aa240d9b607e5
-  score type: 1       #enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
-  patch size: 15      # 31
-
+  type: "AGAST"         
+  threshold: 9
+  nonmaxSuppression: true
+  detection type: 0         #  AGAST_5_8=0, AGAST_7_12d=1, AGAST_7_12s=2, OAST_9_16=3, THRESHOLD=10000, NONMAX_SUPPRESSION=10001
+  
 descriptor:
-  type: "ORB"         
-  nfeatures: 100
-  scale factor: 1.2
-  nlevels: 8
-  edge threshold: 8   # 16
-  first level: 0 
-  WTA_K: 2            # See: http://docs.opencv.org/trunk/db/d95/classcv_1_1ORB.html#a180ae17d3300cf2c619aa240d9b607e5
-  score type: 1       #enum { kBytes = 32, HARRIS_SCORE=0, FAST_SCORE=1 };
-  patch size: 15      # 31
-
+  type: "BRIEF"
+  bytes: 64
+  use_orientation: true     
+  
 matcher:
-  type: "FLANNBASED"
-  match type: 1     #  Match type. MATCH = 1, KNNMATCH = 2, RADIUSMATCH = 3
-  roi:
-    width: 20
-    height: 20
-  min normalized score: 0.85 
+  type: "BRUTEFORCE_HAMMING_2" # BRUTEFORCE, BRUTEFORCE_HAMMING, BRUTEFORCE_HAMMING_2, BRUTEFORCE_L1, FLANNBASED
+  match type: 2    #  Match type. MATCH = 1, KNNMATCH = 2, RADIUSMATCH = 3
+  min normalized score: 0.8
+  filtering:
+    ransac epipolar distance: 3  # Distance to epipolar [pixels]
+    ransac confidence prob: 0.97 # Confidence probability
+    max match euclidean dist: 20 # Max euclidean distance to consider a match as inlier    
     
 algorithm:
   type: "ACTIVESEARCH"   
