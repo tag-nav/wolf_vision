@@ -30,6 +30,8 @@ void SolverManager::update()
 
   for (StateBlockPtr& state : states)
   {
+      state->printNotifications();
+
     const auto notifications = state->consumeNotifications();
 
     for (const auto notif : notifications)

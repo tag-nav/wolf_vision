@@ -57,10 +57,6 @@ CaptureBase::CaptureBase(const std::string& _type,
     }
     updateCalibSize();
 
-    // Set state block parent pointers
-    for (auto sb : state_block_vec_)
-        if (sb) sb->setParent(shared_from_this());
-
     WOLF_TRACE("New Capture ", id(), " -- type ", getType(), " -- t = ", getTimeStamp(), " s");
 }
 
@@ -189,7 +185,7 @@ void CaptureBase::fix()
         {
             sbp->fix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
+                getProblem()->updateFixStateBlockPtr(sbp);
         }
     }
     updateCalibSize();
@@ -204,7 +200,7 @@ void CaptureBase::unfix()
         {
             sbp->unfix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
+                getProblem()->updateFixStateBlockPtr(sbp);
         }
     }
     updateCalibSize();
@@ -219,7 +215,7 @@ void CaptureBase::fixExtrinsics()
         {
             sbp->fix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
+                getProblem()->updateFixStateBlockPtr(sbp);
         }
     }
     updateCalibSize();
@@ -234,7 +230,7 @@ void CaptureBase::unfixExtrinsics()
         {
             sbp->unfix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
+                getProblem()->updateFixStateBlockPtr(sbp);
         }
     }
     updateCalibSize();
@@ -249,7 +245,7 @@ void CaptureBase::fixIntrinsics()
         {
             sbp->fix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
+                getProblem()->updateFixStateBlockPtr(sbp);
         }
     }
     updateCalibSize();
@@ -264,7 +260,7 @@ void CaptureBase::unfixIntrinsics()
         {
             sbp->unfix();
             if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
+                getProblem()->updateFixStateBlockPtr(sbp);
         }
     }
     updateCalibSize();

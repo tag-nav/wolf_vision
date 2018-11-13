@@ -111,6 +111,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
 #include "sensor_base.h"
 #include "frame_base.h"
 #include "feature_base.h"
+#include "state_block.h"
 
 namespace wolf{
 

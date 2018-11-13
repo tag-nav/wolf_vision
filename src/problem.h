@@ -268,7 +268,11 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Adds a new state block to be updated to solver manager
          */
-        void updateStateBlockPtr(StateBlockPtr _state_ptr);
+        void updateFixStateBlockPtr(StateBlockPtr _state_ptr);
+
+        /** \brief Adds a new state block to be updated to solver manager
+         */
+        void updateStateStateBlockPtr(StateBlockPtr _state_ptr);
 
         /** \brief Adds a state block to be removed to solver manager
          */

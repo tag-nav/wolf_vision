@@ -381,12 +381,23 @@ StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
     return _state_ptr;
 }
 
-void Problem::updateStateBlockPtr(StateBlockPtr _state_ptr)
+void Problem::updateFixStateBlockPtr(StateBlockPtr _state_ptr)
 {
     //std::cout << "Problem::updateStateBlockPtr " << _state_ptr.get() << std::endl;
 
     // queue for solver manager
     _state_ptr->addNotification(StateBlock::Notification::UPDATE_FIX);
+    notified_state_block_list_.push_back(_state_ptr);
+    notified_state_block_list_.sort();
+    notified_state_block_list_.unique();
+}
+
+void Problem::updateStateStateBlockPtr(StateBlockPtr _state_ptr)
+{
+    //std::cout << "Problem::updateStateBlockPtr " << _state_ptr.get() << std::endl;
+
+    // queue for solver manager
+    _state_ptr->addNotification(StateBlock::Notification::UPDATE_STATE);
     notified_state_block_list_.push_back(_state_ptr);
     notified_state_block_list_.sort();
     notified_state_block_list_.unique();

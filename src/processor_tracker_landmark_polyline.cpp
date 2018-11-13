@@ -956,8 +956,8 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList& _lmk_
                 // Unfix origin
                 polyline_ptr->getPPtr()->unfix();
                 polyline_ptr->getOPtr()->unfix();
-                getProblem()->updateStateBlockPtr(polyline_ptr->getPPtr());
-                getProblem()->updateStateBlockPtr(polyline_ptr->getOPtr());
+                getProblem()->updateFixStateBlockPtr(polyline_ptr->getPPtr());
+                getProblem()->updateFixStateBlockPtr(polyline_ptr->getOPtr());
 
                 // Move origin to B
                 polyline_ptr->getPPtr()->setState(polyline_ptr->getPointVector((configuration ? B_id : A_id)));
@@ -989,7 +989,7 @@ void ProcessorTrackerLandmarkPolyline::classifyPolilines(LandmarkBaseList& _lmk_
                 for (auto id = polyline_ptr->getFirstId(); id <= polyline_ptr->getLastId(); id++)
                 {
                     polyline_ptr->getPointStateBlockPtr(id)->fix();
-                    getProblem()->updateStateBlockPtr(polyline_ptr->getPointStateBlockPtr(id));
+                    getProblem()->updateFixStateBlockPtr(polyline_ptr->getPointStateBlockPtr(id));
                 }
             }
         }

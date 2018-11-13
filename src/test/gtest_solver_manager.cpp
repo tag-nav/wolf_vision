@@ -150,7 +150,7 @@ TEST(SolverManager, UpdateStateBlock)
     sb_ptr->fix();
 
     // update stateblock
-    P->updateStateBlockPtr(sb_ptr);
+    P->updateFixStateBlockPtr(sb_ptr);
 
     // update solver manager
     solver_manager_ptr->update();
@@ -175,7 +175,7 @@ TEST(SolverManager, AddUpdateStateBlock)
     sb_ptr->fix();
 
     // update stateblock
-    P->updateStateBlockPtr(sb_ptr);
+    P->updateFixStateBlockPtr(sb_ptr);
 
     // update solver manager
     solver_manager_ptr->update();
@@ -255,7 +255,7 @@ TEST(SolverManager, RemoveUpdateStateBlock)
 
     ASSERT_DEATH({
         // update stateblock
-        P->updateStateBlockPtr(sb_ptr);
+        P->updateFixStateBlockPtr(sb_ptr);
 
         // update solver manager
         solver_manager_ptr->update();

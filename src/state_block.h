@@ -28,7 +28,7 @@ namespace wolf {
  *     - Non-fixed state blocks are estimated.
  *  - A local parametrization useful for optimizing in the tangent space to the manifold.
  */
-class StateBlock
+class StateBlock : public std::enable_shared_from_this<StateBlock>
 {
 public:
 
@@ -47,7 +47,6 @@ public:
         mutable Notifications notifications_;
         mutable std::mutex notifictions_mut_;
 
-        NodeBaseWPtr parent_ptr_;  ///< pointer to the wolf Node owning this StateBlock
         ProblemWPtr  problem_ptr_; ///< pointer to the wolf problem
 
         std::atomic_bool fixed_; ///< Key to indicate whether the state is fixed or not
@@ -92,13 +91,9 @@ public:
          **/
         void setState(const Eigen::VectorXs& _state);
 
-        /** \brief Sets the pointer to parent node
-         **/
-        void setParent(const NodeBasePtr _parent_ptr);
-
-        /** \brief Gets the pointer to parent node
-         **/
-        NodeBasePtr getParent() const;
+        /** \brief Set the pointer to Problem
+         */
+        void setProblem(const ProblemPtr _problem);
 
         /** \brief Return the problem pointer
          */
@@ -141,11 +136,15 @@ public:
         StateBlock::Notifications consumeNotifications() const;
 
         bool hasNotifications() const;
+
+        void printNotifications() const;
+
 };
 
 } // namespace wolf
 
 // IMPLEMENTATION
+#include "problem.h"
 #include "local_parametrization_base.h"
 #include "node_base.h"
 
@@ -153,7 +152,6 @@ namespace wolf {
 
 inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
 //        notifications_{Notification::ADD},
-        parent_ptr_(), // nullptr
         fixed_(_fixed),
         state_size_(_state.size()),
         state_(_state),
@@ -164,7 +162,6 @@ inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalP
 
 inline StateBlock::StateBlock(const SizeEigen _size, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
 //        notifications_{Notification::ADD},
-        parent_ptr_(), // nullptr
         fixed_(_fixed),
         state_size_(_size),
         state_(Eigen::VectorXs::Zero(_size)),
@@ -183,19 +180,6 @@ inline Eigen::VectorXs StateBlock::getState() const
 {
     std::lock_guard<std::mutex> lock(mut_state_);
     return state_;
-}
-
-inline void StateBlock::setState(const Eigen::VectorXs& _state)
-{
-    assert(_state.size() == state_.size());
-
-    {
-      std::lock_guard<std::mutex> lock(mut_state_);
-      state_ = _state;
-      state_size_ = state_.size();
-    }
-
-    //addNotification(Notification::STATE_UPDATE);
 }
 
 inline SizeEigen StateBlock::getSize() const
@@ -259,27 +243,13 @@ inline void StateBlock::addNotification(const StateBlock::Notification _new_noti
   notifications_.emplace_back(_new_notification);
 }
 
-inline StateBlock::Notifications StateBlock::consumeNotifications() const
+inline void StateBlock::setProblem(const ProblemPtr _problem)
 {
-  std::lock_guard<std::mutex> lock(notifictions_mut_);
-  return std::move(notifications_);
-}
-
-inline void StateBlock::setParent(const NodeBasePtr _parent_ptr)
-{
-    parent_ptr_ = _parent_ptr;
-}
-
-inline NodeBasePtr StateBlock::getParent() const
-{
-    return parent_ptr_.lock();
+    problem_ptr_ = _problem;
 }
 
 inline ProblemPtr StateBlock::getProblem()
 {
-    if (problem_ptr_.lock() == nullptr)
-        problem_ptr_ = getParent()->getProblem();
-
     return problem_ptr_.lock();
 }
 
