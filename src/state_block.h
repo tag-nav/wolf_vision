@@ -47,7 +47,8 @@ public:
         mutable Notifications notifications_;
         mutable std::mutex notifictions_mut_;
 
-        NodeBaseWPtr node_ptr_; //< pointer to the wolf Node owning this StateBlock
+        NodeBaseWPtr parent_ptr_;  ///< pointer to the wolf Node owning this StateBlock
+        ProblemWPtr  problem_ptr_; ///< pointer to the wolf problem
 
         std::atomic_bool fixed_; ///< Key to indicate whether the state is fixed or not
 
@@ -90,6 +91,18 @@ public:
         /** \brief Sets the state vector
          **/
         void setState(const Eigen::VectorXs& _state);
+
+        /** \brief Sets the pointer to parent node
+         **/
+        void setParent(const NodeBasePtr _parent_ptr);
+
+        /** \brief Gets the pointer to parent node
+         **/
+        NodeBasePtr getParent() const;
+
+        /** \brief Return the problem pointer
+         */
+        ProblemPtr getProblem();
 
         /** \brief Returns the state size
          **/
@@ -134,12 +147,13 @@ public:
 
 // IMPLEMENTATION
 #include "local_parametrization_base.h"
+#include "node_base.h"
 
 namespace wolf {
 
 inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
 //        notifications_{Notification::ADD},
-        node_ptr_(), // nullptr
+        parent_ptr_(), // nullptr
         fixed_(_fixed),
         state_size_(_state.size()),
         state_(_state),
@@ -150,7 +164,7 @@ inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalP
 
 inline StateBlock::StateBlock(const SizeEigen _size, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
 //        notifications_{Notification::ADD},
-        node_ptr_(), // nullptr
+        parent_ptr_(), // nullptr
         fixed_(_fixed),
         state_size_(_size),
         state_(Eigen::VectorXs::Zero(_size)),
@@ -249,6 +263,24 @@ inline StateBlock::Notifications StateBlock::consumeNotifications() const
 {
   std::lock_guard<std::mutex> lock(notifictions_mut_);
   return std::move(notifications_);
+}
+
+inline void StateBlock::setParent(const NodeBasePtr _parent_ptr)
+{
+    parent_ptr_ = _parent_ptr;
+}
+
+inline NodeBasePtr StateBlock::getParent() const
+{
+    return parent_ptr_.lock();
+}
+
+inline ProblemPtr StateBlock::getProblem()
+{
+    if (problem_ptr_.lock() == nullptr)
+        problem_ptr_ = getParent()->getProblem();
+
+    return problem_ptr_.lock();
 }
 
 inline bool StateBlock::hasNotifications() const
