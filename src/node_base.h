@@ -81,7 +81,7 @@ class NodeBase
         void setName(const std::string& _name);
 
         ProblemPtr getProblem() const;
-        void setProblem(ProblemPtr _prob_ptr);
+        virtual void setProblem(ProblemPtr _prob_ptr);
 };
 
 } // namespace wolf
@@ -132,12 +132,12 @@ inline void NodeBase::setName(const std::string& _name)
 
 inline ProblemPtr NodeBase::getProblem() const
 {
-  return problem_ptr_.lock();
+    return problem_ptr_.lock();
 }
 
 inline void NodeBase::setProblem(ProblemPtr _prob_ptr)
 {
-  problem_ptr_ = _prob_ptr;
+    problem_ptr_ = _prob_ptr;
 }
 
 } // namespace wolf

@@ -40,8 +40,6 @@ void SolverManager::update()
       {
         const bool registered = state_blocks_.find(state)!=state_blocks_.end();
 
-        //        const auto p = state_blocks_.emplace(state, state->getState());
-
         // call addStateBlock only if first time added.
         if (!registered)
         {
@@ -53,20 +51,21 @@ void SolverManager::update()
 
         break;
       }
-//      case StateBlock::Notification::STATE_UPDATE:
-//      {
-//        WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
-//                        "Updating the state of an unregistered StateBlock !");
-//
-//        assert(state_blocks_.find(state)!=state_blocks_.end() &&
-//            "Updating the state of an unregistered StateBlock !");
-//
-//        Eigen::VectorXs new_state = state->getState();
-//        std::copy(new_state.data(),new_state.data()+new_state.size(),getAssociatedMemBlockPtr(state));
-//
-//        break;
-//      }
-      case StateBlock::Notification::FIX_UPDATE:
+      case StateBlock::Notification::UPDATE_STATE:
+      {
+        WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
+                        "Updating the state of an unregistered StateBlock !");
+
+        assert(state_blocks_.find(state)!=state_blocks_.end() &&
+            "Updating the state of an unregistered StateBlock !");
+
+        Eigen::VectorXs new_state = state->getState();
+        // We assume the same size for the states in both WOLF and the solver.
+        std::copy(new_state.data(),new_state.data()+new_state.size(),getAssociatedMemBlockPtr(state));
+
+        break;
+      }
+      case StateBlock::Notification::UPDATE_FIX:
       {
         WOLF_DEBUG_COND(state_blocks_.find(state)==state_blocks_.end(),
                         "Updating the fix state of an unregistered StateBlock !");
@@ -156,7 +155,7 @@ std::string SolverManager::solve(const ReportVerbosity report_level)
   {
     // Avoid usuless copies
     if (!it->first->isFixed())
-      it->first->setState(it->second);
+      it->first->setState(it->second, false);
   }
 
   return report;

@@ -369,27 +369,20 @@ StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 {
     //std::cout << "Problem::addStateBlockPtr " << _state_ptr.get() << std::endl;
 
+    // set problem
+    _state_ptr->setProblem(shared_from_this());
+
     // add the state unit to the list
     state_block_list_.push_back(_state_ptr);
 
-    // queue for solver manager
+    // Add add notification
     _state_ptr->addNotification(StateBlock::Notification::ADD);
-    notified_state_block_list_.push_back(_state_ptr);
-    notified_state_block_list_.sort();
-    notified_state_block_list_.unique();
+
+    // Push all notifications from SB to problem
+    for (auto notif : _state_ptr->getNotifications())
+        notifyStateBlock(_state_ptr, notif);
 
     return _state_ptr;
-}
-
-void Problem::updateStateBlockPtr(StateBlockPtr _state_ptr)
-{
-    //std::cout << "Problem::updateStateBlockPtr " << _state_ptr.get() << std::endl;
-
-    // queue for solver manager
-    _state_ptr->addNotification(StateBlock::Notification::FIX_UPDATE);
-    notified_state_block_list_.push_back(_state_ptr);
-    notified_state_block_list_.sort();
-    notified_state_block_list_.unique();
 }
 
 void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
@@ -401,6 +394,11 @@ void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
 
     // Add remove notification
     _state_ptr->addNotification(StateBlock::Notification::REMOVE);
+    notifyStateBlock(_state_ptr, StateBlock::Notification::REMOVE);
+}
+
+void Problem::notifyStateBlock(StateBlockPtr _state_ptr, const StateBlock::Notification _type)
+{
     notified_state_block_list_.push_back(_state_ptr);
     notified_state_block_list_.sort();
     notified_state_block_list_.unique();
@@ -1366,5 +1364,7 @@ void Problem::print(const std::string& depth, bool constr_by, bool metric, bool 
     else
         print(0, constr_by, metric, state_blocks);
 }
+
+
 
 } // namespace wolf

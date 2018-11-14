@@ -111,11 +111,7 @@ void SensorBase::fix()
 {
     for( auto sbp : state_block_vec_)
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     updateCalibSize();
 }
 
@@ -123,11 +119,7 @@ void SensorBase::unfix()
 {
     for( auto sbp : state_block_vec_)
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     updateCalibSize();
 }
 
@@ -137,11 +129,7 @@ void SensorBase::fixExtrinsics()
     {
         auto sbp = state_block_vec_[i];
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -152,11 +140,7 @@ void SensorBase::unfixExtrinsics()
     {
         auto sbp = state_block_vec_[i];
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -167,11 +151,7 @@ void SensorBase::fixIntrinsics()
     {
         auto sbp = state_block_vec_[i];
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -182,11 +162,7 @@ void SensorBase::unfixIntrinsics()
     {
         auto sbp = state_block_vec_[i];
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -372,6 +348,15 @@ StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i, const TimeSta
     }
     else
         return getStateBlockPtrStatic(_i);
+}
+
+void SensorBase::setProblem(ProblemPtr _problem)
+{
+    NodeBase::setProblem(_problem);
+    for (auto prc : processor_list_)
+        prc->setProblem(_problem);
+    for (auto sb : state_block_vec_)
+        if (sb) sb->setProblem(_problem);
 }
 
 } // namespace wolf

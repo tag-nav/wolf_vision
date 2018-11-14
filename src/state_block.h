@@ -28,16 +28,16 @@ namespace wolf {
  *     - Non-fixed state blocks are estimated.
  *  - A local parametrization useful for optimizing in the tangent space to the manifold.
  */
-class StateBlock
+class StateBlock : public std::enable_shared_from_this<StateBlock>
 {
 public:
 
   enum class Notification : std::size_t
   {
-    ADD = 0,
+    ADD = 1,
     REMOVE,
-    STATE_UPDATE,
-    FIX_UPDATE
+    UPDATE_STATE,
+    UPDATE_FIX
   };
 
   using Notifications = std::list<Notification>;
@@ -47,7 +47,7 @@ public:
         mutable Notifications notifications_;
         mutable std::mutex notifictions_mut_;
 
-        NodeBaseWPtr node_ptr_; //< pointer to the wolf Node owning this StateBlock
+        ProblemWPtr  problem_ptr_; ///< pointer to the wolf problem
 
         std::atomic_bool fixed_; ///< Key to indicate whether the state is fixed or not
 
@@ -89,7 +89,15 @@ public:
 
         /** \brief Sets the state vector
          **/
-        void setState(const Eigen::VectorXs& _state);
+        void setState(const Eigen::VectorXs& _state, const bool _notify = true);
+
+        /** \brief Set the pointer to Problem
+         */
+        void setProblem(const ProblemPtr _problem);
+
+        /** \brief Return the problem pointer
+         */
+        ProblemPtr getProblem();
 
         /** \brief Returns the state size
          **/
@@ -127,19 +135,31 @@ public:
 
         StateBlock::Notifications consumeNotifications() const;
 
+        /** \brief Check if exist any notification
+         **/
         bool hasNotifications() const;
+
+        /** \brief Return list of notifications
+         **/
+        StateBlock::Notifications getNotifications() const;
+
+        /** \brief Print list of notifications
+         **/
+        void printNotifications() const;
+
 };
 
 } // namespace wolf
 
 // IMPLEMENTATION
+#include "problem.h"
 #include "local_parametrization_base.h"
+#include "node_base.h"
 
 namespace wolf {
 
 inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
 //        notifications_{Notification::ADD},
-        node_ptr_(), // nullptr
         fixed_(_fixed),
         state_size_(_state.size()),
         state_(_state),
@@ -150,7 +170,6 @@ inline StateBlock::StateBlock(const Eigen::VectorXs& _state, bool _fixed, LocalP
 
 inline StateBlock::StateBlock(const SizeEigen _size, bool _fixed, LocalParametrizationBasePtr _local_param_ptr) :
 //        notifications_{Notification::ADD},
-        node_ptr_(), // nullptr
         fixed_(_fixed),
         state_size_(_size),
         state_(Eigen::VectorXs::Zero(_size)),
@@ -169,19 +188,6 @@ inline Eigen::VectorXs StateBlock::getState() const
 {
     std::lock_guard<std::mutex> lock(mut_state_);
     return state_;
-}
-
-inline void StateBlock::setState(const Eigen::VectorXs& _state)
-{
-    assert(_state.size() == state_.size());
-
-    {
-      std::lock_guard<std::mutex> lock(mut_state_);
-      state_ = _state;
-      state_size_ = state_.size();
-    }
-
-    //addNotification(Notification::STATE_UPDATE);
 }
 
 inline SizeEigen StateBlock::getSize() const
@@ -211,12 +217,6 @@ inline void StateBlock::unfix()
     setFixed(false);
 }
 
-inline void StateBlock::setFixed(bool _fixed)
-{
-    fixed_.store(_fixed);
-    addNotification(Notification::FIX_UPDATE);
-}
-
 inline bool StateBlock::hasLocalParametrization() const
 {
     return (local_param_ptr_ != nullptr);
@@ -239,16 +239,14 @@ inline void StateBlock::setLocalParametrizationPtr(LocalParametrizationBasePtr _
     local_param_ptr_ = _local_param;
 }
 
-inline void StateBlock::addNotification(const StateBlock::Notification _new_notification)
+inline void StateBlock::setProblem(const ProblemPtr _problem)
 {
-  std::lock_guard<std::mutex> lock(notifictions_mut_);
-  notifications_.emplace_back(_new_notification);
+    problem_ptr_ = _problem;
 }
 
-inline StateBlock::Notifications StateBlock::consumeNotifications() const
+inline ProblemPtr StateBlock::getProblem()
 {
-  std::lock_guard<std::mutex> lock(notifictions_mut_);
-  return std::move(notifications_);
+    return problem_ptr_.lock();
 }
 
 inline bool StateBlock::hasNotifications() const

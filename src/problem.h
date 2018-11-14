@@ -16,6 +16,7 @@ struct ProcessorParamsBase;
 //wolf includes
 #include "wolf.h"
 #include "frame_base.h"
+#include "state_block.h"
 
 // std includes
 
@@ -266,13 +267,13 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         StateBlockPtr addStateBlock(StateBlockPtr _state_ptr);
 
-        /** \brief Adds a new state block to be updated to solver manager
-         */
-        void updateStateBlockPtr(StateBlockPtr _state_ptr);
-
         /** \brief Adds a state block to be removed to solver manager
          */
         void removeStateBlockPtr(StateBlockPtr _state_ptr);
+
+        /** \brief Notify State Block change
+         */
+        void notifyStateBlock(StateBlockPtr _state_ptr, const StateBlock::Notification _type);
 
         /** \brief Gets a list of state blocks which state has been changed to be handled by the solver
          */

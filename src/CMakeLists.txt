@@ -310,6 +310,7 @@ SET(SRCS_BASE
     processor_tracker_feature.cpp
     processor_tracker_landmark.cpp
     sensor_base.cpp
+    state_block.cpp
     track_matrix.cpp
     time_stamp.cpp
     trajectory_base.cpp

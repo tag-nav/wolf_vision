@@ -139,22 +139,14 @@ void FrameBase::fix()
 {
     for (auto sbp : state_block_vec_)
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
 }
 
 void FrameBase::unfix()
 {
     for (auto sbp : state_block_vec_)
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
 }
 
 bool FrameBase::isFixed() const
@@ -186,7 +178,7 @@ void FrameBase::setState(const Eigen::VectorXs& _state)
     for (StateBlockPtr sb : state_block_vec_)
         if (sb && (index < _st_size))
         {
-            sb->setState(_state.segment(index, sb->getSize()));
+            sb->setState(_state.segment(index, sb->getSize()), isKey());
             index += sb->getSize();
         }
 }

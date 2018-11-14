@@ -182,11 +182,7 @@ void CaptureBase::fix()
     {
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -197,11 +193,7 @@ void CaptureBase::unfix()
     {
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -212,11 +204,7 @@ void CaptureBase::fixExtrinsics()
     {
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -227,11 +215,7 @@ void CaptureBase::unfixExtrinsics()
     {
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -242,11 +226,7 @@ void CaptureBase::fixIntrinsics()
     {
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -257,11 +237,7 @@ void CaptureBase::unfixIntrinsics()
     {
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }

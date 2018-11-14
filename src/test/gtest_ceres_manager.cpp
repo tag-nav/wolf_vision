@@ -135,9 +135,6 @@ TEST(CeresManager, UpdateStateBlock)
     // Fix frame
     sb_ptr->fix();
 
-    // update stateblock
-    P->updateStateBlockPtr(sb_ptr);
-
     // update solver manager
     ceres_manager_ptr->update();
 
@@ -159,9 +156,6 @@ TEST(CeresManager, AddUpdateStateBlock)
 
     // Fix state block
     sb_ptr->fix();
-
-    // update stateblock
-    P->updateStateBlockPtr(sb_ptr);
 
     // update solver manager
     ceres_manager_ptr->update();
@@ -244,17 +238,6 @@ TEST(CeresManager, RemoveUpdateStateBlock)
 
     // update solver
     ceres_manager_ptr->update();
-
-    // Fix state block
-    sb_ptr->fix();
-
-    ASSERT_DEATH({
-        // update stateblock
-        P->updateStateBlockPtr(sb_ptr);
-
-        // update solver manager
-        ceres_manager_ptr->update();
-    },"");
 }
 
 TEST(CeresManager, DoubleRemoveStateBlock)

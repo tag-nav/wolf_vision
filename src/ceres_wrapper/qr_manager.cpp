@@ -42,7 +42,7 @@ std::string QRManager::solve(const unsigned int& _report_level)
 
     // update state blocks
     for (auto sb_pair : sb_2_col_)
-        sb_pair.first->setState(sb_pair.first->getState() + x_incr.segment(sb_pair.second, sb_pair.first->getSize()));
+        sb_pair.first->setState(sb_pair.first->getState() + x_incr.segment(sb_pair.second, sb_pair.first->getSize()), false);
 
     if (_report_level == 1)
         return std::string("Success!\n");
