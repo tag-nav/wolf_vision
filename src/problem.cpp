@@ -379,8 +379,7 @@ StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
     _state_ptr->addNotification(StateBlock::Notification::ADD);
 
     // Push all notifications from SB to problem
-    for (auto notif : _state_ptr->getNotifications())
-        notifyStateBlock(_state_ptr, notif);
+    notifyStateBlock(_state_ptr);
 
     return _state_ptr;
 }
@@ -394,10 +393,10 @@ void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
 
     // Add remove notification
     _state_ptr->addNotification(StateBlock::Notification::REMOVE);
-    notifyStateBlock(_state_ptr, StateBlock::Notification::REMOVE);
+    notifyStateBlock(_state_ptr);
 }
 
-void Problem::notifyStateBlock(StateBlockPtr _state_ptr, const StateBlock::Notification _type)
+void Problem::notifyStateBlock(StateBlockPtr _state_ptr)
 {
     notified_state_block_list_.push_back(_state_ptr);
     notified_state_block_list_.sort();

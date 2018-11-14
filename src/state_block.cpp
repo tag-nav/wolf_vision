@@ -16,7 +16,7 @@ void StateBlock::setState(const Eigen::VectorXs& _state, const bool _notify)
     {
         addNotification(StateBlock::Notification::UPDATE_STATE);
         if (getProblem() != nullptr)
-            getProblem()->notifyStateBlock(shared_from_this(), StateBlock::Notification::UPDATE_STATE);
+            getProblem()->notifyStateBlock(shared_from_this());
     }
 }
 
@@ -26,7 +26,7 @@ void StateBlock::setFixed(bool _fixed)
     // Notify
     addNotification(StateBlock::Notification::UPDATE_FIX);
     if (getProblem() != nullptr)
-        getProblem()->notifyStateBlock(shared_from_this(), StateBlock::Notification::UPDATE_FIX);
+        getProblem()->notifyStateBlock(shared_from_this());
 }
 
 void StateBlock::addNotification(const StateBlock::Notification _new_notification)
