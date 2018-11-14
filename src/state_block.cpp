@@ -2,7 +2,7 @@
 namespace wolf
 {
 
-void StateBlock::setState(const Eigen::VectorXs& _state)
+void StateBlock::setState(const Eigen::VectorXs& _state, const bool _notify)
 {
     assert(_state.size() == state_.size());
     {
@@ -12,9 +12,12 @@ void StateBlock::setState(const Eigen::VectorXs& _state)
     }
 
     // Notify
-    addNotification(StateBlock::Notification::UPDATE_STATE);
-    if (getProblem() != nullptr)
-        getProblem()->notifyStateBlock(shared_from_this(), StateBlock::Notification::UPDATE_STATE);
+    if (_notify)
+    {
+        addNotification(StateBlock::Notification::UPDATE_STATE);
+        if (getProblem() != nullptr)
+            getProblem()->notifyStateBlock(shared_from_this(), StateBlock::Notification::UPDATE_STATE);
+    }
 }
 
 void StateBlock::setFixed(bool _fixed)

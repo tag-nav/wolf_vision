@@ -89,7 +89,7 @@ public:
 
         /** \brief Sets the state vector
          **/
-        void setState(const Eigen::VectorXs& _state);
+        void setState(const Eigen::VectorXs& _state, const bool _notify = true);
 
         /** \brief Set the pointer to Problem
          */

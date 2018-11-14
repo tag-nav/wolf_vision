@@ -159,7 +159,7 @@ std::string SolverManager::solve(const ReportVerbosity report_level)
   {
     // Avoid usuless copies
     if (!it->first->isFixed())
-      it->first->setState(it->second);
+      it->first->setState(it->second, false);
   }
 
   return report;

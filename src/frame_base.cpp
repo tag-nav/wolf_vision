@@ -178,7 +178,7 @@ void FrameBase::setState(const Eigen::VectorXs& _state)
     for (StateBlockPtr sb : state_block_vec_)
         if (sb && (index < _st_size))
         {
-            sb->setState(_state.segment(index, sb->getSize()));
+            sb->setState(_state.segment(index, sb->getSize()), isKey());
             index += sb->getSize();
         }
 }
