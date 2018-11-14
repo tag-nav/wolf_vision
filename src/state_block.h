@@ -143,10 +143,6 @@ public:
          **/
         StateBlock::Notifications getNotifications() const;
 
-        /** \brief Print list of notifications
-         **/
-        void printNotifications() const;
-
 };
 
 } // namespace wolf
