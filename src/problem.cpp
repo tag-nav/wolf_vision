@@ -395,9 +395,6 @@ void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
     // Add remove notification
     _state_ptr->addNotification(StateBlock::Notification::REMOVE);
     notifyStateBlock(_state_ptr, StateBlock::Notification::REMOVE);
-
-    // reset problem ptr
-    _state_ptr->setProblem(nullptr);
 }
 
 void Problem::notifyStateBlock(StateBlockPtr _state_ptr, const StateBlock::Notification _type)
