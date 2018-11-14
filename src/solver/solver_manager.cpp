@@ -30,8 +30,6 @@ void SolverManager::update()
 
   for (StateBlockPtr& state : states)
   {
-      state->printNotifications();
-
     const auto notifications = state->consumeNotifications();
 
     for (const auto notif : notifications)
@@ -41,8 +39,6 @@ void SolverManager::update()
       case StateBlock::Notification::ADD:
       {
         const bool registered = state_blocks_.find(state)!=state_blocks_.end();
-
-        //        const auto p = state_blocks_.emplace(state, state->getState());
 
         // call addStateBlock only if first time added.
         if (!registered)
