@@ -273,7 +273,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Notify State Block change
          */
-        void notifyStateBlock(StateBlockPtr _state_ptr, const StateBlock::Notification _type);
+        void notifyStateBlock(StateBlockPtr _state_ptr);
 
         /** \brief Gets a list of state blocks which state has been changed to be handled by the solver
          */

@@ -16,7 +16,7 @@ void StateBlock::setState(const Eigen::VectorXs& _state, const bool _notify)
     {
         addNotification(StateBlock::Notification::UPDATE_STATE);
         if (getProblem() != nullptr)
-            getProblem()->notifyStateBlock(shared_from_this(), StateBlock::Notification::UPDATE_STATE);
+            getProblem()->notifyStateBlock(shared_from_this());
     }
 }
 
@@ -26,7 +26,7 @@ void StateBlock::setFixed(bool _fixed)
     // Notify
     addNotification(StateBlock::Notification::UPDATE_FIX);
     if (getProblem() != nullptr)
-        getProblem()->notifyStateBlock(shared_from_this(), StateBlock::Notification::UPDATE_FIX);
+        getProblem()->notifyStateBlock(shared_from_this());
 }
 
 void StateBlock::addNotification(const StateBlock::Notification _new_notification)
@@ -67,31 +67,9 @@ StateBlock::Notifications StateBlock::consumeNotifications() const
 
 StateBlock::Notifications StateBlock::getNotifications() const
 {
+    std::lock_guard<std::mutex> lock(notifictions_mut_);
     return notifications_;
 }
 
-void StateBlock::printNotifications() const
-{
-    WOLF_TRACE("SB Notifications for: ", shared_from_this())
-    for (auto notif : notifications_)
-    {
-        switch (notif)
-        {
-            case Notification::ADD:
-                WOLF_TRACE("   ADD")
-                break;
-            case Notification::REMOVE:
-                WOLF_TRACE("   REMOVE")
-                break;
-            case Notification::UPDATE_FIX:
-                WOLF_TRACE("   UPDATE_FIX")
-                break;
-            case Notification::UPDATE_STATE:
-                WOLF_TRACE("   UPDATE_STATE")
-                break;
-        }
-    }
-
-}
 
 }
