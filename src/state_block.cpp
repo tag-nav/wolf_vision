@@ -67,12 +67,14 @@ StateBlock::Notifications StateBlock::consumeNotifications() const
 
 StateBlock::Notifications StateBlock::getNotifications() const
 {
+    std::lock_guard<std::mutex> lock(notifictions_mut_);
     return notifications_;
 }
 
 void StateBlock::printNotifications() const
 {
-    WOLF_TRACE("SB Notifications for: ", shared_from_this())
+    WOLF_TRACE("SB Notifications for: ", shared_from_this());
+    std::lock_guard<std::mutex> lock(notifictions_mut_);
     for (auto notif : notifications_)
     {
         switch (notif)
