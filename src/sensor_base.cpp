@@ -111,11 +111,7 @@ void SensorBase::fix()
 {
     for( auto sbp : state_block_vec_)
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateFixStateBlockPtr(sbp);
-        }
     updateCalibSize();
 }
 
@@ -123,11 +119,7 @@ void SensorBase::unfix()
 {
     for( auto sbp : state_block_vec_)
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateFixStateBlockPtr(sbp);
-        }
     updateCalibSize();
 }
 
@@ -137,11 +129,7 @@ void SensorBase::fixExtrinsics()
     {
         auto sbp = state_block_vec_[i];
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateFixStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -152,11 +140,7 @@ void SensorBase::unfixExtrinsics()
     {
         auto sbp = state_block_vec_[i];
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateFixStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -167,11 +151,7 @@ void SensorBase::fixIntrinsics()
     {
         auto sbp = state_block_vec_[i];
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateFixStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -182,11 +162,7 @@ void SensorBase::unfixIntrinsics()
     {
         auto sbp = state_block_vec_[i];
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateFixStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }

@@ -10,14 +10,31 @@ void StateBlock::setState(const Eigen::VectorXs& _state)
         state_ = _state;
         state_size_ = state_.size();
     }
+
+    // Notify
+    addNotification(StateBlock::Notification::UPDATE_STATE);
     if (getProblem() != nullptr)
-        getProblem()->updateStateStateBlockPtr(shared_from_this());
+        getProblem()->notifyStateBlock(shared_from_this(), StateBlock::Notification::UPDATE_STATE);
+}
+
+void StateBlock::setFixed(bool _fixed)
+{
+    fixed_.store(_fixed);
+    // Notify
+    addNotification(StateBlock::Notification::UPDATE_FIX);
+    if (getProblem() != nullptr)
+        getProblem()->notifyStateBlock(shared_from_this(), StateBlock::Notification::UPDATE_FIX);
 }
 
 StateBlock::Notifications StateBlock::consumeNotifications() const
 {
     std::lock_guard<std::mutex> lock(notifictions_mut_);
     return std::move(notifications_);
+}
+
+StateBlock::Notifications StateBlock::getNotifications() const
+{
+    return notifications_;
 }
 
 void StateBlock::printNotifications() const

@@ -135,8 +135,16 @@ public:
 
         StateBlock::Notifications consumeNotifications() const;
 
+        /** \brief Check if exist any notification
+         **/
         bool hasNotifications() const;
 
+        /** \brief Return list of notifications
+         **/
+        StateBlock::Notifications getNotifications() const;
+
+        /** \brief Print list of notifications
+         **/
         void printNotifications() const;
 
 };
@@ -207,12 +215,6 @@ inline void StateBlock::fix()
 inline void StateBlock::unfix()
 {
     setFixed(false);
-}
-
-inline void StateBlock::setFixed(bool _fixed)
-{
-    fixed_.store(_fixed);
-    addNotification(Notification::UPDATE_FIX);
 }
 
 inline bool StateBlock::hasLocalParametrization() const

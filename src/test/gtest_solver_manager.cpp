@@ -149,9 +149,6 @@ TEST(SolverManager, UpdateStateBlock)
     // Fix frame
     sb_ptr->fix();
 
-    // update stateblock
-    P->updateFixStateBlockPtr(sb_ptr);
-
     // update solver manager
     solver_manager_ptr->update();
 
@@ -173,9 +170,6 @@ TEST(SolverManager, AddUpdateStateBlock)
 
     // Fix state block
     sb_ptr->fix();
-
-    // update stateblock
-    P->updateFixStateBlockPtr(sb_ptr);
 
     // update solver manager
     solver_manager_ptr->update();
@@ -228,7 +222,7 @@ TEST(SolverManager, AddRemoveStateBlock)
     // update solver
     solver_manager_ptr->update();
 
-    // check stateblock
+    // check state block
     ASSERT_FALSE(solver_manager_ptr->isStateBlockRegistered(sb_ptr));
 }
 
@@ -253,13 +247,8 @@ TEST(SolverManager, RemoveUpdateStateBlock)
     // Fix state block
     sb_ptr->fix();
 
-    ASSERT_DEATH({
-        // update stateblock
-        P->updateFixStateBlockPtr(sb_ptr);
-
-        // update solver manager
-        solver_manager_ptr->update();
-    },"");
+    // update solver manager
+    solver_manager_ptr->update();
 }
 
 TEST(SolverManager, DoubleRemoveStateBlock)
@@ -285,6 +274,40 @@ TEST(SolverManager, DoubleRemoveStateBlock)
 
     // update solver manager
     solver_manager_ptr->update();
+}
+
+TEST(SolverManager, AddUpdatedStateBlock)
+{
+    ProblemPtr P = Problem::create("PO 2D");
+    SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
+
+    // Create State block
+    Vector2s state; state << 1, 2;
+    StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
+
+    // Fix
+    sb_ptr->fix();
+
+    // Set State
+    Vector2s state_2 = 2*state;
+    sb_ptr->setState(state_2);
+
+    // add stateblock
+    P->addStateBlock(sb_ptr);
+
+    StateBlockList P_notif_sb = P->getNotifiedStateBlockList();
+
+    for (auto sb : P_notif_sb)
+    {
+        // Notifications come in historial order
+        StateBlock::Notifications sb_notif = sb->getNotifications();
+        StateBlock::Notifications::iterator iter = sb_notif.begin();
+        EXPECT_EQ(*iter,StateBlock::Notification::UPDATE_FIX);
+        iter++;
+        EXPECT_EQ(*iter,StateBlock::Notification::UPDATE_STATE);
+        iter++;
+        EXPECT_EQ(*iter,StateBlock::Notification::ADD);
+    }
 }
 
 TEST(SolverManager, AddConstraint)
