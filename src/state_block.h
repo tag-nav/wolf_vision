@@ -34,7 +34,7 @@ public:
 
   enum class Notification : std::size_t
   {
-    ADD = 0,
+    ADD = 1,
     REMOVE,
     UPDATE_STATE,
     UPDATE_FIX
@@ -237,12 +237,6 @@ inline void StateBlock::setLocalParametrizationPtr(LocalParametrizationBasePtr _
 {
 	assert(_local_param != nullptr && "setting a null local parametrization");
     local_param_ptr_ = _local_param;
-}
-
-inline void StateBlock::addNotification(const StateBlock::Notification _new_notification)
-{
-  std::lock_guard<std::mutex> lock(notifictions_mut_);
-  notifications_.emplace_back(_new_notification);
 }
 
 inline void StateBlock::setProblem(const ProblemPtr _problem)
