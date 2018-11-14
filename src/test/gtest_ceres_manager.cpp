@@ -238,12 +238,6 @@ TEST(CeresManager, RemoveUpdateStateBlock)
 
     // update solver
     ceres_manager_ptr->update();
-
-    // Fix state block
-    sb_ptr->fix();
-
-    // update solver manager
-    ceres_manager_ptr->update();
 }
 
 TEST(CeresManager, DoubleRemoveStateBlock)

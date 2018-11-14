@@ -80,7 +80,7 @@ TEST(SolverManager, Create)
     ProblemPtr P = Problem::create("PO 2D");
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
-    // check double ointers to branches
+    // check double pointers to branches
     ASSERT_EQ(P, solver_manager_ptr->getProblemPtr());
 }
 
@@ -235,19 +235,13 @@ TEST(SolverManager, RemoveUpdateStateBlock)
     Vector2s state; state << 1, 2;
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
-    // add stateblock
+    // add state_block
     P->addStateBlock(sb_ptr);
 
     // remove state_block
     P->removeStateBlockPtr(sb_ptr);
 
     // update solver
-    solver_manager_ptr->update();
-
-    // Fix state block
-    sb_ptr->fix();
-
-    // update solver manager
     solver_manager_ptr->update();
 }
 
@@ -292,22 +286,78 @@ TEST(SolverManager, AddUpdatedStateBlock)
     Vector2s state_2 = 2*state;
     sb_ptr->setState(state_2);
 
-    // add stateblock
+    // == First add 2 UPDATES (FIX and STATE) ==
+
+    // The expected order is:
+    // ADD in front of the list
+    // Others in historical order
+    ASSERT_EQ(sb_ptr->getNotifications().size(),2); // UPDATE_FIX, UPDATE_STATE
+    StateBlock::Notifications sb_notif = sb_ptr->getNotifications();
+    StateBlock::Notifications::iterator iter = sb_notif.begin();
+    ASSERT_EQ(*iter,StateBlock::Notification::UPDATE_FIX);
+    iter++;
+    ASSERT_EQ(*iter,StateBlock::Notification::UPDATE_STATE);
+
+    // == When an ADD is notified, all previous notifications should be cleared (if not consumption of notifs) ==
+
+    // add state_block
     P->addStateBlock(sb_ptr);
 
+    // Get list of SB notifications
     StateBlockList P_notif_sb = P->getNotifiedStateBlockList();
 
-    for (auto sb : P_notif_sb)
-    {
-        // Notifications come in historial order
-        StateBlock::Notifications sb_notif = sb->getNotifications();
-        StateBlock::Notifications::iterator iter = sb_notif.begin();
-        EXPECT_EQ(*iter,StateBlock::Notification::UPDATE_FIX);
-        iter++;
-        EXPECT_EQ(*iter,StateBlock::Notification::UPDATE_STATE);
-        iter++;
-        EXPECT_EQ(*iter,StateBlock::Notification::ADD);
-    }
+    ASSERT_EQ(P_notif_sb.size(),1);
+
+    sb_notif = P_notif_sb.front()->getNotifications();
+
+    ASSERT_EQ(sb_notif.size(),1);
+    ASSERT_EQ(sb_notif.front(),StateBlock::Notification::ADD);
+
+    // == Insert OTHER notifications ==
+
+    // Set State
+    state_2 = 2*state;
+    sb_ptr->setState(state_2);
+
+    // Fix
+    sb_ptr->unfix();
+
+    sb_notif = P_notif_sb.front()->getNotifications();
+    ASSERT_EQ(sb_notif.size(),3); // ADD, UPDATE_STATE, UPDATE_FIX
+
+    iter = sb_notif.begin();
+    ASSERT_EQ(*iter,StateBlock::Notification::ADD);
+    iter++;
+    ASSERT_EQ(*iter,StateBlock::Notification::UPDATE_STATE);
+    iter++;
+    ASSERT_EQ(*iter,StateBlock::Notification::UPDATE_FIX);
+
+    // == REMOVE should clear all previous notifications in the stack because there's an ADD ==
+
+    // remove state_block
+    P->removeStateBlockPtr(sb_ptr);
+
+    P_notif_sb = P->getNotifiedStateBlockList();
+    ASSERT_EQ(P_notif_sb.size(),1);
+
+    sb_notif = P_notif_sb.front()->getNotifications();
+    ASSERT_EQ(sb_notif.size(),0); // ADD + REMOVE = EMPTY
+
+    // == UPDATES + REMOVE should clear the list of notifications ==
+
+    // Fix
+    sb_ptr->fix();
+
+    // Set State
+    state_2 = 2*state;
+    sb_ptr->setState(state_2);
+
+    // remove state_block
+    P->removeStateBlockPtr(sb_ptr);
+
+    sb_notif = P_notif_sb.front()->getNotifications();
+    ASSERT_EQ(sb_notif.size(),1);
+    ASSERT_EQ(sb_notif.front(),StateBlock::Notification::REMOVE);
 }
 
 TEST(SolverManager, AddConstraint)
