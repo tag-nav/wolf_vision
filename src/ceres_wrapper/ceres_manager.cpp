@@ -238,8 +238,9 @@ void CeresManager::computeCovariances(const StateBlockList& st_list)
 
 void CeresManager::addConstraint(const ConstraintBasePtr& ctr_ptr)
 {
-  auto cost_func_ptr = createCostFunction(ctr_ptr);
+  assert(ctr_2_costfunction_.find(ctr_ptr) == ctr_2_costfunction_.end() && "adding a constraint that is already in the ctr_2_costfunction_ map");
 
+  auto cost_func_ptr = createCostFunction(ctr_ptr);
   ctr_2_costfunction_[ctr_ptr] = cost_func_ptr;
 
   std::vector<Scalar*> res_block_mem;
@@ -249,19 +250,20 @@ void CeresManager::addConstraint(const ConstraintBasePtr& ctr_ptr)
     res_block_mem.emplace_back( getAssociatedMemBlockPtr(st) );
   }
 
-  auto loss_func_ptr = (ctr_ptr->getApplyLossFunction())?
-                        new ceres::CauchyLoss(0.5): nullptr;
+  auto loss_func_ptr = (ctr_ptr->getApplyLossFunction()) ? new ceres::CauchyLoss(0.5) : nullptr;
 
-  ctr_2_residual_idx_[ctr_ptr] =
-      ceres_problem_->AddResidualBlock(cost_func_ptr.get(),
-                                       loss_func_ptr, res_block_mem);
+  assert(ctr_2_residual_idx_.find(ctr_ptr) == ctr_2_residual_idx_.end() && "adding a constraint that is already in the ctr_2_residual_idx_ map");
+
+  ctr_2_residual_idx_[ctr_ptr] = ceres_problem_->AddResidualBlock(cost_func_ptr.get(),
+                                                                  loss_func_ptr,
+                                                                  res_block_mem);
 
   assert((unsigned int)(ceres_problem_->NumResidualBlocks()) == ctr_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
 void CeresManager::removeConstraint(const ConstraintBasePtr& _ctr_ptr)
 {
-  assert(ctr_2_residual_idx_.find(_ctr_ptr) != ctr_2_residual_idx_.end());
+  assert(ctr_2_residual_idx_.find(_ctr_ptr) != ctr_2_residual_idx_.end() && "removing a constraint that is not in the ctr_2_residual map");
 
   ceres_problem_->RemoveResidualBlock(ctr_2_residual_idx_[_ctr_ptr]);
   ctr_2_residual_idx_.erase(_ctr_ptr);
@@ -318,6 +320,39 @@ ceres::CostFunctionPtr CeresManager::createCostFunction(const ConstraintBasePtr&
 
   else
     throw std::invalid_argument( "Wrong Jacobian Method!" );
+}
+
+void CeresManager::check()
+{
+    // Check numbers
+    assert(ceres_problem_->NumResidualBlocks() == ctr_2_costfunction_.size());
+    assert(ceres_problem_->NumResidualBlocks() == ctr_2_residual_idx_.size());
+    assert(ceres_problem_->NumParameterBlocks() == state_blocks_.size());
+
+    // Check parameter blocks
+    for (auto&& state_block_pair : state_blocks_)
+        assert(ceres_problem_->HasParameterBlock(state_block_pair.second.data()));
+
+    // Check residual blocks
+    for (auto&& ctr_res_pair : ctr_2_residual_idx_)
+    {
+        // costfunction - residual
+        assert(ctr_2_costfunction_.find(ctr_res_pair.first) != ctr_2_costfunction_.end());
+        assert(ctr_2_costfunction_[ctr_res_pair.first].get() == ceres_problem_->GetCostFunctionForResidualBlock(ctr_res_pair.second));
+
+        // constraint - residual
+        assert(ctr_res_pair.first == static_cast<const CostFunctionWrapper*>(ceres_problem_->GetCostFunctionForResidualBlock(ctr_res_pair.second))->constraint_ptr_);
+
+        // parameter blocks - state blocks
+        std::vector<Scalar*> param_blocks;
+        ceres_problem_->GetParameterBlocksForResidualBlock(ctr_res_pair.second, &param_blocks);
+        auto i = 0;
+        for (const StateBlockPtr& st : ctr_res_pair.first->getStateBlockPtrVector())
+        {
+            assert(getAssociatedMemBlockPtr(st) == param_blocks[i]);
+            i++;
+        }
+    }
 }
 
 } // namespace wolf
