@@ -45,6 +45,7 @@ void SolverManager::update()
         {
           state_blocks_.emplace(state, state->getState());
           addStateBlock(state);
+          updateStateBlockStatus(state);
         }
 
         WOLF_DEBUG_COND(registered, "Tried adding an already registered StateBlock.");
