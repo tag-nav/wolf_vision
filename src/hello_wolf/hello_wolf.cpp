@@ -1,7 +1,7 @@
 /**
  * \file hello_wolf.cpp
  *
- *  Created on: Dec 1, 2017 -- two months exactly after Oct-1st, we still have 4 political prisoners.
+ *  Created on: Dec 1, 2017  -- two months exactly after Oct-1st, we still have 4 political prisoners.
  *
  *     ###
  *    ## ##
@@ -100,7 +100,7 @@ int main()
      *   - Second, using random values
      * Both solutions must produce the same exact values as in the sketches above.
      *
-     * Optionally, the user can opt to self-calibrate the sensor's orientation (see NOTE within the code around Line 139)
+     * Optionally, the user can opt to self-calibrate the sensor's orientation (see NOTE within the code around Line 141)
      *
      * (c) 2017 Joan Sola @ IRI-CSIC
      */
@@ -136,6 +136,7 @@ int main()
     intrinsics_rb->noise_range_metres_std   = 0.1;
     intrinsics_rb->noise_bearing_degrees_std = 1.0;
     SensorBasePtr sensor_rb                 = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(1,1,0), intrinsics_rb);
+
     // NOTE: uncomment this line below to achieve sensor self-calibration (of the orientation only, since the position is not observable)
     // sensor_rb->getOPtr()->unfix();
 
@@ -270,7 +271,7 @@ int main()
      *
      *  - Observe that all other KFs and Lmks are correct.
      *
-     *  - Try self-calibrating the sensor orientation by uncommenting line 140 (well, around 140)
+     *  - Try self-calibrating the sensor orientation by uncommenting line 141 (well, around 141)
      *
      */
 
