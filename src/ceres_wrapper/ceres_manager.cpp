@@ -289,6 +289,8 @@ void CeresManager::addStateBlock(const StateBlockPtr& state_ptr)
   ceres_problem_->AddParameterBlock(getAssociatedMemBlockPtr(state_ptr),
                                     state_ptr->getSize(),
                                     local_parametrization_ptr);
+
+  updateStateBlockStatus(state_ptr);
 }
 
 void CeresManager::removeStateBlock(const StateBlockPtr& state_ptr)
