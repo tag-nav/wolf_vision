@@ -139,6 +139,7 @@ int main()
 
     // NOTE: uncomment this line below to achieve sensor self-calibration (of the orientation only, since the position is not observable)
     // sensor_rb->getOPtr()->unfix();
+    // sensor_rb->getPPtr()->unfix(); // The position is however not observable, and thus self-calibration would not work. You can try uncommenting it too.
 
     // processor Range and Bearing
     ProcessorParamsRangeBearingPtr params_rb = std::make_shared<ProcessorParamsRangeBearing>();
