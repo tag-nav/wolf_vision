@@ -110,7 +110,7 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
                     for (auto sb : fr_ptr->getStateBlockVec())
                         if (sb)
                             for(auto sb2 : fr_ptr->getStateBlockVec())
-                                if (sb)
+                                if (sb2)
                                 {
                                     state_block_pairs.emplace_back(sb, sb2);
                                     double_pairs.emplace_back(getAssociatedMemBlockPtr(sb), getAssociatedMemBlockPtr(sb2));
