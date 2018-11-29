@@ -115,6 +115,11 @@ Eigen::Vector2s ProcessorRangeBearing::observe(const Eigen::Vector2s& lmk_w) con
     return polar(toSensor(lmk_w));
 }
 
+Eigen::Vector2s ProcessorRangeBearing::invObserve(Scalar r, Scalar b) const
+{
+    return fromSensor(rect(r, b));
+}
+
 ProcessorRangeBearing::Trf ProcessorRangeBearing::transform(const Eigen::Vector3s& _pose) const
 {
     Trf H = Eigen::Translation<Scalar,2>(_pose(0), _pose(1)) * Eigen::Rotation2D<Scalar>(_pose(2)) ;
@@ -152,11 +157,6 @@ Eigen::Vector2s ProcessorRangeBearing::polar(const Eigen::Vector2s& rect) const
 Eigen::Vector2s ProcessorRangeBearing::rect(Scalar range, Scalar bearing) const
 {
     return range * (Vector2s() << cos(bearing), sin(bearing)).finished();
-}
-
-Eigen::Vector2s ProcessorRangeBearing::invObserve(Scalar r, Scalar b) const
-{
-    return fromSensor(rect(r, b));
 }
 
 } /* namespace wolf */
