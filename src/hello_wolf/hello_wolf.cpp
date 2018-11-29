@@ -1,7 +1,7 @@
 /**
  * \file hello_wolf.cpp
  *
- *  Created on: Dec 1, 2017 -- two months exactly after Oct-1st, we still have 4 political prisoners.
+ *  Created on: Dec 1, 2017  -- two months exactly after Oct-1st, we still have 4 political prisoners.
  *
  *     ###
  *    ## ##
@@ -100,7 +100,7 @@ int main()
      *   - Second, using random values
      * Both solutions must produce the same exact values as in the sketches above.
      *
-     * Optionally, the user can opt to self-calibrate the sensor's orientation (see NOTE within the code around Line 139)
+     * Optionally, the user can opt to self-calibrate the sensor's orientation (see NOTE within the code around Line 141)
      *
      * (c) 2017 Joan Sola @ IRI-CSIC
      */
@@ -136,8 +136,10 @@ int main()
     intrinsics_rb->noise_bearing_degrees_std = 1.0;
     intrinsics_rb->noise_range_metres_std   = 0.1;
     SensorBasePtr sensor_rb                 = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(1,1,0), intrinsics_rb);
-    // NOTE: uncomment this line below to achieve sensor self-calibration (of the orientation only)
+
+    // NOTE: uncomment this line below to achieve sensor self-calibration (of the orientation only, since the position is not observable)
     // sensor_rb->getOPtr()->unfix();
+    // sensor_rb->getPPtr()->unfix(); // The position is however not observable, and thus self-calibration would not work. You can try uncommenting it too.
 
     // processor Range and Bearing
     ProcessorParamsRangeBearingPtr params_rb = std::make_shared<ProcessorParamsRangeBearing>();
@@ -157,6 +159,7 @@ int main()
 
 
     // SET OF EVENTS =======================================================
+    std::cout << std::endl;
     WOLF_TRACE("======== BUILD PROBLEM =======")
 
     // We'll do 3 steps of motion and landmark observations.
@@ -205,9 +208,9 @@ int main()
     ranges      << sqrt(2.0), 1.0;          // see drawing
     bearings    << 3*M_PI/4, M_PI/2;
     cap_rb      = std::make_shared<CaptureRangeBearing>(t, sensor_rb, ids, ranges, bearings);
-    sensor_rb   ->process(cap_rb);
+    sensor_rb   ->process(cap_rb);          // L1 : (1,2), L2 : (2,2), L3 : (3,2)
 
-    problem->print(4,1,1,1);
+    problem->print(1,0,1,0);
 
 
     // SOLVE ================================================================
@@ -216,7 +219,7 @@ int main()
     WOLF_TRACE("======== SOLVE PROBLEM WITH EXACT PRIORS =======")
     std::string report = ceres->solve(wolf::SolverManager::ReportVerbosity::FULL);
     WOLF_TRACE(report);                     // should show a very low iteration number (possibly 1)
-    problem->print(4,1,1,1);
+    problem->print(1,0,1,0);
 
     // PERTURB initial guess
     WOLF_TRACE("======== PERTURB PROBLEM PRIORS =======")
@@ -227,14 +230,16 @@ int main()
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         kf->setState(Vector3s::Random() * 0.5);                 // We perturb A LOT !
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
-        lmk->getPPtr()->setState(Vector2s::Random());           // We perturb A LOT !
-    problem->print(4,1,1,1);
+        for (auto sb : lmk->getStateBlockVec())
+            if (sb && !sb->isFixed())
+                sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);       // We perturb A LOT !
+    problem->print(1,0,1,0);
 
     // SOLVE again
     WOLF_TRACE("======== SOLVE PROBLEM WITH PERTURBED PRIORS =======")
     report = ceres->solve(wolf::SolverManager::ReportVerbosity::FULL);
     WOLF_TRACE(report);                     // should show a very high iteration number (more than 10, or than 100!)
-    problem->print(4,1,1,1);
+    problem->print(1,0,1,0);
 
     // GET COVARIANCES of all states
     WOLF_TRACE("======== COVARIANCES OF SOLVED PROBLEM =======")
@@ -244,6 +249,10 @@ int main()
             WOLF_TRACE("KF", kf->id(), "_cov = \n", kf->getCovariance());
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
         WOLF_TRACE("L", lmk->id(), "_cov = \n", lmk->getCovariance());
+    std::cout << std::endl;
+
+    WOLF_TRACE("======== FINAL PRINT FOR INTERPRETATION =======")
+    problem->print(4,1,1,1);
 
     /*
      * ============= FIRST COMMENT ON THE RESULTS ==================
@@ -260,9 +269,7 @@ int main()
      *
      *  - Observe that all other KFs and Lmks are correct.
      *
-     *  - Observe that F4 is not correct. Since it is not a KF, is has not been estimated.
-     *    But this is a no-issue because F4 is just an inner frame used by the odometer processor,
-     *    with no role in the problem itself, nor in the optimization process.
+     *  - Try self-calibrating the sensor orientation by uncommenting line 141 (well, around 141)
      *
      */
 

@@ -57,7 +57,7 @@ CaptureBase::CaptureBase(const std::string& _type,
     }
     updateCalibSize();
 
-    WOLF_TRACE("New Capture ", id(), " -- type ", getType(), " -- t = ", getTimeStamp(), " s");
+//    WOLF_TRACE("New Capture ", id(), " -- type ", getType(), " -- t = ", getTimeStamp(), " s");
 }
 
 
