@@ -368,18 +368,24 @@ void Problem::addLandmarkList(LandmarkBaseList& _lmk_list)
 StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 {
     //std::cout << "Problem::addStateBlockPtr " << _state_ptr.get() << std::endl;
-
-    // set problem
-    _state_ptr->setProblem(shared_from_this());
+    if(std::find(state_block_list_.begin(),state_block_list_.end(),_state_ptr) != state_block_list_.end())
+    {
+        WOLF_WARN("Adding a state block that has already been added");
+        return _state_ptr;
+    }
 
     // add the state unit to the list
     state_block_list_.push_back(_state_ptr);
 
     // Add add notification
-    _state_ptr->addNotification(StateBlock::Notification::ADD);
-
-    // Push all notifications from SB to problem
-    notifyStateBlock(_state_ptr);
+    // Check if there is already a notification for this state block
+    auto notification_it = state_block_notification_map_.find(_state_ptr);
+    if (notification_it != state_block_notification_map_.end() && notification_it->second == ADD)
+    {
+        WOLF_WARN("There is already an ADD notification of this state block");
+    }
+    else
+        state_block_notification_map_[_state_ptr] = ADD;
 
     return _state_ptr;
 }
@@ -387,27 +393,49 @@ StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
 {
     //std::cout << "Problem::removeStateBlockPtr " << _state_ptr.get() << std::endl;
+    //assert(std::find(state_block_list_.begin(),state_block_list_.end(),_state_ptr) != state_block_list_.end() && "Removing a state_block that hasn't been added or already removed");
+    if(std::find(state_block_list_.begin(),state_block_list_.end(),_state_ptr) == state_block_list_.end())
+    {
+        WOLF_WARN("Removing a state_block that hasn't been added or already removed");
+        return;
+    }
 
     // add the state unit to the list
     state_block_list_.remove(_state_ptr);
 
-    // Add remove notification
-    _state_ptr->addNotification(StateBlock::Notification::REMOVE);
-    notifyStateBlock(_state_ptr);
-}
-
-void Problem::notifyStateBlock(StateBlockPtr _state_ptr)
-{
-    notified_state_block_list_.push_back(_state_ptr);
-    notified_state_block_list_.sort();
-    notified_state_block_list_.unique();
+    // Check if there is already a notification for this state block
+    auto notification_it = state_block_notification_map_.find(_state_ptr);
+    if (notification_it != state_block_notification_map_.end())
+    {
+        if (notification_it->second == REMOVE)
+        {
+            WOLF_WARN("There is already an REMOVE notification of this state block");
+        }
+        // Remove ADD notification
+        else
+        {
+            state_block_notification_map_.erase(notification_it);
+        }
+    }
+    // Add REMOVE notification
+    else
+        state_block_notification_map_[_state_ptr] = REMOVE;
 }
 
 ConstraintBasePtr Problem::addConstraintPtr(ConstraintBasePtr _constraint_ptr)
 {
     //std::cout << "Problem::addConstraintPtr " << _constraint_ptr->id() << std::endl;
-    // queue for solver manager
-    constraint_notification_list_.push_back(ConstraintNotification({ADD, _constraint_ptr}));
+
+    // Add ADD notification
+    // Check if there is already a notification for this state block
+    auto notification_it = constraint_notification_map_.find(_constraint_ptr);
+    if (notification_it != constraint_notification_map_.end() && notification_it->second == ADD)
+    {
+        WOLF_WARN("There is already an ADD notification of this constraint");
+    }
+    // Add ADD notification (override in case of REMOVE)
+    else
+        constraint_notification_map_[_constraint_ptr] = ADD;
 
     return _constraint_ptr;
 }
@@ -416,18 +444,21 @@ void Problem::removeConstraintPtr(ConstraintBasePtr _constraint_ptr)
 {
     //std::cout << "Problem::removeConstraintPtr " << _constraint_ptr->id() << std::endl;
 
-    // Check if the constraint addition is still as a notification
-    auto ctr_notif_it = constraint_notification_list_.begin();
-    for (; ctr_notif_it != constraint_notification_list_.end(); ctr_notif_it++)
-        if (ctr_notif_it->notification_ == ADD && ctr_notif_it->constraint_ptr_ == _constraint_ptr)
-            break;
-
-    // Remove addition notification
-    if (ctr_notif_it != constraint_notification_list_.end())
-        constraint_notification_list_.erase(ctr_notif_it); // CHECKED shared_ptr is not active after erase
-    // Add remove notification
+    // Check if there is already a notification for this state block
+    auto notification_it = constraint_notification_map_.find(_constraint_ptr);
+    if (notification_it != constraint_notification_map_.end())
+    {
+        if (notification_it->second == REMOVE)
+        {
+            WOLF_WARN("There is already an REMOVE notification of this state block");
+        }
+        // Remove ADD notification
+        else
+            constraint_notification_map_.erase(notification_it);
+    }
+    // Add REMOVE notification
     else
-        constraint_notification_list_.push_back(ConstraintNotification({REMOVE, _constraint_ptr}));
+        constraint_notification_map_[_constraint_ptr] = REMOVE;
 }
 
 void Problem::clearCovariance()

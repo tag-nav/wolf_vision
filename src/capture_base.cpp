@@ -61,7 +61,6 @@ CaptureBase::CaptureBase(const std::string& _type,
 }
 
 
-
 CaptureBase::~CaptureBase()
 {
     removeStateBlocks();

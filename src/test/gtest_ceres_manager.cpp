@@ -330,12 +330,12 @@ TEST(CeresManager, AddRemoveConstraint)
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
 
-    ASSERT_TRUE(P->getConstraintNotificationList().front().constraint_ptr_ == c);
+    ASSERT_TRUE(P->getConstraintNotificationMap().begin()->first == c);
 
     // add constraint
     P->removeConstraintPtr(c);
 
-    ASSERT_TRUE(P->getConstraintNotificationList().empty());
+    ASSERT_TRUE(P->getConstraintNotificationMap().empty());
 
     // update solver
     ceres_manager_ptr->update();

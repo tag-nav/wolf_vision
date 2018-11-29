@@ -314,6 +314,14 @@ void CeresManager::updateStateBlockStatus(const StateBlockPtr& state_ptr)
         ceres_problem_->SetParameterBlockVariable(getAssociatedMemBlockPtr(state_ptr));
 }
 
+void CeresManager::updateStateBlockLocalParametrization(const StateBlockPtr& state_ptr)
+{
+    assert(state_ptr != nullptr);
+    // in ceres the easiest way to change (add or remove) a local parameterization is remove&add (The associated memory block is and MUST be the same)
+    removeStateBlock(state_ptr);
+    addStateBlock(state_ptr);
+}
+
 ceres::CostFunctionPtr CeresManager::createCostFunction(const ConstraintBasePtr& _ctr_ptr)
 {
     assert(_ctr_ptr != nullptr);

@@ -69,6 +69,8 @@ class CeresManager : public SolverManager
 
         void updateStateBlockStatus(const StateBlockPtr& state_ptr) override;
 
+        void updateStateBlockLocalParametrization(const StateBlockPtr& state_ptr) override;
+
         ceres::CostFunctionPtr createCostFunction(const ConstraintBasePtr& _ctr_ptr);
 
         void check();
