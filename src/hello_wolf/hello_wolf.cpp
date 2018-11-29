@@ -27,7 +27,7 @@
 #include "ceres_wrapper/ceres_manager.h"
 
 int main()
- {
+{
     /*
      * ============= PROBLEM DEFINITION ==================
      *
@@ -117,12 +117,12 @@ int main()
 
     // sensor odometer 2D
     IntrinsicsOdom2DPtr intrinsics_odo      = std::make_shared<IntrinsicsOdom2D>();
+    intrinsics_odo->k_disp_to_disp          = 0.1;
+    intrinsics_odo->k_rot_to_rot            = 0.1;
     SensorBasePtr sensor_odo                = problem->installSensor("ODOM 2D", "sensor odo", Vector3s(0,0,0), intrinsics_odo);
 
     // processor odometer 2D
     ProcessorParamsOdom2DPtr params_odo     = std::make_shared<ProcessorParamsOdom2D>();
-    params_odo->voting_active               = true;
-    params_odo->time_tolerance              = 0.1;
     params_odo->max_time_span               = 999;
     params_odo->dist_traveled               = 0.95; // Will make KFs automatically every 1m displacement
     params_odo->angle_turned                = 999;
@@ -133,8 +133,8 @@ int main()
 
     // sensor Range and Bearing
     IntrinsicsRangeBearingPtr intrinsics_rb = std::make_shared<IntrinsicsRangeBearing>();
-    intrinsics_rb->noise_range_metres_std   = 0.1;
     intrinsics_rb->noise_bearing_degrees_std = 1.0;
+    intrinsics_rb->noise_range_metres_std   = 0.1;
     SensorBasePtr sensor_rb                 = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(1,1,0), intrinsics_rb);
 
     // NOTE: uncomment this line below to achieve sensor self-calibration (of the orientation only, since the position is not observable)
@@ -143,7 +143,6 @@ int main()
 
     // processor Range and Bearing
     ProcessorParamsRangeBearingPtr params_rb = std::make_shared<ProcessorParamsRangeBearing>();
-    params_rb->voting_active                = false;
     params_rb->time_tolerance               = 0.01;
     ProcessorBasePtr processor_rb           = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
 
@@ -168,10 +167,10 @@ int main()
     // STEP 1 --------------------------------------------------------------
 
     // initialize
-    TimeStamp   t(0.0);                     // t : 0.0
+    TimeStamp   t(0.0);
     Vector3s    x(0,0,0);
     Matrix3s    P = Matrix3s::Identity() * 0.1;
-    problem->setPrior(x, P, t, 0.5);             // KF1 : (0,0,0)
+    problem->setPrior(x, P, t, 0.5);             // KF1
 
     // observe lmks
     ids.resize(1); ranges.resize(1); bearings.resize(1);
@@ -179,14 +178,14 @@ int main()
     ranges      << 1.0;                     // see drawing
     bearings    << M_PI/2;
     CaptureRangeBearingPtr cap_rb = std::make_shared<CaptureRangeBearing>(t, sensor_rb, ids, ranges, bearings);
-    sensor_rb   ->process(cap_rb);          // L1 : (1,2)
+    sensor_rb   ->process(cap_rb);
 
     // STEP 2 --------------------------------------------------------------
-    t += 1.0;                     // t : 1.0
+    t += 1.0;
 
     // motion
     CaptureOdom2DPtr cap_motion = std::make_shared<CaptureOdom2D>(t, sensor_odo, motion_data, motion_cov);
-    sensor_odo  ->process(cap_motion);      // KF2 : (1,0,0)
+    sensor_odo  ->process(cap_motion);      // KF2
 
     // observe lmks
     ids.resize(2); ranges.resize(2); bearings.resize(2);
@@ -194,14 +193,14 @@ int main()
     ranges      << sqrt(2.0), 1.0;          // see drawing
     bearings    << 3*M_PI/4, M_PI/2;
     cap_rb      = std::make_shared<CaptureRangeBearing>(t, sensor_rb, ids, ranges, bearings);
-    sensor_rb   ->process(cap_rb);          // L1 : (1,2), L2 : (2,2)
+    sensor_rb   ->process(cap_rb);
 
     // STEP 3 --------------------------------------------------------------
-    t += 1.0;                     // t : 2.0
+    t += 1.0;
 
     // motion
     cap_motion  ->setTimeStamp(t);
-    sensor_odo  ->process(cap_motion);      // KF3 : (2,0,0)
+    sensor_odo  ->process(cap_motion);      // KF3
 
     // observe lmks
     ids.resize(2); ranges.resize(2); bearings.resize(2);
@@ -210,6 +209,7 @@ int main()
     bearings    << 3*M_PI/4, M_PI/2;
     cap_rb      = std::make_shared<CaptureRangeBearing>(t, sensor_rb, ids, ranges, bearings);
     sensor_rb   ->process(cap_rb);          // L1 : (1,2), L2 : (2,2), L3 : (3,2)
+
     problem->print(1,0,1,0);
 
 
@@ -226,12 +226,9 @@ int main()
     for (auto sen : problem->getHardwarePtr()->getSensorList())
         for (auto sb : sen->getStateBlockVec())
             if (sb && !sb->isFixed())
-                sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);       // We perturb A LOT !
+                sb->setState(VectorXs::Random(sb->getSize()) * 0.5); // We perturb A LOT !
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
-        if (kf->isKey())
-            for (auto sb : kf->getStateBlockVec())
-                if (sb && !sb->isFixed())
-                    sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);   // We perturb A LOT !
+        kf->setState(Vector3s::Random() * 0.5);                 // We perturb A LOT !
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
         for (auto sb : lmk->getStateBlockVec())
             if (sb && !sb->isFixed())
