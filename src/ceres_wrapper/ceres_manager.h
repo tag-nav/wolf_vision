@@ -26,60 +26,62 @@ WOLF_PTR_TYPEDEFS(CeresManager);
 
 class CeresManager : public SolverManager
 {
-protected:
+    protected:
 
-  std::map<ConstraintBasePtr, ceres::ResidualBlockId> ctr_2_residual_idx_;
-  std::map<ConstraintBasePtr, ceres::CostFunctionPtr> ctr_2_costfunction_;
+        std::map<ConstraintBasePtr, ceres::ResidualBlockId> ctr_2_residual_idx_;
+        std::map<ConstraintBasePtr, ceres::CostFunctionPtr> ctr_2_costfunction_;
 
-  std::map<StateBlockPtr, LocalParametrizationWrapperPtr> state_blocks_local_param_;
+        std::map<StateBlockPtr, LocalParametrizationWrapperPtr> state_blocks_local_param_;
 
-  ceres::Solver::Options ceres_options_;
-  ceres::Solver::Summary summary_;
-  std::unique_ptr<ceres::Problem> ceres_problem_;
-  std::unique_ptr<ceres::Covariance> covariance_;
+        ceres::Solver::Options ceres_options_;
+        ceres::Solver::Summary summary_;
+        std::unique_ptr<ceres::Problem> ceres_problem_;
+        std::unique_ptr<ceres::Covariance> covariance_;
 
-public:
+    public:
 
-  CeresManager(const ProblemPtr& _wolf_problem,
-               const ceres::Solver::Options& _ceres_options
-                = ceres::Solver::Options());
+        CeresManager(const ProblemPtr& _wolf_problem,
+                     const ceres::Solver::Options& _ceres_options
+                     = ceres::Solver::Options());
 
-  ~CeresManager();
+        ~CeresManager();
 
-  ceres::Solver::Summary getSummary();
+        ceres::Solver::Summary getSummary();
 
-  virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks
-                                  = CovarianceBlocksToBeComputed::ROBOT_LANDMARKS) override;
+        virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks
+                                        = CovarianceBlocksToBeComputed::ROBOT_LANDMARKS) override;
 
-  virtual void computeCovariances(const StateBlockList& st_list) override;
+        virtual void computeCovariances(const StateBlockList& st_list) override;
 
-  ceres::Solver::Options& getSolverOptions();
+        ceres::Solver::Options& getSolverOptions();
 
-private:
+    private:
 
-  std::string solveImpl(const ReportVerbosity report_level) override;
+        std::string solveImpl(const ReportVerbosity report_level) override;
 
-  void addConstraint(const ConstraintBasePtr& ctr_ptr) override;
+        void addConstraint(const ConstraintBasePtr& ctr_ptr) override;
 
-  void removeConstraint(const ConstraintBasePtr& ctr_ptr) override;
+        void removeConstraint(const ConstraintBasePtr& ctr_ptr) override;
 
-  void addStateBlock(const StateBlockPtr& state_ptr) override;
+        void addStateBlock(const StateBlockPtr& state_ptr) override;
 
-  void removeStateBlock(const StateBlockPtr& state_ptr) override;
+        void removeStateBlock(const StateBlockPtr& state_ptr) override;
 
-  void updateStateBlockStatus(const StateBlockPtr& state_ptr) override;
+        void updateStateBlockStatus(const StateBlockPtr& state_ptr) override;
 
-  ceres::CostFunctionPtr createCostFunction(const ConstraintBasePtr& _ctr_ptr);
+        ceres::CostFunctionPtr createCostFunction(const ConstraintBasePtr& _ctr_ptr);
+
+        void check();
 };
 
 inline ceres::Solver::Summary CeresManager::getSummary()
 {
-  return summary_;
+    return summary_;
 }
 
 inline ceres::Solver::Options& CeresManager::getSolverOptions()
 {
-  return ceres_options_;
+    return ceres_options_;
 }
 
 } // namespace wolf

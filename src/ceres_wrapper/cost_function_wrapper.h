@@ -17,10 +17,8 @@ WOLF_PTR_TYPEDEFS(CostFunctionWrapper);
 
 class CostFunctionWrapper : public ceres::CostFunction
 {
-    protected:
-        ConstraintBasePtr constraint_ptr_;
-
     public:
+        ConstraintBasePtr constraint_ptr_;
 
         CostFunctionWrapper(ConstraintBasePtr _constraint_ptr);
 
