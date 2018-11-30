@@ -265,8 +265,6 @@ inline void FrameBase::setProblem(ProblemPtr _problem)
     NodeBase::setProblem(_problem);
     for (auto cap : capture_list_)
         cap->setProblem(_problem);
-    for (auto sb : state_block_vec_)
-        if (sb) sb->setProblem(_problem);
 }
 
 inline ConstraintBaseList& FrameBase::getConstrainedByList()

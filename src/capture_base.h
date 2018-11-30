@@ -125,8 +125,6 @@ inline void CaptureBase::setProblem(ProblemPtr _problem)
     NodeBase::setProblem(_problem);
     for (auto ft : feature_list_)
         ft->setProblem(_problem);
-    for (auto sb : state_block_vec_)
-        if (sb) sb->setProblem(_problem);
 }
 
 inline void CaptureBase::updateCalibSize()

@@ -98,7 +98,7 @@ void SensorBase::removeStateBlocks()
         {
             if (getProblem() != nullptr && !extrinsic_dynamic_)
             {
-                getProblem()->removeStateBlockPtr(sbp);
+                getProblem()->removeStateBlock(sbp);
             }
             setStateBlockPtrStatic(i, nullptr);
         }
@@ -355,8 +355,6 @@ void SensorBase::setProblem(ProblemPtr _problem)
     NodeBase::setProblem(_problem);
     for (auto prc : processor_list_)
         prc->setProblem(_problem);
-    for (auto sb : state_block_vec_)
-        if (sb) sb->setProblem(_problem);
 }
 
 } // namespace wolf

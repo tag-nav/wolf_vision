@@ -303,6 +303,7 @@ void CeresManager::removeStateBlock(const StateBlockPtr& state_ptr)
 {
     assert(state_ptr);
     ceres_problem_->RemoveParameterBlock(getAssociatedMemBlockPtr(state_ptr));
+    state_blocks_local_param_.erase(state_ptr);
 }
 
 void CeresManager::updateStateBlockStatus(const StateBlockPtr& state_ptr)
@@ -312,6 +313,42 @@ void CeresManager::updateStateBlockStatus(const StateBlockPtr& state_ptr)
         ceres_problem_->SetParameterBlockConstant(getAssociatedMemBlockPtr(state_ptr));
     else
         ceres_problem_->SetParameterBlockVariable(getAssociatedMemBlockPtr(state_ptr));
+}
+
+void CeresManager::updateStateBlockLocalParametrization(const StateBlockPtr& state_ptr)
+{
+    assert(state_ptr != nullptr);
+
+    /* in ceres the easiest way to update (add or remove) a local parameterization
+     * of a state block (parameter block in ceres) is remove & add:
+     *    - the state block: The associated memory block (that identified the parameter_block) is and MUST be the same
+     *    - all involved constraints (residual_blocks in ceres)
+     */
+
+    // get all involved constraints
+    ConstraintBaseList involved_constraints;
+    for (auto pair : ctr_2_costfunction_)
+        for (const StateBlockPtr& st : pair.first->getStateBlockPtrVector())
+            if (st == state_ptr)
+            {
+                // store
+                involved_constraints.push_back(pair.first);
+                break;
+            }
+
+    // Remove all involved constraints (it does not remove any parameter block)
+    for (auto ctr : involved_constraints)
+        removeConstraint(ctr);
+
+    // Remove state block (it removes all involved residual blocks but they just were removed)
+    removeStateBlock(state_ptr);
+
+    // Add state block
+    addStateBlock(state_ptr);
+
+    // Add all involved constraints
+    for (auto ctr : involved_constraints)
+        addConstraint(ctr);
 }
 
 ceres::CostFunctionPtr CeresManager::createCostFunction(const ConstraintBasePtr& _ctr_ptr)
@@ -349,7 +386,7 @@ void CeresManager::check()
         assert(ctr_2_costfunction_[ctr_res_pair.first].get() == ceres_problem_->GetCostFunctionForResidualBlock(ctr_res_pair.second));
 
         // constraint - residual
-        assert(ctr_res_pair.first == static_cast<const CostFunctionWrapper*>(ceres_problem_->GetCostFunctionForResidualBlock(ctr_res_pair.second))->constraint_ptr_);
+        assert(ctr_res_pair.first == static_cast<const CostFunctionWrapper*>(ceres_problem_->GetCostFunctionForResidualBlock(ctr_res_pair.second))->getConstraintPtr());
 
         // parameter blocks - state blocks
         std::vector<Scalar*> param_blocks;

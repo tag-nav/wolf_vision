@@ -55,6 +55,8 @@ class CeresManager : public SolverManager
 
         ceres::Solver::Options& getSolverOptions();
 
+        void check();
+
     private:
 
         std::string solveImpl(const ReportVerbosity report_level) override;
@@ -69,9 +71,9 @@ class CeresManager : public SolverManager
 
         void updateStateBlockStatus(const StateBlockPtr& state_ptr) override;
 
-        ceres::CostFunctionPtr createCostFunction(const ConstraintBasePtr& _ctr_ptr);
+        void updateStateBlockLocalParametrization(const StateBlockPtr& state_ptr) override;
 
-        void check();
+        ceres::CostFunctionPtr createCostFunction(const ConstraintBasePtr& _ctr_ptr);
 };
 
 inline ceres::Solver::Summary CeresManager::getSummary()

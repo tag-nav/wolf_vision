@@ -61,7 +61,6 @@ CaptureBase::CaptureBase(const std::string& _type,
 }
 
 
-
 CaptureBase::~CaptureBase()
 {
     removeStateBlocks();
@@ -169,7 +168,7 @@ void CaptureBase::removeStateBlocks()
         {
             if (getProblem() != nullptr)
             {
-                getProblem()->removeStateBlockPtr(sbp);
+                getProblem()->removeStateBlock(sbp);
             }
             setStateBlockPtr(i, nullptr);
         }

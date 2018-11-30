@@ -32,42 +32,25 @@ struct DummyNotificationProcessor
       FAIL() << "problem_ is nullptr !";
     }
 
-    StateBlockList& states = problem_->getNotifiedStateBlockList();
-
-    for (StateBlockPtr& state : states)
+    auto sb_noti_pair = problem_->getStateBlockNotificationMap().begin();
+    while (sb_noti_pair != problem_->getStateBlockNotificationMap().end())
     {
-      const auto notifications = state->consumeNotifications();
-
-      for (const auto notif : notifications)
-      {
-        switch (notif)
+        switch (sb_noti_pair->second)
         {
-          case StateBlock::Notification::ADD:
+          case ADD:
           {
             break;
           }
-          case StateBlock::Notification::UPDATE_STATE:
-          {
-            break;
-          }
-          case StateBlock::Notification::UPDATE_FIX:
-          {
-            break;
-          }
-          case StateBlock::Notification::REMOVE:
+          case REMOVE:
           {
             break;
           }
           default:
-            throw std::runtime_error("SolverManager::update: State Block notification "
-                                     "must be ADD, STATE_UPDATE, FIX_UPDATE, REMOVE or ENABLED.");
+            throw std::runtime_error("SolverManager::update: State Block notification must be ADD or REMOVE.");
         }
-      }
-
-      ASSERT_FALSE(state->hasNotifications());
+        sb_noti_pair = problem_->getStateBlockNotificationMap().erase(sb_noti_pair);
     }
-
-    states.clear();
+    ASSERT_TRUE(problem_->getStateBlockNotificationMap().empty());
   }
 
   ProblemPtr problem_;
@@ -131,45 +114,55 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     FrameBasePtr f2 = std::make_shared<FrameBase>(KEY_FRAME,     2, make_shared<StateBlock>(2), make_shared<StateBlock>(1, true)); // 1 fixed, 1 not
     FrameBasePtr f3 = std::make_shared<FrameBase>(NON_KEY_FRAME, 3, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
 
+    std::cout << __LINE__ << std::endl;
+
     // add frames and keyframes
     T->addFrame(f1); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
     ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 2);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 2);
+    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
+    std::cout << __LINE__ << std::endl;
 
     T->addFrame(f2); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
     ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 4);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 4);
+    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
+    std::cout << __LINE__ << std::endl;
 
     T->addFrame(f3); // F
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 3);
     ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 4);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 4);
+    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
+    std::cout << __LINE__ << std::endl;
 
     ASSERT_EQ(T->getLastFramePtr()->id(), f3->id());
     ASSERT_EQ(T->getLastKeyFramePtr()->id(), f2->id());
+    std::cout << __LINE__ << std::endl;
 
     N.update();
+    std::cout << __LINE__ << std::endl;
 
     // remove frames and keyframes
     f2->remove(); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
     ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 2);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 2);
+    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
+    std::cout << __LINE__ << std::endl;
 
     ASSERT_EQ(T->getLastFramePtr()->id(), f3->id());
     ASSERT_EQ(T->getLastKeyFramePtr()->id(), f1->id());
+    std::cout << __LINE__ << std::endl;
 
     f3->remove(); // F
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
     ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 2);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 2);
+    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
+    std::cout << __LINE__ << std::endl;
 
     ASSERT_EQ(T->getLastKeyFramePtr()->id(), f1->id());
 
@@ -177,11 +170,13 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 0);
     ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 0);
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 4);
+    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
+    std::cout << __LINE__ << std::endl;
 
     N.update();
 
-    ASSERT_EQ(P->getNotifiedStateBlockList().size(),     (unsigned int) 0);
+    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 0);
+    std::cout << __LINE__ << std::endl;
 }
 
 TEST(TrajectoryBase, KeyFramesAreSorted)
