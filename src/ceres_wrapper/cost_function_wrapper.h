@@ -17,14 +17,19 @@ WOLF_PTR_TYPEDEFS(CostFunctionWrapper);
 
 class CostFunctionWrapper : public ceres::CostFunction
 {
-    public:
+    private:
+
         ConstraintBasePtr constraint_ptr_;
+
+    public:
 
         CostFunctionWrapper(ConstraintBasePtr _constraint_ptr);
 
         virtual ~CostFunctionWrapper();
 
         virtual bool Evaluate(const double* const * parameters, double* residuals, double** jacobians) const;
+
+        ConstraintBasePtr getConstraintPtr() const;
 };
 
 inline CostFunctionWrapper::CostFunctionWrapper(ConstraintBasePtr _constraint_ptr) :
@@ -42,6 +47,11 @@ inline CostFunctionWrapper::~CostFunctionWrapper()
 inline bool CostFunctionWrapper::Evaluate(const double* const * parameters, double* residuals, double** jacobians) const
 {
     return constraint_ptr_->evaluate(parameters, residuals, jacobians);
+}
+
+inline ConstraintBasePtr CostFunctionWrapper::getConstraintPtr() const
+{
+    return constraint_ptr_;
 }
 
 } // namespace wolf

@@ -30,6 +30,8 @@ class LocalParametrizationWrapper : public ceres::LocalParameterization
         virtual int GlobalSize() const;
 
         virtual int LocalSize() const;
+
+        LocalParametrizationBasePtr getLocalParametrizationPtr() const;
 };
 
 using LocalParametrizationWrapperPtr = std::shared_ptr<LocalParametrizationWrapper>;
@@ -53,6 +55,11 @@ inline int LocalParametrizationWrapper::GlobalSize() const
 inline int LocalParametrizationWrapper::LocalSize() const
 {
     return local_parametrization_ptr_->getLocalSize();
+}
+
+inline LocalParametrizationBasePtr LocalParametrizationWrapper::getLocalParametrizationPtr() const
+{
+    return local_parametrization_ptr_;
 }
 
 } // namespace wolf
