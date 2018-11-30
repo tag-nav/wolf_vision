@@ -61,7 +61,7 @@ ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
     if (getProblem() != nullptr)
     {
         if (_co_ptr->getStatus() == CTR_ACTIVE)
-            getProblem()->addConstraintPtr(_co_ptr);
+            getProblem()->addConstraint(_co_ptr);
     }
     else
         WOLF_TRACE("WARNING: ADDING CONSTRAINT ", _co_ptr->id(), " TO FEATURE ", this->id(), " NOT CONNECTED WITH PROBLEM.");

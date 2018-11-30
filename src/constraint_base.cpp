@@ -60,7 +60,7 @@ void ConstraintBase::remove()
         }
         // add constraint to be removed from solver
         if (getProblem() != nullptr)
-            getProblem()->removeConstraintPtr(shared_from_this());
+            getProblem()->removeConstraint(shared_from_this());
 
         // remove other: {Frame, Capture, Feature, Landmark}
         FrameBasePtr frm_o = frame_other_ptr_.lock();
@@ -126,9 +126,9 @@ void ConstraintBase::setStatus(ConstraintStatus _status)
     else if (_status != status_)
     {
         if (_status == CTR_ACTIVE)
-            getProblem()->addConstraintPtr(shared_from_this());
+            getProblem()->addConstraint(shared_from_this());
         else if (_status == CTR_INACTIVE)
-            getProblem()->removeConstraintPtr(shared_from_this());
+            getProblem()->removeConstraint(shared_from_this());
     }
     status_ = _status;
 }
@@ -142,8 +142,8 @@ void ConstraintBase::setApplyLossFunction(const bool _apply)
         else
         {
             ConstraintBasePtr this_c = shared_from_this();
-            getProblem()->removeConstraintPtr(this_c);
-            getProblem()->addConstraintPtr(this_c);
+            getProblem()->removeConstraint(this_c);
+            getProblem()->addConstraint(this_c);
         }
     }
 }

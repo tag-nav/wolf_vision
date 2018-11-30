@@ -185,7 +185,7 @@ TEST(CeresManager, RemoveStateBlock)
     ASSERT_TRUE(ceres_manager_ptr->isStateBlockRegisteredCeresManager(sb_ptr));
 
     // remove state_block
-    P->removeStateBlockPtr(sb_ptr);
+    P->removeStateBlock(sb_ptr);
 
     // update solver
     ceres_manager_ptr->update();
@@ -208,7 +208,7 @@ TEST(CeresManager, AddRemoveStateBlock)
     P->addStateBlock(sb_ptr);
 
     // remove state_block
-    P->removeStateBlockPtr(sb_ptr);
+    P->removeStateBlock(sb_ptr);
 
     // update solver
     ceres_manager_ptr->update();
@@ -234,7 +234,7 @@ TEST(CeresManager, RemoveUpdateStateBlock)
     ceres_manager_ptr->update();
 
     // remove state_block
-    P->removeStateBlockPtr(sb_ptr);
+    P->removeStateBlock(sb_ptr);
 
     // update solver
     ceres_manager_ptr->update();
@@ -253,13 +253,13 @@ TEST(CeresManager, DoubleRemoveStateBlock)
     P->addStateBlock(sb_ptr);
 
     // remove state_block
-    P->removeStateBlockPtr(sb_ptr);
+    P->removeStateBlock(sb_ptr);
 
     // update solver
     ceres_manager_ptr->update();
 
     // remove state_block
-    P->removeStateBlockPtr(sb_ptr);
+    P->removeStateBlock(sb_ptr);
 
     // update solver manager
     ceres_manager_ptr->update();
@@ -306,7 +306,7 @@ TEST(CeresManager, RemoveConstraint)
     ceres_manager_ptr->update();
 
     // add constraint
-    P->removeConstraintPtr(c);
+    P->removeConstraint(c);
 
     // update solver
     ceres_manager_ptr->update();
@@ -333,7 +333,7 @@ TEST(CeresManager, AddRemoveConstraint)
     ASSERT_TRUE(P->getConstraintNotificationMap().begin()->first == c);
 
     // add constraint
-    P->removeConstraintPtr(c);
+    P->removeConstraint(c);
 
     ASSERT_TRUE(P->getConstraintNotificationMap().empty());
 
@@ -363,13 +363,13 @@ TEST(CeresManager, DoubleRemoveConstraint)
     ceres_manager_ptr->update();
 
     // remove constraint
-    P->removeConstraintPtr(c);
+    P->removeConstraint(c);
 
     // update solver
     ceres_manager_ptr->update();
 
     // remove constraint
-    P->removeConstraintPtr(c);
+    P->removeConstraint(c);
 
     ASSERT_DEATH({
     // update solver

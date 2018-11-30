@@ -390,7 +390,7 @@ StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
     return _state_ptr;
 }
 
-void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
+void Problem::removeStateBlock(StateBlockPtr _state_ptr)
 {
     //std::cout << "Problem::removeStateBlockPtr " << _state_ptr.get() << std::endl;
     //assert(std::find(state_block_list_.begin(),state_block_list_.end(),_state_ptr) != state_block_list_.end() && "Removing a state_block that hasn't been added or already removed");
@@ -422,7 +422,7 @@ void Problem::removeStateBlockPtr(StateBlockPtr _state_ptr)
         state_block_notification_map_[_state_ptr] = REMOVE;
 }
 
-ConstraintBasePtr Problem::addConstraintPtr(ConstraintBasePtr _constraint_ptr)
+ConstraintBasePtr Problem::addConstraint(ConstraintBasePtr _constraint_ptr)
 {
     //std::cout << "Problem::addConstraintPtr " << _constraint_ptr->id() << std::endl;
 
@@ -440,7 +440,7 @@ ConstraintBasePtr Problem::addConstraintPtr(ConstraintBasePtr _constraint_ptr)
     return _constraint_ptr;
 }
 
-void Problem::removeConstraintPtr(ConstraintBasePtr _constraint_ptr)
+void Problem::removeConstraint(ConstraintBasePtr _constraint_ptr)
 {
     //std::cout << "Problem::removeConstraintPtr " << _constraint_ptr->id() << std::endl;
 

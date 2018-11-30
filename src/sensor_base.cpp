@@ -98,7 +98,7 @@ void SensorBase::removeStateBlocks()
         {
             if (getProblem() != nullptr && !extrinsic_dynamic_)
             {
-                getProblem()->removeStateBlockPtr(sbp);
+                getProblem()->removeStateBlock(sbp);
             }
             setStateBlockPtrStatic(i, nullptr);
         }

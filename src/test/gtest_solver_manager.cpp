@@ -342,7 +342,7 @@ TEST(SolverManager, RemoveStateBlock)
     solver_manager_ptr->update();
 
     // remove state_block
-    P->removeStateBlockPtr(sb_ptr);
+    P->removeStateBlock(sb_ptr);
 
     // update solver
     solver_manager_ptr->update();
@@ -364,7 +364,7 @@ TEST(SolverManager, AddRemoveStateBlock)
     P->addStateBlock(sb_ptr);
 
     // remove state_block
-    P->removeStateBlockPtr(sb_ptr);
+    P->removeStateBlock(sb_ptr);
 
     // update solver
     solver_manager_ptr->update();
@@ -386,7 +386,7 @@ TEST(SolverManager, RemoveUpdateStateBlock)
     P->addStateBlock(sb_ptr);
 
     // remove state_block
-    P->removeStateBlockPtr(sb_ptr);
+    P->removeStateBlock(sb_ptr);
 
     // update solver
     solver_manager_ptr->update();
@@ -405,13 +405,13 @@ TEST(SolverManager, DoubleRemoveStateBlock)
     P->addStateBlock(sb_ptr);
 
     // remove state_block
-    P->removeStateBlockPtr(sb_ptr);
+    P->removeStateBlock(sb_ptr);
 
     // update solver
     solver_manager_ptr->update();
 
     // remove state_block
-    P->removeStateBlockPtr(sb_ptr);
+    P->removeStateBlock(sb_ptr);
 
     // update solver manager
     solver_manager_ptr->update();
@@ -459,7 +459,7 @@ TEST(SolverManager, AddUpdatedStateBlock)
     // == REMOVE should clear the previous notification (ADD) in the stack ==
 
     // remove state_block
-    P->removeStateBlockPtr(sb_ptr);
+    P->removeStateBlock(sb_ptr);
 
     ASSERT_EQ(P->getStateBlockNotificationMap().size(),0);// ADD + REMOVE = EMPTY
 
@@ -481,7 +481,7 @@ TEST(SolverManager, AddUpdatedStateBlock)
     sb_ptr->setState(state_2);
 
     // remove state_block
-    P->removeStateBlockPtr(sb_ptr);
+    P->removeStateBlock(sb_ptr);
 
     ASSERT_EQ(P->getStateBlockNotificationMap().size(),1);
     ASSERT_EQ(P->getStateBlockNotificationMap().begin()->second, REMOVE);
@@ -528,7 +528,7 @@ TEST(SolverManager, RemoveConstraint)
     solver_manager_ptr->update();
 
     // add constraint
-    P->removeConstraintPtr(c);
+    P->removeConstraint(c);
 
     // update solver
     solver_manager_ptr->update();
@@ -555,7 +555,7 @@ TEST(SolverManager, AddRemoveConstraint)
     ASSERT_TRUE(P->getConstraintNotificationMap().begin()->first == c);
 
     // add constraint
-    P->removeConstraintPtr(c);
+    P->removeConstraint(c);
 
     ASSERT_TRUE(P->getConstraintNotificationMap().empty());
 
@@ -585,13 +585,13 @@ TEST(SolverManager, DoubleRemoveConstraint)
     solver_manager_ptr->update();
 
     // remove constraint
-    P->removeConstraintPtr(c);
+    P->removeConstraint(c);
 
     // update solver
     solver_manager_ptr->update();
 
     // remove constraint
-    P->removeConstraintPtr(c);
+    P->removeConstraint(c);
 
     // update solver
     solver_manager_ptr->update();

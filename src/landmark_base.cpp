@@ -114,7 +114,7 @@ void LandmarkBase::removeStateBlocks()
         {
             if (getProblem() != nullptr)
             {
-                getProblem()->removeStateBlockPtr(sbp);
+                getProblem()->removeStateBlock(sbp);
             }
             setStateBlockPtr(i, nullptr);
         }

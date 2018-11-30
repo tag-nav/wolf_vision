@@ -170,7 +170,7 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
 
     // remove and add state block without local parameterization
     if (getProblem() != nullptr)
-    	getProblem()->removeStateBlockPtr(state);
+    	getProblem()->removeStateBlock(state);
 
     state->removeLocalParametrization();
 
@@ -182,8 +182,8 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
         for (auto st_ptr : ctr_ptr->getStateBlockPtrVector())
             if (st_ptr == state && getProblem() != nullptr)
             {
-                getProblem()->removeConstraintPtr(ctr_ptr);
-                getProblem()->addConstraintPtr(ctr_ptr);
+                getProblem()->removeConstraint(ctr_ptr);
+                getProblem()->addConstraint(ctr_ptr);
             }
 
     // update boolean
@@ -304,7 +304,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
 
     // Remove remove_state
     if (getProblem() != nullptr)
-        getProblem()->removeStateBlockPtr(remove_state);
+        getProblem()->removeStateBlock(remove_state);
     std::cout << "state removed " << std::endl;
 
     // remove element from deque
@@ -329,7 +329,7 @@ void LandmarkPolyline2D::removeStateBlocks()
         {
             if (getProblem() != nullptr)
             {
-                getProblem()->removeStateBlockPtr(sbp);
+                getProblem()->removeStateBlock(sbp);
             }
             point_state_ptr_vector_[i] = nullptr;
         }

@@ -261,7 +261,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Notifies a state block to be removed from the solver manager
          */
-        void removeStateBlockPtr(StateBlockPtr _state_ptr);
+        void removeStateBlock(StateBlockPtr _state_ptr);
 
         /** \brief Gets a map of constraint notification to be handled by the solver
          */
@@ -269,11 +269,11 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Notifies a new constraint to be added to the solver manager
          */
-        ConstraintBasePtr addConstraintPtr(ConstraintBasePtr _constraint_ptr);
+        ConstraintBasePtr addConstraint(ConstraintBasePtr _constraint_ptr);
 
         /** \brief Notifies a constraint to be removed from the solver manager
          */
-        void removeConstraintPtr(ConstraintBasePtr _constraint_ptr);
+        void removeConstraint(ConstraintBasePtr _constraint_ptr);
 
         /** \brief Gets a map of constraint notification to be handled by the solver
          */
