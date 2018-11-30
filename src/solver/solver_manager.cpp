@@ -30,15 +30,19 @@ void SolverManager::update()
     auto sb_notification_it = wolf_problem_->getStateBlockNotificationMap().begin();
     while ( sb_notification_it != wolf_problem_->getStateBlockNotificationMap().end() )
     {
-        StateBlockPtr state = sb_notification_it->first;
+        StateBlockPtr state_ptr = sb_notification_it->first;
 
         if (sb_notification_it->second == ADD)
         {
             // only add if not added
-            if (state_blocks_.find(state) == state_blocks_.end())
+            if (state_blocks_.find(state_ptr) == state_blocks_.end())
             {
-                state_blocks_.emplace(state, state->getState());
-                addStateBlock(state);
+                state_blocks_.emplace(state_ptr, state_ptr->getState());
+                addStateBlock(state_ptr);
+                // A state_block is added with its last state_ptr, status and local_param, thus, no update is needed for any of those things -> reset flags
+                state_ptr->resetStateUpdated();
+                state_ptr->resetFixUpdated();
+                state_ptr->resetLocalParamUpdated();
             }
             else
             {
@@ -48,10 +52,10 @@ void SolverManager::update()
         else
         {
             // only remove if it exists
-            if (state_blocks_.find(state)!=state_blocks_.end())
+            if (state_blocks_.find(state_ptr)!=state_blocks_.end())
             {
-                removeStateBlock(state);
-                state_blocks_.erase(state);
+                removeStateBlock(state_ptr);
+                state_blocks_.erase(state_ptr);
             }
             else
             {
@@ -83,22 +87,23 @@ void SolverManager::update()
             Eigen::VectorXs new_state = state_ptr->getState();
             // We assume the same size for the states in both WOLF and the solver.
             std::copy(new_state.data(),new_state.data()+new_state.size(),getAssociatedMemBlockPtr(state_ptr));
+            // reset flag
+            state_ptr->resetStateUpdated();
         }
-
         // fix update
         if (state_ptr->fixUpdated())
         {
             updateStateBlockStatus(state_ptr);
+            // reset flag
+            state_ptr->resetFixUpdated();
         }
-
         // local parameterization update
         if (state_ptr->localParamUpdated())
         {
             updateStateBlockLocalParametrization(state_ptr);
+            // reset flag
+            state_ptr->resetLocalParamUpdated();
         }
-
-        // reset all flags
-        state_ptr->resetFlags();
     }
 
     assert(wolf_problem_->getConstraintNotificationMap().empty() && "wolf problem's constraints notification map not empty after update");
@@ -119,6 +124,7 @@ std::string SolverManager::solve(const ReportVerbosity report_level)
 
     // update StateBlocks with optimized state value.
     /// @todo whatif someone has changed the state notification during opti ??
+    /// JV: I do not see a problem here, the solver provides the optimal state given the constraints, if someone changed the state during optimization, it will be overwritten by the optimal one.
 
     std::map<StateBlockPtr, Eigen::VectorXs>::iterator it = state_blocks_.begin(),
             it_end = state_blocks_.end();
@@ -126,7 +132,7 @@ std::string SolverManager::solve(const ReportVerbosity report_level)
     {
         // Avoid usuless copies
         if (!it->first->isFixed())
-            it->first->setState(it->second, false);
+            it->first->setState(it->second, false); // false = do not raise the flag state_updated_
     }
 
     return report;

@@ -10,12 +10,10 @@ class LocalParametrizationBase;
 
 //Wolf includes
 #include "wolf.h"
-#include "local_parametrization_base.h"
 
 //std includes
 #include <iostream>
 #include <mutex>
-
 
 namespace wolf {
 
@@ -85,8 +83,6 @@ public:
         SizeEigen getSize() const;
 
         /**\brief Returns the size of the local parametrization
-         *
-         * @return the size of the local parametrization
          */
         SizeEigen getLocalSize() const;
 
@@ -102,27 +98,25 @@ public:
          **/
         void unfix();
 
+        /** \brief Sets the state status
+         **/
         void setFixed(bool _fixed);
 
+        /** \brief Returns if the state has a local parametrization
+         **/
         bool hasLocalParametrization() const;
 
+        /** \brief Returns the state local parametrization ptr
+         **/
         LocalParametrizationBasePtr getLocalParametrizationPtr() const;
 
+        /** \brief Sets a local parametrization
+         **/
         void setLocalParametrizationPtr(LocalParametrizationBasePtr _local_param);
 
+        /** \brief Removes the state_block local parametrization
+         **/
         void removeLocalParametrization();
-
-        //void addNotification(const StateBlock::Notification _new_notification);
-
-        //StateBlock::Notifications consumeNotifications() const;
-
-        /** \brief Check if exist any notification
-         **/
-        //bool hasNotifications() const;
-
-        /** \brief Return list of notifications
-         **/
-        //StateBlock::Notifications getNotifications() const;
 
         /** \brief Return if state has been updated
          **/
@@ -136,7 +130,25 @@ public:
          **/
         bool localParamUpdated() const;
 
-        void resetFlags();
+        /** \brief Set state_updated_ to false
+         **/
+        void resetStateUpdated();
+
+        /** \brief Set fix_updated_ to false
+         **/
+        void resetFixUpdated();
+
+        /** \brief Set localk_param_updated_ to false
+         **/
+        void resetLocalParamUpdated();
+
+        /** \brief Add this state_block to the problem
+         **/
+        //void addToProblem(ProblemPtr _problem_ptr);
+
+        /** \brief Remove this state_block from the problem
+         **/
+        //void removeFromProblem(ProblemPtr _problem_ptr);
 };
 
 } // namespace wolf
@@ -144,6 +156,7 @@ public:
 // IMPLEMENTATION
 #include "local_parametrization_base.h"
 #include "node_base.h"
+#include "problem.h"
 
 namespace wolf {
 
@@ -251,19 +264,21 @@ inline bool StateBlock::localParamUpdated() const
     return local_param_updated_.load();
 }
 
-inline void StateBlock::resetFlags()
+inline void StateBlock::resetStateUpdated()
 {
     state_updated_.store(false);
+}
+
+inline void StateBlock::resetFixUpdated()
+{
     fix_updated_.store(false);
+}
+
+inline void StateBlock::resetLocalParamUpdated()
+{
     local_param_updated_.store(false);
 }
 
-//inline bool StateBlock::hasNotifications() const
-//{
-//  std::lock_guard<std::mutex> lock(notifictions_mut_);
-//  return !notifications_.empty();
-//}
-
-} // namespace wolf
+}// namespace wolf
 
 #endif
