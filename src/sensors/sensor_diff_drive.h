@@ -15,7 +15,7 @@
 namespace wolf {
 
 WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsDiffDrive);
-WOLF_STRUCT_PTR_TYPEDEFS(SensorDiffDrive);
+WOLF_PTR_TYPEDEFS(SensorDiffDrive);
 
 struct IntrinsicsDiffDrive : public IntrinsicsBase
 {
