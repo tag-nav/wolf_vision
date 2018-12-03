@@ -51,7 +51,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
     preProcess(); // Derived class operations
 
-    KFPackPtr pack = computeProcessingStep();
+    PackKeyFramePtr pack = computeProcessingStep();
     if (pack)
         kf_pack_buffer_.removeUpTo( pack->key_frame->getTimeStamp() );
 
@@ -573,7 +573,7 @@ FeatureBasePtr ProcessorMotion::emplaceFeature(CaptureMotionPtr _capture_motion)
     return feature;
 }
 
-KFPackPtr ProcessorMotion::computeProcessingStep()
+PackKeyFramePtr ProcessorMotion::computeProcessingStep()
 {
     if (!getProblem()->priorIsSet())
     {
@@ -584,7 +584,7 @@ KFPackPtr ProcessorMotion::computeProcessingStep()
         throw std::runtime_error("ProcessorMotion received data before being initialized.");
     }
 
-    KFPackPtr pack = kf_pack_buffer_.selectPackBefore(last_ptr_, params_motion_->time_tolerance);
+    PackKeyFramePtr pack = kf_pack_buffer_.selectPackBefore(last_ptr_, params_motion_->time_tolerance);
 
     if (pack)
     {

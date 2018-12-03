@@ -28,7 +28,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
     if ( !kf_pack_buffer_.empty() )
     {
         // KeyFrame Callback received
-        KFPackPtr pack = kf_pack_buffer_.selectPack( _capture->getTimeStamp(), params_->time_tolerance );
+        PackKeyFramePtr pack = kf_pack_buffer_.selectPack( _capture->getTimeStamp(), params_->time_tolerance );
 
         if (pack!=nullptr)
             kf = pack->key_frame;

@@ -235,7 +235,7 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual void postProcess() { };
 
-        KFPackPtr computeProcessingStep();
+        PackKeyFramePtr computeProcessingStep();
 
 
         // These are the pure virtual functions doing the mathematics
