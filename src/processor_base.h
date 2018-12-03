@@ -24,16 +24,16 @@ namespace wolf {
  *
  * Used in keyframe callbacks as the minimal pack of information needed by the processor receiving the callback.
  */
-class KFPack
+class PackKeyFrame
 {
     public:
-        KFPack(const FrameBasePtr _key_frame, const Scalar _time_tolerance) : key_frame(_key_frame), time_tolerance(_time_tolerance) {};
-        ~KFPack(){};
+        PackKeyFrame(const FrameBasePtr _key_frame, const Scalar _time_tolerance) : key_frame(_key_frame), time_tolerance(_time_tolerance) {};
+        ~PackKeyFrame(){};
         FrameBasePtr key_frame;
         Scalar time_tolerance;
 };
 
-WOLF_PTR_TYPEDEFS(KFPack);
+WOLF_PTR_TYPEDEFS(PackKeyFrame);
 
 
 
@@ -41,25 +41,25 @@ WOLF_PTR_TYPEDEFS(KFPack);
  *
  * Object and functions to manage a buffer of KFPack objects.
  */
-class KFPackBuffer
+class PackKeyFrameBuffer
 {
     public:
 
-        typedef std::map<TimeStamp,KFPackPtr>::iterator Iterator; // buffer iterator
+        typedef std::map<TimeStamp,PackKeyFramePtr>::iterator Iterator; // buffer iterator
 
-        KFPackBuffer(void);
-        ~KFPackBuffer(void);
+        PackKeyFrameBuffer(void);
+        ~PackKeyFrameBuffer(void);
 
         /**\brief Select a Pack from the buffer
          *
          *  Select from the buffer the closest pack (w.r.t. time stamp),
          * respecting a defined time tolerances
          */
-        KFPackPtr selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
-        KFPackPtr selectPack(const CaptureBasePtr _capture, const Scalar& _time_tolerance);
+        PackKeyFramePtr selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
+        PackKeyFramePtr selectPack(const CaptureBasePtr _capture, const Scalar& _time_tolerance);
 
-        KFPackPtr selectPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
-        KFPackPtr selectPackBefore(const CaptureBasePtr _capture, const Scalar& _time_tolerance);
+        PackKeyFramePtr selectPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
+        PackKeyFramePtr selectPackBefore(const CaptureBasePtr _capture, const Scalar& _time_tolerance);
 
         /**\brief Buffer size
          *
@@ -100,7 +100,7 @@ class KFPackBuffer
 
     private:
 
-        std::map<TimeStamp,KFPackPtr> container_; // Main buffer container
+        std::map<TimeStamp,PackKeyFramePtr> container_; // Main buffer container
 };
 
 /** \brief base struct for processor parameters
@@ -142,7 +142,7 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
     protected:
         unsigned int processor_id_;
         ProcessorParamsBasePtr params_;
-        KFPackBuffer kf_pack_buffer_;
+        PackKeyFrameBuffer kf_pack_buffer_;
 
     private:
         SensorBaseWPtr sensor_ptr_;
@@ -248,27 +248,27 @@ inline void ProcessorBase::setTimeTolerance(Scalar _time_tolerance)
     params_->time_tolerance = _time_tolerance;
 }
 
-inline KFPackBuffer::KFPackBuffer(void)
+inline PackKeyFrameBuffer::PackKeyFrameBuffer(void)
 {
 
 }
 
-inline KFPackBuffer::~KFPackBuffer(void)
+inline PackKeyFrameBuffer::~PackKeyFrameBuffer(void)
 {
 
 }
 
-inline void KFPackBuffer::clear()
+inline void PackKeyFrameBuffer::clear()
 {
     container_.clear();
 }
 
-inline bool KFPackBuffer::empty()
+inline bool PackKeyFrameBuffer::empty()
 {
     return container_.empty();
 }
 
-inline SizeStd KFPackBuffer::size(void)
+inline SizeStd PackKeyFrameBuffer::size(void)
 {
     return container_.size();
 }
