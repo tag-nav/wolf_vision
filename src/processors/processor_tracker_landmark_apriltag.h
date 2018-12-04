@@ -5,6 +5,15 @@
 #include "wolf.h"
 #include "processor_tracker_landmark.h"
 
+#include "opencv2/opencv.hpp"
+
+#include "apriltag.h"
+#include "tag36h11.h"
+#include "tag36h10.h"
+#include "tag36artoolkit.h"
+#include "tag25h9.h"
+#include "tag25h7.h"
+
 namespace wolf
 {
 
@@ -64,6 +73,13 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
          * Implement this method in derived classes.
          */
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
+
+    private:
+
+    cv::Mat grayscale_image_;
+    apriltag_detector_t *td_;
+    FeatureBaseList detections_incoming_;
+    FeatureBaseList detections_last_;
 };
 
 } // namespace wolf

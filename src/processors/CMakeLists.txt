@@ -13,10 +13,12 @@ SET(SRCS_PROCESSOR ${SRCS_PROCESSOR}
 IF (vision_utils_FOUND)
 SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
   ${CMAKE_CURRENT_SOURCE_DIR}/processor_tracker_feature_trifocal.h
+  ${CMAKE_CURRENT_SOURCE_DIR}/processor_tracker_landmark_apriltag.h
   )
 
 SET(SRCS_PROCESSOR ${SRCS_PROCESSOR}
   ${CMAKE_CURRENT_SOURCE_DIR}/processor_tracker_feature_trifocal.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/processor_tracker_landmark_apriltag.cpp
   )
 ENDIF (vision_utils_FOUND)
 

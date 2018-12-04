@@ -196,6 +196,10 @@ target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
 wolf_add_gtest(gtest_shared_from_this gtest_shared_from_this.cpp)
 target_link_libraries(gtest_shared_from_this ${PROJECT_NAME})
 
+# ProcessorTrackerLandmarkApriltag test
+wolf_add_gtest(gtest_processor_tracker_landmark_apriltag gtest_processor_tracker_landmark_apriltag.cpp)
+target_link_libraries(gtest_processor_tracker_landmark_apriltag ${PROJECT_NAME})
+
 # ------- Now Core classes Serialization ----------
 
 add_subdirectory(serialization)

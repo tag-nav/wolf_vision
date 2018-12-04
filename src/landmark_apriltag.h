@@ -25,7 +25,7 @@ class LandmarkApriltag : public LandmarkBase
          * \param _tag_width : total width of the tag (2 by default since tags are of 2 units)
          *
          **/
-		LandmarkApriltag(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Scalar& _tagid,  const Scalar& _tag_width=2);
+		LandmarkApriltag(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const int& _tagid,  const Scalar& _tag_width=2);
 
         virtual ~LandmarkApriltag();
         
@@ -34,7 +34,7 @@ class LandmarkApriltag : public LandmarkBase
          * Returns id of the tag
          * 
          **/
-        Scalar getTagId() const;
+        int getTagId() const;
         
         /** \brief Returns tag width
          * 
