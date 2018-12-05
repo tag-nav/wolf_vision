@@ -63,6 +63,12 @@ IF (vision_utils_FOUND)
 	FIND_PACKAGE(OpenCV QUIET)
 ENDIF(vision_utils_FOUND)
 
+# OpenCV
+FIND_PACKAGE(OpenCV QUIET)
+IF (OPENCV_FOUND)
+	MESSAGE("opencv Library FOUND: opencv related sources will be built.")
+ENDIF(OPENCV_FOUND)
+
 # Cereal
 FIND_PACKAGE(cereal QUIET)
 IF(cereal_FOUND)
@@ -72,7 +78,7 @@ ENDIF(cereal_FOUND)
 # Apriltag
 # TODO: write proper files to be able to use find_package with apriltag library
 FIND_PATH(APRILTAG_INCLUDE_DIR NAMES apriltag.h PATH_SUFFIXES "apriltag" ${APRILTAG_INCLUDE_PATH})
-FIND_LIBRARY(PRILTAG_LIBRARY NAMES apriltag PATH_SUFFIXES "${CMAKE_LIBRARY_ARCHITECTURE}" "apriltag" ${APRILTAG_LIBRARY_PATH})
+FIND_LIBRARY(APRILTAG_LIBRARY NAMES apriltag PATH_SUFFIXES "${CMAKE_LIBRARY_ARCHITECTURE}" "apriltag" ${APRILTAG_LIBRARY_PATH})
 
 IF(APRILTAG_LIBRARY)
     MESSAGE("apriltag Library FOUND in ${APRILTAG_LIBRARY}: apriltag related sources will be built.")
@@ -165,6 +171,10 @@ IF(vision_utils_FOUND)
 	INCLUDE_DIRECTORIES(${vision_utils_INCLUDE_DIR})
 	INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 ENDIF(vision_utils_FOUND)
+
+IF(OPENCV_FOUND)
+	INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
+ENDIF(OPENCV_FOUND)
 
 # cereal
 IF(cereal_FOUND)
@@ -444,7 +454,6 @@ IF (vision_utils_FOUND)
         )
 ENDIF(vision_utils_FOUND)
 
-#use vision_utils instead of opencv ?
 IF (OPENCV_FOUND AND APRILTAG_LIBRARY)
     SET(HDRS ${HDRS}
         landmark_apriltag.h
@@ -543,6 +552,10 @@ IF (vision_utils_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${vision_utils_LIBRARY})
    	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
 ENDIF (vision_utils_FOUND)
+
+IF (OPENCV_FOUND)
+   	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
+ENDIF (OPENCV_FOUND)
 
 IF (YAMLCPP_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${YAMLCPP_LIBRARY})
