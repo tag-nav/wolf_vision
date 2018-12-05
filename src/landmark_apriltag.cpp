@@ -7,6 +7,7 @@ LandmarkApriltag::LandmarkApriltag(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,  
 	LandmarkBase("APRILTAG", _p_ptr, _o_ptr), tag_width_(_tag_width)
 {
   	setDescriptor(Eigen::VectorXs::Constant(1,_tagid)); //change tagid to int ? do not use descriptor vector ?
+    setId(_tagid);
 }
 
 LandmarkApriltag::~LandmarkApriltag()

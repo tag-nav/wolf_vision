@@ -19,7 +19,7 @@ class FeatureApriltag : public FeatureBase
 {
     public:
 
-        FeatureApriltag(const Eigen::Vector7s & _measurement, const Eigen::Matrix6s & _meas_covariance, const apriltag_detection_t & det);
+        FeatureApriltag(const Eigen::Vector7s & _measurement, const Eigen::Matrix6s & _meas_covariance, const apriltag_detection_t & _det);
         virtual ~FeatureApriltag();
         
         /** \brief Returns tag id
@@ -30,7 +30,7 @@ class FeatureApriltag : public FeatureBase
         Scalar getTagId() const; 
 
     private:
-    const apriltag_detection_t *det;
+    const apriltag_detection_t detection_;
         
 };
 

@@ -2,10 +2,27 @@
  
 namespace wolf {
 
+
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsApriltag);
+struct ProcessorParamsApriltag : public ProcessorParamsTrackerLandmark
+{   
+    //tag parameters
+    std::string tag_family_;
+    int tag_black_border_;
+
+    //detector parameters
+    Scalar quad_sigma_;
+    unsigned int nthreads_;
+    bool debug_;
+    bool refine_edges_;
+    bool refine_decode_;
+    bool refine_pose_;
+};
+
 // Constructor
 // TODO Modify this default API to suit your class needs
-ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorParamsTrackerLandmarkPtr _params_tracker_landmark) :
-        ProcessorTrackerLandmark("TRACKER_LANDMARK_APRILTAG",  _params_tracker_landmark )
+ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorParamsApriltagPtr _params_tracker_apriltag) :
+        ProcessorTrackerLandmark("TRACKER LANDMARK APRILTAG",  _params_tracker_apriltag )
 {
     // TODO: use parameters from constructor argument
     apriltag_family_t *tf = NULL;

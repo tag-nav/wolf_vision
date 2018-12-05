@@ -128,6 +128,10 @@ ENDIF(Ceres_FOUND)
 wolf_add_gtest(gtest_constraint_absolute gtest_constraint_absolute.cpp)
 target_link_libraries(gtest_constraint_absolute ${PROJECT_NAME})
 
+# ConstraintAutodiffApriltag test
+wolf_add_gtest(gtest_constraint_autodiff_apriltag gtest_constraint_autodiff_apriltag.cpp)
+target_link_libraries(gtest_constraint_autodiff_apriltag ${PROJECT_NAME})
+
 # ConstraintAutodiffDistance3D test
 wolf_add_gtest(gtest_constraint_autodiff_distance_3D gtest_constraint_autodiff_distance_3D.cpp)
 target_link_libraries(gtest_constraint_autodiff_distance_3D ${PROJECT_NAME})
