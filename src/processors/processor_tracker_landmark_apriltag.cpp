@@ -87,7 +87,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
         Eigen::Affine3ds c_M_t(t_M_c.inverse());
         Eigen::Vector7s pose;
-        pose << c_M_t.translation(), R2q(c_M_t.linear()).data(); //TODO: quaternion order ?
+        pose << c_M_t.translation(), R2q(c_M_t.linear()).coeffs();
 
         Eigen::Matrix6s cov(Eigen::Matrix6s::Identity());
         cov.topLeftCorner(3,3) *= 1e-2;
