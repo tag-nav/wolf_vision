@@ -69,6 +69,15 @@ IF(cereal_FOUND)
     MESSAGE("cereal Library FOUND: cereal related sources will be built.")
 ENDIF(cereal_FOUND)
 
+# Apriltag
+# TODO: write proper files to be able to use find_package with apriltag library
+FIND_PATH(APRILTAG_INCLUDE_DIR NAMES apriltag.h PATH_SUFFIXES "apriltag" ${APRILTAG_INCLUDE_PATH})
+FIND_LIBRARY(PRILTAG_LIBRARY NAMES apriltag PATH_SUFFIXES "${CMAKE_LIBRARY_ARCHITECTURE}" "apriltag" ${APRILTAG_LIBRARY_PATH})
+
+IF(APRILTAG_LIBRARY QUIET
+    MESSAGE("apriltag Library FOUND in ${APRILTAG_LIBRARY}: apriltag related sources will be built.")
+ENDIF(APRILTAG_LIBRARY)
+
 # YAML with yaml-cpp
 INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindYamlCpp.cmake)
 IF(YAMLCPP_FOUND)
@@ -171,8 +180,12 @@ IF(YAMLCPP_FOUND)
 ENDIF(YAMLCPP_FOUND)
 
 IF(GLOG_FOUND)
-INCLUDE_DIRECTORIES(${GLOG_INCLUDE_DIR})
+    INCLUDE_DIRECTORIES(${GLOG_INCLUDE_DIR})
 ENDIF(GLOG_FOUND)
+
+IF(APRILTAG_INCLUDE_DIR)
+    INCLUDE_DIRECTORIES(${APRILTAG_INCLUDE_DIR})
+ENDIF(APRILTAG_INCLUDE_DIR)
 
 #headers
 SET(HDRS_BASE
@@ -431,6 +444,16 @@ IF (vision_utils_FOUND)
         )
 ENDIF(vision_utils_FOUND)
 
+#use vision_utils instead of opencv ?
+IF (OPENCV_FOUND AND APRILTAG_LIBRARY)
+    SET(HDRS ${HDRS}
+        landmark_apriltag.h
+        )
+    SET(SRCS ${SRCS}
+        landmark_apriltag.cpp
+        )
+ENDIF(OPENCV_FOUND AND APRILTAG_LIBRARY)
+
 # Add the capture sub-directory
 ADD_SUBDIRECTORY(captures)
 
@@ -528,6 +551,15 @@ ENDIF (YAMLCPP_FOUND)
 IF (GLOG_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLOG_LIBRARY})
 ENDIF (GLOG_FOUND)
+
+#check if this is done correctly
+IF (OPENCV_FOUND AND APRILTAG_LIBRARY)
+    LINK_LIBRARIES(apriltag m)
+    set(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} -lm)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${EXTRA_FLAGS} ${CMAKE_REQUIRED_LIBRARIES}")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_C_FLAGS} ${CMAKE_REQUIRED_LIBRARIES}")
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${APRILTAG_LIBRARY}  ${CMAKE_THREAD_LIBS_INIT} ${OPENCV_LDFLAGS} m)
+ENDIF(OPENCV_FOUND AND APRILTAG_LIBRARY)
 
 #install library
 #=============================================================

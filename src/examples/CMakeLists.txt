@@ -134,6 +134,11 @@ IF(vision_utils_FOUND)
     ADD_EXECUTABLE(test_tracker_ORB test_tracker_ORB.cpp)
     TARGET_LINK_LIBRARIES(test_tracker_ORB ${PROJECT_NAME})
 
+    IF (APRILTAG_LIBRARY)
+    #    ADD_EXECUTABLE(test_name test_name.cpp)
+    #    TARGET_LINK_LIBRARIES(test_name ${PROJECT_NAME})
+    ENDIF(APRILTAG_LIBRARY)
+
 ENDIF(vision_utils_FOUND)
 
 # Processor Tracker Feature test
