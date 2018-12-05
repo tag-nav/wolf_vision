@@ -8,8 +8,9 @@
 //#include "opencv2/opencv.hpp"
 #include <opencv/cv.h>
 
-
 #include "apriltag.h"
+#include "common/homography.h"
+#include "common/zarray.h"
 #include "tag36h11.h"
 #include "tag36h10.h"
 #include "tag36artoolkit.h"
@@ -98,11 +99,10 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 
     private:
-
-    cv::Mat grayscale_image_;
-    apriltag_detector_t detector_;
-    FeatureBaseList detections_incoming_;
-    FeatureBaseList detections_last_;
+        cv::Mat grayscale_image_;
+        apriltag_detector_t detector_;
+        FeatureBaseList detections_incoming_;
+        FeatureBaseList detections_last_;
 };
 
 } // namespace wolf
