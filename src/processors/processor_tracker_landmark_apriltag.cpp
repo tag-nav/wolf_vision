@@ -48,7 +48,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 {
     //std::cout << "PreProcess: " << std::endl;
     // first, convert image to grayscale
-    cvtColor(std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage(), grayscale_image_, COLOR_BGR2GRAY);
+    cv::cvtColor(std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage(), grayscale_image_, cv::COLOR_BGR2GRAY);
 
     //detect tags in incoming image
     // Make an image_u8_t header for the Mat data

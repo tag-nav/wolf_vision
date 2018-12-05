@@ -5,7 +5,9 @@
 #include "wolf.h"
 #include "processor_tracker_landmark.h"
 
-#include "opencv2/opencv.hpp"
+//#include "opencv2/opencv.hpp"
+#include <opencv/cv.h>
+
 
 #include "apriltag.h"
 #include "tag36h11.h"
@@ -41,6 +43,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
 {
     public:
 
+
         /** \brief Class constructor
          */
         // TODO Modify this default API to suit your class needs
@@ -49,6 +52,8 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         /** \brief Class Destructor
          */
         virtual ~ProcessorTrackerLandmarkApriltag();
+
+        void preProcess();
 
         /** \brief Find provided landmarks in the incoming capture
          * \param _landmark_list_in input list of landmarks to be found in incoming

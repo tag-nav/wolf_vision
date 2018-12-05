@@ -3,6 +3,7 @@
 
 //Wolf includes
 #include "wolf.h"
+#include "rotations.h"
 #include "constraint_autodiff.h"
 
 namespace wolf
@@ -60,9 +61,9 @@ template<typename T> bool ConstraintAutodiffApriltag::operator ()( const T* cons
 
     // error
     Eigen::Matrix<T, 6, 1> er;
-    er.head<3>() = c_M_err.translation();
+    er.block<3,1>(0,0) = c_M_err.translation();
     Eigen::Matrix<T, 3, 3> R_err(c_M_err.rotation());
-    er.tail<3>() = wolf::log_R(R_err);
+    er.block<3,1>(3,0) = wolf::log_R(R_err);
 
     // residual
     Eigen::Map<Eigen::Matrix<T, 3, 1>> res(_residuals);

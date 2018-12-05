@@ -28,10 +28,10 @@ TEST(ProcessorTrackerLandmarkApriltag, Destructor)
 }
 
 //[Class methods]
-TEST(ProcessorTrackerLandmarkApriltag, _feature_landmark_correspondences))
-{
-  std::cout << "033[1;33m [WARN]:033[0m gtest for ProcessorTrackerLandmarkApriltag _feature_landmark_correspondences) is empty." << std::endl;
-}
+//TEST(ProcessorTrackerLandmarkApriltag, _feature_landmark_correspondences))
+//{
+//  std::cout << "033[1;33m [WARN]:033[0m gtest for ProcessorTrackerLandmarkApriltag _feature_landmark_correspondences) is empty." << std::endl;
+//}
 
 TEST(ProcessorTrackerLandmarkApriltag, voteForKeyFrame)
 {
