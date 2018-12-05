@@ -128,9 +128,11 @@ ENDIF(Ceres_FOUND)
 wolf_add_gtest(gtest_constraint_absolute gtest_constraint_absolute.cpp)
 target_link_libraries(gtest_constraint_absolute ${PROJECT_NAME})
 
-# ConstraintAutodiffApriltag test
-wolf_add_gtest(gtest_constraint_autodiff_apriltag gtest_constraint_autodiff_apriltag.cpp)
-target_link_libraries(gtest_constraint_autodiff_apriltag ${PROJECT_NAME})
+IF (OPENCV_FOUND AND APRILTAG_LIBRARY)
+	# ConstraintAutodiffApriltag test
+	wolf_add_gtest(gtest_constraint_autodiff_apriltag gtest_constraint_autodiff_apriltag.cpp)
+	target_link_libraries(gtest_constraint_autodiff_apriltag ${PROJECT_NAME})
+ENDIF(OPENCV_FOUND AND APRILTAG_LIBRARY)
 
 # ConstraintAutodiffDistance3D test
 wolf_add_gtest(gtest_constraint_autodiff_distance_3D gtest_constraint_autodiff_distance_3D.cpp)
@@ -200,9 +202,13 @@ target_link_libraries(gtest_odom_3D ${PROJECT_NAME})
 wolf_add_gtest(gtest_shared_from_this gtest_shared_from_this.cpp)
 target_link_libraries(gtest_shared_from_this ${PROJECT_NAME})
 
-# ProcessorTrackerLandmarkApriltag test
-wolf_add_gtest(gtest_processor_tracker_landmark_apriltag gtest_processor_tracker_landmark_apriltag.cpp)
-target_link_libraries(gtest_processor_tracker_landmark_apriltag ${PROJECT_NAME})
+IF (OPENCV_FOUND AND APRILTAG_LIBRARY)
+	# ProcessorTrackerLandmarkApriltag test
+	wolf_add_gtest(gtest_processor_tracker_landmark_apriltag gtest_processor_tracker_landmark_apriltag.cpp)
+	target_link_libraries(gtest_processor_tracker_landmark_apriltag ${PROJECT_NAME})
+ENDIF(OPENCV_FOUND AND APRILTAG_LIBRARY)
+
+
 
 # ------- Now Core classes Serialization ----------
 
