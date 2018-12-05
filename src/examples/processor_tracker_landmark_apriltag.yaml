@@ -1,0 +1,19 @@
+processor type: "TRACKER LANDMARK APRILTAG"
+processor name: "tracker landmark apriltag example"
+
+
+tag parameters:
+    tag_family:           "tag36h11" 
+    tag_black_border:     1.0
+
+detector parameters: 
+    quad_sigma:     1.0
+    nthreads:       0.0
+    debug:          0
+    refine_edges:   1
+    refine_decode:  1
+    refine_pose:    0
+    
+#noise:
+#    pixel noise std: 1 # pixels
+    
