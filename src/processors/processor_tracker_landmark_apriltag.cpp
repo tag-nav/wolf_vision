@@ -3,57 +3,40 @@
 namespace wolf {
 
 
-WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsApriltag);
-struct ProcessorParamsApriltag : public ProcessorParamsTrackerLandmark
-{   
-    //tag parameters
-    std::string tag_family_;
-    int tag_black_border_;
-
-    //detector parameters
-    Scalar quad_sigma_;
-    unsigned int nthreads_;
-    bool debug_;
-    bool refine_edges_;
-    bool refine_decode_;
-    bool refine_pose_;
-};
-
 // Constructor
-// TODO Modify this default API to suit your class needs
-ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorParamsApriltagPtr _params_tracker_apriltag) :
-        ProcessorTrackerLandmark("TRACKER LANDMARK APRILTAG",  _params_tracker_apriltag )
+ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorParamsApriltagPtr _params_tracker_landmark_apriltag) :
+        ProcessorTrackerLandmark("TRACKER LANDMARK APRILTAG",  _params_tracker_landmark_apriltag )
 {
     // TODO: use parameters from constructor argument
-    apriltag_family_t *tf = NULL;
+    apriltag_family_t tag_family = NULL;
     std::string famname("tag36h11");
     if (famname == "tag36h11")
-        tf = tag36h11_create();
+        tag_family = tag36h11_create();
     else if (famname == "tag36h10")
-        tf = tag36h10_create();
+        tag_family = tag36h10_create();
     else if (famname == "tag36artoolkit")
-        tf = tag36artoolkit_create();
+        tag_family = tag36artoolkit_create();
     else if (famname == "tag25h9")
-        tf = tag25h9_create();
+        tag_family = tag25h9_create();
     else if (famname == "tag25h7")
-        tf = tag25h7_create();
+        tag_family = tag25h7_create();
     else {
         std::cout<< "Unrecognized tag family name. Use e.g. \"tag36h11\"." <<std::endl ;
         exit(-1);
     }
 
-    tf->black_border = 1; //getopt_get_int(getopt, "border"); 
+    tag_family.black_border = 1; //getopt_get_int(getopt, "border");
 
-    *td = apriltag_detector_create();
-    apriltag_detector_add_family(td, tf);
+    detector_ = apriltag_detector_create();
+    apriltag_detector_add_family(&detector_, &tag_family);
 
-    td->quad_decimate = 1.0; //getopt_get_double(getopt, "decimate");
-    td->quad_sigma = 0.0; //getopt_get_double(getopt, "blur");
-    td->nthreads = 1; //getopt_get_int(getopt, "threads");
-    td->debug = 0; //getopt_get_bool(getopt, "debug");
-    td->refine_edges = 1; //getopt_get_bool(getopt, "refine-edges");
-    td->refine_decode = 0; //getopt_get_bool(getopt, "refine-decode");
-    td->refine_pose = 0; //getopt_get_bool(getopt, "refine-pose");
+    detector_.quad_decimate = 1.0; //getopt_get_double(getopt, "decimate");
+    detector_.quad_sigma = 0.0; //getopt_get_double(getopt, "blur");
+    detector_.nthreads = 1; //getopt_get_int(getopt, "threads");
+    detector_.debug = 0; //getopt_get_bool(getopt, "debug");
+    detector_.refine_edges = 1; //getopt_get_bool(getopt, "refine-edges");
+    detector_.refine_decode = 0; //getopt_get_bool(getopt, "refine-decode");
+    detector_.refine_pose = 0; //getopt_get_bool(getopt, "refine-pose");
 }
 
 // Destructor
@@ -69,11 +52,11 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
     //detect tags in incoming image
     // Make an image_u8_t header for the Mat data
-    image_u8_t im = { .width = grayscale_image_.cols,
-      .height = grayscale_image_.rows,
-      .stride = grayscale_image_.cols,
-      .buf = grayscale_image_.data
-    };
+    image_u8_t im = { };
+    im.width = grayscale_image_.cols;
+    im.height = grayscale_image_.rows;
+    im.stride = grayscale_image_.cols;
+    im.buf = grayscale_image_.data;
 
     //defined camera parameters
     SensorBasePtr sensor = incoming_ptr_->getSensorPtr();

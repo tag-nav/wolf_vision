@@ -41,31 +41,32 @@ namespace wolf
 template<typename T> bool ConstraintAutodiffApriltag::operator ()( const T* const _p_camera, const T* const _o_camera, const T* const _p_keyframe, const T* const _o_keyframe, const T* const _p_landmark, const T* const _o_landmark, T* _residuals) const
 {
     //states
-    Eigen::Translation<T,3,1> p_camera(_p_camera), p_keyframe(_p_keyframe), p_landmark(_p_landmark);
+    Eigen::Translation<T,3> p_camera(_p_camera), p_keyframe(_p_keyframe), p_landmark(_p_landmark);
     Eigen::Quaternion<T> q_camera(_o_camera), q_keyframe(_o_keyframe), q_landmark(_o_landmark);
 
     //Measurements
-    Eigen::Translation<T,3,1>  p_measured(getMeasurement().data() + 0);
-    Eigen::Quaternion<T>       q_measured(getMeasurement().data() + 3);
+    Eigen::Translation<T,3>  p_measured(getMeasurement().cast<T>().data() + 0);
+    Eigen::Quaternion<T>     q_measured(getMeasurement().cast<T>().data() + 3);
 
     // 1. create transformation matrix to compose
-    Transform<T, 3, Affine> r_M_c = p_camera * q_camera;
-    Transform<T, 3, Affine> w_M_r = p_keyframe * q_keyframe;
-    Transform<T, 3, Affine> w_M_l = p_landmark * q_landmark;
-    Transform<T, 3, Affine> l_M_c_meas = p_measured * q_measured;
+    Eigen::Transform<T, 3, Eigen::Affine> r_M_c = p_camera * q_camera;
+    Eigen::Transform<T, 3, Eigen::Affine> w_M_r = p_keyframe * q_keyframe;
+    Eigen::Transform<T, 3, Eigen::Affine> w_M_l = p_landmark * q_landmark;
+    Eigen::Transform<T, 3, Eigen::Affine> c_M_l_meas = p_measured * q_measured;
 
-    Transform<T, 3, Affine> w_M_c = w_M_r * r_M_c;
-    Transform<T, 3, Affine> w_M_c_meas = w_M_l * l_M_c_meas;
-    Transform<T, 3, Affine> c_M_c_meas = w_M_c.inverse() *  w_M_c_meas;
+    Eigen::Transform<T, 3, Eigen::Affine> c_M_l_est = (w_M_r * r_M_c).inverse() * w_M_l;
+    Eigen::Transform<T, 3, Eigen::Affine> c_M_err = c_M_l_meas * c_M_l_est.inverse(); // left-minus gives error is the reference camera
 
-    //error
+
+    // error
     Eigen::Matrix<T, 6, 1> er;
-    er.head<3>() = c_M_c_meas.translation();
-    er.tail(3)() = minus_right(q_measured, q_estimated); //TODO: q_estimated
+    er.head<3>() = c_M_err.translation();
+    Eigen::Matrix<T, 3, 3> R_err(c_M_err.rotation());
+    er.tail<3>() = wolf::log_R(R_err);
 
     // residual
     Eigen::Map<Eigen::Matrix<T, 3, 1>> res(_residuals);
-    res               = getFeaturePtr()->getMeasurementSquareRootInformationUpper().cast<T>() * er;
+    res = getFeaturePtr()->getMeasurementSquareRootInformationUpper().cast<T>() * er;
 
     return true;
 }

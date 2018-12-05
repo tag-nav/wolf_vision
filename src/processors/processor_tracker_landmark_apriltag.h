@@ -17,6 +17,24 @@
 namespace wolf
 {
 
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsApriltag);
+struct ProcessorParamsApriltag : public ProcessorParamsTrackerLandmark
+{
+    //tag parameters
+    std::string tag_family_;
+    int tag_black_border_;
+
+    //detector parameters
+    Scalar quad_sigma_;
+    unsigned int nthreads_;
+    bool debug_;
+    bool refine_edges_;
+    bool refine_decode_;
+    bool refine_pose_;
+};
+
+
+
 WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmarkApriltag);
 
 class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
@@ -26,7 +44,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         /** \brief Class constructor
          */
         // TODO Modify this default API to suit your class needs
-        ProcessorTrackerLandmarkApriltag( ProcessorParamsTrackerLandmarkPtr _params_tracker_landmark);
+        ProcessorTrackerLandmarkApriltag( ProcessorParamsApriltagPtr _params_tracker_landmark_apriltag);
 
         /** \brief Class Destructor
          */
@@ -77,7 +95,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
     private:
 
     cv::Mat grayscale_image_;
-    apriltag_detector_t *td_;
+    apriltag_detector_t detector_;
     FeatureBaseList detections_incoming_;
     FeatureBaseList detections_last_;
 };
