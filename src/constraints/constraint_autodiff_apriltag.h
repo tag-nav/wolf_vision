@@ -5,6 +5,9 @@
 #include "wolf.h"
 #include "rotations.h"
 #include "constraint_autodiff.h"
+#include "sensor_base.h"
+#include "landmark_apriltag.h"
+#include "features/feature_apriltag.h"
 
 namespace wolf
 {
@@ -17,8 +20,13 @@ class ConstraintAutodiffApriltag : public ConstraintAutodiff<ConstraintAutodiffA
 
         /** \brief Class constructor
          */
-        // TODO Modify this default API to suit your class needs
-        ConstraintAutodiffApriltag(const std::string& _tp, const FrameBasePtr& _frame_other_ptr, const CaptureBasePtr& _capture_other_ptr, const FeatureBasePtr& _feature_other_ptr, const LandmarkBasePtr& _landmark_other_ptr, const ProcessorBasePtr& _processor_ptr, bool _apply_loss_function, ConstraintStatus _status, StateBlockPtr _state0Ptr, StateBlockPtr _state1Ptr, StateBlockPtr _state2Ptr, StateBlockPtr _state3Ptr, StateBlockPtr _state4Ptr, StateBlockPtr _state5Ptr, StateBlockPtr _state6Ptr, StateBlockPtr _state7Ptr, StateBlockPtr _state8Ptr, StateBlockPtr _state9Ptr);
+        ConstraintAutodiffApriltag(
+                const SensorBasePtr _sensor_ptr,
+                const FrameBasePtr _frame_ptr,
+                const LandmarkApriltagPtr _landmark_other_ptr,
+                const FeatureApriltagPtr _feature_ptr,
+                bool _apply_loss_function,
+                ConstraintStatus _status);
 
         /** \brief Class Destructor
          */
@@ -39,35 +47,67 @@ class ConstraintAutodiffApriltag : public ConstraintAutodiff<ConstraintAutodiffA
 namespace wolf
 {
 
+ConstraintAutodiffApriltag::ConstraintAutodiffApriltag(
+        const SensorBasePtr _sensor_ptr,
+        const FrameBasePtr _frame_ptr,
+        const LandmarkApriltagPtr _landmark_other_ptr,
+        const FeatureApriltagPtr _feature_ptr,
+        bool _apply_loss_function,
+        ConstraintStatus _status) :
+            ConstraintAutodiff("APRILTAG",
+                               nullptr,
+                               nullptr,
+                               nullptr,
+                               _landmark_other_ptr,
+                               nullptr,
+                               false,
+                               CTR_ACTIVE,
+                               _sensor_ptr->getPPtr(), _sensor_ptr->getOPtr(),
+                               _frame_ptr->getPPtr(), _frame_ptr->getOPtr(),
+                               _landmark_other_ptr->getPPtr(), _landmark_other_ptr->getOPtr()
+                               )
+{
+
+
+}
+
+/** \brief Class Destructor
+ */
+ConstraintAutodiffApriltag::~ConstraintAutodiffApriltag()
+{
+    //
+}
+
 template<typename T> bool ConstraintAutodiffApriltag::operator ()( const T* const _p_camera, const T* const _o_camera, const T* const _p_keyframe, const T* const _o_keyframe, const T* const _p_landmark, const T* const _o_landmark, T* _residuals) const
 {
     //states
-    Eigen::Translation<T,3> p_camera(_p_camera), p_keyframe(_p_keyframe), p_landmark(_p_landmark);
+    Eigen::Translation<T,3> p_camera(_p_camera[0], _p_camera[1], _p_camera[2]),
+                            p_keyframe(_p_keyframe[0], _p_keyframe[1], _p_keyframe[2]),
+                            p_landmark(_p_landmark[0], _p_landmark[1], _p_landmark[2]);
     Eigen::Quaternion<T> q_camera(_o_camera), q_keyframe(_o_keyframe), q_landmark(_o_landmark);
 
     //Measurements
-    Eigen::Translation<T,3>  p_measured(getMeasurement().cast<T>().data() + 0);
-    Eigen::Quaternion<T>     q_measured(getMeasurement().cast<T>().data() + 3);
+    Eigen::Translation<Scalar, 3>  p_measured(getMeasurement()(0), getMeasurement()(1), getMeasurement()(2));
+    Eigen::Quaternions     q_measured( getMeasurement().data() + 3 );
 
-    // 1. create transformation matrix to compose
+//    // 1. create transformation matrix to compose
     Eigen::Transform<T, 3, Eigen::Affine> r_M_c = p_camera * q_camera;
     Eigen::Transform<T, 3, Eigen::Affine> w_M_r = p_keyframe * q_keyframe;
     Eigen::Transform<T, 3, Eigen::Affine> w_M_l = p_landmark * q_landmark;
-    Eigen::Transform<T, 3, Eigen::Affine> c_M_l_meas = p_measured * q_measured;
+    Eigen::Transform<T, 3, Eigen::Affine> c_M_l_meas = p_measured.cast<T>() * q_measured.cast<T>();
 
     Eigen::Transform<T, 3, Eigen::Affine> c_M_l_est = (w_M_r * r_M_c).inverse() * w_M_l;
     Eigen::Transform<T, 3, Eigen::Affine> c_M_err = c_M_l_meas * c_M_l_est.inverse(); // left-minus gives error is the reference camera
-
-
-    // error
+//
+//    // error
     Eigen::Matrix<T, 6, 1> er;
-    er.block<3,1>(0,0) = c_M_err.translation();
+    er.block(0,0,3,1) = c_M_err.translation();
     Eigen::Matrix<T, 3, 3> R_err(c_M_err.rotation());
-    er.block<3,1>(3,0) = wolf::log_R(R_err);
-
-    // residual
-    Eigen::Map<Eigen::Matrix<T, 3, 1>> res(_residuals);
-    res = getFeaturePtr()->getMeasurementSquareRootInformationUpper().cast<T>() * er;
+//    er.block(3,0,3,1) = wolf::log_R(R_err);  // BUG
+//
+//    // residual
+//    Eigen::Map<Eigen::Matrix<T, 3, 1>> res(_residuals);
+//    res = getFeaturePtr()->getMeasurementSquareRootInformationUpper().cast<T>() * er;
 
     return true;
 }

@@ -21,8 +21,8 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
     else if (famname == "tag25h7")
         tag_family = tag25h7_create();
     else {
-        std::cout<< "Unrecognized tag family name. Use e.g. \"tag36h11\"." <<std::endl ;
-        exit(-1);
+        WOLF_ERROR("Unrecognized tag family name. Use e.g. \"tag36h11\".");
+        exit(-1);  // TODO: default family instead?
     }
 
     tag_family.black_border = 1; //getopt_get_int(getopt, "border");
@@ -102,9 +102,13 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
 ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
-  std::cout << "033[1;33m [WARN]:033[0m ProcessorTrackerLandmarkApriltag::createConstraint is empty." << std::endl;
-  ConstraintBasePtr return_var{}; //TODO: fill this variable
-  return return_var;
+    ConstraintAutodiffApriltagPtr constraint = std::make_shared<ConstraintAutodiffApriltag>(
+            getSensorPtr(),
+            getLastPtr()->getFramePtr(),
+            _landmark_ptr,
+            _feature_ptr
+    );
+    return constraint;
 }
 
 LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr _feature_ptr)
