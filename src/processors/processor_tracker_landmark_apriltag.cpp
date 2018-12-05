@@ -59,11 +59,12 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
     };
 
     //defined camera parameters
-    //TODO: get parameters from capture
-    double fx(809.135074);
-    double fy(809.410030);
-    double cx(335.684471);
-    double cy(257.352121);
+    SensorBasePtr sensor = incoming_ptr_->getSensorPtr();
+    Eigen::Matrix3s camera_intrinsics(std::static_pointer_cast<SensorCamera>(sensor)->getIntrinsicMatrix()); //[fx 0 cx; 0 fy cy; 0 0 1]
+    double fx(camera_intrinsics(0,0));  //TODO: conversion warning -> wolf::Scalar to double    //test value: 809.135074
+    double fy(camera_intrinsics(1,1));                                                          //test value: 809.410030
+    double cx(camera_intrinsics(0,2));                                                          //test value: 335.684471
+    double cy(camera_intrinsics(1,2));                                                          //test value: 257.352121
 
     zarray_t *detections_ = apriltag_detector_detect(td, &im);
     cout << zarray_size(detections) << " tags detected" << endl;
@@ -109,10 +110,12 @@ ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBase
 LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr _feature_ptr)
 {
     //get parameters from sensor
-    double fx(809.135074);
-    double fy(809.410030);
-    double cx(335.684471);
-    double cy(257.352121);
+    SensorBasePtr sensor = incoming_ptr_->getSensorPtr();
+    Eigen::Matrix3s camera_intrinsics(std::static_pointer_cast<SensorCamera>(sensor)->getIntrinsicMatrix()); //[fx 0 cx; 0 fy cy; 0 0 1]
+    double fx(camera_intrinsics(0,0));  //TODO: conversion warning -> wolf::Scalar to double    //test value: 809.135074
+    double fy(camera_intrinsics(1,1));                                                          //test value: 809.410030
+    double cx(camera_intrinsics(0,2));                                                          //test value: 335.684471
+    double cy(camera_intrinsics(1,2));                                                          //test value: 257.352121
 
     matd_t *pose_matrix = homography_to_pose(std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->det->H, fx, fy, cx, cy);
     Eigen::Affine3ds t_M_c;
