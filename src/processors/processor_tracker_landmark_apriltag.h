@@ -4,25 +4,13 @@
 //Wolf includes
 #include "wolf.h"
 #include "processor_tracker_landmark.h"
-//#include "capture_image.h"
-#include "sensor_camera.h"
-#include "rotations.h"
-#include "features/feature_apriltag.h"
-#include "constraints/constraint_autodiff_apriltag.h"
-#include "landmark_apriltag.h"
 
-//#include "opencv2/opencv.hpp"
+// Apriltag
+#include <apriltag.h>
+
+// open cv
 #include <opencv/cv.h>
-#include <opencv2/imgproc/imgproc.hpp>
 
-#include "apriltag.h"
-#include "common/homography.h"
-#include "common/zarray.h"
-#include "tag36h11.h"
-#include "tag36h10.h"
-#include "tag36artoolkit.h"
-#include "tag25h9.h"
-#include "tag25h7.h"
 
 namespace wolf
 {

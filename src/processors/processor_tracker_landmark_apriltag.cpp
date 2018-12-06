@@ -1,5 +1,25 @@
 #include "processor_tracker_landmark_apriltag.h"
- 
+
+#include "capture_image.h"
+#include "sensor_camera.h"
+#include "rotations.h"
+#include "features/feature_apriltag.h"
+#include "constraints/constraint_autodiff_apriltag.h"
+#include "landmark_apriltag.h"
+
+// April tags
+#include "common/homography.h"
+#include "common/zarray.h"
+
+#include <tag36h11.h>
+#include <tag36h10.h>
+#include <tag36artoolkit.h>
+#include <tag25h9.h>
+#include <tag25h7.h>
+
+// #include "opencv2/opencv.hpp"
+#include <opencv2/imgproc/imgproc.hpp>
+
 namespace wolf {
 
 
@@ -134,7 +154,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
     Eigen::Vector7s pose;
     pose << c_M_t.translation(), R2q(c_M_t.linear()).coeffs();
 
-    LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(std::make_shared<StateBlock>(pose.head<3>()), std::make_shared<StateQuaternion>(pose.tail<4>()), std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->getDetection().id); //TODO: last parameter is width
+    LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(pose, std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->getDetection().id); //TODO: last parameter is width
 
     return new_landmark;
 }
@@ -159,7 +179,7 @@ bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
   return return_var;
 }
 
-unsigned int findLandmarks(const LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
+unsigned int ProcessorTrackerLandmarkApriltag::findLandmarks(const LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
                                            LandmarkMatchMap& _feature_landmark_correspondences)
 {   
     for (auto feature_in_image : detections_incoming_)

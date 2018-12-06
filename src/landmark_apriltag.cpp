@@ -3,8 +3,9 @@
 
 namespace wolf {
 
-LandmarkApriltag::LandmarkApriltag(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,  const int& _tagid,  const Scalar& _tag_width) :
-	LandmarkBase("APRILTAG", _p_ptr, _o_ptr), tag_width_(_tag_width)
+LandmarkApriltag::LandmarkApriltag(Eigen::Vector7s& pose, const int& _tagid, const Scalar& _tag_width) :
+	LandmarkBase("APRILTAG", std::make_shared<StateBlock>(pose.head(3)), std::make_shared<StateQuaternion>(pose.tail(4))),
+	tag_width_(_tag_width)
 {
   	setDescriptor(Eigen::VectorXs::Constant(1,_tagid)); //change tagid to int ? do not use descriptor vector ?
     setId(_tagid);

@@ -90,24 +90,31 @@ template<typename T> bool ConstraintAutodiffApriltag::operator ()( const T* cons
     Eigen::Translation<Scalar, 3>  p_measured(getMeasurement()(0), getMeasurement()(1), getMeasurement()(2));
     Eigen::Quaternions     q_measured( getMeasurement().data() + 3 );
 
-//    // 1. create transformation matrix to compose
+    // Create transformation matrices to compose
+    // camera wrt robot
     Eigen::Transform<T, 3, Eigen::Affine> r_M_c = p_camera * q_camera;
+    // robot wrt world
     Eigen::Transform<T, 3, Eigen::Affine> w_M_r = p_keyframe * q_keyframe;
+    // landmark wrt world
     Eigen::Transform<T, 3, Eigen::Affine> w_M_l = p_landmark * q_landmark;
+    // landmark wrt camera, measure
     Eigen::Transform<T, 3, Eigen::Affine> c_M_l_meas = p_measured.cast<T>() * q_measured.cast<T>();
 
+    // landmark wrt camera, estimated
     Eigen::Transform<T, 3, Eigen::Affine> c_M_l_est = (w_M_r * r_M_c).inverse() * w_M_l;
+
+    // expectation error, in camera frame
     Eigen::Transform<T, 3, Eigen::Affine> c_M_err = c_M_l_meas * c_M_l_est.inverse(); // left-minus gives error is the reference camera
-//
-//    // error
+
+    // error
     Eigen::Matrix<T, 6, 1> er;
     er.block(0,0,3,1) = c_M_err.translation();
-    Eigen::Matrix<T, 3, 3> R_err(c_M_err.rotation());
-//    er.block(3,0,3,1) = wolf::log_R(R_err);  // BUG
-//
-//    // residual
-//    Eigen::Map<Eigen::Matrix<T, 3, 1>> res(_residuals);
-//    res = getFeaturePtr()->getMeasurementSquareRootInformationUpper().cast<T>() * er;
+    Eigen::Matrix<T, 3, 3> R_err(c_M_err.linear());
+    er.block(3,0,3,1) = wolf::log_R(R_err);  // BUG
+
+    // residual
+    Eigen::Map<Eigen::Matrix<T, 3, 1>> res(_residuals);
+    res = getFeaturePtr()->getMeasurementSquareRootInformationUpper().cast<T>() * er;
 
     return true;
 }

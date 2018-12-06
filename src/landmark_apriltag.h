@@ -5,6 +5,8 @@
 //Wolf includes
 #include "landmark_base.h"
 
+#include "state_quaternion.h"
+
 // Std includes
 
 
@@ -25,7 +27,7 @@ class LandmarkApriltag : public LandmarkBase
          * \param _tag_width : total width of the tag (2 by default since tags are of 2 units)
          *
          **/
-		LandmarkApriltag(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const int& _tagid,  const Scalar& _tag_width=2);
+		LandmarkApriltag(Eigen::Vector7s& pose, const int& _tagid, const Scalar& _tag_width=2);
 
         virtual ~LandmarkApriltag();
         
