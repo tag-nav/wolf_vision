@@ -30,23 +30,45 @@ class LandmarkApriltag_class : public testing::Test{
         ProblemPtr   problem;
 };
 
-//TEST(TestGroup, DummyTestExample)
-//{
-//    // TODO: Automatically generated TEST stub
-//}
-
-TEST_F(LandmarkApriltag_class, loadSaveMap)
+TEST(LandmarkApriltag, getTagId)
 {
+    Vector7s p;
+    LandmarkApriltagPtr l = std::make_shared<LandmarkApriltag>(p, 5, 0.2); // pose, tag_id, tag_width
+    ASSERT_EQ(l->getTagId(), 5);
+}
+
+TEST(LandmarkApriltag, getTagWidth)
+{
+    Vector7s p;
+    LandmarkApriltagPtr l = std::make_shared<LandmarkApriltag>(p, 5, 0.2); // pose, tag_id, tag_width
+    ASSERT_EQ(l->getTagWidth(), 0.2);
+}
+
+TEST_F(LandmarkApriltag_class, create)
+{
+    // load original hand-written map
+    problem->loadMap(wolf_root + "/src/examples/map_apriltag_1.yaml"); // this will call create()
+    ASSERT_EQ(problem->getMapPtr()->getLandmarkList().size(), 4);
+    ASSERT_EQ(problem->getMapPtr()->getLandmarkList().front()->getType(), "APRILTAG");
+}
+
+TEST_F(LandmarkApriltag_class, saveToYaml)
+{
+    // load original hand-written map
     problem->loadMap(wolf_root + "/src/examples/map_apriltag_1.yaml");
     ASSERT_EQ(problem->getMapPtr()->getLandmarkList().size(), 4);
 
-    problem->saveMap(wolf_root + "/src/examples/map_apriltag_save.yaml");
+    // write map on new file
+    problem->saveMap(wolf_root + "/src/examples/map_apriltag_save.yaml"); // this will call saveToYaml()
 
+    // delete existing map
     problem->getMapPtr()->getLandmarkList().clear();
     ASSERT_EQ(problem->getMapPtr()->getLandmarkList().size(), 0);
 
+    // reload the saved map
     problem->loadMap(wolf_root + "/src/examples/map_apriltag_save.yaml");
     ASSERT_EQ(problem->getMapPtr()->getLandmarkList().size(), 4);
+    ASSERT_EQ(problem->getMapPtr()->getLandmarkList().front()->getType(), "APRILTAG");
 }
 
 int main(int argc, char **argv)
