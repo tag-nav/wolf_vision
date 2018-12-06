@@ -130,7 +130,8 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
     }
 }
 
-ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
+ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBasePtr _feature_ptr,
+                                                                     LandmarkBasePtr _landmark_ptr)
 {
     ConstraintAutodiffApriltagPtr constraint = std::make_shared<ConstraintAutodiffApriltag>(
             getSensorPtr(),
