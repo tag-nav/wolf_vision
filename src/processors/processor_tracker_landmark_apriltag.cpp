@@ -88,12 +88,11 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
                     };
 
     //defined camera parameters
-    SensorBasePtr sensor = incoming_ptr_->getSensorPtr();
-    Eigen::Matrix3s camera_intrinsics(std::static_pointer_cast<SensorCamera>(sensor)->getIntrinsicMatrix()); //[fx 0 cx; 0 fy cy; 0 0 1]
-    double fx(camera_intrinsics(0,0));  //TODO: conversion warning -> wolf::Scalar to double    //test value: 809.135074
-    double fy(camera_intrinsics(1,1));                                                          //test value: 809.410030
-    double cx(camera_intrinsics(0,2));                                                          //test value: 335.684471
-    double cy(camera_intrinsics(1,2));                                                          //test value: 257.352121
+    Eigen::Vector4s camera_intrinsics(getSensorPtr()->getIntrinsicPtr()->getState()); //[cx cy fx fy]
+    double fx(camera_intrinsics(2));  //TODO: conversion warning -> wolf::Scalar to double    //test value: 809.135074
+    double fy(camera_intrinsics(3));                                                          //test value: 809.410030
+    double cx(camera_intrinsics(0));                                                          //test value: 335.684471
+    double cy(camera_intrinsics(1));                                                          //test value: 257.352121
 
     zarray_t detections_ = *apriltag_detector_detect(&detector_, &im);
 //    WOLF_TRACE(zarray_size(detections_incoming_), " tags detected");
