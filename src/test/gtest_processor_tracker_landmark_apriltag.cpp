@@ -17,18 +17,17 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
     public:
         virtual void SetUp()
         {
-            std::string wolf_root = _WOLF_ROOT_DIR;
+            wolf_root = _WOLF_ROOT_DIR;
 
             problem = Problem::create("PO 3D");
             sen = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_canonical.yaml");
 
-            WOLF_TRACE("");
+            WOLF_TRACE("The line below needs to be uncommented after adding Factory stuff to processor apriltag");
 //            prc = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
-            WOLF_TRACE("");
 
-            problem->loadMap(wolf_root + "/src/examples/map_apriltag_1.yaml");
         }
     public:
+        std::string wolf_root;
         ProblemPtr   problem;
         SensorBasePtr    sen;
         ProcessorBasePtr prc;
@@ -113,6 +112,15 @@ TEST(ProcessorTrackerLandmarkApriltag, createConstraint)
 
 TEST_F(ProcessorTrackerLandmarkApriltag_class, loadMap)
 {
+    problem->loadMap(wolf_root + "/src/examples/map_apriltag_1.yaml");
+    problem->print(4,1,1,1);
+
+    problem->saveMap(wolf_root + "/src/examples/map_apriltag_save.yaml");
+
+    problem->getMapPtr()->getLandmarkList().clear();
+    problem->print(4,1,1,1);
+
+    problem->loadMap(wolf_root + "/src/examples/map_apriltag_save.yaml");
     problem->print(4,1,1,1);
 }
 

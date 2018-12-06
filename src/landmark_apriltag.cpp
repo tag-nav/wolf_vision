@@ -41,13 +41,23 @@ LandmarkBasePtr LandmarkApriltag::create(const YAML::Node& _lmk_node)
     Scalar          tag_width               = _lmk_node["tag width"]            .as<Scalar>();
     Eigen::Vector3s pos                     = _lmk_node["position"]             .as<Eigen::Vector3s>();
     bool            pos_fixed               = _lmk_node["position fixed"]       .as<bool>();
-    Eigen::Vector3s ori          = M_TORAD * (_lmk_node["orientation"]          .as<Eigen::Vector3s>() );
+    Eigen::Vector4s vquat;
+    if (_lmk_node["orientation"].size() == 3)
+    {
+        // we have been given 3 Euler angles in degrees
+        Eigen::Vector3s   euler = M_TORAD * (_lmk_node["orientation"]          .as<Eigen::Vector3s>() );
+        Eigen::Matrix3s       R = matrixRollPitchYaw(euler(0), euler(1), euler(2));
+        Eigen::Quaternions quat = R2q(R);
+        vquat                   = quat.coeffs();
+    }
+    else if (_lmk_node["orientation"].size() == 4)
+    {
+        // we have been given a quaternion
+        vquat                               = _lmk_node["orientation"]          .as<Eigen::Vector4s>();
+    }
     bool            ori_fixed               = _lmk_node["orientation fixed"]    .as<bool>();
 
-    Eigen::Matrix3s       R = matrixRollPitchYaw(ori(0), ori(1), ori(2));
-    Eigen::Quaternions quat = R2q(R);
-    Eigen::Vector7s pose; pose << pos, quat.coeffs();
-
+    Eigen::Vector7s pose; pose << pos, vquat;
 
     // Create a new landmark
     LandmarkApriltagPtr lmk_ptr = std::make_shared<LandmarkApriltag>(pose, tag_id, tag_width);
@@ -64,18 +74,9 @@ YAML::Node LandmarkApriltag::saveToYaml() const
     // First base things
     YAML::Node node = LandmarkBase::saveToYaml();
 
-//    // Then add specific things
-//    node["first_id"]       = first_id_;
-//    node["first_defined"]  = first_defined_;
-//    node["last_defined"]   = last_defined_;
-//    node["classification"] = (int)classification_;
-//
-//    int npoints = point_state_ptr_vector_.size();
-//
-//    for (int i = 0; i < npoints; i++)
-//    {
-//        node["points"].push_back(point_state_ptr_vector_[i]->getState());
-//    }
+    // Then Apriltag specific things
+    node["tag id"] = getTagId();
+    node["tag width"] = getTagWidth();
 
     return node;
 }
