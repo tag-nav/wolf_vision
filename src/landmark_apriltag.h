@@ -45,6 +45,13 @@ class LandmarkApriltag : public LandmarkBase
          **/
         Scalar getTagWidth() const;
 
+        /** Factory method to create new landmarks from YAML nodes
+         */
+        static LandmarkBasePtr create(const YAML::Node& _lmk_node);
+
+        YAML::Node saveToYaml() const;
+
+
     private:
         const Scalar tag_width_;         
         
