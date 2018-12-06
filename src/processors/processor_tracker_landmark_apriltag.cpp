@@ -71,7 +71,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
     detections_incoming_.resize(zarray_size(&detections_));
     // Draw detection outlines
-    for (int i = 0; i < detections_incoming_.size; i++) {
+    for (int i = 0; i < detections_incoming_.size(); i++) {
         apriltag_detection_t *det;
         zarray_get(&detections_, i, &det);
         matd_t *pose_matrix = homography_to_pose(det->H, fx, fy, cx, cy);
@@ -105,8 +105,10 @@ ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBase
     ConstraintAutodiffApriltagPtr constraint = std::make_shared<ConstraintAutodiffApriltag>(
             getSensorPtr(),
             getLastPtr()->getFramePtr(),
-            _landmark_ptr,
-            _feature_ptr
+            std::static_pointer_cast<LandmarkApriltag>(_landmark_ptr),
+            std::static_pointer_cast<FeatureApriltag>(_feature_ptr),
+            false,
+            CTR_ACTIVE
     );
     return constraint;
 }
@@ -138,14 +140,13 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
 
     LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(std::make_shared<StateBlock>(pose.head<3>()), std::make_shared<StateQuaternion>(pose.tail<4>()), std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->getDetection().id); //TODO: last parameter is width
 
-    return LandmarkApriltagPtr;
+    return new_landmark;
 }
 
 unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
 {
   for (auto feature_in_image : detections_incoming_)
     {
-        int tag_id(std::static_pointer_cast<FeatureApriltag>(feature_in_image)->det->id);
         auto search = matches_landmark_from_incoming_.find(feature_in_image);
 
         if (search == matches_landmark_from_incoming_.end())
@@ -171,10 +172,11 @@ unsigned int findLandmarks(const LandmarkBaseList& _landmark_list_in, FeatureBas
 
         for (auto landmark_in_ptr : _landmark_list_in)
         {
-            if(std::static_pointer_cast<LandmarkApriltag>->getTagId() == tag_id)
+            if(std::static_pointer_cast<LandmarkApriltag>(landmark_in_ptr)->getTagId() == tag_id)
             {
                 _feature_list_out.push_back(feature_in_image);
-                LandmarkMatchPtr matched_landmark(landmark_in_ptr, 1.0); //TODO: smarter score
+                Scalar score(1.0);
+                LandmarkMatchPtr matched_landmark = std::make_shared<LandmarkMatch>(landmark_in_ptr, score); //TODO: smarter score
                 _feature_landmark_correspondences.insert ( std::pair<FeatureBasePtr, LandmarkMatchPtr>(feature_in_image,matched_landmark) );
                 break;
             }
