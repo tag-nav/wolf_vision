@@ -13,6 +13,7 @@
 
 //#include "opencv2/opencv.hpp"
 #include <opencv/cv.h>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include "apriltag.h"
 #include "common/homography.h"
