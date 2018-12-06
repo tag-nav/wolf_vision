@@ -132,7 +132,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
 
     Eigen::Affine3ds c_M_t(t_M_c.inverse());
     Eigen::Vector7s pose;
-    pose << c_M_t.translation(), R2q(c_M_t.linear()).data(); //TODO: quaternion order ?
+    pose << c_M_t.translation(), R2q(c_M_t.linear()).coeffs();
 
     LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(std::make_shared<StateBlock>(pose.head<3>()), std::make_shared<StateQuaternion>(pose.tail<4>()), std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->getDetection().id); //TODO: last parameter is width
 
