@@ -514,6 +514,11 @@ IF(YAMLCPP_FOUND)
         	yaml/processor_image_yaml.cpp
         	yaml/processor_tracker_feature_trifocal_yaml.cpp
             )
+            IF(APRILTAG_LIBRARY)
+                SET(SRCS ${SRCS}
+                    yaml/processor_tracker_landmark_apriltag_yaml.cpp
+                )
+            ENDIF(APRILTAG_LIBRARY)
     ENDIF(vision_utils_FOUND)
 ENDIF(YAMLCPP_FOUND)
 

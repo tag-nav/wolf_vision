@@ -15,17 +15,19 @@
 namespace wolf
 {
 
-WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsApriltag);
-struct ProcessorParamsApriltag : public ProcessorParamsTrackerLandmark
+WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerLandmarkApriltag);
+struct ProcessorParamsTrackerLandmarkApriltag : public ProcessorParamsTrackerLandmark
 {
     //tag parameters
     std::string tag_family_;
     int tag_black_border_;
 
     // tag sizes
+    Scalar tag_width_default_;
     std::map<int, Scalar> tag_widths_;
 
     //detector parameters
+    Scalar quad_decimate_;
     Scalar quad_sigma_;
     unsigned int nthreads_;
     bool debug_;
@@ -45,7 +47,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
 
         /** \brief Class constructor
          */
-        ProcessorTrackerLandmarkApriltag( ProcessorParamsApriltagPtr _params_tracker_landmark_apriltag);
+        ProcessorTrackerLandmarkApriltag( ProcessorParamsTrackerLandmarkApriltagPtr _params_tracker_landmark_apriltag);
 
         /** \brief Class Destructor
          */
@@ -101,6 +103,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
 
     private:
         std::map<int, Scalar> tag_widths_;
+        Scalar tag_width_default_;
         cv::Mat grayscale_image_;
         apriltag_detector_t detector_;
         FeatureBaseList detections_incoming_;

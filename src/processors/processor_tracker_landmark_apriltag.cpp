@@ -24,13 +24,15 @@ namespace wolf {
 
 
 // Constructor
-ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorParamsApriltagPtr _params_tracker_landmark_apriltag) :
+ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorParamsTrackerLandmarkApriltagPtr _params_tracker_landmark_apriltag) :
         ProcessorTrackerLandmark("TRACKER LANDMARK APRILTAG",  _params_tracker_landmark_apriltag ),
-        tag_widths_(_params_tracker_landmark_apriltag->tag_widths_)
+        tag_widths_(_params_tracker_landmark_apriltag->tag_widths_),
+        tag_width_default_(_params_tracker_landmark_apriltag->tag_width_default_)
 {
-    // TODO: use parameters from constructor argument
+    // configure apriltag detector
+
     apriltag_family_t tag_family;
-    std::string famname("tag36h11");
+    std::string famname(_params_tracker_landmark_apriltag->tag_family_);
     if (famname == "tag36h11")
         tag_family = *tag36h11_create();
     else if (famname == "tag36h10")
@@ -43,23 +45,21 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         tag_family = *tag25h7_create();
     else {
         WOLF_ERROR("Unrecognized tag family name. Use e.g. \"tag36h11\".");
-        exit(-1);  // TODO: default family instead?
+        exit(-1);
     }
 
-
-
-    tag_family.black_border = 1; //getopt_get_int(getopt, "border");
+    tag_family.black_border     = _params_tracker_landmark_apriltag->tag_black_border_;
 
     detector_ = *apriltag_detector_create();
     apriltag_detector_add_family(&detector_, &tag_family);
 
-    detector_.quad_decimate = 1.0; //getopt_get_double(getopt, "decimate");
-    detector_.quad_sigma = 0.0; //getopt_get_double(getopt, "blur");
-    detector_.nthreads = 1; //getopt_get_int(getopt, "threads");
-    detector_.debug = 0; //getopt_get_bool(getopt, "debug");
-    detector_.refine_edges = 1; //getopt_get_bool(getopt, "refine-edges");
-    detector_.refine_decode = 0; //getopt_get_bool(getopt, "refine-decode");
-    detector_.refine_pose = 0; //getopt_get_bool(getopt, "refine-pose");
+    detector_.quad_decimate     = _params_tracker_landmark_apriltag->quad_decimate_;
+    detector_.quad_sigma        = _params_tracker_landmark_apriltag->quad_sigma_;
+    detector_.nthreads          = _params_tracker_landmark_apriltag->nthreads_;
+    detector_.debug             = _params_tracker_landmark_apriltag->debug_;
+    detector_.refine_edges      = _params_tracker_landmark_apriltag->refine_edges_;
+    detector_.refine_decode     = _params_tracker_landmark_apriltag->refine_decode_;
+    detector_.refine_pose       = _params_tracker_landmark_apriltag->refine_pose_;
 }
 
 // Destructor
@@ -109,10 +109,19 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
         Eigen::Affine3ds c_M_t(t_M_c.inverse());
         Eigen::Vector7s pose;
-        pose << c_M_t.translation(), R2q(c_M_t.linear()).coeffs();
+        Eigen::Vector3s t(c_M_t.translation()); // translation vector in apriltag units (tag width in units is 2 units)
 
+        // set the scale
+        int    tag_id    = det->id;
+        Scalar tag_width = getTagWidth(tag_id);
+        Scalar scale     = tag_width/2;
+
+        // set the measured pose
+        pose << scale*t, R2q(c_M_t.linear()).coeffs();
+
+        // set the covariance
         Eigen::Matrix6s cov(Eigen::Matrix6s::Identity());
-        cov.topLeftCorner(3,3) *= 1e-2;
+        cov.topLeftCorner(3,3)     *= 1e-2;
         cov.bottomRightCorner(3,3) *= 1e-3;
         //get Pose matrix and covarince from det
         detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov, *det)); //warning: pointer ?
@@ -208,14 +217,10 @@ unsigned int ProcessorTrackerLandmarkApriltag::findLandmarks(const LandmarkBaseL
 
 wolf::Scalar ProcessorTrackerLandmarkApriltag::getTagWidth(int _id) const
 {
-    return tag_widths_.at(_id);
+    if (tag_widths_.find(_id) != tag_widths_.end())
+        return tag_widths_.at(_id);
+    else
+        return tag_width_default_;
 }
-
-// LandmarkMatchMap& ProcessorTrackerLandmarkApriltag::_feature_landmark_correspondences)(LandmarkMatchMap& _feature_landmark_correspondences)
-// {
-//   std::cout << "033[1;33m [WARN]:033[0m ProcessorTrackerLandmarkApriltag::_feature_landmark_correspondences) is empty." << std::endl;
-//   LandmarkMatchMap& return_var{}; //TODO: fill this variable
-//   return return_var;
-// }
 
 } // namespace wolf

@@ -2,17 +2,23 @@ processor type: "TRACKER LANDMARK APRILTAG"
 processor name: "tracker landmark apriltag example"
 
 
-tag parameters:
-    tag_family:           "tag36h11" 
-    tag_black_border:     1.0
-
 detector parameters: 
+    quad_decimate:  1.0
     quad_sigma:     1.0
-    nthreads:       0.0
+    nthreads:       1
     debug:          0
     refine_edges:   1
     refine_decode:  1
     refine_pose:    0
+
+tag parameters:
+    tag_family:           "tag36h11" 
+    tag_black_border:     1
+    tag_width_default:    0.1   # enter -1 here if you want to provide a map of [ tagid : tag_width ], see lines just below
+
+tag widths:
+    #1 :             0.2
+    #2 :             0.1
     
 #noise:
 #    pixel noise std: 1 # pixels
