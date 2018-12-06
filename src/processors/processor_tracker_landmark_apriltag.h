@@ -4,6 +4,12 @@
 //Wolf includes
 #include "wolf.h"
 #include "processor_tracker_landmark.h"
+//#include "capture_image.h"
+#include "sensor_camera.h"
+#include "rotations.h"
+#include "features/feature_apriltag.h"
+#include "constraints/constraint_autodiff_apriltag.h"
+#include "landmark_apriltag.h"
 
 //#include "opencv2/opencv.hpp"
 #include <opencv/cv.h>
