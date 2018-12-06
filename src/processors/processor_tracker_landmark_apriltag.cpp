@@ -151,18 +151,19 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
     // world to rob
     Vector3s pos = getLastPtr()->getFramePtr()->getPPtr()->getState();
     Quaternions quat (getLastPtr()->getFramePtr()->getOPtr()->getState().data());
-    Eigen::Affine3ds w_M_r = Eigen::Translation<Scalar,3>(pos(0), pos(1), pos(2)) * quat;
+    Eigen::Affine3ds w_M_r = Eigen::Translation<Scalar,3>(pos.head(3)) * quat;
 
     WOLF_TRACE("");
     // rob to camera
     pos = getSensorPtr()->getPPtr()->getState();
     quat.coeffs() = getSensorPtr()->getOPtr()->getState();
-    Eigen::Affine3ds r_M_c = Eigen::Translation<Scalar,3>(pos(0), pos(1), pos(2)) * quat;
+    Eigen::Affine3ds r_M_c = Eigen::Translation<Scalar,3>(pos.head(3)) * quat;
 
     WOLF_TRACE("");
     // camera to lmk
-    Eigen::Vector7s c_pose_l = _feature_ptr->getMeasurement();
-    Eigen::Affine3ds c_M_l = Eigen::Translation<Scalar,3>(c_pose_l(0), c_pose_l(1), c_pose_l(2)) * Eigen::Quaternions(c_pose_l.data() + 3);
+    pos = _feature_ptr->getMeasurement().head(3);
+    quat.coeffs() = _feature_ptr->getMeasurement().tail(4);
+    Eigen::Affine3ds c_M_l   = Eigen::Translation<Scalar,3>(pos) * quat;
 
     WOLF_TRACE("");
     // world to lmk
