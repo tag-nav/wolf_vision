@@ -223,4 +223,12 @@ wolf::Scalar ProcessorTrackerLandmarkApriltag::getTagWidth(int _id) const
         return tag_width_default_;
 }
 
+void ProcessorTrackerLandmarkApriltag::configure(SensorBasePtr _sensor)
+{
+    // set processor params from camera params if required
+
+    // SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(_sensor);
+    // [...] add more code if needed
+}
+
 } // namespace wolf

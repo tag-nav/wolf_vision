@@ -4,6 +4,7 @@
 //Wolf includes
 #include "wolf.h"
 #include "processor_tracker_landmark.h"
+#include "sensor_camera.h"
 
 // Apriltag
 #include <apriltag.h>
@@ -96,6 +97,9 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
          * Implement this method in derived classes.
          */
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
+
+        virtual void configure(SensorBasePtr _sensor);
+
 
     private:
         Scalar getTagWidth(int _id) const;
