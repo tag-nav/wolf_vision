@@ -220,7 +220,7 @@ unsigned int ProcessorTrackerLandmarkApriltag::findLandmarks(const LandmarkBaseL
                 _feature_list_out.push_back(feature_in_image);
                 Scalar score(1.0);
                 LandmarkMatchPtr matched_landmark = std::make_shared<LandmarkMatch>(landmark_in_ptr, score); //TODO: smarter score
-                _feature_landmark_correspondences.insert ( std::pair<FeatureBasePtr, LandmarkMatchPtr>(feature_in_image,matched_landmark) );
+                _feature_landmark_correspondences.emplace ( feature_in_image, matched_landmark );
                 break;
             }
         }
