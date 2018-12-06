@@ -22,6 +22,9 @@ struct ProcessorParamsApriltag : public ProcessorParamsTrackerLandmark
     std::string tag_family_;
     int tag_black_border_;
 
+    // tag sizes
+    std::map<int, Scalar> tag_widths_;
+
     //detector parameters
     Scalar quad_sigma_;
     unsigned int nthreads_;
@@ -42,7 +45,6 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
 
         /** \brief Class constructor
          */
-        // TODO Modify this default API to suit your class needs
         ProcessorTrackerLandmarkApriltag( ProcessorParamsApriltagPtr _params_tracker_landmark_apriltag);
 
         /** \brief Class Destructor
@@ -94,6 +96,11 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 
     private:
+        Scalar getTagWidth(int _id) const;
+
+
+    private:
+        std::map<int, Scalar> tag_widths_;
         cv::Mat grayscale_image_;
         apriltag_detector_t detector_;
         FeatureBaseList detections_incoming_;

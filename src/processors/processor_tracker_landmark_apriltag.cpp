@@ -25,7 +25,8 @@ namespace wolf {
 
 // Constructor
 ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorParamsApriltagPtr _params_tracker_landmark_apriltag) :
-        ProcessorTrackerLandmark("TRACKER LANDMARK APRILTAG",  _params_tracker_landmark_apriltag )
+        ProcessorTrackerLandmark("TRACKER LANDMARK APRILTAG",  _params_tracker_landmark_apriltag ),
+        tag_widths_(_params_tracker_landmark_apriltag->tag_widths_)
 {
     // TODO: use parameters from constructor argument
     apriltag_family_t tag_family;
@@ -44,6 +45,8 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         WOLF_ERROR("Unrecognized tag family name. Use e.g. \"tag36h11\".");
         exit(-1);  // TODO: default family instead?
     }
+
+
 
     tag_family.black_border = 1; //getopt_get_int(getopt, "border");
 
@@ -154,7 +157,8 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
     Eigen::Vector7s pose;
     pose << c_M_t.translation(), R2q(c_M_t.linear()).coeffs();
 
-    LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(pose, std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->getDetection().id); //TODO: last parameter is width
+    int tagid = std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->getDetection().id;
+    LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(pose, tagid, getTagWidth(tagid));
 
     return new_landmark;
 }
@@ -200,6 +204,11 @@ unsigned int ProcessorTrackerLandmarkApriltag::findLandmarks(const LandmarkBaseL
     }
 
     return _feature_list_out.size();
+}
+
+wolf::Scalar ProcessorTrackerLandmarkApriltag::getTagWidth(int _id) const
+{
+    return tag_widths_.at(_id);
 }
 
 // LandmarkMatchMap& ProcessorTrackerLandmarkApriltag::_feature_landmark_correspondences)(LandmarkMatchMap& _feature_landmark_correspondences)

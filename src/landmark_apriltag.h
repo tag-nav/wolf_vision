@@ -24,10 +24,10 @@ class LandmarkApriltag : public LandmarkBase
          * \param _p_ptr StateBlock shared pointer to the position
          * \param _o_ptr StateBlock shared pointer to the orientation
          * \param _tagid descriptor of the landmark: id of the tag
-         * \param _tag_width : total width of the tag (2 by default since tags are of 2 units)
+         * \param _tag_width : total width of the tag (in metres)
          *
          **/
-		LandmarkApriltag(Eigen::Vector7s& pose, const int& _tagid, const Scalar& _tag_width=2);
+		LandmarkApriltag(Eigen::Vector7s& pose, const int& _tagid, const Scalar& _tag_width);
 
         virtual ~LandmarkApriltag();
         
