@@ -58,6 +58,11 @@ static ProcessorParamsBasePtr createProcessorParamsLandmarkApriltag(const std::s
             params->tag_widths_.emplace(tag_id, tag_width);
         }
 
+        YAML::Node noise                    = config["noise"];
+        params->std_xy_                      = noise["std_xy"]                       .as<Scalar>();
+        params->std_z_                       = noise["std_z"]                        .as<Scalar>();
+        params->std_rpy_           = M_TORAD * noise["std_rpy"]                      .as<Scalar>();
+
         return params;
     }
     else

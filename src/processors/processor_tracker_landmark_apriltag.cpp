@@ -28,7 +28,10 @@ namespace wolf {
 ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorParamsTrackerLandmarkApriltagPtr _params_tracker_landmark_apriltag) :
         ProcessorTrackerLandmark("TRACKER LANDMARK APRILTAG",  _params_tracker_landmark_apriltag ),
         tag_widths_(_params_tracker_landmark_apriltag->tag_widths_),
-        tag_width_default_(_params_tracker_landmark_apriltag->tag_width_default_)
+        tag_width_default_(_params_tracker_landmark_apriltag->tag_width_default_),
+        std_xy_(_params_tracker_landmark_apriltag->std_xy_),
+        std_z_(_params_tracker_landmark_apriltag->std_z_),
+        std_rpy_(_params_tracker_landmark_apriltag->std_rpy_)
 {
     // configure apriltag detector
 
@@ -109,7 +112,6 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         }
 
         Eigen::Affine3ds c_M_t(t_M_c.inverse());
-        Eigen::Vector7s pose;
         Eigen::Vector3s t(c_M_t.translation()); // translation vector in apriltag units (tag width in units is 2 units)
 
         // set the scale
@@ -118,14 +120,15 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         Scalar scale     = tag_width/2;
 
         // set the measured pose
+        Eigen::Vector7s pose;
         pose << scale*t, R2q(c_M_t.linear()).coeffs();
 
         // set the covariance
-        Eigen::Matrix6s cov(Eigen::Matrix6s::Identity());
-        cov.topLeftCorner(3,3)     *= 1e-2;
-        cov.bottomRightCorner(3,3) *= 1e-3;
-        //get Pose matrix and covarince from det
-        detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov, *det)); //warning: pointer ?
+        Eigen::Vector6s var_vec; var_vec << std_xy_*std_xy_, std_xy_*std_xy_, std_z_*std_z_, std_rpy_*std_rpy_, std_rpy_*std_rpy_, std_rpy_*std_rpy_;
+        Eigen::Matrix6s cov = var_vec.asDiagonal() ;
+
+        // add to list
+        detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov, tag_id));
     }
 }
 

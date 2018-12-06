@@ -20,6 +20,8 @@ tag widths:
     #1 :             0.2
     #2 :             0.1
     
-#noise:
-#    pixel noise std: 1 # pixels
+noise:
+    std_xy :      0.1 # m 
+    std_z :       0.1 # m 
+    std_rpy :     5   # degrees
     

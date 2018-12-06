@@ -36,6 +36,8 @@ struct ProcessorParamsTrackerLandmarkApriltag : public ProcessorParamsTrackerLan
     bool refine_edges_;
     bool refine_decode_;
     bool refine_pose_;
+
+    Scalar std_xy_, std_z_, std_rpy_;
 };
 
 
@@ -113,6 +115,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         apriltag_detector_t detector_;
         FeatureBaseList detections_incoming_;
         FeatureBaseList detections_last_;
+        Scalar std_xy_, std_z_, std_rpy_;
 };
 
 } // namespace wolf
