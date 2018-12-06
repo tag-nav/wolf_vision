@@ -8,18 +8,18 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         ProcessorTrackerLandmark("TRACKER LANDMARK APRILTAG",  _params_tracker_landmark_apriltag )
 {
     // TODO: use parameters from constructor argument
-    apriltag_family_t tag_family = NULL;
+    apriltag_family_t tag_family;
     std::string famname("tag36h11");
     if (famname == "tag36h11")
-        tag_family = tag36h11_create();
+        tag_family = *tag36h11_create();
     else if (famname == "tag36h10")
-        tag_family = tag36h10_create();
+        tag_family = *tag36h10_create();
     else if (famname == "tag36artoolkit")
-        tag_family = tag36artoolkit_create();
+        tag_family = *tag36artoolkit_create();
     else if (famname == "tag25h9")
-        tag_family = tag25h9_create();
+        tag_family = *tag25h9_create();
     else if (famname == "tag25h7")
-        tag_family = tag25h7_create();
+        tag_family = *tag25h7_create();
     else {
         WOLF_ERROR("Unrecognized tag family name. Use e.g. \"tag36h11\".");
         exit(-1);  // TODO: default family instead?
@@ -27,7 +27,7 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
 
     tag_family.black_border = 1; //getopt_get_int(getopt, "border");
 
-    detector_ = apriltag_detector_create();
+    detector_ = *apriltag_detector_create();
     apriltag_detector_add_family(&detector_, &tag_family);
 
     detector_.quad_decimate = 1.0; //getopt_get_double(getopt, "decimate");
@@ -52,11 +52,10 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
     //detect tags in incoming image
     // Make an image_u8_t header for the Mat data
-    image_u8_t im = { };
-    im.width = grayscale_image_.cols;
-    im.height = grayscale_image_.rows;
-    im.stride = grayscale_image_.cols;
-    im.buf = grayscale_image_.data;
+    image_u8_t im = {   .width = grayscale_image_.cols,
+                        .height = grayscale_image_.rows,
+                        .stride = grayscale_image_.cols,
+                        .buf = grayscale_image_.data};
 
     //defined camera parameters
     SensorBasePtr sensor = incoming_ptr_->getSensorPtr();
@@ -66,7 +65,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
     double cx(camera_intrinsics(0,2));                                                          //test value: 335.684471
     double cy(camera_intrinsics(1,2));                                                          //test value: 257.352121
 
-    zarray_t detections_ = apriltag_detector_detect(&detector_, &im);
+    zarray_t detections_ = *apriltag_detector_detect(&detector_, &im);
 //    WOLF_TRACE(zarray_size(detections_incoming_), " tags detected");
 
     detections_incoming_.resize(zarray_size(&detections_));
@@ -95,9 +94,6 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         //get Pose matrix and covarince from det
         detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov, *det)); //warning: pointer ?
     }
-
-    //destroy pointers
-    apriltag_detections_destroy(detections);
 }
 
 ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
