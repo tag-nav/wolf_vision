@@ -21,10 +21,10 @@ class ConstraintAutodiffApriltag : public ConstraintAutodiff<ConstraintAutodiffA
         /** \brief Class constructor
          */
         ConstraintAutodiffApriltag(
-                const SensorBasePtr _sensor_ptr,
-                const FrameBasePtr _frame_ptr,
-                const LandmarkApriltagPtr _landmark_other_ptr,
-                const FeatureApriltagPtr _feature_ptr,
+                const SensorBasePtr& _sensor_ptr,
+                const FrameBasePtr& _frame_ptr,
+                const LandmarkApriltagPtr& _landmark_other_ptr,
+                const FeatureApriltagPtr& _feature_ptr,
                 bool _apply_loss_function,
                 ConstraintStatus _status);
 
@@ -48,10 +48,10 @@ namespace wolf
 {
 
 ConstraintAutodiffApriltag::ConstraintAutodiffApriltag(
-        const SensorBasePtr _sensor_ptr,
-        const FrameBasePtr _frame_ptr,
-        const LandmarkApriltagPtr _landmark_other_ptr,
-        const FeatureApriltagPtr _feature_ptr,
+        const SensorBasePtr& _sensor_ptr,
+        const FrameBasePtr& _frame_ptr,
+        const LandmarkApriltagPtr& _landmark_other_ptr,
+        const FeatureApriltagPtr& _feature_ptr,
         bool _apply_loss_function,
         ConstraintStatus _status) :
             ConstraintAutodiff("APRILTAG",
