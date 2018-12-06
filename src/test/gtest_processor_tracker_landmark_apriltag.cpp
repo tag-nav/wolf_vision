@@ -12,18 +12,27 @@ using namespace Eigen;
 using namespace wolf;
 using std::static_pointer_cast;
 
-//// Use the following in case you want to initialize tests with predefines variables or methods.
-//class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
-//    public:
-//        virtual void SetUp()
-//        {
-//            std::string wolf_root = _WOLF_ROOT_DIR;
-//
-//            ProblemPtr   problem = Problem::create("PO 3D");
-//            SensorBasePtr    sen = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_camera.yaml");
-//            ProcessorBasePtr prc = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
-//        }
-//};
+// Use the following in case you want to initialize tests with predefines variables or methods.
+class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
+    public:
+        virtual void SetUp()
+        {
+            std::string wolf_root = _WOLF_ROOT_DIR;
+
+            problem = Problem::create("PO 3D");
+            sen = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_canonical.yaml");
+
+            WOLF_TRACE("");
+//            prc = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
+            WOLF_TRACE("");
+
+            problem->loadMap(wolf_root + "/src/examples/map_apriltag_1.yaml");
+        }
+    public:
+        ProblemPtr   problem;
+        SensorBasePtr    sen;
+        ProcessorBasePtr prc;
+};
 
 TEST(ProcessorTrackerLandmarkApriltag, Constructor)
 {
@@ -100,6 +109,11 @@ TEST(ProcessorTrackerLandmarkApriltag, createLandmark)
 TEST(ProcessorTrackerLandmarkApriltag, createConstraint)
 {
     std::cout << "033[1;33m [WARN]:033[0m gtest for ProcessorTrackerLandmarkApriltag createConstraint is empty." << std::endl;
+}
+
+TEST_F(ProcessorTrackerLandmarkApriltag_class, loadMap)
+{
+    problem->print(4,1,1,1);
 }
 
 
