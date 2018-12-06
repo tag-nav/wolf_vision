@@ -121,7 +121,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
     double cx(camera_intrinsics(0,2));                                                          //test value: 335.684471
     double cy(camera_intrinsics(1,2));                                                          //test value: 257.352121
 
-    matd_t *pose_matrix = homography_to_pose(std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->det->H, fx, fy, cx, cy);
+    matd_t *pose_matrix = homography_to_pose(std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->getDetection().H, fx, fy, cx, cy);
     Eigen::Affine3ds t_M_c;
 
     for(int r=0; r<4; r++)
@@ -136,7 +136,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
     Eigen::Vector7s pose;
     pose << c_M_t.translation(), R2q(c_M_t.linear()).data(); //TODO: quaternion order ?
 
-    LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(std::make_shared<StateBlock>(pose.head<3>()), std::make_shared<StateQuaternion>(pose.tail<4>()), std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->det->id); //TODO: last parameter is width
+    LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(std::make_shared<StateBlock>(pose.head<3>()), std::make_shared<StateQuaternion>(pose.tail<4>()), std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->getDetection().id); //TODO: last parameter is width
 
     return LandmarkApriltagPtr;
 }
@@ -167,7 +167,7 @@ unsigned int findLandmarks(const LandmarkBaseList& _landmark_list_in, FeatureBas
 {   
     for (auto feature_in_image : detections_incoming_)
     {
-        int tag_id(std::static_pointer_cast<FeatureApriltag>(feature_in_image)->det->id);
+        int tag_id(std::static_pointer_cast<FeatureApriltag>(feature_in_image)->getDetection().id);
 
         for (auto landmark_in_ptr : _landmark_list_in)
         {

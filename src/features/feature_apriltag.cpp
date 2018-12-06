@@ -22,4 +22,8 @@ Scalar FeatureApriltag::getTagId() const
     return detection_.id;
 }
 
+const apriltag_detection_t& FeatureApriltag::getDetection() const
+{
+    return detection_;
+}
 } // namespace wolf

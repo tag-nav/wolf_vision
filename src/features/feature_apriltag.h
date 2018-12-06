@@ -29,6 +29,8 @@ class FeatureApriltag : public FeatureBase
          **/
         Scalar getTagId() const; 
 
+        const apriltag_detection_t& getDetection() const;
+
     private:
     const apriltag_detection_t detection_;
         
