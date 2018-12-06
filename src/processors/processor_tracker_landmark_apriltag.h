@@ -17,6 +17,7 @@ namespace wolf
 {
 
 WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerLandmarkApriltag);
+
 struct ProcessorParamsTrackerLandmarkApriltag : public ProcessorParamsTrackerLandmark
 {
     //tag parameters

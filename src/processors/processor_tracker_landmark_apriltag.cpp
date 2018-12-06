@@ -6,6 +6,7 @@
 #include "features/feature_apriltag.h"
 #include "constraints/constraint_autodiff_apriltag.h"
 #include "landmark_apriltag.h"
+#include "state_quaternion.h"
 
 // April tags
 #include "common/homography.h"
@@ -143,32 +144,42 @@ ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBase
 
 LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr _feature_ptr)
 {
-    //get parameters from sensor
-    SensorBasePtr sensor = incoming_ptr_->getSensorPtr();
-    Eigen::Matrix3s camera_intrinsics(std::static_pointer_cast<SensorCamera>(sensor)->getIntrinsicMatrix()); //[fx 0 cx; 0 fy cy; 0 0 1]
-    double fx(camera_intrinsics(0,0));  //TODO: conversion warning -> wolf::Scalar to double    //test value: 809.135074
-    double fy(camera_intrinsics(1,1));                                                          //test value: 809.410030
-    double cx(camera_intrinsics(0,2));                                                          //test value: 335.684471
-    double cy(camera_intrinsics(1,2));                                                          //test value: 257.352121
+    WOLF_TRACE("");
 
-    matd_t *pose_matrix = homography_to_pose(std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->getDetection().H, fx, fy, cx, cy);
-    Eigen::Affine3ds t_M_c;
+    // world to rob
+    Vector3s pos = getLastPtr()->getFramePtr()->getPPtr()->getState();
+    Quaternions quat (getLastPtr()->getFramePtr()->getOPtr()->getState().data());
+    Eigen::Affine3ds w_M_r = Eigen::Translation<Scalar,3>(pos(0), pos(1), pos(2)) * quat;
 
-    for(int r=0; r<4; r++)
-    {
-        for(int c=0; c<4; c++)
-        {
-            t_M_c.matrix()(r,c) = matd_get(pose_matrix,r,c);
-        }
-    }
+    WOLF_TRACE("");
+    // rob to camera
+    pos = getSensorPtr()->getPPtr()->getState();
+    quat.coeffs() = getSensorPtr()->getOPtr()->getState();
+    Eigen::Affine3ds r_M_c = Eigen::Translation<Scalar,3>(pos(0), pos(1), pos(2)) * quat;
 
-    Eigen::Affine3ds c_M_t(t_M_c.inverse());
-    Eigen::Vector7s pose;
-    pose << c_M_t.translation(), R2q(c_M_t.linear()).coeffs();
+    WOLF_TRACE("");
+    // camera to lmk
+    Eigen::Vector7s c_pose_l = _feature_ptr->getMeasurement();
+    Eigen::Affine3ds c_M_l = Eigen::Translation<Scalar,3>(c_pose_l(0), c_pose_l(1), c_pose_l(2)) * Eigen::Quaternions(c_pose_l.data() + 3);
 
+    WOLF_TRACE("");
+    // world to lmk
+    Eigen::Affine3ds w_M_l = w_M_r * r_M_c * c_M_l;
+
+    WOLF_TRACE("");
+    // make 7-vector for lmk pose
+    pos = w_M_l.translation();
+    quat = R2q(w_M_l.linear());
+    Vector7s w_pose_l;
+    w_pose_l << pos, quat.coeffs();
+
+    WOLF_TRACE("");
     int tagid = std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->getDetection().id;
-    LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(pose, tagid, getTagWidth(tagid));
 
+    WOLF_TRACE("");
+    LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(w_pose_l, tagid, getTagWidth(tagid));
+
+    WOLF_TRACE("");
     return new_landmark;
 }
 
@@ -187,9 +198,7 @@ unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned 
 
 bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
 {
-  std::cout << "033[1;33m [WARN]:033[0m ProcessorTrackerLandmarkApriltag::voteForKeyFrame is empty." << std::endl;
-  bool return_var{}; //TODO: fill this variable
-  return return_var;
+    return false;
 }
 
 unsigned int ProcessorTrackerLandmarkApriltag::findLandmarks(const LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
