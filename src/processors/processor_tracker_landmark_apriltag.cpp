@@ -121,7 +121,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         Eigen::Vector7s pose;
         pose << scale*t, R2q(c_M_t.linear()).coeffs();
 
-        // set the covariance
+        // compute the covariance
         Eigen::Vector6s var_vec; var_vec << std_xy_*std_xy_, std_xy_*std_xy_, std_z_*std_z_, std_rpy_*std_rpy_, std_rpy_*std_rpy_, std_rpy_*std_rpy_;
         Eigen::Matrix6s cov = var_vec.asDiagonal() ;
 
@@ -146,8 +146,8 @@ ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBase
 
 LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr _feature_ptr)
 {
-    WOLF_TRACE("");
 
+    WOLF_TRACE("");
     // world to rob
     Vector3s pos = getLastPtr()->getFramePtr()->getPPtr()->getState();
     Quaternions quat (getLastPtr()->getFramePtr()->getOPtr()->getState().data());
@@ -189,7 +189,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
 
 unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
 {
-  for (auto feature_in_image : detections_incoming_)
+    for (auto feature_in_image : detections_incoming_)
     {
         auto search = matches_landmark_from_incoming_.find(feature_in_image);
 
