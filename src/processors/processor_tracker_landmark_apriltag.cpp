@@ -29,8 +29,8 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         ProcessorTrackerLandmark("TRACKER LANDMARK APRILTAG",  _params_tracker_landmark_apriltag ),
         tag_widths_(_params_tracker_landmark_apriltag->tag_widths_),
         tag_width_default_(_params_tracker_landmark_apriltag->tag_width_default_),
-        std_xy_(_params_tracker_landmark_apriltag->std_xy_),
-        std_z_(_params_tracker_landmark_apriltag->std_z_),
+        std_xy_ (_params_tracker_landmark_apriltag->std_xy_ ),
+        std_z_  (_params_tracker_landmark_apriltag->std_z_  ),
         std_rpy_(_params_tracker_landmark_apriltag->std_rpy_)
 {
     // configure apriltag detector
@@ -75,14 +75,17 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 {
     //std::cout << "PreProcess: " << std::endl;
     // first, convert image to grayscale
-    cv::cvtColor(std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage(), grayscale_image_, cv::COLOR_BGR2GRAY);
+    cv::cvtColor(std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage(),
+                 grayscale_image_,
+                 cv::COLOR_BGR2GRAY);
 
     //detect tags in incoming image
     // Make an image_u8_t header for the Mat data
-    image_u8_t im = {   .width = grayscale_image_.cols,
+    image_u8_t im = {   .width  = grayscale_image_.cols,
                         .height = grayscale_image_.rows,
                         .stride = grayscale_image_.cols,
-                        .buf = grayscale_image_.data};
+                        .buf    = grayscale_image_.data
+                    };
 
     //defined camera parameters
     SensorBasePtr sensor = incoming_ptr_->getSensorPtr();
@@ -101,15 +104,11 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         apriltag_detection_t *det;
         zarray_get(&detections_, i, &det);
         matd_t *pose_matrix = homography_to_pose(det->H, fx, fy, cx, cy);
-        Eigen::Affine3ds t_M_c;
 
+        Eigen::Affine3ds t_M_c;
         for(int r=0; r<4; r++)
-        {
             for(int c=0; c<4; c++)
-            {
                 t_M_c.matrix()(r,c) = matd_get(pose_matrix,r,c);
-            }
-        }
 
         Eigen::Affine3ds c_M_t(t_M_c.inverse());
         Eigen::Vector3s t(c_M_t.translation()); // translation vector in apriltag units (tag width in units is 2 units)
@@ -138,7 +137,7 @@ ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBase
             getSensorPtr(),
             getLastPtr()->getFramePtr(),
             std::static_pointer_cast<LandmarkApriltag>(_landmark_ptr),
-            std::static_pointer_cast<FeatureApriltag>(_feature_ptr),
+            std::static_pointer_cast<FeatureApriltag> (_feature_ptr ),
             false,
             CTR_ACTIVE
     );
@@ -205,8 +204,9 @@ bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
     return false;
 }
 
-unsigned int ProcessorTrackerLandmarkApriltag::findLandmarks(const LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
-                                           LandmarkMatchMap& _feature_landmark_correspondences)
+unsigned int ProcessorTrackerLandmarkApriltag::findLandmarks(const LandmarkBaseList& _landmark_list_in,
+                                                             FeatureBaseList& _feature_list_out,
+                                                             LandmarkMatchMap& _feature_landmark_correspondences)
 {   
     for (auto feature_in_image : detections_incoming_)
     {
