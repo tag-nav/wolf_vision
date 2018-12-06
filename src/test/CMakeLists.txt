@@ -164,6 +164,12 @@ target_link_libraries(gtest_feature_IMU ${PROJECT_NAME})
 wolf_add_gtest(gtest_IMU gtest_IMU.cpp)
 target_link_libraries(gtest_IMU ${PROJECT_NAME})
 
+IF (OPENCV_FOUND AND APRILTAG_LIBRARY)
+	# gtest_landmark_apriltag test
+	wolf_add_gtest(gtest_landmark_apriltag gtest_landmark_apriltag.cpp)
+	target_link_libraries(gtest_landmark_apriltag ${PROJECT_NAME})
+ENDIF(OPENCV_FOUND AND APRILTAG_LIBRARY)
+
 # MakePosDef function test
 wolf_add_gtest(gtest_make_posdef gtest_make_posdef.cpp)
 target_link_libraries(gtest_make_posdef ${PROJECT_NAME})

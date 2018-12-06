@@ -4,7 +4,6 @@
 #include "logging.h"
 
 #include "processors/processor_tracker_landmark_apriltag.h"
-
 #include "features/feature_apriltag.h"
 #include "landmark_apriltag.h"
 
@@ -12,7 +11,7 @@ using namespace Eigen;
 using namespace wolf;
 using std::static_pointer_cast;
 
-// Use the following in case you want to initialize tests with predefines variables or methods.
+// Use the following in case you want to initialize tests with predefined variables or methods.
 class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
     public:
         virtual void SetUp()
@@ -109,21 +108,6 @@ TEST(ProcessorTrackerLandmarkApriltag, createConstraint)
 {
     std::cout << "033[1;33m [WARN]:033[0m gtest for ProcessorTrackerLandmarkApriltag createConstraint is empty." << std::endl;
 }
-
-TEST_F(ProcessorTrackerLandmarkApriltag_class, loadMap)
-{
-    problem->loadMap(wolf_root + "/src/examples/map_apriltag_1.yaml");
-    problem->print(4,1,1,1);
-
-    problem->saveMap(wolf_root + "/src/examples/map_apriltag_save.yaml");
-
-    problem->getMapPtr()->getLandmarkList().clear();
-    problem->print(4,1,1,1);
-
-    problem->loadMap(wolf_root + "/src/examples/map_apriltag_save.yaml");
-    problem->print(4,1,1,1);
-}
-
 
 int main(int argc, char **argv)
 {
