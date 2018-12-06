@@ -177,7 +177,8 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
     w_pose_l << pos, quat.coeffs();
 
     WOLF_TRACE("");
-    int tagid = std::static_pointer_cast<FeatureApriltag>(_feature_ptr)->getDetection().id;
+    FeatureApriltagPtr feat_april = std::static_pointer_cast<FeatureApriltag>(_feature_ptr);
+    int tagid = feat_april->getTagId();
 
     WOLF_TRACE("");
     LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(w_pose_l, tagid, getTagWidth(tagid));
@@ -209,7 +210,7 @@ unsigned int ProcessorTrackerLandmarkApriltag::findLandmarks(const LandmarkBaseL
 {   
     for (auto feature_in_image : detections_incoming_)
     {
-        int tag_id(std::static_pointer_cast<FeatureApriltag>(feature_in_image)->getDetection().id);
+        int tag_id(std::static_pointer_cast<FeatureApriltag>(feature_in_image)->getTagId());
 
         for (auto landmark_in_ptr : _landmark_list_in)
         {

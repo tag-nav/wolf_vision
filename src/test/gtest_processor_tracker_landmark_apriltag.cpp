@@ -87,10 +87,7 @@ TEST(ProcessorTrackerLandmarkApriltag, createLandmark)
     params->tag_family_ = "tag36h11";
     ProcessorTrackerLandmarkApriltagPtr p = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
 
-    apriltag_detection_t det;
-    det.id = 1;
-
-    FeatureApriltagPtr feature = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), det);
+    FeatureApriltagPtr feature = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1);
 
     // no links in the wolf tree (it needs sensor, frame, capture):
     ASSERT_DEATH({
