@@ -34,8 +34,8 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
 
 //            F1 = problem->emplaceFrame(KEY_FRAME, 0.0);
 //            C1 = std::make_shared<CapturePose>(0.0, sen, Vector7s(), Matrix6s());
-            C1 = prc_apr->getLastPtr();
-            F1 = C1->getFramePtr();
+//            C1 = prc_apr->getLastPtr();
+//            F1 = C1->getFramePtr();
 //            F1->addCapture(C1);
         }
     public:
@@ -107,12 +107,11 @@ TEST(ProcessorTrackerLandmarkApriltag, detectNewFeatures)
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
 {
     FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1);
-    C1->addFeature(f1);
-
-    problem->print(4,1,1,1);
 
     // need to set at least last_ptr in processor p before this DEATH can be removed
     ASSERT_DEATH({
+        C1->addFeature(f1);
+        problem->print(4,1,1,1);
         LandmarkBasePtr lmk = prc_apr->createLandmark(f1);
         LandmarkApriltagPtr lmk_april = std::static_pointer_cast<LandmarkApriltag>(lmk);
         ASSERT_TRUE(lmk_april->getType() == "APRILTAG");
