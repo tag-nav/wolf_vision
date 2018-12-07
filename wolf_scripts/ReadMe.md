@@ -12,13 +12,22 @@ Helpful scripts to create WOLF tree elements (e.g. processors)
   
 #### SCRIPTS installation  
 
-  * Move to the scripts folder
+  * Move to the WOLF scripts folder 
   
-  ..*`cd $WOLF_ROOT/wolf_scripts`  
+  ..*`cd <WOLF_DIRECTORY>/wolf_scripts`  
 
-  * Run the following line to set your `bashrc`. This will allow you to execute the scripts from any console path.
+  * Run the following lines to set your `bashrc`. This will allow you to execute the scripts from any console path.
   
-  ..*`echo "source $WOLF_ROOT/wolf_scripts/setup.bash" >> ~/.bashrc`
+<<<<<<< HEAD
+  ..*`echo "export WOLF_ROOT=$PWD/../." >> ~/.bashrc`
+=======
+  ..*`echo "export WOLF_ROOT=$PWD/../" >> ~/.bashrc`
+>>>>>>> 91ab6a7... FIX ReadMe to deal with WOLF_ROOT
+  ..*`echo "source $PWD/setup.bash" >> ~/.bashrc`
+  
+  * Source your `bashrc`.
+  
+  ..*`source ~/.bashrc` 
 
 ## Usage
 
