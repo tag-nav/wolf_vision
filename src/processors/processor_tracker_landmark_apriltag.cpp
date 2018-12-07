@@ -71,6 +71,20 @@ ProcessorTrackerLandmarkApriltag::~ProcessorTrackerLandmarkApriltag()
 {
 }
 
+
+ProcessorBasePtr ProcessorTrackerLandmarkApriltag::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
+{
+    std::shared_ptr<ProcessorParamsTrackerLandmarkApriltag> prc_apriltag_params;
+    if (_params)
+        prc_apriltag_params = std::static_pointer_cast<ProcessorParamsTrackerLandmarkApriltag>(_params);
+    else
+        prc_apriltag_params = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
+
+    ProcessorTrackerLandmarkApriltagPtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkApriltag>(prc_apriltag_params);
+    prc_ptr->setName(_unique_name);
+    return prc_ptr;
+}
+
 void ProcessorTrackerLandmarkApriltag::preProcess()
 {
     //std::cout << "PreProcess: " << std::endl;
@@ -237,6 +251,8 @@ wolf::Scalar ProcessorTrackerLandmarkApriltag::getTagWidth(int _id) const
         return tag_width_default_;
 }
 
+
+
 void ProcessorTrackerLandmarkApriltag::configure(SensorBasePtr _sensor)
 {
     // set processor params from camera params if required
@@ -246,3 +262,11 @@ void ProcessorTrackerLandmarkApriltag::configure(SensorBasePtr _sensor)
 }
 
 } // namespace wolf
+
+// Register in the SensorFactory
+#include "processor_factory.h"
+
+namespace wolf
+{
+WOLF_REGISTER_PROCESSOR("TRACKER LANDMARK APRILTAG", ProcessorTrackerLandmarkApriltag)
+}
