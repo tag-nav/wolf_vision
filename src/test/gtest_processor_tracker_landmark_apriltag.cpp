@@ -65,19 +65,22 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
         {
             wolf_root = _WOLF_ROOT_DIR;
 
+            // configure wolf problem
             problem = Problem::create("PO 3D");
             sen = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_canonical.yaml");
-
             prc     = problem->installProcessor("TRACKER LANDMARK APRILTAG WRAPPER", "apriltags_wrapper", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
             prc_apr = std::static_pointer_cast<ProcessorTrackerLandmarkApriltag_Wrapper>(prc);
 
-            F1 = problem->setPrior(Vector7s(), Matrix6s::Identity(), 0.0, 0.1);
+            // set prior
+            F1 = problem->setPrior(Vector7s::Zero(), Matrix6s::Identity(), 0.0, 0.1);
 
+            // minimal config for the processor to be operative
             C1 = std::make_shared<CapturePose>(1.0, sen, Vector7s(), Matrix6s());
             F1->addCapture(C1);
             prc_apr->setOriginPtr(C1);
             prc_apr->setLastPtr(C1);
         }
+
     public:
         std::string wolf_root;
         ProblemPtr   problem;
