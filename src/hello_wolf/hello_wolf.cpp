@@ -100,7 +100,7 @@ int main()
      *   - Second, using random values
      * Both solutions must produce the same exact values as in the sketches above.
      *
-     * Optionally, the user can opt to self-calibrate the sensor's orientation (see NOTE within the code around Line 142)
+     * Optionally, the user can opt to self-calibrate the sensor's orientation (see NOTE within the code around Line 151)
      *
      * (c) 2017 Joan Sola @ IRI-CSIC
      */
@@ -137,19 +137,22 @@ int main()
     intrinsics_rb->noise_bearing_degrees_std = 1.0;
     SensorBasePtr sensor_rb                 = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(1,1,0), intrinsics_rb);
 
-    // NOTE: SELF-CALIBRATION OF SENSOR ORIENTATION
-    // Uncomment this line below to achieve sensor self-calibration (of the orientation only, since the position is not observable)
-    // sensor_rb->getOPtr()->unfix();
-
-    // NOTE: SELF-CALIBRATION OF SENSOR POSITION
-    // The position is however not observable, and thus self-calibration would not work. You can try uncommenting it too.
-    // sensor_rb->getPPtr()->unfix();
-
     // processor Range and Bearing
     ProcessorParamsRangeBearingPtr params_rb = std::make_shared<ProcessorParamsRangeBearing>();
     params_rb->voting_active                = false;
     params_rb->time_tolerance               = 0.01;
     ProcessorBasePtr processor_rb           = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
+
+
+    // SELF CALIBRATION ===================================================
+
+    // NOTE: SELF-CALIBRATION OF SENSOR ORIENTATION
+    // Uncomment this line below to achieve sensor self-calibration (of the orientation only, since the position is not observable)
+    sensor_rb->getOPtr()->unfix();
+
+    // NOTE: SELF-CALIBRATION OF SENSOR POSITION
+    // The position is however not observable, and thus self-calibration would not work. You can try uncommenting it too.
+    // sensor_rb->getPPtr()->unfix();
 
 
     // CONFIGURE ==========================================================
@@ -276,7 +279,7 @@ int main()
      *
      *  - Observe that all other KFs and Lmks are correct.
      *
-     *  - Try self-calibrating the sensor orientation by uncommenting line 142 (well, around 142)
+     *  - Try self-calibrating the sensor orientation by uncommenting line 151 (well, around 151)
      *
      */
 
