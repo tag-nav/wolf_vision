@@ -32,16 +32,8 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
             sen = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_canonical.yaml");
 
             WOLF_TRACE("The line below needs to be uncommented after adding Factory stuff to processor apriltag");
-            //            prc     = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
-            //            prc_apr = std::static_pointer_cast<ProcessorTrackerLandmarkApriltag>(prc);
-            // this is a workaround while the factory is not there...
-            ProcessorParamsTrackerLandmarkApriltagPtr params = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
-            params->name = "Apriltag";
-            params->tag_family_ = "tag36h11";
-            prc_apr = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
-            prc = prc_apr;
-            sen->addProcessor(prc_apr);
-            // so far for the workaround
+            prc     = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
+            prc_apr = std::static_pointer_cast<ProcessorTrackerLandmarkApriltag>(prc);
 
             problem->setPrior(Vector7s(), Matrix6s::Identity(), 0.0, 0.1);
 

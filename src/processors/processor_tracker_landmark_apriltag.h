@@ -103,6 +103,10 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
 
         virtual void configure(SensorBasePtr _sensor);
 
+        // for factory
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
+
+
 
     private:
         Scalar getTagWidth(int _id) const;
@@ -116,6 +120,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         FeatureBaseList detections_incoming_;
         FeatureBaseList detections_last_;
         Scalar std_xy_, std_z_, std_rpy_;
+
 };
 
 } // namespace wolf
