@@ -6,6 +6,7 @@
 #include "processors/processor_tracker_landmark_apriltag.h"
 #include "features/feature_apriltag.h"
 #include "landmark_apriltag.h"
+#include "capture_pose.h"
 
 using namespace Eigen;
 using namespace wolf;
@@ -23,13 +24,28 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
 
             WOLF_TRACE("The line below needs to be uncommented after adding Factory stuff to processor apriltag");
 //            prc = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
+            ProcessorParamsTrackerLandmarkApriltagPtr params = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
+            params->tag_family_ = "tag36h11";
+            prc_apr = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
+            prc = prc_apr;
+            sen->addProcessor(prc_apr);
 
+            problem->setPrior(Vector7s(), Matrix6s::Identity(), 0.0, 0.1);
+
+//            F1 = problem->emplaceFrame(KEY_FRAME, 0.0);
+//            C1 = std::make_shared<CapturePose>(0.0, sen, Vector7s(), Matrix6s());
+            C1 = prc_apr->getLastPtr();
+            F1 = C1->getFramePtr();
+//            F1->addCapture(C1);
         }
     public:
         std::string wolf_root;
         ProblemPtr   problem;
         SensorBasePtr    sen;
         ProcessorBasePtr prc;
+        ProcessorTrackerLandmarkApriltagPtr prc_apr;
+        FrameBasePtr     F1;
+        CaptureBasePtr   C1;
 };
 
 TEST(ProcessorTrackerLandmarkApriltag, Constructor)
@@ -88,17 +104,16 @@ TEST(ProcessorTrackerLandmarkApriltag, detectNewFeatures)
     // Some detected features TODO
 }
 
-TEST(ProcessorTrackerLandmarkApriltag, createLandmark)
+TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
 {
-    ProcessorParamsTrackerLandmarkApriltagPtr params = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
-    params->tag_family_ = "tag36h11";
-    ProcessorTrackerLandmarkApriltagPtr p = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
+    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1);
+    C1->addFeature(f1);
 
-    FeatureApriltagPtr feature = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1);
+    problem->print(4,1,1,1);
 
-    // no links in the wolf tree (it needs sensor, frame, capture):
+    // need to set at least last_ptr in processor p before this DEATH can be removed
     ASSERT_DEATH({
-        LandmarkBasePtr lmk = p->createLandmark(feature);
+        LandmarkBasePtr lmk = prc_apr->createLandmark(f1);
         LandmarkApriltagPtr lmk_april = std::static_pointer_cast<LandmarkApriltag>(lmk);
         ASSERT_TRUE(lmk_april->getType() == "APRILTAG");
     },"");
