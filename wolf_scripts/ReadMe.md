@@ -20,7 +20,7 @@ Helpful scripts to create WOLF tree elements (e.g. processors)
   
   ..*`echo "export WOLF_ROOT=$PWD/../." >> ~/.bashrc`
   ..*`echo "source $PWD/setup.bash" >> ~/.bashrc`
-  
+   
   * Source your `bashrc`.
   
   ..*`source ~/.bashrc` 
