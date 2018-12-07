@@ -366,7 +366,7 @@ updateCMakeLists()
   CML_PATH="${WOLF_ROOT}/src/${TYPE}s/CMakeLists.txt"
 
   # Add Header source
-  Hsources=( $(grep -e ".h " "${CML_PATH}") )
+  Hsources=( $(grep -e ".h" "${CML_PATH}") )
   NewH="\${CMAKE_CURRENT_SOURCE_DIR}/$NAME.h"
   
   # Check if already exists
@@ -407,7 +407,7 @@ updateCMakeLists()
     if ! [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
     then
       # Add CPP source
-      Hsources=( $(grep -e ".cpp " "${CML_PATH}") )
+      Hsources=( $(grep -e ".cpp" "${CML_PATH}") )
       NewCPP="\${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp"
       Hsources=( "${Hsources[@]}" $NewCPP )
       IFS=$'\n' 
