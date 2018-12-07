@@ -38,3 +38,6 @@ Creates the main structure including .cpp and .h files, and a gtest for the new 
     - t: Type. Any of the following [ capture | constraint | feature | landmark | processor | sensor ]"
     - n: Name 
     - b: Base class (inherited from this class)
+  
+  *__[WARNING]__: If you are using external libraries, you will have to manually modify some files. Please check the yellow [WARN] messages shown after executing the script.  
+    
