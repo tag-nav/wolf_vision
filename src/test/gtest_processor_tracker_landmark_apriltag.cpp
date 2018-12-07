@@ -27,6 +27,7 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
             //            prc_apr = std::static_pointer_cast<ProcessorTrackerLandmarkApriltag>(prc);
             // this is a workaround while the factory is not there...
             ProcessorParamsTrackerLandmarkApriltagPtr params = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
+            params->name = "Apriltag";
             params->tag_family_ = "tag36h11";
             prc_apr = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
             prc = prc_apr;
