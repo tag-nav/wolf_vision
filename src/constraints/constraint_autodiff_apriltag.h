@@ -54,7 +54,7 @@ ConstraintAutodiffApriltag::ConstraintAutodiffApriltag(
         const FeatureApriltagPtr& _feature_ptr,
         bool _apply_loss_function,
         ConstraintStatus _status) :
-            ConstraintAutodiff("APRILTAG",
+            ConstraintAutodiff("AUTODIFF APRILTAG",
                                nullptr,
                                nullptr,
                                nullptr,

@@ -165,8 +165,6 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
 
     features_in.push_back(detected_feature0);
     features_in.push_back(detected_feature0);
-
-
 }
 
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
@@ -179,9 +177,17 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
     ASSERT_TRUE(lmk_april->getType() == "APRILTAG");
 }
 
-TEST(ProcessorTrackerLandmarkApriltag, createConstraint)
+TEST_F(ProcessorTrackerLandmarkApriltag_class, createConstraint)
 {
-    std::cout << "033[1;33m [WARN]:033[0m gtest for ProcessorTrackerLandmarkApriltag createConstraint is empty." << std::endl;
+    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1);
+
+    C1->addFeature(f1);
+    LandmarkBasePtr lmk = prc_apr->createLandmark(f1);
+    LandmarkApriltagPtr lmk_april = std::static_pointer_cast<LandmarkApriltag>(lmk);
+
+    ConstraintBasePtr ctr = prc_apr->createConstraint(f1, lmk);
+
+    ASSERT_TRUE(ctr->getType() == "AUTODIFF APRILTAG");
 }
 
 int main(int argc, char **argv)
