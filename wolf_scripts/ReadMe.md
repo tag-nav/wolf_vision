@@ -35,6 +35,6 @@ Creates the main structure including .cpp and .h files, and a gtest for the new 
   `create_wolf_processor.sh -t processor -n example -b tracker` 
 
   * Options:
-    - t: Type. Any of the following [ capture | constraint | feature | processor | sensor ]"
+    - t: Type. Any of the following [ capture | constraint | feature | landmark | processor | sensor ]"
     - n: Name 
     - b: Base class (inherited from this class)
