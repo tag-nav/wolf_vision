@@ -27,9 +27,9 @@ public:
 
     const std::string path_to_io = "/tmp/";
 
-    decltype(std::declval<wolf::NodeBase>().getClass()) nb_class = "Foo";
-    decltype(std::declval<wolf::NodeBase>().getClass()) nb_type  = "Bar";
-    decltype(std::declval<wolf::NodeBase>().getClass()) nb_name  = "Dummy";
+    decltype(std::declval<wolf::NodeBase>().getCategory()) nb_class = "Foo";
+    decltype(std::declval<wolf::NodeBase>().getCategory()) nb_type  = "Bar";
+    decltype(std::declval<wolf::NodeBase>().getCategory()) nb_name  = "Dummy";
 
     decltype(std::declval<wolf::NodeBase>().nodeId()) id;
 
@@ -60,7 +60,7 @@ TEST_F(WolfTestCerealSerializationNodeBase, CerealSerializationNodeBaseXML)
 
     ASSERT_NO_THROW( xml_archive( nb ) );
 
-    ASSERT_EQ(nb.getClass(), nb_class);
+    ASSERT_EQ(nb.getCategory(), nb_class);
     ASSERT_EQ(nb.getType(),  nb_type);
     ASSERT_EQ(nb.getName(),  nb_name);
     ASSERT_EQ(nb.nodeId(),   id);
@@ -92,7 +92,7 @@ TEST_F(WolfTestCerealSerializationNodeBase, CerealSerializationNodeBasePtrXML)
 
     ASSERT_NO_THROW( xml_archive( nb ) );
 
-    ASSERT_EQ(nb->getClass(), nb_class);
+    ASSERT_EQ(nb->getCategory(), nb_class);
     ASSERT_EQ(nb->getType(),  nb_type);
     ASSERT_EQ(nb->getName(),  nb_name);
     ASSERT_EQ(nb->nodeId(),   id);
@@ -128,7 +128,7 @@ TEST_F(WolfTestCerealSerializationNodeBase, CerealSerializationNodeBaseJSON)
 
     ASSERT_NO_THROW( json_archive( nb ) );
 
-    ASSERT_EQ(nb.getClass(), nb_class);
+    ASSERT_EQ(nb.getCategory(), nb_class);
     ASSERT_EQ(nb.getType(),  nb_type);
     ASSERT_EQ(nb.getName(),  nb_name);
     ASSERT_EQ(nb.nodeId(),   id);
@@ -159,7 +159,7 @@ TEST_F(WolfTestCerealSerializationNodeBase, CerealSerializationNodeBasePtrJSON)
 
     ASSERT_NO_THROW( json_archive( nb ) );
 
-    ASSERT_EQ(nb->getClass(), nb_class);
+    ASSERT_EQ(nb->getCategory(), nb_class);
     ASSERT_EQ(nb->getType(),  nb_type);
     ASSERT_EQ(nb->getName(),  nb_name);
     ASSERT_EQ(nb->nodeId(),   id);
@@ -195,7 +195,7 @@ TEST_F(WolfTestCerealSerializationNodeBase, CerealSerializationNodeBaseBinary)
 
     ASSERT_NO_THROW( bin_archive( nb ) );
 
-    ASSERT_EQ(nb.getClass(), nb_class);
+    ASSERT_EQ(nb.getCategory(), nb_class);
     ASSERT_EQ(nb.getType(),  nb_type);
     ASSERT_EQ(nb.getName(),  nb_name);
     ASSERT_EQ(nb.nodeId(),   id);
@@ -226,7 +226,7 @@ TEST_F(WolfTestCerealSerializationNodeBase, CerealSerializationNodeBasePtrBinary
 
     ASSERT_NO_THROW( bin_archive( nb ) );
 
-    ASSERT_EQ(nb->getClass(), nb_class);
+    ASSERT_EQ(nb->getCategory(), nb_class);
     ASSERT_EQ(nb->getType(),  nb_type);
     ASSERT_EQ(nb->getName(),  nb_name);
     ASSERT_EQ(nb->nodeId(),   id);
