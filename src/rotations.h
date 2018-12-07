@@ -205,8 +205,30 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_R(const Eigen::MatrixBa
 
     typedef typename Derived::Scalar T;
 
-    Eigen::AngleAxis<T> aa = Eigen::AngleAxis<T>(_R);
-    return aa.axis() * aa.angle();
+//    Eigen::AngleAxis<T> aa(_R);
+//    return aa.axis() * aa.angle();
+
+    /*
+     *
+     * phi = ( trace ( R) -1 ) / 2;
+     *
+     * u = vee( R - R')/(2 sin phi)
+     */
+
+    T phi = acos(_R.trace() - (T)1.0 ) / (T)2.0 ;
+
+    if (phi > (T)1e-8)
+    {
+        Eigen::Matrix<T,3,1> u = vee(_R - _R.transpose()) / ((T)2 * sin(phi));
+        return phi*u;
+    }
+    else
+    {
+        // Try a better 1-order approximation instead of this 0-order
+        // Anyway Eigen AngleAxis was using (1,0,0) too
+        Eigen::Matrix<T,3,1> u( (T)1.0, (T)0.0, (T)0.0 );
+        return phi*u;
+    }
 }
 
 /** \brief Rotation vector to quaternion conversion
