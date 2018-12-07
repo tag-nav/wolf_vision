@@ -126,6 +126,7 @@ TEST(ProcessorTrackerLandmarkApriltag, Constructor)
 
     params->tag_family_ = "wrong_family";
     params->name        = params->tag_family_;
+    WOLF_INFO("The following runtime error \"Unrecognized tag family name. Use e.g. \"tag36h11\".\" is expected and does not imply a failed test:");
     ASSERT_DEATH( { std::make_shared<ProcessorTrackerLandmarkApriltag>(params); }, "" );
 }
 
