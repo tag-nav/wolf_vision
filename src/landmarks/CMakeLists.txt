@@ -3,11 +3,9 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 # Forward var to parent scope
 
 SET(HDRS_LANDMARK ${HDRS_LANDMARK}
-  #".h files"
   )
 
 SET(SRCS_LANDMARK ${SRCS_LANDMARK}
-  #".cpp files"
   )
 
   
