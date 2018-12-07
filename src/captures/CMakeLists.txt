@@ -12,11 +12,15 @@ SET(SRCS_CAPTURE ${SRCS_CAPTURE}
   ${CMAKE_CURRENT_SOURCE_DIR}/capture_wheel_joint_position.cpp 
   )
 
+#=========================================
+# Add after these lines the CONDITIONAL CLUES [IF/ELSE]  
+# for external libraries and move inside them the respective lines from above.  
 
 
 
-
-
+#=========================================
+#=========================================
+  
 # These lines always at the end
 SET(HDRS_CAPTURE ${HDRS_CAPTURE}  PARENT_SCOPE)
 SET(SRCS_CAPTURE ${SRCS_CAPTURE}  PARENT_SCOPE)
