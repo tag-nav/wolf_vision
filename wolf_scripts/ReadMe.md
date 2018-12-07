@@ -18,11 +18,7 @@ Helpful scripts to create WOLF tree elements (e.g. processors)
 
   * Run the following lines to set your `bashrc`. This will allow you to execute the scripts from any console path.
   
-<<<<<<< HEAD
   ..*`echo "export WOLF_ROOT=$PWD/../." >> ~/.bashrc`
-=======
-  ..*`echo "export WOLF_ROOT=$PWD/../" >> ~/.bashrc`
->>>>>>> 91ab6a7... FIX ReadMe to deal with WOLF_ROOT
   ..*`echo "source $PWD/setup.bash" >> ~/.bashrc`
   
   * Source your `bashrc`.
