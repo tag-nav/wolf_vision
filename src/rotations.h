@@ -193,6 +193,19 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBa
         return Eigen::Matrix<T, 3, 3>::Identity() + skew(_v);
 }
 
+/** \brief rotation matrix to quaternion conversion
+ *
+ * @param _R a rotation matrix
+ * @return the equivalent right-handed unit quaternion
+ */
+template<typename Derived>
+inline Eigen::Quaternion<typename Derived::Scalar> R2q(const Eigen::MatrixBase<Derived>& _R)
+{
+    MatrixSizeCheck<3,3>::check(_R);
+
+    return Eigen::Quaternion<typename Derived::Scalar>(_R);
+}
+
 /** \brief Rotation matrix logarithmic map
  *
  * @param _R a 3D rotation matrix
@@ -201,34 +214,7 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> exp_R(const Eigen::MatrixBa
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 1> log_R(const Eigen::MatrixBase<Derived>& _R)
 {
-    MatrixSizeCheck<3, 3>::check(_R);
-
-    typedef typename Derived::Scalar T;
-
-//    Eigen::AngleAxis<T> aa(_R);
-//    return aa.axis() * aa.angle();
-
-    /*
-     *
-     * phi = ( trace ( R) -1 ) / 2;
-     *
-     * u = vee( R - R')/(2 sin phi)
-     */
-
-    T phi = acos(_R.trace() - (T)1.0 ) / (T)2.0 ;
-
-    if (phi > (T)1e-8)
-    {
-        Eigen::Matrix<T,3,1> u = vee(_R - _R.transpose()) / ((T)2 * sin(phi));
-        return phi*u;
-    }
-    else
-    {
-        // Try a better 1-order approximation instead of this 0-order
-        // Anyway Eigen AngleAxis was using (1,0,0) too
-        Eigen::Matrix<T,3,1> u( (T)1.0, (T)0.0, (T)0.0 );
-        return phi*u;
-    }
+    return log_q(R2q(_R));
 }
 
 /** \brief Rotation vector to quaternion conversion
@@ -297,19 +283,6 @@ inline Eigen::Matrix<typename Derived::Scalar, 3, 3> q2R(const Eigen::MatrixBase
     MatrixSizeCheck<4,1>::check(_q);
     Eigen::Quaternion<typename Derived::Scalar> q(_q(3),_q(0),_q(1),_q(2));
     return q2R( q );
-}
-
-/** \brief rotation matrix to quaternion conversion
- *
- * @param _R a rotation matrix
- * @return the equivalent right-handed unit quaternion
- */
-template<typename Derived>
-inline Eigen::Quaternion<typename Derived::Scalar> R2q(const Eigen::MatrixBase<Derived>& _R)
-{
-    MatrixSizeCheck<3,3>::check(_R);
-
-    return Eigen::Quaternion<typename Derived::Scalar>(_R);
 }
 
 /////////////////////////////////////////////////////////////////
