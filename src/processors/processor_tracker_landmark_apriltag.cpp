@@ -251,7 +251,13 @@ wolf::Scalar ProcessorTrackerLandmarkApriltag::getTagWidth(int _id) const
         return tag_width_default_;
 }
 
+Eigen::Vector6s ProcessorTrackerLandmarkApriltag::getVarVec()
+{
+    Eigen::Vector6s var_vec;
+    var_vec << std_xy_*std_xy_, std_xy_*std_xy_, std_z_*std_z_, std_rpy_*std_rpy_, std_rpy_*std_rpy_, std_rpy_*std_rpy_;
 
+    return var_vec;
+}
 
 void ProcessorTrackerLandmarkApriltag::configure(SensorBasePtr _sensor)
 {

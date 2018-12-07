@@ -129,6 +129,33 @@ TEST(ProcessorTrackerLandmarkApriltag, detectNewFeatures)
     ASSERT_EQ(features_out.size(), 0);
 
     // Some detected features TODO
+    FeatureBaseList features_in;
+    Eigen::Vector3s pos;
+    Eigen::Vector3s ori; //Euler angles in rad
+    Eigen::Quaternions quat;
+    Eigen::Vector7s pose;
+    Eigen::Matrix6s meas_cov( (p->getVarVec()).asDiagonal() );
+
+    // feature 0
+    pos << 0,2,0;
+    ori << M_TORAD * 0, M_TORAD * 0, M_TORAD * 0;
+    quat = e2q(ori);
+    pose << pos, quat.coeffs();
+    int tag_id = 0;
+    FeatureBasePtr detected_feature0 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id);
+
+    // feature 1
+    pos << 1,2,0;
+    ori << M_TORAD * 0, M_TORAD * 0, M_TORAD * 0;
+    quat = e2q(ori);
+    pose << pos, quat.coeffs();
+    int tag_id = 0;
+    FeatureBasePtr detected_feature1 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id);
+
+    features_in.push_back(detected_feature0);
+    features_in.push_back(detected_feature0);
+
+
 }
 
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
