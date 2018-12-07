@@ -75,6 +75,7 @@ static ProcessorParamsBasePtr createProcessorParamsLandmarkApriltag(const std::s
 
 // Register in the SensorFactory
 const bool WOLF_UNUSED registered_prc_apriltag = ProcessorParamsFactory::get().registerCreator("TRACKER LANDMARK APRILTAG", createProcessorParamsLandmarkApriltag);
+const bool WOLF_UNUSED registered_prc_apriltag_wrapper = ProcessorParamsFactory::get().registerCreator("TRACKER LANDMARK APRILTAG WRAPPER", createProcessorParamsLandmarkApriltag);
 
 } // namespace [unnamed]
 

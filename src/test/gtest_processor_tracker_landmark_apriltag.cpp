@@ -7,19 +7,41 @@
 #include "features/feature_apriltag.h"
 #include "landmark_apriltag.h"
 #include "capture_pose.h"
+#include "processor_factory.h"
 
 using namespace Eigen;
 using namespace wolf;
 using std::static_pointer_cast;
 
+WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmarkApriltag_Wrapper);
 class ProcessorTrackerLandmarkApriltag_Wrapper : public ProcessorTrackerLandmarkApriltag
 {
     public:
         ProcessorTrackerLandmarkApriltag_Wrapper(ProcessorParamsTrackerLandmarkApriltagPtr _params_tracker_landmark_apriltag) :
-            ProcessorTrackerLandmarkApriltag(_params_tracker_landmark_apriltag){};
+            ProcessorTrackerLandmarkApriltag(_params_tracker_landmark_apriltag)
+    {
+            setType("TRACKER LANDMARK APRILTAG WRAPPER");
+    };
         ~ProcessorTrackerLandmarkApriltag_Wrapper(){}
         void setLastPtr(const CaptureBasePtr _last_ptr) { last_ptr_ = _last_ptr; }
+        // for factory
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr)
+        {
+            std::shared_ptr<ProcessorParamsTrackerLandmarkApriltag> prc_apriltag_params;
+            if (_params)
+                prc_apriltag_params = std::static_pointer_cast<ProcessorParamsTrackerLandmarkApriltag>(_params);
+            else
+                prc_apriltag_params = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
+
+            ProcessorTrackerLandmarkApriltag_WrapperPtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkApriltag_Wrapper>(prc_apriltag_params);
+            prc_ptr->setName(_unique_name);
+            return prc_ptr;
+        }
 };
+namespace wolf{
+// Register in the Factories
+WOLF_REGISTER_PROCESSOR("TRACKER LANDMARK APRILTAG WRAPPER", ProcessorTrackerLandmarkApriltag_Wrapper);
+}
 
 // Use the following in case you want to initialize tests with predefined variables or methods.
 class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
@@ -32,8 +54,8 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
             sen = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_params_canonical.yaml");
 
             WOLF_TRACE("The line below needs to be uncommented after adding Factory stuff to processor apriltag");
-            prc     = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
-            prc_apr = std::static_pointer_cast<ProcessorTrackerLandmarkApriltag>(prc);
+            prc     = problem->installProcessor("TRACKER LANDMARK APRILTAG WRAPPER", "apriltags_wrapper", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
+            prc_apr = std::static_pointer_cast<ProcessorTrackerLandmarkApriltag_Wrapper>(prc);
 
             problem->setPrior(Vector7s(), Matrix6s::Identity(), 0.0, 0.1);
 
