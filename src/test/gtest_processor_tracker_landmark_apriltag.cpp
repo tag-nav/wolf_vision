@@ -12,6 +12,15 @@ using namespace Eigen;
 using namespace wolf;
 using std::static_pointer_cast;
 
+class ProcessorTrackerLandmarkApriltag_Wrapper : public ProcessorTrackerLandmarkApriltag
+{
+    public:
+        ProcessorTrackerLandmarkApriltag_Wrapper(ProcessorParamsTrackerLandmarkApriltagPtr _params_tracker_landmark_apriltag) :
+            ProcessorTrackerLandmarkApriltag(_params_tracker_landmark_apriltag){};
+        ~ProcessorTrackerLandmarkApriltag_Wrapper(){}
+        void setLastPtr(const CaptureBasePtr _last_ptr) { last_ptr_ = _last_ptr; }
+};
+
 // Use the following in case you want to initialize tests with predefined variables or methods.
 class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
     public:
