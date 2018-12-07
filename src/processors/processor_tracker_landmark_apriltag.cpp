@@ -124,16 +124,17 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
                 t_M_c.matrix()(r,c) = matd_get(pose_matrix,r,c);
 
         Eigen::Affine3ds c_M_t(t_M_c.inverse());
-        Eigen::Vector3s t(c_M_t.translation()); // translation vector in apriltag units (tag width in units is 2 units)
 
-        // set the scale
-        int    tag_id    = det->id;
-        Scalar tag_width = getTagWidth(tag_id);
-        Scalar scale     = tag_width/2;
+        // Set the scale of the translation vector from the relation metric_width / units_width
+        Eigen::Vector3s translation ( c_M_t.translation() ); // translation vector in apriltag units (tag width in units is 2 units)
+        int    tag_id     = det->id;
+        Scalar tag_width  = getTagWidth(tag_id);   // tag width in metric
+        Scalar scale      = tag_width/2.0;         // (tag width in units is 2 units)
+        translation       = scale * translation;
 
         // set the measured pose
         Eigen::Vector7s pose;
-        pose << scale*t, R2q(c_M_t.linear()).coeffs();
+        pose << translation, R2q(c_M_t.linear()).coeffs();
 
         // compute the covariance
         Eigen::Vector6s var_vec; var_vec << std_xy_*std_xy_, std_xy_*std_xy_, std_z_*std_z_, std_rpy_*std_rpy_, std_rpy_*std_rpy_, std_rpy_*std_rpy_;
@@ -161,43 +162,35 @@ ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBase
 LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr _feature_ptr)
 {
 
-    WOLF_TRACE("");
     // world to rob
     Vector3s pos = getLastPtr()->getFramePtr()->getPPtr()->getState();
     Quaternions quat (getLastPtr()->getFramePtr()->getOPtr()->getState().data());
     Eigen::Affine3ds w_M_r = Eigen::Translation<Scalar,3>(pos.head(3)) * quat;
 
-    WOLF_TRACE("");
     // rob to camera
     pos = getSensorPtr()->getPPtr()->getState();
     quat.coeffs() = getSensorPtr()->getOPtr()->getState();
     Eigen::Affine3ds r_M_c = Eigen::Translation<Scalar,3>(pos.head(3)) * quat;
 
-    WOLF_TRACE("");
     // camera to lmk
     pos = _feature_ptr->getMeasurement().head(3);
     quat.coeffs() = _feature_ptr->getMeasurement().tail(4);
     Eigen::Affine3ds c_M_l   = Eigen::Translation<Scalar,3>(pos) * quat;
 
-    WOLF_TRACE("");
     // world to lmk
     Eigen::Affine3ds w_M_l = w_M_r * r_M_c * c_M_l;
 
-    WOLF_TRACE("");
     // make 7-vector for lmk pose
     pos = w_M_l.translation();
-    quat = R2q(w_M_l.linear());
+    quat = w_M_l.linear();
     Vector7s w_pose_l;
     w_pose_l << pos, quat.coeffs();
 
-    WOLF_TRACE("");
     FeatureApriltagPtr feat_april = std::static_pointer_cast<FeatureApriltag>(_feature_ptr);
     int tagid = feat_april->getTagId();
 
-    WOLF_TRACE("");
     LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(w_pose_l, tagid, getTagWidth(tagid));
 
-    WOLF_TRACE("");
     return new_landmark;
 }
 
