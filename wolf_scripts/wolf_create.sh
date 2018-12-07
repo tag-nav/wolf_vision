@@ -59,7 +59,7 @@ then
   echo "${YELLOW} \--x [WARN]: Not necessary. File entries already existing in CMakeLists.txt.${NC}"
 else
   echo "${GREEN} \--> Updated ${DONE} file.${NC}"
-  echo "${YELLOW}\--> [WARN] Consider adding conditional clues [IF/ELSE] in the CMakeLists.txt if you use external dependencies (i.e. avoid compilation in case of uninstalled external dependency)${NC}"
+  echo "${YELLOW} \--> [WARN] Consider adding conditional clues [IF/ELSE] in the CMakeLists.txt if you use external dependencies, hence avoiding compilation if you don't have them installed)${NC}"
 fi
 
 # ===== Create gtest =====
@@ -83,7 +83,7 @@ then
   echo "${YELLOW} \--x [WARN]: Not necessary. gtest file entry already existing in CMakeLists.txt.${NC}"
 else
   echo "${GREEN} \--> Updated ${DONE} file.${NC}"
-  echo "${YELLOW}\--> [WARN] Consider adding conditional clues [IF/ELSE] in the CMakeLists.txt if you use external dependencies (i.e. avoid compilation in case of uninstalled external dependency)${NC}"
+  echo "${YELLOW} \--> [WARN] Consider adding conditional clues [IF/ELSE] in the CMakeLists.txt if you use external dependencies, hence avoiding compilation if you don't have them installed)${NC}"
 fi
 
 #============================================
