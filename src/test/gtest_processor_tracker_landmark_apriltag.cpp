@@ -135,13 +135,14 @@ TEST(ProcessorTrackerLandmarkApriltag, detectNewFeatures)
     Eigen::Quaternions quat;
     Eigen::Vector7s pose;
     Eigen::Matrix6s meas_cov( (p->getVarVec()).asDiagonal() );
+    int tag_id;
 
     // feature 0
     pos << 0,2,0;
     ori << M_TORAD * 0, M_TORAD * 0, M_TORAD * 0;
     quat = e2q(ori);
     pose << pos, quat.coeffs();
-    int tag_id = 0;
+    tag_id = 0;
     FeatureBasePtr detected_feature0 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id);
 
     // feature 1
@@ -149,7 +150,7 @@ TEST(ProcessorTrackerLandmarkApriltag, detectNewFeatures)
     ori << M_TORAD * 0, M_TORAD * 0, M_TORAD * 0;
     quat = e2q(ori);
     pose << pos, quat.coeffs();
-    int tag_id = 0;
+    tag_id = 0;
     FeatureBasePtr detected_feature1 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id);
 
     features_in.push_back(detected_feature0);
