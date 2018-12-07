@@ -440,10 +440,13 @@ ADD_SUBDIRECTORY(constraints)
 # Add the features sub-directory
 ADD_SUBDIRECTORY(features)
 
-# Add the processor sub-directory
+# Add the landmarks sub-directory
+ADD_SUBDIRECTORY(landmarks)
+
+# Add the processors sub-directory
 ADD_SUBDIRECTORY(processors)
 
-# Add the sensor sub-directory
+# Add the sensors sub-directory
 ADD_SUBDIRECTORY(sensors)
 
 # Add the hello_wolf sub-directory
