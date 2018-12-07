@@ -13,15 +13,20 @@ using namespace Eigen;
 using namespace wolf;
 using std::static_pointer_cast;
 
+
+////////////////////////////////////////////////////////////////
+/*
+ * Wrapper class to be able to have setOriginPtr() and setLastPtr() in ProcessorTrackerLandmarkApriltag
+ */
 WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmarkApriltag_Wrapper);
 class ProcessorTrackerLandmarkApriltag_Wrapper : public ProcessorTrackerLandmarkApriltag
 {
     public:
         ProcessorTrackerLandmarkApriltag_Wrapper(ProcessorParamsTrackerLandmarkApriltagPtr _params_tracker_landmark_apriltag) :
             ProcessorTrackerLandmarkApriltag(_params_tracker_landmark_apriltag)
-    {
+        {
             setType("TRACKER LANDMARK APRILTAG WRAPPER");
-    };
+        };
         ~ProcessorTrackerLandmarkApriltag_Wrapper(){}
         void setOriginPtr(const CaptureBasePtr _origin_ptr) { origin_ptr_ = _origin_ptr; }
         void setLastPtr  (const CaptureBasePtr _last_ptr)   { last_ptr_ = _last_ptr; }
@@ -43,7 +48,16 @@ namespace wolf{
 // Register in the Factories
 WOLF_REGISTER_PROCESSOR("TRACKER LANDMARK APRILTAG WRAPPER", ProcessorTrackerLandmarkApriltag_Wrapper);
 }
+////////////////////////////////////////////////////////////////
 
+
+
+////////////////////////////////////////////////////////////////
+/*
+ * Test class to prepare a little wolf problem to test the class ProcessorTrackerLandmarkApriltag
+ *
+ * The class ProcessorTrackerLandmarkApriltag is sometimes tested via the wrapper ProcessorTrackerLandmarkApriltag_Wrapper
+ */
 // Use the following in case you want to initialize tests with predefined variables or methods.
 class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
     public:
@@ -73,7 +87,12 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
         FrameBasePtr     F1;
         CaptureBasePtr   C1;
 };
+////////////////////////////////////////////////////////////////
 
+
+
+/////////////////// TESTS START HERE ///////////////////////////
+//                                                            //
 TEST(ProcessorTrackerLandmarkApriltag, Constructor)
 {
     ProcessorParamsTrackerLandmarkApriltagPtr params = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
@@ -155,12 +174,9 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
     FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1);
 
     C1->addFeature(f1);
-    problem->print(4,1,1,1);
     LandmarkBasePtr lmk = prc_apr->createLandmark(f1);
     LandmarkApriltagPtr lmk_april = std::static_pointer_cast<LandmarkApriltag>(lmk);
-    problem->print(4,1,1,1);
     ASSERT_TRUE(lmk_april->getType() == "APRILTAG");
-    problem->print(4,1,1,1);
 }
 
 TEST(ProcessorTrackerLandmarkApriltag, createConstraint)
