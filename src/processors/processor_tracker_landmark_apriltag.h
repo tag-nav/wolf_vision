@@ -111,6 +111,8 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
     private:
         Scalar getTagWidth(int _id) const;
 
+    public:
+        Eigen::Vector6s getVarVec();
 
     private:
         std::map<int, Scalar> tag_widths_;
