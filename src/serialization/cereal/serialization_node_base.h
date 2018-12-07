@@ -14,7 +14,7 @@ struct NodeBase::Serializer {
   template <class Archive>
   static void serialize(Archive& ar, NodeBase& o, std::uint32_t const /*version*/)
   {
-    ar( cereal::make_nvp("node_class_", o.node_class_) );
+    ar( cereal::make_nvp("node_class_", o.node_category_) );
     ar( cereal::make_nvp("node_type_",  o.node_type_)  );
     ar( cereal::make_nvp("node_name_",  o.node_name_)  );
     ar( cereal::make_nvp("node_id_",    o.node_id_)    );
@@ -29,7 +29,7 @@ struct NodeBase::Serializer {
   static void load_and_construct( Archive& ar, cereal::construct<wolf::NodeBase>& construct,
                                   std::uint32_t const /*version*/ )
   {
-    decltype(std::declval<wolf::NodeBase>().getClass()) nb_class;
+    decltype(std::declval<wolf::NodeBase>().getCategory()) nb_class;
     decltype(std::declval<wolf::NodeBase>().getType())  nb_type;
     decltype(std::declval<wolf::NodeBase>().getName())  nb_name;
 
