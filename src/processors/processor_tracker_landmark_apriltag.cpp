@@ -31,7 +31,9 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         tag_width_default_(_params_tracker_landmark_apriltag->tag_width_default_),
         std_xy_ (_params_tracker_landmark_apriltag->std_xy_ ),
         std_z_  (_params_tracker_landmark_apriltag->std_z_  ),
-        std_rpy_(_params_tracker_landmark_apriltag->std_rpy_)
+        std_rpy_(_params_tracker_landmark_apriltag->std_rpy_),
+        min_time_vote_(_params_tracker_landmark_apriltag->min_time_vote),
+        min_features_for_keyframe_(_params_tracker_landmark_apriltag->min_features_for_keyframe)
 {
     // configure apriltag detector
 
@@ -137,7 +139,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         pose << translation, R2q(c_M_t.linear()).coeffs();
 
         // compute the covariance
-        Eigen::Vector6s var_vec; var_vec << std_xy_*std_xy_, std_xy_*std_xy_, std_z_*std_z_, std_rpy_*std_rpy_, std_rpy_*std_rpy_, std_rpy_*std_rpy_;
+        Eigen::Vector6s var_vec = getVarVec();
         Eigen::Matrix6s cov = var_vec.asDiagonal() ;
 
         // add to list
@@ -209,6 +211,11 @@ unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned 
 
 bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
 {
+    Scalar dt_incoming_origin = getIncomingPtr()->getTimeStamp().get() - getOriginPtr()->getTimeStamp().get();
+    if (dt_incoming_origin > min_time_vote_){
+        return getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_
+                && getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_;
+    }
     return false;
 }
 
