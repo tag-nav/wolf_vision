@@ -203,7 +203,20 @@ unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned 
         auto search = matches_landmark_from_incoming_.find(feature_in_image);
 
         if (search == matches_landmark_from_incoming_.end())
-            _feature_list_out.push_back(feature_in_image);
+        {
+            // TODO: make detections more robust to decoding errors !!!
+            // the detection can be wrong and may decode 2 different tags with the same id.
+            // We need to do something if this happens and we need to do it here
+            for (FeatureBaseList::iterator it=_feature_list_out.begin(); it != _feature_list_out.end(); ++it)
+                if (std::static_pointer_cast<FeatureApriltag>(*it)->getTagId() == std::static_pointer_cast<FeatureApriltag>(feature_in_image)->getTagId())
+                {
+                    //we have a detection with the same id as the currently processed one. We remove the previous feature from the list for now
+                    _feature_list_out.erase(it);
+                    break; //it should not be possible two detection with the same id before getting there so we can stop here.
+                }
+
+            _feature_list_out.push_back(feature_in_image); // If the feature is not in the map and not in the list of newly detected features yet then we add it.
+        }
     }
 
     return _feature_list_out.size();
