@@ -33,6 +33,7 @@ class ProcessorTrackerLandmarkApriltag_Wrapper : public ProcessorTrackerLandmark
         void setIncomingPtr  (const CaptureBasePtr _incoming_ptr)   { incoming_ptr_ = _incoming_ptr; }
         Scalar getMinFeaturesForKeyframe (){return min_features_for_keyframe_;}
         Scalar getMinTimeVote (){return min_time_vote_;}
+        void setIncomingDetections(const FeatureBaseList _incoming_detections) { detections_incoming_ = _incoming_detections; }
 
         // for factory
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr)
@@ -225,6 +226,17 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
 
     features_in.push_back(detected_feature0);
     features_in.push_back(detected_feature0);
+
+    //these features are set as the incoming detections due to processing an image
+    prc_apr->setIncomingDetections(features_in);
+    // at this point we have 0 detections in last, 2 detections in incoming, thus we should have 2 new detected features (if max_features set to >= 2)
+    prc_apr->detectNewFeatures(2, features_out);
+    ASSERT_EQ(features_out.size(), 2);
+
+    //TODO: what if we detect these tags again from another camera pose ?
+    //TODO: max_features_ argument of detectNewFeatures() is not used yet. DO we want to use it ?
+    //TODO: Put some of the features in the graph with createLandmark() and detect some of them as well as others with detectNewFeatures() running again.
+
 }
 
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
