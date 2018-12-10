@@ -30,19 +30,24 @@ class ProcessorTrackerLandmarkApriltag_Wrapper : public ProcessorTrackerLandmark
         ~ProcessorTrackerLandmarkApriltag_Wrapper(){}
         void setOriginPtr(const CaptureBasePtr _origin_ptr) { origin_ptr_ = _origin_ptr; }
         void setLastPtr  (const CaptureBasePtr _last_ptr)   { last_ptr_ = _last_ptr; }
+        void setIncomingPtr  (const CaptureBasePtr _incoming_ptr)   { incoming_ptr_ = _incoming_ptr; }
+        Scalar getMinFeaturesForKeyframe (){return min_features_for_keyframe_;}
+        Scalar getMinTimeVote (){return min_time_vote_;}
+
         // for factory
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr)
         {
-            std::shared_ptr<ProcessorParamsTrackerLandmarkApriltag> prc_apriltag_params;
+            std::shared_ptr<ProcessorParamsTrackerLandmarkApriltag> prc_apriltag_params_;
             if (_params)
-                prc_apriltag_params = std::static_pointer_cast<ProcessorParamsTrackerLandmarkApriltag>(_params);
+                prc_apriltag_params_ = std::static_pointer_cast<ProcessorParamsTrackerLandmarkApriltag>(_params);
             else
-                prc_apriltag_params = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
+                prc_apriltag_params_ = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
 
-            ProcessorTrackerLandmarkApriltag_WrapperPtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkApriltag_Wrapper>(prc_apriltag_params);
+            ProcessorTrackerLandmarkApriltag_WrapperPtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkApriltag_Wrapper>(prc_apriltag_params_);
             prc_ptr->setName(_unique_name);
             return prc_ptr;
         }
+
 };
 namespace wolf{
 // Register in the Factories
@@ -132,8 +137,58 @@ TEST(ProcessorTrackerLandmarkApriltag, Constructor)
 
 TEST_F(ProcessorTrackerLandmarkApriltag_class, voteForKeyFrame)
 {
-//    ASSERT_FALSE(prc_apr->voteForKeyFrame());
-    ASSERT_TRUE(true);
+    Scalar min_time_vote = prc_apr->getMinTimeVote();
+//    TODO: use min_features_for_keyframe (here "hardcoded" to 1, needs to create features with a loop)
+//    unsigned int min_features_for_keyframe = prc_apr->prc_apriltag_params_->min_features_for_keyframe;
+    Scalar start_ts = 2.0;
+
+    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1);
+    FeatureApriltagPtr f2 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 2);
+
+    CaptureBasePtr Ca = std::make_shared<CapturePose>(start_ts, sen, Vector7s(), Matrix6s());
+    Ca->addFeature(f1);
+    Ca->addFeature(f2);  // not really necessary
+
+    CaptureBasePtr Cb = std::make_shared<CapturePose>(start_ts + min_time_vote/2, sen, Vector7s(), Matrix6s());
+    Cb->addFeature(f1);
+
+    CaptureBasePtr Cc = std::make_shared<CapturePose>(start_ts + 2*min_time_vote, sen, Vector7s(), Matrix6s());
+    Cc->addFeature(f1);
+
+    CaptureBasePtr Cd = std::make_shared<CapturePose>(start_ts + 2.5*min_time_vote, sen, Vector7s(), Matrix6s());
+
+    CaptureBasePtr Ce = std::make_shared<CapturePose>(start_ts + 3*min_time_vote, sen, Vector7s(), Matrix6s());
+
+    F1->addCapture(Ca);
+    F1->addCapture(Cb);
+    F1->addCapture(Cc);
+    F1->addCapture(Cd);
+    F1->addCapture(Ce);
+
+    // CASE 1: Not enough time between origin and incoming
+    prc_apr->setOriginPtr(Ca);
+    prc_apr->setIncomingPtr(Cb);
+    ASSERT_FALSE(prc_apr->voteForKeyFrame());
+
+    // CASE 2: Enough time but still too many features in image to trigger a KF
+    prc_apr->setOriginPtr(Ca);
+    prc_apr->setLastPtr(Cb);
+    prc_apr->setIncomingPtr(Cc);
+    ASSERT_FALSE(prc_apr->voteForKeyFrame());
+
+    // CASE 3: Enough time, enough features in last, not enough features in incoming
+    prc_apr->setOriginPtr(Ca);
+    prc_apr->setLastPtr(Cc);
+    prc_apr->setIncomingPtr(Cd);
+    ASSERT_TRUE(prc_apr->voteForKeyFrame());
+
+    // CASE 4: Enough time, not enough features in last, not enough features in incoming
+    prc_apr->setOriginPtr(Ca);
+    prc_apr->setLastPtr(Cd);
+    prc_apr->setIncomingPtr(Ce);
+    ASSERT_FALSE(prc_apr->voteForKeyFrame());
+
+
 }
 
 TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)

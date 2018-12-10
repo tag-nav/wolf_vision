@@ -123,6 +123,9 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         FeatureBaseList detections_incoming_;
         FeatureBaseList detections_last_;
         Scalar std_xy_, std_z_, std_rpy_;
+
+    // To be able to access them in unit tests
+    protected:
         Scalar min_time_vote_;
         unsigned int min_features_for_keyframe_;
 };
