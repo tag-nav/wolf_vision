@@ -214,7 +214,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     quat = e2q(ori);
     pose << pos, quat.coeffs();
     tag_id = 0;
-    FeatureBasePtr detected_feature0 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id);
+    FeatureBasePtr f0 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id);
 
     // feature 1
     pos << 1,2,0;
@@ -222,10 +222,18 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     quat = e2q(ori);
     pose << pos, quat.coeffs();
     tag_id = 1;
-    FeatureBasePtr detected_feature1 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id);
+    FeatureBasePtr f1 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id);
 
-    features_in.push_back(detected_feature0);
-    features_in.push_back(detected_feature0);
+    // feature 2
+    pos << 0,2,1;
+    ori << M_TORAD * 0, M_TORAD * 0, M_TORAD * 0;
+    quat = e2q(ori);
+    pose << pos, quat.coeffs();
+    tag_id = 2;
+    FeatureBasePtr f2 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id);
+
+    features_in.push_back(f0);
+    features_in.push_back(f0);
 
     // We just added twice the same feature in the list.
     prc_apr->setIncomingDetections(features_in);
@@ -235,8 +243,8 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
 
     //we add new different features in the list
     features_in.clear();
-    features_in.push_back(detected_feature0);
-    features_in.push_back(detected_feature1);
+    features_in.push_back(f0);
+    features_in.push_back(f1);
     //these features are set as the incoming detections due to processing an image
     prc_apr->setIncomingDetections(features_in);
     // at this point we have 0 detections in last, 2 detections in incoming with different ids, thus we should have 2 new detected features (if max_features set to >= 2)
