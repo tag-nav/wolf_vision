@@ -251,10 +251,22 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     prc_apr->detectNewFeatures(2, features_out);
     ASSERT_EQ(features_out.size(), 2);
 
-    //TODO: what if we detect these tags again from another camera pose ?
-    //TODO: max_features_ argument of detectNewFeatures() is not used yet. DO we want to use it ?
-    //TODO: Put some of the features in the graph with createLandmark() and detect some of them as well as others with detectNewFeatures() running again.
+    // TODO: Put some of the features in the graph with createLandmark() and detect some of them as well as others with detectNewFeatures() running again.
+    /*C1->addFeature(f0);
+    LandmarkBasePtr lmk0 = prc_apr->createLandmark(f0);
+    C1->addFeature(f1);
+    LandmarkBasePtr lmk1 = prc_apr->createLandmark(f1);
+    //TODO: Add landmarks to the map
 
+    //problem->print(4,1,1,1);
+
+    // Add 1 one more new feature to the detection list
+    features_in.push_back(f2);
+    prc_apr->setIncomingDetections(features_in);
+    // At this point we have 2 landmarks (for f0 and f1), and 3 detections (f0, f1 and f2).
+    // Hence we should 1 new detected feature : f2
+    prc_apr->detectNewFeatures(2, features_out);
+    ASSERT_EQ(features_out.size(), 1);*/
 }
 
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
