@@ -107,22 +107,23 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         // for factory
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 
-
-
-    private:
-        Scalar getTagWidth(int _id) const;
-
     public:
+        Scalar getTagWidth(int _id) const;
         Eigen::Vector6s getVarVec();
+        FeatureBaseList getIncomingDetections() const;
+        FeatureBaseList getLastDetections() const;
 
     private:
         std::map<int, Scalar> tag_widths_;
         Scalar tag_width_default_;
         cv::Mat grayscale_image_;
         apriltag_detector_t detector_;
+        Scalar std_xy_, std_z_, std_rpy_;
+
+    protected:
         FeatureBaseList detections_incoming_;
         FeatureBaseList detections_last_;
-        Scalar std_xy_, std_z_, std_rpy_;
+
 
     // To be able to access them in unit tests
     protected:

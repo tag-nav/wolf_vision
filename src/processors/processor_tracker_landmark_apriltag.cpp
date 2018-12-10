@@ -260,6 +260,16 @@ Eigen::Vector6s ProcessorTrackerLandmarkApriltag::getVarVec()
     return var_vec;
 }
 
+FeatureBaseList ProcessorTrackerLandmarkApriltag::getIncomingDetections() const
+{
+    return detections_incoming_;
+}
+
+FeatureBaseList ProcessorTrackerLandmarkApriltag::getLastDetections() const
+{
+    return detections_last_;
+}
+
 void ProcessorTrackerLandmarkApriltag::configure(SensorBasePtr _sensor)
 {
     // set processor params from camera params if required
