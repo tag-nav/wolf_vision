@@ -198,11 +198,16 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
 
 unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
 {
+    bool feature_already_found(false);
     for (auto feature_in_image : detections_incoming_)
     {
-        auto search = matches_landmark_from_incoming_.find(feature_in_image);
+        //TODO: problem here => features and landmarks must be tested with their ID !!
+        //auto search = matches_landmark_from_incoming_.find(feature_in_image); //is there a better way to do (with key_compare of std::map ?)
+        for(auto it = matches_landmark_from_incoming_.begin(); it != matches_landmark_from_incoming_.end(); ++it)
+            if(std::static_pointer_cast<FeatureApriltag>(it->first)->getTagId() == std::static_pointer_cast<FeatureApriltag>(feature_in_image)->getTagId())
+                feature_already_found = true;
 
-        if (search == matches_landmark_from_incoming_.end())
+        if (!feature_already_found)
         {
             // TODO: make detections more robust to decoding errors !!!
             // the detection can be wrong and may decode 2 different tags with the same id.
