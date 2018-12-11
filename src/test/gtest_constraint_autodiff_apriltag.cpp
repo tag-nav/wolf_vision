@@ -189,6 +189,23 @@ TEST_F(ConstraintAutodiffApriltag_class, Constructor)
     ASSERT_TRUE(constraint->getType() == "AUTODIFF APRILTAG");
 }
 
+TEST_F(ConstraintAutodiffApriltag_class, Check_tree)
+{
+    ConstraintAutodiffApriltagPtr constraint = std::make_shared<ConstraintAutodiffApriltag>(
+            S,
+            F1,
+            lmk1,
+            f1,
+            false,
+            CTR_ACTIVE
+    );
+
+    ConstraintAutodiffApriltagPtr ctr0 = std::static_pointer_cast<ConstraintAutodiffApriltag>(f1->addConstraint(constraint));
+    lmk1->addConstrainedBy(constraint);
+
+    ASSERT_TRUE(problem->check(0));
+}
+
 TEST(ConstraintAutodiffApriltag, Destructor)
 {
     std::cout << "\033[1;33m [WARN]:\033[0m gtest for ConstraintAutodiffApriltag Destructor is empty." << std::endl;
