@@ -71,7 +71,7 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
 
         SensorBasePtr   S;
         FrameBasePtr    F1;
-        CaptureImagePtr I1;
+        CaptureImagePtr C1;
         FeatureApriltagPtr  f1;
         LandmarkApriltagPtr lmk1;
         ConstraintAutodiffApriltagPtr c_tag;
@@ -102,8 +102,8 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
              * Therefore, P projects exactly at the origin of the camera,
              *   f: p = (0,0)
              *
-             * We form a Wolf tree with 1 frames F1, 11 capture C1,
-             * 1 feature f1 (measurement), 11 landmark l and 11 apriltag constraint c1:
+             * We form a Wolf tree with 1 frames F1, 1 capture C1,
+             * 1 feature f1 (measurement), 1 landmark l and 1 apriltag constraint c1:
              *
              *   Frame F1, Capture C1, feature f1, landmark l1, constraint c1
              *
@@ -153,10 +153,10 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
             F1 = problem->setPrior(pose_robot, Matrix6s::Identity(), 0.0, 0.1);
 
             //create feature and landmark
-            I1 = std::make_shared<CaptureImage>(1.0, camera, cv::Mat(2,2,CV_8UC1));
-            F1-> addCapture(I1);
-            proc_apriltag->setOriginPtr(I1);
-            proc_apriltag->setLastPtr(I1);
+            C1 = std::make_shared<CaptureImage>(1.0, camera, cv::Mat(2,2,CV_8UC1));
+            F1-> addCapture(C1);
+            proc_apriltag->setOriginPtr(C1);
+            proc_apriltag->setLastPtr(C1);
 
             // the sensor is at origin as well as the robot. The measurement matches with the pose of the tag wrt camera (and also wrt robot and world)
             // FeatureApriltag(Vector7s & _measurement,Matrix6s & _meas_covariance, const int _tag_id)
@@ -169,7 +169,7 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
             lmk1 = std::static_pointer_cast<LandmarkApriltag>(proc_apriltag->createLandmark(f1));
 
             // Add the feature and the landmark in the graph as needed
-            I1->addFeature(f1); // add feature to capture
+            C1->addFeature(f1); // add feature to capture
             problem->addLandmark(lmk1); // add landmark to map
         }
 };
