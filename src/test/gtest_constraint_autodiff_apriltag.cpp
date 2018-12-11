@@ -7,12 +7,52 @@
 #include "processors/processor_tracker_landmark_apriltag.h"
 #include "capture_image.h"
 #include "constraints/constraint_autodiff_apriltag.h"
+#include "processor_factory.h"
 
 #include <apriltag.h>
 
 using namespace Eigen;
 using namespace wolf;
 using std::static_pointer_cast;
+
+////////////////////////////////////////////////////////////////
+/*
+ * Wrapper class to be able to have setOriginPtr() and setLastPtr() in ProcessorTrackerLandmarkApriltag
+ */
+WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmarkApriltag_Wrapper);
+class ProcessorTrackerLandmarkApriltag_Wrapper : public ProcessorTrackerLandmarkApriltag
+{
+    public:
+        ProcessorTrackerLandmarkApriltag_Wrapper(ProcessorParamsTrackerLandmarkApriltagPtr _params_tracker_landmark_apriltag) :
+            ProcessorTrackerLandmarkApriltag(_params_tracker_landmark_apriltag)
+        {
+            setType("TRACKER LANDMARK APRILTAG WRAPPER");
+        };
+        ~ProcessorTrackerLandmarkApriltag_Wrapper(){}
+        void setOriginPtr(const CaptureBasePtr _origin_ptr) { origin_ptr_ = _origin_ptr; }
+        void setLastPtr  (const CaptureBasePtr _last_ptr)   { last_ptr_ = _last_ptr; }
+        void setIncomingPtr  (const CaptureBasePtr _incoming_ptr)   { incoming_ptr_ = _incoming_ptr; }
+
+        // for factory
+        static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr)
+        {
+            std::shared_ptr<ProcessorParamsTrackerLandmarkApriltag> prc_apriltag_params_;
+            if (_params)
+                prc_apriltag_params_ = std::static_pointer_cast<ProcessorParamsTrackerLandmarkApriltag>(_params);
+            else
+                prc_apriltag_params_ = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
+
+            ProcessorTrackerLandmarkApriltag_WrapperPtr prc_ptr = std::make_shared<ProcessorTrackerLandmarkApriltag_Wrapper>(prc_apriltag_params_);
+            prc_ptr->setName(_unique_name);
+            return prc_ptr;
+        }
+
+};
+namespace wolf{
+// Register in the Factories
+WOLF_REGISTER_PROCESSOR("TRACKER LANDMARK APRILTAG WRAPPER", ProcessorTrackerLandmarkApriltag_Wrapper);
+}
+////////////////////////////////////////////////////////////////
 
 // Use the following in case you want to initialize tests with predefines variables or methods.
 /*class ConstraintAutodiffApriltag_class : public testing::Test{
