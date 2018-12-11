@@ -198,15 +198,19 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
 
 unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
 {
-    bool feature_already_found(false);
     for (auto feature_in_image : detections_incoming_)
     {
-        //TODO: problem here => features and landmarks must be tested with their ID !!
-        //auto search = matches_landmark_from_incoming_.find(feature_in_image); //is there a better way to do (with key_compare of std::map ?)
-        for(auto it = matches_landmark_from_incoming_.begin(); it != matches_landmark_from_incoming_.end(); ++it)
-            if(std::static_pointer_cast<FeatureApriltag>(it->first)->getTagId() == std::static_pointer_cast<FeatureApriltag>(feature_in_image)->getTagId())
+        bool feature_already_found(false);
+        // features and landmarks must be tested with their ID !!
+        // list of landmarks in the map
+        LandmarkBaseList& landmark_list = getProblem()->getMapPtr()->getLandmarkList();
+
+        //is the feature already associated to a landmark in the map ?
+        for(auto it = landmark_list.begin(); it != landmark_list.end(); ++it)
+            if(std::static_pointer_cast<LandmarkApriltag>(*it)->getTagId() == std::static_pointer_cast<FeatureApriltag>(feature_in_image)->getTagId())
                 feature_already_found = true;
 
+        //if the feature is not yet associated to a landmark in the map then we continue
         if (!feature_already_found)
         {
             // TODO: make detections more robust to decoding errors !!!
@@ -221,7 +225,7 @@ unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned 
                 }
 
             _feature_list_out.push_back(feature_in_image); // If the feature is not in the map and not in the list of newly detected features yet then we add it.
-        }
+        } //otherwise we check the next feature
     }
 
     return _feature_list_out.size();

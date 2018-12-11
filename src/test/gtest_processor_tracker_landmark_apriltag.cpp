@@ -251,13 +251,18 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     prc_apr->detectNewFeatures(2, features_out);
     ASSERT_EQ(features_out.size(), 2);
 
-    // TODO: Put some of the features in the graph with createLandmark() and detect some of them as well as others with detectNewFeatures() running again.
-    /*C1->addFeature(f0);
+    // Put some of the features in the graph with createLandmark() and detect some of them as well as others with detectNewFeatures() running again.
+    WOLF_WARN("call to function createLandmark() in unit test for detectNewFeatures().")
+    C1->addFeature(f0);
     LandmarkBasePtr lmk0 = prc_apr->createLandmark(f0);
     C1->addFeature(f1);
     LandmarkBasePtr lmk1 = prc_apr->createLandmark(f1);
-    //TODO: Add landmarks to the map
 
+    // Add landmarks to the map
+    LandmarkBaseList landmark_list;
+    landmark_list.push_back(lmk0);
+    landmark_list.push_back(lmk1);
+    problem->addLandmarkList(landmark_list);
     //problem->print(4,1,1,1);
 
     // Add 1 one more new feature to the detection list
@@ -265,8 +270,10 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     prc_apr->setIncomingDetections(features_in);
     // At this point we have 2 landmarks (for f0 and f1), and 3 detections (f0, f1 and f2).
     // Hence we should 1 new detected feature : f2
+    features_out.clear();
     prc_apr->detectNewFeatures(2, features_out);
-    ASSERT_EQ(features_out.size(), 1);*/
+    ASSERT_EQ(features_out.size(), 1);
+    ASSERT_EQ(std::static_pointer_cast<FeatureApriltag>(features_out.front())->getTagId(), 2);
 }
 
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
