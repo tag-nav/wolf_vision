@@ -202,6 +202,10 @@ TEST_F(ConstraintAutodiffApriltag_class, Check_tree)
 
     ConstraintAutodiffApriltagPtr ctr0 = std::static_pointer_cast<ConstraintAutodiffApriltag>(f1->addConstraint(constraint));
     lmk1->addConstrainedBy(constraint);
+    //check is returning true even without the lines below....
+    WOLF_WARN("I think the lines below are needed... to be checked !")
+    F1->addConstrainedBy(constraint);
+    f1->addConstrainedBy(constraint);
 
     ASSERT_TRUE(problem->check(0));
 }
