@@ -210,6 +210,38 @@ TEST_F(ConstraintAutodiffApriltag_class, Check_tree)
     ASSERT_TRUE(problem->check(0));
 }
 
+TEST_F(ConstraintAutodiffApriltag_class, solve_f1_perturbated)
+{
+    ConstraintAutodiffApriltagPtr constraint = std::make_shared<ConstraintAutodiffApriltag>(
+            S,
+            F1,
+            lmk1,
+            f1,
+            false,
+            CTR_ACTIVE
+    );
+
+    ConstraintAutodiffApriltagPtr ctr0 = std::static_pointer_cast<ConstraintAutodiffApriltag>(f1->addConstraint(constraint));
+    lmk1->addConstrainedBy(constraint);
+    F1->addConstrainedBy(constraint);
+    f1->addConstrainedBy(constraint);
+
+    // unfix F1, perturbate state
+    F1->unfix();
+    Vector3s p0 = Vector3s::Random() * 0.25;
+    Vector7s x0(pose_robot);
+
+    x0.head<3>() += p0;
+    F1->setState(x0);
+
+    //problem detected here. solve() throws an error !
+    // solve
+    //std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::QUIET); // 0: nothing, 1: BriefReport, 2: FullReport
+    //WOLF_TRACE("solved")
+    //ASSERT_MATRIX_APPROX(F1->getState(), pose_robot, 1e-6);
+
+}
+
 TEST(ConstraintAutodiffApriltag, Destructor)
 {
     std::cout << "\033[1;33m [WARN]:\033[0m gtest for ConstraintAutodiffApriltag Destructor is empty." << std::endl;
