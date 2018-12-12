@@ -21,7 +21,7 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsRangeBearing);
 
 struct ProcessorParamsRangeBearing : public ProcessorParamsBase
 {
-        //        Eigen::Vector3s pose0, delta;
+        // We do not need special parameters, but in case you need they should be defined here.
 };
 
 
@@ -46,17 +46,16 @@ class ProcessorRangeBearing : public ProcessorBase
         // Implementation of pure virtuals from ProcessorBase
         virtual void process            (CaptureBasePtr _capture) override;
         virtual bool voteForKeyFrame    () override {return false;}
-        virtual void keyFrameCallback   (FrameBasePtr _key_frame, const Scalar& _time_tolerance) override;
-
-        // landmark observation models -- they would be better off in a separate library e.g. range_bearing_tools.h
-        Eigen::Vector2s observe     (const Eigen::Vector2s& lmk_w) const;
-        Eigen::Vector2s invObserve  (Scalar r, Scalar b) const;
 
     private:
         // control variables
         Trf H_r_s; // transformation matrix, robot to sensor
         std::map<int, LandmarkBasePtr> known_lmks; // all observed lmks so far
 
+    protected:
+        // helper methods -- to be used only here -- they would be better off in a separate library e.g. range_bearing_tools.h
+        Eigen::Vector2s observe     (const Eigen::Vector2s& lmk_w) const;
+        Eigen::Vector2s invObserve  (Scalar r, Scalar b) const;
     private:
         // helper methods -- to be used only here -- they would be better off in a separate library e.g. range_bearing_tools.h
         Trf             transform   (const Eigen::Vector3s& _pose) const;

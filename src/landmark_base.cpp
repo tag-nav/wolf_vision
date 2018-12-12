@@ -18,6 +18,7 @@ LandmarkBase::LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, State
 {
     state_block_vec_[0] = _p_ptr;
     state_block_vec_[1] = _o_ptr;
+
 //    std::cout << "constructed  +L" << id() << std::endl;
 }
                 
@@ -54,22 +55,14 @@ void LandmarkBase::fix()
 {
     for (auto sbp : state_block_vec_)
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
 }
 
 void LandmarkBase::unfix()
 {
     for (auto sbp : state_block_vec_)
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
 }
 
 bool LandmarkBase::isFixed() const
@@ -121,7 +114,7 @@ void LandmarkBase::removeStateBlocks()
         {
             if (getProblem() != nullptr)
             {
-                getProblem()->removeStateBlockPtr(sbp);
+                getProblem()->removeStateBlock(sbp);
             }
             setStateBlockPtr(i, nullptr);
         }

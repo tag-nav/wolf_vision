@@ -59,7 +59,10 @@ ConstraintBasePtr FeatureBase::addConstraint(ConstraintBasePtr _co_ptr)
     _co_ptr->setProblem(getProblem());
     // add constraint to be added in solver
     if (getProblem() != nullptr)
-        getProblem()->addConstraintPtr(_co_ptr);
+    {
+        if (_co_ptr->getStatus() == CTR_ACTIVE)
+            getProblem()->addConstraint(_co_ptr);
+    }
     else
         WOLF_TRACE("WARNING: ADDING CONSTRAINT ", _co_ptr->id(), " TO FEATURE ", this->id(), " NOT CONNECTED WITH PROBLEM.");
     return _co_ptr;
@@ -110,6 +113,13 @@ void FeatureBase::setMeasurementInformation(const Eigen::MatrixXs & _meas_info)
 
     // compute square root information upper matrix
     measurement_sqrt_information_upper_ = computeSqrtUpper(_meas_info);
+}
+
+void FeatureBase::setProblem(ProblemPtr _problem)
+{
+    NodeBase::setProblem(_problem);
+    for (auto ctr : constraint_list_)
+        ctr->setProblem(_problem);
 }
 
 Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) const

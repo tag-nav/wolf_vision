@@ -78,25 +78,25 @@ void ProcessorBase::remove()
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
-void KFPackBuffer::removeUpTo(const TimeStamp& _time_stamp)
+void PackKeyFrameBuffer::removeUpTo(const TimeStamp& _time_stamp)
 {
-    KFPackBuffer::Iterator post = container_.upper_bound(_time_stamp);
+    PackKeyFrameBuffer::Iterator post = container_.upper_bound(_time_stamp);
     container_.erase(container_.begin(), post); // erasing by range
 }
 
-void KFPackBuffer::add(const FrameBasePtr& _key_frame, const Scalar& _time_tolerance)
+void PackKeyFrameBuffer::add(const FrameBasePtr& _key_frame, const Scalar& _time_tolerance)
 {
     TimeStamp time_stamp = _key_frame->getTimeStamp();
-    KFPackPtr kfpack = std::make_shared<KFPack>(_key_frame, _time_tolerance);
+    PackKeyFramePtr kfpack = std::make_shared<PackKeyFrame>(_key_frame, _time_tolerance);
     container_.emplace(time_stamp, kfpack);
 }
 
-KFPackPtr KFPackBuffer::selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance)
+PackKeyFramePtr PackKeyFrameBuffer::selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance)
 {
     if (container_.empty())
         return nullptr;
 
-    KFPackBuffer::Iterator post = container_.upper_bound(_time_stamp);
+    PackKeyFrameBuffer::Iterator post = container_.upper_bound(_time_stamp);
 
     bool prev_exists = (post != container_.begin());
     bool post_exists = (post != container_.end());
@@ -105,7 +105,7 @@ KFPackPtr KFPackBuffer::selectPack(const TimeStamp& _time_stamp, const Scalar& _
 
     if (prev_exists)
     {
-        KFPackBuffer::Iterator prev = std::prev(post);
+        PackKeyFrameBuffer::Iterator prev = std::prev(post);
 
         bool prev_ok = checkTimeTolerance(prev->first, prev->second->time_tolerance, _time_stamp, _time_tolerance);
 
@@ -128,17 +128,17 @@ KFPackPtr KFPackBuffer::selectPack(const TimeStamp& _time_stamp, const Scalar& _
 
     return nullptr;
 }
-KFPackPtr KFPackBuffer::selectPack(const CaptureBasePtr _capture, const Scalar& _time_tolerance)
+PackKeyFramePtr PackKeyFrameBuffer::selectPack(const CaptureBasePtr _capture, const Scalar& _time_tolerance)
 {
     return selectPack(_capture->getTimeStamp(), _time_tolerance);
 }
 
-KFPackPtr KFPackBuffer::selectPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance)
+PackKeyFramePtr PackKeyFrameBuffer::selectPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance)
 {
     if (container_.empty())
         return nullptr;
 
-    KFPackBuffer::Iterator post = container_.upper_bound(_time_stamp);
+    PackKeyFrameBuffer::Iterator post = container_.upper_bound(_time_stamp);
 
     bool prev_exists = (post != container_.begin());
 
@@ -157,12 +157,12 @@ KFPackPtr KFPackBuffer::selectPackBefore(const TimeStamp& _time_stamp, const Sca
     return nullptr;
 }
 
-KFPackPtr KFPackBuffer::selectPackBefore(const CaptureBasePtr _capture, const Scalar& _time_tolerance)
+PackKeyFramePtr PackKeyFrameBuffer::selectPackBefore(const CaptureBasePtr _capture, const Scalar& _time_tolerance)
 {
     return selectPackBefore(_capture->getTimeStamp(), _time_tolerance);
 }
 
-void KFPackBuffer::print(void)
+void PackKeyFrameBuffer::print(void)
 {
     std::cout << "[ ";
     for (auto iter : container_)
@@ -172,7 +172,7 @@ void KFPackBuffer::print(void)
     std::cout << "]" << std::endl;
 }
 
-bool KFPackBuffer::checkTimeTolerance(const TimeStamp& _time_stamp1, const Scalar& _time_tolerance1,
+bool PackKeyFrameBuffer::checkTimeTolerance(const TimeStamp& _time_stamp1, const Scalar& _time_tolerance1,
                                       const TimeStamp& _time_stamp2, const Scalar& _time_tolerance2)
 {
     Scalar time_diff = std::fabs(_time_stamp1 - _time_stamp2);

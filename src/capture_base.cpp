@@ -57,9 +57,8 @@ CaptureBase::CaptureBase(const std::string& _type,
     }
     updateCalibSize();
 
-    WOLF_TRACE("New Capture ", id(), " -- type ", getType(), " -- t = ", getTimeStamp(), " s");
+//    WOLF_TRACE("New Capture ", id(), " -- type ", getType(), " -- t = ", getTimeStamp(), " s");
 }
-
 
 
 CaptureBase::~CaptureBase()
@@ -169,7 +168,7 @@ void CaptureBase::removeStateBlocks()
         {
             if (getProblem() != nullptr)
             {
-                getProblem()->removeStateBlockPtr(sbp);
+                getProblem()->removeStateBlock(sbp);
             }
             setStateBlockPtr(i, nullptr);
         }
@@ -182,11 +181,7 @@ void CaptureBase::fix()
     {
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -197,11 +192,7 @@ void CaptureBase::unfix()
     {
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -212,11 +203,7 @@ void CaptureBase::fixExtrinsics()
     {
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -227,11 +214,7 @@ void CaptureBase::unfixExtrinsics()
     {
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -242,11 +225,7 @@ void CaptureBase::fixIntrinsics()
     {
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
-        {
             sbp->fix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }
@@ -257,11 +236,7 @@ void CaptureBase::unfixIntrinsics()
     {
         auto sbp = getStateBlockPtr(i);
         if (sbp != nullptr)
-        {
             sbp->unfix();
-            if (getProblem() != nullptr)
-                getProblem()->updateStateBlockPtr(sbp);
-        }
     }
     updateCalibSize();
 }

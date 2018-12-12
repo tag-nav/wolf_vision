@@ -13,7 +13,7 @@ namespace wolf {
  *
  *  - A unique ID. The class implements the ID factory.
  *
- *  - A unique class name, strictly within this range of possibilities:
+ *  - A unique category name, strictly within this range of possibilities:
  *    - "BASE" -- should not be used
  *    - "PROBLEM"
  *    - "HARDWARE"
@@ -27,7 +27,7 @@ namespace wolf {
  *    - "MAP"
  *    - "LANDMARK"
  *
- *  - A unique type, which is a subclass of the above. The list here cannot be exhaustive, but a few examples follow:
+ *  - A unique type, which is a subcategory of the above. The list here cannot be exhaustive, but a few examples follow:
  *    - "Camera"
  *    - "LIDAR 2D"
  *    - "Point 3D"
@@ -63,17 +63,17 @@ class NodeBase
         ProblemWPtr problem_ptr_;
 
         unsigned int node_id_;   ///< Node id. It is unique over the whole Wolf Tree
-        std::string node_class_; ///< Text label identifying the class of node ("SENSOR", "FEATURE", etc)
-        std::string node_type_;  ///< Text label identifying the type or subclass of node ("Pin Hole", "Point 2D", etc)
+        std::string node_category_; ///< Text label identifying the category of node ("SENSOR", "FEATURE", etc)
+        std::string node_type_;  ///< Text label identifying the type or subcategory of node ("Pin Hole", "Point 2D", etc)
         std::string node_name_;  ///< Text label identifying each specific object ("left camera", "LIDAR 1", "PointGrey", "Andrew", etc)
 
     public: 
 
-        NodeBase(const std::string& _class, const std::string& _type = "Undefined", const std::string& _name = "");
+        NodeBase(const std::string& _category, const std::string& _type = "Undefined", const std::string& _name = "");
         virtual ~NodeBase() = default;
 
         unsigned int nodeId()  const;
-        std::string getClass() const;
+        std::string getCategory() const;
         std::string getType()  const;
         std::string getName()  const;
 
@@ -81,7 +81,7 @@ class NodeBase
         void setName(const std::string& _name);
 
         ProblemPtr getProblem() const;
-        void setProblem(ProblemPtr _prob_ptr);
+        virtual void setProblem(ProblemPtr _prob_ptr);
 };
 
 } // namespace wolf
@@ -90,10 +90,10 @@ class NodeBase
 
 namespace wolf{
 
-inline NodeBase::NodeBase(const std::string& _class, const std::string& _type, const std::string& _name) :
+inline NodeBase::NodeBase(const std::string& _category, const std::string& _type, const std::string& _name) :
         problem_ptr_(), // nullptr
         node_id_(++node_id_count_),
-        node_class_(_class),
+        node_category_(_category),
         node_type_(_type),
         node_name_(_name)
 {
@@ -105,9 +105,9 @@ inline unsigned int NodeBase::nodeId() const
     return node_id_;
 }
 
-inline std::string NodeBase::getClass() const
+inline std::string NodeBase::getCategory() const
 {
-    return node_class_;
+    return node_category_;
 }
 
 inline std::string NodeBase::getType() const
@@ -132,12 +132,12 @@ inline void NodeBase::setName(const std::string& _name)
 
 inline ProblemPtr NodeBase::getProblem() const
 {
-  return problem_ptr_.lock();
+    return problem_ptr_.lock();
 }
 
 inline void NodeBase::setProblem(ProblemPtr _prob_ptr)
 {
-  problem_ptr_ = _prob_ptr;
+    problem_ptr_ = _prob_ptr;
 }
 
 } // namespace wolf

@@ -77,6 +77,8 @@ protected:
   virtual void removeStateBlock(const StateBlockPtr& state_ptr) = 0;
 
   virtual void updateStateBlockStatus(const StateBlockPtr& state_ptr) = 0;
+
+  virtual void updateStateBlockLocalParametrization(const StateBlockPtr& state_ptr) = 0;
 };
 
 } // namespace wolf

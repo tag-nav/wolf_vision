@@ -16,6 +16,7 @@ struct ProcessorParamsBase;
 //wolf includes
 #include "wolf.h"
 #include "frame_base.h"
+#include "state_block.h"
 
 // std includes
 
@@ -26,16 +27,8 @@ namespace wolf {
 enum Notification
 {
     ADD,
-    REMOVE,
-    UPDATE
+    REMOVE
 };
-
-struct ConstraintNotification
-{
-    Notification notification_;
-    ConstraintBasePtr constraint_ptr_;
-};
-
 
 /** \brief Wolf problem node element in the Wolf Tree
  */
@@ -49,9 +42,9 @@ class Problem : public std::enable_shared_from_this<Problem>
         ProcessorMotionPtr  processor_motion_ptr_;
         StateBlockList      state_block_list_;
         std::map<std::pair<StateBlockPtr, StateBlockPtr>, Eigen::MatrixXs> covariances_;
-        std::list<ConstraintNotification> constraint_notification_list_;
         SizeEigen state_size_, state_cov_size_;
-        StateBlockList notified_state_block_list_;
+        std::map<ConstraintBasePtr, Notification> constraint_notification_map_;
+        std::map<StateBlockPtr, Notification> state_block_notification_map_;
         bool prior_is_set_;
 
     private: // CAUTION: THESE METHODS ARE PRIVATE, DO NOT MAKE THEM PUBLIC !!
@@ -258,37 +251,33 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         // Solver management ----------------------------------------
 
-        /** \brief Gets a reference to the state units list
+        /** \brief Gets a reference to the state blocks list
          */
         StateBlockList& getStateBlockList();
 
-        /** \brief Adds a new state block to be added to solver manager
+        /** \brief Notifies a new state block to be added to the solver manager
          */
         StateBlockPtr addStateBlock(StateBlockPtr _state_ptr);
 
-        /** \brief Adds a new state block to be updated to solver manager
+        /** \brief Notifies a state block to be removed from the solver manager
          */
-        void updateStateBlockPtr(StateBlockPtr _state_ptr);
+        void removeStateBlock(StateBlockPtr _state_ptr);
 
-        /** \brief Adds a state block to be removed to solver manager
+        /** \brief Gets a map of constraint notification to be handled by the solver
          */
-        void removeStateBlockPtr(StateBlockPtr _state_ptr);
+        std::map<StateBlockPtr,Notification>& getStateBlockNotificationMap();
 
-        /** \brief Gets a list of state blocks which state has been changed to be handled by the solver
+        /** \brief Notifies a new constraint to be added to the solver manager
          */
-        StateBlockList& getNotifiedStateBlockList();
+        ConstraintBasePtr addConstraint(ConstraintBasePtr _constraint_ptr);
 
-        /** \brief Gets a queue of constraint notification to be handled by the solver
+        /** \brief Notifies a constraint to be removed from the solver manager
          */
-        std::list<ConstraintNotification>& getConstraintNotificationList();
+        void removeConstraint(ConstraintBasePtr _constraint_ptr);
 
-        /** \brief Adds a new constraint to be added to solver manager
+        /** \brief Gets a map of constraint notification to be handled by the solver
          */
-        ConstraintBasePtr addConstraintPtr(ConstraintBasePtr _constraint_ptr);
-
-        /** \brief Adds a constraint to be removed to solver manager
-         */
-        void removeConstraintPtr(ConstraintBasePtr _constraint_ptr);
+        std::map<ConstraintBasePtr, Notification>& getConstraintNotificationMap();
 
         // Print and check ---------------------------------------
         /**
@@ -327,14 +316,14 @@ inline ProcessorMotionPtr& Problem::getProcessorMotionPtr()
     return processor_motion_ptr_;
 }
 
-inline std::list<ConstraintNotification>& Problem::getConstraintNotificationList()
+inline std::map<StateBlockPtr,Notification>& Problem::getStateBlockNotificationMap()
 {
-    return constraint_notification_list_;
+    return state_block_notification_map_;
 }
 
-inline StateBlockList& Problem::getNotifiedStateBlockList()
+inline std::map<ConstraintBasePtr,Notification>& Problem::getConstraintNotificationMap()
 {
-    return notified_state_block_list_;
+    return constraint_notification_map_;
 }
 
 } // namespace wolf

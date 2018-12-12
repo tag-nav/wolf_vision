@@ -122,6 +122,8 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
         // Wolf tree access ---------------------------------------------------
     public:
+        virtual void setProblem(ProblemPtr _problem) final;
+
         TrajectoryBasePtr getTrajectoryPtr() const;
         void setTrajectoryPtr(TrajectoryBasePtr _trj_ptr);
 
@@ -256,6 +258,13 @@ inline void FrameBase::resizeStateBlockVec(unsigned int _size)
 inline unsigned int FrameBase::getHits() const
 {
     return constrained_by_list_.size();
+}
+
+inline void FrameBase::setProblem(ProblemPtr _problem)
+{
+    NodeBase::setProblem(_problem);
+    for (auto cap : capture_list_)
+        cap->setProblem(_problem);
 }
 
 inline ConstraintBaseList& FrameBase::getConstrainedByList()

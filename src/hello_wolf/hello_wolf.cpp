@@ -1,7 +1,7 @@
 /**
  * \file hello_wolf.cpp
  *
- *  Created on: Dec 1, 2017 -- two months exactly after Oct-1st, we still have 4 political prisoners.
+ *  Created on: Dec 1, 2017  -- two months exactly after Oct-1st, we still have 4 political prisoners.
  *
  *     ###
  *    ## ##
@@ -27,7 +27,7 @@
 #include "ceres_wrapper/ceres_manager.h"
 
 int main()
-{
+ {
     /*
      * ============= PROBLEM DEFINITION ==================
      *
@@ -100,7 +100,7 @@ int main()
      *   - Second, using random values
      * Both solutions must produce the same exact values as in the sketches above.
      *
-     * Optionally, the user can opt to self-calibrate the sensor's orientation (see NOTE within the code around Line 139)
+     * Optionally, the user can opt to self-calibrate the sensor's orientation (see NOTE within the code around Line 151)
      *
      * (c) 2017 Joan Sola @ IRI-CSIC
      */
@@ -117,12 +117,12 @@ int main()
 
     // sensor odometer 2D
     IntrinsicsOdom2DPtr intrinsics_odo      = std::make_shared<IntrinsicsOdom2D>();
-    intrinsics_odo->k_disp_to_disp          = 0.1;
-    intrinsics_odo->k_rot_to_rot            = 0.1;
     SensorBasePtr sensor_odo                = problem->installSensor("ODOM 2D", "sensor odo", Vector3s(0,0,0), intrinsics_odo);
 
     // processor odometer 2D
     ProcessorParamsOdom2DPtr params_odo     = std::make_shared<ProcessorParamsOdom2D>();
+    params_odo->voting_active               = true;
+    params_odo->time_tolerance              = 0.1;
     params_odo->max_time_span               = 999;
     params_odo->dist_traveled               = 0.95; // Will make KFs automatically every 1m displacement
     params_odo->angle_turned                = 999;
@@ -133,16 +133,26 @@ int main()
 
     // sensor Range and Bearing
     IntrinsicsRangeBearingPtr intrinsics_rb = std::make_shared<IntrinsicsRangeBearing>();
-    intrinsics_rb->noise_bearing_degrees_std = 1.0;
     intrinsics_rb->noise_range_metres_std   = 0.1;
+    intrinsics_rb->noise_bearing_degrees_std = 1.0;
     SensorBasePtr sensor_rb                 = problem->installSensor("RANGE BEARING", "sensor RB", Vector3s(1,1,0), intrinsics_rb);
-    // NOTE: uncomment this line below to achieve sensor self-calibration (of the orientation only)
-    // sensor_rb->getOPtr()->unfix();
 
     // processor Range and Bearing
     ProcessorParamsRangeBearingPtr params_rb = std::make_shared<ProcessorParamsRangeBearing>();
+    params_rb->voting_active                = false;
     params_rb->time_tolerance               = 0.01;
     ProcessorBasePtr processor_rb           = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
+
+
+    // SELF CALIBRATION ===================================================
+
+    // NOTE: SELF-CALIBRATION OF SENSOR ORIENTATION
+    // Uncomment this line below to achieve sensor self-calibration (of the orientation only, since the position is not observable)
+    sensor_rb->getOPtr()->unfix();
+
+    // NOTE: SELF-CALIBRATION OF SENSOR POSITION
+    // The position is however not observable, and thus self-calibration would not work. You can try uncommenting it too.
+    // sensor_rb->getPPtr()->unfix();
 
 
     // CONFIGURE ==========================================================
@@ -157,6 +167,7 @@ int main()
 
 
     // SET OF EVENTS =======================================================
+    std::cout << std::endl;
     WOLF_TRACE("======== BUILD PROBLEM =======")
 
     // We'll do 3 steps of motion and landmark observations.
@@ -164,10 +175,10 @@ int main()
     // STEP 1 --------------------------------------------------------------
 
     // initialize
-    TimeStamp   t(0.0);
+    TimeStamp   t(0.0);                     // t : 0.0
     Vector3s    x(0,0,0);
     Matrix3s    P = Matrix3s::Identity() * 0.1;
-    problem->setPrior(x, P, t, 0.5);             // KF1
+    problem->setPrior(x, P, t, 0.5);             // KF1 : (0,0,0)
 
     // observe lmks
     ids.resize(1); ranges.resize(1); bearings.resize(1);
@@ -175,14 +186,14 @@ int main()
     ranges      << 1.0;                     // see drawing
     bearings    << M_PI/2;
     CaptureRangeBearingPtr cap_rb = std::make_shared<CaptureRangeBearing>(t, sensor_rb, ids, ranges, bearings);
-    sensor_rb   ->process(cap_rb);
+    sensor_rb   ->process(cap_rb);          // L1 : (1,2)
 
     // STEP 2 --------------------------------------------------------------
-    t += 1.0;
+    t += 1.0;                     // t : 1.0
 
     // motion
     CaptureOdom2DPtr cap_motion = std::make_shared<CaptureOdom2D>(t, sensor_odo, motion_data, motion_cov);
-    sensor_odo  ->process(cap_motion);      // KF2
+    sensor_odo  ->process(cap_motion);      // KF2 : (1,0,0)
 
     // observe lmks
     ids.resize(2); ranges.resize(2); bearings.resize(2);
@@ -190,14 +201,14 @@ int main()
     ranges      << sqrt(2.0), 1.0;          // see drawing
     bearings    << 3*M_PI/4, M_PI/2;
     cap_rb      = std::make_shared<CaptureRangeBearing>(t, sensor_rb, ids, ranges, bearings);
-    sensor_rb   ->process(cap_rb);
+    sensor_rb   ->process(cap_rb);          // L1 : (1,2), L2 : (2,2)
 
     // STEP 3 --------------------------------------------------------------
-    t += 1.0;
+    t += 1.0;                     // t : 2.0
 
     // motion
     cap_motion  ->setTimeStamp(t);
-    sensor_odo  ->process(cap_motion);      // KF3
+    sensor_odo  ->process(cap_motion);      // KF3 : (2,0,0)
 
     // observe lmks
     ids.resize(2); ranges.resize(2); bearings.resize(2);
@@ -205,9 +216,8 @@ int main()
     ranges      << sqrt(2.0), 1.0;          // see drawing
     bearings    << 3*M_PI/4, M_PI/2;
     cap_rb      = std::make_shared<CaptureRangeBearing>(t, sensor_rb, ids, ranges, bearings);
-    sensor_rb   ->process(cap_rb);
-
-    problem->print(4,1,1,1);
+    sensor_rb   ->process(cap_rb);          // L1 : (1,2), L2 : (2,2), L3 : (3,2)
+    problem->print(1,0,1,0);
 
 
     // SOLVE ================================================================
@@ -216,25 +226,30 @@ int main()
     WOLF_TRACE("======== SOLVE PROBLEM WITH EXACT PRIORS =======")
     std::string report = ceres->solve(wolf::SolverManager::ReportVerbosity::FULL);
     WOLF_TRACE(report);                     // should show a very low iteration number (possibly 1)
-    problem->print(4,1,1,1);
+    problem->print(1,0,1,0);
 
     // PERTURB initial guess
     WOLF_TRACE("======== PERTURB PROBLEM PRIORS =======")
     for (auto sen : problem->getHardwarePtr()->getSensorList())
         for (auto sb : sen->getStateBlockVec())
             if (sb && !sb->isFixed())
-                sb->setState(VectorXs::Random(sb->getSize()) * 0.5); // We perturb A LOT !
+                sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);       // We perturb A LOT !
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
-        kf->setState(Vector3s::Random() * 0.5);                 // We perturb A LOT !
+        if (kf->isKey())
+            for (auto sb : kf->getStateBlockVec())
+                if (sb && !sb->isFixed())
+                    sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);   // We perturb A LOT !
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
-        lmk->getPPtr()->setState(Vector2s::Random());           // We perturb A LOT !
-    problem->print(4,1,1,1);
+        for (auto sb : lmk->getStateBlockVec())
+            if (sb && !sb->isFixed())
+                sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);       // We perturb A LOT !
+    problem->print(1,0,1,0);
 
     // SOLVE again
     WOLF_TRACE("======== SOLVE PROBLEM WITH PERTURBED PRIORS =======")
     report = ceres->solve(wolf::SolverManager::ReportVerbosity::FULL);
     WOLF_TRACE(report);                     // should show a very high iteration number (more than 10, or than 100!)
-    problem->print(4,1,1,1);
+    problem->print(1,0,1,0);
 
     // GET COVARIANCES of all states
     WOLF_TRACE("======== COVARIANCES OF SOLVED PROBLEM =======")
@@ -244,6 +259,10 @@ int main()
             WOLF_TRACE("KF", kf->id(), "_cov = \n", kf->getCovariance());
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
         WOLF_TRACE("L", lmk->id(), "_cov = \n", lmk->getCovariance());
+    std::cout << std::endl;
+
+    WOLF_TRACE("======== FINAL PRINT FOR INTERPRETATION =======")
+    problem->print(4,1,1,1);
 
     /*
      * ============= FIRST COMMENT ON THE RESULTS ==================
@@ -260,9 +279,7 @@ int main()
      *
      *  - Observe that all other KFs and Lmks are correct.
      *
-     *  - Observe that F4 is not correct. Since it is not a KF, is has not been estimated.
-     *    But this is a no-issue because F4 is just an inner frame used by the odometer processor,
-     *    with no role in the problem itself, nor in the optimization process.
+     *  - Try self-calibrating the sensor orientation by uncommenting line 151 (well, around 151)
      *
      */
 
