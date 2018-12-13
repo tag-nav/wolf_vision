@@ -229,16 +229,22 @@ TEST_F(ConstraintAutodiffApriltag_class, solve_f1_perturbated)
     // unfix F1, perturbate state
     F1->unfix();
     Vector3s p0 = Vector3s::Random() * 0.25;
+//    WOLF_DEBUG("Perturbation: ")
+//    WOLF_DEBUG(p0.transpose());
     Vector7s x0(pose_robot);
 
     x0.head<3>() += p0;
+    WOLF_DEBUG("State before perturbation: ");
+    WOLF_DEBUG(F1->getState().transpose());
     F1->setState(x0);
+//    WOLF_DEBUG("State after perturbation: ");
+//    WOLF_DEBUG(F1->getState().transpose());
 
-    //problem detected here. solve() throws an error !
-    // solve
-    //std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::QUIET); // 0: nothing, 1: BriefReport, 2: FullReport
-    //WOLF_TRACE("solved")
-    //ASSERT_MATRIX_APPROX(F1->getState(), pose_robot, 1e-6);
+//    solve
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::QUIET); // 0: nothing, 1: BriefReport, 2: FullReport
+//    WOLF_DEBUG("State after solve: ");
+//    WOLF_DEBUG(F1->getState().transpose());
+    ASSERT_MATRIX_APPROX(F1->getState(), pose_robot, 1e-6);
 
 }
 
