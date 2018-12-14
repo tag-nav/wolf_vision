@@ -473,7 +473,10 @@ createGtest()
     TMP=$(echo $TMP | sed 's/(.*//g' | sed 's/.* //g')
     if ! grep -q "$TMP" "${TEMPLATES_PATH}"/tmp2.cpp
     then
-      sed -i "/\[Class methods\]/a TEST($CLASSNAME, $TMP)\n\{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m gtest for ${CLASSNAME} ${TMP} is empty.\" << std::endl;\n\}\n" "${TEMPLATES_PATH}"/tmp2.cpp
+      if ! [[ ${TMP:0:1} == "_" ]] ## Avoid considering lines where its just a part of the declaration with initial input params _aa"
+      then
+        sed -i "/\[Class methods\]/a TEST($CLASSNAME, $TMP)\n\{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m gtest for ${CLASSNAME} ${TMP} is empty.\" << std::endl;\n\}\n" "${TEMPLATES_PATH}"/tmp2.cpp
+      fi
     fi
   done
 
