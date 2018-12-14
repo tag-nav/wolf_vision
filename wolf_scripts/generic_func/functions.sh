@@ -345,17 +345,20 @@ fillWithBaseVirtualMethods()
         TXTCPP_1=$(echo $TXTH | sed 's/'"$TXTCPP_2"'.*//g')
  
         # CPP file
-        TXTCPP_3=$(echo "$TXTCPP_3" | sed -r 's/\*\*+/XXXX/g') ## remove **
-        TXTCPP_3=$(echo "$TXTCPP_3" | sed -r 's/\*+/YYYY/g') ## remove *
-        sed -i "/\} \/\/ namespace wolf/i ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}" "$NAME_CPP_PATH"
-        if ! [[ $TXTCPP_1 =~ .*void*. ]]
+        if ! [[ ${TXTCPP_2:0:1} == "_" ]] ## Avoid considering lines where its just a part of the declaration with initial input params _aa"
         then
-          sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var\{\}; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
-        else 
-          sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n\}\n" "$NAME_CPP_PATH"
+          TXTCPP_3=$(echo "$TXTCPP_3" | sed -r 's/\*\*+/XXXX/g') ## remove **
+          TXTCPP_3=$(echo "$TXTCPP_3" | sed -r 's/\*+/YYYY/g') ## remove *
+          sed -i "/\} \/\/ namespace wolf/i ${TXTCPP_1}${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}" "$NAME_CPP_PATH"
+          if ! [[ $TXTCPP_1 =~ .*void*. ]]
+          then
+            sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n  ${TXTCPP_1}return_var\{\}; \/\/TODO: fill this variable\n  return return_var;\n\}\n" "$NAME_CPP_PATH"
+          else 
+            sed -i "/${CLASSNAME}::${TXTCPP_2}(${TXTCPP_3}/a \{\n  std::cout << \"\\033[1;33m [WARN]:\\033[0m ${CLASSNAME}::${TXTCPP_2} is empty.\" << std::endl;\n\}\n" "$NAME_CPP_PATH"
+          fi
+          sed -i -r 's/'"XXXX"'/'"**"'/g' "$NAME_CPP_PATH" # add again **
+          sed -i -r 's/'"YYYY"'/'"*"'/g' "$NAME_CPP_PATH" # add again *
         fi
-        sed -i -r 's/'"XXXX"'/'"**"'/g' "$NAME_CPP_PATH" # add again **
-        sed -i -r 's/'"YYYY"'/'"*"'/g' "$NAME_CPP_PATH" # add again *
       done    
     fi
   fi  
