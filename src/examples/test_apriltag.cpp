@@ -34,6 +34,14 @@ bool str_ends_with (std::string const &fullString, std::string const &ending) {
 
 int main(int argc, char *argv[])
 {
+    /*
+     * HOW TO USE ?
+     * For now, just call the executable and append the list of images to be processed
+     * For example, if you want to process only one image located at wolf/bin/images/frame1.jpg
+     * and if wolf_root is correctly set. then just run (from wolf/bin)
+     * ./test_apriltag /bin/images/frame1.jpg
+     */
+
     using namespace wolf;
 
 #ifdef IMAGE_OUTPUT
