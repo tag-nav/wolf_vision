@@ -369,9 +369,13 @@ updateCMakeLists()
   CML_PATH="${WOLF_ROOT}/src/${TYPE}s/CMakeLists.txt"
 
   # Add Header source
-  Hsources=( $(grep -e "\.h" "${CML_PATH}") )
   NewH="\${CMAKE_CURRENT_SOURCE_DIR}/$NAME.h"
-  
+
+  # get file names after conditionals ENDIF is the match
+  sed '1,/ENDIF/d' "${CML_PATH}" > "${WOLF_SCRIPTS_PATH}"/tmp.h
+  Hsources=( $(grep -e "\.h" "${WOLF_SCRIPTS_PATH}"/tmp.h) )
+  rm "${WOLF_SCRIPTS_PATH}"/tmp.h
+    
   # Check if already exists
   EXISTS=0
   for (( idx = 0; idx < ${#Hsources[@]}; idx++ )); do
