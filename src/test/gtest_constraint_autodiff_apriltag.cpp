@@ -210,7 +210,7 @@ TEST_F(ConstraintAutodiffApriltag_class, Check_tree)
     ASSERT_TRUE(problem->check(0));
 }
 
-TEST_F(ConstraintAutodiffApriltag_class, solve_f1_perturbated)
+TEST_F(ConstraintAutodiffApriltag_class, solve_f1_P_perturbated)
 {
     ConstraintAutodiffApriltagPtr constraint = std::make_shared<ConstraintAutodiffApriltag>(
             S,
@@ -234,6 +234,46 @@ TEST_F(ConstraintAutodiffApriltag_class, solve_f1_perturbated)
     Vector7s x0(pose_robot);
 
     x0.head<3>() += p0;
+    WOLF_DEBUG("State before perturbation: ");
+    WOLF_DEBUG(F1->getState().transpose());
+    F1->setState(x0);
+//    WOLF_DEBUG("State after perturbation: ");
+//    WOLF_DEBUG(F1->getState().transpose());
+
+//    solve
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::QUIET); // 0: nothing, 1: BriefReport, 2: FullReport
+//    WOLF_DEBUG("State after solve: ");
+//    WOLF_DEBUG(F1->getState().transpose());
+    ASSERT_MATRIX_APPROX(F1->getState(), pose_robot, 1e-6);
+
+}
+
+TEST_F(ConstraintAutodiffApriltag_class, solve_f1_O_perturbated)
+{
+    ConstraintAutodiffApriltagPtr constraint = std::make_shared<ConstraintAutodiffApriltag>(
+            S,
+            F1,
+            lmk1,
+            f1,
+            false,
+            CTR_ACTIVE
+    );
+
+    ConstraintAutodiffApriltagPtr ctr0 = std::static_pointer_cast<ConstraintAutodiffApriltag>(f1->addConstraint(constraint));
+    lmk1->addConstrainedBy(constraint);
+    F1->addConstrainedBy(constraint);
+    f1->addConstrainedBy(constraint);
+
+    // unfix F1, perturbate state
+    F1->unfix();
+    Vector3s e0 = euler_robot + Vector3s::Random() * 0.25;
+    Quaternions e0_quat     = e2q(e0);
+    Vector4s e0_vquat = e0_quat.coeffs();
+//    WOLF_DEBUG("Perturbation: ")
+//    WOLF_DEBUG(e0.transpose());
+    Vector7s x0(pose_robot);
+
+    x0.tail<4>() = e0_vquat;
     WOLF_DEBUG("State before perturbation: ");
     WOLF_DEBUG(F1->getState().transpose());
     F1->setState(x0);
