@@ -414,9 +414,14 @@ updateCMakeLists()
     if ! [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
     then
       # Add CPP source
-      Hsources=( $(grep -e "\.cpp" "${CML_PATH}") )
       NewCPP="\${CMAKE_CURRENT_SOURCE_DIR}/$NAME.cpp"
+      
+      # get file names after conditionals ENDIF is the match
+      sed '1,/ENDIF/d' "${CML_PATH}" > "${WOLF_SCRIPTS_PATH}"/tmp.h
+      Hsources=( $(grep -e "\.cpp" "${WOLF_SCRIPTS_PATH}"/tmp.h) )
+      rm "${WOLF_SCRIPTS_PATH}"/tmp.h
       Hsources=( "${Hsources[@]}" $NewCPP )
+
       IFS=$'\n' 
       sorted=($(sort <<<"${Hsources[*]}"))
       unset IFS
