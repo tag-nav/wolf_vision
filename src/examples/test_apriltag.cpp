@@ -58,16 +58,17 @@ int main(int argc, char *argv[])
     // first argument is the name of the program.
     // following arguments are path to image (from wolf_root)
     const int inputs = argc -1;
-    WOLF_DEBUG("nb of images %d\n", inputs);
+    WOLF_DEBUG("nb of images: ", inputs);
     cv::Mat frame;
     Scalar ts(0);
-    CaptureImagePtr cap = std::make_shared<CaptureImage>(ts, sen_cam, frame);
 
     WOLF_INFO( "====================        Main loop       ======================" )
     Scalar dt = 1;
     for (int input = 1; input <= inputs; input++) {
         ts += dt;
-        frame = cv::imread(wolf_root + argv[input], CV_LOAD_IMAGE_COLOR);
+        std::string path = wolf_root + argv[input];
+        WOLF_DEBUG("path to image ", path);
+        frame = cv::imread(path, CV_LOAD_IMAGE_COLOR);
 
         if( frame.data ) //if imread succeeded
         {
@@ -75,10 +76,10 @@ int main(int argc, char *argv[])
             sleep(500); //wait for 0.5 s
             imshow( "Display window", frame );  // display original image.
 #endif
-
-            cap->setTimeStamp(ts);
-            // cap->setImage(frame);  TODO: Why is there no setImage() method in CaptureImage class ?
+            CaptureImagePtr cap = std::make_shared<CaptureImage>(ts, sen_cam, frame);
+            WOLF_DEBUG("Processing image...");
             sen->process(cap);
+            WOLF_DEBUG("Image processed...");
         }
     }
 
