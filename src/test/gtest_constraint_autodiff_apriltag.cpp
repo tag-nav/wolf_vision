@@ -248,11 +248,6 @@ TEST_F(ConstraintAutodiffApriltag_class, solve_f1_perturbated)
 
 }
 
-TEST(ConstraintAutodiffApriltag, Destructor)
-{
-    std::cout << "\033[1;33m [WARN]:\033[0m gtest for ConstraintAutodiffApriltag Destructor is empty." << std::endl;
-}
-
 //[Class methods]
 
 int main(int argc, char **argv)

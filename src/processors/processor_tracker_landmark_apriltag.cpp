@@ -238,7 +238,6 @@ bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
         return getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_
         && getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
     }
-    WOLF_DEBUG("NOT ENOUHGH TIME");
     return false;
 }
 

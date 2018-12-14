@@ -27,4 +27,4 @@ noise:
     
 vote:
     min_time_vote: 0.2 # s
-    min_features_for_keyframe: 1 
+    min_features_for_keyframe: 1

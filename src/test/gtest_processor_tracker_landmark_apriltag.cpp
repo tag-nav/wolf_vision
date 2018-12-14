@@ -31,7 +31,7 @@ class ProcessorTrackerLandmarkApriltag_Wrapper : public ProcessorTrackerLandmark
         void setOriginPtr(const CaptureBasePtr _origin_ptr) { origin_ptr_ = _origin_ptr; }
         void setLastPtr  (const CaptureBasePtr _last_ptr)   { last_ptr_ = _last_ptr; }
         void setIncomingPtr  (const CaptureBasePtr _incoming_ptr)   { incoming_ptr_ = _incoming_ptr; }
-        Scalar getMinFeaturesForKeyframe (){return min_features_for_keyframe_;}
+        unsigned int getMinFeaturesForKeyframe (){return min_features_for_keyframe_;}
         Scalar getMinTimeVote (){return min_time_vote_;}
         void setIncomingDetections(const FeatureBaseList _incoming_detections) { detections_incoming_ = _incoming_detections; }
 
@@ -139,27 +139,25 @@ TEST(ProcessorTrackerLandmarkApriltag, Constructor)
 TEST_F(ProcessorTrackerLandmarkApriltag_class, voteForKeyFrame)
 {
     Scalar min_time_vote = prc_apr->getMinTimeVote();
-//    TODO: use min_features_for_keyframe (here "hardcoded" to 1, needs to create features with a loop)
-//    unsigned int min_features_for_keyframe = prc_apr->prc_apriltag_params_->min_features_for_keyframe;
+    unsigned int min_features_for_keyframe = prc_apr->getMinFeaturesForKeyframe();
     Scalar start_ts = 2.0;
 
-    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1);
-    FeatureApriltagPtr f2 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 2);
-
     CaptureBasePtr Ca = std::make_shared<CapturePose>(start_ts, sen, Vector7s(), Matrix6s());
-    Ca->addFeature(f1);
-    Ca->addFeature(f2);  // not really necessary
-
     CaptureBasePtr Cb = std::make_shared<CapturePose>(start_ts + min_time_vote/2, sen, Vector7s(), Matrix6s());
-    Cb->addFeature(f1);
-
     CaptureBasePtr Cc = std::make_shared<CapturePose>(start_ts + 2*min_time_vote, sen, Vector7s(), Matrix6s());
-    Cc->addFeature(f1);
-
     CaptureBasePtr Cd = std::make_shared<CapturePose>(start_ts + 2.5*min_time_vote, sen, Vector7s(), Matrix6s());
-
     CaptureBasePtr Ce = std::make_shared<CapturePose>(start_ts + 3*min_time_vote, sen, Vector7s(), Matrix6s());
 
+    for (int i=0; i < min_features_for_keyframe; i++){
+        FeatureApriltagPtr f = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), i);
+        Ca->addFeature(f);
+        Ca->addFeature(f);
+        Cc->addFeature(f);
+        if (i != min_features_for_keyframe-1){
+            Cd->addFeature(f);
+            Ce->addFeature(f);
+        }
+    }
     F1->addCapture(Ca);
     F1->addCapture(Cb);
     F1->addCapture(Cc);
@@ -188,7 +186,6 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, voteForKeyFrame)
     prc_apr->setLastPtr(Cd);
     prc_apr->setIncomingPtr(Ce);
     ASSERT_FALSE(prc_apr->voteForKeyFrame());
-
 
 }
 
