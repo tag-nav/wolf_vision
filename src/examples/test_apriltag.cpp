@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
     SensorCameraPtr sen_cam = std::static_pointer_cast<SensorCamera>(sen);
     ProcessorBasePtr prc = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
     // set prior
-    FrameBasePtr F1 = problem->setPrior(Vector7s::Zero(), Matrix6s::Identity(), 0.0, 0.1);
+    FrameBasePtr F1 = problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 0.0, 0.1);
     ceres::Solver::Options options;
     CeresManagerPtr ceres_manager = std::make_shared<CeresManager>(problem, options);
 
