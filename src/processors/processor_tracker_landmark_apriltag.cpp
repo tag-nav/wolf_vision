@@ -145,6 +145,13 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         // add to list
         detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov, tag_id));
     }
+
+    apriltag_detections_destroy(&detections_);
+}
+
+void ProcessorTrackerLandmarkApriltag::postProcess()
+{
+
 }
 
 ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBasePtr _feature_ptr,

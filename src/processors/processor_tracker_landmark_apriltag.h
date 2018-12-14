@@ -59,6 +59,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         virtual ~ProcessorTrackerLandmarkApriltag();
 
         void preProcess();
+        void postProcess();
 
         /** \brief Find provided landmarks in the incoming capture
          * \param _landmark_list_in input list of landmarks to be found in incoming
