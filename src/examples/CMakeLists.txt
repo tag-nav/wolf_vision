@@ -135,8 +135,8 @@ IF(vision_utils_FOUND)
     TARGET_LINK_LIBRARIES(test_tracker_ORB ${PROJECT_NAME})
 
     IF (APRILTAG_LIBRARY)
-    #    ADD_EXECUTABLE(test_name test_name.cpp)
-    #    TARGET_LINK_LIBRARIES(test_name ${PROJECT_NAME})
+    ADD_EXECUTABLE(test_apriltag test_apriltag.cpp)
+    TARGET_LINK_LIBRARIES(test_apriltag ${PROJECT_NAME})
     ENDIF(APRILTAG_LIBRARY)
 
 ENDIF(vision_utils_FOUND)

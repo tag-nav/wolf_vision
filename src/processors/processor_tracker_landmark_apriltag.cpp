@@ -145,6 +145,13 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         // add to list
         detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov, tag_id));
     }
+
+    apriltag_detections_destroy(&detections_);
+}
+
+void ProcessorTrackerLandmarkApriltag::postProcess()
+{
+
 }
 
 ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBasePtr _feature_ptr,
@@ -238,7 +245,6 @@ bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
         return getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_
         && getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
     }
-    WOLF_DEBUG("NOT ENOUHGH TIME");
     return false;
 }
 
