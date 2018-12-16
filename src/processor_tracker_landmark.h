@@ -112,10 +112,11 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          */
         virtual unsigned int processKnown();
 
-        /** \brief Find provided landmarks in the incoming capture
+        /** \brief Find provided landmarks in the incoming Capture
          * \param _landmark_list_in input list of landmarks to be found in incoming
          * \param _feature_list_out returned list of incoming features corresponding to a landmark of _landmark_list_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
+         * \return the number of landmarks found
          */
         virtual unsigned int findLandmarks(const LandmarkBaseList& _landmark_list_in,
                                            FeatureBaseList& _feature_list_out,
@@ -139,14 +140,14 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          */
         unsigned int processNew(const unsigned int& _max_features);
 
-        /** \brief Detect new Features
+        /** \brief Detect new Features in last Capture
          * \param _max_features The maximum number of features to detect.
          * \return The number of detected Features.
          *
-         * This function detects Features that do not correspond to known Features/Landmarks in the system.
+         * This function detects Features that do not correspond to known Landmarks in the system.
          *
-         * The function sets the member new_features_list_, the list of newly detected features,
-         * to be used for landmark initialization.
+         * The function sets the member new_features_list_, the list of newly detected features
+         * in last_ptr_ to be used for landmark initialization.
          */
         virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out) = 0;
 
