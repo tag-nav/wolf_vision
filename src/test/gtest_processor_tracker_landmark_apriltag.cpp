@@ -34,6 +34,7 @@ class ProcessorTrackerLandmarkApriltag_Wrapper : public ProcessorTrackerLandmark
         unsigned int getMinFeaturesForKeyframe (){return min_features_for_keyframe_;}
         Scalar getMinTimeVote (){return min_time_vote_;}
         void setIncomingDetections(const FeatureBaseList _incoming_detections) { detections_incoming_ = _incoming_detections; }
+        void setLastDetections(const FeatureBaseList _last_detections) { detections_last_ = _last_detections; }
 
         // for factory
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr)
@@ -233,7 +234,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     features_in.push_back(f0);
 
     // We just added twice the same feature in the list.
-    prc_apr->setIncomingDetections(features_in);
+    prc_apr->setLastDetections(features_in);
     // at this point we have 0 detections in last, 2 detections in incoming with same id. We should keep only one in the final list of new detected features
     prc_apr->detectNewFeatures(2, features_out);
     ASSERT_EQ(features_out.size(), 1);
@@ -243,7 +244,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     features_in.push_back(f0);
     features_in.push_back(f1);
     //these features are set as the incoming detections due to processing an image
-    prc_apr->setIncomingDetections(features_in);
+    prc_apr->setLastDetections(features_in);
     // at this point we have 0 detections in last, 2 detections in incoming with different ids, thus we should have 2 new detected features (if max_features set to >= 2)
     prc_apr->detectNewFeatures(2, features_out);
     ASSERT_EQ(features_out.size(), 2);
@@ -264,7 +265,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
 
     // Add 1 one more new feature to the detection list
     features_in.push_back(f2);
-    prc_apr->setIncomingDetections(features_in);
+    prc_apr->setLastDetections(features_in);
     // At this point we have 2 landmarks (for f0 and f1), and 3 detections (f0, f1 and f2).
     // Hence we should 1 new detected feature : f2
     features_out.clear();

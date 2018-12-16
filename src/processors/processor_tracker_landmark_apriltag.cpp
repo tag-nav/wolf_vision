@@ -205,7 +205,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
 
 unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
 {
-    for (auto feature_in_image : detections_incoming_)
+    for (auto feature_in_image : detections_last_)
     {
         bool feature_already_found(false);
         // features and landmarks must be tested with their ID !!
