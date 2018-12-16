@@ -176,7 +176,6 @@ void ProcessorTrackerFeatureCorner::extractCorners(CaptureLaser2DPtr _capture_la
         measurement.head(2) = corner.pt_.head(2);
         measurement(2) = corner.orientation_;
         measurement(3) = corner.aperture_;
-        // TODO: maybe in line object?
         Scalar L1 = corner.line_1_.length();
         Scalar L2 = corner.line_2_.length();
         Scalar cov_angle_line1 = 12 * corner.line_1_.error_
