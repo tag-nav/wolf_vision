@@ -300,6 +300,18 @@ void ProcessorTrackerLandmarkApriltag::configure(SensorBasePtr _sensor)
     // [...] add more code if needed
 }
 
+void ProcessorTrackerLandmarkApriltag::advanceDerived()
+{
+    ProcessorTrackerLandmark::advanceDerived();
+    detections_last_ = std::move(detections_incoming_);
+}
+
+void ProcessorTrackerLandmarkApriltag::resetDerived()
+{
+    ProcessorTrackerLandmark::resetDerived();
+    detections_last_ = std::move(detections_incoming_);
+}
+
 } // namespace wolf
 
 // Register in the SensorFactory

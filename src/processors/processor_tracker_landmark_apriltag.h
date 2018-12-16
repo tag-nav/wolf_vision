@@ -113,6 +113,10 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         FeatureBaseList getIncomingDetections() const;
         FeatureBaseList getLastDetections() const;
 
+    protected:
+        void advanceDerived();
+        void resetDerived();
+
     private:
         std::map<int, Scalar> tag_widths_;
         Scalar tag_width_default_;

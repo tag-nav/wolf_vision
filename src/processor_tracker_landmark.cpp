@@ -64,10 +64,13 @@ void ProcessorTrackerLandmark::resetDerived()
 unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_features)
 {
     /* Rationale: A keyFrame will be created using the last Capture.
+     *
      * First, we work on this Capture to detect new Features,
      * eventually create Landmarks with them,
      * and in such case create the new Constraints feature-landmark.
+     *
      * When done, we need to track these new Features to the incoming Capture.
+     *
      * At the end, all new Features are appended to the lists of known Features in
      * the last and incoming Captures.
      */
