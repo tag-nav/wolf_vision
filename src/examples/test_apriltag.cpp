@@ -73,7 +73,6 @@ int main(int argc, char *argv[])
     WOLF_INFO( "====================        Main loop       ======================" )
     Scalar dt = 1;
     for (int input = 1; input <= inputs; input++) {
-        ts += dt;
         std::string path = wolf_root + "/" + argv[input];
         WOLF_DEBUG("path to image ", path);
         frame = cv::imread(path, CV_LOAD_IMAGE_COLOR);
@@ -90,7 +89,8 @@ int main(int argc, char *argv[])
             WOLF_DEBUG("Image processed...");
         }
         else
-            WOLF_WARN("could not load image ", path)
+            WOLF_WARN("could not load image ", path);
+        ts += dt;
     }
 
     problem->print(4,1,1,1);
