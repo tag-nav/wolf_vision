@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     Scalar dt = 1;
     for (int input = 1; input <= inputs; input++) {
         ts += dt;
-        std::string path = wolf_root + argv[input];
+        std::string path = wolf_root + "/" + argv[input];
         WOLF_DEBUG("path to image ", path);
         frame = cv::imread(path, CV_LOAD_IMAGE_COLOR);
 
