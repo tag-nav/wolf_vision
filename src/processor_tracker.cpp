@@ -106,6 +106,9 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             // Process info
             processNew(params_tracker_->max_new_features);
 
+            // Establish constraints
+            establishConstraints();
+
             // Update pointers
             resetDerived();
             origin_ptr_ = last_ptr_;
