@@ -78,14 +78,8 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
     // We first need to populate the \b last Capture with new Features
     unsigned int n = detectNewFeatures(_max_features, new_features_last_);
 
-    // Append all new Features to the last Capture's list of Features
-    last_ptr_->addFeatureList(new_features_last_);
-
     // create new landmarks with the new features discovered
     createNewLandmarks();
-
-    // Append new landmarks to the map
-    getProblem()->addLandmarkList(new_landmarks_);
 
     // Find the new landmarks in incoming_ptr_ (if it's not nullptr)
     if (incoming_ptr_ != nullptr)
@@ -95,6 +89,12 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
         // Append all new Features to the incoming Capture's list of Features
         incoming_ptr_->addFeatureList(new_features_incoming_);
     }
+
+    // Append all new Features to the last Capture's list of Features
+    last_ptr_->addFeatureList(new_features_last_);
+
+    // Append new landmarks to the map
+    getProblem()->addLandmarkList(new_landmarks_);
 
     // return the number of new features detected in \b last
     return n;
