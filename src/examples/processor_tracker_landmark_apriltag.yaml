@@ -26,5 +26,6 @@ noise:
     std_rpy :     5   # degrees
     
 vote:
+    voting active: true
     min_time_vote: 0.2 # s
     min_features_for_keyframe: 1
