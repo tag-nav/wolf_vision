@@ -70,6 +70,21 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
 // Destructor
 ProcessorTrackerLandmarkApriltag::~ProcessorTrackerLandmarkApriltag()
 {
+    //apriltag_detector_destroy(&detector_);
+
+    /*std::string famname(tag_family_.name);
+    if (famname == "tag36h11")
+        tag36h11_destroy(&tag_family_);
+    else if (famname == "tag36h10")
+        tag36h10_destroy(&tag_family_);
+    else if (famname == "tag36artoolkit")
+        tag36artoolkit_destroy(&tag_family_);
+    else if (famname == "tag25h9")
+        tag25h9_destroy(&tag_family_);
+    else if (famname == "tag25h7")
+        tag25h7_destroy(&tag_family_);
+    else
+        WOLF_WARN("Unrecognized tag family name. Could not destroy. Possible memory leak.");*/
 }
 
 
