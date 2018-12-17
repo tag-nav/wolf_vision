@@ -125,11 +125,12 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
     double cy(camera_intrinsics(1));                                                          //test value: 257.352121
 
     zarray_t detections_ = *apriltag_detector_detect(&detector_, &im);
-//    WOLF_TRACE(zarray_size(detections_incoming_), " tags detected");
+    // WOLF_TRACE(zarray_size(&detections_), " tags detected");
 
-    detections_incoming_.resize(zarray_size(&detections_));
+    //clear detections so that new ones will be stored inside
+    detections_incoming_.clear();
     // Draw detection outlines
-    for (int i = 0; i < detections_incoming_.size(); i++) {
+    for (int i = 0; i < zarray_size(&detections_); i++) {
         apriltag_detection_t *det;
         zarray_get(&detections_, i, &det);
         matd_t *pose_matrix = homography_to_pose(det->H, fx, fy, cx, cy);
