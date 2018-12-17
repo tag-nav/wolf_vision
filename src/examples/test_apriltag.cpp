@@ -93,10 +93,15 @@ int main(int argc, char *argv[])
         ts += dt;
     }
 
-    problem->print(4,1,1,1);
+    problem->print(3,1,1,0);
     WOLF_INFO( "====================    Solving problem    ======================" )
-    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::QUIET); // 0: nothing, 1: BriefReport, 2: FullReport
-    problem->print(4,1,1,1);
+//    LandmarkBasePtr lmk = problem->getMapPtr()->getLandmarkList().front();
+//    lmk->getPPtr()->setState(Vector3s::Zero());
+//    lmk->getOPtr()->setState((Vector4s()<<0,0,1,0).finished());
+//    lmk->fix();
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
+    WOLF_TRACE(report);
+    problem->print(3,1,1,0);
 
     return 0;
 
