@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
     std::string wolf_root = _WOLF_ROOT_DIR;
     // Wolf problem
     ProblemPtr problem = Problem::create("PO 3D");
-    SensorBasePtr sen = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_apriltag_params_notangentrect.yaml");
+    SensorBasePtr sen = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,1,0).finished(), wolf_root + "/src/examples/camera_apriltag_params_notangentrect.yaml");
     SensorCameraPtr sen_cam = std::static_pointer_cast<SensorCamera>(sen);
     ProcessorBasePtr prc = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
     // set prior
