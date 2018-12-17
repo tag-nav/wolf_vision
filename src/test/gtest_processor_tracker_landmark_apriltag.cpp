@@ -79,7 +79,7 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
             prc_apr = std::static_pointer_cast<ProcessorTrackerLandmarkApriltag_Wrapper>(prc);
 
             // set prior
-            F1 = problem->setPrior(Vector7s::Zero(), Matrix6s::Identity(), 0.0, 0.1);
+            F1 = problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 0.0, 0.1);
 
             // minimal config for the processor to be operative
             C1 = std::make_shared<CapturePose>(1.0, sen, Vector7s(), Matrix6s());
