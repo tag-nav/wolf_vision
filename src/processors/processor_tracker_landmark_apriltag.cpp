@@ -252,8 +252,12 @@ bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
 {
     Scalar dt_incoming_origin = getIncomingPtr()->getTimeStamp().get() - getOriginPtr()->getTimeStamp().get();
     if (dt_incoming_origin > min_time_vote_){
-        return getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_
-        && getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
+        bool more_in_last = getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_;
+        bool less_in_incoming = getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
+        return more_in_last;
+        return more_in_last && less_in_incoming;
+//        return getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_
+//        && getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
     }
     return false;
 }
