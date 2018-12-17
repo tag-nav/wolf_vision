@@ -89,6 +89,8 @@ int main(int argc, char *argv[])
             sen->process(cap);
             WOLF_DEBUG("Image processed...");
         }
+        else
+            WOLF_WARN("could not load image ", path)
     }
 
     problem->print(4,1,1,1);
