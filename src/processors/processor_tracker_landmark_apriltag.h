@@ -124,6 +124,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         Scalar tag_width_default_;
         cv::Mat grayscale_image_;
         apriltag_detector_t detector_;
+        apriltag_family_t tag_family_;
         Scalar std_xy_, std_z_, std_rpy_;
 
     protected:

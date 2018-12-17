@@ -37,27 +37,26 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
 {
     // configure apriltag detector
 
-    apriltag_family_t tag_family;
     std::string famname(_params_tracker_landmark_apriltag->tag_family_);
     if (famname == "tag36h11")
-        tag_family = *tag36h11_create();
+        tag_family_ = *tag36h11_create();
     else if (famname == "tag36h10")
-        tag_family = *tag36h10_create();
+        tag_family_ = *tag36h10_create();
     else if (famname == "tag36artoolkit")
-        tag_family = *tag36artoolkit_create();
+        tag_family_ = *tag36artoolkit_create();
     else if (famname == "tag25h9")
-        tag_family = *tag25h9_create();
+        tag_family_ = *tag25h9_create();
     else if (famname == "tag25h7")
-        tag_family = *tag25h7_create();
+        tag_family_ = *tag25h7_create();
     else {
         WOLF_ERROR("Unrecognized tag family name. Use e.g. \"tag36h11\".");
         exit(-1);
     }
 
-    tag_family.black_border     = _params_tracker_landmark_apriltag->tag_black_border_;
+    tag_family_.black_border     = _params_tracker_landmark_apriltag->tag_black_border_;
 
     detector_ = *apriltag_detector_create();
-    apriltag_detector_add_family(&detector_, &tag_family);
+    apriltag_detector_add_family(&detector_, &tag_family_);
 
     detector_.quad_decimate     = _params_tracker_landmark_apriltag->quad_decimate_;
     detector_.quad_sigma        = _params_tracker_landmark_apriltag->quad_sigma_;
