@@ -70,21 +70,16 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
 // Destructor
 ProcessorTrackerLandmarkApriltag::~ProcessorTrackerLandmarkApriltag()
 {
-    //apriltag_detector_destroy(&detector_);
+    // destroy raw pointers in detector_
+    //apriltag_detector_destroy(&detector_); cannot be used because it is trying to free() the detector_ itself that is not implemented as a raw pointer in our case
+    timeprofile_destroy(detector_.tp);
+    apriltag_detector_clear_families(&detector_);
+    zarray_destroy(detector_.tag_families);
+    workerpool_destroy(detector_.wp);
 
-    /*std::string famname(tag_family_.name);
-    if (famname == "tag36h11")
-        tag36h11_destroy(&tag_family_);
-    else if (famname == "tag36h10")
-        tag36h10_destroy(&tag_family_);
-    else if (famname == "tag36artoolkit")
-        tag36artoolkit_destroy(&tag_family_);
-    else if (famname == "tag25h9")
-        tag25h9_destroy(&tag_family_);
-    else if (famname == "tag25h7")
-        tag25h7_destroy(&tag_family_);
-    else
-        WOLF_WARN("Unrecognized tag family name. Could not destroy. Possible memory leak.");*/
+    //free raw pointers in tag_family_
+    free(tag_family_.name);
+    free(tag_family_.codes);
 }
 
 
