@@ -157,6 +157,11 @@ fillWithBaseConstructorParameters()
    	NAME_STR=$(UpperCase $NAME_STR)
   fi
 
+  if [[ $BASECLASSNAME =~ .*ConstraintAutodiff*. ]] ;
+  then
+	 PARAMS="${PARAMS::-530}" # remove , from the end
+  fi   
+
   OLD=" class_name();"
   NEW="\ \ \ \ \ \ \ \ ${CLASSNAME}(${PARAMS});"
   NEW=${NEW//$'\n'/} # Remove all newlines.
