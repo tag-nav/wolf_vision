@@ -3,60 +3,60 @@ BASE=
 TYPE=
 while getopts ":t:n:b:" OPTION
 do
-  case ${OPTION} in
-    t)
-       TYPE=${OPTARG}
-       ;;
-    n)
-       NAME=${OPTARG}
-       ;;
-    b)
-       BASE=${OPTARG}
-       ;;
-    *) 
-       showHelp 
-       exit
-       ;;
-  esac
+	case ${OPTION} in
+    	t)
+       		TYPE=${OPTARG}
+       		;;
+    	n)
+       		NAME=${OPTARG}
+       		;;
+    	b)
+       		BASE=${OPTARG}
+       		;;
+    	*) 
+       		showHelp 
+       		exit
+       		;;
+  	esac
 done
 if [ -z "$TYPE" ] && [ -z "$NAME" ] && [ -z "$BASE" ]
 then
-   showHelp	
-   exit
+	showHelp	
+   	exit
 fi
 if [ -z "$TYPE" ] ;
 then
-   echo ""
-   echo "${RED}  [ERROR]: Missing TYPE value (-t).${NC}"
-   echo ""
-   showHelp	
-   exit
+   	echo ""
+   	echo "${RED}  [ERROR]: Missing TYPE value (-t).${NC}"
+   	echo ""
+   	showHelp	
+   	exit
 fi
 
 if [ -z "$NAME" ] ;
 then
-   echo ""
-   echo "${RED}  [ERROR]: Missing NAME value (-n).${NC}"
-   echo ""
-   showHelp	
-   exit
+   	echo ""
+   	echo "${RED}  [ERROR]: Missing NAME value (-n).${NC}"
+   	echo ""
+   	showHelp	
+   	exit
 fi
 if [ -z "$BASE" ] ;
 then
-   echo ""
-   echo "${RED}  [ERROR]: Missing BASE value (-b).${NC}"
-   echo ""
-   showHelp	
-   exit
+   	echo ""
+   	echo "${RED}  [ERROR]: Missing BASE value (-b).${NC}"
+   	echo ""
+   	showHelp	
+   	exit
 fi
 
 if ! [ "$TYPE" == "capture" ] && ! [ "$TYPE" == "constraint" ] && ! [ "$TYPE" == "feature" ] && ! [ "$TYPE" == "landmark" ] && ! [ "$TYPE" == "processor" ] && ! [ "$TYPE" == "sensor" ]
 then
-   echo ""
-   echo "${RED} --> Incorrect type \"$TYPE\". Please check the following instructions: ${NC}"
-   echo ""
-   showHelp
-   exit 1
+   	echo ""
+   	echo "${RED} --> Incorrect type \"$TYPE\". Please check the following instructions: ${NC}"
+   	echo ""
+   	showHelp
+   	exit 1
 fi
 
 NAME=$(LowerCase $NAME)
@@ -81,12 +81,12 @@ BASECLASSNAME=$TYPE_CAP1$(echo "$(echo "$BASECLASSNAME" | sed 's/.*/\u&/')")
 
 if ! [[ $NAME =~ $TYPE ]] ;
 then
-  if [[ $BASE =~ .*base*. ]] ;
-  then
-    NAME="$TYPE"_"$NAME";  
-  else
-    NAME="$TYPE"_"$BASE"_"$NAME";
-  fi
+  	if [[ $BASE =~ .*base*. ]] ;
+  	then
+    	NAME="$TYPE"_"$NAME";  
+  	else
+    	NAME="$TYPE"_"$BASE"_"$NAME";
+  	fi
 fi
 if ! [[ $BASE =~ $TYPE ]] ;
 then
