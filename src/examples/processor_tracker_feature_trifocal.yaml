@@ -16,5 +16,5 @@ algorithm:
     min track length for constraint: 3
     
 noise:
-    pixel noise std: 4 # pixels
+    pixel noise std: 1 # pixels
     

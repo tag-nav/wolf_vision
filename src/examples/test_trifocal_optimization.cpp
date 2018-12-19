@@ -105,7 +105,7 @@ int main(int argc, char** argv)
     TimeStamp   t(0.0);
     Vector7s    x; x <<  img_pos.row(0).transpose(), 0.0,   0.0, 0.0, 0.0, 1.0;
     x.segment(3,4).normalize();
-    Matrix6s    P = Matrix6s::Identity() * 0.1;
+    Matrix6s    P = Matrix6s::Identity() * 0.01;
 
     // ====== KF1 ======
     FrameBasePtr kf1 = problem->setPrior(x, P, t, dt/2);
@@ -118,7 +118,7 @@ int main(int argc, char** argv)
     FrameBasePtr kf1_check = capture_1->getFramePtr();
     assert(kf1->id()==kf1_check->id() && "Prior and KF1 are not the same!");
 
-    problem->print(2,1,1,0);
+//    problem->print(2,1,1,0);
 
     // ===============================================
     // KF2 ===========================================
@@ -133,9 +133,9 @@ int main(int argc, char** argv)
     std::cout << "Capture 2 TS: " << capture_2->getTimeStamp() << std::endl;
     camera->process(capture_2);
 
-    problem->print(2,1,1,0);
+//    problem->print(2,1,1,0);
 
-    cv::waitKey(0); // Wait for a keystroke in the window
+//    cv::waitKey(0); // Wait for a keystroke in the window
 
     // ===============================================
     // KF3 ===========================================
@@ -149,9 +149,9 @@ int main(int argc, char** argv)
     CaptureImagePtr capture_3 = make_shared<CaptureImage>(t, camera, images.at(2));
     camera->process(capture_3);
 
-    problem->print(2,1,1,0);
+//    problem->print(2,1,1,0);
 
-    cv::waitKey(0); // Wait for a keystroke in the window
+//    cv::waitKey(0); // Wait for a keystroke in the window
 
     // ===============================================
     // KF4 ===========================================
@@ -165,20 +165,41 @@ int main(int argc, char** argv)
     CaptureImagePtr capture_4 = make_shared<CaptureImage>(t, camera, images.at(3));
     camera->process(capture_4);
 
-    problem->print(2,1,1,0);
+//    problem->print(2,1,1,0);
 
-    cv::waitKey(0); // Wait for a keystroke in the window
+//    cv::waitKey(0); // Wait for a keystroke in the window
+
+
+    // ===============================================
+    // KF5 ===========================================
+    // ===============================================
+
+    t += dt; // increment t
+    x << img_pos.row(4).transpose(),0.0,    0.0,0.0,0.0,1.0; // ground truth position
+    FrameBasePtr kf5 = problem->emplaceFrame(KEY_FRAME,x,t);
+    problem->keyFrameCallback(kf5,nullptr,dt/2.0); // Ack KF creation
+
+    CaptureImagePtr capture_5 = make_shared<CaptureImage>(t, camera, images.at(4));
+    camera->process(capture_5);
+
+//    problem->print(2,1,1,0);
+
+//    cv::waitKey(0); // Wait for a keystroke in the window
 
     // ===============================================
     // Establish 3D Constraint (to see results scaled)
     // ===============================================
 
-//    Vector7s pose; pose << img_pos.row(2).transpose(),0.0,    0.0,0.0,0.0,1.0; // ground truth position
-//    Matrix6s pose_cov = P;
-//    CapturePosePtr capture_pose = make_shared<CapturePose>(t, nullptr, pose, pose_cov);
-//    kf3->addCapture(capture_pose);
-//    capture_pose->emplaceFeatureAndConstraint();
+    std::cout << "================== ADD Absolute constraint ========================" << std::endl;
 
+    Vector7s pose; pose << -2.0, 0.0, 0.0,    0.0,0.0,0.0,1.0; // ground truth position
+    Matrix6s P_pose2 = Matrix6s::Identity() * 100.0;
+    Matrix6s pose_cov = P_pose2;
+    CapturePosePtr capture_pose = make_shared<CapturePose>(t, nullptr, pose, pose_cov);
+    kf3->addCapture(capture_pose);
+    capture_pose->emplaceFeatureAndConstraint();
+
+    problem->print(4,1,1,0);
 
     // ===============================================
     // SOLVE PROBLEM (1) =============================
@@ -195,6 +216,21 @@ int main(int argc, char** argv)
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         std::cout << wolf::q2v(Eigen::Quaternions(kf->getOPtr()->getState().data())).transpose()*180.0/3.14159 << std::endl;
 
+
+    // ===============================================
+    // COVARIANCES ===================================
+    // ===============================================
+    // GET COVARIANCES of all states
+    WOLF_TRACE("======== COVARIANCES OF SOLVED PROBLEM =======")
+    ceres_manager->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
+    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+        if (kf->isKey())
+        {
+            Eigen::MatrixXs cov = kf->getCovariance();
+            WOLF_TRACE("KF", kf->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
+        }
+    std::cout << std::endl;
+
     // ===============================================
     // PERTURBATE STATES =============================
     // ===============================================
@@ -206,7 +242,9 @@ int main(int argc, char** argv)
     {
         if (kf != kf1)
         {
-            Eigen::Vector7s state_perturbed; state_perturbed << Vector3s::Random() * 0.5,    Vector4s::Random().normalized();
+            Eigen::Vector7s perturbation; perturbation << Vector7s::Random() * 0.05;
+            Eigen::Vector7s state_perturbed = kf->getState() + perturbation;
+            state_perturbed.segment(3,4).normalize();
             kf->setState(state_perturbed);
             std::cout << wolf::q2v(Eigen::Quaternions(kf->getOPtr()->getState().data())).transpose()*180.0/3.14159 << std::endl;
         }

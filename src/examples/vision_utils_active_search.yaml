@@ -3,7 +3,7 @@ sensor:
 
 detector:
   type: "AGAST"         
-  threshold: 9
+  threshold: 7
   nonmaxSuppression: true
   detection type: 0         #  AGAST_5_8=0, AGAST_7_12d=1, AGAST_7_12s=2, OAST_9_16=3, THRESHOLD=10000, NONMAX_SUPPRESSION=10001
   

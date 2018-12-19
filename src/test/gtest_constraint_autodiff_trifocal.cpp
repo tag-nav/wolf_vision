@@ -406,7 +406,6 @@ TEST_F(ConstraintAutodiffTrifocalTest, solve_F1)
     WOLF_DEBUG(report, " AND UNION");
 
     ASSERT_MATRIX_APPROX(res, Vector3s::Zero(), 1e-8);
-
 }
 
 TEST_F(ConstraintAutodiffTrifocalTest, solve_F2)

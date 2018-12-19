@@ -114,6 +114,13 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
         SensorCameraPtr camera_ptr_;        // To look for intrinsics
         Vector3s pixel_canonical_prev_, pixel_canonical_origin_, pixel_canonical_last_;
         Matrix3s sqrt_information_upper;
+
+        //Print function specialized for doubles (avoid jets)
+        template <class T, int ROWS, int COLS>
+        void print_matrix(const Eigen::Matrix<T, ROWS, COLS>& _mat);
+
+        template <int ROWS, int COLS>
+        void print_matrix(const Eigen::Matrix<double, ROWS, COLS>& _mat);
 };
 
 } // namespace wolf
@@ -397,6 +404,16 @@ inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_
 
 }
 
+// Print function
+template<class T, int ROWS, int COLS>
+void ConstraintAutodiffTrifocal::print_matrix(const Eigen::Matrix<T, ROWS, COLS>& _mat)
+{}
+
+template<int ROWS, int COLS>
+void ConstraintAutodiffTrifocal::print_matrix(const Eigen::Matrix<double, ROWS, COLS>& _mat)
+{
+    std::cout << _mat << std::endl;
+}
 
 }    // namespace wolf
 
