@@ -189,6 +189,10 @@ int main(int argc, char** argv)
     {
         if (kf != kf1)
         {
+//            std::cout << std::setprecision(5) << std::endl;
+            std::cout << "*****" << std::endl;
+            std::cout << kf->getState().transpose()(1) << std::endl;
+
             Eigen::Vector7s state_perturbed; state_perturbed << Vector3s::Random() * 0.5,    Vector4s::Random().normalized();
             kf->setState(state_perturbed);
             std::cout << wolf::q2v(Eigen::Quaternions(kf->getOPtr()->getState().data())).transpose()*180.0/3.14159 << std::endl;
