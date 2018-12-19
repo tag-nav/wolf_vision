@@ -30,9 +30,4 @@ src/examples/map_apriltag_save.yaml
 
 \.vscode/
 build_release/
-frame0000_rect.jpg
-frame0001_rect.jpg
-frame0002_rect.jpg
-frame0003_rect.jpg
-frame0004_rect.jpg
-frame0005_rect.jpg
+

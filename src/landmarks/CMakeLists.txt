@@ -9,18 +9,16 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
 #=========================================
 #=========================================
-
-SET(HDRS_CAPTURE ${HDRS_CAPTURE}
-  ${CMAKE_CURRENT_SOURCE_DIR}/capture_velocity.h
-  ${CMAKE_CURRENT_SOURCE_DIR}/capture_wheel_joint_position.h 
+  
+SET(HDRS_LANDMARK ${HDRS_LANDMARK}
+  ${CMAKE_CURRENT_SOURCE_DIR}/landmark_point_3D.h
   )
 
-SET(SRCS_CAPTURE ${SRCS_CAPTURE}
-  ${CMAKE_CURRENT_SOURCE_DIR}/capture_velocity.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/capture_wheel_joint_position.cpp 
+SET(SRCS_LANDMARK ${SRCS_LANDMARK}
+  ${CMAKE_CURRENT_SOURCE_DIR}/landmark_point_3D.cpp
   )
 
 # Forward var to parent scope
 # These lines always at the end
-SET(HDRS_CAPTURE ${HDRS_CAPTURE}  PARENT_SCOPE)
-SET(SRCS_CAPTURE ${SRCS_CAPTURE}  PARENT_SCOPE)
+SET(HDRS_LANDMARK ${HDRS_LANDMARK}  PARENT_SCOPE)
+SET(SRCS_LANDMARK ${SRCS_LANDMARK}  PARENT_SCOPE)
