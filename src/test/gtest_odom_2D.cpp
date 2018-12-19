@@ -362,13 +362,9 @@ TEST(Odom2D, KF_callback)
         // re-use capture with updated timestamp
         capture->setTimeStamp(t);
 
-        // Store cout flags
-        std::ios_base::fmtflags cout_flags(std::cout.flags());
         std::cout << "capture ts: " << capture->getTimeStamp() << " - " << capture->getTimeStamp().get();
         std::cout << "nsec:        " << capture->getTimeStamp().getNanoSeconds() << std::endl;
-        std::cout << "filled nsec: " << std::setfill('0') << std::setw(9) << std::right << capture->getTimeStamp().getNanoSeconds() << std::endl;
-        // Restore initial cout flags
-        std::cout.flags(cout_flags);
+        std::cout << "filled nsec: " << std::setfill(' ') << std::setw(9) << std::right << capture->getTimeStamp().getNanoSeconds() << std::endl;
 
         // Processor
         sensor_odom2d->process(capture);

@@ -5,17 +5,9 @@ namespace wolf {
 
 std::ostream& operator<<(std::ostream& os, const TimeStamp& _ts)
 {
-    // Store cout flags
-    std::ios_base::fmtflags cout_flags(std::cout.flags());
-
-    os << _ts.getSeconds() << "." << std::setfill('0') << std::setw(9) << std::right <<_ts.getNanoSeconds(); // write obj to stream
-
-    // Restore initial cout flags
-    std::cout.flags(cout_flags);
+    os << _ts.getSeconds() << "." << std::setfill(' ') << std::setw(9) << std::right <<_ts.getNanoSeconds(); // write obj to stream
     return os;
 }
-
-
 
 TimeStamp::TimeStamp() :
         //time_stamp_(0)
