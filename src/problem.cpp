@@ -889,7 +889,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                                 cout << "      sb: ";
                                 cout << (sb->isFixed() ? "Fix" : "Est");
                                 if (metric)
-                                    cout << std::setprecision(3) << " (" << sb->getState().transpose() << " )";
+                                    cout << std::setprecision(2) << " (" << sb->getState().transpose() << " )";
                                 cout << endl;
                             }
 
@@ -924,7 +924,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                             }
                             cout << endl;
                             if (metric)
-                                cout << "        m = ( " << std::setprecision(3) << f->getMeasurement().transpose()
+                                cout << "        m = ( " << std::setprecision(2) << f->getMeasurement().transpose()
                                         << " )" << endl;
                             if (depth >= 4)
                             {
