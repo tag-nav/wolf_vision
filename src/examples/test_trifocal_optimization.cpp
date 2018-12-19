@@ -15,6 +15,7 @@
 #include "../sensor_camera.h"
 #include "../ceres_wrapper/ceres_manager.h"
 #include "../rotations.h"
+#include "../capture_pose.h"
 
 Eigen::VectorXs get_random_state(const double& _LO, const double& _HI)
 {
@@ -42,22 +43,22 @@ int main(int argc, char** argv)
 
     // x,y cm displacement, negatives values are directly added in the path string (row-wise).
     Eigen::MatrixXs img_pos = Eigen::MatrixXs::Zero(9,2);
-    img_pos.row(0) << 0,0;
-    img_pos.row(1) << 1,0;
-    img_pos.row(2) << 2,0;
-    img_pos.row(3) << 2,1;
-    img_pos.row(4) << 2,2;
-    img_pos.row(5) << 1,2;
-    img_pos.row(6) << 0,2;
-    img_pos.row(7) << 0,1;
-    img_pos.row(8) << 0,0;
+    img_pos.row(0) <<  0, 0;
+    img_pos.row(1) << -1, 0;
+    img_pos.row(2) << -2, 0;
+    img_pos.row(3) << -2,-1;
+    img_pos.row(4) << -2,-2;
+    img_pos.row(5) << -1,-2;
+    img_pos.row(6) <<  0,-2;
+    img_pos.row(7) <<  0,-1;
+    img_pos.row(8) <<  0, 0;
 
     // read image
     std::cout << std::endl << "-> Reading images from ground-truth movements..." << std::endl;
     std::vector<cv::Mat> images;
     for (unsigned int ii = 0; ii < img_pos.rows(); ++ii)
     {
-        std::string img_path = wolf_root + "/src/examples/Test_gazebo_x-" + std::to_string((int)img_pos(ii,0)) + "0cm_y-" + std::to_string((int)img_pos(ii,1)) + "0cm.png";
+        std::string img_path = wolf_root + "/src/examples/Test_gazebo_x" + std::to_string((int)img_pos(ii,0)) + "0cm_y" + std::to_string((int)img_pos(ii,1)) + "0cm.png";
         std::cout << " |->" << img_path << std::endl;
         images.push_back(cv::imread(img_path, CV_LOAD_IMAGE_GRAYSCALE));   // Read the file
         if(! images.at(ii).data )                              // Check for invalid input
@@ -82,11 +83,12 @@ int main(int argc, char** argv)
     CeresManagerPtr ceres_manager;
     ceres::Solver::Options ceres_options;
     ceres_options.max_num_iterations = 1000;
+    ceres_options.function_tolerance = 1e-15;
     ceres_manager = make_shared<CeresManager>(problem, ceres_options);
 
     // Install tracker (sensor and processor)
     Eigen::Vector7s cam_ext; cam_ext << 0.0,0.0,0.0, 0.0,0.0,0.0,1.0;
-    std::string cam_intr_yaml = wolf_root + "/src/examples/camera_params_vga_ideal.yaml";
+    std::string cam_intr_yaml = wolf_root + "/src/examples/camera_params_1280x960_ideal.yaml";
     SensorBasePtr sensor = problem->installSensor("CAMERA","camera",cam_ext,cam_intr_yaml);
     SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(sensor);
 
@@ -116,7 +118,7 @@ int main(int argc, char** argv)
     FrameBasePtr kf1_check = capture_1->getFramePtr();
     assert(kf1->id()==kf1_check->id() && "Prior and KF1 are not the same!");
 
-    problem->print(1,1,1,0);
+    problem->print(2,1,1,0);
 
     // ===============================================
     // KF2 ===========================================
@@ -147,6 +149,8 @@ int main(int argc, char** argv)
     CaptureImagePtr capture_3 = make_shared<CaptureImage>(t, camera, images.at(2));
     camera->process(capture_3);
 
+    problem->print(2,1,1,0);
+
     cv::waitKey(0); // Wait for a keystroke in the window
 
     // ===============================================
@@ -161,7 +165,20 @@ int main(int argc, char** argv)
     CaptureImagePtr capture_4 = make_shared<CaptureImage>(t, camera, images.at(3));
     camera->process(capture_4);
 
+    problem->print(2,1,1,0);
+
     cv::waitKey(0); // Wait for a keystroke in the window
+
+    // ===============================================
+    // Establish 3D Constraint (to see results scaled)
+    // ===============================================
+
+//    Vector7s pose; pose << img_pos.row(2).transpose(),0.0,    0.0,0.0,0.0,1.0; // ground truth position
+//    Matrix6s pose_cov = P;
+//    CapturePosePtr capture_pose = make_shared<CapturePose>(t, nullptr, pose, pose_cov);
+//    kf3->addCapture(capture_pose);
+//    capture_pose->emplaceFeatureAndConstraint();
+
 
     // ===============================================
     // SOLVE PROBLEM (1) =============================
@@ -172,7 +189,7 @@ int main(int argc, char** argv)
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL);
     std::cout << report << std::endl;
 
-    problem->print(1,1,1,0);
+    problem->print(2,1,1,0);
 
     // Print orientation states for all KFs
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
@@ -195,7 +212,7 @@ int main(int argc, char** argv)
         }
     }
 
-    problem->print(1,1,1,0);
+    problem->print(2,1,1,0);
 
     // ===============================================
     // SOLVE PROBLEM (2) =============================
@@ -207,10 +224,12 @@ int main(int argc, char** argv)
     std::cout << report << std::endl;
 
     std::cout << "================== AFTER SOLVE 2nd TIME ========================" << std::endl;
-    problem->print(2,1,1,0);
+    problem->print(4,1,1,0);
 
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         std::cout << wolf::q2v(Eigen::Quaternions(kf->getOPtr()->getState().data())).transpose()*180.0/3.14159 << std::endl;
+
+    cv::waitKey(0); // Wait for a keystroke in the window
 
     return 0;
 }
