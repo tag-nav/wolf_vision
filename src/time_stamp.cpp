@@ -6,6 +6,7 @@ namespace wolf {
 std::ostream& operator<<(std::ostream& os, const TimeStamp& _ts)
 {
     os << _ts.getSeconds() << "." << std::setfill('0') << std::setw(9) << std::right <<_ts.getNanoSeconds(); // write obj to stream
+    os << std::setfill(' ');
     return os;
 }
 
