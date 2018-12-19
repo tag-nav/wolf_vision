@@ -729,9 +729,6 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
     using std::cout;
     using std::endl;
 
-    // Store cout flags
-    std::ios_base::fmtflags cout_flags(std::cout.flags());
-
     cout << endl;
     cout << "P: wolf tree status ---------------------" << endl;
     cout << "Hardware" << ((depth < 1) ? ("   -- " + std::to_string(getHardwarePtr()->getSensorList().size()) + "S") : "")  << endl;
@@ -986,9 +983,6 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
     }
     cout << "-----------------------------------------" << endl;
     cout << endl;
-
-    // Restore initial cout flags
-    std::cout.flags(cout_flags);
 }
 
 FrameBasePtr Problem::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
