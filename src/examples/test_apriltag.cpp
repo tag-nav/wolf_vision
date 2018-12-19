@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
     // Wolf problem
     ProblemPtr problem = Problem::create("PO 3D");
     SensorBasePtr sen = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_logitech_c300_640_480.yaml");
+//    SensorBasePtr sen = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_apriltag_params_notangentrect.yaml");
     SensorCameraPtr sen_cam = std::static_pointer_cast<SensorCamera>(sen);
     ProcessorBasePtr prc = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
     // set prior
@@ -93,7 +94,7 @@ int main(int argc, char *argv[])
         ts += dt;
     }
 
-    problem->print(3,1,1,0);
+    problem->print(1,1,1,0);
     WOLF_INFO( "====================    Solving problem    ======================" )
 //    LandmarkBasePtr lmk = problem->getMapPtr()->getLandmarkList().front();
 //    lmk->getPPtr()->setState(Vector3s::Zero());
@@ -101,7 +102,7 @@ int main(int argc, char *argv[])
 //    lmk->fix();
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
     WOLF_TRACE(report);
-    problem->print(3,0,1,0);
+    problem->print(1,0,1,0);
 
     LandmarkBasePtr lmk_front = problem->getMapPtr()->getLandmarkList().front();
     LandmarkBasePtr lmk_back = problem->getMapPtr()->getLandmarkList().back();

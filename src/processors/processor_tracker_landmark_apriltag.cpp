@@ -133,16 +133,24 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         zarray_get(detections, i, &det);
         matd_t *pose_matrix = homography_to_pose(det->H, fx, fy, cx, cy);
 
-        Eigen::Affine3ds ac_M_t; // tag to camera as defined by apriltag lib
+        Eigen::Affine3ds Mapril; // tag to camera as defined by apriltag lib
         for(int r=0; r<4; r++)
             for(int c=0; c<4; c++)
-                ac_M_t.matrix()(r,c) = matd_get(pose_matrix,r,c);
+                Mapril.matrix()(r,c) = matd_get(pose_matrix,r,c);
 
-        WOLF_DEBUG("Before ", ac_M_t.matrix());
+        Eigen::Translation3d Tapril(Mapril.translation());
 
-        Eigen::Affine3ds c_M_t(c_M_ac_*ac_M_t.inverse());
-//        Eigen::Affine3ds c_M_t(ac_M_t);
-        WOLF_DEBUG("Apres ", c_M_t.matrix());
+        /*
+         * The transformation given by apriltag library is confusing for several reasons:
+         * - The frame of the camera is looking away from the tag
+         * - translation is frame of the tag in the frame of the april camera ac_T_t
+         * while
+         * - rotation is frame of the tag in the frame of the april camera t_T_ac
+         */
+        Eigen::Affine3ds ac_M_t = Tapril * Mapril.linear().inverse();
+
+//        Mapril.aff
+        Eigen::Affine3ds c_M_t(c_M_ac_*ac_M_t);
 
         // Set the scale of the translation vector from the relation metric_width / units_width
         Eigen::Vector3s translation ( c_M_t.translation() ); // translation vector in apriltag units (tag width in units is 2 units)
@@ -150,6 +158,8 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         Scalar tag_width  = getTagWidth(tag_id);   // tag width in metric
         Scalar scale      = tag_width/2.0;         // (tag width in units is 2 units)
         translation       = scale * translation;
+
+        WOLF_DEBUG("Raw apriltag, id: ", det->id, "; ", scale*Mapril.translation().transpose(), "; ",  Eigen::Quaternions(Mapril.rotation()).coeffs().transpose());
 
         // set the measured pose
         Eigen::Vector7s pose;
