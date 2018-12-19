@@ -1,6 +1,14 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
-# Forward var to parent scope
+#=========================================
+#=========================================
+# Add in this section the CONDITIONAL CLUES [IF/ELSE]  
+# for external libraries and move inside them the respective lines from above.  
+
+
+
+#=========================================
+#=========================================
 
 SET(HDRS_CONSTRAINT ${HDRS_CONSTRAINT}
   ${CMAKE_CURRENT_SOURCE_DIR}/constraint_autodiff_distance_3D.h
@@ -11,7 +19,7 @@ SET(HDRS_CONSTRAINT ${HDRS_CONSTRAINT}
 SET(SRCS_CONSTRAINT ${SRCS_CONSTRAINT} 
   )
 
-
+# Forward var to parent scope
 # These lines always at the end
 SET(HDRS_CONSTRAINT ${HDRS_CONSTRAINT}  PARENT_SCOPE)
 SET(SRCS_CONSTRAINT ${SRCS_CONSTRAINT}   PARENT_SCOPE)

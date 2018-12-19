@@ -68,10 +68,6 @@ target_link_libraries(gtest_frame_base ${PROJECT_NAME})
 wolf_add_gtest(gtest_IMU_tools gtest_IMU_tools.cpp)
 # target_link_libraries(gtest_IMU_tools ${PROJECT_NAME}) // WOLF library not needed
 
-# IMU tools test
-wolf_add_gtest(gtest_pack_KF_buffer gtest_pack_KF_buffer.cpp)
-target_link_libraries(gtest_pack_KF_buffer ${PROJECT_NAME})
-
 # LocalParametrizationXxx classes test
 wolf_add_gtest(gtest_local_param gtest_local_param.cpp)
 target_link_libraries(gtest_local_param ${PROJECT_NAME})
@@ -79,6 +75,10 @@ target_link_libraries(gtest_local_param ${PROJECT_NAME})
 # MotionBuffer class test
 wolf_add_gtest(gtest_motion_buffer gtest_motion_buffer.cpp)
 target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
+
+# PackKFBuffer
+wolf_add_gtest(gtest_pack_KF_buffer gtest_pack_KF_buffer.cpp)
+target_link_libraries(gtest_pack_KF_buffer ${PROJECT_NAME})
 
 # Problem class test
 wolf_add_gtest(gtest_problem gtest_problem.cpp)
@@ -179,7 +179,7 @@ wolf_add_gtest(gtest_processor_IMU_jacobians gtest_processor_IMU_jacobians.cpp)
 target_link_libraries(gtest_processor_IMU_jacobians ${PROJECT_NAME})
 
 IF(vision_utils_FOUND)
-# ProcessorIMUJacobians test
+# ProcessorFeatureTrifocal test
 wolf_add_gtest(gtest_processor_tracker_feature_trifocal gtest_processor_tracker_feature_trifocal.cpp)
 target_link_libraries(gtest_processor_tracker_feature_trifocal ${PROJECT_NAME})
 ENDIF(vision_utils_FOUND)
