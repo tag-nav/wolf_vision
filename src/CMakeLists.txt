@@ -81,6 +81,7 @@ FIND_PATH(APRILTAG_INCLUDE_DIR NAMES apriltag.h PATH_SUFFIXES "apriltag" ${APRIL
 FIND_LIBRARY(APRILTAG_LIBRARY NAMES apriltag PATH_SUFFIXES "${CMAKE_LIBRARY_ARCHITECTURE}" "apriltag" ${APRILTAG_LIBRARY_PATH})
 
 IF(APRILTAG_LIBRARY)
+    SET(Apriltag_FOUND TRUE)
     MESSAGE("apriltag Library FOUND in ${APRILTAG_LIBRARY}: apriltag related sources will be built.")
 ENDIF(APRILTAG_LIBRARY)
 
@@ -439,7 +440,6 @@ IF (vision_utils_FOUND)
         capture_image.h
         feature_point_image.h
         landmark_AHP.h
-        landmark_point_3D.h
         processor_params_image.h
         processor_tracker_feature_image.h
         processor_tracker_landmark_image.h
@@ -448,20 +448,19 @@ IF (vision_utils_FOUND)
         capture_image.cpp
         feature_point_image.cpp
         landmark_AHP.cpp
-        landmark_point_3D.cpp
         processor_tracker_feature_image.cpp
         processor_tracker_landmark_image.cpp
         )
 ENDIF(vision_utils_FOUND)
 
-IF (OPENCV_FOUND AND APRILTAG_LIBRARY)
+IF (OPENCV_FOUND AND Apriltag_FOUND)
     SET(HDRS ${HDRS}
         landmark_apriltag.h
         )
     SET(SRCS ${SRCS}
         landmark_apriltag.cpp
         )
-ENDIF(OPENCV_FOUND AND APRILTAG_LIBRARY)
+ENDIF(OPENCV_FOUND AND Apriltag_FOUND)
 
 # Add the capture sub-directory
 ADD_SUBDIRECTORY(captures)
@@ -472,10 +471,13 @@ ADD_SUBDIRECTORY(constraints)
 # Add the features sub-directory
 ADD_SUBDIRECTORY(features)
 
-# Add the processor sub-directory
+# Add the landmarks sub-directory
+ADD_SUBDIRECTORY(landmarks)
+
+# Add the processors sub-directory
 ADD_SUBDIRECTORY(processors)
 
-# Add the sensor sub-directory
+# Add the sensors sub-directory
 ADD_SUBDIRECTORY(sensors)
 
 # Add the hello_wolf sub-directory
@@ -514,11 +516,11 @@ IF(YAMLCPP_FOUND)
         	yaml/processor_image_yaml.cpp
         	yaml/processor_tracker_feature_trifocal_yaml.cpp
             )
-            IF(APRILTAG_LIBRARY)
+            IF(Apriltag_FOUND)
                 SET(SRCS ${SRCS}
                     yaml/processor_tracker_landmark_apriltag_yaml.cpp
                 )
-            ENDIF(APRILTAG_LIBRARY)
+            ENDIF(Apriltag_FOUND)
     ENDIF(vision_utils_FOUND)
 ENDIF(YAMLCPP_FOUND)
 
@@ -553,10 +555,13 @@ IF (raw_gps_utils_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${raw_gps_utils_LIBRARY})
 ENDIF (raw_gps_utils_FOUND)
 
-IF (vision_utils_FOUND)
-    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${vision_utils_LIBRARY})
+
+IF (OPENCV_FOUND)
    	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
-ENDIF (vision_utils_FOUND)
+	IF (vision_utils_FOUND)
+    	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${vision_utils_LIBRARY})
+	ENDIF (vision_utils_FOUND)
+ENDIF (OPENCV_FOUND)
 
 IF (OPENCV_FOUND)
    	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
@@ -571,10 +576,10 @@ IF (GLOG_FOUND)
 ENDIF (GLOG_FOUND)
 
 #check if this is done correctly
-IF (OPENCV_FOUND AND APRILTAG_LIBRARY)
+IF (OPENCV_FOUND AND Apriltag_FOUND)
     LINK_LIBRARIES(apriltag m)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${APRILTAG_LIBRARY}  ${CMAKE_THREAD_LIBS_INIT} ${OPENCV_LDFLAGS} m)
-ENDIF(OPENCV_FOUND AND APRILTAG_LIBRARY)
+ENDIF(OPENCV_FOUND AND Apriltag_FOUND)
 
 #install library
 #=============================================================

@@ -61,7 +61,7 @@ static ProcessorParamsBasePtr createProcessorParamsLandmarkApriltag(const std::s
         YAML::Node noise                    = config["noise"];
         params->std_xy_                      = noise["std_xy"]                       .as<Scalar>();
         params->std_z_                       = noise["std_z"]                        .as<Scalar>();
-        params->std_rpy_           = M_TORAD * noise["std_rpy"]                      .as<Scalar>();
+        params->std_rpy_           = M_TORAD * noise["std_rpy_degrees"]              .as<Scalar>();
 
         YAML::Node vote                     = config["vote"];
         params->voting_active               = vote["voting active"]                  .as<bool>();

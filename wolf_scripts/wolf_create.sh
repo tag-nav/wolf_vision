@@ -33,10 +33,10 @@ echo "- Generating CPP and H files."
 BASE_H_PATH=$(getFilePath $BASE.h)
 if [ -z "$BASE_H_PATH" ]
 then
-  echo ""
-  echo "${RED}  [ERROR]: Cannot find header file for base class ${BASE}.${NC}"
-  echo ""
-  exit
+  	echo ""
+  	echo "${RED}  [ERROR]: Cannot find header file for base class ${BASE}.${NC}"
+  	echo ""
+  	exit
 fi
 
 # Create Header and CPP files
@@ -56,9 +56,10 @@ echo "- Modifying CMakeLists.txt to include CPP and H files."
 DONE=$(updateCMakeLists)
 if [ -z "$DONE" ]
 then
-  echo "${YELLOW} \--x [WARN]: Not necessary. File entries already existing in CMakeLists.txt.${NC}"
+  	echo "${YELLOW} \--x [WARN]: Not necessary. File entries already existing in CMakeLists.txt.${NC}"
 else
-  echo "${GREEN} \--> Updated ${DONE} file.${NC}"
+  	echo "${GREEN} \--> Updated ${DONE} file.${NC}"
+  	echo "${YELLOW} \--> [WARN] Consider adding conditional clues [IF/ELSE] in the CMakeLists.txt if you use external dependencies, hence avoiding compilation if you don't have them installed${NC}"
 fi
 
 # ===== Create gtest =====
@@ -79,9 +80,10 @@ echo "- Modifying CMakeLists.txt to include gtest files."
 DONE=$(updateCMakeListsGTest)
 if [ -z "$DONE" ]
 then
-  echo "${YELLOW} \--x [WARN]: Not necessary. gtest file entry already existing in CMakeLists.txt.${NC}"
+  	echo "${YELLOW} \--x [WARN]: Not necessary. gtest file entry already existing in CMakeLists.txt.${NC}"
 else
-  echo "${GREEN} \--> Updated ${DONE} file.${NC}"
+  	echo "${GREEN} \--> Updated ${DONE} file.${NC}"
+ 	echo "${YELLOW} \--> [WARN] Consider adding conditional clues [IF/ELSE] in the CMakeLists.txt if you use external dependencies, hence avoiding compilation if you don't have them installed${NC}"
 fi
 
 #============================================

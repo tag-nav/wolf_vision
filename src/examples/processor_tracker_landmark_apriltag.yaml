@@ -21,9 +21,9 @@ tag widths:
     #2 :             0.1
     
 noise:
-    std_xy :      0.1 # m 
-    std_z :       0.1 # m 
-    std_rpy :     5   # degrees
+    std_xy :          0.1 # m 
+    std_z :           0.1 # m 
+    std_rpy_degrees : 5   # degrees
     
 vote:
     voting active: true

@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
         if( frame.data ) //if imread succeeded
         {
 #ifdef IMAGE_OUTPUT
-            sleep(500); //wait for 0.5 s
-            imshow( "Display window", frame );  // display original image.
+            sleep(0.5); //wait for 0.5 s
+            cv::imshow( "Display window", frame );  // display original image.
 #endif
             CaptureImagePtr cap = std::make_shared<CaptureImage>(ts, sen_cam, frame);
             WOLF_DEBUG("Processing image...");
