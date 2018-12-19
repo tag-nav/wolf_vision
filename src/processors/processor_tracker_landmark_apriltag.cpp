@@ -35,6 +35,9 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         min_time_vote_(_params_tracker_landmark_apriltag->min_time_vote),
         min_features_for_keyframe_(_params_tracker_landmark_apriltag->min_features_for_keyframe)
 {
+    // Constant transformation from apriltag camera frame to wolf camera frame
+    c_M_ac_.matrix() = (Eigen::Vector4s() << -1, 1, -1, 1).finished().asDiagonal();
+
     // configure apriltag detector
 
     std::string famname(_params_tracker_landmark_apriltag->tag_family_);
@@ -130,12 +133,16 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         zarray_get(detections, i, &det);
         matd_t *pose_matrix = homography_to_pose(det->H, fx, fy, cx, cy);
 
-        Eigen::Affine3ds t_M_c;
+        Eigen::Affine3ds ac_M_t; // tag to camera as defined by apriltag lib
         for(int r=0; r<4; r++)
             for(int c=0; c<4; c++)
-                t_M_c.matrix()(r,c) = matd_get(pose_matrix,r,c);
+                ac_M_t.matrix()(r,c) = matd_get(pose_matrix,r,c);
 
-        Eigen::Affine3ds c_M_t(t_M_c.inverse());
+        WOLF_DEBUG("Before ", ac_M_t.matrix());
+
+        Eigen::Affine3ds c_M_t(c_M_ac_*ac_M_t.inverse());
+//        Eigen::Affine3ds c_M_t(ac_M_t);
+        WOLF_DEBUG("Apres ", c_M_t.matrix());
 
         // Set the scale of the translation vector from the relation metric_width / units_width
         Eigen::Vector3s translation ( c_M_t.translation() ); // translation vector in apriltag units (tag width in units is 2 units)

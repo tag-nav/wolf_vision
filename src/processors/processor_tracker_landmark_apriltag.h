@@ -126,6 +126,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         apriltag_detector_t detector_;
         apriltag_family_t tag_family_;
         Scalar std_xy_, std_z_, std_rpy_;
+        Eigen::Affine3ds c_M_ac_;
 
     protected:
         FeatureBaseList detections_incoming_;

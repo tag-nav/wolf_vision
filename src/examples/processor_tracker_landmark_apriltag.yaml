@@ -14,7 +14,7 @@ detector parameters:
 tag parameters:
     tag_family:           "tag36h11" 
     tag_black_border:     1
-    tag_width_default:    0.1   # enter -1 here if you want to provide a map of [ tagid : tag_width ], see lines just below
+    tag_width_default:    0.166   # enter -1 here if you want to provide a map of [ tagid : tag_width ], see lines just below
 
 tag widths:
     #1 :             0.2
