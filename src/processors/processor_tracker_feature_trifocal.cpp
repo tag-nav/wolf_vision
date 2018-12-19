@@ -437,7 +437,7 @@ void ProcessorTrackerFeatureTrifocal::setParams(const ProcessorParamsTrackerFeat
 
 void ProcessorTrackerFeatureTrifocal::configure(SensorBasePtr _sensor)
 {
-    getSensorPtr()->setNoiseStd(Vector2s::Ones() * params_tracker_feature_trifocal_->pixel_noise_std);
+    _sensor->setNoiseStd(Vector2s::Ones() * params_tracker_feature_trifocal_->pixel_noise_std);
 }
 
 ProcessorBasePtr ProcessorTrackerFeatureTrifocal::create(const std::string& _unique_name,
