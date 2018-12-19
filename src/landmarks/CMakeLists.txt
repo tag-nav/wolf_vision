@@ -10,16 +10,15 @@ INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 #=========================================
 #=========================================
   
-SET(HDRS_FEATURE ${HDRS_FEATURE}
-  ${CMAKE_CURRENT_SOURCE_DIR}/feature_diff_drive.h 
+SET(HDRS_LANDMARK ${HDRS_LANDMARK}
+  ${CMAKE_CURRENT_SOURCE_DIR}/landmark_point_3D.h
   )
 
-SET(SRCS_FEATURE ${SRCS_FEATURE}
-  ${CMAKE_CURRENT_SOURCE_DIR}/feature_diff_drive.cpp 
+SET(SRCS_LANDMARK ${SRCS_LANDMARK}
+  ${CMAKE_CURRENT_SOURCE_DIR}/landmark_point_3D.cpp
   )
-  
+
 # Forward var to parent scope
 # These lines always at the end
-SET(HDRS_FEATURE ${HDRS_FEATURE}  PARENT_SCOPE)
-SET(SRCS_FEATURE ${SRCS_FEATURE}  PARENT_SCOPE)
-  
+SET(HDRS_LANDMARK ${HDRS_LANDMARK}  PARENT_SCOPE)
+SET(SRCS_LANDMARK ${SRCS_LANDMARK}  PARENT_SCOPE)

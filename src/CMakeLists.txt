@@ -416,7 +416,6 @@ IF (vision_utils_FOUND)
         capture_image.h
         feature_point_image.h
         landmark_AHP.h
-        landmark_point_3D.h
         processor_params_image.h
         processor_tracker_feature_image.h
         processor_tracker_landmark_image.h
@@ -425,7 +424,6 @@ IF (vision_utils_FOUND)
         capture_image.cpp
         feature_point_image.cpp
         landmark_AHP.cpp
-        landmark_point_3D.cpp
         processor_tracker_feature_image.cpp
         processor_tracker_landmark_image.cpp
         )
@@ -440,10 +438,13 @@ ADD_SUBDIRECTORY(constraints)
 # Add the features sub-directory
 ADD_SUBDIRECTORY(features)
 
-# Add the processor sub-directory
+# Add the landmarks sub-directory
+ADD_SUBDIRECTORY(landmarks)
+
+# Add the processors sub-directory
 ADD_SUBDIRECTORY(processors)
 
-# Add the sensor sub-directory
+# Add the sensors sub-directory
 ADD_SUBDIRECTORY(sensors)
 
 # Add the hello_wolf sub-directory

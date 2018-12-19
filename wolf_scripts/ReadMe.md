@@ -77,17 +77,18 @@ Helpful scripts to create WOLF tree elements (e.g. processors)
   
 #### SCRIPTS installation  
 
-  * Move to the scripts folder
+  * Move to the WOLF scripts folder 
   
-    ```
-    cd $WOLF_ROOT/wolf_scripts
-    ```
+  ..*`cd <WOLF_DIRECTORY>/wolf_scripts`  
 
-  * Run the following line to set your `bashrc`. This will allow you to execute the scripts from any console path.
+  * Run the following lines to set your `bashrc`. This will allow you to execute the scripts from any console path.
   
-    ```
-    echo "source $WOLF_ROOT/wolf_scripts/setup.bash" >> ~/.bashrc
-    ```
+  ..*`echo "export WOLF_ROOT=$PWD/../." >> ~/.bashrc`
+  ..*`echo "source $PWD/setup.bash" >> ~/.bashrc`
+   
+  * Source your `bashrc`.
+  
+  ..*`source ~/.bashrc` 
 
 ## Usage
 
@@ -111,6 +112,10 @@ Creates the main structure including .cpp and .h files, and a gtest for the new 
     and modify the `CMakeLists.txt` files in the directories `src/processors/` and `src/test/`.
 
   * Options:
-    - t: Type. Any of the following "[ capture | constraint | feature | processor | sensor ]"
+
+    - t: Type. Any of the following [ capture | constraint | feature | landmark | processor | sensor ]"
     - n: Name 
     - b: Base class (inherited from this class)
+  
+  *__[WARNING]__: If you are using external libraries, you will have to manually modify some files. Please check the yellow [WARN] messages shown after executing the script.  
+    
