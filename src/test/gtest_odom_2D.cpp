@@ -364,7 +364,8 @@ TEST(Odom2D, KF_callback)
 
         std::cout << "capture ts: " << capture->getTimeStamp() << " - " << capture->getTimeStamp().get();
         std::cout << "nsec:        " << capture->getTimeStamp().getNanoSeconds() << std::endl;
-        std::cout << "filled nsec: " << std::setfill(' ') << std::setw(9) << std::right << capture->getTimeStamp().getNanoSeconds() << std::endl;
+        std::cout << "filled nsec: " << std::setfill('0') << std::setw(9) << std::right << capture->getTimeStamp().getNanoSeconds() << std::endl;
+        std::cout << std::setfill(' ');
 
         // Processor
         sensor_odom2d->process(capture);
