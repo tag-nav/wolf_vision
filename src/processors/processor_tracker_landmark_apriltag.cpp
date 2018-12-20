@@ -35,11 +35,11 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         min_time_vote_(_params_tracker_landmark_apriltag->min_time_vote),
         min_features_for_keyframe_(_params_tracker_landmark_apriltag->min_features_for_keyframe)
 {
-    // Constant transformation from apriltag camera frame to wolf camera frame
-    c_M_ac_.matrix() = (Eigen::Vector4s() << -1, 1, -1, 1).finished().asDiagonal();
+    // Constant transformation from apriltag camera frame (Z axis looking away from the tag)
+    // to wolf camera frame (Z axis looking at the tag)
+    c_M_ac_.matrix() = (Eigen::Vector4s() << 1, -1, -1, 1).finished().asDiagonal();
 
     // configure apriltag detector
-
     std::string famname(_params_tracker_landmark_apriltag->tag_family_);
     if (famname == "tag36h11")
         tag_family_ = *tag36h11_create();
@@ -117,10 +117,10 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
     //defined camera parameters
     Eigen::Vector4s camera_intrinsics(getSensorPtr()->getIntrinsicPtr()->getState()); //[cx cy fx fy]
-    double fx(camera_intrinsics(2));  //TODO: conversion warning -> wolf::Scalar to double    //test value: 809.135074
-    double fy(camera_intrinsics(3));                                                          //test value: 809.410030
-    double cx(camera_intrinsics(0));                                                          //test value: 335.684471
-    double cy(camera_intrinsics(1));                                                          //test value: 257.352121
+    double fx(-camera_intrinsics(2));  // !! Negative sign advised by apriltag library commentary
+    double fy( camera_intrinsics(3));
+    double cx( camera_intrinsics(0));
+    double cy( camera_intrinsics(1));
 
     zarray_t *detections = apriltag_detector_detect(&detector_, &im);
     // WOLF_TRACE(zarray_size(&detections), " tags detected");
@@ -133,23 +133,15 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         zarray_get(detections, i, &det);
         matd_t *pose_matrix = homography_to_pose(det->H, fx, fy, cx, cy);
 
-        Eigen::Affine3ds Mapril; // tag to camera as defined by apriltag lib
+        Eigen::Affine3ds Mapril;
         for(int r=0; r<4; r++)
             for(int c=0; c<4; c++)
                 Mapril.matrix()(r,c) = matd_get(pose_matrix,r,c);
 
         Eigen::Translation3d Tapril(Mapril.translation());
 
-        /*
-         * The transformation given by apriltag library is confusing for several reasons:
-         * - The frame of the camera is looking away from the tag
-         * - translation is frame of the tag in the frame of the april camera ac_T_t
-         * while
-         * - rotation is frame of the tag in the frame of the april camera t_T_ac
-         */
-        Eigen::Affine3ds ac_M_t = Tapril * Mapril.linear().inverse();
+        Eigen::Affine3ds ac_M_t = Tapril * Mapril.linear();
 
-//        Mapril.aff
         Eigen::Affine3ds c_M_t(c_M_ac_*ac_M_t);
 
         // Set the scale of the translation vector from the relation metric_width / units_width
@@ -159,7 +151,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         Scalar scale      = tag_width/2.0;         // (tag width in units is 2 units)
         translation       = scale * translation;
 
-        WOLF_DEBUG("Raw apriltag, id: ", det->id, "; ", scale*Mapril.translation().transpose(), "; ",  Eigen::Quaternions(Mapril.rotation()).coeffs().transpose());
+//        WOLF_DEBUG("Raw apriltag, id: ", det->id, "; ", scale*Mapril.translation().transpose(), "; ",  M_TODEG * R2e(Mapril.rotation()).transpose());
 
         // set the measured pose
         Eigen::Vector7s pose;

@@ -22,6 +22,8 @@
 #include "processors/processor_tracker_landmark_apriltag.h"
 #include "capture_image.h"
 
+#include "rotations.h"
+
 //#define IMAGE_OUTPUT
 
 bool str_ends_with (std::string const &fullString, std::string const &ending) {
@@ -100,6 +102,22 @@ int main(int argc, char *argv[])
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
     WOLF_TRACE(report);
     problem->print(2,0,1,0);
+
+    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+    {
+        if (kf->isKey())
+            for (auto cap : kf->getCaptureList())
+            {
+                if (cap->getType() != "POSE")
+                {
+                    Vector3s T = kf->getPPtr()->getState();
+                    Vector4s qv= kf->getOPtr()->getState();
+                    Matrix3s R = q2R(qv);
+                    Vector3s e = M_TODEG * R2e(R);
+                    WOLF_TRACE(cap->getType(), " \n ", T.transpose(), " | ", e.transpose());
+                }
+            }
+    }
 
     return 0;
 
