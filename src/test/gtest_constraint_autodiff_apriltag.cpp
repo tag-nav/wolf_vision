@@ -91,7 +91,7 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
              * Camera's current pose in World is the composition of the robot pose with the camera extrinsics.
              *
              * The robot has a camera looking forward
-             *   S: pos = (0,0,0), ori = (-pi/1, 0, -pi/1)
+             *   S: pos = (0,0,0), ori = (0, 0, 0)
              *
              * There is a point at the origin
              *   P: pos = (0,0,0)
@@ -119,7 +119,8 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
             pos_camera      << 0,0,0;
             pos_robot       << 0,0,0; //robot is at origin
             pos_landmark    << 0,1,0;
-            euler_camera    << -M_PI_2, 0, -M_PI_2;
+            euler_camera    << 0,0,0;
+            //euler_camera    << -M_PI_2, 0, -M_PI_2;
             euler_robot     << 0,0,0;
             euler_landmark  << 0,0,0;
             quat_camera     = e2q(euler_camera);
@@ -306,7 +307,86 @@ TEST_F(ConstraintAutodiffApriltag_class, Check_initialization)
 
     ASSERT_MATRIX_APPROX(F1->getState(), pose_robot, 1e-6);
     ASSERT_MATRIX_APPROX(f1->getMeasurement(), pose_landmark, 1e-6);
-    //ASSERT_MATRIX_APPROX(lmk1->getState(), pose_landmark, 1e-6);   //Fails here... Why ?..
+    ASSERT_MATRIX_APPROX(lmk1->getState(), pose_landmark, 1e-6);
+
+}
+
+TEST_F(ConstraintAutodiffApriltag_class, solve_L1_P_perturbated)
+{
+    ConstraintAutodiffApriltagPtr constraint = std::make_shared<ConstraintAutodiffApriltag>(
+            S,
+            F1,
+            lmk1,
+            f1,
+            false,
+            CTR_ACTIVE
+    );
+
+    ConstraintAutodiffApriltagPtr ctr0 = std::static_pointer_cast<ConstraintAutodiffApriltag>(f1->addConstraint(constraint));
+    lmk1->addConstrainedBy(constraint);
+    F1->addConstrainedBy(constraint);
+    f1->addConstrainedBy(constraint);
+
+
+    // unfix lmk1, perturbate state
+    lmk1->unfix();
+    Vector3s p0 = Vector3s::Random() * 0.25;
+//    WOLF_DEBUG("Perturbation: ")
+//    WOLF_DEBUG(p0.transpose());
+    Vector7s x0(pose_landmark);
+
+    x0.head<3>() += p0;
+    //WOLF_DEBUG("Landmark state before perturbation: ");
+    //WOLF_DEBUG(lmk1->getState().transpose());
+    lmk1->getPPtr()->setState(x0.head<3>());
+    //WOLF_DEBUG("Landmark state after perturbation: ");
+    //WOLF_DEBUG(lmk1->getState().transpose());
+
+//    solve
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::QUIET); // 0: nothing, 1: BriefReport, 2: FullReport
+    //WOLF_DEBUG("Landmark state after solve: ");
+    //WOLF_DEBUG(lmk1->getState().transpose());
+    ASSERT_MATRIX_APPROX(F1->getState(), pose_robot, 1e-6);
+    ASSERT_MATRIX_APPROX(lmk1->getState(), pose_landmark, 1e-6);
+}
+
+TEST_F(ConstraintAutodiffApriltag_class, solve_L1_O_perturbated)
+{
+    ConstraintAutodiffApriltagPtr constraint = std::make_shared<ConstraintAutodiffApriltag>(
+            S,
+            F1,
+            lmk1,
+            f1,
+            false,
+            CTR_ACTIVE
+    );
+
+    ConstraintAutodiffApriltagPtr ctr0 = std::static_pointer_cast<ConstraintAutodiffApriltag>(f1->addConstraint(constraint));
+    lmk1->addConstrainedBy(constraint);
+    F1->addConstrainedBy(constraint);
+    f1->addConstrainedBy(constraint);
+
+    // unfix F1, perturbate state
+    lmk1->unfix();
+    Vector3s e0 = euler_landmark + Vector3s::Random() * 0.25;
+    Quaternions e0_quat     = e2q(e0);
+    Vector4s e0_vquat = e0_quat.coeffs();
+//    WOLF_DEBUG("Perturbation: ")
+//    WOLF_DEBUG(e0.transpose());
+
+    //WOLF_DEBUG("Landmark state before perturbation: ");
+    //WOLF_DEBUG(lmk1->getState().transpose());
+    lmk1->getOPtr()->setState(e0_vquat);
+    //WOLF_DEBUG("Landmark state after perturbation: ");
+    //WOLF_DEBUG(lmk1->getState().transpose());
+
+//    solve
+    std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::QUIET); // 0: nothing, 1: BriefReport, 2: FullReport
+    //WOLF_DEBUG("Landmark state after solve: ");
+    //WOLF_DEBUG(lmk1->getState().transpose());
+    ASSERT_MATRIX_APPROX(F1->getState(), pose_robot, 1e-6);
+    ASSERT_MATRIX_APPROX(lmk1->getState(), pose_landmark, 1e-6);
+
 }
 
 //[Class methods]

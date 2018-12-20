@@ -276,12 +276,14 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
 
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
 {
-    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1);
+    Vector7s pose_landmark((Vector7s()<<0,0,0,0,0,0,1).finished());
+    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>(pose_landmark, Matrix6s::Identity(), 1);
 
     C1->addFeature(f1);
     LandmarkBasePtr lmk = prc_apr->createLandmark(f1);
     LandmarkApriltagPtr lmk_april = std::static_pointer_cast<LandmarkApriltag>(lmk);
     ASSERT_TRUE(lmk_april->getType() == "APRILTAG");
+    ASSERT_MATRIX_APPROX(lmk_april->getState(), pose_landmark, 1e-6);
 }
 
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createConstraint)
