@@ -97,18 +97,9 @@ int main(int argc, char *argv[])
 
     problem->print(1,1,1,0);
     WOLF_INFO( "====================    Solving problem    ======================" )
-//    LandmarkBasePtr lmk = problem->getMapPtr()->getLandmarkList().front();
-//    lmk->getPPtr()->setState(Vector3s::Zero());
-//    lmk->getOPtr()->setState((Vector4s()<<0,0,1,0).finished());
-//    lmk->fix();
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
     WOLF_TRACE(report);
     problem->print(2,0,1,0);
-
-    LandmarkBasePtr lmk_front = problem->getMapPtr()->getLandmarkList().front();
-    LandmarkBasePtr lmk_back = problem->getMapPtr()->getLandmarkList().back();
-    WOLF_DEBUG(lmk_front->getState().transpose());
-    WOLF_DEBUG(lmk_back->getState().transpose());
 
     return 0;
 
