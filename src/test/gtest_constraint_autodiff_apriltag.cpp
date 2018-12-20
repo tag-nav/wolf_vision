@@ -210,7 +210,7 @@ TEST_F(ConstraintAutodiffApriltag_class, Check_tree)
     ASSERT_TRUE(problem->check(0));
 }
 
-TEST_F(ConstraintAutodiffApriltag_class, solve_f1_P_perturbated)
+TEST_F(ConstraintAutodiffApriltag_class, solve_F1_P_perturbated)
 {
     ConstraintAutodiffApriltagPtr constraint = std::make_shared<ConstraintAutodiffApriltag>(
             S,
@@ -248,7 +248,7 @@ TEST_F(ConstraintAutodiffApriltag_class, solve_f1_P_perturbated)
 
 }
 
-TEST_F(ConstraintAutodiffApriltag_class, solve_f1_O_perturbated)
+TEST_F(ConstraintAutodiffApriltag_class, solve_F1_O_perturbated)
 {
     ConstraintAutodiffApriltagPtr constraint = std::make_shared<ConstraintAutodiffApriltag>(
             S,
@@ -286,6 +286,27 @@ TEST_F(ConstraintAutodiffApriltag_class, solve_f1_O_perturbated)
 //    WOLF_DEBUG(F1->getState().transpose());
     ASSERT_MATRIX_APPROX(F1->getState(), pose_robot, 1e-6);
 
+}
+
+TEST_F(ConstraintAutodiffApriltag_class, Check_initialization)
+{
+    ConstraintAutodiffApriltagPtr constraint = std::make_shared<ConstraintAutodiffApriltag>(
+            S,
+            F1,
+            lmk1,
+            f1,
+            false,
+            CTR_ACTIVE
+    );
+
+    ConstraintAutodiffApriltagPtr ctr0 = std::static_pointer_cast<ConstraintAutodiffApriltag>(f1->addConstraint(constraint));
+    lmk1->addConstrainedBy(constraint);
+    F1->addConstrainedBy(constraint);
+    f1->addConstrainedBy(constraint);
+
+    ASSERT_MATRIX_APPROX(F1->getState(), pose_robot, 1e-6);
+    ASSERT_MATRIX_APPROX(f1->getMeasurement(), pose_landmark, 1e-6);
+    //ASSERT_MATRIX_APPROX(lmk1->getState(), pose_landmark, 1e-6);   //Fails here... Why ?..
 }
 
 //[Class methods]
