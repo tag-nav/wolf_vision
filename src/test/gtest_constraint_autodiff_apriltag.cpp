@@ -91,7 +91,7 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
              * Camera's current pose in World is the composition of the robot pose with the camera extrinsics.
              *
              * The robot has a camera looking forward
-             *   S: pos = (0,0,0), ori = (-pi/1, 0, -pi/1)
+             *   S: pos = (0,0,0), ori = (0, 0, 0)
              *
              * There is a point at the origin
              *   P: pos = (0,0,0)
@@ -119,7 +119,8 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
             pos_camera      << 0,0,0;
             pos_robot       << 0,0,0; //robot is at origin
             pos_landmark    << 0,1,0;
-            euler_camera    << -M_PI_2, 0, -M_PI_2;
+            euler_camera    << 0,0,0;
+            //euler_camera    << -M_PI_2, 0, -M_PI_2;
             euler_robot     << 0,0,0;
             euler_landmark  << 0,0,0;
             quat_camera     = e2q(euler_camera);
