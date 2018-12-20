@@ -120,23 +120,23 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         void resetDerived();
 
     private:
-        std::map<int, Scalar> tag_widths_;
-        Scalar tag_width_default_;
+        std::map<int, Scalar> tag_widths_;  ///< each tag's width indexed by tag_id
+        Scalar tag_width_default_;          ///< all tags widths defaut to this
         cv::Mat grayscale_image_;
         apriltag_detector_t detector_;
         apriltag_family_t tag_family_;
-        Scalar std_xy_, std_z_, std_rpy_;
-        Eigen::Affine3ds c_M_ac_;
+        Scalar std_xy_, std_z_, std_rpy_;   ///< dummy std values for covariance computation
+        Eigen::Affine3ds c_M_ac_;           ///< aprilCamera-to-camera transform
 
     protected:
-        FeatureBaseList detections_incoming_;
-        FeatureBaseList detections_last_;
+        FeatureBaseList detections_incoming_;   ///< detected tags in wolf form, incoming image
+        FeatureBaseList detections_last_;       ///< detected tags in wolf form, last image
 
 
     // To be able to access them in unit tests
     protected:
-        Scalar min_time_vote_;
-        unsigned int min_features_for_keyframe_;
+        Scalar          min_time_vote_;
+        unsigned int    min_features_for_keyframe_;
 };
 
 } // namespace wolf
