@@ -85,6 +85,7 @@ int main(int argc, char *argv[])
             cv::imshow( "Display window", frame );  // display original image.
 #endif
             CaptureImagePtr cap = std::make_shared<CaptureImage>(ts, sen_cam, frame);
+            cap->setType(argv[input]);
             WOLF_DEBUG("Processing image...");
             sen->process(cap);
             WOLF_DEBUG("Image processed...");
@@ -102,7 +103,7 @@ int main(int argc, char *argv[])
 //    lmk->fix();
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
     WOLF_TRACE(report);
-    problem->print(1,0,1,0);
+    problem->print(2,0,1,0);
 
     LandmarkBasePtr lmk_front = problem->getMapPtr()->getLandmarkList().front();
     LandmarkBasePtr lmk_back = problem->getMapPtr()->getLandmarkList().back();
