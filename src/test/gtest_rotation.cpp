@@ -683,6 +683,30 @@ TEST(log_q, small)
     }
 }
 
+TEST(Conversions, e2q_q2R_R2e)
+{
+    Vector3s e, eo;
+    Quaternions q;
+    Matrix3s R;
+
+    e.setRandom();
+    e << 0.1, .2, .3;
+    q = e2q(e);
+    R = q2R(q);
+
+    eo = R2e(R);
+
+    WOLF_TRACE("euler    ", e.transpose());
+    WOLF_TRACE("quat     ", q.coeffs().transpose());
+    WOLF_TRACE("R \n", R);
+
+    WOLF_TRACE("euler o  ", eo.transpose());
+
+
+    ASSERT_MATRIX_APPROX(eo, e, 1e-10);
+
+}
+
 
 int main(int argc, char **argv)
 {

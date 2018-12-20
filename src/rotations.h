@@ -548,6 +548,23 @@ getYaw(const Eigen::MatrixBase<Derived>& R)
     return atan2( R(1, 0), R(0, 0) );
 }
 
+template<typename Derived>
+inline typename Eigen::Matrix<typename Derived::Scalar, 3, 1> R2e(const Eigen::MatrixBase<Derived>& _R)
+{
+    Eigen::Matrix<typename Derived::Scalar, 3, 1> e;
+
+    e(0) = atan2(_R(2,1),_R(2,2));
+    e(1) = atan2(-_R(2,0), sqrt(_R(0,0)*_R(0,0) + _R(1,0)*_R(1,0)));
+    e(2) = atan2(_R(1,0), _R(0,0));
+
+    // slamtb
+    //    roll  = atan2(R(3,2),R(3,3));
+    //    pitch = asin(-R(3,1));
+    //    yaw   = atan2(R(2,1),R(1,1));
+
+    return e;
+}
+
 } // namespace wolf
 
 #endif /* ROTATIONS_H_ */
