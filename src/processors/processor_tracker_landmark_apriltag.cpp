@@ -138,9 +138,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
             for(int c=0; c<4; c++)
                 Mapril.matrix()(r,c) = matd_get(pose_matrix,r,c);
 
-        Eigen::Translation3d Tapril(Mapril.translation());
-
-        Eigen::Affine3ds ac_M_t = Tapril * Mapril.linear();
+        Eigen::Affine3ds ac_M_t = Mapril;
 
         Eigen::Affine3ds c_M_t(c_M_ac_*ac_M_t);
 
