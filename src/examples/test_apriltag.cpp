@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
     SensorCameraPtr sen_cam = std::static_pointer_cast<SensorCamera>(sen);
     ProcessorBasePtr prc = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
     // set prior
-    FrameBasePtr F1 = problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 0.0, 0.1);
+    FrameBasePtr F1 = problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), 0.000001 * Matrix6s::Identity(), 0.0, 0.1);
     ceres::Solver::Options options;
     CeresManagerPtr ceres_manager = std::make_shared<CeresManager>(problem, options);
 
@@ -103,6 +103,9 @@ int main(int argc, char *argv[])
     WOLF_TRACE(report);
     problem->print(2,0,1,0);
 
+
+
+    WOLF_TRACE("============= SOLVED PROBLEM ===============")
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
     {
         if (kf->isKey())
@@ -114,10 +117,31 @@ int main(int argc, char *argv[])
                     Vector4s qv= kf->getOPtr()->getState();
                     Matrix3s R = q2R(qv);
                     Vector3s e = M_TODEG * R2e(R);
-                    WOLF_TRACE(cap->getType(), " \n ", T.transpose(), " | ", e.transpose());
+                    WOLF_TRACE(cap->getType(), " => ", T.transpose(), " | ", e.transpose());
                 }
             }
     }
+
+
+    // ===============================================
+    // COVARIANCES ===================================
+    // ===============================================
+    // Print COVARIANCES of all states
+    WOLF_TRACE("======== COVARIANCES OF SOLVED PROBLEM =======")
+    ceres_manager->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
+    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+        if (kf->isKey())
+        {
+            Eigen::MatrixXs cov = kf->getCovariance();
+            WOLF_TRACE("KF", kf->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
+        }
+    for (auto lmk : problem->getMapPtr()->getLandmarkList())
+    {
+        Eigen::MatrixXs cov = lmk->getCovariance();
+        WOLF_TRACE("L", lmk->id(), "__std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
+    }
+    std::cout << std::endl;
+
 
     return 0;
 
