@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 
 
 
-    WOLF_TRACE("============= SOLVED PROBLEM ===============")
+    WOLF_TRACE("============= SOLVED PROBLEM : POS | EULER (DEG) ===============")
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
     {
         if (kf->isKey())
@@ -127,17 +127,19 @@ int main(int argc, char *argv[])
     // COVARIANCES ===================================
     // ===============================================
     // Print COVARIANCES of all states
-    WOLF_TRACE("======== COVARIANCES OF SOLVED PROBLEM =======")
+    WOLF_TRACE("======== STATE AND COVARIANCES OF SOLVED PROBLEM : POS | QUAT =======")
     ceres_manager->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         if (kf->isKey())
         {
             Eigen::MatrixXs cov = kf->getCovariance();
+            WOLF_TRACE("KF", kf->id(), "_state        = ", kf->getState().transpose());
             WOLF_TRACE("KF", kf->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
         }
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
     {
         Eigen::MatrixXs cov = lmk->getCovariance();
+        WOLF_TRACE("L", lmk->id(), "__state        = ", lmk->getState().transpose());
         WOLF_TRACE("L", lmk->id(), "__std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
     }
     std::cout << std::endl;
