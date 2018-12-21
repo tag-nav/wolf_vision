@@ -62,10 +62,10 @@ int main(int argc, char *argv[])
 
     // set prior
     Eigen::Matrix6s covariance = Matrix6s::Identity();
-    Scalar stdev_m = 0.1;     // standard deviation on original translation
-    Scalar stdev_deg = 10.0;  // standard deviation on original rotation
-    covariance.topLeftCorner(3,3) =  stdev_m*stdev_m * covariance.topLeftCorner(3,3);
-    covariance.topLeftCorner(3,3) = (M_TORAD*stdev_deg)*(M_TORAD*stdev_deg) * covariance.topLeftCorner(3,3);
+    Scalar stdev_m   = 0.00001;  // standard deviation on original translation
+    Scalar stdev_deg = 0.00001;  // standard deviation on original rotation
+    covariance.topLeftCorner(3,3)       =  stdev_m*stdev_m * covariance.topLeftCorner(3,3);
+    covariance.bottomRightCorner(3,3)   = (M_TORAD*stdev_deg)*(M_TORAD*stdev_deg) * covariance.bottomRightCorner(3,3);
     FrameBasePtr F1 = problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), covariance, 0.0, 0.1);
     ceres::Solver::Options options;
     CeresManagerPtr ceres_manager = std::make_shared<CeresManager>(problem, options);
