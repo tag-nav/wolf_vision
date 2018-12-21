@@ -54,11 +54,14 @@ int main(int argc, char *argv[])
 
     std::string wolf_root = _WOLF_ROOT_DIR;
     // Wolf problem
-    ProblemPtr problem = Problem::create("PO 3D");
-//    SensorBasePtr sen = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_logitech_c300_640_480.yaml");
-    SensorBasePtr sen = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_apriltag_params_notangentrect.yaml");
+    ProblemPtr problem              = Problem::create("PO 3D");
+    ceres::Solver::Options options;
+    CeresManagerPtr ceres_manager   = std::make_shared<CeresManager>(problem, options);
+
+    SensorBasePtr sen       = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_logitech_c300_640_480.yaml");
+//    SensorBasePtr sen       = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_apriltag_params_notangentrect.yaml");
     SensorCameraPtr sen_cam = std::static_pointer_cast<SensorCamera>(sen);
-    ProcessorBasePtr prc = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
+    ProcessorBasePtr prc    = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
 
     // set prior
     Eigen::Matrix6s covariance = Matrix6s::Identity();
@@ -67,8 +70,7 @@ int main(int argc, char *argv[])
     covariance.topLeftCorner(3,3)       =  stdev_m*stdev_m * covariance.topLeftCorner(3,3);
     covariance.bottomRightCorner(3,3)   = (M_TORAD*stdev_deg)*(M_TORAD*stdev_deg) * covariance.bottomRightCorner(3,3);
     FrameBasePtr F1 = problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), covariance, 0.0, 0.1);
-    ceres::Solver::Options options;
-    CeresManagerPtr ceres_manager = std::make_shared<CeresManager>(problem, options);
+
 
     WOLF_INFO( "====================       Problem set      ======================" )
 
