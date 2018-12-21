@@ -35,8 +35,8 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         min_time_vote_(_params_tracker_landmark_apriltag->min_time_vote),
         min_features_for_keyframe_(_params_tracker_landmark_apriltag->min_features_for_keyframe)
 {
-    // Constant transformation from apriltag camera frame (Z axis looking away from the tag)
-    // to wolf camera frame (Z axis looking at the tag)
+    // Constant transformation from apriltag camera frame (RUB: Z axis looking away from the tag)
+    // to wolf camera frame (RDF: Z axis looking at the tag)
     c_M_ac_.matrix() = (Eigen::Vector4s() << 1, -1, -1, 1).finished().asDiagonal();
 
     // configure apriltag detector
@@ -101,7 +101,9 @@ ProcessorBasePtr ProcessorTrackerLandmarkApriltag::create(const std::string& _un
 
 void ProcessorTrackerLandmarkApriltag::preProcess()
 {
-    //std::cout << "PreProcess: " << std::endl;
+    //clear wolf detections so that new ones will be stored inside
+    detections_incoming_.clear();
+
     // first, convert image to grayscale
     cv::cvtColor(std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage(),
                  grayscale_image_,
@@ -115,53 +117,51 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
                         .buf    = grayscale_image_.data
                     };
 
-    //defined camera parameters
+    // get camera intrinsic parameters as required by Apriltag homography-to-pose routine below
     Eigen::Vector4s camera_intrinsics(getSensorPtr()->getIntrinsicPtr()->getState()); //[cx cy fx fy]
-    double fx(-camera_intrinsics(2));  // !! Negative sign advised by apriltag library commentary
-    double fy( camera_intrinsics(3));
     double cx( camera_intrinsics(0));
     double cy( camera_intrinsics(1));
+    double fx(-camera_intrinsics(2));  // !! Negative sign advised by apriltag library commentary
+    double fy( camera_intrinsics(3));
 
+    // run Apriltag detector
     zarray_t *detections = apriltag_detector_detect(&detector_, &im);
-    // WOLF_TRACE(zarray_size(&detections), " tags detected");
 
-    //clear detections so that new ones will be stored inside
-    detections_incoming_.clear();
-    // Draw detection outlines
+    // loop all detections
     for (int i = 0; i < zarray_size(detections); i++) {
+
+        // get raw Apriltag pose from homography
         apriltag_detection_t *det;
         zarray_get(detections, i, &det);
         matd_t *pose_matrix = homography_to_pose(det->H, fx, fy, cx, cy);
 
-        Eigen::Affine3ds Mapril;
+        // write it in Eigen form
+        Eigen::Affine3ds M_april_raw;
         for(int r=0; r<4; r++)
             for(int c=0; c<4; c++)
-                Mapril.matrix()(r,c) = matd_get(pose_matrix,r,c);
+                M_april_raw.matrix()(r,c) = matd_get(pose_matrix,r,c);
 
-        Eigen::Translation3d Tapril(Mapril.translation());
+        // we identify the raw april with the tag-to-aprilCamera transform (to be revised if needed)
+        Eigen::Affine3ds ac_M_t = M_april_raw;
 
-        Eigen::Affine3ds ac_M_t = Tapril * Mapril.linear();
+        // compose with aprilCamera-to-camera transform, get tag-to-camera transform
+        Eigen::Affine3ds c_M_t ( c_M_ac_ * ac_M_t );
 
-        Eigen::Affine3ds c_M_t(c_M_ac_*ac_M_t);
-
-        // Set the scale of the translation vector from the relation metric_width / units_width
+        // Set the scale of the translation vector from the relation: metric_width / units_width
         Eigen::Vector3s translation ( c_M_t.translation() ); // translation vector in apriltag units (tag width in units is 2 units)
         int    tag_id     = det->id;
         Scalar tag_width  = getTagWidth(tag_id);   // tag width in metric
-        Scalar scale      = tag_width/2.0;         // (tag width in units is 2 units)
+        Scalar scale      = tag_width / 2.0;       // (tag width in units is 2 units)
         translation       = scale * translation;
 
-//        WOLF_DEBUG("Raw apriltag, id: ", det->id, "; ", scale*Mapril.translation().transpose(), "; ",  M_TODEG * R2e(Mapril.rotation()).transpose());
-
-        // set the measured pose
+        // set the measured pose vector
         Eigen::Vector7s pose;
         pose << translation, R2q(c_M_t.linear()).coeffs();
 
         // compute the covariance
-        Eigen::Vector6s var_vec = getVarVec();
-        Eigen::Matrix6s cov = var_vec.asDiagonal() ;
+        Eigen::Matrix6s cov = getVarVec().asDiagonal() ;
 
-        // add to list
+        // add to detected features list
         detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov, tag_id));
     }
 
@@ -200,24 +200,24 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
     quat.coeffs() = getSensorPtr()->getOPtr()->getState();
     Eigen::Affine3ds r_M_c = Eigen::Translation<Scalar,3>(pos.head(3)) * quat;
 
-    // camera to lmk
+    // camera to lmk (tag)
     pos = _feature_ptr->getMeasurement().head(3);
     quat.coeffs() = _feature_ptr->getMeasurement().tail(4);
-    Eigen::Affine3ds c_M_l   = Eigen::Translation<Scalar,3>(pos) * quat;
+    Eigen::Affine3ds c_M_t   = Eigen::Translation<Scalar,3>(pos) * quat;
 
-    // world to lmk
-    Eigen::Affine3ds w_M_l = w_M_r * r_M_c * c_M_l;
+    // world to lmk (tag)
+    Eigen::Affine3ds w_M_t = w_M_r * r_M_c * c_M_t;
 
-    // make 7-vector for lmk pose
-    pos = w_M_l.translation();
-    quat = w_M_l.linear();
-    Vector7s w_pose_l;
-    w_pose_l << pos, quat.coeffs();
+    // make 7-vector for lmk (tag) pose
+    pos  = w_M_t.translation();
+    quat = w_M_t.linear();
+    Vector7s w_pose_t;
+    w_pose_t << pos, quat.coeffs();
 
     FeatureApriltagPtr feat_april = std::static_pointer_cast<FeatureApriltag>(_feature_ptr);
-    int tagid = feat_april->getTagId();
+    int tag_id = feat_april->getTagId();
 
-    LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(w_pose_l, tagid, getTagWidth(tagid));
+    LandmarkApriltagPtr new_landmark = std::make_shared<LandmarkApriltag>(w_pose_t, tag_id, getTagWidth(tag_id));
 
     return new_landmark;
 }
