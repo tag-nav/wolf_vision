@@ -9,22 +9,22 @@
 #include <iostream>
 #include <stdlib.h>
 
-//opencv
-#include <opencv2/imgproc/imgproc.hpp>
-#include "opencv2/opencv.hpp"
-
 //Wolf
 #include "wolf.h"
 #include "ceres_wrapper/ceres_manager.h"
 #include "problem.h"
 #include "sensor_camera.h"
-#include "state_block.h"
 #include "processors/processor_tracker_landmark_apriltag.h"
 #include "capture_image.h"
+#include "features/feature_apriltag.h"
 
 #include "rotations.h"
 
-//#define IMAGE_OUTPUT
+//opencv
+#include <opencv2/imgproc/imgproc.hpp>
+#include "opencv2/opencv.hpp"
+
+#define IMAGE_OUTPUT
 
 bool str_ends_with (std::string const &fullString, std::string const &ending) {
     if (fullString.length() >= ending.length()) {
@@ -46,9 +46,6 @@ int main(int argc, char *argv[])
 
     using namespace wolf;
 
-#ifdef IMAGE_OUTPUT
-    cv::namedWindow( "Display window", cv::WINDOW_AUTOSIZE );// Create a window for display.
-#endif
 
     WOLF_INFO( "==================== processor apriltag test ======================" )
 
@@ -91,11 +88,11 @@ int main(int argc, char *argv[])
         if( frame.data ) //if imread succeeded
         {
 #ifdef IMAGE_OUTPUT
-            sleep(0.5); //wait for 0.5 s
-            cv::imshow( "Display window", frame );  // display original image.
+    cv::namedWindow( argv[input], cv::WINDOW_AUTOSIZE );// Create a window for display.
 #endif
             CaptureImagePtr cap = std::make_shared<CaptureImage>(ts, sen_cam, frame);
             cap->setType(argv[input]);
+            cap->setName(argv[input]);
             WOLF_DEBUG("Processing image...");
             sen->process(cap);
             WOLF_DEBUG("Image processed...");
@@ -106,6 +103,35 @@ int main(int argc, char *argv[])
     }
 
     problem->print(1,1,1,0);
+#ifdef IMAGE_OUTPUT
+    WOLF_INFO( "====================    Draw all detections    ======================" )
+    for (auto F : problem->getTrajectoryPtr()->getFrameList())
+    {
+        if (F->isKey())
+        {
+            for (auto cap : F->getCaptureList())
+            {
+                if (cap->getType() != "POSE")
+                {
+                    auto img = std::static_pointer_cast<CaptureImage>(cap);
+                    for (FeatureBasePtr f : img->getFeatureList())
+                    {
+                        FeatureApriltagPtr fa = std::static_pointer_cast<FeatureApriltag>(f);
+                        cv::line(img->getImage(), fa->getTagCorners()[0], fa->getTagCorners()[1], cv::Scalar(0, 255, 0));
+                        cv::line(img->getImage(), fa->getTagCorners()[1], fa->getTagCorners()[2], cv::Scalar(0, 255, 0));
+                        cv::line(img->getImage(), fa->getTagCorners()[2], fa->getTagCorners()[3], cv::Scalar(0, 255, 0));
+                        cv::line(img->getImage(), fa->getTagCorners()[3], fa->getTagCorners()[0], cv::Scalar(0, 255, 0));
+                    }
+                    cv::imshow( img->getName(), img->getImage() );  // display original image.
+                    cv::waitKey(1);
+                }
+            }
+        }
+    }
+#endif
+
+
+
     WOLF_INFO( "====================    Solving problem    ======================" )
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
     WOLF_TRACE(report);
@@ -152,6 +178,9 @@ int main(int argc, char *argv[])
     }
     std::cout << std::endl;
 
+#ifdef IMAGE_OUTPUT
+    cv::waitKey(0);
+#endif
 
     return 0;
 
