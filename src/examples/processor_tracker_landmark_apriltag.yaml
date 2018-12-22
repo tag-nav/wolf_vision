@@ -3,13 +3,13 @@ processor name: "tracker landmark apriltag example"
 
 
 detector parameters: 
-    quad_decimate:  1.0
+    quad_decimate:  0.0
     quad_sigma:     1.0
     nthreads:       1
     debug:          false
     refine_edges:   true
     refine_decode:  true
-    refine_pose:    false
+    refine_pose:    true
 
 tag parameters:
     tag_family:           "tag36h11" 
