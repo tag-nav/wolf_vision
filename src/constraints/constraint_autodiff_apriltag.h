@@ -37,6 +37,18 @@ class ConstraintAutodiffApriltag : public ConstraintAutodiff<ConstraintAutodiffA
         template<typename T>
         bool operator ()( const T* const _p_camera, const T* const _o_camera, const T* const _p_keyframe, const T* const _o_keyframe, const T* const _p_landmark, const T* const _o_landmark, T* _residuals) const;
 
+        // print function only for double (not Jet)
+        template<typename T, int Rows, int Cols>
+        void print(const std::string s, int kf, int lmk, const Eigen::Matrix<T, Rows, Cols> _M) const
+        {
+            // jet prints nothing
+        }
+        template<int Rows, int Cols>
+        void print(const std::string s, int kf, int lmk, const Eigen::Matrix<Scalar, Rows, Cols> _M) const
+        {
+            // double prints stuff
+            WOLF_TRACE("KF", kf, " L", lmk, "; ", s, _M);
+        }
 };
 
 } // namespace wolf
@@ -80,6 +92,10 @@ ConstraintAutodiffApriltag::~ConstraintAutodiffApriltag()
 
 template<typename T> bool ConstraintAutodiffApriltag::operator ()( const T* const _p_camera, const T* const _o_camera, const T* const _p_keyframe, const T* const _o_keyframe, const T* const _p_landmark, const T* const _o_landmark, T* _residuals) const
 {
+    // debug stuff
+    int kf = getFeaturePtr()->getCapturePtr()->getFramePtr()->id();
+    int lmk = getLandmarkOtherPtr()->id();
+
     //states
     Eigen::Translation<T,3> p_camera(_p_camera[0], _p_camera[1], _p_camera[2]),
                             p_keyframe(_p_keyframe[0], _p_keyframe[1], _p_keyframe[2]),
@@ -93,23 +109,26 @@ template<typename T> bool ConstraintAutodiffApriltag::operator ()( const T* cons
     Eigen::Transform<T, 3, Eigen::Affine> c_M_l_meas = p_measured.cast<T>() * q_measured.cast<T>();
 
     // Create transformation matrices to compose
-    // camera wrt robot
-    Eigen::Transform<T, 3, Eigen::Affine> r_M_c = p_camera * q_camera;
     // robot wrt world
     Eigen::Transform<T, 3, Eigen::Affine> w_M_r = p_keyframe * q_keyframe;
+    // camera wrt robot
+    Eigen::Transform<T, 3, Eigen::Affine> r_M_c = p_camera * q_camera;
     // landmark wrt world
     Eigen::Transform<T, 3, Eigen::Affine> w_M_l = p_landmark * q_landmark;
     // landmark wrt camera, estimated
     Eigen::Transform<T, 3, Eigen::Affine> c_M_l_est = (w_M_r * r_M_c).inverse() * w_M_l;
 
     // expectation error, in camera frame
-    Eigen::Transform<T, 3, Eigen::Affine> c_M_err = c_M_l_meas * c_M_l_est.inverse(); // left-minus gives error is the reference camera
+    Eigen::Transform<T, 3, Eigen::Affine> c_M_err = c_M_l_meas * c_M_l_est.inverse(); // left-minus gives error in the reference camera
+//    Eigen::Transform<T, 3, Eigen::Affine> c_M_err = c_M_l_est.inverse() * c_M_l_meas; // right-minus gives error in the reference landmark
 
     // error
     Eigen::Matrix<T, 6, 1> err;
     err.block(0,0,3,1) = c_M_err.translation();
     Eigen::Matrix<T, 3, 3> R_err(c_M_err.linear());
     err.block(3,0,3,1) = wolf::log_R(R_err);
+
+    print("error: ", kf, lmk, err.transpose().eval());
 
     // residual
     Eigen::Map<Eigen::Matrix<T, 6, 1>> res(_residuals);
