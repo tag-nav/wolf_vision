@@ -77,9 +77,9 @@ int main(int argc, char *argv[])
     WOLF_DEBUG("nb of images: ", inputs);
     cv::Mat frame;
     Scalar ts(0);
+    Scalar dt = 1;
 
     WOLF_INFO( "====================        Main loop       ======================" )
-    Scalar dt = 1;
     for (int input = 1; input <= inputs; input++) {
         std::string path = wolf_root + "/" + argv[input];
         WOLF_DEBUG("path to image ", path);
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
         ts += dt;
     }
 
-    problem->print(1,1,1,0);
+
 #ifdef IMAGE_OUTPUT
     WOLF_INFO( "====================    Draw all detections    ======================" )
     for (auto F : problem->getTrajectoryPtr()->getFrameList())
@@ -132,10 +132,11 @@ int main(int argc, char *argv[])
 
 
 
+//    problem->print(1,1,1,0);
     WOLF_INFO( "====================    Solving problem    ======================" )
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
     WOLF_TRACE(report);
-    problem->print(2,0,1,0);
+    problem->print(4,1,1,1);
 
 
 
@@ -168,13 +169,13 @@ int main(int argc, char *argv[])
         {
             Eigen::MatrixXs cov = kf->getCovariance();
             WOLF_TRACE("KF", kf->id(), "_state        = ", kf->getState().transpose());
-            WOLF_TRACE("KF", kf->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
+//            WOLF_TRACE("KF", kf->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
         }
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
     {
         Eigen::MatrixXs cov = lmk->getCovariance();
         WOLF_TRACE("L", lmk->id(), "__state        = ", lmk->getState().transpose());
-        WOLF_TRACE("L", lmk->id(), "__std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
+//        WOLF_TRACE("L", lmk->id(), "__std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
     }
     std::cout << std::endl;
 
