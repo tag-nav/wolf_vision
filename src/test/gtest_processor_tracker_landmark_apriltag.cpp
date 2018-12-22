@@ -160,6 +160,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, voteForKeyFrame)
     CaptureBasePtr Ce = std::make_shared<CapturePose>(start_ts + 3*min_time_vote, sen, Vector7s(), Matrix6s());
 
     for (int i=0; i < min_features_for_keyframe; i++){
+        det.id = i;
         FeatureApriltagPtr f = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), i, det);
         Ca->addFeature(f);
         Ca->addFeature(f);
@@ -222,6 +223,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     quat = e2q(ori);
     pose << pos, quat.coeffs();
     tag_id = 0;
+    det.id = tag_id;
     FeatureBasePtr f0 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id, det);
 
     // feature 1
@@ -230,6 +232,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     quat = e2q(ori);
     pose << pos, quat.coeffs();
     tag_id = 1;
+    det.id = tag_id;
     FeatureBasePtr f1 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id, det);
 
     // feature 2
@@ -238,6 +241,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     quat = e2q(ori);
     pose << pos, quat.coeffs();
     tag_id = 2;
+    det.id = tag_id;
     FeatureBasePtr f2 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id, det);
 
     features_in.push_back(f0);
@@ -287,6 +291,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
 {
     Vector7s pose_landmark((Vector7s()<<0,0,0,0,0,0,1).finished());
+    det.id = 1;
     FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>(pose_landmark, Matrix6s::Identity(), 1, det);
 
     C1->addFeature(f1);
@@ -298,6 +303,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
 
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createConstraint)
 {
+    det.id = 1;
     FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1, det);
 
     C1->addFeature(f1);

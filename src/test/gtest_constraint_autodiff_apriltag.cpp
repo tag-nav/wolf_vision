@@ -167,6 +167,7 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
             meas_cov.bottomRightCorner(3,3) *= 1e-3;
             int tag_id = 1;
 
+            det.id = tag_id;
             det.p[0][0] =  1.0;
             det.p[0][1] = -1.0;
             det.p[1][0] =  1.0;
