@@ -75,6 +75,7 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
         FeatureApriltagPtr  f1;
         LandmarkApriltagPtr lmk1;
         ConstraintAutodiffApriltagPtr c_tag;
+        apriltag_detection_t    det;
 
         virtual void SetUp()
         {
@@ -160,13 +161,24 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
             proc_apriltag->setLastPtr(C1);
 
             // the sensor is at origin as well as the robot. The measurement matches with the pose of the tag wrt camera (and also wrt robot and world)
-            // FeatureApriltag(Vector7s & _measurement,Matrix6s & _meas_covariance, const int _tag_id)
+            // FeatureApriltag(Vector7s & _measurement,Matrix6s & _meas_covariance, const int _tag_id, det)
             Eigen::Matrix6s meas_cov(Eigen::Matrix6s::Identity());
             meas_cov.topLeftCorner(3,3)     *= 1e-2;
             meas_cov.bottomRightCorner(3,3) *= 1e-3;
             int tag_id = 1;
 
-            f1 = std::make_shared<FeatureApriltag>(pose_landmark, meas_cov, tag_id);
+            det.p[0][0] =  1.0;
+            det.p[0][1] = -1.0;
+            det.p[1][0] =  1.0;
+            det.p[1][1] =  1.0;
+            det.p[2][0] = -1.0;
+            det.p[2][1] =  1.0;
+            det.p[3][0] = -1.0;
+            det.p[3][1] = -1.0;
+
+
+
+            f1 = std::make_shared<FeatureApriltag>(pose_landmark, meas_cov, tag_id, det);
             lmk1 = std::static_pointer_cast<LandmarkApriltag>(proc_apriltag->createLandmark(f1));
 
             // Add the feature and the landmark in the graph as needed

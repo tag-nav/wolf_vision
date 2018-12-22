@@ -86,16 +86,26 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
             F1->addCapture(C1);
             prc_apr->setOriginPtr(C1);
             prc_apr->setLastPtr(C1);
+
+            det.p[0][0] =  1.0;
+            det.p[0][1] = -1.0;
+            det.p[1][0] =  1.0;
+            det.p[1][1] =  1.0;
+            det.p[2][0] = -1.0;
+            det.p[2][1] =  1.0;
+            det.p[3][0] = -1.0;
+            det.p[3][1] = -1.0;
         }
 
     public:
-        std::string wolf_root;
-        ProblemPtr   problem;
-        SensorBasePtr    sen;
-        ProcessorBasePtr prc;
         ProcessorTrackerLandmarkApriltag_WrapperPtr prc_apr;
-        FrameBasePtr     F1;
-        CaptureBasePtr   C1;
+        std::string             wolf_root;
+        ProblemPtr              problem;
+        SensorBasePtr           sen;
+        ProcessorBasePtr        prc;
+        FrameBasePtr            F1;
+        CaptureBasePtr          C1;
+        apriltag_detection_t    det;
 };
 ////////////////////////////////////////////////////////////////
 
@@ -150,7 +160,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, voteForKeyFrame)
     CaptureBasePtr Ce = std::make_shared<CapturePose>(start_ts + 3*min_time_vote, sen, Vector7s(), Matrix6s());
 
     for (int i=0; i < min_features_for_keyframe; i++){
-        FeatureApriltagPtr f = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), i);
+        FeatureApriltagPtr f = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), i, det);
         Ca->addFeature(f);
         Ca->addFeature(f);
         Cc->addFeature(f);
@@ -212,7 +222,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     quat = e2q(ori);
     pose << pos, quat.coeffs();
     tag_id = 0;
-    FeatureBasePtr f0 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id);
+    FeatureBasePtr f0 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id, det);
 
     // feature 1
     pos << 1,2,0;
@@ -220,7 +230,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     quat = e2q(ori);
     pose << pos, quat.coeffs();
     tag_id = 1;
-    FeatureBasePtr f1 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id);
+    FeatureBasePtr f1 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id, det);
 
     // feature 2
     pos << 0,2,1;
@@ -228,7 +238,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     quat = e2q(ori);
     pose << pos, quat.coeffs();
     tag_id = 2;
-    FeatureBasePtr f2 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id);
+    FeatureBasePtr f2 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id, det);
 
     features_in.push_back(f0);
     features_in.push_back(f0);
@@ -277,7 +287,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
 {
     Vector7s pose_landmark((Vector7s()<<0,0,0,0,0,0,1).finished());
-    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>(pose_landmark, Matrix6s::Identity(), 1);
+    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>(pose_landmark, Matrix6s::Identity(), 1, det);
 
     C1->addFeature(f1);
     LandmarkBasePtr lmk = prc_apr->createLandmark(f1);
@@ -288,7 +298,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
 
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createConstraint)
 {
-    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1);
+    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1, det);
 
     C1->addFeature(f1);
     LandmarkBasePtr lmk = prc_apr->createLandmark(f1);

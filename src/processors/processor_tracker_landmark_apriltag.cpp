@@ -130,6 +130,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
     // loop all detections
     for (int i = 0; i < zarray_size(detections); i++) {
 
+
         // get raw Apriltag pose from homography
         apriltag_detection_t *det;
         zarray_get(detections, i, &det);
@@ -140,6 +141,14 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         for(int r=0; r<4; r++)
             for(int c=0; c<4; c++)
                 M_april_raw.matrix()(r,c) = matd_get(pose_matrix,r,c);
+
+        // write tag corners
+        std::vector<cv::Point2d> corners(4);
+        for (int c = 0; c < 4; c++)
+        {
+            corners[i].x = det->p[i][0];
+            corners[i].y = det->p[i][1];
+        }
 
         // we identify the raw april with the tag-to-aprilCamera transform (to be revised if needed)
         Eigen::Affine3ds ac_M_t = M_april_raw;
@@ -162,7 +171,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         Eigen::Matrix6s cov = getVarVec().asDiagonal() ;
 
         // add to detected features list
-        detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov, tag_id));
+        detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov, tag_id, *det));
     }
 
     apriltag_detections_destroy(detections);

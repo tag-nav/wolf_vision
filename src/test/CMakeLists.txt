@@ -156,6 +156,12 @@ target_link_libraries(gtest_constraint_pose_2D ${PROJECT_NAME})
 wolf_add_gtest(gtest_constraint_pose_3D gtest_constraint_pose_3D.cpp)
 target_link_libraries(gtest_constraint_pose_3D ${PROJECT_NAME})
 
+IF (OPENCV_FOUND AND APRILTAG_LIBRARY)
+	# FeatureApriltag test
+	wolf_add_gtest(gtest_feature_apriltag gtest_feature_apriltag.cpp)
+	target_link_libraries(gtest_feature_apriltag ${PROJECT_NAME})
+ENDIF(OPENCV_FOUND AND APRILTAG_LIBRARY)
+
 # FeatureIMU test
 wolf_add_gtest(gtest_feature_IMU gtest_feature_IMU.cpp)
 target_link_libraries(gtest_feature_IMU ${PROJECT_NAME})
