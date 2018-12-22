@@ -13,10 +13,6 @@ FeatureApriltag::FeatureApriltag(const Eigen::Vector7s & _measurement,
     detection_  (_det)
 {
     assert(_det.id == _tag_id && "Tag ID and detection ID do not match!");
-
-    //_measurement : translation + quaternion
-    // meas_cov : a definir
-    //std::cout << "feature: "<< _measurement.transpose() << std::endl;
     setTrackId(_tag_id);
     for (int i = 0; i < 4; i++)
     {

@@ -87,18 +87,19 @@ int main(int argc, char *argv[])
 
         if( frame.data ) //if imread succeeded
         {
-#ifdef IMAGE_OUTPUT
-    cv::namedWindow( argv[input], cv::WINDOW_AUTOSIZE );// Create a window for display.
-#endif
             CaptureImagePtr cap = std::make_shared<CaptureImage>(ts, sen_cam, frame);
             cap->setType(argv[input]);
             cap->setName(argv[input]);
             WOLF_DEBUG("Processing image...");
             sen->process(cap);
             WOLF_DEBUG("Image processed...");
+#ifdef IMAGE_OUTPUT
+    cv::namedWindow( cap->getName(), cv::WINDOW_NORMAL );// Create a window for display.
+#endif
         }
         else
             WOLF_WARN("could not load image ", path);
+
         ts += dt;
     }
 
@@ -150,11 +151,17 @@ int main(int argc, char *argv[])
                 {
                     Vector3s T = kf->getPPtr()->getState();
                     Vector4s qv= kf->getOPtr()->getState();
-                    Matrix3s R = q2R(qv);
-                    Vector3s e = M_TODEG * R2e(R);
+                    Vector3s e = M_TODEG * R2e(q2R(qv));
                     WOLF_TRACE(cap->getType(), " => ", T.transpose(), " | ", e.transpose());
                 }
             }
+    }
+    for (auto lmk : problem->getMapPtr()->getLandmarkList())
+    {
+        Vector3s T = lmk->getPPtr()->getState();
+        Vector4s qv= lmk->getOPtr()->getState();
+        Vector3s e = M_TODEG * R2e(q2R(qv));
+        WOLF_TRACE("L", lmk->id(), " => ", T.transpose(), " | ", e.transpose());
     }
 
 
@@ -168,19 +175,20 @@ int main(int argc, char *argv[])
         if (kf->isKey())
         {
             Eigen::MatrixXs cov = kf->getCovariance();
-            WOLF_TRACE("KF", kf->id(), "_state        = ", kf->getState().transpose());
-//            WOLF_TRACE("KF", kf->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
+//            WOLF_TRACE("KF", kf->id(), "_state        = ", kf->getState().transpose());
+            WOLF_TRACE("KF", kf->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
         }
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
     {
         Eigen::MatrixXs cov = lmk->getCovariance();
-        WOLF_TRACE("L", lmk->id(), "__state        = ", lmk->getState().transpose());
-//        WOLF_TRACE("L", lmk->id(), "__std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
+//        WOLF_TRACE("L", lmk->id(), "__state        = ", lmk->getState().transpose());
+        WOLF_TRACE("L", lmk->id(), "__std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
     }
     std::cout << std::endl;
 
 #ifdef IMAGE_OUTPUT
     cv::waitKey(0);
+    cv::destroyAllWindows();
 #endif
 
     return 0;
