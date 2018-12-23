@@ -55,6 +55,9 @@ int main(int argc, char *argv[])
     ceres::Solver::Options options;
     CeresManagerPtr ceres_manager   = std::make_shared<CeresManager>(problem, options);
 
+
+    WOLF_INFO( "====================    Configure Problem      ======================" )
+
     SensorBasePtr sen       = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_logitech_c300_640_480.yaml");
 //    SensorBasePtr sen       = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_apriltag_params_notangentrect.yaml");
     SensorCameraPtr sen_cam = std::static_pointer_cast<SensorCamera>(sen);
@@ -69,8 +72,6 @@ int main(int argc, char *argv[])
     FrameBasePtr F1 = problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), covariance, 0.0, 0.1);
 
 
-    WOLF_INFO( "====================       Problem set      ======================" )
-
     // first argument is the name of the program.
     // following arguments are path to image (from wolf_root)
     const int inputs = argc -1;
@@ -82,7 +83,6 @@ int main(int argc, char *argv[])
     WOLF_INFO( "====================        Main loop       ======================" )
     for (int input = 1; input <= inputs; input++) {
         std::string path = wolf_root + "/" + argv[input];
-        WOLF_DEBUG("path to image ", path);
         frame = cv::imread(path, CV_LOAD_IMAGE_COLOR);
 
         if( frame.data ) //if imread succeeded
@@ -90,9 +90,8 @@ int main(int argc, char *argv[])
             CaptureImagePtr cap = std::make_shared<CaptureImage>(ts, sen_cam, frame);
             cap->setType(argv[input]);
             cap->setName(argv[input]);
-            WOLF_DEBUG("Processing image...");
+            WOLF_DEBUG("Processing image...", path);
             sen->process(cap);
-            WOLF_DEBUG("Image processed...");
 #ifdef IMAGE_OUTPUT
     cv::namedWindow( cap->getName(), cv::WINDOW_NORMAL );// Create a window for display.
 #endif
@@ -134,14 +133,14 @@ int main(int argc, char *argv[])
 
 
 //    problem->print(1,1,1,0);
-    WOLF_INFO( "====================    Solving problem    ======================" )
+    WOLF_INFO( "====================    Solve problem    ======================" )
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
-    WOLF_TRACE(report);
+    WOLF_DEBUG(report);
     problem->print(4,1,1,1);
 
 
 
-    WOLF_TRACE("============= SOLVED PROBLEM : POS | EULER (DEG) ===============")
+    WOLF_INFO("============= SOLVED PROBLEM : POS | EULER (DEG) ===============")
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
     {
         if (kf->isKey())
@@ -152,7 +151,7 @@ int main(int argc, char *argv[])
                     Vector3s T = kf->getPPtr()->getState();
                     Vector4s qv= kf->getOPtr()->getState();
                     Vector3s e = M_TODEG * R2e(q2R(qv));
-                    WOLF_TRACE(cap->getType(), " => ", T.transpose(), " | ", e.transpose());
+                    WOLF_DEBUG(cap->getType(), " => ", T.transpose(), " | ", e.transpose());
                 }
             }
     }
@@ -161,7 +160,7 @@ int main(int argc, char *argv[])
         Vector3s T = lmk->getPPtr()->getState();
         Vector4s qv= lmk->getOPtr()->getState();
         Vector3s e = M_TODEG * R2e(q2R(qv));
-        WOLF_TRACE("L", lmk->id(), " => ", T.transpose(), " | ", e.transpose());
+        WOLF_DEBUG("L", lmk->id(), " => ", T.transpose(), " | ", e.transpose());
     }
 
 
@@ -169,20 +168,20 @@ int main(int argc, char *argv[])
     // COVARIANCES ===================================
     // ===============================================
     // Print COVARIANCES of all states
-    WOLF_TRACE("======== STATE AND COVARIANCES OF SOLVED PROBLEM : POS | QUAT =======")
+    WOLF_INFO("======== STATE AND COVARIANCES OF SOLVED PROBLEM : POS | QUAT =======")
     ceres_manager->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         if (kf->isKey())
         {
             Eigen::MatrixXs cov = kf->getCovariance();
 //            WOLF_TRACE("KF", kf->id(), "_state        = ", kf->getState().transpose());
-            WOLF_TRACE("KF", kf->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
+            WOLF_DEBUG("KF", kf->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
         }
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
     {
         Eigen::MatrixXs cov = lmk->getCovariance();
 //        WOLF_TRACE("L", lmk->id(), "__state        = ", lmk->getState().transpose());
-        WOLF_TRACE("L", lmk->id(), "__std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
+        WOLF_DEBUG("L", lmk->id(), "__std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
     }
     std::cout << std::endl;
 
