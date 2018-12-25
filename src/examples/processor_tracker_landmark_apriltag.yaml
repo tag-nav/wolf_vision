@@ -4,8 +4,8 @@ processor name: "tracker landmark apriltag example"
 
 detector parameters: 
     quad_decimate:  0.0
-    quad_sigma:     1.0
-    nthreads:       1
+    quad_sigma:     2.0
+    nthreads:       4
     debug:          false
     refine_edges:   true
     refine_decode:  true
@@ -14,18 +14,19 @@ detector parameters:
 tag parameters:
     tag_family:           "tag36h11" 
     tag_black_border:     1
-    tag_width_default:    0.166   # enter -1 here if you want to provide a map of [ tagid : tag_width ], see lines just below
+    tag_width_default:    0.052   # enter -1 here if you want to provide a map of [ tagid : tag_width ], see lines just below
 
 tag widths:
-    #1 :             0.2
-    #2 :             0.1
+    #1 :               0.2
+    #2 :               0.1
+    # etc...
     
 noise:
-    std_xy :          0.1 # m 
-    std_z :           0.1 # m 
-    std_rpy_degrees : 5   # degrees
+    std_xy :          0.05 # m 
+    std_z :           0.05 # m 
+    std_rpy_degrees : 20   # degrees
     
 vote:
-    voting active: true
-    min_time_vote: 0.2 # s
-    min_features_for_keyframe: 1
+    voting active:              true
+    min_time_vote:              0.2 # s
+    min_features_for_keyframe:  1

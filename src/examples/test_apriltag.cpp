@@ -53,6 +53,8 @@ int main(int argc, char *argv[])
     // Wolf problem
     ProblemPtr problem              = Problem::create("PO 3D");
     ceres::Solver::Options options;
+    options.function_tolerance = 1e-6;
+    options.max_num_iterations = 100;
     CeresManagerPtr ceres_manager   = std::make_shared<CeresManager>(problem, options);
 
 
@@ -88,7 +90,7 @@ int main(int argc, char *argv[])
         if( frame.data ) //if imread succeeded
         {
             CaptureImagePtr cap = std::make_shared<CaptureImage>(ts, sen_cam, frame);
-            cap->setType(argv[input]);
+//            cap->setType(argv[input]); // only for problem->print() to show img filename
             cap->setName(argv[input]);
             WOLF_DEBUG("Processing image...", path);
             sen->process(cap);
@@ -111,7 +113,7 @@ int main(int argc, char *argv[])
         {
             for (auto cap : F->getCaptureList())
             {
-                if (cap->getType() != "POSE")
+                if (cap->getType() == "IMAGE")
                 {
                     auto img = std::static_pointer_cast<CaptureImage>(cap);
                     for (FeatureBasePtr f : img->getFeatureList())
@@ -132,7 +134,18 @@ int main(int argc, char *argv[])
 
 
 
-//    problem->print(1,1,1,0);
+    WOLF_INFO( "====================    Provide perturbed prior    ======================" )
+    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+    {
+        Vector7s x;
+        if (kf->isKey())
+        {
+            x.setRandom();
+            x.tail(4).normalize();
+            kf->setState(x);
+        }
+    }
+
     WOLF_INFO( "====================    Solve problem    ======================" )
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
     WOLF_DEBUG(report);
@@ -151,7 +164,7 @@ int main(int argc, char *argv[])
                     Vector3s T = kf->getPPtr()->getState();
                     Vector4s qv= kf->getOPtr()->getState();
                     Vector3s e = M_TODEG * R2e(q2R(qv));
-                    WOLF_DEBUG(cap->getType(), " => ", T.transpose(), " | ", e.transpose());
+                    WOLF_DEBUG("KF", kf->id(), " => ", T.transpose(), " | ", e.transpose());
                 }
             }
     }
@@ -160,7 +173,7 @@ int main(int argc, char *argv[])
         Vector3s T = lmk->getPPtr()->getState();
         Vector4s qv= lmk->getOPtr()->getState();
         Vector3s e = M_TODEG * R2e(q2R(qv));
-        WOLF_DEBUG("L", lmk->id(), " => ", T.transpose(), " | ", e.transpose());
+        WOLF_DEBUG(" L", lmk->id(), " => ", T.transpose(), " | ", e.transpose());
     }
 
 
@@ -168,22 +181,27 @@ int main(int argc, char *argv[])
     // COVARIANCES ===================================
     // ===============================================
     // Print COVARIANCES of all states
-    WOLF_INFO("======== STATE AND COVARIANCES OF SOLVED PROBLEM : POS | QUAT =======")
+    WOLF_INFO("======== COVARIANCES OF SOLVED PROBLEM : POS | QUAT =======")
     ceres_manager->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         if (kf->isKey())
         {
             Eigen::MatrixXs cov = kf->getCovariance();
-//            WOLF_TRACE("KF", kf->id(), "_state        = ", kf->getState().transpose());
             WOLF_DEBUG("KF", kf->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
         }
     for (auto lmk : problem->getMapPtr()->getLandmarkList())
     {
         Eigen::MatrixXs cov = lmk->getCovariance();
-//        WOLF_TRACE("L", lmk->id(), "__state        = ", lmk->getState().transpose());
-        WOLF_DEBUG("L", lmk->id(), "__std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
+        WOLF_DEBUG(" L", lmk->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
     }
     std::cout << std::endl;
+
+
+    // ===============================================
+    // SAVE MAP TO YAML ==============================
+    // ===============================================
+    //
+    //    problem->saveMap(wolf_root + "/src/examples/map_apriltag_set3_HC.yaml", "set3");
 
 #ifdef IMAGE_OUTPUT
     cv::waitKey(0);
