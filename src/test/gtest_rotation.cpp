@@ -707,6 +707,30 @@ TEST(Conversions, e2q_q2R_R2e)
 
 }
 
+TEST(Conversions, e2R_R2q_q2e)
+{
+    Vector3s e, eo;
+    Quaternions q;
+    Matrix3s R;
+
+    e.setRandom();
+    e << 0.1, 0.2, 0.3;
+    R = e2R(e(0), e(1), e(2));
+    q = R2q(R);
+
+    eo = q2e(q.coeffs());
+
+    WOLF_TRACE("euler    ", e.transpose());
+    WOLF_TRACE("R \n", R);
+    WOLF_TRACE("quat     ", q.coeffs().transpose());
+
+    WOLF_TRACE("euler o  ", eo.transpose());
+
+
+    ASSERT_MATRIX_APPROX(eo, e, 1e-10);
+
+}
+
 
 int main(int argc, char **argv)
 {
