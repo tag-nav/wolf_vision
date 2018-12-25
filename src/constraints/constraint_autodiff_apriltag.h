@@ -39,12 +39,12 @@ class ConstraintAutodiffApriltag : public ConstraintAutodiff<ConstraintAutodiffA
 
         // print function only for double (not Jet)
         template<typename T, int Rows, int Cols>
-        void print(const std::string s, int kf, int lmk, const Eigen::Matrix<T, Rows, Cols> _M) const
+        void print(int kf, int lmk, const std::string s, const Eigen::Matrix<T, Rows, Cols> _M) const
         {
             // jet prints nothing
         }
         template<int Rows, int Cols>
-        void print(const std::string s, int kf, int lmk, const Eigen::Matrix<Scalar, Rows, Cols> _M) const
+        void print(int kf, int lmk, const std::string s, const Eigen::Matrix<Scalar, Rows, Cols> _M) const
         {
             // double prints stuff
             WOLF_TRACE("KF", kf, " L", lmk, "; ", s, _M);
@@ -92,10 +92,6 @@ ConstraintAutodiffApriltag::~ConstraintAutodiffApriltag()
 
 template<typename T> bool ConstraintAutodiffApriltag::operator ()( const T* const _p_camera, const T* const _o_camera, const T* const _p_keyframe, const T* const _o_keyframe, const T* const _p_landmark, const T* const _o_landmark, T* _residuals) const
 {
-    // debug stuff
-    int kf = getFeaturePtr()->getCapturePtr()->getFramePtr()->id();
-    int lmk = getLandmarkOtherPtr()->id();
-
     //states
     Eigen::Translation<T,3> p_camera(_p_camera[0], _p_camera[1], _p_camera[2]),
                             p_keyframe(_p_keyframe[0], _p_keyframe[1], _p_keyframe[2]),
@@ -104,7 +100,7 @@ template<typename T> bool ConstraintAutodiffApriltag::operator ()( const T* cons
 
     //Measurements T and Q
     Eigen::Translation3ds  p_measured(getMeasurement().head(3));
-    Eigen::Quaternions     q_measured( getMeasurement().data() + 3 );
+    Eigen::Quaternions     q_measured(getMeasurement().data() + 3 );
     // landmark wrt camera, measure
     Eigen::Transform<T, 3, Eigen::Affine> c_M_l_meas = p_measured.cast<T>() * q_measured.cast<T>();
 
@@ -128,7 +124,15 @@ template<typename T> bool ConstraintAutodiffApriltag::operator ()( const T* cons
     Eigen::Matrix<T, 3, 3> R_err(c_M_err.linear());
     err.block(3,0,3,1) = wolf::log_R(R_err);
 
-    print("error: ", kf, lmk, err.transpose().eval());
+    // debug stuff
+//    int kf = getFeaturePtr()->getCapturePtr()->getFramePtr()->id();
+//    int lmk = getLandmarkOtherPtr()->id();
+//
+//    print(kf, lmk, "w_M_c  : \n", (w_M_r*r_M_c).matrix());
+//    print(kf, lmk, "w_M_l  : \n", w_M_l.matrix());
+//    print(kf, lmk, "c_M_l_e: \n", c_M_l_est.matrix());
+//    print(kf, lmk, "c_M_l_m: \n", c_M_l_meas.matrix());
+//    print(kf, lmk, "error  : \n", err.transpose().eval());
 
     // residual
     Eigen::Map<Eigen::Matrix<T, 6, 1>> res(_residuals);
