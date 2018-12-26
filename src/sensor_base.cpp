@@ -226,6 +226,8 @@ CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
     // we search for the most recent Capture of this sensor before _ts
     CaptureBasePtr capture = nullptr;
     FrameBaseList frame_list = getProblem()->getTrajectoryPtr()->getFrameList();
+
+    // We iterate in reverse since we're likely to find it close to the rbegin() place.
     FrameBaseRevIter frame_rev_it = frame_list.rbegin();
     while (frame_rev_it != frame_list.rend())
     {
