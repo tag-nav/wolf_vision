@@ -162,51 +162,17 @@ e2q(const Eigen::MatrixBase<D>& _euler)
 }
 
 
-
-/** \brief Euler angles to quaternion
- * \param roll in ZYX convention
- * \param pitch in ZYX convention
- * \param yaw in ZYX convention
- * \return equivalent quaternion
- */
-template<typename T>
-inline Eigen::Quaternion<T>
-e2q(const T roll,
-    const T pitch,
-    const T yaw)
-{
-    const Eigen::AngleAxis<T> ax = Eigen::AngleAxis<T>(roll,  Eigen::Matrix<T, 3, 1>::UnitX());
-    const Eigen::AngleAxis<T> ay = Eigen::AngleAxis<T>(pitch, Eigen::Matrix<T, 3, 1>::UnitY());
-    const Eigen::AngleAxis<T> az = Eigen::AngleAxis<T>(yaw,   Eigen::Matrix<T, 3, 1>::UnitZ());
-
-    return (az * ay * ax);
-}
-
-
-/** \brief Euler angles to rotation matrix
- * \param roll in ZYX convention
- * \param pitch in ZYX convention
- * \param yaw in ZYX convention
- * \return equivalent rotation matrix
- */
-template<typename T>
-inline Eigen::Matrix<T, 3, 3>
-e2R(const T roll,
-    const T pitch,
-    const T yaw)
-{
-    return e2q(roll, pitch, yaw).matrix();
-}
-
 /** \brief Euler angles to rotation matrix
  * \param _e = (roll pitch yaw) in ZYX convention
  * \return equivalent rotation matrix
  */
 template<typename Derived>
 inline Eigen::Matrix<typename Derived::Scalar, 3, 3>
-e2R(Eigen::MatrixBase<Derived> _e)
+e2R(const Eigen::MatrixBase<Derived>& _e)
 {
-    return e2R(_e(0), _e(1), _e(2));
+    MatrixSizeCheck<3, 1>::check(_e);
+
+    return e2q(_e).matrix();
 }
 
 
@@ -226,9 +192,9 @@ R2e(const Eigen::MatrixBase<Derived>& _R)
 {
     Eigen::Matrix<typename Derived::Scalar, 3, 1> e;
 
-    e(0) = atan2(_R(2,1),_R(2,2));
+    e(0) = atan2( _R(2,1), _R(2,2));
     e(1) = atan2(-_R(2,0), sqrt(_R(0,0)*_R(0,0) + _R(1,0)*_R(1,0)));
-    e(2) = atan2(_R(1,0), _R(0,0));
+    e(2) = atan2( _R(1,0), _R(0,0));
 
     return e;
 }
@@ -241,26 +207,26 @@ q2e(const Eigen::MatrixBase<Derived>& _q)
     typedef typename Derived::Scalar T;
     Eigen::Matrix<T, 3, 1> e;
 
-    Scalar w  = _q(3,0);
-    Scalar x  = _q(0,0);
-    Scalar y  = _q(1,0);
-    Scalar z  = _q(2,0);
+    Scalar w  = _q(3);
+    Scalar x  = _q(0);
+    Scalar y  = _q(1);
+    Scalar z  = _q(2);
 
-    Scalar wx = w*x;
     Scalar xx = x*x;
     Scalar xy = x*y;
     Scalar xz = x*z;
-    Scalar wy = w*y;
     Scalar yy = y*y;
     Scalar yz = y*z;
     Scalar zz = z*z;
+    Scalar wx = w*x;
+    Scalar wy = w*y;
     Scalar wz = w*z;
 
-    Scalar r00 = T(1) - T(2) * (yy + zz);
-    Scalar r10 = T(2) * ( xy + wz );
-    Scalar r20 = T(2) * ( xz - wy );
-    Scalar r21 = T(2) * ( yz + wx );
-    Scalar r22 = T(1) - T(2) * (xx + yy);
+    Scalar r00 = T(1) - T(2) * ( yy + zz );
+    Scalar r10 =        T(2) * ( xy + wz );
+    Scalar r20 =        T(2) * ( xz - wy );
+    Scalar r21 =        T(2) * ( yz + wx );
+    Scalar r22 = T(1) - T(2) * ( xx + yy );
 
     e(0) = atan2( r21, r22);
     e(1) = atan2(-r20, sqrt(r00*r00 + r10*r10));
@@ -684,6 +650,7 @@ diff(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
 {
     return minus(q1, q2);
 }
+
 
 } // namespace wolf
 

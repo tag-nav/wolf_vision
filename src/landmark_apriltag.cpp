@@ -47,7 +47,7 @@ LandmarkBasePtr LandmarkApriltag::create(const YAML::Node& _lmk_node)
     {
         // we have been given 3 Euler angles in degrees
         Eigen::Vector3s   euler = M_TORAD * ( _lmk_node["orientation"]          .as<Eigen::Vector3s>() );
-        Eigen::Matrix3s       R = e2R(euler(0), euler(1), euler(2));
+        Eigen::Matrix3s       R = e2R(euler);
         Eigen::Quaternions quat = R2q(R);
         vquat                   = quat.coeffs();
     }

@@ -94,7 +94,7 @@ target_link_libraries(gtest_processor_motion ${PROJECT_NAME})
   
 # Rotation test
 wolf_add_gtest(gtest_rotation gtest_rotation.cpp)
-target_link_libraries(gtest_rotation ${PROJECT_NAME})
+#target_link_libraries(gtest_rotation ${PROJECT_NAME})
 
 # SensorBase test
 wolf_add_gtest(gtest_sensor_base gtest_sensor_base.cpp)

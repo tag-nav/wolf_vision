@@ -441,25 +441,6 @@ TEST(compose, Quat_compos_var_rateOfTurn_diff)
     "\n computed final orientation : " << wolf::q2v(q0).transpose() << std::endl;
 }
 
-TEST(q2R, q2R_R2q)
-{
-    Vector3s v; v.setRandom();
-    Quaternions q = v2q(v);
-    Matrix3s R = v2R(v);
-
-    Quaternions q_R = R2q(R);
-    Quaternions qq_R(R);
-
-    ASSERT_NEAR(q.norm(),    1, wolf::Constants::EPS);
-    ASSERT_NEAR(q_R.norm(),  1, wolf::Constants::EPS);
-    ASSERT_NEAR(qq_R.norm(), 1, wolf::Constants::EPS);
-
-    ASSERT_MATRIX_APPROX(q.coeffs(), R2q(R).coeffs(), wolf::Constants::EPS);
-    ASSERT_MATRIX_APPROX(q.coeffs(), qq_R.coeffs(),   wolf::Constants::EPS);
-    ASSERT_MATRIX_APPROX(R,          q2R(q),          wolf::Constants::EPS);
-    ASSERT_MATRIX_APPROX(R,          qq_R.matrix(),   wolf::Constants::EPS);
-}
-
 TEST(Plus, Random)
 {
     Quaternions q;
@@ -495,20 +476,29 @@ TEST(Plus, Identity_plus_small)
 
 TEST(Minus_and_diff, Random)
 {
-    Quaternions q1, q2;
+    Quaternions q1, q2, qo;
     q1              .coeffs().setRandom().normalize();
     q2              .coeffs().setRandom().normalize();
+
 
     Vector3s vr      = log_q(q1.conjugate() * q2);
     Vector3s vl      = log_q(q2 * q1.conjugate());
 
     ASSERT_MATRIX_APPROX(minus(q1, q2), vr, 1e-12);
-    ASSERT_QUATERNION_APPROX(plus(q1, minus(q1, q2)), q2, 1e-12);
     ASSERT_MATRIX_APPROX(diff(q1, q2), vr, 1e-12);
-    ASSERT_QUATERNION_APPROX(plus(q1, diff(q1, q2)), q2, 1e-12);
-
     ASSERT_MATRIX_APPROX(minus_left(q1, q2), vl, 1e-12);
-    ASSERT_QUATERNION_APPROX(plus_left(minus_left(q1, q2), q1), q2, 1e-12);
+
+    qo = plus(q1, minus(q1, q2));
+    if (q2.w() * qo.w() < 0) q2.coeffs() = -(q2.coeffs()); // allow q = -q
+    ASSERT_QUATERNION_APPROX(qo, q2, 1e-12);
+
+    qo = plus(q1, diff(q1, q2));
+    if (q2.w() * qo.w() < 0) q2.coeffs() = -(q2.coeffs()); // allow q = -q
+    ASSERT_QUATERNION_APPROX(qo, q2, 1e-12);
+
+    qo = plus_left(minus_left(q1, q2), q1);
+    if (q2.w() * qo.w() < 0) q2.coeffs() = -(q2.coeffs()); // allow q = -q
+    ASSERT_QUATERNION_APPROX(qo, q2, 1e-12);
 }
 
 TEST(Jacobians, Jr)
@@ -683,28 +673,86 @@ TEST(log_q, small)
     }
 }
 
+//<<<<<<< HEAD
+//=======
+TEST(Conversions, q2R_R2q)
+{
+    Vector3s v; v.setRandom();
+    Quaternions q = v2q(v);
+    Matrix3s R = v2R(v);
+
+    Quaternions q_R = R2q(R);
+    Quaternions qq_R(R);
+
+    ASSERT_NEAR(q.norm(),    1, wolf::Constants::EPS);
+    ASSERT_NEAR(q_R.norm(),  1, wolf::Constants::EPS);
+    ASSERT_NEAR(qq_R.norm(), 1, wolf::Constants::EPS);
+
+    ASSERT_MATRIX_APPROX(q.coeffs(), R2q(R).coeffs(), wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(q.coeffs(), qq_R.coeffs(),   wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(R,          q2R(q),          wolf::Constants::EPS);
+    ASSERT_MATRIX_APPROX(R,          qq_R.matrix(),   wolf::Constants::EPS);
+}
+
+TEST(Conversions, e2q_q2e)
+{
+    Vector3s e, eo;
+    Quaternions q;
+
+    e << 0.1, .2, .3;
+
+    q = e2q(e);
+
+    eo = q2e(q);
+    ASSERT_MATRIX_APPROX(eo, e, 1e-10);
+
+    eo = q2e(q.coeffs());
+    ASSERT_MATRIX_APPROX(eo, e, 1e-10);
+
+}
+
+//>>>>>>> master
 TEST(Conversions, e2q_q2R_R2e)
 {
     Vector3s e, eo;
     Quaternions q;
     Matrix3s R;
 
-    e.setRandom();
+//<<<<<<< HEAD
+//    e.setRandom();
+//=======
+//>>>>>>> master
     e << 0.1, .2, .3;
     q = e2q(e);
     R = q2R(q);
 
     eo = R2e(R);
 
-    WOLF_TRACE("euler    ", e.transpose());
-    WOLF_TRACE("quat     ", q.coeffs().transpose());
-    WOLF_TRACE("R \n", R);
-
-    WOLF_TRACE("euler o  ", eo.transpose());
-
-
+//<<<<<<< HEAD
+//    WOLF_TRACE("euler    ", e.transpose());
+//    WOLF_TRACE("quat     ", q.coeffs().transpose());
+//    WOLF_TRACE("R \n", R);
+//
+//    WOLF_TRACE("euler o  ", eo.transpose());
+//
+//
+//    ASSERT_MATRIX_APPROX(eo, e, 1e-10);
+//
+//=======
     ASSERT_MATRIX_APPROX(eo, e, 1e-10);
+}
 
+TEST(Conversions, e2R_R2e)
+{
+    Vector3s e, eo;
+    Matrix3s R;
+
+    e << 0.1, 0.2, 0.3;
+
+    R  = e2R(e);
+    eo = R2e(R);
+    ASSERT_MATRIX_APPROX(eo, e, 1e-10);
+//>>>>>>> master
 }
 
 TEST(Conversions, e2R_R2q_q2e)
@@ -713,22 +761,31 @@ TEST(Conversions, e2R_R2q_q2e)
     Quaternions q;
     Matrix3s R;
 
-    e.setRandom();
+//<<<<<<< HEAD
+//    e.setRandom();
+//    e << 0.1, 0.2, 0.3;
+//    R = e2R(e(0), e(1), e(2));
+//=======
     e << 0.1, 0.2, 0.3;
-    R = e2R(e(0), e(1), e(2));
+    R = e2R(e);
+//>>>>>>> master
     q = R2q(R);
 
     eo = q2e(q.coeffs());
 
-    WOLF_TRACE("euler    ", e.transpose());
-    WOLF_TRACE("R \n", R);
-    WOLF_TRACE("quat     ", q.coeffs().transpose());
-
-    WOLF_TRACE("euler o  ", eo.transpose());
-
-
+//<<<<<<< HEAD
+//    WOLF_TRACE("euler    ", e.transpose());
+//    WOLF_TRACE("R \n", R);
+//    WOLF_TRACE("quat     ", q.coeffs().transpose());
+//
+//    WOLF_TRACE("euler o  ", eo.transpose());
+//
+//
+//    ASSERT_MATRIX_APPROX(eo, e, 1e-10);
+//
+//=======
     ASSERT_MATRIX_APPROX(eo, e, 1e-10);
-
+//>>>>>>> master
 }
 
 
