@@ -53,6 +53,7 @@ class LandmarkApriltag : public LandmarkBase
 
 
     private:
+        const int tag_id_;
         const Scalar tag_width_;         
         
 };

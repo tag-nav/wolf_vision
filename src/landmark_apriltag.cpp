@@ -8,10 +8,11 @@ namespace wolf {
 
 LandmarkApriltag::LandmarkApriltag(Eigen::Vector7s& pose, const int& _tagid, const Scalar& _tag_width) :
 	LandmarkBase("APRILTAG", std::make_shared<StateBlock>(pose.head(3)), std::make_shared<StateQuaternion>(pose.tail(4))),
+	tag_id_(_tagid),
 	tag_width_(_tag_width)
 {
   	setDescriptor(Eigen::VectorXs::Constant(1,_tagid)); //change tagid to int ? do not use descriptor vector ?
-    setId(_tagid);
+    setId(_tagid); // overwrite lmk ID to match tag_id.
 }
 
 LandmarkApriltag::~LandmarkApriltag()
@@ -27,7 +28,7 @@ Scalar LandmarkApriltag::getTagWidth() const
 
 int LandmarkApriltag::getTagId() const
 {
-    return round(descriptor_(0));
+    return tag_id_;
 }
 
 // LANDMARK SAVE AND LOAD FROM YAML
