@@ -25,7 +25,8 @@
 #include "opencv2/opencv.hpp"
 
 #define CONTRAST
-#define IMAGE_OUTPUT
+//#define IMAGE_OUTPUT
+#define USEMAP
 
 
 int main(int argc, char *argv[])
@@ -59,8 +60,12 @@ int main(int argc, char *argv[])
     SensorCameraPtr sen_cam = std::static_pointer_cast<SensorCamera>(sen);
     ProcessorBasePtr prc    = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
 
-    std::cout << wolf_root + "/src/examples/maps/map_apriltag_logitech.yaml" << std::endl;
+#ifdef USEMAP
     problem->loadMap(wolf_root + "/src/examples/maps/map_apriltag_logitech_1234.yaml");
+    for (auto lmk : problem->getMapPtr()->getLandmarkList()){
+        lmk->fix();
+    }
+#endif
 
     // set prior
     Eigen::Matrix6s covariance = Matrix6s::Identity();
