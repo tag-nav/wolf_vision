@@ -1,0 +1,46 @@
+map name: "4 tags printed on a A4 sheet vertical recorded at IRI with logitech webcam."
+
+nlandmarks: 4          # This must match the number of landmarks in the list that follows. Otherwise it is an error.
+
+######################
+# World frame is considered to be at 75cm from the sheet with RDF convention (like a camera). 
+# Landmarks facing the Z axis (view axis of the camera) have the same orientation as world frame.
+######################
+landmarks:
+
+  - id : 0                    # use same as tag id
+    type: "APRILTAG"          # This must match the KEY used in the LandmarkFactory. Otherwise it is an error.
+    tag id: 0
+    tag width: 0.055
+    position: [-0.061, -0.185, 0.75]
+    orientation: [0, 0, 0]    # roll pitch yaw in degrees
+    position fixed: true
+    orientation fixed: true
+
+  - id : 1                    # use same as tag id
+    type: "APRILTAG"          # This must match the KEY used in the LandmarkFactory. Otherwise it is an error.
+    tag id: 1
+    tag width: 0.055
+    position: [0.061, -0.185, 0.75]
+    orientation: [0, 0, 0]    # roll pitch yaw in degrees
+    position fixed: true
+    orientation fixed: true
+
+  - id : 2                    # use same as tag id
+    type: "APRILTAG"          # This must match the KEY used in the LandmarkFactory. Otherwise it is an error.
+    tag id: 2
+    tag width: 0.055
+    position: [-0.061, 0, 0.75]
+    orientation: [0, 0, 0]    # roll pitch yaw in degrees
+    position fixed: true
+    orientation fixed: true
+
+  - id : 3                    # use same as tag id
+    type: "APRILTAG"          # This must match the KEY used in the LandmarkFactory. Otherwise it is an error.
+    tag id: 3
+    tag width: 0.055
+    position: [0.061, 0, 0.75]
+    orientation: [0, 0, 0]    # roll pitch yaw in degrees
+    position fixed: true
+    orientation fixed: true
+

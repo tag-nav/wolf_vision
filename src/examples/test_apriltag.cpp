@@ -59,14 +59,17 @@ int main(int argc, char *argv[])
     SensorCameraPtr sen_cam = std::static_pointer_cast<SensorCamera>(sen);
     ProcessorBasePtr prc    = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
 
+    std::cout << wolf_root + "/src/examples/maps/map_apriltag_logitech.yaml" << std::endl;
+    problem->loadMap(wolf_root + "/src/examples/maps/map_apriltag_logitech_1234.yaml");
+
     // set prior
     Eigen::Matrix6s covariance = Matrix6s::Identity();
     Scalar stdev_m   = 0.00001;  // standard deviation on original translation
     Scalar stdev_deg = 0.00001;  // standard deviation on original rotation
     covariance.topLeftCorner(3,3)       =  stdev_m*stdev_m * covariance.topLeftCorner(3,3);
     covariance.bottomRightCorner(3,3)   = (M_TORAD*stdev_deg)*(M_TORAD*stdev_deg) * covariance.bottomRightCorner(3,3);
-    FrameBasePtr F1 = problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), covariance, 0.0, 0.1);
 
+    FrameBasePtr F1 = problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), covariance, 0.0, 0.1);
 
     // first argument is the name of the program.
     // following arguments are path to image (from wolf_root)
