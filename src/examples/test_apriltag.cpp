@@ -24,24 +24,18 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "opencv2/opencv.hpp"
 
+#define CONTRAST
 #define IMAGE_OUTPUT
 
-bool str_ends_with (std::string const &fullString, std::string const &ending) {
-    if (fullString.length() >= ending.length()) {
-        return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
-    } else {
-        return false;
-    }
-}
 
 int main(int argc, char *argv[])
 {
     /*
      * HOW TO USE ?
-     * For now, just call the executable and append the list of images to be processed
-     * For example, if you want to process only one image located at wolf/bin/images/frame1.jpg
-     * and if wolf_root is correctly set. then just run (from wolf/bin)
-     * ./test_apriltag /bin/images/frame1.jpg
+     * For now, just call the executable and append the list of images to be processed.
+     * The images must be placed in the root folder of your wolf project.
+     * Ex:
+     * ./test_apriltag frame1.jpg frame2.jpg frame3.jpg
      */
 
     using namespace wolf;
@@ -89,6 +83,20 @@ int main(int argc, char *argv[])
 
         if( frame.data ) //if imread succeeded
         {
+
+#ifdef CONTRAST
+            Scalar alpha = 2.0; // to tune contrast  [1-3]
+            int beta = 0;       // to tune lightness [0-100]
+            // Do the operation new_image(i,j) = alpha*image(i,j) + beta
+            for( int y = 0; y < frame.rows; y++ ){
+                for( int x = 0; x < frame.cols; x++ ){
+                    for( int c = 0; c < 3; c++ ){
+                        frame.at<cv::Vec3b>(y,x)[c] = cv::saturate_cast<uchar>( alpha*( frame.at<cv::Vec3b>(y,x)[c] ) + beta );
+                    }
+                }
+            }
+#endif
+
             CaptureImagePtr cap = std::make_shared<CaptureImage>(ts, sen_cam, frame);
 //            cap->setType(argv[input]); // only for problem->print() to show img filename
             cap->setName(argv[input]);
@@ -125,7 +133,7 @@ int main(int argc, char *argv[])
                         cv::line(img->getImage(), fa->getTagCorners()[3], fa->getTagCorners()[0], cv::Scalar(0, 255, 0));
                     }
                     cv::imshow( img->getName(), img->getImage() );  // display original image.
-                    cv::waitKey(1);
+                    cv::waitKey(0.1);
                 }
             }
         }
