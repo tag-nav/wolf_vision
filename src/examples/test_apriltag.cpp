@@ -74,7 +74,8 @@ int main(int argc, char *argv[])
     covariance.topLeftCorner(3,3)       =  stdev_m*stdev_m * covariance.topLeftCorner(3,3);
     covariance.bottomRightCorner(3,3)   = (M_TORAD*stdev_deg)*(M_TORAD*stdev_deg) * covariance.bottomRightCorner(3,3);
 
-    FrameBasePtr F1 = problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), covariance, 0.0, 0.1);
+//    FrameBasePtr F1 = problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), covariance, 0.0, 0.1);
+    FrameBasePtr F1 = problem->setPrior((Vector7s()<<0.08, 0, -0.75, 0, 0, 0, 1).finished(), covariance, 0.0, 0.1);
 
     // first argument is the name of the program.
     // following arguments are path to image (from wolf_root)
