@@ -61,6 +61,11 @@ unsigned int ProcessorTrackerFeature::processKnown()
     assert(matches_last_from_incoming_.size() == 0
             && "In ProcessorTrackerFeature::processKnown(): match list from last to incoming must be empty before processKnown()");
 
+    if (!last_ptr_ || last_ptr_->getFeatureList().empty())
+    {
+        return 0;
+    }
+
     // Track features from last_ptr_ to incoming_ptr_
     trackFeatures(last_ptr_->getFeatureList(), known_features_incoming_, matches_last_from_incoming_);
     for (auto match : matches_last_from_incoming_)
