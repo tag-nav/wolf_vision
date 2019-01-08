@@ -61,6 +61,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             pack->key_frame->addCapture(incoming_ptr_);
 
             // Process info
+            processKnown();
             // We only process new features in Last, here last = nullptr, so we do not have anything to do.
 
             // Update pointers
@@ -77,6 +78,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             kfrm->addCapture(incoming_ptr_);
 
             // Process info
+            processKnown();
             // We only process new features in Last, here last = nullptr, so we do not have anything to do.
 
             // Issue KF callback with new KF
@@ -95,7 +97,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         	// No-break case only for debug. Next case will be executed too.
             PackKeyFramePtr pack = kf_pack_buffer_.selectPack( incoming_ptr_, params_tracker_->time_tolerance);
             WOLF_DEBUG( "PT ", getName(), ": KF" , pack->key_frame->id() , " callback unpacked with ts= " , pack->key_frame->getTimeStamp().get() );
-        }
+        } // @suppress("No break at end of case")
         case SECOND_TIME_WITHOUT_PACK :
         {
             FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
@@ -104,6 +106,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             // We have a last_ Capture with no features, so we do not process known features, and we do not vote for KF.
 
             // Process info
+            processKnown();
             processNew(params_tracker_->max_new_features);
 
             // Establish constraints
