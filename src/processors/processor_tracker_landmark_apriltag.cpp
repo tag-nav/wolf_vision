@@ -7,6 +7,7 @@
 #include "constraints/constraint_autodiff_apriltag.h"
 #include "landmark_apriltag.h"
 #include "state_quaternion.h"
+#include "pinhole_tools.h"
 
 // April tags
 #include "common/homography.h"
@@ -117,24 +118,16 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
                         .buf    = grayscale_image_.data
                     };
 
-    // get camera intrinsic parameters as required by Apriltag homography-to-pose routine below
-    Eigen::Vector4s camera_intrinsics(getSensorPtr()->getIntrinsicPtr()->getState()); //[cx cy fx fy]
-    double cx( camera_intrinsics(0));
-    double cy( camera_intrinsics(1));
-    double fx(-camera_intrinsics(2));  // !! Negative sign advised by apriltag library commentary
-    double fy( camera_intrinsics(3));
-
     // run Apriltag detector
     zarray_t *detections = apriltag_detector_detect(&detector_, &im);
 
     // loop all detections
     for (int i = 0; i < zarray_size(detections); i++) {
 
-
         // get raw Apriltag pose from homography
         apriltag_detection_t *det;
         zarray_get(detections, i, &det);
-        matd_t *pose_matrix = homography_to_pose(det->H, fx, fy, cx, cy);
+        matd_t *pose_matrix = homography_to_pose(det->H, -fx_, fy_, cx_, cy_); // !! fx Negative sign advised by apriltag library commentary
 
         // write it in Eigen form
         Eigen::Affine3ds M_april_raw;
@@ -168,7 +161,10 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         pose << translation, R2q(c_M_t.linear()).coeffs();
 
         // compute the covariance
-        Eigen::Matrix6s cov = getVarVec().asDiagonal() ;
+//        Eigen::Matrix6s cov = getVarVec().asDiagonal() ;
+        double sig_q = 2;
+        std::vector<Scalar> k_vec = {cx_, cy_, fx_, fy_};
+        Eigen::Matrix6s cov = computeCovariance(translation, c_M_t.linear(), k_vec, tag_width, sig_q);
 
         // add to detected features list
         detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov, tag_id, *det));
@@ -320,6 +316,64 @@ Eigen::Vector6s ProcessorTrackerLandmarkApriltag::getVarVec()
     return var_vec;
 }
 
+Eigen::Matrix6s ProcessorTrackerLandmarkApriltag::computeCovariance(Eigen::Vector3s const &t, Eigen::Matrix3s const &R, std::vector<Scalar> const &k_vec, Scalar const &tag_width, double const &sig_q)
+{
+    // Create cam intrisic matrix
+    Eigen::Matrix3s K;
+    K << k_vec[2], 0,  k_vec[0],
+         0,  k_vec[3], k_vec[1],
+         0,  0,  1;
+
+    // position of the 4 corners of the tag in its reference frame (which is in its middle
+    Eigen::Vector3s p1; p1 <<  1,  1, 0; p1 = p1*tag_width/2; // top left
+    Eigen::Vector3s p2; p2 << -1,  1, 0; p2 = p2*tag_width/2; // top right
+    Eigen::Vector3s p3; p3 << -1, -1, 0; p3 = p3*tag_width/2; // bottom right
+    Eigen::Vector3s p4; p4 <<  1, -1, 0; p4 = p4*tag_width/2; // bottom left
+    std::vector<Eigen::Vector3s> pvec = {p1, p2, p3, p4};
+
+//    WOLF_TRACE(pvec);
+
+    // Initialize jacobian matrices
+    Eigen::Matrix<Scalar, 8, 6> J_u_TR = Eigen::Matrix<Scalar, 8, 6>::Zero();
+    Eigen::Vector3s h;
+    Eigen::Matrix3s J_h_T;
+    Eigen::Matrix3s J_h_R;
+    Eigen::Vector2s eu;  // 2D pixel coord, not needed
+    Eigen::Matrix<Scalar, 3, 6> J_h_TR;
+    Eigen::Matrix<Scalar, 2, 3> J_u_h;
+    for (int i=0; i < pvec.size(); i++){
+        // Pinhole projection to non normalized homogeneous coordinates in pixels (along with jacobians)
+        pinholeHomogeneous(K, t, R, pvec[i], h, J_h_T, J_h_R);
+        // 3 x 6 tag to camera translation|rotation jacobian
+        J_h_TR << J_h_T, J_h_R;
+        // Euclidianization Jacobian
+        pinhole::projectPointToNormalizedPlane(h, eu, J_u_h);
+        // Fill jacobian for ith corner
+        J_u_TR.block(2*i, 0, 2, 6) = J_u_h * J_h_TR;
+    }
+
+    Eigen::Matrix<Scalar, 8, 8> pixel_cov = pow(sig_q, 2) * Eigen::Matrix<Scalar, 8, 8>::Identity();
+    // 6 x 6 translation|rotation covariance computed with covariance propagation formula (inverted)
+    Eigen::Matrix6s transformation_cov  = (J_u_TR.transpose() * pixel_cov.inverse() * J_u_TR).inverse();
+
+    return transformation_cov;
+
+}
+
+void ProcessorTrackerLandmarkApriltag::pinholeHomogeneous(Eigen::Matrix3s const & K, Eigen::Vector3s const & t,
+                                                          Eigen::Matrix3s const & R, Eigen::Vector3s const & p,
+                                                          Eigen::Vector3s &h, Eigen::Matrix3s &J_h_T, Eigen::Matrix3s &J_h_R)
+{
+    // Pinhole
+    h =  K * (t + R * p);
+    J_h_T = K;
+    Eigen::Matrix3s p_hat;
+    p_hat << 0, -p(2), p(1),
+             p(2), 0, -p(0),
+            -p(1), p(0), 0;
+    J_h_R = -K * R * p_hat;
+}
+
 FeatureBaseList ProcessorTrackerLandmarkApriltag::getIncomingDetections() const
 {
     return detections_incoming_;
@@ -332,10 +386,12 @@ FeatureBaseList ProcessorTrackerLandmarkApriltag::getLastDetections() const
 
 void ProcessorTrackerLandmarkApriltag::configure(SensorBasePtr _sensor)
 {
-    // set processor params from camera params if required
-
-    // SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(_sensor);
-    // [...] add more code if needed
+    // get camera intrinsic parameters
+    Eigen::Vector4s camera_intrinsics(_sensor->getIntrinsicPtr()->getState()); //[cx cy fx fy]
+    cx_ = camera_intrinsics(0);
+    cy_ = camera_intrinsics(1);
+    fx_ = camera_intrinsics(2);
+    fy_ = camera_intrinsics(3);
 }
 
 void ProcessorTrackerLandmarkApriltag::advanceDerived()

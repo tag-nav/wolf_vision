@@ -114,6 +114,10 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         Eigen::Vector6s getVarVec();
         FeatureBaseList getIncomingDetections() const;
         FeatureBaseList getLastDetections() const;
+        Eigen::Matrix6s computeCovariance(Eigen::Vector3s const &t, Eigen::Matrix3s const &R, std::vector<Scalar> const &k_vec, Scalar const &tag_width, double const &sig_q);
+        void pinholeHomogeneous(Eigen::Matrix3s const & K, Eigen::Vector3s const & t,
+                                Eigen::Matrix3s const & R, Eigen::Vector3s const & p,
+                                Eigen::Vector3s &h, Eigen::Matrix3s &J_h_T, Eigen::Matrix3s &J_h_R);
 
     protected:
         void advanceDerived();
@@ -127,6 +131,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         apriltag_family_t tag_family_;
         Scalar std_xy_, std_z_, std_rpy_;   ///< dummy std values for covariance computation
         Eigen::Affine3ds c_M_ac_;           ///< aprilCamera-to-camera transform
+        double cx_, cy_, fx_, fy_;
 
     protected:
         FeatureBaseList detections_incoming_;   ///< detected tags in wolf form, incoming image

@@ -315,6 +315,80 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, createConstraint)
     ASSERT_TRUE(ctr->getType() == "AUTODIFF APRILTAG");
 }
 
+TEST_F(ProcessorTrackerLandmarkApriltag_class, computeCovariance)
+{
+    Scalar cx = 320;
+    Scalar cy = 240;
+    Scalar fx = 320;
+    Scalar fy = 320;
+    Eigen::Matrix3s K;
+    K <<  fx,  0, cx,
+          0,  fy, cy,
+          0,    0,   1;
+    Eigen::Vector3s t; t << 0.0, 0.0, 0.4;
+    Eigen::Vector3s v; v << 0.2, 0.0, 0.0;
+    Scalar tag_width = 0.05;
+    Eigen::Vector3s p1; p1 <<  1,  1, 0; p1 = p1*tag_width/2; // top left
+    Eigen::Vector3s p2; p2 << -1,  1, 0; p2 = p2*tag_width/2; // top right
+
+    // Got from Matlab code:
+    // Top left corner
+    Eigen::Vector3s h1_matlab; h1_matlab <<   137.5894, 105.0325, 0.4050;
+    Eigen::Matrix3s J_h_T1_matlab;
+    J_h_T1_matlab << 320,  0, 320,
+                     0,  320, 240,
+                     0,    0,   1;
+    Eigen::Matrix3s J_h_R1_matlab;
+    J_h_R1_matlab << 7.8405, -7.8405, -6.4106,
+                     4.2910, -4.2910,  9.0325,
+                     0.0245, -0.0245,  0.0050;
+    // Top right corner
+    Eigen::Vector3s h2_matlab; h2_matlab << 121.5894, 105.0325, 0.4050;
+    Eigen::Matrix3s J_h_T2_matlab;
+    J_h_T2_matlab << 320,  0, 320,
+                     0,  320, 240,
+                     0,    0,   1;
+    Eigen::Matrix3s J_h_R2_matlab;
+    J_h_R2_matlab << 7.8405, 7.8405, -9.5894,
+                     4.2910, 4.2910, -9.0325,
+                     0.0245, 0.0245, -0.0050;
+
+    Eigen::Vector3s h1;
+    Eigen::Matrix3s J_h_T1;
+    Eigen::Matrix3s J_h_R1;
+    Eigen::Vector3s h2;
+    Eigen::Matrix3s J_h_T2;
+    Eigen::Matrix3s J_h_R2;
+
+    prc_apr->pinholeHomogeneous(K, t, v2R(v), p1, h1, J_h_T1, J_h_R1);
+    prc_apr->pinholeHomogeneous(K, t, v2R(v), p2, h2, J_h_T2, J_h_R2);
+
+    ASSERT_MATRIX_APPROX(h1, h1_matlab, 1e-3);
+    ASSERT_MATRIX_APPROX(J_h_T1, J_h_T1_matlab, 1e-3);
+    ASSERT_MATRIX_APPROX(J_h_R1, J_h_R1_matlab, 1e-3);
+    ASSERT_MATRIX_APPROX(h2, h2_matlab, 1e-3);
+    ASSERT_MATRIX_APPROX(J_h_T2, J_h_T2_matlab, 1e-3);
+    ASSERT_MATRIX_APPROX(J_h_R2, J_h_R2_matlab, 1e-3);
+
+    Scalar sig_q = 2;
+    std::vector<Scalar> k_vec = {cx, cy, fx, fy};
+    Eigen::Matrix6s transformation_cov = prc_apr->computeCovariance(t, v2R(v), k_vec, tag_width, sig_q);
+
+    // From Matlab
+    Eigen::Matrix6s transformation_cov_matlab;
+    transformation_cov_matlab <<
+    0.0000,    0.0000,   -0.0000,    0.0000,   -0.0002,    0.0000,
+    0.0000,    0.0000,   -0.0000,    0.0002,    0.0000,    0.0000,
+   -0.0000,   -0.0000,    0.0004,   -0.0040,   -0.0000,    0.0000,
+    0.0000,    0.0002,   -0.0040,    0.1027,    0.0000,    0.0000,
+   -0.0002,    0.0000,   -0.0000,    0.0000,    0.1074,   -0.0106,
+    0.0000,    0.0000,    0.0000,    0.0000,   -0.0106,    0.0023;
+
+    ASSERT_MATRIX_APPROX(transformation_cov, transformation_cov_matlab, 1e-3);
+
+
+}
+
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
