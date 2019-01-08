@@ -33,6 +33,7 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         std_xy_ (_params_tracker_landmark_apriltag->std_xy_ ),
         std_z_  (_params_tracker_landmark_apriltag->std_z_  ),
         std_rpy_(_params_tracker_landmark_apriltag->std_rpy_),
+        std_pix_(_params_tracker_landmark_apriltag->std_pix_),
         min_time_vote_(_params_tracker_landmark_apriltag->min_time_vote),
         min_features_for_keyframe_(_params_tracker_landmark_apriltag->min_features_for_keyframe)
 {
@@ -161,10 +162,9 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         pose << translation, R2q(c_M_t.linear()).coeffs();
 
         // compute the covariance
-//        Eigen::Matrix6s cov = getVarVec().asDiagonal() ;
-        double sig_q = 2;
-        std::vector<Scalar> k_vec = {cx_, cy_, fx_, fy_};
-        Eigen::Matrix6s cov = computeCovariance(translation, c_M_t.linear(), k_vec, tag_width, sig_q);
+        Eigen::Matrix6s cov = getVarVec().asDiagonal() ;  // fixed dummy covariance
+//        std::vector<Scalar> k_vec = {cx_, cy_, fx_, fy_};
+//        Eigen::Matrix6s cov = computeCovariance(translation, c_M_t.linear(), k_vec, tag_width, std_pix_);
 
         // add to detected features list
         detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov, tag_id, *det));
@@ -324,14 +324,12 @@ Eigen::Matrix6s ProcessorTrackerLandmarkApriltag::computeCovariance(Eigen::Vecto
          0,  k_vec[3], k_vec[1],
          0,  0,  1;
 
-    // position of the 4 corners of the tag in its reference frame (which is in its middle
+    // position of the 4 corners of the tag in its reference frame (which is in its middle)
     Eigen::Vector3s p1; p1 <<  1,  1, 0; p1 = p1*tag_width/2; // top left
     Eigen::Vector3s p2; p2 << -1,  1, 0; p2 = p2*tag_width/2; // top right
     Eigen::Vector3s p3; p3 << -1, -1, 0; p3 = p3*tag_width/2; // bottom right
     Eigen::Vector3s p4; p4 <<  1, -1, 0; p4 = p4*tag_width/2; // bottom left
     std::vector<Eigen::Vector3s> pvec = {p1, p2, p3, p4};
-
-//    WOLF_TRACE(pvec);
 
     // Initialize jacobian matrices
     Eigen::Matrix<Scalar, 8, 6> J_u_TR = Eigen::Matrix<Scalar, 8, 6>::Zero();

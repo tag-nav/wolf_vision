@@ -38,6 +38,7 @@ struct ProcessorParamsTrackerLandmarkApriltag : public ProcessorParamsTrackerLan
     bool refine_pose_;
 
     Scalar std_xy_, std_z_, std_rpy_;
+    Scalar std_pix_;
     Scalar min_time_vote;
 };
 
@@ -130,6 +131,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         apriltag_detector_t detector_;
         apriltag_family_t tag_family_;
         Scalar std_xy_, std_z_, std_rpy_;   ///< dummy std values for covariance computation
+        Scalar std_pix_;                    ///< pixel error to be propagated to a camera to tag transformation covariance
         Eigen::Affine3ds c_M_ac_;           ///< aprilCamera-to-camera transform
         double cx_, cy_, fx_, fy_;
 
