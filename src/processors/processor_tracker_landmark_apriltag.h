@@ -119,6 +119,9 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         void pinholeHomogeneous(Eigen::Matrix3s const & K, Eigen::Vector3s const & t,
                                 Eigen::Matrix3s const & R, Eigen::Vector3s const & p,
                                 Eigen::Vector3s &h, Eigen::Matrix3s &J_h_T, Eigen::Matrix3s &J_h_R);
+        void cornersToPose(const std::vector<cv::Point2d> &img_pts,
+                           const std::vector<Scalar> &k_vec,
+                           Eigen::Affine3ds &M);
 
     protected:
         void advanceDerived();
