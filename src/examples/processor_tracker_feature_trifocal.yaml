@@ -12,9 +12,9 @@ algorithm:
     grid horiz cells: 10
     grid vert cells: 10
     min response new features: 50   
-    max euclidean distance: 20 
+    max euclidean distance: 50 
     min track length for constraint: 3
     
 noise:
-    pixel noise std: 1 # pixels
+    pixel noise std: 2 # pixels
     

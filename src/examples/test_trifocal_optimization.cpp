@@ -120,71 +120,31 @@ int main(int argc, char** argv)
 
 //    problem->print(2,1,1,0);
 
-    // ===============================================
-    // KF2 ===========================================
-    // ===============================================
-
-    t += dt; // increment t
-    x << img_pos.row(1).transpose(),0.0,    0.0,0.0,0.0,1.0; // ground truth position
-    FrameBasePtr kf2 = problem->emplaceFrame(KEY_FRAME,x,t);
-    problem->keyFrameCallback(kf2,nullptr,dt/2.0); // Ack KF creation
-
-    CaptureImagePtr capture_2 = make_shared<CaptureImage>(t, camera, images.at(1));
-    std::cout << "Capture 2 TS: " << capture_2->getTimeStamp() << std::endl;
-    camera->process(capture_2);
-
-//    problem->print(2,1,1,0);
-
-//    cv::waitKey(0); // Wait for a keystroke in the window
 
     // ===============================================
-    // KF3 ===========================================
+    // Other KFs =====================================
     // ===============================================
+    int kf_total_num = 9;
+    std::vector<FrameBasePtr> kfs;
+    kfs.push_back(kf1);
+    std::vector<CaptureImagePtr> captures;
+    captures.push_back(capture_1);
 
-    t += dt; // increment t
-    x << img_pos.row(2).transpose(),0.0,    0.0,0.0,0.0,1.0; // ground truth position
-    FrameBasePtr kf3 = problem->emplaceFrame(KEY_FRAME,x,t);
-    problem->keyFrameCallback(kf3,nullptr,dt/2.0); // Ack KF creation
+    for (int kf_id = 2; kf_id <= kf_total_num; ++kf_id)
+    {
+        t += dt; // increment t
+        x << img_pos.row(kf_id-1).transpose(),0.0,    0.0,0.0,0.0,1.0; // ground truth position
+        FrameBasePtr kf = problem->emplaceFrame(KEY_FRAME,x,t);
+        kfs.push_back(kf);
+        problem->keyFrameCallback(kf,nullptr,dt/2.0); // Ack KF creation
 
-    CaptureImagePtr capture_3 = make_shared<CaptureImage>(t, camera, images.at(2));
-    camera->process(capture_3);
+        CaptureImagePtr capture = make_shared<CaptureImage>(t, camera, images.at(kf_id-1));
+        captures.push_back(capture);
+        std::cout << "Capture " << kf_id << " TS: " << capture->getTimeStamp() << std::endl;
+        camera->process(capture);
 
-//    problem->print(2,1,1,0);
-
-//    cv::waitKey(0); // Wait for a keystroke in the window
-
-    // ===============================================
-    // KF4 ===========================================
-    // ===============================================
-
-    t += dt; // increment t
-    x << img_pos.row(3).transpose(),0.0,    0.0,0.0,0.0,1.0; // ground truth position
-    FrameBasePtr kf4 = problem->emplaceFrame(KEY_FRAME,x,t);
-    problem->keyFrameCallback(kf4,nullptr,dt/2.0); // Ack KF creation
-
-    CaptureImagePtr capture_4 = make_shared<CaptureImage>(t, camera, images.at(3));
-    camera->process(capture_4);
-
-//    problem->print(2,1,1,0);
-
-//    cv::waitKey(0); // Wait for a keystroke in the window
-
-
-    // ===============================================
-    // KF5 ===========================================
-    // ===============================================
-
-    t += dt; // increment t
-    x << img_pos.row(4).transpose(),0.0,    0.0,0.0,0.0,1.0; // ground truth position
-    FrameBasePtr kf5 = problem->emplaceFrame(KEY_FRAME,x,t);
-    problem->keyFrameCallback(kf5,nullptr,dt/2.0); // Ack KF creation
-
-    CaptureImagePtr capture_5 = make_shared<CaptureImage>(t, camera, images.at(4));
-    camera->process(capture_5);
-
-//    problem->print(2,1,1,0);
-
-//    cv::waitKey(0); // Wait for a keystroke in the window
+        cv::waitKey(0); // Wait for a keystroke in the window
+    }
 
     // ===============================================
     // Establish 3D Constraint (to see results scaled)
@@ -196,10 +156,10 @@ int main(int argc, char** argv)
     Matrix6s P_pose2 = Matrix6s::Identity() * 100.0;
     Matrix6s pose_cov = P_pose2;
     CapturePosePtr capture_pose = make_shared<CapturePose>(t, nullptr, pose, pose_cov);
-    kf3->addCapture(capture_pose);
+    kfs.at(2)->addCapture(capture_pose);
     capture_pose->emplaceFeatureAndConstraint();
 
-    problem->print(4,1,1,0);
+    problem->print(2,1,1,0);
 
     // ===============================================
     // SOLVE PROBLEM (1) =============================
@@ -262,7 +222,7 @@ int main(int argc, char** argv)
     std::cout << report << std::endl;
 
     std::cout << "================== AFTER SOLVE 2nd TIME ========================" << std::endl;
-    problem->print(4,1,1,0);
+    problem->print(2,1,1,0);
 
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         std::cout << wolf::q2v(Eigen::Quaternions(kf->getOPtr()->getState().data())).transpose()*180.0/3.14159 << std::endl;

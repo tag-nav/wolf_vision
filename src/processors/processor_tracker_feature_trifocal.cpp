@@ -117,6 +117,7 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ProcessorParams
     // DEBUG VIEW
     cv::startWindowThread();
     cv::namedWindow("DEBUG VIEW", cv::WINDOW_NORMAL);
+    cv::namedWindow("DEBUG MATCHES", cv::WINDOW_NORMAL);
 }
 
 // Destructor
@@ -278,12 +279,18 @@ bool ProcessorTrackerFeatureTrifocal::voteForKeyFrame()
     // 2. vote if we have not enough features now
     vote_down = vote_down && (incoming_ptr_->getFeatureList().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
 
+    // C. Time-based policies
+    bool vote_time = false;
+//    vote_time = vote_time || (incoming_ptr_->getTimeStamp()-origin_ptr_->getTimeStamp() > 1.0);
+
     if (vote_up)
         WOLF_TRACE("VOTE UP");
     if (vote_down)
         WOLF_TRACE("VOTE DOWN");
+    if (vote_time)
+        WOLF_TRACE("VOTE TIME");
 
-    return vote_up || vote_down;
+    return vote_up || vote_down || vote_time;
 }
 
 void ProcessorTrackerFeatureTrifocal::advanceDerived()
@@ -348,20 +355,26 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
 
         // Match full image (faster)
         // We exchange the order of the descriptors to fill better the map hereafter (map does not allow a single key)
-        DMatchVector matches_incoming_from_last;
-
         capture_incoming_->matches_normalized_scores_ = mat_ptr_->robustMatch(capture_incoming_->keypoints_,
                                                                               capture_last_->keypoints_,
                                                                               capture_incoming_->descriptors_,
                                                                               capture_last_->descriptors_,
                                                                               des_ptr_->getSize(),
-                                                                              matches_incoming_from_last);
-
-        capture_incoming_->matches_from_precedent_ = matches_incoming_from_last;
+                                                                              capture_incoming_->matches_from_precedent_);
 
         // Set capture map of match indices
         for (auto match : capture_incoming_->matches_from_precedent_)
             capture_last_->map_index_to_next_[match.trainIdx] = match.queryIdx; // map[last] = incoming
+
+
+        // DEBUG
+        cv::Mat img_last = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
+        cv::Mat img_incoming = (std::static_pointer_cast<CaptureImage>(incoming_ptr_))->getImage();
+        cv::Mat img_matches;
+
+        cv::drawMatches(img_incoming, capture_incoming_->keypoints_, img_last, capture_last_->keypoints_, capture_incoming_->matches_from_precedent_, img_matches);
+        cv::imshow("DEBUG MATCHES", img_matches);
+        cv::waitKey(0);
     }
 }
 
@@ -370,18 +383,29 @@ void ProcessorTrackerFeatureTrifocal::postProcess()
     // DEBUG
     std::vector<vision_utils::KeyPointEnhanced> kps_e;
 
+    std::map<int,std::list<vision_utils::KeyPointEnhanced> > map_of_features_trackedkps;
+
     for (auto const & feat_base : last_ptr_->getFeatureList())
     {
         FeaturePointImagePtr feat = std::static_pointer_cast<FeaturePointImage>(feat_base);
-        unsigned int id = feat->id();
+        unsigned int feat_id = feat->id();
         unsigned int track_id = feat->trackId();
-        vision_utils::KeyPointEnhanced kp_e(feat->getKeypoint(), id, track_id, track_matrix_.trackSize(track_id), feat->getMeasurementCovariance());
-        kps_e.push_back(kp_e);
+
+        // tracks
+        std::list<vision_utils::KeyPointEnhanced> track_list;
+        for (auto feat_base : track_matrix_.trackAsVector(track_id))
+        {
+            FeaturePointImagePtr feat_track = std::static_pointer_cast<FeaturePointImage>(feat_base);
+            vision_utils::KeyPointEnhanced kp_e(feat_track->getKeypoint(), feat_id, track_id, track_matrix_.trackSize(track_id), feat_track->getMeasurementCovariance());
+            track_list.push_back(kp_e);
+        }
+
+        map_of_features_trackedkps[feat_id] = track_list;
     }
 
     // DEBUG
     cv::Mat img = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
-    cv::Mat img_proc = vision_utils::buildImageProcessed(img, kps_e);
+    cv::Mat img_proc = vision_utils::buildImageProcessed(img, map_of_features_trackedkps);
 
     cv::imshow("DEBUG VIEW", img_proc);
     cv::waitKey(1);
