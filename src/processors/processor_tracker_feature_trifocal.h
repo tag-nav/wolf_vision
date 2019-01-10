@@ -142,11 +142,26 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
         static ProcessorBasePtr create(const std::string& _unique_name,
                                        const ProcessorParamsBasePtr _params,
                                        const SensorBasePtr _sensor_ptr);
+    private:
+
+        cv::Mat image_debug_;
+
+    public:
+
+        /**
+         * \brief Return Image for debug purposes
+         */
+        cv::Mat getImageDebug();
 };
 
 inline CaptureBasePtr ProcessorTrackerFeatureTrifocal::getPrevOriginPtr()
 {
     return prev_origin_ptr_;
+}
+
+inline cv::Mat ProcessorTrackerFeatureTrifocal::getImageDebug()
+{
+    return image_debug_;
 }
 
 } // namespace wolf

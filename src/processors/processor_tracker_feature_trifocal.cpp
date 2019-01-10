@@ -114,10 +114,10 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ProcessorParams
     if (mat_name.compare("BRUTEFORCE_HAMMING_2") == 0)
         mat_ptr_ = std::static_pointer_cast<vision_utils::MatcherBRUTEFORCE_HAMMING_2>(mat_ptr_);
 
-    // DEBUG VIEW
+//    // DEBUG VIEW
     cv::startWindowThread();
     cv::namedWindow("DEBUG VIEW", cv::WINDOW_NORMAL);
-    cv::namedWindow("DEBUG MATCHES", cv::WINDOW_NORMAL);
+//    cv::namedWindow("DEBUG MATCHES", cv::WINDOW_NORMAL);
 }
 
 // Destructor
@@ -196,9 +196,8 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
             break; // There are no empty cells
     }
 
-    WOLF_TRACE("DetectNewFeatures - Number of new features detected: " , _feature_list_out.size() );
-
 //    // DEBUG
+//    WOLF_TRACE("DetectNewFeatures - Number of new features detected: " , _feature_list_out.size() );
 //    debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
 //    WOLF_TRACE("--> TIME: detect new features: TOTAL ",debug_comp_time_);
 //    WOLF_TRACE("======== ========= =========");
@@ -249,11 +248,12 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
     }
 
 //    // DEBUG
+//    WOLF_TRACE("TrAckFeatures - Number of features tracked: " , _feature_list_out.size() );
 //    debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
 //    WOLF_TRACE("--> TIME: track: ",debug_comp_time_);
 //    WOLF_TRACE("======== ========= =========");
 
-    WOLF_TRACE("TrAckFeatures - Number of features tracked: " , _feature_list_out.size() );
+
 
     return _feature_list_out.size();
 }
@@ -322,7 +322,8 @@ void ProcessorTrackerFeatureTrifocal::resetDerived()
 
 void ProcessorTrackerFeatureTrifocal::preProcess()
 {
-    WOLF_TRACE("-------- Image ", getIncomingPtr()->id(), " -- t = ", getIncomingPtr()->getTimeStamp(), " s ----------");
+//    //DEBUG
+//    WOLF_TRACE("-------- Image ", getIncomingPtr()->id(), " -- t = ", getIncomingPtr()->getTimeStamp(), " s ----------");
 
     if (!initialized_)
     {
@@ -366,15 +367,17 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
         for (auto match : capture_incoming_->matches_from_precedent_)
             capture_last_->map_index_to_next_[match.trainIdx] = match.queryIdx; // map[last] = incoming
 
-
         // DEBUG
-        cv::Mat img_last = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
-        cv::Mat img_incoming = (std::static_pointer_cast<CaptureImage>(incoming_ptr_))->getImage();
-        cv::Mat img_matches;
-
-        cv::drawMatches(img_incoming, capture_incoming_->keypoints_, img_last, capture_last_->keypoints_, capture_incoming_->matches_from_precedent_, img_matches);
-        cv::imshow("DEBUG MATCHES", img_matches);
-        cv::waitKey(0);
+//        cv::Mat img_last = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
+//        cv::Mat img_incoming = (std::static_pointer_cast<CaptureImage>(incoming_ptr_))->getImage();
+//
+//        cv::putText(img_last, "LAST",    cv::Point(img_last.cols/2,20), cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(255,0,0), 10.0);
+//        cv::putText(img_incoming, "INCOMING",cv::Point(img_last.cols/2,20), cv::FONT_HERSHEY_PLAIN, 1.0, CV_RGB(255,0,0), 10.0);
+//
+//        cv::Mat img_matches;
+//        cv::drawMatches(img_incoming, capture_incoming_->keypoints_, img_last, capture_last_->keypoints_, capture_incoming_->matches_from_precedent_, img_matches);
+//        cv::imshow("DEBUG MATCHES", img_matches);
+//        cv::waitKey(0);
     }
 }
 
@@ -404,10 +407,9 @@ void ProcessorTrackerFeatureTrifocal::postProcess()
     }
 
     // DEBUG
-    cv::Mat img = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();
-    cv::Mat img_proc = vision_utils::buildImageProcessed(img, map_of_features_trackedkps);
+    image_debug_ = vision_utils::buildImageProcessed((std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage(), map_of_features_trackedkps);
 
-    cv::imshow("DEBUG VIEW", img_proc);
+    cv::imshow("DEBUG VIEW", image_debug_);
     cv::waitKey(1);
 }
 
