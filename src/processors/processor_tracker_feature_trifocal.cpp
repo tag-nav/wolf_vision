@@ -132,7 +132,7 @@ bool ProcessorTrackerFeatureTrifocal::isInlier(const cv::KeyPoint& _kp_last, con
     bool inlier = true;
 
     // A. Check euclidean norm
-    inlier = inlier && (cv::norm(_kp_incoming.pt-_kp_last.pt) < params_tracker_feature_trifocal_->max_euclidean_distance);
+    inlier = inlier && (cv::norm(_kp_incoming.pt-_kp_last.pt) < mat_ptr_->getParams()->max_match_euclidean_dist);
 
     return inlier;
 }

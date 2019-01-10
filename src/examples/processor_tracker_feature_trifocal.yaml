@@ -2,7 +2,7 @@ processor type: "TRACKER FEATURE TRIFOCAL"
 processor name: "tracker feature trifocal example"
 
 vision_utils:
-    YAML file params: vision_utils_active_search.yaml
+    YAML file params: processor_tracker_feature_trifocal_vision_utils.yaml
 
 algorithm:
     time tolerance: 0.005
@@ -12,7 +12,6 @@ algorithm:
     grid horiz cells: 10
     grid vert cells: 10
     min response new features: 50   
-    max euclidean distance: 50 
     min track length for constraint: 3
     
 noise:

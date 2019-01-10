@@ -24,7 +24,6 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
         int n_cells_h;
         int n_cells_v;
         int min_response_new_feature;
-        Scalar max_euclidean_distance;
         Scalar pixel_noise_std; ///< std noise of the pixel
         int min_track_length_for_constraint; ///< Minimum track length of a matched feature to create a constraint
 };
