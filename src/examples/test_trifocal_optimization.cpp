@@ -58,7 +58,7 @@ int main(int argc, char** argv)
     std::vector<cv::Mat> images;
     for (unsigned int ii = 0; ii < img_pos.rows(); ++ii)
     {
-        std::string img_path = wolf_root + "/src/examples/Test_gazebo_x" + std::to_string((int)img_pos(ii,0)) + "0cm_y" + std::to_string((int)img_pos(ii,1)) + "0cm.png";
+        std::string img_path = wolf_root + "/src/examples/Test_gazebo_x" + std::to_string((int)img_pos(ii,0)) + "0cm_y" + std::to_string((int)img_pos(ii,1)) + "0cm.jpg";
         std::cout << " |->" << img_path << std::endl;
         images.push_back(cv::imread(img_path, CV_LOAD_IMAGE_GRAYSCALE));   // Read the file
         if(! images.at(ii).data )                              // Check for invalid input
@@ -152,7 +152,7 @@ int main(int argc, char** argv)
 
     std::cout << "================== ADD Absolute constraint ========================" << std::endl;
 
-    Vector7s pose; pose << -2.0, 0.0, 0.0,    0.0,0.0,0.0,1.0; // ground truth position
+    Vector7s pose; pose << -0.2, 0.0, 0.0,    0.0,0.0,0.0,1.0; // ground truth position
     Matrix6s P_pose2 = Matrix6s::Identity() * 100.0;
     Matrix6s pose_cov = P_pose2;
     CapturePosePtr capture_pose = make_shared<CapturePose>(t, nullptr, pose, pose_cov);
