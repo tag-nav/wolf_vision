@@ -69,6 +69,10 @@ int main(int argc, char** argv)
     }
     std::cout << std::endl;
 
+
+    // Scale ground truth priors
+    img_pos /= 10;
+
     cv::imshow( "DEBUG VIEW", images.at(0) );  // Show our image inside it.
     cv::waitKey(0);                            // Wait for a keystroke in the window
 
@@ -82,8 +86,8 @@ int main(int argc, char** argv)
     // CERES WRAPPER
     CeresManagerPtr ceres_manager;
     ceres::Solver::Options ceres_options;
-    ceres_options.max_num_iterations = 1000;
-    ceres_options.function_tolerance = 1e-15;
+    ceres_options.max_num_iterations = 50;
+    ceres_options.function_tolerance = 1e-6;
     ceres_manager = make_shared<CeresManager>(problem, ceres_options);
 
     // Install tracker (sensor and processor)
@@ -118,7 +122,7 @@ int main(int argc, char** argv)
     FrameBasePtr kf1_check = capture_1->getFramePtr();
     assert(kf1->id()==kf1_check->id() && "Prior and KF1 are not the same!");
 
-//    problem->print(2,1,1,0);
+//    problem->print(2,0,1,0);
 
 
     // ===============================================
@@ -159,7 +163,7 @@ int main(int argc, char** argv)
     kfs.at(2)->addCapture(capture_pose);
     capture_pose->emplaceFeatureAndConstraint();
 
-    problem->print(2,1,1,0);
+    problem->print(2,0,1,0);
 
     // ===============================================
     // SOLVE PROBLEM (1) =============================
@@ -170,7 +174,7 @@ int main(int argc, char** argv)
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL);
     std::cout << report << std::endl;
 
-    problem->print(2,1,1,0);
+    problem->print(2,0,1,0);
 
     // Print orientation states for all KFs
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
@@ -210,7 +214,7 @@ int main(int argc, char** argv)
         }
     }
 
-    problem->print(2,1,1,0);
+    problem->print(2,0,1,0);
 
     // ===============================================
     // SOLVE PROBLEM (2) =============================
@@ -222,7 +226,7 @@ int main(int argc, char** argv)
     std::cout << report << std::endl;
 
     std::cout << "================== AFTER SOLVE 2nd TIME ========================" << std::endl;
-    problem->print(2,1,1,0);
+    problem->print(2,0,1,0);
 
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         std::cout << wolf::q2v(Eigen::Quaternions(kf->getOPtr()->getState().data())).transpose()*180.0/3.14159 << std::endl;
