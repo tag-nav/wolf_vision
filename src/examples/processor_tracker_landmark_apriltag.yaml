@@ -22,9 +22,9 @@ tag widths:
     # etc...
     
 noise:
-    std_xy :          0.05 # m 
-    std_z :           0.05 # m 
-    std_rpy_degrees : 20   # degrees
+    std_xy :          0.1 # m 
+    std_z :           0.1 # m 
+    std_rpy_degrees : 180   # degrees
     std_pix:          2    # pixel error
     
 vote:

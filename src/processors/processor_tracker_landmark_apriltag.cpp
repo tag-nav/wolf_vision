@@ -40,7 +40,7 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
 {
     // Constant transformation from apriltag camera frame (RUB: Z axis looking away from the tag)
     // to wolf camera frame (RDF: Z axis looking at the tag)
-    c_M_ac_.matrix() = (Eigen::Vector4s() << 1, -1, -1, 1).finished().asDiagonal();
+//    c_M_ac_.matrix() = (Eigen::Vector4s() << 1, -1, -1, 1).finished().asDiagonal();  // Not used anymore with solvePnP
 
     // configure apriltag detector
     std::string famname(_params_tracker_landmark_apriltag->tag_family_);
@@ -133,41 +133,19 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         int    tag_id     = det->id;
         Scalar tag_width  = getTagWidth(tag_id);   // tag width in meters
 
-        Eigen::Affine3ds ac_M_t;
+        Eigen::Affine3ds c_M_t;
+        std::vector<Scalar> k_vec = {cx_, cy_, fx_, fy_};
         //////////////////
         // OPENCV
         //////////////////
-//        // write tag corners
-//        std::vector<cv::Point2d> corners_pix(4);
-//        for (int c = 0; c < 4; c++)
-//        {
-//            corners_pix[i].x = det->p[i][0];
-//            corners_pix[i].y = det->p[i][1];
-//        }
-//        std::vector<Scalar> k_vec = {cx_, cy_, fx_, fy_};
-//        cornersToPose(corners_pix, k_vec, ac_M_t);
+        c_M_t = opencv_pose_estimation(det, k_vec);
         //////////////////
 
         //////////////////
         // UMICH
         //////////////////
-        matd_t *pose_matrix = homography_to_pose(det->H, -fx_, fy_, cx_, cy_); // !! fx Negative sign advised by apriltag library commentary
-        // write it in Eigen form
-        Eigen::Affine3ds M_april_raw;
-        for(int r=0; r<4; r++)
-            for(int c=0; c<4; c++)
-                M_april_raw.matrix()(r,c) = matd_get(pose_matrix,r,c);
-
-        // We identify the raw april with the tag-to-aprilCamera transform (to be revised if needed)
-        ac_M_t = M_april_raw;
-        ////////////////
-
-//        WOLF_TRACE("\nac_M_t\n", ac_M_t.matrix());
-//        WOLF_TRACE("\nc_M_ac_ * ac_M_t\n", (c_M_ac_ * ac_M_t).matrix());
-//        WOLF_TRACE("\nM_april_raw\n", (c_M_ac_ * M_april_raw).matrix());
-
-        // compose with aprilCamera-to-camera transform, get tag-to-camera transform
-        Eigen::Affine3ds c_M_t ( c_M_ac_ * ac_M_t );
+//        c_M_t = umich_pose_estimation(det, k_vec);
+        //////////////////
 
         // Set the scale of the translation vector from the relation: metric_width / units_width
         Eigen::Vector3s translation ( c_M_t.translation() ); // translation vector in apriltag units (tag width in units is 2 units)
@@ -192,36 +170,60 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
 // To compare with apriltag implementation
 // Returned translation is in tag units: needs to be multiplied by tag_width/2
-void ProcessorTrackerLandmarkApriltag::cornersToPose(const std::vector<cv::Point2d> &img_pts,
-                                                     const std::vector<Scalar> &k_vec,
-                                                     Eigen::Affine3ds &M){
+Eigen::Affine3ds ProcessorTrackerLandmarkApriltag::opencv_pose_estimation(apriltag_detection_t *det, std::vector<Scalar> kvec){
+    // get corners from det
+    std::vector<cv::Point2d> corners_pix(4);
+    for (int i = 0; i < 4; i++)
+    {
+        corners_pix[i].x = det->p[i][0];
+        corners_pix[i].y = det->p[i][1];
+    }
 
     std::vector<cv::Point3d> obj_pts;
-    obj_pts.emplace_back(-1, -1, 0); // top left
-    obj_pts.emplace_back( 1, -1, 0); // top right
-    obj_pts.emplace_back( 1,  1, 0); // bottom right
+    // Same order as the 2D corners (anti clockwise, looking at the tag)
     obj_pts.emplace_back(-1,  1, 0); // bottom left
+    obj_pts.emplace_back( 1,  1, 0); // bottom right
+    obj_pts.emplace_back( 1, -1, 0); // top right
+    obj_pts.emplace_back(-1, -1, 0); // top left
 
     // Solve for pose
     // The estimated r and t brings points from tag frame to camera frame
-    // r = c_r_w, t = c_t_w
     cv::Mat rvec, tvec;
-    cv::Mat K = (cv::Mat_<Scalar>(3,3) << fx_, 0, cx_,
-                                          0, fy_, cy_,
+    cv::Mat K = (cv::Mat_<Scalar>(3,3) << kvec[2], 0, kvec[0],
+                                          0, kvec[3], kvec[1],
                                           0, 0, 1);
     cv::Mat dist_coeffs = cv::Mat::zeros(4,1,cv::DataType<Scalar>::type); // Assuming corrected images
-    WOLF_TRACE("HEY");
-    WOLF_TRACE(obj_pts);
-    WOLF_TRACE(K);
-    WOLF_TRACE(dist_coeffs);
-    cv::solvePnP(obj_pts, img_pts, K, dist_coeffs, rvec, tvec);
 
+    cv::solvePnP(obj_pts, corners_pix, K, dist_coeffs, rvec, tvec);
+
+    // Puts the result in a Eigen affine Transform
     cv::Matx33d rmat;
     cv::Rodrigues(rvec, rmat);
     Eigen::Matrix3s R_eigen; cv2eigen(rmat, R_eigen);
     Eigen::Vector3s t_eigen; cv2eigen(tvec, t_eigen);
-    M = Eigen::Translation<Scalar, 3>(t_eigen);
+    Eigen::Affine3ds M;
     M.matrix().block(0,0,3,3) = R_eigen;
+    M.matrix().block(0,3,3,1) = t_eigen;
+
+    return M;
+}
+
+Eigen::Affine3d ProcessorTrackerLandmarkApriltag::umich_pose_estimation(apriltag_detection_t *det, std::vector<Scalar> kvec){
+    // To put in the usual camera frame with Z looking in front (RDF)
+    Eigen::Affine3ds c_M_ac;
+    c_M_ac.matrix() = (Eigen::Vector4s() << 1, -1, -1, 1).finished().asDiagonal();
+
+    Eigen::Affine3ds M_april_raw;
+    matd_t *pose_matrix = homography_to_pose(det->H, -kvec[2], kvec[3], kvec[0], kvec[1]); // !! fx Negative sign advised by apriltag library commentary
+    // write it in Eigen form
+    Eigen::Affine3ds ac_M_t;
+    for(int r=0; r<4; r++)
+        for(int c=0; c<4; c++)
+            ac_M_t.matrix()(r,c) = matd_get(pose_matrix, r, c);
+
+    Eigen::Affine3ds c_M_t = c_M_ac * ac_M_t;
+
+    return c_M_t;
 }
 
 void ProcessorTrackerLandmarkApriltag::postProcess()
@@ -237,7 +239,7 @@ ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBase
             getLastPtr()->getFramePtr(),
             std::static_pointer_cast<LandmarkApriltag>(_landmark_ptr),
             std::static_pointer_cast<FeatureApriltag> (_feature_ptr ),
-            false,
+            true,
             CTR_ACTIVE
     );
     return constraint;
