@@ -83,8 +83,8 @@ class TrackMatrix
         void            remove      (FeatureBasePtr _ftr);
         void            remove      (size_t _track_id);
         void            remove      (CaptureBasePtr _cap);
-        SizeStd          numTracks   ();
-        SizeStd          trackSize   (size_t _track_id);
+        SizeStd         numTracks   ();
+        SizeStd         trackSize   (size_t _track_id);
         Track           track       (size_t _track_id);
         Snapshot        snapshot    (CaptureBasePtr _capture);
         vector<FeatureBasePtr>
