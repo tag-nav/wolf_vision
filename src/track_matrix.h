@@ -67,8 +67,8 @@ typedef map<size_t, pair<FeatureBasePtr, FeatureBasePtr> >  TrackMatches; // mat
  *
  * so e.g. given a feature f,
  *
- *      getTrack   (f->trackId()) ;       // returns all the track where feature f is.
- *      getSnapshot(f->getCapturePtr()) ; // returns all the features in the same capture of f.
+ *      track   (f->trackId()) ;       // returns all the track where feature f is.
+ *      snapshot(f->getCapturePtr()) ; // returns all the features in the same capture of f.
  *
  */
 
