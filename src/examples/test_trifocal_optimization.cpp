@@ -87,7 +87,7 @@ int main(int argc, char** argv)
     CeresManagerPtr ceres_manager;
     ceres::Solver::Options ceres_options;
     ceres_options.max_num_iterations = 50;
-    ceres_options.function_tolerance = 1e-6;
+    ceres_options.function_tolerance = 1e-4;
     ceres_manager = make_shared<CeresManager>(problem, ceres_options);
 
     // Install tracker (sensor and processor)
@@ -178,7 +178,7 @@ int main(int argc, char** argv)
 
     // Print orientation states for all KFs
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
-        std::cout << wolf::q2v(Eigen::Quaternions(kf->getOPtr()->getState().data())).transpose()*180.0/3.14159 << std::endl;
+        std::cout << "KF" << kf->id() << " Euler deg " << wolf::q2e(kf->getOPtr()->getState()).transpose()*180.0/3.14159 << std::endl;
 
 
     // ===============================================
@@ -210,7 +210,7 @@ int main(int argc, char** argv)
             Eigen::Vector7s state_perturbed = kf->getState() + perturbation;
             state_perturbed.segment(3,4).normalize();
             kf->setState(state_perturbed);
-            std::cout << wolf::q2v(Eigen::Quaternions(kf->getOPtr()->getState().data())).transpose()*180.0/3.14159 << std::endl;
+            std::cout << "KF" << kf->id() << " Euler deg " << wolf::q2e(kf->getOPtr()->getState()).transpose()*180.0/3.14159 << std::endl;
         }
     }
 
@@ -229,7 +229,7 @@ int main(int argc, char** argv)
     problem->print(2,0,1,0);
 
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
-        std::cout << wolf::q2v(Eigen::Quaternions(kf->getOPtr()->getState().data())).transpose()*180.0/3.14159 << std::endl;
+        std::cout << "KF" << kf->id() << " Euler deg " << wolf::q2e(kf->getOPtr()->getState()).transpose()*180.0/3.14159 << std::endl;
 
     cv::waitKey(0); // Wait for a keystroke in the window
 
