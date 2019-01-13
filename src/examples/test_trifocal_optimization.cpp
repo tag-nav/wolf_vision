@@ -131,7 +131,7 @@ int main(int argc, char** argv)
     // ===============================================
     // Other KFs =====================================
     // ===============================================
-    int kf_total_num = 10;
+    int kf_total_num = img_pos.rows();
     std::vector<FrameBasePtr> kfs;
     kfs.push_back(kf1);
     std::vector<CaptureImagePtr> captures;
@@ -244,7 +244,7 @@ int main(int argc, char** argv)
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         std::cout << "KF" << kf->id() << " Euler deg " << wolf::q2e(kf->getOPtr()->getState()).transpose()*180.0/3.14159 << std::endl;
 
-    cv::waitKey(1); // Wait for a keystroke in the window
+    cv::waitKey(0); // Wait for a keystroke in the window
 
     return 0;
 }
