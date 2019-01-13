@@ -21,8 +21,8 @@ class ConstraintAutodiffDistance3D : public ConstraintAutodiff<ConstraintAutodif
         ConstraintAutodiffDistance3D(const FeatureBasePtr&   _feat,
                                      const FrameBasePtr&     _frm_other,
                                      const ProcessorBasePtr& _processor_ptr,
-                                     bool                    _apply_loss_function,
-                                     ConstraintStatus        _status) :
+                                     bool                    _apply_loss_function = false,
+                                     ConstraintStatus        _status = CTR_ACTIVE) :
                                          ConstraintAutodiff("DISTANCE 3D",
                                                             _frm_other,
                                                             nullptr,

@@ -16,6 +16,8 @@
 #include "../ceres_wrapper/ceres_manager.h"
 #include "../rotations.h"
 #include "../capture_pose.h"
+#include "../capture_void.h"
+#include "../constraints/constraint_autodiff_distance_3D.h"
 
 Eigen::VectorXs get_random_state(const double& _LO, const double& _HI)
 {
@@ -41,8 +43,8 @@ int main(int argc, char** argv)
     // TEST IMAGES ===================================
     // ===============================================
 
-    // x,y cm displacement, negatives values are directly added in the path string (row-wise).
-    Eigen::MatrixXs img_pos = Eigen::MatrixXs::Zero(9,2);
+    // x,y displacement, negatives values are directly added in the path string (row-wise).
+    Eigen::MatrixXs img_pos = Eigen::MatrixXs::Zero(10,2);
     img_pos.row(0) <<  0, 0;
     img_pos.row(1) << -1, 0;
     img_pos.row(2) << -2, 0;
@@ -52,6 +54,7 @@ int main(int argc, char** argv)
     img_pos.row(6) <<  0,-2;
     img_pos.row(7) <<  0,-1;
     img_pos.row(8) <<  0, 0;
+    img_pos.row(9) << -1, 0;
 
     // read image
     std::cout << std::endl << "-> Reading images from ground-truth movements..." << std::endl;
@@ -71,10 +74,10 @@ int main(int argc, char** argv)
 
 
     // Scale ground truth priors
-    img_pos /= 10;
+    img_pos *= 0.10;
 
     cv::imshow( "DEBUG VIEW", images.at(0) );  // Show our image inside it.
-    cv::waitKey(0);                            // Wait for a keystroke in the window
+    cv::waitKey(1);                            // Wait for a keystroke in the window
 
     // ===============================================
     // CONFIG WOLF ===================================
@@ -87,7 +90,7 @@ int main(int argc, char** argv)
     CeresManagerPtr ceres_manager;
     ceres::Solver::Options ceres_options;
     ceres_options.max_num_iterations = 50;
-    ceres_options.function_tolerance = 1e-4;
+    ceres_options.function_tolerance = 1e-6;
     ceres_manager = make_shared<CeresManager>(problem, ceres_options);
 
     // Install tracker (sensor and processor)
@@ -109,7 +112,7 @@ int main(int argc, char** argv)
     TimeStamp   t(0.0);
     Vector7s    x; x <<  img_pos.row(0).transpose(), 0.0,   0.0, 0.0, 0.0, 1.0;
     x.segment(3,4).normalize();
-    Matrix6s    P = Matrix6s::Identity() * 0.01;
+    Matrix6s    P = Matrix6s::Identity() * 0.000001; // 1mm
 
     // ====== KF1 ======
     FrameBasePtr kf1 = problem->setPrior(x, P, t, dt/2);
@@ -128,7 +131,7 @@ int main(int argc, char** argv)
     // ===============================================
     // Other KFs =====================================
     // ===============================================
-    int kf_total_num = 9;
+    int kf_total_num = 10;
     std::vector<FrameBasePtr> kfs;
     kfs.push_back(kf1);
     std::vector<CaptureImagePtr> captures;
@@ -147,23 +150,33 @@ int main(int argc, char** argv)
         std::cout << "Capture " << kf_id << " TS: " << capture->getTimeStamp() << std::endl;
         camera->process(capture);
 
-        cv::waitKey(0); // Wait for a keystroke in the window
+        cv::waitKey(1); // Wait for a keystroke in the window
     }
 
-    // ===============================================
-    // Establish 3D Constraint (to see results scaled)
-    // ===============================================
+    // ==================================================
+    // Establish Scale Constraint (to see results scaled)
+    // ==================================================
 
-    std::cout << "================== ADD Absolute constraint ========================" << std::endl;
+    std::cout << "================== ADD Scale constraint ========================" << std::endl;
 
-    Vector7s pose; pose << -0.2, 0.0, 0.0,    0.0,0.0,0.0,1.0; // ground truth position
-    Matrix6s P_pose2 = Matrix6s::Identity() * 100.0;
-    Matrix6s pose_cov = P_pose2;
-    CapturePosePtr capture_pose = make_shared<CapturePose>(t, nullptr, pose, pose_cov);
-    kfs.at(2)->addCapture(capture_pose);
-    capture_pose->emplaceFeatureAndConstraint();
+    // Distance constraint
+    Vector1s distance(0.2);      // 2x10cm distance -- this fixes the scale
+    Matrix1s dist_cov(0.000001); // 1mm error
 
-    problem->print(2,0,1,0);
+    CaptureBasePtr
+    cap_dist  = kfs.at(2)->addCapture(make_shared<CaptureVoid>(t,
+                                                               sensor));
+    FeatureBasePtr
+    ftr_dist = cap_dist->addFeature(make_shared<FeatureBase>("DISTANCE",
+                                                              distance,
+                                                              dist_cov));
+    ConstraintBasePtr
+    ctr_dist  = ftr_dist->addConstraint(make_shared<ConstraintAutodiffDistance3D>(ftr_dist,
+                                                                                  kfs.at(0),
+                                                                                  nullptr));
+    kfs.at(0)->addConstrainedBy(ctr_dist);
+
+    problem->print(1,1,1,0);
 
     // ===============================================
     // SOLVE PROBLEM (1) =============================
@@ -174,7 +187,7 @@ int main(int argc, char** argv)
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL);
     std::cout << report << std::endl;
 
-    problem->print(2,0,1,0);
+    problem->print(1,1,1,0);
 
     // Print orientation states for all KFs
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
@@ -214,7 +227,7 @@ int main(int argc, char** argv)
         }
     }
 
-    problem->print(2,0,1,0);
+    problem->print(1,1,1,0);
 
     // ===============================================
     // SOLVE PROBLEM (2) =============================
@@ -226,12 +239,12 @@ int main(int argc, char** argv)
     std::cout << report << std::endl;
 
     std::cout << "================== AFTER SOLVE 2nd TIME ========================" << std::endl;
-    problem->print(2,0,1,0);
+    problem->print(1,1,1,0);
 
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         std::cout << "KF" << kf->id() << " Euler deg " << wolf::q2e(kf->getOPtr()->getState()).transpose()*180.0/3.14159 << std::endl;
 
-    cv::waitKey(0); // Wait for a keystroke in the window
+    cv::waitKey(1); // Wait for a keystroke in the window
 
     return 0;
 }
