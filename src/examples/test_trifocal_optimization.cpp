@@ -239,7 +239,7 @@ int main(int argc, char** argv)
     std::cout << report << std::endl;
 
     std::cout << "================== AFTER SOLVE 2nd TIME ========================" << std::endl;
-    problem->print(3,1,1,0);
+    problem->print(1,1,1,0);
 
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         std::cout << "KF" << kf->id() << " Euler deg " << wolf::q2e(kf->getOPtr()->getState()).transpose()*180.0/3.14159 << std::endl;
