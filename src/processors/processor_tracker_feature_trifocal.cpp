@@ -460,6 +460,7 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
                 ConstraintAutodiffTrifocalPtr ctr = std::make_shared<ConstraintAutodiffTrifocal>(ftr_first, ftr_mid, ftr_last, shared_from_this(), false, CTR_ACTIVE);
 
                 // link to wolf tree
+                ctr->setFeaturePtr(ftr_last);
                 ftr_first->addConstrainedBy(ctr);
                 ftr_mid->addConstrainedBy(ctr);
                 ftr_last->addConstraint(ctr);
