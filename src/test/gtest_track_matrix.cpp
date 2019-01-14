@@ -163,6 +163,11 @@ TEST_F(TrackMatrixTest, feature_time)
     ASSERT_EQ(track_matrix.feature(f5->trackId(), wolf::TimeStamp(0.9)), f5);
     ASSERT_NE(track_matrix.feature(f5->trackId(), wolf::TimeStamp(1.1)), f5);
 
+    // query a feature after the track's last time stamp --> should be empty
+    ASSERT_TRUE(track_matrix.feature(f0->trackId(), wolf::TimeStamp(3.1)) == nullptr);
+
+    // query for a feature in a non-existing track --> should be empty
+    ASSERT_TRUE(track_matrix.feature(99, wolf::TimeStamp(1.0)) == nullptr);
 }
 
 

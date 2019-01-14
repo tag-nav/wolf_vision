@@ -453,7 +453,8 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
 
                 assert(ftr_mid != ftr_first && "First and middle features are the same! Adjust time stamp average to correct this.");
                 assert(ftr_mid != ftr_last  && "Last and middle features are the same! Adjust time stamp average to correct this.");
-//                WOLF_TRACE("first ", ftr_first->id(), ", mid ", ftr_mid->id(), ", last ", ftr_last->id());
+
+                // WOLF_TRACE("first ", ftr_first->id(), ", mid ", ftr_mid->id(), ", last ", ftr_last->id());
 
                 // make constraint
                 ConstraintAutodiffTrifocalPtr ctr = std::make_shared<ConstraintAutodiffTrifocal>(ftr_first, ftr_mid, ftr_last, shared_from_this(), false, CTR_ACTIVE);

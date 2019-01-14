@@ -191,12 +191,13 @@ FeatureBasePtr TrackMatrix::feature(size_t _track_id, CaptureBasePtr _cap)
 
 FeatureBasePtr TrackMatrix::feature(size_t _track_id, const TimeStamp& _ts)
 {
-    Track trk = track(_track_id);
+    Track trk   = track(_track_id);
 
-    auto it = trk.lower_bound(_ts);
+    auto ftr_it = trk.lower_bound(_ts);
 
-    if (it == trk.end()) return nullptr;
-    auto ftr = it->second;
+    if (ftr_it == trk.end()) return nullptr;
+
+    FeatureBasePtr ftr    = ftr_it->second;
     return ftr;
 }
 
