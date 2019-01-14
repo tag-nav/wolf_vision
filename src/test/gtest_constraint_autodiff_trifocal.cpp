@@ -290,51 +290,51 @@ TEST_F(ConstraintAutodiffTrifocalTest, error_jacobians)
     Matrix<Scalar,3,3> Jn_r_m1, Jn_r_m2, Jn_r_m3;
 
     // jacs wrt m1
-    pix0 = c123->getPixelCanonicalPrev();
+    pix0 = c123->getPixelCanonical1();
     for (int i=0; i<3; i++)
     {
         pert.setZero();
         pert(i)  = epsilon;
         pix_pert = pix0 + pert;
-        c123->setPixelCanonicalPrev(pix_pert); // m1
+        c123->setPixelCanonical1(pix_pert); // m1
         residual_pert = c123->residual(tensor, c2Ec1);
 
         Jn_r_m1.col(i) = (residual_pert - residual) / epsilon;
     }
-    c123->setPixelCanonicalPrev(pix0);
+    c123->setPixelCanonical1(pix0);
 
     ASSERT_MATRIX_APPROX(J_r_m1, Jn_r_m1, 1e-6);
 
 
     // jacs wrt m2
-    pix0 = c123->getPixelCanonicalOrigin();
+    pix0 = c123->getPixelCanonical2();
     for (int i=0; i<3; i++)
     {
         pert.setZero();
         pert(i)  = epsilon;
         pix_pert = pix0 + pert;
-        c123->setPixelCanonicalOrigin(pix_pert); // m2
+        c123->setPixelCanonical2(pix_pert); // m2
         residual_pert = c123->residual(tensor, c2Ec1);
         Jn_r_m2.col(i) = (residual_pert - residual) / epsilon;
     }
-    c123->setPixelCanonicalOrigin(pix0);
+    c123->setPixelCanonical2(pix0);
 
     ASSERT_MATRIX_APPROX(J_r_m2, Jn_r_m2, 1e-6);
 
 
     // jacs wrt m3
-    pix0 = c123->getPixelCanonicalLast();
+    pix0 = c123->getPixelCanonical3();
     for (int i=0; i<3; i++)
     {
         pert.setZero();
         pert(i)  = epsilon;
         pix_pert = pix0 + pert;
-        c123->setPixelCanonicalLast(pix_pert); // m3
+        c123->setPixelCanonical3(pix_pert); // m3
         residual_pert = c123->residual(tensor, c2Ec1);
 
         Jn_r_m3.col(i) = (residual_pert - residual) / epsilon;
     }
-    c123->setPixelCanonicalLast(pix0);
+    c123->setPixelCanonical3(pix0);
 
     ASSERT_MATRIX_APPROX(J_r_m3, Jn_r_m3, 1e-6);
 
