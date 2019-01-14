@@ -185,17 +185,13 @@ inline bool ConstraintAHP::operator ()(const T* const _current_frame_p,
 }
 
 inline ConstraintAHPPtr ConstraintAHP::create(const FeatureBasePtr&   _ftr_ptr,
-                                                    const LandmarkAHPPtr&   _lmk_ahp_ptr,
-                                                    const ProcessorBasePtr& _processor_ptr,
-                                                    bool             _apply_loss_function,
-                                                    ConstraintStatus _status)
+                                              const LandmarkAHPPtr&   _lmk_ahp_ptr,
+                                              const ProcessorBasePtr& _processor_ptr,
+                                              bool             _apply_loss_function,
+                                              ConstraintStatus _status)
 {
     // construct constraint
     ConstraintAHPPtr ctr_ahp = std::make_shared<ConstraintAHP>(_ftr_ptr, _lmk_ahp_ptr, _processor_ptr, _apply_loss_function, _status);
-
-    // link it to wolf tree <-- these pointers cannot be set at construction time
-    _lmk_ahp_ptr->getAnchorFrame()->addConstrainedBy(ctr_ahp);
-    _lmk_ahp_ptr->addConstrainedBy(ctr_ahp);
 
     return ctr_ahp;
 }

@@ -91,7 +91,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
             image_last_ = image_incoming_;
         }
 
-        virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
+        virtual unsigned int trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out,
                                            FeatureMatchMap& _feature_correspondences);
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
@@ -119,7 +119,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          *
          * \return The number of detected Features.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_incoming_out);
 
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
