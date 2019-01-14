@@ -7,7 +7,7 @@
 #include <iostream>
 
 // Vision utils
-#include "vision_utils.h"
+#include <vision_utils.h>
 
 //Wolf includes
 #include "../processors/processor_tracker_feature_trifocal.h"
@@ -77,7 +77,7 @@ int main(int argc, char** argv)
     img_pos *= 0.10;
 
     cv::imshow( "DEBUG VIEW", images.at(0) );  // Show our image inside it.
-    cv::waitKey(1);                            // Wait for a keystroke in the window
+//    cv::waitKey(1);                            // Wait for a keystroke in the window
 
     // ===============================================
     // CONFIG WOLF ===================================
@@ -150,7 +150,7 @@ int main(int argc, char** argv)
         std::cout << "Capture " << kf_id << " TS: " << capture->getTimeStamp() << std::endl;
         camera->process(capture);
 
-        cv::waitKey(1); // Wait for a keystroke in the window
+//        cv::waitKey(1); // Wait for a keystroke in the window
     }
 
     // ==================================================
@@ -239,7 +239,7 @@ int main(int argc, char** argv)
     std::cout << report << std::endl;
 
     std::cout << "================== AFTER SOLVE 2nd TIME ========================" << std::endl;
-    problem->print(1,1,1,0);
+    problem->print(3,1,1,0);
 
     for (auto kf : problem->getTrajectoryPtr()->getFrameList())
         std::cout << "KF" << kf->id() << " Euler deg " << wolf::q2e(kf->getOPtr()->getState()).transpose()*180.0/3.14159 << std::endl;

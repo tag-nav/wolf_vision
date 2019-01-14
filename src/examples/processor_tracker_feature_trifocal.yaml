@@ -9,8 +9,8 @@ algorithm:
     voting active: true
     minimum features for keyframe: 40
     maximum new features: 100
-    grid horiz cells: 15
-    grid vert cells: 15
+    grid horiz cells: 13
+    grid vert cells:  10
     min response new features: 50   
     min track length for constraint: 3
     
