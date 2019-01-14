@@ -4,6 +4,8 @@
 README.txt
 bin/
 build/
+build_debug/
+build_release/
 lib/
 .idea/
 ./Wolf.user
