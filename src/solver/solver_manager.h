@@ -55,6 +55,14 @@ public:
 
   virtual void computeCovariances(const StateBlockList& st_list) = 0;
 
+  virtual bool hasConverged() = 0;
+
+  virtual SizeStd iterations() = 0;
+
+  virtual Scalar initialCost() = 0;
+
+  virtual Scalar finalCost() = 0;
+
   virtual void update();
 
   ProblemPtr getProblemPtr();

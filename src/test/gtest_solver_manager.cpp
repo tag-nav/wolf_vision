@@ -63,6 +63,14 @@ class SolverManagerWrapper : public SolverManager
         virtual void computeCovariances(const CovarianceBlocksToBeComputed blocks){};
         virtual void computeCovariances(const StateBlockList& st_list){};
 
+        // The following are dummy implementations
+        bool    hasConverged()  { return true;      }
+        SizeStd iterations()    { return 1;         }
+        Scalar  initialCost()   { return Scalar(1); }
+        Scalar  finalCost()     { return Scalar(0); }
+
+
+
     protected:
 
         virtual std::string solveImpl(const ReportVerbosity report_level){ return std::string("");};
