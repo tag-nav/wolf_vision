@@ -70,14 +70,14 @@ void ProcessorTrackerFeatureCorner::advanceDerived()
     corners_last_ = std::move(corners_incoming_);
 }
 
-unsigned int ProcessorTrackerFeatureCorner::trackFeatures(const FeatureBaseList& _feature_list_in,
-                                                         FeatureBaseList& _feature_list_out,
+unsigned int ProcessorTrackerFeatureCorner::trackFeatures(const FeatureBaseList& _features_last_in,
+                                                         FeatureBaseList& _features_incoming_out,
                                                          FeatureMatchMap& _feature_correspondences)
 {
-    std::cout << "tracking " << _feature_list_in.size() << " features..." << std::endl;
+    std::cout << "tracking " << _features_last_in.size() << " features..." << std::endl;
 
     Eigen::Vector3s expected_feature_pose;
-    for (auto feat_in_ptr : _feature_list_in)
+    for (auto feat_in_ptr : _features_last_in)
     {
         expected_feature_pose = R_current_prev_ * feat_in_ptr->getMeasurement().head<3>() + t_current_prev_;
         
@@ -91,7 +91,7 @@ unsigned int ProcessorTrackerFeatureCorner::trackFeatures(const FeatureBaseList&
                 _feature_correspondences[*feat_out_it] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in_ptr,0}));
                 
                 // move matched feature to list
-                _feature_list_out.splice(_feature_list_out.end(), corners_incoming_, feat_out_it);
+                _features_incoming_out.splice(_features_incoming_out.end(), corners_incoming_, feat_out_it);
                 
                 std::cout << "feature " << feat_in_ptr->id() << " tracked!" << std::endl;
             }
@@ -99,7 +99,7 @@ unsigned int ProcessorTrackerFeatureCorner::trackFeatures(const FeatureBaseList&
         }
     }
 
-    return _feature_list_out.size();
+    return _features_incoming_out.size();
 }
 
 bool ProcessorTrackerFeatureCorner::voteForKeyFrame()
@@ -107,11 +107,11 @@ bool ProcessorTrackerFeatureCorner::voteForKeyFrame()
     return incoming_ptr_->getFeatureList().size() < params_tracker_feature_corner_->n_corners_th;
 }
 
-unsigned int ProcessorTrackerFeatureCorner::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
+unsigned int ProcessorTrackerFeatureCorner::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out)
 {
     // in corners_last_ remain all not tracked corners
-    _feature_list_out = std::move(corners_last_);
-    return _feature_list_out.size();
+    _features_incoming_out = std::move(corners_last_);
+    return _features_incoming_out.size();
 }
 
 ConstraintBasePtr ProcessorTrackerFeatureCorner::createConstraint(FeatureBasePtr _feature_ptr,

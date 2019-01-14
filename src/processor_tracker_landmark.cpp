@@ -116,15 +116,6 @@ void ProcessorTrackerLandmark::createNewLandmarks()
 
 unsigned int ProcessorTrackerLandmark::processKnown()
 {
-
-    //std::cout << "ProcessorTrackerLandmark::processKnown:" << std::endl;
-    //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
-    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureList().size()) << std::endl;
-    //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
-    //std::cout << "\tincoming correspondences: " << matches_landmark_from_incoming_.size() << std::endl;
-    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureList().size()) << std::endl;
-    //std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
-
     // Find landmarks in incoming_ptr_
     FeatureBaseList known_features_list_incoming;
     unsigned int n = findLandmarks(getProblem()->getMapPtr()->getLandmarkList(),
@@ -132,22 +123,12 @@ unsigned int ProcessorTrackerLandmark::processKnown()
     // Append found incoming features
     incoming_ptr_->addFeatureList(known_features_list_incoming);
 
-    //std::cout << "end of processKnown:" << std::endl;
-    //std::cout << "\tlast correspondences: " << matches_landmark_from_last_.size() << std::endl;
-    //std::cout << "\tlast features: " << (last_ptr_ == nullptr ? 0 : last_ptr_->getFeatureList().size()) << std::endl;
-    //std::cout << "\tlast new features: " << new_features_last_.size() << std::endl;
-    //std::cout << "\tincoming correspondences: " << matches_landmark_from_incoming_.size() << std::endl;
-    //std::cout << "\tincoming features: " << (incoming_ptr_ == nullptr ? 0 : incoming_ptr_->getFeatureList().size()) << std::endl;
-    //std::cout << "\tincoming new features: " << new_features_incoming_.size() << std::endl;
     return n;
-
 }
 
 void ProcessorTrackerLandmark::establishConstraints()
 {
-
-    //std::cout << "\tfeatures:" << last_ptr_->getFeatureList().size() << std::endl;
-    //std::cout << "\tcorrespondences: " << matches_landmark_from_last_.size() << std::endl;
+    // Loop all features in last_ptr_
     for (auto last_feature : last_ptr_->getFeatureList())
     {
         auto lmk = matches_landmark_from_last_[last_feature]->landmark_ptr_;
@@ -160,6 +141,9 @@ void ProcessorTrackerLandmark::establishConstraints()
             FrameBasePtr frm = ctr_ptr->getFrameOtherPtr();
             if (frm)
                 frm->addConstrainedBy(ctr_ptr);
+            CaptureBasePtr cap = ctr_ptr->getCaptureOtherPtr();
+            if (cap)
+                cap->addConstrainedBy(ctr_ptr);
         }
     }
 }
