@@ -139,7 +139,7 @@ We are shipping the CMAKE file `FindYamlCpp.cmake` together with Wolf. Find it a
 
 #### spdlog
 
-Wolf used spdlog macros. To install it:
+Wolf uses spdlog macros. Right now Wolf is only compatible with spdlog version 0.17.0. To install it:
 
 -   Git clone the source:
 
@@ -148,6 +148,7 @@ Wolf used spdlog macros. To install it:
 -   Build and install with:
 
         $ cd spdlog
+        $ git checkout v0.17.0
         $ mkdir build
         $ cd build
         $ cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS} -fPIC" ..
