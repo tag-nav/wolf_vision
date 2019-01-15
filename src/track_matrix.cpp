@@ -189,6 +189,18 @@ FeatureBasePtr TrackMatrix::feature(size_t _track_id, CaptureBasePtr _cap)
         return nullptr;
 }
 
+FeatureBasePtr TrackMatrix::feature(size_t _track_id, const TimeStamp& _ts)
+{
+    Track trk   = track(_track_id);
+
+    auto ftr_it = trk.lower_bound(_ts);
+
+    if (ftr_it == trk.end()) return nullptr;
+
+    FeatureBasePtr ftr    = ftr_it->second;
+    return ftr;
+}
+
 CaptureBasePtr TrackMatrix::firstCapture(size_t _track_id)
 {
     return firstFeature(_track_id)->getCapturePtr();

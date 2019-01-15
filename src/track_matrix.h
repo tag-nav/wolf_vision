@@ -95,6 +95,7 @@ class TrackMatrix
         FeatureBasePtr  firstFeature(size_t _track_id);
         FeatureBasePtr  lastFeature (size_t _track_id);
         FeatureBasePtr  feature     (size_t _track_id, CaptureBasePtr _cap);
+        FeatureBasePtr  feature     (size_t _track_id, const TimeStamp& _ts); // return feat with time stamp >= _ts
         CaptureBasePtr  firstCapture(size_t _track_id);
 
     private:
