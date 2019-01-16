@@ -192,8 +192,8 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
                 // Update pointers
                 resetDerived();
-                origin_ptr_ = last_ptr_;
-                last_ptr_   = incoming_ptr_;
+                origin_ptr_   = last_ptr_;
+                last_ptr_     = incoming_ptr_;
                 incoming_ptr_ = nullptr;
 
             }
@@ -208,7 +208,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
                 // Update pointers
                 advanceDerived();
-                last_ptr_   = incoming_ptr_;
+                last_ptr_     = incoming_ptr_;
                 incoming_ptr_ = nullptr;
             }
             break;

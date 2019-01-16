@@ -70,6 +70,7 @@ unsigned int ProcessorTrackerFeature::processKnown()
     trackFeatures(last_ptr_->getFeatureList(), known_features_incoming_, matches_last_from_incoming_);
     for (auto match : matches_last_from_incoming_)
     {
+        match.first->setProblem(this->getProblem());
         SizeStd trk_id_from_last = match.second->feature_ptr_->trackId();
         track_matrix_.add(trk_id_from_last, incoming_ptr_, match.first);
     }
@@ -79,14 +80,11 @@ unsigned int ProcessorTrackerFeature::processKnown()
     {
         for (auto feature_in_incoming : known_features_incoming_)
         {
-            SizeStd         track_id          = feature_in_incoming->trackId();
+            SizeStd        track_id          = feature_in_incoming->trackId();
             FeatureBasePtr feature_in_last   = track_matrix_.feature(track_id, last_ptr_);
             FeatureBasePtr feature_in_origin = track_matrix_.feature(track_id, origin_ptr_);
-            if (correctFeatureDrift(feature_in_origin, feature_in_last, feature_in_incoming))
-            {
-                feature_in_incoming->setProblem(this->getProblem());
-            }
-            else
+
+            if (correctFeatureDrift(feature_in_origin, feature_in_last, feature_in_incoming) == false)
             {
                 // Remove this feature from many places:
                 matches_last_from_incoming_ .erase (feature_in_incoming); // remove match
@@ -117,8 +115,8 @@ void ProcessorTrackerFeature::advanceDerived()
     for (auto ftr : incoming_ptr_->getFeatureList())
         ftr->setProblem(getProblem());
 
-    // // remove last from track matrix in case you want to have only KF in the track matrix
-    // track_matrix_.remove(last_ptr_);
+//     // remove last from track matrix in case you want to have only KF in the track matrix
+//     track_matrix_.remove(last_ptr_);
 }
 
 void ProcessorTrackerFeature::resetDerived()
