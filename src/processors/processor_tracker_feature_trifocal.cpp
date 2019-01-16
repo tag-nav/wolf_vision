@@ -443,7 +443,7 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
                 FeatureBasePtr ftr_last = pair_trkid_match.second.second;
 
                 // get the first feature in the whole track
-//                FeatureBasePtr ftr_first = track_matrix_.firstFeature(trk_id);
+                FeatureBasePtr ftr_first = track_matrix_.firstFeature(trk_id);
 
 //                // get the middle feature of the track using the average of the time stamps
 //                Scalar    Dt            = (ftr_last->getCapturePtr()->getTimeStamp() - ftr_first->getCapturePtr()->getTimeStamp()) / 2.0;
