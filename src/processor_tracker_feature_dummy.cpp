@@ -23,7 +23,7 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
     {
         if (++count_ % 3 == 2) // lose one every 3 tracks
         {
-            WOLF_INFO("track: " , feat_in->trackId() , " feature: " , feat_in->id() , " lost!");
+            WOLF_INFO("track: " , feat_in->trackId() , " feature: " , feat_in->id() , " lost");
         }
         else
         {
@@ -31,7 +31,7 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
             _features_incoming_out.push_back(ftr);
             _feature_correspondences[_features_incoming_out.back()] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in,0}));
 
-            WOLF_INFO("track: " , feat_in->trackId() , " last: " , feat_in->id() , " inc: " , ftr->id() , " !" );
+            WOLF_INFO("track: " , feat_in->trackId() , " last: " , feat_in->id() , " inc: " , ftr->id());
         }
     }
 
@@ -62,10 +62,10 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
                                                          Eigen::MatrixXs::Ones(1, 1)));
         _features_incoming_out.push_back(ftr);
 
-        WOLF_INFO("feature " , ftr->id() , " detected!" );
+        WOLF_INFO("feature " , ftr->id() , " detected --> new track" );
     }
 
-    WOLF_INFO(_features_incoming_out.size() , " features detected!");
+    WOLF_INFO(_features_incoming_out.size() , " features detected");
 
     return _features_incoming_out.size();
 }
