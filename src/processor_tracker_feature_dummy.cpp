@@ -29,7 +29,7 @@ unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& 
         {
             FeatureBasePtr ftr(std::make_shared<FeatureBase>("POINT IMAGE", feat_in->getMeasurement(), feat_in->getMeasurementCovariance()));
             _features_incoming_out.push_back(ftr);
-            _feature_correspondences[_features_incoming_out.back()] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in,0}));
+            _feature_correspondences[ftr] = std::make_shared<FeatureMatch>(FeatureMatch({feat_in,1.0}));
 
             WOLF_INFO("track: " , feat_in->trackId() , " last: " , feat_in->id() , " inc: " , ftr->id());
         }
@@ -46,7 +46,7 @@ bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
 
     WOLF_INFO( (vote ? "Vote ": "Do not vote ") , "for KF" );
 
-    return incoming_ptr_->getFeatureList().size() < params_tracker_feature_->min_features_for_keyframe;
+    return vote;
 }
 
 unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out)
@@ -59,7 +59,7 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
         n_feature_++;
         FeatureBasePtr ftr(std::make_shared<FeatureBase>("POINT IMAGE",
                                                          n_feature_* Eigen::Vector1s::Ones(),
-                                                         Eigen::MatrixXs::Ones(1, 1)));
+                                                         Eigen::MatrixXs::Identity(1,1)));
         _features_incoming_out.push_back(ftr);
 
         WOLF_INFO("feature " , ftr->id() , " detected --> new track" );
