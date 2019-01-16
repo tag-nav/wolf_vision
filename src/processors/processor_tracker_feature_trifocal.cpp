@@ -200,7 +200,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
 //    WOLF_TRACE("DetectNewFeatures - Number of new features detected: " , _feature_list_out.size() );
 //    debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
 //    WOLF_TRACE("--> TIME: detect new features: TOTAL ",debug_comp_time_);
-//    WOLF_TRACE("======== ========= =========");
+//    WOLF_TRACE("======== END DETECT NEW FEATURES =========");
 
     return _feature_list_out.size();
 }
@@ -251,7 +251,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
 //    WOLF_TRACE("TrAckFeatures - Number of features tracked: " , _feature_list_out.size() );
 //    debug_comp_time_ = (double)(clock() - debug_tStart) / CLOCKS_PER_SEC;
 //    WOLF_TRACE("--> TIME: track: ",debug_comp_time_);
-//    WOLF_TRACE("======== ========= =========");
+//    WOLF_TRACE("======== END TRACK FEATURES =========");
 
 
 
@@ -425,6 +425,8 @@ ConstraintBasePtr ProcessorTrackerFeatureTrifocal::createConstraint(FeatureBaseP
 
 void ProcessorTrackerFeatureTrifocal::establishConstraints()
 {
+//    WOLF_TRACE("===== ESTABLISH CONSTRAINT =====");
+
     if (initialized_)
     {
         // get tracks between prev, origin and last
@@ -439,22 +441,26 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
 
             if (trk_length >= params_tracker_feature_trifocal_->min_track_length_for_constraint)
             {
-
                 // get the last feature in the track
                 FeatureBasePtr ftr_last = pair_trkid_match.second.second;
 
                 // get the first feature in the whole track
-                FeatureBasePtr ftr_first = track_matrix_.firstFeature(trk_id);
+//                FeatureBasePtr ftr_first = track_matrix_.firstFeature(trk_id);
 
-                // get the middle feature of the track using the average of the time stamps
-                Scalar    Dt            = (ftr_last->getCapturePtr()->getTimeStamp() - ftr_first->getCapturePtr()->getTimeStamp()) / 2.0;
-                TimeStamp ts_mid        = ftr_first->getCapturePtr()->getTimeStamp() + Dt;
-                FeatureBasePtr ftr_mid  = track_matrix_.feature(trk_id, ts_mid - 1e-4); // 1e-4 to be on the safe side if numerical errors occur
+//                // get the middle feature of the track using the average of the time stamps
+//                Scalar    Dt            = (ftr_last->getCapturePtr()->getTimeStamp() - ftr_first->getCapturePtr()->getTimeStamp()) / 2.0;
+//                TimeStamp ts_mid        = ftr_first->getCapturePtr()->getTimeStamp() + Dt;
+//                FeatureBasePtr ftr_mid  = track_matrix_.feature(trk_id, ts_mid - 1e-4); // 1e-4 to be on the safe side if numerical errors occur
+
+                // FIX this
+                FeatureBasePtr ftr_first = pair_trkid_match.second.first;
+                FeatureBasePtr ftr_mid = track_matrix_.feature(trk_id, origin_ptr_);
 
                 assert(ftr_mid != ftr_first && "First and middle features are the same! Adjust time stamp average to correct this.");
                 assert(ftr_mid != ftr_last  && "Last and middle features are the same! Adjust time stamp average to correct this.");
 
-                // WOLF_TRACE("first ", ftr_first->id(), ", mid ", ftr_mid->id(), ", last ", ftr_last->id());
+//                WOLF_TRACE("first ", ftr_first->id(), ", mid ", ftr_mid->id(), ", last ", ftr_last->id());
+//                WOLF_TRACE("OLD first ", pair_trkid_match.second.first->id(), ", mid ", track_matrix_.feature(trk_id, origin_ptr_)->id(), ", last ", ftr_last->id());
 
                 // make constraint
                 ConstraintAutodiffTrifocalPtr ctr = std::make_shared<ConstraintAutodiffTrifocal>(ftr_first, ftr_mid, ftr_last, shared_from_this(), false, CTR_ACTIVE);
@@ -467,6 +473,9 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
             }
         }
     }
+
+//    WOLF_TRACE("===== END ESTABLISH CONSTRAINT =====");
+
 }
 
 void ProcessorTrackerFeatureTrifocal::setParams(const ProcessorParamsTrackerFeatureTrifocalPtr _params)
