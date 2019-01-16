@@ -46,7 +46,8 @@ void TrackMatrix::newTrack(CaptureBasePtr _cap, FeatureBasePtr _ftr)
 
 void TrackMatrix::add(size_t _track_id, CaptureBasePtr _cap, FeatureBasePtr _ftr)
 {
-    assert( (_track_id > 0) && (_track_id <= track_id_count_) && "Provided track ID does not exist. Use newTrack() instead.");
+    assert( (_track_id > 0)   && (_track_id <= track_id_count_) && "Provided track ID does not exist. Use newTrack() instead.");
+    assert( (_cap != nullptr) && "Capture is null ptr." );
 
     _ftr->setTrackId(_track_id);
     if (_cap != _ftr->getCapturePtr())
