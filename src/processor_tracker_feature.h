@@ -168,7 +168,15 @@ class ProcessorTrackerFeature : public ProcessorTracker
         /** \brief Establish constraints between features in Captures \b last and \b origin
          */
         virtual void establishConstraints();
+
+    public:
+        Track track(SizeStd _trk_id);
 };
+
+inline wolf::Track ProcessorTrackerFeature::track(SizeStd _trk_id)
+{
+    return track_matrix_.track(_trk_id);
+}
 
 } // namespace wolf
 
