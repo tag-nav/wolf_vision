@@ -22,6 +22,11 @@ TrackMatrix::~TrackMatrix()
     //
 }
 
+map<size_t, Track > TrackMatrix::tracks() const
+{
+    return tracks_;
+}
+
 Track TrackMatrix::track(size_t _track_id)
 {
     if (tracks_.count(_track_id) > 0)
@@ -161,6 +166,8 @@ std::list<FeatureBasePtr> TrackMatrix::snapshotAsList(CaptureBasePtr _cap)
 TrackMatches TrackMatrix::matches(CaptureBasePtr _cap_1, CaptureBasePtr _cap_2)
 {
     TrackMatches pairs;
+
+    if (_cap_1 == _cap_2) return pairs;
 
     Snapshot s_1 = snapshot(_cap_1);
     Snapshot s_2 = snapshot(_cap_2);
