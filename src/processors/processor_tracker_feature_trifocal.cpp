@@ -454,6 +454,36 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
                 FeatureBasePtr ftr_first = pair_trkid_match.second.first;
                 FeatureBasePtr ftr_mid = track_matrix_.feature(trk_id, origin_ptr_);
 
+                // get the middle feature of the track using the average of the time stamps
+                FeatureBasePtr ftr_mid = nullptr;
+
+                TimeStamp ts_first      = ftr_first->getCapturePtr()->getTimeStamp();
+                TimeStamp ts_last       = ftr_last->getCapturePtr()->getTimeStamp();
+                Scalar    Dt2           = (ts_last - ts_first) / 2.0;
+                TimeStamp ts_ave        = ts_first + Dt2;
+
+                Scalar dt_err = Dt2;
+                auto track = track_matrix_.track(trk_id);
+                for (auto ftr_it = track.begin() ; ftr_it != track.end() ; ftr_it ++)
+                {
+//                    if ( ftr_it->second->getCapturePtr() != nullptr ) // have capture
+                        if ( auto kf_mid = ftr_it->second->getCapturePtr()->getFramePtr() ) // have frame
+                        {
+                            TimeStamp ts_mid    = kf_mid->getTimeStamp();
+
+                            auto dt_err_curr = fabs(ts_mid - ts_ave);
+                            if (dt_err_curr <= dt_err)
+                            {
+                                dt_err  = dt_err_curr;
+                                ftr_mid = ftr_it->second;
+                            }
+                            else //if (dt_err_increasing)
+                                break;
+                        }
+                }
+
+//                FeatureBasePtr ftr_mid  = track_matrix_.feature(trk_id, ts_mid - 1e-4); // 1e-4 to be on the safe side if numerical errors occur
+
                 assert(ftr_mid != ftr_first && "First and middle features are the same! Adjust time stamp average to correct this.");
                 assert(ftr_mid != ftr_last  && "Last and middle features are the same! Adjust time stamp average to correct this.");
 
