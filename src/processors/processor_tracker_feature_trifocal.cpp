@@ -450,9 +450,9 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
 //                TimeStamp ts_mid        = ftr_first->getCapturePtr()->getTimeStamp() + Dt;
 //                FeatureBasePtr ftr_mid  = track_matrix_.feature(trk_id, ts_mid - 1e-4); // 1e-4 to be on the safe side if numerical errors occur
 
-                // FIX this
-                FeatureBasePtr ftr_first = pair_trkid_match.second.first;
-                FeatureBasePtr ftr_mid = track_matrix_.feature(trk_id, origin_ptr_);
+//                // FIX this
+//                FeatureBasePtr ftr_first = pair_trkid_match.second.first;
+//                FeatureBasePtr ftr_mid = track_matrix_.feature(trk_id, origin_ptr_);
 
                 // get the middle feature of the track using the average of the time stamps
                 FeatureBasePtr ftr_mid = nullptr;
