@@ -158,11 +158,11 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             processKnown();
 
             // eventually add more features
-            if (last_ptr_->getFeatureList().size() < params_tracker_->min_features_for_keyframe)
-            {
-                WOLF_TRACE("Adding more features...");
-                processNew(params_tracker_->max_new_features);
-            }
+//            if (last_ptr_->getFeatureList().size() < params_tracker_->min_features_for_keyframe)
+//            {
+//                WOLF_TRACE("Adding more features...");
+//                processNew(params_tracker_->max_new_features);
+//            }
 
             if (voteForKeyFrame() && permittedKeyFrame())
             {
