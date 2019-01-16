@@ -138,7 +138,7 @@ bool ProcessorTrackerFeatureTrifocal::isInlier(const cv::KeyPoint& _kp_last, con
 }
 
 
-unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out)
+unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_incoming_out)
 {
 //    // DEBUG =====================================
 //    clock_t debug_tStart;
@@ -178,7 +178,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
                                 capture_last_->descriptors_.row(index_last),
                                 Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
 
-                        _feature_list_out.push_back(last_point_ptr);
+                        _features_incoming_out.push_back(last_point_ptr);
 
                         // hit cell to acknowledge there's a tracked point in that cell
                         capture_last_->grid_features_->hitTrackingCell(kp_last);
@@ -202,10 +202,10 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
 //    WOLF_TRACE("--> TIME: detect new features: TOTAL ",debug_comp_time_);
 //    WOLF_TRACE("======== END DETECT NEW FEATURES =========");
 
-    return _feature_list_out.size();
+    return _features_incoming_out.size();
 }
 
-unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureMatchMap& _feature_matches)
+unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out, FeatureMatchMap& _feature_matches)
 {
 //    // DEBUG =====================================
 //    clock_t debug_tStart;
@@ -214,7 +214,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
 //    WOLF_TRACE("======== TrackFeatures =========");
 //    // ===========================================
 
-    for (auto feature_base_last_ : _feature_list_in)
+    for (auto feature_base_last_ : _features_last_in)
     {
         FeaturePointImagePtr feature_last_ = std::static_pointer_cast<FeaturePointImage>(feature_base_last_);
 
@@ -236,7 +236,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
                             capture_incoming_->descriptors_.row(index_kp_incoming),
                             Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
 
-                    _feature_list_out.push_back(incoming_point_ptr);
+                    _features_incoming_out.push_back(incoming_point_ptr);
 
                     _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_last_, capture_incoming_->matches_normalized_scores_.at(index_kp_incoming)}));
 
@@ -253,9 +253,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
 //    WOLF_TRACE("--> TIME: track: ",debug_comp_time_);
 //    WOLF_TRACE("======== END TRACK FEATURES =========");
 
-
-
-    return _feature_list_out.size();
+    return _features_incoming_out.size();
 }
 
 bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
@@ -419,7 +417,7 @@ ConstraintBasePtr ProcessorTrackerFeatureTrifocal::createConstraint(FeatureBaseP
     // Therefore, we implement establishConstraints() instead and do all the job there.
     // This function remains empty, and with a warning or even an error issued in case someone calls it.
     std::cout << "033[1;33m [WARN]:033[0m ProcessorTrackerFeatureTrifocal::createConstraint is empty." << std::endl;
-    ConstraintBasePtr return_var{}; //TODO: fill this variable
+    ConstraintBasePtr return_var{};
     return return_var;
 }
 

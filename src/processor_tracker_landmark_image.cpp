@@ -144,8 +144,8 @@ void ProcessorTrackerLandmarkImage::postProcess()
     feat_lmk_found_.clear();
 }
 
-unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList& _landmark_list_in,
-                                                         FeatureBaseList&  _feature_list_out,
+unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList& _landmarks_in,
+                                                         FeatureBaseList&  _features_incoming_out,
                                                          LandmarkMatchMap& _feature_landmark_correspondences)
 {
     KeyPointVector candidate_keypoints;
@@ -154,7 +154,7 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList
 
     Eigen::VectorXs current_state = getProblem()->getState(incoming_ptr_->getTimeStamp());
 
-    for (auto landmark_in_ptr : _landmark_list_in)
+    for (auto landmark_in_ptr : _landmarks_in)
     {
 
         // project landmark into incoming capture
@@ -194,7 +194,7 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList
                     incoming_point_ptr->setScore(normalized_score);
                     incoming_point_ptr->setExpectation(pixel);
 
-                    _feature_list_out.push_back(incoming_point_ptr);
+                    _features_incoming_out.push_back(incoming_point_ptr);
 
 
                     _feature_landmark_correspondences[incoming_point_ptr] = std::make_shared<LandmarkMatch>(landmark_in_ptr, normalized_score);
@@ -215,9 +215,9 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList
 //        else
 //            std::cout << "NOT in the image" << std::endl;
     }
-//    std::cout << "\tNumber of Features tracked: " << _feature_list_out.size() << std::endl;
-    landmarks_tracked_ = _feature_list_out.size();
-    return _feature_list_out.size();
+//    std::cout << "\tNumber of Features tracked: " << _features_incoming_out.size() << std::endl;
+    landmarks_tracked_ = _features_incoming_out.size();
+    return _features_incoming_out.size();
 }
 
 bool ProcessorTrackerLandmarkImage::voteForKeyFrame()
@@ -226,7 +226,7 @@ bool ProcessorTrackerLandmarkImage::voteForKeyFrame()
 //    return landmarks_tracked_ < params_tracker_landmark_image_->min_features_for_keyframe;
 }
 
-unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
+unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -261,7 +261,7 @@ unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int
                     point_ptr->setIsKnown(false);
                     point_ptr->setTrackId(point_ptr->id());
                     point_ptr->setExpectation(Eigen::Vector2s(new_keypoints[0].pt.x,new_keypoints[0].pt.y));
-                    _feature_list_out.push_back(point_ptr);
+                    _features_incoming_out.push_back(point_ptr);
 
                     active_search_ptr_->hitCell(new_keypoints[0]);
 

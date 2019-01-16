@@ -31,11 +31,11 @@ class ProcessorTrackerLandmarkDummy : public ProcessorTrackerLandmark
         virtual void postProcess(); // implemented
 
         /** \brief Find provided landmarks in the incoming capture
-         * \param _landmark_list_in input list of landmarks to be found in incoming
-         * \param _feature_list_out returned list of incoming features corresponding to a landmark of _landmark_list_in
+         * \param _landmarks_in input list of landmarks to be found in incoming
+         * \param _features_incoming_out returned list of incoming features corresponding to a landmark of _landmarks_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          */
-        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
+        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmarks_in, FeatureBaseList& _features_incoming_out,
                                            LandmarkMatchMap& _feature_landmark_correspondences);
 
         /** \brief Vote for KeyFrame generation
@@ -56,7 +56,7 @@ class ProcessorTrackerLandmarkDummy : public ProcessorTrackerLandmark
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out);
 
         /** \brief Create one landmark
          *
