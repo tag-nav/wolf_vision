@@ -474,8 +474,10 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
 
 //                FeatureBasePtr ftr_mid  = track_matrix_.feature(trk_id, ts_mid - 1e-4); // 1e-4 to be on the safe side if numerical errors occur
 
-                assert(ftr_mid != ftr_first && "First and middle features are the same! Adjust time stamp average to correct this.");
-                assert(ftr_mid != ftr_last  && "Last and middle features are the same! Adjust time stamp average to correct this.");
+                assert(ftr_mid != nullptr   && "Middle feature is nullptr!");
+                assert(ftr_mid->getCapturePtr()->getFramePtr() != nullptr   && "Middle feature's frame is nullptr!");
+                assert(ftr_mid != ftr_first && "First and middle features are the same!");
+                assert(ftr_mid != ftr_last  && "Last and middle features are the same!");
 
                 WOLF_TRACE("first ", ftr_first->id(), ", mid ", ftr_mid->id(), ", last ", ftr_last->id());
 
