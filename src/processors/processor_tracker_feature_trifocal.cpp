@@ -34,8 +34,8 @@ namespace wolf {
 ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ProcessorParamsTrackerFeatureTrifocalPtr _params_tracker_feature_trifocal) :
         ProcessorTrackerFeature("TRACKER FEATURE TRIFOCAL", _params_tracker_feature_trifocal ),
         params_tracker_feature_trifocal_(_params_tracker_feature_trifocal),
-        capture_last_(nullptr),
-        capture_incoming_(nullptr),
+        capture_image_last_(nullptr),
+        capture_image_incoming_(nullptr),
         prev_origin_ptr_(nullptr),
         initialized_(false)
 {
@@ -138,7 +138,7 @@ bool ProcessorTrackerFeatureTrifocal::isInlier(const cv::KeyPoint& _kp_last, con
 }
 
 
-unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_incoming_out)
+unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_last_out)
 {
 //    // DEBUG =====================================
 //    clock_t debug_tStart;
@@ -150,38 +150,40 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
     for (unsigned int n_iterations = 0; n_iterations < _max_new_features; ++n_iterations)
     {
         Eigen::Vector2i cell_last;
-        if (capture_last_->grid_features_->pickEmptyTrackingCell(cell_last))
+        if (capture_image_last_->grid_features_->pickEmptyTrackingCell(cell_last))
         {
             // Get best keypoint in cell
-            vision_utils::FeatureIdxMap cell_feat_map = capture_last_->grid_features_->getFeatureIdxMap(cell_last(0), cell_last(1));
+            vision_utils::FeatureIdxMap cell_feat_map = capture_image_last_->grid_features_->getFeatureIdxMap(cell_last(0), cell_last(1));
             bool found_feature_in_cell = false;
 
             for (auto target_last_pair_response_idx : cell_feat_map)
             {
-                // Get last KeyPoint
+                // Get KeyPoint in last
                 unsigned int index_last = target_last_pair_response_idx.second;
-                cv::KeyPoint kp_last = capture_last_->keypoints_.at(index_last);
+                cv::KeyPoint kp_last = capture_image_last_->keypoints_.at(index_last);
                 assert(target_last_pair_response_idx.first == kp_last.response && "[ProcessorTrackerFeatureTrifocal::detectNewFeatures]: response mismatch.");
 
                 // Check if there is match with incoming, if not we do not want it
-                if (capture_last_->map_index_to_next_.count(index_last))
+                if (capture_image_last_->map_index_to_next_.count(index_last))
                 {
-                    unsigned int index_incoming = capture_last_->map_index_to_next_[index_last];
-                    cv::KeyPoint kp_incoming = capture_incoming_->keypoints_.at(index_incoming);
+                    // matching keypoint in incoming
+                    unsigned int index_incoming = capture_image_last_->map_index_to_next_[index_last];
+                    cv::KeyPoint kp_incoming = capture_image_incoming_->keypoints_.at(index_incoming);
 
+                    // validate match with extra tests
                     if (isInlier( kp_incoming, kp_last))
                     {
                         // Create WOLF feature
-                        FeaturePointImagePtr last_point_ptr = std::make_shared<FeaturePointImage>(
+                        FeaturePointImagePtr ftr_point_last = std::make_shared<FeaturePointImage>(
                                 kp_last,
                                 index_last,
-                                capture_last_->descriptors_.row(index_last),
+                                capture_image_last_->descriptors_.row(index_last),
                                 Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
 
-                        _features_incoming_out.push_back(last_point_ptr);
+                        _features_last_out.push_back(ftr_point_last);
 
                         // hit cell to acknowledge there's a tracked point in that cell
-                        capture_last_->grid_features_->hitTrackingCell(kp_last);
+                        capture_image_last_->grid_features_->hitTrackingCell(kp_last);
 
                         found_feature_in_cell = true;
 
@@ -190,7 +192,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
                 }
             }
             if (!found_feature_in_cell)
-                capture_last_->grid_features_->blockTrackingCell(cell_last);
+                capture_image_last_->grid_features_->blockTrackingCell(cell_last);
         }
         else
             break; // There are no empty cells
@@ -202,7 +204,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
 //    WOLF_TRACE("--> TIME: detect new features: TOTAL ",debug_comp_time_);
 //    WOLF_TRACE("======== END DETECT NEW FEATURES =========");
 
-    return _features_incoming_out.size();
+    return _features_last_out.size();
 }
 
 unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out, FeatureMatchMap& _feature_matches)
@@ -218,30 +220,30 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
     {
         FeaturePointImagePtr feature_last_ = std::static_pointer_cast<FeaturePointImage>(feature_base_last_);
 
-        if ( capture_last_->map_index_to_next_.count(feature_last_->getIndexKeyPoint()) )
+        if ( capture_image_last_->map_index_to_next_.count(feature_last_->getIndexKeyPoint()) )
         {
-            int index_kp_incoming = capture_last_->map_index_to_next_[feature_last_->getIndexKeyPoint()];
+            int index_kp_incoming = capture_image_last_->map_index_to_next_[feature_last_->getIndexKeyPoint()];
 
-            if (capture_incoming_->matches_normalized_scores_.at(index_kp_incoming) > mat_ptr_->getParams()->min_norm_score )
+            if (capture_image_incoming_->matches_normalized_scores_.at(index_kp_incoming) > mat_ptr_->getParams()->min_norm_score )
             {
                 // Check Euclidean distance between keypoints
-                cv::KeyPoint kp_incoming = capture_incoming_->keypoints_.at(index_kp_incoming);
-                cv::KeyPoint kp_last = capture_last_->keypoints_.at(feature_last_->getIndexKeyPoint());
+                cv::KeyPoint kp_incoming = capture_image_incoming_->keypoints_.at(index_kp_incoming);
+                cv::KeyPoint kp_last = capture_image_last_->keypoints_.at(feature_last_->getIndexKeyPoint());
 
                 if (isInlier(kp_last, kp_incoming))
                 {
                     FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
                             kp_incoming,
                             index_kp_incoming,
-                            capture_incoming_->descriptors_.row(index_kp_incoming),
+                            capture_image_incoming_->descriptors_.row(index_kp_incoming),
                             Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
 
                     _features_incoming_out.push_back(incoming_point_ptr);
 
-                    _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_last_, capture_incoming_->matches_normalized_scores_.at(index_kp_incoming)}));
+                    _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_last_, capture_image_incoming_->matches_normalized_scores_.at(index_kp_incoming)}));
 
                     // hit cell to acknowledge there's a tracked point in that cell
-                    capture_incoming_->grid_features_->hitTrackingCell(kp_incoming);
+                    capture_image_incoming_->grid_features_->hitTrackingCell(kp_incoming);
                 }
             }
         }
@@ -333,37 +335,37 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
     }
 
     // Get capture
-    capture_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_);
+    capture_image_incoming_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_);
 
     // Detect INC KeyPoints
-    capture_incoming_->keypoints_ = det_ptr_->detect(capture_incoming_->getImage());
+    capture_image_incoming_->keypoints_ = det_ptr_->detect(capture_image_incoming_->getImage());
 
     // Get INC descriptors
-    capture_incoming_->descriptors_ = des_ptr_->getDescriptor(capture_incoming_->getImage(), capture_incoming_->keypoints_);
+    capture_image_incoming_->descriptors_ = des_ptr_->getDescriptor(capture_image_incoming_->getImage(), capture_image_incoming_->keypoints_);
 
     // Create and fill incoming grid
-    capture_incoming_->grid_features_ = std::make_shared<vision_utils::FeatureIdxGrid>(capture_incoming_->getImage().rows, capture_incoming_->getImage().cols, params_tracker_feature_trifocal_->n_cells_v, params_tracker_feature_trifocal_->n_cells_h);
+    capture_image_incoming_->grid_features_ = std::make_shared<vision_utils::FeatureIdxGrid>(capture_image_incoming_->getImage().rows, capture_image_incoming_->getImage().cols, params_tracker_feature_trifocal_->n_cells_v, params_tracker_feature_trifocal_->n_cells_h);
 
-    capture_incoming_->grid_features_->insert(capture_incoming_->keypoints_);
+    capture_image_incoming_->grid_features_->insert(capture_image_incoming_->keypoints_);
 
     // If last_ptr_ is not null, then we can do some computation here.
     if (last_ptr_ != nullptr)
     {
         // Get capture
-        capture_last_ = std::static_pointer_cast<CaptureImage>(last_ptr_);
+        capture_image_last_ = std::static_pointer_cast<CaptureImage>(last_ptr_);
 
         // Match full image (faster)
         // We exchange the order of the descriptors to fill better the map hereafter (map does not allow a single key)
-        capture_incoming_->matches_normalized_scores_ = mat_ptr_->robustMatch(capture_incoming_->keypoints_,
-                                                                              capture_last_->keypoints_,
-                                                                              capture_incoming_->descriptors_,
-                                                                              capture_last_->descriptors_,
+        capture_image_incoming_->matches_normalized_scores_ = mat_ptr_->robustMatch(capture_image_incoming_->keypoints_,
+                                                                              capture_image_last_->keypoints_,
+                                                                              capture_image_incoming_->descriptors_,
+                                                                              capture_image_last_->descriptors_,
                                                                               des_ptr_->getSize(),
-                                                                              capture_incoming_->matches_from_precedent_);
+                                                                              capture_image_incoming_->matches_from_precedent_);
 
         // Set capture map of match indices
-        for (auto match : capture_incoming_->matches_from_precedent_)
-            capture_last_->map_index_to_next_[match.trainIdx] = match.queryIdx; // map[last] = incoming
+        for (auto match : capture_image_incoming_->matches_from_precedent_)
+            capture_image_last_->map_index_to_next_[match.trainIdx] = match.queryIdx; // map[last] = incoming
 
         // DEBUG
 //        cv::Mat img_last = (std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage();

@@ -49,7 +49,7 @@ bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
     return vote;
 }
 
-unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out)
+unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_last_out)
 {
     WOLF_INFO("Detecting " , _max_features , " new features..." );
 
@@ -60,14 +60,14 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
         FeatureBasePtr ftr(std::make_shared<FeatureBase>("POINT IMAGE",
                                                          n_feature_* Eigen::Vector1s::Ones(),
                                                          Eigen::MatrixXs::Identity(1,1)));
-        _features_incoming_out.push_back(ftr);
+        _features_last_out.push_back(ftr);
 
         WOLF_INFO("feature " , ftr->id() , " detected --> new track" );
     }
 
-    WOLF_INFO(_features_incoming_out.size() , " features detected");
+    WOLF_INFO(_features_last_out.size() , " features detected");
 
-    return _features_incoming_out.size();
+    return _features_last_out.size();
 }
 
 ConstraintBasePtr ProcessorTrackerFeatureDummy::createConstraint(FeatureBasePtr _feature_ptr,
