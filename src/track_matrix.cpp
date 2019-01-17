@@ -54,13 +54,9 @@ void TrackMatrix::add(size_t _track_id, CaptureBasePtr _cap, FeatureBasePtr _ftr
     assert( (_track_id > 0)   && (_track_id <= track_id_count_) && "Provided track ID does not exist. Use newTrack() instead.");
     assert( (_cap != nullptr) && "Capture is null ptr." );
 
-    std::cout << " Add FTR " << _ftr << " id " << _ftr->id() << " in TRCK: " << _track_id;
-
     _ftr->setTrackId(_track_id);
     if (_cap != _ftr->getCapturePtr())
         _ftr->setCapturePtr(_cap);
-
-    std::cout << " in CAPT: " << _ftr->getCapturePtr() << " with TS " << _ftr->getCapturePtr()->getTimeStamp() << std::endl;
 
     tracks_[_track_id].emplace(_cap->getTimeStamp(), _ftr);
     snapshots_[_cap->id()].emplace(_track_id, _ftr);        // will create new snapshot if _cap_id   is not present
