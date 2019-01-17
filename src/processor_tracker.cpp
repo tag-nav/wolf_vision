@@ -100,8 +100,6 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         } // @suppress("No break at end of case")
         case SECOND_TIME_WITHOUT_PACK :
         {
-            WOLF_TRACE("SECOND_TIME_WITHOUT_PACK");
-
             FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
             frm->addCapture(incoming_ptr_);
 
@@ -124,8 +122,6 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
         case RUNNING_WITH_PACK :
         {
-            WOLF_TRACE("RUNNING_WITH_PACK");
-
             PackKeyFramePtr pack = kf_pack_buffer_.selectPack( last_ptr_ , params_tracker_->time_tolerance);
             kf_pack_buffer_.removeUpTo( last_ptr_->getTimeStamp() );
 
@@ -159,12 +155,10 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
         case RUNNING_WITHOUT_PACK :
         {
-            WOLF_TRACE("RUNNING_WITHOUT_PACK");
             processKnown();
 
             if (voteForKeyFrame() && permittedKeyFrame())
             {
-                WOLF_TRACE("if (voteForKeyFrame() && permittedKeyFrame())");
                 // We create a KF
 
                 // set KF on last
@@ -195,7 +189,6 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             }
             else
             {
-                WOLF_TRACE("else (voteForKeyFrame() && permittedKeyFrame())");
                 // We do not create a KF
 
                 // Advance this
