@@ -267,30 +267,30 @@ bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _
 
 bool ProcessorTrackerFeatureTrifocal::voteForKeyFrame()
 {
-    // A. crossing voting threshold with ascending number of features
-    bool vote_up = true;
-    // 1. vote if we did not have enough features before
-    vote_up = vote_up && (previousNumberOfTracks() < params_tracker_feature_trifocal_->min_features_for_keyframe);
-    // 2. vote if we have enough features now
-    vote_up = vote_up && (incoming_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
+//    // A. crossing voting threshold with ascending number of features
+    bool vote_up = false;
+//    // 1. vote if we did not have enough features before
+//    vote_up = vote_up && (previousNumberOfTracks() < params_tracker_feature_trifocal_->min_features_for_keyframe);
+//    // 2. vote if we have enough features now
+//    vote_up = vote_up && (incoming_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
 
     // B. crossing voting threshold with descending number of features
     bool vote_down = true;
     // 1. vote if we had enough features before
-    vote_down = vote_down && (last_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
+//    vote_down = vote_down && (last_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
     // 2. vote if we have not enough features now
     vote_down = vote_down && (incoming_ptr_->getFeatureList().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
 
-    // C. Time-based policies
+//    // C. Time-based policies
     bool vote_time = false;
-//    vote_time = vote_time || (incoming_ptr_->getTimeStamp()-origin_ptr_->getTimeStamp() > 1.0);
-
-    if (vote_up)
-        WOLF_TRACE("VOTE UP");
-    if (vote_down)
-        WOLF_TRACE("VOTE DOWN");
-    if (vote_time)
-        WOLF_TRACE("VOTE TIME");
+////    vote_time = vote_time || (incoming_ptr_->getTimeStamp()-origin_ptr_->getTimeStamp() > 1.0);
+//
+//    if (vote_up)
+//        WOLF_TRACE("VOTE UP");
+//    if (vote_down)
+//        WOLF_TRACE("VOTE DOWN");
+//    if (vote_time)
+//        WOLF_TRACE("VOTE TIME");
 
     return vote_up || vote_down || vote_time;
 }
@@ -449,15 +449,6 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
                 // get the first feature in the whole track
                 FeatureBasePtr ftr_first = track_matrix_.firstFeature(trk_id);
 
-//                // get the middle feature of the track using the average of the time stamps
-//                Scalar    Dt            = (ftr_last->getCapturePtr()->getTimeStamp() - ftr_first->getCapturePtr()->getTimeStamp()) / 2.0;
-//                TimeStamp ts_mid        = ftr_first->getCapturePtr()->getTimeStamp() + Dt;
-//                FeatureBasePtr ftr_mid  = track_matrix_.feature(trk_id, ts_mid - 1e-4); // 1e-4 to be on the safe side if numerical errors occur
-
-//                // FIX this
-//                FeatureBasePtr ftr_first = pair_trkid_match.second.first;
-//                FeatureBasePtr ftr_mid = track_matrix_.feature(trk_id, origin_ptr_);
-
                 // get the middle feature of the track using the average of the time stamps
                 FeatureBasePtr ftr_mid = nullptr;
 
@@ -488,25 +479,25 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
                     }
                 }
 
-                // DEBUG
-                std::cout << " TRACK "  << trk_id
-                        << " prev: "    << prev_origin_ptr_->getTimeStamp() << ", "  << prev_origin_ptr_
-                        << " origin: "  << origin_ptr_->getTimeStamp() << ", "  << origin_ptr_ << (origin_ptr_->getFramePtr()->isKey() ? " KF" : " NO kf")
-                        << " last: "    << last_ptr_->getTimeStamp() << ", "  << last_ptr_
-                        << " incoming " << incoming_ptr_->getTimeStamp() << ", "  << incoming_ptr_
-                        << std::endl;
-                for (auto ftr_it = track.begin() ; ftr_it != track.end() ; ftr_it ++)
-                {
-                    if ( ftr_it->second->getCapturePtr() != nullptr ) // have capture
-                        std::cout
-                        << " ts: " << ftr_it->first << ", "
-                        << ftr_it->second->id() << ", "
-                        << ftr_it->second->getCapturePtr()->getTimeStamp() << ", "
-                        << ftr_it->second->getCapturePtr() << std::endl;
-                    else
-                        std::cout << " ts: " << ftr_it->first << ", " << ftr_it->second->id() << ", -- || ";
-                }
-                std::cout << std::endl;
+//                // DEBUG
+//                std::cout << " TRACK "  << trk_id
+//                        << " prev: "    << prev_origin_ptr_->getTimeStamp() << ", "  << prev_origin_ptr_
+//                        << " origin: "  << origin_ptr_->getTimeStamp() << ", "  << origin_ptr_ << (origin_ptr_->getFramePtr()->isKey() ? " KF" : " NO kf")
+//                        << " last: "    << last_ptr_->getTimeStamp() << ", "  << last_ptr_
+//                        << " incoming " << incoming_ptr_->getTimeStamp() << ", "  << incoming_ptr_
+//                        << std::endl;
+//                for (auto ftr_it = track.begin() ; ftr_it != track.end() ; ftr_it ++)
+//                {
+//                    if ( ftr_it->second->getCapturePtr() != nullptr ) // have capture
+//                        std::cout
+//                        << " ts: " << ftr_it->first << ", "
+//                        << ftr_it->second->id() << ", "
+//                        << ftr_it->second->getCapturePtr()->getTimeStamp() << ", "
+//                        << ftr_it->second->getCapturePtr() << std::endl;
+//                    else
+//                        std::cout << " ts: " << ftr_it->first << ", " << ftr_it->second->id() << ", -- || ";
+//                }
+//                std::cout << std::endl;
 
 //                FeatureBasePtr ftr_mid  = track_matrix_.feature(trk_id, ts_mid - 1e-4); // 1e-4 to be on the safe side if numerical errors occur
 
@@ -515,8 +506,8 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
                 assert(ftr_mid != ftr_first && "First and middle features are the same!");
                 assert(ftr_mid != ftr_last  && "Last and middle features are the same!");
 
-                WOLF_TRACE("first ", ftr_first->id(), ", mid ", ftr_mid->id(), ", last ", ftr_last->id());
-                WOLF_TRACE("OLD first ", pair_trkid_match.second.first->id(), ", mid ", track_matrix_.feature(trk_id, origin_ptr_)->id(), ", last ", ftr_last->id());
+//                WOLF_TRACE("first ", ftr_first->id(), ", mid ", ftr_mid->id(), ", last ", ftr_last->id());
+//                WOLF_TRACE("OLD first ", pair_trkid_match.second.first->id(), ", mid ", track_matrix_.feature(trk_id, origin_ptr_)->id(), ", last ", ftr_last->id());
 
                 // make constraint
                 ConstraintAutodiffTrifocalPtr ctr = std::make_shared<ConstraintAutodiffTrifocal>(ftr_first, ftr_mid, ftr_last, shared_from_this(), false, CTR_ACTIVE);

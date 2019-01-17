@@ -57,6 +57,7 @@ void TrackMatrix::add(size_t _track_id, CaptureBasePtr _cap, FeatureBasePtr _ftr
     _ftr->setTrackId(_track_id);
     if (_cap != _ftr->getCapturePtr())
         _ftr->setCapturePtr(_cap);
+
     tracks_[_track_id].emplace(_cap->getTimeStamp(), _ftr);
     snapshots_[_cap->id()].emplace(_track_id, _ftr);        // will create new snapshot if _cap_id   is not present
 }
