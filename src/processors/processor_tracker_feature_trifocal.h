@@ -44,6 +44,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         CaptureImagePtr capture_image_last_;
         CaptureImagePtr capture_image_incoming_;
+        Matrix2s        pixel_cov_;
 
     private:
         CaptureBasePtr prev_origin_ptr_;                    ///< Capture previous to origin_ptr_ for the third focus of the trifocal.
@@ -152,6 +153,9 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          * \brief Return Image for debug purposes
          */
         cv::Mat getImageDebug();
+
+        /// \brief Get pixel covariance
+        const Matrix2s& pixelCov() const;
 };
 
 inline CaptureBasePtr ProcessorTrackerFeatureTrifocal::getPrevOriginPtr()
@@ -162,6 +166,11 @@ inline CaptureBasePtr ProcessorTrackerFeatureTrifocal::getPrevOriginPtr()
 inline cv::Mat ProcessorTrackerFeatureTrifocal::getImageDebug()
 {
     return image_debug_;
+}
+
+inline const Eigen::Matrix2s& ProcessorTrackerFeatureTrifocal::pixelCov() const
+{
+    return pixel_cov_;
 }
 
 } // namespace wolf
