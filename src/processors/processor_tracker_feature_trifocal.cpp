@@ -263,30 +263,30 @@ bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _
 
 bool ProcessorTrackerFeatureTrifocal::voteForKeyFrame()
 {
-    // A. crossing voting threshold with ascending number of features
-    bool vote_up = true;
-    // 1. vote if we did not have enough features before
-    vote_up = vote_up && (previousNumberOfTracks() < params_tracker_feature_trifocal_->min_features_for_keyframe);
-    // 2. vote if we have enough features now
-    vote_up = vote_up && (incoming_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
+//    // A. crossing voting threshold with ascending number of features
+    bool vote_up = false;
+//    // 1. vote if we did not have enough features before
+//    vote_up = vote_up && (previousNumberOfTracks() < params_tracker_feature_trifocal_->min_features_for_keyframe);
+//    // 2. vote if we have enough features now
+//    vote_up = vote_up && (incoming_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
 
     // B. crossing voting threshold with descending number of features
     bool vote_down = true;
     // 1. vote if we had enough features before
-    vote_down = vote_down && (last_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
+//    vote_down = vote_down && (last_ptr_->getFeatureList().size() >= params_tracker_feature_trifocal_->min_features_for_keyframe);
     // 2. vote if we have not enough features now
     vote_down = vote_down && (incoming_ptr_->getFeatureList().size() < params_tracker_feature_trifocal_->min_features_for_keyframe);
 
-    // C. Time-based policies
+//    // C. Time-based policies
     bool vote_time = false;
-//    vote_time = vote_time || (incoming_ptr_->getTimeStamp()-origin_ptr_->getTimeStamp() > 1.0);
-
-    if (vote_up)
-        WOLF_TRACE("VOTE UP");
-    if (vote_down)
-        WOLF_TRACE("VOTE DOWN");
-    if (vote_time)
-        WOLF_TRACE("VOTE TIME");
+////    vote_time = vote_time || (incoming_ptr_->getTimeStamp()-origin_ptr_->getTimeStamp() > 1.0);
+//
+//    if (vote_up)
+//        WOLF_TRACE("VOTE UP");
+//    if (vote_down)
+//        WOLF_TRACE("VOTE DOWN");
+//    if (vote_time)
+//        WOLF_TRACE("VOTE TIME");
 
     return vote_up || vote_down || vote_time;
 }

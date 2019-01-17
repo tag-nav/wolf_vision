@@ -88,10 +88,12 @@ void CaptureBase::remove()
         // remove downstream
         while (!feature_list_.empty())
         {
+            WOLF_TRACE("removing WOLF feature ", feature_list_.front());
             feature_list_.front()->remove(); // remove downstream
         }
         while (!constrained_by_list_.empty())
         {
+            WOLF_TRACE("removing WOLF feature (constrained by)", feature_list_.front());
             constrained_by_list_.front()->remove(); // remove constrained by
         }
     }
