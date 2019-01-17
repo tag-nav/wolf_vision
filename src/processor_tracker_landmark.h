@@ -137,10 +137,10 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
-         * The function sets the member new_features_list_, the list of newly detected features,
+         * The function sets _features_last_out, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out) = 0;
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_last_out) = 0;
 
         /** \brief Creates a landmark for each of new_features_last_
          **/

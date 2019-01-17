@@ -151,9 +151,9 @@ class ProcessorTrackerFeature : public ProcessorTracker
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
-         * The function sets the member new_features_last_, the list of newly detected features.
+         * The function sets _features_last_out, the list of newly detected features in Capture last.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_incoming_out) = 0;
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_last_out) = 0;
 
         /** \brief Create a new constraint and link it to the wolf tree
          * \param _feature_ptr pointer to the parent Feature

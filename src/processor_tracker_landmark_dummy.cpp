@@ -63,7 +63,7 @@ bool ProcessorTrackerLandmarkDummy::voteForKeyFrame()
     return incoming_ptr_->getFeatureList().size() < 4;
 }
 
-unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out)
+unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_last_out)
 {
     std::cout << "\tProcessorTrackerLandmarkDummy::detectNewFeatures" << std::endl;
 
@@ -71,11 +71,11 @@ unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const unsigned int
     for (unsigned int i = 1; i <= _max_features; i++)
     {
         n_feature_++;
-        _features_incoming_out.push_back(
+        _features_last_out.push_back(
                 std::make_shared<FeatureBase>("POINT IMAGE", n_feature_ * Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
-        std::cout << "\t\tfeature " << _features_incoming_out.back()->getMeasurement() << " detected!" << std::endl;
+        std::cout << "\t\tfeature " << _features_last_out.back()->getMeasurement() << " detected!" << std::endl;
     }
-    return _features_incoming_out.size();
+    return _features_last_out.size();
 }
 
 LandmarkBasePtr ProcessorTrackerLandmarkDummy::createLandmark(FeatureBasePtr _feature_ptr)

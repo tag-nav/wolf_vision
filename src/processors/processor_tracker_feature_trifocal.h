@@ -42,8 +42,8 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
 
         ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal_;      ///< Configuration parameters
 
-        CaptureImagePtr capture_last_;
-        CaptureImagePtr capture_incoming_;
+        CaptureImagePtr capture_image_last_;
+        CaptureImagePtr capture_image_incoming_;
 
     private:
         CaptureBasePtr prev_origin_ptr_;                    ///< Capture previous to origin_ptr_ for the third focus of the trifocal.
@@ -91,7 +91,7 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          *
          * The function sets the member new_features_last_, the list of newly detected features.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_incoming_out) override;
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_last_out) override;
 
         /** \brief Create a new constraint and link it to the wolf tree
          * \param _feature_ptr pointer to the parent Feature

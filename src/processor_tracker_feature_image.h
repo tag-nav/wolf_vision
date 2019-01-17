@@ -115,11 +115,11 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          *
          * This is intended to create Features that are not among the Features already known in the Map.
          *
-         * This function sets new_features_last_, the list of newly detected features.
+         * This function sets _features_last_out, the list of newly detected features.
          *
          * \return The number of detected Features.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_incoming_out);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_last_out);
 
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
