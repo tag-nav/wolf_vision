@@ -222,25 +222,25 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
 
         if ( capture_image_last_->map_index_to_next_.count(feature_last_->getIndexKeyPoint()) )
         {
-            int index_kp_incoming = capture_image_last_->map_index_to_next_[feature_last_->getIndexKeyPoint()];
+            int index_incoming = capture_image_last_->map_index_to_next_[feature_last_->getIndexKeyPoint()];
 
-            if (capture_image_incoming_->matches_normalized_scores_.at(index_kp_incoming) > mat_ptr_->getParams()->min_norm_score )
+            if (capture_image_incoming_->matches_normalized_scores_.at(index_incoming) > mat_ptr_->getParams()->min_norm_score )
             {
                 // Check Euclidean distance between keypoints
-                cv::KeyPoint kp_incoming = capture_image_incoming_->keypoints_.at(index_kp_incoming);
+                cv::KeyPoint kp_incoming = capture_image_incoming_->keypoints_.at(index_incoming);
                 cv::KeyPoint kp_last = capture_image_last_->keypoints_.at(feature_last_->getIndexKeyPoint());
 
                 if (isInlier(kp_last, kp_incoming))
                 {
-                    FeaturePointImagePtr incoming_point_ptr = std::make_shared<FeaturePointImage>(
+                    FeaturePointImagePtr ftr_point_incoming = std::make_shared<FeaturePointImage>(
                             kp_incoming,
-                            index_kp_incoming,
-                            capture_image_incoming_->descriptors_.row(index_kp_incoming),
+                            index_incoming,
+                            capture_image_incoming_->descriptors_.row(index_incoming),
                             Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
 
-                    _features_incoming_out.push_back(incoming_point_ptr);
+                    _features_incoming_out.push_back(ftr_point_incoming);
 
-                    _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_last_, capture_image_incoming_->matches_normalized_scores_.at(index_kp_incoming)}));
+                    _feature_matches[ftr_point_incoming] = std::make_shared<FeatureMatch>(FeatureMatch({feature_last_, capture_image_incoming_->matches_normalized_scores_.at(index_incoming)}));
 
                     // hit cell to acknowledge there's a tracked point in that cell
                     capture_image_incoming_->grid_features_->hitTrackingCell(kp_incoming);
