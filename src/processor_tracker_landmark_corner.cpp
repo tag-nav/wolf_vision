@@ -375,11 +375,11 @@ LandmarkBasePtr ProcessorTrackerLandmarkCorner::createLandmark(FeatureBasePtr _f
                                               _feature_ptr->getMeasurement()(3));
 }
 
-unsigned int ProcessorTrackerLandmarkCorner::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out)
+unsigned int ProcessorTrackerLandmarkCorner::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_last_out)
 {
     // already computed since each scan is computed in preprocess()
-    _features_incoming_out = std::move(corners_last_);
-    return _features_incoming_out.size();
+    _features_last_out = std::move(corners_last_);
+    return _features_last_out.size();
 }
 
 ConstraintBasePtr ProcessorTrackerLandmarkCorner::createConstraint(FeatureBasePtr _feature_ptr,
