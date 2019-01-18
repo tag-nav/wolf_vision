@@ -44,9 +44,9 @@ int main(int argc, char *argv[])
 
 
     // General execution options
-    bool APPLY_CONTRAST = true;
-    bool IMAGE_OUTPUT = true;
-    bool USEMAP = true;
+    const bool APPLY_CONTRAST = false;
+    const bool IMAGE_OUTPUT   = true;
+    const bool USEMAP         = true;
 
 
     WOLF_INFO( "==================== processor apriltag test ======================" )
@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
                             draw_apriltag(img->getImage(), fa->getTagCorners(), 1);
                         }
                         cv::imshow( img->getName(), img->getImage() );  // display original image.
-                        cv::waitKey(0.1);
+                        cv::waitKey(1);
                     }
                 }
             }
@@ -184,7 +184,7 @@ int main(int argc, char *argv[])
     WOLF_INFO( "====================    Solve problem    ======================" )
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
     WOLF_DEBUG(report);
-    problem->print(4,1,1,1);
+    problem->print(3,1,1,1);
 
 
 
