@@ -372,8 +372,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, computeInformation)
     ASSERT_MATRIX_APPROX(J_h_R2, J_h_R2_matlab, 1e-3);
 
     Scalar sig_q = 2;
-    std::vector<Scalar> k_vec = {cx, cy, fx, fy};
-    Eigen::Matrix6s transformation_info = prc_apr->computeInformation(t, v2R(v), k_vec, tag_width, sig_q);
+    Eigen::Matrix6s transformation_info = prc_apr->computeInformation(t, v2R(v), K, tag_width, sig_q);
 
     // From Matlab
 //    Eigen::Matrix6s transformation_cov_matlab;

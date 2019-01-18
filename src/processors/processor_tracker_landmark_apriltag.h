@@ -115,14 +115,14 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         Eigen::Vector6s getVarVec();
         FeatureBaseList getIncomingDetections() const;
         FeatureBaseList getLastDetections() const;
-        Eigen::Affine3d opencv_pose_estimation(apriltag_detection_t *det, std::vector<double> kvec, double tag_width);
-        Eigen::Affine3d umich_pose_estimation(apriltag_detection_t *det, std::vector<double> kvec, double tag_width);
-        void ippe_pose_estimation(apriltag_detection_t *det, std::vector<double> kvec, double tag_width,
+        Eigen::Affine3d opencv_pose_estimation(apriltag_detection_t *det, cv::Mat_<Scalar>, double tag_width);
+        Eigen::Affine3d umich_pose_estimation(apriltag_detection_t *det, cv::Mat_<Scalar>, double tag_width);
+        void ippe_pose_estimation(apriltag_detection_t *det, cv::Mat_<Scalar>, double tag_width,
                                     Eigen::Affine3d &M1,
                                     double &rep_error1,
                                     Eigen::Affine3d &M2,
                                     double &rep_error2);
-        Eigen::Matrix6s computeInformation(Eigen::Vector3s const &t, Eigen::Matrix3s const &R, std::vector<double> const &k_vec, double const &tag_width, double const &sig_q);
+        Eigen::Matrix6s computeInformation(Eigen::Vector3s const &t, Eigen::Matrix3s const &R, Eigen::Matrix3s const &K, double const &tag_width, double const &sig_q);
         void pinholeHomogeneous(Eigen::Matrix3s const & K, Eigen::Vector3s const & t,
                                 Eigen::Matrix3s const & R, Eigen::Vector3s const & p,
                                 Eigen::Vector3s &h, Eigen::Matrix3s &J_h_T, Eigen::Matrix3s &J_h_R);
@@ -143,7 +143,9 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         Scalar std_xy_, std_z_, std_rpy_;   ///< dummy std values for covariance computation
         Scalar std_pix_;                    ///< pixel error to be propagated to a camera to tag transformation covariance
 //        Eigen::Affine3ds c_M_ac_;           ///< aprilCamera-to-camera transform not used with solvePnP
-        double cx_, cy_, fx_, fy_;
+//        double cx_, cy_, fx_, fy_;
+        Matrix3s K_;
+        cv::Mat_<Scalar> cv_K_;
 
     protected:
         FeatureBaseList detections_incoming_;   ///< detected tags in wolf form, incoming image

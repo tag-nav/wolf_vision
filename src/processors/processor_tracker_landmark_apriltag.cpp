@@ -37,6 +37,7 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         std_z_  (_params_tracker_landmark_apriltag->std_z_  ),
         std_rpy_(_params_tracker_landmark_apriltag->std_rpy_),
         std_pix_(_params_tracker_landmark_apriltag->std_pix_),
+        cv_K_(3,3),
         min_time_vote_(_params_tracker_landmark_apriltag->min_time_vote),
         min_features_for_keyframe_(_params_tracker_landmark_apriltag->min_features_for_keyframe)
 {
@@ -125,7 +126,6 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
     // run Apriltag detector
     zarray_t *detections = apriltag_detector_detect(&detector_, &im);
 
-    std::vector<Scalar> k_vec = {cx_, cy_, fx_, fy_};
     // loop all detections
     for (int i = 0; i < zarray_size(detections); i++) {
 
@@ -142,10 +142,10 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         // IPPE (Infinitesimal Plane-based Pose Estimation)
         //////////////////
         //
-        Eigen::Affine3ds M_ippe2;
+        Eigen::Affine3ds M_ippe1, M_ippe2, M_april, M_PnP;
         Scalar rep_error1;
         Scalar rep_error2;
-        ippe_pose_estimation(det, k_vec, tag_width, c_M_t, rep_error1, M_ippe2, rep_error2);
+        ippe_pose_estimation(det, cv_K_, tag_width, M_ippe1, rep_error1, M_ippe2, rep_error2);
 
         // If not so sure about whether we have the right solution or not, do not create a feature
         // TODO: use parameters
@@ -157,7 +157,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         // Slower than UMICH (iterative algorithm LM) but yield more precise results
         // Does not solve the ambiguity on the rotation however
         //////////////////
-//        c_M_t = opencv_pose_estimation(det, k_vec, tag_width);
+        M_PnP = opencv_pose_estimation(det, cv_K_, tag_width);
         //////////////////
 
         //////////////////
@@ -165,7 +165,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         // Implementation found in the original Apriltag c implementation.
         // Analytical formula but high reprojection error for large angles
         //////////////////
-//        c_M_t = umich_pose_estimation(det, k_vec, tag_width);
+        // M_april = umich_pose_estimation(det, cv_K_, tag_width);
         //////////////////
 
         // set the measured pose vector
@@ -175,7 +175,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
         // compute the covariance
         Eigen::Matrix6s cov = getVarVec().asDiagonal() ;  // fixed dummy covariance
-//        Eigen::Matrix6s info = computeInformation(translation, c_M_t.linear(), k_vec, tag_width, std_pix_);  // Lie jacobians covariance
+//        Eigen::Matrix6s info = computeInformation(translation, c_M_t.linear(), K_, tag_width, std_pix_);  // Lie jacobians covariance
 
         if (is_ambiguous){
             WOLF_INFO("Ambiguity on estimated rotation is likely");
@@ -192,7 +192,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
 // To compare with apriltag implementation
 // Returned translation is in tag units: needs to be multiplied by tag_width/2
-Eigen::Affine3ds ProcessorTrackerLandmarkApriltag::opencv_pose_estimation(apriltag_detection_t *det, std::vector<double> kvec, double tag_width){
+Eigen::Affine3ds ProcessorTrackerLandmarkApriltag::opencv_pose_estimation(apriltag_detection_t *det, cv::Mat_<Scalar> K, double tag_width){
     // get corners from det
     std::vector<cv::Point2d> corners_pix(4);
     for (int i = 0; i < 4; i++)
@@ -214,9 +214,6 @@ Eigen::Affine3ds ProcessorTrackerLandmarkApriltag::opencv_pose_estimation(aprilt
     // Solve for pose
     // The estimated r and t brings points from tag frame to camera frame
     cv::Mat rvec, tvec;
-    cv::Mat K = (cv::Mat_<Scalar>(3,3) << kvec[2], 0, kvec[0],
-                                          0, kvec[3], kvec[1],
-                                          0, 0, 1);
     cv::Mat dist_coeffs = cv::Mat::zeros(4,1,cv::DataType<Scalar>::type); // Assuming corrected images
 
     cv::solvePnP(obj_pts, corners_pix, K, dist_coeffs, rvec, tvec);
@@ -233,13 +230,13 @@ Eigen::Affine3ds ProcessorTrackerLandmarkApriltag::opencv_pose_estimation(aprilt
     return M;
 }
 
-Eigen::Affine3d ProcessorTrackerLandmarkApriltag::umich_pose_estimation(apriltag_detection_t *det, std::vector<double> kvec, double tag_width){
+Eigen::Affine3d ProcessorTrackerLandmarkApriltag::umich_pose_estimation(apriltag_detection_t *det, cv::Mat_<Scalar> K, double tag_width){
     // To put in the usual camera frame with Z looking in front (RDF)
     Eigen::Affine3d c_M_ac;
     c_M_ac.matrix() = (Eigen::Vector4d() << 1, -1, -1, 1).finished().asDiagonal();
 
     Eigen::Affine3d M_april_raw;
-    matd_t *pose_matrix = homography_to_pose(det->H, -kvec[2], kvec[3], kvec[0], kvec[1]); // !! fx Negative sign advised by apriltag library commentary
+    matd_t *pose_matrix = homography_to_pose(det->H, -K(0,0), K(1,1), K(0,2), K(1,2)); // !! fx Negative sign advised by apriltag library commentary
     // write it in Eigen form
     Eigen::Affine3d ac_M_t;
     for(int r=0; r<4; r++)
@@ -254,16 +251,13 @@ Eigen::Affine3d ProcessorTrackerLandmarkApriltag::umich_pose_estimation(apriltag
     return c_M_t;
 }
 
-void ProcessorTrackerLandmarkApriltag::ippe_pose_estimation(apriltag_detection_t *det, std::vector<double> kvec, double tag_width,
+void ProcessorTrackerLandmarkApriltag::ippe_pose_estimation(apriltag_detection_t *det, cv::Mat_<Scalar> K, double tag_width,
                             Eigen::Affine3d &M1,
                             double &rep_error1,
                             Eigen::Affine3d &M2,
                             double &rep_error2){
 
     // camera coefficients
-    cv::Mat K = (cv::Mat_<Scalar>(3,3) << kvec[2], 0, kvec[0],
-                                        0, kvec[3], kvec[1],
-                                        0, 0, 1);
     cv::Mat dist_coeffs = cv::Mat::zeros(4,1,cv::DataType<Scalar>::type); // Assuming corrected images
 
     // get corners from det
@@ -463,14 +457,8 @@ Eigen::Vector6s ProcessorTrackerLandmarkApriltag::getVarVec()
     return var_vec;
 }
 
-Eigen::Matrix6s ProcessorTrackerLandmarkApriltag::computeInformation(Eigen::Vector3s const &t, Eigen::Matrix3s const &R, std::vector<Scalar> const &k_vec, Scalar const &tag_width, double const &sig_q)
+Eigen::Matrix6s ProcessorTrackerLandmarkApriltag::computeInformation(Eigen::Vector3s const &t, Eigen::Matrix3s const &R, Eigen::Matrix3s const &K, Scalar const &tag_width, double const &sig_q)
 {
-    // Create cam intrisic matrix
-    Eigen::Matrix3s K;
-    K << k_vec[2], 0,  k_vec[0],
-         0,  k_vec[3], k_vec[1],
-         0,  0,  1;
-
     // Same order as the 2D corners (anti clockwise, looking at the tag).
     // Looking at the tag, the reference frame is
     // X = Right, Y = Down, Z = Inside the plane
@@ -537,11 +525,18 @@ FeatureBaseList ProcessorTrackerLandmarkApriltag::getLastDetections() const
 void ProcessorTrackerLandmarkApriltag::configure(SensorBasePtr _sensor)
 {
     // get camera intrinsic parameters
-    Eigen::Vector4s camera_intrinsics(_sensor->getIntrinsicPtr()->getState()); //[cx cy fx fy]
-    cx_ = camera_intrinsics(0);
-    cy_ = camera_intrinsics(1);
-    fx_ = camera_intrinsics(2);
-    fy_ = camera_intrinsics(3);
+    Eigen::Vector4s k(_sensor->getIntrinsicPtr()->getState()); //[cx cy fx fy]
+
+    // Intrinsic matrices for opencv and eigen:
+
+    cv_K_ << k(2),    0, k(0),
+                0, k(3), k(1),
+                0,    0,    1;
+
+    K_ << k(2),    0, k(0),
+             0, k(3), k(1),
+             0,    0,    1;
+
 }
 
 void ProcessorTrackerLandmarkApriltag::advanceDerived()
