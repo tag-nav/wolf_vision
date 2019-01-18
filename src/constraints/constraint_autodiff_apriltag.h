@@ -93,10 +93,12 @@ ConstraintAutodiffApriltag::~ConstraintAutodiffApriltag()
 template<typename T> bool ConstraintAutodiffApriltag::operator ()( const T* const _p_camera, const T* const _o_camera, const T* const _p_keyframe, const T* const _o_keyframe, const T* const _p_landmark, const T* const _o_landmark, T* _residuals) const
 {
     //states
-    Eigen::Translation<T,3> p_camera(_p_camera[0], _p_camera[1], _p_camera[2]),
-                            p_keyframe(_p_keyframe[0], _p_keyframe[1], _p_keyframe[2]),
-                            p_landmark(_p_landmark[0], _p_landmark[1], _p_landmark[2]);
-    Eigen::Quaternion<T> q_camera(_o_camera), q_keyframe(_o_keyframe), q_landmark(_o_landmark);
+    Eigen::Translation<T,3> p_camera    (_p_camera[0]  , _p_camera[1]  , _p_camera[2]),
+                            p_keyframe  (_p_keyframe[0], _p_keyframe[1], _p_keyframe[2]),
+                            p_landmark  (_p_landmark[0], _p_landmark[1], _p_landmark[2]);
+    Eigen::Quaternion<T> q_camera   (_o_camera),
+                         q_keyframe (_o_keyframe),
+                         q_landmark (_o_landmark);
 
     //Measurements T and Q
     Eigen::Translation3ds  p_measured(getMeasurement().head(3));
