@@ -53,10 +53,12 @@ void ProcessorOdom3D::computeCurrentDelta(const Eigen::VectorXs& _data,
 {
     assert((_data.size() == 6 || _data.size() == 7) && "Wrong data size. Must be 6 or 7 for 3D.");
     Scalar disp, rot; // displacement and rotation of this motion step
+    Vector3s vtheta;
     if (_data.size() == (long int)6)
     {
         // rotation in vector form
-        _delta.head<3>() = _data.head<3>();
+        vtheta = _data.head<3>();
+        _delta.head<3>() = vtheta;
         new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta.data() + 3);
         q_out_ = v2q(_data.tail<3>());
         disp = _data.head<3>().norm();
@@ -66,23 +68,33 @@ void ProcessorOdom3D::computeCurrentDelta(const Eigen::VectorXs& _data,
     {
         // rotation in quaternion form
         _delta = _data;
+        vtheta = q2v(_data.tail<4>());
         disp = _data.head<3>().norm();
         rot = 2 * acos(_data(3));
     }
-    /* Jacobians of d = data2delta(data, dt)
+    /* Jacobians of d = computeCurrentDelta(data, dt)
      * with: d =    [Dp Dq]
      *       data = [dp do]
      *
      *       Dp = dp
-     *       Dq = v2q(do)
+     *       Dq = v2q(do) = exp(do)
      *
-     * dDp/ddp = I
-     * dDp/ddo = 0
-     * dDo/ddp = 0
-     * dDo/ddo = I
+     * J = dD/dd, with:
      *
-     * so, J = I, and delta_cov = _data_cov
+     *   dDp/ddp = I
+     *   dDp/ddo = 0
+     *   dDo/ddp = 0
+     *   dDo/ddo = Jr(do)
+     *
+     * so, delta_cov = J * _data_cov * J\tr
      */
+
+
+    // Static covariance from data_cov
+//    Matrix6s J(Matrix6s::Identity());
+//    J.block(3,3,3,3) = wolf::jac_SO3_right(vtheta);
+//    _delta_cov = J * _data_cov * J.transpose();
+
     // We discard _data_cov and create a new one from the measured motion
     Scalar disp_var = min_disp_var_ + k_disp_to_disp_ * disp;
     Scalar rot_var = min_rot_var_ + k_disp_to_rot_ * disp + k_rot_to_rot_ * rot;
