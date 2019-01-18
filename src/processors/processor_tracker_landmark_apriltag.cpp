@@ -168,6 +168,13 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         // M_april = umich_pose_estimation(det, cv_K_, tag_width);
         //////////////////
 
+        WOLF_DEBUG("ippe1\n",   M_ippe1 .matrix());
+        WOLF_DEBUG("ippe2\n",   M_ippe2 .matrix());
+//        WOLF_DEBUG("M_PnP\n",   M_PnP   .matrix());
+//        WOLF_DEBUG("M_april\n", M_april .matrix());
+
+        c_M_t = M_ippe1;
+
         // set the measured pose vector
         Eigen::Vector3s translation ( c_M_t.translation() ); // translation vector in apriltag meters
         Eigen::Vector7s pose;
@@ -182,9 +189,11 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
             // Put a very high covariance on angles measurements
             cov.bottomRightCorner(3, 3) = 1000000*Eigen::Matrix3s::Identity();
         }
-        WOLF_TRACE("cov \n", cov);
+        WOLF_TRACE("cov diagonal: [", cov.diagonal(), "]");
         // add to detected features list
         detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov.inverse(), tag_id, *det, FeatureBase::UncertaintyType::UNCERTAINTY_IS_INFO));
+
+        WOLF_TRACE("---------------------\n");
     }
 
     apriltag_detections_destroy(detections);
