@@ -184,7 +184,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         }
         WOLF_TRACE("cov \n", cov);
         // add to detected features list
-        detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov, tag_id, *det));
+        detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, cov.inverse(), tag_id, *det, FeatureBase::UncertaintyType::UNCERTAINTY_IS_INFO));
     }
 
     apriltag_detections_destroy(detections);

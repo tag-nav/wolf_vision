@@ -22,7 +22,7 @@ class FeatureApriltag : public FeatureBase
 {
     public:
 
-        FeatureApriltag(const Eigen::Vector7s & _measurement, const Eigen::Matrix6s & _meas_covariance, const int _tag_id, const apriltag_detection_t & _det);
+        FeatureApriltag(const Eigen::Vector7s & _measurement, const Eigen::Matrix6s & _meas_covariance, const int _tag_id, const apriltag_detection_t & _det, UncertaintyType _uncertainty_type = UNCERTAINTY_IS_INFO);
         virtual ~FeatureApriltag();
         
         /** \brief Returns tag id

@@ -4,10 +4,11 @@
 namespace wolf {
 
 FeatureApriltag::FeatureApriltag(const Eigen::Vector7s & _measurement,
-                                 const Eigen::Matrix6s & _meas_covariance,
+                                 const Eigen::Matrix6s & _meas_uncertainty,
                                  const int _tag_id,
-                                 const apriltag_detection_t & _det) :
-    FeatureBase("APRILTAG", _measurement, _meas_covariance),
+                                 const apriltag_detection_t & _det,
+                                 UncertaintyType _uncertainty_type) :
+    FeatureBase("APRILTAG", _measurement, _meas_uncertainty, _uncertainty_type),
     tag_id_     (_tag_id),
     tag_corners_(4),
     detection_  (_det)

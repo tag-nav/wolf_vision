@@ -50,7 +50,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
          * \param _measurement the measurement
          * \param _meas_covariance the noise of the measurement
          */
-        FeatureBase(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_uncertainty, UncertaintyType _uncertainty_is_info = UNCERTAINTY_IS_COVARIANCE);
+        FeatureBase(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_uncertainty, UncertaintyType _uncertainty_type = UNCERTAINTY_IS_COVARIANCE);
 
         virtual ~FeatureBase();
         void remove();

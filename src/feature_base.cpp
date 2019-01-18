@@ -6,7 +6,7 @@ namespace wolf {
 
 unsigned int FeatureBase::feature_id_count_ = 0;
 
-FeatureBase::FeatureBase(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_uncertainty, UncertaintyType _uncertainty_is_info) :
+FeatureBase::FeatureBase(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_uncertainty, UncertaintyType _uncertainty_type) :
 	NodeBase("FEATURE", _type),
     capture_ptr_(),
     is_removing_(false),
@@ -15,7 +15,7 @@ FeatureBase::FeatureBase(const std::string& _type, const Eigen::VectorXs& _measu
     landmark_id_(0),
 	measurement_(_measurement)
 {
-    switch (_uncertainty_is_info )
+    switch (_uncertainty_type)
     {
         case UNCERTAINTY_IS_INFO :
             setMeasurementInformation(_meas_uncertainty);
