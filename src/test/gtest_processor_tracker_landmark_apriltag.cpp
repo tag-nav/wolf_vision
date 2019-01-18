@@ -315,7 +315,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, createConstraint)
     ASSERT_TRUE(ctr->getType() == "AUTODIFF APRILTAG");
 }
 
-TEST_F(ProcessorTrackerLandmarkApriltag_class, computeCovariance)
+TEST_F(ProcessorTrackerLandmarkApriltag_class, computeInformation)
 {
     Scalar cx = 320;
     Scalar cy = 240;
@@ -328,8 +328,9 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, computeCovariance)
     Eigen::Vector3s t; t << 0.0, 0.0, 0.4;
     Eigen::Vector3s v; v << 0.2, 0.0, 0.0;
     Scalar tag_width = 0.05;
-    Eigen::Vector3s p1; p1 <<  1,  1, 0; p1 = p1*tag_width/2; // top left
-    Eigen::Vector3s p2; p2 << -1,  1, 0; p2 = p2*tag_width/2; // top right
+    Scalar s = tag_width/2;
+    Eigen::Vector3s p1; p1 <<  s,  s, 0; // bottom right
+    Eigen::Vector3s p2; p2 << -s,  s, 0; // bottom left
 
     // Got from Matlab code:
     // Top left corner
@@ -372,19 +373,31 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, computeCovariance)
 
     Scalar sig_q = 2;
     std::vector<Scalar> k_vec = {cx, cy, fx, fy};
-    Eigen::Matrix6s transformation_cov = prc_apr->computeCovariance(t, v2R(v), k_vec, tag_width, sig_q);
+    Eigen::Matrix6s transformation_info = prc_apr->computeInformation(t, v2R(v), k_vec, tag_width, sig_q);
 
     // From Matlab
-    Eigen::Matrix6s transformation_cov_matlab;
-    transformation_cov_matlab <<
-    0.0000,    0.0000,   -0.0000,    0.0000,   -0.0002,    0.0000,
-    0.0000,    0.0000,   -0.0000,    0.0002,    0.0000,    0.0000,
-   -0.0000,   -0.0000,    0.0004,   -0.0040,   -0.0000,    0.0000,
-    0.0000,    0.0002,   -0.0040,    0.1027,    0.0000,    0.0000,
-   -0.0002,    0.0000,   -0.0000,    0.0000,    0.1074,   -0.0106,
-    0.0000,    0.0000,    0.0000,    0.0000,   -0.0106,    0.0023;
+//    Eigen::Matrix6s transformation_cov_matlab;
+//    transformation_cov_matlab <<
+//    0.0000,    0.0000,   -0.0000,    0.0000,   -0.0002,    0.0000,
+//    0.0000,    0.0000,   -0.0000,    0.0002,    0.0000,    0.0000,
+//   -0.0000,   -0.0000,    0.0004,   -0.0040,   -0.0000,    0.0000,
+//    0.0000,    0.0002,   -0.0040,    0.1027,    0.0000,    0.0000,
+//   -0.0002,    0.0000,   -0.0000,    0.0000,    0.1074,   -0.0106,
+//    0.0000,    0.0000,    0.0000,    0.0000,   -0.0106,    0.0023;
 
-    ASSERT_MATRIX_APPROX(transformation_cov, transformation_cov_matlab, 1e-3);
+    Eigen::Matrix6s transformation_info_matlab;
+    transformation_info_matlab <<
+    6.402960973553990,                   0,   0.000000000000000,  -0.000000000000000,   0.009809735541319,   0.001986080274985,
+                    0,   6.402960973553990,   0.014610695222409,  -0.008824560412472,   0.000000000000000,   0.000000000000000,
+    0.000000000000000,   0.014610695222409,   0.049088870761338,   0.001889201771982,   0.000000000000000,   0.000000000000000,
+   -0.000000000000000,  -0.008824560412472,   0.001889201771982,   0.000183864607538,  -0.000000000000000,   0.000000000000000,
+    0.009809735541319,   0.000000000000000,   0.000000000000000,  -0.000000000000000,   0.000183864607538,   0.000773944077821,
+    0.001986080274985,   0.000000000000000,   0.000000000000000,  -0.000000000000000,   0.000773944077821,   0.007846814985446;
+
+    transformation_info_matlab = transformation_info_matlab*100000.0;
+
+
+    ASSERT_MATRIX_APPROX(transformation_info, transformation_info_matlab, 1e-3);
 
 
 }

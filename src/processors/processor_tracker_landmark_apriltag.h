@@ -115,9 +115,14 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         Eigen::Vector6s getVarVec();
         FeatureBaseList getIncomingDetections() const;
         FeatureBaseList getLastDetections() const;
-        Eigen::Affine3d opencv_pose_estimation(apriltag_detection_t *det, std::vector<double> kvec);
-        Eigen::Affine3d umich_pose_estimation(apriltag_detection_t *det, std::vector<double> kvec);
-        Eigen::Matrix6s computeCovariance(Eigen::Vector3s const &t, Eigen::Matrix3s const &R, std::vector<Scalar> const &k_vec, Scalar const &tag_width, double const &sig_q);
+        Eigen::Affine3d opencv_pose_estimation(apriltag_detection_t *det, std::vector<double> kvec, double tag_width);
+        Eigen::Affine3d umich_pose_estimation(apriltag_detection_t *det, std::vector<double> kvec, double tag_width);
+        void ippe_pose_estimation(apriltag_detection_t *det, std::vector<double> kvec, double tag_width,
+                                    Eigen::Affine3d &M1,
+                                    double &rep_error1,
+                                    Eigen::Affine3d &M2,
+                                    double &rep_error2);
+        Eigen::Matrix6s computeInformation(Eigen::Vector3s const &t, Eigen::Matrix3s const &R, std::vector<double> const &k_vec, double const &tag_width, double const &sig_q);
         void pinholeHomogeneous(Eigen::Matrix3s const & K, Eigen::Vector3s const & t,
                                 Eigen::Matrix3s const & R, Eigen::Vector3s const & p,
                                 Eigen::Vector3s &h, Eigen::Matrix3s &J_h_T, Eigen::Matrix3s &J_h_R);

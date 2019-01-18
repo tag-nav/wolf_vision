@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     // General execution options
     bool APPLY_CONTRAST = true;
     bool IMAGE_OUTPUT = true;
-    bool USEMAP = false;
+    bool USEMAP = true;
 
 
     WOLF_INFO( "==================== processor apriltag test ======================" )
