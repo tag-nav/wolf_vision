@@ -351,6 +351,26 @@ void CeresManager::updateStateBlockLocalParametrization(const StateBlockPtr& sta
         addConstraint(ctr);
 }
 
+bool CeresManager::hasConverged()
+{
+    return summary_.termination_type == ceres::CONVERGENCE;
+}
+
+SizeStd CeresManager::iterations()
+{
+    return summary_.iterations.size();
+}
+
+Scalar CeresManager::initialCost()
+{
+    return Scalar(summary_.initial_cost);
+}
+
+Scalar CeresManager::finalCost()
+{
+    return Scalar(summary_.final_cost);
+}
+
 ceres::CostFunctionPtr CeresManager::createCostFunction(const ConstraintBasePtr& _ctr_ptr)
 {
     assert(_ctr_ptr != nullptr);

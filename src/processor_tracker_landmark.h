@@ -94,33 +94,25 @@ class ProcessorTrackerLandmark : public ProcessorTracker
         /** \brief Tracker function
          * \return The number of successful tracks.
          *
+         * Find Features in \b incoming Capture corresponding to known landmarks in the \b Map.
+         *
          * This is the tracker function to be implemented in derived classes.
          * It operates on the \b incoming capture pointed by incoming_ptr_.
          *
-         * This should do one of the following, depending on the design of the tracker:
-         *   - Track Features against other Features in the \b origin Capture. Tips:
-         *     - An intermediary step of matching against Features in the \b last Capture makes tracking easier.
-         *     - Once tracked against last, then the link to Features in \b origin is provided by the Features' Constraints in \b last.
-         *     - If required, correct the drift by re-comparing against the Features in origin.
-         *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
-         *
-         * The function must generate the necessary Features in the \b incoming Capture,
-         * of the correct type, derived from FeatureBase.
-         *
-         * It must also generate the constraints, of the correct type, derived from ConstraintBase
-         * (through ConstraintAnalytic or ConstraintSparse).
+         * The function must populate the list of Features in the \b incoming Capture.
+         * Features need to be of the correct type, derived from FeatureBase.
          */
         virtual unsigned int processKnown();
 
-        /** \brief Find provided landmarks in the incoming Capture
-         * \param _landmark_list_in input list of landmarks to be found in incoming
-         * \param _feature_list_out returned list of incoming features corresponding to a landmark of _landmark_list_in
+        /** \brief Find provided landmarks in the incoming capture
+         * \param _landmarks_in input list of landmarks to be found in incoming
+         * \param _features_incoming_out returned list of incoming features corresponding to a landmark of _landmarks_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          * \return the number of landmarks found
          */
-        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmark_list_in,
-                                           FeatureBaseList& _feature_list_out,
-                                           LandmarkMatchMap& _feature_landmark_correspondences) = 0;
+        virtual unsigned int findLandmarks(const LandmarkBaseList&  _landmarks_in,
+                                           FeatureBaseList&         _features_incoming_out,
+                                           LandmarkMatchMap&        _feature_landmark_correspondences) = 0;
 
         /** \brief Vote for KeyFrame generation
          *
@@ -149,7 +141,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          * The function sets the member new_features_list_, the list of newly detected features
          * in last_ptr_ to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out) = 0;
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out) = 0;
 
         /** \brief Creates a landmark for each of new_features_last_
          **/
