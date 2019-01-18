@@ -52,25 +52,25 @@ void ProcessorOdom3D::computeCurrentDelta(const Eigen::VectorXs& _data,
                                           Eigen::MatrixXs& _jacobian_calib)
 {
     assert((_data.size() == 6 || _data.size() == 7) && "Wrong data size. Must be 6 or 7 for 3D.");
-    Scalar disp, rot; // displacement and rotation of this motion step
-    Vector3s vtheta;
+    Scalar disp, rot;   // displacement and rotation scalars of this motion step
+    Vector3s vtheta;    // rotation vector
     if (_data.size() == (long int)6)
     {
-        // rotation in vector form
-        vtheta = _data.head<3>();
-        _delta.head<3>() = vtheta;
+        _delta.head<3>()    = _data.head<3>();
         new (&q_out_) Eigen::Map<Eigen::Quaternions>(_delta.data() + 3);
-        q_out_ = v2q(_data.tail<3>());
-        disp = _data.head<3>().norm();
-        rot = _data.tail<3>().norm();
+
+        vtheta              = _data.tail<3>();
+        q_out_              = v2q(vtheta);
+        disp                = _data.head<3>().norm();
+        rot                 = vtheta.norm();
     }
     else
     {
         // rotation in quaternion form
-        _delta = _data;
-        vtheta = q2v(_data.tail<4>());
-        disp = _data.head<3>().norm();
-        rot = 2 * acos(_data(3));
+        _delta  = _data;
+        vtheta  = q2v(_data.tail<4>());
+        disp    = _data.head<3>().norm();
+        rot     = 2 * acos(_data(3));
     }
     /* Jacobians of d = computeCurrentDelta(data, dt)
      * with: d =    [Dp Dq]
