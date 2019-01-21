@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     WOLF_INFO( "====================    Configure Problem      ======================" )
 
     SensorBasePtr sen       = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_logitech_c300_640_480.yaml");
-//    SensorBasePtr sen       = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_apriltag_params_notangentrect.yaml");
+//    SensorBasePtr sen       = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_Dinesh_LAAS_params_notangentrect.yaml");
     SensorCameraPtr sen_cam = std::static_pointer_cast<SensorCamera>(sen);
     ProcessorBasePtr prc    = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
 
@@ -95,6 +95,7 @@ int main(int argc, char *argv[])
     }
     else {
         FrameBasePtr F1 = problem->setPrior((Vector7s()<<0,0,0,0,0,0,1).finished(), covariance, 0.0, 0.1);
+        F1->fix();
     }
 
     // first argument is the name of the program.
@@ -169,22 +170,22 @@ int main(int argc, char *argv[])
 
 
 
-    WOLF_INFO( "====================    Provide perturbed prior    ======================" )
-    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
-    {
-        Vector7s x;
-        if (kf->isKey())
-        {
-            x.setRandom();
-            x.tail(4).normalize();
-            kf->setState(x);
-        }
-    }
+//    WOLF_INFO( "====================    Provide perturbed prior    ======================" )
+//    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+//    {
+//        Vector7s x;
+//        if (kf->isKey())
+//        {
+//            x.setRandom();
+//            x.tail(4).normalize();
+//            kf->setState(x);
+//        }
+//    }
 
     WOLF_INFO( "====================    Solve problem    ======================" )
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::FULL); // 0: nothing, 1: BriefReport, 2: FullReport
     WOLF_DEBUG(report);
-    problem->print(3,1,1,1);
+    problem->print(3,0,1,1);
 
 
 
