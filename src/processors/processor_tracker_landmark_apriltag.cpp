@@ -37,6 +37,8 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         std_z_  (_params_tracker_landmark_apriltag->std_z_  ),
         std_rpy_(_params_tracker_landmark_apriltag->std_rpy_),
         std_pix_(_params_tracker_landmark_apriltag->std_pix_),
+        ippe_min_ratio_(_params_tracker_landmark_apriltag->ippe_min_ratio_),
+        ippe_max_rep_error_(_params_tracker_landmark_apriltag->ippe_max_rep_error_),
         cv_K_(3,3),
         min_time_vote_(_params_tracker_landmark_apriltag->min_time_vote),
         min_features_for_keyframe_(_params_tracker_landmark_apriltag->min_features_for_keyframe)
@@ -149,7 +151,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
         // If not so sure about whether we have the right solution or not, do not create a feature
         // TODO: use parameters
-        is_ambiguous = !((rep_error2 / rep_error1 > 5.0) && rep_error1 < 1.0);
+        is_ambiguous = !((rep_error2 / rep_error1 > ippe_min_ratio_) && rep_error1 < ippe_max_rep_error_);
         //////////////////
 
         //////////////////
@@ -190,9 +192,12 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         Eigen::Matrix6s info = computeInformation(translation, c_M_t.linear(), K_, tag_width, std_pix_);  // Lie jacobians covariance
 
         if (is_ambiguous){
-//            WOLF_INFO("Ambiguity on estimated rotation is likely");
-//            // Put a very high covariance on angles measurements
+            WOLF_INFO("Ambiguity on estimated rotation is likely");
+            // Put a very high covariance on angles measurements (low info matrix ?)
 //            cov.bottomRightCorner(3, 3) = 1000000*Eigen::Matrix3s::Identity();
+            Eigen::Matrix6s new_info = 0.00001*Eigen::Matrix6s::Identity();
+            new_info.topLeftCorner(3, 3) = info.topLeftCorner(3, 3);
+            info = new_info;
         }
 //        if (tag_id == 1){
 //            // Put a very high covariance on angles measurements
@@ -203,7 +208,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 //        WOLF_TRACE("tag ", tag_id, " cov diagonal: [", cov.diagonal().transpose(), "]");
         // add to detected features list
         detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, info, tag_id, *det, FeatureBase::UncertaintyType::UNCERTAINTY_IS_INFO));
-
+        WOLF_TRACE("Meas Covariance tag ", tag_id, "\n", info.inverse());
         WOLF_TRACE("---------------------\n");
     }
 

@@ -40,6 +40,8 @@ struct ProcessorParamsTrackerLandmarkApriltag : public ProcessorParamsTrackerLan
     Scalar std_xy_, std_z_, std_rpy_;
     Scalar std_pix_;
     Scalar min_time_vote;
+    Scalar ippe_min_ratio_;
+    Scalar ippe_max_rep_error_;
 };
 
 
@@ -142,6 +144,8 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         apriltag_family_t tag_family_;
         Scalar std_xy_, std_z_, std_rpy_;   ///< dummy std values for covariance computation
         Scalar std_pix_;                    ///< pixel error to be propagated to a camera to tag transformation covariance
+        Scalar ippe_min_ratio_;
+        Scalar ippe_max_rep_error_;
 //        Eigen::Affine3ds c_M_ac_;           ///< aprilCamera-to-camera transform not used with solvePnP
 //        double cx_, cy_, fx_, fy_;
         Matrix3s K_;
