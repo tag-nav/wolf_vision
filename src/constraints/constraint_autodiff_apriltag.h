@@ -117,8 +117,11 @@ template<typename T> bool ConstraintAutodiffApriltag::operator ()( const T* cons
     Eigen::Transform<T, 3, Eigen::Affine> c_M_l_est = (w_M_r * r_M_c).inverse() * w_M_l;
 
     // expectation error, in camera frame
-    Eigen::Transform<T, 3, Eigen::Affine> c_M_err = c_M_l_meas * c_M_l_est.inverse(); // left-minus gives error in the reference camera
-//    Eigen::Transform<T, 3, Eigen::Affine> c_M_err = c_M_l_est.inverse() * c_M_l_meas; // right-minus gives error in the reference landmark
+    // left-minus
+    Eigen::Transform<T, 3, Eigen::Affine> c_M_err = c_M_l_meas.inverse() * c_M_l_est;
+    // right-minus also works
+//    Eigen::Transform<T, 3, Eigen::Affine> c_M_err = c_M_l_est.inverse() * c_M_l_meas;
+
 
     // error
     Eigen::Matrix<T, 6, 1> err;
