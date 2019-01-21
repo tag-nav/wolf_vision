@@ -36,13 +36,15 @@ static ProcessorParamsBasePtr createProcessorParamsLandmarkApriltag(const std::s
         params->name                        = config["processor name"]              .as<std::string>();
 
         YAML::Node detector_parameters      = config["detector parameters"];
-        params->quad_decimate_              = detector_parameters["quad_decimate"]  .as<Scalar>();
-        params->quad_sigma_                 = detector_parameters["quad_sigma"]     .as<Scalar>();
-        params->nthreads_                   = detector_parameters["nthreads"]       .as<int>();
-        params->debug_                      = detector_parameters["debug"]          .as<bool>();
-        params->refine_edges_               = detector_parameters["refine_edges"]   .as<bool>();
-        params->refine_decode_              = detector_parameters["refine_decode"]  .as<bool>();
-        params->refine_pose_                = detector_parameters["refine_pose"]    .as<bool>();
+        params->quad_decimate_              = detector_parameters["quad_decimate"]            .as<Scalar>();
+        params->quad_sigma_                 = detector_parameters["quad_sigma"]               .as<Scalar>();
+        params->nthreads_                   = detector_parameters["nthreads"]                 .as<int>();
+        params->debug_                      = detector_parameters["debug"]                    .as<bool>();
+        params->refine_edges_               = detector_parameters["refine_edges"]             .as<bool>();
+        params->refine_decode_              = detector_parameters["refine_decode"]            .as<bool>();
+        params->refine_pose_                = detector_parameters["refine_pose"]              .as<bool>();
+        params->ippe_min_ratio_             = detector_parameters["ippe_min_ratio"]           .as<Scalar>();
+        params->ippe_max_rep_error_         = detector_parameters["ippe_max_rep_error"]       .as<Scalar>();
 
         YAML::Node tag_parameters           = config["tag parameters"];
         params->tag_family_                 = tag_parameters["tag_family"]          .as<std::string>();

@@ -10,6 +10,8 @@ detector parameters:
     refine_edges:   true
     refine_decode:  true
     refine_pose:    true
+    ippe_min_ratio: 3.0  	# quite arbitrary, always > 1 (to deactive, set at 0 for example)
+    ippe_max_rep_error: 2.0     # to deactivate, set at something big (100)
 
 tag parameters:
     tag_family:           "tag36h11" 
@@ -24,8 +26,8 @@ tag widths:
 noise:
     std_xy :          0.1 # m 
     std_z :           0.1 # m 
-    std_rpy_degrees : 20   # degrees
-    std_pix:          2    # pixel error
+    std_rpy_degrees : 5   # degrees
+    std_pix:          20    # pixel error
     
 vote:
     voting active:              true
