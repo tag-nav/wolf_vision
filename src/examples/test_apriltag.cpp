@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     // General execution options
     const bool APPLY_CONTRAST = false;
     const bool IMAGE_OUTPUT   = true;
-    const bool USEMAP         = true;
+    const bool USEMAP         = false;
 
 
     WOLF_INFO( "==================== processor apriltag test ======================" )
@@ -61,9 +61,9 @@ int main(int argc, char *argv[])
 
 
     WOLF_INFO( "====================    Configure Problem      ======================" )
-
-    SensorBasePtr sen       = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_logitech_c300_640_480.yaml");
-//    SensorBasePtr sen       = problem->installSensor("CAMERA", "camera", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/camera_Dinesh_LAAS_params_notangentrect.yaml");
+    Eigen::Vector7s cam_extrinsics; cam_extrinsics << 0,0,0,  0,0,0,1;
+    SensorBasePtr sen       = problem->installSensor("CAMERA", "camera", cam_extrinsics, wolf_root + "/src/examples/camera_logitech_c300_640_480.yaml");
+//    SensorBasePtr sen       = problem->installSensor("CAMERA", "camera", cam_extrinsics, wolf_root + "/src/examples/camera_Dinesh_LAAS_params_notangentrect.yaml");
     SensorCameraPtr sen_cam = std::static_pointer_cast<SensorCamera>(sen);
     ProcessorBasePtr prc    = problem->installProcessor("TRACKER LANDMARK APRILTAG", "apriltags", "camera", wolf_root + "/src/examples/processor_tracker_landmark_apriltag.yaml");
 

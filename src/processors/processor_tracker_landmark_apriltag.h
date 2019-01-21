@@ -115,20 +115,20 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         Eigen::Vector6s getVarVec();
         FeatureBaseList getIncomingDetections() const;
         FeatureBaseList getLastDetections() const;
-        Eigen::Affine3d opencv_pose_estimation(apriltag_detection_t *det, cv::Mat_<Scalar>, double tag_width);
-        Eigen::Affine3d umich_pose_estimation(apriltag_detection_t *det, cv::Mat_<Scalar>, double tag_width);
-        void ippe_pose_estimation(apriltag_detection_t *det, cv::Mat_<Scalar>, double tag_width,
-                                    Eigen::Affine3d &M1,
-                                    double &rep_error1,
-                                    Eigen::Affine3d &M2,
-                                    double &rep_error2);
-        Eigen::Matrix6s computeInformation(Eigen::Vector3s const &t, Eigen::Matrix3s const &R, Eigen::Matrix3s const &K, double const &tag_width, double const &sig_q);
-        void pinholeHomogeneous(Eigen::Matrix3s const & K, Eigen::Vector3s const & t,
-                                Eigen::Matrix3s const & R, Eigen::Vector3s const & p,
-                                Eigen::Vector3s &h, Eigen::Matrix3s &J_h_T, Eigen::Matrix3s &J_h_R);
-        void cornersToPose(const std::vector<cv::Point2d> &img_pts,
-                           const std::vector<Scalar> &k_vec,
-                           Eigen::Affine3ds &M);
+        Eigen::Affine3d opencvPoseEstimation(apriltag_detection_t *_det, cv::Mat_<Scalar>, double _tag_width);
+        Eigen::Affine3d umichPoseEstimation(apriltag_detection_t *_det, cv::Mat_<Scalar>, double _tag_width);
+        void ippePoseEstimation(apriltag_detection_t *_det, cv::Mat_<Scalar>, double _tag_width,
+                                    Eigen::Affine3d &_M1,
+                                    double &_rep_error1,
+                                    Eigen::Affine3d &_M2,
+                                    double &_rep_error2);
+        Eigen::Matrix6s computeInformation(Eigen::Vector3s const &_t, Eigen::Matrix3s const &_R, Eigen::Matrix3s const &_K, double const &_tag_width, double const &_sig_q);
+        void pinholeHomogeneous(Eigen::Matrix3s const & _K, Eigen::Vector3s const & _t,
+                                Eigen::Matrix3s const & _R, Eigen::Vector3s const & _p,
+                                Eigen::Vector3s &_h, Eigen::Matrix3s &_J_h_T, Eigen::Matrix3s &_J_h_R);
+        void cornersToPose(const std::vector<cv::Point2d> &_img_pts,
+                           const std::vector<Scalar> &_k_vec,
+                           Eigen::Affine3ds &_M);
 
     protected:
         void advanceDerived();
