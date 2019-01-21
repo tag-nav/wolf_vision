@@ -387,6 +387,19 @@ q2v(const Eigen::QuaternionBase<Derived>& _q)
     return log_q(_q);
 }
 
+/** \brief Quaternion to rotation vector conversion
+ *
+ * @param _q a right-handed unit quaternion
+ * @return the equivalent rotation vector
+ */
+template<typename Derived>
+inline Eigen::Matrix<typename Derived::Scalar, 3, 1>
+q2v(const Eigen::MatrixBase<Derived>& _qv)
+{
+    MatrixSizeCheck<4, 1>::check(_qv);
+    return log_q(Quaternions(_qv(3), _qv(0), _qv(1), _qv(2))); // caution quaternion constructor (w,x,y,z) but storage (x,y,z,w)
+}
+
 /** \brief Rotation vector to rotation matrix conversion
  *
  * @param _v a rotation vector
