@@ -53,13 +53,13 @@ class CeresManager : public SolverManager
 
         virtual void computeCovariances(const StateBlockList& st_list) override;
 
-        virtual bool hasConverged();
+        virtual bool hasConverged() override;
 
-        virtual SizeStd iterations();
+        virtual SizeStd iterations() override;
 
-        virtual Scalar initialCost();
+        virtual Scalar initialCost() override;
 
-        virtual Scalar finalCost();
+        virtual Scalar finalCost() override;
 
         ceres::Solver::Options& getSolverOptions();
 
