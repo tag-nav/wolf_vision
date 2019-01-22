@@ -150,7 +150,6 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         ippePoseEstimation(det, cv_K_, tag_width, M_ippe1, rep_error1, M_ippe2, rep_error2);
 
         // If not so sure about whether we have the right solution or not, do not create a feature
-        // TODO: use parameters
         is_ambiguous = !((rep_error2 / rep_error1 > ippe_min_ratio_) && rep_error1 < ippe_max_rep_error_);
         //////////////////
 
@@ -159,7 +158,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         // Slower than UMICH (iterative algorithm LM) but yield more precise results
         // Does not solve the ambiguity on the rotation however
         //////////////////
-        M_PnP = opencvPoseEstimation(det, cv_K_, tag_width);
+        // M_PnP = opencvPoseEstimation(det, cv_K_, tag_width);
         //////////////////
 
         //////////////////
