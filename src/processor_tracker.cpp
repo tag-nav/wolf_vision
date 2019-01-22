@@ -62,8 +62,9 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             pack->key_frame->addCapture(incoming_ptr_);
 
             // Process info
+            // TrackerFeature:  We only process new features in Last, here last = nullptr, so we do not have anything to do.
+            // TrackerLandmark: If we have given a map, all landmarks in the map are know. Process them.
             processKnown();
-            // We only process new features in Last, here last = nullptr, so we do not have anything to do.
 
             // Update pointers
             resetDerived();
