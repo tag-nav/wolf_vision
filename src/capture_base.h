@@ -50,6 +50,8 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         // Type
         virtual bool isMotion() const { return false; }
 
+        bool process();
+
         unsigned int id();
         TimeStamp getTimeStamp() const;
         void setTimeStamp(const TimeStamp& _ts);
@@ -219,6 +221,14 @@ inline void CaptureBase::setTimeStampToNow()
 {
     time_stamp_.setToNow();
 }
+
+inline bool CaptureBase::process()
+{
+    assert (getSensorPtr() != nullptr && "Attempting to process a capture with no associated sensor. Either set the capture's sensor or call sensor->process(capture) instead.");
+
+    return getSensorPtr()->process(shared_from_this());
+}
+
 
 } // namespace wolf
 
