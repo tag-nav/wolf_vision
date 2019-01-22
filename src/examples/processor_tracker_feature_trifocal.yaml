@@ -6,7 +6,7 @@ vision_utils:
 
 algorithm:
     time tolerance: 0.005
-    voting active: true
+    voting active: false
     minimum features for keyframe: 40
     maximum new features: 100
     grid horiz cells: 13

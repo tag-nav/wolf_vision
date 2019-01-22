@@ -77,7 +77,7 @@ int main(int argc, char** argv)
     img_pos *= 0.10;
 
     cv::imshow( "DEBUG VIEW", images.at(0) );  // Show our image inside it.
-//    cv::waitKey(1);                            // Wait for a keystroke in the window
+    cv::waitKey(1);                            // Wait for a keystroke in the window
 
     // ===============================================
     // CONFIG WOLF ===================================
@@ -140,17 +140,22 @@ int main(int argc, char** argv)
     for (int kf_id = 2; kf_id <= kf_total_num; ++kf_id)
     {
         t += dt; // increment t
-        x << img_pos.row(kf_id-1).transpose(),0.0,    0.0,0.0,0.0,1.0; // ground truth position
-        FrameBasePtr kf = problem->emplaceFrame(KEY_FRAME,x,t);
-        kfs.push_back(kf);
-        problem->keyFrameCallback(kf,nullptr,dt/2.0); // Ack KF creation
+
+        if ( (kf_id % 2 == 1) )
+        {
+            x << img_pos.row(kf_id-1).transpose(),0.0,    0.0,0.0,0.0,1.0; // ground truth position
+            FrameBasePtr kf = problem->emplaceFrame(KEY_FRAME,x,t);
+            std::cout << "KeyFrm " << kf->id() << " TS: " << kf->getTimeStamp() << std::endl;
+            kfs.push_back(kf);
+            problem->keyFrameCallback(kf,nullptr,dt/2.0); // Ack KF creation
+        }
 
         CaptureImagePtr capture = make_shared<CaptureImage>(t, camera, images.at(kf_id-1));
         captures.push_back(capture);
         std::cout << "Capture " << kf_id << " TS: " << capture->getTimeStamp() << std::endl;
         camera->process(capture);
 
-//        cv::waitKey(1); // Wait for a keystroke in the window
+        cv::waitKey(1); // Wait for a keystroke in the window
     }
 
     // ==================================================
@@ -164,8 +169,8 @@ int main(int argc, char** argv)
     Matrix1s dist_cov(0.000001); // 1mm error
 
     CaptureBasePtr
-    cap_dist  = kfs.at(2)->addCapture(make_shared<CaptureVoid>(t,
-                                                               sensor));
+    cap_dist  = problem->closestKeyFrameToTimeStamp(TimeStamp(2*dt))->addCapture(make_shared<CaptureVoid>(t,
+                                                                                                          sensor));
     FeatureBasePtr
     ftr_dist = cap_dist->addFeature(make_shared<FeatureBase>("DISTANCE",
                                                               distance,
