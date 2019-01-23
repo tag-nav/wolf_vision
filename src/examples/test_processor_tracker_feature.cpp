@@ -58,8 +58,8 @@ int main()
 
     ProcessorParamsTrackerFeaturePtr params_trk = std::make_shared<ProcessorParamsTrackerFeature>();
     params_trk->voting_active = true;
-    params_trk->max_new_features = 4;
-    params_trk->min_features_for_keyframe = 7;
+    params_trk->max_new_features = 7;
+    params_trk->min_features_for_keyframe = 4;
     params_trk->time_tolerance = 0.25;
     shared_ptr<ProcessorTrackerFeatureDummy> processor_ptr_ = make_shared<ProcessorTrackerFeatureDummy>(params_trk);
 
@@ -70,7 +70,7 @@ int main()
 
     TimeStamp t(0);
     Scalar dt = 0.5;
-    for (auto i = 0; i < 5; i++)
+    for (auto i = 0; i < 10; i++)
     {
         std::cout << "\n===== Capture TS = " << t << " =====" << std::endl;
         processor_ptr_->process(make_shared<CaptureVoid>(t, sensor_ptr_));

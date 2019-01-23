@@ -59,11 +59,18 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     {
 
         case RUNNING_WITHOUT_PACK :
+        {
+            WOLF_DEBUG("PM: RUNNING_WITHOUT_PACK");
+        }
         case RUNNING_WITH_PACK_ON_ORIGIN :
+        {
+            WOLF_DEBUG("PM: RUNNING_WITHOUT_PACK / RUNNING_WITH_PACK_ON_ORIGIN");
             break;
+        }
 
         case RUNNING_WITH_PACK_BEFORE_ORIGIN :
         {
+            WOLF_DEBUG("PM: RUNNING_WITH_PACK_BEFORE_ORIGIN");
             // extract pack elements
             FrameBasePtr keyframe_from_callback = pack->key_frame;
             TimeStamp ts_from_callback = keyframe_from_callback->getTimeStamp();
@@ -92,6 +99,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             // interpolate individual delta
             if (!existing_capture->getBuffer().get().empty() && capture_for_keyframe_callback->getBuffer().get().back().ts_ != ts_from_callback)
             {
+                WOLF_DEBUG("PM: if (!existing_capture->getBuffer().get().empty() && capture_for_keyframe_callback->getBuffer().get().back().ts_ != ts_from_callback)");
                 // interpolate Motion at the new time stamp
                 Motion motion_interpolated = interpolate(capture_for_keyframe_callback->getBuffer().get().back(), // last Motion of old buffer
                                                          existing_capture->getBuffer().get().front(), // first motion of new buffer
@@ -116,6 +124,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             // modify existing feature and constraint (if they exist in the existing capture)
             if (!existing_capture->getFeatureList().empty())
             {
+                WOLF_DEBUG("PM: if (!existing_capture->getFeatureList().empty())");
                 auto existing_feature = existing_capture->getFeatureList().back(); // there is only one feature!
 
                 // Modify existing feature --------
@@ -134,6 +143,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
         case RUNNING_WITH_PACK_AFTER_ORIGIN :
         {
+            WOLF_DEBUG("PM: RUNNING_WITH_PACK_AFTER_ORIGIN");
             // extract pack elements
             FrameBasePtr keyframe_from_callback = pack->key_frame;
             TimeStamp    ts_from_callback       = keyframe_from_callback->getTimeStamp();
@@ -159,6 +169,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             // interpolate individual delta
             if (!last_ptr_->getBuffer().get().empty() && capture_for_keyframe_callback->getBuffer().get().back().ts_ != ts_from_callback)
             {
+                WOLF_DEBUG("PM: if (!last_ptr_->getBuffer().get().empty() && capture_for_keyframe_callback->getBuffer().get().back().ts_ != ts_from_callback)");
                 // interpolate Motion at the new time stamp
                 Motion motion_interpolated = interpolate(capture_for_keyframe_callback->getBuffer().get().back(), // last Motion of old buffer
                                                          last_ptr_->getBuffer().get().front(), // first motion of new buffer

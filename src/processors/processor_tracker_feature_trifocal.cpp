@@ -43,6 +43,8 @@ ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ProcessorParams
     assert(!(params_tracker_feature_trifocal_->yaml_file_params_vision_utils.empty()) && "Missing YAML file with vision_utils parameters!");
     assert(file_exists(params_tracker_feature_trifocal_->yaml_file_params_vision_utils) && "Cannot setup processor: vision_utils' YAML file does not exist.");
 
+    pixel_cov_ = Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std;
+
     // Detector
     std::string det_name = vision_utils::readYamlType(params_tracker_feature_trifocal_->yaml_file_params_vision_utils, "detector");
     det_ptr_ = vision_utils::setupDetector(det_name, det_name + " detector", params_tracker_feature_trifocal_->yaml_file_params_vision_utils);
@@ -119,7 +121,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
                                 kp_last,
                                 index_last,
                                 capture_image_last_->descriptors_.row(index_last),
-                                Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
+                                pixel_cov_);
 
                         _features_last_out.push_back(ftr_point_last);
 
@@ -177,7 +179,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
                             kp_incoming,
                             index_incoming,
                             capture_image_incoming_->descriptors_.row(index_incoming),
-                            Eigen::Matrix2s::Identity() * params_tracker_feature_trifocal_->pixel_noise_std * params_tracker_feature_trifocal_->pixel_noise_std);
+                            pixel_cov_);
 
                     _features_incoming_out.push_back(ftr_point_incoming);
 
