@@ -77,6 +77,9 @@ bool ProcessorTrackerFeatureTrifocal::isInlier(const cv::KeyPoint& _kp_last, con
     // A. Check euclidean norm
     inlier = inlier && (cv::norm(_kp_incoming.pt-_kp_last.pt) < mat_ptr_->getParams()->max_match_euclidean_dist);
 
+    // B. add your new condition test here
+    // inlier = inlier && ...
+
     return inlier;
 }
 
@@ -203,6 +206,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::trackFeatures(const FeatureBaseLis
 
 bool ProcessorTrackerFeatureTrifocal::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
 {
+    // We purposely ignore this step
     return true;
 }
 
@@ -243,7 +247,7 @@ void ProcessorTrackerFeatureTrifocal::advanceDerived()
 
 void ProcessorTrackerFeatureTrifocal::resetDerived()
 {
-    // Call parent class method
+    // Call parent class' reset method
     ProcessorTrackerFeature::resetDerived();
 
     // Conditionally assign the prev_origin pointer
@@ -326,10 +330,7 @@ void ProcessorTrackerFeatureTrifocal::preProcess()
 
 void ProcessorTrackerFeatureTrifocal::postProcess()
 {
-    // DEBUG
-    std::vector<vision_utils::KeyPointEnhanced> kps_e;
-
-    std::map<int,std::list<vision_utils::KeyPointEnhanced> > map_of_features_trackedkps;
+    std::map<int,std::list<vision_utils::KeyPointEnhanced> > kp_enh_tracks;
 
     for (auto const & feat_base : last_ptr_->getFeatureList())
     {
@@ -338,19 +339,23 @@ void ProcessorTrackerFeatureTrifocal::postProcess()
         unsigned int track_id = feat->trackId();
 
         // tracks
-        std::list<vision_utils::KeyPointEnhanced> track_list;
+        std::list<vision_utils::KeyPointEnhanced> kp_enh_track;
         for (auto feat_base : track_matrix_.trackAsVector(track_id))
         {
-            FeaturePointImagePtr feat_track = std::static_pointer_cast<FeaturePointImage>(feat_base);
-            vision_utils::KeyPointEnhanced kp_e(feat_track->getKeypoint(), feat_id, track_id, track_matrix_.trackSize(track_id), feat_track->getMeasurementCovariance());
-            track_list.push_back(kp_e);
+            FeaturePointImagePtr feat_img = std::static_pointer_cast<FeaturePointImage>(feat_base);
+            vision_utils::KeyPointEnhanced kp_enh(feat_img->getKeypoint(),
+                                                  feat_id,
+                                                  track_id,
+                                                  track_matrix_.trackSize(track_id),
+                                                  feat_img->getMeasurementCovariance());
+            kp_enh_track.push_back(kp_enh);
         }
 
-        map_of_features_trackedkps[feat_id] = track_list;
+        kp_enh_tracks[feat_id] = kp_enh_track;
     }
 
     // DEBUG
-    image_debug_ = vision_utils::buildImageProcessed((std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage(), map_of_features_trackedkps);
+    image_debug_ = vision_utils::buildImageProcessed((std::static_pointer_cast<CaptureImage>(last_ptr_))->getImage(), kp_enh_tracks);
 
     cv::imshow("DEBUG VIEW", image_debug_);
     cv::waitKey(1);
@@ -398,7 +403,7 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
                 Scalar    Dt2           = (ts_last - ts_first) / 2.0;
                 TimeStamp ts_ave        = ts_first + Dt2;
 
-                Scalar dt_err = Dt2;
+                Scalar dt_dev_min = Dt2;
                 auto track = track_matrix_.track(trk_id);
                 for (auto ftr_it = track.begin() ; ftr_it != track.end() ; ftr_it ++)
                 {
@@ -408,50 +413,32 @@ void ProcessorTrackerFeatureTrifocal::establishConstraints()
                         {
                             TimeStamp ts_mid    = kf_mid->getTimeStamp();
 
-                            auto dt_err_curr = fabs(ts_mid - ts_ave);
-                            if (dt_err_curr <= dt_err)
+                            auto dt_dev_curr = fabs(ts_mid - ts_ave);
+                            if (dt_dev_curr <= dt_dev_min) // dt_dev is decreasing
                             {
-                                dt_err  = dt_err_curr;
+                                dt_dev_min  = dt_dev_curr;
                                 ftr_mid = ftr_it->second;
                             }
-                            else //if (dt_err_increasing)
+                            else //if (dt_dev is increasing)
                                 break;
                         }
                     }
                 }
 
-//                // DEBUG
-//                std::cout << " TRACK "  << trk_id
-//                        << " prev: "    << prev_origin_ptr_->getTimeStamp() << ", "  << prev_origin_ptr_
-//                        << " origin: "  << origin_ptr_->getTimeStamp() << ", "  << origin_ptr_ << (origin_ptr_->getFramePtr()->isKey() ? " KF" : " NO kf")
-//                        << " last: "    << last_ptr_->getTimeStamp() << ", "  << last_ptr_
-//                        << " incoming " << incoming_ptr_->getTimeStamp() << ", "  << incoming_ptr_
-//                        << std::endl;
-//                for (auto ftr_it = track.begin() ; ftr_it != track.end() ; ftr_it ++)
-//                {
-//                    if ( ftr_it->second->getCapturePtr() != nullptr ) // have capture
-//                        std::cout
-//                        << " ts: " << ftr_it->first << ", "
-//                        << ftr_it->second->id() << ", "
-//                        << ftr_it->second->getCapturePtr()->getTimeStamp() << ", "
-//                        << ftr_it->second->getCapturePtr() << std::endl;
-//                    else
-//                        std::cout << " ts: " << ftr_it->first << ", " << ftr_it->second->id() << ", -- || ";
-//                }
-//                std::cout << std::endl;
-
-//                FeatureBasePtr ftr_mid  = track_matrix_.feature(trk_id, ts_mid - 1e-4); // 1e-4 to be on the safe side if numerical errors occur
-
+                // Several safety checks
                 assert(ftr_mid != nullptr   && "Middle feature is nullptr!");
                 assert(ftr_mid->getCapturePtr()->getFramePtr() != nullptr   && "Middle feature's frame is nullptr!");
                 assert(ftr_mid != ftr_first && "First and middle features are the same!");
                 assert(ftr_mid != ftr_last  && "Last and middle features are the same!");
 
-//                WOLF_TRACE("first ", ftr_first->id(), ", mid ", ftr_mid->id(), ", last ", ftr_last->id());
-//                WOLF_TRACE("OLD first ", pair_trkid_match.second.first->id(), ", mid ", track_matrix_.feature(trk_id, origin_ptr_)->id(), ", last ", ftr_last->id());
-
                 // make constraint
-                ConstraintAutodiffTrifocalPtr ctr = std::make_shared<ConstraintAutodiffTrifocal>(ftr_first, ftr_mid, ftr_last, shared_from_this(), false, CTR_ACTIVE);
+                ConstraintAutodiffTrifocalPtr ctr = std::make_shared<ConstraintAutodiffTrifocal>(
+                        ftr_first,
+                        ftr_mid,
+                        ftr_last,
+                        shared_from_this(),
+                        false,
+                        CTR_ACTIVE);
 
                 // link to wolf tree
                 ctr         ->  setFeaturePtr   (ftr_last);
