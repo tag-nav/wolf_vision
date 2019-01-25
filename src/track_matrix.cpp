@@ -35,6 +35,14 @@ Track TrackMatrix::track(size_t _track_id)
         return Track();
 }
 
+Track TrackMatrix::trackKeyframes(size_t _track_id)
+{
+    if (tracks_kf_.count(_track_id) > 0)
+        return tracks_kf_.at(_track_id);
+    else
+        return Track();
+}
+
 Snapshot TrackMatrix::snapshot(CaptureBasePtr _capture)
 {
     if (_capture && snapshots_.count(_capture->id()) > 0)

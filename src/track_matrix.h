@@ -87,6 +87,7 @@ class TrackMatrix
         SizeStd         numTracks   ();
         SizeStd         trackSize   (size_t _track_id);
         Track           track       (size_t _track_id);
+        Track           trackKeyframes(size_t _track_id);
         Snapshot        snapshot    (CaptureBasePtr _capture);
         vector<FeatureBasePtr>
                         trackAsVector(size_t _track_id);
@@ -104,7 +105,11 @@ class TrackMatrix
         static SizeStd track_id_count_;
 
         // Along track: maps of Feature pointers indexed by time stamp.
+        // these tracks contain all features from all captures
         map<size_t, Track > tracks_;       // map indexed by track_Id   of ( maps indexed by TimeStamp  of ( features ) )
+
+        // these tracks contain only features at captures belonging to a KF
+        map<size_t, Track > tracks_kf_;    // map indexed by track_Id   of ( maps indexed by TimeStamp  of ( features ) )
 
         // Across track: maps of Feature pointers indexed by track_Id.
         map<size_t, Snapshot > snapshots_; // map indexed by capture_Id of ( maps indexed by track_Id of ( features ) )
