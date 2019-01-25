@@ -1,16 +1,15 @@
 processor type: "TRACKER LANDMARK APRILTAG"
 processor name: "tracker landmark apriltag example"
 
-
 detector parameters: 
-    quad_decimate:  0.0
-    quad_sigma:     2.0
-    nthreads:       4
-    debug:          false
-    refine_edges:   true
-    refine_decode:  true
-    refine_pose:    true
-    ippe_min_ratio: 3.0  	# quite arbitrary, always > 1 (to deactive, set at 0 for example)
+    quad_decimate:  1.5      # doing quad detection at lower resolution to speed things up (see end of file)
+    quad_sigma:     0.8	     # gaussian blur good for noisy images, may be recommended with quad_decimate. Kernel size adapted (see end of this file) 
+    nthreads:       8       # how many thread during tag detection (does not change much?)
+    debug:          false    # write some debugging images
+    refine_edges:   true    # better edge detection if quad_decimate > 1 (quite inexpensive, almost no diff)
+    refine_decode:  false    # improve detection probability for small tags (quite expensive (~*3)
+    refine_pose:    false    # improves detection by maximizing local contrast so that future pose extraction works better (VERY expensive ~*10-20)
+    ippe_min_ratio:     3.0  	# quite arbitrary, always > 1 (to deactive, set at 0 for example)
     ippe_max_rep_error: 2.0     # to deactivate, set at something big (100)
 
 tag parameters:
@@ -33,3 +32,21 @@ vote:
     voting active:              true
     min_time_vote:              0.2 # s
     min_features_for_keyframe:  1
+
+
+
+
+# Annexes:
+### Quad decimate: the higher, the lower the resolution
+# Does nothing if <= 1.0
+# Only values taken into account:
+# 1.5, 2, 3, 4
+# 1.5 -> ~*2 speed up
+
+# Higher values use a "bad" code according to commentaries in the library, smaller do nothing
+### Gaussian blur table:
+# max sigma          kernel size
+# 0.499              1  (disabled)
+# 0.999              3
+# 1.499              5
+# 1.999              7
