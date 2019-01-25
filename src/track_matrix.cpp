@@ -35,14 +35,6 @@ Track TrackMatrix::track(size_t _track_id)
         return Track();
 }
 
-Track TrackMatrix::trackKeyframes(size_t _track_id)
-{
-    if (tracks_kf_.count(_track_id) > 0)
-        return tracks_kf_.at(_track_id);
-    else
-        return Track();
-}
-
 Snapshot TrackMatrix::snapshot(CaptureBasePtr _capture)
 {
     if (_capture && snapshots_.count(_capture->id()) > 0)
@@ -221,6 +213,49 @@ FeatureBasePtr TrackMatrix::feature(size_t _track_id, const TimeStamp& _ts)
 CaptureBasePtr TrackMatrix::firstCapture(size_t _track_id)
 {
     return firstFeature(_track_id)->getCapturePtr();
+}
+
+Track TrackMatrix::trackAtKeyframes(size_t _track_id)
+{
+    if (tracks_kf_.count(_track_id) > 0)
+        return tracks_kf_.at(_track_id);
+    else
+        return Track();
+}
+
+bool TrackMatrix::markKeyframe(CaptureBasePtr _capture)
+{
+    if (_capture->getFramePtr() && _capture->getFramePtr()->isKey())
+    {
+        auto snap = snapshot(_capture);
+
+        if (snap.empty())
+            return false;
+
+        for (auto pair_trkid_ftr : snap)
+        {
+            auto track_id = pair_trkid_ftr.first;
+            auto ftr = pair_trkid_ftr.second;
+            auto ts = _capture->getFramePtr()->getTimeStamp();
+            tracks_kf_[track_id][ts] = ftr;
+        }
+        return true;
+    }
+    return false;
+}
+
+bool TrackMatrix::unmarkKeyframe(FrameBasePtr _keyframe)
+{
+    bool removed = false;
+    auto ts = _keyframe->getTimeStamp();
+    for (auto pair_id_trk : tracks_kf_)
+    {
+        if (pair_id_trk.second.erase(ts))
+        {
+            removed = true;
+        }
+    }
+    return removed;
 }
 
 }

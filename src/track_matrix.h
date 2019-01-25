@@ -87,7 +87,6 @@ class TrackMatrix
         SizeStd         numTracks   ();
         SizeStd         trackSize   (size_t _track_id);
         Track           track       (size_t _track_id);
-        Track           trackKeyframes(size_t _track_id);
         Snapshot        snapshot    (CaptureBasePtr _capture);
         vector<FeatureBasePtr>
                         trackAsVector(size_t _track_id);
@@ -99,6 +98,10 @@ class TrackMatrix
         FeatureBasePtr  feature     (size_t _track_id, CaptureBasePtr _cap);
         FeatureBasePtr  feature     (size_t _track_id, const TimeStamp& _ts); // return feat with time stamp >= _ts
         CaptureBasePtr  firstCapture(size_t _track_id);
+
+        Track           trackAtKeyframes(size_t _track_id);
+        bool            markKeyframe(CaptureBasePtr _capture);
+        bool            unmarkKeyframe(FrameBasePtr _keyframe);
 
     private:
 
