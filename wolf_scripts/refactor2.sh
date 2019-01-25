@@ -3,5 +3,6 @@
 # echo $files
 for f in $(cat ~/workspace/wip/wolf/files.txt); do
     path=$(ag -g $f -l ~/workspace/wip/wolf/ | cut -d '/' -f 7-)
-    echo $f " now in -> " $path
+    # echo $f " now in -> " $path
+    sed -i "/"$f"$/c\\"$path ~/workspace/wip/wolf/CMakeLists.txt
 done
