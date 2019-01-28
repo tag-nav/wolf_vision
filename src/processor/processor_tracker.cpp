@@ -6,7 +6,7 @@
  */
 
 // wolf
-#include "processor_tracker.h"
+#include "base/processor/processor_tracker.h"
 
 // std
 #include <cmath>
@@ -233,7 +233,6 @@ void ProcessorTracker::computeProcessingStep()
     else
         step = RUNNING;
 
-
     // Then combine with the existence (or not) of a keyframe callback pack
     switch (step)
     {
@@ -276,9 +275,6 @@ void ProcessorTracker::computeProcessingStep()
             break;
     }
 }
-
-
-
 
 } // namespace wolf
 

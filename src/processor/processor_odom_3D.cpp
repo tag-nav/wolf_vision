@@ -1,4 +1,4 @@
-#include "processor_odom_3D.h"
+#include "base/processor/processor_odom_3D.h"
 namespace wolf
 {
 
@@ -14,7 +14,6 @@ ProcessorOdom3D::ProcessorOdom3D(ProcessorParamsOdom3DPtr _params, SensorOdom3DP
             jacobian_delta_preint_.setZero(delta_cov_size_, delta_cov_size_);
             jacobian_delta_.setZero(delta_cov_size_, delta_cov_size_);
         }
-
 
 ProcessorOdom3D::~ProcessorOdom3D()
 {
@@ -200,7 +199,6 @@ Motion ProcessorOdom3D::interpolate(const Motion& _motion_ref, Motion& _motion_s
 //    assert(_motion_second.delta_integr_cov_.cols() == delta_cov_size_ && "Wrong delta cov size");
 //    assert(_motion_second.delta_integr_cov_.rows() == delta_cov_size_ && "Wrong delta cov size");
 
-
     using namespace Eigen;
     // Interpolate between motion_ref and motion, as in:
     //
@@ -347,9 +345,8 @@ void ProcessorOdom3D::remap(const Eigen::VectorXs& _x1, const Eigen::VectorXs& _
 
 }
 
-
 // Register in the SensorFactory
-#include "processor_factory.h"
+#include "base/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("ODOM 3D", ProcessorOdom3D)
 } // namespace wolf

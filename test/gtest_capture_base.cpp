@@ -5,11 +5,10 @@
  *      Author: jsola
  */
 
-
 #include "utils_gtest.h"
 
-#include "capture_base.h"
-#include "state_angle.h"
+#include "base/capture/capture_base.h"
+#include "base/state_angle.h"
 
 using namespace wolf;
 using namespace Eigen;

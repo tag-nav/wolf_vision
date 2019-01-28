@@ -2,7 +2,7 @@
 #define SENSOR_CAMERA_H
 
 //wolf includes
-#include "sensor_base.h"
+#include "base/sensor/sensor_base.h"
 
 namespace wolf
 {
@@ -19,7 +19,6 @@ struct IntrinsicsCamera : public IntrinsicsBase
 
         virtual ~IntrinsicsCamera() = default;
 };
-
 
 WOLF_PTR_TYPEDEFS(SensorCamera);
 /**Pin-hole camera sensor

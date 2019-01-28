@@ -1,7 +1,7 @@
 // wolf
-#include "processor_IMU.h"
-#include "constraint_IMU.h"
-#include "IMU_tools.h"
+#include "base/processor/processor_IMU.h"
+#include "base/constraint/constraint_IMU.h"
+#include "base/IMU_tools.h"
 
 namespace wolf {
 
@@ -329,9 +329,8 @@ void ProcessorIMU::deltaPlusDelta(const Eigen::VectorXs& _delta_preint,
 
 } // namespace wolf
 
-
 // Register in the SensorFactory
-#include "processor_factory.h"
+#include "base/processor/processor_factory.h"
 
 namespace wolf
 {

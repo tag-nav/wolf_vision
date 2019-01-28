@@ -7,8 +7,8 @@ class FeatureBase;
 }
 
 //Wolf includes
-#include "wolf.h"
-#include "node_base.h"
+#include "base/wolf.h"
+#include "base/node_base.h"
 
 //std includes
 
@@ -178,16 +178,15 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
 //        void print(const std::string& name, const Eigen::Matrix<Scalar, R, C>& mat) const; // Normal print if Scalar type is wolf::Scalar
 };
 
-
 }
 
 // IMPLEMENTATION //
 
-#include "problem.h"
-#include "frame_base.h"
-#include "feature_base.h"
-#include "sensor_base.h"
-#include "landmark_base.h"
+#include "base/problem.h"
+#include "base/frame_base.h"
+#include "base/feature/feature_base.h"
+#include "base/sensor/sensor_base.h"
+#include "base/landmark/landmark_base.h"
 
 namespace wolf{
 

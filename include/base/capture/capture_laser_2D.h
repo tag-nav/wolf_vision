@@ -8,8 +8,8 @@ class SensorLaser2D;
 }
 
 //wolf includes
-#include "capture_base.h"
-#include "sensor_laser_2D.h"
+#include "base/capture/capture_base.h"
+#include "base/sensor/sensor_laser_2D.h"
 
 //laserscanutils includes
 #include "laser_scan_utils/laser_scan.h"
@@ -17,7 +17,6 @@ class SensorLaser2D;
 namespace wolf {
 
 WOLF_PTR_TYPEDEFS(CaptureLaser2D);
-
 
 class CaptureLaser2D : public CaptureBase
 {

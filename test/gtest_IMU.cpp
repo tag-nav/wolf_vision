@@ -6,15 +6,15 @@
  */
 
 //Wolf
-#include "processor_IMU.h"
-#include "sensor_IMU.h"
-#include "wolf.h"
-#include "sensor_odom_3D.h"
-#include "processor_odom_3D.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/processor/processor_IMU.h"
+#include "base/sensor/sensor_IMU.h"
+#include "base/wolf.h"
+#include "base/sensor/sensor_odom_3D.h"
+#include "base/processor/processor_odom_3D.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 #include "utils_gtest.h"
-#include "logging.h"
+#include "base/logging.h"
 
 // make my life easier
 using namespace Eigen;
@@ -23,7 +23,6 @@ using std::shared_ptr;
 using std::make_shared;
 using std::static_pointer_cast;
 using std::string;
-
 
 class Process_Constraint_IMU : public testing::Test
 {
@@ -83,7 +82,6 @@ class Process_Constraint_IMU : public testing::Test
         bool                p0_fixed, q0_fixed, v0_fixed;
         bool                p1_fixed, q1_fixed, v1_fixed;
 
-
         virtual void SetUp( )
         {
             string wolf_root = _WOLF_ROOT_DIR;
@@ -113,7 +111,6 @@ class Process_Constraint_IMU : public testing::Test
             x1_optim_imu.resize(10);
 
         }
-
 
         
         /* Integrate one step of acc and angVel motion, obtain Delta_preintegrated
@@ -152,7 +149,6 @@ class Process_Constraint_IMU : public testing::Test
             }
             Delta               = Delta_plus;
         }
-
 
         /* Integrate acc and angVel motion, obtain Delta_preintegrated
          * Input:
@@ -258,8 +254,6 @@ class Process_Constraint_IMU : public testing::Test
             return trajectory;
         }
 
-
-
         MotionBuffer integrateWithProcessor(int N, const TimeStamp& t0, const Quaternions q0, const MatrixXs& motion, const VectorXs& bias_real, const VectorXs& bias_preint, Scalar dt, VectorXs& D_preint, VectorXs& D_corrected)
         {
             Vector6s      motion_now;
@@ -287,8 +281,6 @@ class Process_Constraint_IMU : public testing::Test
             }
             return processor_imu->getBuffer();
         }
-
-
 
         // Initial configuration of variables
         bool configureAll()
@@ -326,8 +318,6 @@ class Process_Constraint_IMU : public testing::Test
             return true;
         }
 
-
-
         // Integrate using all methods
         virtual void integrateAll()
         {
@@ -337,7 +327,6 @@ class Process_Constraint_IMU : public testing::Test
             else
                 D_exact = integrateDelta(q0, motion, bias_null, bias_null, dt, J_D_bias);
             x1_exact = imu::composeOverState(x0, D_exact, DT );
-
 
             // ===================================== INTEGRATE USING IMU_TOOLS
             // pre-integrate
@@ -363,14 +352,12 @@ class Process_Constraint_IMU : public testing::Test
             x1_corrected     = imu::composeOverState(x0, D_corrected     , DT );
         }
 
-
         // Integrate Trajectories all methods
         virtual void integrateAllTrajectories()
         {
             SizeEigen cols = motion.cols() + 1;
             Trj_D_exact.resize(10,cols); Trj_D_preint_imu.resize(10,cols); Trj_D_preint_prc.resize(10,cols); Trj_D_corrected_imu.resize(10,cols); Trj_D_corrected_prc.resize(10,cols);
             Trj_x_exact.resize(10,cols); Trj_x_preint_imu.resize(10,cols); Trj_x_preint_prc.resize(10,cols); Trj_x_corrected_imu.resize(10,cols); Trj_x_corrected_prc.resize(10,cols);
-
 
             // ===================================== INTEGRATE EXACTLY WITH IMU_TOOLS with no bias at all
             MotionBuffer Buf_exact = integrateDeltaTrajectory(q0, motion, bias_null, bias_null, dt, J_D_bias);
@@ -425,7 +412,6 @@ class Process_Constraint_IMU : public testing::Test
 
             MotionBuffer Buf_D_preint_prc = integrateWithProcessor(num_integrations, t0, q0, motion, bias_real, bias_preint, dt, D_preint, D_corrected);
 
-
             // Build trajectories preintegrated and corrected with processorIMU
             Dt = 0;
             col = 0;
@@ -451,8 +437,6 @@ class Process_Constraint_IMU : public testing::Test
             x1_corrected     = imu::composeOverState(x0, D_corrected     , DT );
         }
 
-
-
         // Set state_blocks status
         void setFixedBlocks()
         {
@@ -464,8 +448,6 @@ class Process_Constraint_IMU : public testing::Test
             KF_1->getOPtr()->setFixed(q1_fixed);
             KF_1->getVPtr()->setFixed(v1_fixed);
         }
-
-
 
         void setKfStates()
         {
@@ -495,8 +477,6 @@ class Process_Constraint_IMU : public testing::Test
             KF_1->setState(x_pert);
         }
 
-
-
         virtual void buildProblem()
         {
             // ===================================== SET KF in Wolf tree
@@ -519,8 +499,6 @@ class Process_Constraint_IMU : public testing::Test
             setKfStates();
         }
 
-
-
         string solveProblem(SolverManager::ReportVerbosity verbose = SolverManager::ReportVerbosity::BRIEF)
         {
             string report   = ceres_manager->solve(verbose);
@@ -542,8 +520,6 @@ class Process_Constraint_IMU : public testing::Test
             return report;
         }
 
-
-
         string runAll(SolverManager::ReportVerbosity verbose)
         {
             configureAll();
@@ -552,8 +528,6 @@ class Process_Constraint_IMU : public testing::Test
             string report = solveProblem(verbose);
             return report;
         }
-
-
 
         void printAll(std::string report = "")
         {
@@ -584,8 +558,6 @@ class Process_Constraint_IMU : public testing::Test
             WOLF_TRACE("err1_optim_imu: ", (x1_optim_imu-x1_exact).transpose() ); // error of optimal state corrected by imu_tools w.r.t. exact state
             WOLF_TRACE("X0_optim      : ", x0_optim           .transpose() ); // optimal state after solving using processor
         }
-
-
 
         virtual void assertAll()
         {
@@ -729,7 +701,6 @@ TEST_F(Process_Constraint_IMU, MotionConstant_PQV_b__PQV_b) // F_ixed___e_stimat
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
 
-
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
@@ -774,7 +745,6 @@ TEST_F(Process_Constraint_IMU, test_capture) // F_ixed___e_stimated
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
 
-
     // ===================================== RUN ALL
     Eigen::Vector6s initial_bias((Eigen::Vector6s()<< .002, .0007, -.001,   .003, -.002, .001).finished());
     sensor_imu->getIntrinsicPtr()->setState(initial_bias);
@@ -785,7 +755,6 @@ TEST_F(Process_Constraint_IMU, test_capture) // F_ixed___e_stimated
     ASSERT_MATRIX_APPROX(KF_0->getCaptureOf(sensor_imu)->getCalibration(), initial_bias, 1e-8 );
     ASSERT_MATRIX_APPROX(KF_0->getCaptureOf(sensor_imu)->getCalibration(), KF_1->getCaptureOf(sensor_imu)->getCalibration(), 1e-8 );
 }
-
 
 TEST_F(Process_Constraint_IMU, MotionConstant_pqv_b__PQV_b) // F_ixed___e_stimated
 {
@@ -822,7 +791,6 @@ TEST_F(Process_Constraint_IMU, MotionConstant_pqv_b__PQV_b) // F_ixed___e_stimat
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
 
-
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
@@ -831,7 +799,6 @@ TEST_F(Process_Constraint_IMU, MotionConstant_pqv_b__PQV_b) // F_ixed___e_stimat
     assertAll();
 
 }
-
 
 TEST_F(Process_Constraint_IMU, MotionConstant_pqV_b__PQv_b) // F_ixed___e_stimated
 {
@@ -868,7 +835,6 @@ TEST_F(Process_Constraint_IMU, MotionConstant_pqV_b__PQv_b) // F_ixed___e_stimat
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
 
-
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
@@ -877,7 +843,6 @@ TEST_F(Process_Constraint_IMU, MotionConstant_pqV_b__PQv_b) // F_ixed___e_stimat
     assertAll();
 
 }
-
 
 TEST_F(Process_Constraint_IMU, MotionRandom_PQV_b__PQV_b) // F_ixed___e_stimated
 {
@@ -914,7 +879,6 @@ TEST_F(Process_Constraint_IMU, MotionRandom_PQV_b__PQV_b) // F_ixed___e_stimated
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
 
-
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
@@ -923,7 +887,6 @@ TEST_F(Process_Constraint_IMU, MotionRandom_PQV_b__PQV_b) // F_ixed___e_stimated
     assertAll();
 
 }
-
 
 TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__PQv_b) // F_ixed___e_stimated
 {
@@ -959,7 +922,6 @@ TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__PQv_b) // F_ixed___e_stimated
     //
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
-
 
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
@@ -1005,7 +967,6 @@ TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__pQV_b) // F_ixed___e_stimated
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
 
-
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
@@ -1049,7 +1010,6 @@ TEST_F(Process_Constraint_IMU, MotionConstant_NonNullState_PQV_b__PQV_b) // F_ix
     //
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
-
 
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
@@ -1095,7 +1055,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__PQV_b) // F_ixe
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
 
-
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
@@ -1139,7 +1098,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__PQv_b) // F_ixe
     //
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
-
 
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
@@ -1185,7 +1143,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__Pqv_b) // F_ixe
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
 
-
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
@@ -1229,7 +1186,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__pQv_b) // F_ixe
     //
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
-
 
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
@@ -1275,7 +1231,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__pqv_b) // F_ixe
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
 
-
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
@@ -1319,7 +1274,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqv_b__pqV_b) // F_ixed___e_st
     //
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
-
 
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
@@ -1365,7 +1319,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_st
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
 
-
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
@@ -1409,7 +1362,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PQV_b__pqv_b) // F_ixed___e_stim
     //
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
-
 
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
@@ -1455,7 +1407,6 @@ TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PqV_b__pqV_b) // F_ixed___e_stim
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
 
-
     // ===================================== RUN ALL
     string report = runAll(SolverManager::ReportVerbosity::BRIEF);
 
@@ -1499,7 +1450,6 @@ TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) 
     //
     // ===================================== INITIAL CONDITIONS -- USER INPUT ENDS HERE =============================== //
     // ================================================================================================================ //
-
 
     // ===================================== RUN ALL
     configureAll();
@@ -1560,8 +1510,6 @@ int main(int argc, char **argv)
 
     return RUN_ALL_TESTS();
 }
-
-
 
 /* Some notes :
  *

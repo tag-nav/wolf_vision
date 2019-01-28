@@ -2,9 +2,9 @@
 #define CERES_MANAGER_H_
 
 //wolf includes
-#include "../constraint_GPS_2D.h"
-#include "../wolf.h"
-#include "../state_block.h"
+#include "base/constraint/constraint_GPS_2D.h"
+#include "base/wolf.h"
+#include "base/state_block.h"
 #include "../state_point.h"
 #include "../state_complex_angle.h"
 #include "../state_theta.h"
@@ -20,7 +20,6 @@
 class SolverManager
 {
 	protected:
-
 
 	public:
 		SolverManager(ceres::Problem::Options _options);

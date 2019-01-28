@@ -6,13 +6,13 @@
  */
 
 #include "utils_gtest.h"
-#include "../src/logging.h"
+#include "base/logging.h"
 
-#include "../problem.h"
-#include "../sensor_base.h"
-#include "../sensor_odom_3D.h"
-#include "../processor_odom_3D.h"
-#include "../processor_tracker_feature_dummy.h"
+#include "base/problem.h"
+#include "base/sensor/sensor_base.h"
+#include "base/sensor/sensor_odom_3D.h"
+#include "base/processor/processor_odom_3D.h"
+#include "base/processor/processor_tracker_feature_dummy.h"
 
 #include <iostream>
 
@@ -127,7 +127,6 @@ TEST(Problem, SetOrigin_PO_2D)
     // check that the constraint is absolute (no pointers to other F, f, or L)
     ConstraintBasePtr c = f->getConstraintList().front();
     ASSERT_FALSE(c->getFrameOtherPtr());
-    ASSERT_FALSE(c->getFrameOtherPtr());
     ASSERT_FALSE(c->getLandmarkOtherPtr());
 
     // check that the Feature measurement and covariance are the ones provided
@@ -136,7 +135,6 @@ TEST(Problem, SetOrigin_PO_2D)
 
     //    P->print(4,1,1,1);
 }
-
 
 TEST(Problem, SetOrigin_PO_3D)
 {
@@ -166,7 +164,6 @@ TEST(Problem, SetOrigin_PO_3D)
     // check that the constraint is absolute (no pointers to other F, f, or L)
     ConstraintBasePtr c = f->getConstraintList().front();
     ASSERT_FALSE(c->getFrameOtherPtr());
-    ASSERT_FALSE(c->getFrameOtherPtr());
     ASSERT_FALSE(c->getLandmarkOtherPtr());
 
     // check that the Feature measurement and covariance are the ones provided
@@ -175,8 +172,6 @@ TEST(Problem, SetOrigin_PO_3D)
 
     //    P->print(4,1,1,1);
 }
-
-
 
 TEST(Problem, emplaceFrame_factory)
 {
@@ -202,7 +197,6 @@ TEST(Problem, emplaceFrame_factory)
     ASSERT_EQ(f1->getProblem(), P);
     ASSERT_EQ(f2->getProblem(), P);
 }
-
 
 TEST(Problem, StateBlocks)
 {
@@ -234,7 +228,6 @@ TEST(Problem, StateBlocks)
     P->emplaceFrame("PO 3D", KEY_FRAME, xs, 0);
     ASSERT_EQ(P->getStateBlockList().size(), (unsigned int)(2 + 3 + 2));
     ASSERT_EQ(P->getStateBlockNotificationMap().size(), (unsigned int)(2 + 3 + 2));
-
 
     //    P->print(4,1,1,1);
 
@@ -276,7 +269,6 @@ TEST(Problem, Covariances)
     ASSERT_EQ(Cov.rows() , 7);
 
 }
-
 
 int main(int argc, char **argv)
 {

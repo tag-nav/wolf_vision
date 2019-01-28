@@ -6,7 +6,7 @@
  */
 
 #include "sensor_range_bearing.h"
-#include "state_angle.h"
+#include "base/state_angle.h"
 
 namespace wolf
 {
@@ -28,7 +28,6 @@ SensorRangeBearing::~SensorRangeBearing()
     //
 }
 
-
 SensorBasePtr SensorRangeBearing::create(const std::string& _unique_name, //
         const Eigen::VectorXs& _extrinsics, //
         const IntrinsicsBasePtr _intrinsics)
@@ -45,12 +44,10 @@ SensorBasePtr SensorRangeBearing::create(const std::string& _unique_name, //
 
 } /* namespace wolf */
 
-
 // Register in the SensorFactory
-#include "sensor_factory.h"
+#include "base/sensor/sensor_factory.h"
 namespace wolf
 {
 WOLF_REGISTER_SENSOR("RANGE BEARING", SensorRangeBearing)
 } // namespace wolf
-
 

@@ -1,5 +1,5 @@
-#include "processor_tracker_landmark_corner.h"
-#include "rotations.h"
+#include "base/processor/processor_tracker_landmark_corner.h"
+#include "base/rotations.h"
 
 namespace wolf
 {
@@ -422,7 +422,7 @@ ProcessorTrackerLandmarkCorner::ProcessorTrackerLandmarkCorner(ProcessorParamsLa
 }        //namespace wolf
 
 // Register in the SensorFactory
-#include "processor_factory.h"
+#include "base/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("TRACKER LANDMARK CORNER", ProcessorTrackerLandmarkCorner)
 } // namespace wolf

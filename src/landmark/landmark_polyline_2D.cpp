@@ -5,18 +5,17 @@
  *      \author: jvallve
  */
 
-#include "feature_polyline_2D.h"
-#include "landmark_polyline_2D.h"
-#include "local_parametrization_polyline_extreme.h"
-#include "constraint_point_2D.h"
-#include "constraint_point_to_line_2D.h"
-#include "state_block.h"
-#include "factory.h"
-#include "yaml/yaml_conversion.h"
+#include "base/feature/feature_polyline_2D.h"
+#include "base/landmark/landmark_polyline_2D.h"
+#include "base/local_parametrization_polyline_extreme.h"
+#include "base/constraint/constraint_point_2D.h"
+#include "base/constraint/constraint_point_to_line_2D.h"
+#include "base/state_block.h"
+#include "base/factory.h"
+#include "base/yaml/yaml_conversion.h"
 
 namespace wolf
 {
-
 
 LandmarkPolyline2D::LandmarkPolyline2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Eigen::MatrixXs& _points, const bool _first_extreme, const bool _last_extreme, unsigned int _first_id, LandmarkClassification _class) :
         LandmarkBase("POLYLINE 2D", _p_ptr, _o_ptr), first_id_(_first_id), first_defined_(_first_extreme), last_defined_(_last_extreme), closed_(false), classification_(_class)
@@ -336,7 +335,6 @@ void LandmarkPolyline2D::removeStateBlocks()
     }
     LandmarkBase::removeStateBlocks();
 }
-
 
 // static
 LandmarkBasePtr LandmarkPolyline2D::create(const YAML::Node& _lmk_node)

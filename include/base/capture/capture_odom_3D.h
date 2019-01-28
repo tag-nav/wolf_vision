@@ -8,9 +8,9 @@
 #ifndef CAPTURE_ODOM_3D_H_
 #define CAPTURE_ODOM_3D_H_
 
-#include "capture_motion.h"
+#include "base/capture/capture_motion.h"
 
-#include "rotations.h"
+#include "base/rotations.h"
 
 namespace wolf
 {
@@ -38,6 +38,5 @@ class CaptureOdom3D : public CaptureMotion
 };
 
 } /* namespace wolf */
-
 
 #endif /* CAPTURE_ODOM_3D_H_ */

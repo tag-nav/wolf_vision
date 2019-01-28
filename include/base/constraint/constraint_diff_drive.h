@@ -9,10 +9,10 @@
 #define WOLF_CONSTRAINT_DIFF_DRIVE_H_
 
 //Wolf includes
-#include "../constraint_autodiff.h"
-#include "../frame_base.h"
-#include "../features/feature_diff_drive.h"
-#include "../captures/capture_wheel_joint_position.h"
+#include "base/constraint/constraint_autodiff.h"
+#include "base/frame_base.h"
+#include "base/feature/feature_diff_drive.h"
+#include "base/capture/capture_wheel_joint_position.h"
 
 namespace
 {

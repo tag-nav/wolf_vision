@@ -2,9 +2,9 @@
 #define CONSTRAINT_POINT_2D_THETA_H_
 
 //Wolf includes
-#include "constraint_autodiff.h"
-#include "feature_polyline_2D.h"
-#include "landmark_polyline_2D.h"
+#include "base/constraint/constraint_autodiff.h"
+#include "base/feature/feature_polyline_2D.h"
+#include "base/landmark/landmark_polyline_2D.h"
 
 namespace wolf {
     

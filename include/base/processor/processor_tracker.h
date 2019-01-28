@@ -8,8 +8,8 @@
 #ifndef SRC_PROCESSOR_TRACKER_H_
 #define SRC_PROCESSOR_TRACKER_H_
 
-#include "processor_base.h"
-#include "capture_motion.h"
+#include "base/processor/processor_base.h"
+#include "base/capture/capture_motion.h"
 
 namespace wolf {
     

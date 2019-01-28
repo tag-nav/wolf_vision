@@ -3,10 +3,9 @@
 #define CONSTRAINT_POSE_3D_H_
 
 //Wolf includes
-#include "constraint_autodiff.h"
-#include "frame_base.h"
-#include "rotations.h"
-
+#include "base/constraint/constraint_autodiff.h"
+#include "base/frame_base.h"
+#include "base/rotations.h"
 
 namespace wolf {
 

@@ -1,6 +1,6 @@
-#include "sensor_IMU.h"
-#include "state_block.h"
-#include "state_quaternion.h"
+#include "base/sensor/sensor_IMU.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
 
 namespace wolf {
 
@@ -40,7 +40,6 @@ SensorIMU::SensorIMU(const Eigen::VectorXs& _extrinsics, const IntrinsicsIMU& _p
     assert(_extrinsics.size() == 7 && "Wrong extrinsics vector size! Should be 7 for 2D.");
 }
 
-
 SensorIMU::~SensorIMU()
 {
     //
@@ -61,9 +60,8 @@ SensorBasePtr SensorIMU::create(const std::string& _unique_name, const Eigen::Ve
 
 } // namespace wolf
 
-
 // Register in the SensorFactory
-#include "sensor_factory.h"
+#include "base/sensor/sensor_factory.h"
 namespace wolf {
 WOLF_REGISTER_SENSOR("IMU", SensorIMU)
 } // namespace wolf

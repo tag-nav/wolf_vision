@@ -2,7 +2,7 @@
 #define _WOLF_PROCESSOR_LOOPCLOSURE_BASE_H
 
 // Wolf related headers
-#include "processor_base.h"
+#include "base/processor/processor_base.h"
 
 namespace wolf{
 
@@ -34,7 +34,6 @@ struct ProcessorParamsLoopClosure : public ProcessorParamsBase
 class ProcessorLoopClosureBase : public ProcessorBase
 {
 protected:
-
 
   ProcessorParamsLoopClosurePtr params_loop_closure_;
 
@@ -95,7 +94,6 @@ protected:
    *   - drawing / printing / logging the results of the processing
    */
   virtual void postProcess() { }
-
 
   /** Find a loop closure between incoming data and all keyframe data
    *

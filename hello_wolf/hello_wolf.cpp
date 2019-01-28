@@ -12,11 +12,10 @@
  *      \author: jsola
  */
 
+#include "base/wolf.h"
 
-#include "wolf.h"
-
-#include "sensor_odom_2D.h"
-#include "processor_odom_2D.h"
+#include "base/sensor/sensor_odom_2D.h"
+#include "base/processor/processor_odom_2D.h"
 #include "sensor_range_bearing.h"
 #include "processor_range_bearing.h"
 #include "capture_range_bearing.h"
@@ -24,13 +23,12 @@
 #include "constraint_range_bearing.h"
 #include "landmark_point_2D.h"
 
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 int main()
  {
     /*
      * ============= PROBLEM DEFINITION ==================
-     *
      *
      * We have a planar robot with a range-and-bearing sensor 'S' mounted at its front-left corner, looking forward:
      *
@@ -38,9 +36,7 @@ int main()
      *              |
      *     ------------------S->        sensor at location (1,1) and orientation 0 degrees, that is, at pose (1,1,0).
      *     |        |        |
-     *     |        |        |
      *     |        +--------|--> X     robot axes X, Y
-     *     |                 |
      *     |                 |
      *     -------------------
      *
@@ -62,7 +58,6 @@ int main()
      *     KF1->---KF2->---KF3->                KEYFRAMES -- robot poses
      *   (0,0,0) (1,0,0) (2,0,0)                keyframe poses in world frame
      *      |
-     *      |
      *      * prior                             Initial robot pose in world frame
      *    (0,0,0)
      *
@@ -81,7 +76,6 @@ int main()
      *   - Lmks are at positions (1,2), (2,2), (3,2)
      *   - Observations have ranges 1 or sqrt(2)
      *   - Observations have bearings pi/2 or 3pi/4
-     *
      *
      * The robot starts at (0,0,0) with a map with no previously known landmarks.
      * At each keyframe, it does:
@@ -143,7 +137,6 @@ int main()
     params_rb->time_tolerance               = 0.01;
     ProcessorBasePtr processor_rb           = problem->installProcessor("RANGE BEARING", "processor RB", sensor_rb, params_rb);
 
-
     // SELF CALIBRATION ===================================================
 
     // NOTE: SELF-CALIBRATION OF SENSOR ORIENTATION
@@ -154,7 +147,6 @@ int main()
     // The position is however not observable, and thus self-calibration would not work. You can try uncommenting it too.
     // sensor_rb->getPPtr()->unfix();
 
-
     // CONFIGURE ==========================================================
 
     // Motion data
@@ -164,7 +156,6 @@ int main()
     // landmark observations data
     VectorXi ids;
     VectorXs ranges, bearings;
-
 
     // SET OF EVENTS =======================================================
     std::cout << std::endl;
@@ -218,7 +209,6 @@ int main()
     cap_rb      = std::make_shared<CaptureRangeBearing>(t, sensor_rb, ids, ranges, bearings);
     sensor_rb   ->process(cap_rb);          // L1 : (1,2), L2 : (2,2), L3 : (3,2)
     problem->print(1,0,1,0);
-
 
     // SOLVE ================================================================
 
@@ -282,7 +272,6 @@ int main()
      *  - Try self-calibrating the sensor orientation by uncommenting line 151 (well, around 151)
      *
      */
-
 
     /*
      * ============= DETAILED DESCRIPTION OF THE PRINTED RESULT ==================

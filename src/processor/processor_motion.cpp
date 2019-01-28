@@ -1,4 +1,4 @@
-#include "processor_motion.h"
+#include "base/processor/processor_motion.h"
 namespace wolf
 {
 
@@ -88,7 +88,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             // and give the part of the buffer before the new keyframe to the capture for the KF callback
             existing_capture->getBuffer().split(ts_from_callback, capture_for_keyframe_callback->getBuffer());
 
-
             // interpolate individual delta
             if (!existing_capture->getBuffer().get().empty() && capture_for_keyframe_callback->getBuffer().get().back().ts_ != ts_from_callback)
             {
@@ -99,7 +98,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
                 // add to old buffer
                 capture_for_keyframe_callback->getBuffer().get().push_back(motion_interpolated);
             }
-
 
             // create motion feature and add it to the capture
             auto new_feature = emplaceFeature(capture_for_keyframe_callback);
@@ -130,7 +128,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             }
             break;
         }
-
 
         case RUNNING_WITH_PACK_AFTER_ORIGIN :
         {
@@ -184,8 +181,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
             break;
         }
-
-
 
         default :
             break;
@@ -255,7 +250,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
     postProcess();
 }
-
 
 bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 {

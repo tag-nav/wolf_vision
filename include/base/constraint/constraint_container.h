@@ -2,9 +2,9 @@
 #define CONSTRAINT_CONTAINER_H_
 
 //Wolf includes
-#include "wolf.h"
-#include "constraint_autodiff.h"
-#include "landmark_container.h"
+#include "base/wolf.h"
+#include "base/constraint/constraint_autodiff.h"
+#include "base/landmark/landmark_container.h"
 
 namespace wolf {
     
@@ -115,7 +115,6 @@ class ConstraintContainer: public ConstraintAutodiff<ConstraintContainer,3,2,1,2
 
 			return true;
 		}
-
 
   public:
     static ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,

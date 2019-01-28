@@ -2,11 +2,11 @@
 #define CONSTRAINT_AHP_H
 
 //Wolf includes
-#include "constraint_autodiff.h"
-#include "landmark_AHP.h"
-#include "sensor_camera.h"
-//#include "feature_point_image.h"
-#include "pinhole_tools.h"
+#include "base/constraint/constraint_autodiff.h"
+#include "base/landmark/landmark_AHP.h"
+#include "base/sensor/sensor_camera.h"
+//#include "base/feature/feature_point_image.h"
+#include "base/pinhole_tools.h"
 
 #include <iomanip> //setprecision
 
@@ -68,7 +68,6 @@ inline ConstraintAHP::ConstraintAHP(const FeatureBasePtr&   _ftr_ptr,
         ConstraintAutodiff<ConstraintAHP, 2, 3, 4, 3, 4, 4>("AHP",
                                                             _landmark_ptr->getAnchorFrame(),
                                                             nullptr,
-                                                            nullptr,
                                                             _landmark_ptr,
                                                             _processor_ptr,
                                                             _apply_loss_function,
@@ -114,7 +113,6 @@ inline void ConstraintAHP::expectation(const T* const _current_frame_p,
                                        T* _expectation) const
 {
     using namespace Eigen;
-
 
     // All involved transforms typedef
     typedef Eigen::Transform<T, 3, Eigen::Affine> TransformType;
@@ -197,6 +195,5 @@ inline ConstraintAHPPtr ConstraintAHP::create(const FeatureBasePtr&   _ftr_ptr,
 }
 
 } // namespace wolf
-
 
 #endif // CONSTRAINT_AHP_H

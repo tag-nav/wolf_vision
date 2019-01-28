@@ -1,5 +1,4 @@
-#include "capture_GPS_fix.h"
-
+#include "base/capture/capture_GPS_fix.h"
 
 namespace wolf {
 
@@ -31,6 +30,5 @@ void CaptureGPSFix::process()
     // ADD CONSTRAINT
     getFeatureList().front()->addConstraint(std::make_shared <ConstraintGPS2D>(getFeatureList().front()));
 }
-
 
 } //namespace wolf

@@ -4,9 +4,9 @@
 #define LIGHT_SPEED 299792458
 
 //Wolf includes
-#include "sensor_GPS.h"
-#include "feature_GPS_pseudorange.h"
-#include "constraint_autodiff.h"
+#include "base/sensor/sensor_GPS.h"
+#include "base/feature/feature_GPS_pseudorange.h"
+#include "base/constraint/constraint_autodiff.h"
 
 namespace wolf {
 
@@ -45,7 +45,6 @@ class ConstraintGPSPseudorange3D: public ConstraintAutodiff<ConstraintGPSPseudor
             //std::cout << "ConstraintGPSPseudorange3D()  pr=" << pseudorange_ << "\tsat_pos=(" << sat_position_[0] << ", " << sat_position_[1] << ", " << sat_position_[2] << ")" << std::endl;
         }
 
-
         virtual ~ConstraintGPSPseudorange3D() = default;
 
         template<typename T>
@@ -65,7 +64,6 @@ class ConstraintGPSPseudorange3D: public ConstraintAutodiff<ConstraintGPSPseudor
         {
             return std::make_shared<ConstraintGPSPseudorange3D>(_feature_ptr);
         }
-
 
 };
 
@@ -114,7 +112,6 @@ inline bool ConstraintGPSPseudorange3D::operator ()(const T* const _vehicle_p, c
             T_map_base(i, j) = rot_matr_vehicle(i, j);
     for (int i = 0; i < 3; ++i)
         T_map_base(i, 3) = _vehicle_p[i];
-
 
     /*
      * Compute sensor_p wrt ECEF

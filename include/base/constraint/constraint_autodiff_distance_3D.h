@@ -8,7 +8,7 @@
 #ifndef CONSTRAINT_AUTODIFF_DISTANCE_3D_H_
 #define CONSTRAINT_AUTODIFF_DISTANCE_3D_H_
 
-#include "constraint_autodiff.h"
+#include "base/constraint/constraint_autodiff.h"
 
 namespace wolf
 {

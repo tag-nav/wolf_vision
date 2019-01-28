@@ -8,7 +8,7 @@
 #ifndef HELLO_WOLF_CONSTRAINT_BEARING_H_
 #define HELLO_WOLF_CONSTRAINT_BEARING_H_
 
-#include "constraint_autodiff.h"
+#include "base/constraint/constraint_autodiff.h"
 
 namespace wolf
 {
@@ -45,7 +45,6 @@ class ConstraintBearing : public ConstraintAutodiff<ConstraintBearing, 1, 2, 1, 
 };
 
 } /* namespace wolf */
-
 
 ////////////////   IMPLEMENTATION   //////////////////////////////////////////
 

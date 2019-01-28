@@ -8,8 +8,8 @@
 #ifndef _WOLF_CAPTURE_BUFFER_H_
 #define _WOLF_CAPTURE_BUFFER_H_
 
-#include "wolf.h"
-#include "time_stamp.h"
+#include "base/wolf.h"
+#include "base/time_stamp.h"
 
 #include <list>
 #include <algorithm>
@@ -78,7 +78,6 @@ public:
 
   std::list<CaptureBasePtr> container_;
 };
-
 
 CaptureBuffer::CaptureBuffer(const Scalar _buffer_dt, const int _max_capture) :
   max_capture_(_max_capture), buffer_dt_(_buffer_dt)

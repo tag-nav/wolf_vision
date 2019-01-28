@@ -5,15 +5,14 @@
  *      Author: jvallve
  */
 
-
 #include "utils_gtest.h"
 
-#include "sensor_odom_2D.h"
-#include "capture_void.h"
-#include "feature_odom_2D.h"
-#include "constraint_odom_2D.h"
-#include "constraint_odom_2D_analytic.h"
-#include "constraint_autodiff.h"
+#include "base/sensor/sensor_odom_2D.h"
+#include "base/capture/capture_void.h"
+#include "base/feature/feature_odom_2D.h"
+#include "base/constraint/constraint_odom_2D.h"
+#include "base/constraint/constraint_odom_2D_analytic.h"
+#include "base/constraint/constraint_autodiff.h"
 
 using namespace wolf;
 using namespace Eigen;

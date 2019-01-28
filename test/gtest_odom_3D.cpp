@@ -5,18 +5,14 @@
  *      \author: jsola
  */
 
-
-
-
 #include "utils_gtest.h"
 
-#include "wolf.h"
-#include "logging.h"
+#include "base/wolf.h"
+#include "base/logging.h"
 
-#include "processor_odom_3D.h"
+#include "base/processor/processor_odom_3D.h"
 
 #include <iostream>
-
 
 #define JAC_NUMERIC(prc_ptr, D, d, dt, J_D, J_d, dx) \
 {   VectorXs Do(7); \
@@ -155,7 +151,6 @@ TEST(ProcessorOdom3D, deltaPlusDelta_Jac)
 
 }
 
-
 TEST(ProcessorOdom3D, Interpolate0) // basic test
 {
     /* Conditions:
@@ -176,7 +171,6 @@ TEST(ProcessorOdom3D, Interpolate0) // basic test
 
     WOLF_DEBUG("ref delta= ", ref.delta_.transpose());
     WOLF_DEBUG("ref Delta= ", ref.delta_integr_.transpose());
-
 
     // set final
     final.ts_ = 5;
@@ -271,7 +265,6 @@ TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
     // Motion structures
     Motion R(0.0,6,7,6,0), I(0.0,6,7,6,0), S(0.0,6,7,6,0), F(0.0,6,7,6,0);
 
-
     /////////// start experiment ///////////////
 
     // set origin and ref states
@@ -314,7 +307,6 @@ TEST(ProcessorOdom3D, Interpolate1) // delta algebra test
     Dq_os = q_o.conjugate() *  q_s;
     Dp_of = q_o.conjugate() * (p_f - p_o);
     Dq_of = q_o.conjugate() *  q_f;
-
 
     // set ref
     R.ts_           = t_r;
@@ -405,7 +397,6 @@ TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
     // Motion structures
     Motion R(0.0,6,7,6,0), I(0.0,6,7,6,0), S(0.0,6,7,6,0), F(0.0,6,7,6,0);
 
-
     /////////// start experiment ///////////////
 
     // set final and ref deltas
@@ -495,13 +486,9 @@ TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
 
 }
 
-
-
-
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
 

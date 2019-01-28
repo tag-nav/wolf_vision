@@ -8,7 +8,7 @@
 #ifndef PROCESSOR_TRACKER_LANDMARK_DUMMY_H_
 #define PROCESSOR_TRACKER_LANDMARK_DUMMY_H_
 
-#include "processor_tracker_landmark.h"
+#include "base/processor/processor_tracker_landmark.h"
 
 namespace wolf
 {

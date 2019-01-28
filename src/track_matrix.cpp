@@ -5,7 +5,7 @@
  *      \author: jsola
  */
 
-#include "track_matrix.h"
+#include "base/track_matrix.h"
 
 namespace wolf
 {

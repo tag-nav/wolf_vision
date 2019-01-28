@@ -4,7 +4,7 @@
 #define SENSOR_LASER_2D_H_
 
 //wolf
-#include "sensor_base.h"
+#include "base/sensor/sensor_base.h"
 
 //laser_scan_utils
 #include "laser_scan_utils/laser_scan.h"

@@ -5,13 +5,12 @@
  *      Author: jsola
  */
 
-
 #include "utils_gtest.h"
-#include "../src/logging.h"
+#include "base/logging.h"
 
-#include "../problem.h"
-#include "../trajectory_base.h"
-#include "../frame_base.h"
+#include "base/problem.h"
+#include "base/trajectory_base.h"
+#include "base/frame_base.h"
 
 #include <iostream>
 
@@ -55,7 +54,6 @@ struct DummyNotificationProcessor
 
   ProblemPtr problem_;
 };
-
 
 /// Set to true if you want debug info
 bool debug = false;

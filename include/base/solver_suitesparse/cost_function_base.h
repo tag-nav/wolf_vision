@@ -8,7 +8,7 @@
 #ifndef TRUNK_SRC_SOLVER_COST_FUNCTION_BASE_H_
 #define TRUNK_SRC_SOLVER_COST_FUNCTION_BASE_H_
 
-#include "wolf.h"
+#include "base/wolf.h"
 #include <Eigen/StdVector>
 
 class CostFunctionBase
@@ -74,7 +74,6 @@ class CostFunctionBase
         }
 
         virtual void evaluateResidualJacobians() = 0;
-
 
         void getResidual(Eigen::VectorXs &residual)
         {

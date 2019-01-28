@@ -9,9 +9,9 @@
 #define _WOLF_PROCESSOR_CAPTURE_HOLDER_H_
 
 //Wolf includes
-#include "processor_base.h"
-#include "capture_base.h"
-#include "capture_buffer.h"
+#include "base/processor/processor_base.h"
+#include "base/capture/capture_base.h"
+#include "base/capture/capture_buffer.h"
 
 namespace wolf {
 

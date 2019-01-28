@@ -5,14 +5,12 @@
  *      \author: datchuth
  */
 
-
 #include "utils_gtest.h"
-#include "constraint_block_absolute.h"
-#include "constraint_quaternion_absolute.h"
-#include "capture_motion.h"
+#include "base/constraint/constraint_block_absolute.h"
+#include "base/constraint/constraint_quaternion_absolute.h"
+#include "base/capture/capture_motion.h"
 
-#include "ceres_wrapper/ceres_manager.h"
-
+#include "base/ceres_wrapper/ceres_manager.h"
 
 using namespace Eigen;
 using namespace wolf;

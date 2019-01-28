@@ -1,5 +1,5 @@
-#include "sensor_laser_2D.h"
-#include "state_block.h"
+#include "base/sensor/sensor_laser_2D.h"
+#include "base/state_block.h"
 
 namespace wolf {
 
@@ -79,14 +79,10 @@ SensorBasePtr SensorLaser2D::create(const std::string& _unique_name, const Eigen
     return sen;
 }
 
-
 } // namespace wolf
 
-
-
-
 // Register in the SensorFactory and the ParameterFactory
-#include "sensor_factory.h"
+#include "base/sensor/sensor_factory.h"
 //#include "intrinsics_factory.h"
 namespace wolf {
 WOLF_REGISTER_SENSOR("LASER 2D", SensorLaser2D)

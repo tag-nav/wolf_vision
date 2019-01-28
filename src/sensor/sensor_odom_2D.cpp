@@ -1,6 +1,6 @@
-#include "sensor_odom_2D.h"
-#include "state_block.h"
-#include "state_angle.h"
+#include "base/sensor/sensor_odom_2D.h"
+#include "base/state_block.h"
+#include "base/state_angle.h"
 
 namespace wolf {
 
@@ -26,7 +26,6 @@ SensorOdom2D::SensorOdom2D(Eigen::VectorXs _extrinsics, IntrinsicsOdom2DPtr _int
 {
     //
 }
-
 
 SensorOdom2D::~SensorOdom2D()
 {
@@ -69,9 +68,8 @@ SensorBasePtr SensorOdom2D::create(const std::string& _unique_name, const Eigen:
 
 } // namespace wolf
 
-
 // Register in the SensorFactory
-#include "sensor_factory.h"
+#include "base/sensor/sensor_factory.h"
 namespace wolf {
 WOLF_REGISTER_SENSOR("ODOM 2D", SensorOdom2D)
 } // namespace wolf

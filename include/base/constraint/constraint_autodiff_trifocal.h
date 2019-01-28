@@ -2,9 +2,9 @@
 #define _CONSTRAINT_AUTODIFF_TRIFOCAL_H_
 
 //Wolf includes
-//#include "wolf.h"
-#include "constraint_autodiff.h"
-#include "sensor_camera.h"
+//#include "base/wolf.h"
+#include "base/constraint/constraint_autodiff.h"
+#include "base/sensor/sensor_camera.h"
 
 #include <common_class/trifocaltensor.h>
 #include <vision_utils.h>
@@ -108,7 +108,6 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
                                         MatrixBase<D3>& _J_e_m2,
                                         MatrixBase<D4>& _J_e_m3);
 
-
     private:
         FeatureBaseWPtr feature_prev_ptr_;  // To look for measurements
         SensorCameraPtr camera_ptr_;        // To look for intrinsics
@@ -118,10 +117,8 @@ class ConstraintAutodiffTrifocal : public ConstraintAutodiff<ConstraintAutodiffT
 
 } // namespace wolf
 
-
-
 // Includes for implentation
-#include "rotations.h"
+#include "base/rotations.h"
 
 namespace wolf
 {
@@ -136,7 +133,6 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
         const ProcessorBasePtr& _processor_ptr,
         bool _apply_loss_function,
         ConstraintStatus _status) : ConstraintAutodiff( "TRIFOCAL PLP",
-                                                        nullptr,
                                                         nullptr,
                                                         _feature_origin_ptr,
                                                         nullptr,
@@ -216,7 +212,6 @@ inline FeatureBasePtr ConstraintAutodiffTrifocal::getFeaturePrevPtr()
 {
     return feature_prev_ptr_.lock();
 }
-
 
 template<typename T>
 bool ConstraintAutodiffTrifocal::operator ()( const T* const _prev_pos,
@@ -379,7 +374,6 @@ inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_
 
     J_e2_m3.setZero(); // Not involved in epipolar c1->c2
 
-
     // Compact Jacobians
     _J_e_m1.topRows(2) = J_e1_m1;
     _J_e_m1.row(2)     = J_e2_m1;
@@ -397,8 +391,6 @@ inline Matrix<T, 3, 1> ConstraintAutodiffTrifocal::error_jacobians(const vision_
 
 }
 
-
 }    // namespace wolf
-
 
 #endif /* _CONSTRAINT_AUTODIFF_TRIFOCAL_H_ */

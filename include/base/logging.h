@@ -17,7 +17,7 @@
 #include "spdlog/fmt/bundled/ostream.h"
 
 // Wolf includes
-#include "singleton.h"
+#include "base/singleton.h"
 
 namespace wolf {
 namespace internal {

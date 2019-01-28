@@ -1,5 +1,5 @@
-#include "capture_base.h"
-#include "sensor_base.h"
+#include "base/capture/capture_base.h"
+#include "base/sensor/sensor_base.h"
 
 namespace wolf{
 
@@ -58,7 +58,6 @@ CaptureBase::CaptureBase(const std::string& _type,
 
 //    WOLF_TRACE("New Capture ", id(), " -- type ", getType(), " -- t = ", getTimeStamp(), " s");
 }
-
 
 CaptureBase::~CaptureBase()
 {
@@ -293,9 +292,6 @@ void CaptureBase::setCalibration(const VectorXs& _calib)
         }
     }
 }
-
-
-
 
 } // namespace wolf
 

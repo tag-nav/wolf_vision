@@ -1,7 +1,7 @@
 
-#include "sensor_GPS.h"
-#include "state_block.h"
-#include "state_quaternion.h"
+#include "base/sensor/sensor_GPS.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
 
 namespace wolf {
 
@@ -34,7 +34,6 @@ StateBlockPtr SensorGPS::getMapOPtr() const
     return getStateBlockPtrStatic(4);
 }
 
-
 // Define the factory method
 SensorBasePtr SensorGPS::create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_p,
                               const IntrinsicsBasePtr _intrinsics)
@@ -50,9 +49,8 @@ SensorBasePtr SensorGPS::create(const std::string& _unique_name, const Eigen::Ve
 
 } // namespace wolf
 
-
 // Register in the SensorFactory
-#include "sensor_factory.h"
+#include "base/sensor/sensor_factory.h"
 namespace wolf {
 WOLF_REGISTER_SENSOR("GPS",SensorGPS)
 } // namespace wolf

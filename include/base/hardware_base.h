@@ -8,8 +8,8 @@ class SensorBase;
 }
 
 //Wolf includes
-#include "wolf.h"
-#include "node_base.h"
+#include "base/wolf.h"
+#include "base/node_base.h"
 
 namespace wolf {
 

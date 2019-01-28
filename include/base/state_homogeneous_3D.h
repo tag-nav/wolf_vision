@@ -8,8 +8,8 @@
 #ifndef SRC_STATE_HOMOGENEOUS_3D_H_
 #define SRC_STATE_HOMOGENEOUS_3D_H_
 
-#include "state_block.h"
-#include "local_parametrization_homogeneous.h"
+#include "base/state_block.h"
+#include "base/local_parametrization_homogeneous.h"
 
 namespace wolf {
 

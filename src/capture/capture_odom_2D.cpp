@@ -5,7 +5,7 @@
  *      Author: jsola
  */
 
-#include "capture_odom_2D.h"
+#include "base/capture/capture_odom_2D.h"
 
 namespace wolf
 {

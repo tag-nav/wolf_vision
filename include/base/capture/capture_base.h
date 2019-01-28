@@ -8,9 +8,9 @@ class FeatureBase;
 }
 
 //Wolf includes
-#include "wolf.h"
-#include "node_base.h"
-#include "time_stamp.h"
+#include "base/wolf.h"
+#include "base/node_base.h"
+#include "base/time_stamp.h"
 
 //std includes
 
@@ -109,10 +109,10 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
 
 }
 
-#include "sensor_base.h"
-#include "frame_base.h"
-#include "feature_base.h"
-#include "state_block.h"
+#include "base/sensor/sensor_base.h"
+#include "base/frame_base.h"
+#include "base/feature/feature_base.h"
+#include "base/state_block.h"
 
 namespace wolf{
 
@@ -148,7 +148,6 @@ inline void CaptureBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _
     state_block_vec_[_i] = _sb_ptr;
 }
 
-
 inline StateBlockPtr CaptureBase::getSensorPPtr() const
 {
     return getStateBlockPtr(0);
@@ -163,7 +162,6 @@ inline StateBlockPtr CaptureBase::getSensorIntrinsicPtr() const
 {
     return getStateBlockPtr(2);
 }
-
 
 inline unsigned int CaptureBase::id()
 {
@@ -194,7 +192,6 @@ inline ConstraintBaseList& CaptureBase::getConstrainedByList()
 {
     return constrained_by_list_;
 }
-
 
 inline TimeStamp CaptureBase::getTimeStamp() const
 {

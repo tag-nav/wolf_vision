@@ -1,5 +1,5 @@
 #include "utils_gtest.h"
-#include "wolf.h"
+#include "base/wolf.h"
 
 using namespace Eigen;
 using namespace wolf;

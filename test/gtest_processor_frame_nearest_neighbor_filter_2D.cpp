@@ -6,12 +6,11 @@
  *      \author: tessajohanna
  */
 
-
 #include "utils_gtest.h"
-#include "../logging.h"
+#include "base/logging.h"
 
-#include "../sensor_odom_2D.h"
-#include "../processor_frame_nearest_neighbor_filter.h"
+#include "base/sensor/sensor_odom_2D.h"
+#include "base/processor/processor_frame_nearest_neighbor_filter.h"
 
 #include <iostream>
 

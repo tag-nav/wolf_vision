@@ -6,15 +6,15 @@
  */
 
 // wolf yaml
-#include "yaml_conversion.h"
+#include "base/yaml/yaml_conversion.h"
 
 // wolf
-#include "../factory.h"
+#include "base/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
 
-#include "../processor_params_image.h"
+#include "base/processor/processor_params_image.h"
 
 namespace wolf
 {
@@ -64,7 +64,5 @@ static ProcessorParamsBasePtr createProcessorParamsImage(const std::string & _fi
 const bool WOLF_UNUSED registered_prc_image_feature_par = ProcessorParamsFactory::get().registerCreator("IMAGE FEATURE", createProcessorParamsImage);
 const bool WOLF_UNUSED registered_prc_image_landmark_par = ProcessorParamsFactory::get().registerCreator("IMAGE LANDMARK", createProcessorParamsImage);
 
-
-}
 }
 

@@ -2,7 +2,7 @@
 #define _WOLF_IO_CEREAL_TIME_STAMP_H_
 
 // Wolf includes
-#include "../../time_stamp.h"
+#include "base/time_stamp.h"
 
 #include <cereal/cereal.hpp>
 

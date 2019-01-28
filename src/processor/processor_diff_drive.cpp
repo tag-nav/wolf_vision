@@ -1,13 +1,13 @@
-#include "processor_diff_drive.h"
+#include "base/processor/processor_diff_drive.h"
 
-#include "../sensors/sensor_diff_drive.h"
+#include "base/sensor/sensor_diff_drive.h"
 
-#include "../captures/capture_wheel_joint_position.h"
-#include "../captures/capture_velocity.h"
+#include "base/capture/capture_wheel_joint_position.h"
+#include "base/capture/capture_velocity.h"
 
-#include "../rotations.h"
-#include "../constraint_odom_2D.h"
-#include "../features/feature_diff_drive.h"
+#include "base/rotations.h"
+#include "base/constraint/constraint_odom_2D.h"
+#include "base/feature/feature_diff_drive.h"
 
 namespace wolf
 {
@@ -259,7 +259,7 @@ ProcessorBasePtr ProcessorDiffDrive::create(const std::string& _unique_name,
 } // namespace wolf
 
 // Register in the ProcessorFactory
-#include "processor_factory.h"
+#include "base/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("DIFF DRIVE", ProcessorDiffDrive)
 } // namespace wolf

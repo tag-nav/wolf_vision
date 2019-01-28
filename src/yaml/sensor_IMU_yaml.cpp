@@ -6,11 +6,11 @@
  */
 
 // wolf yaml
-#include "sensor_IMU.h"
-#include "yaml_conversion.h"
+#include "base/sensor/sensor_IMU.h"
+#include "base/yaml/yaml_conversion.h"
 
 // wolf
-#include "../factory.h"
+#include "base/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>

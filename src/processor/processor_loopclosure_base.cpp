@@ -5,7 +5,7 @@
  *      \author: Tessa Johanna
  */
 
-#include "processor_loopclosure_base.h"
+#include "base/processor/processor_loopclosure_base.h"
 
 namespace wolf
 {

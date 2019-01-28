@@ -8,8 +8,8 @@
 #ifndef STATE_ANGLE_H_
 #define STATE_ANGLE_H_
 
-#include "state_block.h"
-#include "local_parametrization_angle.h"
+#include "base/state_block.h"
+#include "base/local_parametrization_angle.h"
 
 namespace wolf
 {

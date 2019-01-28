@@ -5,9 +5,9 @@
  *      \author: jvallve
  */
 
-#include "processor_tracker_landmark_dummy.h"
-#include "landmark_corner_2D.h"
-#include "constraint_corner_2D.h"
+#include "base/processor/processor_tracker_landmark_dummy.h"
+#include "base/landmark/landmark_corner_2D.h"
+#include "base/constraint/constraint_corner_2D.h"
 
 namespace wolf
 {

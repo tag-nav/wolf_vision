@@ -2,13 +2,12 @@
 #define CONSTRAINT_IMU_THETA_H_
 
 //Wolf includes
-#include "feature_IMU.h"
-#include "sensor_IMU.h"
-#include "constraint_autodiff.h"
-#include "rotations.h"
+#include "base/feature/feature_IMU.h"
+#include "base/sensor/sensor_IMU.h"
+#include "base/constraint/constraint_autodiff.h"
+#include "base/rotations.h"
 
 //Eigen include
-
 
 namespace wolf {
     
@@ -101,7 +100,6 @@ class ConstraintIMU : public ConstraintAutodiff<ConstraintIMU, 15, 3, 4, 3, 6, 3
         */
         Eigen::VectorXs expectation() const;
 
-
     private:
         /// Preintegrated delta
         Eigen::Vector3s dp_preint_;
@@ -182,8 +180,6 @@ inline ConstraintIMU::ConstraintIMU(const FeatureIMUPtr&    _ftr_ptr,
 {
     //
 }
-
-
 
 template<typename T>
 inline bool ConstraintIMU::operator ()(const T* const _p1,
@@ -267,11 +263,9 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
      *   results in :
      *    res    = W.sqrt * ( ( diff ( D_preint , D_exp ) ) - J_preint * (b - b_preint) )
      *
-     *
      * NOTE: See optimization report at the end of this file for comparisons of both methods.
      */
 #define METHOD_1 // if commented, then METHOD_2 will be applied
-
 
     //needed typedefs
     typedef typename D1::Scalar T;
@@ -284,7 +278,6 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     Eigen::Matrix<T, 3, 1>    dv_exp;
 
     imu::betweenStates(_p1, _q1, _v1, _p2, _q2, _v2, (T)dt_, dp_exp, dq_exp, dv_exp);
-
 
     // 2. Corrected integrated delta: delta_corr = delta_preint (+) J_bias * (bias_current - bias_preint)
 
@@ -308,7 +301,6 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     imu::plus(dp_preint_.cast<T>(), dq_preint_.cast<T>(), dv_preint_.cast<T>(),
               dp_step, do_step, dv_step,
               dp_correct, dq_correct, dv_correct);
-
 
     // 3. Delta error in minimal form: D_err = diff(D_exp , D_corr)
     // Note the Dt here is zero because it's the delta-time between the same time stamps!
@@ -361,7 +353,6 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     _res.segment(9,3)  = sqrt_A_r_dt_inv.cast<T>() * ab_error;
     _res.tail(3)       = sqrt_W_r_dt_inv.cast<T>() * wb_error;
 
-
     //////////////////////////////////////////////////////////////////////////////////////////////
     /////////////////////////////////       PRINT VALUES       ///////////////////////////////////
 #if 0
@@ -396,13 +387,9 @@ inline bool ConstraintIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
     WOLF_TRACE("-----------------------------------------")
 #endif
     /////////////////////////////////////////////////////////////////////////////////////////////
-    /////////////////////////////////////////////////////////////////////////////////////////////
-
-
 
     return true;
 }
-
 
 inline Eigen::VectorXs ConstraintIMU::expectation() const
 {
@@ -448,24 +435,19 @@ inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> &        _p1,
     imu::betweenStates(_p1, _q1, _v1, _p2, _q2, _v2, _dt, _pe, _qe, _ve);
 }
 
-
 } // namespace wolf
 
 #endif
 
-
 /*
  * Optimization results
  * ================================================
- *
  *
  * Using gtest_IMU.cpp
  *
  * Conclusion: Residuals with method 1 and 2 are essentially identical, after exactly the same number of iterations.
  *
  * You can verify this by looking at the 'Iterations' and 'Final costs' in the Ceres reports below.
- *
- *
  *
  * With Method 1:
  *
@@ -490,8 +472,6 @@ inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> &        _p1,
 [       OK ] Process_Constraint_IMU_ODO.Var_P0_Q0_B0_P1_Q1_V1_B1__Invar_V0 (52 ms)
 [----------] 2 tests from Process_Constraint_IMU_ODO (120 ms total)
 *
-*
-*
 * With Method 2:
 *
 [ RUN      ] Process_Constraint_IMU.Var_B1_B2_Invar_P1_Q1_V1_P2_Q2_V2
@@ -514,6 +494,5 @@ inline void ConstraintIMU::expectation(const Eigen::MatrixBase<D1> &        _p1,
 [trace][11:15:43] [gtest_IMU.cpp L783 : TestBody] Ceres Solver Report: Iterations: 16, Initial cost: 1.363675e+04, Final cost: 1.880084e-20, Termination: CONVERGENCE
 [       OK ] Process_Constraint_IMU_ODO.Var_P0_Q0_B0_P1_Q1_V1_B1__Invar_V0 (59 ms)
 [----------] 2 tests from Process_Constraint_IMU_ODO (127 ms total)
-*
 *
 */

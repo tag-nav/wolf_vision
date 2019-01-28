@@ -1,4 +1,4 @@
-#include "capture_image.h"
+#include "base/capture/capture_image.h"
 
 namespace wolf {
 
@@ -44,6 +44,5 @@ std::vector<cv::KeyPoint>& CaptureImage::getKeypoints()
 {
     return frame_.getKeyPoints();
 }
-
 
 } // namespace wolf

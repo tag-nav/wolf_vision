@@ -2,14 +2,14 @@
 #define PROCESSOR_TRACKER_FEATURE_IMAGE_H
 
 // Wolf includes
-#include "sensor_camera.h"
-#include "capture_image.h"
-#include "feature_point_image.h"
-#include "state_block.h"
-#include "state_quaternion.h"
-#include "processor_tracker_feature.h"
-#include "constraint_epipolar.h"
-#include "processor_params_image.h"
+#include "base/sensor/sensor_camera.h"
+#include "base/capture/capture_image.h"
+#include "base/feature/feature_point_image.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
+#include "base/processor/processor_tracker_feature.h"
+#include "base/constraint/constraint_epipolar.h"
+#include "base/processor/processor_params_image.h"
 
 // vision_utils
 #include <detectors/detector_base.h>

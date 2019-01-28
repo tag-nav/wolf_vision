@@ -15,7 +15,7 @@ struct IntrinsicsBase;
 }
 
 // wolf
-#include "factory.h"
+#include "base/factory.h"
 
 namespace wolf
 {
@@ -174,7 +174,7 @@ namespace wolf
  *
  *  \code
  *  #include "sensor_factory.h"
- *  #include "sensor_camera.h" // provides SensorCamera
+ *  #include "base/sensor/sensor_camera.h" // provides SensorCamera
  *
  *  // Note: SensorCamera::create() is already registered, automatically.
  *

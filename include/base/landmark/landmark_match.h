@@ -2,7 +2,7 @@
 #define LANDMARK_MATCH_H_
 
 // Wolf includes
-#include "wolf.h"
+#include "base/wolf.h"
 
 //wolf nampseace
 namespace wolf {
@@ -32,7 +32,6 @@ struct LandmarkMatch
 
     }
 };
-
 
 }//end namespace
 

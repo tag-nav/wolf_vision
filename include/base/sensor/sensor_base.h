@@ -9,14 +9,13 @@ class StateBlock;
 }
 
 //Wolf includes
-#include "wolf.h"
-#include "node_base.h"
-#include "time_stamp.h"
+#include "base/wolf.h"
+#include "base/node_base.h"
+#include "base/time_stamp.h"
 
 //std includes
 
 namespace wolf {
-
 
 /** \brief base struct for intrinsic sensor parameters
  *
@@ -162,10 +161,10 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
 }
 
-#include "problem.h"
-#include "hardware_base.h"
-#include "capture_base.h"
-#include "processor_base.h"
+#include "base/problem.h"
+#include "base/hardware_base.h"
+#include "base/capture/capture_base.h"
+#include "base/processor/processor_base.h"
 
 namespace wolf{
 
@@ -272,8 +271,6 @@ inline void SensorBase::setIntrinsicDynamic(bool _intrinsic_dynamic)
 {
     intrinsic_dynamic_ = _intrinsic_dynamic;
 }
-
-
 
 } // namespace wolf
 

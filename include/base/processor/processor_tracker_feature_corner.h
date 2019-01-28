@@ -9,14 +9,14 @@
 #define PROCESSOR_TRACKER_FEATURE_CORNER_H_
 
 // Wolf includes
-#include "sensor_laser_2D.h"
-#include "capture_laser_2D.h"
-#include "feature_corner_2D.h"
-#include "landmark_corner_2D.h"
-#include "constraint_corner_2D.h"
-#include "state_block.h"
-#include "data_association/association_tree.h"
-#include "processor_tracker_feature.h"
+#include "base/sensor/sensor_laser_2D.h"
+#include "base/capture/capture_laser_2D.h"
+#include "base/feature/feature_corner_2D.h"
+#include "base/landmark/landmark_corner_2D.h"
+#include "base/constraint/constraint_corner_2D.h"
+#include "base/state_block.h"
+#include "base/association/association_tree.h"
+#include "base/processor/processor_tracker_feature.h"
 
 //laser_scan_utils
 //#include "laser_scan_utils/scan_basics.h"
@@ -24,7 +24,6 @@
 #include "laser_scan_utils/laser_scan.h"
 #include "laser_scan_utils/line_finder_iterative.h"
 #include "laser_scan_utils/corner_finder.h"
-
 
 namespace wolf
 {

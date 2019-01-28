@@ -1,17 +1,17 @@
-#include "processor_tracker_landmark_image.h"
+#include "base/processor/processor_tracker_landmark_image.h"
 
-#include "capture_image.h"
-#include "constraint_AHP.h"
-#include "feature_base.h"
-#include "feature_point_image.h"
-#include "frame_base.h"
-#include "logging.h"
-#include "map_base.h"
-#include "pinhole_tools.h"
-#include "problem.h"
-#include "sensor_camera.h"
-#include "state_block.h"
-#include "time_stamp.h"
+#include "base/capture/capture_image.h"
+#include "base/constraint/constraint_AHP.h"
+#include "base/feature/feature_base.h"
+#include "base/feature/feature_point_image.h"
+#include "base/frame_base.h"
+#include "base/logging.h"
+#include "base/map_base.h"
+#include "base/pinhole_tools.h"
+#include "base/problem.h"
+#include "base/sensor/sensor_camera.h"
+#include "base/state_block.h"
+#include "base/time_stamp.h"
 
 // vision_utils
 #include <detectors.h>
@@ -196,7 +196,6 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList
 
                     _features_incoming_out.push_back(incoming_point_ptr);
 
-
                     _feature_landmark_correspondences[incoming_point_ptr] = std::make_shared<LandmarkMatch>(landmark_in_ptr, normalized_score);
 
                     feat_lmk_found_.push_back(incoming_point_ptr);
@@ -302,7 +301,6 @@ LandmarkBasePtr ProcessorTrackerLandmarkImage::createLandmark(FeatureBasePtr _fe
 
     point3D.normalize();
 
-
     vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/distance};
 
     LandmarkAHPPtr lmk_ahp_ptr = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
@@ -329,7 +327,6 @@ ConstraintBasePtr ProcessorTrackerLandmarkImage::createConstraint(FeatureBasePtr
         return constraint_ptr;
     }
 }
-
 
 // ==================================================================== My own functions
 
@@ -360,7 +357,6 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
      *
      * We use Eigen::Transform which is like using homogeneous transform matrices with a simpler API
      */
-
 
     // Assert frame is 3D with at least PQ
     assert((_current_state.size() == 7 || _current_state.size() == 16) && "Wrong state size! Should be 7 for 3D pose or 16 for IMU.");
@@ -493,7 +489,6 @@ void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
     }
 }
 
-
 //namespace wolf{
 
 ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sen_ptr)
@@ -504,7 +499,6 @@ ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _uniqu
 }
 
 } // namespace wolf
-
 
 // Register in the SensorFactory
 #include "processor_factory.h"

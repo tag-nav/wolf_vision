@@ -6,11 +6,10 @@
 #define WOLF_PROCESSOR_GPS_H
 
 // Wolf includes
-#include "processor_base.h"
-#include "capture_GPS.h"
+#include "base/processor/processor_base.h"
+#include "base/capture/capture_GPS.h"
 
 // Std includes
-
 
 namespace wolf {
     

@@ -1,5 +1,4 @@
-
-
+    
 #ifndef association_node_H
 #define association_node_H
 
@@ -10,7 +9,7 @@
 #include <algorithm> //find()
 
 //pipol tracker
-#include "matrix.h"
+#include "base/association/matrix.h"
 
 //constants
 const double PROB_ZERO_ = 1e-3;

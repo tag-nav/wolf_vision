@@ -5,15 +5,14 @@
  *      Author: jsola
  */
 
-
 #include "utils_gtest.h"
 
-#include "wolf.h"
-#include "logging.h"
+#include "base/wolf.h"
+#include "base/logging.h"
 
-#include "sensor_odom_2D.h"
-#include "processor_odom_2D.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/sensor/sensor_odom_2D.h"
+#include "base/processor/processor_odom_2D.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 using namespace Eigen;
 using namespace wolf;
@@ -57,7 +56,6 @@ class ProcessorMotion_test : public ProcessorOdom2D, public testing::Test{
         virtual void TearDown(){}
 
 };
-
 
 TEST_F(ProcessorMotion_test, IntegrateStraight)
 {

@@ -8,9 +8,9 @@
 #ifndef PROCESSOR_TRACKER_FEATURE_DUMMY_H_
 #define PROCESSOR_TRACKER_FEATURE_DUMMY_H_
 
-#include "wolf.h"
-#include "processor_tracker_feature.h"
-#include "constraint_epipolar.h"
+#include "base/wolf.h"
+#include "base/processor/processor_tracker_feature.h"
+#include "base/constraint/constraint_epipolar.h"
 
 namespace wolf
 {

@@ -5,13 +5,12 @@
  *      Author: jsola
  */
 
-
 #include "utils_gtest.h"
-#include "../logging.h"
+#include "base/logging.h"
 
-#include "../motion_buffer.h"
+#include "base/motion_buffer.h"
 
-#include "wolf.h"
+#include "base/wolf.h"
 
 #include <iostream>
 
@@ -183,5 +182,4 @@ int main(int argc, char **argv)
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
 

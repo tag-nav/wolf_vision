@@ -5,8 +5,8 @@
  *      \author: jvallve
  */
 
-#include "processor_tracker_feature_dummy.h"
-#include "feature_base.h"
+#include "base/processor/processor_tracker_feature_dummy.h"
+#include "base/feature/feature_base.h"
 
 namespace wolf
 {

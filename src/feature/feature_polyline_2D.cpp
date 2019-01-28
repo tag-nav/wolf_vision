@@ -5,7 +5,7 @@
  *      \author: jvallve
  */
 
-#include "feature_polyline_2D.h"
+#include "base/feature/feature_polyline_2D.h"
 
 namespace wolf
 {

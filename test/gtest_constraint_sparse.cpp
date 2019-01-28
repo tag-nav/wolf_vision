@@ -5,7 +5,6 @@
  *      \author: jsola
  */
 
-
 #include "utils_gtest.h"
 
 #include "constraint_sparse.h"

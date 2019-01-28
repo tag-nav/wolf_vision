@@ -5,16 +5,16 @@
  *      \author: jsola
  */
 
-#include "capture_IMU.h"
-#include "processor_IMU.h"
-#include "sensor_IMU.h"
-#include "wolf.h"
+#include "base/capture/capture_IMU.h"
+#include "base/processor/processor_IMU.h"
+#include "base/sensor/sensor_IMU.h"
+#include "base/wolf.h"
 
 #include "utils_gtest.h"
-#include "logging.h"
+#include "base/logging.h"
 
-#include "rotations.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/rotations.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 #include <cmath>
 #include <iostream>
@@ -78,11 +78,9 @@ class ProcessorIMUt : public testing::Test
     }
 };
 
-
 TEST(ProcessorIMU_constructors, ALL)
 {
     using namespace wolf;
-
 
     //constructor with ProcessorIMUParamsPtr argument only
     ProcessorParamsIMUPtr param_ptr = std::make_shared<ProcessorParamsIMU>();
@@ -248,7 +246,6 @@ ASSERT_MATRIX_APPROX(mot_int.data_,  mot_int_gt.data_, 1e-6);
 //ASSERT_MATRIX_APPROX(mot_int.delta_, mot_int_gt.delta_, 1e-6); // FIXME: delta_p not correctly interpolated
 ASSERT_MATRIX_APPROX(mot_final.delta_integr_,  mot_sec.delta_integr_, 1e-6);
 
-
 }
 
 TEST_F(ProcessorIMUt, acc_x)
@@ -351,7 +348,6 @@ TEST_F(ProcessorIMUt, acc_z)
     ASSERT_MATRIX_APPROX(problem->getProcessorMotionPtr()->getLastPtr()->getCalibrationPreint() , b, wolf::Constants::EPS);
 }
 
-
 TEST_F(ProcessorIMUt, check_Covariance)
 {
     t.set(0); // clock in 0,1 ms ticks
@@ -393,7 +389,6 @@ TEST_F(ProcessorIMUt, gyro_x)
 
     VectorXs x(10);
     x << 0,0,0, quat_comp.x(),quat_comp.y(),quat_comp.z(),quat_comp.w(), 0,0,0; // rotated at 5 deg/s for 0.001s = 0.005 deg => 0.005 * M_PI/180
-
 
     ASSERT_MATRIX_APPROX(problem->getCurrentState().head(10) , x, wolf::Constants::EPS_SMALL);
 

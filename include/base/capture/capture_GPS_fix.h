@@ -2,8 +2,8 @@
 #define CAPTURE_GPS_FIX_H_
 
 //Wolf includes
-#include "feature_GPS_fix.h"
-#include "capture_base.h"
+#include "base/feature/feature_GPS_fix.h"
+#include "base/capture/capture_base.h"
 
 //std includes
 //

@@ -8,8 +8,8 @@
 #ifndef SRC_STATE_QUATERNION_H_
 #define SRC_STATE_QUATERNION_H_
 
-#include "state_block.h"
-#include "local_parametrization_quaternion.h"
+#include "base/state_block.h"
+#include "base/local_parametrization_quaternion.h"
 
 namespace wolf {
 

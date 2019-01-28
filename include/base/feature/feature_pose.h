@@ -1,9 +1,8 @@
 #ifndef FEATURE_POSE_H_
 #define FEATURE_POSE_H_
 
-
 //Wolf includes
-#include "feature_base.h"
+#include "base/feature/feature_base.h"
 
 //std includes
 //

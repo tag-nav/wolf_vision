@@ -13,12 +13,12 @@
 #include <ctime>
 
 //Wolf includes
-#include "state_block.h"
+#include "base/state_block.h"
 #include "../constraint_sparse.h"
-#include "../constraint_odom_2D.h"
-#include "../constraint_corner_2D.h"
-#include "../constraint_container.h"
-#include "sparse_utils.h"
+#include "base/constraint/constraint_odom_2D.h"
+#include "base/constraint/constraint_corner_2D.h"
+#include "base/constraint/constraint_container.h"
+#include "base/solver_suitesparse/sparse_utils.h"
 
 // wolf solver
 #include "solver/ccolamd_ordering.h"
@@ -28,7 +28,7 @@
 #include <eigen3/Eigen/OrderingMethods>
 #include <eigen3/Eigen/SparseQR>
 #include <Eigen/StdVector>
-#include "../constraint_pose_2D.h"
+#include "base/constraint/constraint_pose_2D.h"
 
 namespace wolf
 {

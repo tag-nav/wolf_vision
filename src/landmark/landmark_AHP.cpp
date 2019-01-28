@@ -1,7 +1,7 @@
-#include "landmark_AHP.h"
+#include "base/landmark/landmark_AHP.h"
 
-#include "state_homogeneous_3D.h"
-#include "factory.h"
+#include "base/state_homogeneous_3D.h"
+#include "base/factory.h"
 #include "yaml/yaml_conversion.h"
 
 namespace wolf {

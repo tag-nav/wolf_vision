@@ -3,12 +3,9 @@
 #define SENSOR_GPS_FIX_H_
 
 //wolf includes
-#include "sensor_base.h"
+#include "base/sensor/sensor_base.h"
 
 // std includes
-
-
-
 
 namespace wolf {
 

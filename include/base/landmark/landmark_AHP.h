@@ -2,14 +2,13 @@
 #define LANDMARK_AHP_H
 
 //Wolf includes
-#include "landmark_base.h"
+#include "base/landmark/landmark_base.h"
 
 // yaml
 #include <yaml-cpp/yaml.h>
 
 // Vision utils
 #include <vision_utils/vision_utils.h>
-
 
 namespace wolf {
     

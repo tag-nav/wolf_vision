@@ -1,4 +1,4 @@
-#include "motion_buffer.h"
+#include "base/motion_buffer.h"
 namespace wolf
 {
 
@@ -59,7 +59,6 @@ void Motion::resize(SizeEigen _data_s, SizeEigen _delta_s, SizeEigen _delta_cov_
     jacobian_delta_integr_.resize(_delta_cov_s, _delta_cov_s);
     jacobian_calib_.resize(_delta_cov_s, _calib_s);
 }
-
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -220,7 +219,6 @@ void MotionBuffer::print(bool show_data, bool show_delta, bool show_delta_int, b
         }
     }
 }
-
 
 }
 

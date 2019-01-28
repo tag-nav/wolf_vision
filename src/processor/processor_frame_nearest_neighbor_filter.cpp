@@ -1,4 +1,4 @@
-#include "processor_frame_nearest_neighbor_filter.h"
+#include "base/processor/processor_frame_nearest_neighbor_filter.h"
 
 namespace wolf
 {

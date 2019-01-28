@@ -8,13 +8,13 @@
 //Wolf
 #include "utils_gtest.h"
 
-#include "processor_odom_2D.h"
-#include "sensor_odom_2D.h"
+#include "base/processor/processor_odom_2D.h"
+#include "base/sensor/sensor_odom_2D.h"
 
-#include "processor_tracker_feature_dummy.h"
-#include "capture_void.h"
+#include "base/processor/processor_tracker_feature_dummy.h"
+#include "base/capture/capture_void.h"
 
-#include "problem.h"
+#include "base/problem.h"
 
 // STL
 #include <iterator>
@@ -22,7 +22,6 @@
 
 using namespace wolf;
 using namespace Eigen;
-
 
 TEST(ProcessorBase, KeyFrameCallback)
 {

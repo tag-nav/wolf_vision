@@ -3,11 +3,11 @@
 
 // Wolf includes
 
-#include "landmark_AHP.h"
-#include "landmark_match.h"
-#include "processor_params_image.h"
-#include "processor_tracker_landmark.h"
-#include "wolf.h"
+#include "base/landmark/landmark_AHP.h"
+#include "base/landmark/landmark_match.h"
+#include "base/processor/processor_params_image.h"
+#include "base/processor/processor_tracker_landmark.h"
+#include "base/wolf.h"
 
 #include <algorithms/activesearch/alg_activesearch.h>
 #include <descriptors/descriptor_base.h>
@@ -102,7 +102,6 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
             image_last_ = image_incoming_;
         }
 
-
         /**
          * \brief Does the drawing of the features.
          *
@@ -147,8 +146,6 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
     public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 
-
-
         /** \brief Create a new constraint
          * \param _feature_ptr pointer to the Feature to constrain
          * \param _landmark_ptr LandmarkBase pointer to the Landmark constrained.
@@ -190,8 +187,6 @@ class ProcessorTrackerLandmarkImage : public ProcessorTrackerLandmark
 
 };
 
-
 } // namespace wolf
-
 
 #endif // PROCESSOR_TRACKER_LANDMARK_IMAGE_H

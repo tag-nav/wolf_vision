@@ -6,18 +6,18 @@
  */
 
 #include "utils_gtest.h"
-#include "../src/logging.h"
+#include "base/logging.h"
 
-#include "../problem.h"
-#include "../sensor_base.h"
-#include "../state_block.h"
-#include "../capture_void.h"
-#include "../constraint_pose_2D.h"
-#include "../constraint_quaternion_absolute.h"
-#include "../solver/solver_manager.h"
-#include "../ceres_wrapper/ceres_manager.h"
-#include "../local_parametrization_angle.h"
-#include "../local_parametrization_quaternion.h"
+#include "base/problem.h"
+#include "base/sensor/sensor_base.h"
+#include "base/state_block.h"
+#include "base/capture/capture_void.h"
+#include "base/constraint/constraint_pose_2D.h"
+#include "base/constraint/constraint_quaternion_absolute.h"
+#include "base/solver/solver_manager.h"
+#include "base/ceres_wrapper/ceres_manager.h"
+#include "base/local_parametrization_angle.h"
+#include "base/local_parametrization_quaternion.h"
 
 #include "ceres/ceres.h"
 
@@ -628,7 +628,6 @@ TEST(CeresManager, ConstraintsUpdateLocalParam)
     // run ceres manager check
     ceres_manager_ptr->check();
 }
-
 
 int main(int argc, char **argv)
 {

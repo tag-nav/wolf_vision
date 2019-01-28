@@ -8,11 +8,10 @@
 #ifndef SRC_PROCESSOR_ODOM_2D_H_
 #define SRC_PROCESSOR_ODOM_2D_H_
 
-#include "processor_motion.h"
-#include "capture_odom_2D.h"
-#include "constraint_odom_2D.h"
-#include "rotations.h"
-
+#include "base/processor/processor_motion.h"
+#include "base/capture/capture_odom_2D.h"
+#include "base/constraint/constraint_odom_2D.h"
+#include "base/rotations.h"
 
 namespace wolf {
     

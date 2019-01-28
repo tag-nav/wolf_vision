@@ -7,7 +7,7 @@
 #include <vector>
 
 //matrix class
-#include "matrix.h"
+#include "base/association/matrix.h"
 
 namespace wolf
 {

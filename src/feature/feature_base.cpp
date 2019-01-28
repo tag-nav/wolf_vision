@@ -1,6 +1,6 @@
-#include "feature_base.h"
-#include "constraint_base.h"
-#include "capture_base.h"
+#include "base/feature/feature_base.h"
+#include "base/constraint/constraint_base.h"
+#include "base/capture/capture_base.h"
 
 namespace wolf {
 

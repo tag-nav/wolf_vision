@@ -3,7 +3,7 @@
 #define CONSTRAINT_ANALYTIC_H_
 
 //Wolf includes
-#include "constraint_base.h"
+#include "base/constraint/constraint_base.h"
 #include <Eigen/StdVector>
 
 namespace wolf {
@@ -37,7 +37,6 @@ class ConstraintAnalytic: public ConstraintBase
                            StateBlockPtr _state8Ptr = nullptr,
                            StateBlockPtr _state9Ptr = nullptr ) ;
 
-
         ConstraintAnalytic(const std::string&  _tp,
                            const FrameBasePtr& _frame_other_ptr,
                            const CaptureBasePtr& _capture_other_ptr,
@@ -56,7 +55,6 @@ class ConstraintAnalytic: public ConstraintBase
                            StateBlockPtr _state7Ptr = nullptr,
                            StateBlockPtr _state8Ptr = nullptr,
                            StateBlockPtr _state9Ptr = nullptr );
-
 
         virtual ~ConstraintAnalytic() = default;
 

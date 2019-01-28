@@ -6,13 +6,13 @@
  */
 
  //Wolf
-#include "capture_IMU.h"
-#include "sensor_IMU.h"
+#include "base/capture/capture_IMU.h"
+#include "base/sensor/sensor_IMU.h"
 #include "test/processor_IMU_UnitTester.h"
-#include "wolf.h"
-#include "problem.h"
-#include "state_block.h"
-#include "state_quaternion.h"
+#include "base/wolf.h"
+#include "base/problem.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -109,7 +109,6 @@ class ProcessorIMU_jacobians : public testing::Test
         */
     }
 };
-
 
 class ProcessorIMU_jacobians_Dq : public testing::Test
 {
@@ -470,7 +469,6 @@ TEST_F(ProcessorIMU_jacobians, dDv_dO)
 
 //dDo_dP = dDo_dV = [0, 0, 0]
 
-
 TEST_F(ProcessorIMU_jacobians, dDo_dO)
 {
     using namespace wolf;
@@ -505,7 +503,6 @@ TEST_F(ProcessorIMU_jacobians, dDp_dp)
 }
 
 //dDv_dp = [0, 0, 0]
-
 
 TEST_F(ProcessorIMU_jacobians, dDv_dv)
 {
@@ -543,7 +540,6 @@ TEST_F(ProcessorIMU_jacobians, dDo_do)
     ASSERT_TRUE((dDo_do - dDo_do_a).isMuchSmallerThan(1,0.000001)) << "dDo_do : \n" << dDo_do << "\n dDo_do_a :\n" << dDo_do_a <<
      "\ndDo_do_a - dDo_do_ : \n" << dDo_do_a - dDo_do << std::endl;
 }
-
 
 int main(int argc, char **argv)
 {

@@ -1,5 +1,5 @@
 #include "utils_gtest.h"
-#include "node_base.h"
+#include "base/node_base.h"
 
 class CChildBase;
 
@@ -20,7 +20,6 @@ class CParentBase : public wolf::NodeBase
          child_list_.push_back(_child_ptr);
       }
 };
-
 
 class CParentDerived : public CParentBase
 {
@@ -50,8 +49,6 @@ class CChildDerived : public CChildBase
 
       CChildDerived(std::shared_ptr<CParentBase> _parent_ptr) : CChildBase(_parent_ptr){};
 };
-
-
 
 TEST(TestTest, SingleTest)
 {

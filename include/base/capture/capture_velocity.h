@@ -9,7 +9,7 @@
 #define _WOLF_CAPTURE_VELOCITY_H_
 
 //wolf includes
-#include "capture_motion.h"
+#include "base/capture/capture_motion.h"
 
 namespace wolf {
 

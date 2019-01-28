@@ -3,8 +3,8 @@
 #define PROCESSOR_IMU_UNITTESTER_H
 
 // Wolf
-#include "processor_IMU.h"
-#include "processor_motion.h"
+#include "base/processor/processor_IMU.h"
+#include "base/processor/processor_motion.h"
 
 namespace wolf {
     struct IMU_jac_bias{ //struct used for checking jacobians by finite difference
@@ -64,7 +64,6 @@ namespace wolf {
             Eigen::Matrix3s dDp_dwb_;
             Eigen::Matrix3s dDv_dwb_;
             Eigen::Matrix3s dDq_dwb_;
-
 
         public:
             void copyfrom(IMU_jac_bias const& right){
@@ -197,9 +196,8 @@ namespace wolf {
 /////////////////////////////////////////////////////////
 
 // Wolf
-#include "state_block.h"
-#include "rotations.h"
-
+#include "base/state_block.h"
+#include "base/rotations.h"
 
 namespace wolf{
 

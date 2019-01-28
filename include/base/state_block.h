@@ -9,7 +9,7 @@ class LocalParametrizationBase;
 }
 
 //Wolf includes
-#include "wolf.h"
+#include "base/wolf.h"
 
 //std includes
 #include <iostream>
@@ -154,9 +154,9 @@ public:
 } // namespace wolf
 
 // IMPLEMENTATION
-#include "local_parametrization_base.h"
-#include "node_base.h"
-#include "problem.h"
+#include "base/local_parametrization_base.h"
+#include "base/node_base.h"
+#include "base/problem.h"
 
 namespace wolf {
 

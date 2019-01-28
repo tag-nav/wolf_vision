@@ -10,8 +10,8 @@ class TimeStamp;
 }
 
 //Wolf includes
-#include "wolf.h"
-#include "node_base.h"
+#include "base/wolf.h"
+#include "base/node_base.h"
 
 //std includes
 
@@ -71,12 +71,10 @@ inline void TrajectoryBase::setLastKeyFramePtr(FrameBasePtr _key_frame_ptr)
     last_key_frame_ptr_ = _key_frame_ptr;
 }
 
-
 inline std::string TrajectoryBase::getFrameStructure() const
 {
     return frame_structure_;
 }
-
 
 } // namespace wolf
 

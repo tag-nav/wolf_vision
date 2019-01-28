@@ -4,9 +4,9 @@
 #define LIGHT_SPEED_ 299792458
 
 //Wolf includes
-#include "sensor_GPS.h"
-#include "feature_GPS_pseudorange.h"
-#include "constraint_autodiff.h"
+#include "base/sensor/sensor_GPS.h"
+#include "base/feature/feature_GPS_pseudorange.h"
+#include "base/constraint/constraint_autodiff.h"
 
 //std
 #include <string>
@@ -31,10 +31,6 @@ class ConstraintGPSPseudorange2D : public ConstraintAutodiff<ConstraintGPSPseudo
                                    bool _apply_loss_function = false, 
                                    ConstraintStatus _status = CTR_ACTIVE) :
            ConstraintAutodiff<ConstraintGPSPseudorange2D, 1, 2, 1, 3, 1, 3, 1>("GPS PR 2D",
-                                                                               nullptr,
-                                                                               nullptr,
-                                                                               nullptr,
-                                                                               nullptr,
                                                                                nullptr,
                                                                                _apply_loss_function,
                                                                                _status,
@@ -97,7 +93,6 @@ inline bool ConstraintGPSPseudorange2D::operator ()(const T* const _vehicle_p, c
     }
     //Filling Eigen vectors
     Eigen::Matrix<T, 4, 1> sensor_p_base(_sensor_p[0], _sensor_p[1], _sensor_p[2], T(1)); //sensor position with respect base frame
-
 
     /*
      * Base-to-map transform matrix
@@ -175,7 +170,6 @@ inline bool ConstraintGPSPseudorange2D::operator ()(const T* const _vehicle_p, c
     T_lon_lat(2, 0) = T(sin(lat));
     T_lon_lat(2, 2) = T(cos(lat));
 
-
     Eigen::Matrix<T, 4, 4> T_lat_enu = Eigen::Matrix<T, 4, 4>::Zero();
     T_lat_enu(0, 2) = T_lat_enu(1, 0) = T_lat_enu(2, 1) = T_lat_enu(3, 3) = T(1);
 
@@ -189,7 +183,6 @@ inline bool ConstraintGPSPseudorange2D::operator ()(const T* const _vehicle_p, c
 
     //sensor position with respect to ecef coordinate system
     Eigen::Matrix<T, 4, 1> sensor_p_ecef = T_ecef_map * sensor_p_map;
-
 
     /*
      * calculate the residual
@@ -208,7 +201,6 @@ inline bool ConstraintGPSPseudorange2D::operator ()(const T* const _vehicle_p, c
 
     // normalizing by the covariance
     _residual[0] = _residual[0] / T(getMeasurementCovariance()(0, 0));//T(sqrt(getMeasurementCovariance()(0, 0)));
-
 
     if (verbose_level_ >= 1)
     {

@@ -1,5 +1,5 @@
 
-#include "feature_point_image.h"
+#include "base/feature/feature_point_image.h"
 
 namespace wolf {
 

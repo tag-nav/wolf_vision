@@ -2,7 +2,7 @@
 #define FEATURE_MATCH_H_
 
 // Wolf includes
-#include "wolf.h"
+#include "base/wolf.h"
 
 //wolf nampseace
 namespace wolf {
@@ -33,5 +33,4 @@ struct FeatureMatch
 }//end namespace
 
 #endif
-
 

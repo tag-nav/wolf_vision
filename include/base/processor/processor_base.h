@@ -7,10 +7,10 @@ class SensorBase;
 }
 
 // Wolf includes
-#include "wolf.h"
-#include "node_base.h"
-#include "time_stamp.h"
-#include "frame_base.h"
+#include "base/wolf.h"
+#include "base/node_base.h"
+#include "base/time_stamp.h"
+#include "base/frame_base.h"
 
 // std
 #include <memory>
@@ -34,8 +34,6 @@ class PackKeyFrame
 };
 
 WOLF_PTR_TYPEDEFS(PackKeyFrame);
-
-
 
 /** \brief Buffer of Key frame class objects
  *
@@ -216,8 +214,8 @@ inline void ProcessorBase::setVotingActive(bool _voting_active)
 
 }
 
-#include "sensor_base.h"
-#include "constraint_base.h"
+#include "base/sensor/sensor_base.h"
+#include "base/constraint/constraint_base.h"
 
 namespace wolf {
 

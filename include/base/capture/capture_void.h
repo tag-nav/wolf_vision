@@ -2,8 +2,7 @@
 #define CAPTURE_VOID_H_
 
 //Wolf includes
-#include "capture_base.h"
-
+#include "base/capture/capture_base.h"
 
 namespace wolf {
 

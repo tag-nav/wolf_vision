@@ -9,11 +9,10 @@
 #define CONSTRAINT_QUATERNION_ABSOLUTE_H_
 
 //Wolf includes
-#include "constraint_autodiff.h"
-#include "local_parametrization_quaternion.h"
-#include "frame_base.h"
-#include "rotations.h"
-
+#include "base/constraint/constraint_autodiff.h"
+#include "base/local_parametrization_quaternion.h"
+#include "base/frame_base.h"
+#include "base/rotations.h"
 
 namespace wolf {
 

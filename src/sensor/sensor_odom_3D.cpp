@@ -5,10 +5,10 @@
  *      \author: jsola
  */
 
-#include "sensor_odom_3D.h"
+#include "base/sensor/sensor_odom_3D.h"
 
-#include "state_block.h"
-#include "state_quaternion.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
 
 namespace wolf {
 
@@ -44,7 +44,6 @@ SensorOdom3D::SensorOdom3D(const Eigen::VectorXs& _extrinsics_pq, IntrinsicsOdom
     //
 }
 
-
 SensorOdom3D::~SensorOdom3D()
 {
     //
@@ -69,9 +68,8 @@ SensorBasePtr SensorOdom3D::create(const std::string& _unique_name, const Eigen:
 
 } // namespace wolf
 
-
 // Register in the SensorFactory
-#include "sensor_factory.h"
+#include "base/sensor/sensor_factory.h"
 namespace wolf {
 WOLF_REGISTER_SENSOR("ODOM 3D", SensorOdom3D)
 }

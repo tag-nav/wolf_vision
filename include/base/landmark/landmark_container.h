@@ -3,8 +3,8 @@
 #define LANDMARK_CONTAINER_H_
 
 //Wolf includes
-#include "landmark_base.h"
-#include "wolf.h"
+#include "base/landmark/landmark_base.h"
+#include "base/wolf.h"
 
 // Std includes
 
@@ -35,7 +35,6 @@ class LandmarkContainer : public LandmarkBase
 		 *  The vertices are refered as A, B, C and D:
 		 *
 		 *          B ---------------------------- A
-         *          |                              |
          *          |                              |
          *          |           <---+              |
          *          |               |              |
@@ -102,7 +101,6 @@ class LandmarkContainer : public LandmarkBase
         Eigen::VectorXs getCorner(const unsigned int _id) const;
         
 };
-
 
 } // namespace wolf
 

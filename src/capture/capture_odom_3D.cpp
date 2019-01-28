@@ -5,7 +5,7 @@
  *      Author: jsola
  */
 
-#include "capture_odom_3D.h"
+#include "base/capture/capture_odom_3D.h"
 
 namespace wolf
 {
@@ -43,6 +43,4 @@ Eigen::VectorXs CaptureOdom3D::correctDelta(const VectorXs& _delta, const Vector
 }
 
 } /* namespace wolf */
-
-
 

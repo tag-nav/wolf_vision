@@ -1,6 +1,6 @@
-#include "constraint_base.h"
-#include "frame_base.h"
-#include "landmark_base.h"
+#include "base/constraint/constraint_base.h"
+#include "base/frame_base.h"
+#include "base/landmark/landmark_base.h"
 
 namespace wolf {
 

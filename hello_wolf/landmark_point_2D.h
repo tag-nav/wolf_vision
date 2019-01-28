@@ -8,7 +8,7 @@
 #ifndef HELLO_WOLF_LANDMARK_POINT_2D_H_
 #define HELLO_WOLF_LANDMARK_POINT_2D_H_
 
-#include "landmark_base.h"
+#include "base/landmark/landmark_base.h"
 
 namespace wolf
 {

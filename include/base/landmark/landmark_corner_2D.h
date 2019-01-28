@@ -3,10 +3,9 @@
 #define LANDMARK_CORNER_H_
 
 //Wolf includes
-#include "landmark_base.h"
+#include "base/landmark/landmark_base.h"
 
 // Std includes
-
 
 namespace wolf {
 

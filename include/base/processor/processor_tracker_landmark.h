@@ -9,9 +9,9 @@
 #define PROCESSOR_TRACKER_LANDMARK_H_
 
 //wolf includes
-#include "processor_tracker.h"
-#include "capture_base.h"
-#include "landmark_match.h"
+#include "base/processor/processor_tracker.h"
+#include "base/capture/capture_base.h"
+#include "base/landmark/landmark_match.h"
 
 namespace wolf
 {
@@ -22,7 +22,6 @@ struct ProcessorParamsTrackerLandmark : public ProcessorParamsTracker
 {
     //
 };
-
 
 WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmark);
     
@@ -168,6 +167,6 @@ class ProcessorTrackerLandmark : public ProcessorTracker
 }// namespace wolf
 
 // IMPLEMENTATION
-#include "landmark_base.h"
+#include "base/landmark/landmark_base.h"
 
 #endif /* PROCESSOR_TRACKER_LANDMARK_H_ */

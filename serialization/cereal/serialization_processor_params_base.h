@@ -2,7 +2,7 @@
 #define _WOLF_SERIALIZATION_CEREAL_PROCESSOR_PARAM_BASE_H_
 
 // Wolf includes
-#include "../../processor_base.h"
+#include "base/processor/processor_base.h"
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/polymorphic.hpp>

@@ -1,11 +1,11 @@
 
 // wolf
-#include "processor_tracker_feature_trifocal.h"
+#include "processor/processor_tracker_feature_trifocal.h"
 
-#include "sensor_camera.h"
-#include "feature_point_image.h"
+#include "base/sensor/sensor_camera.h"
+#include "base/feature/feature_point_image.h"
 #include "constraints/constraint_autodiff_trifocal.h"
-#include "capture_image.h"
+#include "base/capture/capture_image.h"
 
 // vision_utils
 #include <vision_utils.h>
@@ -18,7 +18,6 @@
 
 namespace wolf {
 
-
 //// DEBUG =====================================
 //debug_tTmp = clock();
 //WOLF_TRACE("======== DetectNewFeatures =========");
@@ -28,7 +27,6 @@ namespace wolf {
 //debug_comp_time_ = (double)(clock() - debug_tTmp) / CLOCKS_PER_SEC;
 //WOLF_TRACE("--> TIME: Detect New Features: detect ",debug_comp_time_);
 //// ===========================================
-
 
 // Constructor
 ProcessorTrackerFeatureTrifocal::ProcessorTrackerFeatureTrifocal(ProcessorParamsTrackerFeatureTrifocalPtr _params_tracker_feature_trifocal) :

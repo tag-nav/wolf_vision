@@ -1,10 +1,8 @@
-#include "capture_IMU.h"
-#include "sensor_IMU.h"
-#include "state_quaternion.h"
+#include "base/capture/capture_IMU.h"
+#include "base/sensor/sensor_IMU.h"
+#include "base/state_quaternion.h"
 
 namespace wolf {
-
-
 
 CaptureIMU::CaptureIMU(const TimeStamp& _init_ts,
                        SensorBasePtr _sensor_ptr,
@@ -26,7 +24,6 @@ CaptureIMU::CaptureIMU(const TimeStamp& _init_ts,
 {
     //
 }
-
 
 CaptureIMU::~CaptureIMU()
 {

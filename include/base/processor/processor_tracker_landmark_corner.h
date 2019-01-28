@@ -9,14 +9,14 @@
 #define SRC_PROCESSOR_TRACKER_LANDMARK_CORNER_H_
 
 // Wolf includes
-#include "sensor_laser_2D.h"
-#include "capture_laser_2D.h"
-#include "feature_corner_2D.h"
-#include "landmark_corner_2D.h"
-#include "constraint_corner_2D.h"
-#include "state_block.h"
-#include "data_association/association_tree.h"
-#include "processor_tracker_landmark.h"
+#include "base/sensor/sensor_laser_2D.h"
+#include "base/capture/capture_laser_2D.h"
+#include "base/feature/feature_corner_2D.h"
+#include "base/landmark/landmark_corner_2D.h"
+#include "base/constraint/constraint_corner_2D.h"
+#include "base/state_block.h"
+#include "base/association/association_tree.h"
+#include "base/processor/processor_tracker_landmark.h"
 
 //laser_scan_utils
 //#include "laser_scan_utils/scan_basics.h"
@@ -33,7 +33,6 @@ const Scalar aperture_error_th_ = 20.0 * M_PI / 180.; //20 degrees
 const Scalar angular_error_th_ = 10.0 * M_PI / 180.; //10 degrees;
 const Scalar position_error_th_ = 1;
 const Scalar min_features_ratio_th_ = 0.5;
-
 
 //forward declaration to typedef class pointers
 struct ProcessorParamsLaser;
@@ -61,7 +60,6 @@ class ProcessorTrackerLandmarkCorner : public ProcessorTrackerLandmark
         laserscanutils::LineFinderIterative line_finder_;
         laserscanutils::CornerFinder corner_finder_;
         //TODO: add corner_finder_params
-
 
         FeatureBaseList corners_incoming_;
         FeatureBaseList corners_last_;

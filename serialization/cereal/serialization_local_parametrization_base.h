@@ -1,7 +1,7 @@
 #ifndef _WOLF_IO_CEREAL_LOCAL_PARAMETRIZATION_BASE_H_
 #define _WOLF_IO_CEREAL_LOCAL_PARAMETRIZATION_BASE_H_
 
-#include "../../local_parametrization_base.h"
+#include "base/local_parametrization_base.h"
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/polymorphic.hpp>
@@ -20,7 +20,6 @@ inline void serialize(
 {
   //
 }
-
 
 } //namespace cereal
 

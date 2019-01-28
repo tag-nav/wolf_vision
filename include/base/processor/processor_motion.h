@@ -9,9 +9,9 @@
 #define PROCESSOR_MOTION_H_
 
 // Wolf
-#include "capture_motion.h"
-#include "processor_base.h"
-#include "time_stamp.h"
+#include "base/capture/capture_motion.h"
+#include "base/processor/processor_base.h"
+#include "base/time_stamp.h"
 
 // std
 #include <iomanip>
@@ -90,7 +90,6 @@ struct ProcessorParamsMotion : public ProcessorParamsBase
  * on top of the current Robot frame: R <-- R (+) delta_R
  *
  *     \code    statePlusDelta(R_old, delta_R, R_new) \endcode
- *
  *
  * ### Defining (or not) the fromSensorFrame():
  *
@@ -201,7 +200,6 @@ class ProcessorMotion : public ProcessorBase
         MotionBuffer& getBuffer();
         const MotionBuffer& getBuffer() const;
 
-
         // Helper functions:
     protected:
 
@@ -237,10 +235,8 @@ class ProcessorMotion : public ProcessorBase
 
         PackKeyFramePtr computeProcessingStep();
 
-
         // These are the pure virtual functions doing the mathematics
     protected:
-
 
         /** \brief convert raw CaptureMotion data to the delta-state format
          *
@@ -355,7 +351,6 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual Eigen::VectorXs deltaZero() const = 0;
 
-
         /** \brief Interpolate motion to an intermediate time-stamp
          *
          * @param _ref    The motion reference
@@ -449,8 +444,6 @@ class ProcessorMotion : public ProcessorBase
         void setDistTraveled(const Scalar& _dist_traveled);
         void setAngleTurned(const Scalar& _angle_turned);
 
-
-
     protected:
         // Attributes
         SizeEigen x_size_;           ///< The size of the state vector
@@ -481,7 +474,7 @@ class ProcessorMotion : public ProcessorBase
 
 }
 
-#include "frame_base.h"
+#include "base/frame_base.h"
 
 namespace wolf{
 
@@ -558,7 +551,6 @@ inline const MotionBuffer& ProcessorMotion::getBuffer() const
     return last_ptr_->getBuffer();
 }
 
-
 inline MotionBuffer& ProcessorMotion::getBuffer()
 {
     return last_ptr_->getBuffer();
@@ -630,8 +622,6 @@ inline void ProcessorMotion::setAngleTurned(const Scalar& _angle_turned)
 {
     params_motion_->angle_turned = _angle_turned;
 }
-
-
 
 } // namespace wolf
 

@@ -2,8 +2,7 @@
 #define NODE_BASE_H_
 
 // Wolf includes
-#include "wolf.h"
-
+#include "base/wolf.h"
 
 namespace wolf {
 
