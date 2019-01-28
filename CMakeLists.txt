@@ -252,14 +252,37 @@ ENDIF(GLOG_FOUND)
 #HEADERS
 
 SET(HDRS_BASE
-include/base/capture/capture_motion.h
+include/base/diff_drive_tools.h
+include/base/diff_drive_tools.hpp
 include/base/eigen_assert.h
 include/base/eigen_predicates.h
-include/base/landmark/landmark_match.h
+include/base/factory.h
+include/base/frame_base.h
+include/base/hardware_base.h
+include/base/IMU_tools.h
+include/base/local_parametrization_angle.h
+include/base/local_parametrization_base.h
+include/base/local_parametrization_homogeneous.h
+include/base/local_parametrization_polyline_extreme.h
+include/base/local_parametrization_quaternion.h
+include/base/logging.h
 include/base/make_unique.h
+include/base/map_base.h
+include/base/motion_buffer.h
+include/base/node_base.h
 include/base/pinhole_tools.h
-include/base/processor/processor_capture_holder.h
-include/base/processor/processor_tracker_landmark.h
+include/base/problem.h
+include/base/rotations.h
+include/base/singleton.h
+include/base/state_angle.h
+include/base/state_block.h
+include/base/state_homogeneous_3D.h
+include/base/state_quaternion.h
+include/base/three_D_tools.h
+include/base/time_stamp.h
+include/base/track_matrix.h
+include/base/trajectory_base.h
+include/base/wolf.h
     )
 SET(HDRS
 include/base/capture/capture_motion.h
@@ -723,8 +746,6 @@ INSTALL(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
 install(EXPORT ${PROJECT_NAME}Targets DESTINATION lib/cmake/${PROJECT_NAME})
 #install headers
 INSTALL(FILES ${HDRS_BASE}
-    DESTINATION include/iri-algorithms/wolf/base)
-INSTALL(FILES ${HDRS}
     DESTINATION include/iri-algorithms/wolf/base)
 INSTALL(FILES ${HDRS_DTASSC}
    DESTINATION include/iri-algorithms/wolf/base/association)
