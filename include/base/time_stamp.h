@@ -3,7 +3,7 @@
 #define TIME_STAMP_H_
 
 //wolf includes
-#include "wolf.h"
+#include "base/wolf.h"
 
 //C, std
 #include <sys/time.h>

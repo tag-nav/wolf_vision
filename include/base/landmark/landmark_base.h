@@ -8,9 +8,9 @@ class StateBlock;
 }
 
 //Wolf includes
-#include "wolf.h"
-#include "node_base.h"
-#include "time_stamp.h"
+#include "base/wolf.h"
+#include "base/node_base.h"
+#include "base/time_stamp.h"
 
 //std includes
 
@@ -18,7 +18,6 @@ class StateBlock;
 #include "yaml-cpp/yaml.h"
 
 namespace wolf {
-
 
 //class LandmarkBase
 class LandmarkBase : public NodeBase, public std::enable_shared_from_this<LandmarkBase>
@@ -76,7 +75,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         bool getCovariance(Eigen::MatrixXs& _cov) const;
         Eigen::MatrixXs getCovariance() const;
 
-
     protected:
         virtual void removeStateBlocks();
 
@@ -85,7 +83,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         const Eigen::VectorXs& getDescriptor() const;        
         Scalar getDescriptor(unsigned int _ii) const;
         void setDescriptor(const Eigen::VectorXs& _descriptor);
-
 
         // Navigate wolf tree
         virtual void setProblem(ProblemPtr _problem) final;
@@ -101,9 +98,9 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
 }
 
-#include "map_base.h"
-#include "constraint_base.h"
-#include "state_block.h"
+#include "base/map_base.h"
+#include "base/constraint/constraint_base.h"
+#include "base/state_block.h"
 
 namespace wolf{
 

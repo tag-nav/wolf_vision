@@ -6,15 +6,15 @@
  */
 
 //Wolf
-#include "capture_IMU.h"
-#include "constraint_pose_3D.h"
-#include "processor_IMU.h"
-#include "sensor_IMU.h"
-#include "processor_odom_3D.h"
+#include "base/capture/capture_IMU.h"
+#include "base/constraint/constraint_pose_3D.h"
+#include "base/processor/processor_IMU.h"
+#include "base/sensor/sensor_IMU.h"
+#include "base/processor/processor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 #include "utils_gtest.h"
-#include "logging.h"
+#include "base/logging.h"
 
 #include <iostream>
 #include <fstream>
@@ -89,7 +89,6 @@ class ConstraintIMU_biasTest_Static_NullBias : public testing::Test
         KF0 = processor_ptr_imu->setOrigin(x_origin, t);
 
         //===================================================== END{INITIALIZATION}
-
 
         //===================================================== PROCESS DATA
         // PROCESS DATA
@@ -435,7 +434,6 @@ class ConstraintIMU_biasTest_Move_NullBias : public testing::Test
         origin_KF = processor_ptr_imu->setOrigin(x_origin, t);
 
         //===================================================== END{INITIALIZATION}
-
 
         //===================================================== PROCESS DATA
         // PROCESS DATA
@@ -1011,7 +1009,6 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
 //        WOLF_TRACE("KF2 delta cor: ", last_CM  ->getDeltaCorrected(origin_CB->getCalibration()).transpose());
 //        WOLF_TRACE("KF2 jacob    : ", last_CM  ->getJacobianCalib().row(0));
 
-
         // ==================================================== show problem status
 
         problem->print(4,1,1,1);
@@ -1335,8 +1332,6 @@ class ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
     virtual void TearDown(){}
 };
 
-
-
 // tests with following conditions :
 //  var(b1,b2),        invar(p1,q1,v1,p2,q2,v2),    factor : imu(p,q,v)
 
@@ -1642,7 +1637,6 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullGyroBias,VarB1B2_InvarP1Q1V1P2Q2V2_E
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
 
-
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-2")
     epsilon_bias = 0.01;
@@ -1722,7 +1716,6 @@ TEST_F(ConstraintIMU_biasTest_Static_NonNullBias,VarB1B2_InvarP1Q1V1P2Q2V2_ErrBi
     //Only biases are unfixed
     ASSERT_MATRIX_APPROX(origin_KF->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
     ASSERT_MATRIX_APPROX(last_KF  ->getCaptureOf(sen_imu)->getCalibration(), origin_bias, 1e-5)
-
 
     //==============================================================
     //WOLF_INFO("Starting error bias 1e-2")
@@ -2842,7 +2835,6 @@ int main(int argc, char **argv)
 //  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRotY.VarB1B2V1V2_InvarP1Q1P2Q2_initOK";
 //  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_ODOM_biasTest_Move_NonNullBiasRot.VarB1B2_InvarP1Q1V1P2Q2V2_initOK";
 //  ::testing::GTEST_FLAG(filter) = "ConstraintIMU_biasTest_Move_NonNullBiasRot.VarB1B2V1P2V2_InvarP1Q1Q2_initOK";
-
 
   return RUN_ALL_TESTS();
 }

@@ -8,9 +8,9 @@
 #ifndef CAPTURE_ODOM_2D_H_
 #define CAPTURE_ODOM_2D_H_
 
-#include "capture_motion.h"
+#include "base/capture/capture_motion.h"
 
-#include "rotations.h"
+#include "base/rotations.h"
 
 namespace wolf
 {
@@ -43,8 +43,6 @@ inline Eigen::VectorXs CaptureOdom2D::correctDelta(const VectorXs& _delta, const
     delta(2) = pi2pi(delta(2));
     return delta;
 }
-
-
 
 } /* namespace wolf */
 

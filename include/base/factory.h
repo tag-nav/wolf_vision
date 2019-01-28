@@ -9,7 +9,7 @@
 #define FACTORY_H_
 
 // wolf
-#include "wolf.h"
+#include "base/wolf.h"
 
 // std
 #include <string>
@@ -308,8 +308,6 @@ inline std::string Factory<TypeBase, TypeInput...>::getClass()
 
 } // namespace wolf
 
-
-
 namespace wolf
 {
 
@@ -349,7 +347,7 @@ inline std::string LandmarkFactory::getClass()
 // Frames
 class TimeStamp;
 } // namespace wolf
-#include "frame_base.h"
+#include "base/frame_base.h"
 namespace wolf{
 typedef Factory<FrameBase, const FrameType&, const TimeStamp&, const Eigen::VectorXs&> FrameFactory;
 template<>
@@ -377,7 +375,6 @@ inline std::string FrameFactory::getClass()
 #define WOLF_REGISTER_FRAME(FrameType, FrameName) \
   namespace{ const bool WOLF_UNUSED FrameName##Registered = \
     wolf::FrameFactory::get().registerCreator(FrameType, FrameName::create); }\
-
 
 } /* namespace wolf */
 

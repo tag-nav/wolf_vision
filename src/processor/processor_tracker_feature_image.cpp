@@ -1,5 +1,5 @@
 // Wolf includes
-#include "processor_tracker_feature_image.h"
+#include "base/processor/processor_tracker_feature_image.h"
 
 // Vision utils
 #include <detectors.h>
@@ -382,7 +382,6 @@ void ProcessorTrackerFeatureImage::drawFeatures(cv::Mat _image)
     }
 }
 
-
 ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr _sensor_ptr)
 {
     ProcessorTrackerFeatureImagePtr prc_ptr = std::make_shared<ProcessorTrackerFeatureImage>(std::static_pointer_cast<ProcessorParamsTrackerFeatureImage>(_params));
@@ -390,9 +389,7 @@ ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique
     return prc_ptr;
 }
 
-
 } // namespace wolf
-
 
 // Register in the SensorFactory
 #include "processor_factory.h"

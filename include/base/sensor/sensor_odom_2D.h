@@ -3,7 +3,7 @@
 #define SENSOR_ODOM_2D_H_
 
 //wolf includes
-#include "sensor_base.h"
+#include "base/sensor/sensor_base.h"
 
 namespace wolf {
 
@@ -58,7 +58,6 @@ class SensorOdom2D : public SensorBase
 
 	public:
         static SensorBasePtr create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBasePtr _intrinsics);
-
 
 };
 

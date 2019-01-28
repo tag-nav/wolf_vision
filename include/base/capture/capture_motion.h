@@ -9,8 +9,8 @@
 #define SRC_CAPTURE_MOTION_H_
 
 // Wolf includes
-#include "capture_base.h"
-#include "motion_buffer.h"
+#include "base/capture/capture_base.h"
+#include "base/motion_buffer.h"
 
 // STL includes
 #include <list>

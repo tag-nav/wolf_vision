@@ -2,12 +2,11 @@
 #define FEATURE_LINE_2D_H_
 
 //Wolf includes
-#include "feature_base.h"
+#include "base/feature/feature_base.h"
 
 namespace wolf {
 
 WOLF_PTR_TYPEDEFS(FeatureLine2D);
-    
     
 /** \brief class FeatureLine2D
  * 

@@ -3,16 +3,14 @@
 #define LANDMARK_LINE_2D_H_
 
 //Wolf includes
-#include "landmark_base.h"
-#include "wolf.h"
+#include "base/landmark/landmark_base.h"
+#include "base/wolf.h"
 
 //std includes
-
 
 namespace wolf {
     
 WOLF_PTR_TYPEDEFS(LandmarkLine2D);
-
 
 //class LandmarkLine2D
 class LandmarkLine2D : public LandmarkBase

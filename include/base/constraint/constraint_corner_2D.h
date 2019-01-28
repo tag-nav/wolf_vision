@@ -2,8 +2,8 @@
 #define CONSTRAINT_CORNER_2D_THETA_H_
 
 //Wolf includes
-#include "constraint_autodiff.h"
-#include "landmark_corner_2D.h"
+#include "base/constraint/constraint_autodiff.h"
+#include "base/landmark/landmark_corner_2D.h"
 
 namespace wolf {
 
@@ -110,7 +110,5 @@ inline bool ConstraintCorner2D::operator ()(const T* const _robotP, const T* con
 }
 
 } // namespace wolf
-
-
 
 #endif

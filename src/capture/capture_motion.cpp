@@ -5,7 +5,7 @@
  *      \author: jsola
  */
 
-#include "capture_motion.h"
+#include "base/capture/capture_motion.h"
 
 namespace wolf
 {
@@ -46,14 +46,10 @@ CaptureMotion::CaptureMotion(const std::string & _type,
     //
 }
 
-
-
-
 CaptureMotion::~CaptureMotion()
 {
     //
 }
-
 
 Eigen::VectorXs CaptureMotion::getDeltaCorrected(const VectorXs& _calib_current)
 {

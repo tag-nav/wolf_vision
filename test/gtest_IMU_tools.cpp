@@ -5,9 +5,8 @@
  *      Author: jsola
  */
 
-#include "IMU_tools.h"
+#include "base/IMU_tools.h"
 #include "utils_gtest.h"
-
 
 using namespace Eigen;
 using namespace wolf;
@@ -376,7 +375,6 @@ TEST(motion2data, AllRandom)
     Vector6s bias;
     Quaternions q;
 
-
     motion      .setRandom();
     bias        .setRandom();
     q.coeffs()  .setRandom().normalize();
@@ -389,7 +387,6 @@ TEST(motion2data, AllRandom)
 
     ASSERT_MATRIX_APPROX(data, data_true, 1e-12);
 }
-
 
 /* Integrate acc and angVel motion, obtain Delta_preintegrated
  * Input:

@@ -6,14 +6,13 @@
  */
 
 #include "utils_gtest.h"
-#include "../src/logging.h"
+#include "base/logging.h"
 
+#include "base/local_parametrization_quaternion.h"
+#include "base/local_parametrization_homogeneous.h"
+#include "base/rotations.h"
 
-#include "../src/local_parametrization_quaternion.h"
-#include "../src/local_parametrization_homogeneous.h"
-#include "../src/rotations.h"
-
-#include "../src/wolf.h"
+#include "base/wolf.h"
 
 #include <iostream>
 
@@ -31,7 +30,6 @@
         _J.col(i) = (_xo - _x0)/dx; \
     } \
 }
-
 
 using namespace Eigen;
 using namespace std;
@@ -125,7 +123,6 @@ TEST(TestLocalParametrization, QuaternionGlobal)
     Qpar_glob.minus(q_m, qoc_m, da2_m);
 
     ASSERT_MATRIX_APPROX(da_m, da2_m, 1e-10);
-
 
 }
 

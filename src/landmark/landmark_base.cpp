@@ -1,9 +1,9 @@
 
-#include "landmark_base.h"
-#include "constraint_base.h"
-#include "map_base.h"
-#include "state_block.h"
-#include "yaml/yaml_conversion.h"
+#include "base/landmark/landmark_base.h"
+#include "base/constraint/constraint_base.h"
+#include "base/map_base.h"
+#include "base/state_block.h"
+#include "base/yaml/yaml_conversion.h"
 
 namespace wolf {
 
@@ -121,7 +121,6 @@ void LandmarkBase::removeStateBlocks()
     }
 }
 
-
 Eigen::VectorXs LandmarkBase::getState() const
 {
     SizeEigen size = 0;
@@ -153,7 +152,6 @@ void LandmarkBase::getState(Eigen::VectorXs& _state) const
             index += sb->getSize();
         }
 }
-
 
 YAML::Node LandmarkBase::saveToYaml() const
 {

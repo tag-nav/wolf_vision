@@ -2,8 +2,8 @@
 #define _WOLF_SRC_PROCESSOR_FRAME_NEAREST_NEIGHBOR_FILTER_H
 
 // Wolf related headers
-#include "processor_loopclosure_base.h"
-#include "state_block.h"
+#include "base/processor/processor_loopclosure_base.h"
+#include "base/state_block.h"
 
 namespace wolf{
 

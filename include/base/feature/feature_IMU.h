@@ -2,12 +2,11 @@
 #define FEATURE_IMU_H_
 
 //Wolf includes
-#include "capture_IMU.h"
-#include "feature_base.h"
-#include "wolf.h"
+#include "base/capture/capture_IMU.h"
+#include "base/feature/feature_base.h"
+#include "base/wolf.h"
 
 //std includes
-
 
 namespace wolf {
 
@@ -17,7 +16,6 @@ WOLF_PTR_TYPEDEFS(FeatureIMU);
 class FeatureIMU : public FeatureBase
 {
     public:
-
 
         /** \brief Constructor from and measures
          *
@@ -57,7 +55,6 @@ class FeatureIMU : public FeatureBase
     public:
       EIGEN_MAKE_ALIGNED_OPERATOR_NEW;
 };
-
 
 inline const Eigen::Vector3s& FeatureIMU::getAccBiasPreint() const
 {

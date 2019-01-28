@@ -1,10 +1,10 @@
 #include "utils_gtest.h"
 
-#include "logging.h"
+#include "base/logging.h"
 
 #include "ceres_wrapper/ceres_manager.h"
 #include "processors/processor_tracker_feature_trifocal.h"
-#include "capture_image.h"
+#include "base/capture/capture_image.h"
 #include "constraints/constraint_autodiff_trifocal.h"
 
 using namespace Eigen;
@@ -278,7 +278,6 @@ TEST_F(ConstraintAutodiffTrifocalTest, error_jacobians)
 
     ASSERT_MATRIX_APPROX(J_r_m1, Jn_r_m1, 1e-6);
 
-
     // jacs wrt m2
     pix0 = c123->getPixelCanonicalOrigin();
     for (int i=0; i<3; i++)
@@ -294,7 +293,6 @@ TEST_F(ConstraintAutodiffTrifocalTest, error_jacobians)
     c123->setPixelCanonicalOrigin(pix0);
 
     ASSERT_MATRIX_APPROX(J_r_m2, Jn_r_m2, 1e-6);
-
 
     // jacs wrt m3
     pix0 = c123->getPixelCanonicalLast();
@@ -671,7 +669,6 @@ class ConstraintAutodiffTrifocalMultiPointTest : public ConstraintAutodiffTrifoc
          *
          */
 
-
     public:
         std::vector<FeatureBasePtr> fv1, fv2, fv3;
         std::vector<ConstraintAutodiffTrifocalPtr> cv123;
@@ -734,7 +731,6 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point)
      * C2.ori and all C3 are optimized
      *
      */
-
 
     S ->getPPtr()->fix(); // do not calibrate sensor pos
     S ->getOPtr()->fix(); // do not calibrate sensor ori
@@ -801,7 +797,6 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
      *
      */
 
-
     S ->getPPtr()->fix(); // do not calibrate sensor pos
     S ->getOPtr()->fix(); // do not calibrate sensor ori
     F1->getPPtr()->fix(); // Cam 1 acts as reference
@@ -867,7 +862,6 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
      * The scale is observed through a distance constraint
      *
      */
-
 
     S ->getPPtr()->fix(); // do not calibrate sensor pos
     S ->getOPtr()->fix(); // do not calibrate sensor ori

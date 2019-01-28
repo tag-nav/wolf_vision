@@ -1,5 +1,5 @@
-#include "constraint_analytic.h"
-#include "state_block.h"
+#include "base/constraint/constraint_analytic.h"
+#include "base/state_block.h"
 
 namespace wolf {
 

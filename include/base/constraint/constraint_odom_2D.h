@@ -2,8 +2,8 @@
 #define CONSTRAINT_ODOM_2D_THETA_H_
 
 //Wolf includes
-#include "constraint_autodiff.h"
-#include "frame_base.h"
+#include "base/constraint/constraint_autodiff.h"
+#include "base/frame_base.h"
 
 //#include "ceres/jet.h"
 
@@ -73,7 +73,6 @@ inline bool ConstraintOdom2D::operator ()(const T* const _p1, const T* const _o1
     // Residuals
     res = getMeasurementSquareRootInformationUpper().cast<T>() * er;
 
-
     ////////////////////////////////////////////////////////
     // print Jacobian. Uncomment this as you wish (remember to uncomment #include "ceres/jet.h" above):
 //    using ceres::Jet;
@@ -91,7 +90,6 @@ inline bool ConstraintOdom2D::operator ()(const T* const _p1, const T* const _o1
 //        std::cout << "ConstraintOdom2D::Sqrt Info(c" << id() << ") = \n" << getMeasurementSquareRootInformationUpper() << std::endl;
 //    }
     ////////////////////////////////////////////////////////
-
 
     return true;
 }

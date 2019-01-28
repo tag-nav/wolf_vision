@@ -1,7 +1,7 @@
 #ifndef CONSTRAINT_EPIPOLAR_H
 #define CONSTRAINT_EPIPOLAR_H
 
-#include "constraint_base.h"
+#include "base/constraint/constraint_base.h"
 
 namespace wolf {
 
@@ -18,7 +18,6 @@ class ConstraintEpipolar : public ConstraintBase
                            ConstraintStatus _status = CTR_ACTIVE);
 
         virtual ~ConstraintEpipolar() = default;
-
 
         /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
         **/

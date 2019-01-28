@@ -2,7 +2,7 @@
 #define CONSTRAINT_ODOM_2D_ANALYTIC_H_
 
 //Wolf includes
-#include "constraint_relative_2D_analytic.h"
+#include "base/constraint/constraint_relative_2D_analytic.h"
 #include <Eigen/StdVector>
 
 namespace wolf {
@@ -92,7 +92,6 @@ class ConstraintOdom2DAnalytic : public ConstraintRelative2DAnalytic
 //            jacobians[3] << 0, 0, 1;
 //            jacobians[3] = getMeasurementSquareRootInformationUpper() * jacobians[0];
 //        }
-
 
     public:
         static ConstraintBasePtr create(const FeatureBasePtr& _feature_ptr,

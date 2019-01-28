@@ -8,8 +8,7 @@
 #ifndef LOCAL_PARAMETRIZATION_BASE_H_
 #define LOCAL_PARAMETRIZATION_BASE_H_
 
-#include "wolf.h"
-
+#include "base/wolf.h"
 
 namespace wolf {
 

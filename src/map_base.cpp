@@ -1,8 +1,8 @@
 
 // wolf
-#include "map_base.h"
-#include "landmark_base.h"
-#include "factory.h"
+#include "base/map_base.h"
+#include "base/landmark/landmark_base.h"
+#include "base/factory.h"
 
 // YAML
 #include <yaml-cpp/yaml.h>
@@ -13,8 +13,6 @@
 #include <iomanip>
 #include <iostream>
 #include <sstream>
-
-
 
 namespace wolf {
 
@@ -84,7 +82,6 @@ void MapBase::save(const std::string& _map_file_yaml, const std::string& _map_na
         emitter << YAML::Flow << lmk_ptr->saveToYaml();
     }
     emitter << YAML::EndSeq << YAML::EndMap;
-
 
     std::ofstream fout(_map_file_yaml);
     fout << emitter.c_str();

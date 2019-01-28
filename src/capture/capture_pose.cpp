@@ -1,4 +1,4 @@
-#include "capture_pose.h"
+#include "base/capture/capture_pose.h"
 
 namespace wolf{
 
@@ -29,6 +29,5 @@ void CapturePose::emplaceFeatureAndConstraint()
     else
         throw std::runtime_error("Wrong data size in CapturePose. Use 3 for 2D. Use 7 for 3D.");
 }
-
 
 } // namespace wolf

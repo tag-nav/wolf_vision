@@ -1,6 +1,6 @@
 
-#include "landmark_container.h"
-#include "state_block.h"
+#include "base/landmark/landmark_container.h"
+#include "base/state_block.h"
 
 namespace wolf {
 

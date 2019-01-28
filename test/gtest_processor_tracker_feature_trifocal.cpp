@@ -1,14 +1,14 @@
 #include "utils_gtest.h"
 
-#include "wolf.h"
-#include "logging.h"
+#include "base/wolf.h"
+#include "base/logging.h"
 
 #include "vision_utils.h"
 
 #include "processors/processor_tracker_feature_trifocal.h"
-#include "processor_odom_3D.h"
-#include "capture_image.h"
-#include "sensor_camera.h"
+#include "base/processor/processor_odom_3D.h"
+#include "base/capture/capture_image.h"
+#include "base/sensor/sensor_camera.h"
 
 using namespace Eigen;
 using namespace wolf;
@@ -20,7 +20,6 @@ using namespace wolf;
 //        {
 //        }
 //};
-
 
 //TEST(ProcessorTrackerFeatureTrifocal, Constructor)
 //{
@@ -145,7 +144,6 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
         ASSERT_TRUE( problem->getLastKeyFramePtr()->getType().compare("PO 3D")==0 );
     }
 }
-
 
 int main(int argc, char **argv)
 {

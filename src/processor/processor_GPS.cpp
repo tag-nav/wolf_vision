@@ -2,11 +2,11 @@
 // Created by ptirindelli on 16/12/15.
 //
 
-#include "constraint_GPS_pseudorange_2D.h"
-#include "feature_GPS_pseudorange.h"
-#include "processor_GPS.h"
+#include "base/constraint/constraint_GPS_pseudorange_2D.h"
+#include "base/feature/feature_GPS_pseudorange.h"
+#include "base/processor/processor_GPS.h"
 
-#include "capture_GPS.h"
+#include "base/capture/capture_GPS.h"
 
 namespace wolf
 {
@@ -67,7 +67,6 @@ ProcessorBasePtr ProcessorGPS::create(const std::string& _unique_name, const Pro
 }
 
 } // namespace wolf
-
 
 // Register in the SensorFactory
 #include "processor_factory.h"

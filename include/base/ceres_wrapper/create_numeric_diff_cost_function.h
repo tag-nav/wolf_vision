@@ -12,9 +12,8 @@
 #include "ceres/numeric_diff_cost_function.h"
 
 // Constraints
-#include "../constraint_odom_2D.h"
-#include "../constraint_base.h"
-
+#include "base/constraint/constraint_odom_2D.h"
+#include "base/constraint/constraint_base.h"
 
 namespace wolf {
 
@@ -28,7 +27,6 @@ std::shared_ptr<ceres::NumericDiffCostFunction<T, ceres::CENTRAL, T::residualSiz
                                                            T::block0Size,T::block1Size,T::block2Size,T::block3Size,T::block4Size,
                                                            T::block5Size,T::block6Size,T::block7Size,T::block8Size,T::block9Size> >(std::static_pointer_cast<T>(_constraint_ptr).get());
 };
-
 
 inline std::shared_ptr<ceres::CostFunction> createNumericDiffCostFunction(ConstraintBasePtr _ctr_ptr)
 {

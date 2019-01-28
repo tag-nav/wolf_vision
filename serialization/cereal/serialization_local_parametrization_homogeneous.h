@@ -1,7 +1,7 @@
 #ifndef _WOLF_IO_CEREAL_LOCAL_PARAMETRIZATION_BASE_HOMOGENEOUS_H_
 #define _WOLF_IO_CEREAL_LOCAL_PARAMETRIZATION_BASE_HOMOGENEOUS_H_
 
-#include "../../local_parametrization_homogeneous.h"
+#include "base/local_parametrization_homogeneous.h"
 
 #include "serialization_local_parametrization_base.h"
 

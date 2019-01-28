@@ -1,6 +1,5 @@
-#include "sensor_base.h"
-#include "state_block.h"
-
+#include "base/sensor/sensor_base.h"
+#include "base/state_block.h"
 
 namespace wolf {
 
@@ -105,8 +104,6 @@ void SensorBase::removeStateBlocks()
     }
 }
 
-
-
 void SensorBase::fix()
 {
     for( auto sbp : state_block_vec_)
@@ -166,8 +163,6 @@ void SensorBase::unfixIntrinsics()
     }
     updateCalibSize();
 }
-
-
 
 void SensorBase::registerNewStateBlocks()
 {
@@ -285,7 +280,6 @@ SizeEigen SensorBase::computeCalibSize() const
     return sz;
 }
 
-
 Eigen::VectorXs SensorBase::getCalibration() const
 {
     SizeEigen index = 0;
@@ -302,7 +296,6 @@ Eigen::VectorXs SensorBase::getCalibration() const
     }
     return calib;
 }
-
 
 bool SensorBase::process(const CaptureBasePtr capture_ptr)
 {

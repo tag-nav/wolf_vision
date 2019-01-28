@@ -8,9 +8,8 @@
 #ifndef IMU_TOOLS_H_
 #define IMU_TOOLS_H_
 
-
-#include "wolf.h"
-#include "rotations.h"
+#include "base/wolf.h"
+#include "base/rotations.h"
 
 /*
  * Most functions in this file are explained in the document:
@@ -40,8 +39,6 @@
  *   - diff: d = lift( D2 (-) D1 )
  *   - body2delta: construct a delta from body magnitudes of linAcc and angVel
  */
-
-
 
 namespace wolf 
 {
@@ -109,7 +106,6 @@ inline void inverse(const MatrixBase<D1>& d,
 
     inverse(dp, dq, dv, dt, idp, idq, idv);
 }
-
 
 template<typename D, class T>
 inline Matrix<typename D::Scalar, 10, 1> inverse(const MatrixBase<D>& d,
@@ -246,7 +242,6 @@ inline void between(const MatrixBase<D1>& d1,
 
     between(dp1, dq1, dv1, dp2, dq2, dv2, dt, diff_p, diff_q, diff_v);
 }
-
 
 template<typename D1, typename D2, class T>
 inline Matrix<typename D1::Scalar, 10, 1> between(const MatrixBase<D1>& d1,
@@ -445,7 +440,6 @@ inline void diff(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1, const
     J_do_dq2    =   jac_SO3_right_inv(diff_o);
 }
 
-
 template<typename D1, typename D2, typename D3>
 inline void diff(const MatrixBase<D1>& d1,
                  const MatrixBase<D2>& d2,
@@ -510,7 +504,6 @@ inline Matrix<typename D1::Scalar, 9, 1> diff(const MatrixBase<D1>& d1,
     diff(d1, d2, ret);
     return ret;
 }
-
 
 template<typename D1, typename D2, typename D3, typename D4, typename D5>
 inline void body2delta(const MatrixBase<D1>& a,
@@ -610,8 +603,6 @@ Matrix<typename D1::Scalar, 6, 1> motion2data(const MatrixBase<D1>& motion, cons
 
     return  data;
 }
-
-
 
 } // namespace imu
 } // namespace wolf

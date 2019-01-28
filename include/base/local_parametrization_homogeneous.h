@@ -8,8 +8,7 @@
 #ifndef LOCALPARAMETRIZATIONHOMOGENEOUS_H_
 #define LOCALPARAMETRIZATIONHOMOGENEOUS_H_
 
-#include "local_parametrization_base.h"
-
+#include "base/local_parametrization_base.h"
 
 namespace wolf {
 

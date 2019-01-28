@@ -5,8 +5,8 @@
  *      \author: jvallve
  */
 
-#include "processor_tracker_feature_corner.h"
-#include "feature_corner_2D.h"
+#include "base/processor/processor_tracker_feature_corner.h"
+#include "base/feature/feature_corner_2D.h"
 
 namespace wolf
 {

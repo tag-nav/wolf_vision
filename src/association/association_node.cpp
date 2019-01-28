@@ -1,5 +1,5 @@
 
-#include "association_node.h"
+#include "base/association/association_node.h"
 
 AssociationNode::AssociationNode(const unsigned int _det_idx, const unsigned int _tar_idx, const double _prob, AssociationNode * _un_ptr, bool _is_root) :
     is_root_(_is_root),

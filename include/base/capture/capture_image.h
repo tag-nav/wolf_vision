@@ -2,9 +2,9 @@
 #define CAPTURE_IMAGE_H
 
 //Wolf includes
-#include "capture_base.h"
-#include "feature_point_image.h"
-#include "sensor_camera.h"
+#include "base/capture/capture_base.h"
+#include "base/feature/feature_point_image.h"
+#include "base/sensor/sensor_camera.h"
 
 // Vision Utils includes
 #include "vision_utils/vision_utils.h"

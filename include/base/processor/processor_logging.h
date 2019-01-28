@@ -9,7 +9,7 @@
 #define _WOLF_PROCESSOR_LOGGING_H_
 
 /// @brief un-comment for IDE highlights.
-//#include "logging.h"
+//#include "base/logging.h"
 
 #define __INTERNAL_WOLF_ASSERT_PROCESSOR \
   static_assert(std::is_base_of<ProcessorBase, \

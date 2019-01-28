@@ -1,20 +1,20 @@
 // wolf includes
-#include "problem.h"
-#include "hardware_base.h"
-#include "trajectory_base.h"
-#include "map_base.h"
-#include "sensor_base.h"
-#include "factory.h"
-#include "sensor_factory.h"
-#include "processor_factory.h"
-#include "constraint_base.h"
-#include "state_block.h"
-#include "processor_motion.h"
-#include "sensor_GPS.h"
+#include "base/problem.h"
+#include "base/hardware_base.h"
+#include "base/trajectory_base.h"
+#include "base/map_base.h"
+#include "base/sensor/sensor_base.h"
+#include "base/factory.h"
+#include "base/sensor/sensor_factory.h"
+#include "base/processor/processor_factory.h"
+#include "base/constraint/constraint_base.h"
+#include "base/state_block.h"
+#include "base/processor/processor_motion.h"
+#include "base/sensor/sensor_GPS.h"
 
-#include "processor_tracker.h"
+#include "base/processor/processor_tracker.h"
 //#include "processors/processor_tracker_feature_trifocal.h"
-#include "capture_pose.h"
+#include "base/capture/capture_pose.h"
 
 // IRI libs includes
 
@@ -29,7 +29,6 @@ namespace
 {
 std::string uppercase(std::string s) {for (auto & c: s) c = std::toupper(c); return s;}
 }
-
 
 Problem::Problem(const std::string& _frame_structure) :
         hardware_ptr_(std::make_shared<HardwareBase>()),
@@ -213,7 +212,6 @@ void Problem::clearProcessorMotion()
     processor_motion_ptr_.reset();
 }
 
-
 FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, //
                                    FrameType _frame_key_type, //
                                    const Eigen::VectorXs& _frame_state, //
@@ -262,7 +260,6 @@ void Problem::getCurrentState(Eigen::VectorXs& state)
     else
         state = zeroState();
 }
-
 
 void Problem::getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& ts)
 {
@@ -670,8 +667,6 @@ StateBlockList& Problem::getStateBlockList()
 {
     return state_block_list_;
 }
-
-
 
 FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov, const TimeStamp& _ts, const Scalar _time_tolerance)
 {
@@ -1394,7 +1389,5 @@ void Problem::print(const std::string& depth, bool constr_by, bool metric, bool 
     else
         print(0, constr_by, metric, state_blocks);
 }
-
-
 
 } // namespace wolf

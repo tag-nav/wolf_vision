@@ -8,8 +8,6 @@
 #ifndef TRUNK_SRC_WOLF_SOLVER_CCOLAMD_ORDERING_H_
 #define TRUNK_SRC_WOLF_SOLVER_CCOLAMD_ORDERING_H_
 
-
-
 //std includes
 #include <iostream>
 
@@ -78,6 +76,5 @@ class CCOLAMDOrdering
         }
 };
 }
-
 
 #endif /* TRUNK_SRC_WOLF_SOLVER_CCOLAMD_ORDERING_H_ */

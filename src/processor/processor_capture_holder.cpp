@@ -6,7 +6,7 @@
  */
 
 //Wolf includes
-#include "processor_capture_holder.h"
+#include "base/processor/processor_capture_holder.h"
 
 namespace wolf {
 
@@ -121,7 +121,6 @@ CaptureBasePtr ProcessorCaptureHolder::findCaptureContainingTimeStamp(const Time
 
 //  return capt;
 
-
   return buffer_.getCapture(_ts);
 }
 
@@ -146,7 +145,7 @@ ProcessorBasePtr ProcessorCaptureHolder::create(const std::string& _unique_name,
 } // namespace wolf
 
 // Register in the ProcessorFactory
-#include "processor_factory.h"
+#include "base/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("CAPTURE HOLDER", ProcessorCaptureHolder)
 } // namespace wolf

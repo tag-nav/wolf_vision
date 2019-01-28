@@ -8,13 +8,12 @@
 #ifndef SRC_PROCESSOR_ODOM_3D_H_
 #define SRC_PROCESSOR_ODOM_3D_H_
 
-#include "processor_motion.h"
-#include "sensor_odom_3D.h"
-#include "capture_odom_3D.h"
-#include "constraint_odom_3D.h"
-#include "rotations.h"
+#include "base/processor/processor_motion.h"
+#include "base/sensor/sensor_odom_3D.h"
+#include "base/capture/capture_odom_3D.h"
+#include "base/constraint/constraint_odom_3D.h"
+#include "base/rotations.h"
 #include <cmath>
-
 
 namespace wolf {
     
@@ -24,7 +23,6 @@ struct ProcessorParamsOdom3D : public ProcessorParamsMotion
 {
         //
 };
-
 
 WOLF_PTR_TYPEDEFS(ProcessorOdom3D);
 

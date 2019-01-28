@@ -2,8 +2,8 @@
 #define CONSTRAINT_RELATIVE_2D_ANALYTIC_H_
 
 //Wolf includes
-#include "constraint_analytic.h"
-#include "landmark_base.h"
+#include "base/constraint/constraint_analytic.h"
+#include "base/landmark/landmark_base.h"
 #include <Eigen/StdVector>
 
 namespace wolf {
@@ -92,7 +92,6 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
         virtual void evaluatePureJacobians(std::vector<Eigen::MatrixXs>& jacobians) const override;
 
 };
-
 
 /// IMPLEMENTATION ///
 

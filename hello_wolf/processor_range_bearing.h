@@ -8,7 +8,7 @@
 #ifndef HELLO_WOLF_PROCESSOR_RANGE_BEARING_H_
 #define HELLO_WOLF_PROCESSOR_RANGE_BEARING_H_
 
-#include "processor_base.h"
+#include "base/processor/processor_base.h"
 #include "sensor_range_bearing.h"
 #include "Eigen/Geometry"
 
@@ -23,7 +23,6 @@ struct ProcessorParamsRangeBearing : public ProcessorParamsBase
 {
         // We do not need special parameters, but in case you need they should be defined here.
 };
-
 
 using namespace Eigen;
 WOLF_PTR_TYPEDEFS(ProcessorRangeBearing);

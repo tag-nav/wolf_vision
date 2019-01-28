@@ -8,7 +8,7 @@
 #ifndef _WOLF_EIGEN_PREDICATES_H_
 #define _WOLF_EIGEN_PREDICATES_H_
 
-#include "rotations.h"
+#include "base/rotations.h"
 
 namespace wolf {
 
@@ -96,6 +96,5 @@ auto pred_angle_zero = [](const Scalar lhs, const Scalar precision)
 //                              };
 
 } // namespace wolf
-
 
 #endif /* _WOLF_EIGEN_PREDICATES_H_ */

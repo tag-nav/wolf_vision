@@ -5,9 +5,8 @@
  *      Author: jsola
  */
 
-#include "pinhole_tools.h"
+#include "base/pinhole_tools.h"
 #include "utils_gtest.h"
-
 
 using namespace Eigen;
 using namespace wolf;
@@ -199,5 +198,4 @@ int main(int argc, char **argv)
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
 

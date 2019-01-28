@@ -2,7 +2,7 @@
 #define _WOLF_SERIALIZATION_CEREAL_SENSOR_INTRINSIC_BASE_H_
 
 // Wolf includes
-#include "../../sensor_base.h"
+#include "base/sensor/sensor_base.h"
 
 #include <cereal/cereal.hpp>
 #include <cereal/types/polymorphic.hpp>

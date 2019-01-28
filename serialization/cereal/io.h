@@ -167,7 +167,6 @@ using SerializerJSON = Serializer<Extensions::JSON,
                                   cereal::JSONInputArchive,
                                   cereal::JSONOutputArchive>;
 
-
 } /* namespace serialization */
 
 template <typename... T>

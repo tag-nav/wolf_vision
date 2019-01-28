@@ -8,9 +8,8 @@
 #ifndef THREE_D_TOOLS_H_
 #define THREE_D_TOOLS_H_
 
-
-#include "wolf.h"
-#include "rotations.h"
+#include "base/wolf.h"
+#include "base/rotations.h"
 
 /*
  * The functions in this file are related to manipulations of Delta motion magnitudes used in 3D motion.
@@ -32,8 +31,6 @@
  *   - plus:        D2 = D1 (+) retract(d)
  *   - diff:        d  = lift( D2 (-) D1 )
  */
-
-
 
 namespace wolf
 {
@@ -93,7 +90,6 @@ inline void inverse(const MatrixBase<D1>& d,
 
     inverse(dp, dq, idp, idq);
 }
-
 
 template<typename D>
 inline Matrix<typename D::Scalar, 7, 1> inverse(const MatrixBase<D>& d)
@@ -207,7 +203,6 @@ inline void between(const MatrixBase<D1>& d1,
     between(dp1, dq1, dp2, dq2, dp12, dq12);
 }
 
-
 template<typename D1, typename D2>
 inline Matrix<typename D1::Scalar, 7, 1> between(const MatrixBase<D1>& d1,
                                                  const MatrixBase<D2>& d2 )
@@ -312,7 +307,6 @@ inline void diff(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1,
     J_do_dq2    =   jac_SO3_right_inv(diff_o);
 }
 
-
 template<typename D1, typename D2, typename D3>
 inline void diff(const MatrixBase<D1>& d1,
                  const MatrixBase<D2>& d2,
@@ -375,9 +369,7 @@ inline Matrix<typename D1::Scalar, 6, 1> diff(const MatrixBase<D1>& d1,
     return ret;
 }
 
-
 } // namespace three_d
 } // namespace wolf
-
 
 #endif /* THREE_D_TOOLS_H_ */

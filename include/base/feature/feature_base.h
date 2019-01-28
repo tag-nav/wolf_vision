@@ -8,13 +8,12 @@ class ConstraintBase;
 }
 
 //Wolf includes
-#include "wolf.h"
-#include "node_base.h"
+#include "base/wolf.h"
+#include "base/node_base.h"
 
 //std includes
 
 namespace wolf {
-
 
 //class FeatureBase
 class FeatureBase : public NodeBase, public std::enable_shared_from_this<FeatureBase>
@@ -98,7 +97,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
 
 // IMPLEMENTATION
 
-#include "constraint_base.h"
+#include "base/constraint/constraint_base.h"
 
 namespace wolf{
 

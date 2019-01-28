@@ -7,12 +7,11 @@
  * \date 06/04/2010
  * \author jsola
  *
- *
  *  ## Add a description here ##
  *
  */
 
-#include "wolf.h"
+#include "base/wolf.h"
 
 #include <iostream>
 
@@ -130,7 +129,6 @@ projectPointToNormalizedPlane(const MatrixBase<Derived1>& _v,
 
     _dist = _v.norm();
 }
-
 
 /**
  * Canonical back-projection.
@@ -261,7 +259,6 @@ Matrix<typename Derived2::Scalar, 2, 1> distortPoint(const MatrixBase<Derived1> 
         return distortionFactor(d, r2) * up;
     }
 }
-
 
 /**
  * Radial distortion: ud = (1 + d_0 * r^2 + d_1 * r^4 + d_2 * r^6 + etc) * u, with jacobians
@@ -398,7 +395,6 @@ void undistortPoint(const MatrixBase<Derived1>& c,
     }
 }
 
-
 /**
  * Pixellization from k = [u_0, v_0, a_u, a_v]
  * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
@@ -425,8 +421,6 @@ Matrix<typename Derived2::Scalar, 2, 1> pixellizePoint(const MatrixBase<Derived1
 
     return u;
 }
-
-
 
 /**
  * Pixellization from k = [u_0, v_0, a_u, a_v] with jacobians
@@ -459,7 +453,6 @@ void pixellizePoint(const MatrixBase<Derived1>& k,
     U_ud(1, 1) = a_v;
 }
 
-
 /**
  * Depixellization from k = [u_0, v_0, a_u, a_v]
  * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
@@ -486,7 +479,6 @@ Matrix<typename Derived2::Scalar, 2, 1> depixellizePoint(const MatrixBase<Derive
 
     return ud;
 }
-
 
 /**
  * Depixellization from k = [u_0, v_0, a_u, a_v], with Jacobians
@@ -517,7 +509,6 @@ void depixellizePoint(const MatrixBase<Derived1>&   k,
     UD_u(1, 0) = 0.0;
     UD_u(1, 1) = 1.0 / a_v;
 }
-
 
 /**
  * Project a point into a pin-hole camera with radial distortion
@@ -594,8 +585,6 @@ void projectPoint(const MatrixBase<Derived1>& k,
     u = pixellizePoint( k, distortPoint( d, up ));
 }
 
-
-
 /**
  * Project a point into a pin-hole camera with radial distortion
  * \param k the vector of intrinsic parameters, k = [u0, v0, au, av]
@@ -629,7 +618,6 @@ void projectPoint(const MatrixBase<Derived1>& k,
 
     U_v.noalias() = U_ud * UD_up * UP_v;
 }
-
 
 /**
  * Back-Project a point from a pin-hole camera with radial distortion
@@ -688,7 +676,6 @@ void backprojectPoint(const MatrixBase<Derived1>&       k,
     P_u.noalias() = P_up * UP_ud * UD_u;
 }
 
-
 /**
  * Determine if a pixel is inside the region of interest
  * \param pix the pixel to test
@@ -712,7 +699,6 @@ template<typename VPix>
 bool isInImage(const MatrixBase<VPix> & pix, const int & width, const int & height) {
     return isInRoi(pix, 0, 0, width, height);
 }
-
 
 /**
  * Compute distortion correction parameters.
@@ -764,7 +750,6 @@ void computeCorrectionModel(const Vk & k, const Vd & d, Vc & c)
         // this does not work:
         // jmath::LinearSolvers::solve_Cholesky(Rd, (rc - rd), c);
 
-
         // therefore we solve manually the pseudo-inverse:
         Eigen::MatrixXs RdtRd(size, size);
         RdtRd = Rd.transpose() * Rd;
@@ -780,9 +765,6 @@ void computeCorrectionModel(const Vk & k, const Vd & d, Vc & c)
 
 } // namespace pinhole
 
-
-
 } // namespace wolf
-
 
 #endif // PINHOLETOOLS_H

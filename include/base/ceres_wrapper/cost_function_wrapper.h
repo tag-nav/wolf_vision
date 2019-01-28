@@ -2,8 +2,8 @@
 #define TRUNK_SRC_COST_FUNCTION_WRAPPER_H_
 
 // WOLF
-#include "../wolf.h"
-#include "../constraint_analytic.h"
+#include "base/wolf.h"
+#include "base/constraint/constraint_analytic.h"
 
 // CERES
 #include "ceres/cost_function.h"
@@ -55,7 +55,5 @@ inline ConstraintBasePtr CostFunctionWrapper::getConstraintPtr() const
 }
 
 } // namespace wolf
-
-
 
 #endif /* TRUNK_SRC_COST_FUNCTION_WRAPPER_H_ */

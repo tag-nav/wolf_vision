@@ -8,7 +8,7 @@
 #ifndef HELLO_WOLF_CAPTURE_RANGE_BEARING_H_
 #define HELLO_WOLF_CAPTURE_RANGE_BEARING_H_
 
-#include "capture_base.h"
+#include "base/capture/capture_base.h"
 
 namespace wolf
 {

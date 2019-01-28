@@ -9,9 +9,8 @@
 #define CONSTRAINT_BLOCK_ABSOLUTE_H_
 
 //Wolf includes
-#include "constraint_autodiff.h"
-#include "frame_base.h"
-
+#include "base/constraint/constraint_autodiff.h"
+#include "base/frame_base.h"
 
 namespace wolf {
 

@@ -9,11 +9,10 @@
 //#include <memory>
 
 //pipol tracker
-#include "matrix.h"
-#include "association_solver.h"
-#include "association_node.h"
+#include "base/association/matrix.h"
+#include "base/association/association_solver.h"
+#include "base/association/association_node.h"
 #include <map>
-
 
 namespace wolf
 {

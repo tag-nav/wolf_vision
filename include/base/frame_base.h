@@ -10,9 +10,9 @@ class StateBlock;
 }
 
 //Wolf includes
-#include "wolf.h"
-#include "time_stamp.h"
-#include "node_base.h"
+#include "base/wolf.h"
+#include "base/time_stamp.h"
+#include "base/node_base.h"
 
 //std includes
 
@@ -25,7 +25,6 @@ typedef enum
     NON_KEY_FRAME = 0,  ///< Regular frame. It does not play at optimization.
     KEY_FRAME = 1       ///< key frame. It plays at optimizations.
 } FrameType;
-
 
 //class FrameBase
 class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase>
@@ -68,9 +67,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
         virtual ~FrameBase();
         void remove();
-
-
-
 
         // Frame properties -----------------------------------------------
     public:
@@ -161,13 +157,12 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
 // IMPLEMENTATION //
 
-#include "trajectory_base.h"
-#include "capture_base.h"
-#include "constraint_base.h"
-#include "state_block.h"
+#include "base/trajectory_base.h"
+#include "base/capture/capture_base.h"
+#include "base/constraint/constraint_base.h"
+#include "base/state_block.h"
 
 namespace wolf {
-
 
 inline unsigned int FrameBase::id()
 {

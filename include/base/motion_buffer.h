@@ -8,8 +8,8 @@
 #ifndef SRC_MOTIONBUFFER_H_
 #define SRC_MOTIONBUFFER_H_
 
-#include "wolf.h"
-#include "time_stamp.h"
+#include "base/wolf.h"
+#include "base/time_stamp.h"
 
 #include <list>
 #include <algorithm>
@@ -50,7 +50,6 @@ struct Motion
         void resize(SizeEigen _data_s, SizeEigen _delta_s, SizeEigen _delta_cov_s, SizeEigen _calib_s);
 
 }; ///< One instance of the buffered data, corresponding to a particular time stamp.
-
 
 /** \brief class for motion buffers.
  *
@@ -116,7 +115,6 @@ inline void MotionBuffer::setCalibrationPreint(const VectorXs& _calib_preint)
 
     calib_preint_ = _calib_preint;
 }
-
 
 } // namespace wolf
 

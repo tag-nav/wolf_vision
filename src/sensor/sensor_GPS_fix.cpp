@@ -1,6 +1,6 @@
-#include "sensor_GPS_fix.h"
-#include "state_block.h"
-#include "state_quaternion.h"
+#include "base/sensor/sensor_GPS_fix.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
 
 namespace wolf {
 
@@ -22,7 +22,6 @@ SensorGPSFix::SensorGPSFix(const Eigen::VectorXs & _extrinsics, IntrinsicsGPSFix
     //
 }
 
-
 SensorGPSFix::~SensorGPSFix()
 {
     //
@@ -42,9 +41,8 @@ SensorBasePtr SensorGPSFix::create(const std::string& _unique_name, const Eigen:
 
 } // namespace wolf
 
-
 // Register in the SensorFactory
-#include "sensor_factory.h"
+#include "base/sensor/sensor_factory.h"
 namespace wolf {
 WOLF_REGISTER_SENSOR("GPS FIX", SensorGPSFix)
 } // namespace wolf

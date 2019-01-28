@@ -5,19 +5,16 @@
  *      Author: jsola
  */
 
-
-
 #include "utils_gtest.h"
-#include "../logging.h"
+#include "base/logging.h"
 
-#include "../frame_base.h"
-#include "../sensor_odom_2D.h"
-#include "../processor_odom_2D.h"
-#include "../constraint_odom_2D.h"
-#include "../capture_motion.h"
+#include "base/frame_base.h"
+#include "base/sensor/sensor_odom_2D.h"
+#include "base/processor/processor_odom_2D.h"
+#include "base/constraint/constraint_odom_2D.h"
+#include "base/capture/capture_motion.h"
 
 #include <iostream>
-
 
 using namespace Eigen;
 using namespace std;
@@ -60,7 +57,6 @@ TEST(FrameBase, LinksBasic)
     ASSERT_TRUE(F->getConstrainedByList().empty());
     ASSERT_EQ(F->getHits() , (unsigned int) 0);
 }
-
 
 TEST(FrameBase, LinksToTree)
 {
@@ -120,8 +116,6 @@ TEST(FrameBase, LinksToTree)
     F1->getOPtr()->fix();
     ASSERT_TRUE(F1->isFixed());
 
-
-
     // set key
     F1->setKey();
     ASSERT_TRUE(F1->isKey());
@@ -131,7 +125,7 @@ TEST(FrameBase, LinksToTree)
     ASSERT_TRUE(F1->getCaptureList().empty());
 }
 
-#include "state_quaternion.h"
+#include "base/state_quaternion.h"
 TEST(FrameBase, GetSetState)
 {
     // Create PQV_3D state blocks
@@ -166,13 +160,9 @@ TEST(FrameBase, GetSetState)
     ASSERT_TRUE((x2 - x).isMuchSmallerThan(1, Constants::EPS_SMALL));
 }
 
-
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
-
-
 

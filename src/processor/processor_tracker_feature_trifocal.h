@@ -2,8 +2,8 @@
 #define _PROCESSOR_TRACKER_FEATURE_TRIFOCAL_H_
 
 //Wolf includes
-#include "../processor_tracker_feature.h"
-#include "../capture_image.h"
+#include "base/processor/processor_tracker_feature.h"
+#include "base/capture/capture_image.h"
 
 // Vision utils
 #include <vision_utils.h>
@@ -103,7 +103,6 @@ class ProcessorTrackerFeatureTrifocal : public ProcessorTrackerFeature
          * This function creates a constraint of the appropriate type for the derived processor.
          */
         virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr) override;
-
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

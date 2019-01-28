@@ -5,7 +5,7 @@
  *      \author: jsola
  */
 
-#include "processor_tracker_feature.h"
+#include "base/processor/processor_tracker_feature.h"
 
 namespace wolf
 {

@@ -9,15 +9,15 @@
 #define SRC_PROCESSOR_TRACKER_LANDMARK_POLYLINE_H_
 
 // Wolf includes
-#include "sensor_laser_2D.h"
-#include "capture_laser_2D.h"
-#include "feature_polyline_2D.h"
-#include "landmark_polyline_2D.h"
-#include "constraint_point_2D.h"
-#include "constraint_point_to_line_2D.h"
-#include "state_block.h"
-#include "data_association/association_tree.h"
-#include "processor_tracker_landmark.h"
+#include "base/sensor/sensor_laser_2D.h"
+#include "base/capture/capture_laser_2D.h"
+#include "base/feature/feature_polyline_2D.h"
+#include "base/landmark/landmark_polyline_2D.h"
+#include "base/constraint/constraint_point_2D.h"
+#include "base/constraint/constraint_point_to_line_2D.h"
+#include "base/state_block.h"
+#include "base/association/association_tree.h"
+#include "base/processor/processor_tracker_landmark.h"
 
 //laser_scan_utils
 #include "laser_scan_utils/laser_scan.h"
@@ -31,7 +31,6 @@ namespace wolf
 const Scalar position_error_th_ = 1;
 const Scalar min_features_ratio_th_ = 0.5;
 
-
 //forward declaration to typedef class pointers
 struct LandmarkPolylineMatch;
 typedef std::shared_ptr<LandmarkPolylineMatch> LandmarkPolylineMatchPtr;
@@ -40,9 +39,7 @@ typedef std::shared_ptr<LandmarkPolylineMatch> LandmarkPolylineMatchPtr;
 struct ProcessorParamsPolyline;
 typedef std::shared_ptr<ProcessorParamsPolyline> ProcessorParamsPolylinePtr;
 
-
 WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmarkPolyline);
-
 
 // Match Feature - Landmark
 struct LandmarkPolylineMatch : public LandmarkMatch

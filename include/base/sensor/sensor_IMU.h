@@ -2,7 +2,7 @@
 #define SENSOR_IMU_H
 
 //wolf includes
-#include "sensor_base.h"
+#include "base/sensor/sensor_base.h"
 #include <iostream>
 
 namespace wolf {

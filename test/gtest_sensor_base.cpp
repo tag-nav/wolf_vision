@@ -5,10 +5,9 @@
  *      \author: jsola
  */
 
-#include "sensor_base.h"
+#include "base/sensor/sensor_base.h"
 
 #include "utils_gtest.h"
-
 
 using namespace wolf;
 

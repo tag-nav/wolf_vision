@@ -8,7 +8,7 @@
 #ifndef ROTATIONS_H_
 #define ROTATIONS_H_
 
-#include "wolf.h"
+#include "base/wolf.h"
 
 namespace wolf
 {
@@ -96,7 +96,6 @@ vee(const Eigen::MatrixBase<Derived>& _m)
     return (Eigen::Matrix<T, 3, 1>() << _m(2, 1), _m(0, 2), _m(1, 0)).finished();
 }
 
-
 ////////////////////////////////////////////////////
 // Rotation conversions q, R, Euler, back and forth
 //
@@ -161,7 +160,6 @@ e2q(const Eigen::MatrixBase<D>& _euler)
     return Eigen::Quaternion<T>(az * ay * ax);
 }
 
-
 /** \brief Euler angles to rotation matrix
  * \param _e = (roll pitch yaw) in ZYX convention
  * \return equivalent rotation matrix
@@ -174,7 +172,6 @@ e2R(const Eigen::MatrixBase<Derived>& _e)
 
     return e2q(_e).matrix();
 }
-
 
 template <typename Derived>
 inline typename Eigen::MatrixBase<Derived>::Scalar
@@ -198,7 +195,6 @@ R2e(const Eigen::MatrixBase<Derived>& _R)
 
     return e;
 }
-
 
 template<typename Derived>
 inline typename Eigen::Matrix<typename Derived::Scalar, 3, 1>
@@ -235,16 +231,12 @@ q2e(const Eigen::MatrixBase<Derived>& _q)
     return e;
 }
 
-
 template<typename Derived>
 inline typename Eigen::Matrix<typename Derived::Scalar, 3, 1>
 q2e(const Eigen::QuaternionBase<Derived>& _q)
 {
     return q2e(_q.coeffs());
 }
-
-
-
 
 ///////////////////////////////////////////////////////////////
 // Rotation conversions - exp and log maps
@@ -294,7 +286,6 @@ log_q(const Eigen::QuaternionBase<Derived>& _q)
     //    typedef typename Derived::Scalar T;
     //    Eigen::AngleAxis<T> aa(_q);
     //    return aa.angle() * aa.axis();
-
 
     // In the meanwhile, we have a custom implementation as follows
 
@@ -410,8 +401,6 @@ R2v(const Eigen::MatrixBase<Derived>& _R)
 {
     return log_R(_R);
 }
-
-
 
 /////////////////////////////////////////////////////////////////
 // Jacobians of SO(3)
@@ -650,7 +639,6 @@ diff(const Eigen::QuaternionBase<D1>& q1, const Eigen::QuaternionBase<D2>& q2)
 {
     return minus(q1, q2);
 }
-
 
 } // namespace wolf
 

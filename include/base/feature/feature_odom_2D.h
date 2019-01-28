@@ -2,12 +2,11 @@
 #define FEATURE_ODOM_2D_H_
 
 //Wolf includes
-#include "feature_base.h"
-#include "constraint_odom_2D.h"
-#include "constraint_odom_2D_analytic.h"
+#include "base/feature/feature_base.h"
+#include "base/constraint/constraint_odom_2D.h"
+#include "base/constraint/constraint_odom_2D_analytic.h"
 
 //std includes
-
 
 namespace wolf {
 

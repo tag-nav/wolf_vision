@@ -1,10 +1,9 @@
 #ifndef CAPTURE_GPS_H_
 #define CAPTURE_GPS_H_
 
-
 // Wolf includes
 #include "raw_gps_utils/satellites_obs.h"
-#include "capture_base.h"
+#include "base/capture/capture_base.h"
 
 namespace wolf {
     

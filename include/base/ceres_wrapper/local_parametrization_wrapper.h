@@ -7,7 +7,7 @@ class LocalParametrizationBase;
 }
 
 //Ceres includes
-#include "../wolf.h"
+#include "base/wolf.h"
 #include "ceres/ceres.h"
 
 namespace wolf {
@@ -38,7 +38,7 @@ using LocalParametrizationWrapperPtr = std::shared_ptr<LocalParametrizationWrapp
 
 } // namespace wolf
 
-#include "../local_parametrization_base.h"
+#include "base/local_parametrization_base.h"
 
 namespace wolf {
 

@@ -3,11 +3,10 @@
 #define FEATURE_GPS_PSEUDORANGE_H_
 
 //Wolf includes
-#include "feature_base.h"
+#include "base/feature/feature_base.h"
 
 //std includes
 #include <iomanip>
-
 
 namespace wolf {
 

@@ -1,4 +1,4 @@
-#include "capture_laser_2D.h"
+#include "base/capture/capture_laser_2D.h"
 
 namespace wolf {
 

@@ -1,5 +1,5 @@
 
-#include "landmark_line_2D.h"
+#include "base/landmark/landmark_line_2D.h"
 
 namespace wolf {
 
@@ -42,8 +42,6 @@ void LandmarkLine2D::updateExtremePoints(Eigen::Vector3s & _q1, Eigen::Vector3s 
 
     //compute all necessary scalar products. 
     //s_p1q1 = p1p2.dot()
-    
-    
     
 }
 

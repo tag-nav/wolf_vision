@@ -5,14 +5,12 @@
  *      \author: jsola
  */
 
-
-#include "../constraint_pose_3D.h"
+#include "base/constraint/constraint_pose_3D.h"
 #include "utils_gtest.h"
 
-#include "capture_motion.h"
+#include "base/capture/capture_motion.h"
 
-#include "ceres_wrapper/ceres_manager.h"
-
+#include "base/ceres_wrapper/ceres_manager.h"
 
 using namespace Eigen;
 using namespace wolf;
@@ -23,7 +21,6 @@ Vector7s pose6toPose7(Vector6s _pose6)
 {
     return (Vector7s() << _pose6.head<3>() , v2q(_pose6.tail<3>()).coeffs()).finished();
 }
-
 
 // Input pose6 and covariance
 Vector6s pose(Vector6s::Random());
@@ -45,7 +42,6 @@ FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeS
 CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("ODOM 3D", 0, nullptr, pose7, 7, 6, nullptr));
 FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("ODOM 3D", pose7, data_cov));
 ConstraintPose3DPtr ctr0 = std::static_pointer_cast<ConstraintPose3D>(fea0->addConstraint(std::make_shared<ConstraintPose3D>(fea0)));
-
 
 ////////////////////////////////////////////////////////
 
@@ -72,7 +68,6 @@ TEST(ConstraintPose3D, solve)
     ASSERT_MATRIX_APPROX(frm0->getState(), pose7, 1e-6);
 
 }
-
 
 int main(int argc, char **argv)
 {

@@ -8,8 +8,8 @@
 #ifndef SRC_CERES_WRAPPER_QR_MANAGER_H_
 #define SRC_CERES_WRAPPER_QR_MANAGER_H_
 
-#include "solver_manager.h"
-#include "sparse_utils.h"
+#include "base/solver/solver_manager.h"
+#include "base/solver_suitesparse/sparse_utils.h"
 
 namespace wolf
 {

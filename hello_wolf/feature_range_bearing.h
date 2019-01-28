@@ -8,7 +8,7 @@
 #ifndef HELLO_WOLF_FEATURE_RANGE_BEARING_H_
 #define HELLO_WOLF_FEATURE_RANGE_BEARING_H_
 
-#include "feature_base.h"
+#include "base/feature/feature_base.h"
 
 namespace wolf
 {

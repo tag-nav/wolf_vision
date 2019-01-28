@@ -1,9 +1,8 @@
 #ifndef FEATURE_IMAGE_H
 #define FEATURE_IMAGE_H
 
-
 //Wolf includes
-#include "feature_base.h"
+#include "base/feature/feature_base.h"
 
 // Vision Utils includes
 #include <vision_utils.h>

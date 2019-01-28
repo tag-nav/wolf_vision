@@ -1,8 +1,8 @@
-#include "sensor_camera.h"
+#include "base/sensor/sensor_camera.h"
 
-#include "pinhole_tools.h"
-#include "state_block.h"
-#include "state_quaternion.h"
+#include "base/pinhole_tools.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
 
 namespace wolf
 {
@@ -51,7 +51,6 @@ Eigen::Matrix3s SensorCamera::setIntrinsicMatrix(Eigen::Vector4s _pinhole_model)
     return K;
 }
 
-
 // Define the factory method
 SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
                                  const Eigen::VectorXs& _extrinsics_pq, //
@@ -66,12 +65,11 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
     return sen_ptr;
 }
 
-
 } // namespace wolf
 
 // Register in the SensorFactory
-#include "sensor_factory.h"
-//#include "factory.h"
+#include "base/sensor/sensor_factory.h"
+//#include "base/factory.h"
 namespace wolf
 {
 WOLF_REGISTER_SENSOR("CAMERA", SensorCamera)

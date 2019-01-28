@@ -161,9 +161,8 @@ Eigen::Vector2s ProcessorRangeBearing::rect(Scalar range, Scalar bearing) const
 
 } /* namespace wolf */
 
-
 // Register in the SensorFactory
-#include "processor_factory.h"
+#include "base/processor/processor_factory.h"
 namespace wolf
 {
 WOLF_REGISTER_PROCESSOR("RANGE BEARING", ProcessorRangeBearing)

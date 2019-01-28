@@ -7,10 +7,10 @@
 #include "glog/logging.h"
 
 //wolf includes
-#include "../solver/solver_manager.h"
-#include "cost_function_wrapper.h"
+#include "base/solver/solver_manager.h"
+#include "base/ceres_wrapper/cost_function_wrapper.h"
 #include "local_parametrization_wrapper.h"
-#include "create_numeric_diff_cost_function.h"
+#include "base/ceres_wrapper/create_numeric_diff_cost_function.h"
 
 namespace ceres {
 typedef std::shared_ptr<CostFunction>  CostFunctionPtr;

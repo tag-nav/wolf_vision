@@ -1,7 +1,7 @@
-#include "processor_base.h"
-#include "processor_motion.h"
-#include "capture_base.h"
-#include "frame_base.h"
+#include "base/processor/processor_base.h"
+#include "base/processor/processor_motion.h"
+#include "base/capture/capture_base.h"
+#include "base/frame_base.h"
 
 namespace wolf {
 
@@ -73,8 +73,6 @@ void ProcessorBase::remove()
             sen->getProcessorList().remove(this_p);
     }
 }
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////
 
@@ -180,7 +178,5 @@ bool PackKeyFrameBuffer::checkTimeTolerance(const TimeStamp& _time_stamp1, const
     bool pass = time_diff <= time_tol;
     return pass;
 }
-
-
 
 } // namespace wolf

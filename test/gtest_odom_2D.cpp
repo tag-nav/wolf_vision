@@ -8,14 +8,14 @@
 #include "utils_gtest.h"
 
 // Classes under test
-#include "../processor_odom_2D.h"
-#include "../constraint_odom_2D.h"
+#include "base/processor/processor_odom_2D.h"
+#include "base/constraint/constraint_odom_2D.h"
 
 // Wolf includes
-#include "../sensor_odom_2D.h"
-#include "../state_block.h"
-#include "../wolf.h"
-#include "../ceres_wrapper/ceres_manager.h"
+#include "base/sensor/sensor_odom_2D.h"
+#include "base/state_block.h"
+#include "base/wolf.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 // STL includes
 #include <map>
@@ -26,11 +26,10 @@
 // General includes
 #include <iostream>
 #include <iomanip>      // std::setprecision
-#include "../capture_pose.h"
+#include "base/capture/capture_pose.h"
 
 using namespace wolf;
 using namespace Eigen;
-
 
 VectorXs plus(const VectorXs& _pose, const Vector2s& _data)
 {
@@ -98,7 +97,6 @@ void show(const ProblemPtr& problem)
     }
 }
 
-
 TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
 {
     using std::cout;
@@ -131,7 +129,6 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
 
     // KF1 and motion from KF0
     t += dt;
-    t += dt;
     FrameBasePtr        F1 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
     CaptureBasePtr      C1 = F1->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
     FeatureBasePtr      f1 = C1->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
@@ -139,7 +136,6 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     F0->addConstrainedBy(c1);
 
     // KF2 and motion from KF1
-    t += dt;
     t += dt;
     FrameBasePtr        F2 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
     CaptureBasePtr      C2 = F2->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
@@ -470,8 +466,6 @@ TEST(Odom2D, KF_callback)
         EXPECT_POSE2D_APPROX(problem->getState(t), integrated_pose_vector[n], 1e-6);
     }
 }
-
-
 
 int main(int argc, char **argv)
 {

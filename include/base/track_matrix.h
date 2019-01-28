@@ -8,8 +8,8 @@
 #ifndef TRACK_MATRIX_H_
 #define TRACK_MATRIX_H_
 
-#include "feature_base.h"
-#include "capture_base.h"
+#include "base/feature/feature_base.h"
+#include "base/capture/capture_base.h"
 
 #include <map>
 #include <vector>

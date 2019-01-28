@@ -1,22 +1,21 @@
 #!/bin/bash
-# First parameter $1 is the path to the wolf root
-# Second parameter $2 is the name of the new folder
-
-hdrs_folder=$1/include/base/$2
-srcs_folder=$1/src/$2
-#Fix the includes in general
-core_headers=$(ag -g .*\\.h -l $1/include/base/$2/ | rev | cut -d '/' -f 1 | rev)
-for f in $core_headers; do
-    ch_files=$(ag \#include[[:space:]]+\"\(.*\/\)*"$2/$f"\" $1/include/base/ -l)
-    for fp in $ch_files; do
-        # echo ".h -> "$fp
-        sed -i -E "s/(#include[[:space:]]+\")("$2"\/)?"$f"\"/\1base\/"$2"\/"$f"\"/gp" $fp
-        sed -i -E "s/(#include[[:space:]]+<)("$2"\/)?"$f">/\1base\/"$2"\/"$f">/gp" $fp
-    done
-    cs_files=$(ag \#include[[:space:]]+\"\(.*\/\)*"$2/$f"\" $1/src/ -l)
-    for fp in $cs_files; do
-        # echo ".cpp -> "$fp
-        sed -i -E "s/(#include[[:space:]]+\")("$2"\/)?"$f"\"/\1base\/"$2"\/"$f"\"/gp" $fp
-        sed -i -E "s/(#include[[:space:]]+<)("$2"\/)?"$f">/\1base\/"$2"\/"$f">/gp" $fp
+for ff in $(find ~/workspace/wip/wolf/templinks/ -follow | cut -d '/' -f 8- | grep ".h$\|.cpp$"); do
+    for f in $(cat ~/workspace/wip/wolf/files.txt); do
+        path=$(ag -g /$f$ -l ~/workspace/wip/wolf/ | cut -d '/' -f 8-)
+        matches=$(echo $path | wc -w)
+        if [ $matches -gt 1 ]; then
+            # echo $f " -> " $path
+            path=$(echo $path | cut -d ' ' -f 1)
+        fi
+        # echo $f " now in -> " $path " modifying file "$ff
+        # sed -i -E "s:(#include[[:space:]]+)."$f".:\1\""$path"\":gp" ~/workspace/wip/wolf/$ff
+        sed -i -E "s:(#include[[:space:]]+).(\.\.\/)+(.+\/)+"$f".:\1\""$path"\":g" ~/workspace/wip/wolf/$ff
     done
 done
+# for f in $(cat ~/workspace/wip/wolf/files.txt); do
+#     path=$(ag -g /$f$ -l ~/workspace/wip/wolf/ | cut -d '/' -f 7-)
+#     matches=$(echo $path | wc -w)
+#     if [ $matches -gt 1 ]; then
+#         echo $f " -> " $(echo $path | cut -d ' ' -f 1)
+#     fi
+# done

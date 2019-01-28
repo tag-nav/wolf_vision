@@ -10,7 +10,7 @@
 
 // Enable project-specific definitions and macros
 #include "internal/config.h"
-#include "logging.h"
+#include "base/logging.h"
 
 //includes from Eigen lib
 #include <Eigen/Dense>
@@ -44,7 +44,6 @@ namespace wolf {
 //typedef float Scalar;         // Use this for float, 32 bit precision
 typedef double Scalar;        // Use this for double, 64 bit precision
 //typedef long double Scalar;   // Use this for long double, 128 bit precision
-
 
 /**
  * \brief Vector and Matrices size type for the Wolf project
@@ -205,7 +204,6 @@ struct MatrixSizeCheck
 //
 // End of check matrix sizes /////////////////////////////////////////////////
 
-
 /////////////////////////////////////////////////////////////////////////
 //      TYPEDEFS FOR POINTERS, LISTS AND ITERATORS IN THE WOLF TREE
 /////////////////////////////////////////////////////////////////////////
@@ -226,7 +224,6 @@ struct MatrixSizeCheck
         struct StructName; \
         typedef std::shared_ptr<StructName>          StructName##Ptr; \
         typedef std::shared_ptr<const StructName>    StructName##ConstPtr; \
-
 
 // NodeBase
 WOLF_PTR_TYPEDEFS(NodeBase);
@@ -288,7 +285,6 @@ WOLF_PTR_TYPEDEFS(StateQuaternion);
 
 // - - Local Parametrization
 WOLF_PTR_TYPEDEFS(LocalParametrizationBase);
-
 
 // ==================================================
 // Some dangling functions
@@ -372,7 +368,5 @@ bool makePosDef(Eigen::Matrix<T,N,N,RC>& M, const T& eps = Constants::EPS)
 //===================================================
 
 } // namespace wolf
-
-
 
 #endif /* WOLF_H_ */

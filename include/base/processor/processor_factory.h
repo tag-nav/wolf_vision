@@ -15,7 +15,7 @@ struct ProcessorParamsBase;
 }
 
 // wolf
-#include "factory.h"
+#include "base/factory.h"
 
 // std
 
@@ -125,8 +125,8 @@ namespace wolf
  * and bind it to a SensorOdom2D:
  *
  *     \code
- *     #include "sensor_odom_2D.h"      // provides SensorOdom2D    and SensorFactory
- *     #include "processor_odom_2D.h"   // provides ProcessorOdom2D and ProcessorFactory
+ *     #include "base/sensor/sensor_odom_2D.h"      // provides SensorOdom2D    and SensorFactory
+ *     #include "base/processor/processor_odom_2D.h"   // provides ProcessorOdom2D and ProcessorFactory
  *
  *     // Note: SensorOdom2D::create()    is already registered, automatically.
  *     // Note: ProcessorOdom2D::create() is already registered, automatically.
@@ -153,9 +153,9 @@ namespace wolf
  * The example 1 above can be accomplished as follows (we obviated for simplicity all the parameter creation),
  *
  *     \code
- *     #include "sensor_odom_2D.h"
- *     #include "processor_odom_2D.h"
- *     #include "problem.h"
+ *     #include "base/sensor/sensor_odom_2D.h"
+ *     #include "base/processor/processor_odom_2D.h"
+ *     #include "base/problem.h"
  *
  *     Problem problem(FRM_PO_2D);
  *     problem.installSensor    ( "ODOM 2D" , "Main odometer" , extrinsics      , &intrinsics );
@@ -174,7 +174,6 @@ inline std::string ProcessorFactory::getClass()
 {
   return "ProcessorFactory";
 }
-
 
 #define WOLF_REGISTER_PROCESSOR(ProcessorType, ProcessorName) \
   namespace{ const bool WOLF_UNUSED ProcessorName##Registered = \

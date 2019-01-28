@@ -9,11 +9,11 @@
 #define PROCESSOR_TRACKER_FEATURE_H_
 
 //wolf includes
-#include "processor_tracker.h"
-#include "capture_base.h"
-#include "feature_match.h"
-#include "track_matrix.h"
-#include "wolf.h"
+#include "base/processor/processor_tracker.h"
+#include "base/capture/capture_base.h"
+#include "base/feature/feature_match.h"
+#include "base/track_matrix.h"
+#include "base/wolf.h"
 
 namespace wolf
 {

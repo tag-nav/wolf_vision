@@ -8,8 +8,8 @@
 #ifndef LOCAL_PARAMETRIZATION_ANGLE_H_
 #define LOCAL_PARAMETRIZATION_ANGLE_H_
 
-#include "local_parametrization_base.h"
-#include "rotations.h"
+#include "base/local_parametrization_base.h"
+#include "base/rotations.h"
 
 namespace wolf
 {

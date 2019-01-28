@@ -29,5 +29,4 @@ class SolverQR
     private:
 };
 
-
 #endif /* TRUNK_SRC_SOLVER_SOLVER_QR_H_ */

@@ -5,14 +5,12 @@
  *      \author: jsola
  */
 
-
-#include "../constraint_pose_2D.h"
+#include "base/constraint/constraint_pose_2D.h"
 #include "utils_gtest.h"
 
-#include "capture_motion.h"
+#include "base/capture/capture_motion.h"
 
-#include "ceres_wrapper/ceres_manager.h"
-
+#include "base/ceres_wrapper/ceres_manager.h"
 
 using namespace Eigen;
 using namespace wolf;
@@ -64,7 +62,6 @@ TEST(ConstraintPose2D, solve)
     ASSERT_MATRIX_APPROX(frm0->getState(), pose, 1e-6);
 
 }
-
 
 int main(int argc, char **argv)
 {

@@ -1,4 +1,4 @@
-#include "capture_void.h"
+#include "base/capture/capture_void.h"
 
 namespace wolf {
 
@@ -12,6 +12,5 @@ CaptureVoid::~CaptureVoid()
 {
 	//std::cout << "deleting CaptureVoid " << id() << std::endl;
 }
-
 
 } // namespace wolf

@@ -2,10 +2,9 @@
 #define PROCESSOR_IMU_H
 
 // Wolf
-#include "capture_IMU.h"
-#include "feature_IMU.h"
-#include "processor_motion.h"
-
+#include "base/capture/capture_IMU.h"
+#include "base/feature/feature_IMU.h"
+#include "base/processor/processor_motion.h"
 
 namespace wolf {
 WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsIMU);

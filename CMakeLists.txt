@@ -197,6 +197,8 @@ IF(EXISTS "${WOLF_CONFIG_DIR}" AND NOT IS_DIRECTORY "${WOLF_CONFIG_DIR}")
 ENDIF()
 # Configure config.h
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/internal/config.h.in "${WOLF_CONFIG_DIR}/config.h")
+message("CONFIG DIRECTORY ${PROJECT_BINARY_DIR}")
+include_directories("${PROJECT_BINARY_DIR}/conf")
 # include spdlog (logging library)
 FIND_PATH(SPDLOG_INCLUDE_DIR spdlog.h /usr/local/include/spdlog /usr/include/spdlog)
 IF (SPDLOG_INCLUDE_DIR)
@@ -207,7 +209,8 @@ ELSE (SPDLOG_INCLUDE_DIR)
 ENDIF (SPDLOG_INCLUDE_DIR)  
   
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
-
+include_directories("include")
+include_directories("templinks")
 IF(Ceres_FOUND)
     INCLUDE_DIRECTORIES(${CERES_INCLUDE_DIRS})
 ENDIF(Ceres_FOUND)
@@ -283,8 +286,6 @@ include/base/constraint/constraint_pose_2D.h
 include/base/constraint/constraint_pose_3D.h
 include/base/constraint/constraint_quaternion_absolute.h
 include/base/constraint/constraint_relative_2D_analytic.h
-src/sensor/diff_drive_tools.hpp
-    temp/diff_drive_tools.hpp
 include/base/feature/feature_corner_2D.h
 include/base/feature/feature_GPS_fix.h
 include/base/feature/feature_GPS_pseudorange.h
@@ -460,7 +461,6 @@ src/processor/processor_base.cpp
 src/processor/processor_loopclosure_base.cpp
 src/processor/processor_motion.cpp
 src/processor/processor_tracker.cpp
-examples/test_processor_tracker_feature.cpp
 src/sensor/sensor_base.cpp
 src/state_block.cpp
 src/time_stamp.cpp
@@ -471,7 +471,7 @@ src/trajectory_base.cpp
 SET(SRCS_BASE
 src/capture/capture_motion.cpp
 src/processor/processor_capture_holder.cpp
-examples/test_processor_tracker_landmark.cpp
+# examples/test_processor_tracker_landmark.cpp
     )
 
 SET(SRCS
@@ -506,7 +506,7 @@ src/processor/processor_frame_nearest_neighbor_filter.cpp
 src/processor/processor_diff_drive.cpp
 src/processor/processor_IMU.cpp
 src/processor/processor_odom_2D.cpp
-examples/test_processor_odom_3D.cpp
+src/processor/processor_odom_3D.cpp
 src/processor/processor_tracker_feature_dummy.cpp
 src/processor/processor_tracker_landmark_dummy.cpp
     )
@@ -560,11 +560,14 @@ include/base/processor/processor_tracker_landmark_corner.h
 include/base/processor/processor_tracker_landmark_polyline.h
         )
     SET(SRCS ${SRCS}
-examples/test_capture_laser_2D.cpp
+# examples/test_capture_laser_2D.cpp
 src/sensor/sensor_laser_2D.cpp
+src/processor/processor_tracker_feature.cpp
 src/processor/processor_tracker_feature_corner.cpp
 src/processor/processor_tracker_landmark_corner.cpp
 src/processor/processor_tracker_landmark_polyline.cpp
+src/processor/processor_tracker_landmark.cpp
+src/processor/processor_tracker_landmark_dummy.cpp
         )
 ENDIF(laser_scan_utils_FOUND)
 
@@ -600,7 +603,7 @@ src/capture/capture_image.cpp
 src/feature/feature_point_image.cpp
 src/landmark/landmark_AHP.cpp
 src/processor/processor_tracker_feature_image.cpp
-examples/test_processor_tracker_landmark_image.cpp
+# examples/test_processor_tracker_landmark_image.cpp
         )
     SET(SRCS_LANDMARK ${SRCS_LANDMARK}
 src/landmark/landmark_point_3D.cpp
@@ -611,9 +614,7 @@ src/processor/processor_tracker_feature_trifocal.cpp
 ENDIF(vision_utils_FOUND)
 
 #SUBDIRECTORIES
-
-ADD_SUBDIRECTORY(hello_wolf)
-
+add_subdirectory(hello_wolf)
 IF (cereal_FOUND)
   ADD_SUBDIRECTORY(serialization/cereal)
 ENDIF(cereal_FOUND)
@@ -669,9 +670,8 @@ ADD_LIBRARY(${PROJECT_NAME}
             ${SRCS_SOLVER}
             ${SRCS_WRAPPER}
             )
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_core ${CMAKE_THREAD_LIBS_INIT})
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_core)
 #Link the created libraries
 #=============================================================
 IF (Ceres_FOUND)
@@ -700,6 +700,13 @@ ENDIF (YAMLCPP_FOUND)
 IF (GLOG_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLOG_LIBRARY})
 ENDIF (GLOG_FOUND)
+IF (GLOG_FOUND)
+    IF(BUILD_TESTS)
+        MESSAGE("Building tests.")
+        add_subdirectory(test)
+    ENDIF(BUILD_TESTS)
+ENDIF (GLOG_FOUND)
+
 #-END_SRC --------------------------------------------------------------------------------------------------------------------------------
 FIND_PACKAGE(Doxygen)
 

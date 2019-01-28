@@ -14,15 +14,13 @@ struct ProcessorParamsBase;
 }
 
 //wolf includes
-#include "wolf.h"
-#include "frame_base.h"
-#include "state_block.h"
+#include "base/wolf.h"
+#include "base/frame_base.h"
+#include "base/state_block.h"
 
 // std includes
 
-
 namespace wolf {
-
 
 enum Notification
 {
@@ -90,7 +88,6 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         SensorBasePtr getSensorPtr(const std::string& _sensor_name);
 
-
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *
          * This method creates a Processor, and adds it to the specified sensor's list of processors
@@ -127,7 +124,6 @@ class Problem : public std::enable_shared_from_this<Problem>
         ProcessorMotionPtr setProcessorMotion(const std::string& _unique_processor_name);
         void clearProcessorMotion();
         ProcessorMotionPtr& getProcessorMotionPtr();
-
 
         // Trajectory branch ----------------------------------
         TrajectoryBasePtr getTrajectoryPtr();
@@ -197,7 +193,6 @@ class Problem : public std::enable_shared_from_this<Problem>
         FrameBasePtr    getLastKeyFramePtr      ( );
         FrameBasePtr    closestKeyFrameToTimeStamp(const TimeStamp& _ts);
 
-
         /** \brief Give the permission to a processor to create a new keyFrame
          *
          * This should implement a black list of processors that have forbidden keyframe creation.
@@ -224,8 +219,6 @@ class Problem : public std::enable_shared_from_this<Problem>
         Eigen::VectorXs zeroState ( );
         bool priorIsSet() const;
 
-
-
         // Map branch -----------------------------------------
         MapBasePtr getMapPtr();
         LandmarkBasePtr addLandmark(LandmarkBasePtr _lmk_ptr);
@@ -233,8 +226,6 @@ class Problem : public std::enable_shared_from_this<Problem>
         void loadMap(const std::string& _filename_dot_yaml);
         void saveMap(const std::string& _filename_dot_yaml, //
                      const std::string& _map_name = "Map automatically saved by Wolf");
-
-
 
         // Covariances -------------------------------------------
         void clearCovariance();
@@ -327,6 +318,5 @@ inline std::map<ConstraintBasePtr,Notification>& Problem::getConstraintNotificat
 }
 
 } // namespace wolf
-
 
 #endif // PROBLEM_H

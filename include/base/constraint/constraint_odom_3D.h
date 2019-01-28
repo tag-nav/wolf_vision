@@ -8,8 +8,8 @@
 #ifndef CONSTRAINT_ODOM_3D_H_
 #define CONSTRAINT_ODOM_3D_H_
 
-#include "constraint_autodiff.h"
-#include "rotations.h"
+#include "base/constraint/constraint_autodiff.h"
+#include "base/rotations.h"
 
 namespace wolf
 {
@@ -49,7 +49,6 @@ class ConstraintOdom3D : public ConstraintAutodiff<ConstraintOdom3D,6,3,4,3,4>
         template<typename T>
         void printRes(const Eigen::Matrix<T, 6, 1>& r) const;
 
-
 };
 
 template<typename T>
@@ -70,7 +69,6 @@ inline void ConstraintOdom3D::printRes (const  Eigen::Matrix<Scalar,6,1> & r) co
     std::cout << "Scalar residual = " << std::endl;
     std::cout << r.transpose() << std::endl;
 }
-
 
 inline ConstraintOdom3D::ConstraintOdom3D(const FeatureBasePtr& _ftr_current_ptr,
                                           const FrameBasePtr& _frame_past_ptr,

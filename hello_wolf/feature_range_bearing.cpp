@@ -16,7 +16,6 @@ FeatureRangeBearing::FeatureRangeBearing(const Eigen::VectorXs& _measurement, co
     //
 }
 
-
 FeatureRangeBearing::~FeatureRangeBearing()
 {
     //

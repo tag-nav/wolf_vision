@@ -9,9 +9,9 @@
  */
 
 //wolf
-#include "sensor_base.h"
+#include "base/sensor/sensor_base.h"
 //#include "sensor_factory.h"
-//#include "factory.h"
+//#include "base/factory.h"
 
 // std
 
@@ -39,7 +39,6 @@ public:
 
 public:
     static SensorBasePtr create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_p, const IntrinsicsBasePtr _intrinsics);
-
 
 };
 

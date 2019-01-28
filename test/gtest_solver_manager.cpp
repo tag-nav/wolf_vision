@@ -6,16 +6,16 @@
  */
 
 #include "utils_gtest.h"
-#include "../src/logging.h"
+#include "base/logging.h"
 
-#include "../problem.h"
-#include "../sensor_base.h"
-#include "../state_block.h"
-#include "../capture_void.h"
-#include "../constraint_pose_2D.h"
-#include "../solver/solver_manager.h"
-#include "../local_parametrization_base.h"
-#include "../local_parametrization_angle.h"
+#include "base/problem.h"
+#include "base/sensor/sensor_base.h"
+#include "base/state_block.h"
+#include "base/capture/capture_void.h"
+#include "base/constraint/constraint_pose_2D.h"
+#include "base/solver/solver_manager.h"
+#include "base/local_parametrization_base.h"
+#include "base/local_parametrization_angle.h"
 
 #include <iostream>
 

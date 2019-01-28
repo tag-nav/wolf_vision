@@ -1,13 +1,13 @@
 //Wolf
-#include "capture_IMU.h"
-#include "processor_IMU.h"
-#include "sensor_IMU.h"
-#include "wolf.h"
-#include "problem.h"
-#include "state_block.h"
-#include "state_quaternion.h"
+#include "base/capture/capture_IMU.h"
+#include "base/processor/processor_IMU.h"
+#include "base/sensor/sensor_IMU.h"
+#include "base/wolf.h"
+#include "base/problem.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
 #include "utils_gtest.h"
-#include "../src/logging.h"
+#include "base/logging.h"
 
 class FeatureIMU_test : public testing::Test
 {

@@ -2,10 +2,10 @@
 #define CAPTURE_POSE_H_
 
 //Wolf includes
-#include "capture_base.h"
-#include "constraint_pose_2D.h"
-#include "constraint_pose_3D.h"
-#include "feature_pose.h"
+#include "base/capture/capture_base.h"
+#include "base/constraint/constraint_pose_2D.h"
+#include "base/constraint/constraint_pose_3D.h"
+#include "base/feature/feature_pose.h"
 
 //std includes
 //

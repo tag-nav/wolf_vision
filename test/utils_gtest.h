@@ -11,7 +11,6 @@
 
 #include <gtest/gtest.h>
 
-
 // Macros for testing equalities and inequalities.
 //
 //    * {ASSERT|EXPECT}_EQ(expected, actual): Tests that expected == actual
@@ -47,7 +46,6 @@
 // failures in the current thread.
 //
 //    * {ASSERT|EXPECT}_NO_FATAL_FAILURE(statement);
-
 
 // http://stackoverflow.com/a/29155677
 
@@ -144,6 +142,5 @@ TEST(Test, Foo)
                C_expect, C_actual);
 
 } // namespace testing
-
 
 #endif /* WOLF_UTILS_GTEST_H */

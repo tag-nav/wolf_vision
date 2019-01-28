@@ -9,7 +9,7 @@
 #define CAPTURE_WHEEL_JOINT_POSITION_H_
 
 //wolf includes
-#include "../capture_motion.h"
+#include "base/capture/capture_motion.h"
 
 namespace wolf {
 
@@ -59,7 +59,6 @@ protected:
   Eigen::VectorXs positions_;
   Eigen::MatrixXs positions_cov_;
 };
-
 
 /// @todo Enforce some logic on the wheel joint pos data
 
@@ -177,7 +176,6 @@ protected:
 //};
 
 //using CaptureDiffDriveWheelJointPosition = CaptureWheelJointPosition<DiffDriveController>;
-
 
 } // namespace wolf
 

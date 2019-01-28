@@ -1,5 +1,5 @@
 
-#include "landmark_corner_2D.h"
+#include "base/landmark/landmark_corner_2D.h"
 
 namespace wolf {
 
@@ -13,7 +13,6 @@ LandmarkCorner2D::~LandmarkCorner2D()
 {
     //
 }
-
 
 Scalar LandmarkCorner2D::getAperture() const
 {

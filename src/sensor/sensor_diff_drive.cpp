@@ -1,7 +1,7 @@
-#include "sensor_diff_drive.h"
-#include "../state_block.h"
-#include "../capture_motion.h"
-#include "../eigen_assert.h"
+#include "base/sensor/sensor_diff_drive.h"
+#include "base/state_block.h"
+#include "base/capture/capture_motion.h"
+#include "base/eigen_assert.h"
 
 namespace wolf {
 
@@ -45,7 +45,6 @@ SensorBasePtr SensorDiffDrive::create(const std::string& _unique_name,
 
   return odo;
 }
-
 
 /// @todo Further work to enforce wheel model
 
@@ -127,9 +126,8 @@ SensorBasePtr SensorDiffDrive::create(const std::string& _unique_name,
 
 } // namespace wolf
 
-
 // Register in the SensorFactory
-#include "sensor_factory.h"
+#include "base/sensor/sensor_factory.h"
 namespace wolf {
 WOLF_REGISTER_SENSOR("DIFF DRIVE", SensorDiffDrive)
 } // namespace wolf

@@ -5,10 +5,9 @@
  *      Author: jsola
  */
 
-#include "feature_base.h"
+#include "base/feature/feature_base.h"
 
 #include "utils_gtest.h"
-
 
 using namespace wolf;
 using namespace Eigen;

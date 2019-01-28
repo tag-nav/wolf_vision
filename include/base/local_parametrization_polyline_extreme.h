@@ -8,8 +8,7 @@
 #ifndef LOCAL_PARAMETRIZATION_POLYLINE_EXTREME_H_
 #define LOCAL_PARAMETRIZATION_POLYLINE_EXTREME_H_
 
-#include "local_parametrization_base.h"
-
+#include "base/local_parametrization_base.h"
 
 namespace wolf {
 

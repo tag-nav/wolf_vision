@@ -5,11 +5,11 @@
  *      \author: jsola
  */
 
-#include "constraints/constraint_autodiff_distance_3D.h"
-#include "problem.h"
-#include "logging.h"
-#include "ceres_wrapper/ceres_manager.h"
-#include "rotations.h"
+#include "base/constraint/constraint_autodiff_distance_3D.h"
+#include "base/problem.h"
+#include "base/logging.h"
+#include "base/ceres_wrapper/ceres_manager.h"
+#include "base/rotations.h"
 
 #include "utils_gtest.h"
 

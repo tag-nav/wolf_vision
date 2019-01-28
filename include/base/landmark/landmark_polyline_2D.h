@@ -9,7 +9,7 @@
 #define LANDMARK_POLYLINE_2D_H_
 
 // Wolf
-#include "landmark_base.h"
+#include "base/landmark/landmark_base.h"
 
 // STL
 #include <deque>

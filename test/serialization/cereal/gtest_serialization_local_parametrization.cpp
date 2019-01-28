@@ -198,7 +198,6 @@ TEST(TestSerialization, SerializationLocalParametrizationHomogeneousPtrBIN)
   PRINTF("All good at TestSerialization::SerializationLocalParametrizationHomogeneousPtrBIN !\n");
 }
 
-
 //////////////////////////////////////
 /// LocalParametrizationQuaternion ///
 //////////////////////////////////////

@@ -1,4 +1,4 @@
-#include "processor_tracker_landmark_polyline.h"
+#include "base/processor/processor_tracker_landmark_polyline.h"
 
 namespace wolf
 {
@@ -268,7 +268,6 @@ unsigned int ProcessorTrackerLandmarkPolyline::findLandmarks(const LandmarkBaseL
             //if (!polyline_feature->isFirstDefined() && !polyline_landmark->isLastDefined())
             //    std::cout << "\tLIMITED min offset " << min_offset << std::endl;
 
-
         }
         // Match found for this feature
         if (best_match != nullptr)
@@ -444,7 +443,6 @@ Scalar ProcessorTrackerLandmarkPolyline::sqDistPointToLine(const Eigen::Vector3s
      *      Returns the distance B-Line if the projection of B to the line is in [A, inf). Otherwise, return squared distance A-B.
      *      Checks if the angle BAAaux is >=  90º: (BAaux)² >= (BA)² + (AAaux)²
      *
-     *
      * ( Case B and A are defined is not point-to-line, is point to point -> assertion )
      *
      */
@@ -509,7 +507,6 @@ LandmarkBasePtr ProcessorTrackerLandmarkPolyline::createLandmark(FeatureBasePtr 
     //std::cout << "ProcessorTrackerLandmarkPolyline::createLandmark" << std::endl;
     //std::cout << "Robot global pose: " << t_world_robot_.transpose() << std::endl;
     //std::cout << "Sensor global pose: " << t_world_sensor_.transpose() << std::endl;
-
 
     FeaturePolyline2DPtr polyline_ptr = std::static_pointer_cast<FeaturePolyline2D>(_feature_ptr);
     // compute feature global pose
@@ -1017,7 +1014,7 @@ ProcessorBasePtr ProcessorTrackerLandmarkPolyline::create(const std::string& _un
 }        //namespace wolf
 
 // Register in the SensorFactory
-#include "processor_factory.h"
+#include "base/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("POLYLINE", ProcessorTrackerLandmarkPolyline)
 } // namespace wolf

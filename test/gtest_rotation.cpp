@@ -9,8 +9,8 @@
 #include <Eigen/Geometry>
 
 //Wolf
-#include "wolf.h"
-#include "../rotations.h"
+#include "base/wolf.h"
+#include "base/rotations.h"
 
 //std
 #include <iostream>
@@ -27,7 +27,6 @@
 using namespace wolf;
 using namespace Eigen;
 
-
 TEST(exp_q, unit_norm)
 {
     Vector3s v0  = Vector3s::Random();
@@ -40,7 +39,6 @@ TEST(exp_q, unit_norm)
         scale /= 10;
     }
 }
-
 
 TEST(rotations, pi2pi)
 {
@@ -218,7 +216,6 @@ TEST(rotations, AngleAxis_limits)
         scale = scale*0.1;
     }
 }
-
 
 TEST(compose, Quat_compos_const_rateOfTurn)
 {
@@ -479,7 +476,6 @@ TEST(Minus_and_diff, Random)
     Quaternions q1, q2, qo;
     q1              .coeffs().setRandom().normalize();
     q2              .coeffs().setRandom().normalize();
-
 
     Vector3s vr      = log_q(q1.conjugate() * q2);
     Vector3s vl      = log_q(q2 * q1.conjugate());
@@ -751,11 +747,9 @@ TEST(Conversions, e2R_R2q_q2e)
     ASSERT_MATRIX_APPROX(eo, e, 1e-10);
 }
 
-
 int main(int argc, char **argv)
 {
     using namespace wolf;
-
 
     /*
         LIST OF FUNCTIONS : 

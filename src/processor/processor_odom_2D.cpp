@@ -1,4 +1,4 @@
-#include "processor_odom_2D.h"
+#include "base/processor/processor_odom_2D.h"
 namespace wolf
 {
 
@@ -189,13 +189,10 @@ ProcessorBasePtr ProcessorOdom2D::create(const std::string& _unique_name, const 
     return prc_ptr;
 }
 
-
-
 }
 
-
 // Register in the ProcessorFactory
-#include "processor_factory.h"
+#include "base/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("ODOM 2D", ProcessorOdom2D)
 } // namespace wolf
