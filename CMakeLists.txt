@@ -346,7 +346,7 @@ include/base/constraint/constraint_relative_2D_analytic.h
     )
   SET(HDRS_FEATURE
 include/base/feature/feature_corner_2D.h
-src/feature/feature_diff_drive.h
+include/base/feature/feature_diff_drive.h
 include/base/feature/feature_GPS_fix.h
 include/base/feature/feature_GPS_pseudorange.h
 include/base/feature/feature_IMU.h
@@ -362,7 +362,7 @@ include/base/landmark/landmark_polyline_2D.h
     )
   SET(HDRS_PROCESSOR
 include/base/processor/processor_capture_holder.h
-src/processor/processor_diff_drive.h
+include/base/processor/processor_diff_drive.h
 include/base/processor/processor_frame_nearest_neighbor_filter.h
 include/base/processor/processor_IMU.h
 include/base/processor/processor_odom_2D.h
@@ -373,7 +373,7 @@ include/base/processor/processor_tracker_landmark_dummy.h
     )
   SET(HDRS_SENSOR
 include/base/sensor/sensor_camera.h
-src/sensor/sensor_diff_drive.h
+include/base/sensor/sensor_diff_drive.h
 include/base/sensor/sensor_GPS.h
 include/base/sensor/sensor_GPS_fix.h
 include/base/sensor/sensor_IMU.h
@@ -629,6 +629,9 @@ IF(YAMLCPP_FOUND)
     SET(HDRS ${HDRS}
 include/base/yaml/yaml_conversion.h
         )
+    SET(HDRS_YAML ${HDRS_YAML}
+include/base/yaml/yaml_conversion.h
+        )
 
     # sources
     SET(SRCS ${SRCS}
@@ -706,6 +709,60 @@ IF (GLOG_FOUND)
         add_subdirectory(test)
     ENDIF(BUILD_TESTS)
 ENDIF (GLOG_FOUND)
+
+install(TARGETS ${PROJECT_NAME}_core DESTINATION lib/iri-algorithms EXPORT ${PROJECT_NAME}_core-targets)
+install(EXPORT ${PROJECT_NAME}_core-targets DESTINATION lib/iri-algorithms)
+#install library
+
+#=============================================================
+INSTALL(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
+      RUNTIME DESTINATION bin
+      LIBRARY DESTINATION lib/iri-algorithms
+      ARCHIVE DESTINATION lib/iri-algorithms)
+
+install(EXPORT ${PROJECT_NAME}Targets DESTINATION lib/cmake/${PROJECT_NAME})
+#install headers
+INSTALL(FILES ${HDRS_BASE}
+    DESTINATION include/iri-algorithms/wolf/base)
+INSTALL(FILES ${HDRS}
+    DESTINATION include/iri-algorithms/wolf/base)
+INSTALL(FILES ${HDRS_DTASSC}
+   DESTINATION include/iri-algorithms/wolf/base/association)
+INSTALL(FILES ${HDRS_CAPTURE}
+    DESTINATION include/iri-algorithms/wolf/base/capture)
+INSTALL(FILES ${HDRS_CONSTRAINT}
+    DESTINATION include/iri-algorithms/wolf/base/constraint)
+INSTALL(FILES ${HDRS_FEATURE}
+    DESTINATION include/iri-algorithms/wolf/base/feature)
+INSTALL(FILES ${HDRS_SENSOR}
+    DESTINATION include/iri-algorithms/wolf/base/sensor)
+INSTALL(FILES ${HDRS_PROCESSOR}
+    DESTINATION include/iri-algorithms/wolf/base/processor)
+INSTALL(FILES ${HDRS_WRAPPER}
+    DESTINATION include/iri-algorithms/wolf/base/ceres_wrapper)
+INSTALL(FILES ${HDRS_SOLVER_SUITESPARSE}
+   DESTINATION include/iri-algorithms/wolf/base/solver_suitesparse)
+INSTALL(FILES ${HDRS_SOLVER}
+    DESTINATION include/iri-algorithms/wolf/base/solver)
+INSTALL(FILES ${HDRS_SERIALIZATION}
+    DESTINATION include/iri-algorithms/wolf/base/serialization)
+INSTALL(FILES ${HDRS_YAML}
+    DESTINATION include/iri-algorithms/wolf/base/yaml)
+INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf.cmake"
+    DESTINATION "lib/cmake/${PROJECT_NAME}")
+
+#install Find*.cmake
+configure_file("${CMAKE_SOURCE_DIR}/cmake_modules/wolfConfig.cmake"
+               "${CMAKE_BINARY_DIR}/wolfConfig.cmake" @ONLY)
+
+INSTALL(FILES "${WOLF_CONFIG_DIR}/config.h"
+DESTINATION include/iri-algorithms/wolf/internal)
+
+INSTALL(FILES "${CMAKE_BINARY_DIR}/wolfConfig.cmake" DESTINATION "lib/cmake/${PROJECT_NAME}")
+
+INSTALL(DIRECTORY ${SPDLOG_INCLUDE_DIRS} DESTINATION "include/iri-algorithms/")
+
+export(PACKAGE ${PROJECT_NAME})
 
 #-END_SRC --------------------------------------------------------------------------------------------------------------------------------
 FIND_PACKAGE(Doxygen)
