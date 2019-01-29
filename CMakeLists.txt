@@ -396,7 +396,6 @@ include/base/processor/processor_odom_3D.h
 include/base/processor/processor_tracker_feature_dummy.h
 include/base/processor/processor_tracker_landmark_dummy.h
 include/base/processor/processor_factory.h
-include/base/processor/new_processor_factory.h
 include/base/processor/processor_logging.h
 include/base/processor/processor_base.h
 include/base/processor/processor_factory.h
@@ -421,7 +420,6 @@ include/base/sensor/sensor_IMU.h
 include/base/sensor/sensor_odom_2D.h
 include/base/sensor/sensor_odom_3D.h
 include/base/sensor/sensor_factory.h
-include/base/sensor/new_sensor_factory.h
     )
 SET(HDRS_SOLVER
 include/base/solver/solver_manager.h
@@ -461,7 +459,6 @@ include/base/motion_buffer.h
 include/base/node_base.h
 include/base/problem.h
 include/base/processor/processor_base.h
-include/base/processor/processor_factory.h
 include/base/processor/processor_loopclosure_base.h
 include/base/processor/processor_motion.h
 include/base/processor/processor_tracker_feature.h
