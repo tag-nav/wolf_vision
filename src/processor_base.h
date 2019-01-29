@@ -58,8 +58,8 @@ class PackKeyFrameBuffer
         PackKeyFramePtr selectPack(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
         PackKeyFramePtr selectPack(const CaptureBasePtr _capture, const Scalar& _time_tolerance);
 
-        PackKeyFramePtr selectPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
-        PackKeyFramePtr selectPackBefore(const CaptureBasePtr _capture, const Scalar& _time_tolerance);
+        PackKeyFramePtr selectFirstPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance);
+        PackKeyFramePtr selectFirstPackBefore(const CaptureBasePtr _capture, const Scalar& _time_tolerance);
 
         /**\brief Buffer size
          *
@@ -147,15 +147,13 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
     private:
         SensorBaseWPtr sensor_ptr_;
 
-        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
-
         static unsigned int processor_id_count_;
 
     public:
         ProcessorBase(const std::string& _type, ProcessorParamsBasePtr _params);
         virtual ~ProcessorBase();
         virtual void configure(SensorBasePtr _sensor) = 0;
-        void remove();
+        virtual void remove();
 
         unsigned int id();
 
