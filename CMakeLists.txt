@@ -283,13 +283,27 @@ include/base/time_stamp.h
 include/base/track_matrix.h
 include/base/trajectory_base.h
 include/base/wolf.h
-    )
-SET(HDRS
+include/base/IMU_tools.h
+include/base/local_parametrization_polyline_extreme.h
+  )
+SET(HDRS_CAPTURE
+include/base/capture/capture_base.h
+include/base/capture/capture_buffer.h
+include/base/capture/capture_pose.h
+include/base/capture/capture_void.h
 include/base/capture/capture_motion.h
 include/base/capture/capture_GPS_fix.h
 include/base/capture/capture_IMU.h
 include/base/capture/capture_odom_2D.h
 include/base/capture/capture_odom_3D.h
+include/base/capture/capture_GPS_fix.h
+include/base/capture/capture_IMU.h
+include/base/capture/capture_odom_2D.h
+include/base/capture/capture_odom_3D.h
+include/base/capture/capture_velocity.h
+include/base/capture/capture_wheel_joint_position.h
+    )
+  SET(HDRS_CONSTRAINT
 include/base/constraint/constraint_block_absolute.h
 include/base/constraint/constraint_container.h
 include/base/constraint/constraint_corner_2D.h
@@ -309,41 +323,6 @@ include/base/constraint/constraint_pose_2D.h
 include/base/constraint/constraint_pose_3D.h
 include/base/constraint/constraint_quaternion_absolute.h
 include/base/constraint/constraint_relative_2D_analytic.h
-include/base/feature/feature_corner_2D.h
-include/base/feature/feature_GPS_fix.h
-include/base/feature/feature_GPS_pseudorange.h
-include/base/feature/feature_IMU.h
-include/base/feature/feature_odom_2D.h
-include/base/feature/feature_polyline_2D.h
-include/base/IMU_tools.h
-include/base/landmark/landmark_corner_2D.h
-include/base/landmark/landmark_container.h
-include/base/landmark/landmark_line_2D.h
-include/base/landmark/landmark_polyline_2D.h
-include/base/local_parametrization_polyline_extreme.h
-include/base/processor/processor_frame_nearest_neighbor_filter.h
-include/base/processor/processor_IMU.h
-test/processor_IMU_UnitTester.h
-include/base/processor/processor_odom_2D.h
-include/base/processor/processor_odom_3D.h
-include/base/processor/processor_tracker_feature_dummy.h
-include/base/processor/processor_tracker_landmark_dummy.h
-include/base/sensor/sensor_camera.h
-include/base/sensor/sensor_GPS.h
-include/base/sensor/sensor_GPS_fix.h
-include/base/sensor/sensor_IMU.h
-include/base/sensor/sensor_odom_2D.h
-include/base/sensor/sensor_odom_3D.h
-    )
-  SET(HDRS_CAPTURE
-include/base/capture/capture_GPS_fix.h
-include/base/capture/capture_IMU.h
-include/base/capture/capture_odom_2D.h
-include/base/capture/capture_odom_3D.h
-include/base/capture/capture_velocity.h
-include/base/capture/capture_wheel_joint_position.h
-    )
-  SET(HDRS_CONSTRAINT
 include/base/constraint/constraint_autodiff_trifocal.h
 include/base/constraint/constraint_autodiff_distance_3D.h
 include/base/constraint/constraint_AHP.h
@@ -366,8 +345,17 @@ include/base/constraint/constraint_pose_2D.h
 include/base/constraint/constraint_pose_3D.h
 include/base/constraint/constraint_quaternion_absolute.h
 include/base/constraint/constraint_relative_2D_analytic.h
+include/base/constraint/constraint_analytic.h
+include/base/constraint/constraint_autodiff.h
+include/base/constraint/constraint_base.h
     )
   SET(HDRS_FEATURE
+include/base/feature/feature_corner_2D.h
+include/base/feature/feature_GPS_fix.h
+include/base/feature/feature_GPS_pseudorange.h
+include/base/feature/feature_IMU.h
+include/base/feature/feature_odom_2D.h
+include/base/feature/feature_polyline_2D.h
 include/base/feature/feature_corner_2D.h
 include/base/feature/feature_diff_drive.h
 include/base/feature/feature_GPS_fix.h
@@ -375,9 +363,17 @@ include/base/feature/feature_GPS_pseudorange.h
 include/base/feature/feature_IMU.h
 include/base/feature/feature_odom_2D.h
 include/base/feature/feature_polyline_2D.h
+include/base/feature/feature_base.h
+include/base/feature/feature_match.h
+include/base/feature/feature_pose.h
     )
   SET(HDRS_LANDMARK
+include/base/landmark/landmark_base.h
 include/base/landmark/landmark_match.h
+include/base/landmark/landmark_corner_2D.h
+include/base/landmark/landmark_container.h
+include/base/landmark/landmark_line_2D.h
+include/base/landmark/landmark_polyline_2D.h
 include/base/landmark/landmark_corner_2D.h
 include/base/landmark/landmark_container.h
 include/base/landmark/landmark_line_2D.h
@@ -393,8 +389,24 @@ include/base/processor/processor_odom_3D.h
 include/base/processor/processor_tracker_feature_dummy.h
 include/base/processor/processor_tracker_landmark.h
 include/base/processor/processor_tracker_landmark_dummy.h
+include/base/processor/processor_frame_nearest_neighbor_filter.h
+include/base/processor/processor_IMU.h
+include/base/processor/processor_odom_2D.h
+include/base/processor/processor_odom_3D.h
+include/base/processor/processor_tracker_feature_dummy.h
+include/base/processor/processor_tracker_landmark_dummy.h
+include/base/processor/processor_factory.h
+include/base/processor/new_processor_factory.h
+include/base/processor/processor_logging.h
+include/base/processor/processor_base.h
+include/base/processor/processor_factory.h
+include/base/processor/processor_loopclosure_base.h
+include/base/processor/processor_motion.h
+include/base/processor/processor_tracker_feature.h
+include/base/processor/processor_tracker.h
     )
   SET(HDRS_SENSOR
+include/base/sensor/sensor_base.h
 include/base/sensor/sensor_camera.h
 include/base/sensor/sensor_diff_drive.h
 include/base/sensor/sensor_GPS.h
@@ -402,6 +414,14 @@ include/base/sensor/sensor_GPS_fix.h
 include/base/sensor/sensor_IMU.h
 include/base/sensor/sensor_odom_2D.h
 include/base/sensor/sensor_odom_3D.h
+include/base/sensor/sensor_camera.h
+include/base/sensor/sensor_GPS.h
+include/base/sensor/sensor_GPS_fix.h
+include/base/sensor/sensor_IMU.h
+include/base/sensor/sensor_odom_2D.h
+include/base/sensor/sensor_odom_3D.h
+include/base/sensor/sensor_factory.h
+include/base/sensor/new_sensor_factory.h
     )
 SET(HDRS_SOLVER
 include/base/solver/solver_manager.h
@@ -759,6 +779,8 @@ INSTALL(FILES ${HDRS_SENSOR}
     DESTINATION include/iri-algorithms/wolf/base/sensor)
 INSTALL(FILES ${HDRS_PROCESSOR}
     DESTINATION include/iri-algorithms/wolf/base/processor)
+INSTALL(FILES ${HDRS_LANDMARK}
+    DESTINATION include/iri-algorithms/wolf/base/landmark)
 INSTALL(FILES ${HDRS_WRAPPER}
     DESTINATION include/iri-algorithms/wolf/base/ceres_wrapper)
 INSTALL(FILES ${HDRS_SOLVER_SUITESPARSE}
