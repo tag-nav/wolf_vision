@@ -42,6 +42,16 @@ SensorBasePtr SensorRangeBearing::create(const std::string& _unique_name, //
     return sensor;
 }
 
+SensorBasePtr SensorRangeBearing::createNew(const std::string& _unique_name, //
+                                            const paramsServer& _server)
+{
+    Eigen::Vector2s noise_std(0.1,1.0);
+    SensorRangeBearingPtr sensor = std::make_shared<SensorRangeBearing>(Eigen::Vector3s(1,1,0), noise_std);
+    sensor->setName(_unique_name);
+    // sensor->node_name_ = _unique_name;
+    return sensor;
+}
+
 } /* namespace wolf */
 
 // Register in the SensorFactory
@@ -50,4 +60,8 @@ namespace wolf
 {
 WOLF_REGISTER_SENSOR("RANGE BEARING", SensorRangeBearing)
 } // namespace wolf
-
+#include "base/sensor/new_sensor_factory.h"
+namespace wolf
+{
+WOLF_REGISTER_SENSORN("RANGE BEARING", SensorRangeBearing)
+} // namespace wolf

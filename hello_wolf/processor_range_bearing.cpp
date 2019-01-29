@@ -110,6 +110,24 @@ ProcessorBasePtr ProcessorRangeBearing::create(const std::string& _unique_name, 
     return prc;
 }
 
+ProcessorBasePtr ProcessorRangeBearing::createNew(const std::string& _unique_name,
+                                                  const paramsServer& _server,
+                                                  const SensorBasePtr _sensor_ptr)
+{
+    SensorRangeBearingPtr       sensor_rb = std::static_pointer_cast<SensorRangeBearing>(_sensor_ptr);
+    ProcessorParamsRangeBearingPtr params = std::make_shared<ProcessorParamsRangeBearing>();
+    params->voting_active = _server.getParam<bool>("voting_active", "false");
+    params->time_tolerance = _server.getParam<double>("time_tolerance", "0.01");
+
+    // construct processor
+    ProcessorRangeBearingPtr prc = std::make_shared<ProcessorRangeBearing>(sensor_rb, params);
+
+    // setup processor
+    prc->setName(_unique_name);
+
+    return prc;
+}
+
 Eigen::Vector2s ProcessorRangeBearing::observe(const Eigen::Vector2s& lmk_w) const
 {
     return polar(toSensor(lmk_w));
@@ -166,5 +184,10 @@ Eigen::Vector2s ProcessorRangeBearing::rect(Scalar range, Scalar bearing) const
 namespace wolf
 {
 WOLF_REGISTER_PROCESSOR("RANGE BEARING", ProcessorRangeBearing)
+} // namespace wolf
+#include "base/processor/new_processor_factory.h"
+namespace wolf
+{
+WOLF_REGISTER_PROCESSORN("RANGE BEARING", ProcessorRangeBearing)
 } // namespace wolf
 

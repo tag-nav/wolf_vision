@@ -46,6 +46,8 @@ class CeresManager : public SolverManager
 
         ~CeresManager();
 
+        static SolverManagerPtr create(const ProblemPtr& wolf_problem, const paramsServer& _server);
+
         ceres::Solver::Summary getSummary();
 
         virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks

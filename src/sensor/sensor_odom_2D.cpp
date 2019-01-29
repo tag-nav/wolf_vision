@@ -66,10 +66,28 @@ SensorBasePtr SensorOdom2D::create(const std::string& _unique_name, const Eigen:
     return odo;
 }
 
+SensorBasePtr SensorOdom2D::createNew(const std::string& _unique_name, const paramsServer& _server)
+{
+    // Eigen::VectorXs _extrinsics_po = Eigen::Vector3s(0,0,0);
+    Eigen::VectorXs _extrinsics_po = _server.getParam<Eigen::VectorXs>("ODOM 2D/"+ _unique_name + "/extrinsic/pos", "[0,0,0]");
+    assert(_extrinsics_po.size() == 3 && "Bad extrinsics vector length. Should be 3 for 2D.");
+    SensorOdom2DPtr odo;
+    IntrinsicsOdom2D params;
+    params.k_disp_to_disp = _server.getParam<double>("ODOM 2D/"+ _unique_name + "/intrinsic/k_disp_to_disp", "1");
+    params.k_rot_to_rot   = _server.getParam<double>("ODOM 2D/"+ _unique_name + "/intrinsic/k_rot_to_rot", "1");
+    odo = std::make_shared<SensorOdom2D>(_extrinsics_po, params);
+    odo->setName(_unique_name);
+    return odo;
+}
+
 } // namespace wolf
 
 // Register in the SensorFactory
 #include "base/sensor/sensor_factory.h"
 namespace wolf {
 WOLF_REGISTER_SENSOR("ODOM 2D", SensorOdom2D)
+} // namespace wolf
+#include "base/sensor/new_sensor_factory.h"
+namespace wolf {
+WOLF_REGISTER_SENSORN("ODOM 2D", SensorOdom2D)
 } // namespace wolf

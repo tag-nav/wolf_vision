@@ -40,6 +40,14 @@ CeresManager::~CeresManager()
         removeConstraint(ctr_2_residual_idx_.begin()->first);
 }
 
+SolverManagerPtr CeresManager::create(const ProblemPtr &wolf_problem, const paramsServer &_server)
+{
+    ceres::Solver::Options opt;
+    opt.max_num_iterations = _server.getParam<int>("max_num_iterations","1000");
+    // CeresManager m = CeresManager(wolf_problem, opt);
+    return std::make_shared<CeresManager>(wolf_problem, opt);
+}
+
 std::string CeresManager::solveImpl(const ReportVerbosity report_level)
 {
     // Check
@@ -400,5 +408,9 @@ void CeresManager::check()
     }
 }
 
+} // namespace wolf
+#include "base/solver/solver_factory.h"
+namespace wolf {
+    WOLF_REGISTER_SOLVER(CeresManager)
 } // namespace wolf
 

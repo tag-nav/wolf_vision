@@ -17,6 +17,9 @@ struct ProcessorParamsBase;
 #include "base/wolf.h"
 #include "base/frame_base.h"
 #include "base/state_block.h"
+#include "base/params_server.hpp"
+#include "base/sensor/new_sensor_factory.h"
+#include "base/processor/new_processor_factory.h"
 
 // std includes
 
@@ -82,7 +85,12 @@ class Problem : public std::enable_shared_from_this<Problem>
                                     const std::string& _unique_sensor_name, //
                                     const Eigen::VectorXs& _extrinsics, //
                                     const std::string& _intrinsics_filename);
-
+    /**
+       Custom installSensor using the parameters server
+    */
+    SensorBasePtr installSensor(const std::string& _sen_type, //
+                                const std::string& _unique_sensor_name,
+                                const paramsServer& _server);
         /** \brief get a sensor pointer by its name
          * \param _sensor_name The sensor name, as it was installed with installSensor()
          */
@@ -116,7 +124,14 @@ class Problem : public std::enable_shared_from_this<Problem>
                                           const std::string& _corresponding_sensor_name, //
                                           const std::string& _params_filename = "");
 
-        /** \brief Set the processor motion
+    /**
+       Custom installProcessor to be used with parameters server
+    */
+    ProcessorBasePtr installProcessor(const std::string& _prc_type, //
+                                      const std::string& _unique_processor_name, //
+                                      const std::string& _corresponding_sensor_name, //
+                                      const paramsServer& _server);        
+    /** \brief Set the processor motion
          *
          * Set the processor motion.
          */

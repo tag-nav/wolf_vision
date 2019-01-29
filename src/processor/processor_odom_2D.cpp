@@ -189,10 +189,36 @@ ProcessorBasePtr ProcessorOdom2D::create(const std::string& _unique_name, const 
     return prc_ptr;
 }
 
+ProcessorBasePtr ProcessorOdom2D::createNew(const std::string& _unique_name, const paramsServer& _server, const SensorBasePtr sensor_ptr)
+{
+
+    ProcessorOdom2DPtr prc_ptr;
+
+    std::shared_ptr<ProcessorParamsOdom2D> params;
+    params = std::make_shared<ProcessorParamsOdom2D>();
+
+    params->voting_active               = _server.getParam<bool>("voting_active", "true");
+    params->time_tolerance              = _server.getParam<double>("time_tolerance", "0.1");
+    params->max_time_span               = _server.getParam<double>("max_time_span", "999");
+    params->dist_traveled               = _server.getParam<double>("dist_traveled", "0.95"); // Will make KFs automatically every 1m displacement
+    params->angle_turned                = _server.getParam<double>("angle_turned", "999");
+    params->cov_det                     = _server.getParam<double>("cov_det", "999");
+    params->unmeasured_perturbation_std = _server.getParam<double>("unmeasured_perturbation_std", "0.0001");
+
+    prc_ptr = std::make_shared<ProcessorOdom2D>(params);
+    prc_ptr->setName(_unique_name);
+
+    return prc_ptr;
+}
+
 }
 
 // Register in the ProcessorFactory
 #include "base/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("ODOM 2D", ProcessorOdom2D)
+} // namespace wolf
+#include "base/processor/new_processor_factory.h"
+namespace wolf {
+    WOLF_REGISTER_PROCESSORN("ODOM 2D", ProcessorOdom2D)
 } // namespace wolf

@@ -1,0 +1,25 @@
+config:
+  sensors: 
+    -
+      type: "ODOM 2D"
+      name: "odom"
+      intrinsic:
+        k_disp_to_disp: 0.1
+        k_rot_to_rot: 0.1 
+      extrinsic:
+        pos: [1,2,3]
+    -
+      type: "RANGE BEARING"
+      name: "rb"
+  processors:
+    -
+      type: "ODOM 2D"
+      name: "processor1"
+      sensorname: "odom"
+    -
+      type: "RANGE BEARING"
+      name: "rb_processor"
+      sensorname: "rb"
+files:
+  - "/home/jcasals/workspace/wip/wolf/lib/libsensor_odo.so"
+  - "/home/jcasals/workspace/wip/wolf/lib/librange_bearing.so"

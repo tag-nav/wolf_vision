@@ -110,7 +110,14 @@ SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
         return installSensor(_sen_type, _unique_sensor_name, _extrinsics, IntrinsicsBasePtr());
 
 }
-
+    SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
+                                         const std::string& _unique_sensor_name, //
+                                         const paramsServer& _server)
+    {
+        SensorBasePtr sen_ptr = NewSensorFactory::get().create(uppercase(_sen_type), _unique_sensor_name, _server);
+        addSensor(sen_ptr);
+        return sen_ptr;
+    }
 ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
                                            const std::string& _unique_processor_name, //
                                            SensorBasePtr _corresponding_sensor_ptr, //
@@ -154,6 +161,29 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
         ProcessorParamsBasePtr prc_params = ProcessorParamsFactory::get().create(_prc_type, _params_filename);
         return installProcessor(_prc_type, _unique_processor_name, sen_ptr, prc_params);
     }
+}
+
+ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
+                                           const std::string& _unique_processor_name, //
+                                           const std::string& _corresponding_sensor_name, //
+                                           const paramsServer& _server)
+{
+    SensorBasePtr sen_ptr = getSensorPtr(_corresponding_sensor_name);
+    if (sen_ptr == nullptr)
+        throw std::runtime_error("Sensor not found. Cannot bind Processor.");
+    ProcessorBasePtr prc_ptr = NewProcessorFactory::get().create(uppercase(_prc_type), _unique_processor_name, _server, sen_ptr);
+    prc_ptr->configure(sen_ptr);
+    sen_ptr->addProcessor(prc_ptr);
+
+    // setting the origin in all processor motion if origin already setted
+    if (prc_ptr->isMotion() && prior_is_set_)
+        (std::static_pointer_cast<ProcessorMotion>(prc_ptr))->setOrigin(getLastKeyFramePtr());
+
+    // setting the main processor motion
+    if (prc_ptr->isMotion() && processor_motion_ptr_ == nullptr)
+        processor_motion_ptr_ = std::static_pointer_cast<ProcessorMotion>(prc_ptr);
+
+    return prc_ptr;
 }
 
 SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)

@@ -12,6 +12,7 @@
 #include "base/capture/capture_odom_2D.h"
 #include "base/constraint/constraint_odom_2D.h"
 #include "base/rotations.h"
+#include "base/params_server.hpp"
 
 namespace wolf {
     
@@ -76,6 +77,7 @@ class ProcessorOdom2D : public ProcessorMotion
         // Factory method
     public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
+        static ProcessorBasePtr createNew(const std::string& _unique_name, const paramsServer& _server, const SensorBasePtr sensor_ptr = nullptr);
 };
 
 inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const

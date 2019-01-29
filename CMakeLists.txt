@@ -252,6 +252,7 @@ ENDIF(GLOG_FOUND)
 #HEADERS
 
 SET(HDRS_BASE
+include/base/converter.h
 include/base/diff_drive_tools.h
 include/base/diff_drive_tools.hpp
 include/base/eigen_assert.h
@@ -270,6 +271,7 @@ include/base/make_unique.h
 include/base/map_base.h
 include/base/motion_buffer.h
 include/base/node_base.h
+include/base/params_server.hpp
 include/base/pinhole_tools.h
 include/base/problem.h
 include/base/rotations.h
@@ -638,6 +640,7 @@ ENDIF(vision_utils_FOUND)
 
 #SUBDIRECTORIES
 add_subdirectory(hello_wolf)
+add_subdirectory(hello_plugin)
 IF (cereal_FOUND)
   ADD_SUBDIRECTORY(serialization/cereal)
 ENDIF(cereal_FOUND)

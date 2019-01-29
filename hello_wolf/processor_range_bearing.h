@@ -40,6 +40,9 @@ class ProcessorRangeBearing : public ProcessorBase
         static ProcessorBasePtr create(const std::string& _unique_name,
                                        const ProcessorParamsBasePtr _params,
                                        const SensorBasePtr sensor_ptr = nullptr);
+        static ProcessorBasePtr createNew(const std::string& _unique_name,
+                                          const paramsServer& _server,
+                                          const SensorBasePtr _sensor_ptr = nullptr);
 
     protected:
         // Implementation of pure virtuals from ProcessorBase

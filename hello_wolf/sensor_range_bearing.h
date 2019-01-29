@@ -32,6 +32,8 @@ class SensorRangeBearing : public SensorBase
         static SensorBasePtr create(const std::string& _unique_name, //
                                     const Eigen::VectorXs& _extrinsics, //
                                     const IntrinsicsBasePtr _intrinsics);
+        static SensorBasePtr createNew(const std::string& _unique_name, //
+                                       const paramsServer& _server);
 };
 
 } /* namespace wolf */
