@@ -52,6 +52,10 @@ target_link_libraries(gtest_capture_base ${PROJECT_NAME})
 wolf_add_gtest(gtest_constraint_autodiff gtest_constraint_autodiff.cpp)
 target_link_libraries(gtest_constraint_autodiff ${PROJECT_NAME})
 
+# Converter from String to various types used by the parameters server
+wolf_add_gtest(gtest_converter gtest_converter.cpp)
+target_link_libraries(gtest_converter ${PROJECT_NAME})
+
 # FeatureBase classes test
 wolf_add_gtest(gtest_eigen_predicates gtest_eigen_predicates.cpp)
 target_link_libraries(gtest_eigen_predicates ${PROJECT_NAME})
