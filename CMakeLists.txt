@@ -19,6 +19,7 @@ PROJECT(wolf)
 #ENDIF()
 #message(STATUS "Binary path : " ${CMAKE_BINARY_DIR})
 #
+
 #SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
 #SET(LIBRARY_OUTPUT_PATH ${CMAKE_BINARY_DIR}/lib)
 #
@@ -210,7 +211,8 @@ ENDIF (SPDLOG_INCLUDE_DIR)
   
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 include_directories("include")
-include_directories("templinks")
+include_directories(.)
+# include_directories("templinks")
 IF(Ceres_FOUND)
     INCLUDE_DIRECTORIES(${CERES_INCLUDE_DIRS})
 ENDIF(Ceres_FOUND)
