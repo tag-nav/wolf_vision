@@ -35,13 +35,13 @@ namespace utils{
         std::regex exp("(\\{[^\\{:]:.*?\\})");
         // std::smatch res;
         // string val = "[{x:1},{y:[1,23,3]},{z:3}]";
-        // auto v = std::vector<std::string>(); 
+        // auto v = std::vector<std::string>();
         // std::string::const_iterator searchStart( val.cbegin() );
         // while ( regex_search( searchStart, val.cend(), res, exp ) ) {
         //     v.push_back(res[0]);
         //     searchStart = res.suffix().first;
         // }
-        // return v; 
+        // return v;
         return getMatches(val, exp);
     }
     static inline std::array<std::string,2> splitMatrixStringRepresentation(std::string matrix){
@@ -93,7 +93,7 @@ struct converter<utils::list<A>>{
             for(auto it : l){
                 result.push_back(converter<A>::convert(it));
             }
-        } else throw std::runtime_error("Invalid string format representing a list-like structure. Correct format is [(value)?(,value)*]. String provided: " + val); 
+        } else throw std::runtime_error("Invalid string format representing a list-like structure. Correct format is [(value)?(,value)*]. String provided: " + val);
         return result;
     }
     static std::string convert(utils::list<A> val){
@@ -126,7 +126,7 @@ struct converter<bool>{
     static bool convert(std::string val){
         if(val == "true") return true;
         else if (val == "false") return false;
-        else throw std::runtime_error("Invalid conversion to bool (Must be either \"true\" or \"false\"). String provided: " + val); 
+        else throw std::runtime_error("Invalid conversion to bool (Must be either \"true\" or \"false\"). String provided: " + val);
     }
 };
 template<>
@@ -202,7 +202,7 @@ struct converter<std::pair<A,B>>{
         std::smatch matches;
         if(std::regex_match(val, matches, rgxP)) {
             return std::pair<A,B>(converter<A>::convert(matches[1].str()), converter<B>::convert(matches[2].str()));
-        } else throw std::runtime_error("Invalid string format representing a pair. Correct format is {identifier:value}. String provided: " + val); 
+        } else throw std::runtime_error("Invalid string format representing a pair. Correct format is {identifier:value}. String provided: " + val);
     }
     static std::vector<A> convert(std::vector<std::string> val){
         std::vector<A> rtn = std::vector<A>();
@@ -214,7 +214,6 @@ struct converter<std::pair<A,B>>{
 // template<typename A>
 // struct converter<std::vector<A>>{
 //     static std::vector<A> convert(std::string val){
-        
 //         auto aux = utils::
 //             std::vector<A> rtn = std::vector<A>();
 //         for(auto it : aux)
