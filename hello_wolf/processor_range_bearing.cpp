@@ -116,8 +116,8 @@ ProcessorBasePtr ProcessorRangeBearing::createNew(const std::string& _unique_nam
 {
     SensorRangeBearingPtr       sensor_rb = std::static_pointer_cast<SensorRangeBearing>(_sensor_ptr);
     ProcessorParamsRangeBearingPtr params = std::make_shared<ProcessorParamsRangeBearing>();
-    params->voting_active = _server.getParam<bool>("voting_active", "false");
-    params->time_tolerance = _server.getParam<double>("time_tolerance", "0.01");
+    params->voting_active = _server.getParam<bool>(_unique_name + "/voting_active", "false");
+    params->time_tolerance = _server.getParam<double>(_unique_name + "/time_tolerance", "0.01");
 
     // construct processor
     ProcessorRangeBearingPtr prc = std::make_shared<ProcessorRangeBearing>(sensor_rb, params);

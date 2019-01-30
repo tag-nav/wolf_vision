@@ -205,11 +205,13 @@ void parserYAML::parse(){
     this->parseFirstLevel(this->_file);
     for(auto it : _paramsSens){
         vector<string> tags = vector<string>();
-        this->walkTreeR(it.n , tags , it._type + "/" + it._name);
+        // this->walkTreeR(it.n , tags , it._type + "/" + it._name);
+        this->walkTreeR(it.n , tags , it._name);
     }
     for(auto it : _paramsProc){
         vector<string> tags = vector<string>();
-        this->walkTreeR(it.n , tags , it._type + "/" + it._name);
+        // this->walkTreeR(it.n , tags , it._type + "/" + it._name);
+        this->walkTreeR(it.n , tags , it._name);
     }
 }
 map<string, string> parserYAML::fetchAsMap(YAML::Node n){
