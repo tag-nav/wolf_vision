@@ -134,6 +134,7 @@ ConstraintAutodiffTrifocal::ConstraintAutodiffTrifocal(
         bool _apply_loss_function,
         ConstraintStatus _status) : ConstraintAutodiff( "TRIFOCAL PLP",
                                                         nullptr,
+                                                        nullptr,
                                                         _feature_origin_ptr,
                                                         nullptr,
                                                         _processor_ptr,

@@ -2,7 +2,7 @@
 
 #include "base/state_homogeneous_3D.h"
 #include "base/factory.h"
-#include "yaml/yaml_conversion.h"
+#include "base/yaml/yaml_conversion.h"
 
 namespace wolf {
 
