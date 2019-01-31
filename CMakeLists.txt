@@ -640,10 +640,10 @@ include/base/processor/processor_tracker_feature_image.h
 include/base/processor/processor_tracker_landmark_image.h
         )
     SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
-src/processor/processor_tracker_feature_trifocal.h
+include/base/processor/processor_tracker_feature_trifocal.h
     )
   SET(HDRS_LANDMARK ${HDRS_LANDMARK}
-src/landmark/landmark_point_3D.h
+include/base/landmark/landmark_point_3D.h
     )
     SET(SRCS ${SRCS}
 src/capture/capture_image.cpp
