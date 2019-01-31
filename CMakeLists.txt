@@ -602,7 +602,6 @@ include/base/processor/processor_tracker_landmark_corner.h
 include/base/processor/processor_tracker_landmark_polyline.h
         )
     SET(SRCS ${SRCS}
-# examples/test_capture_laser_2D.cpp
 src/sensor/sensor_laser_2D.cpp
 src/processor/processor_tracker_feature.cpp
 src/processor/processor_tracker_feature_corner.cpp
@@ -629,29 +628,29 @@ IF (vision_utils_FOUND)
     SET(HDRS ${HDRS}
 include/base/capture/capture_image.h
 include/base/feature/feature_point_image.h
-include/base/landmark/landmark_AHP.h
-include/base/processor/processor_params_image.h
-include/base/processor/processor_tracker_feature_image.h
-include/base/processor/processor_tracker_landmark_image.h
         )
     SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
 include/base/processor/processor_tracker_feature_trifocal.h
+include/base/processor/processor_params_image.h
+include/base/processor/processor_tracker_feature_image.h
+include/base/processor/processor_tracker_landmark_image.h
     )
   SET(HDRS_LANDMARK ${HDRS_LANDMARK}
 include/base/landmark/landmark_point_3D.h
+include/base/landmark/landmark_AHP.h
     )
     SET(SRCS ${SRCS}
 src/capture/capture_image.cpp
 src/feature/feature_point_image.cpp
-src/landmark/landmark_AHP.cpp
-src/processor/processor_tracker_feature_image.cpp
-# examples/test_processor_tracker_landmark_image.cpp
         )
     SET(SRCS_LANDMARK ${SRCS_LANDMARK}
 src/landmark/landmark_point_3D.cpp
+src/landmark/landmark_AHP.cpp
     )
     SET(SRCS_PROCESSOR ${SRCS_PROCESSOR}
 src/processor/processor_tracker_feature_trifocal.cpp
+src/processor/processor_tracker_feature_image.cpp
+src/processor/processor_tracker_landmark_image.cpp
     )
 ENDIF(vision_utils_FOUND)
 

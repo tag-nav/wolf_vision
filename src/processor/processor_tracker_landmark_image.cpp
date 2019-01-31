@@ -501,7 +501,7 @@ ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _uniqu
 } // namespace wolf
 
 // Register in the SensorFactory
-#include "processor_factory.h"
+#include "base/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("IMAGE LANDMARK", ProcessorTrackerLandmarkImage)
 } // namespace wolf
