@@ -65,4 +65,4 @@ const bool WOLF_UNUSED registered_prc_image_feature_par = ProcessorParamsFactory
 const bool WOLF_UNUSED registered_prc_image_landmark_par = ProcessorParamsFactory::get().registerCreator("IMAGE LANDMARK", createProcessorParamsImage);
 
 }
-
+}

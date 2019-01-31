@@ -2,10 +2,10 @@
 
 #include "base/logging.h"
 
-#include "ceres_wrapper/ceres_manager.h"
-#include "processors/processor_tracker_feature_trifocal.h"
+#include "base/ceres_wrapper/ceres_manager.h"
+#include "base/processor/processor_tracker_feature_trifocal.h"
 #include "base/capture/capture_image.h"
-#include "constraints/constraint_autodiff_trifocal.h"
+#include "base/constraint/constraint_autodiff_trifocal.h"
 
 using namespace Eigen;
 using namespace wolf;
@@ -849,7 +849,7 @@ TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
     }
 }
 
-#include "constraints/constraint_autodiff_distance_3D.h"
+#include "base/constraint/constraint_autodiff_distance_3D.h"
 
 TEST_F(ConstraintAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
 {

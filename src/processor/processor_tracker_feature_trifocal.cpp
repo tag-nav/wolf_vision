@@ -1,10 +1,10 @@
 
 // wolf
-#include "processor/processor_tracker_feature_trifocal.h"
+#include "base/processor/processor_tracker_feature_trifocal.h"
 
 #include "base/sensor/sensor_camera.h"
 #include "base/feature/feature_point_image.h"
-#include "constraints/constraint_autodiff_trifocal.h"
+#include "base/constraint/constraint_autodiff_trifocal.h"
 #include "base/capture/capture_image.h"
 
 // vision_utils
@@ -452,7 +452,7 @@ ProcessorBasePtr ProcessorTrackerFeatureTrifocal::create(const std::string& _uni
 } // namespace wolf
 
 // Register in the ProcessorFactory
-#include "processor_factory.h"
+#include "base/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("TRACKER FEATURE TRIFOCAL", ProcessorTrackerFeatureTrifocal)
 } // namespace wolf

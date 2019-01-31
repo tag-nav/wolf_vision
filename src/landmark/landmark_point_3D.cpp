@@ -1,4 +1,4 @@
-#include "landmarks/landmark_point_3D.h"
+#include "base/landmark/landmark_point_3D.h"
 
 namespace wolf {
 
