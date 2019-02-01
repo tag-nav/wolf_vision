@@ -31,6 +31,7 @@
  *   - exp_SE3:     go from tangent space to delta manifold (equivalent to exp() in rotations)
  *   - plus:        D2 = D1 * exp_SE3(d)
  *   - minus:       d  = log_SE3( D1.inv() * D2 )
+ *   - interpolate: dd = D1 * exp ( log( D1.inv() * D2 ) * t ) = D1 (+) ( (D2 (-) D1) * t)
  */
 
 
@@ -374,6 +375,22 @@ inline Matrix<typename D1::Scalar, 6, 1> minus(const MatrixBase<D1>& d1,
     minus(d1, d2, ret);
     return ret;
 }
+
+template<typename D1, typename D2, typename D3>
+inline void interpolate(const MatrixBase<D1>& d1,
+                        const MatrixBase<D2>& d2,
+                        const typename D1::Scalar t,
+                        MatrixBase<D3>& sum)
+{
+    Matrix<typename D1::Scalar, 6, 1> dd;
+    Matrix<typename D1::Scalar, 7, 1> ret;
+
+    minus(d1, d2, dd);
+    plus(d1, dd * t, ret);
+
+    return ret;
+}
+
 
 
 } // namespace three_d
