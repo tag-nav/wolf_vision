@@ -27,10 +27,10 @@
  *   - identity:    I  = Delta at the origin, with Dp = [0,0,0]; Dq = [0,0,0,1], so that D (+) I = I (+) D = D
  *   - inverse:     so that D (+) D.inv = D.inv (+) D = I
  *   - between:     Db = D2 (-) D1 := D1.inv (+) D2, so that D2 = D1 (+) Db
- *   - lift:        go from Delta manifold to tangent space (equivalent to log() in rotations)
- *   - retract:     go from tangent space to delta manifold (equivalent to exp() in rotations)
- *   - plus:        D2 = D1 (+) retract(d)
- *   - diff:        d  = lift( D2 (-) D1 )
+ *   - log_SE3:     go from Delta manifold to tangent space (equivalent to log() in rotations)
+ *   - exp_SE3:     go from tangent space to delta manifold (equivalent to exp() in rotations)
+ *   - plus:        D2 = D1 * exp_SE3(d)
+ *   - minus:       d  = log_SE3( D1.inv() * D2 )
  */
 
 
@@ -220,7 +220,7 @@ inline Matrix<typename D1::Scalar, 7, 1> between(const MatrixBase<D1>& d1,
 }
 
 template<typename Derived>
-Matrix<typename Derived::Scalar, 6, 1> lift(const MatrixBase<Derived>& delta_in)
+Matrix<typename Derived::Scalar, 6, 1> log_SE3(const MatrixBase<Derived>& delta_in)
 {
     MatrixSizeCheck<7, 1>::check(delta_in);
 
@@ -238,7 +238,7 @@ Matrix<typename Derived::Scalar, 6, 1> lift(const MatrixBase<Derived>& delta_in)
 }
 
 template<typename Derived>
-Matrix<typename Derived::Scalar, 7, 1> retract(const MatrixBase<Derived>& d_in)
+Matrix<typename Derived::Scalar, 7, 1> exp_SE3(const MatrixBase<Derived>& d_in)
 {
     MatrixSizeCheck<6, 1>::check(d_in);
 
@@ -292,21 +292,21 @@ inline Matrix<typename D1::Scalar, 7, 1> plus(const MatrixBase<D1>& d1,
 }
 
 template<typename D1, typename D2, typename D4, typename D5, typename D7, typename D8>
-inline void diff(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1,
-                 const MatrixBase<D4>& dp2, const QuaternionBase<D5>& dq2,
-                 MatrixBase<D7>& diff_p, MatrixBase<D8>& diff_o )
+inline void minus(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1,
+                  const MatrixBase<D4>& dp2, const QuaternionBase<D5>& dq2,
+                  MatrixBase<D7>& diff_p, MatrixBase<D8>& diff_o )
 {
-        diff_p = dp2 - dp1;
-        diff_o = log_q(dq1.conjugate() * dq2);
+    diff_p = dp2 - dp1;
+    diff_o = log_q(dq1.conjugate() * dq2);
 }
 
 template<typename D1, typename D2, typename D4, typename D5, typename D6, typename D7, typename D8, typename D9>
-inline void diff(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1,
-                 const MatrixBase<D4>& dp2, const QuaternionBase<D5>& dq2,
-                 MatrixBase<D6>& diff_p, MatrixBase<D7>& diff_o,
-                 MatrixBase<D8>& J_do_dq1, MatrixBase<D9>& J_do_dq2)
+inline void minus(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1,
+                  const MatrixBase<D4>& dp2, const QuaternionBase<D5>& dq2,
+                  MatrixBase<D6>& diff_p, MatrixBase<D7>& diff_o,
+                  MatrixBase<D8>& J_do_dq1, MatrixBase<D9>& J_do_dq2)
 {
-    diff(dp1, dq1, dp2, dq2, diff_p, diff_o);
+    minus(dp1, dq1, dp2, dq2, diff_p, diff_o);
 
     J_do_dq1    = - jac_SO3_left_inv(diff_o);
     J_do_dq2    =   jac_SO3_right_inv(diff_o);
@@ -314,9 +314,9 @@ inline void diff(const MatrixBase<D1>& dp1, const QuaternionBase<D2>& dq1,
 
 
 template<typename D1, typename D2, typename D3>
-inline void diff(const MatrixBase<D1>& d1,
-                 const MatrixBase<D2>& d2,
-                 MatrixBase<D3>& err)
+inline void minus(const MatrixBase<D1>& d1,
+                  const MatrixBase<D2>& d2,
+                  MatrixBase<D3>& err)
 {
     Map<const Matrix<typename D1::Scalar, 3, 1> >   dp1    ( & d1(0) );
     Map<const Quaternion<typename D1::Scalar> >     dq1    ( & d1(3) );
@@ -325,15 +325,15 @@ inline void diff(const MatrixBase<D1>& d1,
     Map<Matrix<typename D3::Scalar, 3, 1> >         diff_p ( & err(0) );
     Map<Matrix<typename D3::Scalar, 3, 1> >         diff_o ( & err(3) );
 
-    diff(dp1, dq1, dp2, dq2, diff_p, diff_o);
+    minus(dp1, dq1, dp2, dq2, diff_p, diff_o);
 }
 
 template<typename D1, typename D2, typename D3, typename D4, typename D5>
-inline void diff(const MatrixBase<D1>& d1,
-                 const MatrixBase<D2>& d2,
-                 MatrixBase<D3>& dif,
-                 MatrixBase<D4>& J_diff_d1,
-                 MatrixBase<D5>& J_diff_d2)
+inline void minus(const MatrixBase<D1>& d1,
+                  const MatrixBase<D2>& d2,
+                  MatrixBase<D3>& dif,
+                  MatrixBase<D4>& J_diff_d1,
+                  MatrixBase<D5>& J_diff_d2)
 {
     Map<const Matrix<typename D1::Scalar, 3, 1> >   dp1    ( & d1(0) );
     Map<const Quaternion<typename D1::Scalar> >     dq1    ( & d1(3) );
@@ -347,9 +347,9 @@ inline void diff(const MatrixBase<D1>& d1,
 
     Matrix<typename D4::Scalar, 3, 3> J_do_dq1, J_do_dq2;
 
-    diff(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v, J_do_dq1, J_do_dq2);
+    minus(dp1, dq1, dv1, dp2, dq2, dv2, diff_p, diff_o, diff_v, J_do_dq1, J_do_dq2);
 
-    /* d = diff(d1, d2) is
+    /* d = minus(d1, d2) is
      *   dp = dp2 - dp1
      *   do = Log(dq1.conj * dq2)
      *   dv = dv2 - dv1
@@ -367,11 +367,11 @@ inline void diff(const MatrixBase<D1>& d1,
 }
 
 template<typename D1, typename D2>
-inline Matrix<typename D1::Scalar, 6, 1> diff(const MatrixBase<D1>& d1,
-                                              const MatrixBase<D2>& d2)
+inline Matrix<typename D1::Scalar, 6, 1> minus(const MatrixBase<D1>& d1,
+                                               const MatrixBase<D2>& d2)
 {
     Matrix<typename D1::Scalar, 6, 1> ret;
-    diff(d1, d2, ret);
+    minus(d1, d2, ret);
     return ret;
 }
 
