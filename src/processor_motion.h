@@ -399,6 +399,10 @@ class ProcessorMotion : public ProcessorBase
          * \param _capture_motion: the parent capture
          */
         FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_own);
+
+        /** \brief create a feature corresponding to given capture
+         * \param _capture_motion: the parent capture
+         */
         virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_own) = 0;
 
         /** \brief create a constraint and link it in the wolf tree

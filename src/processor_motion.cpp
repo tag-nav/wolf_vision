@@ -501,7 +501,7 @@ Motion ProcessorMotion::interpolate(const Motion& _ref, Motion& _second, TimeSta
     else
     {
         // _ts is closest to _second
-        Motion interpolated             ( _second );
+        Motion interpolated                 ( _second );
         interpolated.ts_                    = _ts;
         _second.data_                       . setZero();
         _second.data_cov_                   . setZero();
@@ -518,7 +518,7 @@ Motion ProcessorMotion::interpolate(const Motion& _ref, Motion& _second, TimeSta
 CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
 {
     // We need to search in previous keyframes for the capture containing a motion buffer with the queried time stamp
-    // Note: since the buffer goes from a FK through the past until the previous KF, we need to:
+    // Note: since the buffer goes from a KF in the past until the next KF, we need to:
     //  1. See that the KF contains a CaptureMotion
     //  2. See that the TS is smaller than the KF's TS
     //  3. See that the TS is bigger than the KF's first Motion in the CaptureMotion's buffer
@@ -533,7 +533,7 @@ CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp
         capture = frame->getCaptureOf(getSensorPtr());
         if (capture != nullptr)
         {
-            // We found a Capture belonging to this processor's Sensor ==> it is a CaptureMotion
+            // Rule 1 satisfied! We found a Capture belonging to this processor's Sensor ==> it is a CaptureMotion
             capture_motion = std::static_pointer_cast<CaptureMotion>(capture);
             if (_ts >= capture_motion->getBuffer().get().front().ts_)
                 // Found time stamp satisfying rule 3 above !! ==> break for loop
