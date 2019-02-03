@@ -1,12 +1,12 @@
 /*
- * three_D_tools.h
+ * SE3.h
  *
  *  Created on: Mar 15, 2018
  *      Author: jsola
  */
 
-#ifndef THREE_D_TOOLS_H_
-#define THREE_D_TOOLS_H_
+#ifndef SE3_H_
+#define SE3_H_
 
 
 #include "wolf.h"
@@ -232,8 +232,11 @@ Matrix<typename Derived::Scalar, 6, 1> log_SE3(const MatrixBase<Derived>& delta_
     Map<Matrix<typename Derived::Scalar, 3, 1> >         dp_ret ( & ret(0) );
     Map<Matrix<typename Derived::Scalar, 3, 1> >         do_ret ( & ret(3) );
 
-    dp_ret = dp_in;
-    do_ret = log_q(dq_in);
+    Matrix<typename Derived::Scalar, 3, 3> V_inv;
+
+    do_ret  = log_q(dq_in);
+    V_inv   = jac_SO3_left_inv(do_ret);
+    dp_ret  = V_inv * dp_in;
 
     return ret;
 }
@@ -245,12 +248,16 @@ Matrix<typename Derived::Scalar, 7, 1> exp_SE3(const MatrixBase<Derived>& d_in)
 
     Matrix<typename Derived::Scalar, 7, 1> ret;
 
+    Matrix<typename Derived::Scalar, 3, 3> V;
+
+    V = jac_SO3_left(d_in.template tail<3>());
+
     Map<const Matrix<typename Derived::Scalar, 3, 1> >   dp_in  ( & d_in(0) );
     Map<const Matrix<typename Derived::Scalar, 3, 1> >   do_in  ( & d_in(3) );
     Map<Matrix<typename Derived::Scalar, 3, 1> >         dp     ( &  ret(0) );
     Map<Quaternion<typename Derived::Scalar> >           dq     ( &  ret(3) );
 
-    dp = dp_in;
+    dp = V * dp_in;
     dq = exp_q(do_in);
 
     return ret;
@@ -379,22 +386,88 @@ inline Matrix<typename D1::Scalar, 6, 1> minus(const MatrixBase<D1>& d1,
 template<typename D1, typename D2, typename D3>
 inline void interpolate(const MatrixBase<D1>& d1,
                         const MatrixBase<D2>& d2,
-                        const typename D1::Scalar t,
-                        MatrixBase<D3>& sum)
+                        const typename D1::Scalar& t,
+                        MatrixBase<D3>& ret)
 {
-    Matrix<typename D1::Scalar, 6, 1> dd;
-    Matrix<typename D1::Scalar, 7, 1> ret;
+    Matrix<typename D1::Scalar, 7, 1> dd = between(d1, d2);
 
-    minus(d1, d2, dd);
-    plus(d1, dd * t, ret);
+    Matrix<typename D1::Scalar, 6, 1> tau = t * log_SE3(dd);
 
-    return ret;
+    ret = compose(d1, exp_SE3(tau));
 }
 
+template<typename D1, typename D2>
+inline void toSE3(const MatrixBase<D1>& pose,
+                        MatrixBase<D2>& SE3)
+{
+    MatrixSizeCheck<4,4>::check(SE3);
 
+    typedef typename D1::Scalar T;
+
+    SE3.template block<3,1>(0,3) = pose.template head<3>();
+    SE3.template block<3,3>(0,0) = q2R(pose.template tail<4>());
+    SE3.template block<1,3>(3,0).setZero();
+    SE3(3,3) = (T)1.0;
+}
+
+template<typename D1, typename D2>
+inline Matrix<typename D1::Scalar, 6, 6> Q_helper(const MatrixBase<D1>& v, const MatrixBase<D1>& w)
+{
+    typedef typename D1::Scalar T;
+
+    Matrix<T, 3, 3> vx      = skew(v);
+    Matrix<T, 3, 3> wx      = skew(w);
+    Matrix<T, 3, 3> wxvx    = wx*vx;
+    Matrix<T, 3, 3> vxwx    = wxvx.transpose();
+    Matrix<T, 3, 3> wxwx    = wx*wx;
+    Matrix<T, 3, 3> wxvxwx  = wx*vx*wx;
+
+    T th        = wx.norm();
+    T th_2      = th*th;
+    T th_3      = th_2*th;
+    T th_4      = th_2*th_2;
+    T th_5      = th_3*th_2;
+    T sin_th    = sin(th);
+    T cos_th    = cos(th);
+    T A         = (th-sin_th)/th_3;
+    T B         = (T(1.0) - th_2/T(2.0) - cos_th)/th_4;
+    T C         = (th - sin_th - th_3/T(6.0))/th_5;
+
+    Matrix<T, 3, 3> Q
+        = T(0.5)*vx
+        + A * (wxvx + vxwx + wxvxwx)
+        - B * (wxwx*vx + vxwx*wx - T(3.0)*wxvxwx)
+        - (B - T(3.0)*C) * wxvx*wxwx;
+        // - T(0.5) * (B - T(3.0)*C) * (wxvx*wxwx + wxwx*vxwx);
+
+    return Q;
+}
+
+template<typename D1>
+inline Matrix<typename D1::Scalar, 6, 6> jac_SE3_left(const MatrixBase<D1>& tangent)
+{
+    typedef typename D1::Scalar T;
+    Map<Matrix<T, 3, 1>> v(tangent.data() + 0); // linear
+    Map<Matrix<T, 3, 1>> w(tangent.data() + 3); // angular
+
+    Matrix<T, 3, 3> Jl(jac_SO3_left(w));
+    Matrix<T, 3, 3> Q = Q_helper(v,w);
+
+    Matrix<T, 6, 6> Jl_SE3;
+    Jl_SE3.topleft(3,3)     = Jl;
+    Jl_SE3.bottomright(3,3) = Jl;
+    Jl_SE3.topright(3,3)    = Q;
+    Jl_SE3.bottomleft(3,3)  .setZero();
+}
+
+template<typename D1>
+inline Matrix<typename D1::Scalar, 6, 6> jac_SE3_right(const MatrixBase<D1>& tangent)
+{
+    return jac_SE3_left(-tangent);
+}
 
 } // namespace three_d
 } // namespace wolf
 
 
-#endif /* THREE_D_TOOLS_H_ */
+#endif /* SE3_H_ */
