@@ -415,30 +415,42 @@ inline Matrix<typename D1::Scalar, 6, 6> Q_helper(const MatrixBase<D1>& v, const
 {
     typedef typename D1::Scalar T;
 
-    Matrix<T, 3, 3> vx      = skew(v);
-    Matrix<T, 3, 3> wx      = skew(w);
-    Matrix<T, 3, 3> wxvx    = wx*vx;
-    Matrix<T, 3, 3> vxwx    = wxvx.transpose();
-    Matrix<T, 3, 3> wxwx    = wx*wx;
-    Matrix<T, 3, 3> wxvxwx  = wx*vx*wx;
+    Matrix<T, 3, 3> V   = skew(v);
+    Matrix<T, 3, 3> W   = skew(w);
+    Matrix<T, 3, 3> VW  = V * W;
+    Matrix<T, 3, 3> WV  = VW.transpose();       // Note on this change wrt. Barfoot: it happens that V*W = (W*V).transpose() !!!
+    Matrix<T, 3, 3> WVW = WV * W;
+    Matrix<T, 3, 3> VWW = VW * W;
 
-    T th        = wx.norm();
-    T th_2      = th*th;
-    T th_3      = th_2*th;
-    T th_4      = th_2*th_2;
-    T th_5      = th_3*th_2;
-    T sin_th    = sin(th);
-    T cos_th    = cos(th);
-    T A         = (th-sin_th)/th_3;
-    T B         = (T(1.0) - th_2/T(2.0) - cos_th)/th_4;
-    T C         = (th - sin_th - th_3/T(6.0))/th_5;
+    T th_2      = w.squaredNorm();
 
-    Matrix<T, 3, 3> Q
-        = T(0.5)*vx
-        + A * (wxvx + vxwx + wxvxwx)
-        - B * (wxwx*vx + vxwx*wx - T(3.0)*wxvxwx)
-        - (B - T(3.0)*C) * wxvx*wxwx;
-        // - T(0.5) * (B - T(3.0)*C) * (wxvx*wxwx + wxwx*vxwx);
+    T A(T(0.5)), B, C, D;
+
+    // Small angle approximation
+    if (th_2 <= T(1e-8))
+    {
+        B =  Scalar(1./6.)  + Scalar(1./120.)  * th_2;
+        C = -Scalar(1./24.) + Scalar(1./720.)  * th_2;
+        D = -Scalar(1./60.);
+    }
+    else
+    {
+        T th        = sqrt(th_2);
+        T th_3      = th_2*th;
+        T th_4      = th_2*th_2;
+        T th_5      = th_3*th_2;
+        T sin_th    = sin(th);
+        T cos_th    = cos(th);
+        B           = (th-sin_th)/th_3;
+        C           = (T(1.0) - th_2/T(2.0) - cos_th)/th_4;
+        D           = (th - sin_th - th_3/T(6.0))/th_5;
+    }
+    Matrix<T, 3, 3> Q;
+    Q.noalias() =
+            + A * V
+            + B * (WV + VW + WVW)
+            - C * (VWW - VWW.transpose() - Scalar(3) * WVW)           // Note on this change wrt. Barfoot: it happens that V*W*W = -(W*W*V).transpose() !!!
+            - D * WVW * W;                                            // Note on this change wrt. Barfoot: it happens that W*V*W*W = W*W*V*W !!!
 
     return Q;
 }
@@ -454,10 +466,10 @@ inline Matrix<typename D1::Scalar, 6, 6> jac_SE3_left(const MatrixBase<D1>& tang
     Matrix<T, 3, 3> Q = Q_helper(v,w);
 
     Matrix<T, 6, 6> Jl_SE3;
-    Jl_SE3.topleft(3,3)     = Jl;
-    Jl_SE3.bottomright(3,3) = Jl;
-    Jl_SE3.topright(3,3)    = Q;
-    Jl_SE3.bottomleft(3,3)  .setZero();
+    Jl_SE3.topLeftCorner(3,3)     = Jl;
+    Jl_SE3.bottomRightCorner(3,3) = Jl;
+    Jl_SE3.topRightCorner(3,3)    = Q;
+    Jl_SE3.bottomLeftCorner(3,3)  .setZero();
 }
 
 template<typename D1>
