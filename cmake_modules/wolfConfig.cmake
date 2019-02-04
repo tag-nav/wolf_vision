@@ -140,7 +140,7 @@ if (NOT EXISTS ${wolf_INCLUDE_DIR}/wolf)
     "partially relocated outside of CMake after wolf was built.")
 # endif (NOT EXISTS ${wolf_INCLUDE_DIR}/wolf/wolf.h)
 endif (NOT EXISTS ${wolf_INCLUDE_DIR}/wolf)
-list(APPEND wolf_INCLUDE_DIRS ${wolf_INCLUDE_DIR})
+list(APPEND wolf_INCLUDE_DIRS ${wolf_INCLUDE_DIR}/wolf)
 
 # Set the version.
 set(wolf_VERSION 0.0.1)

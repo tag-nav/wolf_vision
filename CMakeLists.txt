@@ -594,13 +594,17 @@ ELSE(Ceres_FOUND)
 ENDIF(Ceres_FOUND)
 
 IF (laser_scan_utils_FOUND)
-    SET(HDRS ${HDRS}
-include/base/capture/capture_laser_2D.h
-include/base/sensor/sensor_laser_2D.h
-include/base/processor/processor_tracker_feature_corner.h
-include/base/processor/processor_tracker_landmark_corner.h
-include/base/processor/processor_tracker_landmark_polyline.h
+      SET(HDRS_CAPTURE ${HDRS_CAPTURE}
+        include/base/capture/capture_laser_2D.h
         )
+    SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
+      include/base/processor/processor_tracker_feature_corner.h
+      include/base/processor/processor_tracker_landmark_corner.h
+      include/base/processor/processor_tracker_landmark_polyline.h
+      )
+    SET(HDRS_SENSOR ${HDRS_SENSOR}
+      include/base/sensor/sensor_laser_2D.h
+      )
     SET(SRCS ${SRCS}
 src/sensor/sensor_laser_2D.cpp
 src/processor/processor_tracker_feature.cpp
@@ -613,10 +617,12 @@ src/processor/processor_tracker_landmark_dummy.cpp
 ENDIF(laser_scan_utils_FOUND)
 
 IF (raw_gps_utils_FOUND)
-    SET(HDRS ${HDRS}
-include/base/capture/capture_GPS.h
-include/base/processor/processor_GPS.h
-        )
+    SET(HDRS_CAPTURE ${HDRS_CAPTURE}
+      include/base/capture/capture_GPS.h
+      )
+    SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
+      include/base/processor/processor_GPS.h
+      )
     SET(SRCS ${SRCS}
 src/capture/capture_GPS.cpp
 src/processor/processor_GPS.cpp
@@ -625,10 +631,12 @@ ENDIF(raw_gps_utils_FOUND)
 
 # Vision
 IF (vision_utils_FOUND)
-    SET(HDRS ${HDRS}
-include/base/capture/capture_image.h
-include/base/feature/feature_point_image.h
-        )
+    SET(HDRS_CAPTURE ${HDRS_CAPTURE}
+      include/base/capture/capture_image.h
+    )
+  SET(HDRS_FEATURE ${HDRS_FEATURE}
+    include/base/feature/feature_point_image.h
+    )
     SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
 include/base/processor/processor_tracker_feature_trifocal.h
 include/base/processor/processor_params_image.h
