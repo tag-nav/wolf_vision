@@ -596,7 +596,7 @@ PackKeyFramePtr ProcessorMotion::computeProcessingStep()
             //            throw std::runtime_error("Pack's KF and origin's KF have matching time stamps (i.e. below time tolerances)");
             processing_step_ = RUNNING_WITH_PACK_ON_ORIGIN;
         }
-        else if (pack->key_frame->getTimeStamp() < origin_ptr_->getTimeStamp() - params_motion_->time_tolerance)
+        else if (pack->key_frame->getTimeStamp() < origin_ptr_->getTimeStamp())
             processing_step_ = RUNNING_WITH_PACK_BEFORE_ORIGIN;
 
         else
