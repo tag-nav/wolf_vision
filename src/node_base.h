@@ -73,7 +73,6 @@ class NodeBase
 
         NodeBase(const std::string& _category, const std::string& _type = "Undefined", const std::string& _name = "");
         virtual ~NodeBase() = default;
-        virtual void remove(){};
 
         unsigned int nodeId()  const;
         std::string getCategory() const;
