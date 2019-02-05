@@ -39,20 +39,12 @@ class ConstraintBlockAbsolute: public ConstraintAutodiff<ConstraintBlockAbsolute
 template<typename T>
 inline bool ConstraintBlockAbsolute::operator ()(const T* const _sb, T* _residuals) const
 {
-
-    // states
-    Eigen::Matrix<T, 3, 1>  sb(_sb);
-
-    // measurements
-    Eigen::Vector3s     measured_state(getMeasurement().data() + 0);
-
-    // error
-    Eigen::Matrix<T, 3, 1> er;
-    er       = measured_state.cast<T>() - sb;
+    // Maps
+    Eigen::Map<T, 3, 1> sb(_sb); // state
+    Eigen::Map<Eigen::Matrix<T, 3, 1>> res(_residuals); // residual
 
     // residual
-    Eigen::Map<Eigen::Matrix<T, 3, 1>> res(_residuals);
-    res               = getFeaturePtr()->getMeasurementSquareRootInformationUpper().cast<T>() * er;
+    res = getFeaturePtr()->getMeasurementSquareRootInformationUpper().cast<T>() * (getMeasurement().cast<T>() - sb);
 
     return true;
 }
