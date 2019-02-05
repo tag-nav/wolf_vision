@@ -51,6 +51,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         Eigen::VectorXs noise_std_; // std of sensor noise
         Eigen::MatrixXs noise_cov_; // cov matrix of noise
 
+        FeatureBaseList params_prior_list_; // Priors (value and covariance) of extrinsic & intrinsic parameters
+
     public:
         /** \brief Constructor with noise size
          *
