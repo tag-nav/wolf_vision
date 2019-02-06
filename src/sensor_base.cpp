@@ -1,5 +1,6 @@
 #include "sensor_base.h"
 #include "state_block.h"
+#include "state_quaternion.h"
 #include "constraint_block_absolute.h"
 #include "constraint_quaternion_absolute.h"
 
@@ -151,10 +152,21 @@ void SensorBase::addParameterPrior(const StateBlockPtr& _sb, const Eigen::Vector
     assert(_x.size() == _cov.rows() && _x.size() == _cov.cols() && "covariance and prior dimension should be the same");
     assert((_size == -1 && _start_idx == 0) || (_size+_start_idx <= _sb->getSize()));
     assert(_size == -1 || _size == _x.size());
+    assert(!(_size != -1 && _sb->hasLocalParametrization()) && "prior for a segment of the state only available withour local parameterization");
     assert(params_prior_map_.find(_sb) == params_prior_map_.end() && "this parameter has already a prior");
 
+    // set StateBlock state
+    if (_size == -1)
+        _sb->setState(_x);
+    else
+    {
+        auto new_x = _sb->getState();
+        new_x.segment(_start_idx,_size) = _x;
+        _sb->setState(new_x);
+    }
+
     // create feature
-    auto ftr_prior = std::make_shared<FeatureBase>(_x,_cov);
+    FeatureBasePtr ftr_prior = std::make_shared<FeatureBase>("ABSOLUTE",_x,_cov);
 
     // set feature problem
     ftr_prior->setProblem(getProblem());
