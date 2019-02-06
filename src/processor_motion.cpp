@@ -26,7 +26,7 @@ ProcessorMotion::ProcessorMotion(const std::string& _type,
         delta_cov_(_delta_cov_size, _delta_cov_size),
         delta_integrated_(_delta_size),
         delta_integrated_cov_(_delta_cov_size, _delta_cov_size),
-        calib_(_calib_size),
+        calib_preint_(_calib_size),
         jacobian_delta_preint_(delta_cov_size_, delta_cov_size_),
         jacobian_delta_(delta_cov_size_, delta_cov_size_),
         jacobian_calib_(delta_size_, calib_size_)
@@ -387,12 +387,12 @@ void ProcessorMotion::integrateOneStep()
     assert(dt_ >= 0 && "Time interval _dt is negative!");
 
     // get vector of parameters to calibrate
-    calib_ = getBuffer().getCalibrationPreint();
+    calib_preint_ = getBuffer().getCalibrationPreint();
 
     // get data and convert it to delta, and obtain also the delta covariance
     computeCurrentDelta(incoming_ptr_->getData(),
                         incoming_ptr_->getDataCovariance(),
-                        calib_,
+                        calib_preint_,
                         dt_,
                         delta_,
                         delta_cov_,

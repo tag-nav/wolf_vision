@@ -471,7 +471,7 @@ class ProcessorMotion : public ProcessorBase
         Eigen::MatrixXs delta_cov_;             ///< current delta covariance
         Eigen::VectorXs delta_integrated_;      ///< integrated delta
         Eigen::MatrixXs delta_integrated_cov_;  ///< integrated delta covariance
-        Eigen::VectorXs calib_;                 ///< calibration vector
+        Eigen::VectorXs calib_preint_;          ///< calibration vector used during pre-integration
         Eigen::MatrixXs jacobian_delta_preint_; ///< jacobian of delta composition w.r.t previous delta integrated
         Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
         Eigen::MatrixXs jacobian_calib_;        ///< jacobian of delta preintegration wrt calibration params
