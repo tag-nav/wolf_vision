@@ -71,7 +71,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p)
 
 TEST(ConstraintBlockAbs, ctr_block_abs_p_tail2)
 {
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION TAIL 2", pose10.tail<2>(), data_cov.bottomRightCorner<2,2>()));
+    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION TAIL 2", pose10.segment<2>(1), data_cov.bottomRightCorner<2,2>()));
     fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr(),1,2));
 
     // Unfix frame 0, perturb frm0
