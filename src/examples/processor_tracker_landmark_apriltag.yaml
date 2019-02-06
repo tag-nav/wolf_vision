@@ -12,15 +12,17 @@ detector parameters:
     ippe_min_ratio:     3.0  	# quite arbitrary, always > 1 (to deactive, set at 0 for example)
     ippe_max_rep_error: 2.0     # to deactivate, set at something big (100)
 
+tag widths:                    
+    0: 0.055
+    1: 0.055
+    2: 0.055
+    3: 0.055
+
 tag parameters:
     tag_family:           "tag36h11" 
     tag_black_border:     1
-    tag_width_default:    0.055   # enter -1 here if you want to provide a map of [ tagid : tag_width ], see lines just below
+    tag_width_default:    0.165   # used if tag width not specified
 
-tag widths:
-    #1 :               0.2
-    #2 :               0.1
-    # etc...
     
 noise:
     std_xy :          0.1 # m 
@@ -30,7 +32,7 @@ noise:
     
 vote:
     voting active:              true
-    min_time_vote:              0.2 # s
+    min_time_vote:              1 # s
     min_features_for_keyframe:  1
 
 

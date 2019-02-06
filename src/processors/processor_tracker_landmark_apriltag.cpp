@@ -69,26 +69,6 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
     detector_ = *apriltag_detector_create();
     apriltag_detector_add_family(&detector_, &tag_family_);
 
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-    WOLF_TRACE("\n\n\n\n", _params_tracker_landmark_apriltag->nthreads_, "\n\n\n\n");
-
-
     detector_.quad_decimate     = _params_tracker_landmark_apriltag->quad_decimate_;
     detector_.quad_sigma        = _params_tracker_landmark_apriltag->quad_sigma_;
     detector_.nthreads          = _params_tracker_landmark_apriltag->nthreads_;
@@ -229,7 +209,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         // add to detected features list
         detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, info, tag_id, *det, FeatureBase::UncertaintyType::UNCERTAINTY_IS_INFO));
 //        WOLF_TRACE("Meas Covariance tag ", tag_id, "\n", info.inverse());
-        WOLF_TRACE("---------------------\n");
+//        WOLF_TRACE("---------------------\n");
     }
 
     apriltag_detections_destroy(detections);
@@ -454,7 +434,7 @@ bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
     if (dt_incoming_origin > min_time_vote_){
         bool more_in_last = getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_;
         bool less_in_incoming = getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
-        return more_in_last;
+//        return more_in_last;  // Only used for fixed time kf creation
         return more_in_last && less_in_incoming;
 //        return getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_
 //        && getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
