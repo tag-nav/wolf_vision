@@ -145,12 +145,13 @@ void SensorBase::unfixIntrinsics()
     updateCalibSize();
 }
 
-void SensorBase::addParameterPrior(const StateBlockPtr& _sb, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx = 0, int _size = -1)
+void SensorBase::addParameterPrior(const StateBlockPtr& _sb, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
 {
     assert(std::find(state_block_vec_.begin(),state_block_vec_.end(),_sb) != state_block_vec_.end() && "adding prior to unknown state block");
     assert(_x.size() == _cov.rows() && _x.size() == _cov.cols() && "covariance and prior dimension should be the same");
     assert((_size == -1 && _start_idx == 0) || (_size+_start_idx <= _sb->getSize()));
     assert(_size == -1 || _size == _x.size());
+    assert(params_prior_map_.find(_sb) == params_prior_map_.end() && "this parameter has already a prior");
 
     // create feature
     auto ftr_prior = std::make_shared<FeatureBase>(_x,_cov);
@@ -163,6 +164,9 @@ void SensorBase::addParameterPrior(const StateBlockPtr& _sb, const Eigen::Vector
         ftr_prior->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(_sb));
     else
         ftr_prior->addConstraint(std::make_shared<ConstraintBlockAbsolute>(_sb, _start_idx, _size));
+
+    // store feature in params_prior_map_
+    params_prior_map_[_sb] = ftr_prior;
 }
 
 void SensorBase::registerNewStateBlocks()

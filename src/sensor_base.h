@@ -51,7 +51,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         Eigen::VectorXs noise_std_; // std of sensor noise
         Eigen::MatrixXs noise_cov_; // cov matrix of noise
 
-        FeatureBaseList params_prior_list_; // Priors (value and covariance) of extrinsic & intrinsic parameters
+        std::map<StateBlockPtr,FeatureBasePtr> params_prior_map_; // Priors (value and covariance) of extrinsic & intrinsic state blocks (multimap
 
     public:
         /** \brief Constructor with noise size
@@ -93,7 +93,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
                    const bool _intr_dyn = false);
 
         virtual ~SensorBase();
-        void remove();
 
         unsigned int id();
 
@@ -136,7 +135,21 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void unfixExtrinsics();
         void fixIntrinsics();
         void unfixIntrinsics();
-        void addParameterPrior(const StateBlockPtr& _sb, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx = 0, int _size = -1);
+        /** \brief Add an absolute constraint to a parameter
+         *
+         * Add an absolute constraint to a parameter
+         * \param _sb state block of the parameter to be constrained
+         * \param _x prior value
+         * \param _cov covariance
+         * \param _start_idx state segment starting index (not used in quaternions)
+         * \param _size state segment size (-1: whole state) (not used in quaternions)
+         *
+         **/
+        void addParameterPrior(const StateBlockPtr& _sb,
+                               const Eigen::VectorXs& _x,
+                               const Eigen::MatrixXs& _cov,
+                               unsigned int _start_idx = 0,
+                               int _size = -1);
 
         SizeEigen getCalibSize() const;
         Eigen::VectorXs getCalibration() const;
@@ -201,6 +214,7 @@ inline StateBlockPtr SensorBase::getStateBlockPtrStatic(unsigned int _i) const
 
 inline void SensorBase::setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
+    assert((params_prior_map_.find(state_block_vec_[_i]) == params_prior_map_.end() || _sb_ptr == nullptr) && "overwriting a state block that has an absolute constraint");
     state_block_vec_[_i] = _sb_ptr;
 }
 
