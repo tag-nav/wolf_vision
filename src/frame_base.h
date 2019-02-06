@@ -37,7 +37,6 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order: Position, Orientation, Velocity.
 
         static unsigned int frame_id_count_;
-        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
 
     protected:
         unsigned int frame_id_;
@@ -67,7 +66,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr, StateBlockPtr _v_ptr = nullptr);
 
         virtual ~FrameBase();
-        void remove();
+        virtual void remove();
 
 
 

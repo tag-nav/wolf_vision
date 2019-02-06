@@ -584,7 +584,7 @@ PackKeyFramePtr ProcessorMotion::computeProcessingStep()
         throw std::runtime_error("ProcessorMotion received data before being initialized.");
     }
 
-    PackKeyFramePtr pack = kf_pack_buffer_.selectPackBefore(last_ptr_, params_motion_->time_tolerance);
+    PackKeyFramePtr pack = kf_pack_buffer_.selectFirstPackBefore(last_ptr_, params_motion_->time_tolerance);
 
     if (pack)
     {
