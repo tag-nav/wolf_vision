@@ -21,8 +21,10 @@ WOLF_PTR_TYPEDEFS(ConstraintBlockAbsolute);
 class ConstraintBlockAbsolute : public ConstraintAnalytic
 {
     private:
+        SizeEigen sb_size_;              // the size of the state block
         SizeEigen sb_constrained_start_; // the index of the first state element that is constrained
         SizeEigen sb_constrained_size_;  // the size of the state segment that is constrained
+        Eigen::MatrixXs J_;              // Jacobian
 
     public:
 
@@ -35,10 +37,20 @@ class ConstraintBlockAbsolute : public ConstraintAnalytic
          */
         ConstraintBlockAbsolute(StateBlockPtr _sb_ptr, unsigned int _start_idx = 0, int _size = -1, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
             ConstraintAnalytic("BLOCK ABS", _apply_loss_function, _status, _sb_ptr),
+            sb_size_(_sb_ptr->getSize()),
             sb_constrained_start_(_start_idx),
-            sb_constrained_size_(_size == -1 ? _sb_ptr->getSize() : _size)
+            sb_constrained_size_(_size == -1 ? sb_size_ : _size)
         {
-            assert(sb_constrained_size_-sb_constrained_start_ == _sb_ptr->getSize());
+            assert(sb_constrained_size_+sb_constrained_start_ <= sb_size_);
+
+            // precompute Jacobian (Identity)
+            if (sb_constrained_start_ == 0)
+                J_ = Eigen::MatrixXs::Identity(sb_constrained_size_, sb_size_);
+            else
+            {
+                J_ = Eigen::MatrixXs::Zero(sb_constrained_size_,sb_size_);
+                J_.middleCols(sb_constrained_start_,sb_constrained_size_) = Eigen::MatrixXs::Identity(sb_constrained_size_, sb_constrained_size_);
+            }
         }
 
         virtual ~ConstraintBlockAbsolute() = default;
@@ -97,30 +109,19 @@ inline void ConstraintBlockAbsolute::evaluateJacobians(
     assert(_st_vector.size() == 1 && "Wrong number of state blocks!");
     assert(jacobians.size() == 1 && "Wrong number of jacobians!");
     assert(_compute_jacobian.size() == 1 && "Wrong number of _compute_jacobian booleans!");
+    assert(_st_vector.front().size() == sb_size_ && "Wrong StateBlock size");
     assert(_st_vector.front().size() >= getMeasurement().size() && "StateBlock size and measurement size should match");
 
-
-    // jacobian is identity -> returning sqrt information right (or upper)
+    // normalized jacobian
     if (_compute_jacobian.front())
-    {
-        // whole state constrained
-        if (sb_constrained_size_ == _st_vector.front().size())
-            jacobians.front() = getMeasurementSquareRootInformationUpper();
-        // segment of state constrained
-        else
-        {
-            jacobians.front() = Eigen::MatrixXs::Zero(sb_constrained_size_,_st_vector.front().size());
-            jacobians.front().middleCols(sb_constrained_start_,sb_constrained_size_) = getMeasurementSquareRootInformationUpper();
-        }
-    }
+        jacobians.front() = getMeasurementSquareRootInformationUpper() * J_;
 }
 
 inline void ConstraintBlockAbsolute::evaluatePureJacobians(std::vector<Eigen::MatrixXs>& jacobians) const
 {
     assert(jacobians.size() == 1 && "Wrong number of jacobians!");
 
-    // jacobian is identity
-    jacobians.front() = Eigen::MatrixXs::Identity(getMeasurement().size(), getMeasurement().size());
+    jacobians.front() = J_;
 }
 
 inline unsigned int ConstraintBlockAbsolute::getSize() const
