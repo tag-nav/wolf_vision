@@ -248,7 +248,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         getProblem()->keyFrameCallback(key_frame_ptr, shared_from_this(), params_motion_->time_tolerance);
     }
 
-    resetDerived(); // TODO see where to put this
+    resetDerived();
 
     // clear incoming just in case
     incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
@@ -274,7 +274,7 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
         CaptureBasePtr cap_orig   = capture_motion->getOriginFramePtr()->getCaptureOf(getSensorPtr());
         VectorXs calib            = cap_orig->getCalibration();
 
-        // Get delta and correct it with new bias
+        // Get delta and correct it with new calibration params
         VectorXs calib_preint     = capture_motion->getBuffer().getCalibrationPreint();
         Motion   motion           = capture_motion->getBuffer().getMotion(_ts);
         
@@ -295,35 +295,6 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
     }
     return true;
 }
-
-//CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
-//{
-//    //std::cout << "ProcessorMotion::findCaptureContainingTimeStamp: ts = " << _ts.getSeconds() << "." << _ts.getNanoSeconds() << std::endl;
-//    CaptureMotionPtr capture_ptr = last_ptr_;
-//    while (capture_ptr != nullptr)
-//    {
-//        // capture containing motion previous than the ts found:
-//        if (capture_ptr->getBuffer().get().front().ts_ < _ts)
-//            return capture_ptr;
-//        else
-//        {
-//            // go to the previous motion capture
-//            if (capture_ptr == last_ptr_)
-//                capture_ptr = origin_ptr_;
-//            else if (capture_ptr->getOriginFramePtr() == nullptr)
-//                return nullptr;
-//            else
-//            {
-//                CaptureBasePtr capture_base_ptr = capture_ptr->getOriginFramePtr()->getCaptureOf(getSensorPtr());
-//                if (capture_base_ptr == nullptr)
-//                    return nullptr;
-//                else
-//                    capture_ptr = std::static_pointer_cast<CaptureMotion>(capture_base_ptr);
-//            }
-//        }
-//    }
-//    return capture_ptr;
-//}
 
 FrameBasePtr ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
