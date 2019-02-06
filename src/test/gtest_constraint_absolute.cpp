@@ -79,7 +79,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p_tail2)
     std::string brief_report = ceres_mgr.solve(wolf::SolverManager::ReportVerbosity::BRIEF);
 
     //only orientation is constrained
-    ASSERT_MATRIX_APPROX(frm0->getPPtr()->getState().tail<2>(), pose10.tail<2>(), 1e-6);
+    ASSERT_MATRIX_APPROX(frm0->getPPtr()->getState().tail<2>(), pose10.segment<2>(1), 1e-6);
 }
 
 TEST(ConstraintBlockAbs, ctr_block_abs_v)
