@@ -136,6 +136,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void unfixExtrinsics();
         void fixIntrinsics();
         void unfixIntrinsics();
+        void addFeaturePrior();
 
         SizeEigen getCalibSize() const;
         Eigen::VectorXs getCalibration() const;
