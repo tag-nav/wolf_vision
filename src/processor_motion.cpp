@@ -408,11 +408,14 @@ void ProcessorMotion::integrateOneStep()
 
     // integrate Jacobian wrt calib
     if ( hasCalibration() )
-        jacobian_calib_ = jacobian_delta_preint_ * getBuffer().get().back().jacobian_calib_ + jacobian_delta_ * jacobian_delta_calib_;
+        jacobian_calib_.noalias()
+            = jacobian_delta_preint_ * getBuffer().get().back().jacobian_calib_
+            + jacobian_delta_ * jacobian_delta_calib_;
 
     // Integrate covariance
-    delta_integrated_cov_ = jacobian_delta_preint_ * getBuffer().get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
-                          + jacobian_delta_        * delta_cov_                                 * jacobian_delta_.transpose();
+    delta_integrated_cov_.noalias()
+            = jacobian_delta_preint_ * getBuffer().get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
+            + jacobian_delta_        * delta_cov_                                 * jacobian_delta_.transpose();
 
     // push all into buffer
     getBuffer().get().emplace_back(incoming_ptr_->getTimeStamp(),
