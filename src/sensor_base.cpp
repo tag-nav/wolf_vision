@@ -20,7 +20,6 @@ SensorBase::SensorBase(const std::string& _type,
         hardware_ptr_(),
         state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
         calib_size_(0),
-        is_removing_(false),
         sensor_id_(++sensor_id_count_), // simple ID factory
         extrinsic_dynamic_(_extr_dyn),
         intrinsic_dynamic_(_intr_dyn),
@@ -47,7 +46,6 @@ SensorBase::SensorBase(const std::string& _type,
         hardware_ptr_(),
         state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
         calib_size_(0),
-        is_removing_(false),
         sensor_id_(++sensor_id_count_), // simple ID factory
         extrinsic_dynamic_(_extr_dyn),
         intrinsic_dynamic_(_intr_dyn),

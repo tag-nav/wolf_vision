@@ -11,8 +11,7 @@ ProcessorBase::ProcessorBase(const std::string& _type, ProcessorParamsBasePtr _p
         NodeBase("PROCESSOR", _type, _params->name),
         processor_id_(++processor_id_count_),
         params_(_params),
-        sensor_ptr_(),
-        is_removing_(false)
+        sensor_ptr_()
 {
 //    WOLF_DEBUG("constructed    +p" , id());
 }
@@ -98,6 +97,12 @@ PackKeyFramePtr PackKeyFrameBuffer::selectPack(const TimeStamp& _time_stamp, con
 
     PackKeyFrameBuffer::Iterator post = container_.upper_bound(_time_stamp);
 
+    // remove packs corresponding to removed KFs (keeping the next iterator in post)
+    while (post != container_.end() && post->second->key_frame->isRemoving())
+        post = container_.erase(post);
+    while (post != container_.begin() && std::prev(post)->second->key_frame->isRemoving())
+        container_.erase(std::prev(post));
+
     bool prev_exists = (post != container_.begin());
     bool post_exists = (post != container_.end());
 
@@ -133,33 +138,33 @@ PackKeyFramePtr PackKeyFrameBuffer::selectPack(const CaptureBasePtr _capture, co
     return selectPack(_capture->getTimeStamp(), _time_tolerance);
 }
 
-PackKeyFramePtr PackKeyFrameBuffer::selectPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance)
+PackKeyFramePtr PackKeyFrameBuffer::selectFirstPackBefore(const TimeStamp& _time_stamp, const Scalar& _time_tolerance)
 {
+    // remove packs corresponding to removed KFs
+    while (!container_.empty() && container_.begin()->second->key_frame->isRemoving())
+        container_.erase(container_.begin());
+
+    // There is no pack
     if (container_.empty())
-        return nullptr;
+         return nullptr;
 
-    PackKeyFrameBuffer::Iterator post = container_.upper_bound(_time_stamp);
+    // Checking on begin() since packs are ordered in time
+    // Return first pack if is older than time stamp
+    if (container_.begin()->first < _time_stamp)
+         return container_.begin()->second;
 
-    bool prev_exists = (post != container_.begin());
-
-    if (prev_exists)
+    // Return first pack if despite being newer, it is within the time tolerance
+    if (checkTimeTolerance(container_.begin()->first, container_.begin()->second->time_tolerance, _time_stamp, _time_tolerance))
         return container_.begin()->second;
 
-    else
-    {
-        bool post_exists = (post != container_.end());
-        bool post_ok     = post_exists && checkTimeTolerance(post->first, post->second->time_tolerance, _time_stamp, _time_tolerance);
-
-        if (post_ok)
-            return post->second;
-    }
-
+    // otherwise return nullptr (no pack before the provided ts or within the tolerance was found)
     return nullptr;
+
 }
 
-PackKeyFramePtr PackKeyFrameBuffer::selectPackBefore(const CaptureBasePtr _capture, const Scalar& _time_tolerance)
+PackKeyFramePtr PackKeyFrameBuffer::selectFirstPackBefore(const CaptureBasePtr _capture, const Scalar& _time_tolerance)
 {
-    return selectPackBefore(_capture->getTimeStamp(), _time_tolerance);
+    return selectFirstPackBefore(_capture->getTimeStamp(), _time_tolerance);
 }
 
 void PackKeyFrameBuffer::print(void)

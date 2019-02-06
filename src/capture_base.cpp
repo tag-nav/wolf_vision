@@ -18,7 +18,6 @@ CaptureBase::CaptureBase(const std::string& _type,
     sensor_ptr_(_sensor_ptr),
     state_block_vec_(3),
     calib_size_(0),
-    is_removing_(false),
     capture_id_(++capture_id_count_),
     time_stamp_(_ts)
 {

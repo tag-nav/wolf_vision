@@ -34,10 +34,10 @@
  *   - between: Db = D2 (-) D1, so that D2 = D1 (+) Db
  *   - composeOverState: x2 = x1 (+) D
  *   - betweenStates: D = x2 (-) x1, so that x2 = x1 (+) D
- *   - lift: got from Delta manifold to tangent space (equivalent to log() in rotations)
- *   - retract: go from tangent space to delta manifold (equivalent to exp() in rotations)
- *   - plus: D2 = D1 (+) retract(d)
- *   - diff: d = lift( D2 (-) D1 )
+ *   - log: got from Delta manifold to tangent space (equivalent to log() in rotations)
+ *   - exp_IMU: go from tangent space to delta manifold (equivalent to exp() in rotations)
+ *   - plus: D2 = D1 (+) exp_IMU(d)
+ *   - diff: d = log_IMU( D2 (-) D1 )
  *   - body2delta: construct a delta from body magnitudes of linAcc and angVel
  */
 
@@ -345,7 +345,7 @@ inline Matrix<typename D1::Scalar, 10, 1> betweenStates(const MatrixBase<D1>& x1
 }
 
 template<typename Derived>
-Matrix<typename Derived::Scalar, 9, 1> lift(const MatrixBase<Derived>& delta_in)
+Matrix<typename Derived::Scalar, 9, 1> log_IMU(const MatrixBase<Derived>& delta_in)
 {
     MatrixSizeCheck<10, 1>::check(delta_in);
 
@@ -366,7 +366,7 @@ Matrix<typename Derived::Scalar, 9, 1> lift(const MatrixBase<Derived>& delta_in)
 }
 
 template<typename Derived>
-Matrix<typename Derived::Scalar, 10, 1> retract(const MatrixBase<Derived>& d_in)
+Matrix<typename Derived::Scalar, 10, 1> exp_IMU(const MatrixBase<Derived>& d_in)
 {
     MatrixSizeCheck<9, 1>::check(d_in);
 

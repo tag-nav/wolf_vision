@@ -67,6 +67,8 @@ class NodeBase
         std::string node_type_;  ///< Text label identifying the type or subcategory of node ("Pin Hole", "Point 2D", etc)
         std::string node_name_;  ///< Text label identifying each specific object ("left camera", "LIDAR 1", "PointGrey", "Andrew", etc)
 
+        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
+
     public: 
 
         NodeBase(const std::string& _category, const std::string& _type = "Undefined", const std::string& _name = "");
@@ -76,6 +78,7 @@ class NodeBase
         std::string getCategory() const;
         std::string getType()  const;
         std::string getName()  const;
+        bool isRemoving() const;
 
         void setType(const std::string& _type);
         void setName(const std::string& _name);
@@ -95,7 +98,8 @@ inline NodeBase::NodeBase(const std::string& _category, const std::string& _type
         node_id_(++node_id_count_),
         node_category_(_category),
         node_type_(_type),
-        node_name_(_name)
+        node_name_(_name),
+        is_removing_(false)
 {
     //
 }
@@ -118,6 +122,11 @@ inline std::string NodeBase::getType() const
 inline std::string NodeBase::getName() const
 {
     return node_name_;
+}
+
+inline bool NodeBase::isRemoving() const
+{
+    return is_removing_;
 }
 
 inline void NodeBase::setType(const std::string& _type)
