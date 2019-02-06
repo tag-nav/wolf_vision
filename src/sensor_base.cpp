@@ -153,7 +153,6 @@ void SensorBase::addParameterPrior(const StateBlockPtr& _sb, const Eigen::Vector
     assert((_size == -1 && _start_idx == 0) || (_size+_start_idx <= _sb->getSize()));
     assert(_size == -1 || _size == _x.size());
     assert(!(_size != -1 && _sb->hasLocalParametrization()) && "prior for a segment of the state only available withour local parameterization");
-    assert(params_prior_map_.find(_sb) == params_prior_map_.end() && "this parameter has already a prior");
 
     // set StateBlock state
     if (_size == -1)
@@ -164,6 +163,10 @@ void SensorBase::addParameterPrior(const StateBlockPtr& _sb, const Eigen::Vector
         new_x.segment(_start_idx,_size) = _x;
         _sb->setState(new_x);
     }
+
+    // remove previous prior (if any)
+    if (params_prior_map_.find(_sb) == params_prior_map_.end())
+        params_prior_map_[_sb]->remove();
 
     // create feature
     FeatureBasePtr ftr_prior = std::make_shared<FeatureBase>("ABSOLUTE",_x,_cov);
