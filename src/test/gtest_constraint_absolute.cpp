@@ -49,20 +49,13 @@ CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("IMU ABS"
  * Both features and constraints are created in the TEST(). Hence, tests will not interfere each others.
  */
 
-TEST(ConstraintBlockAbs, ctr_block_abs_p_check)
-{
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
-    ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
-        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr()))
-        );
-    ASSERT_TRUE(problem->check(0));
-}
-
-TEST(ConstraintBlockAbs, ctr_block_abs_p_solve)
+TEST(ConstraintBlockAbs, ctr_block_abs_p)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
     fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr()));
-    
+
+    ASSERT_TRUE(problem->check(0));
+
     // Unfix frame 0, perturb frm0
     frm0->unfix();
     frm0->setState(x0);
@@ -76,7 +69,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p_solve)
     ASSERT_MATRIX_APPROX(frm0->getState().head<3>(), pose10.head<3>(), 1e-6);
 }
 
-TEST(ConstraintBlockAbs, ctr_block_abs_p_tail2_solve)
+TEST(ConstraintBlockAbs, ctr_block_abs_p_tail2)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION TAIL 2", pose10.tail<2>(), data_cov.bottomRightCorner<2,2>()));
     fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr(),1,2));
@@ -94,18 +87,12 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p_tail2_solve)
     ASSERT_MATRIX_APPROX(frm0->getState().tail<2>(), pose10.tail<2>(), 1e-6);
 }
 
-TEST(ConstraintBlockAbs, ctr_block_abs_v_check)
+TEST(ConstraintBlockAbs, ctr_block_abs_v)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("VELOCITY", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
     fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr()));
 
     ASSERT_TRUE(problem->check(0));
-}
-
-TEST(ConstraintBlockAbs, ctr_block_abs_v_solve)
-{
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("VELOCITY", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
-    fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr()));
     
     // Unfix frame 0, perturb frm0
     frm0->unfix();
@@ -120,18 +107,12 @@ TEST(ConstraintBlockAbs, ctr_block_abs_v_solve)
     ASSERT_MATRIX_APPROX(frm0->getState().tail<3>(), pose10.tail<3>(), 1e-6);
 }
 
-TEST(ConstraintQuatAbs, ctr_block_abs_o_check)
+TEST(ConstraintQuatAbs, ctr_block_abs_o)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("QUATERNION", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
     fea0->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(fea0->getFramePtr()->getOPtr()));
 
     ASSERT_TRUE(problem->check(0));
-}
-
-TEST(ConstraintQuatAbs, ctr_block_abs_o_solve)
-{
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("QUATERNION", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
-    fea0->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(fea0->getFramePtr()->getOPtr()));
     
     // Unfix frame 0, perturb frm0
     frm0->unfix();
