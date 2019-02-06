@@ -124,7 +124,7 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     Matrix3s delta_cov; delta_cov << .02, 0, 0, 0, .025, .02, 0, .02, .02;
 
     ProblemPtr          Pr = Problem::create("PO 2D");
-    CeresManager ceres_manager(Pr);
+    CeresManager        ceres_manager(Pr);
 
     // KF0 and absolute prior
     FrameBasePtr        F0 = Pr->setPrior(x0, P0,t0, dt/2);
