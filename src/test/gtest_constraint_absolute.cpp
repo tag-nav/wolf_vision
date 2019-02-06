@@ -66,7 +66,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p)
     WOLF_INFO("SOLVER REPORT:\n",brief_report);
 
     //only orientation is constrained
-    ASSERT_MATRIX_APPROX(frm0->getState().head<3>(), pose10.head<3>(), 1e-6);
+    ASSERT_MATRIX_APPROX(frm0->getPPtr()->getState(), pose10.head<3>(), 1e-6);
 }
 
 TEST(ConstraintBlockAbs, ctr_block_abs_p_tail2)
@@ -84,7 +84,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p_tail2)
     WOLF_INFO("SOLVER REPORT:\n",brief_report);
 
     //only orientation is constrained
-    ASSERT_MATRIX_APPROX(frm0->getState().tail<2>(), pose10.tail<2>(), 1e-6);
+    ASSERT_MATRIX_APPROX(frm0->getPPtr()->getState().tail<2>(), pose10.tail<2>(), 1e-6);
 }
 
 TEST(ConstraintBlockAbs, ctr_block_abs_v)
@@ -104,7 +104,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_v)
     WOLF_INFO("SOLVER REPORT:\n",brief_report);
 
     //only velocity is constrained
-    ASSERT_MATRIX_APPROX(frm0->getState().tail<3>(), pose10.tail<3>(), 1e-6);
+    ASSERT_MATRIX_APPROX(frm0->getVPtr()->getState(), pose10.tail<3>(), 1e-6);
 }
 
 TEST(ConstraintQuatAbs, ctr_block_abs_o)
@@ -124,7 +124,7 @@ TEST(ConstraintQuatAbs, ctr_block_abs_o)
     WOLF_INFO("SOLVER REPORT:\n",brief_report);
 
     //only velocity is constrained
-    ASSERT_MATRIX_APPROX(frm0->getState().segment<4>(3), pose10.segment<4>(3), 1e-6);
+    ASSERT_MATRIX_APPROX(frm0->getOPtr()->getState(), pose10.segment<4>(3), 1e-6);
 }
 
 int main(int argc, char **argv)
