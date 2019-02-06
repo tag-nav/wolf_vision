@@ -27,8 +27,7 @@ Vector10s pose9toPose10(Vector9s _pose9)
 // Input pose9 and covariance
 Vector9s pose(Vector9s::Random());
 Vector10s pose10 = pose9toPose10(pose);
-Vector9s data_var((Vector9s() << 0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2).finished());
-Eigen::Matrix<wolf::Scalar, 9, 9> data_cov = 0.01*Eigen::Matrix<Scalar,9,9>::Identity();//data_var.asDiagonal();
+Eigen::Matrix<wolf::Scalar, 9, 9> data_cov = 0.2 * Eigen::Matrix<Scalar,9,9>::Identity();
 
 // perturbated priors
 Vector10s x0 = pose9toPose10(pose + Vector9s::Random()*0.25);
@@ -63,8 +62,6 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p)
     // solve for frm0
     std::string brief_report = ceres_mgr.solve(wolf::SolverManager::ReportVerbosity::BRIEF);
 
-    WOLF_INFO("SOLVER REPORT:\n",brief_report);
-
     //only orientation is constrained
     ASSERT_MATRIX_APPROX(frm0->getPPtr()->getState(), pose10.head<3>(), 1e-6);
 }
@@ -80,8 +77,6 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p_tail2)
 
     // solve for frm0
     std::string brief_report = ceres_mgr.solve(wolf::SolverManager::ReportVerbosity::BRIEF);
-
-    WOLF_INFO("SOLVER REPORT:\n",brief_report);
 
     //only orientation is constrained
     ASSERT_MATRIX_APPROX(frm0->getPPtr()->getState().tail<2>(), pose10.tail<2>(), 1e-6);
@@ -101,8 +96,6 @@ TEST(ConstraintBlockAbs, ctr_block_abs_v)
     // solve for frm0
     std::string brief_report = ceres_mgr.solve(wolf::SolverManager::ReportVerbosity::BRIEF);
 
-    WOLF_INFO("SOLVER REPORT:\n",brief_report);
-
     //only velocity is constrained
     ASSERT_MATRIX_APPROX(frm0->getVPtr()->getState(), pose10.tail<3>(), 1e-6);
 }
@@ -120,8 +113,6 @@ TEST(ConstraintQuatAbs, ctr_block_abs_o)
 
     // solve for frm0
     std::string brief_report = ceres_mgr.solve(wolf::SolverManager::ReportVerbosity::BRIEF);
-
-    WOLF_INFO("SOLVER REPORT:\n",brief_report);
 
     //only velocity is constrained
     ASSERT_MATRIX_APPROX(frm0->getOPtr()->getState(), pose10.segment<4>(3), 1e-6);
