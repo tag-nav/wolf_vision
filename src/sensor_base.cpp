@@ -67,30 +67,6 @@ SensorBase::~SensorBase()
     removeStateBlocks();
 }
 
-void SensorBase::remove()
-{
-    if (!is_removing_)
-    {
-        is_removing_ = true;
-        SensorBasePtr this_S = shared_from_this(); // protect it while removing links
-
-        // Remove State Blocks
-        removeStateBlocks();
-
-        // remove from upstream
-        auto H = hardware_ptr_.lock();
-        if (H)
-            H->getSensorList().remove(this_S);
-
-        // remove downstream processors
-        while (!processor_list_.empty())
-        {
-            processor_list_.front()->remove();
-        }
-    }
-
-}
-
 void SensorBase::removeStateBlocks()
 {
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
