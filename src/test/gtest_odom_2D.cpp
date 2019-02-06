@@ -16,6 +16,7 @@
 #include "../state_block.h"
 #include "../wolf.h"
 #include "../ceres_wrapper/ceres_manager.h"
+#include "../capture_pose.h"
 
 // STL includes
 #include <map>
@@ -26,7 +27,6 @@
 // General includes
 #include <iostream>
 #include <iomanip>      // std::setprecision
-#include "../capture_pose.h"
 
 using namespace wolf;
 using namespace Eigen;
