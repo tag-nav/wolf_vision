@@ -33,11 +33,11 @@ Eigen::Matrix<wolf::Scalar, 9, 9> data_cov = 0.2 * Eigen::Matrix<Scalar,9,9>::Id
 Vector10s x0 = pose9toPose10(pose + Vector9s::Random()*0.25);
 
 // Problem and solver
-ProblemPtr problem = Problem::create("POV 3D");
-CeresManager ceres_mgr(problem);
+ProblemPtr problem_ptr = Problem::create("POV 3D");
+CeresManager ceres_mgr(problem_ptr);
 
 // Two frames
-FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeStamp(0));
+FrameBasePtr frm0 = problem_ptr->emplaceFrame(KEY_FRAME, problem_ptr->zeroState(), TimeStamp(0));
 
 // Capture, feature and constraint
 CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("IMU ABS", 0, nullptr, pose10, 10, 9, nullptr));
@@ -53,7 +53,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p)
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
     fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr()));
 
-    ASSERT_TRUE(problem->check(0));
+    ASSERT_TRUE(problem_ptr->check(0));
 
     // Unfix frame 0, perturb frm0
     frm0->unfix();
@@ -87,7 +87,7 @@ TEST(ConstraintBlockAbs, ctr_block_abs_v)
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("VELOCITY", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
     fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr()));
 
-    ASSERT_TRUE(problem->check(0));
+    ASSERT_TRUE(problem_ptr->check(0));
     
     // Unfix frame 0, perturb frm0
     frm0->unfix();
@@ -105,7 +105,7 @@ TEST(ConstraintQuatAbs, ctr_block_abs_o)
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("QUATERNION", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
     fea0->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(fea0->getFramePtr()->getOPtr()));
 
-    ASSERT_TRUE(problem->check(0));
+    ASSERT_TRUE(problem_ptr->check(0));
     
     // Unfix frame 0, perturb frm0
     frm0->unfix();
