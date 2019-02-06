@@ -162,6 +162,10 @@ target_link_libraries(gtest_IMU ${PROJECT_NAME})
 wolf_add_gtest(gtest_make_posdef gtest_make_posdef.cpp)
 target_link_libraries(gtest_make_posdef ${PROJECT_NAME})
 
+# Parameter prior test
+wolf_add_gtest(gtest_param_prior gtest_param_prior.cpp)
+target_link_libraries(gtest_param_prior ${PROJECT_NAME})
+
 # Pinhole test
 wolf_add_gtest(gtest_pinhole gtest_pinhole.cpp)
 target_link_libraries(gtest_pinhole ${PROJECT_NAME})
