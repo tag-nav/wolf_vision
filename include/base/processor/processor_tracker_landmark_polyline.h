@@ -129,11 +129,11 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
         void resetDerived();
 
         /** \brief Find provided landmarks in the incoming capture
-         * \param _landmark_list_in input list of landmarks to be found in incoming
-         * \param _feature_list_out returned list of incoming features corresponding to a landmark of _landmark_list_in
+         * \param _landmarks_in input list of landmarks to be found in incoming
+         * \param _features_incoming_out returned list of incoming features corresponding to a landmark of _landmarks_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          */
-        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
+        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmarks_in, FeatureBaseList& _features_incoming_out,
                                            LandmarkMatchMap& _feature_landmark_correspondences);
 
         /** \brief Vote for KeyFrame generation
@@ -155,7 +155,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out);
 
         /** \brief Creates a landmark for each of new_features_last_
          **/
@@ -210,11 +210,11 @@ inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(Proces
 {
 }
 
-inline unsigned int ProcessorTrackerLandmarkPolyline::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
+inline unsigned int ProcessorTrackerLandmarkPolyline::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out)
 {
     // already computed since each scan is computed in preprocess()
-    _feature_list_out = std::move(polylines_last_);
-    return _feature_list_out.size();
+    _features_incoming_out = std::move(polylines_last_);
+    return _features_incoming_out.size();
 }
 
 inline void ProcessorTrackerLandmarkPolyline::advanceDerived()

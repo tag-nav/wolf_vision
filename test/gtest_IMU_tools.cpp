@@ -128,7 +128,7 @@ TEST(IMU_tools, lift_retract)
     VectorXs d_min(9); d_min << 0, 1, 2, .3, .4, .5, 6, 7, 8; // use angles in the ball theta < pi
 
     // transform to delta
-    VectorXs delta = retract(d_min);
+    VectorXs delta = exp_IMU(d_min);
 
     // expected delta
     Vector3s dp = d_min.head(3);
@@ -138,11 +138,11 @@ TEST(IMU_tools, lift_retract)
     ASSERT_MATRIX_APPROX(delta, delta_true, 1e-10);
 
     // transform to a new tangent -- should be the original tangent
-    VectorXs d_from_delta = lift(delta);
+    VectorXs d_from_delta = log_IMU(delta);
     ASSERT_MATRIX_APPROX(d_from_delta, d_min, 1e-10);
 
     // transform to a new delta -- should be the previous delta
-    VectorXs delta_from_d = retract(d_from_delta);
+    VectorXs delta_from_d = exp_IMU(d_from_delta);
     ASSERT_MATRIX_APPROX(delta_from_d, delta, 1e-10);
 }
 

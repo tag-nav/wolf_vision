@@ -148,9 +148,20 @@ void ProcessorTrackerFeature::establishConstraints()
         FeatureBasePtr feature_in_origin = pair_trkid_pair.second.first;
         FeatureBasePtr feature_in_last   = pair_trkid_pair.second.second;
 
-        auto constraint  = createConstraint(feature_in_last, feature_in_origin);
-        feature_in_last  ->addConstraint(constraint);
-        feature_in_origin->addConstrainedBy(constraint);
+        auto ctr_ptr  = createConstraint(feature_in_last, feature_in_origin);
+        feature_in_last  ->addConstraint(ctr_ptr);
+        feature_in_origin->addConstrainedBy(ctr_ptr);
+
+        if (ctr_ptr != nullptr) // constraint links
+        {
+            FrameBasePtr frm = ctr_ptr->getFrameOtherPtr();
+            if (frm)
+                frm->addConstrainedBy(ctr_ptr);
+            CaptureBasePtr cap = ctr_ptr->getCaptureOtherPtr();
+            if (cap)
+                cap->addConstrainedBy(ctr_ptr);
+        }
+
 
         WOLF_DEBUG( "Constraint: track: " , feature_in_last->trackId(),
                     " origin: "           , feature_in_origin->id() ,

@@ -35,25 +35,26 @@ Problem::Problem(const std::string& _frame_structure) :
         trajectory_ptr_(std::make_shared<TrajectoryBase>(_frame_structure)),
         map_ptr_(std::make_shared<MapBase>()),
         processor_motion_ptr_(),
-        state_size_(0),
-        state_cov_size_(0),
         prior_is_set_(false)
 {
     if (_frame_structure == "PO 2D")
     {
         state_size_ = 3;
         state_cov_size_ = 3;
+        dim_ = 2;
     }
 
     else if (_frame_structure == "PO 3D")
     {
         state_size_ = 7;
         state_cov_size_ = 6;
+        dim_ = 3;
     }
     else if (_frame_structure == "POV 3D")
     {
         state_size_ = 10;
         state_cov_size_ = 9;
+        dim_ = 3;
     }
     else std::runtime_error(
             "Problem::Problem(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
@@ -340,6 +341,11 @@ void Problem::getFrameStructureSize(SizeEigen& _x_size, SizeEigen& _cov_size) co
 {
     _x_size   = state_size_;
     _cov_size = state_cov_size_;
+}
+
+SizeEigen Problem::getDim() const
+{
+    return dim_;
 }
 
 Eigen::VectorXs Problem::zeroState()

@@ -28,13 +28,17 @@ class ProcessorMotion_test : public ProcessorOdom2D, public testing::Test{
         Vector2s            data;
         Matrix2s            data_cov;
 
-        ProcessorMotion_test() : ProcessorOdom2D(std::make_shared<ProcessorParamsOdom2D>()) { }
+        ProcessorMotion_test() :
+            ProcessorOdom2D(std::make_shared<ProcessorParamsOdom2D>()),
+            dt(0)
+        { }
 
         virtual void SetUp()
         {
-            dt                          = 1.0;
+            dt                      = 1.0;
             problem = Problem::create("PO 2D");
             ProcessorParamsOdom2DPtr params(std::make_shared<ProcessorParamsOdom2D>());
+            params->time_tolerance  = 0.25;
             params->dist_traveled   = 100;
             params->angle_turned    = 6.28;
             params->max_time_span   = 2.5*dt; // force KF at every third process()
@@ -50,18 +54,6 @@ class ProcessorMotion_test : public ProcessorOdom2D, public testing::Test{
         }
 
         virtual void TearDown(){}
-
-        virtual Motion interpolate(const Motion& _ref,
-                                   Motion& _second,
-                                   TimeStamp& _ts)
-        {
-            return ProcessorMotion::interpolate(_ref, _second, _ts);
-        }
-
-        virtual Motion motionZero(TimeStamp& t)
-        {
-            return ProcessorOdom2D::motionZero(t);
-        }
 
 };
 
@@ -90,7 +82,7 @@ TEST_F(ProcessorMotion_test, IntegrateCircle)
     data_cov.setIdentity();
     TimeStamp t(0.0);
 
-    for (int i = 0; i<10; i++) // one full turn
+    for (int i = 0; i<10; i++) // one full turn exactly
     {
         t += dt;
         capture->setTimeStamp(t);
@@ -105,13 +97,13 @@ TEST_F(ProcessorMotion_test, IntegrateCircle)
 
 TEST_F(ProcessorMotion_test, Interpolate)
 {
-    data << 1, 2*M_PI/10; // advance straight
+    data << 1, 2*M_PI/10; // advance in turn
     data_cov.setIdentity();
     TimeStamp t(0.0);
     std::vector<Motion> motions;
     motions.push_back(motionZero(t));
 
-    for (int i = 0; i<10; i++)
+    for (int i = 0; i<10; i++) // one full turn exactly
     {
         t += dt;
         capture->setTimeStamp(t);

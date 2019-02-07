@@ -28,7 +28,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O.
 
         static unsigned int landmark_id_count_;
-        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
 
     protected:
         unsigned int landmark_id_; ///< landmark unique id
@@ -47,7 +46,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
          **/
         LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr);
         virtual ~LandmarkBase();
-        void remove();
+        virtual void remove();
         virtual YAML::Node saveToYaml() const;
 
         // Properties

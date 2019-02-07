@@ -114,11 +114,11 @@ class ProcessorTrackerFeature : public ProcessorTracker
         virtual unsigned int processKnown();
 
         /** \brief Track provided features from \b last to \b incoming
-         * \param _feature_list_in input list of features in \b last to track
-         * \param _feature_list_out returned list of features found in \b incoming
+         * \param _features_last_in input list of features in \b last to track
+         * \param _features_incoming_out returned list of features found in \b incoming
          * \param _feature_correspondences returned map of correspondences: _feature_correspondences[feature_out_ptr] = feature_in_ptr
          */
-        virtual unsigned int trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out, FeatureMatchMap& _feature_correspondences) = 0;
+        virtual unsigned int trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out, FeatureMatchMap& _feature_correspondences) = 0;
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
          * \param _origin_feature input feature in origin capture tracked
@@ -153,7 +153,7 @@ class ProcessorTrackerFeature : public ProcessorTracker
          *
          * The function sets the member new_features_last_, the list of newly detected features.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out) = 0;
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_incoming_out) = 0;
 
         /** \brief Create a new constraint and link it to the wolf tree
          * \param _feature_ptr pointer to the parent Feature

@@ -38,7 +38,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         SizeEigen calib_size_;
 
         static unsigned int sensor_id_count_; ///< Object counter (acts as simple ID factory)
-        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
 
     protected:
         unsigned int sensor_id_;   // sensor ID
@@ -90,7 +89,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
                    const bool _intr_dyn = false);
 
         virtual ~SensorBase();
-        void remove();
+        virtual void remove();
 
         unsigned int id();
 

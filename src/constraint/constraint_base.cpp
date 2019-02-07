@@ -11,7 +11,6 @@ ConstraintBase::ConstraintBase(const std::string&  _tp,
                                ConstraintStatus _status) :
     NodeBase("CONSTRAINT", _tp),
     feature_ptr_(), // nullptr
-    is_removing_(false),
     constraint_id_(++constraint_id_count_),
     status_(_status),
     apply_loss_function_(_apply_loss_function),
@@ -32,7 +31,6 @@ ConstraintBase::ConstraintBase(const std::string&  _tp,
                                bool _apply_loss_function, ConstraintStatus _status) :
     NodeBase("CONSTRAINT", _tp),
     feature_ptr_(),
-    is_removing_(false),
     constraint_id_(++constraint_id_count_),
     status_(_status),
     apply_loss_function_(_apply_loss_function),

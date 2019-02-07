@@ -135,14 +135,14 @@ void ProcessorTrackerFeatureImage::postProcess()
 {
 }
 
-unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& _feature_list_in, FeatureBaseList& _feature_list_out,
+unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out,
                                            FeatureMatchMap& _feature_matches)
 {
     KeyPointVector candidate_keypoints;
     cv::Mat candidate_descriptors;
     DMatchVector cv_matches;
 
-    for (auto feature_base_ptr : _feature_list_in)
+    for (auto feature_base_ptr : _features_last_in)
     {
         FeaturePointImagePtr feature_ptr = std::static_pointer_cast<FeaturePointImage>(feature_base_ptr);
 
@@ -167,7 +167,7 @@ unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& 
                         (candidate_descriptors.row(cv_matches[0].trainIdx)),
                         Eigen::Matrix2s::Identity()*params_tracker_feature_image_->pixel_noise_var);
                 incoming_point_ptr->setIsKnown(feature_ptr->isKnown());
-                _feature_list_out.push_back(incoming_point_ptr);
+                _features_incoming_out.push_back(incoming_point_ptr);
 
                 _feature_matches[incoming_point_ptr] = std::make_shared<FeatureMatch>(FeatureMatch({feature_base_ptr, normalized_score}));
             }
@@ -185,8 +185,8 @@ unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& 
             tracker_roi_.pop_back();
         }
     }
-//    std::cout << "TrackFeatures - Number of Features tracked: " << _feature_list_out.size() << std::endl;
-    return _feature_list_out.size();
+//    std::cout << "TrackFeatures - Number of Features tracked: " << _features_incoming_out.size() << std::endl;
+    return _features_incoming_out.size();
 }
 
 bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _origin_feature, const FeatureBasePtr _last_feature, FeatureBasePtr _incoming_feature)
@@ -244,7 +244,7 @@ bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _ori
     }
 }
 
-unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _feature_list_out)
+unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_incoming_out)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -277,7 +277,7 @@ unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int&
                             new_descriptors.row(index),
                             Eigen::Matrix2s::Identity()*params_tracker_feature_image_->pixel_noise_var);
                     point_ptr->setIsKnown(false);
-                    _feature_list_out.push_back(point_ptr);
+                    _features_incoming_out.push_back(point_ptr);
 
                     active_search_ptr_->hitCell(new_keypoints[0]);
 

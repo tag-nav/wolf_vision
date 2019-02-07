@@ -15,7 +15,6 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
             NodeBase("FRAME", "Base"),
             trajectory_ptr_(),
             state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
-            is_removing_(false),
             frame_id_(++frame_id_count_),
             type_(NON_KEY_FRAME),
             time_stamp_(_ts)
@@ -29,7 +28,6 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
             NodeBase("FRAME", "Base"),
             trajectory_ptr_(),
             state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
-            is_removing_(false),
             frame_id_(++frame_id_count_),
             type_(_tp),
             time_stamp_(_ts)

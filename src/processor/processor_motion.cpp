@@ -26,7 +26,7 @@ ProcessorMotion::ProcessorMotion(const std::string& _type,
         delta_cov_(_delta_cov_size, _delta_cov_size),
         delta_integrated_(_delta_size),
         delta_integrated_cov_(_delta_cov_size, _delta_cov_size),
-        calib_(_calib_size),
+        calib_preint_(_calib_size),
         jacobian_delta_preint_(delta_cov_size_, delta_cov_size_),
         jacobian_delta_(delta_cov_size_, delta_cov_size_),
         jacobian_calib_(delta_size_, calib_size_)
@@ -243,7 +243,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         getProblem()->keyFrameCallback(key_frame_ptr, shared_from_this(), params_motion_->time_tolerance);
     }
 
-    resetDerived(); // TODO see where to put this
+    resetDerived();
 
     // clear incoming just in case
     incoming_ptr_ = nullptr; // This line is not really needed, but it makes things clearer.
@@ -268,7 +268,7 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
         CaptureBasePtr cap_orig   = capture_motion->getOriginFramePtr()->getCaptureOf(getSensorPtr());
         VectorXs calib            = cap_orig->getCalibration();
 
-        // Get delta and correct it with new bias
+        // Get delta and correct it with new calibration params
         VectorXs calib_preint     = capture_motion->getBuffer().getCalibrationPreint();
         Motion   motion           = capture_motion->getBuffer().getMotion(_ts);
         
@@ -289,35 +289,6 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
     }
     return true;
 }
-
-//CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
-//{
-//    //std::cout << "ProcessorMotion::findCaptureContainingTimeStamp: ts = " << _ts.getSeconds() << "." << _ts.getNanoSeconds() << std::endl;
-//    CaptureMotionPtr capture_ptr = last_ptr_;
-//    while (capture_ptr != nullptr)
-//    {
-//        // capture containing motion previous than the ts found:
-//        if (capture_ptr->getBuffer().get().front().ts_ < _ts)
-//            return capture_ptr;
-//        else
-//        {
-//            // go to the previous motion capture
-//            if (capture_ptr == last_ptr_)
-//                capture_ptr = origin_ptr_;
-//            else if (capture_ptr->getOriginFramePtr() == nullptr)
-//                return nullptr;
-//            else
-//            {
-//                CaptureBasePtr capture_base_ptr = capture_ptr->getOriginFramePtr()->getCaptureOf(getSensorPtr());
-//                if (capture_base_ptr == nullptr)
-//                    return nullptr;
-//                else
-//                    capture_ptr = std::static_pointer_cast<CaptureMotion>(capture_base_ptr);
-//            }
-//        }
-//    }
-//    return capture_ptr;
-//}
 
 FrameBasePtr ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
@@ -381,12 +352,12 @@ void ProcessorMotion::integrateOneStep()
     assert(dt_ >= 0 && "Time interval _dt is negative!");
 
     // get vector of parameters to calibrate
-    calib_ = getBuffer().getCalibrationPreint();
+    calib_preint_ = getBuffer().getCalibrationPreint();
 
     // get data and convert it to delta, and obtain also the delta covariance
     computeCurrentDelta(incoming_ptr_->getData(),
                         incoming_ptr_->getDataCovariance(),
-                        calib_,
+                        calib_preint_,
                         dt_,
                         delta_,
                         delta_cov_,
@@ -402,11 +373,14 @@ void ProcessorMotion::integrateOneStep()
 
     // integrate Jacobian wrt calib
     if ( hasCalibration() )
-        jacobian_calib_ = jacobian_delta_preint_ * getBuffer().get().back().jacobian_calib_ + jacobian_delta_ * jacobian_delta_calib_;
+        jacobian_calib_.noalias()
+            = jacobian_delta_preint_ * getBuffer().get().back().jacobian_calib_
+            + jacobian_delta_ * jacobian_delta_calib_;
 
     // Integrate covariance
-    delta_integrated_cov_ = jacobian_delta_preint_ * getBuffer().get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
-                          + jacobian_delta_        * delta_cov_                                 * jacobian_delta_.transpose();
+    delta_integrated_cov_.noalias()
+            = jacobian_delta_preint_ * getBuffer().get().back().delta_integr_cov_ * jacobian_delta_preint_.transpose()
+            + jacobian_delta_        * delta_cov_                                 * jacobian_delta_.transpose();
 
     // push all into buffer
     getBuffer().get().emplace_back(incoming_ptr_->getTimeStamp(),
@@ -495,8 +469,53 @@ Motion ProcessorMotion::interpolate(const Motion& _ref, Motion& _second, TimeSta
     else
     {
         // _ts is closest to _second
-        Motion interpolated             ( _second );
+        Motion interpolated                 ( _second );
         interpolated.ts_                    = _ts;
+        _second.data_                       . setZero();
+        _second.data_cov_                   . setZero();
+        _second.delta_                      = deltaZero();
+        _second.delta_cov_                  . setZero();
+        _second.jacobian_delta_integr_      . setIdentity();
+        _second.jacobian_delta_             . setZero();
+
+        return interpolated;
+    }
+
+}
+
+Motion ProcessorMotion::interpolate(const Motion& _ref1, const Motion& _ref2, const TimeStamp& _ts, Motion& _second)
+{
+    // Check time bounds
+    assert(_ref1.ts_ <= _ref2.ts_ && "Interpolation bounds not causal.");
+    assert(_ts >= _ref1.ts_       && "Interpolation time is before the _ref1 motion.");
+    assert(_ts <= _ref2.ts_       && "Interpolation time is after  the _ref2 motion.");
+
+    // Fraction of the time interval
+    Scalar tau    = (_ts - _ref1.ts_) / (_ref2.ts_ - _ref1.ts_);
+
+    if (tau < 0.5)
+    {
+        // _ts is closest to _ref1
+        Motion interpolated                 ( _ref1 );
+        interpolated.ts_                    = _ts;
+        interpolated.data_                  . setZero();
+        interpolated.data_cov_              . setZero();
+        interpolated.delta_                 = deltaZero();
+        interpolated.delta_cov_             . setZero();
+        interpolated.jacobian_delta_integr_ . setIdentity();
+        interpolated.jacobian_delta_        . setZero();
+
+        _second = _ref2;
+
+        return interpolated;
+    }
+    else
+    {
+        // _ts is closest to _ref2
+        Motion interpolated                 ( _ref2 );
+        interpolated.ts_                    = _ts;
+
+        _second                             = _ref2;
         _second.data_                       . setZero();
         _second.data_cov_                   . setZero();
         _second.delta_                      = deltaZero();
@@ -512,7 +531,7 @@ Motion ProcessorMotion::interpolate(const Motion& _ref, Motion& _second, TimeSta
 CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp& _ts) const
 {
     // We need to search in previous keyframes for the capture containing a motion buffer with the queried time stamp
-    // Note: since the buffer goes from a FK through the past until the previous KF, we need to:
+    // Note: since the buffer goes from a KF in the past until the next KF, we need to:
     //  1. See that the KF contains a CaptureMotion
     //  2. See that the TS is smaller than the KF's TS
     //  3. See that the TS is bigger than the KF's first Motion in the CaptureMotion's buffer
@@ -527,7 +546,7 @@ CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp
         capture = frame->getCaptureOf(getSensorPtr());
         if (capture != nullptr)
         {
-            // We found a Capture belonging to this processor's Sensor ==> it is a CaptureMotion
+            // Rule 1 satisfied! We found a Capture belonging to this processor's Sensor ==> it is a CaptureMotion
             capture_motion = std::static_pointer_cast<CaptureMotion>(capture);
             if (_ts >= capture_motion->getBuffer().get().front().ts_)
                 // Found time stamp satisfying rule 3 above !! ==> break for loop
@@ -578,7 +597,7 @@ PackKeyFramePtr ProcessorMotion::computeProcessingStep()
         throw std::runtime_error("ProcessorMotion received data before being initialized.");
     }
 
-    PackKeyFramePtr pack = kf_pack_buffer_.selectPackBefore(last_ptr_, params_motion_->time_tolerance);
+    PackKeyFramePtr pack = kf_pack_buffer_.selectFirstPackBefore(last_ptr_, params_motion_->time_tolerance);
 
     if (pack)
     {
@@ -590,7 +609,7 @@ PackKeyFramePtr ProcessorMotion::computeProcessingStep()
             //            throw std::runtime_error("Pack's KF and origin's KF have matching time stamps (i.e. below time tolerances)");
             processing_step_ = RUNNING_WITH_PACK_ON_ORIGIN;
         }
-        else if (pack->key_frame->getTimeStamp() < origin_ptr_->getTimeStamp() - params_motion_->time_tolerance)
+        else if (pack->key_frame->getTimeStamp() < origin_ptr_->getTimeStamp())
             processing_step_ = RUNNING_WITH_PACK_BEFORE_ORIGIN;
 
         else

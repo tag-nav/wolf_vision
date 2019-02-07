@@ -144,7 +144,7 @@ TEST_F(BufferPackKeyFrameTest, selectPack)
     }
 }
 
-TEST_F(BufferPackKeyFrameTest, selectPackBefore)
+TEST_F(BufferPackKeyFrameTest, selectFirstPackBefore)
 {
     pack_kf_buffer.clear();
 
@@ -194,7 +194,7 @@ TEST_F(BufferPackKeyFrameTest, selectPackBefore)
         int j = 0;
         for (auto ts : q_ts)
         {
-            packQ = pack_kf_buffer.selectPackBefore(ts, tt);
+            packQ = pack_kf_buffer.selectFirstPackBefore(ts, tt);
             if (packQ)
                 res(i,j) = packQ->key_frame->getTimeStamp().get();
 

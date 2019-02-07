@@ -367,6 +367,24 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts);
 
+        /** \brief Interpolate motion to an intermediate time-stamp
+         *
+         * @param _ref1   The first motion reference
+         * @param _ref2   The second motion reference.
+         * @param _ts     The intermediate time stamp: it must be bounded by  `_ref.ts_ <= _ts <= _second.ts_`.
+         * @param _second The second part motion after interpolation, so that return (+) second = ref2.
+         * @return        The interpolated motion (see documentation below).
+         *
+         * This function interpolates a motion between two existing motions.
+         *
+         * In this base implementation, we just provide the closest motion provided (ref1 or ref2),
+         * the second motion being the complementary part,
+         * so really no interpolation takes place and just the current data and delta are updated.
+         *
+         * Should you require finer interpolation, you must overload this method in your derived class.
+         */
+        virtual Motion interpolate(const Motion& _ref1, const Motion& _ref2, const TimeStamp& _ts, Motion& _second);
+
         /** \brief create a CaptureMotion and add it to a Frame
          * \param _ts time stamp
          * \param _sensor Sensor that produced the Capture
@@ -394,6 +412,10 @@ class ProcessorMotion : public ProcessorBase
          * \param _capture_motion: the parent capture
          */
         FeatureBasePtr emplaceFeature(CaptureMotionPtr _capture_own);
+
+        /** \brief create a feature corresponding to given capture
+         * \param _capture_motion: the parent capture
+         */
         virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_own) = 0;
 
         /** \brief create a constraint and link it in the wolf tree
@@ -428,7 +450,7 @@ class ProcessorMotion : public ProcessorBase
         SizeEigen data_size_;        ///< the size of the incoming data
         SizeEigen delta_size_;       ///< the size of the deltas
         SizeEigen delta_cov_size_;   ///< the size of the delta covariances matrix
-        SizeEigen calib_size_;       ///< size of the extra parameters (TBD in derived classes)
+        SizeEigen calib_size_;       ///< the size of the calibration parameters (TBD in derived classes)
         CaptureMotionPtr origin_ptr_;
         CaptureMotionPtr last_ptr_;
         CaptureMotionPtr incoming_ptr_;
@@ -442,7 +464,7 @@ class ProcessorMotion : public ProcessorBase
         Eigen::MatrixXs delta_cov_;             ///< current delta covariance
         Eigen::VectorXs delta_integrated_;      ///< integrated delta
         Eigen::MatrixXs delta_integrated_cov_;  ///< integrated delta covariance
-        Eigen::VectorXs calib_;                 ///< calibration vector
+        Eigen::VectorXs calib_preint_;          ///< calibration vector used during pre-integration
         Eigen::MatrixXs jacobian_delta_preint_; ///< jacobian of delta composition w.r.t previous delta integrated
         Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
         Eigen::MatrixXs jacobian_calib_;        ///< jacobian of delta preintegration wrt calibration params
