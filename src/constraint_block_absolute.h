@@ -35,8 +35,15 @@ class ConstraintBlockAbsolute : public ConstraintAnalytic
          * \param _start_idx (default=-1) the size of the state segment that is constrained, -1 = all the
          *
          */
-        ConstraintBlockAbsolute(StateBlockPtr _sb_ptr, unsigned int _start_idx = 0, int _size = -1, bool _apply_loss_function = false, ConstraintStatus _status = CTR_ACTIVE) :
-            ConstraintAnalytic("BLOCK ABS", _apply_loss_function, _status, _sb_ptr),
+        ConstraintBlockAbsolute(StateBlockPtr _sb_ptr,
+                                unsigned int _start_idx = 0,
+                                int _size = -1,
+                                bool _apply_loss_function = false,
+                                ConstraintStatus _status = CTR_ACTIVE) :
+            ConstraintAnalytic("BLOCK ABS",
+                               _apply_loss_function,
+                               _status,
+                               _sb_ptr),
             sb_size_(_sb_ptr->getSize()),
             sb_constrained_start_(_start_idx),
             sb_constrained_size_(_size == -1 ? sb_size_ : _size)
