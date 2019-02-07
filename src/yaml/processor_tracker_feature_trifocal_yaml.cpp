@@ -34,9 +34,6 @@ static ProcessorParamsBasePtr createProcessorParamsTrackerFeatureTrifocal(const 
     {
         ProcessorParamsTrackerFeatureTrifocalPtr params = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
 
-        params->type                          = config["processor type"].as<std::string>();
-        params->name                          = config["processor name"].as<std::string>();
-
         YAML::Node vision_utils               = config      ["vision_utils"];
         params->yaml_file_params_vision_utils = vision_utils["YAML file params"].as<std::string>();
 

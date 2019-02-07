@@ -24,13 +24,12 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
 {
     YAML::Node camera_config = YAML::LoadFile(_filename_dot_yaml);
 
-    if ("CAMERA") //camera_config["sensor type"])
+    //    if (camera_config["sensor type"].as<std::string>() == "CAMERA") // this does not work: camera YAML files are ROS-styled
+    if (camera_config["camera_matrix"]) // check that at least this field exists to validate YAML file of the correct type
     {
 
         // YAML:: to Eigen::
         using namespace Eigen;
-        std::string sensor_type = "CAMERA"; //camera_config["sensor type"]                  .as<std::string>();
-        std::string sensor_name = camera_config["camera_name"]                      .as<std::string>();
         unsigned int width      = camera_config["image_width"]                      .as<unsigned int>();
         unsigned int height     = camera_config["image_height"]                     .as<unsigned int>();
         VectorXd intrinsic      = camera_config["camera_matrix"]["data"]            .as<VectorXd>();
@@ -38,8 +37,6 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
 
         // Eigen:: to wolf::
         std::shared_ptr<IntrinsicsCamera> intrinsics_cam = std::make_shared<IntrinsicsCamera>();
-        intrinsics_cam->type = sensor_type;
-        intrinsics_cam->name = sensor_name;
         intrinsics_cam->pinhole_model[0] = intrinsic[2];
         intrinsics_cam->pinhole_model[1] = intrinsic[5];
         intrinsics_cam->pinhole_model[2] = intrinsic[0];
@@ -87,7 +84,7 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
         return intrinsics_cam;
     }
 
-    std::cout << "Bad configuration file. No sensor type found." << std::endl;
+    std::cout << "Bad configuration file. No or bad sensor type found." << std::endl;
     return nullptr;
 }
 

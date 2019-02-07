@@ -26,14 +26,7 @@ static IntrinsicsBasePtr createIntrinsicsOdom3D(const std::string & _filename_do
 
     if (config["sensor type"].as<std::string>() == "ODOM 3D")
     {
-
-        // YAML:: to Eigen::
-        using namespace Eigen;
-        std::string sensor_type = config["sensor type"]     .as<std::string>();
-        std::string sensor_name = config["sensor name"]     .as<std::string>();
-
         YAML::Node variances = config["motion variances"];
-        YAML::Node kf_vote = config["keyframe vote"];
 
         IntrinsicsOdom3DPtr params = std::make_shared<IntrinsicsOdom3D>();
 

@@ -26,18 +26,10 @@ static ProcessorParamsBasePtr createProcessorOdom3DParams(const std::string & _f
 
     if (config["processor type"].as<std::string>() == "ODOM 3D")
     {
-
-        // YAML:: to Eigen::
-        using namespace Eigen;
-        std::string processor_type = config["processor type"]     .as<std::string>();
-        std::string processor_name = config["processor name"]     .as<std::string>();
-
         YAML::Node kf_vote = config["keyframe vote"];
 
         ProcessorParamsOdom3DPtr params = std::make_shared<ProcessorParamsOdom3D>();
 
-        params->type                = processor_type;
-        params->name                = processor_name;
         params->max_time_span       = kf_vote["max time span"]      .as<Scalar>();
         params->max_buff_length     = kf_vote["max buffer length"]  .as<SizeEigen  >();
         params->dist_traveled       = kf_vote["dist traveled"]      .as<Scalar>();

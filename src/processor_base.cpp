@@ -8,7 +8,7 @@ namespace wolf {
 unsigned int ProcessorBase::processor_id_count_ = 0;
 
 ProcessorBase::ProcessorBase(const std::string& _type, ProcessorParamsBasePtr _params) :
-        NodeBase("PROCESSOR", _type, _params->name),
+        NodeBase("PROCESSOR", _type),
         processor_id_(++processor_id_count_),
         params_(_params),
         sensor_ptr_()
