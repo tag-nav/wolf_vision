@@ -6,7 +6,7 @@
  */
 
 
-#include "../SE3.h"
+#include "base/SE3.h"
 #include "utils_gtest.h"
 
 

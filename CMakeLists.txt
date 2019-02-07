@@ -280,7 +280,7 @@ include/base/state_angle.h
 include/base/state_block.h
 include/base/state_homogeneous_3D.h
 include/base/state_quaternion.h
-include/base/three_D_tools.h
+include/base/SE3.h
 include/base/time_stamp.h
 include/base/track_matrix.h
 include/base/trajectory_base.h
@@ -473,7 +473,7 @@ include/base/state_angle.h
 include/base/state_block.h
 include/base/state_homogeneous_3D.h
 include/base/state_quaternion.h
-include/base/three_D_tools.h
+include/base/SE3.h
 include/base/time_stamp.h
 include/base/track_matrix.h
 include/base/trajectory_base.h
