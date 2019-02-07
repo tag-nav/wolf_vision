@@ -112,13 +112,9 @@ struct ProcessorParamsBase
     ProcessorParamsBase() = default;
 
     ProcessorParamsBase(bool _voting_active,
-                        Scalar _time_tolerance,
-                        const std::string& _type,
-                        const std::string& _name)
+                        Scalar _time_tolerance)
       : voting_active(_voting_active)
       , time_tolerance(_time_tolerance)
-      , type(_type)
-      , name(_name)
     {
       //
     }
@@ -131,9 +127,6 @@ struct ProcessorParamsBase
     /// a particular Capture of this processor to allow assigning
     /// this Capture to the Keyframe.
     Scalar time_tolerance = Scalar(0);
-
-    std::string type;
-    std::string name;
 };
 
 //class ProcessorBase

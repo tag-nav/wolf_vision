@@ -23,9 +23,9 @@ namespace {
 // intrinsics creator
 IntrinsicsBasePtr createIntrinsicsLaser2D(const std::string& _filename_dot_yaml)
 {
-    // TODO: Parse YAML <-- maybe we want this out of this file?
+    // If required: Parse YAML
+
     IntrinsicsLaser2DPtr params; // dummy
-    params->type = "LASER 2D"; // fill this one just for the fun of it
     return params;
 }
 
