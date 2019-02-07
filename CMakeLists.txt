@@ -549,8 +549,10 @@ src/processor/processor_diff_drive.cpp
 src/processor/processor_IMU.cpp
 src/processor/processor_odom_2D.cpp
 src/processor/processor_odom_3D.cpp
+src/processor/processor_tracker_feature.cpp
 src/processor/processor_tracker_feature_dummy.cpp
 src/processor/processor_tracker_landmark_dummy.cpp
+src/processor/processor_tracker_landmark.cpp
     )
   SET(SRCS_SENSOR
 src/sensor/sensor_camera.cpp
@@ -607,12 +609,9 @@ IF (laser_scan_utils_FOUND)
       )
     SET(SRCS ${SRCS}
 src/sensor/sensor_laser_2D.cpp
-src/processor/processor_tracker_feature.cpp
 src/processor/processor_tracker_feature_corner.cpp
 src/processor/processor_tracker_landmark_corner.cpp
 src/processor/processor_tracker_landmark_polyline.cpp
-src/processor/processor_tracker_landmark.cpp
-src/processor/processor_tracker_landmark_dummy.cpp
         )
 ENDIF(laser_scan_utils_FOUND)
 
