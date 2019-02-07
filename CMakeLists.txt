@@ -710,13 +710,10 @@ src/yaml/processor_tracker_feature_trifocal_yaml.cpp
 ENDIF(YAMLCPP_FOUND)
 
 # create the shared library
-add_library(${PROJECT_NAME}_core SHARED
-                 ${SRCS_CORE}
-                 ${SRCS_BASE} 
-                )
 ADD_LIBRARY(${PROJECT_NAME} 
             SHARED 
             ${SRCS_BASE} 
+            ${SRCS_CORE}
             ${SRCS}
             ${SRCS_CAPTURE}
             ${SRCS_CONSTRAINT}
@@ -728,7 +725,7 @@ ADD_LIBRARY(${PROJECT_NAME}
             ${SRCS_SOLVER}
             ${SRCS_WRAPPER}
             )
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_core ${CMAKE_THREAD_LIBS_INIT})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
 #Link the created libraries
 #=============================================================
@@ -765,8 +762,6 @@ IF (GLOG_FOUND)
     ENDIF(BUILD_TESTS)
 ENDIF (GLOG_FOUND)
 
-install(TARGETS ${PROJECT_NAME}_core DESTINATION lib/iri-algorithms EXPORT ${PROJECT_NAME}_core-targets)
-install(EXPORT ${PROJECT_NAME}_core-targets DESTINATION lib/iri-algorithms)
 #install library
 
 #=============================================================
