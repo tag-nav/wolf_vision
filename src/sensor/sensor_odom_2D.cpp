@@ -80,6 +80,8 @@ SensorBasePtr SensorOdom2D::createNew(const std::string& _unique_name, const par
     return odo;
 }
 
+}
+
 // Register in the SensorFactory
 #include "base/sensor/sensor_factory.h"
 namespace wolf {
