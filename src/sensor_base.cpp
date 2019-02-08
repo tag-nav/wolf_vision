@@ -368,6 +368,44 @@ StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i, const TimeSta
         return getStateBlockPtrStatic(_i);
 }
 
+bool SensorBase::isDynamic(unsigned int _i, CaptureBasePtr& cap) const
+{
+    if ((_i<2 && this->extrinsicsInCaptures()) || (_i>=2 && intrinsicsInCaptures()))
+    {
+        cap = lastKeyCapture();
+
+        return cap != nullptr;
+    }
+    else
+        return false;
+}
+
+bool SensorBase::isDynamic(unsigned int _i, const TimeStamp& _ts, CaptureBasePtr& cap) const
+{
+    if ((_i<2 && this->extrinsicsInCaptures()) || (_i>=2 && intrinsicsInCaptures()))
+    {
+        cap = lastCapture(_ts);
+
+        return cap != nullptr;
+    }
+    else
+        return false;
+}
+
+bool SensorBase::isDynamic(unsigned int _i) const
+{
+    CaptureBasePtr& cap;
+
+    return isDynamic(_i,cap);
+}
+
+bool SensorBase::isDynamic(unsigned int _i, const TimeStamp& _ts) const
+{
+    CaptureBasePtr& cap;
+
+    return isDynamic(_i,_ts,cap);
+}
+
 void SensorBase::setProblem(ProblemPtr _problem)
 {
     NodeBase::setProblem(_problem);
