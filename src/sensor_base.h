@@ -117,10 +117,11 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr);
         void resizeStateBlockVec(unsigned int _size);
 
-        bool isDynamic(unsigned int _i, const TimeStamp& _ts, CaptureBasePtr& cap) const;
-        bool isDynamic(unsigned int _i, CaptureBasePtr& cap) const;
-        bool isDynamic(unsigned int _i, const TimeStamp& _ts) const;
-        bool isDynamic(unsigned int _i) const;
+        bool isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts, CaptureBasePtr& cap) const;
+        bool isStateBlockDynamic(unsigned int _i, CaptureBasePtr& cap) const;
+        bool isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts) const;
+        bool isStateBlockDynamic(unsigned int _i) const;
+
         StateBlockPtr getPPtr(const TimeStamp _ts);
         StateBlockPtr getOPtr(const TimeStamp _ts);
         StateBlockPtr getIntrinsicPtr(const TimeStamp _ts);
@@ -138,6 +139,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void unfixExtrinsics();
         void fixIntrinsics();
         void unfixIntrinsics();
+
         /** \brief Add an absolute constraint to a parameter
          *
          * Add an absolute constraint to a parameter
@@ -198,6 +200,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
                                 const Eigen::MatrixXs& _cov,
                                 unsigned int _start_idx = 0,
                                 int _size = -1);
+
         SizeEigen getCalibSize() const;
         Eigen::VectorXs getCalibration() const;
 
@@ -323,7 +326,7 @@ inline void SensorBase::addParameterPrior(const unsigned int _i, const TimeStamp
 {
     CaptureBasePtr cap;
     // i is dynamic? //TODO
-    if (isDynamic(_i, _ts, cap))
+    if (isStateBlockDynamic(_i, _ts, cap))
         addParameterDynamicPrior(cap, cap->getStateBlockPtr(_i), _x, _cov, _start_idx, _size);
     else
         addParameterStaticPrior(getStateBlockPtrStatic(_i), _x, _cov, _start_idx, _size);
@@ -334,7 +337,7 @@ inline void SensorBase::addParameterPrior(const unsigned int _i, const Eigen::Ve
 {
     CaptureBasePtr cap;
     // i is dynamic? //TODO
-    if (isDynamic(_i, cap))
+    if (isStateBlockDynamic(_i, cap))
         addParameterDynamicPrior(cap, cap->getStateBlockPtr(_i), _x, _cov, _start_idx, _size);
     else
         addParameterStaticPrior(getStateBlockPtrStatic(_i), _x, _cov, _start_idx, _size);
