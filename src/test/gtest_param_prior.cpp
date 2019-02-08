@@ -35,7 +35,7 @@ TEST(ParameterPrior, initial_extrinsics)
 
 TEST(ParameterPrior, prior_p)
 {
-    odom_sensor_ptr_->addParameterPrior(odom_sensor_ptr_->getPPtr(), prior_extrinsics.head(3),Eigen::Matrix3s::Identity());
+    odom_sensor_ptr_->addPriorP(prior_extrinsics.head(3),Eigen::Matrix3s::Identity());
 
     std::string report = ceres_mgr_ptr->solve(SolverManager::ReportVerbosity::BRIEF);
 
@@ -44,7 +44,7 @@ TEST(ParameterPrior, prior_p)
 
 TEST(ParameterPrior, prior_o)
 {
-    odom_sensor_ptr_->addParameterPrior(odom_sensor_ptr_->getOPtr(), prior_extrinsics.tail(4),Eigen::Matrix3s::Identity());
+    odom_sensor_ptr_->addPriorO(prior_extrinsics.tail(4),Eigen::Matrix3s::Identity());
 
     std::string report = ceres_mgr_ptr->solve(SolverManager::ReportVerbosity::BRIEF);
 
@@ -53,7 +53,7 @@ TEST(ParameterPrior, prior_o)
 
 TEST(ParameterPrior, prior_p_overwrite)
 {
-    odom_sensor_ptr_->addParameterPrior(odom_sensor_ptr_->getPPtr(), prior2_extrinsics.head(3),Eigen::Matrix3s::Identity());
+    odom_sensor_ptr_->addPriorP(prior2_extrinsics.head(3),Eigen::Matrix3s::Identity());
 
     std::string report = ceres_mgr_ptr->solve(SolverManager::ReportVerbosity::BRIEF);
 
@@ -62,7 +62,7 @@ TEST(ParameterPrior, prior_p_overwrite)
 
 TEST(ParameterPrior, prior_p_segment)
 {
-    odom_sensor_ptr_->addParameterPrior(odom_sensor_ptr_->getPPtr(), prior_extrinsics.segment(1,2),Eigen::Matrix2s::Identity(),1,2);
+    odom_sensor_ptr_->addPriorP(prior_extrinsics.segment(1,2),Eigen::Matrix2s::Identity(),1,2);
 
     std::string report = ceres_mgr_ptr->solve(SolverManager::ReportVerbosity::BRIEF);
 
@@ -72,7 +72,7 @@ TEST(ParameterPrior, prior_p_segment)
 TEST(ParameterPrior, prior_o_segment)
 {
     // constraining segment of quaternion is not allowed
-    ASSERT_DEATH(odom_sensor_ptr_->addParameterPrior(odom_sensor_ptr_->getOPtr(), prior_extrinsics.segment(1,2),Eigen::Matrix2s::Identity(),1,2),"");
+    ASSERT_DEATH(odom_sensor_ptr_->addPriorParameter(1, prior_extrinsics.segment(1,2),Eigen::Matrix2s::Identity(),1,2),"");
 }
 
 

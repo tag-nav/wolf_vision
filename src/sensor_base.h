@@ -143,18 +143,13 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         /** \brief Add an absolute constraint to a parameter
          *
          * Add an absolute constraint to a parameter
-         * \param _sb state block of the parameter to be constrained
+         * \param _i state block index (in state_block_vec_) of the parameter to be constrained
          * \param _x prior value
          * \param _cov covariance
          * \param _start_idx state segment starting index (not used in quaternions)
          * \param _size state segment size (-1: whole state) (not used in quaternions)
          *
          **/
-        void addPriorParameter(const StateBlockPtr& _sb,
-                                     const Eigen::VectorXs& _x,
-                                     const Eigen::MatrixXs& _cov,
-                                     unsigned int _start_idx = 0,
-                                     int _size = -1);
         void addPriorParameter(const unsigned int _i,
                                const Eigen::VectorXs& _x,
                                const Eigen::MatrixXs& _cov,
@@ -290,12 +285,6 @@ inline void SensorBase::setIntrinsicPtr(const StateBlockPtr _intr_ptr)
 inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
 {
     hardware_ptr_ = _hw_ptr;
-}
-
-inline void SensorBase::addPriorParameter(const unsigned int _i, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov,
-                                          unsigned int _start_idx, int _size)
-{
-    addPriorParameter(getStateBlockPtrStatic(_i), _x, _cov, _start_idx, _size);
 }
 
 inline void SensorBase::addPriorP(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
