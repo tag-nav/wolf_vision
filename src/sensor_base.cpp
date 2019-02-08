@@ -387,14 +387,14 @@ bool SensorBase::isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts, Capt
 
 bool SensorBase::isStateBlockDynamic(unsigned int _i) const
 {
-    CaptureBasePtr& cap;
+    CaptureBasePtr cap;
 
     return isStateBlockDynamic(_i,cap);
 }
 
 bool SensorBase::isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts) const
 {
-    CaptureBasePtr& cap;
+    CaptureBasePtr cap;
 
     return isStateBlockDynamic(_i,_ts,cap);
 }
