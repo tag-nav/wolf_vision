@@ -235,6 +235,7 @@ inline StateBlockPtr SensorBase::getStateBlockPtrStatic(unsigned int _i) const
 
 inline void SensorBase::setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
+    assert (_i < state_block_vec_.size() && "Setting a state block pointer out of the vector range!");
     assert((params_prior_map_.find(_i) == params_prior_map_.end() || _sb_ptr == nullptr) && "overwriting a state block that has an absolute constraint");
     state_block_vec_[_i] = _sb_ptr;
 }
