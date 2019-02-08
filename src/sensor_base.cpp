@@ -144,7 +144,48 @@ void SensorBase::unfixIntrinsics()
     updateCalibSize();
 }
 
-void SensorBase::addStaticParameterPrior(const StateBlockPtr& _sb, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
+void SensorBase::addPriorParameterStatic(const StateBlockPtr& _sb, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
+{
+    bool is_quaternion = (std::dynamic_pointer_cast<StateQuaternion>(_sb) != nullptr);
+
+    assert(std::find(state_block_vec_.begin(),state_block_vec_.end(),_sb) != state_block_vec_.end() && "adding prior to unknown state block");
+    assert(((!is_quaternion && _x.size() == _cov.rows() && _x.size() == _cov.cols()) ||
+            (is_quaternion && _x.size() == 4 &&_cov.rows() == 3 && _cov.cols() == 3)) && "bad prior/covariance dimensions");
+    assert((_size == -1 && _start_idx == 0) || (_size+_start_idx <= _sb->getSize()));
+    assert(_size == -1 || _size == _x.size());
+    assert(!(_size != -1 && is_quaternion) && "prior of a segment of state not available for quaternion");
+
+    // set StateBlock state
+    if (_size == -1)
+        _sb->setState(_x);
+    else
+    {
+        Eigen::VectorXs new_x = _sb->getState();
+        new_x.segment(_start_idx,_size) = _x;
+        _sb->setState(new_x);
+    }
+
+    // remove previous prior (if any)
+    if (params_prior_map_.find(_sb) != params_prior_map_.end())
+        params_prior_map_[_sb]->remove();
+
+    // create feature
+    FeatureBasePtr ftr_prior = std::make_shared<FeatureBase>("ABSOLUTE",_x,_cov);
+
+    // set feature problem
+    ftr_prior->setProblem(getProblem());
+
+    // create & add constraint absolute
+    if (is_quaternion)
+        ftr_prior->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(_sb));
+    else
+        ftr_prior->addConstraint(std::make_shared<ConstraintBlockAbsolute>(_sb, _start_idx, _size));
+
+    // store feature in params_prior_map_
+    params_prior_map_[_sb] = ftr_prior;
+}
+
+void SensorBase::addPriorParameterDynamic(const StateBlockPtr& _sb, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
 {
     bool is_quaternion = (std::dynamic_pointer_cast<StateQuaternion>(_sb) != nullptr);
 
