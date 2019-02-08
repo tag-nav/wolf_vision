@@ -50,7 +50,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         Eigen::VectorXs noise_std_; // std of sensor noise
         Eigen::MatrixXs noise_cov_; // cov matrix of noise
 
-        std::map<StateBlockPtr,FeatureBasePtr> params_prior_map_; // Priors (value and covariance) of extrinsic & intrinsic state blocks (multimap
+        std::map<unsigned int,FeatureBasePtr> params_prior_map_; // Priors (value and covariance) of extrinsic & intrinsic state blocks (by index in state_block_vec_)
 
     public:
         /** \brief Constructor with noise size
