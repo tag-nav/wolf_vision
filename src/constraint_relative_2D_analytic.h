@@ -85,7 +85,6 @@ class ConstraintRelative2DAnalytic : public ConstraintAnalytic
                                        const std::vector<bool>& _compute_jacobian) const override;
 
         /** \brief Returns the pure jacobians (without measurement noise) evaluated in the state blocks values
-         * \param _st_vector is a vector containing the mapped eigen vectors of all state blocks involved in the constraint
          * \param jacobians is an output vector of mapped eigen matrices that sould contain the jacobians w.r.t each state block
          *
          **/
@@ -125,11 +124,11 @@ inline void ConstraintRelative2DAnalytic::evaluateJacobians(
             << -(_st_vector[2](0) - _st_vector[0](0)) * sin(_st_vector[1](0))
                     + (_st_vector[2](1) - _st_vector[0](1)) * cos(_st_vector[1](0)), -(_st_vector[2](0)
             - _st_vector[0](0)) * cos(_st_vector[1](0)) - (_st_vector[2](1) - _st_vector[0](1)) * sin(_st_vector[1](0)), -1;
-    jacobians[1] = getMeasurementSquareRootInformationUpper() * jacobians[0];
+    jacobians[1] = getMeasurementSquareRootInformationUpper() * jacobians[1];
     jacobians[2] << cos(_st_vector[1](0)), sin(_st_vector[1](0)), -sin(_st_vector[1](0)), cos(_st_vector[1](0)), 0, 0;
-    jacobians[2] = getMeasurementSquareRootInformationUpper() * jacobians[0];
+    jacobians[2] = getMeasurementSquareRootInformationUpper() * jacobians[2];
     jacobians[3] << 0, 0, 1;
-    jacobians[3] = getMeasurementSquareRootInformationUpper() * jacobians[0];
+    jacobians[3] = getMeasurementSquareRootInformationUpper() * jacobians[3];
 }
 
 inline void ConstraintRelative2DAnalytic::evaluatePureJacobians(std::vector<Eigen::MatrixXs>& jacobians) const

@@ -26,20 +26,12 @@ static ProcessorParamsBasePtr createProcessorIMUParams(const std::string & _file
 
     if (config["processor type"].as<std::string>() == "IMU")
     {
-
-        // YAML:: to Eigen::
-        using namespace Eigen;
-        std::string processor_type = config["processor type"]     .as<std::string>();
-        std::string processor_name = config["processor name"]     .as<std::string>();
-
         YAML::Node kf_vote = config["keyframe vote"];
 
         ProcessorParamsIMUPtr params = std::make_shared<ProcessorParamsIMU>();
 
-        params->time_tolerance = config["time tolerance"].as<Scalar>();
+        params->time_tolerance      = config["time tolerance"].as<Scalar>();
 
-        params->type                = processor_type;
-        params->name                = processor_name;
         params->max_time_span       = kf_vote["max time span"]      .as<Scalar>();
         params->max_buff_length     = kf_vote["max buffer length"]  .as<SizeEigen  >();
         params->dist_traveled       = kf_vote["dist traveled"]      .as<Scalar>();

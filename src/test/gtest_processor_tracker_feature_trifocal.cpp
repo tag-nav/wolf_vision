@@ -82,8 +82,9 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
                                                          intr);
 
     ProcessorParamsTrackerFeatureTrifocalPtr params_tracker_feature_trifocal = std::make_shared<ProcessorParamsTrackerFeatureTrifocal>();
-    params_tracker_feature_trifocal->name                           = "trifocal";
-    params_tracker_feature_trifocal->voting_active                  = false;
+    params_tracker_feature_trifocal->pixel_noise_std                = 1.0;
+    params_tracker_feature_trifocal->voting_active                  = true;
+    params_tracker_feature_trifocal->min_features_for_keyframe      = 5;
     params_tracker_feature_trifocal->time_tolerance                 = dt/2;
     params_tracker_feature_trifocal->min_features_for_keyframe      = 5;
     params_tracker_feature_trifocal->pixel_noise_std                = 1.0;
