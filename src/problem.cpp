@@ -4,17 +4,14 @@
 #include "trajectory_base.h"
 #include "map_base.h"
 #include "sensor_base.h"
-#include "factory.h"
+#include "processor_motion.h"
+#include "processor_tracker.h"
+#include "capture_pose.h"
+#include "constraint_base.h"
 #include "sensor_factory.h"
 #include "processor_factory.h"
-#include "constraint_base.h"
 #include "state_block.h"
-#include "processor_motion.h"
-#include "sensor_GPS.h"
 
-#include "processor_tracker.h"
-//#include "processors/processor_tracker_feature_trifocal.h"
-#include "capture_pose.h"
 
 // IRI libs includes
 

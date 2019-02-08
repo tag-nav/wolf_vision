@@ -55,7 +55,8 @@ TEST(FrameBase, LinksBasic)
     ASSERT_FALSE(F->getProblem());
     //    ASSERT_THROW(f->getPreviousFrame(), std::runtime_error);  // protected by assert()
     //    ASSERT_EQ(f->getStatus(), ST_ESTIMATED);                  // protected
-    ASSERT_FALSE(F->getCaptureOf(make_shared<SensorOdom2D>(nullptr, nullptr, 1,1)));
+    SensorOdom2DPtr S = make_shared<SensorOdom2D>(Vector3s::Zero(), IntrinsicsOdom2D());
+    ASSERT_FALSE(F->getCaptureOf(S));
     ASSERT_TRUE(F->getCaptureList().empty());
     ASSERT_TRUE(F->getConstrainedByList().empty());
     ASSERT_EQ(F->getHits() , (unsigned int) 0);
@@ -67,7 +68,10 @@ TEST(FrameBase, LinksToTree)
     // Problem with 2 frames and one motion constraint between them
     ProblemPtr P = Problem::create("PO 2D");
     TrajectoryBasePtr T = P->getTrajectoryPtr();
-    SensorOdom2DPtr S = make_shared<SensorOdom2D>(make_shared<StateBlock>(2), make_shared<StateBlock>(1), 1,1);
+    IntrinsicsOdom2D intrinsics_odo;
+    intrinsics_odo.k_disp_to_disp = 1;
+    intrinsics_odo.k_rot_to_rot = 1;
+    SensorOdom2DPtr S = make_shared<SensorOdom2D>(Vector3s::Zero(), intrinsics_odo);
     P->getHardwarePtr()->addSensor(S);
     FrameBasePtr F1 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
     T->addFrame(F1);
