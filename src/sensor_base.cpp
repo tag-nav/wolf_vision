@@ -144,7 +144,7 @@ void SensorBase::unfixIntrinsics()
     updateCalibSize();
 }
 
-void SensorBase::addParameterPrior(const StateBlockPtr& _sb, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
+void SensorBase::addStaticParameterPrior(const StateBlockPtr& _sb, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
 {
     bool is_quaternion = (std::dynamic_pointer_cast<StateQuaternion>(_sb) != nullptr);
 

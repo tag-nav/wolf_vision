@@ -148,12 +148,56 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          * \param _size state segment size (-1: whole state) (not used in quaternions)
          *
          **/
-        void addParameterPrior(const StateBlockPtr& _sb,
+        void addParameterStaticPrior(const StateBlockPtr& _sb,
+                                     const Eigen::VectorXs& _x,
+                                     const Eigen::MatrixXs& _cov,
+                                     unsigned int _start_idx = 0,
+                                     int _size = -1);
+
+        void addParameterDynamicPrior(const CaptureBase& _cap,
+                                      const StateBlockPtr& _sb,
+                                      const Eigen::VectorXs& _x,
+                                      const Eigen::MatrixXs& _cov,
+                                      unsigned int _start_idx = 0,
+                                      int _size = -1);
+
+        void addParameterPrior(const unsigned int _i,
                                const Eigen::VectorXs& _x,
                                const Eigen::MatrixXs& _cov,
                                unsigned int _start_idx = 0,
                                int _size = -1);
 
+        void addParameterPrior(const unsigned int _i,
+                               const TimeStamp _ts,
+                               const Eigen::VectorXs& _x,
+                               const Eigen::MatrixXs& _cov,
+                               unsigned int _start_idx = 0,
+                               int _size = -1);
+
+        void addPPrior(const TimeStamp _ts,
+                       const Eigen::VectorXs& _x,
+                       const Eigen::MatrixXs& _cov,
+                       unsigned int _start_idx = 0,
+                       int _size = -1);
+        void addOPrior(const TimeStamp _ts,
+                       const Eigen::VectorXs& _x,
+                       const Eigen::MatrixXs& _cov);
+        void addIntrinsicsPrior(const TimeStamp _ts,
+                                const Eigen::VectorXs& _x,
+                                const Eigen::MatrixXs& _cov,
+                                unsigned int _start_idx = 0,
+                                int _size = -1);
+
+        void addPPrior(const Eigen::VectorXs& _x,
+                       const Eigen::MatrixXs& _cov,
+                       unsigned int _start_idx = 0,
+                       int _size = -1);
+        void addOPrior(const Eigen::VectorXs& _x,
+                       const Eigen::MatrixXs& _cov);
+        void addIntrinsicsPrior(const Eigen::VectorXs& _x,
+                                const Eigen::MatrixXs& _cov,
+                                unsigned int _start_idx = 0,
+                                int _size = -1);
         SizeEigen getCalibSize() const;
         Eigen::VectorXs getCalibration() const;
 
@@ -272,6 +316,60 @@ inline void SensorBase::setIntrinsicPtr(const StateBlockPtr _intr_ptr)
 inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
 {
     hardware_ptr_ = _hw_ptr;
+}
+
+inline void SensorBase::addParameterPrior(const unsigned int _i, const TimeStamp _ts, const Eigen::VectorXs& _x,
+                                          const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
+{
+    CaptureBasePtr cap;
+    // i is dynamic? //TODO
+    if (isDynamic(_i, _ts, cap))
+        addParameterDynamicPrior(cap, cap->getStateBlockPtr(_i), _x, _cov, _start_idx, _size);
+    else
+        addParameterStaticPrior(getStateBlockPtrStatic(_i), _x, _cov, _start_idx, _size);
+}
+
+inline void SensorBase::addParameterPrior(const unsigned int _i, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov,
+                                          unsigned int _start_idx, int _size)
+{
+    CaptureBasePtr cap;
+    // i is dynamic? //TODO
+    if (isDynamic(_i, cap))
+        addParameterDynamicPrior(cap, cap->getStateBlockPtr(_i), _x, _cov, _start_idx, _size);
+    else
+        addParameterStaticPrior(getStateBlockPtrStatic(_i), _x, _cov, _start_idx, _size);
+}
+
+inline void SensorBase::addPPrior(const TimeStamp _ts, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx,
+                                  int _size)
+{
+    addParameterPrior(0, _ts, _x, _cov, _start_idx, _size);
+}
+
+inline void SensorBase::addOPrior(const TimeStamp _ts, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov)
+{
+    addParameterPrior(1, _ts, _x, _cov);
+}
+
+inline void SensorBase::addIntrinsicsPrior(const TimeStamp _ts, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov,
+                                           unsigned int _start_idx, int _size)
+{
+    addParameterPrior(2,_ts, _x, _cov);
+}
+
+inline void SensorBase::addPPrior(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
+{
+    addParameterPrior(0, _x, _cov, _start_idx, _size);
+}
+
+inline void SensorBase::addOPrior(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov)
+{
+    addParameterPrior(1, _x, _cov);
+}
+
+inline void SensorBase::addIntrinsicsPrior(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
+{
+    addParameterPrior(2, _x, _cov);
 }
 
 inline SizeEigen SensorBase::getCalibSize() const
