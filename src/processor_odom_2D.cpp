@@ -21,7 +21,7 @@ void ProcessorOdom2D::computeCurrentDelta(const Eigen::VectorXs& _data, const Ei
     assert(_data_cov.rows() == data_size_ && "Wrong _data_cov size");
     assert(_data_cov.cols() == data_size_ && "Wrong _data_cov size");
 
-    // data  is [dtheta, dr]
+    // data  is [dr, dtheta]
     // delta is [dx, dy, dtheta]
     // motion model is 1/2 turn + straight + 1/2 turn
     _delta(0) = cos(_data(1) / 2) * _data(0);
