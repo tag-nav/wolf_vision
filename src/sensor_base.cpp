@@ -361,7 +361,7 @@ StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i, const TimeStamp& _ts
     return getStateBlockPtrStatic(_i);
 }
 
-bool SensorBase::isStateBlockDynamic(unsigned int _i, CaptureBasePtr& cap) const
+bool SensorBase::isStateBlockDynamic(unsigned int _i, CaptureBasePtr& cap)
 {
     if ((_i<2 && this->extrinsicsInCaptures()) || (_i>=2 && intrinsicsInCaptures()))
     {
@@ -373,7 +373,7 @@ bool SensorBase::isStateBlockDynamic(unsigned int _i, CaptureBasePtr& cap) const
         return false;
 }
 
-bool SensorBase::isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts, CaptureBasePtr& cap) const
+bool SensorBase::isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts, CaptureBasePtr& cap)
 {
     if ((_i<2 && this->extrinsicsInCaptures()) || (_i>=2 && intrinsicsInCaptures()))
     {
@@ -385,14 +385,14 @@ bool SensorBase::isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts, Capt
         return false;
 }
 
-bool SensorBase::isStateBlockDynamic(unsigned int _i) const
+bool SensorBase::isStateBlockDynamic(unsigned int _i)
 {
     CaptureBasePtr cap;
 
     return isStateBlockDynamic(_i,cap);
 }
 
-bool SensorBase::isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts) const
+bool SensorBase::isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts)
 {
     CaptureBasePtr cap;
 
