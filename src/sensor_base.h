@@ -190,13 +190,13 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
                                 unsigned int _start_idx = 0,
                                 int _size = -1);
 
-        void addPPrior(const Eigen::VectorXs& _x,
+        void addPriorP(const Eigen::VectorXs& _x,
                        const Eigen::MatrixXs& _cov,
                        unsigned int _start_idx = 0,
                        int _size = -1);
-        void addOPrior(const Eigen::VectorXs& _x,
+        void addPriorO(const Eigen::VectorXs& _x,
                        const Eigen::MatrixXs& _cov);
-        void addIntrinsicsPrior(const Eigen::VectorXs& _x,
+        void addPriorIntrinsics(const Eigen::VectorXs& _x,
                                 const Eigen::MatrixXs& _cov,
                                 unsigned int _start_idx = 0,
                                 int _size = -1);
@@ -332,7 +332,7 @@ inline void SensorBase::addParameterPrior(const unsigned int _i, const TimeStamp
         addParameterStaticPrior(getStateBlockPtrStatic(_i), _x, _cov, _start_idx, _size);
 }
 
-inline void SensorBase::addParameterPrior(const unsigned int _i, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov,
+inline void SensorBase::addPriorParameter(const unsigned int _i, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov,
                                           unsigned int _start_idx, int _size)
 {
     CaptureBasePtr cap;
@@ -357,22 +357,22 @@ inline void SensorBase::addOPrior(const TimeStamp _ts, const Eigen::VectorXs& _x
 inline void SensorBase::addIntrinsicsPrior(const TimeStamp _ts, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov,
                                            unsigned int _start_idx, int _size)
 {
-    addParameterPrior(2,_ts, _x, _cov);
+    addPriorParameter(getStateBlockPtrStatic(_i), _x, _cov, _start_idx, _size);
 }
 
-inline void SensorBase::addPPrior(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
+inline void SensorBase::addPriorP(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
 {
-    addParameterPrior(0, _x, _cov, _start_idx, _size);
+    addPriorParameter(0, _x, _cov, _start_idx, _size);
 }
 
-inline void SensorBase::addOPrior(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov)
+inline void SensorBase::addPriorO(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov)
 {
-    addParameterPrior(1, _x, _cov);
+    addPriorParameter(1, _x, _cov);
 }
 
-inline void SensorBase::addIntrinsicsPrior(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
+inline void SensorBase::addPriorIntrinsics(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
 {
-    addParameterPrior(2, _x, _cov);
+    addPriorParameter(2, _x, _cov);
 }
 
 inline SizeEigen SensorBase::getCalibSize() const
