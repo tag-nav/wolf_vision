@@ -150,45 +150,16 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
          * \param _size state segment size (-1: whole state) (not used in quaternions)
          *
          **/
-        void addParameterStaticPrior(const StateBlockPtr& _sb,
+        void addPriorParameter(const StateBlockPtr& _sb,
                                      const Eigen::VectorXs& _x,
                                      const Eigen::MatrixXs& _cov,
                                      unsigned int _start_idx = 0,
                                      int _size = -1);
-
-        void addParameterDynamicPrior(const CaptureBase& _cap,
-                                      const StateBlockPtr& _sb,
-                                      const Eigen::VectorXs& _x,
-                                      const Eigen::MatrixXs& _cov,
-                                      unsigned int _start_idx = 0,
-                                      int _size = -1);
-
-        void addParameterPrior(const unsigned int _i,
+        void addPriorParameter(const unsigned int _i,
                                const Eigen::VectorXs& _x,
                                const Eigen::MatrixXs& _cov,
                                unsigned int _start_idx = 0,
                                int _size = -1);
-
-        void addParameterPrior(const unsigned int _i,
-                               const TimeStamp _ts,
-                               const Eigen::VectorXs& _x,
-                               const Eigen::MatrixXs& _cov,
-                               unsigned int _start_idx = 0,
-                               int _size = -1);
-
-        void addPPrior(const TimeStamp _ts,
-                       const Eigen::VectorXs& _x,
-                       const Eigen::MatrixXs& _cov,
-                       unsigned int _start_idx = 0,
-                       int _size = -1);
-        void addOPrior(const TimeStamp _ts,
-                       const Eigen::VectorXs& _x,
-                       const Eigen::MatrixXs& _cov);
-        void addIntrinsicsPrior(const TimeStamp _ts,
-                                const Eigen::VectorXs& _x,
-                                const Eigen::MatrixXs& _cov,
-                                unsigned int _start_idx = 0,
-                                int _size = -1);
 
         void addPriorP(const Eigen::VectorXs& _x,
                        const Eigen::MatrixXs& _cov,
@@ -321,41 +292,8 @@ inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
     hardware_ptr_ = _hw_ptr;
 }
 
-inline void SensorBase::addParameterPrior(const unsigned int _i, const TimeStamp _ts, const Eigen::VectorXs& _x,
-                                          const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
-{
-    CaptureBasePtr cap;
-    // i is dynamic? //TODO
-    if (isStateBlockDynamic(_i, _ts, cap))
-        addParameterDynamicPrior(cap, cap->getStateBlockPtr(_i), _x, _cov, _start_idx, _size);
-    else
-        addParameterStaticPrior(getStateBlockPtrStatic(_i), _x, _cov, _start_idx, _size);
-}
-
 inline void SensorBase::addPriorParameter(const unsigned int _i, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov,
                                           unsigned int _start_idx, int _size)
-{
-    CaptureBasePtr cap;
-    // i is dynamic? //TODO
-    if (isStateBlockDynamic(_i, cap))
-        addParameterDynamicPrior(cap, cap->getStateBlockPtr(_i), _x, _cov, _start_idx, _size);
-    else
-        addParameterStaticPrior(getStateBlockPtrStatic(_i), _x, _cov, _start_idx, _size);
-}
-
-inline void SensorBase::addPPrior(const TimeStamp _ts, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx,
-                                  int _size)
-{
-    addParameterPrior(0, _ts, _x, _cov, _start_idx, _size);
-}
-
-inline void SensorBase::addOPrior(const TimeStamp _ts, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov)
-{
-    addParameterPrior(1, _ts, _x, _cov);
-}
-
-inline void SensorBase::addIntrinsicsPrior(const TimeStamp _ts, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov,
-                                           unsigned int _start_idx, int _size)
 {
     addPriorParameter(getStateBlockPtrStatic(_i), _x, _cov, _start_idx, _size);
 }
