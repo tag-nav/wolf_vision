@@ -261,32 +261,32 @@ CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
 
 StateBlockPtr SensorBase::getPPtr(const TimeStamp _ts)
 {
-    return getStateBlockPtrDynamic(0, _ts);
+    return getStateBlockPtr(0, _ts);
 }
 
 StateBlockPtr SensorBase::getOPtr(const TimeStamp _ts)
 {
-    return getStateBlockPtrDynamic(1, _ts);
+    return getStateBlockPtr(1, _ts);
 }
 
 StateBlockPtr SensorBase::getIntrinsicPtr(const TimeStamp _ts)
 {
-    return getStateBlockPtrDynamic(2, _ts);
+    return getStateBlockPtr(2, _ts);
 }
 
 StateBlockPtr SensorBase::getPPtr()
 {
-    return getStateBlockPtrDynamic(0);
+    return getStateBlockPtr(0);
 }
 
 StateBlockPtr SensorBase::getOPtr()
 {
-    return getStateBlockPtrDynamic(1);
+    return getStateBlockPtr(1);
 }
 
 StateBlockPtr SensorBase::getIntrinsicPtr()
 {
-    return getStateBlockPtrDynamic(2);
+    return getStateBlockPtr(2);
 }
 
 SizeEigen SensorBase::computeCalibSize() const
@@ -340,7 +340,7 @@ ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
     return _proc_ptr;
 }
 
-StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i)
+StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i)
 {
     CaptureBasePtr cap;
 
@@ -350,7 +350,7 @@ StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i)
     return getStateBlockPtrStatic(_i);
 }
 
-StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts)
+StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i, const TimeStamp& _ts)
 {
     CaptureBasePtr cap;
 
