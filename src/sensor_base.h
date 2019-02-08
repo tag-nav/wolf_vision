@@ -160,7 +160,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
                                const Eigen::MatrixXs& _cov,
                                unsigned int _start_idx = 0,
                                int _size = -1);
-
         void addPriorP(const Eigen::VectorXs& _x,
                        const Eigen::MatrixXs& _cov,
                        unsigned int _start_idx = 0,
