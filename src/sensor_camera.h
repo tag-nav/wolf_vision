@@ -28,17 +28,6 @@ WOLF_PTR_TYPEDEFS(SensorCamera);
 class SensorCamera : public SensorBase
 {
     public:
-        /** \brief Constructor with arguments
-         *
-         * Constructor with arguments
-         * \param _p_ptr StateBlock pointer to the sensor position wrt vehicle base
-         * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
-         * \param _intr_ptr contains intrinsic values for the camera
-         * \param _img_width image height in pixels
-         * \param _img_height image width in pixels
-         *
-         **/
-        SensorCamera(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, int _img_width, int _img_height);
 
         SensorCamera(const Eigen::VectorXs & _extrinsics, const IntrinsicsCamera& _intrinsics);
         SensorCamera(const Eigen::VectorXs & _extrinsics, IntrinsicsCameraPtr _intrinsics_ptr);

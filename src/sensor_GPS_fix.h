@@ -25,15 +25,6 @@ WOLF_PTR_TYPEDEFS(SensorGPSFix);
 class SensorGPSFix : public SensorBase
 {
     public:
-        /** \brief Constructor with arguments
-         * 
-         * Constructor with arguments
-         * \param _p_ptr StateBlock pointer to the sensor position
-         * \param _o_ptr StateBlock pointer to the sensor orientation
-         * \param _noise noise standard deviation
-         * 
-         **/
-		SensorGPSFix(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const double& _noise);
         SensorGPSFix(const Eigen::VectorXs & _extrinsics, const IntrinsicsGPSFix& _intrinsics);
         SensorGPSFix(const Eigen::VectorXs & _extrinsics, IntrinsicsGPSFixPtr _intrinsics_ptr);
 
