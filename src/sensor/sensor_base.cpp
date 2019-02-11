@@ -1,5 +1,9 @@
 #include "base/sensor/sensor_base.h"
 #include "base/state_block.h"
+#include "base/state_quaternion.h"
+#include "base/constraint/constraint_block_absolute.h"
+#include "base/constraint/constraint_quaternion_absolute.h"
+
 
 namespace wolf {
 
@@ -60,30 +64,6 @@ SensorBase::~SensorBase()
 {
     // Remove State Blocks
     removeStateBlocks();
-}
-
-void SensorBase::remove()
-{
-    if (!is_removing_)
-    {
-        is_removing_ = true;
-        SensorBasePtr this_S = shared_from_this(); // protect it while removing links
-
-        // Remove State Blocks
-        removeStateBlocks();
-
-        // remove from upstream
-        auto H = hardware_ptr_.lock();
-        if (H)
-            H->getSensorList().remove(this_S);
-
-        // remove downstream processors
-        while (!processor_list_.empty())
-        {
-            processor_list_.front()->remove();
-        }
-    }
-
 }
 
 void SensorBase::removeStateBlocks()
@@ -162,6 +142,50 @@ void SensorBase::unfixIntrinsics()
     updateCalibSize();
 }
 
+void SensorBase::addPriorParameter(const unsigned int _i, const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
+{
+    assert(!isStateBlockDynamic(_i) && "SensorBase::addPriorParameter only allowed for static parameters");
+    assert(_i < state_block_vec_.size() && "State block not found");
+
+    StateBlockPtr _sb = getStateBlockPtrStatic(_i);
+    bool is_quaternion = (std::dynamic_pointer_cast<StateQuaternion>(_sb) != nullptr);
+
+    assert(((!is_quaternion && _x.size() == _cov.rows() && _x.size() == _cov.cols()) ||
+            (is_quaternion && _x.size() == 4 &&_cov.rows() == 3 && _cov.cols() == 3)) && "bad prior/covariance dimensions");
+    assert((_size == -1 && _start_idx == 0) || (_size+_start_idx <= _sb->getSize()));
+    assert(_size == -1 || _size == _x.size());
+    assert(!(_size != -1 && is_quaternion) && "prior of a segment of state not available for quaternion");
+
+    // set StateBlock state
+    if (_size == -1)
+        _sb->setState(_x);
+    else
+    {
+        Eigen::VectorXs new_x = _sb->getState();
+        new_x.segment(_start_idx,_size) = _x;
+        _sb->setState(new_x);
+    }
+
+    // remove previous prior (if any)
+    if (params_prior_map_.find(_i) != params_prior_map_.end())
+        params_prior_map_[_i]->remove();
+
+    // create feature
+    FeatureBasePtr ftr_prior = std::make_shared<FeatureBase>("ABSOLUTE",_x,_cov);
+
+    // set feature problem
+    ftr_prior->setProblem(getProblem());
+
+    // create & add constraint absolute
+    if (is_quaternion)
+        ftr_prior->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(_sb));
+    else
+        ftr_prior->addConstraint(std::make_shared<ConstraintBlockAbsolute>(_sb, _start_idx, _size));
+
+    // store feature in params_prior_map_
+    params_prior_map_[_i] = ftr_prior;
+}
+
 void SensorBase::registerNewStateBlocks()
 {
     if (getProblem() != nullptr)
@@ -238,32 +262,32 @@ CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
 
 StateBlockPtr SensorBase::getPPtr(const TimeStamp _ts)
 {
-    return getStateBlockPtrDynamic(0, _ts);
+    return getStateBlockPtr(0, _ts);
 }
 
 StateBlockPtr SensorBase::getOPtr(const TimeStamp _ts)
 {
-    return getStateBlockPtrDynamic(1, _ts);
+    return getStateBlockPtr(1, _ts);
 }
 
 StateBlockPtr SensorBase::getIntrinsicPtr(const TimeStamp _ts)
 {
-    return getStateBlockPtrDynamic(2, _ts);
+    return getStateBlockPtr(2, _ts);
 }
 
 StateBlockPtr SensorBase::getPPtr()
 {
-    return getStateBlockPtrDynamic(0);
+    return getStateBlockPtr(0);
 }
 
 StateBlockPtr SensorBase::getOPtr()
 {
-    return getStateBlockPtrDynamic(1);
+    return getStateBlockPtr(1);
 }
 
 StateBlockPtr SensorBase::getIntrinsicPtr()
 {
-    return getStateBlockPtrDynamic(2);
+    return getStateBlockPtr(2);
 }
 
 SizeEigen SensorBase::computeCalibSize() const
@@ -315,32 +339,62 @@ ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
     return _proc_ptr;
 }
 
-StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i)
+StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i)
 {
-    if ((_i<2 && this->extrinsicsInCaptures()) || (_i>=2 && intrinsicsInCaptures()))
-    {
-        CaptureBasePtr cap = lastKeyCapture();
-        if (cap)
-            return cap->getStateBlockPtr(_i);
-        else
-            return getStateBlockPtrStatic(_i);
-    }
-    else
-        return getStateBlockPtrStatic(_i);
+    CaptureBasePtr cap;
+
+    if (isStateBlockDynamic(_i, cap))
+        return cap->getStateBlockPtr(_i);
+
+    return getStateBlockPtrStatic(_i);
 }
 
-StateBlockPtr SensorBase::getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts)
+StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i, const TimeStamp& _ts)
+{
+    CaptureBasePtr cap;
+
+    if (isStateBlockDynamic(_i, _ts, cap))
+        return cap->getStateBlockPtr(_i);
+
+    return getStateBlockPtrStatic(_i);
+}
+
+bool SensorBase::isStateBlockDynamic(unsigned int _i, CaptureBasePtr& cap)
 {
     if ((_i<2 && this->extrinsicsInCaptures()) || (_i>=2 && intrinsicsInCaptures()))
     {
-        CaptureBasePtr cap = lastCapture(_ts);
-        if (cap)
-            return cap->getStateBlockPtr(_i);
-        else
-            return getStateBlockPtrStatic(_i);
+        cap = lastKeyCapture();
+
+        return cap != nullptr;
     }
     else
-        return getStateBlockPtrStatic(_i);
+        return false;
+}
+
+bool SensorBase::isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts, CaptureBasePtr& cap)
+{
+    if ((_i<2 && this->extrinsicsInCaptures()) || (_i>=2 && intrinsicsInCaptures()))
+    {
+        cap = lastCapture(_ts);
+
+        return cap != nullptr;
+    }
+    else
+        return false;
+}
+
+bool SensorBase::isStateBlockDynamic(unsigned int _i)
+{
+    CaptureBasePtr cap;
+
+    return isStateBlockDynamic(_i,cap);
+}
+
+bool SensorBase::isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts)
+{
+    CaptureBasePtr cap;
+
+    return isStateBlockDynamic(_i,_ts,cap);
 }
 
 void SensorBase::setProblem(ProblemPtr _problem)

@@ -46,17 +46,6 @@ class SensorIMU : public SensorBase
 
     public:
 
-        /** \brief Constructor with arguments
-         *
-         * Constructor with arguments
-         * \param _p_ptr StateBlock pointer to the sensor position wrt vehicle base
-         * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
-         * \param params IntrinsicsIMU pointer to sensor properties
-         * \param _a_w_biases_ptr StateBlock pointer to the vector of acc and gyro biases
-         *
-         **/
-        SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPtr _params);
-        SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const IntrinsicsIMU& _params);
         SensorIMU(const Eigen::VectorXs& _extrinsics, const IntrinsicsIMU& _params);
         SensorIMU(const Eigen::VectorXs& _extrinsics, IntrinsicsIMUPtr _params);
 

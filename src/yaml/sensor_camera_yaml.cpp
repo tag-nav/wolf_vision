@@ -24,40 +24,58 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
 {
     YAML::Node camera_config = YAML::LoadFile(_filename_dot_yaml);
 
-    if ("CAMERA") //camera_config["sensor type"])
+    //    if (camera_config["sensor type"].as<std::string>() == "CAMERA") // this does not work: camera YAML files are ROS-styled
+    if (camera_config["camera_matrix"]) // check that at least this field exists to validate YAML file of the correct type
     {
 
         // YAML:: to Eigen::
         using namespace Eigen;
-        std::string sensor_type = "CAMERA"; //camera_config["sensor type"]                  .as<std::string>();
-        std::string sensor_name = camera_config["camera_name"]                      .as<std::string>();
         unsigned int width      = camera_config["image_width"]                      .as<unsigned int>();
         unsigned int height     = camera_config["image_height"]                     .as<unsigned int>();
-        VectorXd intrinsic      = camera_config["camera_matrix"]["data"]            .as<VectorXd>();
         VectorXd distortion     = camera_config["distortion_coefficients"]["data"]  .as<VectorXd>();
+        VectorXd intrinsic      = camera_config["camera_matrix"]["data"]            .as<VectorXd>();
+        VectorXd projection     = camera_config["projection_matrix"]["data"]        .as<VectorXd>();
 
         // Eigen:: to wolf::
         std::shared_ptr<IntrinsicsCamera> intrinsics_cam = std::make_shared<IntrinsicsCamera>();
-        intrinsics_cam->type = sensor_type;
-        intrinsics_cam->name = sensor_name;
-        intrinsics_cam->pinhole_model[0] = intrinsic[2];
-        intrinsics_cam->pinhole_model[1] = intrinsic[5];
-        intrinsics_cam->pinhole_model[2] = intrinsic[0];
-        intrinsics_cam->pinhole_model[3] = intrinsic[4];
+
+        intrinsics_cam->width   = width;
+        intrinsics_cam->height  = height;
+
+        intrinsics_cam->pinhole_model_raw[0] = intrinsic[2];
+        intrinsics_cam->pinhole_model_raw[1] = intrinsic[5];
+        intrinsics_cam->pinhole_model_raw[2] = intrinsic[0];
+        intrinsics_cam->pinhole_model_raw[3] = intrinsic[4];
+
+        intrinsics_cam->pinhole_model_rectified[0] = projection[2];
+        intrinsics_cam->pinhole_model_rectified[1] = projection[6];
+        intrinsics_cam->pinhole_model_rectified[2] = projection[0];
+        intrinsics_cam->pinhole_model_rectified[3] = projection[5];
+
         assert (distortion.size() == 5 && "Distortion size must be size 5!");
-        assert (distortion(2) == 0 && distortion(3) == 0 && "Cannot handle tangential distortion. Please re-calibrate without tangential distortion!");
+
+        WOLF_WARN_COND( distortion(2) != 0 || distortion(3) != 0 , "Wolf does not handle tangential distortion. Please consider re-calibrating without tangential distortion!");
+
         if (distortion(4) == 0)
-            intrinsics_cam->distortion = distortion.head<2>();
+            if (distortion(1) == 0)
+                if (distortion(0) == 0)
+                    intrinsics_cam->distortion.resize(0);
+                else
+                {
+                    intrinsics_cam->distortion.resize(1);
+                    intrinsics_cam->distortion = distortion.head<1>();
+                }
+            else
+            {
+                intrinsics_cam->distortion.resize(2);
+                intrinsics_cam->distortion = distortion.head<2>();
+            }
         else
         {
-            unsigned int dist_size = distortion.size() - 2;
-            unsigned int dist_tail_size = dist_size - 2;
-            intrinsics_cam->distortion.resize(dist_size);
+            intrinsics_cam->distortion.resize(3);
             intrinsics_cam->distortion.head<2>() = distortion.head<2>();
-            intrinsics_cam->distortion.tail(dist_tail_size) = distortion.tail(dist_tail_size);
+            intrinsics_cam->distortion.tail<1>() = distortion.tail<1>();
         }
-        intrinsics_cam->width = width;
-        intrinsics_cam->height = height;
 
         //=========================================
         // ===== this part for debugging only =====
@@ -83,7 +101,7 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
         return intrinsics_cam;
     }
 
-    std::cout << "Bad configuration file. No sensor type found." << std::endl;
+    std::cout << "Bad configuration file. No or bad sensor type found." << std::endl;
     return nullptr;
 }
 

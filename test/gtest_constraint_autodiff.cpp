@@ -23,7 +23,10 @@ TEST(CaptureAutodiff, ConstructorOdom2d)
     FrameBasePtr fr2_ptr(std::make_shared<FrameBase>(TimeStamp(0), std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1)));
 
     // SENSOR
-    SensorOdom2DPtr sensor_ptr = std::make_shared<SensorOdom2D>(std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1), 0.1, 0.1);
+    IntrinsicsOdom2D intrinsics_odo;
+    intrinsics_odo.k_disp_to_disp = 0.1;
+    intrinsics_odo.k_rot_to_rot = 0.1;
+    SensorOdom2DPtr sensor_ptr = std::make_shared<SensorOdom2D>(Vector3s::Zero(), intrinsics_odo);
 
     // CAPTURE
     CaptureVoidPtr capture_ptr = std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr);
@@ -55,7 +58,10 @@ TEST(CaptureAutodiff, ResidualOdom2d)
     FrameBasePtr fr2_ptr(std::make_shared<FrameBase>(TimeStamp(0), std::make_shared<StateBlock>(f2_pose.head<2>()), std::make_shared<StateBlock>(f2_pose.tail<1>())));
 
     // SENSOR
-    SensorOdom2DPtr sensor_ptr = std::make_shared<SensorOdom2D>(std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1), 0.1, 0.1);
+    IntrinsicsOdom2D intrinsics_odo;
+    intrinsics_odo.k_disp_to_disp = 0.1;
+    intrinsics_odo.k_rot_to_rot = 0.1;
+    SensorOdom2DPtr sensor_ptr = std::make_shared<SensorOdom2D>(Vector3s::Zero(), intrinsics_odo);
 
     // CAPTURE
     CaptureVoidPtr capture_ptr = std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr);
@@ -99,7 +105,10 @@ TEST(CaptureAutodiff, JacobianOdom2d)
     FrameBasePtr fr2_ptr(std::make_shared<FrameBase>(TimeStamp(0), std::make_shared<StateBlock>(f2_pose.head<2>()), std::make_shared<StateBlock>(f2_pose.tail<1>())));
 
     // SENSOR
-    SensorOdom2DPtr sensor_ptr = std::make_shared<SensorOdom2D>(std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1), 0.1, 0.1);
+    IntrinsicsOdom2D intrinsics_odo;
+    intrinsics_odo.k_disp_to_disp = 0.1;
+    intrinsics_odo.k_rot_to_rot = 0.1;
+    SensorOdom2DPtr sensor_ptr = std::make_shared<SensorOdom2D>(Vector3s::Zero(), intrinsics_odo);
 
     // CAPTURE
     CaptureVoidPtr capture_ptr = std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr);
@@ -178,7 +187,10 @@ TEST(CaptureAutodiff, AutodiffVsAnalytic)
     FrameBasePtr fr2_ptr(std::make_shared<FrameBase>(TimeStamp(0), std::make_shared<StateBlock>(f2_pose.head<2>()), std::make_shared<StateBlock>(f2_pose.tail<1>())));
 
     // SENSOR
-    SensorOdom2DPtr sensor_ptr = std::make_shared<SensorOdom2D>(std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1), 0.1, 0.1);
+    IntrinsicsOdom2D intrinsics_odo;
+    intrinsics_odo.k_disp_to_disp = 0.1;
+    intrinsics_odo.k_rot_to_rot = 0.1;
+    SensorOdom2DPtr sensor_ptr = std::make_shared<SensorOdom2D>(Vector3s::Zero(), intrinsics_odo);
 
     // CAPTURE
     CaptureVoidPtr capture_ptr = std::make_shared<CaptureVoid>(TimeStamp(0), sensor_ptr);

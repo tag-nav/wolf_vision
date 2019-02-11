@@ -7,23 +7,18 @@
 namespace wolf
 {
 
-SensorCamera::SensorCamera(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, //
-                           int _img_width, int _img_height) :
-        SensorBase("CAMERA", _p_ptr, _o_ptr, _intr_ptr, 2), //
-        img_width_(_img_width), img_height_(_img_height)
-{
-    //
-}
-
 SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsCamera& _intrinsics) :
-                SensorBase("CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(_intrinsics.pinhole_model, true), 1),
+                SensorBase("CAMERA", std::make_shared<StateBlock>(_extrinsics.head(3), true), std::make_shared<StateQuaternion>(_extrinsics.tail(4), true), std::make_shared<StateBlock>(_intrinsics.pinhole_model_raw, true), 1),
                 img_width_(_intrinsics.width), //
                 img_height_(_intrinsics.height), //
                 distortion_(_intrinsics.distortion), //
-                correction_(distortion_.size()+2) // make correction vector of the same size as distortion vector
+                correction_(distortion_.size() + 1), // make correction vector slightly larger in size than the distortion vector
+                pinhole_model_raw_(_intrinsics.pinhole_model_raw), //
+                pinhole_model_rectified_(_intrinsics.pinhole_model_rectified), //
+                using_raw_(true)
 {
     assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3D");
-    K_ = setIntrinsicMatrix(_intrinsics.pinhole_model);
+    useRawImages();
     pinhole::computeCorrectionModel(getIntrinsicPtr()->getState(), distortion_, correction_);
 }
 
@@ -69,7 +64,6 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
 
 // Register in the SensorFactory
 #include "base/sensor/sensor_factory.h"
-//#include "base/factory.h"
 namespace wolf
 {
 WOLF_REGISTER_SENSOR("CAMERA", SensorCamera)

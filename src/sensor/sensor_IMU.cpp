@@ -4,24 +4,6 @@
 
 namespace wolf {
 
-SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const IntrinsicsIMU& _params) :
-        SensorBase("IMU", _p_ptr, _o_ptr, std::make_shared<StateBlock>(6, false, nullptr), (Eigen::Vector6s()<<_params.a_noise,_params.a_noise,_params.a_noise,_params.w_noise,_params.w_noise,_params.w_noise).finished(), false, true),
-        a_noise(_params.a_noise),
-        w_noise(_params.w_noise),
-        ab_initial_stdev(_params.ab_initial_stdev),
-        wb_initial_stdev(_params.wb_initial_stdev),
-        ab_rate_stdev(_params.ab_rate_stdev),
-        wb_rate_stdev(_params.wb_rate_stdev)
-{
-    //
-}
-
-SensorIMU::SensorIMU(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, IntrinsicsIMUPtr _params) :
-        SensorIMU(_p_ptr, _o_ptr, *_params)
-{
-    //
-}
-
 SensorIMU::SensorIMU(const Eigen::VectorXs& _extrinsics, IntrinsicsIMUPtr _params) :
         SensorIMU(_extrinsics, *_params)
 {

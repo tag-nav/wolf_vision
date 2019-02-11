@@ -26,16 +26,6 @@ class SensorOdom2D : public SensorBase
         Scalar k_rot_to_rot_; ///< ratio of rotation variance to rotation, for odometry noise calculation
 
 	public:
-        /** \brief Constructor with arguments
-         * 
-         * Constructor with arguments
-         * \param _p_ptr StateBlock pointer to the sensor position wrt vehicle base
-         * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
-         * \param _disp_noise_factor displacement noise factor
-         * \param _rot_noise_factor rotation noise factor
-         * 
-         **/
-        SensorOdom2D(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, const Scalar& _disp_noise_factor, const Scalar&  _rot_noise_factor);
         SensorOdom2D(Eigen::VectorXs _extrinsics, const IntrinsicsOdom2D& _intrinsics);
         SensorOdom2D(Eigen::VectorXs _extrinsics, IntrinsicsOdom2DPtr _intrinsics);
 
