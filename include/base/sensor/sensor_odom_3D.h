@@ -38,14 +38,6 @@ class SensorOdom3D : public SensorBase
         Scalar min_rot_var_;
 
     public:
-        /** \brief Constructor with arguments
-         *
-         * Constructor with arguments
-         * \param _p_ptr StateBlock pointer to the sensor position wrt vehicle base
-         * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
-         * \param _params shared_ptr to a struct with parameters
-         **/
-        SensorOdom3D(StateBlockPtr _p_ptr, StateQuaternionPtr _q_ptr, IntrinsicsOdom3DPtr params);
         SensorOdom3D(const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsOdom3D& params);
         SensorOdom3D(const Eigen::VectorXs& _extrinsics_pq, IntrinsicsOdom3DPtr params);
 

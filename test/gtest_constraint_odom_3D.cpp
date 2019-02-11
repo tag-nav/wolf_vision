@@ -33,12 +33,12 @@ Vector7s x0 = data2delta(Vector6s::Random()*0.25);
 Vector7s x1 = data2delta(data + Vector6s::Random()*0.25);
 
 // Problem and solver
-ProblemPtr problem = Problem::create("PO 3D");
-CeresManager ceres_mgr(problem);
+ProblemPtr problem_ptr = Problem::create("PO 3D");
+CeresManager ceres_mgr(problem_ptr);
 
 // Two frames
-FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeStamp(0));
-FrameBasePtr frm1 = problem->emplaceFrame(KEY_FRAME, delta, TimeStamp(1));
+FrameBasePtr frm0 = problem_ptr->emplaceFrame(KEY_FRAME, problem_ptr->zeroState(), TimeStamp(0));
+FrameBasePtr frm1 = problem_ptr->emplaceFrame(KEY_FRAME, delta, TimeStamp(1));
 
 // Capture, feature and constraint from frm1 to frm0
 CaptureBasePtr cap1 = frm1->addCapture(std::make_shared<CaptureMotion>("ODOM 3D", 1, nullptr, delta, 7, 6, nullptr));
@@ -50,7 +50,7 @@ ConstraintBasePtr dummy = frm0->addConstrainedBy(ctr1);
 
 TEST(ConstraintOdom3D, check_tree)
 {
-    ASSERT_TRUE(problem->check(0));
+    ASSERT_TRUE(problem_ptr->check(0));
 }
 
 TEST(ConstraintOdom3D, expectation)
@@ -83,7 +83,7 @@ TEST(ConstraintOdom3D, fix_1_solve)
     // solve for frm0
     std::string brief_report = ceres_mgr.solve(SolverManager::ReportVerbosity::BRIEF);
 
-    ASSERT_MATRIX_APPROX(frm0->getState(), problem->zeroState(), 1e-6);
+    ASSERT_MATRIX_APPROX(frm0->getState(), problem_ptr->zeroState(), 1e-6);
 }
 
 int main(int argc, char **argv)

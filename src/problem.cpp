@@ -4,17 +4,14 @@
 #include "base/trajectory_base.h"
 #include "base/map_base.h"
 #include "base/sensor/sensor_base.h"
-#include "base/factory.h"
+#include "base/processor/processor_motion.h"
+#include "base/processor/processor_tracker.h"
+#include "base/capture/capture_pose.h"
+#include "base/constraint/constraint_base.h"
 #include "base/sensor/sensor_factory.h"
 #include "base/processor/processor_factory.h"
-#include "base/constraint/constraint_base.h"
 #include "base/state_block.h"
-#include "base/processor/processor_motion.h"
-#include "base/sensor/sensor_GPS.h"
 
-#include "base/processor/processor_tracker.h"
-//#include "processors/processor_tracker_feature_trifocal.h"
-#include "base/capture/capture_pose.h"
 
 // IRI libs includes
 
@@ -779,7 +776,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                 {
                     if (i==0) cout << "    Extr " << (S->isExtrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
                     if (i==2) cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
-                    auto sb = S->getStateBlockPtrDynamic(i);
+                    auto sb = S->getStateBlockPtr(i);
                     if (sb)
                     {
                         cout << (sb->isFixed() ? " Fix( " : " Est( ") << sb->getState().transpose() << " )";
