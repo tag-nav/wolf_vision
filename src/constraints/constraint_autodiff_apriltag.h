@@ -72,7 +72,7 @@ ConstraintAutodiffApriltag::ConstraintAutodiffApriltag(
                                nullptr,
                                _landmark_other_ptr,
                                nullptr,
-                               false,
+                               true,
                                CTR_ACTIVE,
                                _sensor_ptr->getPPtr(),         _sensor_ptr->getOPtr(),
                                _frame_ptr->getPPtr(),          _frame_ptr->getOPtr(),

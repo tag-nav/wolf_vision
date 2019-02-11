@@ -549,6 +549,8 @@ FeatureBaseList ProcessorTrackerLandmarkApriltag::getLastDetections() const
 
 void ProcessorTrackerLandmarkApriltag::configure(SensorBasePtr _sensor)
 {
+//    _sensor->useRectifiedImages();
+
     // get camera intrinsic parameters
     Eigen::Vector4s k(_sensor->getIntrinsicPtr()->getState()); //[cx cy fx fy]
 
