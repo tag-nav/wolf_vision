@@ -103,6 +103,15 @@ TEST(CaptureBase, addFeatureList)
     ASSERT_EQ(C->getFeatureList().back(), f_last);
 }
 
+TEST(CaptureBase, process)
+{
+    SensorBasePtr S(std::make_shared<SensorBase>("DUMMY", nullptr, nullptr, nullptr, 2));
+    CaptureBasePtr C(std::make_shared<CaptureBase>("DUMMY", 1.5, nullptr));
+    ASSERT_DEATH({C->process();},""); // No sensor in the capture should fail
+    C->setSensorPtr(S);
+    ASSERT_TRUE(C->process()); // This should not fail (although it does nothing)
+}
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);

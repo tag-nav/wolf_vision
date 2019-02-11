@@ -42,7 +42,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         ProcessorMotionPtr  processor_motion_ptr_;
         StateBlockList      state_block_list_;
         std::map<std::pair<StateBlockPtr, StateBlockPtr>, Eigen::MatrixXs> covariances_;
-        SizeEigen state_size_, state_cov_size_;
+        SizeEigen state_size_, state_cov_size_, dim_;
         std::map<ConstraintBasePtr, Notification> constraint_notification_map_;
         std::map<StateBlockPtr, Notification> state_block_notification_map_;
         bool prior_is_set_;
@@ -58,6 +58,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         // Properties -----------------------------------------
         SizeEigen getFrameStructureSize() const;
         void getFrameStructureSize(SizeEigen& _x_size, SizeEigen& _cov_size) const;
+        SizeEigen getDim() const;
 
         // Hardware branch ------------------------------------
         HardwareBasePtr getHardwarePtr();

@@ -83,7 +83,6 @@ class ConstraintAnalytic: public ConstraintBase
 
         /** \brief Evaluate the constraint given the input parameters and returning the residuals and jacobians
         **/
-        // TODO
         virtual bool evaluate(Scalar const* const* parameters, Scalar* residuals, Scalar** jacobians) const override
         {
             // load parameters evaluation value
@@ -118,7 +117,7 @@ class ConstraintAnalytic: public ConstraintBase
             return true;
         };
 
-        /** Returns the residual vetor and a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
+        /** Returns the residual vector and a vector of Jacobian matrix corresponding to each state block evaluated in the point provided in _states_ptr
          **/
         // TODO
         virtual void evaluate(const std::vector<const Scalar*>& _states_ptr, Eigen::VectorXs& residual_, std::vector<Eigen::MatrixXs>& jacobians_) const override
@@ -132,9 +131,9 @@ class ConstraintAnalytic: public ConstraintBase
          **/
         virtual Eigen::VectorXs evaluateResiduals(const std::vector<Eigen::Map<const Eigen::VectorXs>>& _st_vector) const = 0;
 
-        /** \brief Returns the jacobians evaluated in the states provided
+        /** \brief Returns the normalized jacobians evaluated in the states
          *
-         * Returns the jacobians evaluated in the states provided in std::vector of mapped Eigen::VectorXs.
+         * Returns the normalized (by the measurement noise sqrt information) jacobians evaluated in the states provided in std::vector of mapped Eigen::VectorXs.
          * IMPORTANT: only fill the jacobians of the state blocks specified in _compute_jacobian.
          *
          * \param _st_vector is a vector containing the mapped eigen vectors of all state blocks involved in the constraint
@@ -144,11 +143,10 @@ class ConstraintAnalytic: public ConstraintBase
          **/
         virtual void evaluateJacobians(const std::vector<Eigen::Map<const Eigen::VectorXs>>& _st_vector, std::vector<Eigen::Map<Eigen::MatrixXs>>& jacobians, const std::vector<bool>& _compute_jacobian) const = 0;
 
-        /** \brief Returns the pure jacobians (without measurement noise) evaluated in the state blocks values
+        /** \brief Returns the jacobians (without measurement noise normalization) evaluated in the current state blocks values
          *
-         * Returns the pure jacobians (without measurement noise) evaluated in the state blocks values
+         * Returns the jacobians (without measurement noise normalization) evaluated in the current state blocks values
          *
-         * \param _st_vector is a vector containing the mapped eigen vectors of all state blocks involved in the constraint
          * \param jacobians is an output vector of mapped eigen matrices that sould contain the jacobians w.r.t each state block
          *
          **/

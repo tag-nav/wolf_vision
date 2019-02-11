@@ -25,9 +25,6 @@ namespace wolf {
 struct IntrinsicsBase
 {
         virtual ~IntrinsicsBase() = default;
-
-        std::string type;
-        std::string name;
 };
 
 class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBase>
@@ -39,7 +36,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         SizeEigen calib_size_;
 
         static unsigned int sensor_id_count_; ///< Object counter (acts as simple ID factory)
-        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
 
     protected:
         unsigned int sensor_id_;   // sensor ID
@@ -50,6 +46,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
         Eigen::VectorXs noise_std_; // std of sensor noise
         Eigen::MatrixXs noise_cov_; // cov matrix of noise
+
+        std::map<unsigned int,FeatureBasePtr> params_prior_map_; // Priors (value and covariance) of extrinsic & intrinsic state blocks (by index in state_block_vec_)
 
     public:
         /** \brief Constructor with noise size
@@ -91,7 +89,6 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
                    const bool _intr_dyn = false);
 
         virtual ~SensorBase();
-        void remove();
 
         unsigned int id();
 
@@ -112,10 +109,15 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
         std::vector<StateBlockPtr>& getStateBlockVec();
         StateBlockPtr getStateBlockPtrStatic(unsigned int _i) const;
-        StateBlockPtr getStateBlockPtrDynamic(unsigned int _i);
-        StateBlockPtr getStateBlockPtrDynamic(unsigned int _i, const TimeStamp& _ts);
+        StateBlockPtr getStateBlockPtr(unsigned int _i);
+        StateBlockPtr getStateBlockPtr(unsigned int _i, const TimeStamp& _ts);
         void setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr);
         void resizeStateBlockVec(unsigned int _size);
+
+        bool isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts, CaptureBasePtr& cap);
+        bool isStateBlockDynamic(unsigned int _i, CaptureBasePtr& cap);
+        bool isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts);
+        bool isStateBlockDynamic(unsigned int _i);
 
         StateBlockPtr getPPtr(const TimeStamp _ts);
         StateBlockPtr getOPtr(const TimeStamp _ts);
@@ -134,6 +136,32 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         void unfixExtrinsics();
         void fixIntrinsics();
         void unfixIntrinsics();
+
+        /** \brief Add an absolute constraint to a parameter
+         *
+         * Add an absolute constraint to a parameter
+         * \param _i state block index (in state_block_vec_) of the parameter to be constrained
+         * \param _x prior value
+         * \param _cov covariance
+         * \param _start_idx state segment starting index (not used in quaternions)
+         * \param _size state segment size (-1: whole state) (not used in quaternions)
+         *
+         **/
+        void addPriorParameter(const unsigned int _i,
+                               const Eigen::VectorXs& _x,
+                               const Eigen::MatrixXs& _cov,
+                               unsigned int _start_idx = 0,
+                               int _size = -1);
+        void addPriorP(const Eigen::VectorXs& _x,
+                       const Eigen::MatrixXs& _cov,
+                       unsigned int _start_idx = 0,
+                       int _size = -1);
+        void addPriorO(const Eigen::VectorXs& _x,
+                       const Eigen::MatrixXs& _cov);
+        void addPriorIntrinsics(const Eigen::VectorXs& _x,
+                                const Eigen::MatrixXs& _cov,
+                                unsigned int _start_idx = 0,
+                                int _size = -1);
 
         SizeEigen getCalibSize() const;
         Eigen::VectorXs getCalibration() const;
@@ -198,6 +226,8 @@ inline StateBlockPtr SensorBase::getStateBlockPtrStatic(unsigned int _i) const
 
 inline void SensorBase::setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
+    assert (_i < state_block_vec_.size() && "Setting a state block pointer out of the vector range!");
+    assert((params_prior_map_.find(_i) == params_prior_map_.end() || _sb_ptr == nullptr) && "overwriting a state block that has an absolute constraint");
     state_block_vec_[_i] = _sb_ptr;
 }
 
@@ -252,6 +282,21 @@ inline void SensorBase::setIntrinsicPtr(const StateBlockPtr _intr_ptr)
 inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
 {
     hardware_ptr_ = _hw_ptr;
+}
+
+inline void SensorBase::addPriorP(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
+{
+    addPriorParameter(0, _x, _cov, _start_idx, _size);
+}
+
+inline void SensorBase::addPriorO(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov)
+{
+    addPriorParameter(1, _x, _cov);
+}
+
+inline void SensorBase::addPriorIntrinsics(const Eigen::VectorXs& _x, const Eigen::MatrixXs& _cov, unsigned int _start_idx, int _size)
+{
+    addPriorParameter(2, _x, _cov);
 }
 
 inline SizeEigen SensorBase::getCalibSize() const

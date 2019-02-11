@@ -12,10 +12,11 @@ WOLF_STRUCT_PTR_TYPEDEFS(IntrinsicsCamera);
  */
 struct IntrinsicsCamera : public IntrinsicsBase
 {
-        unsigned int width;                 ///< Image width in pixels
-        unsigned int height;                ///< Image height in pixels
-        Eigen::Vector4s pinhole_model;      ///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
-        Eigen::VectorXs distortion;         ///< d = [d_1, d_2, d_3, ...] radial distortion coefficients
+        unsigned int width;                     ///< Image width in pixels
+        unsigned int height;                    ///< Image height in pixels
+        Eigen::Vector4s pinhole_model_raw;      ///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
+        Eigen::Vector4s pinhole_model_rectified;///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
+        Eigen::VectorXs distortion;             ///< d = [d_1, d_2, d_3, ...] radial distortion coefficients
 
         virtual ~IntrinsicsCamera() = default;
 };
@@ -27,26 +28,20 @@ WOLF_PTR_TYPEDEFS(SensorCamera);
 class SensorCamera : public SensorBase
 {
     public:
-        /** \brief Constructor with arguments
-         *
-         * Constructor with arguments
-         * \param _p_ptr StateBlock pointer to the sensor position wrt vehicle base
-         * \param _o_ptr StateBlock pointer to the sensor orientation wrt vehicle base
-         * \param _intr_ptr contains intrinsic values for the camera
-         * \param _img_width image height in pixels
-         * \param _img_height image width in pixels
-         *
-         **/
-        SensorCamera(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, StateBlockPtr _intr_ptr, int _img_width, int _img_height);
 
         SensorCamera(const Eigen::VectorXs & _extrinsics, const IntrinsicsCamera& _intrinsics);
         SensorCamera(const Eigen::VectorXs & _extrinsics, IntrinsicsCameraPtr _intrinsics_ptr);
 
         virtual ~SensorCamera();
 
-        Eigen::VectorXs getDistortionVector(){return distortion_;}
-        Eigen::VectorXs getCorrectionVector(){return correction_;}
-        Eigen::Matrix3s getIntrinsicMatrix() {return K_;}
+        Eigen::VectorXs getDistortionVector()   { return distortion_; }
+        Eigen::VectorXs getCorrectionVector()   { return correction_; }
+        Eigen::Matrix3s getIntrinsicMatrix()    { return K_; }
+
+        bool isUsingRawImages() { return using_raw_; }
+        bool useRawImages();
+        bool useRectifiedImages();
+
 
         int getImgWidth(){return img_width_;}
         int getImgHeight(){return img_height_;}
@@ -58,7 +53,9 @@ class SensorCamera : public SensorBase
         int img_height_;
         Eigen::VectorXs distortion_;
         Eigen::VectorXs correction_;
+        Eigen::Vector4s pinhole_model_raw_, pinhole_model_rectified_;
         Eigen::Matrix3s K_;
+        bool using_raw_;
 
         virtual Eigen::Matrix3s setIntrinsicMatrix(Eigen::Vector4s _pinhole_model);
 
@@ -70,6 +67,24 @@ class SensorCamera : public SensorBase
                                     const IntrinsicsBasePtr _intrinsics);
 
 };
+
+inline bool SensorCamera::useRawImages()
+{
+    getIntrinsicPtr()->setState(pinhole_model_raw_);
+    K_ = setIntrinsicMatrix(pinhole_model_raw_);
+    using_raw_ = true;
+
+    return true;
+}
+
+inline bool SensorCamera::useRectifiedImages()
+{
+    getIntrinsicPtr()->setState(pinhole_model_rectified_);
+    K_ = setIntrinsicMatrix(pinhole_model_rectified_);
+    using_raw_ = false;
+
+    return true;
+}
 
 } // namespace wolf
 

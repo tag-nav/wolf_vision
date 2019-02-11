@@ -29,7 +29,6 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         SizeEigen calib_size_;           ///< size of the calibration parameters (dynamic or static sensor params that are not fixed)
 
         static unsigned int capture_id_count_;
-        bool is_removing_;          ///< A flag for safely removing nodes from the Wolf tree. See remove().
 
     protected:
         unsigned int capture_id_;
@@ -45,10 +44,12 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
                     StateBlockPtr _intr_ptr     = nullptr);
 
         virtual ~CaptureBase();
-        void remove();
+        virtual void remove();
 
         // Type
         virtual bool isMotion() const { return false; }
+
+        bool process();
 
         unsigned int id();
         TimeStamp getTimeStamp() const;
@@ -219,6 +220,14 @@ inline void CaptureBase::setTimeStampToNow()
 {
     time_stamp_.setToNow();
 }
+
+inline bool CaptureBase::process()
+{
+    assert (getSensorPtr() != nullptr && "Attempting to process a capture with no associated sensor. Either set the capture's sensor or call sensor->process(capture) instead.");
+
+    return getSensorPtr()->process(shared_from_this());
+}
+
 
 } // namespace wolf
 

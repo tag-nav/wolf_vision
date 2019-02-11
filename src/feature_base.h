@@ -25,7 +25,6 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         ConstraintBaseList constrained_by_list_;
 
         static unsigned int feature_id_count_;
-        bool is_removing_; ///< A flag for safely removing nodes from the Wolf tree. See remove().
 
     protected:
         unsigned int feature_id_;
@@ -53,7 +52,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         FeatureBase(const std::string& _type, const Eigen::VectorXs& _measurement, const Eigen::MatrixXs& _meas_uncertainty, UncertaintyType _uncertainty_type = UNCERTAINTY_IS_COVARIANCE);
 
         virtual ~FeatureBase();
-        void remove();
+        virtual void remove();
 
         virtual void setProblem(ProblemPtr _problem) final;
 

@@ -430,6 +430,7 @@ unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned 
 
 bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
 {
+    return true;
     Scalar dt_incoming_origin = getIncomingPtr()->getTimeStamp().get() - getOriginPtr()->getTimeStamp().get();
     if (dt_incoming_origin > min_time_vote_){
         bool more_in_last = getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_;
@@ -549,7 +550,8 @@ FeatureBaseList ProcessorTrackerLandmarkApriltag::getLastDetections() const
 
 void ProcessorTrackerLandmarkApriltag::configure(SensorBasePtr _sensor)
 {
-//    _sensor->useRectifiedImages();
+    SensorCameraPtr sen_cam_ptr = std::static_pointer_cast<SensorCamera>(_sensor);
+    sen_cam_ptr->useRectifiedImages();
 
     // get camera intrinsic parameters
     Eigen::Vector4s k(_sensor->getIntrinsicPtr()->getState()); //[cx cy fx fy]

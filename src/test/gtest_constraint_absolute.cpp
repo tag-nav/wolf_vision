@@ -27,18 +27,17 @@ Vector10s pose9toPose10(Vector9s _pose9)
 // Input pose9 and covariance
 Vector9s pose(Vector9s::Random());
 Vector10s pose10 = pose9toPose10(pose);
-Vector9s data_var((Vector9s() << 0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2,0.2).finished());
-Eigen::Matrix<wolf::Scalar, 9, 9> data_cov = data_var.asDiagonal();
+Eigen::Matrix<wolf::Scalar, 9, 9> data_cov = 0.2 * Eigen::Matrix<Scalar,9,9>::Identity();
 
 // perturbated priors
 Vector10s x0 = pose9toPose10(pose + Vector9s::Random()*0.25);
 
 // Problem and solver
-ProblemPtr problem = Problem::create("POV 3D");
-CeresManager ceres_mgr(problem);
+ProblemPtr problem_ptr = Problem::create("POV 3D");
+CeresManager ceres_mgr(problem_ptr);
 
 // Two frames
-FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeStamp(0));
+FrameBasePtr frm0 = problem_ptr->emplaceFrame(KEY_FRAME, problem_ptr->zeroState(), TimeStamp(0));
 
 // Capture, feature and constraint
 CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("IMU ABS", 0, nullptr, pose10, 10, 9, nullptr));
@@ -49,22 +48,13 @@ CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("IMU ABS"
  * Both features and constraints are created in the TEST(). Hence, tests will not interfere each others.
  */
 
-TEST(ConstraintBlockAbs, ctr_block_abs_p_check)
+TEST(ConstraintBlockAbs, ctr_block_abs_p)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
-    ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
-        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr()))
-        );
-    ASSERT_TRUE(problem->check(0));
-}
+    fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr()));
 
-TEST(ConstraintBlockAbs, ctr_block_abs_p_solve)
-{
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION", pose10.head<3>(), data_cov.topLeftCorner<3,3>()));
-    ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
-        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr()))
-        );
-    
+    ASSERT_TRUE(problem_ptr->check(0));
+
     // Unfix frame 0, perturb frm0
     frm0->unfix();
     frm0->setState(x0);
@@ -73,24 +63,31 @@ TEST(ConstraintBlockAbs, ctr_block_abs_p_solve)
     std::string brief_report = ceres_mgr.solve(wolf::SolverManager::ReportVerbosity::BRIEF);
 
     //only orientation is constrained
-    ASSERT_MATRIX_APPROX(frm0->getState().head<3>(), pose10.head<3>(), 1e-6);
+    ASSERT_MATRIX_APPROX(frm0->getPPtr()->getState(), pose10.head<3>(), 1e-6);
 }
 
-TEST(ConstraintBlockAbs, ctr_block_abs_v_check)
+TEST(ConstraintBlockAbs, ctr_block_abs_p_tail2)
 {
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("VELOCITY", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
-    ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
-        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr()))
-        );
-    ASSERT_TRUE(problem->check(0));
+    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("POSITION TAIL 2", pose10.segment<2>(1), data_cov.bottomRightCorner<2,2>()));
+    fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getPPtr(),1,2));
+
+    // Unfix frame 0, perturb frm0
+    frm0->unfix();
+    frm0->setState(x0);
+
+    // solve for frm0
+    std::string brief_report = ceres_mgr.solve(wolf::SolverManager::ReportVerbosity::BRIEF);
+
+    //only orientation is constrained
+    ASSERT_MATRIX_APPROX(frm0->getPPtr()->getState().tail<2>(), pose10.segment<2>(1), 1e-6);
 }
 
-TEST(ConstraintBlockAbs, ctr_block_abs_v_solve)
+TEST(ConstraintBlockAbs, ctr_block_abs_v)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("VELOCITY", pose10.tail<3>(), data_cov.bottomRightCorner<3,3>()));
-    ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
-        fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr()))
-        );
+    fea0->addConstraint(std::make_shared<ConstraintBlockAbsolute>(fea0->getFramePtr()->getVPtr()));
+
+    ASSERT_TRUE(problem_ptr->check(0));
     
     // Unfix frame 0, perturb frm0
     frm0->unfix();
@@ -100,24 +97,15 @@ TEST(ConstraintBlockAbs, ctr_block_abs_v_solve)
     std::string brief_report = ceres_mgr.solve(wolf::SolverManager::ReportVerbosity::BRIEF);
 
     //only velocity is constrained
-    ASSERT_MATRIX_APPROX(frm0->getState().tail<3>(), pose10.tail<3>(), 1e-6);
+    ASSERT_MATRIX_APPROX(frm0->getVPtr()->getState(), pose10.tail<3>(), 1e-6);
 }
 
-TEST(ConstraintQuatAbs, ctr_block_abs_o_check)
+TEST(ConstraintQuatAbs, ctr_block_abs_o)
 {
     FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("QUATERNION", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
-    ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
-        fea0->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(fea0->getFramePtr()->getOPtr()))
-        );
-    ASSERT_TRUE(problem->check(0));
-}
+    fea0->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(fea0->getFramePtr()->getOPtr()));
 
-TEST(ConstraintQuatAbs, ctr_block_abs_o_solve)
-{
-    FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("QUATERNION", pose10.segment<4>(3), data_cov.block<3,3>(3,3)));
-    ConstraintBlockAbsolutePtr ctr0 = std::static_pointer_cast<ConstraintBlockAbsolute>(
-        fea0->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(fea0->getFramePtr()->getOPtr()))
-        );
+    ASSERT_TRUE(problem_ptr->check(0));
     
     // Unfix frame 0, perturb frm0
     frm0->unfix();
@@ -127,7 +115,7 @@ TEST(ConstraintQuatAbs, ctr_block_abs_o_solve)
     std::string brief_report = ceres_mgr.solve(wolf::SolverManager::ReportVerbosity::BRIEF);
 
     //only velocity is constrained
-    ASSERT_MATRIX_APPROX(frm0->getState().segment<4>(3), pose10.segment<4>(3), 1e-6);
+    ASSERT_MATRIX_APPROX(frm0->getOPtr()->getState(), pose10.segment<4>(3), 1e-6);
 }
 
 int main(int argc, char **argv)

@@ -4,17 +4,14 @@
 #include "trajectory_base.h"
 #include "map_base.h"
 #include "sensor_base.h"
-#include "factory.h"
+#include "processor_motion.h"
+#include "processor_tracker.h"
+#include "capture_pose.h"
+#include "constraint_base.h"
 #include "sensor_factory.h"
 #include "processor_factory.h"
-#include "constraint_base.h"
 #include "state_block.h"
-#include "processor_motion.h"
-#include "sensor_GPS.h"
 
-#include "processor_tracker.h"
-//#include "processors/processor_tracker_feature_trifocal.h"
-#include "capture_pose.h"
 
 // IRI libs includes
 
@@ -36,25 +33,26 @@ Problem::Problem(const std::string& _frame_structure) :
         trajectory_ptr_(std::make_shared<TrajectoryBase>(_frame_structure)),
         map_ptr_(std::make_shared<MapBase>()),
         processor_motion_ptr_(),
-        state_size_(0),
-        state_cov_size_(0),
         prior_is_set_(false)
 {
     if (_frame_structure == "PO 2D")
     {
         state_size_ = 3;
         state_cov_size_ = 3;
+        dim_ = 2;
     }
 
     else if (_frame_structure == "PO 3D")
     {
         state_size_ = 7;
         state_cov_size_ = 6;
+        dim_ = 3;
     }
     else if (_frame_structure == "POV 3D")
     {
         state_size_ = 10;
         state_cov_size_ = 9;
+        dim_ = 3;
     }
     else std::runtime_error(
             "Problem::Problem(): Unknown frame structure. Add appropriate frame structure to the switch statement.");
@@ -313,6 +311,11 @@ void Problem::getFrameStructureSize(SizeEigen& _x_size, SizeEigen& _cov_size) co
 {
     _x_size   = state_size_;
     _cov_size = state_cov_size_;
+}
+
+SizeEigen Problem::getDim() const
+{
+    return dim_;
 }
 
 Eigen::VectorXs Problem::zeroState()
@@ -750,7 +753,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                 {
                     if (i==0) cout << "    Extr " << (S->isExtrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
                     if (i==2) cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
-                    auto sb = S->getStateBlockPtrDynamic(i);
+                    auto sb = S->getStateBlockPtr(i);
                     if (sb)
                     {
                         cout << (sb->isFixed() ? " Fix( " : " Est( ") << sb->getState().transpose() << " )";

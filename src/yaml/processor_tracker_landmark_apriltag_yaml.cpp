@@ -32,9 +32,6 @@ static ProcessorParamsBasePtr createProcessorParamsLandmarkApriltag(const std::s
     {
         ProcessorParamsTrackerLandmarkApriltagPtr params = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
 
-        params->type                        = config["processor type"]              .as<std::string>();
-        params->name                        = config["processor name"]              .as<std::string>();
-
         YAML::Node detector_parameters      = config["detector parameters"];
         params->quad_decimate_              = detector_parameters["quad_decimate"]            .as<Scalar>();
         params->quad_sigma_                 = detector_parameters["quad_sigma"]               .as<Scalar>();

@@ -117,32 +117,26 @@ TEST(ProcessorTrackerLandmarkApriltag, Constructor)
 {
     ProcessorParamsTrackerLandmarkApriltagPtr params = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
     params->tag_family_ = "tag36h11";
-    params->name        = params->tag_family_;
     ProcessorTrackerLandmarkApriltagPtr p = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
     ASSERT_TRUE(p->getName() == params->tag_family_);
 
     params->tag_family_ = "tag36h10";
-    params->name        = params->tag_family_;
     p = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
     ASSERT_TRUE(p->getName() == params->tag_family_);
 
     params->tag_family_ = "tag36artoolkit";
-    params->name        = params->tag_family_;
     p = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
     ASSERT_TRUE(p->getName() == params->tag_family_);
 
     params->tag_family_ = "tag25h9";
-    params->name        = params->tag_family_;
     p = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
     ASSERT_TRUE(p->getName() == params->tag_family_);
 
     params->tag_family_ = "tag25h7";
-    params->name        = params->tag_family_;
     p = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
     ASSERT_TRUE(p->getName() == params->tag_family_);
 
     params->tag_family_ = "wrong_family";
-    params->name        = params->tag_family_;
     WOLF_INFO("The following runtime error \"Unrecognized tag family name. Use e.g. \"tag36h11\".\" is expected and does not imply a failed test:");
     ASSERT_DEATH( { std::make_shared<ProcessorTrackerLandmarkApriltag>(params); }, "" );
 }
