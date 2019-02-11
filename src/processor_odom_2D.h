@@ -63,7 +63,7 @@ class ProcessorOdom2D : public ProcessorMotion
         virtual Motion interpolate(const Motion& _ref1,
                                    const Motion& _ref2,
                                    const TimeStamp& _ts,
-                                   Motion& _second);
+                                   Motion& _second) override;
 
         virtual CaptureMotionPtr createCapture(const TimeStamp& _ts,
                                                const SensorBasePtr& _sensor,
