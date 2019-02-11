@@ -39,6 +39,36 @@ ProcessorMotion::~ProcessorMotion()
 //    std::cout << "destructed     -p-Mot" << id() << std::endl;
 }
 
+void ProcessorMotion::splitBuffer(const wolf::CaptureMotionPtr& _capture_source,
+                                  TimeStamp _ts_split,
+                                  const FrameBasePtr& _keyframe_target,
+                                  const wolf::CaptureMotionPtr& _capture_target)
+{
+    // split the buffer
+    // and give the part of the buffer before the new keyframe to the capture for the KF callback
+    _capture_source->getBuffer().split(_ts_split, _capture_target->getBuffer());
+
+    // interpolate individual delta which has been cut by the split timestamp
+    if (!_capture_source->getBuffer().get().empty()
+            && _capture_target->getBuffer().get().back().ts_ != _ts_split)
+    {
+        // interpolate Motion at the new time stamp
+        Motion motion_interpolated = interpolate(_capture_target->getBuffer().get().back(),  // last Motion of old buffer
+                                                 _capture_source->getBuffer().get().front(), // first motion of new buffer
+                                                 _ts_split,
+                                                 _capture_source->getBuffer().get().front());
+
+        // add to old buffer
+        _capture_target->getBuffer().get().push_back(motion_interpolated);
+    }
+
+    // Update the existing capture
+    _capture_source->setOriginFramePtr(_keyframe_target);
+
+    // re-integrate existing buffer -- note: the result of re-integration is stored in the same buffer!
+    reintegrateBuffer(_capture_source);
+}
+
 void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 {
     if (_incoming_ptr == nullptr)
@@ -86,32 +116,13 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
             // split the buffer
             // and give the part of the buffer before the new keyframe to the capture for the KF callback
-            existing_capture->getBuffer().split(ts_from_callback, capture_for_keyframe_callback->getBuffer());
-
-
-            // interpolate individual delta
-            if (!existing_capture->getBuffer().get().empty() && capture_for_keyframe_callback->getBuffer().get().back().ts_ != ts_from_callback)
-            {
-                // interpolate Motion at the new time stamp
-                Motion motion_interpolated = interpolate(capture_for_keyframe_callback->getBuffer().get().back(), // last Motion of old buffer
-                                                         existing_capture->getBuffer().get().front(), // first motion of new buffer
-                                                         ts_from_callback);
-                // add to old buffer
-                capture_for_keyframe_callback->getBuffer().get().push_back(motion_interpolated);
-            }
-
+            splitBuffer(existing_capture, ts_from_callback, keyframe_from_callback, capture_for_keyframe_callback);
 
             // create motion feature and add it to the capture
             auto new_feature = emplaceFeature(capture_for_keyframe_callback);
 
             // create motion constraint and add it to the feature, and constrain to the other capture (origin)
             emplaceConstraint(new_feature, keyframe_origin->getCaptureOf(getSensorPtr()) );
-
-            // Update the existing capture
-            existing_capture->setOriginFramePtr(keyframe_from_callback);
-
-            // re-integrate existing buffer -- note: the result of re-integration is stored in the same buffer!
-            reintegrateBuffer(existing_capture);
 
             // modify existing feature and constraint (if they exist in the existing capture)
             if (!existing_capture->getFeatureList().empty())
@@ -154,18 +165,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
             // split the buffer
             // and give the part of the buffer before the new keyframe to the capture for the KF callback
-            last_ptr_->getBuffer().split(ts_from_callback, capture_for_keyframe_callback->getBuffer());
-
-            // interpolate individual delta
-            if (!last_ptr_->getBuffer().get().empty() && capture_for_keyframe_callback->getBuffer().get().back().ts_ != ts_from_callback)
-            {
-                // interpolate Motion at the new time stamp
-                Motion motion_interpolated = interpolate(capture_for_keyframe_callback->getBuffer().get().back(), // last Motion of old buffer
-                                                         last_ptr_->getBuffer().get().front(), // first motion of new buffer
-                                                         ts_from_callback);
-                // add to old buffer
-                capture_for_keyframe_callback->getBuffer().get().push_back(motion_interpolated);
-            }
+            splitBuffer(last_ptr_, ts_from_callback, keyframe_from_callback, capture_for_keyframe_callback);
 
             // create motion feature and add it to the capture
             auto feature_for_keyframe_callback = emplaceFeature(capture_for_keyframe_callback);
@@ -175,12 +175,6 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
             // reset processor origin
             origin_ptr_ = capture_for_keyframe_callback;
-
-            // Update the existing capture
-            last_ptr_->setOriginFramePtr(keyframe_from_callback);
-
-            // re-integrate existing buffer -- note: the result of re-integration is stored in the same buffer!
-            reintegrateBuffer(last_ptr_);
 
             break;
         }

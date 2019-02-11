@@ -83,6 +83,10 @@ class ProcessorOdom3D : public ProcessorMotion
         Motion interpolate(const Motion& _motion_ref,
                            Motion& _motion,
                            TimeStamp& _ts) override;
+        virtual Motion interpolate(const Motion& _ref1,
+                                   const Motion& _ref2,
+                                   const TimeStamp& _ts,
+                                   Motion& _second) override;
         bool voteForKeyFrame() override;
         virtual CaptureMotionPtr createCapture(const TimeStamp& _ts,
                                                const SensorBasePtr& _sensor,
