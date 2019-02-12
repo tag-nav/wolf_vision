@@ -5,14 +5,13 @@
  *      \author: jsola
  */
 
-
 // wolf yaml
-#include "yaml_conversion.h"
+#include "base/yaml/yaml_conversion.h"
 
 // wolf
-//#include "../intrinsics_factory.h"
-#include "../factory.h"
-#include "../sensor_laser_2D.h"
+//#include "base/intrinsics_factory.h"
+#include "base/factory.h"
+#include "base/sensor/sensor_laser_2D.h"
 
 // yaml library
 #include <yaml-cpp/yaml.h>
@@ -28,7 +27,6 @@ IntrinsicsBasePtr createIntrinsicsLaser2D(const std::string& _filename_dot_yaml)
     IntrinsicsLaser2DPtr params; // dummy
     return params;
 }
-
 
 // register into factory
 const bool WOLF_UNUSED registered_laser_params = IntrinsicsFactory::get().registerCreator("LASER 2D", createIntrinsicsLaser2D);

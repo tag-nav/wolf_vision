@@ -17,6 +17,7 @@
 #   specific prior written permission.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+
 # AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 # IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
 # ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
@@ -129,15 +130,17 @@ endif (NOT EXISTS ${CURRENT_ROOT_INSTALL_DIR})
 # Set the include directories for wolf (itself).
 set(wolf_INCLUDE_DIR "${CURRENT_ROOT_INSTALL_DIR}/include/iri-algorithms")
 
-if (NOT EXISTS ${wolf_INCLUDE_DIR}/wolf/wolf.h)
+# if (NOT EXISTS ${wolf_INCLUDE_DIR}/wolf/wolf.h)
+if (NOT EXISTS ${wolf_INCLUDE_DIR}/wolf)
   wolf_report_not_found(
     "wolf install root: ${CURRENT_ROOT_INSTALL_DIR}, "
     "determined from relative path from wolfConfig.cmake install location: "
     "${wolf_CURRENT_CONFIG_DIR}, does not contain wolf headers. "
     "Either the install directory was deleted, or the install tree was only "
     "partially relocated outside of CMake after wolf was built.")
-endif (NOT EXISTS ${wolf_INCLUDE_DIR}/wolf/wolf.h)
-list(APPEND wolf_INCLUDE_DIRS ${wolf_INCLUDE_DIR})
+# endif (NOT EXISTS ${wolf_INCLUDE_DIR}/wolf/wolf.h)
+endif (NOT EXISTS ${wolf_INCLUDE_DIR}/wolf)
+list(APPEND wolf_INCLUDE_DIRS ${wolf_INCLUDE_DIR}/wolf)
 
 # Set the version.
 set(wolf_VERSION 0.0.1)

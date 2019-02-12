@@ -1,4 +1,4 @@
-#include "local_parametrization_wrapper.h"
+#include "base/ceres_wrapper/local_parametrization_wrapper.h"
 
 namespace wolf {
 

@@ -1,4 +1,4 @@
-#include "ceres_manager.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 SolverManager::SolverManager()
 {

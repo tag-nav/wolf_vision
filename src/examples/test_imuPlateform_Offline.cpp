@@ -1,15 +1,15 @@
 //Wolf
-#include <capture_IMU.h>
-#include <processor_IMU.h>
-#include <sensor_IMU.h>
-#include "wolf.h"
-#include "problem.h"
-#include "sensor_odom_3D.h"
-#include "constraint_odom_3D.h"
-#include "state_block.h"
-#include "state_quaternion.h"
-#include "processor_odom_3D.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/capture/capture_IMU.h"
+#include "base/processor/processor_IMU.h"
+#include "base/sensor/sensor_IMU.h"
+#include "base/wolf.h"
+#include "base/problem.h"
+#include "base/sensor/sensor_odom_3D.h"
+#include "base/constraint/constraint_odom_3D.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
+#include "base/processor/processor_odom_3D.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 //std
 #include <iostream>
@@ -92,7 +92,6 @@ int main(int argc, char** argv)
     ProcessorBasePtr processor_ptr_ = wolf_problem_ptr_->installProcessor("IMU", "IMU pre-integrator", sen0_ptr, prc_imu_params);
     SensorIMUPtr sen_imu = std::static_pointer_cast<SensorIMU>(sen0_ptr);
     ProcessorIMUPtr processor_ptr_imu = std::static_pointer_cast<ProcessorIMU>(processor_ptr_);
-
 
     // SENSOR + PROCESSOR ODOM 3D
     SensorBasePtr sen1_ptr = wolf_problem_ptr_->installSensor("ODOM 3D", "odom", (Vector7s()<<0,0,0,0,0,0,1).finished(), wolf_root + "/src/examples/sensor_odom_3D.yaml");
@@ -177,7 +176,6 @@ int main(int argc, char** argv)
     std::cout << "Integrated std  : " << std::fixed << std::setprecision(3) << std::setw(8)
     << (wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_.diagonal().transpose()).array().sqrt() << std::endl;
 
-
     // Print statistics
     std::cout << "\nStatistics -----------------------------------------------------------------------------------" << std::endl;
     std::cout << "If you want meaningful CPU metrics, remove all couts in the loop / remove DEBUG_RESULTS definition variable, and compile in RELEASE mode!" << std::endl;
@@ -234,7 +232,6 @@ int main(int argc, char** argv)
             covX.block(13,13,3,3) = cov3;
             for(int i = 0; i<16; i++)
                 cov_stdev(i) = ( covX(i,i)? 2*sqrt(covX(i,i)):0); //if diagonal value is 0 then store 0 else store 2*sqrt(diag_value)
-
 
             debug_results << std::setprecision(16) << ts.get() << "\t" << frm_state(0) << "\t" << frm_state(1) << "\t" << frm_state(2)
             << "\t" << frm_state(3) << "\t" << frm_state(4) << "\t" << frm_state(5) << "\t" << frm_state(6)

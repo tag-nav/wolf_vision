@@ -5,7 +5,6 @@
  *      Author: jvallve
  */
 
-
 //std includes
 #include <cstdlib>
 #include <iostream>
@@ -51,7 +50,6 @@ void permutation_2_block_permutation(const PermutationMatrix<Dynamic, Dynamic, i
     Map<ArrayXi> idx_blocks(idx.data(), dim*size, 1);
     perm_blocks.indices() = idx_blocks;
 }
-
 
 //main
 int main(int argc, char *argv[])
@@ -179,7 +177,4 @@ int main(int argc, char *argv[])
     //std::cout << "x = " << x_ordered.transpose() << std::endl;
     //std::cout << "x = " << x_block_ordered.transpose() << std::endl;
 }
-
-
-
 

@@ -5,9 +5,9 @@
  *      Author: jsola
  */
 
-#include "local_parametrization_homogeneous.h"
+#include "base/local_parametrization_homogeneous.h"
 #include "iostream"
-#include "rotations.h" // we use quaternion algebra here
+#include "base/rotations.h" // we use quaternion algebra here
 
 namespace wolf {
 

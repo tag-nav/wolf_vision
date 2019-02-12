@@ -6,7 +6,7 @@
  */
 
 // Wolf includes
-#include "wolf.h"
+#include "base/wolf.h"
 
 //std includes
 #include <cstdlib>

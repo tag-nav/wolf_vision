@@ -6,10 +6,10 @@
  */
 
 // Wolf includes
-#include "../wolf.h"
-#include "../problem.h"
-#include "../frame_base.h"
-#include "../trajectory_base.h"
+#include "base/wolf.h"
+#include "base/problem.h"
+#include "base/frame_base.h"
+#include "base/trajectory_base.h"
 
 // STL includes
 #include <list>
@@ -74,8 +74,6 @@ int main()
     std::cout << std::endl << "created Key Frame " << frm8->id() << " TS: " << 0.35 << std::endl;
 
     printFrames(problem_ptr);
-
-
 
     return 0;
 }

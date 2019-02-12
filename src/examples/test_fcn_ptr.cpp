@@ -15,7 +15,6 @@ double divide   (double _n, double _d)              { return _n/_d;     }
 double mult     (double _x, double _y)              { return _x*_y;     }
 double mult_div (double _x, double _y, double _z)   { return _x*_y/_z;  }
 
-
 //======== test_simple usage of function pointers ============
 typedef double (*FcnType)(double);
 
@@ -118,7 +117,6 @@ void test_var()
     std::cout << "4*2   = " << run_v((FcnTypeV)mult,     2, 4.0, 2.0     ) << std::endl;
     std::cout << "4*3/6 = " << run_v((FcnTypeV)mult_div, 3, 4.0, 3.0, 6.0) << std::endl;
 }
-
 
 //####################################################################################
 

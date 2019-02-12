@@ -5,15 +5,15 @@
  *      \author: jtarraso
  */
 
-#include "wolf.h"
-#include "frame_base.h"
-#include "pinhole_tools.h"
-#include "sensor_camera.h"
-#include "rotations.h"
-#include "capture_image.h"
-#include "landmark_AHP.h"
-#include "constraint_AHP.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/wolf.h"
+#include "base/frame_base.h"
+#include "base/pinhole_tools.h"
+#include "base/sensor/sensor_camera.h"
+#include "base/rotations.h"
+#include "base/capture/capture_image.h"
+#include "base/landmark/landmark_AHP.h"
+#include "base/constraint/constraint_AHP.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 // Vision utils
 #include <vision_utils/vision_utils.h>
@@ -61,11 +61,9 @@
  *      0   160  320  480  640
  *      +----+----+----+----+
  *                |
- *                |
  *                | 320
  *                |
  *                *
- *
  *
  *      projected pixels:
  *      p0 = (320,240) // at optical axis or relation 1:0
@@ -128,7 +126,6 @@ int main(int argc, char** argv)
     lmk_hmg_c = {lmk_dir(0),lmk_dir(1),lmk_dir(2),(1/distance)};
 //    std::cout << "lmk hmg in C frame: " << lmk_hmg_c.transpose() << std::endl;
     // ============================================================================================================
-
 
     // Captures------------------
     cv::Mat cv_image;
@@ -199,7 +196,6 @@ int main(int argc, char** argv)
     FeaturePointImagePtr feat_4 = std::make_shared<FeaturePointImage>(kp_2, 0, desc, Eigen::Matrix2s::Identity());
     image_2->addFeature(feat_4);
 
-
     // New landmark with measured pixels from kf2 (anchor) kf3 and kf4 (measurements)
     Scalar unknown_distance = 2; // the real distance is 1
     Matrix3s K = camera->getIntrinsicMatrix();
@@ -241,7 +237,6 @@ int main(int argc, char** argv)
 
     CeresManager ceres_manager(problem, ceres_options);
 
-
     std::string summary = ceres_manager.solve(SolverManager::ReportVerbosity::FULL);// 0: nothing, 1: BriefReport, 2: FullReport
     std::cout << summary << std::endl;
 
@@ -259,19 +254,4 @@ int main(int argc, char** argv)
     return 0;
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

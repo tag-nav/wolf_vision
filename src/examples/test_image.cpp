@@ -1,10 +1,10 @@
 // Testing things for the 3D image odometry
 
 //Wolf includes
-#include "sensor_camera.h"
-#include "capture_image.h"
-#include "processor_tracker_feature_image.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/sensor/sensor_camera.h"
+#include "base/capture/capture_image.h"
+#include "base/processor/processor_tracker_feature_image.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 // Vision utils includes
 #include <vision_utils.h>

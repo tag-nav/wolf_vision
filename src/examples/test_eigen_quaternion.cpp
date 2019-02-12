@@ -6,7 +6,7 @@
 #include <eigen3/Eigen/Geometry>
 
 //Wolf
-#include "wolf.h"
+#include "base/wolf.h"
 
 int main()
 {

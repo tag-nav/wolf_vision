@@ -1,6 +1,6 @@
-#include "local_parametrization_polyline_extreme.h"
-#include "state_block.h"
-#include "rotations.h"
+#include "base/local_parametrization_polyline_extreme.h"
+#include "base/state_block.h"
+#include "base/rotations.h"
 
 namespace wolf {
 

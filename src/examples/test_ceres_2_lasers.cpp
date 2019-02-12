@@ -1,5 +1,5 @@
 //std includes
-#include <sensor_GPS_fix.h>
+#include "base/sensor/sensor_GPS_fix.h"
 #include <cstdlib>
 #include <iostream>
 #include <fstream>
@@ -17,12 +17,12 @@
 #include "glog/logging.h"
 
 //Wolf includes
-#include "problem.h"
-#include "processor_tracker_landmark_corner.h"
-#include "processor_odom_2D.h"
-#include "sensor_laser_2D.h"
-#include "sensor_odom_2D.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/problem.h"
+#include "base/processor/processor_tracker_landmark_corner.h"
+#include "base/processor/processor_odom_2D.h"
+#include "base/sensor/sensor_laser_2D.h"
+#include "base/sensor/sensor_odom_2D.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 // laserscanutils
 #include "laser_scan_utils/line_finder_iterative.h"
@@ -31,7 +31,7 @@
 //C includes for sleep, time and main args
 #include "unistd.h"
 
-#include "../capture_pose.h"
+#include "base/capture/capture_pose.h"
 //faramotics includes
 #include "faramotics/dynamicSceneRender.h"
 #include "faramotics/rangeScan2D.h"
@@ -70,7 +70,6 @@ class FaramoticsRobot
             myScanner = new CrangeScan2D(HOKUYO_UTM30LX_180DEG);  //HOKUYO_UTM30LX_180DEG or LEUZE_RS4
             myScanner->loadAssimpModel(modelFileName);
         }
-
 
         //function travel around
         Eigen::Vector3s motionCampus(unsigned int ii, double& displacement_, double& rotation_)
