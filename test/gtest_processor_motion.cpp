@@ -53,6 +53,17 @@ class ProcessorMotion_test : public ProcessorOdom2D, public testing::Test{
             problem->setPrior(x0, P0, 0.0, 0.01);
         }
 
+        Motion interpolate(const Motion& _ref, Motion& _second, TimeStamp& _ts)
+        {
+            return ProcessorMotion::interpolate(_ref, _second, _ts);
+        }
+
+        Motion interpolate(const Motion& _ref1, const Motion& _ref2, const TimeStamp& _ts, Motion& _second)
+        {
+            return ProcessorMotion::interpolate(_ref1, _ref2, _ts, _second);
+        }
+
+
         virtual void TearDown(){}
 
 };
@@ -131,6 +142,55 @@ TEST_F(ProcessorMotion_test, Interpolate)
     ASSERT_MATRIX_APPROX(interp.data_           , motions[3].data_          , 1e-8);
     ASSERT_MATRIX_APPROX(interp.delta_          , motions[3].delta_         , 1e-8);
     ASSERT_MATRIX_APPROX(interp.delta_integr_   , motions[3].delta_integr_  , 1e-8);
+}
+
+TEST_F(ProcessorMotion_test, Interpolate_alternative)
+{
+    data << 1, 2*M_PI/10; // advance in turn
+    data_cov.setIdentity();
+    TimeStamp t(0.0);
+    std::vector<Motion> motions;
+    motions.push_back(motionZero(t));
+
+    for (int i = 0; i<10; i++) // one full turn exactly
+    {
+        t += dt;
+        capture->setTimeStamp(t);
+        capture->setData(data);
+        capture->setDataCovariance(data_cov);
+        processor->process(capture);
+        motions.push_back(processor->getMotion(t));
+        WOLF_DEBUG("t: ", t, "  x: ", problem->getCurrentState().transpose());
+    }
+
+    TimeStamp tt    = 2.2;
+    Motion ref1     = motions[2];
+    Motion ref2     = motions[3];
+    Motion second(0.0, 2, 3, 3, 0);
+    Motion interp   = interpolate(ref1, ref2, tt, second);
+
+    ASSERT_NEAR(         interp.ts_.get()       , 2.2                       , 1e-8);
+    ASSERT_MATRIX_APPROX(interp.data_           , VectorXs::Zero(2)         , 1e-8);
+    ASSERT_MATRIX_APPROX(interp.delta_          , VectorXs::Zero(3)         , 1e-8);
+    ASSERT_MATRIX_APPROX(interp.delta_integr_   , motions[2].delta_integr_  , 1e-8);
+
+    ASSERT_NEAR(         second.ts_.get()       , 3.0                       , 1e-8);
+    ASSERT_MATRIX_APPROX(second.data_           , motions[3].data_          , 1e-8);
+    ASSERT_MATRIX_APPROX(second.delta_          , motions[3].delta_         , 1e-8);
+    ASSERT_MATRIX_APPROX(second.delta_integr_   , motions[3].delta_integr_  , 1e-8);
+
+    tt      = 2.6;
+    interp  = interpolate(ref1, ref2, tt, second);
+
+    ASSERT_NEAR(         interp.ts_.get()       , 2.6                       , 1e-8);
+    ASSERT_MATRIX_APPROX(interp.data_           , motions[3].data_          , 1e-8);
+    ASSERT_MATRIX_APPROX(interp.delta_          , motions[3].delta_         , 1e-8);
+    ASSERT_MATRIX_APPROX(interp.delta_integr_   , motions[3].delta_integr_  , 1e-8);
+
+    ASSERT_NEAR(         second.ts_.get()       , 3.0                       , 1e-8);
+    ASSERT_MATRIX_APPROX(second.data_           , VectorXs::Zero(2)         , 1e-8);
+    ASSERT_MATRIX_APPROX(second.delta_          , VectorXs::Zero(3)         , 1e-8);
+    ASSERT_MATRIX_APPROX(second.delta_integr_   , motions[3].delta_integr_  , 1e-8);
 }
 
 int main(int argc, char **argv)

@@ -44,15 +44,22 @@ void ProcessorDiffDrive::computeCurrentDelta(const Eigen::VectorXs& _data,
   case DiffDriveModel::Two_Factor_Model:
     std::tie(vel, J_vel_data, J_vel_calib) =
         wheelPositionIncrementToVelocity<DiffDriveModel::Two_Factor_Model>(
-          _data, _data_cov,
-          intrinsics.left_radius_, intrinsics.right_radius_, intrinsics.separation_,
-          _calib, _dt);
+          _data,
+          _data_cov,
+          intrinsics.left_radius_,
+          intrinsics.right_radius_,
+          intrinsics.separation_,
+          _calib,
+          _dt);
     break;
   case DiffDriveModel::Three_Factor_Model:
     std::tie(vel, J_vel_data, J_vel_calib) =
         wheelPositionIncrementToVelocity<DiffDriveModel::Three_Factor_Model>(
-          _data, _data_cov,
-          intrinsics.left_radius_, intrinsics.right_radius_, intrinsics.separation_,
+          _data,
+          _data_cov,
+          intrinsics.left_radius_,
+          intrinsics.right_radius_,
+          intrinsics.separation_,
           _calib, _dt);
     break;
   case DiffDriveModel::Five_Factor_Model:
