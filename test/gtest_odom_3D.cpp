@@ -486,6 +486,92 @@ TEST(ProcessorOdom3D, Interpolate2) // timestamp out of bounds test
 
 }
 
+
+TEST(ProcessorOdom3D, Interpolate3) // timestamp out of bounds test
+{
+    ProcessorOdom3D prc(std::make_shared<ProcessorParamsOdom3D>());
+
+    /*
+     * We create several poses: origin, ref, int, second, final, as follows:
+     *
+     *   +---+---+---+---->
+     *   o   r   i  s,f
+     *
+     * We compute all deltas between them: d_or, d_ri, d_is, d_rf
+     * We create the motions R, F
+     * We interpolate, and get I, S
+     */
+
+    // deltas -- referred to previous delta
+    //         o-r    r-i    i-s    s-f
+    VectorXs        dx_or(7), dx_ri(7), dx_is(7), dx_if(7), dx_rf(7);
+    Map<VectorXs>   dx_rs(dx_rf.data(), 7); // this ensures dx_rs = dx_rf
+
+    // Deltas -- always referred to origin
+    //         o-r    o-i    o-s    o-f
+    VectorXs Dx_or(7), Dx_oi(7), Dx_os(7), Dx_of(7);
+
+    // time stamps and intervals
+    TimeStamp t_o(0), t_r(1), t_i, t_f(5); // we'll set t_i later
+
+    WOLF_DEBUG("t_o: ", t_o.get(), "; t_r: ", t_r.get(), "; t_f: ", t_f.get());
+
+    // Motion structures
+    Motion R(0.0,6,7,6,0), I(0.0,6,7,6,0), S(0.0,6,7,6,0), F(0.0,6,7,6,0);
+
+
+    /////////// start experiment ///////////////
+
+    // set ref and final deltas
+    dx_or << 1,2,3, 4,5,6,7; dx_or.tail<4>().normalize();
+    dx_rf << 7,6,5, 4,3,2,1; dx_rf.tail<4>().normalize();
+    Dx_or = dx_or;
+    prc.deltaPlusDelta(Dx_or, dx_rf, t_f - t_r, Dx_of);
+    Dx_os = Dx_of;
+
+    // set ref
+    R.ts_           = t_r;
+    R.delta_        = dx_or; // origin to ref
+    R.delta_integr_ = Dx_or; // origin to ref
+
+    WOLF_DEBUG("* R.d = ", R.delta_.transpose());
+    WOLF_DEBUG("  or  = ", dx_or.transpose());
+    ASSERT_MATRIX_APPROX(R.delta_        , dx_or, Constants::EPS);
+
+    WOLF_DEBUG("  R.D = ", R.delta_integr_.transpose());
+    WOLF_DEBUG("  or  = ", Dx_or.transpose());
+    ASSERT_MATRIX_APPROX(R.delta_integr_ , Dx_or, Constants::EPS);
+
+    // set final
+    F.ts_           = t_f;
+    F.delta_        = dx_rf; // ref to final
+    F.delta_integr_ = Dx_of; // origin to final
+
+    WOLF_DEBUG("* F.d = ", F.delta_.transpose());
+    WOLF_DEBUG("  rf  = ", dx_rf.transpose());
+    ASSERT_MATRIX_APPROX(F.delta_        , dx_rf, Constants::EPS);
+
+    WOLF_DEBUG("  F.D = ", F.delta_integr_.transpose());
+    WOLF_DEBUG("  of  = ", Dx_of.transpose());
+    ASSERT_MATRIX_APPROX(F.delta_integr_ , Dx_of, Constants::EPS);
+
+    // interpolate!
+    t_i = 2; /// 25% between refs!
+    WOLF_DEBUG("*** INTERPOLATE *** I and S have been computed.");
+    I = prc.interpolate(R, F, t_i, S);
+
+
+    prc.deltaPlusDelta(R.delta_integr_, I.delta_, t_i-t_r, Dx_oi);
+    ASSERT_MATRIX_APPROX(I.delta_integr_  , Dx_oi, Constants::EPS);
+
+    prc.deltaPlusDelta(I.delta_, S.delta_, t_f-t_i, dx_rf);
+    ASSERT_MATRIX_APPROX(F.delta_ , dx_rf, Constants::EPS);
+
+}
+
+
+
+
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);

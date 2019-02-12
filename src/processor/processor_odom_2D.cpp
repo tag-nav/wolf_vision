@@ -114,6 +114,11 @@ Motion ProcessorOdom2D::interpolate(const Motion& _ref, Motion& _second, TimeSta
 
 }
 
+Motion ProcessorOdom2D::interpolate(const Motion& _ref1, const Motion& _ref2, const TimeStamp& _ts, Motion& _second)
+{
+    return ProcessorMotion::interpolate(_ref1, _ref2, _ts, _second);
+}
+
 bool ProcessorOdom2D::voteForKeyFrame()
 {
     // Distance criterion

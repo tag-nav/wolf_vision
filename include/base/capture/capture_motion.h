@@ -104,7 +104,7 @@ class CaptureMotion : public CaptureBase
         Eigen::VectorXs data_;          ///< Motion data in form of vector mandatory
         Eigen::MatrixXs data_cov_;      ///< Motion data covariance
         MotionBuffer buffer_;           ///< Buffer of motions between this Capture and the next one.
-        FrameBasePtr origin_frame_ptr_; ///< Pointer to the origin frame of the motion
+        FrameBaseWPtr origin_frame_ptr_; ///< Pointer to the origin frame of the motion
 };
 
 inline const Eigen::VectorXs& CaptureMotion::getData() const
@@ -158,7 +158,7 @@ inline Eigen::VectorXs CaptureMotion::correctDelta(const VectorXs& _delta, const
 
 inline FrameBasePtr CaptureMotion::getOriginFramePtr()
 {
-    return origin_frame_ptr_;
+    return origin_frame_ptr_.lock();
 }
 
 inline void CaptureMotion::setOriginFramePtr(FrameBasePtr _frame_ptr)

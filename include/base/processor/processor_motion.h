@@ -205,8 +205,11 @@ class ProcessorMotion : public ProcessorBase
 
         Scalar updateDt();
         void integrateOneStep();
-        void splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part);
         void reintegrateBuffer(CaptureMotionPtr _capture_ptr);
+        void splitBuffer(const wolf::CaptureMotionPtr& capture_source,
+                         TimeStamp ts_split,
+                         const FrameBasePtr& keyframe_target,
+                         const wolf::CaptureMotionPtr& capture_target);
 
         /** Pre-process incoming Capture
          *
@@ -469,7 +472,6 @@ class ProcessorMotion : public ProcessorBase
         Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
         Eigen::MatrixXs jacobian_calib_;        ///< jacobian of delta preintegration wrt calibration params
         Eigen::MatrixXs jacobian_delta_calib_;  ///< jacobian of delta wrt calib params
-
 };
 
 }
@@ -477,11 +479,6 @@ class ProcessorMotion : public ProcessorBase
 #include "base/frame_base.h"
 
 namespace wolf{
-
-inline void ProcessorMotion::splitBuffer(const TimeStamp& _t_split, MotionBuffer& _oldest_part)
-{
-    last_ptr_->getBuffer().split(_t_split, _oldest_part);
-}
 
 inline void ProcessorMotion::resetDerived()
 {
