@@ -580,6 +580,11 @@ void ProcessorTrackerLandmarkApriltag::resetDerived()
     detections_last_ = std::move(detections_incoming_);
 }
 
+std::string ProcessorTrackerLandmarkApriltag::getTagFamily() const
+{
+    return tag_family_.name;
+}
+
 } // namespace wolf
 
 // Register in the SensorFactory
@@ -589,3 +594,4 @@ namespace wolf
 {
 WOLF_REGISTER_PROCESSOR("TRACKER LANDMARK APRILTAG", ProcessorTrackerLandmarkApriltag)
 }
+

@@ -114,6 +114,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
 
     public:
         Scalar getTagWidth(int _id) const;
+        std::string getTagFamily() const;
         Eigen::Vector6s getVarVec();
         FeatureBaseList getIncomingDetections() const;
         FeatureBaseList getLastDetections() const;
