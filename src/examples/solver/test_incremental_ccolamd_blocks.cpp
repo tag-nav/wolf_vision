@@ -5,7 +5,6 @@
  *      Author: jvallve
  */
 
-
 //std includes
 #include <cstdlib>
 #include <iostream>
@@ -53,7 +52,6 @@ void permutation_2_block_permutation(const PermutationMatrix<Dynamic, Dynamic, i
     Map<ArrayXi> idx_blocks(idx.data(), dim*size, 1);
     perm_blocks.indices() = idx_blocks;
 }
-
 
 //main
 int main(int argc, char *argv[])
@@ -143,7 +141,6 @@ int main(int argc, char *argv[])
         // r.h.v
         b.segment(i*dim, dim) = VectorXd::LinSpaced(Sequential, dim, dim*i, dim *(i+1)-1);
 
-
         std::cout << "Solving factor graph:" << std::endl;
         std::cout << "Factors: " << std::endl << factors * MatrixXi::Identity((i+1), (i+1)) << std::endl << std::endl;
 //        std::cout << "H: " << std::endl << H * MatrixXd::Identity(dim*(i+1), dim*(i+1)) << std::endl << std::endl;
@@ -159,7 +156,6 @@ int main(int argc, char *argv[])
         }
         x = solver.solve(b);
         time1 += ((double) clock() - t1) / CLOCKS_PER_SEC;
-
 
         // SOLVING WITH REORDERING ------------------------------------
         // Order with previous orderings
@@ -197,7 +193,6 @@ int main(int argc, char *argv[])
         x_ordered = solver2.solve(b_ordered);
         x_ordered = acc_permutation_matrix.inverse() * x_ordered;
         time2 += ((double) clock() - t2) / CLOCKS_PER_SEC;
-
 
         // SOLVING WITH BLOCK REORDERING ------------------------------------
         // Order with previous orderings
@@ -245,7 +240,6 @@ int main(int argc, char *argv[])
         x_b_ordered = acc_permutation_b_matrix.inverse() * x_b_ordered;
         time3 += ((double) clock() - t3) / CLOCKS_PER_SEC;
 
-
         // RESULTS ------------------------------------
         std::cout << "========================= RESULTS " << i << ":" << std::endl;
         std::cout << "NO REORDERING:    solved in " << time1*1e3 << " ms" << std::endl;
@@ -265,7 +259,4 @@ int main(int argc, char *argv[])
         //std::cout << "x = " << x_ordered.transpose() << std::endl;
         //std::cout << "x = " << x_b_ordered.transpose() << std::endl;
 }
-
-
-
 

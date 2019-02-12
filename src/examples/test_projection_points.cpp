@@ -6,7 +6,7 @@
 #include <iostream>
 
 //wolf includes
-#include "pinhole_tools.h"
+#include "base/pinhole_tools.h"
 
 int main(int argc, char** argv)
 {
@@ -41,7 +41,6 @@ int main(int argc, char** argv)
     for (int ii = 0; ii < points3D.rows(); ++ii)
         std::cout << "points2D- X: " << points2D(ii,0) << "; Y: " << points2D(ii,1) << std::endl;
 
-
     std::cout << std::endl << " ========= PinholeTools DUALITY TEST ===========" << std::endl << std::endl;
 
     //================================= projectPoint and backprojectPoint to/from NormalizedPlane
@@ -67,13 +66,11 @@ int main(int argc, char** argv)
             pinhole::backprojectPointFromNormalizedPlane(project_point_normalized_output,
                                                          backproject_point_normalized_depth);
 
-
     std::cout << "TEST project and backproject PointToNormalizedPlane" << std::endl;
     std::cout << std:: endl << "Original         " << project_point_normalized_test.transpose() << std::endl;
     std::cout << std:: endl << "Project          " << project_point_normalized_output.transpose() << std::endl;
     std::cout << std:: endl << "Alternate project" << project_point_normalized_output.transpose() << std::endl;
     std::cout << std:: endl << "Backproject      " << backproject_point_normalized_output.transpose() << std::endl;
-
 
     //================================= projectPoint and backprojectPoint to/from NormalizedPlane WITH JACOBIANS
 
@@ -91,7 +88,6 @@ int main(int argc, char** argv)
     Eigen::Vector3s bpp_normalized_output;
     Eigen::Matrix<Scalar, 3, 2> bpp_normalized_jacobian;
     Eigen::Vector3s bpp_normalized_jacobian_depth;
-
 
     pinhole::projectPointToNormalizedPlane(pp_normalized_test,
                                            pp_normalized_output,
@@ -123,12 +119,10 @@ int main(int argc, char** argv)
     std::cout << "\n--> Jacobian" << std::endl << bpp_normalized_jacobian << std::endl;
     std::cout << "\n--> Jacobian - depth" << bpp_normalized_jacobian_depth.transpose() << std::endl;
 
-
     Eigen::Matrix2s test_jacobian; // (2x3) * (3x2) = (2x2)
     test_jacobian =  pp_normalized_jacobian * bpp_normalized_jacobian;
 
     std::cout << "\n\n\n==> Jacobian Testing" << std::endl << test_jacobian << std::endl;
-
 
     //================================= IsInRoi / IsInImage
 
@@ -166,8 +160,6 @@ int main(int argc, char** argv)
     std::cout << "width: " << image_width << "; height: " << image_height << std::endl;
     std::cout << "is_in_image: " << is_in_image << std::endl;
 
-
-
     //================================= computeCorrectionModel
 
     Eigen::Vector2s distortion2;
@@ -194,10 +186,7 @@ int main(int argc, char** argv)
     std::cout << std::endl << "correction" << std::endl;
     std::cout << "c1: " << correction_test2[0] << "; c2: " << correction_test2[1] << std::endl;
 
-
-
     //================================= distortPoint
-
 
     Eigen::Vector2s distorting_point;
     distorting_point[0] = 0.35355;
@@ -236,8 +225,6 @@ int main(int argc, char** argv)
     std::cout << "x: " << distored_point4[0] << "; y: " << distored_point4[1] << std::endl;
     std::cout << "\n--> Jacobian" << std::endl <<
                  distortion_jacobian2 << std::endl;
-
-
 
     Eigen::Vector2s corrected_point5;
     Eigen::Matrix2s corrected_jacobian2;
@@ -280,7 +267,6 @@ int main(int argc, char** argv)
     std::cout << std::endl << "Depixelized" << std::endl;
     std::cout << "x: " << depixelize_output3[0] << "; y: " << depixelize_output3[1] << std::endl;
 
-
     ////
 
     Eigen::Vector2s pixelize_output4;
@@ -297,7 +283,6 @@ int main(int argc, char** argv)
     std::cout << "x: " << pixelize_output4[0] << "; y: " << pixelize_output4[1] << std::endl;
     std::cout << "\n--> Jacobian" << std::endl <<
                  pixelize_jacobian2 << std::endl;
-
 
     Eigen::Vector2s depixelize_output4;
     Eigen::Matrix2s depixelize_jacobian2;
@@ -317,11 +302,7 @@ int main(int argc, char** argv)
     std::cout << "\n\n\n==> Jacobian Testing" << std::endl <<
                  test_jacobian_pix << std::endl;
 
-
-
-
     //================================= projectPoint Complete
-
 
 //    //distortion
 //    distortion2;
@@ -331,7 +312,6 @@ int main(int argc, char** argv)
 
 //    //3Dpoint
 //    project_point_normalized_test;
-
 
     Eigen::Vector2s point2D_test5;
     point2D_test5 = pinhole::projectPoint(k_test2,
@@ -393,7 +373,6 @@ int main(int argc, char** argv)
     std::cout << "\n-->Jacobian" << std::endl <<
                  jacobian_test4 << std::endl;
 
-
     /////////////////////////////
 
 //    //correction
@@ -414,8 +393,6 @@ int main(int argc, char** argv)
     std::cout << std::endl << "First function output" << std::endl;
     std::cout << "x: " << point3D_backproj5[0] << "; y: " << point3D_backproj5[1] << "; z: " << point3D_backproj5[2] << std::endl;
 
-
-
         //jacobian
     Eigen::Vector3s point3D_backproj4;
     Eigen::MatrixXs jacobian_backproj2(3,2);
@@ -435,19 +412,11 @@ int main(int argc, char** argv)
     std::cout << "\n--> Jacobian - depth" << std::endl <<
                  depth_jacobian2[0] << " " << depth_jacobian2[1] << " " << depth_jacobian2[2] << " " << std::endl;
 
-
-
-
     Eigen::Matrix2s test_jacobian_complete;
     test_jacobian_complete =  jacobian_test4 * jacobian_backproj2;
 
     std::cout << "\n\n\n==> Jacobian Testing" << std::endl <<
                  test_jacobian_complete << std::endl;
-
-
-
-
-
 
     /* Test */
     std::cout << "\n\n\n\nTEST\n" << std::endl;
@@ -476,8 +445,6 @@ int main(int argc, char** argv)
     Eigen::Vector2s test_point2D = {123,321};
     std::cout << "\ntest_point2D ORIGINAL:\n" << test_point2D << std::endl;
 
-
-
     test_point2D = pinhole::depixellizePoint(K_params,
                                              test_point2D);
     std::cout << "\ntest_point2D DEPIXELIZED:\n" << test_point2D << std::endl;
@@ -487,8 +454,6 @@ int main(int argc, char** argv)
     test_point3D = pinhole::backprojectPointFromNormalizedPlane(test_point2D,
                                                                 2);
     std::cout << "\ntest_point3D BACKPROJECTED:\n" << test_point3D << std::endl;
-
-
 
     test_point2D = pinhole::projectPointToNormalizedPlane(test_point3D);
     std::cout << "\ntest_point2D NORMALIZED:\n" << test_point2D << std::endl;
@@ -500,10 +465,4 @@ int main(int argc, char** argv)
     std::cout << "\ntest_point2D PIXELIZED:\n" << test_point2D << std::endl;
 
 }
-
-
-
-
-
-
 

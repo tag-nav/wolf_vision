@@ -12,7 +12,6 @@
  *      Author: jvallve
  */
 
-
 //std includes
 #include <cstdlib>
 #include <iostream>
@@ -96,7 +95,6 @@ void augment_permutation(PermutationMatrix<Dynamic, Dynamic, int> &perm, const i
     perm.resize(new_size);
     perm.indices() = new_indices;
 }
-
 
 //main
 int main(int argc, char *argv[])
@@ -349,9 +347,4 @@ int main(int argc, char *argv[])
             std::cout << "DIFFERENT SOLUTIONS!!!!!!!! max difference " << (x_ordered_partial-x_ordered).maxCoeff() << std::endl;
     }
 }
-
-
-
-
-
 

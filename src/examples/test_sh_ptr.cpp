@@ -39,7 +39,6 @@ class c; // constraint
 class M; // map
 class L; // landmark
 
-
 //////////////////////////////////////////////////////////////////////////////////
 // DECLARE WOLF TREE
 
@@ -318,8 +317,6 @@ class M : public enable_shared_from_this<M>
         shared_ptr<L> add_L(shared_ptr<L> _L);
 };
 
-
-
 class L : public enable_shared_from_this<L>
 {
     private:
@@ -522,7 +519,6 @@ void c::remove()
     }
 }
 
-
 shared_ptr<L> M::add_L(shared_ptr<L> _L)
 {
     L_list_.push_back(_L);
@@ -543,8 +539,6 @@ void L::remove()
             c_by_list.front()->remove();        // remove constrained
     }
 }
-
-
 
 }
 
@@ -770,7 +764,6 @@ int main()
     cout<<endl;
     print_c(Pp);
 
-
     //------------------------------------------------------------------
     // Several tests. Uncomment the desired test.
     // Run only one test at a time, otherwise you'll get segfaults!
@@ -799,5 +792,4 @@ int main()
 
     return 1;
 }
-
 

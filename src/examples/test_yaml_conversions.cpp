@@ -5,7 +5,7 @@
  *      \author: jsola
  */
 
-#include "../yaml/yaml_conversion.h"
+#include "base/yaml/yaml_conversion.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -14,12 +14,10 @@
 #include <iostream>
 //#include <fstream>
 
-
 int main()
 {
 
     using namespace Eigen;
-
 
     std::cout << "\nTrying different yaml specs for matrix..." << std::endl;
 

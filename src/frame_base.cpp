@@ -1,11 +1,11 @@
 
-#include "frame_base.h"
-#include "constraint_base.h"
-#include "trajectory_base.h"
-#include "capture_base.h"
-#include "state_block.h"
-#include "state_angle.h"
-#include "state_quaternion.h"
+#include "base/frame_base.h"
+#include "base/constraint/constraint_base.h"
+#include "base/trajectory_base.h"
+#include "base/capture/capture_base.h"
+#include "base/state_block.h"
+#include "base/state_angle.h"
+#include "base/state_quaternion.h"
 
 namespace wolf {
 
@@ -226,8 +226,6 @@ Eigen::MatrixXs FrameBase::getCovariance() const
     return getProblem()->getFrameCovariance(shared_from_this());
 }
 
-
-
 FrameBasePtr FrameBase::getPreviousFrame() const
 {
     //std::cout << "finding previous frame of " << this->frame_id_ << std::endl;
@@ -386,7 +384,7 @@ FrameBasePtr FrameBase::create_POV_3D(const FrameType & _tp,
 
 } // namespace wolf
 
-#include "factory.h"
+#include "base/factory.h"
 namespace wolf
 {
 namespace{ const bool WOLF_UNUSED Frame_PO_2D_Registered  = FrameFactory::get().registerCreator("PO 2D",  FrameBase::create_PO_2D ); }

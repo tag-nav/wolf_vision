@@ -14,10 +14,10 @@
 #include <queue>
 
 //Wolf includes
-#include "capture_void.h"
-#include "feature_odom_2D.h"
-#include "constraint_base.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/capture/capture_void.h"
+#include "base/feature/feature_odom_2D.h"
+#include "base/constraint/constraint_base.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 // EIGEN
 //#include <Eigen/CholmodSupport>
@@ -296,7 +296,6 @@ int main(int argc, char** argv)
 
 			// covariance
         bl_ceres_manager->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL);//ALL_MARGINALS
-
 
 	//		t1 = clock();
 	//		double t_sigma_manual = 0;

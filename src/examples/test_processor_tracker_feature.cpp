@@ -9,12 +9,12 @@
 #include <iostream>
 
 //Wolf
-#include "wolf.h"
-#include "problem.h"
-#include "sensor_base.h"
-#include "state_block.h"
-#include "processor_tracker_feature_dummy.h"
-#include "capture_void.h"
+#include "base/wolf.h"
+#include "base/problem.h"
+#include "base/sensor/sensor_base.h"
+#include "base/state_block.h"
+#include "base/processor/processor_tracker_feature_dummy.h"
+#include "base/capture/capture_void.h"
 
 void print_prc(wolf::ProcessorTrackerFeaturePtr _prc)
 {

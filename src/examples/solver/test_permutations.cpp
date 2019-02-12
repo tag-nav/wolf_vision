@@ -5,7 +5,6 @@
  *      Author: jvallve
  */
 
-
 //std includes
 #include <cstdlib>
 #include <iostream>
@@ -18,7 +17,6 @@
 
 // eigen includes
 #include <eigen3/Eigen/OrderingMethods>
-
 
 using namespace Eigen;
 
@@ -110,7 +108,6 @@ int main(int argc, char *argv[])
     std::cout << "a = P2 * a: " << std::endl << a.transpose() << std::endl << std::endl;
     std::cout << "mapped_a = " << mapped_a.transpose() << std::endl << std::endl;
     std::cout << "maps are affected of the reorderings in mapped vectors" << std::endl;
-
 
 //    Map<>
 }

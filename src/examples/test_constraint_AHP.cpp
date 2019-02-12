@@ -1,10 +1,10 @@
-#include "pinhole_tools.h"
-#include "landmark_AHP.h"
-#include "constraint_AHP.h"
-#include "state_block.h"
-#include "state_quaternion.h"
-#include "sensor_camera.h"
-#include "capture_image.h"
+#include "base/pinhole_tools.h"
+#include "base/landmark/landmark_AHP.h"
+#include "base/constraint/constraint_AHP.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
+#include "base/sensor/sensor_camera.h"
+#include "base/capture/capture_image.h"
 
 int main()
 {
@@ -45,7 +45,6 @@ int main()
     // one-liner API
     ProcessorBasePtr processor_ptr = wolf_problem_ptr_->installProcessor("IMAGE LANDMARK", "ORB", "PinHole", wolf_root + "/src/examples/processor_image_feature.yaml");
 
-
     // create the current frame
     Eigen::Vector7s frame_pos_ori;
     frame_pos_ori.setRandom();
@@ -71,7 +70,6 @@ int main()
     image_ptr = std::make_shared< CaptureImage>(t, camera_ptr_, frame);
     last_frame->addCapture(image_ptr);
 
-
     // create the feature
     cv::KeyPoint kp; kp.pt = {10,20};
     cv::Mat desc;
@@ -82,13 +80,11 @@ int main()
     FrameBasePtr anchor_frame = std::make_shared< FrameBase>(t,std::make_shared<StateBlock>(frame_val.head(3)), std::make_shared<StateQuaternion>(frame_val.tail(4)));
     //FrameBasePtr anchor_frame = wolf_problem_ptr_->getTrajectoryPtr()->getLastFramePtr();
 
-
     // create the landmark
     Eigen::Vector2s point2D;
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
     point2D[1] = feat_point_image_ptr->getKeypoint().pt.y;
     std::cout << "point2D: " << point2D.transpose() << std::endl;
-
 
     Scalar distance = 2; // arbitrary value
     Eigen::Vector4s vec_homogeneous;
@@ -114,8 +110,6 @@ int main()
     LandmarkAHPPtr landmark = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, image_ptr->getSensorPtr(), feat_point_image_ptr->getDescriptor());
 
     std::cout << "Landmark AHP created" << std::endl;
-
-
 
     // Create the constraint
     ConstraintAHPPtr constraint_ptr = std::make_shared<ConstraintAHP>(feat_point_image_ptr, std::static_pointer_cast<LandmarkAHP>(landmark), processor_ptr);
@@ -145,7 +139,6 @@ int main()
             anchor_frame_p.data(), anchor_frame_o.data(),
             landmark_.data(), expectation.data());
 //    current_frame p; current_frame o; anchor_frame p; anchor_frame o; homogeneous_vector landmark, residual
-
 
     std::cout << "expectation computed" << std::endl;
     std::cout << "expectation = " << expectation[0] << "   " << expectation[1] << std::endl;

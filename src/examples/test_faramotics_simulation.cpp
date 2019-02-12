@@ -16,10 +16,10 @@
 #include "unistd.h"
 
 // wolf
-#include "wolf.h"
-#include "feature_base.h"
-#include "landmark_base.h"
-#include "state_block.h"
+#include "base/wolf.h"
+#include "base/feature/feature_base.h"
+#include "base/landmark/landmark_base.h"
+#include "base/state_block.h"
 
 //faramotics includes
 #include "faramotics/dynamicSceneRender.h"
@@ -59,7 +59,6 @@ class FaramoticsRobot
             myScanner = new CrangeScan2D(HOKUYO_UTM30LX_180DEG);  //HOKUYO_UTM30LX_180DEG or LEUZE_RS4
             myScanner->loadAssimpModel(modelFileName);
         }
-
 
         //function travel around
         Eigen::Vector3s motionCampus(unsigned int ii, double& displacement_, double& rotation_)
@@ -215,7 +214,6 @@ int main(int argc, char** argv)
     {
         // ROBOT MOVEMENT ---------------------------
         ground_truth = robot.motionCampus(step, odom_data(0), odom_data(1));
-
 
         // LIDAR DATA ---------------------------
         scan1 = robot.computeScan(1);

@@ -12,8 +12,8 @@
 
 //Wolf includes
 #include "wolf_manager.h"
-#include "capture_void.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/capture/capture_void.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 int main(int argc, char** argv) 
 {
@@ -56,8 +56,6 @@ int main(int argc, char** argv)
     ceres_options.max_num_iterations = 1e4;
     CeresManager* ceres_manager_ceres_diff = new CeresManager(wolf_problem_ceres_diff, ceres_options, false);
     CeresManager* ceres_manager_wolf_diff = new CeresManager(wolf_problem_wolf_diff, ceres_options, true);
-
-
 
     // load graph from .txt
     offLineFile_.open(file_path_.c_str(), std::ifstream::in);

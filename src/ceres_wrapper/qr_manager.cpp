@@ -154,7 +154,6 @@ void QRManager::addConstraint(ConstraintBasePtr _ctr_ptr)
     pending_changes_ = true;
 }
 
-
 void QRManager::removeConstraint(ConstraintBasePtr _ctr_ptr)
 {
     //std::cout << "remove constraint " << _ctr_ptr->id() << std::endl;

@@ -6,11 +6,11 @@
  */
 
 // wolf yaml
-#include "yaml_conversion.h"
+#include "base/yaml/yaml_conversion.h"
 
 // wolf
-#include "../sensor_odom_3D.h"
-#include "../factory.h"
+#include "base/sensor/sensor_odom_3D.h"
+#include "base/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
