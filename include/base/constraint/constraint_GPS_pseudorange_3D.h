@@ -26,11 +26,11 @@ class ConstraintGPSPseudorange3D: public ConstraintAutodiff<ConstraintGPSPseudor
 
     public:
 
-        ConstraintGPSPseudorange3D(FeatureBasePtr _ftr_ptr, 
+        ConstraintGPSPseudorange3D(FeatureBasePtr _ftr_ptr, const ProcessorBasePtr& _pr_ptr,
                                    bool _apply_loss_function = false, 
                                    ConstraintStatus _status = CTR_ACTIVE) :
              ConstraintAutodiff<ConstraintGPSPseudorange3D, 1, 3, 4, 3, 1, 3, 4>("GPS PR 3D",
-                                                                                 nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status,
+                                                                                 nullptr, nullptr, nullptr, nullptr, _pr_ptr, _apply_loss_function, _status,
                             _ftr_ptr->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to map frame
                             _ftr_ptr->getFramePtr()->getOPtr(), // orientation of the vehicle's frame wrt map frame
                             _ftr_ptr->getCapturePtr()->getSensorPPtr(), // position of the sensor (gps antenna) with respect to base frame

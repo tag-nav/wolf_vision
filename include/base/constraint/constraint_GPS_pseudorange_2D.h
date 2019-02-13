@@ -27,11 +27,15 @@ WOLF_PTR_TYPEDEFS(ConstraintGPSPseudorange2D);
 class ConstraintGPSPseudorange2D : public ConstraintAutodiff<ConstraintGPSPseudorange2D, 1, 2, 1, 3, 1, 3, 1>
 {
     public:
-        ConstraintGPSPseudorange2D(const FeatureBasePtr& _ftr_ptr,
+        ConstraintGPSPseudorange2D(const FeatureBasePtr& _ftr_ptr, const ProcessorBasePtr& _pr_ptr,
                                    bool _apply_loss_function = false, 
                                    ConstraintStatus _status = CTR_ACTIVE) :
            ConstraintAutodiff<ConstraintGPSPseudorange2D, 1, 2, 1, 3, 1, 3, 1>("GPS PR 2D",
                                                                                nullptr,
+                                                                               nullptr,
+                                                                               nullptr,
+                                                                               nullptr,
+																			   _pr_ptr,
                                                                                _apply_loss_function,
                                                                                _status,
                                                                                _ftr_ptr->getFramePtr()->getPPtr(), // position of the vehicle's frame with respect to the initial pos frame
