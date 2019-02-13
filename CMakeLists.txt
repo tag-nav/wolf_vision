@@ -380,6 +380,7 @@ include/base/landmark/landmark_corner_2D.h
 include/base/landmark/landmark_container.h
 include/base/landmark/landmark_line_2D.h
 include/base/landmark/landmark_polyline_2D.h
+include/base/landmark/landmark_apriltag.h
     )
   SET(HDRS_PROCESSOR
 include/base/processor/processor_capture_holder.h
@@ -542,6 +543,7 @@ src/landmark/landmark_corner_2D.cpp
 src/landmark/landmark_container.cpp
 src/landmark/landmark_line_2D.cpp
 src/landmark/landmark_polyline_2D.cpp
+src/landmark/landmark_apriltag.cpp
     )
   SET(SRCS_PROCESSOR
 src/processor/processor_frame_nearest_neighbor_filter.cpp
