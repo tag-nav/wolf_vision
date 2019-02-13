@@ -2,12 +2,12 @@
 #define _CONSTRAINT_AUTODIFF_APRILTAG_H_
 
 //Wolf includes
-#include "wolf.h"
-#include "rotations.h"
-#include "constraint_autodiff.h"
-#include "sensor_base.h"
-#include "landmark_apriltag.h"
-#include "features/feature_apriltag.h"
+#include "base/wolf.h"
+#include "base/rotations.h"
+#include "base/constraint/constraint_autodiff.h"
+#include "base/sensor/sensor_base.h"
+#include "base/landmark/landmark_apriltag.h"
+#include "base/feature/feature_apriltag.h"
 
 namespace wolf
 {

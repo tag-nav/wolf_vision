@@ -151,6 +151,16 @@ IF(cereal_FOUND)
     MESSAGE("cereal Library FOUND: cereal related sources will be built.")
 ENDIF(cereal_FOUND)
 
+# Apriltag
+# TODO: write proper files to be able to use find_package with apriltag library
+FIND_PATH(APRILTAG_INCLUDE_DIR NAMES apriltag.h PATH_SUFFIXES "apriltag" ${APRILTAG_INCLUDE_PATH})
+FIND_LIBRARY(APRILTAG_LIBRARY NAMES apriltag PATH_SUFFIXES "${CMAKE_LIBRARY_ARCHITECTURE}" "apriltag" ${APRILTAG_LIBRARY_PATH})
+
+IF(APRILTAG_LIBRARY)
+    SET(Apriltag_FOUND TRUE)
+    MESSAGE("apriltag Library FOUND in ${APRILTAG_LIBRARY}: apriltag related sources will be built.")
+ENDIF(APRILTAG_LIBRARY)
+
 # YAML with yaml-cpp
 INCLUDE (${PROJECT_SOURCE_DIR}/cmake_modules/FindYamlCpp.cmake)
 IF(YAMLCPP_FOUND)
@@ -663,6 +673,15 @@ src/processor/processor_tracker_landmark_image.cpp
     )
 ENDIF(vision_utils_FOUND)
 
+IF (OPENCV_FOUND AND Apriltag_FOUND)
+    SET(HDRS ${HDRS}
+        landmark_apriltag.h
+        )
+    SET(SRCS ${SRCS}
+        landmark_apriltag.cpp
+        )
+ENDIF(OPENCV_FOUND AND Apriltag_FOUND)
+
 #SUBDIRECTORIES
 add_subdirectory(hello_wolf)
 IF (cereal_FOUND)
@@ -701,6 +720,11 @@ src/yaml/sensor_laser_2D_yaml.cpp
 src/yaml/processor_image_yaml.cpp
 src/yaml/processor_tracker_feature_trifocal_yaml.cpp
             )
+            IF(Apriltag_FOUND)
+                SET(SRCS ${SRCS}
+                    yaml/processor_tracker_landmark_apriltag_yaml.cpp
+                )
+            ENDIF(Apriltag_FOUND)
     ENDIF(vision_utils_FOUND)
 ENDIF(YAMLCPP_FOUND)
 
@@ -750,6 +774,12 @@ ENDIF (YAMLCPP_FOUND)
 IF (GLOG_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${GLOG_LIBRARY})
 ENDIF (GLOG_FOUND)
+#check if this is done correctly
+IF (OPENCV_FOUND AND Apriltag_FOUND)
+    LINK_LIBRARIES(apriltag m)
+    TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${APRILTAG_LIBRARY}  ${CMAKE_THREAD_LIBS_INIT} ${OPENCV_LDFLAGS} m)
+ENDIF(OPENCV_FOUND AND Apriltag_FOUND)
+
 IF (GLOG_FOUND)
     IF(BUILD_TESTS)
         MESSAGE("Building tests.")

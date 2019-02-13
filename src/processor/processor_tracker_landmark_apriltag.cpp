@@ -1,13 +1,13 @@
-#include "processor_tracker_landmark_apriltag.h"
+#include "base/processor/processor_tracker_landmark_apriltag.h"
 
-#include "capture_image.h"
-#include "sensor_camera.h"
-#include "rotations.h"
-#include "features/feature_apriltag.h"
-#include "constraints/constraint_autodiff_apriltag.h"
-#include "landmark_apriltag.h"
-#include "state_quaternion.h"
-#include "pinhole_tools.h"
+#include "base/capture/capture_image.h"
+#include "base/sensor/sensor_camera.h"
+#include "base/rotations.h"
+#include "base/feature/feature_apriltag.h"
+#include "base/constraint/constraint_autodiff_apriltag.h"
+#include "base/landmark/landmark_apriltag.h"
+#include "base/state_quaternion.h"
+#include "base/pinhole_tools.h"
 
 // April tags
 #include "common/homography.h"
@@ -19,7 +19,7 @@
 #include <tag25h9.h>
 #include <tag25h7.h>
 
-#include "ippe.h"
+#include "base/processor/ippe.h"
 
 // #include "opencv2/opencv.hpp"
 #include <opencv2/imgproc/imgproc.hpp>
@@ -588,7 +588,7 @@ std::string ProcessorTrackerLandmarkApriltag::getTagFamily() const
 } // namespace wolf
 
 // Register in the SensorFactory
-#include "processor_factory.h"
+#include "base/processor/processor_factory.h"
 
 namespace wolf
 {
