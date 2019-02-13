@@ -98,7 +98,7 @@ ENDIF()
 
 option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
-option(BUILD_EXAMPLES "Build examples" OFF)
+# option(BUILD_EXAMPLES "Build examples" OFF)
 set(BUILD_TESTS true)
 
 # Does this has any other interest
@@ -760,6 +760,13 @@ IF (GLOG_FOUND)
         add_subdirectory(test)
     ENDIF(BUILD_TESTS)
 ENDIF (GLOG_FOUND)
+
+IF(BUILD_EXAMPLES)
+  #Build examples
+  MESSAGE("Building examples.")
+  ADD_SUBDIRECTORY(src/examples)
+ENDIF(BUILD_EXAMPLES)
+
 
 #install library
 

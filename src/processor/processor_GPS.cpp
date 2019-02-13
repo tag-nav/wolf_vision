@@ -44,7 +44,7 @@ void ProcessorGPS::process(CaptureBasePtr _capture_ptr)
     for (auto i_it = capture_gps_ptr_->getFeatureList().begin();
             i_it != capture_gps_ptr_->getFeatureList().end(); i_it++)
     {
-        capture_gps_ptr_->getFeatureList().front()->addConstraint(std::make_shared<ConstraintGPSPseudorange2D>((*i_it)));
+        capture_gps_ptr_->getFeatureList().front()->addConstraint(std::make_shared<ConstraintGPSPseudorange2D>((*i_it), shared_from_this()));
     }
     //std::cout << "Constraints established" << std::endl;
 }
@@ -69,7 +69,7 @@ ProcessorBasePtr ProcessorGPS::create(const std::string& _unique_name, const Pro
 } // namespace wolf
 
 // Register in the SensorFactory
-#include "processor_factory.h"
+#include "base/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("GPS",ProcessorGPS)
 } // namespace wolf
