@@ -1,13 +1,13 @@
 #include "utils_gtest.h"
 
-#include "wolf.h"
-#include "logging.h"
+#include "base/wolf.h"
+#include "base/logging.h"
 
-#include "processors/processor_tracker_landmark_apriltag.h"
-#include "features/feature_apriltag.h"
-#include "landmark_apriltag.h"
-#include "capture_pose.h"
-#include "processor_factory.h"
+#include "base/processor/processor_tracker_landmark_apriltag.h"
+#include "base/feature/feature_apriltag.h"
+#include "base/landmark/landmark_apriltag.h"
+#include "base/capture/capture_pose.h"
+#include "base/processor/processor_factory.h"
 
 using namespace Eigen;
 using namespace wolf;

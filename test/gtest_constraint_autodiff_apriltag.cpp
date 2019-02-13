@@ -1,13 +1,13 @@
 #include "utils_gtest.h"
 
-#include "wolf.h"
-#include "logging.h"
+#include "base/wolf.h"
+#include "base/logging.h"
 
-#include "ceres_wrapper/ceres_manager.h"
-#include "processors/processor_tracker_landmark_apriltag.h"
-#include "capture_image.h"
-#include "constraints/constraint_autodiff_apriltag.h"
-#include "processor_factory.h"
+#include "base/ceres_wrapper/ceres_manager.h"
+#include "base/processor/processor_tracker_landmark_apriltag.h"
+#include "base/capture/capture_image.h"
+#include "base/constraint/constraint_autodiff_apriltag.h"
+#include "base/processor/processor_factory.h"
 
 #include <apriltag.h>
 

@@ -7,9 +7,9 @@
 
 
 // wolf
-#include "../processors/processor_tracker_landmark_apriltag.h"
-#include "yaml_conversion.h"
-#include "../factory.h"
+#include "base/processor/processor_tracker_landmark_apriltag.h"
+#include "base/yaml/yaml_conversion.h"
+#include "base/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>

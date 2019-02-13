@@ -9,10 +9,10 @@
 #include "utils_gtest.h"
 
 
-#include "wolf.h"
-#include "logging.h"
+#include "base/wolf.h"
+#include "base/logging.h"
 
-#include "landmark_apriltag.h"
+#include "base/landmark/landmark_apriltag.h"
 
 using namespace Eigen;
 using namespace wolf;

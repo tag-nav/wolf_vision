@@ -261,6 +261,10 @@ IF(GLOG_FOUND)
 INCLUDE_DIRECTORIES(${GLOG_INCLUDE_DIR})
 ENDIF(GLOG_FOUND)
 
+IF(APRILTAG_INCLUDE_DIR)
+    INCLUDE_DIRECTORIES(${APRILTAG_INCLUDE_DIR})
+ENDIF(APRILTAG_INCLUDE_DIR)
+
 #HEADERS
 
 SET(HDRS_BASE
@@ -674,9 +678,13 @@ ENDIF(vision_utils_FOUND)
 IF (OPENCV_FOUND AND Apriltag_FOUND)
     SET(HDRS ${HDRS}
       include/base/landmark/landmark_apriltag.h
+      include/base/feature/feature_apriltag.h
+      include/base/processor/processor_tracker_landmark_apriltag.h
         )
     SET(SRCS ${SRCS}
       src/landmark/landmark_apriltag.cpp
+      src/feature/feature_apriltag.cpp
+      src/processor/processor_tracker_landmark_apriltag.cpp
         )
 ENDIF(OPENCV_FOUND AND Apriltag_FOUND)
 
