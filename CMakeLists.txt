@@ -680,11 +680,13 @@ IF (OPENCV_FOUND AND Apriltag_FOUND)
       include/base/landmark/landmark_apriltag.h
       include/base/feature/feature_apriltag.h
       include/base/processor/processor_tracker_landmark_apriltag.h
+      include/base/processor/ippe.h
         )
     SET(SRCS ${SRCS}
       src/landmark/landmark_apriltag.cpp
       src/feature/feature_apriltag.cpp
       src/processor/processor_tracker_landmark_apriltag.cpp
+      src/processor/ippe.cpp
         )
 ENDIF(OPENCV_FOUND AND Apriltag_FOUND)
 
