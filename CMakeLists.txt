@@ -720,7 +720,7 @@ src/yaml/processor_tracker_feature_trifocal_yaml.cpp
             )
             IF(Apriltag_FOUND)
                 SET(SRCS ${SRCS}
-                    yaml/processor_tracker_landmark_apriltag_yaml.cpp
+                  src/yaml/processor_tracker_landmark_apriltag_yaml.cpp
                 )
             ENDIF(Apriltag_FOUND)
     ENDIF(vision_utils_FOUND)
