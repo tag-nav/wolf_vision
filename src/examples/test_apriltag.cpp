@@ -5,26 +5,27 @@
  *      \author: Dinesh Atchtuhan
  */
 
-//std
-#include <iostream>
-#include <stdlib.h>
+//Wolf
+#include "base/wolf.h"
+#include "base/rotations.h"
+#include "base/problem.h"
+#include "base/ceres_wrapper/ceres_manager.h"
+#include "base/sensor/sensor_camera.h"
+#include "base/processor/processor_tracker_landmark_apriltag.h"
+#include "base/capture/capture_image.h"
+#include "base/feature/feature_apriltag.h"
+
+// opencv
+#include <opencv2/imgproc/imgproc.hpp>
+#include "opencv2/opencv.hpp"
+
+// Eigen
 #include <Eigen/Core>
 #include <Eigen/Geometry>
 
-//Wolf
-#include "wolf.h"
-#include "ceres_wrapper/ceres_manager.h"
-#include "problem.h"
-#include "sensor_camera.h"
-#include "processors/processor_tracker_landmark_apriltag.h"
-#include "capture_image.h"
-#include "features/feature_apriltag.h"
-
-#include "rotations.h"
-
-//opencv
-#include <opencv2/imgproc/imgproc.hpp>
-#include "opencv2/opencv.hpp"
+// std
+#include <iostream>
+#include <stdlib.h>
 
 
 void draw_apriltag(cv::Mat image, std::vector<cv::Point2d> corners, int thickness=1, bool draw_corners=false);
