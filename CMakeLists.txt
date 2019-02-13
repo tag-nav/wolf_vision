@@ -681,6 +681,7 @@ IF (OPENCV_FOUND AND Apriltag_FOUND)
       include/base/feature/feature_apriltag.h
       include/base/processor/processor_tracker_landmark_apriltag.h
       include/base/processor/ippe.h
+      include/base/constraint/constraint_autodiff_apriltag.h
         )
     SET(SRCS ${SRCS}
       src/landmark/landmark_apriltag.cpp
