@@ -32,7 +32,8 @@ noise:
     
 vote:
     voting active:              true
-    min_time_vote:              1 # s
+    min_time_vote:              0 # s
+    max_time_vote:              0 # s
     min_features_for_keyframe:  1
 
 

@@ -5,14 +5,13 @@
  *      \author: jsola
  */
 
-
-#include <capture_IMU.h>
-#include "problem.h"
-#include "sensor_odom_2D.h"
-#include "processor_odom_3D.h"
-#include "map_base.h"
-#include "landmark_base.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/capture/capture_IMU.h"
+#include "base/problem.h"
+#include "base/sensor/sensor_odom_2D.h"
+#include "base/processor/processor_odom_3D.h"
+#include "base/map_base.h"
+#include "base/landmark/landmark_base.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 #include <cstdlib>
 
@@ -24,8 +23,6 @@ using Eigen::Vector6s;
 using Eigen::Vector7s;
 using Eigen::Quaternions;
 using Eigen::VectorXs;
-
-
 
 int main (int argc, char** argv)
 {

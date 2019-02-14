@@ -1,9 +1,0 @@
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-
-# Forward var to parent scope
-
-SET(HDRS_SOLVER ${HDRS_SOLVER}
-                ${CMAKE_CURRENT_SOURCE_DIR}/solver_manager.h PARENT_SCOPE)
-
-SET(SRCS_SOLVER ${SRCS_SOLVER}
-                ${CMAKE_CURRENT_SOURCE_DIR}/solver_manager.cpp PARENT_SCOPE)

@@ -7,9 +7,9 @@
 
 
 // wolf
-#include "../processors/processor_tracker_landmark_apriltag.h"
-#include "yaml_conversion.h"
-#include "../factory.h"
+#include "base/processor/processor_tracker_landmark_apriltag.h"
+#include "base/yaml/yaml_conversion.h"
+#include "base/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
@@ -65,7 +65,8 @@ static ProcessorParamsBasePtr createProcessorParamsLandmarkApriltag(const std::s
 
         YAML::Node vote                     = config["vote"];
         params->voting_active               = vote["voting active"]                  .as<bool>();
-        params->min_time_vote               = vote["min_time_vote"]                  .as<Scalar>();
+        params->min_time_vote_              = vote["min_time_vote"]                  .as<Scalar>();
+        params->max_time_vote_              = vote["max_time_vote"]                  .as<Scalar>();
         params->min_features_for_keyframe   = vote["min_features_for_keyframe"]      .as<unsigned int>();
 
         return params;

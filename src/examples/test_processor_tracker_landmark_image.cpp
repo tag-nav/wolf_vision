@@ -1,18 +1,18 @@
 //std
 #include <iostream>
 
-#include "processor_tracker_landmark_image.h"
+#include "base/processor/processor_tracker_landmark_image.h"
 
 //Wolf
-#include "wolf.h"
-#include "problem.h"
-#include "state_block.h"
-#include "processor_odom_3D.h"
-#include "sensor_odom_3D.h"
-#include "sensor_camera.h"
-#include "capture_image.h"
-#include "capture_pose.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/wolf.h"
+#include "base/problem.h"
+#include "base/state_block.h"
+#include "base/processor/processor_odom_3D.h"
+#include "base/sensor/sensor_odom_3D.h"
+#include "base/sensor/sensor_camera.h"
+#include "base/capture/capture_image.h"
+#include "base/capture/capture_pose.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 // Vision utils includes
 #include <vision_utils.h>
@@ -221,11 +221,9 @@ int main(int argc, char** argv)
 //        std::cout << "current   ts: " << t.get() << std::endl;
 //        std::cout << "          dt: " << t_prev - t_prev_prev << "; dx: " << dx.transpose() << std::endl;
 
-
         // Cleanup map ---------------------------------------
 
         cleanupMap(problem, t, 2, 5); // dt, min_ctr
-
 
         // Solve -----------------------------------------------
         // solve only when new KFs are added
@@ -235,7 +233,6 @@ int main(int argc, char** argv)
             std::string summary = ceres_manager.solve(SolverManager::ReportVerbosity::BRIEF);// 0: nothing, 1: BriefReport, 2: FullReport
             std::cout << summary << std::endl;
         }
-
 
         // Finish loop -----------------------------------------
         cv::Mat image_graphics = frame_buff.back()->getImage().clone();

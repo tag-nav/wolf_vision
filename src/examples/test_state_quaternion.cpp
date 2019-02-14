@@ -5,10 +5,9 @@
  *      \author: jsola
  */
 
-
-#include "frame_base.h"
-#include "state_quaternion.h"
-#include "time_stamp.h"
+#include "base/frame_base.h"
+#include "base/state_quaternion.h"
+#include "base/time_stamp.h"
 
 #include <iostream>
 
@@ -35,7 +34,6 @@ int main (void)
     // Note: Deleting the StateBlock pointers will be done at the destruction of FrameBase.
 
     std::cout << "Done" << std::endl;
-
 
     return 1;
 }

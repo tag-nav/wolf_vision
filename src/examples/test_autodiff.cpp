@@ -17,8 +17,8 @@
 
 //Wolf includes
 #include "wolf_manager.h"
-#include "sensor_laser_2D.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/sensor/sensor_laser_2D.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 //C includes for sleep, time and main args
 #include "unistd.h"
@@ -48,7 +48,6 @@ void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double
 
     pose.moveForward(displacement_);
     pose.rt.setEuler(pose.rt.head() + rotation_, pose.rt.pitch(), pose.rt.roll());
-}
 }
 
 int main(int argc, char** argv)

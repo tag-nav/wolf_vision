@@ -5,7 +5,6 @@
  *      \author: jsola
  */
 
-
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Geometry>
 #include <iostream>
@@ -57,11 +56,9 @@ inline Eigen::Quaternion<typename Derived::Scalar> v2q(const Eigen::MatrixBase<D
     }
 }
 
-
 int main(void)
 {
     using namespace Eigen;
-
 
     VectorXd x(10);
     x << 1,2,3,4,5,6,7,8,9,10;

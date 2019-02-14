@@ -12,9 +12,9 @@
 
 //Wolf includes
 #include "wolf_manager.h"
-#include "capture_void.h"
-#include "constraint_base.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/capture/capture_void.h"
+#include "base/constraint/constraint_base.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 // EIGEN
 //#include <Eigen/CholmodSupport>
@@ -30,7 +30,6 @@ void insertSparseBlock(const Eigen::SparseMatrix<Scalar>& ins, Eigen::SparseMatr
       original.coeffRef(iti.row() + row, iti.col() + col) = iti.value();
 
   original.makeCompressed();
-}
 }
 
 int main(int argc, char** argv) 
@@ -403,7 +402,6 @@ int main(int argc, char** argv)
 //        std::cout << "Sigma_34" << std::endl << Sigma_34 << std::endl;
 //        std::cout << "Sigma_44" << std::endl << Sigma_44 << std::endl;
 
-
         // jacobians
         ((ConstraintAnalytic*)(*c_it))->evaluatePureJacobians(jacobians);
         Eigen::MatrixXs& J1 = jacobians[0];
@@ -433,7 +431,6 @@ int main(int argc, char** argv)
                                               J4 * Sigma_24.transpose() * J2.transpose() +
                                               J4 * Sigma_34.transpose() * J3.transpose() +
                                               J4 * Sigma_44 * J4.transpose()) ).determinant() );
-
 
 //        std::cout << "part = " << std::endl << (J1 * Sigma_11 * J1.transpose() +
 //                                                  J1 * Sigma_12 * J2.transpose() +

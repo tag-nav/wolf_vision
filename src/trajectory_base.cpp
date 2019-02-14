@@ -1,6 +1,5 @@
-#include "trajectory_base.h"
-#include "frame_base.h"
-
+#include "base/trajectory_base.h"
+#include "base/frame_base.h"
 
 namespace wolf {
 
@@ -38,7 +37,6 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
 
     return _frame_ptr;
 }
-
 
 void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
 {

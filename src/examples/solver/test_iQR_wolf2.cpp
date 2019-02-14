@@ -17,9 +17,9 @@
 #include <queue>
 
 //Wolf includes
-#include "state_block.h"
-#include "constraint_base.h"
-#include "sensor_laser_2D.h"
+#include "base/state_block.h"
+#include "base/constraint/constraint_base.h"
+#include "base/sensor/sensor_laser_2D.h"
 #include "wolf_manager.h"
 
 // wolf solver
@@ -35,13 +35,11 @@
 
 //Ceres includes
 #include "glog/logging.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 //laser_scan_utils
 #include "iri-algorithms/laser_scan_utils/corner_detector.h"
 #include "iri-algorithms/laser_scan_utils/entities.h"
-
-
 
 //function travel around
 void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double& rotation_)
@@ -96,7 +94,6 @@ void motionCampus(unsigned int ii, Cpose3d & pose, double& displacement_, double
     pose.rt.setEuler(pose.rt.head() + rotation_, pose.rt.pitch(), pose.rt.roll());
 }
 
-
 //main
 int main(int argc, char *argv[])
 {
@@ -117,7 +114,6 @@ int main(int argc, char *argv[])
     unsigned int n_execution = (unsigned int) atoi(argv[1]); //number of iterations of the whole execution
 
     // INITIALIZATION ============================================================================================
-
 
     //init random generators
     Scalar odom_std_factor = 0.1;
@@ -431,9 +427,4 @@ int main(int argc, char *argv[])
     //exit
     return 0;
 }
-
-
-
-
-
 

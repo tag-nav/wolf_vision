@@ -115,26 +115,29 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
 //                                                            //
 TEST(ProcessorTrackerLandmarkApriltag, Constructor)
 {
+    std::string s1;
+    std::string s2;
+
     ProcessorParamsTrackerLandmarkApriltagPtr params = std::make_shared<ProcessorParamsTrackerLandmarkApriltag>();
     params->tag_family_ = "tag36h11";
     ProcessorTrackerLandmarkApriltagPtr p = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
-    ASSERT_TRUE(p->getName() == params->tag_family_);
+    ASSERT_TRUE(p->getTagFamily() == params->tag_family_);
 
     params->tag_family_ = "tag36h10";
     p = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
-    ASSERT_TRUE(p->getName() == params->tag_family_);
+    ASSERT_TRUE(p->getTagFamily() == params->tag_family_);
 
     params->tag_family_ = "tag36artoolkit";
     p = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
-    ASSERT_TRUE(p->getName() == params->tag_family_);
+    ASSERT_TRUE(p->getTagFamily() == "artoolkit"); // This tagfamily is stored differently by apriltag library
 
     params->tag_family_ = "tag25h9";
     p = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
-    ASSERT_TRUE(p->getName() == params->tag_family_);
+    ASSERT_TRUE(p->getTagFamily() == params->tag_family_);
 
     params->tag_family_ = "tag25h7";
     p = std::make_shared<ProcessorTrackerLandmarkApriltag>(params);
-    ASSERT_TRUE(p->getName() == params->tag_family_);
+    ASSERT_TRUE(p->getTagFamily() == params->tag_family_);
 
     params->tag_family_ = "wrong_family";
     WOLF_INFO("The following runtime error \"Unrecognized tag family name. Use e.g. \"tag36h11\".\" is expected and does not imply a failed test:");

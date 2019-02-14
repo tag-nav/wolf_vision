@@ -6,11 +6,11 @@
  */
 
  //Wolf
-#include <capture_IMU.h>
-#include "wolf.h"
-#include "problem.h"
-#include "state_block.h"
-#include "state_quaternion.h"
+#include "base/capture/capture_IMU.h"
+#include "base/wolf.h"
+#include "base/problem.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -18,8 +18,8 @@
 #include <cmath>
 #include <termios.h>
 #include <fcntl.h>
-#include <processor_IMU.h>
-#include <sensor_IMU.h>
+#include "base/processor/processor_IMU.h"
+#include "base/sensor/sensor_IMU.h"
 
 #define DEBUG_RESULTS
 #define FROM_FILE
@@ -193,7 +193,6 @@ int main(int argc, char** argv)
     << wolf_problem_ptr_->getProcessorMotionPtr()->getCurrentState().head(16).transpose() << std::endl;
     std::cout << "Integrated std  : " << std::fixed << std::setprecision(3) << std::setw(8)
     << (wolf_problem_ptr_->getProcessorMotionPtr()->getMotion().delta_integr_cov_.diagonal().transpose()).array().sqrt() << std::endl;
-
 
     // Print statistics
     std::cout << "\nStatistics -----------------------------------------------------------------------------------" << std::endl;

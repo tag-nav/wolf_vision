@@ -12,8 +12,8 @@
 
 //Wolf includes
 #include "wolf_manager.h"
-#include "capture_void.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/capture/capture_void.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 // EIGEN
 //#include <Eigen/CholmodSupport>
@@ -27,7 +27,6 @@ void insertSparseBlock(const Eigen::SparseMatrix<Scalar>& ins, Eigen::SparseMatr
       original.coeffRef(iti.row() + row, iti.col() + col) = iti.value();
 
   original.makeCompressed();
-}
 }
 
 int main(int argc, char** argv) 
@@ -75,8 +74,6 @@ int main(int argc, char** argv)
     ceres_options.max_num_iterations = 1e4;
     CeresManager* ceres_manager_full = new CeresManager(wolf_problem_full, ceres_options);
     CeresManager* ceres_manager_prun = new CeresManager(wolf_problem_prun, ceres_options);
-
-
 
     // load graph from .txt
     offLineFile_.open(file_path_.c_str(), std::ifstream::in);
@@ -361,7 +358,6 @@ int main(int argc, char** argv)
         wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOtherPtr()->getOPtr(), (*c_it)->getCapturePtr()->getFramePtr()->getOPtr(), Sigma_ij, 2, 2);
 //        std::cout << "Sigma_ij" << std::endl << Sigma_ij << std::endl;
 //        std::cout << "Sigma(i,j)" << std::endl << Sigma.block<3,3>(frame_ptr_2_index_prun[(*c_it)->getFrameToPtr()]*3, frame_ptr_2_index_prun[(*c_it)->getCapturePtr()->getFramePtr()]*3) << std::endl;
-
 
         //jacobian
         xi = *(*c_it)->getFrameOtherPtr()->getPPtr()->getPtr();

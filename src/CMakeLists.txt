@@ -1,4 +1,3 @@
-
 #Start WOLF build
 MESSAGE("Starting WOLF CMakeLists ...")
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
@@ -25,7 +24,6 @@ set(BUILD_TESTS true)
 IF(BUILD_EXAMPLES OR BUILD_TESTS)
   set(_WOLF_ROOT_DIR ${CMAKE_SOURCE_DIR})
 ENDIF(BUILD_EXAMPLES OR BUILD_TESTS)
-
 
 #find dependencies.
 
@@ -130,11 +128,13 @@ IF(EXISTS "${WOLF_CONFIG_DIR}" AND NOT IS_DIRECTORY "${WOLF_CONFIG_DIR}")
   message(FATAL_ERROR "Bug: Specified CONFIG_DIR: "
     "${WOLF_CONFIG_DIR} exists, but is not a directory.")
 ENDIF()
-
 # Configure config.h
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/internal/config.h.in "${WOLF_CONFIG_DIR}/config.h")
 
-#include directories
+#TEMPORAL INCLUDE UNTIL WE FIGURE OUT WHAT TO DO WITH FILES in src/temp
+
+include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(../dummyInclude)
 
 # Include config.h directory at first.
 include_directories("${PROJECT_BINARY_DIR}/conf")
@@ -200,104 +200,135 @@ ENDIF(APRILTAG_INCLUDE_DIR)
 
 #headers
 SET(HDRS_BASE
-    capture_base.h
-    capture_motion.h
-    constraint_analytic.h
-    constraint_autodiff.h
-    constraint_base.h
+capture/capture_motion.h
     eigen_assert.h
     eigen_predicates.h
-    factory.h
-    feature_base.h
-    feature_match.h
-    frame_base.h
-    hardware_base.h
-    landmark_base.h
-    landmark_match.h
-    local_parametrization_base.h
-    local_parametrization_quaternion.h
-    local_parametrization_homogeneous.h
-    logging.h
+landmark/landmark_match.h
     make_unique.h
-    map_base.h
-    motion_buffer.h
-    node_base.h
     pinhole_tools.h
-    problem.h
-    processor_base.h
-    processor_capture_holder.h
-    processor_factory.h
-    processor_logging.h
-    processor_loopclosure_base.h
-    processor_motion.h
-    processor_tracker.h
-    processor_tracker_feature.h
-    processor_tracker_landmark.h
-    rotations.h
-    sensor_base.h
-    sensor_factory.h
-    singleton.h
-    state_block.h
-    state_homogeneous_3D.h
-    state_quaternion.h
-    time_stamp.h
-    track_matrix.h
-    trajectory_base.h
-    wolf.h
+processor/processor_capture_holder.h
+processor/processor_tracker_landmark.h
     )
-
 SET(HDRS
-    capture_pose.h
-    capture_GPS_fix.h
-    capture_IMU.h
-    capture_odom_2D.h
-    capture_odom_3D.h
-    capture_void.h
-    constraint_block_absolute.h
-    constraint_container.h
-    constraint_corner_2D.h
-    constraint_AHP.h
-    constraint_epipolar.h
-    constraint_IMU.h
-    constraint_fix_bias.h
-    constraint_GPS_2D.h
-    constraint_GPS_pseudorange_3D.h
-    constraint_GPS_pseudorange_2D.h
-    constraint_odom_2D.h
-    constraint_odom_2D_analytic.h
-    constraint_odom_3D.h
-    constraint_point_2D.h
-    constraint_point_to_line_2D.h
-    constraint_pose_2D.h
-    constraint_pose_3D.h
-    constraint_quaternion_absolute.h
-    constraint_relative_2D_analytic.h
-    feature_corner_2D.h
-    feature_GPS_fix.h
-    feature_GPS_pseudorange.h
-    feature_IMU.h
-    feature_odom_2D.h
-    feature_polyline_2D.h
-    feature_pose.h
+capture/capture_motion.h
+capture/capture_GPS_fix.h
+capture/capture_IMU.h
+capture/capture_odom_2D.h
+capture/capture_odom_3D.h
+constraint/constraint_block_absolute.h
+constraint/constraint_container.h
+constraint/constraint_corner_2D.h
+constraint/constraint_AHP.h
+constraint/constraint_epipolar.h
+constraint/constraint_IMU.h
+constraint/constraint_fix_bias.h
+constraint/constraint_GPS_2D.h
+constraint/constraint_GPS_pseudorange_3D.h
+constraint/constraint_GPS_pseudorange_2D.h
+constraint/constraint_odom_2D.h
+constraint/constraint_odom_2D_analytic.h
+constraint/constraint_odom_3D.h
+constraint/constraint_point_2D.h
+constraint/constraint_point_to_line_2D.h
+constraint/constraint_pose_2D.h
+constraint/constraint_pose_3D.h
+constraint/constraint_quaternion_absolute.h
+constraint/constraint_relative_2D_analytic.h
+    temp/diff_drive_tools.h
+    temp/diff_drive_tools.hpp
+feature/feature_corner_2D.h
+feature/feature_GPS_fix.h
+feature/feature_GPS_pseudorange.h
+feature/feature_IMU.h
+feature/feature_odom_2D.h
+feature/feature_polyline_2D.h
     IMU_tools.h
-    landmark_corner_2D.h
-    landmark_container.h
-    landmark_line_2D.h
-    landmark_polyline_2D.h
+landmark/landmark_corner_2D.h
+landmark/landmark_container.h
+landmark/landmark_line_2D.h
+landmark/landmark_polyline_2D.h
     local_parametrization_polyline_extreme.h
-    processor_frame_nearest_neighbor_filter.h
-    processor_IMU.h
+processor/processor_frame_nearest_neighbor_filter.h
+processor/processor_IMU.h
     test/processor_IMU_UnitTester.h
-    processor_odom_2D.h
-    processor_odom_3D.h
-    processor_tracker_feature_dummy.h
-    processor_tracker_landmark_dummy.h
-    sensor_camera.h
-    sensor_GPS.h
-    sensor_GPS_fix.h
-    sensor_IMU.h
-    sensor_odom_2D.h
-    sensor_odom_3D.h
+processor/processor_odom_2D.h
+processor/processor_odom_3D.h
+processor/processor_tracker_feature_dummy.h
+processor/processor_tracker_landmark_dummy.h
+sensor/sensor_camera.h
+sensor/sensor_GPS.h
+sensor/sensor_GPS_fix.h
+sensor/sensor_IMU.h
+sensor/sensor_odom_2D.h
+sensor/sensor_odom_3D.h
+    )
+  SET(HDRS_CAPTURE
+capture/capture_GPS_fix.h
+capture/capture_IMU.h
+capture/capture_odom_2D.h
+capture/capture_odom_3D.h
+capture/capture_velocity.h
+capture/capture_wheel_joint_position.h
+    )
+  SET(HDRS_CONSTRAINT
+constraint/constraint_autodiff_trifocal.h
+constraint/constraint_autodiff_distance_3D.h
+constraint/constraint_AHP.h
+constraint/constraint_block_absolute.h
+constraint/constraint_container.h
+constraint/constraint_corner_2D.h
+constraint/constraint_diff_drive.h
+constraint/constraint_epipolar.h
+constraint/constraint_IMU.h
+constraint/constraint_fix_bias.h
+constraint/constraint_GPS_2D.h
+constraint/constraint_GPS_pseudorange_3D.h
+constraint/constraint_GPS_pseudorange_2D.h
+constraint/constraint_odom_2D.h
+constraint/constraint_odom_2D_analytic.h
+constraint/constraint_odom_3D.h
+constraint/constraint_point_2D.h
+constraint/constraint_point_to_line_2D.h
+constraint/constraint_pose_2D.h
+constraint/constraint_pose_3D.h
+constraint/constraint_quaternion_absolute.h
+constraint/constraint_relative_2D_analytic.h
+    )
+  SET(HDRS_FEATURE
+feature/feature_corner_2D.h
+feature/feature_diff_drive.h
+feature/feature_GPS_fix.h
+feature/feature_GPS_pseudorange.h
+feature/feature_IMU.h
+feature/feature_odom_2D.h
+feature/feature_polyline_2D.h
+    )
+  SET(HDRS_LANDMARK
+landmark/landmark_match.h
+landmark/landmark_corner_2D.h
+landmark/landmark_container.h
+landmark/landmark_line_2D.h
+landmark/landmark_polyline_2D.h
+    )
+  SET(HDRS_PROCESSOR
+processor/processor_capture_holder.h
+processor/processor_diff_drive.h
+processor/processor_frame_nearest_neighbor_filter.h
+processor/processor_IMU.h
+processor/processor_odom_2D.h
+processor/processor_odom_3D.h
+processor/processor_tracker_feature_dummy.h
+processor/processor_tracker_landmark.h
+processor/processor_tracker_landmark_dummy.h
+    )
+  SET(HDRS_SENSOR
+sensor/sensor_camera.h
+sensor/sensor_diff_drive.h
+sensor/sensor_GPS.h
+sensor/sensor_GPS_fix.h
+sensor/sensor_IMU.h
+sensor/sensor_odom_2D.h
+sensor/sensor_odom_3D.h
     )
 # [Add generic derived header before this line]
 
@@ -309,71 +340,131 @@ SET(HDRS_DTASSC
     data_association/association_nnls.h
     )
 
+SET(HDRS_CORE 
+core/capture_base.h
+core/capture_buffer.h
+core/capture_pose.h
+core/capture_void.h
+core/constraint_analytic.h
+core/constraint_autodiff.h
+core/constraint_base.h
+core/factory.h
+core/feature_base.h
+core/feature_match.h
+core/feature_pose.h
+core/frame_base.h
+core/hardware_base.h
+core/landmark_base.h
+core/local_parametrization_angle.h
+core/local_parametrization_base.h
+core/local_parametrization_homogeneous.h
+core/local_parametrization_quaternion.h
+core/logging.h
+core/map_base.h
+core/motion_buffer.h
+core/node_base.h
+core/problem.h
+core/processor_base.h
+core/factory.h
+core/processor_loopclosure_base.h
+core/processor_motion.h
+core/processor_tracker_feature.h
+core/processor_tracker.h
+core/rotations.h
+core/sensor_base.h
+core/factory.h
+core/singleton.h
+core/state_angle.h
+core/state_block.h
+core/state_homogeneous_3D.h
+core/state_quaternion.h
+core/three_D_tools.h
+core/time_stamp.h
+core/track_matrix.h
+core/trajectory_base.h
+core/wolf.h
+  )
+SET(SRCS_CORE 
+core/capture_base.cpp
+core/capture_pose.cpp
+core/capture_void.cpp
+core/constraint_analytic.cpp
+core/constraint_base.cpp
+core/feature_base.cpp
+core/feature_pose.cpp
+core/frame_base.cpp
+core/hardware_base.cpp
+core/landmark_base.cpp
+core/local_parametrization_base.cpp
+core/local_parametrization_homogeneous.cpp
+core/local_parametrization_quaternion.cpp
+core/map_base.cpp
+core/motion_buffer.cpp
+core/node_base.cpp
+core/problem.cpp
+core/processor_base.cpp
+core/processor_loopclosure_base.cpp
+core/processor_motion.cpp
+core/processor_tracker.cpp
+core/processor_tracker_feature.cpp
+core/sensor_base.cpp
+core/state_block.cpp
+core/time_stamp.cpp
+core/track_matrix.cpp
+core/trajectory_base.cpp
+  )
 #sources
 SET(SRCS_BASE
-    capture_base.cpp
-    capture_motion.cpp
-    constraint_base.cpp
-    constraint_analytic.cpp
-    feature_base.cpp
-    frame_base.cpp
-    hardware_base.cpp
-    landmark_base.cpp
-    local_parametrization_base.cpp
-    local_parametrization_quaternion.cpp
-    local_parametrization_homogeneous.cpp
-    map_base.cpp
-    motion_buffer.cpp
-    node_base.cpp
-    problem.cpp
-    processor_base.cpp
-    processor_capture_holder.cpp
-    processor_loopclosure_base.cpp
-    processor_motion.cpp
-    processor_tracker.cpp
-    processor_tracker_feature.cpp
-    processor_tracker_landmark.cpp
-    sensor_base.cpp
-    state_block.cpp
-    track_matrix.cpp
-    time_stamp.cpp
-    trajectory_base.cpp
+capture/capture_motion.cpp
+processor/processor_capture_holder.cpp
+processor/processor_tracker_landmark.cpp
     )
 
 SET(SRCS
-    capture_GPS_fix.cpp
-    capture_IMU.cpp
-    capture_odom_2D.cpp
-    capture_odom_3D.cpp
-    capture_pose.cpp
-    capture_void.cpp
-    feature_corner_2D.cpp
-    feature_GPS_fix.cpp
-    feature_GPS_pseudorange.cpp
-    feature_IMU.cpp
-    feature_odom_2D.cpp
-    feature_polyline_2D.cpp
-    feature_pose.cpp
-    landmark_corner_2D.cpp
-    landmark_container.cpp
-    landmark_line_2D.cpp
-    landmark_polyline_2D.cpp
-    local_parametrization_polyline_extreme.cpp
-    processor_frame_nearest_neighbor_filter.cpp
-    processor_IMU.cpp
-    test/processor_IMU_UnitTester.cpp
-    processor_odom_2D.cpp
-    processor_odom_3D.cpp
-    processor_tracker_feature_dummy.cpp
-    processor_tracker_landmark_dummy.cpp
-    sensor_camera.cpp
-    sensor_GPS.cpp
-    sensor_GPS_fix.cpp
-    sensor_IMU.cpp
-    sensor_odom_2D.cpp
-    sensor_odom_3D.cpp
+  local_parametrization_polyline_extreme.cpp
+  test/processor_IMU_UnitTester.cpp
+  )
+  SET(SRCS_CAPTURE
+capture/capture_GPS_fix.cpp
+capture/capture_IMU.cpp
+capture/capture_odom_2D.cpp
+capture/capture_odom_3D.cpp
+capture/capture_velocity.cpp
+capture/capture_wheel_joint_position.cpp
     )
-    
+  SET(SRCS_FEATURE
+feature/feature_corner_2D.cpp
+feature/feature_diff_drive.cpp
+feature/feature_GPS_fix.cpp
+feature/feature_GPS_pseudorange.cpp
+feature/feature_IMU.cpp
+feature/feature_odom_2D.cpp
+feature/feature_polyline_2D.cpp
+    )
+  SET(SRCS_LANDMARK
+landmark/landmark_corner_2D.cpp
+landmark/landmark_container.cpp
+landmark/landmark_line_2D.cpp
+landmark/landmark_polyline_2D.cpp
+    )
+  SET(SRCS_PROCESSOR
+processor/processor_frame_nearest_neighbor_filter.cpp
+processor/processor_diff_drive.cpp
+processor/processor_IMU.cpp
+processor/processor_odom_2D.cpp
+processor/processor_odom_3D.cpp
+processor/processor_tracker_feature_dummy.cpp
+processor/processor_tracker_landmark_dummy.cpp
+    )
+  SET(SRCS_SENSOR
+sensor/sensor_camera.cpp
+sensor/sensor_diff_drive.cpp
+sensor/sensor_GPS.cpp
+sensor/sensor_GPS_fix.cpp
+sensor/sensor_IMU.cpp
+sensor/sensor_odom_2D.cpp
+sensor/sensor_odom_3D.cpp
+    )
 SET(SRCS_DTASSC
     data_association/association_solver.cpp
     data_association/association_node.cpp
@@ -408,49 +499,61 @@ ENDIF(Ceres_FOUND)
 
 IF (laser_scan_utils_FOUND)
     SET(HDRS ${HDRS}
-        capture_laser_2D.h
-        sensor_laser_2D.h
-        processor_tracker_feature_corner.h
-        processor_tracker_landmark_corner.h
-        processor_tracker_landmark_polyline.h
+capture/capture_laser_2D.h
+sensor/sensor_laser_2D.h
+processor/processor_tracker_feature_corner.h
+processor/processor_tracker_landmark_corner.h
+processor/processor_tracker_landmark_polyline.h
         )
     SET(SRCS ${SRCS}
-        capture_laser_2D.cpp
-        sensor_laser_2D.cpp
-        processor_tracker_feature_corner.cpp
-        processor_tracker_landmark_corner.cpp
-        processor_tracker_landmark_polyline.cpp
+capture/capture_laser_2D.cpp
+sensor/sensor_laser_2D.cpp
+processor/processor_tracker_feature_corner.cpp
+processor/processor_tracker_landmark_corner.cpp
+processor/processor_tracker_landmark_polyline.cpp
         )
 ENDIF(laser_scan_utils_FOUND)
 
 IF (raw_gps_utils_FOUND)
     SET(HDRS ${HDRS}
-        capture_GPS.h
-        processor_GPS.h
+capture/capture_GPS.h
+processor/processor_GPS.h
         )
     SET(SRCS ${SRCS}
-        capture_GPS.cpp
-        processor_GPS.cpp
+capture/capture_GPS.cpp
+processor/processor_GPS.cpp
         )
 ENDIF(raw_gps_utils_FOUND)
 
 # Vision
 IF (vision_utils_FOUND)
     SET(HDRS ${HDRS}
-        capture_image.h
-        feature_point_image.h
-        landmark_AHP.h
-        processor_params_image.h
-        processor_tracker_feature_image.h
-        processor_tracker_landmark_image.h
+capture/capture_image.h
+feature/feature_point_image.h
+landmark/landmark_AHP.h
+processor/processor_params_image.h
+processor/processor_tracker_feature_image.h
+processor/processor_tracker_landmark_image.h
         )
+    SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
+processor/processor_tracker_feature_trifocal.h
+    )
+  SET(HDRS_LANDMARK ${HDRS_LANDMARK}
+landmark/landmark_point_3D.h
+    )
     SET(SRCS ${SRCS}
-        capture_image.cpp
-        feature_point_image.cpp
-        landmark_AHP.cpp
-        processor_tracker_feature_image.cpp
-        processor_tracker_landmark_image.cpp
+capture/capture_image.cpp
+feature/feature_point_image.cpp
+landmark/landmark_AHP.cpp
+processor/processor_tracker_feature_image.cpp
+processor/processor_tracker_landmark_image.cpp
         )
+    SET(SRCS_LANDMARK ${SRCS_LANDMARK}
+landmark/landmark_point_3D.cpp
+    )
+    SET(SRCS_PROCESSOR ${SRCS_PROCESSOR}
+processor/processor_tracker_feature_trifocal.cpp
+    )
 ENDIF(vision_utils_FOUND)
 
 IF (OPENCV_FOUND AND Apriltag_FOUND)
@@ -463,22 +566,22 @@ IF (OPENCV_FOUND AND Apriltag_FOUND)
 ENDIF(OPENCV_FOUND AND Apriltag_FOUND)
 
 # Add the capture sub-directory
-ADD_SUBDIRECTORY(captures)
+# ADD_SUBDIRECTORY(captures)
 
 # Add the constraints sub-directory
-ADD_SUBDIRECTORY(constraints)
+# ADD_SUBDIRECTORY(constraints)
 
 # Add the features sub-directory
-ADD_SUBDIRECTORY(features)
+# ADD_SUBDIRECTORY(features)
 
 # Add the landmarks sub-directory
-ADD_SUBDIRECTORY(landmarks)
+# ADD_SUBDIRECTORY(landmarks)
 
 # Add the processors sub-directory
-ADD_SUBDIRECTORY(processors)
+# ADD_SUBDIRECTORY(processors)
 
 # Add the sensors sub-directory
-ADD_SUBDIRECTORY(sensors)
+# ADD_SUBDIRECTORY(sensors)
 
 # Add the hello_wolf sub-directory
 ADD_SUBDIRECTORY(hello_wolf)
@@ -525,6 +628,10 @@ IF(YAMLCPP_FOUND)
 ENDIF(YAMLCPP_FOUND)
 
 # create the shared library
+add_library(${PROJECT_NAME}_core SHARED
+                 ${SRCS_CORE}
+                 ${SRCS_BASE} 
+                )
 ADD_LIBRARY(${PROJECT_NAME} 
             SHARED 
             ${SRCS_BASE} 
@@ -532,15 +639,16 @@ ADD_LIBRARY(${PROJECT_NAME}
             ${SRCS_CAPTURE}
             ${SRCS_CONSTRAINT}
             ${SRCS_FEATURE}
-            ${SRCS_SENSOR}
+            ${SRCS_LANDMARK}
             ${SRCS_PROCESSOR}
+            ${SRCS_SENSOR}
             #${SRCS_DTASSC} 
             ${SRCS_SOLVER}
             ${SRCS_WRAPPER}
             )
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
-
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_NAME}_core)
 #Link the created libraries
 #=============================================================
 IF (Ceres_FOUND)
@@ -554,7 +662,6 @@ ENDIF (laser_scan_utils_FOUND)
 IF (raw_gps_utils_FOUND)
     TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${raw_gps_utils_LIBRARY})
 ENDIF (raw_gps_utils_FOUND)
-
 
 IF (OPENCV_FOUND)
    	TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${OpenCV_LIBS})
@@ -582,6 +689,8 @@ IF (OPENCV_FOUND AND Apriltag_FOUND)
 ENDIF(OPENCV_FOUND AND Apriltag_FOUND)
 
 #install library
+install(TARGETS ${PROJECT_NAME}_core DESTINATION lib/iri-algorithms EXPORT ${PROJECT_NAME}_core-targets)
+install(EXPORT ${PROJECT_NAME}_core-targets DESTINATION lib/iri-algorithms)
 #=============================================================
 INSTALL(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
       RUNTIME DESTINATION bin
@@ -595,18 +704,22 @@ INSTALL(FILES ${HDRS_BASE}
     DESTINATION include/iri-algorithms/wolf)
 INSTALL(FILES ${HDRS}
     DESTINATION include/iri-algorithms/wolf)
+INSTALL(FILES ${HDRS_CORE}
+    DESTINATION include/iri-algorithms/wolf/core)
 #INSTALL(FILES ${HDRS_DTASSC}
 #    DESTINATION include/iri-algorithms/wolf/data_association)
 INSTALL(FILES ${HDRS_CAPTURE}
-    DESTINATION include/iri-algorithms/wolf/captures)
+    DESTINATION include/iri-algorithms/wolf/capture)
 INSTALL(FILES ${HDRS_CONSTRAINT}
-    DESTINATION include/iri-algorithms/wolf/constraints)
+    DESTINATION include/iri-algorithms/wolf/constraint)
 INSTALL(FILES ${HDRS_FEATURE}
-    DESTINATION include/iri-algorithms/wolf/features)
+    DESTINATION include/iri-algorithms/wolf/feature)
 INSTALL(FILES ${HDRS_SENSOR}
-    DESTINATION include/iri-algorithms/wolf/sensors)
+    DESTINATION include/iri-algorithms/wolf/sensor)
 INSTALL(FILES ${HDRS_PROCESSOR}
-    DESTINATION include/iri-algorithms/wolf/processors)
+    DESTINATION include/iri-algorithms/wolf/processor)
+INSTALL(FILES ${HDRS_LANDMARK}
+    DESTINATION include/iri-algorithms/wolf/landmark)
 INSTALL(FILES ${HDRS_WRAPPER}
     DESTINATION include/iri-algorithms/wolf/ceres_wrapper)
 #INSTALL(FILES ${HDRS_SOLVER_SUITESPARSE}
