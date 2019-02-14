@@ -152,6 +152,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         ippePoseEstimation(det, cv_K_, tag_width, M_ippe1, rep_error1, M_ippe2, rep_error2);
         // If not so sure about whether we have the right solution or not, do not create a feature
         is_ambiguous = !((rep_error2 / rep_error1 > ippe_min_ratio_) && rep_error1 < ippe_max_rep_error_);
+//        std::cout << "   Tag id: " << tag_id << " ippe_ratio: " << rep_error2 / rep_error1 << " rep error " << rep_error1 << std::endl;
         //////////////////
 
         //////////////////
@@ -195,10 +196,12 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 //            WOLF_INFO("Ambiguity on estimated rotation is likely");
             // Put a very high covariance on angles measurements (low info matrix ?)
 //            cov.bottomRightCorner(3, 3) = 1000000*Eigen::Matrix3s::Identity();
-            Eigen::Matrix6s new_info = 0.00001*Eigen::Matrix6s::Identity();
+            Eigen::Matrix6s new_info = 0.001*Eigen::Matrix6s::Identity();
             new_info.topLeftCorner(3, 3) = info.topLeftCorner(3, 3);
             info = new_info;
         }
+
+//        FOR TEST ONLY
 //        if (tag_id == 1){
 //            // Put a very high covariance on angles measurements
 //            WOLF_INFO("TEST2: Increase meas cov on tag 1");
@@ -208,7 +211,8 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 //        WOLF_TRACE("tag ", tag_id, " cov diagonal: [", cov.diagonal().transpose(), "]");
         // add to detected features list
         detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, info, tag_id, *det, FeatureBase::UncertaintyType::UNCERTAINTY_IS_INFO));
-//        WOLF_TRACE("Meas Covariance tag ", tag_id, "\n", info.inverse());
+        //        std::cout << "Meas Covariance tag " << tag_id << "\n" << info.inverse() << std::endl;
+        //        WOLF_TRACE("Meas Covariance tag ", tag_id, "\n", info.inverse());
 //        WOLF_TRACE("---------------------\n");
     }
 
@@ -239,9 +243,9 @@ Eigen::Affine3ds ProcessorTrackerLandmarkApriltag::opencvPoseEstimation(apriltag
     // Solve for pose
     // The estimated r and t brings points from tag frame to camera frame
     cv::Mat rvec, tvec;
-    cv::Mat dist_coeffs = cv::Mat::zeros(4,1,cv::DataType<Scalar>::type); // Assuming corrected images
+//    cv::Mat dist_coeffs = cv::Mat::zeros(4,1,cv::DataType<Scalar>::type); // Assuming corrected images
 
-    cv::solvePnP(obj_pts, corners_pix, _K, dist_coeffs, rvec, tvec);
+    cv::solvePnP(obj_pts, corners_pix, _K, cv::Mat(), rvec, tvec);
 
     // Puts the result in a Eigen affine Transform
     cv::Matx33d rmat;
@@ -283,7 +287,7 @@ void ProcessorTrackerLandmarkApriltag::ippePoseEstimation(apriltag_detection_t *
                             double &_rep_error2){
 
     // camera coefficients
-    cv::Mat dist_coeffs = cv::Mat::zeros(4,1,cv::DataType<Scalar>::type); // Assuming corrected images
+//    cv::Mat dist_coeffs = cv::Mat::zeros(4,1,cv::DataType<Scalar>::type); // Assuming corrected images
 
     // get corners from det
     std::vector<cv::Point2d> corners_pix(4);
@@ -303,6 +307,7 @@ void ProcessorTrackerLandmarkApriltag::ippePoseEstimation(apriltag_detection_t *
     obj_pts.emplace_back(-s, -s, 0); // top left
 
     cv::Mat rvec1, tvec1, rvec2, tvec2;
+    float err1, err2;
     IPPE::PoseSolver pose_solver;
 
         /**
@@ -318,10 +323,31 @@ void ProcessorTrackerLandmarkApriltag::ippePoseEstimation(apriltag_detection_t *
      * @param _tvec2         Second translation solution (3x1 vector)
      * @param reprojErr2     Reprojection error of second solution
      */
-    float err1, err2;
-    pose_solver.solveGeneric(obj_pts, corners_pix, _K, dist_coeffs,
+//    pose_solver.solveGeneric(obj_pts, corners_pix, _K, cv::Mat(),
+//                            rvec1, tvec1, err1,
+//                            rvec2, tvec2, err2);
+
+    /** @brief                Finds the two possible poses of a square planar object and their respective reprojection errors using IPPE. These poses are sorted so that the first one is the one with the lowest reprojection error.
+     *
+     * @param _squareLength      The square's length (which is also it's width) in object coordinate units (e.g. millimeters, meters, etc.)
+     * @param _imagePoints       Array of corresponding image points, 1xN/Nx1 2-channel. This can either be in pixel coordinates or normalized pixel coordinates.
+     * @param _cameraMatrix      Intrinsic camera matrix (same definition as OpenCV). If _imagePoints is in normalized pixel coordinates you must set  _cameraMatrix = cv::noArray()
+     * @param _distCoeffs        Intrinsic camera distortion vector (same definition as OpenCV). If _imagePoints is in normalized pixel coordinates you must set  _cameraMatrix = cv::noArray()
+     * @param _rvec1             First rotation solution (3x1 rotation vector)
+     * @param _tvec1             First translation solution (3x1 vector)
+     * @param reprojErr1         Reprojection error of first solution
+     * @param _rvec2             Second rotation solution (3x1 rotation vector)
+     * @param _tvec2             Second translation solution (3x1 vector)
+     * @param reprojErr2         Reprojection error of second solution
+     */
+//    pose_solver.solveSquare(float squareLength, InputArray _imagePoints, InputArray _cameraMatrix, InputArray _distCoeffs,
+//                                       OutputArray _rvec1, OutputArray _tvec1, float& err1, OutputArray _rvec2, OutputArray _tvec2, float& err2)
+
+    pose_solver.solveSquare(_tag_width, corners_pix, _K, cv::Mat(),
                             rvec1, tvec1, err1,
                             rvec2, tvec2, err2);
+
+
     _rep_error1 = err1;
     _rep_error2 = err2;
 
@@ -363,7 +389,6 @@ ConstraintBasePtr ProcessorTrackerLandmarkApriltag::createConstraint(FeatureBase
 
 LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr _feature_ptr)
 {
-
     // world to rob
     Vector3s pos = getLastPtr()->getFramePtr()->getPPtr()->getState();
     Quaternions quat (getLastPtr()->getFramePtr()->getOPtr()->getState().data());
@@ -403,7 +428,7 @@ unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned 
         bool feature_already_found(false);
         // features and landmarks must be tested with their ID !!
         // list of landmarks in the map
-        LandmarkBaseList& landmark_list = getProblem()->getMapPtr()->getLandmarkList();
+        LandmarkBaseList& landmark_list = getProblem()->getMapPtr()->getLandmarkList();  // Need to retrieve at each iteration?
 
         //is the feature already associated to a landmark in the map ?
         for(auto it = landmark_list.begin(); it != landmark_list.end(); ++it)
@@ -430,15 +455,13 @@ unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned 
 
 bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
 {
-    return true;
+//    return true;
     Scalar dt_incoming_origin = getIncomingPtr()->getTimeStamp().get() - getOriginPtr()->getTimeStamp().get();
     if (dt_incoming_origin > min_time_vote_){
         bool more_in_last = getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_;
         bool less_in_incoming = getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
 //        return more_in_last;  // Only used for fixed time kf creation
         return more_in_last && less_in_incoming;
-//        return getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_
-//        && getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
     }
     return false;
 }
@@ -494,9 +517,11 @@ Eigen::Matrix6s ProcessorTrackerLandmarkApriltag::computeInformation(Eigen::Vect
     Eigen::Vector3s p3; p3 <<  s, -s, 0; // top right
     Eigen::Vector3s p4; p4 << -s, -s, 0; // top left
     std::vector<Eigen::Vector3s> pvec = {p1, p2, p3, p4};
+    std::vector<Eigen::Vector2s> proj_pix_vec; proj_pix_vec.resize(4);
+
 
     // Initialize jacobian matrices
-    Eigen::Matrix<Scalar, 8, 6> J_u_TR = Eigen::Matrix<Scalar, 8, 6>::Zero();
+    Eigen::Matrix<Scalar, 8, 6> J_u_TR = Eigen::Matrix<Scalar, 8, 6>::Zero();  // 2N x 6 jac
     Eigen::Vector3s h;
     Eigen::Matrix3s J_h_T;
     Eigen::Matrix3s J_h_R;
@@ -512,13 +537,62 @@ Eigen::Matrix6s ProcessorTrackerLandmarkApriltag::computeInformation(Eigen::Vect
         pinhole::projectPointToNormalizedPlane(h, eu, J_u_h);
         // Fill jacobian for ith corner
         J_u_TR.block(2*i, 0, 2, 6) = J_u_h * J_h_TR;
+        proj_pix_vec[i] = eu;
     }
 
+
+    // COMPARISON WITH OPENCV IMPLEMENTATION
+    std::vector<cv::Point3d> obj_pts;
+//    // Same order as the 2D corners (anti clockwise, looking at the tag).
+//    // Looking at the tag, the reference frame is
+//    // X = Right, Y = Down, Z = Inside the plane
+    obj_pts.emplace_back(-s,  s, 0); // bottom left
+    obj_pts.emplace_back( s,  s, 0); // bottom right
+    obj_pts.emplace_back( s, -s, 0); // top right
+    obj_pts.emplace_back(-s, -s, 0); // top left
+//
+    cv::Mat J_opencv;  // 2N x (10 + nb_dist_coeffs): img point derivates with regard to rvec, tvec, focal length, principal point coordinates (+ dist_coeffs)
+    cv::Mat rvec, tvec;
+    Eigen::AngleAxis<Scalar> rvec_eigen(R);
+    Eigen::Vector3s toto = rvec_eigen.angle()*rvec_eigen.axis();
+    eigen2cv(toto, rvec);
+    eigen2cv(t, tvec);
+    std::vector<cv::Point2d> p_proj;
+    cv::projectPoints(obj_pts, rvec, tvec, cv_K_, cv::Mat(), p_proj, J_opencv);
+
+
+    // Build Eigen jacobian with same convention as J_u_TR from opencv result
+    Eigen::Matrix<Scalar, 8, 6> J_u_TR_opencv;
+    Eigen::Matrix<Scalar, 8, 3> J_T_opencv;
+    Eigen::Matrix<Scalar, 8, 3> J_R_opencv;
+    // !! Rect(startX, startY, ncols, nrows)
+    cv2eigen(J_opencv(cv::Rect(3,0,3,8)), J_T_opencv);
+    cv2eigen(J_opencv(cv::Rect(0,0,3,8)), J_R_opencv);
+    J_u_TR_opencv.topLeftCorner(8,3) = J_T_opencv;
+    J_u_TR_opencv.topRightCorner(8,3) = J_R_opencv;
+
+
+    // PRINT COMPARISON --> NO diff for J_T but some difference for J_R
+//    std::cout << "pvec maison:" << std::endl;
+//    for (int i=0; i < 4; i++){
+//        std::cout << proj_pix_vec[i] << std::endl;
+//    }
+//    std::cout << "Jac maison:\n" << J_u_TR << std::endl;
+//    std::cout << "pvec opencv:" << std::endl;
+//    for (int i=0; i < 4; i++){
+//        std::cout << p_proj[i] << std::endl;
+//    }
+//    std::cout <<  "Jac cv:\n" <<  J_u_TR_opencv << std::endl;
+    /////////////////////////////////////
+
+    // Pixel uncertainty covariance matrix
     Eigen::Matrix<Scalar, 8, 8> pixel_cov = pow(sig_q, 2) * Eigen::Matrix<Scalar, 8, 8>::Identity();
+
     // 6 x 6 translation|rotation covariance computed with covariance propagation formula (inverted)
 //    Eigen::Matrix6s transformation_cov  = (J_u_TR.transpose() * pixel_cov.inverse() * J_u_TR).inverse();
     // 6 x 6 translation|rotation information matrix computed with covariance propagation formula (inverted)
-    Eigen::Matrix6s transformation_info  = (J_u_TR.transpose() * pixel_cov.inverse() * J_u_TR);
+//    Eigen::Matrix6s transformation_info  = (J_u_TR.transpose() * pixel_cov.inverse() * J_u_TR);  // Wolf jac
+    Eigen::Matrix6s transformation_info  = (J_u_TR_opencv.transpose() * pixel_cov.inverse() * J_u_TR_opencv);  // OpencvJac
 
     return transformation_info;
 
