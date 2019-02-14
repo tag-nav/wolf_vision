@@ -676,16 +676,26 @@ IF (vision_utils_FOUND)
 ENDIF(vision_utils_FOUND)
 
 IF (OPENCV_FOUND AND Apriltag_FOUND)
-  SET(HDRS ${HDRS}
-    include/base/landmark/landmark_apriltag.h
-    include/base/feature/feature_apriltag.h
-    include/base/processor/processor_tracker_landmark_apriltag.h
-    include/base/processor/ippe.h
+  SET(HDRS_CONSTRAINT ${HDRS_CONSTRAINT}
     include/base/constraint/constraint_autodiff_apriltag.h
     )
-  SET(SRCS ${SRCS}
-    src/landmark/landmark_apriltag.cpp
+  SET(HDRS_FEATURE ${HDRS_FEATURE}
+    include/base/feature/feature_apriltag.h
+    )
+  SET(HDRS_LANDMARK ${HDRS_LANDMARK}
+    include/base/landmark/landmark_apriltag.h
+    )
+  SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
+    include/base/processor/processor_tracker_landmark_apriltag.h
+    include/base/processor/ippe.h
+    )
+  SET(SRCS_FEATURE ${SRCS_FEATURE}
     src/feature/feature_apriltag.cpp
+    )
+  SET(SRCS_LANDMARK ${SRCS_LANDMARK}
+    src/landmark/landmark_apriltag.cpp
+    )
+  SET(SRCS_PROCESSOR ${SRCS_PROCESSOR}
     src/processor/processor_tracker_landmark_apriltag.cpp
     src/processor/ippe.cpp
     )
