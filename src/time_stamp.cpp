@@ -1,5 +1,5 @@
 
-#include "time_stamp.h"
+#include "base/time_stamp.h"
 
 namespace wolf {
 
@@ -9,8 +9,6 @@ std::ostream& operator<<(std::ostream& os, const TimeStamp& _ts)
     os << std::setfill(' ');
     return os;
 }
-
-
 
 TimeStamp::TimeStamp() :
         //time_stamp_(0)

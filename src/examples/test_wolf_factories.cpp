@@ -5,26 +5,25 @@
  *      \author: jsola
  */
 
-#include <processor_IMU.h>
-#include <sensor_GPS_fix.h>
-#include "../hardware_base.h"
-#include "../sensor_camera.h"
-#include "../sensor_odom_2D.h"
+#include "base/processor/processor_IMU.h"
+#include "base/sensor/sensor_GPS_fix.h"
+#include "base/hardware_base.h"
+#include "base/sensor/sensor_camera.h"
+#include "base/sensor/sensor_odom_2D.h"
 #include "../sensor_imu.h"
 //#include "../sensor_gps.h"
 
-#include "../processor_odom_2D.h"
-#include "../processor_odom_3D.h"
+#include "base/processor/processor_odom_2D.h"
+#include "base/processor/processor_odom_3D.h"
 #include "../processor_image_feature.h"
 
-#include "../problem.h"
+#include "base/problem.h"
 
-#include "../factory.h"
+#include "base/factory.h"
 
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
-
 
 int main(void)
 {
@@ -33,8 +32,6 @@ int main(void)
     using std::shared_ptr;
     using std::make_shared;
     using std::static_pointer_cast;
-
-
 
     //==============================================================================================
     std::string wolf_root       = _WOLF_ROOT_DIR;
@@ -104,7 +101,6 @@ int main(void)
             << " | type : " << setw(8) << prc->getType()
             << " | name: " << setw(17) << prc->getName()
             << " | bound to sensor " << setw(2) << prc->getSensorPtr()->id() << ": " << prc->getSensorPtr()->getName() << endl;
-
 
     return 0;
 }

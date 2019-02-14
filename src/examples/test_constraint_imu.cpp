@@ -1,14 +1,14 @@
 //Wolf
-#include <capture_IMU.h>
-#include <processor_IMU.h>
-#include <sensor_IMU.h>
-#include "../capture_pose.h"
-#include "wolf.h"
-#include "problem.h"
-#include "constraint_odom_3D.h"
-#include "state_block.h"
-#include "state_quaternion.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/capture/capture_IMU.h"
+#include "base/processor/processor_IMU.h"
+#include "base/sensor/sensor_IMU.h"
+#include "base/capture/capture_pose.h"
+#include "base/wolf.h"
+#include "base/problem.h"
+#include "base/constraint/constraint_odom_3D.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 //#define DEBUG_RESULTS
 
@@ -55,7 +55,6 @@ int main(int argc, char** argv)
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_, Eigen::Matrix6s::Identity()) );
     imu_ptr->setFramePtr(wolf_problem_ptr_->getTrajectoryPtr()->getFrameList().back());
-
 
     // set variables
     using namespace std;
@@ -236,7 +235,6 @@ int main(int argc, char** argv)
     if(wolf_problem_ptr_->check(1)){
         wolf_problem_ptr_->print(4,1,1,1);
     }
-
 
     ///having a look at covariances
     Eigen::MatrixXs predelta_cov;

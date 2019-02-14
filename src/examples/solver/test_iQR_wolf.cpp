@@ -5,7 +5,6 @@
  *      Author: jvallve
  */
 
-
 //std includes
 #include <cstdlib>
 #include <string>
@@ -222,7 +221,6 @@ class SolverQR
 
                 A_nodes_.coeffRef(A_nodes_.rows()-1, ordered_node) = 1;
 
-
                 assert(_meas.jacobians.at(j).cols() == nodes_.at(_meas.nodes_idx.at(j)).dim);
                 assert(_meas.jacobians.at(j).rows() == _meas.dim);
 
@@ -396,7 +394,6 @@ class SolverQR
             return 1;
         }
 
-
         void nodePermutation2VariablesPermutation(const PermutationMatrix<Dynamic, Dynamic, int> &_perm_nodes, PermutationMatrix<Dynamic, Dynamic, int> &perm_variables)
         {
             ArrayXi locations = perm_nodes_2_locations(_perm_nodes);
@@ -560,9 +557,4 @@ int main(int argc, char *argv[])
 //            std::cout << "DIFFERENT SOLUTIONS!!!!!!!! max difference " << (x_ordered_partial-x_ordered).maxCoeff() << std::endl;
     }
 }
-
-
-
-
-
 

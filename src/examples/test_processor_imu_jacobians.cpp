@@ -6,13 +6,13 @@
  */
 
 //Wolf
-#include <capture_IMU.h>
-#include <sensor_IMU.h>
+#include "base/capture/capture_IMU.h"
+#include "base/sensor/sensor_IMU.h"
 #include <test/processor_IMU_UnitTester.h>
-#include "wolf.h"
-#include "problem.h"
-#include "state_block.h"
-#include "state_quaternion.h"
+#include "base/wolf.h"
+#include "base/problem.h"
+#include "base/state_block.h"
+#include "base/state_quaternion.h"
 #include <iostream>
 #include <fstream>
 #include <iomanip>
@@ -191,7 +191,6 @@ int main(int argc, char** argv)
         std::cout<< "dDq_dab_ jacobian is correct (Zero) !" << std::endl;
     else
         std::cout<< "\t\tdDq_dab_ jacobian is not Zero :" << dDq_dab << std::endl;
-
 
     /*              Numerical method to check jacobians wrt noise
 

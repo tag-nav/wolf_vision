@@ -11,7 +11,7 @@
 #include <matchers/bruteforce_hamming_2/matcher_bruteforce_hamming_2.h>
 
 //Wolf
-#include "../processor_tracker_landmark_image.h"
+#include "base/processor/processor_tracker_landmark_image.h"
 
 int main(int argc, char** argv)
 {
@@ -243,7 +243,6 @@ int main(int argc, char** argv)
             current_descriptors.copyTo(target_descriptors);
             current_keypoints.clear();
             current_descriptors.release();
-
 
             std::cout << "\nAFTER THE ADVANCE" << std::endl;
 //            for(unsigned int i = 0; i < target_keypoints.size(); i++)

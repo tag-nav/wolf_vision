@@ -45,7 +45,6 @@ int main (int argc, char **argv)
     std::cout << "solved x_" << std::endl << x_ << std::endl;
     std::cout << "ordering: " << solver.colsPermutation().indices().transpose() << std::endl;
 
-
     ///////////////////////////////////////////////////////////////////////
     // Directly in suitesparse
     cholmod_common Common, *cc ;

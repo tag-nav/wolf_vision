@@ -88,8 +88,6 @@ EIGEN_DEFINE_STL_VECTOR_SPECIALIZATION(Eigen::Matrix<double,9,1>)
         std::cout << "Time Co = C * C: " << (long double)(t1 - t0) * 1e9 / CLOCKS_PER_SEC / N \
         << "ns <-- this is the Eigen default!" << std::endl;
 
-
-
 /**
  * We multiply matrices and see how long it takes.
  * We compare different combinations of row-major and column-major to see which one is the fastest.

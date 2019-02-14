@@ -1,6 +1,6 @@
 
-#include "local_parametrization_quaternion.h"
-#include "rotations.h"
+#include "base/local_parametrization_quaternion.h"
+#include "base/rotations.h"
 
 #include <iostream>
 namespace wolf {
@@ -57,7 +57,6 @@ bool LocalParametrizationQuaternion<DQ_LOCAL>::minus(Eigen::Map<const Eigen::Vec
     return true;
 }
 
-
 ////////// GLOBAL PERTURBATION //////////////
 
 template <>
@@ -109,7 +108,5 @@ bool LocalParametrizationQuaternion<DQ_GLOBAL>::minus(Eigen::Map<const Eigen::Ve
 
     return true;
 }
-
-
 
 } // namespace wolf

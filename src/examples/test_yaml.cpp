@@ -5,10 +5,10 @@
  *      \author: jsola
  */
 
-#include "pinhole_tools.h"
+#include "base/pinhole_tools.h"
 #include "yaml/yaml_conversion.h"
 #include "processor_image_feature.h"
-#include "factory.h"
+#include "base/factory.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -16,7 +16,6 @@
 
 #include <iostream>
 #include <fstream>
-
 
 int main()
 {
@@ -69,8 +68,6 @@ int main()
     else
         std::cout << "Bad configuration file. No sensor type found." << std::endl;
 
-
-
 //    // Processor Image parameters
 //
 //    ProcessorParamsImage p;
@@ -92,7 +89,6 @@ int main()
 //        p.max_new_features            = alg["maximum new features"].as<unsigned int>();
 //        p.min_features_for_keyframe   = alg["minimum features for new keyframe"].as<unsigned int>();
 //    }
-
 
     return 0;
 }

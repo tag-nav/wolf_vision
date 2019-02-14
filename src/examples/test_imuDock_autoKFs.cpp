@@ -5,21 +5,21 @@
  *      \author: Dinesh Atchuthan
  */
 
-#include <processor_IMU.h>
-#include <sensor_IMU.h>
-#include "wolf.h"
-#include "problem.h"
-#include "ceres_wrapper/ceres_manager.h"
-#include "sensor_odom_3D.h"
-#include "processor_odom_3D.h"
+#include "base/processor/processor_IMU.h"
+#include "base/sensor/sensor_IMU.h"
+#include "base/wolf.h"
+#include "base/problem.h"
+#include "base/ceres_wrapper/ceres_manager.h"
+#include "base/sensor/sensor_odom_3D.h"
+#include "base/processor/processor_odom_3D.h"
 
 //Constraints headers
-#include "constraint_fix_bias.h"
+#include "base/constraint/constraint_fix_bias.h"
 
 //std
 #include <iostream>
 #include <fstream>
-#include "../constraint_pose_3D.h"
+#include "base/constraint/constraint_pose_3D.h"
 
 #define OUTPUT_RESULTS
 //#define AUTO_KFS

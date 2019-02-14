@@ -6,11 +6,11 @@
  */
 
 // wolf yaml
-#include "yaml_conversion.h"
+#include "base/yaml/yaml_conversion.h"
 
 // wolf
-#include "../sensor_camera.h"
-#include "../factory.h"
+#include "base/sensor/sensor_camera.h"
+#include "base/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
@@ -95,7 +95,6 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
             intrinsics_cam->distortion.tail<1>() = distortion.tail<1>();
         }
 
-
         //=========================================
         // ===== this part for debugging only =====
         //=========================================
@@ -116,9 +115,6 @@ static IntrinsicsBasePtr createIntrinsicsCamera(const std::string & _filename_do
 //        std::cout << "\tintrinsic   : " << intrinsic.transpose() << std::endl;
 //        std::cout << "\tdistoriton  : " << distortion.transpose() << std::endl;
         //=========================================
-        //=========================================
-
-
 
         return intrinsics_cam;
     }

@@ -5,8 +5,6 @@
  *      Author: jsola
  */
 
-
-
 #include <memory>
 #include <list>
 #include <algorithm>

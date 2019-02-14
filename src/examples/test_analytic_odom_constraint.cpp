@@ -12,8 +12,8 @@
 
 //Wolf includes
 #include "wolf_manager.h"
-#include "capture_void.h"
-#include "ceres_wrapper/ceres_manager.h"
+#include "base/capture/capture_void.h"
+#include "base/ceres_wrapper/ceres_manager.h"
 
 // EIGEN
 //#include <Eigen/CholmodSupport>
@@ -28,8 +28,6 @@ void insertSparseBlock(const Eigen::SparseMatrix<Scalar>& ins, Eigen::SparseMatr
 
   original.makeCompressed();
 }
-}
-
 
 int main(int argc, char** argv) 
 {
@@ -70,8 +68,6 @@ int main(int argc, char** argv)
     ceres_options.max_num_iterations = 1e4;
     CeresManager* ceres_manager_autodiff = new CeresManager(wolf_problem_autodiff, ceres_options);
     CeresManager* ceres_manager_analytic = new CeresManager(wolf_problem_analytic, ceres_options);
-
-
 
     // load graph from .txt
     offLineFile_.open(file_path_.c_str(), std::ifstream::in);

@@ -5,13 +5,12 @@
  *      Author: asantamaria
  */
 
-
 // wolf yaml
-#include "../processors/processor_tracker_feature_trifocal.h"
-#include "yaml_conversion.h"
+#include "base/processor/processor_tracker_feature_trifocal.h"
+#include "base/yaml/yaml_conversion.h"
 
 // wolf
-#include "../factory.h"
+#include "base/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
@@ -54,7 +53,6 @@ static ProcessorParamsBasePtr createProcessorParamsTrackerFeatureTrifocal(const 
         params->min_response_new_feature        = algorithm["min response new features"]      .as<int>();
         params->max_euclidean_distance          = algorithm["max euclidean distance"]         .as<Scalar>();
         params->min_track_length_for_constraint = algorithm["min track length for constraint"].as<int>();
-
 
         YAML::Node noise                      = config["noise"];
         params->pixel_noise_std               = noise ["pixel noise std"].as<Scalar>();
