@@ -7,11 +7,15 @@ FeatureApriltag::FeatureApriltag(const Eigen::Vector7s & _measurement,
                                  const Eigen::Matrix6s & _meas_uncertainty,
                                  const int _tag_id,
                                  const apriltag_detection_t & _det,
+                                 Scalar _rep_error1,
+                                 Scalar _rep_error2,
                                  UncertaintyType _uncertainty_type) :
     FeatureBase("APRILTAG", _measurement, _meas_uncertainty, _uncertainty_type),
     tag_id_     (_tag_id),
     tag_corners_(4),
-    detection_  (_det)
+    detection_  (_det),
+    rep_error1_(_rep_error1),
+    rep_error2_(_rep_error2)
 {
     assert(_det.id == _tag_id && "Tag ID and detection ID do not match!");
     setTrackId(_tag_id);
@@ -40,6 +44,16 @@ const apriltag_detection_t& FeatureApriltag::getDetection() const
 const std::vector<cv::Point2d>& FeatureApriltag::getTagCorners() const
 {
     return tag_corners_;
+}
+
+Scalar FeatureApriltag::getRepError1() const
+{
+    return rep_error1_;
+}
+
+Scalar FeatureApriltag::getRepError2() const
+{
+    return rep_error2_;
 }
 
 } // namespace wolf

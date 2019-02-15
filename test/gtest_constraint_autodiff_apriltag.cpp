@@ -161,7 +161,6 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
             proc_apriltag->setLastPtr(C1);
 
             // the sensor is at origin as well as the robot. The measurement matches with the pose of the tag wrt camera (and also wrt robot and world)
-            // FeatureApriltag(Vector7s & _measurement,Matrix6s & _meas_covariance, const int _tag_id, det)
             Eigen::Matrix6s meas_cov(Eigen::Matrix6s::Identity());
             meas_cov.topLeftCorner(3,3)     *= 1e-2;
             meas_cov.bottomRightCorner(3,3) *= 1e-3;
@@ -177,9 +176,10 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
             det.p[3][0] = -1.0;
             det.p[3][1] = -1.0;
 
+            Scalar rep_error1 = 0.01;
+            Scalar rep_error2 = 0.1;
 
-
-            f1 = std::make_shared<FeatureApriltag>(pose_landmark, meas_cov, tag_id, det);
+            f1 = std::make_shared<FeatureApriltag>(pose_landmark, meas_cov, tag_id, det, rep_error1, rep_error2);
             lmk1 = std::static_pointer_cast<LandmarkApriltag>(proc_apriltag->createLandmark(f1));
 
             // Add the feature and the landmark in the graph as needed

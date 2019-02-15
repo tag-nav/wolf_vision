@@ -211,7 +211,8 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
 //        WOLF_TRACE("tag ", tag_id, " cov diagonal: [", cov.diagonal().transpose(), "]");
         // add to detected features list
-        detections_incoming_.push_back(std::make_shared<FeatureApriltag>(pose, info, tag_id, *det, FeatureBase::UncertaintyType::UNCERTAINTY_IS_INFO));
+        detections_incoming_.push_back(
+                std::make_shared<FeatureApriltag>(pose, info, tag_id, *det, rep_error1, rep_error2, FeatureBase::UncertaintyType::UNCERTAINTY_IS_INFO));
         //        std::cout << "Meas Covariance tag " << tag_id << "\n" << info.inverse() << std::endl;
         //        WOLF_TRACE("Meas Covariance tag ", tag_id, "\n", info.inverse());
 //        WOLF_TRACE("---------------------\n");
@@ -593,9 +594,10 @@ Eigen::Matrix6s ProcessorTrackerLandmarkApriltag::computeInformation(Eigen::Vect
 
     // 6 x 6 translation|rotation covariance computed with covariance propagation formula (inverted)
 //    Eigen::Matrix6s transformation_cov  = (J_u_TR.transpose() * pixel_cov.inverse() * J_u_TR).inverse();
+
     // 6 x 6 translation|rotation information matrix computed with covariance propagation formula (inverted)
-//    Eigen::Matrix6s transformation_info  = (J_u_TR.transpose() * pixel_cov.inverse() * J_u_TR);  // Wolf jac
-    Eigen::Matrix6s transformation_info  = (J_u_TR_opencv.transpose() * pixel_cov.inverse() * J_u_TR_opencv);  // OpencvJac
+    Eigen::Matrix6s transformation_info  = (J_u_TR.transpose() * pixel_cov.inverse() * J_u_TR);  // Wolf jac
+//    Eigen::Matrix6s transformation_info  = (J_u_TR_opencv.transpose() * pixel_cov.inverse() * J_u_TR_opencv);  // OpencvJac
 
     return transformation_info;
 
@@ -653,6 +655,18 @@ void ProcessorTrackerLandmarkApriltag::advanceDerived()
 
 void ProcessorTrackerLandmarkApriltag::resetDerived()
 {
+    // Code for motion current frame
+    getOriginPtr()->getFramePtr()
+
+    // get features list of KF linked to origin capture and last capture
+
+    // retrieve the intersection of the corresponding features
+
+    //
+
+
+
+
     ProcessorTrackerLandmark::resetDerived();
     detections_last_ = std::move(detections_incoming_);
 }

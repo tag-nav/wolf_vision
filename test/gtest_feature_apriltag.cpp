@@ -19,6 +19,8 @@ class FeatureApriltag_test : public testing::Test
         Eigen::Matrix6s cov;
         int tag_id;
         apriltag_detection_t det;
+        Scalar rep_error1;
+        Scalar rep_error2;
 
         virtual void SetUp()
         {
@@ -26,6 +28,7 @@ class FeatureApriltag_test : public testing::Test
             cov.setIdentity() * 2.0;
 
             det.id      = 1;
+            tag_id      = det.id;
             det.p[0][0] =  1.0;
             det.p[0][1] = -1.0;
             det.p[1][0] =  1.0;
@@ -35,27 +38,28 @@ class FeatureApriltag_test : public testing::Test
             det.p[3][0] = -1.0;
             det.p[3][1] = -1.0;
 
-            tag_id      = det.id;
+            rep_error1 = 0.01;
+            rep_error2 = 0.1;
         }
 };
 
 TEST_F(FeatureApriltag_test, type)
 {
-    FeatureApriltag f(pose, cov, tag_id, det);
+    FeatureApriltag f(pose, cov, tag_id, det, rep_error1, rep_error2);
 
     ASSERT_EQ(f.getType(), "APRILTAG");
 }
 
 TEST_F(FeatureApriltag_test, getTagId)
 {
-    FeatureApriltag f(pose, cov, tag_id, det);
+    FeatureApriltag f(pose, cov, tag_id, det, rep_error1, rep_error2);
 
     ASSERT_EQ(f.getTagId(), 1);
 }
 
 TEST_F(FeatureApriltag_test, getCorners)
 {
-    FeatureApriltag f(pose, cov, tag_id, det);
+    FeatureApriltag f(pose, cov, tag_id, det, rep_error1, rep_error2);
 
     ASSERT_EQ(f.getTagCorners().size(), 4);
 
@@ -71,27 +75,38 @@ TEST_F(FeatureApriltag_test, getCorners)
 
 TEST_F(FeatureApriltag_test, getDetection)
 {
-    FeatureApriltag f(pose, cov, tag_id, det);
+    FeatureApriltag f(pose, cov, tag_id, det, rep_error1, rep_error2);
 
     ASSERT_EQ(f.getDetection().id, 1);
 }
 
 TEST_F(FeatureApriltag_test, tagid_detid_equality)
 {
-    FeatureApriltag f(pose, cov, tag_id, det);
+    FeatureApriltag f(pose, cov, tag_id, det, rep_error1, rep_error2);
 
     ASSERT_EQ(f.getDetection().id, f.getTagId());
 }
 
 TEST_F(FeatureApriltag_test, tagCorners_detection_equality)
 {
-    FeatureApriltag f(pose, cov, tag_id, det);
+    FeatureApriltag f(pose, cov, tag_id, det, rep_error1, rep_error2);
 
     for (int i = 0; i<f.getTagCorners().size(); i++)
     {
         ASSERT_EQ(f.getTagCorners()[i].x, f.getDetection().p[i][0]);
         ASSERT_EQ(f.getTagCorners()[i].y, f.getDetection().p[i][1]);
     }
+}
+
+TEST_F(FeatureApriltag_test, getRepErrors)
+{
+    FeatureApriltag f(pose, cov, tag_id, det, rep_error1, rep_error2);
+
+    Scalar err1 = f.getRepError1();
+    Scalar err2 = f.getRepError2();
+
+    ASSERT_EQ(err1, rep_error1);
+    ASSERT_EQ(err2, rep_error2);
 }
 
 int main(int argc, char **argv)
