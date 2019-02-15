@@ -56,6 +56,7 @@ int main(int argc, char** argv) {
         cout << s._name << " " << s._type << " " << s._name_assoc_sensor << endl;
         procesorMap.insert(pair<string, ProcessorBasePtr>(s._name,problem->installProcessor(s._type, s._name, s._name_assoc_sensor, server)));
     }
+
     problem->print(4,1,1,1);
     Vector2s motion_data(1.0, 0.0);                     // Will advance 1m at each keyframe, will not turn.
     Matrix2s motion_cov = 0.1 * Matrix2s::Identity();

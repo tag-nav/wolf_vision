@@ -21,7 +21,12 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsOdom3D);
 
 struct ProcessorParamsOdom3D : public ProcessorParamsMotion
 {
-        //
+  ProcessorParamsOdom3D() = default;
+  ProcessorParamsOdom3D(std::string _unique_name, const paramsServer& _server):
+    ProcessorParamsMotion(_unique_name, _server)
+  {
+    //
+  }
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorOdom3D);

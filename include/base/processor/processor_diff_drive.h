@@ -10,6 +10,7 @@
 
 #include "base/processor/processor_motion.h"
 #include "base/diff_drive_tools.h"
+#include "base/params_server.hpp"
 
 namespace wolf {
 
@@ -17,19 +18,13 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsDiffDrive);
 
 struct ProcessorParamsDiffDrive : public ProcessorParamsMotion
 {
-//  ProcessorParamsDiffDrive(const Scalar _time_tolerance,
-//                           const Scalar _dist_travel_th,
-//                           const Scalar _theta_traveled_th,
-//                           const Scalar _cov_det_th,
-//                           const Scalar _unmeasured_perturbation_std = 0.0001) :
-//    dist_traveled_th_(_dist_travel_th),
-//    theta_traveled_th_(_theta_traveled_th),
-//    cov_det_th_(_cov_det_th),
-//    unmeasured_perturbation_std_(_unmeasured_perturbation_std)
-//  {
-//      time_tolerance = _time_tolerance;
-//  }
   Scalar unmeasured_perturbation_std = 0.0001;
+  ProcessorParamsDiffDrive();
+  ProcessorParamsDiffDrive(std::string _unique_name, const paramsServer& _server):
+    ProcessorParamsMotion(_unique_name, _server)
+  {
+    unmeasured_perturbation_std = _server.getParam<Scalar>(_unique_name + "/unmeasured_perturbation_std", "0.0001");
+  }
 };
 
 /**

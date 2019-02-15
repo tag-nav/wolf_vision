@@ -12,6 +12,7 @@
 #include "base/capture/capture_motion.h"
 #include "base/processor/processor_base.h"
 #include "base/time_stamp.h"
+#include "base/params_server.hpp"
 
 // std
 #include <iomanip>
@@ -27,6 +28,15 @@ struct ProcessorParamsMotion : public ProcessorParamsBase
         unsigned int max_buff_length  = 10;
         Scalar dist_traveled    = 5;
         Scalar angle_turned     = 0.5;
+    ProcessorParamsMotion() = default;
+    ProcessorParamsMotion(std::string _unique_name, const paramsServer& _server):
+        ProcessorParamsBase(_unique_name, _server)
+    {
+      max_time_span   = _server.getParam<Scalar>(_unique_name + "/max_time_span", "0.5");
+      max_buff_length = _server.getParam<unsigned int>(_unique_name + "/max_buff_length", "10");
+      dist_traveled   = _server.getParam<Scalar>(_unique_name + "/dist_traveled", "5");
+      angle_turned    = _server.getParam<Scalar>(_unique_name + "/angle_turned", "0.5");
+    }
 };
 
 /** \brief class for Motion processors

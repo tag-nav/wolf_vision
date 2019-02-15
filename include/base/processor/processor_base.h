@@ -11,6 +11,7 @@ class SensorBase;
 #include "base/node_base.h"
 #include "base/time_stamp.h"
 #include "base/frame_base.h"
+#include "base/params_server.hpp"
 
 // std
 #include <memory>
@@ -108,13 +109,17 @@ class PackKeyFrameBuffer
 struct ProcessorParamsBase
 {
     ProcessorParamsBase() = default;
-
     ProcessorParamsBase(bool _voting_active,
                         Scalar _time_tolerance)
       : voting_active(_voting_active)
       , time_tolerance(_time_tolerance)
     {
       //
+    }
+    ProcessorParamsBase(std::string _unique_name, const paramsServer& _server)
+    {
+        voting_active = _server.getParam<bool>(_unique_name + "/voting_active", "false");
+        time_tolerance = _server.getParam<Scalar>(_unique_name + "/time_tolerance", "0");
     }
 
     virtual ~ProcessorParamsBase() = default;

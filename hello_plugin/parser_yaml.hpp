@@ -140,13 +140,20 @@ void parserYAML::walkTreeR(YAML::Node n, vector<string>& tags, string hdr){
     }
     case YAML::NodeType::Map : {
         for(const auto& kv : n){
+            // If the key's value starts with a $ (i.e. $key) then its value is parsed as a literal map,
+            //otherwise the parser recursively parses the map
             regex r("^\\$.*");
             if(not regex_match(kv.first.as<string>(), r)){
-                tags.push_back(kv.first.as<string>());
-                if(tags.size() == 2) this->updateActiveName(kv.first.as<string>());
-                walkTreeR(kv.second, tags, hdr +"/"+ kv.first.as<string>());
-                tags.pop_back();
-                if(tags.size() == 1) this->updateActiveName("");
+                regex rr("follow");
+                if(not regex_match(kv.first.as<string>(), rr)) {
+                    tags.push_back(kv.first.as<string>());
+                    if(tags.size() == 2) this->updateActiveName(kv.first.as<string>());
+                    walkTreeR(kv.second, tags, hdr +"/"+ kv.first.as<string>());
+                    tags.pop_back();
+                    if(tags.size() == 1) this->updateActiveName("");
+                }else{
+                    walkTree(kv.second.as<string>(), tags, hdr);
+                }
             }else{
                 string key = kv.first.as<string>();
                 key = key.substr(1,key.size() - 1);
