@@ -5,18 +5,35 @@
 using namespace std;
 using namespace wolf;
 
-TEST(ParserYAML, RegularParse)
+parserYAML parse(string _file)
 {
-  string file = "";
-  file = "../test/params1.yaml";
-  parserYAML parser = parserYAML(file);
+  parserYAML parser = parserYAML(_file);
   parser.parse();
-  auto params = parser.getParams();
-  for(auto it : params)
-    cout << it.first << " %% " << it.second << endl;
-  ASSERT_EQ(params["odom/intrinsic/k_rot_to_rot"], "0.1");
+  return parser;
 }
 
+TEST(ParserYAML, RegularParse)
+{
+  auto parser = parse("../test/params1.yaml");
+  auto params = parser.getParams();
+  // for(auto it : params)
+  //   cout << it.first << " %% " << it.second << endl;
+  ASSERT_EQ(params["odom/intrinsic/k_rot_to_rot"], "0.1");
+  ASSERT_EQ(params["processor1/sensorname"], "odom");
+}
+TEST(ParserYAML, ParseMap)
+{
+  auto parser = parse("../test/params2.yaml");
+  auto params = parser.getParams();
+  ASSERT_EQ(params["processor1/mymap"], "[{k1:v1},{k2:v2},{k3:[v3,v4,v5]}]");
+}
+TEST(ParserYAML, JumpFile)
+{
+  auto parser = parse("../test/params3.yaml");
+  auto params = parser.getParams();
+  ASSERT_EQ(params["my_proc_test/max_buff_length"], "100");
+  ASSERT_EQ(params["my_proc_test/jump/voting_active"], "false");
+}
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);

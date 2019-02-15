@@ -125,8 +125,8 @@ void parserYAML::walkTreeR(YAML::Node n, vector<string>& tags, string hdr){
             // cout << "SUBSTR " << str.substr(1,str.size() - 1);
             walkTree(str.substr(1,str.size() - 1), tags, hdr);
         }else{
-            std::copy(tags.begin(), tags.end(), std::ostream_iterator<string>(std::cout, "¬"));
-            cout << "«»" << n.Scalar() << endl;
+            // std::copy(tags.begin(), tags.end(), std::ostream_iterator<string>(std::cout, "¬"));
+            // cout << "«»" << n.Scalar() << endl;
             _params.insert(pair<string,string>(hdr, n.Scalar()));
         }
         break;
@@ -140,7 +140,7 @@ void parserYAML::walkTreeR(YAML::Node n, vector<string>& tags, string hdr){
     }
     case YAML::NodeType::Map : {
         for(const auto& kv : n){
-            // If the key's value starts with a $ (i.e. $key) then its value is parsed as a literal map,
+            //If the key's value starts with a $ (i.e. $key) then its value is parsed as a literal map,
             //otherwise the parser recursively parses the map
             regex r("^\\$.*");
             if(not regex_match(kv.first.as<string>(), r)){
