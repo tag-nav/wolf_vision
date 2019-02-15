@@ -43,6 +43,8 @@ struct ProcessorParamsTrackerLandmarkApriltag : public ProcessorParamsTrackerLan
     Scalar max_time_vote_;
     Scalar ippe_min_ratio_;
     Scalar ippe_max_rep_error_;
+
+    bool reestimate_last_frame_;
 };
 
 
@@ -110,6 +112,8 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
 
         virtual void configure(SensorBasePtr _sensor);
 
+        void reestimateLastFrame();
+
         // for factory
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
 
@@ -152,6 +156,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
 //        double cx_, cy_, fx_, fy_;
         Matrix3s K_;
         cv::Mat_<Scalar> cv_K_;
+        bool reestimate_last_frame_;
 
     protected:
         FeatureBaseList detections_incoming_;   ///< detected tags in wolf form, incoming image

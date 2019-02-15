@@ -40,6 +40,7 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         ippe_min_ratio_(_params_tracker_landmark_apriltag->ippe_min_ratio_),
         ippe_max_rep_error_(_params_tracker_landmark_apriltag->ippe_max_rep_error_),
         cv_K_(3,3),
+        reestimate_last_frame_(_params_tracker_landmark_apriltag->reestimate_last_frame_),
         min_time_vote_(_params_tracker_landmark_apriltag->min_time_vote_),
         max_time_vote_(_params_tracker_landmark_apriltag->max_time_vote_),
         min_features_for_keyframe_(_params_tracker_landmark_apriltag->min_features_for_keyframe)
@@ -655,20 +656,85 @@ void ProcessorTrackerLandmarkApriltag::advanceDerived()
 
 void ProcessorTrackerLandmarkApriltag::resetDerived()
 {
-    // Code for motion current frame
-    getOriginPtr()->getFramePtr()
-
-    // get features list of KF linked to origin capture and last capture
-
-    // retrieve the intersection of the corresponding features
-
-    //
-
-
-
+    if (reestimate_last_frame_){
+        reestimateLastFrame();
+    }
 
     ProcessorTrackerLandmark::resetDerived();
     detections_last_ = std::move(detections_incoming_);
+}
+
+void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
+        // Rewrite the last frame state and landmark state initialised during last frame creation to account
+    // for a better estimate of the current state using the last landmark detection.
+    // Otherwise, default behaviour is to take the last KF as an initialization of the new KF which can lead
+    // to the solver finding local minima
+
+    // get features list of KF linked to origin capture and last capture
+    FeatureBaseList ori_feature_list = getOriginPtr()->getFeatureList();
+    FeatureBaseList last_feature_list = getLastPtr()->getFeatureList();
+    // Among landmarks detected in origin and last, find the one that has the smallest error ratio (best confidence)
+    Scalar lowest_ration = 1;  // rep_error1/rep_error2 cannot be higher than 1
+    FeatureApriltagPtr best_feature;
+    for (auto it_last = last_feature_list.begin(); it_last != last_feature_list.end(); it_last++){
+        FeatureApriltagPtr last_feat_ptr = std::static_pointer_cast<FeatureApriltag>(*it_last);
+        for (auto it_ori = ori_feature_list.begin(); it_ori != ori_feature_list.end(); it_ori++){
+            FeatureApriltagPtr ori_feat_ptr =  std::static_pointer_cast<FeatureApriltag>(*it_ori);
+            if (ori_feat_ptr->getTagId() == last_feat_ptr->getTagId()){
+                Scalar ratio = ori_feat_ptr->getRepError1() / ori_feat_ptr->getRepError2(); 
+                if (ratio < lowest_ration){
+                    lowest_ration = ratio;
+                    best_feature = last_feat_ptr;
+                    std::cout << "Best feature id: " << best_feature->getTagId() << std::endl;
+                }
+            }
+        }
+    }
+
+    std::cout << "Best feature id after: " << best_feature->getTagId() << std::endl;
+    // Retrieve cam to landmark transform
+    Eigen::Vector7s cam_pose_lmk = best_feature->getMeasurement();
+    Eigen::Quaternions cam_q_lmk(cam_pose_lmk.segment<4>(3).data());
+    Eigen::Affine3ds cam_M_lmk = Eigen::Translation3ds(cam_pose_lmk.head(3)) * cam_q_lmk;
+
+
+    // Get corresponding landmarks in origin/last landmark list
+    Eigen::Affine3ds w_M_lmk;
+    LandmarkBaseList lmk_list = getProblem()->getMapPtr()->getLandmarkList();
+    // Iterate in reverse order because landmark detected in last are at the end of the list
+    for (std::list<LandmarkBasePtr>::reverse_iterator it_lmk = lmk_list.rbegin(); it_lmk != lmk_list.rend(); ++it_lmk){
+        LandmarkApriltagPtr lmk_ptr = std::dynamic_pointer_cast<LandmarkApriltag>(*it_lmk);
+        // the map might contain other types of landmarks so check if the cast is valid
+        if (lmk_ptr == nullptr){
+            continue;
+        }
+
+        if (lmk_ptr->getTagId() == best_feature->getTagId()){
+            Eigen::Vector3s w_t_lmk = lmk_ptr->getPPtr()->getState();
+            Eigen::Quaternions w_q_lmk(lmk_ptr->getOPtr()->getState().data());
+            w_M_lmk = Eigen::Translation<Scalar,3>(w_t_lmk) * w_q_lmk;
+        }
+    }
+
+    // Retrieve camera extrinsics
+    Eigen::Quaternions last_q_cam(getSensorPtr()->getOPtr()->getState().data());
+    Eigen::Affine3ds last_M_cam = Eigen::Translation3ds(getSensorPtr()->getPPtr()->getState()) * last_q_cam;
+
+    // Compute last frame estimate
+    Eigen::Affine3ds w_M_last = w_M_lmk * (last_M_cam * cam_M_lmk).inverse();
+
+    //////////////////
+    // Use the w_M_last to overide last key frame state estimation and keyframe estimation
+    //////////////////
+    Eigen::Vector3s pos_last  = w_M_last.translation();
+    Eigen::Quaternions quat_last(w_M_last.linear());
+    getLastPtr()->getFramePtr()->getPPtr()->setState(pos_last);
+    getLastPtr()->getFramePtr()->getOPtr()->setState(quat_last.coeffs());
+
+
+    // ???? How to get the new landmarks that were created ????
+    
+    //////////////////
 }
 
 std::string ProcessorTrackerLandmarkApriltag::getTagFamily() const
