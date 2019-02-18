@@ -1,24 +1,23 @@
 #include "utils_gtest.h"
 #include "base/converter.h"
 #include "base/wolf.h"
-#include "../hello_plugin/parser_yaml.hpp"
+#include "base/yaml/parser_yaml.hpp"
 
 using namespace std;
 using namespace wolf;
 
 std::string wolf_root = _WOLF_ROOT_DIR;
 
-parserYAML parse(string _file)
+parserYAML parse(string _file, string _path_root)
 {
-  parserYAML parser = parserYAML(_file);
+  parserYAML parser = parserYAML(_file, _path_root);
   parser.parse();
   return parser;
 }
 
 TEST(ParserYAML, RegularParse)
 {
-  cout << "WOOT " << wolf_root + "/test/params1.yaml" << endl;
-  auto parser = parse(wolf_root + "/test/params1.yaml");
+  auto parser = parse("/test/params1.yaml", wolf_root);
   auto params = parser.getParams();
   // for(auto it : params)
   //   cout << it.first << " %% " << it.second << endl;
@@ -27,13 +26,13 @@ TEST(ParserYAML, RegularParse)
 }
 TEST(ParserYAML, ParseMap)
 {
-  auto parser = parse(wolf_root + "/test/params2.yaml");
+  auto parser = parse("/test/params2.yaml", wolf_root);
   auto params = parser.getParams();
   EXPECT_EQ(params["processor1/mymap"], "[{k1:v1},{k2:v2},{k3:[v3,v4,v5]}]");
 }
 TEST(ParserYAML, JumpFile)
 {
-  auto parser = parse(wolf_root + "/test/params3.yaml");
+  auto parser = parse("/test/params3.yaml", wolf_root);
   auto params = parser.getParams();
   EXPECT_EQ(params["my_proc_test/max_buff_length"], "100");
   EXPECT_EQ(params["my_proc_test/jump/voting_active"], "false");

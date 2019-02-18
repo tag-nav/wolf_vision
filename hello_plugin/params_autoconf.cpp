@@ -9,7 +9,7 @@
 #include "base/wolf.h"
 // #include "sensor_odom_2D.cpp"
 #include <yaml-cpp/yaml.h>
-#include "parser_yaml.hpp"
+#include "base/yaml/parser_yaml.hpp"
 #include "base/params_server.hpp"
 
 #include "../hello_wolf/capture_range_bearing.h"

@@ -1,23 +1,24 @@
 #include "utils_gtest.h"
 #include "base/converter.h"
 #include "base/wolf.h"
-#include "../hello_plugin/parser_yaml.hpp"
+#include "base/yaml/parser_yaml.hpp"
 #include "base/params_server.hpp"
 
 using namespace std;
 using namespace wolf;
 
-parserYAML parse(string _file)
+std::string wolf_root = _WOLF_ROOT_DIR;
+
+parserYAML parse(string _file, string _path_root)
 {
-  parserYAML parser = parserYAML(_file);
+  parserYAML parser = parserYAML(_file, _path_root);
   parser.parse();
   return parser;
 }
 
 TEST(ParamsServer, Default)
 {
-  std::string wolf_root = _WOLF_ROOT_DIR;
-  auto parser = parse(wolf_root + "/test/params1.yaml");
+  auto parser = parse("/test/params1.yaml", wolf_root);
   auto params = parser.getParams();
   paramsServer server = paramsServer(params, parser.sensorsSerialization(), parser.processorsSerialization());
   EXPECT_EQ(server.getParam<double>("should_not_exist", "2.6"), 2.6);
