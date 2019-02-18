@@ -41,9 +41,11 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         ippe_max_rep_error_(_params_tracker_landmark_apriltag->ippe_max_rep_error_),
         cv_K_(3,3),
         reestimate_last_frame_(_params_tracker_landmark_apriltag->reestimate_last_frame_),
+        n_reset_(0),
         min_time_vote_(_params_tracker_landmark_apriltag->min_time_vote_),
         max_time_vote_(_params_tracker_landmark_apriltag->max_time_vote_),
-        min_features_for_keyframe_(_params_tracker_landmark_apriltag->min_features_for_keyframe)
+        min_features_for_keyframe_(_params_tracker_landmark_apriltag->min_features_for_keyframe),
+        max_features_diff_(_params_tracker_landmark_apriltag->max_features_diff_)
 {
     // Constant transformation from apriltag camera frame (RUB: Z axis looking away from the tag)
     // to wolf camera frame (RDF: Z axis looking at the tag)
@@ -457,18 +459,32 @@ unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned 
 }
 
 bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
-{
-    bool too_long_since_last_KF = false;
+{   
     Scalar dt_incoming_origin = getIncomingPtr()->getTimeStamp().get() - getOriginPtr()->getTimeStamp().get();
-    if (dt_incoming_origin > min_time_vote_){
-        bool more_in_last = getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_;
-        if (dt_incoming_origin > max_time_vote_ && more_in_last){
-            too_long_since_last_KF = true;
-        }
-        bool less_in_incoming = getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
-        return more_in_last && (less_in_incoming || too_long_since_last_KF);
-    }
-    return false;
+    // Necessary conditions
+    bool more_than_min_time_vote = dt_incoming_origin > min_time_vote_; 
+    bool more_in_last = getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_;
+
+    // Alternative decision factors
+    bool too_long_since_last_KF = dt_incoming_origin > max_time_vote_;
+    bool less_in_incoming = getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
+    int diff = getOriginPtr()->getFeatureList().size() - getIncomingPtr()->getFeatureList().size();
+    bool too_big_feature_diff = (diff >=  max_features_diff_);
+
+    bool vote = more_than_min_time_vote && more_in_last && (less_in_incoming || too_long_since_last_KF || too_big_feature_diff);
+
+    // if (vote){
+    //     std::cout << "getOriginPtr()->getFeatureList().size(): " << getOriginPtr()->getFeatureList().size() << std::endl;
+    //     std::cout << "getIncomingPtr()->getFeatureList().size(): " << getIncomingPtr()->getFeatureList().size() << std::endl;
+    //     std::cout << "diff " << diff << std::endl;
+    //     std::cout << "max_features_diff_ " << max_features_diff_ << std::endl;
+
+    //     std::cout << "    less_in_incoming " << less_in_incoming << std::endl;
+    //     std::cout << "    too_long_since_last_KF " << too_long_since_last_KF << std::endl;
+    //     std::cout << "    too_big_feature_diff " << too_big_feature_diff << std::endl;
+    // }
+
+    return vote;
 }
 
 unsigned int ProcessorTrackerLandmarkApriltag::findLandmarks(const LandmarkBaseList& _landmark_list_in,
@@ -670,33 +686,51 @@ void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
     // Otherwise, default behaviour is to take the last KF as an initialization of the new KF which can lead
     // to the solver finding local minima
 
+
+    // When called for the first time, no feature list initialized in ori/last(?)
+    if (n_reset_ < 1){
+        n_reset_ += 1;
+        return;
+    }
     // get features list of KF linked to origin capture and last capture
+
     FeatureBaseList ori_feature_list = getOriginPtr()->getFeatureList();
     FeatureBaseList last_feature_list = getLastPtr()->getFeatureList();
+
+    // std::cout << "last_feature_list.size(): " << last_feature_list.size() << std::endl;
+    // std::cout << "ori_feature_list.size(): " << ori_feature_list.size() << std::endl;
+    if (last_feature_list.size() == 0 || ori_feature_list.size() == 0){
+        return;
+    }
     // Among landmarks detected in origin and last, find the one that has the smallest error ratio (best confidence)
     Scalar lowest_ration = 1;  // rep_error1/rep_error2 cannot be higher than 1
     FeatureApriltagPtr best_feature;
+    bool broken_continuity = true;
     for (auto it_last = last_feature_list.begin(); it_last != last_feature_list.end(); it_last++){
         FeatureApriltagPtr last_feat_ptr = std::static_pointer_cast<FeatureApriltag>(*it_last);
         for (auto it_ori = ori_feature_list.begin(); it_ori != ori_feature_list.end(); it_ori++){
             FeatureApriltagPtr ori_feat_ptr =  std::static_pointer_cast<FeatureApriltag>(*it_ori);
             if (ori_feat_ptr->getTagId() == last_feat_ptr->getTagId()){
+                broken_continuity = false;
                 Scalar ratio = ori_feat_ptr->getRepError1() / ori_feat_ptr->getRepError2(); 
                 if (ratio < lowest_ration){
                     lowest_ration = ratio;
                     best_feature = last_feat_ptr;
-                    std::cout << "Best feature id: " << best_feature->getTagId() << std::endl;
+                    // std::cout << "Best feature id: " << best_feature->getTagId() << std::endl;
                 }
             }
         }
     }
-
-    std::cout << "Best feature id after: " << best_feature->getTagId() << std::endl;
+    // If there is no common feature between the two images, the continuity is broken and 
+    // nothing can be estimated. In the case of aprilslam alone, this result in a broken factor map
+    if (broken_continuity){
+        return;
+    }
+    // std::cout << "Best feature id after: " << best_feature->getTagId() << std::endl;
     // Retrieve cam to landmark transform
     Eigen::Vector7s cam_pose_lmk = best_feature->getMeasurement();
     Eigen::Quaternions cam_q_lmk(cam_pose_lmk.segment<4>(3).data());
     Eigen::Affine3ds cam_M_lmk = Eigen::Translation3ds(cam_pose_lmk.head(3)) * cam_q_lmk;
-
 
     // Get corresponding landmarks in origin/last landmark list
     Eigen::Affine3ds w_M_lmk;

@@ -41,6 +41,7 @@ struct ProcessorParamsTrackerLandmarkApriltag : public ProcessorParamsTrackerLan
     Scalar std_pix_;
     Scalar min_time_vote_;
     Scalar max_time_vote_;
+    int max_features_diff_;
     Scalar ippe_min_ratio_;
     Scalar ippe_max_rep_error_;
 
@@ -157,6 +158,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         Matrix3s K_;
         cv::Mat_<Scalar> cv_K_;
         bool reestimate_last_frame_;
+        int n_reset_;
 
     protected:
         FeatureBaseList detections_incoming_;   ///< detected tags in wolf form, incoming image
@@ -168,6 +170,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         Scalar          min_time_vote_;
         Scalar          max_time_vote_;
         unsigned int    min_features_for_keyframe_;
+        int             max_features_diff_;
 };
 
 } // namespace wolf

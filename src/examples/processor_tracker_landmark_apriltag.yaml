@@ -34,7 +34,8 @@ vote:
     voting active:              true
     min_time_vote:              0 # s
     max_time_vote:              0 # s
-    min_features_for_keyframe:  1
+    min_features_for_keyframe:  12
+    max_features_diff:  17
 
 reestimate_last_frame: true   # for a better prior on the new keyframe: use only if no motion processor
 
