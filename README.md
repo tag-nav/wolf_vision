@@ -37,12 +37,19 @@ Dependencies
 
 ! Please notice that we are detailing two installation procedures below. If you are familiar with `ROS` and more especially the [`catkin_tools`](https://catkin-tools.readthedocs.io/en/latest/index.html) package then you may jump directly to the 'Using the `catkin_tools` package' section.
 
+#### CMake 
+Building tool used by Wolf and by some of its dependencies. In order to install *cmake*, please follow the instructions at [cmake site](https://cmake.org/install/)
+
+#### Autoreconf
+
+    $ sudo apt get install dh-autoreconf
+
 #### Eigen
 
 [Eigen](http://eigen.tuxfamily.org). Linear algebra, header library. Eigen 3.2 is also a depencency of ROS-Hydro. In case you don't have ROS in your machine, you can install Eigen by typing:
 
     $ sudo apt-get install libeigen3-dev
-    
+
 #### Ceres (5 steps)
 
 [Ceres](http://www.ceres-solver.org/) is an optimization library. Currently, this dependency is optional, so the build procedure of Wolf skips part of compilation in case this dependency is not found on the system. **Installation** is desctibed at [Ceres site](http://www.ceres-solver.org/building.html). However we report here an alternative step by step procedure to install Ceres.
@@ -159,7 +166,7 @@ Wolf uses spdlog macros. Right now Wolf is only compatible with spdlog version 0
 
 **(1)** Git clone the source:
 
-        $ git clone ssh://git@gitlab.iri.upc.edu:2202/asantamaria/vision_utils.git
+        $ git clone https://gitlab.iri.upc.edu/mobile_robotics/vision_utils.git
     
 **(2)** Build and install:
 
