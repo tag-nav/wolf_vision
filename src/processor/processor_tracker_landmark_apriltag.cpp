@@ -426,36 +426,41 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
     return new_landmark;
 }
 
-unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out)
+unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _new_features_last)
 {
+    LandmarkBaseList& landmark_list = getProblem()->getMapPtr()->getLandmarkList();
     for (auto feature_in_image : detections_last_)
     {
         bool feature_already_found(false);
         // features and landmarks must be tested with their ID !!
         // list of landmarks in the map
-        LandmarkBaseList& landmark_list = getProblem()->getMapPtr()->getLandmarkList();  // Need to retrieve at each iteration?
 
-        //is the feature already associated to a landmark in the map ?
-        for(auto it = landmark_list.begin(); it != landmark_list.end(); ++it)
-            if(std::static_pointer_cast<LandmarkApriltag>(*it)->getTagId() == std::static_pointer_cast<FeatureApriltag>(feature_in_image)->getTagId())
+        //Loop over the landmark to find is one is associated to  feature_in_image
+        for(auto it = landmark_list.begin(); it != landmark_list.end(); ++it){
+            if(std::static_pointer_cast<LandmarkApriltag>(*it)->getTagId() == std::static_pointer_cast<FeatureApriltag>(feature_in_image)->getTagId()){
                 feature_already_found = true;
+                break;
+            }
+        }
 
-        //if the feature is not yet associated to a landmark in the map then we continue
         if (!feature_already_found)
         {
-            for (FeatureBaseList::iterator it=_feature_list_out.begin(); it != _feature_list_out.end(); ++it)
+            // Loop over the 
+            for (FeatureBaseList::iterator it=_new_features_last.begin(); it != _new_features_last.end(); ++it)
                 if (std::static_pointer_cast<FeatureApriltag>(*it)->getTagId() == std::static_pointer_cast<FeatureApriltag>(feature_in_image)->getTagId())
                 {
                     //we have a detection with the same id as the currently processed one. We remove the previous feature from the list for now
-                    _feature_list_out.erase(it);
+                    _new_features_last.erase(it);
                     break; //it should not be possible two detection with the same id before getting there so we can stop here.
                 }
 
-            _feature_list_out.push_back(feature_in_image); // If the feature is not in the map and not in the list of newly detected features yet then we add it.
+            _new_features_last.push_back(feature_in_image); // If the feature is not in the map and not in the list of newly detected features yet then we add it.
         } //otherwise we check the next feature
     }
 
-    return _feature_list_out.size();
+    std::cout << "_new_features_last: " << _new_features_last.size() << std::endl;
+
+    return _new_features_last.size();
 }
 
 bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
@@ -469,7 +474,7 @@ bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
     bool too_long_since_last_KF = dt_incoming_origin > max_time_vote_;
     bool less_in_incoming = getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
     int diff = getOriginPtr()->getFeatureList().size() - getIncomingPtr()->getFeatureList().size();
-    bool too_big_feature_diff = (diff >=  max_features_diff_);
+    bool too_big_feature_diff = (abs(diff) >=  max_features_diff_);
 
     bool vote = more_than_min_time_vote && more_in_last && (less_in_incoming || too_long_since_last_KF || too_big_feature_diff);
 
@@ -671,7 +676,7 @@ void ProcessorTrackerLandmarkApriltag::advanceDerived()
 }
 
 void ProcessorTrackerLandmarkApriltag::resetDerived()
-{
+{   
     if (reestimate_last_frame_){
         reestimateLastFrame();
     }
@@ -681,19 +686,22 @@ void ProcessorTrackerLandmarkApriltag::resetDerived()
 }
 
 void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
-        // Rewrite the last frame state and landmark state initialised during last frame creation to account
+    // Rewrite the last frame state and landmark state initialised during last frame creation to account
     // for a better estimate of the current state using the last landmark detection.
     // Otherwise, default behaviour is to take the last KF as an initialization of the new KF which can lead
     // to the solver finding local minima
-
 
     // When called for the first time, no feature list initialized in ori/last(?)
     if (n_reset_ < 1){
         n_reset_ += 1;
         return;
     }
-    // get features list of KF linked to origin capture and last capture
 
+    // Retrieve camera extrinsics
+    Eigen::Quaternions last_q_cam(getSensorPtr()->getOPtr()->getState().data());
+    Eigen::Affine3ds last_M_cam = Eigen::Translation3ds(getSensorPtr()->getPPtr()->getState()) * last_q_cam;
+
+    // get features list of KF linked to origin capture and last capture
     FeatureBaseList ori_feature_list = getOriginPtr()->getFeatureList();
     FeatureBaseList last_feature_list = getLastPtr()->getFeatureList();
 
@@ -750,25 +758,40 @@ void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
         }
     }
 
-    // Retrieve camera extrinsics
-    Eigen::Quaternions last_q_cam(getSensorPtr()->getOPtr()->getState().data());
-    Eigen::Affine3ds last_M_cam = Eigen::Translation3ds(getSensorPtr()->getPPtr()->getState()) * last_q_cam;
-
     // Compute last frame estimate
     Eigen::Affine3ds w_M_last = w_M_lmk * (last_M_cam * cam_M_lmk).inverse();
 
-    //////////////////
     // Use the w_M_last to overide last key frame state estimation and keyframe estimation
-    //////////////////
     Eigen::Vector3s pos_last  = w_M_last.translation();
     Eigen::Quaternions quat_last(w_M_last.linear());
     getLastPtr()->getFramePtr()->getPPtr()->setState(pos_last);
     getLastPtr()->getFramePtr()->getOPtr()->setState(quat_last.coeffs());
-
-
-    // ???? How to get the new landmarks that were created ????
     
-    //////////////////
+    ///////////////////
+    // Reestimate position of landmark new in Last
+    // TODO: yet another loop throuh the landmarks...
+    ///////////////////
+    std::cout << "  " << "new_features_last_.size(): " << new_features_last_.size() << std::endl;
+    for (auto feat_it = new_features_last_.begin(); feat_it != new_features_last_.end(); feat_it++){
+        FeatureApriltagPtr new_feature_last = std::static_pointer_cast<FeatureApriltag>(*feat_it);
+       
+        Eigen::Vector7s cam_pose_lmk = new_feature_last->getMeasurement();
+        Eigen::Quaternions cam_q_lmk(cam_pose_lmk.segment<4>(3).data());
+        Eigen::Affine3ds cam_M_lmk_new = Eigen::Translation3ds(cam_pose_lmk.head(3)) * cam_q_lmk;
+        Eigen::Affine3ds w_M_lmk =  w_M_last * last_M_cam * cam_M_lmk_new;
+
+        for (auto it_lmk = lmk_list.begin(); it_lmk != lmk_list.end(); ++it_lmk){
+            LandmarkApriltagPtr lmk_ptr = std::dynamic_pointer_cast<LandmarkApriltag>(*it_lmk);
+            if (lmk_ptr->getTagId() == new_feature_last->getTagId()){
+                Eigen::Vector3s pos_lmk_last  = w_M_lmk.translation();
+                Eigen::Quaternions quat_lmk_last(w_M_lmk.linear());
+                lmk_ptr->getPPtr()->setState(pos_lmk_last);
+                lmk_ptr->getOPtr()->setState(quat_lmk_last.coeffs());
+                break;
+            }
+        }
+    }
+    
 }
 
 std::string ProcessorTrackerLandmarkApriltag::getTagFamily() const
