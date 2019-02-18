@@ -69,6 +69,11 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
      * the last and incoming Captures.
      */
 
+    // clear new lists
+    new_features_last_.clear();
+    new_features_incoming_.clear();
+    new_landmarks_.clear();
+
     // We first need to populate the \b last Capture with new Features
     unsigned int n = detectNewFeatures(_max_features, new_features_last_);
 

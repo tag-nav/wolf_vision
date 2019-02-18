@@ -38,14 +38,16 @@ LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)
 
 void MapBase::addLandmarkList(LandmarkBaseList& _landmark_list)
 {
-	LandmarkBaseList lmk_list_copy = _landmark_list; //since _landmark_list will be empty after addDownNodeList()
-    for (LandmarkBasePtr landmark_ptr : lmk_list_copy)
-    {
-        landmark_ptr->setMapPtr(shared_from_this());
-        landmark_ptr->setProblem(getProblem());
-        landmark_ptr->registerNewStateBlocks();
-    }
-    landmark_list_.splice(landmark_list_.end(), _landmark_list);
+    for (auto lmk : _landmark_list)
+        addLandmark(lmk);
+//	LandmarkBaseList lmk_list_copy = _landmark_list; //since _landmark_list will be empty after addDownNodeList()
+//    for (LandmarkBasePtr landmark_ptr : lmk_list_copy)
+//    {
+//        landmark_ptr->setMapPtr(shared_from_this());
+//        landmark_ptr->setProblem(getProblem());
+//        landmark_ptr->registerNewStateBlocks();
+//    }
+//    landmark_list_.splice(landmark_list_.end(), _landmark_list);
 }
 
 void MapBase::load(const std::string& _map_file_dot_yaml)
