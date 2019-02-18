@@ -43,21 +43,16 @@ void ProcessorTrackerLandmark::advanceDerived()
     }
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
     new_features_last_ = std::move(new_features_incoming_);
-    //    for (auto match : matches_landmark_from_last_)
-    //            std::cout << "\t" << match.first->id() << " to " << match.second->landmark_ptr_->id() << std::endl;
 }
 
 void ProcessorTrackerLandmark::resetDerived()
 {
-    //std::cout << "ProcessorTrackerLandmark::reset" << std::endl;
     for (auto match : matches_landmark_from_last_)
     {
         match.second.reset(); // TODO: Should we just remove the entries? What about match.first?
     }
     matches_landmark_from_last_ = std::move(matches_landmark_from_incoming_);
     new_features_last_ = std::move(new_features_incoming_);
-    //    for (auto match : matches_landmark_from_last_)
-    //            std::cout << "\t" << match.first->id() << " to " << match.second.landmark_ptr_->id() << std::endl;
 }
 
 unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_features)
