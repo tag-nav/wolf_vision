@@ -19,7 +19,7 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsDiffDrive);
 struct ProcessorParamsDiffDrive : public ProcessorParamsMotion
 {
   Scalar unmeasured_perturbation_std = 0.0001;
-  ProcessorParamsDiffDrive();
+  ProcessorParamsDiffDrive() = default;
   ProcessorParamsDiffDrive(std::string _unique_name, const paramsServer& _server):
     ProcessorParamsMotion(_unique_name, _server)
   {
