@@ -145,7 +145,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         Scalar tag_width  = getTagWidth(tag_id);   // tag width in meters
 
         Eigen::Affine3ds c_M_t;
-        bool is_ambiguous = false;  // only redefined if using IPPE
+        bool use_rotation = true;  // only redefined if using IPPE
         //////////////////
         // IPPE (Infinitesimal Plane-based Pose Estimation)
         //////////////////
@@ -155,7 +155,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         Scalar rep_error2;
         ippePoseEstimation(det, cv_K_, tag_width, M_ippe1, rep_error1, M_ippe2, rep_error2);
         // If not so sure about whether we have the right solution or not, do not create a feature
-        is_ambiguous = !((rep_error2 / rep_error1 > ippe_min_ratio_) && rep_error1 < ippe_max_rep_error_);
+        use_rotation = ((rep_error2 / rep_error1 > ippe_min_ratio_) && rep_error1 < ippe_max_rep_error_);
 //        std::cout << "   Tag id: " << tag_id << " ippe_ratio: " << rep_error2 / rep_error1 << " rep error " << rep_error1 << std::endl;
         //////////////////
 
@@ -196,7 +196,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 //        Eigen::Matrix6s cov = getVarVec().asDiagonal() ;  // fixed dummy covariance
         Eigen::Matrix6s info = computeInformation(translation, c_M_t.linear(), K_, tag_width, std_pix_);  // Lie jacobians covariance
 
-        if (is_ambiguous){
+        if (!use_rotation){
 //            WOLF_INFO("Ambiguity on estimated rotation is likely");
             // Put a very high covariance on angles measurements (low info matrix ?)
 //            cov.bottomRightCorner(3, 3) = 1000000*Eigen::Matrix3s::Identity();
@@ -215,7 +215,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 //        WOLF_TRACE("tag ", tag_id, " cov diagonal: [", cov.diagonal().transpose(), "]");
         // add to detected features list
         detections_incoming_.push_back(
-                std::make_shared<FeatureApriltag>(pose, info, tag_id, *det, rep_error1, rep_error2, FeatureBase::UncertaintyType::UNCERTAINTY_IS_INFO));
+                std::make_shared<FeatureApriltag>(pose, info, tag_id, *det, rep_error1, rep_error2, use_rotation, FeatureBase::UncertaintyType::UNCERTAINTY_IS_INFO));
         //        std::cout << "Meas Covariance tag " << tag_id << "\n" << info.inverse() << std::endl;
         //        WOLF_TRACE("Meas Covariance tag ", tag_id, "\n", info.inverse());
 //        WOLF_TRACE("---------------------\n");
@@ -457,8 +457,6 @@ unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned 
             _new_features_last.push_back(feature_in_image); // If the feature is not in the map and not in the list of newly detected features yet then we add it.
         } //otherwise we check the next feature
     }
-
-    std::cout << "_new_features_last: " << _new_features_last.size() << std::endl;
 
     return _new_features_last.size();
 }
@@ -769,19 +767,20 @@ void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
     
     ///////////////////
     // Reestimate position of landmark new in Last
-    // TODO: yet another loop throuh the landmarks...
     ///////////////////
-    std::cout << "  " << "new_features_last_.size(): " << new_features_last_.size() << std::endl;
-    for (auto feat_it = new_features_last_.begin(); feat_it != new_features_last_.end(); feat_it++){
-        FeatureApriltagPtr new_feature_last = std::static_pointer_cast<FeatureApriltag>(*feat_it);
+    for (auto it_feat = new_features_last_.begin(); it_feat != new_features_last_.end(); it_feat++){
+        FeatureApriltagPtr new_feature_last = std::static_pointer_cast<FeatureApriltag>(*it_feat);
        
         Eigen::Vector7s cam_pose_lmk = new_feature_last->getMeasurement();
         Eigen::Quaternions cam_q_lmk(cam_pose_lmk.segment<4>(3).data());
         Eigen::Affine3ds cam_M_lmk_new = Eigen::Translation3ds(cam_pose_lmk.head(3)) * cam_q_lmk;
         Eigen::Affine3ds w_M_lmk =  w_M_last * last_M_cam * cam_M_lmk_new;
 
-        for (auto it_lmk = lmk_list.begin(); it_lmk != lmk_list.end(); ++it_lmk){
+        for (auto it_lmk = new_landmarks_.begin(); it_lmk != new_landmarks_.end(); ++it_lmk){
             LandmarkApriltagPtr lmk_ptr = std::dynamic_pointer_cast<LandmarkApriltag>(*it_lmk);
+            if (lmk_ptr == nullptr){
+                continue;
+            }
             if (lmk_ptr->getTagId() == new_feature_last->getTagId()){
                 Eigen::Vector3s pos_lmk_last  = w_M_lmk.translation();
                 Eigen::Quaternions quat_lmk_last(w_M_lmk.linear());

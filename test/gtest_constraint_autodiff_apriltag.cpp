@@ -178,8 +178,9 @@ class ConstraintAutodiffApriltag_class : public testing::Test{
 
             Scalar rep_error1 = 0.01;
             Scalar rep_error2 = 0.1;
+            bool use_rotation = true;
 
-            f1 = std::make_shared<FeatureApriltag>(pose_landmark, meas_cov, tag_id, det, rep_error1, rep_error2);
+            f1 = std::make_shared<FeatureApriltag>(pose_landmark, meas_cov, tag_id, det, rep_error1, rep_error2, use_rotation);
             lmk1 = std::static_pointer_cast<LandmarkApriltag>(proc_apriltag->createLandmark(f1));
 
             // Add the feature and the landmark in the graph as needed

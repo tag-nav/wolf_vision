@@ -98,6 +98,7 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
 
             rep_error1 = 0.01;
             rep_error2 = 0.1;
+            use_rotation = true;
         }
 
     public:
@@ -111,6 +112,7 @@ class ProcessorTrackerLandmarkApriltag_class : public testing::Test{
         apriltag_detection_t    det;
         Scalar                  rep_error1;
         Scalar                  rep_error2;
+        bool                    use_rotation;
 };
 ////////////////////////////////////////////////////////////////
 
@@ -163,7 +165,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, voteForKeyFrame)
 
     for (int i=0; i < min_features_for_keyframe; i++){
         det.id = i;
-        FeatureApriltagPtr f = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), i, det, rep_error1, rep_error2);
+        FeatureApriltagPtr f = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), i, det, rep_error1, rep_error2, use_rotation);
         Ca->addFeature(f);
         Ca->addFeature(f);
         Cc->addFeature(f);
@@ -226,7 +228,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     pose << pos, quat.coeffs();
     tag_id = 0;
     det.id = tag_id;
-    FeatureBasePtr f0 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id, det, rep_error1, rep_error2);
+    FeatureBasePtr f0 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id, det, rep_error1, rep_error2, use_rotation);
 
     // feature 1
     pos << 1,2,0;
@@ -235,7 +237,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     pose << pos, quat.coeffs();
     tag_id = 1;
     det.id = tag_id;
-    FeatureBasePtr f1 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id, det, rep_error1, rep_error2);
+    FeatureBasePtr f1 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id, det, rep_error1, rep_error2, use_rotation);
 
     // feature 2
     pos << 0,2,1;
@@ -244,7 +246,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     pose << pos, quat.coeffs();
     tag_id = 2;
     det.id = tag_id;
-    FeatureBasePtr f2 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id, det, rep_error1, rep_error2);
+    FeatureBasePtr f2 = std::make_shared<FeatureApriltag>(pose, meas_cov, tag_id, det, rep_error1, rep_error2, use_rotation);
 
     features_in.push_back(f0);
     features_in.push_back(f0);
@@ -294,7 +296,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
 {
     Vector7s pose_landmark((Vector7s()<<0,0,0,0,0,0,1).finished());
     det.id = 1;
-    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>(pose_landmark, Matrix6s::Identity(), 1, det, rep_error1, rep_error2);
+    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>(pose_landmark, Matrix6s::Identity(), 1, det, rep_error1, rep_error2, use_rotation);
 
     C1->addFeature(f1);
     LandmarkBasePtr lmk = prc_apr->createLandmark(f1);
@@ -306,7 +308,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
 TEST_F(ProcessorTrackerLandmarkApriltag_class, createConstraint)
 {
     det.id = 1;
-    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1, det, rep_error1, rep_error2);
+    FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1, det, rep_error1, rep_error2, use_rotation);
 
     C1->addFeature(f1);
     LandmarkBasePtr lmk = prc_apr->createLandmark(f1);

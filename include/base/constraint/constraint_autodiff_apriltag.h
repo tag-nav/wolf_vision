@@ -35,7 +35,16 @@ class ConstraintAutodiffApriltag : public ConstraintAutodiff<ConstraintAutodiffA
         /** brief : compute the residual from the state blocks being iterated by the solver.
          **/
         template<typename T>
-        bool operator ()( const T* const _p_camera, const T* const _o_camera, const T* const _p_keyframe, const T* const _o_keyframe, const T* const _p_landmark, const T* const _o_landmark, T* _residuals) const;
+        bool operator ()( const T* const _p_camera, 
+                          const T* const _o_camera, 
+                          const T* const _p_keyframe, 
+                          const T* const _o_keyframe, 
+                          const T* const _p_landmark, 
+                          const T* const _o_landmark, 
+                          T* _residuals) const;
+
+        Eigen::Vector6s residual() const;
+        Scalar cost() const;
 
         // print function only for double (not Jet)
         template<typename T, int Rows, int Cols>
@@ -145,6 +154,27 @@ template<typename T> bool ConstraintAutodiffApriltag::operator ()( const T* cons
     res = getFeaturePtr()->getMeasurementSquareRootInformationUpper().cast<T>() * err;
 
     return true;
+}
+
+Eigen::Vector6s ConstraintAutodiffApriltag::residual() const
+{
+    Eigen::Vector6s res;
+    Scalar * p_camera, * o_camera, * p_frame, * o_frame, * p_tag, * o_tag;
+    p_camera = getCapturePtr()->getSensorPPtr()->getState().data();
+    o_camera = getCapturePtr()->getSensorOPtr()->getState().data();
+    p_frame  = getCapturePtr()->getFramePtr()->getPPtr()->getState().data();
+    o_frame  = getCapturePtr()->getFramePtr()->getOPtr()->getState().data();
+    p_tag    = getLandmarkOtherPtr()->getPPtr()->getState().data();
+    o_tag    = getLandmarkOtherPtr()->getOPtr()->getState().data();
+
+    operator() (p_camera, o_camera, p_frame, o_frame, p_tag, o_tag, res.data());
+
+    return res;
+}
+
+Scalar ConstraintAutodiffApriltag::cost() const
+{
+    return residual().norm();
 }
 
 } // namespace wolf

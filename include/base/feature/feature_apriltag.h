@@ -24,7 +24,7 @@ class FeatureApriltag : public FeatureBase
 
         FeatureApriltag(const Eigen::Vector7s & _measurement, const Eigen::Matrix6s & _meas_covariance,
                         const int _tag_id, const apriltag_detection_t & _det,
-                        Scalar _rep_error1, Scalar _rep_error2,
+                        Scalar _rep_error1, Scalar _rep_error2, bool _use_rotation,
                         UncertaintyType _uncertainty_type = UNCERTAINTY_IS_INFO);
         virtual ~FeatureApriltag();
         
@@ -41,6 +41,7 @@ class FeatureApriltag : public FeatureBase
 
         Scalar getRepError1() const;
         Scalar getRepError2() const;
+        bool getUserotation() const;
 
 
     private:
@@ -49,6 +50,7 @@ class FeatureApriltag : public FeatureBase
         apriltag_detection_t detection_;
         Scalar rep_error1_;
         Scalar rep_error2_;
+        bool use_rotation_;
         
 };
 
