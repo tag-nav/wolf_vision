@@ -42,7 +42,7 @@ Building tool used by Wolf and by some of its dependencies. In order to install 
 
 #### Autoreconf
 
-    $ sudo apt get install dh-autoreconf
+    $ sudo apt install dh-autoreconf
 
 #### Eigen
 
@@ -52,7 +52,7 @@ Building tool used by Wolf and by some of its dependencies. In order to install 
 
 #### Ceres (5 steps)
 
-[Ceres](http://www.ceres-solver.org/) is an optimization library. Currently, this dependency is optional, so the build procedure of Wolf skips part of compilation in case this dependency is not found on the system. **Installation** is desctibed at [Ceres site](http://www.ceres-solver.org/building.html). However we report here an alternative step by step procedure to install Ceres.
+[Ceres](http://www.ceres-solver.org/) is an optimization library. Currently, this dependency is optional, so the build procedure of Wolf skips part of compilation in case this dependency is not found on the system. **Installation** is described at [Ceres site](http://www.ceres-solver.org/building.html). However we report here an alternative step by step procedure to install Ceres.
 
 **(1)** Skip this step if Cmake 2.8.0+ and Eigen3.0+ are already installed. Otherwise install them with *apt-get*.
 
@@ -81,6 +81,7 @@ libgflags.a will be installed at **/usr/local/lib**
     
 -   Build and install with:
 
+        $ cd glog
         $ ./autogen.sh
         $ ./configure --with-gflags=/usr/local/
         $ make
@@ -164,6 +165,8 @@ Wolf uses spdlog macros. Right now Wolf is only compatible with spdlog version 0
 
 #### Optional: Vision Utils (Install only if you want to use IRI's vision utils)
 
+This library requires OpenCV. If it is not installed in your system or you are unsure, please follow the installation steps at https://gitlab.iri.upc.edu/mobile_robotics/vision_utils
+
 **(1)** Git clone the source:
 
         $ git clone https://gitlab.iri.upc.edu/mobile_robotics/vision_utils.git
@@ -187,7 +190,8 @@ Wolf uses spdlog macros. Right now Wolf is only compatible with spdlog version 0
     
 **(2)** Build and install:
 
-        $ cd laser_scan_utils/build
+        $ cd laser_scan_utils
+        $ mkdir build && cd build
         $ cmake ..
         $ make
         $ sudo make install
@@ -200,7 +204,8 @@ Wolf uses spdlog macros. Right now Wolf is only compatible with spdlog version 0
     
 **(2)** Build and install:
 
-    $ cd raw_gps_utils/build
+    $ cd raw_gps_utils
+    $ mkdir build && cd build
     $ cmake ..
     $ make
     $ sudo make install
