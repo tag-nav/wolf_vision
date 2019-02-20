@@ -38,7 +38,7 @@ Dependencies
 ! Please notice that we are detailing two installation procedures below. If you are familiar with `ROS` and more especially the [`catkin_tools`](https://catkin-tools.readthedocs.io/en/latest/index.html) package then you may jump directly to the 'Using the `catkin_tools` package' section.
 
 #### CMake 
-Building tool used by Wolf and by some of its dependencies. In order to install *cmake*, please follow the instructions at [cmake site](https://cmake.org/install/)
+Building tool used by Wolf and by some of its dependencies. In order to install *cmake* please follow the instructions at [cmake site](https://cmake.org/install/)
 
 #### Autoreconf
 
