@@ -5,6 +5,7 @@
 #include "base/wolf.h"
 #include "base/processor/processor_tracker_landmark.h"
 #include "base/sensor/sensor_camera.h"
+#include "base/constraint/constraint_autodiff_distance_3D.h"
 
 // Apriltag
 #include <apriltag.h>
@@ -42,6 +43,9 @@ struct ProcessorParamsTrackerLandmarkApriltag : public ProcessorParamsTrackerLan
     Scalar min_time_vote_;
     Scalar max_time_vote_;
     int max_features_diff_;
+    int nb_vote_for_every_first_;
+    bool enough_info_necessary_;
+    bool add_3D_cstr_;
     Scalar ippe_min_ratio_;
     Scalar ippe_max_rep_error_;
 
@@ -171,6 +175,10 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         Scalar          max_time_vote_;
         unsigned int    min_features_for_keyframe_;
         int             max_features_diff_;
+        int             nb_vote_for_every_first_;
+        bool            enough_info_necessary_;
+        bool            add_3D_cstr_;
+        int             nb_vote_;
 };
 
 } // namespace wolf

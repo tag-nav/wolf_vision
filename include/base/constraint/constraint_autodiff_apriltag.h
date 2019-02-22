@@ -81,8 +81,8 @@ ConstraintAutodiffApriltag::ConstraintAutodiffApriltag(
                                nullptr,
                                _landmark_other_ptr,
                                nullptr,
-                               true,
-                               CTR_ACTIVE,
+                               _apply_loss_function,
+                               _status,
                                _sensor_ptr->getPPtr(),         _sensor_ptr->getOPtr(),
                                _frame_ptr->getPPtr(),          _frame_ptr->getOPtr(),
                                _landmark_other_ptr->getPPtr(), _landmark_other_ptr->getOPtr()
@@ -174,7 +174,7 @@ Eigen::Vector6s ConstraintAutodiffApriltag::residual() const
 
 Scalar ConstraintAutodiffApriltag::cost() const
 {
-    return residual().norm();
+    return residual().squaredNorm();
 }
 
 } // namespace wolf

@@ -58,10 +58,10 @@ static ProcessorParamsBasePtr createProcessorParamsLandmarkApriltag(const std::s
         }
 
         YAML::Node noise                    = config["noise"];
-        params->std_xy_                      = noise["std_xy"]                       .as<Scalar>();
-        params->std_z_                       = noise["std_z"]                        .as<Scalar>();
-        params->std_rpy_           = M_TORAD * noise["std_rpy_degrees"]              .as<Scalar>();
-        params->std_pix_                     = noise["std_pix"]                      .as<Scalar>();
+        params->std_xy_                     = noise["std_xy"]                       .as<Scalar>();
+        params->std_z_                      = noise["std_z"]                        .as<Scalar>();
+        params->std_rpy_          = M_TORAD * noise["std_rpy_degrees"]              .as<Scalar>();
+        params->std_pix_                    = noise["std_pix"]                      .as<Scalar>();
 
         YAML::Node vote                     = config["vote"];
         params->voting_active               = vote["voting active"]                  .as<bool>();
@@ -69,8 +69,11 @@ static ProcessorParamsBasePtr createProcessorParamsLandmarkApriltag(const std::s
         params->max_time_vote_              = vote["max_time_vote"]                  .as<Scalar>();
         params->min_features_for_keyframe   = vote["min_features_for_keyframe"]      .as<unsigned int>();
         params->max_features_diff_          = vote["max_features_diff"]              .as<int>();
-
+        params->nb_vote_for_every_first_    = vote["nb_vote_for_every_first"]        .as<int>();
+        params->enough_info_necessary_      = vote["enough_info_necessary"]          .as<bool>();
+        
         params->reestimate_last_frame_      = config["reestimate_last_frame"]        .as<bool>();
+        params->add_3D_cstr_                = config["add_3D_cstr"]                  .as<bool>();
 
         return params;
     }

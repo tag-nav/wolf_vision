@@ -45,7 +45,12 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
         min_time_vote_(_params_tracker_landmark_apriltag->min_time_vote_),
         max_time_vote_(_params_tracker_landmark_apriltag->max_time_vote_),
         min_features_for_keyframe_(_params_tracker_landmark_apriltag->min_features_for_keyframe),
-        max_features_diff_(_params_tracker_landmark_apriltag->max_features_diff_)
+        max_features_diff_(_params_tracker_landmark_apriltag->max_features_diff_),
+        nb_vote_for_every_first_(_params_tracker_landmark_apriltag->nb_vote_for_every_first_),
+        enough_info_necessary_(_params_tracker_landmark_apriltag->enough_info_necessary_),
+        add_3D_cstr_(_params_tracker_landmark_apriltag->add_3D_cstr_),
+        nb_vote_(0)
+
 {
     // Constant transformation from apriltag camera frame (RUB: Z axis looking away from the tag)
     // to wolf camera frame (RDF: Z axis looking at the tag)
@@ -116,7 +121,8 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
     //clear wolf detections so that new ones will be stored inside
     detections_incoming_.clear();
 
-    // first, convert image to grayscale
+    // the image has to be already grayscale (how to test it?)
+    // grayscale_image_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
     cv::cvtColor(std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage(),
                  grayscale_image_,
                  cv::COLOR_BGR2GRAY);
@@ -131,7 +137,9 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
     // run Apriltag detector
 //    const clock_t begin_time_detection = clock();
+    // std::cout << "BEfore detect" << std::endl;
     zarray_t *detections = apriltag_detector_detect(&detector_, &im);
+    // std::cout << "After detect" << std::endl;
 //    WOLF_DEBUG("tag detection: ", (double)(clock() - begin_time_detection) / CLOCKS_PER_SEC);
 
     // loop all detections
@@ -463,29 +471,52 @@ unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned 
 
 bool ProcessorTrackerLandmarkApriltag::voteForKeyFrame()
 {   
-    Scalar dt_incoming_origin = getIncomingPtr()->getTimeStamp().get() - getOriginPtr()->getTimeStamp().get();
     // Necessary conditions
-    bool more_than_min_time_vote = dt_incoming_origin > min_time_vote_; 
-    bool more_in_last = getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_;
 
-    // Alternative decision factors
+    bool more_in_last = getLastPtr()->getFeatureList().size() >= min_features_for_keyframe_;
+    // Vote for every image processed at the beginning, bypasses the others
+    if (more_in_last && (nb_vote_ < nb_vote_for_every_first_)){
+        nb_vote_++;
+        return true;
+    }
+    // Check if enough information is provided by the measurements to determine uniquely the position of the KF
+    // Is only activated when enough_info_necessary_ is set to true
+    bool enough_info;
+    if (enough_info_necessary_){
+        int nb_userot = 0;
+        int nb_not_userot = 0;
+        for (auto it_feat = getLastPtr()->getFeatureList().begin(); it_feat != getLastPtr()->getFeatureList().end(); it_feat++){
+            FeatureApriltagPtr feat_apr_ptr = std::static_pointer_cast<FeatureApriltag>(*it_feat);
+            if (feat_apr_ptr->getUserotation()){
+                nb_userot++;
+            }
+            else{
+                nb_not_userot++;
+            }
+        }
+        // Condition on wether enough information is provided by the measurements:
+        // Position + rotation OR more that 3 3D translations (3 gives 2 symmetric solutions)
+        enough_info = (nb_userot > 0) || (nb_not_userot > 3);
+        // std::cout << "nb_userot     " << nb_userot << std::endl;
+        // std::cout << "nb_not_userot " << nb_not_userot << std::endl;
+    }
+    else{
+        enough_info = true;
+    }
+    Scalar dt_incoming_origin = getIncomingPtr()->getTimeStamp().get() - getOriginPtr()->getTimeStamp().get();
+    bool more_than_min_time_vote = dt_incoming_origin > min_time_vote_; 
+
+
+    // Possible decision factors
+
     bool too_long_since_last_KF = dt_incoming_origin > max_time_vote_;
     bool less_in_incoming = getIncomingPtr()->getFeatureList().size() <  min_features_for_keyframe_;
     int diff = getOriginPtr()->getFeatureList().size() - getIncomingPtr()->getFeatureList().size();
     bool too_big_feature_diff = (abs(diff) >=  max_features_diff_);
 
-    bool vote = more_than_min_time_vote && more_in_last && (less_in_incoming || too_long_since_last_KF || too_big_feature_diff);
-
-    // if (vote){
-    //     std::cout << "getOriginPtr()->getFeatureList().size(): " << getOriginPtr()->getFeatureList().size() << std::endl;
-    //     std::cout << "getIncomingPtr()->getFeatureList().size(): " << getIncomingPtr()->getFeatureList().size() << std::endl;
-    //     std::cout << "diff " << diff << std::endl;
-    //     std::cout << "max_features_diff_ " << max_features_diff_ << std::endl;
-
-    //     std::cout << "    less_in_incoming " << less_in_incoming << std::endl;
-    //     std::cout << "    too_long_since_last_KF " << too_long_since_last_KF << std::endl;
-    //     std::cout << "    too_big_feature_diff " << too_big_feature_diff << std::endl;
-    // }
+    // Final decision logic
+    bool vote = enough_info && more_than_min_time_vote && more_in_last && (less_in_incoming || too_long_since_last_KF || too_big_feature_diff);
+    // std::cout << "vote: " << vote << std::endl;
 
     return vote;
 }
@@ -675,7 +706,31 @@ void ProcessorTrackerLandmarkApriltag::advanceDerived()
 
 void ProcessorTrackerLandmarkApriltag::resetDerived()
 {   
-    if (reestimate_last_frame_){
+    // Add 3D distance constraint between 2 frames
+    if (getProblem()->getProcessorMotionPtr() == nullptr && add_3D_cstr_){
+        if ((getOriginPtr() != nullptr) && 
+            (getOriginPtr()->getFramePtr() != nullptr) && 
+            (getOriginPtr() != getLastPtr()) &&
+            (getOriginPtr()->getFramePtr() != getLastPtr()->getFramePtr()) 
+            )
+        {
+
+            FrameBasePtr ori_frame = getOriginPtr()->getFramePtr();
+            Eigen::Vector1s dist_meas; dist_meas << 0.0;
+            double dist_std = 0.2;
+            Eigen::Matrix1s cov0(dist_std*dist_std);
+
+            CaptureBasePtr capt3D = std::make_shared<CaptureBase>("Dist", getLastPtr()->getTimeStamp());
+            getLastPtr()->getFramePtr()->addCapture(capt3D);
+            FeatureBasePtr feat_dist = capt3D->addFeature(std::make_shared<FeatureBase>("Dist", dist_meas, cov0));
+            // ConstraintAutodiffDistance3DPtr cstr = std::make_shared<ConstraintAutodiffDistance3D>(feat_dist, ori_frame, shared_from_this, false, CTR_ACTIVE);
+            ConstraintAutodiffDistance3DPtr cstr = std::make_shared<ConstraintAutodiffDistance3D>(feat_dist, ori_frame, nullptr, false, CTR_ACTIVE);
+            feat_dist->addConstraint(cstr);
+            ori_frame->addConstrainedBy(cstr);    
+        }
+    }
+    
+    if ((getProblem()->getProcessorMotionPtr() == nullptr) && reestimate_last_frame_){
         reestimateLastFrame();
     }
 
@@ -695,6 +750,9 @@ void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
         return;
     }
 
+    // A TESTER
+    // (getOriginPtr() != nullptr)
+
     // Retrieve camera extrinsics
     Eigen::Quaternions last_q_cam(getSensorPtr()->getOPtr()->getState().data());
     Eigen::Affine3ds last_M_cam = Eigen::Translation3ds(getSensorPtr()->getPPtr()->getState()) * last_q_cam;
@@ -711,15 +769,16 @@ void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
     // Among landmarks detected in origin and last, find the one that has the smallest error ratio (best confidence)
     Scalar lowest_ration = 1;  // rep_error1/rep_error2 cannot be higher than 1
     FeatureApriltagPtr best_feature;
-    bool broken_continuity = true;
+    bool useable_feature = false;
     for (auto it_last = last_feature_list.begin(); it_last != last_feature_list.end(); it_last++){
         FeatureApriltagPtr last_feat_ptr = std::static_pointer_cast<FeatureApriltag>(*it_last);
         for (auto it_ori = ori_feature_list.begin(); it_ori != ori_feature_list.end(); it_ori++){
             FeatureApriltagPtr ori_feat_ptr =  std::static_pointer_cast<FeatureApriltag>(*it_ori);
             if (ori_feat_ptr->getTagId() == last_feat_ptr->getTagId()){
-                broken_continuity = false;
                 Scalar ratio = ori_feat_ptr->getRepError1() / ori_feat_ptr->getRepError2(); 
                 if (ratio < lowest_ration){
+                // if (last_feat_ptr->getUserotation() && (ratio < lowest_ration)){
+                    useable_feature = true;
                     lowest_ration = ratio;
                     best_feature = last_feat_ptr;
                     // std::cout << "Best feature id: " << best_feature->getTagId() << std::endl;
@@ -729,7 +788,7 @@ void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
     }
     // If there is no common feature between the two images, the continuity is broken and 
     // nothing can be estimated. In the case of aprilslam alone, this result in a broken factor map
-    if (broken_continuity){
+    if (!useable_feature){
         return;
     }
     // std::cout << "Best feature id after: " << best_feature->getTagId() << std::endl;
@@ -741,7 +800,7 @@ void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
     // Get corresponding landmarks in origin/last landmark list
     Eigen::Affine3ds w_M_lmk;
     LandmarkBaseList lmk_list = getProblem()->getMapPtr()->getLandmarkList();
-    // Iterate in reverse order because landmark detected in last are at the end of the list
+    // Iterate in reverse order because landmark detected in last are at the end of the list (while still landmarks to discovers)
     for (std::list<LandmarkBasePtr>::reverse_iterator it_lmk = lmk_list.rbegin(); it_lmk != lmk_list.rend(); ++it_lmk){
         LandmarkApriltagPtr lmk_ptr = std::dynamic_pointer_cast<LandmarkApriltag>(*it_lmk);
         // the map might contain other types of landmarks so check if the cast is valid
@@ -765,6 +824,9 @@ void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
     getLastPtr()->getFramePtr()->getPPtr()->setState(pos_last);
     getLastPtr()->getFramePtr()->getOPtr()->setState(quat_last.coeffs());
     
+    // if (!best_feature->getUserotation()){
+    //     return;
+    // }
     ///////////////////
     // Reestimate position of landmark new in Last
     ///////////////////
@@ -790,7 +852,6 @@ void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
             }
         }
     }
-    
 }
 
 std::string ProcessorTrackerLandmarkApriltag::getTagFamily() const

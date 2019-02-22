@@ -21,8 +21,8 @@ class ConstraintAutodiffDistance3D : public ConstraintAutodiff<ConstraintAutodif
         ConstraintAutodiffDistance3D(const FeatureBasePtr&   _feat,
                                      const FrameBasePtr&     _frm_other,
                                      const ProcessorBasePtr& _processor_ptr,
-                                     bool                    _apply_loss_function,
-                                     ConstraintStatus        _status) :
+                                     bool                    _apply_loss_function=false,
+                                     ConstraintStatus        _status=CTR_ACTIVE) :
                                          ConstraintAutodiff("DISTANCE 3D",
                                                             _frm_other,
                                                             nullptr,
@@ -50,7 +50,8 @@ class ConstraintAutodiffDistance3D : public ConstraintAutodiff<ConstraintAutodif
             Map<const Matrix<T,3,1>> pos2(_pos2);
             Map<Matrix<T,1,1>> res(_residual);
 
-            Matrix<T,1,1> dist_exp ( sqrt( ( pos2 - pos1 ).squaredNorm() ) );
+            Matrix<T,1,1> dist_exp ( sqrt( ( pos2 - pos1 ).squaredNorm() + 1e-6) );
+            // Matrix<T,1,1> dist_exp ( ( pos2 - pos1 ).squaredNorm() );
             Matrix<T,1,1> dist_meas (getMeasurement().cast<T>() );
             Matrix<T,1,1> sqrt_info_upper = getMeasurementSquareRootInformationUpper().cast<T>();
 
