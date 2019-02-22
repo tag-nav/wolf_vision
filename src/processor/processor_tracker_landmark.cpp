@@ -55,6 +55,21 @@ void ProcessorTrackerLandmark::resetDerived()
     new_features_last_ = std::move(new_features_incoming_);
 }
 
+unsigned int ProcessorTrackerLandmark::processKnown()
+{
+    // clear matches list
+    matches_landmark_from_incoming_.clear();
+
+    // Find landmarks in incoming_ptr_
+    FeatureBaseList known_features_list_incoming;
+    unsigned int n = findLandmarks(getProblem()->getMapPtr()->getLandmarkList(),
+                                                 known_features_list_incoming, matches_landmark_from_incoming_);
+    // Append found incoming features
+    incoming_ptr_->addFeatureList(known_features_list_incoming);
+
+    return n;
+}
+
 unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_features)
 {
     /* Rationale: A keyFrame will be created using the last Capture.
@@ -115,18 +130,6 @@ void ProcessorTrackerLandmark::createNewLandmarks()
         // create new correspondence
         matches_landmark_from_last_[new_feature_ptr] = std::make_shared<LandmarkMatch>(new_lmk_ptr, 1); // max score
     }
-}
-
-unsigned int ProcessorTrackerLandmark::processKnown()
-{
-    // Find landmarks in incoming_ptr_
-    FeatureBaseList known_features_list_incoming;
-    unsigned int n = findLandmarks(getProblem()->getMapPtr()->getLandmarkList(),
-                                                 known_features_list_incoming, matches_landmark_from_incoming_);
-    // Append found incoming features
-    incoming_ptr_->addFeatureList(known_features_list_incoming);
-
-    return n;
 }
 
 void ProcessorTrackerLandmark::establishConstraints()
