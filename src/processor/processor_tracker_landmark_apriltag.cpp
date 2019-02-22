@@ -121,12 +121,9 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
     //clear wolf detections so that new ones will be stored inside
     detections_incoming_.clear();
 
-    // the image has to be already grayscale (how to test it?)
-    // grayscale_image_ = std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage();
-    cv::cvtColor(std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage(),
-                 grayscale_image_,
-                 cv::COLOR_BGR2GRAY);
-
+    // The image is assumed to be of color BGR2 type
+    cv::cvtColor(std::static_pointer_cast<CaptureImage>(incoming_ptr_)->getImage(), grayscale_image_, cv::COLOR_BGR2GRAY);   
+    
     //detect tags in incoming image
     // Make an image_u8_t header for the Mat data
     image_u8_t im = {   .width  = grayscale_image_.cols,
