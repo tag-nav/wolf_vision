@@ -76,7 +76,7 @@ TEST_F(ConstraintAutodiffDistance3D_Test, ground_truth)
 
     c2->operator ()(pos1.data(), pos2.data(), &res);
 
-    ASSERT_NEAR(res, 0.0, 1e-8);
+    ASSERT_NEAR(res, 0.0, 1e-5);
 }
 
 TEST_F(ConstraintAutodiffDistance3D_Test, expected_residual)
@@ -90,7 +90,7 @@ TEST_F(ConstraintAutodiffDistance3D_Test, expected_residual)
     Scalar res;
     c2->operator ()(pos1.data(), pos2.data(), &res);
 
-    ASSERT_NEAR(res, res_expected, 1e-8);
+    ASSERT_NEAR(res, res_expected, 1e-5);
 }
 
 TEST_F(ConstraintAutodiffDistance3D_Test, solve)
@@ -101,7 +101,7 @@ TEST_F(ConstraintAutodiffDistance3D_Test, solve)
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::QUIET);
 
     // Check distance between F1 and F2 positions -- must match the measurement
-    ASSERT_NEAR( (F1->getPPtr()->getState() - F2->getPPtr()->getState()).norm(), measurement, 1e-10);
+    ASSERT_NEAR( (F1->getPPtr()->getState() - F2->getPPtr()->getState()).norm(), measurement, 1e-6);
 }
 
 int main(int argc, char **argv)

@@ -50,8 +50,12 @@ class ConstraintAutodiffDistance3D : public ConstraintAutodiff<ConstraintAutodif
             Map<const Matrix<T,3,1>> pos2(_pos2);
             Map<Matrix<T,1,1>> res(_residual);
 
-            Matrix<T,1,1> dist_exp ( sqrt( ( pos2 - pos1 ).squaredNorm() + 1e-6) );
-            // Matrix<T,1,1> dist_exp ( ( pos2 - pos1 ).squaredNorm() );
+            // If pos2 and pos1 are the same, undefined behavior when computing the jacobian
+            T norm_squared = ( pos2 - pos1 ).squaredNorm();
+            if (norm_squared < (T)1e-8){
+                norm_squared += (T)1e-8;
+            }
+            Matrix<T,1,1> dist_exp ( sqrt(norm_squared) );
             Matrix<T,1,1> dist_meas (getMeasurement().cast<T>() );
             Matrix<T,1,1> sqrt_info_upper = getMeasurementSquareRootInformationUpper().cast<T>();
 
