@@ -24,7 +24,7 @@ config:
       type: "ODOM 2D"
       name: "my_proc_test"
       sensorname: "odom"
-      follow: "../hello_plugin/params_conf.yaml"
+      follow: "/test/params3.1.yaml"
 files:
   - "/home/jcasals/workspace/wip/wolf/lib/libsensor_odo.so"
   - "/home/jcasals/workspace/wip/wolf/lib/librange_bearing.so"

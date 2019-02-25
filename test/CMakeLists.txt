@@ -84,6 +84,14 @@ target_link_libraries(gtest_motion_buffer ${PROJECT_NAME})
 wolf_add_gtest(gtest_pack_KF_buffer gtest_pack_KF_buffer.cpp)
 target_link_libraries(gtest_pack_KF_buffer ${PROJECT_NAME})
 
+# Parameters server
+wolf_add_gtest(gtest_param_server gtest_param_server.cpp ${CMAKE_CURRENT_LIST_DIR})
+target_link_libraries(gtest_param_server ${PROJECT_NAME})
+
+# YAML parser
+wolf_add_gtest(gtest_parser_yaml gtest_parser_yaml.cpp)
+target_link_libraries(gtest_parser_yaml ${PROJECT_NAME})
+
 # Problem class test
 wolf_add_gtest(gtest_problem gtest_problem.cpp)
 target_link_libraries(gtest_problem ${PROJECT_NAME})

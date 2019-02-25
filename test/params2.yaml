@@ -16,6 +16,10 @@ config:
       type: "ODOM 2D"
       name: "processor1"
       sensorname: "odom"
+      $mymap:
+        k1: v1
+        k2: v2
+        k3: [v3,v4,v5]
     -
       type: "RANGE BEARING"
       name: "rb_processor"
@@ -24,7 +28,6 @@ config:
       type: "ODOM 2D"
       name: "my_proc_test"
       sensorname: "odom"
-      follow: "../hello_plugin/params_conf.yaml"
 files:
   - "/home/jcasals/workspace/wip/wolf/lib/libsensor_odo.so"
   - "/home/jcasals/workspace/wip/wolf/lib/librange_bearing.so"

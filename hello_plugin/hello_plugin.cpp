@@ -4,25 +4,24 @@
  *  Created on: Nov 12, 2018
  *      Author: jcasals
  */
-#include <class_loader/class_loader.hpp>
 #include "base/sensor/sensor_base.h"
 #include "base/wolf.h"
 // #include "sensor_odom_2D.cpp"
 #include <yaml-cpp/yaml.h>
-#include "parser_yaml.hpp"
+#include "base/yaml/parser_yaml.hpp"
 #include "base/params_server.hpp"
 
 #include "../hello_wolf/capture_range_bearing.h"
 #include "../hello_wolf/feature_range_bearing.h"
 #include "../hello_wolf/constraint_range_bearing.h"
 #include "../hello_wolf/landmark_point_2D.h"
+#include "loader.hpp"
 #include "base/processor/processor_odom_2D.h"
 
 #include "base/solver/solver_factory.h"
 #include "base/ceres_wrapper/ceres_manager.h"
 
 using namespace std;
-using namespace class_loader;
 using namespace wolf;
 using namespace Eigen;
 
@@ -40,10 +39,15 @@ int main(int argc, char** argv) {
        a segmentation fault. Likewise, it seems that these ClassLoaders must be allocated at the heap, because
        the constructor refuses to build an object if I try to do local (stack) allocation, i.e `ClassLoader(it)` is not allowed but `new ClassLoader(it)` is.
      **/
-    vector<ClassLoader*> class_loaders = vector<ClassLoader*>();
+    // vector<ClassLoader*> class_loaders = vector<ClassLoader*>();
+    // for(auto it : parser.getFiles()) {
+    //     auto c = new ClassLoader(it);
+    //     class_loaders.push_back(c);
+    // }
+    auto loaders = vector<Loader*>();
     for(auto it : parser.getFiles()) {
-        auto c = new ClassLoader(it);
-        class_loaders.push_back(c);
+        auto l = new LoaderRaw(it);
+        loaders.push_back(l);
     }
     ProblemPtr problem = Problem::create("PO 2D");
     auto sensorMap = map<string, SensorBasePtr>();
@@ -56,6 +60,7 @@ int main(int argc, char** argv) {
         cout << s._name << " " << s._type << " " << s._name_assoc_sensor << endl;
         procesorMap.insert(pair<string, ProcessorBasePtr>(s._name,problem->installProcessor(s._type, s._name, s._name_assoc_sensor, server)));
     }
+
     problem->print(4,1,1,1);
     Vector2s motion_data(1.0, 0.0);                     // Will advance 1m at each keyframe, will not turn.
     Matrix2s motion_cov = 0.1 * Matrix2s::Identity();

@@ -116,6 +116,12 @@ struct converter<int>{
     }
 };
 template<>
+struct converter<unsigned int>{
+    static unsigned int convert(std::string val){
+        return stod(val);
+    }
+};
+template<>
 struct converter<double>{
     static double convert(std::string val){
         return stod(val);

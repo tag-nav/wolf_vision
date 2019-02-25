@@ -62,6 +62,8 @@ class parserYAML {
     vector<ParamsInitProcessor> _paramsProc;
     vector<string> _files;
     string _file;
+    bool _relative_path;
+    string _path_root;
 public:
     parserYAML(){
         _params = map<string, string>();
@@ -70,6 +72,8 @@ public:
         _paramsProc = vector<ParamsInitProcessor>();
         _file = "";
         _files = vector<string>();
+        _path_root = "";
+        _relative_path = false;
     }
     parserYAML(string file){
         _params = map<string, string>();
@@ -78,6 +82,18 @@ public:
         _paramsProc = vector<ParamsInitProcessor>();
         _files = vector<string>();
         _file = file;
+        _path_root = "";
+        _relative_path = false;
+    }
+    parserYAML(string file, string path_root){
+        _params = map<string, string>();
+        _active_name = "";
+        _paramsSens = vector<ParamsInitSensor>();
+        _paramsProc = vector<ParamsInitProcessor>();
+        _files = vector<string>();
+        _file = file;
+        _path_root = path_root;
+        _relative_path = true;
     }
     ~parserYAML(){
         //
@@ -104,16 +120,25 @@ string parserYAML::tagsToString(vector<std::string> &tags){
     return hdr;
 }
 void parserYAML::walkTree(string file){
-    YAML::Node n = YAML::LoadFile(file);
+    YAML::Node n;
+    // cout << "RELATIVE? " << _relative_path << " path root " << _path_root << " file " << file << endl;
+    if(not _relative_path) n = YAML::LoadFile(file);
+    else n = YAML::LoadFile(_path_root + file);
     vector<string> hdrs = vector<string>();
     walkTreeR(n, hdrs, "");
 }
 void parserYAML::walkTree(string file, vector<string>& tags){
-    YAML::Node n = YAML::LoadFile(file);
+    YAML::Node n;
+    // cout << "RELATIVE? " << _relative_path << " path root " << _path_root << " file " << file << endl;
+    if(not _relative_path) n = YAML::LoadFile(file);
+    else n = YAML::LoadFile(_path_root + file);
     walkTreeR(n, tags, "");
 }
 void parserYAML::walkTree(string file, vector<string>& tags, string hdr){
-    YAML::Node n = YAML::LoadFile(file);
+    YAML::Node n;
+    // cout << "RELATIVE? " << _relative_path << " path root " << _path_root << " file " << file << endl;
+    if(not _relative_path) n = YAML::LoadFile(file);
+    else n = YAML::LoadFile(_path_root + file);
     walkTreeR(n, tags, hdr);
 }
 void parserYAML::walkTreeR(YAML::Node n, vector<string>& tags, string hdr){
@@ -125,8 +150,8 @@ void parserYAML::walkTreeR(YAML::Node n, vector<string>& tags, string hdr){
             // cout << "SUBSTR " << str.substr(1,str.size() - 1);
             walkTree(str.substr(1,str.size() - 1), tags, hdr);
         }else{
-            std::copy(tags.begin(), tags.end(), std::ostream_iterator<string>(std::cout, "¬"));
-            cout << "«»" << n.Scalar() << endl;
+            // std::copy(tags.begin(), tags.end(), std::ostream_iterator<string>(std::cout, "¬"));
+            // cout << "«»" << n.Scalar() << endl;
             _params.insert(pair<string,string>(hdr, n.Scalar()));
         }
         break;
@@ -140,13 +165,20 @@ void parserYAML::walkTreeR(YAML::Node n, vector<string>& tags, string hdr){
     }
     case YAML::NodeType::Map : {
         for(const auto& kv : n){
+            //If the key's value starts with a $ (i.e. $key) then its value is parsed as a literal map,
+            //otherwise the parser recursively parses the map
             regex r("^\\$.*");
             if(not regex_match(kv.first.as<string>(), r)){
-                tags.push_back(kv.first.as<string>());
-                if(tags.size() == 2) this->updateActiveName(kv.first.as<string>());
-                walkTreeR(kv.second, tags, hdr +"/"+ kv.first.as<string>());
-                tags.pop_back();
-                if(tags.size() == 1) this->updateActiveName("");
+                regex rr("follow");
+                if(not regex_match(kv.first.as<string>(), rr)) {
+                    tags.push_back(kv.first.as<string>());
+                    if(tags.size() == 2) this->updateActiveName(kv.first.as<string>());
+                    walkTreeR(kv.second, tags, hdr +"/"+ kv.first.as<string>());
+                    tags.pop_back();
+                    if(tags.size() == 1) this->updateActiveName("");
+                }else{
+                    walkTree(kv.second.as<string>(), tags, hdr);
+                }
             }else{
                 string key = kv.first.as<string>();
                 key = key.substr(1,key.size() - 1);
@@ -165,7 +197,10 @@ void parserYAML::updateActiveName(string tag){
     this->_active_name = tag;
 }
 void parserYAML::parseFirstLevel(string file){
-    YAML::Node n = YAML::LoadFile(file);
+    YAML::Node n;
+    // cout << "RELATIVE? " << _relative_path << " path root " << _path_root << " file " << file << endl;
+    if(not _relative_path) n = YAML::LoadFile(file);
+    else n = YAML::LoadFile(_path_root + file);
     YAML::Node n_config = n["config"];
     assert(n_config.Type() == YAML::NodeType::Map && "trying to parse config node but found a non-Map node");
     for(const auto& kv : n_config["sensors"]){
