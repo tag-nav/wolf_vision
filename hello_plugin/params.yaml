@@ -26,5 +26,5 @@ config:
       sensorname: "odom"
       follow: "../hello_plugin/params_conf.yaml"
 files:
-  - "/home/jcasals/workspace/wip/wolf/lib/libsensor_odo.so"
+  - "/home/jcasals/workspace/wip/wolf/lib/libsensor_odom.so"
   - "/home/jcasals/workspace/wip/wolf/lib/librange_bearing.so"

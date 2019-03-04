@@ -15,7 +15,7 @@
 #include "../hello_wolf/feature_range_bearing.h"
 #include "../hello_wolf/constraint_range_bearing.h"
 #include "../hello_wolf/landmark_point_2D.h"
-#include "loader.hpp"
+#include "base/loader.hpp"
 #include "base/processor/processor_odom_2D.h"
 
 #include "base/solver/solver_factory.h"
@@ -42,6 +42,7 @@ int main(int argc, char** argv) {
     auto loaders = vector<Loader*>();
     for(auto it : parser.getFiles()) {
         auto l = new LoaderRaw(it);
+        l->load();
         loaders.push_back(l);
     }
     ProblemPtr problem = Problem::create("PO 2D");

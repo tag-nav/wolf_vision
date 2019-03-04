@@ -4,7 +4,7 @@ FIND_PATH(
     # NAMES wolf.h
     PATHS /usr/local/include/iri-algorithms/wolf)
 #change INCLUDE_DIRS to its parent directory
-get_filename_component(wolf_INCLUDE_DIRS ${wolf_INCLUDE_DIRS} DIRECTORY)
+# get_filename_component(wolf_INCLUDE_DIRS ${wolf_INCLUDE_DIRS} DIRECTORY)
 MESSAGE("Found wolf include dirs: ${wolf_INCLUDE_DIRS}")
 
 FIND_LIBRARY(

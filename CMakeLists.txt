@@ -2,7 +2,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 if(COMMAND cmake_policy)
-  cmake_policy(SET CMP0005 NEW) 
+  cmake_policy(SET CMP0005 NEW)
   cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 # MAC OSX RPATH
@@ -207,8 +207,8 @@ IF (SPDLOG_INCLUDE_DIR)
   MESSAGE(STATUS "Found spdlog: ${SPDLOG_INCLUDE_DIR}")
 ELSE (SPDLOG_INCLUDE_DIR)
  MESSAGE(FATAL_ERROR "Could not find spdlog")
-ENDIF (SPDLOG_INCLUDE_DIR)  
-  
+ENDIF (SPDLOG_INCLUDE_DIR)
+
 INCLUDE_DIRECTORIES(${EIGEN_INCLUDE_DIRS})
 include_directories("include")
 include_directories(.)
@@ -289,6 +289,7 @@ SET(HDRS_BASE
   include/base/wolf.h
   include/base/IMU_tools.h
   include/base/local_parametrization_polyline_extreme.h
+  include/base/loader.hpp
   )
 SET(HDRS_CAPTURE
   include/base/capture/capture_base.h
@@ -440,7 +441,7 @@ SET(HDRS_DTASSC
   include/base/association/association_nnls.h
   )
 
-SET(HDRS_CORE 
+SET(HDRS_CORE
   include/base/capture/capture_base.h
   include/base/capture/capture_buffer.h
   include/base/capture/capture_pose.h
@@ -484,9 +485,11 @@ SET(HDRS_CORE
   include/base/trajectory_base.h
   include/base/wolf.h
   )
-
+SET(HDRS_YAML
+  include/base/yaml/parser_yaml.hpp
+  )
 #SOURCES
-SET(SRCS_CORE 
+SET(SRCS_CORE
   src/capture/capture_base.cpp
   src/capture/capture_pose.cpp
   src/capture/capture_void.cpp
@@ -586,13 +589,13 @@ IF (Ceres_FOUND)
    #ceres_wrapper/qr_manager.h
    include/base/ceres_wrapper/cost_function_wrapper.h
    include/base/ceres_wrapper/create_numeric_diff_cost_function.h
-   include/base/ceres_wrapper/local_parametrization_wrapper.h 
+   include/base/ceres_wrapper/local_parametrization_wrapper.h
    )
  SET(SRCS_WRAPPER
    src/solver/solver_manager.cpp
    src/ceres_wrapper/ceres_manager.cpp
    #ceres_wrapper/qr_manager.cpp
-   src/ceres_wrapper/local_parametrization_wrapper.cpp 
+   src/ceres_wrapper/local_parametrization_wrapper.cpp
    )
 ELSE(Ceres_FOUND)
  SET(HDRS_WRAPPER)
@@ -672,7 +675,7 @@ ADD_SUBDIRECTORY(serialization/cereal)
 ENDIF(cereal_FOUND)
 
 IF (Suitesparse_FOUND)
-  #DOES NOTHING?!    
+  #DOES NOTHING?!
   #ADD_SUBDIRECTORY(solver_suitesparse)
 ENDIF(Suitesparse_FOUND)
 # LEAVE YAML FILES ALWAYS IN THE LAST POSITION !!
@@ -684,7 +687,7 @@ IF(YAMLCPP_FOUND)
   SET(HDRS_YAML ${HDRS_YAML}
     include/base/yaml/yaml_conversion.h
     )
-  
+
   # sources
   SET(SRCS ${SRCS}
     src/yaml/processor_odom_3D_yaml.cpp
@@ -705,11 +708,11 @@ IF(YAMLCPP_FOUND)
       )
   ENDIF(vision_utils_FOUND)
 ENDIF(YAMLCPP_FOUND)
-    
+
 # create the shared library
-ADD_LIBRARY(${PROJECT_NAME} 
-  SHARED 
-  ${SRCS_BASE} 
+ADD_LIBRARY(${PROJECT_NAME}
+  SHARED
+  ${SRCS_BASE}
   ${SRCS_CORE}
   ${SRCS}
   ${SRCS_CAPTURE}
@@ -718,7 +721,7 @@ ADD_LIBRARY(${PROJECT_NAME}
   ${SRCS_LANDMARK}
   ${SRCS_PROCESSOR}
   ${SRCS_SENSOR}
-  #${SRCS_DTASSC} 
+  #${SRCS_DTASSC}
   ${SRCS_SOLVER}
   ${SRCS_WRAPPER}
   )
@@ -835,7 +838,7 @@ IF (UNIX)
     COMMENT "distribution clean"
     COMMAND make ARGS clean
     COMMAND rm ARGS -rf ${CMAKE_SOURCE_DIR}/build/*
-    
+
     TARGET  distclean
     )
 ELSE(UNIX)
@@ -875,4 +878,3 @@ ELSE(UNIX)
     COMMENT "packaging only implemented in unix"
     TARGET  uninstall)
 ENDIF(UNIX)
-

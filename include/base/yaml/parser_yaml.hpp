@@ -64,6 +64,7 @@ class parserYAML {
     string _file;
     bool _relative_path;
     string _path_root;
+    vector<array<string, 2>> _callbacks;
 public:
     parserYAML(){
         _params = map<string, string>();
@@ -74,6 +75,7 @@ public:
         _files = vector<string>();
         _path_root = "";
         _relative_path = false;
+        _callbacks = vector<array<string, 2>>();
     }
     parserYAML(string file){
         _params = map<string, string>();
@@ -84,6 +86,7 @@ public:
         _file = file;
         _path_root = "";
         _relative_path = false;
+        _callbacks = vector<array<string, 2>>();
     }
     parserYAML(string file, string path_root){
         _params = map<string, string>();
@@ -94,6 +97,7 @@ public:
         _file = file;
         _path_root = path_root;
         _relative_path = true;
+        _callbacks = vector<array<string, 2>>();
     }
     ~parserYAML(){
         //
@@ -108,6 +112,7 @@ public:
     vector<array<string, 2>> sensorsSerialization();
     vector<array<string, 3>> processorsSerialization();
     vector<string> getFiles();
+    vector<array<string, 2>> getCallbacks();
     map<string,string> getParams();
     void parse();
     map<string, string> fetchAsMap(YAML::Node);
@@ -211,6 +216,9 @@ void parserYAML::parseFirstLevel(string file){
         ParamsInitProcessor pProc = {kv["type"].Scalar(), kv["name"].Scalar(), kv["sensorname"].Scalar(), kv};
         _paramsProc.push_back(pProc);
     }
+    for(const auto& kv : n_config["callbacks"]){
+        _callbacks.push_back({{kv[0].as<std::string>(), kv[1].as<std::string>()}});
+    }
     YAML::Node n_files = n["files"];
     assert(n_files.Type() == YAML::NodeType::Sequence && "trying to parse files node but found a non-Sequence node");
     for(const auto& kv : n_files){
@@ -231,6 +239,9 @@ vector<array<string, 3>> parserYAML::processorsSerialization(){
 }
 vector<string> parserYAML::getFiles(){
     return this->_files;
+}
+vector<array<string, 2>> parserYAML::getCallbacks(){
+    return this->_callbacks;
 }
 map<string,string> parserYAML::getParams(){
     map<string,string> rtn = _params;
