@@ -174,6 +174,28 @@ void parserYAML::walkTreeR(YAML::Node n, vector<string>& tags, string hdr){
             //otherwise the parser recursively parses the map
             regex r("^\\$.*");
             if(not regex_match(kv.first.as<string>(), r)){
+                /*
+                If key=="follow" then the parser will assume that the value is a path and will parse
+                the (expected) yaml file at the specified path. Note that this does not increase the header depth
+                The following example shows how the header remains unafected:
+                @my_main_config                |  @some_path
+                - cov_det: 1                   |  - my_value : 23
+                - follow: "some_path"          |
+                - var: 1.2                     |
+                Resulting map:
+                   cov_det -> 1
+                   my_value-> 23
+                   var: 1.2
+                 Instead of:
+                 cov_det -> 1
+                 follow/my_value-> 23
+                 var: 1.2
+                 Which would result from the following yaml files
+                 @my_main_config                |  @some_path
+                 - cov_det: 1                   |  - my_value : 23
+                 - $follow: "some_path"         |
+                 - var: 1.2                     |
+                */
                 regex rr("follow");
                 if(not regex_match(kv.first.as<string>(), rr)) {
                     tags.push_back(kv.first.as<string>());
