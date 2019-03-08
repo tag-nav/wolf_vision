@@ -489,38 +489,84 @@ Motion ProcessorMotion::interpolate(const Motion& _ref1, const Motion& _ref2, co
     // Fraction of the time interval
     Scalar tau    = (_ts - _ref1.ts_) / (_ref2.ts_ - _ref1.ts_);
 
-    if (tau < 0.5)
-    {
-        // _ts is closest to _ref1
-        Motion interpolated                 ( _ref1 );
-        interpolated.ts_                    = _ts;
-        interpolated.data_                  . setZero();
-        interpolated.data_cov_              . setZero();
-        interpolated.delta_                 = deltaZero();
-        interpolated.delta_cov_             . setZero();
-        interpolated.jacobian_delta_integr_ . setIdentity();
-        interpolated.jacobian_delta_        . setZero();
 
-        _second = _ref2;
 
-        return interpolated;
-    }
-    else
-    {
-        // _ts is closest to _ref2
-        Motion interpolated                 ( _ref2 );
-        interpolated.ts_                    = _ts;
 
-        _second                             = _ref2;
-        _second.data_                       . setZero();
-        _second.data_cov_                   . setZero();
-        _second.delta_                      = deltaZero();
-        _second.delta_cov_                  . setZero();
-        _second.jacobian_delta_integr_      . setIdentity();
-        _second.jacobian_delta_             . setZero();
+    Motion interpolated(_ref1);  
+    interpolated.ts_        = _ts;
+    interpolated.data_      = (1-tau)*_ref1.data_ + tau*_ref2.data_;
+    interpolated.data_cov_  = (1-tau)*_ref1.data_cov_ + tau*_ref2.data_cov_;  // bof
+    computeCurrentDelta(interpolated.data_,
+                        interpolated.data_cov_,
+                        calib_preint_,
+                        _ts.get() - _ref1.ts_.get(),
+                        interpolated.delta_,
+                        interpolated.delta_cov_,
+                        interpolated.jacobian_calib_);
+    deltaPlusDelta(_ref1.delta_integr_,
+                   interpolated.delta_,
+                   _ts.get() - _ref1.ts_.get(),
+                   interpolated.delta_integr_,
+                   interpolated.jacobian_delta_integr_,
+                   interpolated.jacobian_delta_);
 
-        return interpolated;
-    }
+    _second.ts_       = _ref2.ts_;
+    _second.data_     = tau*_ref1.data_ + (1-tau)*_ref2.data_;
+    _second.data_cov_ = tau*_ref1.data_cov_ + (1-tau)*_ref2.data_cov_;  // bof
+    computeCurrentDelta(_second.data_,
+                        _second.data_cov_,
+                        calib_preint_,
+                        _ref2.ts_.get() - _ts.get(),
+                        _second.delta_,
+                        _second.delta_cov_,
+                        _second.jacobian_calib_);
+    deltaPlusDelta(_second.delta_integr_,
+                   _second.delta_,
+                   _second.ts_.get() - _ref1.ts_.get(),
+                   _second.delta_integr_,
+                   _second.jacobian_delta_integr_,
+                   _second.jacobian_delta_);
+
+    return interpolated;
+
+
+
+
+    // if (tau < 0.5)
+    // {
+    //     // _ts is closest to _ref1
+    //     Motion interpolated                 ( _ref1 );
+    //     // interpolated.ts_                    = _ref1.ts_;
+    //     // interpolated.data_                  = _ref1.data_;
+    //     // interpolated.data_cov_              = _ref1.data_cov_;
+    //     interpolated.delta_                 = deltaZero();
+    //     interpolated.delta_cov_             . setZero();
+    //     // interpolated.delta_integr_          = _ref1.delta_integr_;
+    //     // interpolated.delta_integr_cov_      = _ref1.delta_integr_cov_;
+    //     interpolated.jacobian_delta_integr_ . setIdentity();
+    //     interpolated.jacobian_delta_        . setZero();
+
+    //     _second = _ref2;
+
+    //     return interpolated;
+    // }
+    // else
+    // {
+    //     // _ts is closest to _ref2
+    //     Motion interpolated                 ( _ref2 );
+
+    //     _second                             = _ref2;
+    //     // _second.data_                       = _ref2.data_;
+    //     // _second.data_cov_                   = _ref2.data_cov_;
+    //     _second.delta_                      = deltaZero();
+    //     _second.delta_cov_                  . setZero();
+    //     // _second.delta_integr_               = _ref2.delta_integr_;
+    //     // _second.delta_integr_cov_           = _ref2.delta_integr_cov_;
+    //     _second.jacobian_delta_integr_      . setIdentity();
+    //     _second.jacobian_delta_             . setZero();
+
+    //     return interpolated;
+    // }
 
 }
 
