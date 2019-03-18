@@ -10,6 +10,7 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsLoopClosure);
 
 struct ProcessorParamsLoopClosure : public ProcessorParamsBase
 {
+    using ProcessorParamsBase::ProcessorParamsBase;
 //  virtual ~ProcessorParamsLoopClosure() = default;
 
   // add neccesery parameters for loop closure initialisation here and initialize

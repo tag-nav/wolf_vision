@@ -15,7 +15,7 @@
 #include "base/params_server.hpp"
 
 namespace wolf {
-    
+
 WOLF_PTR_TYPEDEFS(ProcessorOdom2D);
 WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsOdom2D);
 
@@ -25,14 +25,13 @@ struct ProcessorParamsOdom2D : public ProcessorParamsMotion
     Scalar unmeasured_perturbation_std = 0.001;    // no particular dimension: the same for displacement and angle
 
     ProcessorParamsOdom2D() = default;
-    ProcessorParamsOdom2D(std::string _unique_name, const paramsServer& _server):
+    ProcessorParamsOdom2D(std::string _unique_name, const wolf::paramsServer & _server):
         ProcessorParamsMotion(_unique_name, _server)
     {
-      cov_det                     = _server.getParam<Scalar>(_unique_name + "/cov_det", "1.0");
-      unmeasured_perturbation_std = _server.getParam<Scalar>(_unique_name + "/unmeasured_perturbation_std", "0.001");
+        cov_det                     = _server.getParam<Scalar>(_unique_name + "/cov_det", "1.0");
+        unmeasured_perturbation_std = _server.getParam<Scalar>(_unique_name + "/unmeasured_perturbation_std", "0.001");
     }
 };
-
 class ProcessorOdom2D : public ProcessorMotion
 {
     public:

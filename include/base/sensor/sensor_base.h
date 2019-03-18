@@ -21,9 +21,10 @@ namespace wolf {
  *
  * Derive from this struct to create structs of sensor intrinsic parameters.
  */
-struct IntrinsicsBase
+struct IntrinsicsBase: public ParamsBase
 {
         virtual ~IntrinsicsBase() = default;
+    using ParamsBase::ParamsBase;
 };
 
 class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBase>

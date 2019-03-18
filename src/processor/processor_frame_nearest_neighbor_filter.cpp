@@ -2,7 +2,6 @@
 
 namespace wolf
 {
-
 ProcessorFrameNearestNeighborFilter::ProcessorFrameNearestNeighborFilter(ParamsPtr _params_NNF):
     ProcessorLoopClosureBase("FRAME NEAREST NEIGHBOR FILTER", _params_NNF),
     params_NNF(_params_NNF)

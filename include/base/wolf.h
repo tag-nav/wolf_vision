@@ -11,6 +11,7 @@
 // Enable project-specific definitions and macros
 #include "internal/config.h"
 #include "base/logging.h"
+#include "base/params_server.hpp"
 
 //includes from Eigen lib
 #include <Eigen/Dense>
@@ -366,7 +367,16 @@ bool makePosDef(Eigen::Matrix<T,N,N,RC>& M, const T& eps = Constants::EPS)
 }
 
 //===================================================
+struct ParamsBase
+{
+    ParamsBase() = default;
+    ParamsBase(std::string _unique_name, const paramsServer&)
+    {
+        //
+    }
 
+    virtual ~ParamsBase() = default;
+};
 } // namespace wolf
 
 #endif /* WOLF_H_ */

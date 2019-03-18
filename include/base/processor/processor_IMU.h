@@ -11,12 +11,8 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsIMU);
 
 struct ProcessorParamsIMU : public ProcessorParamsMotion
 {
-  ProcessorParamsIMU() = default;
-  ProcessorParamsIMU(std::string _unique_name, const paramsServer& _server):
-    ProcessorParamsMotion(_unique_name, _server)
-  {
-    //
-  }
+  // ProcessorParamsIMU() = default;
+    using ProcessorParamsMotion::ProcessorParamsMotion;
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorIMU);

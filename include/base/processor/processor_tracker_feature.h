@@ -22,9 +22,9 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerFeature);
 
 struct ProcessorParamsTrackerFeature : public ProcessorParamsTracker
 {
-    //
+    using ProcessorParamsTracker::ProcessorParamsTracker;
 };
-    
+
 WOLF_PTR_TYPEDEFS(ProcessorTrackerFeature);
 
 /** \brief Feature tracker processor

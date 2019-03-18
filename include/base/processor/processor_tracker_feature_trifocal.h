@@ -4,6 +4,7 @@
 //Wolf includes
 #include "base/processor/processor_tracker_feature.h"
 #include "base/capture/capture_image.h"
+#include "base/params_server.hpp"
 
 // Vision utils
 #include <vision_utils.h>
@@ -27,6 +28,18 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
         Scalar max_euclidean_distance;
         Scalar pixel_noise_std; ///< std noise of the pixel
         int min_track_length_for_constraint; ///< Minimum track length of a matched feature to create a constraint
+    ProcessorParamsTrackerFeatureTrifocal() = default;
+    ProcessorParamsTrackerFeatureTrifocal(std::string _unique_name, const paramsServer& _server):
+        ProcessorParamsTrackerFeature(_unique_name, _server)
+    {
+        yaml_file_params_vision_utils = _server.getParam<std::string>(_unique_name + "/yaml_file_params_vision_utils", "");
+        n_cells_h = _server.getParam<int>(_unique_name + "/n_cells_h", "");
+        n_cells_v = _server.getParam<int>(_unique_name + "/n_cells_v", "");
+        min_response_new_feature = _server.getParam<int>(_unique_name + "/min_response_new_feature", "");
+        max_euclidean_distance = _server.getParam<Scalar>(_unique_name + "/max_euclidean_distance", "");
+        pixel_noise_std = _server.getParam<Scalar>(_unique_name + "/pixel_noise_std", "");
+        min_track_length_for_constraint = _server.getParam<int>(_unique_name + "/min_track_length_for_constraint", "");
+    }
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorTrackerFeatureTrifocal);

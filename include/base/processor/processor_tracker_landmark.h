@@ -20,6 +20,7 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTrackerLandmark);
 
 struct ProcessorParamsTrackerLandmark : public ProcessorParamsTracker
 {
+    using ProcessorParamsTracker::ProcessorParamsTracker;
     //
 };
 

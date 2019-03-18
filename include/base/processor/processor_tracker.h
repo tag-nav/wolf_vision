@@ -12,13 +12,20 @@
 #include "base/capture/capture_motion.h"
 
 namespace wolf {
-    
+
 WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTracker);
 
 struct ProcessorParamsTracker : public ProcessorParamsBase
 {
         unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
         unsigned int max_new_features;
+    ProcessorParamsTracker() = default;
+    ProcessorParamsTracker(std::string _unique_name, const wolf::paramsServer & _server):
+        ProcessorParamsBase(_unique_name, _server)
+    {
+        min_features_for_keyframe = _server.getParam<unsigned int>(_unique_name + "/min_features_for_keyframe", "1");
+        max_new_features = _server.getParam<unsigned int>(_unique_name + "/max_new_features", "10");
+    }
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorTracker);

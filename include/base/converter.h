@@ -33,15 +33,6 @@ namespace utils{
     }
     static inline std::vector<std::string> pairSplitter(std::string val){
         std::regex exp("(\\{[^\\{:]:.*?\\})");
-        // std::smatch res;
-        // string val = "[{x:1},{y:[1,23,3]},{z:3}]";
-        // auto v = std::vector<std::string>();
-        // std::string::const_iterator searchStart( val.cbegin() );
-        // while ( regex_search( searchStart, val.cend(), res, exp ) ) {
-        //     v.push_back(res[0]);
-        //     searchStart = res.suffix().first;
-        // }
-        // return v;
         return getMatches(val, exp);
     }
     static inline std::array<std::string,2> splitMatrixStringRepresentation(std::string matrix){
@@ -151,19 +142,6 @@ struct converter<std::string>{
     static std::string convert(double val){
         return std::to_string(val);
     }
-    // template<typename A>
-    // static std::string convert(std::vector<A> val){
-    //     std::string result = "";
-    //     bool first = true;
-    //     for(auto it : val){
-    //         if(not first) result += "," + converter<std::string>::convert(it);
-    //         else{
-    //             first = false;
-    //             result = converter<std::string>::convert(it);
-    //         }
-    //     }
-    //     return "[" + result + "]";
-    // }
     template<typename A>
     static std::string convert(utils::list<A> val){
         std::string result = "";
@@ -210,52 +188,23 @@ struct converter<std::pair<A,B>>{
             return std::pair<A,B>(converter<A>::convert(matches[1].str()), converter<B>::convert(matches[2].str()));
         } else throw std::runtime_error("Invalid string format representing a pair. Correct format is {identifier:value}. String provided: " + val);
     }
-    static std::vector<A> convert(std::vector<std::string> val){
-        std::vector<A> rtn = std::vector<A>();
-        for(auto it : val)
-            rtn.push_back(converter<A>::convert(it));
-        return rtn;
-    }
 };
-// template<typename A>
-// struct converter<std::vector<A>>{
-//     static std::vector<A> convert(std::string val){
-//         auto aux = utils::
-//             std::vector<A> rtn = std::vector<A>();
-//         for(auto it : aux)
-//             rtn.push_back(converter<A>::convert(it));
-//         return rtn;
-//     }
-//     static std::vector<A> convert(std::vector<std::string> val){
-//         std::vector<A> rtn = std::vector<A>();
-//         for(auto it : val)
-//             rtn.push_back(converter<A>::convert(it));
-//         return rtn;
-//     }
-// };
-
 // TODO: WARNING!! For some reason when trying to specialize converter to std::array
 // it defaults to the generic T type, thus causing an error!
 
-template<typename A, int _size>
-struct converter<std::array<A, _size>>{
-    static std::array<A, _size> convert(std::string val){
+template<typename A, unsigned int N>
+struct converter<std::array<A, N>>{
+    static std::array<A,N> convert(std::string val){
         // std::vector<std::string> aux = utils::splitter(val);
         auto aux = converter<utils::list<A>>::convert(val);
-        std::array<A,_size> rtn = std::array<A, _size>();
-        if(_size != aux.size()) throw std::runtime_error("Error in trying to transform literal string to Array. Invalid argument size. Required size "
-                                                         + std::to_string(_size) + "; provided size " + std::to_string(aux.size()));
-        for (int i = 0; i < _size; ++i) {
+        std::array<A,N> rtn = std::array<A,N>();
+        if(N != aux.size()) throw std::runtime_error("Error in trying to transform literal string to Array. Invalid argument size. Required size "
+                                                         + std::to_string(N) + "; provided size " + std::to_string(aux.size()));
+        for (int i = 0; i < N; ++i) {
             rtn[i] = aux[i];
         }
         return rtn;
     }
-    // static std::vector<A> convert(std::vector<std::string> val){
-    //     std::vector<A> rtn = std::vector<A>();
-    //     for(auto it : val)
-    //         rtn.push_back(converter<A>::convert(it));
-    //     return rtn;
-    // }
 };
 template<typename _Scalar, int _Rows, int _Cols, int _Options, int _MaxRows, int _MaxCols>
 struct converter<Eigen::Matrix<_Scalar, _Rows, _Cols, _Options, _MaxRows, _MaxCols>>{
@@ -299,11 +248,5 @@ struct converter<std::map<std::string,A>>{
         return map;
     }
 };
-    // template<typename A>
-    // struct converter<utils::toString<A>>{
-    //     static std::string convert(T val){
-    //         return std::to_string(val);
-    //     }
-    // }
 }
 #endif

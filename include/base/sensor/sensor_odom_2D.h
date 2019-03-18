@@ -1,4 +1,3 @@
-
 #ifndef SENSOR_ODOM_2D_H_
 #define SENSOR_ODOM_2D_H_
 
@@ -31,21 +30,21 @@ class SensorOdom2D : public SensorBase
         SensorOdom2D(Eigen::VectorXs _extrinsics, IntrinsicsOdom2DPtr _intrinsics);
 
         virtual ~SensorOdom2D();
-        
+
         /** \brief Returns displacement noise factor
-         * 
+         *
          * Returns displacement noise factor
-         * 
-         **/        
+         *
+         **/
         Scalar getDispVarToDispNoiseFactor() const;
 
         /** \brief Returns rotation noise factor
-         * 
+         *
          * Returns rotation noise factor
-         * 
-         **/        
+         *
+         **/
         Scalar getRotVarToRotNoiseFactor() const;
-        
+
 
 	public:
         static SensorBasePtr create(const std::string& _unique_name, const Eigen::VectorXs& _extrinsics_pq, const IntrinsicsBasePtr _intrinsics);

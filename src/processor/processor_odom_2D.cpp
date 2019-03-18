@@ -188,7 +188,6 @@ ProcessorBasePtr ProcessorOdom2D::create(const std::string& _unique_name, const 
 
     return prc_ptr;
 }
-
 ProcessorBasePtr ProcessorOdom2D::createNew(const std::string& _unique_name, const paramsServer& _server, const SensorBasePtr sensor_ptr)
 {
 

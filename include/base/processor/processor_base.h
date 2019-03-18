@@ -106,7 +106,7 @@ class PackKeyFrameBuffer
  *
  * Derive from this struct to create structs of processor parameters.
  */
-struct ProcessorParamsBase
+struct ProcessorParamsBase : public ParamsBase
 {
     ProcessorParamsBase() = default;
     ProcessorParamsBase(bool _voting_active,
@@ -116,7 +116,8 @@ struct ProcessorParamsBase
     {
       //
     }
-    ProcessorParamsBase(std::string _unique_name, const paramsServer& _server)
+    ProcessorParamsBase(std::string _unique_name, const paramsServer& _server):
+        ParamsBase(_unique_name, _server)
     {
         voting_active = _server.getParam<bool>(_unique_name + "/voting_active", "false");
         time_tolerance = _server.getParam<Scalar>(_unique_name + "/time_tolerance", "0");
