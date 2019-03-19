@@ -89,7 +89,7 @@ libgflags.a will be installed at **/usr/local/lib**
 
 libglog.so will be installed at **/usr/local/lib**
 
--   Tourbleshooting:
+-   Troubleshooting:
 
     * If ./autogen.sh fails with './autogen.sh: autoreconf: not found'
 
@@ -217,7 +217,7 @@ Download and build
 
 **Download:**
     
-    $ git clone https://gitlab.iri.upc.edu/mobile_robotics/wolf.git
+    $ https://gitlab.iri.upc.edu/mobile_robotics/wolf_projects/wolf_lib/wolf.git
     
 **Build:**
 
