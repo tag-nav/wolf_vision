@@ -4,6 +4,7 @@
 
 //wolf includes
 #include "base/sensor/sensor_base.h"
+#include "base/params_server.hpp"
 
 // std includes
 
@@ -14,6 +15,11 @@ struct IntrinsicsGPSFix : public IntrinsicsBase
 {
         Eigen::Vector3s noise_std;
         // Empty -- it acts only as a typedef for IntrinsicsBase, but allows future extension with parameters
+    IntrinsicsGPSFix(std::string _unique_name, const paramsServer& _server):
+        IntrinsicsBase(_unique_name, _server)
+    {
+        noise_std = _server.getParam<Eigen::Vector3s>(_unique_name + "/noise_std", "");
+    }
         virtual ~IntrinsicsGPSFix() = default;
 };
 

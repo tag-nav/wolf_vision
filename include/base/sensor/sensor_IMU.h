@@ -3,6 +3,7 @@
 
 //wolf includes
 #include "base/sensor/sensor_base.h"
+#include "base/params_server.hpp"
 #include <iostream>
 
 namespace wolf {
@@ -27,6 +28,16 @@ struct IntrinsicsIMU : public IntrinsicsBase
         Scalar wb_rate_stdev = 0.00001;
 
         virtual ~IntrinsicsIMU() = default;
+    IntrinsicsIMU(std::string _unique_name, const paramsServer& _server):
+        IntrinsicsBase(_unique_name, _server)
+    {
+        w_noise = _server.getParam<Scalar>(_unique_name + "/w_noise", "0.001");
+        a_noise = _server.getParam<Scalar>(_unique_name + "/a_noise", "0.004");
+        ab_initial_stdev = _server.getParam<Scalar>(_unique_name + "/ab_initial_stdev", "0.01");
+        wb_initial_stdev = _server.getParam<Scalar>(_unique_name + "/wb_initial_stdev", "0.01");
+        ab_rate_stdev = _server.getParam<Scalar>(_unique_name + "/ab_rate_stdev", "0.00001");
+        wb_rate_stdev = _server.getParam<Scalar>(_unique_name + "/wb_rate_stdev", "0.00001");
+    }
 };
 
 WOLF_PTR_TYPEDEFS(SensorIMU);

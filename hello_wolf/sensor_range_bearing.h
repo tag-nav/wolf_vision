@@ -9,6 +9,7 @@
 #define HELLO_WOLF_SENSOR_RANGE_BEARING_H_
 
 #include "base/sensor/sensor_base.h"
+#include "base/params_server.hpp"
 
 namespace wolf
 {
@@ -18,6 +19,12 @@ struct IntrinsicsRangeBearing : public IntrinsicsBase
 {
         Scalar noise_range_metres_std       = 0.05;
         Scalar noise_bearing_degrees_std    = 0.5;
+    IntrinsicsRangeBearing(std::string _unique_name, const paramsServer& _server):
+        IntrinsicsBase(_unique_name, _server)
+    {
+        noise_range_metres_std = _server.getParam<Scalar>(_unique_name + "/noise_range_metres_std", "0.05");
+        noise_bearing_degrees_std = _server.getParam<Scalar>(_unique_name + "/noise_bearing_degrees_std", "0.5");
+    }
 };
 
 WOLF_PTR_TYPEDEFS(SensorRangeBearing)

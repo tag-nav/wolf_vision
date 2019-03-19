@@ -11,6 +11,7 @@
 //wolf includes
 #include "base/sensor/sensor_base.h"
 #include "base/diff_drive_tools.h"
+#include "base/params_server.hpp"
 
 namespace wolf {
 
@@ -32,7 +33,28 @@ struct IntrinsicsDiffDrive : public IntrinsicsBase
 
   Scalar left_gain_  = 0.01;
   Scalar right_gain_ = 0.01;
+    IntrinsicsDiffDrive(std::string _unique_name, const paramsServer& _server):
+        IntrinsicsBase(_unique_name, _server)
+    {
 
+        left_radius_ = _server.getParam<Scalar>(_unique_name + "/left_radius_", "");
+        right_radius_ = _server.getParam<Scalar>(_unique_name + "/right_radius_", "");
+        separation_ = _server.getParam<Scalar>(_unique_name + "/separation_", "");
+
+        auto model_str = _server.getParam<std::string>(_unique_name + "/model", "");
+        if(model_str.compare("Two_Factor_Model")) model_ = DiffDriveModel::Two_Factor_Model;
+        else if(model_str.compare("Three_Factor_Model")) model_ = DiffDriveModel::Three_Factor_Model;
+        else if(model_str.compare("Five_Factor_Model")) model_ = DiffDriveModel::Five_Factor_Model;
+        else throw std::runtime_error("Failed to fetch a valid value for the enumerate DiffDriveModel. Value provided: " + model_str);
+
+        factors_ = _server.getParam<Eigen::VectorXs>(_unique_name + "/factors", "[1,1,1]");
+
+        left_resolution_ = _server.getParam<Scalar>(_unique_name + "/left_resolution_", "");
+        right_resolution_ = _server.getParam<Scalar>(_unique_name + "/right_resolution_", "");
+
+        left_gain_ = _server.getParam<Scalar>(_unique_name + "/left_gain", "0.01");
+        right_gain_ = _server.getParam<Scalar>(_unique_name + "/right_gain", "0.01");
+    }
   virtual ~IntrinsicsDiffDrive() = default;
 };
 

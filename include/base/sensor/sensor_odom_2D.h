@@ -15,6 +15,12 @@ struct IntrinsicsOdom2D : public IntrinsicsBase
 
         Scalar k_disp_to_disp; ///< ratio of displacement variance to displacement, for odometry noise calculation
         Scalar k_rot_to_rot; ///< ratio of rotation variance to rotation, for odometry noise calculation
+    IntrinsicsOdom2D(std::string _unique_name, const paramsServer& _server):
+        IntrinsicsBase(_unique_name, _server)
+    {
+        k_disp_to_disp = _server.getParam<Scalar>(_unique_name + "/k_disp_to_disp", "");
+        k_rot_to_rot = _server.getParam<Scalar>(_unique_name + "/k_rot_to_rot", "");
+    }
 };
 
 WOLF_PTR_TYPEDEFS(SensorOdom2D);

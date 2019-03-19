@@ -3,6 +3,7 @@
 
 //wolf includes
 #include "base/sensor/sensor_base.h"
+#include "base/params_server.hpp"
 
 namespace wolf
 {
@@ -18,6 +19,15 @@ struct IntrinsicsCamera : public IntrinsicsBase
         Eigen::Vector4s pinhole_model_rectified;///< k = [u_0, v_0, alpha_u, alpha_v]  vector of pinhole intrinsic parameters
         Eigen::VectorXs distortion;             ///< d = [d_1, d_2, d_3, ...] radial distortion coefficients
 
+    IntrinsicsCamera(std::string _unique_name, const paramsServer& _server):
+        IntrinsicsBase(_unique_name,  _server)
+    {
+        width = _server.getParam<unsigned int>(_unique_name + "/width", "");
+        height = _server.getParam<unsigned int>(_unique_name + "/height", "");
+        pinhole_model_raw = _server.getParam<Eigen::Vector4s>(_unique_name + "/pinhole_model_raw", "");
+        pinhole_model_rectified = _server.getParam<Eigen::Vector4s>(_unique_name + "/pinhole_model_rectified", "");
+        distortion = _server.getParam<Eigen::VectorXs>(_unique_name + "/distortion", "");
+    }
         virtual ~IntrinsicsCamera() = default;
 };
 
