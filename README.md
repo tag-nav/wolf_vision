@@ -215,9 +215,9 @@ Download and build
 
 #### Wolf C++ Library
 
-**Download:**
+**Clone:**
     
-    $ https://gitlab.iri.upc.edu/mobile_robotics/wolf_projects/wolf_lib/wolf.git
+    $ git clone https://gitlab.iri.upc.edu/mobile_robotics/wolf_projects/wolf_lib/wolf.git
     
 **Build:**
 
