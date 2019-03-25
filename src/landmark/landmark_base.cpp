@@ -9,7 +9,7 @@ namespace wolf {
 
 unsigned int LandmarkBase::landmark_id_count_ = 0;
 
-LandmarkBase::LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr) :
+    LandmarkBase::LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr) :
             NodeBase("LANDMARK", _type),
             map_ptr_(),
             state_block_vec_(2), // allow for 2 state blocks by default. Resize in derived constructors if needed.
@@ -20,7 +20,18 @@ LandmarkBase::LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, State
 
 //    std::cout << "constructed  +L" << id() << std::endl;
 }
-                
+
+    LandmarkBase::LandmarkBase(MapBaseWPtr _ptr, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr) :
+        NodeBase("LANDMARK", _type),
+        map_ptr_(_ptr),
+        state_block_vec_(2), // allow for 2 state blocks by default. Resize in derived constructors if needed.
+        landmark_id_(++landmark_id_count_)
+    {
+        state_block_vec_[0] = _p_ptr;
+        state_block_vec_[1] = _o_ptr;
+
+        //    std::cout << "constructed  +L" << id() << std::endl;
+    }
 LandmarkBase::~LandmarkBase()
 {
     removeStateBlocks();
@@ -169,7 +180,13 @@ YAML::Node LandmarkBase::saveToYaml() const
     }
     return node;
 }
-
+    void LandmarkBase::link(MapBasePtr _map_ptr)
+    {
+        std::cout << "Linking LandmarkBase" << std::endl;
+        // this->map_ptr_.lock()->addLandmark(shared_from_this());
+        this->setMapPtr(_map_ptr);
+        this->map_ptr_.lock()->addLandmark(shared_from_this());
+    }
 ConstraintBasePtr LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 {
     constrained_by_list_.push_back(_ctr_ptr);

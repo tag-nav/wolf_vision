@@ -36,7 +36,7 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
     state_block_vec_[1] = _o_ptr;
     state_block_vec_[2] = _v_ptr;
 }
-                
+
 FrameBase::~FrameBase()
 {
     if ( isKey() )
@@ -158,7 +158,7 @@ void FrameBase::setState(const Eigen::VectorXs& _state)
     for(unsigned int i = 0; i<state_block_vec_.size(); i++){
         size += (state_block_vec_[i]==nullptr ? 0 : state_block_vec_[i]->getSize());
     }
-    
+
     //State Vector size must be lower or equal to frame state size :
     // example : PQVBB -> if we initialize only position and orientation due to use of processorOdom3D
     assert(_state.size() <= size && "In FrameBase::setState wrong state size");
@@ -166,7 +166,7 @@ void FrameBase::setState(const Eigen::VectorXs& _state)
     unsigned int index = 0;
     const unsigned int _st_size = _state.size();
 
-    //initialize the FrameBase StateBlocks while StateBlocks list's end not reached and input state_size can go further 
+    //initialize the FrameBase StateBlocks while StateBlocks list's end not reached and input state_size can go further
     for (StateBlockPtr sb : state_block_vec_)
         if (sb && (index < _st_size))
         {
@@ -381,7 +381,12 @@ FrameBasePtr FrameBase::create_POV_3D(const FrameType & _tp,
     f->setType("POV 3D");
     return f;
 }
-
+void FrameBase::link(TrajectoryBasePtr _ptr)
+{
+    std::cout << "Linking FrameBase" << std::endl;
+    _ptr->addFrame(shared_from_this());
+    this->setTrajectoryPtr(_ptr);
+}
 } // namespace wolf
 
 #include "base/factory.h"

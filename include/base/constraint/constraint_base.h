@@ -171,6 +171,11 @@ class ConstraintBase : public NodeBase, public std::enable_shared_from_this<Cons
          */
         void setProcessor(const ProcessorBasePtr& _processor_ptr);
 
+        template<typename otherType>
+        void link(otherType);
+        template<typename otherType, typename classType, typename... T>
+        static std::shared_ptr<ConstraintBase> emplace(otherType _oth_ptr, T&&... all);
+
 //    protected:
 //        template<typename D>
 //        void print(const std::string& name, const Eigen::MatrixBase<D>& mat) const; // Do nothing if input Scalar type is ceres::Jet
@@ -208,6 +213,30 @@ namespace wolf{
 //        WOLF_TRACE(name, ":\n", mat);
 //    }
 //}
+
+template<typename OtherPtr, typename classType, typename... T>
+std::shared_ptr<ConstraintBase> ConstraintBase::emplace(OtherPtr _oth_ptr, T&&... all)
+{
+    ConstraintBasePtr ctr = std::make_shared<classType>(std::forward<T>(all)...);
+    ctr->link(_oth_ptr);
+    return ctr;
+}
+
+template<typename otherType>
+void ConstraintBase::link(otherType _oth_ptr)
+{
+    std::cout << "Linking ConstraintBase" << std::endl;
+    // _oth_ptr->addConstrainedBy(shared_from_this());
+    _oth_ptr->addConstraint(shared_from_this());
+    auto frame_other = this->frame_other_ptr_.lock();
+    if(frame_other != nullptr) frame_other->addConstrainedBy(shared_from_this());
+    auto capture_other = this->capture_other_ptr_.lock();
+    if(capture_other != nullptr) capture_other->addConstrainedBy(shared_from_this());
+    auto feature_other = this->feature_other_ptr_.lock();
+    if(feature_other != nullptr) feature_other->addConstrainedBy(shared_from_this());
+    auto landmark_other = this->landmark_other_ptr_.lock();
+    if(landmark_other != nullptr) landmark_other->addConstrainedBy(shared_from_this());
+}
 
 inline unsigned int ConstraintBase::id() const
 {

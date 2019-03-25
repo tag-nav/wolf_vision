@@ -189,6 +189,13 @@ ProcessorBasePtr ProcessorOdom2D::create(const std::string& _unique_name, const 
     return prc_ptr;
 }
 
+void ProcessorOdom2D::link(SensorBasePtr _sen_ptr)
+{
+    std::cout << "Linking ProcessorOdom2D" << std::endl;
+    _sen_ptr->addProcessor(shared_from_this());
+    this->setSensorPtr(_sen_ptr);
+}
+
 }
 
 // Register in the ProcessorFactory

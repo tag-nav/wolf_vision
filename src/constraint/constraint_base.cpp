@@ -145,5 +145,4 @@ void ConstraintBase::setApplyLossFunction(const bool _apply)
         }
     }
 }
-
 } // namespace wolf

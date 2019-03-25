@@ -193,6 +193,10 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
         bool isVotingActive() const;
 
         void setVotingActive(bool _voting_active = true);
+
+        void link(SensorBasePtr);
+        template<typename classType, typename... T>
+        static std::shared_ptr<ProcessorBase> emplace(SensorBasePtr _sen_ptr, T&&... all);
 };
 
 inline bool ProcessorBase::isVotingActive() const
@@ -211,6 +215,14 @@ inline void ProcessorBase::setVotingActive(bool _voting_active)
 #include "base/constraint/constraint_base.h"
 
 namespace wolf {
+
+template<typename classType, typename... T>
+std::shared_ptr<ProcessorBase> ProcessorBase::emplace(SensorBasePtr _sen_ptr, T&&... all)
+{
+    ProcessorBasePtr prc = std::make_shared<classType>(std::forward<T>(all)...);
+    prc->link(_sen_ptr);
+    return prc;
+}
 
 inline bool ProcessorBase::isMotion()
 {

@@ -404,4 +404,11 @@ void SensorBase::setProblem(ProblemPtr _problem)
         prc->setProblem(_problem);
 }
 
+void SensorBase::link(HardwareBasePtr _hw_ptr)
+{
+    std::cout << "Linking SensorBase" << std::endl;
+    this->setHardwarePtr(_hw_ptr);
+    this->getHardwarePtr()->addSensor(shared_from_this());
+}
+
 } // namespace wolf

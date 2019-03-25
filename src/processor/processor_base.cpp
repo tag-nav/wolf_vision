@@ -72,7 +72,12 @@ void ProcessorBase::remove()
             sen->getProcessorList().remove(this_p);
     }
 }
-
+    void ProcessorBase::link(SensorBasePtr _sen_ptr)
+    {
+        std::cout << "Linking ProcessorBase" << std::endl;
+        _sen_ptr->addProcessor(shared_from_this());
+        this->setSensorPtr(_sen_ptr);
+    }
 /////////////////////////////////////////////////////////////////////////////////////////
 
 void PackKeyFrameBuffer::removeUpTo(const TimeStamp& _time_stamp)
@@ -183,5 +188,4 @@ bool PackKeyFrameBuffer::checkTimeTolerance(const TimeStamp& _time_stamp1, const
     bool pass = time_diff <= time_tol;
     return pass;
 }
-
 } // namespace wolf

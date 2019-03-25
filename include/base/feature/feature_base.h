@@ -88,6 +88,10 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         // all constraints
         void getConstraintList(ConstraintBaseList & _ctr_list);
 
+        void link(CaptureBasePtr);
+        template<typename classType, typename... T>
+        static std::shared_ptr<FeatureBase> emplace(CaptureBasePtr _cpt_ptr, T&&... all);
+
     private:
         Eigen::MatrixXs computeSqrtUpper(const Eigen::MatrixXs& _M) const;
 };
@@ -99,6 +103,14 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
 #include "base/constraint/constraint_base.h"
 
 namespace wolf{
+
+    template<typename classType, typename... T>
+    std::shared_ptr<FeatureBase> FeatureBase::emplace(CaptureBasePtr _cpt_ptr, T&&... all)
+    {
+        FeatureBasePtr ftr = std::make_shared<classType>(std::forward<T>(all)...);
+        ftr->link(_cpt_ptr);
+        return ftr;
+    }
 
 inline unsigned int FeatureBase::getHits() const
 {

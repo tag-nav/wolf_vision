@@ -44,7 +44,8 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
          * \param _o_ptr StateBlock pointer to the orientation (default: nullptr)
          *
          **/
-        LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr);
+    LandmarkBase(const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr);
+    LandmarkBase(MapBaseWPtr _ptr, const std::string& _type, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr);
         virtual ~LandmarkBase();
         virtual void remove();
         virtual YAML::Node saveToYaml() const;
@@ -79,7 +80,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
         // Descriptor
     public:
-        const Eigen::VectorXs& getDescriptor() const;        
+        const Eigen::VectorXs& getDescriptor() const;
         Scalar getDescriptor(unsigned int _ii) const;
         void setDescriptor(const Eigen::VectorXs& _descriptor);
 
@@ -92,6 +93,9 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
         void setMapPtr(const MapBasePtr _map_ptr);
         MapBasePtr getMapPtr();
+        void link(MapBasePtr);
+        template<typename classType, typename... T>
+        static std::shared_ptr<LandmarkBase> emplace(MapBasePtr _map_ptr, T&&... all);
 
 };
 
@@ -103,6 +107,13 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
 namespace wolf{
 
+template<typename classType, typename... T>
+std::shared_ptr<LandmarkBase> LandmarkBase::emplace(MapBasePtr _map_ptr, T&&... all)
+{
+    LandmarkBasePtr lmk = std::make_shared<classType>(std::forward<T>(all)...);
+    lmk->link(_map_ptr);
+    return lmk;
+}
 inline void LandmarkBase::setProblem(ProblemPtr _problem)
 {
     NodeBase::setProblem(_problem);
