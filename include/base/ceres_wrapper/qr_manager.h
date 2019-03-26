@@ -22,7 +22,7 @@ class QRManager : public SolverManager
         Eigen::SparseMatrixs A_;
         Eigen::VectorXs b_;
         std::map<StateBlockPtr, unsigned int> sb_2_col_;
-        std::map<ConstraintBasePtr, unsigned int> ctr_2_row_;
+        std::map<FactorBasePtr, unsigned int> ctr_2_row_;
         bool any_state_block_removed_;
         unsigned int new_state_blocks_;
         unsigned int N_batch_;
@@ -38,15 +38,15 @@ class QRManager : public SolverManager
 
         virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS);
 
-        virtual void computeCovariances(const StateBlockList& _sb_list);
+        virtual void computeCovariances(const StateBlockPtrList& _sb_list);
 
     private:
 
         bool computeDecomposition();
 
-        virtual void addConstraint(ConstraintBasePtr _ctr_ptr);
+        virtual void addFactor(FactorBasePtr _ctr_ptr);
 
-        virtual void removeConstraint(ConstraintBasePtr _ctr_ptr);
+        virtual void removeFactor(FactorBasePtr _ctr_ptr);
 
         virtual void addStateBlock(StateBlockPtr _st_ptr);
 
@@ -54,7 +54,7 @@ class QRManager : public SolverManager
 
         virtual void updateStateBlockStatus(StateBlockPtr _st_ptr);
 
-        void relinearizeConstraint(ConstraintBasePtr _ctr_ptr);
+        void relinearizeFactor(FactorBasePtr _ctr_ptr);
 };
 
 } /* namespace wolf */

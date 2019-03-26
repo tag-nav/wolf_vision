@@ -96,7 +96,7 @@ class CaptureMotion : public CaptureBase
         virtual VectorXs correctDelta(const VectorXs& _delta, const VectorXs& _delta_error);
 
         // Origin frame
-        FrameBasePtr getOriginFramePtr();
+        FrameBasePtr getOriginFrame();
         void setOriginFramePtr(FrameBasePtr _frame_ptr);
 
         // member data:
@@ -156,7 +156,7 @@ inline Eigen::VectorXs CaptureMotion::correctDelta(const VectorXs& _delta, const
     return _delta + _delta_error;
 }
 
-inline FrameBasePtr CaptureMotion::getOriginFramePtr()
+inline FrameBasePtr CaptureMotion::getOriginFrame()
 {
     return origin_frame_ptr_.lock();
 }

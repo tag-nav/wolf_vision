@@ -102,7 +102,7 @@ class AssociationNode
          * Returns a copy of up_node_ptr_
          * 
          **/
-        AssociationNode * upNodePtr() const;
+        AssociationNode * upNode() const;
         
         /** \brief Computes node probability
          * 

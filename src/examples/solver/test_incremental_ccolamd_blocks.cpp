@@ -91,8 +91,8 @@ int main(int argc, char *argv[])
     acc_permutation_factors(0) = 0;
 
     CCOLAMDOrdering<int> ordering;
-    VectorXi factor_ordering_constraints(1);
-    VectorXi ordering_constraints(1);
+    VectorXi factor_ordering_factors(1);
+    VectorXi ordering_factors(1);
 
     // results variables
     clock_t t1, t2, t3;
@@ -166,16 +166,16 @@ int main(int argc, char *argv[])
         b_ordered = acc_permutation_matrix * b;
         H_ordered = H.twistedBy(acc_permutation_matrix);
 
-        // ordering constraints
-        ordering_constraints.resize(dim*(i+1));
-        ordering_constraints = ((H_ordered.rightCols(3) * MatrixXd::Ones(3,1)).array() == 0).select(VectorXi::Zero(dim*(i+1)),VectorXi::Ones(dim*(i+1)));
+        // ordering factors
+        ordering_factors.resize(dim*(i+1));
+        ordering_factors = ((H_ordered.rightCols(3) * MatrixXd::Ones(3,1)).array() == 0).select(VectorXi::Zero(dim*(i+1)),VectorXi::Ones(dim*(i+1)));
 
         // variable ordering
         t2 = clock();
         H_ordered.makeCompressed();
 
         PermutationMatrix<Dynamic, Dynamic, int> permutation_matrix(dim*(i+1));
-        ordering(H_ordered, permutation_matrix, ordering_constraints.data());
+        ordering(H_ordered, permutation_matrix, ordering_factors.data());
 
         // applying ordering
         acc_permutation_matrix = permutation_matrix * acc_permutation_matrix;
@@ -209,16 +209,16 @@ int main(int argc, char *argv[])
         acc_permutation_factors_matrix.indices() = acc_permutation_factors;
         factors_ordered = factors.twistedBy(acc_permutation_factors_matrix);
 
-        // ordering constraints
-        factor_ordering_constraints.resize(i);
-        factor_ordering_constraints = factors_ordered.rightCols(1);
+        // ordering factors
+        factor_ordering_factors.resize(i);
+        factor_ordering_factors = factors_ordered.rightCols(1);
 
         // block ordering
         t3 = clock();
         factors_ordered.makeCompressed();
 
         PermutationMatrix<Dynamic, Dynamic, int> permutation_factors_matrix(i+1);
-        ordering(factors_ordered, permutation_factors_matrix, factor_ordering_constraints.data());
+        ordering(factors_ordered, permutation_factors_matrix, factor_ordering_factors.data());
 
         // applying ordering
         permutation_2_block_permutation(permutation_factors_matrix, permutation_matrix , dim, i+1);

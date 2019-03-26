@@ -24,7 +24,7 @@ using std::make_shared;
 using std::static_pointer_cast;
 using std::string;
 
-class Process_Constraint_IMU : public testing::Test
+class Process_Factor_IMU : public testing::Test
 {
     public:
         // Wolf objects
@@ -63,9 +63,9 @@ class Process_Constraint_IMU : public testing::Test
         VectorXs        D_corrected_imu, x1_corrected_imu;  // corrected with imu_tools
         VectorXs        D_preint,        x1_preint;         // preintegrated with processor_imu
         VectorXs        D_corrected,     x1_corrected;      // corrected with processor_imu
-        VectorXs        D_optim,         x1_optim;          // optimized using constraint_imu
+        VectorXs        D_optim,         x1_optim;          // optimized using factor_imu
         VectorXs        D_optim_imu,     x1_optim_imu;      // corrected with imu_tools using optimized bias
-        VectorXs                         x0_optim;          // optimized using constraint_imu
+        VectorXs                         x0_optim;          // optimized using factor_imu
 
         // Trajectory buffer of correction Jacobians
         std::vector<MatrixXs> Buf_Jac_preint_prc;
@@ -276,8 +276,8 @@ class Process_Constraint_IMU : public testing::Test
 
                 sensor_imu->process(capture_imu);
 
-                D_preint    = processor_imu->getLastPtr()->getDeltaPreint();
-                D_corrected = processor_imu->getLastPtr()->getDeltaCorrected(bias_real);
+                D_preint    = processor_imu->getLast()->getDeltaPreint();
+                D_corrected = processor_imu->getLast()->getDeltaCorrected(bias_real);
             }
             return processor_imu->getBuffer();
         }
@@ -311,9 +311,9 @@ class Process_Constraint_IMU : public testing::Test
 
             // wolf objects
             KF_0    = problem->setPrior(x0, P0, t0, dt/2);
-            C_0     = processor_imu->getOriginPtr();
+            C_0     = processor_imu->getOrigin();
 
-            processor_imu->getLastPtr()->setCalibrationPreint(bias_preint);
+            processor_imu->getLast()->setCalibrationPreint(bias_preint);
 
             return true;
         }
@@ -441,12 +441,12 @@ class Process_Constraint_IMU : public testing::Test
         void setFixedBlocks()
         {
             // this sets each state block status fixed / unfixed
-            KF_0->getPPtr()->setFixed(p0_fixed);
-            KF_0->getOPtr()->setFixed(q0_fixed);
-            KF_0->getVPtr()->setFixed(v0_fixed);
-            KF_1->getPPtr()->setFixed(p1_fixed);
-            KF_1->getOPtr()->setFixed(q1_fixed);
-            KF_1->getVPtr()->setFixed(v1_fixed);
+            KF_0->getP()->setFixed(p0_fixed);
+            KF_0->getO()->setFixed(q0_fixed);
+            KF_0->getV()->setFixed(v0_fixed);
+            KF_1->getP()->setFixed(p1_fixed);
+            KF_1->getO()->setFixed(q1_fixed);
+            KF_1->getV()->setFixed(v1_fixed);
         }
 
         void setKfStates()
@@ -490,7 +490,7 @@ class Process_Constraint_IMU : public testing::Test
             capture_imu = make_shared<CaptureIMU>(t+dt, sensor_imu, data, sensor_imu->getNoiseCov());
             processor_imu->process(capture_imu);
 
-            KF_1 = problem->getLastKeyFramePtr();
+            KF_1 = problem->getLastKeyFrame();
             C_1  = KF_1->getCaptureList().front(); // front is IMU
             CM_1 = static_pointer_cast<CaptureMotion>(C_1);
 
@@ -583,7 +583,7 @@ class Process_Constraint_IMU : public testing::Test
 
 };
 
-class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
+class Process_Factor_IMU_ODO : public Process_Factor_IMU
 {
     public:
         // Wolf objects
@@ -595,7 +595,7 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
         {
 
             // ===================================== IMU
-            Process_Constraint_IMU::SetUp();
+            Process_Factor_IMU::SetUp();
 
             // ===================================== ODO
             string wolf_root = _WOLF_ROOT_DIR;
@@ -618,7 +618,7 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
         virtual void integrateAll() override
         {
             // ===================================== IMU
-            Process_Constraint_IMU::integrateAll();
+            Process_Factor_IMU::integrateAll();
 
             // ===================================== ODO
             Vector6s    data;
@@ -636,7 +636,7 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
         virtual void integrateAllTrajectories() override
         {
             // ===================================== IMU
-            Process_Constraint_IMU::integrateAllTrajectories();
+            Process_Factor_IMU::integrateAllTrajectories();
 
             // ===================================== ODO
             Vector6s    data;
@@ -654,7 +654,7 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
         virtual void buildProblem() override
         {
             // ===================================== IMU
-            Process_Constraint_IMU::buildProblem();
+            Process_Factor_IMU::buildProblem();
 
             // ===================================== ODO
             // Process ODO for the callback to take effect
@@ -666,7 +666,7 @@ class Process_Constraint_IMU_ODO : public Process_Constraint_IMU
 
 };
 
-TEST_F(Process_Constraint_IMU, MotionConstant_PQV_b__PQV_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU, MotionConstant_PQV_b__PQV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -710,7 +710,7 @@ TEST_F(Process_Constraint_IMU, MotionConstant_PQV_b__PQV_b) // F_ixed___e_stimat
 
 }
 
-TEST_F(Process_Constraint_IMU, test_capture) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU, test_capture) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -747,7 +747,7 @@ TEST_F(Process_Constraint_IMU, test_capture) // F_ixed___e_stimated
 
     // ===================================== RUN ALL
     Eigen::Vector6s initial_bias((Eigen::Vector6s()<< .002, .0007, -.001,   .003, -.002, .001).finished());
-    sensor_imu->getIntrinsicPtr()->setState(initial_bias);
+    sensor_imu->getIntrinsic()->setState(initial_bias);
     configureAll();
     integrateAll();
     buildProblem();
@@ -756,7 +756,7 @@ TEST_F(Process_Constraint_IMU, test_capture) // F_ixed___e_stimated
     ASSERT_MATRIX_APPROX(KF_0->getCaptureOf(sensor_imu)->getCalibration(), KF_1->getCaptureOf(sensor_imu)->getCalibration(), 1e-8 );
 }
 
-TEST_F(Process_Constraint_IMU, MotionConstant_pqv_b__PQV_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU, MotionConstant_pqv_b__PQV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -800,7 +800,7 @@ TEST_F(Process_Constraint_IMU, MotionConstant_pqv_b__PQV_b) // F_ixed___e_stimat
 
 }
 
-TEST_F(Process_Constraint_IMU, MotionConstant_pqV_b__PQv_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU, MotionConstant_pqV_b__PQv_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -844,7 +844,7 @@ TEST_F(Process_Constraint_IMU, MotionConstant_pqV_b__PQv_b) // F_ixed___e_stimat
 
 }
 
-TEST_F(Process_Constraint_IMU, MotionRandom_PQV_b__PQV_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU, MotionRandom_PQV_b__PQV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -888,7 +888,7 @@ TEST_F(Process_Constraint_IMU, MotionRandom_PQV_b__PQV_b) // F_ixed___e_stimated
 
 }
 
-TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__PQv_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU, MotionRandom_pqV_b__PQv_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -932,7 +932,7 @@ TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__PQv_b) // F_ixed___e_stimated
 
 }
 
-TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__pQV_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU, MotionRandom_pqV_b__pQV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -976,7 +976,7 @@ TEST_F(Process_Constraint_IMU, MotionRandom_pqV_b__pQV_b) // F_ixed___e_stimated
 
 }
 
-TEST_F(Process_Constraint_IMU, MotionConstant_NonNullState_PQV_b__PQV_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU, MotionConstant_NonNullState_PQV_b__PQV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -1020,7 +1020,7 @@ TEST_F(Process_Constraint_IMU, MotionConstant_NonNullState_PQV_b__PQV_b) // F_ix
 
 }
 
-TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__PQV_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU_ODO, MotionConstantRotation_PQV_b__PQV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -1064,7 +1064,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__PQV_b) // F_ixe
 
 }
 
-TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__PQv_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU_ODO, MotionConstantRotation_PQV_b__PQv_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -1108,7 +1108,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__PQv_b) // F_ixe
 
 }
 
-TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__Pqv_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU_ODO, MotionConstantRotation_PQV_b__Pqv_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -1152,7 +1152,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__Pqv_b) // F_ixe
 
 }
 
-TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__pQv_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU_ODO, MotionConstantRotation_PQV_b__pQv_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -1196,7 +1196,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__pQv_b) // F_ixe
 
 }
 
-TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__pqv_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU_ODO, MotionConstantRotation_PQV_b__pqv_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -1240,7 +1240,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstantRotation_PQV_b__pqv_b) // F_ixe
 
 }
 
-TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqv_b__pqV_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU_ODO, MotionConstant_pqv_b__pqV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -1284,7 +1284,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqv_b__pqV_b) // F_ixed___e_st
 
 }
 
-TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -1328,7 +1328,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionConstant_pqV_b__pqv_b) // F_ixed___e_st
 
 }
 
-TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PQV_b__pqv_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU_ODO, MotionRandom_PQV_b__pqv_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -1372,7 +1372,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PQV_b__pqv_b) // F_ixed___e_stim
 
 }
 
-TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PqV_b__pqV_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU_ODO, MotionRandom_PqV_b__pqV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -1416,7 +1416,7 @@ TEST_F(Process_Constraint_IMU_ODO, MotionRandom_PqV_b__pqV_b) // F_ixed___e_stim
 
 }
 
-TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) // F_ixed___e_stimated
+TEST_F(Process_Factor_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) // F_ixed___e_stimated
 {
 
     // ================================================================================================================ //
@@ -1504,28 +1504,28 @@ TEST_F(Process_Constraint_IMU_ODO, RecoverTrajectory_MotionRandom_PqV_b__pqV_b) 
 int main(int argc, char **argv)
 {
     testing::InitGoogleTest(&argc, argv);
-    //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU.*";
-    //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.*";
-    //    ::testing::GTEST_FLAG(filter) = "Process_Constraint_IMU_ODO.RecoverTrajectory_MotionRandom_PqV_b__pqV_b";
+    //    ::testing::GTEST_FLAG(filter) = "Process_Factor_IMU.*";
+    //    ::testing::GTEST_FLAG(filter) = "Process_Factor_IMU_ODO.*";
+    //    ::testing::GTEST_FLAG(filter) = "Process_Factor_IMU_ODO.RecoverTrajectory_MotionRandom_PqV_b__pqV_b";
 
     return RUN_ALL_TESTS();
 }
 
 /* Some notes :
  *
- * - Process_Constraint_IMU_ODO.MotionConstant_PQv_b__PQv_b :
+ * - Process_Factor_IMU_ODO.MotionConstant_PQv_b__PQv_b :
  *      this test will not work + jacobian is rank deficient because of estimating both initial
  *      and final velocities. 
  *      IMU data integration is done with correct biases (so this is the case of a calibrated IMU). Before solving the problem, we perturbate the initial bias.
- *      We solve the problem by fixing all states excepted V1 and V2. while creating the constraints, both velocities are corrected using the difference between the actual
+ *      We solve the problem by fixing all states excepted V1 and V2. while creating the factors, both velocities are corrected using the difference between the actual
  *      bias and the bias used during preintegration. One way to solve this in the solver side would be to make the actual bias match the preintegraion bias so that the
  *      difference is 0 and does not affect the states of the KF. Another possibility is to have both velocities modified without changing the biases. it is likely that this
- *      solution is chosen in this case (bias changes is penalized between 2 KeyFrames, but velocities have no other constraints here.)
+ *      solution is chosen in this case (bias changes is penalized between 2 KeyFrames, but velocities have no other factors here.)
  * 
  *  - Bias evaluation with a precision of 1e-4 :
  *      The bias introduced in the data for the preintegration steps is different of the real bias. This is simulating the case of a non calibrated IMU
  *      Because of cross relations between acc and gyro biases (respectively a_b and w_b) it is difficult to expect a better estimation.
  *      A small change in a_b can be cancelled by a small variation in w_b. in other words : there are local minima.
- *      In addition, for Process_Constraint_IMU tests, P and V are tested against 1e-5 precision while 1e-8 is used for Q.
+ *      In addition, for Process_Factor_IMU tests, P and V are tested against 1e-5 precision while 1e-8 is used for Q.
  *      Errors tend to be distributed in different estimated variable when we get into a local minima (to minimize residuals in a least square sense).
  */

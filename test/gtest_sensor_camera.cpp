@@ -48,17 +48,17 @@ TEST(SensorCamera, Intrinsics_Raw_Rectified)
     // default is raw
     ASSERT_TRUE(cam->isUsingRawImages());
     ASSERT_MATRIX_APPROX(K_raw, cam->getIntrinsicMatrix(), 1e-8);
-    ASSERT_MATRIX_APPROX(k_raw, cam->getIntrinsicPtr()->getState(), 1e-8);
+    ASSERT_MATRIX_APPROX(k_raw, cam->getIntrinsic()->getState(), 1e-8);
 
     cam->useRectifiedImages();
     ASSERT_FALSE(cam->isUsingRawImages());
     ASSERT_MATRIX_APPROX(K_rectified, cam->getIntrinsicMatrix(), 1e-8);
-    ASSERT_MATRIX_APPROX(k_rectified, cam->getIntrinsicPtr()->getState(), 1e-8);
+    ASSERT_MATRIX_APPROX(k_rectified, cam->getIntrinsic()->getState(), 1e-8);
 
     cam->useRawImages();
     ASSERT_TRUE(cam->isUsingRawImages());
     ASSERT_MATRIX_APPROX(K_raw, cam->getIntrinsicMatrix(), 1e-8);
-    ASSERT_MATRIX_APPROX(k_raw, cam->getIntrinsicPtr()->getState(), 1e-8);
+    ASSERT_MATRIX_APPROX(k_raw, cam->getIntrinsic()->getState(), 1e-8);
 }
 
 TEST(SensorCamera, Distortion)

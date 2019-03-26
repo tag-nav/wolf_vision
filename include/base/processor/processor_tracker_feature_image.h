@@ -8,7 +8,7 @@
 #include "base/state_block.h"
 #include "base/state_quaternion.h"
 #include "base/processor/processor_tracker_feature.h"
-#include "base/constraint/constraint_epipolar.h"
+#include "base/factor/factor_epipolar.h"
 #include "base/processor/processor_params_image.h"
 
 // vision_utils
@@ -91,7 +91,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
             image_last_ = image_incoming_;
         }
 
-        virtual unsigned int trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out,
+        virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out,
                                            FeatureMatchMap& _feature_correspondences);
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
@@ -119,9 +119,9 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
          *
          * \return The number of detected Features.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_incoming_out);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBasePtrList& _features_incoming_out);
 
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
+        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
     private:
 
@@ -151,7 +151,7 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
         virtual void drawFeatures(cv::Mat _image);
         virtual void drawTarget(cv::Mat _image, std::list<cv::Point> _target_list);
         virtual void drawRoi(cv::Mat _image, std::list<cv::Rect> _roi_list, cv::Scalar _color);
-        virtual void resetVisualizationFlag(FeatureBaseList& _feature_list_last);
+        virtual void resetVisualizationFlag(FeatureBasePtrList& _feature_list_last);
 
     public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params,
