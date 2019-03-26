@@ -8,8 +8,8 @@
 #include "base/feature/feature_polyline_2D.h"
 #include "base/landmark/landmark_polyline_2D.h"
 #include "base/local_parametrization_polyline_extreme.h"
-#include "base/constraint/constraint_point_2D.h"
-#include "base/constraint/constraint_point_to_line_2D.h"
+#include "base/factor/factor_point_2D.h"
+#include "base/factor/factor_point_to_line_2D.h"
 #include "base/state_block.h"
 #include "base/factory.h"
 #include "base/yaml/yaml_conversion.h"
@@ -165,7 +165,7 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
     assert((_back ? !last_defined_: !first_defined_) && "defining an already defined extreme");
     assert(state->hasLocalParametrization() && "not defined extreme without local parameterization");
 
-    //std::cout << "Defining extreme --> Removing and adding state blocks and constraints" << std::endl;
+    //std::cout << "Defining extreme --> Removing and adding state blocks and factors" << std::endl;
 
     // remove and add state block without local parameterization
     if (getProblem() != nullptr)
@@ -176,13 +176,13 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
     if (getProblem() != nullptr)
     	getProblem()->addStateBlock(state);
 
-    // remove and add all constraints to the point
+    // remove and add all factors to the point
     for (auto ctr_ptr : getConstrainedByList())
         for (auto st_ptr : ctr_ptr->getStateBlockPtrVector())
             if (st_ptr == state && getProblem() != nullptr)
             {
-                getProblem()->removeConstraint(ctr_ptr);
-                getProblem()->addConstraint(ctr_ptr);
+                getProblem()->removeFactor(ctr_ptr);
+                getProblem()->addFactor(ctr_ptr);
             }
 
     // update boolean
@@ -233,22 +233,22 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
     StateBlockPtr remove_state = getPointStateBlockPtr(_remove_id);
     std::cout << "state block to remove " << remove_state->getState().transpose() << std::endl;
 
-    // Change constraints from remove_state to remain_state
-    ConstraintBaseList old_constraints_list = getConstrainedByList();
-    std::cout << "changing constraints: " << old_constraints_list.size() << std::endl;
-    ConstraintBasePtr new_ctr_ptr = nullptr;
-    for (auto ctr_ptr : old_constraints_list)
+    // Change factors from remove_state to remain_state
+    FactorBasePtrList old_factors_list = getConstrainedByList();
+    std::cout << "changing factors: " << old_factors_list.size() << std::endl;
+    FactorBasePtr new_ctr_ptr = nullptr;
+    for (auto ctr_ptr : old_factors_list)
     {
-        ConstraintPoint2DPtr ctr_point_ptr;
-        ConstraintPointToLine2DPtr ctr_point_line_ptr;
-        if ( (ctr_point_ptr = std::dynamic_pointer_cast<ConstraintPoint2D>(ctr_ptr)))
+        FactorPoint2DPtr ctr_point_ptr;
+        FactorPointToLine2DPtr ctr_point_line_ptr;
+        if ( (ctr_point_ptr = std::dynamic_pointer_cast<FactorPoint2D>(ctr_ptr)))
 //        if (ctr_ptr->getTypeId() == CTR_POINT_2D)
         {
-//            ConstraintPoint2DPtr ctr_point_ptr = std::static_pointer_cast<ConstraintPoint2D>(ctr_ptr);
+//            FactorPoint2DPtr ctr_point_ptr = std::static_pointer_cast<FactorPoint2D>(ctr_ptr);
 
-            // If landmark point constrained -> new constraint
+            // If landmark point constrained -> new factor
             if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
-                new_ctr_ptr = std::make_shared<ConstraintPoint2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
+                new_ctr_ptr = std::make_shared<FactorPoint2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeature()),
                                                                   std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
                                                                   ctr_point_ptr->getProcessor(),
                                                                   ctr_point_ptr->getFeaturePointId(),
@@ -256,14 +256,14 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
                                                                   ctr_point_ptr->getApplyLossFunction(),
                                                                   ctr_point_ptr->getStatus());
         }
-        else if ((ctr_point_line_ptr = std::dynamic_pointer_cast<ConstraintPointToLine2D>(ctr_ptr)))
+        else if ((ctr_point_line_ptr = std::dynamic_pointer_cast<FactorPointToLine2D>(ctr_ptr)))
 //        else if  (ctr_ptr->getTypeId() == CTR_POINT_TO_LINE_2D)
         {
-//            ConstraintPointToLine2DPtr ctr_point_line_ptr = std::static_pointer_cast<ConstraintPointToLine2D>(ctr_ptr);
+//            FactorPointToLine2DPtr ctr_point_line_ptr = std::static_pointer_cast<FactorPointToLine2D>(ctr_ptr);
 
-            // If landmark point constrained -> new constraint
+            // If landmark point constrained -> new factor
             if (ctr_point_line_ptr->getLandmarkPointId() == _remove_id)
-                new_ctr_ptr = std::make_shared<ConstraintPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
+                new_ctr_ptr = std::make_shared<FactorPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeature()),
                                                                         std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
                                                                         ctr_point_line_ptr->getProcessor(),
                                                                         ctr_point_line_ptr->getFeaturePointId(),
@@ -271,9 +271,9 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
                                                                         ctr_point_line_ptr->getLandmarkPointAuxId(),
                                                                         ctr_point_ptr->getApplyLossFunction(),
                                                                         ctr_point_line_ptr->getStatus());
-            // If landmark point is aux point -> new constraint
+            // If landmark point is aux point -> new factor
             else if (ctr_point_line_ptr->getLandmarkPointAuxId() == _remove_id)
-                new_ctr_ptr = std::make_shared<ConstraintPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeaturePtr()),
+                new_ctr_ptr = std::make_shared<FactorPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeature()),
                                                                         std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
                                                                         ctr_point_line_ptr->getProcessor(),
                                                                         ctr_point_line_ptr->getFeaturePointId(),
@@ -283,18 +283,18 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
                                                                         ctr_point_line_ptr->getStatus());
         }
         else
-            throw std::runtime_error ("polyline constraint of unknown type");
+            throw std::runtime_error ("polyline factor of unknown type");
 
-        // If new constraint
+        // If new factor
         if (new_ctr_ptr != nullptr)
         {
-            std::cout << "created new constraint: " << new_ctr_ptr->id() << std::endl;
-            std::cout << "deleting constraint: " << ctr_ptr->id() << std::endl;
+            std::cout << "created new factor: " << new_ctr_ptr->id() << std::endl;
+            std::cout << "deleting factor: " << ctr_ptr->id() << std::endl;
 
-            // add new constraint
-            ctr_ptr->getFeaturePtr()->addConstraint(new_ctr_ptr);
+            // add new factor
+            ctr_ptr->getFeature()->addFactor(new_ctr_ptr);
 
-            // remove constraint
+            // remove factor
             ctr_ptr->remove();
 
             new_ctr_ptr = nullptr;

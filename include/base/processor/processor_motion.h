@@ -48,7 +48,7 @@ struct ProcessorParamsMotion : public ProcessorParamsBase
  * This data is, in the general case, in the reference frame of the sensor:
  *
  *   - Beware of the frame transformations Map to Robot, and Robot to Sensor, so that your produced
- *   motion Constraints are correctly expressed.
+ *   motion Factors are correctly expressed.
  *     - The robot state R is expressed in a global or 'Map' reference frame, named M.
  *     - The sensor frame S is expressed in the robot frame R.
  *     - The motion data data_ is expressed in the sensor frame S.
@@ -57,7 +57,7 @@ struct ProcessorParamsMotion : public ProcessorParamsBase
  *     - Transform incoming data from sensor frame to robot frame, and then integrate motion in robot frame.
  *     - Integrate motion directly in sensor frame, and transform to robot frame at the time of:
  *       - Publishing the robot state (see getCurrentState() and similar functions)
- *       - Creating Keyframes and Constraints (see emplaceConstraint() ).
+ *       - Creating Keyframes and Factors (see emplaceFactor() ).
  *
  * Should you need extra functionality for your derived types, you can overload these two methods,
  *
@@ -431,11 +431,11 @@ class ProcessorMotion : public ProcessorBase
          */
         virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_own) = 0;
 
-        /** \brief create a constraint and link it in the wolf tree
+        /** \brief create a factor and link it in the wolf tree
          * \param _feature_motion: the parent feature
-         * \param _frame_origin: the frame constrained by this motion constraint
+         * \param _frame_origin: the frame constrained by this motion factor
          */
-        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin) = 0;
+        virtual FactorBasePtr emplaceFactor(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin) = 0;
 
         Motion motionZero(const TimeStamp& _ts);
 
@@ -443,9 +443,9 @@ class ProcessorMotion : public ProcessorBase
 
     public:
         //getters
-        CaptureMotionPtr getOriginPtr();
-        CaptureMotionPtr getLastPtr();
-        CaptureMotionPtr getIncomingPtr();
+        CaptureMotionPtr getOrigin();
+        CaptureMotionPtr getLast();
+        CaptureMotionPtr getIncoming();
 
         Scalar getMaxTimeSpan() const;
         Scalar getMaxBuffLength() const;
@@ -522,7 +522,7 @@ inline Eigen::VectorXs ProcessorMotion::getCurrentState()
 inline void ProcessorMotion::getCurrentState(Eigen::VectorXs& _x)
 {
     Scalar Dt = getCurrentTimeStamp() - origin_ptr_->getTimeStamp();
-    statePlusDelta(origin_ptr_->getFramePtr()->getState(), last_ptr_->getDeltaCorrected(origin_ptr_->getCalibration()), Dt, _x);
+    statePlusDelta(origin_ptr_->getFrame()->getState(), last_ptr_->getDeltaCorrected(origin_ptr_->getCalibration()), Dt, _x);
 }
 
 inline const Eigen::MatrixXs ProcessorMotion::getCurrentDeltaPreintCov()
@@ -578,17 +578,17 @@ inline Motion ProcessorMotion::motionZero(const TimeStamp& _ts)
     );
 }
 
-inline CaptureMotionPtr ProcessorMotion::getOriginPtr()
+inline CaptureMotionPtr ProcessorMotion::getOrigin()
 {
     return origin_ptr_;
 }
 
-inline CaptureMotionPtr ProcessorMotion::getLastPtr()
+inline CaptureMotionPtr ProcessorMotion::getLast()
 {
     return last_ptr_;
 }
 
-inline CaptureMotionPtr ProcessorMotion::getIncomingPtr()
+inline CaptureMotionPtr ProcessorMotion::getIncoming()
 {
     return incoming_ptr_;
 }

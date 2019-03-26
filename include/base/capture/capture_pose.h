@@ -3,8 +3,8 @@
 
 //Wolf includes
 #include "base/capture/capture_base.h"
-#include "base/constraint/constraint_pose_2D.h"
-#include "base/constraint/constraint_pose_3D.h"
+#include "base/factor/factor_pose_2D.h"
+#include "base/factor/factor_pose_3D.h"
 #include "base/feature/feature_pose.h"
 
 //std includes
@@ -27,7 +27,7 @@ class CapturePose : public CaptureBase
 
         virtual ~CapturePose();
 
-        virtual void emplaceFeatureAndConstraint();
+        virtual void emplaceFeatureAndFactor();
 
 };
 

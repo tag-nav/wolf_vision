@@ -1,6 +1,6 @@
 // wolf
 #include "base/processor/processor_IMU.h"
-#include "base/constraint/constraint_IMU.h"
+#include "base/factor/factor_IMU.h"
 #include "base/IMU_tools.h"
 
 namespace wolf {
@@ -210,16 +210,16 @@ FeatureBasePtr ProcessorIMU::createFeature(CaptureMotionPtr _capture_motion)
     return key_feature_ptr;
 }
 
-ConstraintBasePtr ProcessorIMU::emplaceConstraint(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin)
+FactorBasePtr ProcessorIMU::emplaceFactor(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin)
 {
     CaptureIMUPtr cap_imu = std::static_pointer_cast<CaptureIMU>(_capture_origin);
     FeatureIMUPtr ftr_imu = std::static_pointer_cast<FeatureIMU>(_feature_motion);
-    ConstraintIMUPtr ctr_imu = std::make_shared<ConstraintIMU>(ftr_imu, cap_imu, shared_from_this());
+    FactorIMUPtr ctr_imu = std::make_shared<FactorIMU>(ftr_imu, cap_imu, shared_from_this());
 
     // link ot wolf tree
-    _feature_motion->addConstraint(ctr_imu);
+    _feature_motion->addFactor(ctr_imu);
     _capture_origin->addConstrainedBy(ctr_imu);
-    _capture_origin->getFramePtr()->addConstrainedBy(ctr_imu);
+    _capture_origin->getFrame()->addConstrainedBy(ctr_imu);
 
     return ctr_imu;
 }

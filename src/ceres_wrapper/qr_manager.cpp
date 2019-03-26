@@ -57,7 +57,7 @@ void QRManager::computeCovariances(CovarianceBlocksToBeComputed _blocks)
     // TODO
 }
 
-void QRManager::computeCovariances(const StateBlockList& _sb_list)
+void QRManager::computeCovariances(const StateBlockPtrList& _sb_list)
 {
     //std::cout << "computing covariances.." << std::endl;
     update();
@@ -119,9 +119,9 @@ bool QRManager::computeDecomposition()
 
         if (any_state_block_removed_ || new_state_blocks_ >= N_batch_)
         {
-            // relinearize all constraints
+            // relinearize all factors
             for (auto ctr_pair : ctr_2_row_)
-                relinearizeConstraint(ctr_pair.first);
+                relinearizeFactor(ctr_pair.first);
 
             any_state_block_removed_ = false;
             new_state_blocks_ = 0;
@@ -138,10 +138,10 @@ bool QRManager::computeDecomposition()
     return true;
 }
 
-void QRManager::addConstraint(ConstraintBasePtr _ctr_ptr)
+void QRManager::addFactor(FactorBasePtr _ctr_ptr)
 {
-    //std::cout << "add constraint " << _ctr_ptr->id() << std::endl;
-    assert(ctr_2_row_.find(_ctr_ptr) == ctr_2_row_.end() && "adding existing constraint");
+    //std::cout << "add factor " << _ctr_ptr->id() << std::endl;
+    assert(ctr_2_row_.find(_ctr_ptr) == ctr_2_row_.end() && "adding existing factor");
     ctr_2_row_[_ctr_ptr] = A_.rows();
     A_.conservativeResize(A_.rows() + _ctr_ptr->getSize(), A_.cols());
     b_.conservativeResize(b_.size() + _ctr_ptr->getSize());
@@ -149,15 +149,15 @@ void QRManager::addConstraint(ConstraintBasePtr _ctr_ptr)
     assert(A_.rows() >= ctr_2_row_[_ctr_ptr] + _ctr_ptr->getSize() - 1 && "bad A number of rows");
     assert(b_.rows() >= ctr_2_row_[_ctr_ptr] + _ctr_ptr->getSize() - 1 && "bad b number of rows");
 
-    relinearizeConstraint(_ctr_ptr);
+    relinearizeFactor(_ctr_ptr);
 
     pending_changes_ = true;
 }
 
-void QRManager::removeConstraint(ConstraintBasePtr _ctr_ptr)
+void QRManager::removeFactor(FactorBasePtr _ctr_ptr)
 {
-    //std::cout << "remove constraint " << _ctr_ptr->id() << std::endl;
-    assert(ctr_2_row_.find(_ctr_ptr) != ctr_2_row_.end() && "removing unknown constraint");
+    //std::cout << "remove factor " << _ctr_ptr->id() << std::endl;
+    assert(ctr_2_row_.find(_ctr_ptr) != ctr_2_row_.end() && "removing unknown factor");
     eraseBlockRow(A_, ctr_2_row_[_ctr_ptr], _ctr_ptr->getSize());
     b_.segment(ctr_2_row_[_ctr_ptr], _ctr_ptr->getSize()).setZero();
     ctr_2_row_.erase(_ctr_ptr);
@@ -202,12 +202,12 @@ void QRManager::updateStateBlockStatus(StateBlockPtr _st_ptr)
             addStateBlock(_st_ptr);
 }
 
-void QRManager::relinearizeConstraint(ConstraintBasePtr _ctr_ptr)
+void QRManager::relinearizeFactor(FactorBasePtr _ctr_ptr)
 {
-    // evaluate constraint
+    // evaluate factor
     std::vector<const Scalar*> ctr_states_ptr;
     for (auto sb : _ctr_ptr->getStateBlockPtrVector())
-        ctr_states_ptr.push_back(sb->getPtr());
+        ctr_states_ptr.push_back(sb->get());
     Eigen::VectorXs residual(_ctr_ptr->getSize());
     std::vector<Eigen::MatrixXs> jacobians;
     _ctr_ptr->evaluate(ctr_states_ptr,residual,jacobians);
@@ -217,7 +217,7 @@ void QRManager::relinearizeConstraint(ConstraintBasePtr _ctr_ptr)
     for (auto i = 0; i < jacobians.size(); i++)
         if (!_ctr_ptr->getStateBlockPtrVector()[i]->isFixed())
         {
-            assert(sb_2_col_.find(_ctr_ptr->getStateBlockPtrVector()[i]) != sb_2_col_.end() && "constraint involving a state block not added");
+            assert(sb_2_col_.find(_ctr_ptr->getStateBlockPtrVector()[i]) != sb_2_col_.end() && "factor involving a state block not added");
             assert(A_.cols() >= sb_2_col_[_ctr_ptr->getStateBlockPtrVector()[i]] + jacobians[i].cols() - 1 && "bad A number of cols");
             // insert since A_block_row has just been created so it's empty for sure
             insertSparseBlock(jacobians[i], A_block_row, 0, sb_2_col_[_ctr_ptr->getStateBlockPtrVector()[i]]);

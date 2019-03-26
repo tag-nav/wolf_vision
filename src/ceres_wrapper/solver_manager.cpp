@@ -18,15 +18,15 @@ void SolverManager::update()
 {
     //std::cout << "SolverManager: updating... " << std::endl;
     //std::cout << wolf_problem_->getStateBlockNotificationList().size() << " state block notifications" << std::endl;
-    //std::cout << wolf_problem_->getConstraintNotificationList().size() << " constraint notifications" << std::endl;
+    //std::cout << wolf_problem_->getFactorNotificationList().size() << " factor notifications" << std::endl;
 
 	// REMOVE CONSTRAINTS
-	auto ctr_notification_it = wolf_problem_->getConstraintNotificationList().begin();
-	while ( ctr_notification_it != wolf_problem_->getConstraintNotificationList().end() )
+	auto ctr_notification_it = wolf_problem_->getFactorNotificationList().begin();
+	while ( ctr_notification_it != wolf_problem_->getFactorNotificationList().end() )
 		if (ctr_notification_it->notification_ == REMOVE)
 		{
-			removeConstraint(ctr_notification_it->constraint_ptr_);
-			ctr_notification_it = wolf_problem_->getConstraintNotificationList().erase(ctr_notification_it);
+			removeFactor(ctr_notification_it->factor_ptr_);
+			ctr_notification_it = wolf_problem_->getFactorNotificationList().erase(ctr_notification_it);
 		}
 		else
 			ctr_notification_it++;
@@ -65,26 +65,26 @@ void SolverManager::update()
         wolf_problem_->getStateBlockNotificationList().pop_front();
     }
     // ADD CONSTRAINTS
-    while (!wolf_problem_->getConstraintNotificationList().empty())
+    while (!wolf_problem_->getFactorNotificationList().empty())
     {
-        switch (wolf_problem_->getConstraintNotificationList().front().notification_)
+        switch (wolf_problem_->getFactorNotificationList().front().notification_)
         {
             case ADD:
             {
-                addConstraint(wolf_problem_->getConstraintNotificationList().front().constraint_ptr_);
+                addFactor(wolf_problem_->getFactorNotificationList().front().factor_ptr_);
                 break;
             }
             default:
-                throw std::runtime_error("SolverManager::update: Constraint notification must be ADD or REMOVE.");
+                throw std::runtime_error("SolverManager::update: Factor notification must be ADD or REMOVE.");
         }
-        wolf_problem_->getConstraintNotificationList().pop_front();
+        wolf_problem_->getFactorNotificationList().pop_front();
     }
 
-    assert(wolf_problem_->getConstraintNotificationList().empty() && "wolf problem's constraints notification list not empty after update");
+    assert(wolf_problem_->getFactorNotificationList().empty() && "wolf problem's factors notification list not empty after update");
     assert(wolf_problem_->getStateBlockNotificationList().empty() && "wolf problem's state_blocks notification list not empty after update");
 }
 
-ProblemPtr SolverManager::getProblemPtr()
+ProblemPtr SolverManager::getProblem()
 {
     return wolf_problem_;
 }

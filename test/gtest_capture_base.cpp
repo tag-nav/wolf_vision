@@ -18,9 +18,9 @@ TEST(CaptureBase, ConstructorNoSensor)
     CaptureBasePtr C(std::make_shared<CaptureBase>("DUMMY", 1.2)); // timestamp = 1.2
 
     ASSERT_EQ(C->getTimeStamp(), 1.2);
-    ASSERT_FALSE(C->getFramePtr());
+    ASSERT_FALSE(C->getFrame());
     ASSERT_FALSE(C->getProblem());
-    ASSERT_FALSE(C->getSensorPtr());
+    ASSERT_FALSE(C->getSensor());
 }
 
 TEST(CaptureBase, ConstructorWithSensor)
@@ -28,11 +28,11 @@ TEST(CaptureBase, ConstructorWithSensor)
     SensorBasePtr S(std::make_shared<SensorBase>("DUMMY", nullptr, nullptr, nullptr, 2));
     CaptureBasePtr C(std::make_shared<CaptureBase>("DUMMY", 1.5, S)); // timestamp = 1.5
     ASSERT_EQ(C->getTimeStamp(), 1.5);
-    ASSERT_FALSE(C->getFramePtr());
+    ASSERT_FALSE(C->getFrame());
     ASSERT_FALSE(C->getProblem());
-    ASSERT_TRUE(C->getSensorPtr());
-    ASSERT_FALSE(C->getSensorPPtr());
-    ASSERT_FALSE(C->getSensorOPtr());
+    ASSERT_TRUE(C->getSensor());
+    ASSERT_FALSE(C->getSensorP());
+    ASSERT_FALSE(C->getSensorO());
 }
 
 TEST(CaptureBase, Static_sensor_params)
@@ -44,14 +44,14 @@ TEST(CaptureBase, Static_sensor_params)
     CaptureBasePtr C(std::make_shared<CaptureBase>("DUMMY", 1.5, S)); // timestamp = 1.5
 
     // query sensor blocks
-    ASSERT_EQ(S->getPPtr(), p);
-    ASSERT_EQ(S->getOPtr(), o);
-    ASSERT_EQ(S->getIntrinsicPtr(), i);
+    ASSERT_EQ(S->getP(), p);
+    ASSERT_EQ(S->getO(), o);
+    ASSERT_EQ(S->getIntrinsic(), i);
 
     // query capture blocks
-    ASSERT_EQ(C->getSensorPPtr(), p);
-    ASSERT_EQ(C->getSensorOPtr(), o);
-    ASSERT_EQ(C->getSensorIntrinsicPtr(), i);
+    ASSERT_EQ(C->getSensorP(), p);
+    ASSERT_EQ(C->getSensorO(), o);
+    ASSERT_EQ(C->getSensorIntrinsic(), i);
 }
 
 TEST(CaptureBase, Dynamic_sensor_params)
@@ -63,14 +63,14 @@ TEST(CaptureBase, Dynamic_sensor_params)
     CaptureBasePtr C(std::make_shared<CaptureBase>("DUMMY", 1.5, S, p, o, i)); // timestamp = 1.5
 
     // query sensor blocks -- need KFs to find some Capture with the params
-    //    ASSERT_EQ(S->getPPtr(), p);
-    //    ASSERT_EQ(S->getOPtr(), o);
-    //    ASSERT_EQ(S->getIntrinsicPtr(), i);
+    //    ASSERT_EQ(S->getP(), p);
+    //    ASSERT_EQ(S->getO(), o);
+    //    ASSERT_EQ(S->getIntrinsic(), i);
 
     // query capture blocks
-    ASSERT_EQ(C->getSensorPPtr(), p);
-    ASSERT_EQ(C->getSensorOPtr(), o);
-    ASSERT_EQ(C->getSensorIntrinsicPtr(), i);
+    ASSERT_EQ(C->getSensorP(), p);
+    ASSERT_EQ(C->getSensorO(), o);
+    ASSERT_EQ(C->getSensorIntrinsic(), i);
 }
 
 TEST(CaptureBase, addFeature)

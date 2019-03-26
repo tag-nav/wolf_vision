@@ -49,7 +49,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTracker);
  *     Each successful correspondence
  *     results in an extension of the track of the Feature up to the \b incoming Capture.
  *
- * It establishes constraints Feature-Feature or Feature-Landmark;
+ * It establishes factors Feature-Feature or Feature-Landmark;
  * Implement these options in two separate derived classes:
  *   - ProcessorTrackerFeature : for Feature-Feature correspondences (no landmarks)
  *   - ProcessorTrackerLandmark : for Feature-Landmark correspondences (with landmarks)
@@ -62,7 +62,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTracker);
  *     - if voteForKeyFrame()                                                       <=== IMPLEMENT
  *       - Populate the tracker with new Features : processNew()                    <=== IMPLEMENT
  *       - Make a KeyFrame with the \b last Capture: makeFrame(), setKey()
- *       - Establish constraints of the new Features: establishConstraints()        <=== IMPLEMENT
+ *       - Establish factors of the new Features: establishFactors()        <=== IMPLEMENT
  *       - Reset the tracker with the \b last Capture as the new \b origin: reset() <=== IMPLEMENT
  *     - else
  *       - Advance the tracker one Capture ahead: advance()                         <=== IMPLEMENT
@@ -93,8 +93,8 @@ class ProcessorTracker : public ProcessorBase
         CaptureBasePtr origin_ptr_;             ///< Pointer to the origin of the tracker.
         CaptureBasePtr last_ptr_;               ///< Pointer to the last tracked capture.
         CaptureBasePtr incoming_ptr_;           ///< Pointer to the incoming capture being processed.
-        FeatureBaseList new_features_last_;     ///< List of new features in \b last for landmark initialization and new key-frame creation.
-        FeatureBaseList new_features_incoming_; ///< list of the new features of \b last successfully tracked in \b incoming
+        FeatureBasePtrList new_features_last_;     ///< List of new features in \b last for landmark initialization and new key-frame creation.
+        FeatureBasePtrList new_features_incoming_; ///< list of the new features of \b last successfully tracked in \b incoming
 
         SizeStd number_of_tracks_;
 
@@ -115,9 +115,9 @@ class ProcessorTracker : public ProcessorBase
         bool checkTimeTolerance(const FrameBasePtr _frm, const TimeStamp& _ts);
         bool checkTimeTolerance(const FrameBasePtr _frm, const CaptureBasePtr _cap);
 
-        virtual CaptureBasePtr getOriginPtr();
-        virtual CaptureBasePtr getLastPtr();
-        virtual CaptureBasePtr getIncomingPtr();
+        virtual CaptureBasePtr getOrigin();
+        virtual CaptureBasePtr getLast();
+        virtual CaptureBasePtr getIncoming();
 
     protected:
         /** Pre-process incoming Capture
@@ -154,18 +154,18 @@ class ProcessorTracker : public ProcessorBase
          * This should do one of the following, depending on the design of the tracker -- see use_landmarks_:
          *   - Track Features against other Features in the \b origin Capture. Tips:
          *     - An intermediary step of matching against Features in the \b last Capture makes tracking easier.
-         *     - Once tracked against last, then the link to Features in \b origin is provided by the Features' Constraints in \b last.
+         *     - Once tracked against last, then the link to Features in \b origin is provided by the Features' Factors in \b last.
          *     - If required, correct the drift by re-comparing against the Features in origin.
-         *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
+         *     - The Factors in \b last need to be transferred to \b incoming (moved, not copied).
          *   - Track Features against Landmarks in the Map. Tips:
-         *     - The links to the Landmarks are in the Features' Constraints in last.
-         *     - The Constraints in \b last need to be transferred to \b incoming (moved, not copied).
+         *     - The links to the Landmarks are in the Features' Factors in last.
+         *     - The Factors in \b last need to be transferred to \b incoming (moved, not copied).
          *
          * The function must generate the necessary Features in the \b incoming Capture,
          * of the correct type, derived from FeatureBase.
          *
-         * It must also generate the constraints, of the correct type, derived from ConstraintBase
-         * (through ConstraintAnalytic or ConstraintSparse).
+         * It must also generate the factors, of the correct type, derived from FactorBase
+         * (through FactorAnalytic or FactorSparse).
          */
         virtual unsigned int processKnown() = 0;
 
@@ -190,10 +190,10 @@ class ProcessorTracker : public ProcessorBase
          */
         virtual unsigned int processNew(const unsigned int& _max_features) = 0;
 
-        /**\brief Creates and adds constraints from last_ to origin_
+        /**\brief Creates and adds factors from last_ to origin_
          *
          */
-        virtual void establishConstraints() = 0;
+        virtual void establishFactors() = 0;
 
         /** \brief Reset the tracker using the \b last Capture as the new \b origin.
          */
@@ -201,7 +201,7 @@ class ProcessorTracker : public ProcessorBase
 
     public:
 
-        FeatureBaseList& getNewFeaturesListLast();
+        FeatureBasePtrList& getNewFeaturesListLast();
 
         const SizeStd& previousNumberOfTracks() const
         {
@@ -219,13 +219,13 @@ class ProcessorTracker : public ProcessorBase
 
         void addNewFeatureLast(FeatureBasePtr _feature_ptr);
 
-        FeatureBaseList& getNewFeaturesListIncoming();
+        FeatureBasePtrList& getNewFeaturesListIncoming();
 
         void addNewFeatureIncoming(FeatureBasePtr _feature_ptr);
 
 };
 
-inline FeatureBaseList& ProcessorTracker::getNewFeaturesListLast()
+inline FeatureBasePtrList& ProcessorTracker::getNewFeaturesListLast()
 {
     return new_features_last_;
 }
@@ -235,7 +235,7 @@ inline void ProcessorTracker::addNewFeatureLast(FeatureBasePtr _feature_ptr)
     new_features_last_.push_back(_feature_ptr);
 }
 
-inline FeatureBaseList& ProcessorTracker::getNewFeaturesListIncoming()
+inline FeatureBasePtrList& ProcessorTracker::getNewFeaturesListIncoming()
 {
     return new_features_incoming_;
 }
@@ -265,17 +265,17 @@ inline void ProcessorTracker::addNewFeatureIncoming(FeatureBasePtr _feature_ptr)
     new_features_incoming_.push_back(_feature_ptr);
 }
 
-inline CaptureBasePtr ProcessorTracker::getOriginPtr()
+inline CaptureBasePtr ProcessorTracker::getOrigin()
 {
     return origin_ptr_;
 }
 
-inline CaptureBasePtr ProcessorTracker::getLastPtr()
+inline CaptureBasePtr ProcessorTracker::getLast()
 {
     return last_ptr_;
 }
 
-inline CaptureBasePtr ProcessorTracker::getIncomingPtr()
+inline CaptureBasePtr ProcessorTracker::getIncoming()
 {
     return incoming_ptr_;
 }

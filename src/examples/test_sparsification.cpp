@@ -16,7 +16,7 @@
 //Wolf includes
 #include "base/capture/capture_void.h"
 #include "base/feature/feature_odom_2D.h"
-#include "base/constraint/constraint_base.h"
+#include "base/factor/factor_base.h"
 #include "base/ceres_wrapper/ceres_manager.h"
 
 // EIGEN
@@ -252,7 +252,7 @@ int main(int argc, char** argv)
 				if (edge_from == last_frame_ptr->id())
 					frame_from_ptr = last_frame_ptr;
 				else
-					for (auto frm_rit = bl_problem_ptr->getTrajectoryPtr()->getFrameList().rbegin(); frm_rit != bl_problem_ptr->getTrajectoryPtr()->getFrameList().rend(); frm_rit++)
+					for (auto frm_rit = bl_problem_ptr->getTrajectory()->getFrameList().rbegin(); frm_rit != bl_problem_ptr->getTrajectory()->getFrameList().rend(); frm_rit++)
 						if ((*frm_rit)->id() == edge_from)
 						{
 							frame_from_ptr = *frm_rit;
@@ -261,7 +261,7 @@ int main(int argc, char** argv)
 				if (edge_to == last_frame_ptr->id())
 					frame_to_ptr = last_frame_ptr;
 				else
-					for (auto frm_rit = bl_problem_ptr->getTrajectoryPtr()->getFrameList().rbegin(); frm_rit != bl_problem_ptr->getTrajectoryPtr()->getFrameList().rend(); frm_rit++)
+					for (auto frm_rit = bl_problem_ptr->getTrajectory()->getFrameList().rbegin(); frm_rit != bl_problem_ptr->getTrajectory()->getFrameList().rend(); frm_rit++)
 						if ((*frm_rit)->id() == edge_to)
 						{
 							frame_to_ptr = *frm_rit;
@@ -285,9 +285,9 @@ int main(int argc, char** argv)
 			capture_ptr->addFeature(feature_ptr);
 
 			// CONSTRAINT
-			ConstraintOdom2DPtr constraint_ptr = std::make_shared<ConstraintOdom2D>(feature_ptr, frame_to_ptr);
-			feature_ptr->addConstraint(constraint_ptr);
-			frame_to_ptr->addConstrainedBy(constraint_ptr);
+			FactorOdom2DPtr factor_ptr = std::make_shared<FactorOdom2D>(feature_ptr, frame_to_ptr);
+			feature_ptr->addFactor(factor_ptr);
+			frame_to_ptr->addConstrainedBy(factor_ptr);
 
 			// SOLVE
 			// solution

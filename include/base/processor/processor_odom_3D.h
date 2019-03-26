@@ -11,7 +11,7 @@
 #include "base/processor/processor_motion.h"
 #include "base/sensor/sensor_odom_3D.h"
 #include "base/capture/capture_odom_3D.h"
-#include "base/constraint/constraint_odom_3D.h"
+#include "base/factor/factor_odom_3D.h"
 #include "base/rotations.h"
 #include <cmath>
 
@@ -96,7 +96,7 @@ class ProcessorOdom3D : public ProcessorMotion
                                                const VectorXs& _data,
                                                const MatrixXs& _data_cov,
                                                const FrameBasePtr& _frame_origin) override;
-        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature_motion,
+        virtual FactorBasePtr emplaceFactor(FeatureBasePtr _feature_motion,
                                                     CaptureBasePtr _capture_origin) override;
         virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion) override;
 

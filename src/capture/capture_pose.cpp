@@ -15,17 +15,17 @@ CapturePose::~CapturePose()
 	//
 }
 
-void CapturePose::emplaceFeatureAndConstraint()
+void CapturePose::emplaceFeatureAndFactor()
 {
     // Emplace feature
     FeaturePosePtr feature_pose = std::make_shared<FeaturePose>(data_,data_covariance_);
     addFeature(feature_pose);
 
-    // Emplace constraint
+    // Emplace factor
     if (data_.size() == 3 && data_covariance_.rows() == 3 && data_covariance_.cols() == 3 )
-        feature_pose->addConstraint(std::make_shared<ConstraintPose2D>(feature_pose));
+        feature_pose->addFactor(std::make_shared<FactorPose2D>(feature_pose));
     else if (data_.size() == 7 && data_covariance_.rows() == 6 && data_covariance_.cols() == 6 )
-        feature_pose->addConstraint(std::make_shared<ConstraintPose3D>(feature_pose));
+        feature_pose->addFactor(std::make_shared<FactorPose3D>(feature_pose));
     else
         throw std::runtime_error("Wrong data size in CapturePose. Use 3 for 2D. Use 7 for 3D.");
 }

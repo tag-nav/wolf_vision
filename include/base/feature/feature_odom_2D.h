@@ -3,8 +3,8 @@
 
 //Wolf includes
 #include "base/feature/feature_base.h"
-#include "base/constraint/constraint_odom_2D.h"
-#include "base/constraint/constraint_odom_2D_analytic.h"
+#include "base/factor/factor_odom_2D.h"
+#include "base/factor/factor_odom_2D_analytic.h"
 
 //std includes
 
@@ -27,13 +27,13 @@ class FeatureOdom2D : public FeatureBase
 
         virtual ~FeatureOdom2D();
 
-        /** \brief Generic interface to find constraints
+        /** \brief Generic interface to find factors
          * 
          * TBD
-         * Generic interface to find constraints between this feature and a map (static/slam) or a previous feature
+         * Generic interface to find factors between this feature and a map (static/slam) or a previous feature
          *
          **/
-        virtual void findConstraints();
+        virtual void findFactors();
         
 };
 

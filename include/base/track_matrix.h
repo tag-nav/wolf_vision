@@ -59,7 +59,7 @@ typedef map<size_t, pair<FeatureBasePtr, FeatureBasePtr> >  TrackMatches; // mat
  * The storage is implemented as two maps of maps, so each addition and removal of single features is accomplished in logarithmic time:
  *
  *      Tracks are identified with the track ID in           f->trackId()
- *      Snapshots are identified with the Capture pointer in f->getCapturePtr()
+ *      Snapshots are identified with the Capture pointer in f->getCapture()
  *
  * these fields of FeatureBase are initialized each time a feature is added to the track matrix:
  *
@@ -68,7 +68,7 @@ typedef map<size_t, pair<FeatureBasePtr, FeatureBasePtr> >  TrackMatches; // mat
  * so e.g. given a feature f,
  *
  *      getTrack   (f->trackId()) ;       // returns all the track where feature f is.
- *      getSnapshot(f->getCapturePtr()) ; // returns all the features in the same capture of f.
+ *      getSnapshot(f->getCapture()) ; // returns all the features in the same capture of f.
  *
  */
 

@@ -14,13 +14,13 @@ SolverManager::SolverManager(const ProblemPtr& _wolf_problem) :
 void SolverManager::update()
 {
     // REMOVE CONSTRAINTS
-    auto ctr_notification_it = wolf_problem_->getConstraintNotificationMap().begin();
-    while ( ctr_notification_it != wolf_problem_->getConstraintNotificationMap().end() )
+    auto ctr_notification_it = wolf_problem_->getFactorNotificationMap().begin();
+    while ( ctr_notification_it != wolf_problem_->getFactorNotificationMap().end() )
     {
         if (ctr_notification_it->second == REMOVE)
         {
-            removeConstraint(ctr_notification_it->first);
-            ctr_notification_it = wolf_problem_->getConstraintNotificationMap().erase(ctr_notification_it);
+            removeFactor(ctr_notification_it->first);
+            ctr_notification_it = wolf_problem_->getFactorNotificationMap().erase(ctr_notification_it);
         }
         else
             ctr_notification_it++;
@@ -67,17 +67,17 @@ void SolverManager::update()
     }
 
     // ADD CONSTRAINTS
-    ctr_notification_it = wolf_problem_->getConstraintNotificationMap().begin();
-    while (ctr_notification_it != wolf_problem_->getConstraintNotificationMap().end())
+    ctr_notification_it = wolf_problem_->getFactorNotificationMap().begin();
+    while (ctr_notification_it != wolf_problem_->getFactorNotificationMap().end())
     {
-        assert(wolf_problem_->getConstraintNotificationMap().begin()->second == ADD && "unexpected constraint notification value after all REMOVE have been processed, this should be ADD");
+        assert(wolf_problem_->getFactorNotificationMap().begin()->second == ADD && "unexpected factor notification value after all REMOVE have been processed, this should be ADD");
 
-        addConstraint(wolf_problem_->getConstraintNotificationMap().begin()->first);
-        ctr_notification_it = wolf_problem_->getConstraintNotificationMap().erase(ctr_notification_it);
+        addFactor(wolf_problem_->getFactorNotificationMap().begin()->first);
+        ctr_notification_it = wolf_problem_->getFactorNotificationMap().erase(ctr_notification_it);
     }
 
     // UPDATE STATE BLOCKS (state, fix or local parameterization)
-    for (auto state_ptr : wolf_problem_->getStateBlockList())
+    for (auto state_ptr : wolf_problem_->getStateBlockPtrList())
     {
         assert(state_blocks_.find(state_ptr)!=state_blocks_.end() && "Updating the state of an unregistered StateBlock !");
 
@@ -106,11 +106,11 @@ void SolverManager::update()
         }
     }
 
-    assert(wolf_problem_->getConstraintNotificationMap().empty() && "wolf problem's constraints notification map not empty after update");
+    assert(wolf_problem_->getFactorNotificationMap().empty() && "wolf problem's factors notification map not empty after update");
     assert(wolf_problem_->getStateBlockNotificationMap().empty() && "wolf problem's state_blocks notification map not empty after update");
 }
 
-wolf::ProblemPtr SolverManager::getProblemPtr()
+wolf::ProblemPtr SolverManager::getProblem()
 {
     return wolf_problem_;
 }
@@ -124,7 +124,7 @@ std::string SolverManager::solve(const ReportVerbosity report_level)
 
     // update StateBlocks with optimized state value.
     /// @todo whatif someone has changed the state notification during opti ??
-    /// JV: I do not see a problem here, the solver provides the optimal state given the constraints, if someone changed the state during optimization, it will be overwritten by the optimal one.
+    /// JV: I do not see a problem here, the solver provides the optimal state given the factors, if someone changed the state during optimization, it will be overwritten by the optimal one.
 
     std::map<StateBlockPtr, Eigen::VectorXs>::iterator it = state_blocks_.begin(),
             it_end = state_blocks_.end();

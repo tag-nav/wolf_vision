@@ -7,7 +7,7 @@
 #include "base/processor/processor_motion.h"
 #include "base/processor/processor_tracker.h"
 #include "base/capture/capture_pose.h"
-#include "base/constraint/constraint_base.h"
+#include "base/factor/factor_base.h"
 #include "base/sensor/sensor_factory.h"
 #include "base/processor/processor_factory.h"
 #include "base/state_block.h"
@@ -79,7 +79,7 @@ Problem::~Problem()
 
 void Problem::addSensor(SensorBasePtr _sen_ptr)
 {
-    getHardwarePtr()->addSensor(_sen_ptr);
+    getHardware()->addSensor(_sen_ptr);
 }
 
 SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
@@ -134,7 +134,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
 
     // setting the origin in all processor motion if origin already setted
     if (prc_ptr->isMotion() && prior_is_set_)
-        (std::static_pointer_cast<ProcessorMotion>(prc_ptr))->setOrigin(getLastKeyFramePtr());
+        (std::static_pointer_cast<ProcessorMotion>(prc_ptr))->setOrigin(getLastKeyFrame());
 
     // setting the main processor motion
     if (prc_ptr->isMotion() && processor_motion_ptr_ == nullptr)
@@ -175,7 +175,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
 
     // setting the origin in all processor motion if origin already setted
     if (prc_ptr->isMotion() && prior_is_set_)
-        (std::static_pointer_cast<ProcessorMotion>(prc_ptr))->setOrigin(getLastKeyFramePtr());
+        (std::static_pointer_cast<ProcessorMotion>(prc_ptr))->setOrigin(getLastKeyFrame());
 
     // setting the main processor motion
     if (prc_ptr->isMotion() && processor_motion_ptr_ == nullptr)
@@ -186,14 +186,14 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
 
 SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)
 {
-    auto sen_it = std::find_if(getHardwarePtr()->getSensorList().begin(),
-                               getHardwarePtr()->getSensorList().end(),
+    auto sen_it = std::find_if(getHardware()->getSensorList().begin(),
+                               getHardware()->getSensorList().end(),
                                [&](SensorBasePtr sb)
                                {
                                    return sb->getName() == _sensor_name;
                                }); // lambda function for the find_if
 
-    if (sen_it == getHardwarePtr()->getSensorList().end())
+    if (sen_it == getHardware()->getSensorList().end())
         return nullptr;
 
     return (*sen_it);
@@ -201,7 +201,7 @@ SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)
 
 ProcessorMotionPtr Problem::setProcessorMotion(const std::string& _processor_name)
 {
-    for (auto sen : getHardwarePtr()->getSensorList()) // loop all sensors
+    for (auto sen : getHardware()->getSensorList()) // loop all sensors
     {
         auto prc_it = std::find_if(sen->getProcessorList().begin(), // find processor by its name
                                    sen->getProcessorList().end(),
@@ -283,8 +283,8 @@ void Problem::getCurrentState(Eigen::VectorXs& state)
 
     if (processor_motion_ptr_ != nullptr)
         processor_motion_ptr_->getCurrentState(state);
-    else if (trajectory_ptr_->getLastKeyFramePtr() != nullptr)
-        trajectory_ptr_->getLastKeyFramePtr()->getState(state);
+    else if (trajectory_ptr_->getLastKeyFrame() != nullptr)
+        trajectory_ptr_->getLastKeyFrame()->getState(state);
     else
         state = zeroState();
 }
@@ -298,10 +298,10 @@ void Problem::getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& ts)
         processor_motion_ptr_->getCurrentState(state);
         processor_motion_ptr_->getCurrentTimeStamp(ts);
     }
-    else if (trajectory_ptr_->getLastKeyFramePtr() != nullptr)
+    else if (trajectory_ptr_->getLastKeyFrame() != nullptr)
     {
-        trajectory_ptr_->getLastKeyFramePtr()->getTimeStamp(ts);
-        trajectory_ptr_->getLastKeyFramePtr()->getState(state);
+        trajectory_ptr_->getLastKeyFrame()->getTimeStamp(ts);
+        trajectory_ptr_->getLastKeyFrame()->getState(state);
     }
     else
         state = zeroState();
@@ -386,13 +386,13 @@ void Problem::keyFrameCallback(FrameBasePtr _keyframe_ptr, ProcessorBasePtr _pro
 
 LandmarkBasePtr Problem::addLandmark(LandmarkBasePtr _lmk_ptr)
 {
-    getMapPtr()->addLandmark(_lmk_ptr);
+    getMap()->addLandmark(_lmk_ptr);
     return _lmk_ptr;
 }
 
-void Problem::addLandmarkList(LandmarkBaseList& _lmk_list)
+void Problem::addLandmarkList(LandmarkBasePtrList& _lmk_list)
 {
-    getMapPtr()->addLandmarkList(_lmk_list);
+    getMap()->addLandmarkList(_lmk_list);
 }
 
 StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
@@ -452,31 +452,31 @@ void Problem::removeStateBlock(StateBlockPtr _state_ptr)
         state_block_notification_map_[_state_ptr] = REMOVE;
 }
 
-ConstraintBasePtr Problem::addConstraint(ConstraintBasePtr _constraint_ptr)
+FactorBasePtr Problem::addFactor(FactorBasePtr _factor_ptr)
 {
-    //std::cout << "Problem::addConstraintPtr " << _constraint_ptr->id() << std::endl;
+    //std::cout << "Problem::addFactorPtr " << _factor_ptr->id() << std::endl;
 
     // Add ADD notification
     // Check if there is already a notification for this state block
-    auto notification_it = constraint_notification_map_.find(_constraint_ptr);
-    if (notification_it != constraint_notification_map_.end() && notification_it->second == ADD)
+    auto notification_it = factor_notification_map_.find(_factor_ptr);
+    if (notification_it != factor_notification_map_.end() && notification_it->second == ADD)
     {
-        WOLF_WARN("There is already an ADD notification of this constraint");
+        WOLF_WARN("There is already an ADD notification of this factor");
     }
     // Add ADD notification (override in case of REMOVE)
     else
-        constraint_notification_map_[_constraint_ptr] = ADD;
+        factor_notification_map_[_factor_ptr] = ADD;
 
-    return _constraint_ptr;
+    return _factor_ptr;
 }
 
-void Problem::removeConstraint(ConstraintBasePtr _constraint_ptr)
+void Problem::removeFactor(FactorBasePtr _factor_ptr)
 {
-    //std::cout << "Problem::removeConstraintPtr " << _constraint_ptr->id() << std::endl;
+    //std::cout << "Problem::removeFactorPtr " << _factor_ptr->id() << std::endl;
 
     // Check if there is already a notification for this state block
-    auto notification_it = constraint_notification_map_.find(_constraint_ptr);
-    if (notification_it != constraint_notification_map_.end())
+    auto notification_it = factor_notification_map_.find(_factor_ptr);
+    if (notification_it != factor_notification_map_.end())
     {
         if (notification_it->second == REMOVE)
         {
@@ -484,11 +484,11 @@ void Problem::removeConstraint(ConstraintBasePtr _constraint_ptr)
         }
         // Remove ADD notification
         else
-            constraint_notification_map_.erase(notification_it);
+            factor_notification_map_.erase(notification_it);
     }
     // Add REMOVE notification
     else
-        constraint_notification_map_[_constraint_ptr] = REMOVE;
+        factor_notification_map_[_factor_ptr] = REMOVE;
 }
 
 void Problem::clearCovariance()
@@ -628,7 +628,7 @@ Eigen::MatrixXs Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr)
 
 Eigen::MatrixXs Problem::getLastKeyFrameCovariance()
 {
-    FrameBasePtr frm = getLastKeyFramePtr();
+    FrameBasePtr frm = getLastKeyFrame();
     return getFrameCovariance(frm);
 }
 
@@ -671,32 +671,32 @@ Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_pt
     return covariance;
 }
 
-MapBasePtr Problem::getMapPtr()
+MapBasePtr Problem::getMap()
 {
     return map_ptr_;
 }
 
-TrajectoryBasePtr Problem::getTrajectoryPtr()
+TrajectoryBasePtr Problem::getTrajectory()
 {
     return trajectory_ptr_;
 }
 
-HardwareBasePtr Problem::getHardwarePtr()
+HardwareBasePtr Problem::getHardware()
 {
     return hardware_ptr_;
 }
 
-FrameBasePtr Problem::getLastFramePtr()
+FrameBasePtr Problem::getLastFrame()
 {
-    return trajectory_ptr_->getLastFramePtr();
+    return trajectory_ptr_->getLastFrame();
 }
 
-FrameBasePtr Problem::getLastKeyFramePtr()
+FrameBasePtr Problem::getLastKeyFrame()
 {
-    return trajectory_ptr_->getLastKeyFramePtr();
+    return trajectory_ptr_->getLastKeyFrame();
 }
 
-StateBlockList& Problem::getStateBlockList()
+StateBlockPtrList& Problem::getStateBlockPtrList()
 {
     return state_block_list_;
 }
@@ -718,8 +718,8 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
 
         origin_keyframe->addCapture(init_capture);
 
-        // emplace feature and constraint
-        init_capture->emplaceFeatureAndConstraint();
+        // emplace feature and factor
+        init_capture->emplaceFeatureAndFactor();
 
         // Notify all processors about the prior KF
         for (auto sensor : hardware_ptr_->getSensorList())
@@ -744,12 +744,12 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
 
 void Problem::loadMap(const std::string& _filename_dot_yaml)
 {
-    getMapPtr()->load(_filename_dot_yaml);
+    getMap()->load(_filename_dot_yaml);
 }
 
 void Problem::saveMap(const std::string& _filename_dot_yaml, const std::string& _map_name)
 {
-    getMapPtr()->save(_filename_dot_yaml, _map_name);
+    getMap()->save(_filename_dot_yaml, _map_name);
 }
 
 void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
@@ -759,11 +759,11 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
 
     cout << endl;
     cout << "P: wolf tree status ---------------------" << endl;
-    cout << "Hardware" << ((depth < 1) ? ("   -- " + std::to_string(getHardwarePtr()->getSensorList().size()) + "S") : "")  << endl;
+    cout << "Hardware" << ((depth < 1) ? ("   -- " + std::to_string(getHardware()->getSensorList().size()) + "S") : "")  << endl;
     if (depth >= 1)
     {
         // Sensors =======================================================================================
-        for (auto S : getHardwarePtr()->getSensorList())
+        for (auto S : getHardware()->getSensorList())
         {
             cout << "  S" << S->id() << " " << S->getType();
             if (!metric && !state_blocks) cout << (S->isExtrinsicDynamic() ? " [Dyn," : " [Sta,") << (S->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
@@ -788,13 +788,13 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             else if (metric)
             {
                 cout << "    Extr " << (S->isExtrinsicDynamic() ? "[Dyn]" : "[Sta]") << "= ( ";
-                if (S->getPPtr())
-                    cout << S->getPPtr()->getState().transpose();
-                if (S->getOPtr())
-                    cout << " " << S->getOPtr()->getState().transpose();
+                if (S->getP())
+                    cout << S->getP()->getState().transpose();
+                if (S->getO())
+                    cout << " " << S->getO()->getState().transpose();
                 cout  << " )";
-                if (S->getIntrinsicPtr())
-                    cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << "= ( " << S->getIntrinsicPtr()->getState().transpose() << " )";
+                if (S->getIntrinsic())
+                    cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << "= ( " << S->getIntrinsic()->getState().transpose() << " )";
                 cout << endl;
             }
             else if (state_blocks)
@@ -814,14 +814,14 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                     {
                         std::cout << "    pm" << p->id() << " " << p->getType() << endl;
                         ProcessorMotionPtr pm = std::static_pointer_cast<ProcessorMotion>(p);
-                        if (pm->getOriginPtr())
-                            cout << "      o: C" << pm->getOriginPtr()->id() << " - " << (pm->getOriginPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
-                            << pm->getOriginPtr()->getFramePtr()->id() << endl;
-                        if (pm->getLastPtr())
-                            cout << "      l: C" << pm->getLastPtr()->id() << " - " << (pm->getLastPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
-                            << pm->getLastPtr()->getFramePtr()->id() << endl;
-                        if (pm->getIncomingPtr())
-                            cout << "      i: C" << pm->getIncomingPtr()->id() << endl;
+                        if (pm->getOrigin())
+                            cout << "      o: C" << pm->getOrigin()->id() << " - " << (pm->getOrigin()->getFrame()->isKey() ? "  KF" : "  F")
+                            << pm->getOrigin()->getFrame()->id() << endl;
+                        if (pm->getLast())
+                            cout << "      l: C" << pm->getLast()->id() << " - " << (pm->getLast()->getFrame()->isKey() ? "  KF" : "  F")
+                            << pm->getLast()->getFrame()->id() << endl;
+                        if (pm->getIncoming())
+                            cout << "      i: C" << pm->getIncoming()->id() << endl;
                     }
                     else
                     {
@@ -832,29 +832,29 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
 //                            ProcessorTrackerFeatureTrifocalPtr ptt = std::dynamic_pointer_cast<ProcessorTrackerFeatureTrifocal>(pt);
 //                            if (ptt)
 //                            {
-//                                if (ptt->getPrevOriginPtr())
-//                                    cout << "      p: C" << ptt->getPrevOriginPtr()->id() << " - " << (ptt->getPrevOriginPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
-//                                    << ptt->getPrevOriginPtr()->getFramePtr()->id() << endl;
+//                                if (ptt->getPrevOrigin())
+//                                    cout << "      p: C" << ptt->getPrevOrigin()->id() << " - " << (ptt->getPrevOrigin()->getFrame()->isKey() ? "  KF" : "  F")
+//                                    << ptt->getPrevOrigin()->getFrame()->id() << endl;
 //                            }
-                            if (pt->getOriginPtr())
-                                cout << "      o: C" << pt->getOriginPtr()->id() << " - " << (pt->getOriginPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
-                                << pt->getOriginPtr()->getFramePtr()->id() << endl;
-                            if (pt->getLastPtr())
-                                cout << "      l: C" << pt->getLastPtr()->id() << " - " << (pt->getLastPtr()->getFramePtr()->isKey() ? "  KF" : "  F")
-                                << pt->getLastPtr()->getFramePtr()->id() << endl;
-                            if (pt->getIncomingPtr())
-                                cout << "      i: C" << pt->getIncomingPtr()->id() << endl;
+                            if (pt->getOrigin())
+                                cout << "      o: C" << pt->getOrigin()->id() << " - " << (pt->getOrigin()->getFrame()->isKey() ? "  KF" : "  F")
+                                << pt->getOrigin()->getFrame()->id() << endl;
+                            if (pt->getLast())
+                                cout << "      l: C" << pt->getLast()->id() << " - " << (pt->getLast()->getFrame()->isKey() ? "  KF" : "  F")
+                                << pt->getLast()->getFrame()->id() << endl;
+                            if (pt->getIncoming())
+                                cout << "      i: C" << pt->getIncoming()->id() << endl;
                         }
                     }
                 } // for p
             }
         } // for S
     }
-    cout << "Trajectory" << ((depth < 1) ? (" -- " + std::to_string(getTrajectoryPtr()->getFrameList().size()) + "F") : "")  << endl;
+    cout << "Trajectory" << ((depth < 1) ? (" -- " + std::to_string(getTrajectory()->getFrameList().size()) + "F") : "")  << endl;
     if (depth >= 1)
     {
         // Frames =======================================================================================
-        for (auto F : getTrajectoryPtr()->getFrameList())
+        for (auto F : getTrajectory()->getFrameList())
         {
             cout << (F->isKey() ? "  KF" : "  F") << F->id() << ((depth < 2) ? " -- " + std::to_string(F->getCaptureList().size()) + "C  " : "");
             if (constr_by)
@@ -886,19 +886,19 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                 {
                     cout << "    C" << (C->isMotion() ? "M" : "") << C->id() << " " << C->getType();
                     
-                    if(C->getSensorPtr() != nullptr)
+                    if(C->getSensor() != nullptr)
                     {
-                        cout << " -> S" << C->getSensorPtr()->id();
-                        cout << (C->getSensorPtr()->isExtrinsicDynamic() ? " [Dyn, ": " [Sta, ");
-                        cout << (C->getSensorPtr()->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
+                        cout << " -> S" << C->getSensor()->id();
+                        cout << (C->getSensor()->isExtrinsicDynamic() ? " [Dyn, ": " [Sta, ");
+                        cout << (C->getSensor()->isIntrinsicDynamic() ? "Dyn]" : "Sta]");
                     }
                     else
                         cout << " -> S-";
                     if (C->isMotion())
                     {
                         auto CM = std::static_pointer_cast<CaptureMotion>(C);
-                        if (CM->getOriginFramePtr())
-                            cout << " -> OF" << CM->getOriginFramePtr()->id();
+                        if (CM->getOriginFrame())
+                            cout << " -> OF" << CM->getOriginFrame()->id();
                     }
 
                     cout << ((depth < 3) ? " -- " + std::to_string(C->getFeatureList().size()) + "f" : "");
@@ -943,7 +943,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         // Features =======================================================================================
                         for (auto f : C->getFeatureList())
                         {
-                            cout << "      f" << f->id() << " trk" << f->trackId() << " " << f->getType() << ((depth < 4) ? " -- " + std::to_string(f->getConstraintList().size()) + "c  " : "");
+                            cout << "      f" << f->id() << " trk" << f->trackId() << " " << f->getType() << ((depth < 4) ? " -- " + std::to_string(f->getFactorList().size()) + "c  " : "");
                             if (constr_by)
                             {
                                 cout << "  <--\t";
@@ -956,20 +956,20 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                                         << " )" << endl;
                             if (depth >= 4)
                             {
-                                // Constraints =======================================================================================
-                                for (auto c : f->getConstraintList())
+                                // Factors =======================================================================================
+                                for (auto c : f->getFactorList())
                                 {
                                     cout << "        c" << c->id() << " " << c->getType() << " -->";
-                                    if (c->getFrameOtherPtr() == nullptr && c->getCaptureOtherPtr() == nullptr && c->getFeatureOtherPtr() == nullptr && c->getLandmarkOtherPtr() == nullptr)
+                                    if (c->getFrameOther() == nullptr && c->getCaptureOther() == nullptr && c->getFeatureOther() == nullptr && c->getLandmarkOther() == nullptr)
                                         cout << " A";
-                                    if (c->getFrameOtherPtr() != nullptr)
-                                        cout << " F" << c->getFrameOtherPtr()->id();
-                                    if (c->getCaptureOtherPtr() != nullptr)
-                                        cout << " C" << c->getCaptureOtherPtr()->id();
-                                    if (c->getFeatureOtherPtr() != nullptr)
-                                        cout << " f" << c->getFeatureOtherPtr()->id();
-                                    if (c->getLandmarkOtherPtr() != nullptr)
-                                        cout << " L" << c->getLandmarkOtherPtr()->id();
+                                    if (c->getFrameOther() != nullptr)
+                                        cout << " F" << c->getFrameOther()->id();
+                                    if (c->getCaptureOther() != nullptr)
+                                        cout << " C" << c->getCaptureOther()->id();
+                                    if (c->getFeatureOther() != nullptr)
+                                        cout << " f" << c->getFeatureOther()->id();
+                                    if (c->getLandmarkOther() != nullptr)
+                                        cout << " L" << c->getLandmarkOther()->id();
                                     cout << endl;
                                 } // for c
                             }
@@ -979,11 +979,11 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
             }
         } // for F
     }
-    cout << "Map" << ((depth < 1) ? ("        -- " + std::to_string(getMapPtr()->getLandmarkList().size()) + "L") : "") << endl;
+    cout << "Map" << ((depth < 1) ? ("        -- " + std::to_string(getMap()->getLandmarkList().size()) + "L") : "") << endl;
     if (depth >= 1)
     {
         // Landmarks =======================================================================================
-        for (auto L : getMapPtr()->getLandmarkList())
+        for (auto L : getMap()->getLandmarkList())
         {
             cout << "  L" << L->id() << " " << L->getType();
             if (constr_by)
@@ -1050,13 +1050,13 @@ bool Problem::check(int verbose_level)
         {
             cout << "  S" << S->id() << " @ " << S.get() << endl;
             cout << "    -> P @ " << S->getProblem().get() << endl;
-            cout << "    -> H @ " << S->getHardwarePtr().get() << endl;
+            cout << "    -> H @ " << S->getHardware().get() << endl;
             for (auto sb : S->getStateBlockVec())
             {
                 cout <<  "    sb @ " << sb.get();
                 if (sb)
                 {
-                    auto lp = sb->getLocalParametrizationPtr();
+                    auto lp = sb->getLocalParametrization();
                     if (lp)
                         cout <<  " (lp @ " << lp.get() << ")";
                 }
@@ -1065,20 +1065,20 @@ bool Problem::check(int verbose_level)
         }
         // check problem and hardware pointers
         is_consistent = is_consistent && (S->getProblem().get() == P_raw);
-        is_consistent = is_consistent && (S->getHardwarePtr() == H);
+        is_consistent = is_consistent && (S->getHardware() == H);
 
         // Processors =======================================================================================
         for (auto p : S->getProcessorList())
         {
             if (verbose_level > 0)
             {
-                cout << "    p" << p->id() << " @ " << p.get() << " -> S" << p->getSensorPtr()->id() << endl;
+                cout << "    p" << p->id() << " @ " << p.get() << " -> S" << p->getSensor()->id() << endl;
                 cout << "      -> P  @ " << p->getProblem().get() << endl;
-                cout << "      -> S" << p->getSensorPtr()->id() << " @ " << p->getSensorPtr().get() << endl;
+                cout << "      -> S" << p->getSensor()->id() << " @ " << p->getSensor().get() << endl;
             }
             // check problem and sensor pointers
             is_consistent = is_consistent && (p->getProblem().get() == P_raw);
-            is_consistent = is_consistent && (p->getSensorPtr() == S);
+            is_consistent = is_consistent && (p->getSensor() == S);
         }
     }
     // ------------------------
@@ -1099,13 +1099,13 @@ bool Problem::check(int verbose_level)
         {
             cout << (F->isKey() ? "  KF" : "  F") << F->id() << " @ " << F.get() << endl;
             cout << "    -> P @ " << F->getProblem().get() << endl;
-            cout << "    -> T @ " << F->getTrajectoryPtr().get() << endl;
+            cout << "    -> T @ " << F->getTrajectory().get() << endl;
             for (auto sb : F->getStateBlockVec())
             {
                 cout <<  "    sb @ " << sb.get();
                 if (sb)
                 {
-                    auto lp = sb->getLocalParametrizationPtr();
+                    auto lp = sb->getLocalParametrization();
                     if (lp)
                         cout <<  " (lp @ " << lp.get() << ")";
                 }
@@ -1114,15 +1114,15 @@ bool Problem::check(int verbose_level)
         }
         // check problem and trajectory pointers
         is_consistent = is_consistent && (F->getProblem().get() == P_raw);
-        is_consistent = is_consistent && (F->getTrajectoryPtr() == T);
+        is_consistent = is_consistent && (F->getTrajectory() == T);
         for (auto cby : F->getConstrainedByList())
         {
             if (verbose_level > 0)
             {
-                cout << "    <- c" << cby->id() << " -> F" << cby->getFrameOtherPtr()->id() << endl;
+                cout << "    <- c" << cby->id() << " -> F" << cby->getFrameOther()->id() << endl;
             }
             // check constrained_by pointer to this frame
-            is_consistent = is_consistent && (cby->getFrameOtherPtr() == F);
+            is_consistent = is_consistent && (cby->getFrameOther() == F);
             for (auto sb : cby->getStateBlockPtrVector())
             {
                 if (verbose_level > 0)
@@ -1130,7 +1130,7 @@ bool Problem::check(int verbose_level)
                     cout << "      sb @ " << sb.get();
                     if (sb)
                     {
-                        auto lp = sb->getLocalParametrizationPtr();
+                        auto lp = sb->getLocalParametrization();
                         if (lp)
                             cout <<  " (lp @ " << lp.get() << ")";
                     }
@@ -1145,17 +1145,17 @@ bool Problem::check(int verbose_level)
             if (verbose_level > 0)
             {
                 cout << "    C" << C->id() << " @ " << C.get() << " -> S";
-                if (C->getSensorPtr()) cout << C->getSensorPtr()->id();
+                if (C->getSensor()) cout << C->getSensor()->id();
                 else cout << "-";
                 cout << endl;
                 cout << "      -> P  @ " << C->getProblem().get() << endl;
-                cout << "      -> F" << C->getFramePtr()->id() << " @ " << C->getFramePtr().get() << endl;
+                cout << "      -> F" << C->getFrame()->id() << " @ " << C->getFrame().get() << endl;
                 for (auto sb : C->getStateBlockVec())
                 {
                     cout <<  "      sb @ " << sb.get();
                     if (sb)
                     {
-                        auto lp = sb->getLocalParametrizationPtr();
+                        auto lp = sb->getLocalParametrization();
                         if (lp)
                             cout <<  " (lp @ " << lp.get() << ")";
                     }
@@ -1164,7 +1164,7 @@ bool Problem::check(int verbose_level)
             }
             // check problem and frame pointers
             is_consistent = is_consistent && (C->getProblem().get() == P_raw);
-            is_consistent = is_consistent && (C->getFramePtr() == F);
+            is_consistent = is_consistent && (C->getFrame() == F);
 
             // Features =======================================================================================
             for (auto f : C->getFeatureList())
@@ -1173,33 +1173,33 @@ bool Problem::check(int verbose_level)
                 {
                     cout << "      f" << f->id() << " @ " << f.get() << endl;
                     cout << "        -> P  @ " << f->getProblem().get() << endl;
-                    cout << "        -> C" << f->getCapturePtr()->id() << " @ " << f->getCapturePtr().get()
+                    cout << "        -> C" << f->getCapture()->id() << " @ " << f->getCapture().get()
                             << endl;
                 }
                 // check problem and capture pointers
                 is_consistent = is_consistent && (f->getProblem().get() == P_raw);
-                is_consistent = is_consistent && (f->getCapturePtr() == C);
+                is_consistent = is_consistent && (f->getCapture() == C);
 
                 for (auto cby : f->getConstrainedByList())
                 {
                     if (verbose_level > 0)
                     {
-                        cout << "     <- c" << cby->id() << " -> f" << cby->getFeatureOtherPtr()->id() << endl;
+                        cout << "     <- c" << cby->id() << " -> f" << cby->getFeatureOther()->id() << endl;
                     }
                     // check constrained_by pointer to this feature
-                    is_consistent = is_consistent && (cby->getFeatureOtherPtr() == f);
+                    is_consistent = is_consistent && (cby->getFeatureOther() == f);
                 }
 
-                // Constraints =======================================================================================
-                for (auto c : f->getConstraintList())
+                // Factors =======================================================================================
+                for (auto c : f->getFactorList())
                 {
                     if (verbose_level > 0)
                         cout << "        c" << c->id() << " @ " << c.get();
 
-                    auto Fo = c->getFrameOtherPtr();
-                    auto Co = c->getCaptureOtherPtr();
-                    auto fo = c->getFeatureOtherPtr();
-                    auto Lo = c->getLandmarkOtherPtr();
+                    auto Fo = c->getFrameOther();
+                    auto Co = c->getCaptureOther();
+                    auto fo = c->getFeatureOther();
+                    auto Lo = c->getLandmarkOther();
 
                     if ( !Fo && !Co && !fo && !Lo )    // case ABSOLUTE:
                     {
@@ -1281,14 +1281,14 @@ bool Problem::check(int verbose_level)
                     if (verbose_level > 0)
                     {
                         cout << "          -> P  @ " << c->getProblem().get() << endl;
-                        cout << "          -> f" << c->getFeaturePtr()->id() << " @ " << c->getFeaturePtr().get() << endl;
+                        cout << "          -> f" << c->getFeature()->id() << " @ " << c->getFeature().get() << endl;
                     }
                     // check problem and feature pointers
                     is_consistent = is_consistent && (c->getProblem().get() == P_raw);
-                    is_consistent = is_consistent && (c->getFeaturePtr() == f);
+                    is_consistent = is_consistent && (c->getFeature() == f);
 
                     // find state block pointers in all constrained nodes
-                    SensorBasePtr S = c->getFeaturePtr()->getCapturePtr()->getSensorPtr(); // get own sensor to check sb
+                    SensorBasePtr S = c->getFeature()->getCapture()->getSensor(); // get own sensor to check sb
                     for (auto sb : c->getStateBlockPtrVector())
                     {
                         bool found = false;
@@ -1297,7 +1297,7 @@ bool Problem::check(int verbose_level)
                             cout <<  "          sb @ " << sb.get();
                             if (sb)
                             {
-                                auto lp = sb->getLocalParametrizationPtr();
+                                auto lp = sb->getLocalParametrization();
                                 if (lp)
                                     cout <<  " (lp @ " << lp.get() << ")";
                             }
@@ -1319,13 +1319,13 @@ bool Problem::check(int verbose_level)
                         if (fo)
                         {
                             // find in constrained feature's Frame
-                            FrameBasePtr foF = fo->getFramePtr();
+                            FrameBasePtr foF = fo->getFrame();
                             found = found || (std::find(foF->getStateBlockVec().begin(), foF->getStateBlockVec().end(), sb) != foF->getStateBlockVec().end());
                             // find in constrained feature's Capture
-                            CaptureBasePtr foC = fo->getCapturePtr();
+                            CaptureBasePtr foC = fo->getCapture();
                             found = found || (std::find(foC->getStateBlockVec().begin(), foC->getStateBlockVec().end(), sb) != foC->getStateBlockVec().end());
                             // find in constrained feature's Sensor
-                            SensorBasePtr foS = fo->getCapturePtr()->getSensorPtr();
+                            SensorBasePtr foS = fo->getCapture()->getSensor();
                             found = found || (std::find(foS->getStateBlockVec().begin(), foS->getStateBlockVec().end(), sb) != foS->getStateBlockVec().end());
                         }
                         // find in constrained landmark
@@ -1362,13 +1362,13 @@ bool Problem::check(int verbose_level)
         {
             cout << "  L" << L->id() << " @ " << L.get() << endl;
             cout << "  -> P @ " << L->getProblem().get() << endl;
-            cout << "  -> M @ " << L->getMapPtr().get() << endl;
+            cout << "  -> M @ " << L->getMap().get() << endl;
             for (auto sb : L->getStateBlockVec())
             {
                 cout <<  "  sb @ " << sb.get();
                 if (sb)
                 {
-                    auto lp = sb->getLocalParametrizationPtr();
+                    auto lp = sb->getLocalParametrization();
                     if (lp)
                         cout <<  " (lp @ " << lp.get() << ")";
                 }
@@ -1377,13 +1377,13 @@ bool Problem::check(int verbose_level)
         }
         // check problem and map pointers
         is_consistent = is_consistent && (L->getProblem().get() == P_raw);
-        is_consistent = is_consistent && (L->getMapPtr() == M);
+        is_consistent = is_consistent && (L->getMap() == M);
         for (auto cby : L->getConstrainedByList())
         {
             if (verbose_level > 0)
-                cout << "      <- c" << cby->id() << " -> L" << cby->getLandmarkOtherPtr()->id() << endl;
+                cout << "      <- c" << cby->id() << " -> L" << cby->getLandmarkOther()->id() << endl;
             // check constrained_by pointer to this landmark
-            is_consistent = is_consistent && (cby->getLandmarkOtherPtr() && L->id() == cby->getLandmarkOtherPtr()->id());
+            is_consistent = is_consistent && (cby->getLandmarkOther() && L->id() == cby->getLandmarkOther()->id());
             for (auto sb : cby->getStateBlockPtrVector())
             {
                 if (verbose_level > 0)
@@ -1391,7 +1391,7 @@ bool Problem::check(int verbose_level)
                     cout << "      sb @ " << sb.get();
                     if (sb)
                     {
-                        auto lp = sb->getLocalParametrizationPtr();
+                        auto lp = sb->getLocalParametrization();
                         if (lp)
                             cout <<  " (lp @ " << lp.get() << ")";
                     }

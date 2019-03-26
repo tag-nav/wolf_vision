@@ -13,7 +13,7 @@
 
 #include "../hello_wolf/capture_range_bearing.h"
 #include "../hello_wolf/feature_range_bearing.h"
-#include "../hello_wolf/constraint_range_bearing.h"
+#include "../hello_wolf/factor_range_bearing.h"
 #include "../hello_wolf/landmark_point_2D.h"
 #include "base/loader.hpp"
 #include "base/processor/processor_odom_2D.h"
@@ -138,16 +138,16 @@ int main(int argc, char** argv) {
 
     // PERTURB initial guess
     WOLF_TRACE("======== PERTURB PROBLEM PRIORS =======")
-    for (auto sen : problem->getHardwarePtr()->getSensorList())
+    for (auto sen : problem->getHardware()->getSensorList())
         for (auto sb : sen->getStateBlockVec())
             if (sb && !sb->isFixed())
                 sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);       // We perturb A LOT !
-    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+    for (auto kf : problem->getTrajectory()->getFrameList())
         if (kf->isKey())
             for (auto sb : kf->getStateBlockVec())
                 if (sb && !sb->isFixed())
                     sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);   // We perturb A LOT !
-    for (auto lmk : problem->getMapPtr()->getLandmarkList())
+    for (auto lmk : problem->getMap()->getLandmarkList())
         for (auto sb : lmk->getStateBlockVec())
             if (sb && !sb->isFixed())
                 sb->setState(sb->getState() + VectorXs::Random(sb->getSize()) * 0.5);       // We perturb A LOT !
@@ -162,10 +162,10 @@ int main(int argc, char** argv) {
     // GET COVARIANCES of all states
     WOLF_TRACE("======== COVARIANCES OF SOLVED PROBLEM =======")
     ceres->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
-    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+    for (auto kf : problem->getTrajectory()->getFrameList())
         if (kf->isKey())
             WOLF_TRACE("KF", kf->id(), "_cov = \n", kf->getCovariance());
-    for (auto lmk : problem->getMapPtr()->getLandmarkList())
+    for (auto lmk : problem->getMap()->getLandmarkList())
         WOLF_TRACE("L", lmk->id(), "_cov = \n", lmk->getCovariance());
     std::cout << std::endl;
 

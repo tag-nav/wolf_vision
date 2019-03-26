@@ -193,7 +193,7 @@ class SolverQR
             time_managing_ += ((double) clock() - t_managing_) / CLOCKS_PER_SEC;
         }
 
-        void addConstraint(const measurement& _meas)
+        void addFactor(const measurement& _meas)
         {
             t_managing_ = clock();
 
@@ -242,7 +242,7 @@ class SolverQR
             // full problem ordering
             if (_first_ordered_node == 0)
             {
-                // ordering ordering constraints
+                // ordering ordering factors
                 node_ordering_restrictions_.resize(n_nodes_);
                 node_ordering_restrictions_ = A_nodes_.bottomRows(1).transpose();
 
@@ -274,7 +274,7 @@ class SolverQR
                     //std::cout << "ordering partial_ordering problem: " << _first_ordered_node << " to "<< n_nodes_ - 1 << std::endl;
                     SparseMatrix<int> sub_A_nodes_ = A_nodes_.rightCols(ordered_nodes);
 
-                    // _partial_ordering ordering_ constraints
+                    // _partial_ordering ordering_ factors
                     node_ordering_restrictions_.resize(ordered_nodes);
                     node_ordering_restrictions_ = sub_A_nodes_.bottomRows(1).transpose();
 
@@ -343,8 +343,8 @@ class SolverQR
                 // finding measurements block
                 SparseMatrix<int> measurements_to_initial = A_nodes_.col(first_ordered_node_);
         //        std::cout << "measurements_to_initial " << measurements_to_initial << std::endl;
-        //        std::cout << "measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]] " << measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]] << std::endl;
-                int first_ordered_measurement = measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]];
+        //        std::cout << "measurements_to_initial.innerIndex()[measurements_to_initial.outerIndex()[0]] " << measurements_to_initial.innerIndex()[measurements_to_initial.outerIndex()[0]] << std::endl;
+                int first_ordered_measurement = measurements_to_initial.innerIndex()[measurements_to_initial.outerIndex()[0]];
                 int ordered_measurements = A_.rows() - measurements_.at(first_ordered_measurement).location;
                 int ordered_variables = A_.cols() - nodes_.at(first_ordered_node_).location;
                 int unordered_variables = nodes_.at(first_ordered_node_).location;
@@ -531,9 +531,9 @@ int main(int argc, char *argv[])
         }
 
         // ADD MEASUREMENTS
-        solver_unordered.addConstraint(measurements.at(i));
-        solver_ordered.addConstraint(measurements.at(i));
-        solver_ordered_partial.addConstraint(measurements.at(i));
+        solver_unordered.addFactor(measurements.at(i));
+        solver_ordered.addFactor(measurements.at(i));
+        solver_ordered_partial.addFactor(measurements.at(i));
 
         // PRINT PROBLEM
         solver_unordered.printProblem();

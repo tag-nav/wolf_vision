@@ -217,9 +217,9 @@ struct MatrixSizeCheck
 
 #define WOLF_LIST_TYPEDEFS(ClassName) \
         class ClassName; \
-        typedef std::list<ClassName##Ptr>          ClassName##List; \
-        typedef ClassName##List::iterator          ClassName##Iter; \
-        typedef ClassName##List::reverse_iterator  ClassName##RevIter;
+        typedef std::list<ClassName##Ptr>          ClassName##PtrList; \
+        typedef ClassName##PtrList::iterator          ClassName##Iter; \
+        typedef ClassName##PtrList::reverse_iterator  ClassName##RevIter;
 
 #define WOLF_STRUCT_PTR_TYPEDEFS(StructName) \
         struct StructName; \
@@ -267,9 +267,9 @@ WOLF_LIST_TYPEDEFS(CaptureBase);
 WOLF_PTR_TYPEDEFS(FeatureBase);
 WOLF_LIST_TYPEDEFS(FeatureBase);
 
-// - Constraint
-WOLF_PTR_TYPEDEFS(ConstraintBase);
-WOLF_LIST_TYPEDEFS(ConstraintBase);
+// - Factor
+WOLF_PTR_TYPEDEFS(FactorBase);
+WOLF_LIST_TYPEDEFS(FactorBase);
 
 // Map
 WOLF_PTR_TYPEDEFS(MapBase);
