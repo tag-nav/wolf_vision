@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
     PermutationMatrix<Dynamic, Dynamic, int> acc_permutation_nodes_matrix(0);
 
     CCOLAMDOrdering<int> ordering, partial_ordering;
-    VectorXi nodes_ordering_constraints;
+    VectorXi nodes_ordering_factors;
 
     // results variables
     clock_t t_ordering, t_solving_ordered_full, t_solving_unordered, t_solving_ordered_partial, t4;
@@ -222,13 +222,13 @@ int main(int argc, char *argv[])
             std::cout << "ordering partial problem: " << min_ordered_node << " to "<< n_nodes - 1 << std::endl;
             SparseMatrix<int> sub_A_nodes_ordered = A_nodes_ordered.rightCols(ordered_nodes);
 
-            // partial ordering constraints
-            VectorXi nodes_partial_ordering_constraints = sub_A_nodes_ordered.bottomRows(1).transpose();
+            // partial ordering factors
+            VectorXi nodes_partial_ordering_factors = sub_A_nodes_ordered.bottomRows(1).transpose();
 
             // computing nodes partial ordering
             A_nodes_ordered.makeCompressed();
             PermutationMatrix<Dynamic, Dynamic, int> partial_permutation_nodes_matrix(ordered_nodes);
-            partial_ordering(sub_A_nodes_ordered, partial_permutation_nodes_matrix, nodes_partial_ordering_constraints.data());
+            partial_ordering(sub_A_nodes_ordered, partial_permutation_nodes_matrix, nodes_partial_ordering_factors.data());
 
             // node ordering to variable ordering
             PermutationMatrix<Dynamic, Dynamic, int> partial_permutation_matrix(A_ordered.cols());
@@ -258,8 +258,8 @@ int main(int argc, char *argv[])
         // finding measurements block
         SparseMatrix<int> measurements_to_initial = A_nodes_ordered.col(min_ordered_node);
 //        std::cout << "measurements_to_initial " << measurements_to_initial << std::endl;
-//        std::cout << "measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]] " << measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]] << std::endl;
-        int initial_measurement = measurements_to_initial.innerIndexPtr()[measurements_to_initial.outerIndexPtr()[0]];
+//        std::cout << "measurements_to_initial.innerIndex()[measurements_to_initial.outerIndex()[0]] " << measurements_to_initial.innerIndex()[measurements_to_initial.outerIndex()[0]] << std::endl;
+        int initial_measurement = measurements_to_initial.innerIndex()[measurements_to_initial.outerIndex()[0]];
 
         SparseMatrix<double> A_ordered_partial = A_ordered.bottomRightCorner((n_nodes - initial_measurement) * dim, ordered_nodes * dim);
         solver_ordered_partial.compute(A_ordered_partial);

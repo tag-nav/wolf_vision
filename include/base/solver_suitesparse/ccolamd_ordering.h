@@ -44,9 +44,9 @@ class CCOLAMDOrdering
 
             IndexVector p(n + 1), A(Alen);
             for (Index i = 0; i <= n; i++)
-                p(i) = mat.outerIndexPtr()[i];
+                p(i) = mat.outerIndex()[i];
             for (Index i = 0; i < nnz; i++)
-                A(i) = mat.innerIndexPtr()[i];
+                A(i) = mat.innerIndex()[i];
 //            std::cout << "p = " << std::endl << p.transpose() << std::endl;
 //            std::cout << "A = " << std::endl << A.head(nnz).transpose() << std::endl;
 

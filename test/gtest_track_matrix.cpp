@@ -288,7 +288,7 @@ TEST_F(TrackMatrixTest, snapshotAsList)
      *  f2             trk 1
      */
 
-    std::list<FeatureBasePtr> lt0 = track_matrix.snapshotAsList(f0->getCapturePtr()); // get track 0 as vector
+    std::list<FeatureBasePtr> lt0 = track_matrix.snapshotAsList(f0->getCapture()); // get track 0 as vector
 
     ASSERT_EQ(lt0.size() , (unsigned int) 2);
     ASSERT_EQ(lt0.front(), f0);

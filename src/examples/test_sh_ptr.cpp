@@ -35,7 +35,7 @@ class T; // trajectory
 class F; // frame
 class C; // capture
 class f; // feature
-class c; // constraint
+class c; // factor
 class M; // map
 class L; // landmark
 
@@ -156,7 +156,7 @@ class F : public enable_shared_from_this<F>
         weak_ptr<T> T_ptr_;
         list<shared_ptr<C>> C_list_;
 
-        list<shared_ptr<c>> c_by_list; // list of constraints to this frame
+        list<shared_ptr<c>> c_by_list; // list of factors to this frame
 
         static int id_count_;
         bool is_removing;
@@ -228,7 +228,7 @@ class f : public enable_shared_from_this<f>
         weak_ptr<C> C_ptr_;
         list<shared_ptr<c>> c_list_;
 
-        list<shared_ptr<c>> c_by_list; // list of constraints to this feature
+        list<shared_ptr<c>> c_by_list; // list of factors to this feature
 
         static int id_count_;
         bool is_deleting;
@@ -323,7 +323,7 @@ class L : public enable_shared_from_this<L>
         weak_ptr<P> P_ptr_;
         weak_ptr<M> M_ptr_;
 
-        list<shared_ptr<c>> c_by_list; // list of constraints to this landmark
+        list<shared_ptr<c>> c_by_list; // list of factors to this landmark
 
         static int id_count_;
         bool is_deleting;
@@ -549,7 +549,7 @@ using namespace wolf;
 
 void print_cF(const shared_ptr<P>& Pp)
 {
-    cout << "Frame constraints" << endl;
+    cout << "Frame factors" << endl;
     for (auto Fp : Pp->getT()->getFlist())
     {
         cout << "F" << Fp->id << " @ " << Fp.get() << endl;
@@ -563,7 +563,7 @@ void print_cF(const shared_ptr<P>& Pp)
 
 void print_cf(const shared_ptr<P>& Pp)
 {
-    cout << "Feature constraints" << endl;
+    cout << "Feature factors" << endl;
     for (auto Fp : Pp->getT()->getFlist())
     {
         for (auto Cp : Fp->getClist())
@@ -583,7 +583,7 @@ void print_cf(const shared_ptr<P>& Pp)
 
 void print_cL(const shared_ptr<P>& Pp)
 {
-    cout << "Landmark constraints" << endl;
+    cout << "Landmark factors" << endl;
     for (auto Lp : Pp->getM()->getLlist())
     {
         cout << "L" << Lp->id << " @ " << Lp.get() << endl;
@@ -597,7 +597,7 @@ void print_cL(const shared_ptr<P>& Pp)
 
 void print_c(const shared_ptr<P>& Pp)
 {
-    cout << "All constraints" << endl;
+    cout << "All factors" << endl;
     for (auto Fp : Pp->getT()->getFlist())
     {
         for (auto Cp : Fp->getClist())
@@ -623,7 +623,7 @@ void print_c(const shared_ptr<P>& Pp)
                                 << " -> L" << cp->getLother()->id << " @ " << cp->getLother() << endl;
                                 break;
                             default:
-                                cout << "Bad constraint" << endl;
+                                cout << "Bad factor" << endl;
                                 break;
                         }
                     }
@@ -668,7 +668,7 @@ shared_ptr<P> buildProblem(int N)
             for (int fi = 0; fi < 1; fi++)
             {
                 shared_ptr<f> fp = Cp->add_f(make_shared<f>());
-                if (Ci || !Fi) // landmark constraint
+                if (Ci || !Fi) // landmark factor
                 {
                     shared_ptr<c> cp = fp->add_c(make_shared<c>(*Lit));
                     (*Lit)->add_c_by(cp);
@@ -676,7 +676,7 @@ shared_ptr<P> buildProblem(int N)
                     if (Lit == Pp->getM()->getLlist().end())
                         Lit = Pp->getM()->getLlist().begin();
                 }
-                else // motion constraint
+                else // motion factor
                 {
                     shared_ptr<F> Fp = Fvec.at(Fi-1).lock();
                     if (Fp)
@@ -703,17 +703,17 @@ int c::id_count_ = 0;
 int L::id_count_ = 0;
 
 // tests
-void removeConstraints(const shared_ptr<P>& Pp)
+void removeFactors(const shared_ptr<P>& Pp)
 {
-    cout << "Removing constraint type L ----------" << endl;
+    cout << "Removing factor type L ----------" << endl;
     Pp->getT()->getFlist().front()->getClist().front()->getflist().front()->getclist().front()->remove();
-    cout << "Removing constraint type L ----------" << endl;
+    cout << "Removing factor type L ----------" << endl;
     Pp->getT()->getFlist().front()->getClist().front()->getflist().front()->getclist().front()->remove();
-    cout << "Removing constraint type F ----------" << endl;
+    cout << "Removing factor type F ----------" << endl;
     Pp->getT()->getFlist().back()->getClist().front()->getflist().front()->getclist().front()->remove();
-    cout << "Removing constraint type L ----------" << endl;
+    cout << "Removing factor type L ----------" << endl;
     Pp->getT()->getFlist().back()->getClist().back()->getflist().front()->getclist().front()->remove();
-    cout << "Removing constraint type F ----------" << endl;
+    cout << "Removing factor type F ----------" << endl;
     Pp->getT()->getFlist().back()->getClist().front()->getflist().front()->getclist().front()->remove();
 }
 
@@ -754,7 +754,7 @@ int main()
     shared_ptr<P> Pp = buildProblem(N);
     cout << "Wolf tree created ----------------------------" << endl;
 
-    cout << "\nShowing constraints --------------------------" << endl;
+    cout << "\nShowing factors --------------------------" << endl;
     cout<<endl;
     print_cF(Pp);
     cout<<endl;
@@ -768,8 +768,8 @@ int main()
     // Several tests. Uncomment the desired test.
     // Run only one test at a time, otherwise you'll get segfaults!
 
-//    cout << "\nRemoving constraints -------------------------" << endl;
-//    removeConstraints(Pp);
+//    cout << "\nRemoving factors -------------------------" << endl;
+//    removeFactors(Pp);
 
 //    cout << "\nRemoving landmarks ---------------------------" << endl;
 //    removeLandmarks(Pp);

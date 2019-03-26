@@ -139,7 +139,7 @@ void ProcessorTrackerFeature::resetDerived()
     }
 }
 
-void ProcessorTrackerFeature::establishConstraints()
+void ProcessorTrackerFeature::establishFactors()
 {
     TrackMatches matches_origin_last = track_matrix_.matches(origin_ptr_, last_ptr_);
 
@@ -148,22 +148,22 @@ void ProcessorTrackerFeature::establishConstraints()
         FeatureBasePtr feature_in_origin = pair_trkid_pair.second.first;
         FeatureBasePtr feature_in_last   = pair_trkid_pair.second.second;
 
-        auto ctr_ptr  = createConstraint(feature_in_last, feature_in_origin);
-        feature_in_last  ->addConstraint(ctr_ptr);
+        auto ctr_ptr  = createFactor(feature_in_last, feature_in_origin);
+        feature_in_last  ->addFactor(ctr_ptr);
         feature_in_origin->addConstrainedBy(ctr_ptr);
 
-        if (ctr_ptr != nullptr) // constraint links
+        if (ctr_ptr != nullptr) // factor links
         {
-            FrameBasePtr frm = ctr_ptr->getFrameOtherPtr();
+            FrameBasePtr frm = ctr_ptr->getFrameOther();
             if (frm)
                 frm->addConstrainedBy(ctr_ptr);
-            CaptureBasePtr cap = ctr_ptr->getCaptureOtherPtr();
+            CaptureBasePtr cap = ctr_ptr->getCaptureOther();
             if (cap)
                 cap->addConstrainedBy(ctr_ptr);
         }
 
 
-        WOLF_DEBUG( "Constraint: track: " , feature_in_last->trackId(),
+        WOLF_DEBUG( "Factor: track: " , feature_in_last->trackId(),
                     " origin: "           , feature_in_origin->id() ,
                     " from last: "        , feature_in_last->id() );
     }

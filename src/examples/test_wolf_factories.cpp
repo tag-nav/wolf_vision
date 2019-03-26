@@ -78,7 +78,7 @@ int main(void)
     problem->installSensor("CAMERA", "rear camera", pq_3d, wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
 
     // print available sensors
-    for (auto sen : problem->getHardwarePtr()->getSensorList())
+    for (auto sen : problem->getHardware()->getSensorList())
     {
         cout << "Sensor " << setw(2) << left << sen->id()
                 << " | type " << setw(8) << sen->getType()
@@ -95,12 +95,12 @@ int main(void)
 //    problem->createProcessor("GPS",     "GPS pseudoranges", "GPS raw");
 
     // print installed processors
-    for (auto sen : problem->getHardwarePtr()->getSensorList())
+    for (auto sen : problem->getHardware()->getSensorList())
         for (auto prc : sen->getProcessorList())
             cout << "Processor " << setw(2) << left  << prc->id()
             << " | type : " << setw(8) << prc->getType()
             << " | name: " << setw(17) << prc->getName()
-            << " | bound to sensor " << setw(2) << prc->getSensorPtr()->id() << ": " << prc->getSensorPtr()->getName() << endl;
+            << " | bound to sensor " << setw(2) << prc->getSensor()->id() << ": " << prc->getSensor()->getName() << endl;
 
     return 0;
 }

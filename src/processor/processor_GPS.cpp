@@ -2,7 +2,7 @@
 // Created by ptirindelli on 16/12/15.
 //
 
-#include "base/constraint/constraint_GPS_pseudorange_2D.h"
+#include "base/factor/factor_GPS_pseudorange_2D.h"
 #include "base/feature/feature_GPS_pseudorange.h"
 #include "base/processor/processor_GPS.h"
 
@@ -40,13 +40,13 @@ void ProcessorGPS::process(CaptureBasePtr _capture_ptr)
         capture_gps_ptr_->addFeature(std::make_shared<FeatureGPSPseudorange>(sat_pos, pr, gps_covariance_));
     }
     //std::cout << "gps features extracted" << std::endl;
-    //std::cout << "Establishing constraints to gps features..." << std::endl;
+    //std::cout << "Establishing factors to gps features..." << std::endl;
     for (auto i_it = capture_gps_ptr_->getFeatureList().begin();
             i_it != capture_gps_ptr_->getFeatureList().end(); i_it++)
     {
-        capture_gps_ptr_->getFeatureList().front()->addConstraint(std::make_shared<ConstraintGPSPseudorange2D>((*i_it), shared_from_this()));
+        capture_gps_ptr_->getFeatureList().front()->addFactor(std::make_shared<FactorGPSPseudorange2D>((*i_it), shared_from_this()));
     }
-    //std::cout << "Constraints established" << std::endl;
+    //std::cout << "Factors established" << std::endl;
 }
 
 bool ProcessorGPS::voteForKeyFrame()

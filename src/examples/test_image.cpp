@@ -64,7 +64,7 @@ int main(int argc, char** argv)
 //                                                  std::make_shared<StateBlock>(Eigen::Vector3s::Zero()),
 //                                                  std::make_shared<StateBlock>(k,false),img_width,img_height);
 //
-//        wolf_problem_->getHardwarePtr()->addSensor(camera_ptr);
+//        wolf_problem_->getHardware()->addSensor(camera_ptr);
 //
 //        // PROCESSOR
 //        ProcessorParamsImage tracker_params;
@@ -167,9 +167,9 @@ int main(int argc, char** argv)
 //            std::cout << summary << std::endl;
 //
 //            std::cout << "Last key frame pose: "
-//                      << wolf_problem_->getLastKeyFramePtr()->getPPtr()->getState().transpose() << std::endl;
+//                      << wolf_problem_->getLastKeyFrame()->getP()->getState().transpose() << std::endl;
 //            std::cout << "Last key frame orientation: "
-//                      << wolf_problem_->getLastKeyFramePtr()->getOPtr()->getState().transpose() << std::endl;
+//                      << wolf_problem_->getLastKeyFrame()->getO()->getState().transpose() << std::endl;
 //
 //            cv::waitKey(0);
 //        }

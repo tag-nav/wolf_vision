@@ -1,6 +1,6 @@
 
 #include "base/landmark/landmark_base.h"
-#include "base/constraint/constraint_base.h"
+#include "base/factor/factor_base.h"
 #include "base/map_base.h"
 #include "base/state_block.h"
 #include "base/yaml/yaml_conversion.h"
@@ -157,20 +157,20 @@ YAML::Node LandmarkBase::saveToYaml() const
     YAML::Node node;
     node["id"] = landmark_id_;
     node["type"] = node_type_;
-    if (getPPtr() != nullptr)
+    if (getP() != nullptr)
     {
-        node["position"] = getPPtr()->getState();
-        node["position fixed"] = getPPtr()->isFixed();
+        node["position"] = getP()->getState();
+        node["position fixed"] = getP()->isFixed();
     }
-    if (getOPtr() != nullptr)
+    if (getO() != nullptr)
     {
-        node["orientation"] = getOPtr()->getState();
-        node["orientation fixed"] = getOPtr()->isFixed();
+        node["orientation"] = getO()->getState();
+        node["orientation fixed"] = getO()->isFixed();
     }
     return node;
 }
 
-ConstraintBasePtr LandmarkBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+FactorBasePtr LandmarkBase::addConstrainedBy(FactorBasePtr _ctr_ptr)
 {
     constrained_by_list_.push_back(_ctr_ptr);
     _ctr_ptr->setLandmarkOtherPtr(shared_from_this());

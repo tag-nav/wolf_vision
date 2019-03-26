@@ -20,15 +20,15 @@ namespace wolf {
 class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
 {
     private:
-        LandmarkBaseList landmark_list_;
+        LandmarkBasePtrList landmark_list_;
 
     public:
         MapBase();
         ~MapBase();
         
         virtual LandmarkBasePtr addLandmark(LandmarkBasePtr _landmark_ptr);
-        virtual void addLandmarkList(LandmarkBaseList& _landmark_list);
-        LandmarkBaseList& getLandmarkList();
+        virtual void addLandmarkList(LandmarkBasePtrList& _landmark_list);
+        LandmarkBasePtrList& getLandmarkList();
         
         void load(const std::string& _map_file_yaml);
         void save(const std::string& _map_file_yaml, const std::string& _map_name = "Map automatically saved by Wolf");
@@ -37,7 +37,7 @@ class MapBase : public NodeBase, public std::enable_shared_from_this<MapBase>
         std::string dateTimeNow();
 };
 
-inline LandmarkBaseList& MapBase::getLandmarkList()
+inline LandmarkBasePtrList& MapBase::getLandmarkList()
 {
     return landmark_list_;
 }

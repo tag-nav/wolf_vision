@@ -24,9 +24,9 @@ TEST(Problem, create)
     ProblemPtr P = Problem::create("POV 3D");
 
     // check double ointers to branches
-    ASSERT_EQ(P, P->getHardwarePtr()->getProblem());
-    ASSERT_EQ(P, P->getTrajectoryPtr()->getProblem());
-    ASSERT_EQ(P, P->getMapPtr()->getProblem());
+    ASSERT_EQ(P, P->getHardware()->getProblem());
+    ASSERT_EQ(P, P->getTrajectory()->getProblem());
+    ASSERT_EQ(P, P->getMap()->getProblem());
 
     // check frame structure through the state size
     ASSERT_EQ(P->getFrameStructureSize(), 10);
@@ -42,7 +42,7 @@ TEST(Problem, Sensors)
 
     // check pointers
     ASSERT_EQ(P, S->getProblem());
-    ASSERT_EQ(P->getHardwarePtr(), S->getHardwarePtr());
+    ASSERT_EQ(P->getHardware(), S->getHardware());
 
 }
 
@@ -51,7 +51,7 @@ TEST(Problem, Processor)
     ProblemPtr P = Problem::create("PO 3D");
 
     // check motion processor is null
-    ASSERT_FALSE(P->getProcessorMotionPtr());
+    ASSERT_FALSE(P->getProcessorMotion());
 
     // add a motion sensor and processor
     SensorBasePtr Sm = std::make_shared<SensorOdom3D>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(), IntrinsicsOdom3D()); // with dummy intrinsics
@@ -62,12 +62,12 @@ TEST(Problem, Processor)
     Sm->addProcessor(Pm);
 
     // check motion processor IS NOT set by addSensor <-- using InstallProcessor it should, see test Installers
-    ASSERT_FALSE(P->getProcessorMotionPtr());
+    ASSERT_FALSE(P->getProcessorMotion());
 
     // set processor motion
     P->setProcessorMotion(Pm);
     // re-check motion processor IS set by addSensor
-    ASSERT_EQ(P->getProcessorMotionPtr(), Pm);
+    ASSERT_EQ(P->getProcessorMotion(), Pm);
 }
 
 TEST(Problem, Installers)
@@ -87,16 +87,16 @@ TEST(Problem, Installers)
     S->addProcessor(pt);
 
     // check motion processor IS NOT set
-    ASSERT_FALSE(P->getProcessorMotionPtr());
+    ASSERT_FALSE(P->getProcessorMotion());
 
     // install processor motion
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D", "odom integrator", "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
     // check motion processor is set
-    ASSERT_TRUE(P->getProcessorMotionPtr());
+    ASSERT_TRUE(P->getProcessorMotion());
 
     // check motion processor is correct
-    ASSERT_EQ(P->getProcessorMotionPtr(), pm);
+    ASSERT_EQ(P->getProcessorMotion(), pm);
 }
 
 TEST(Problem, SetOrigin_PO_2D)
@@ -109,25 +109,25 @@ TEST(Problem, SetOrigin_PO_2D)
     P->setPrior(x0, P0, t0, 1.0);
 
     // check that no sensor has been added
-    ASSERT_EQ(P->getHardwarePtr()->getSensorList().size(), (unsigned int) 0);
+    ASSERT_EQ(P->getHardware()->getSensorList().size(), (unsigned int) 0);
 
     // check that the state is correct
     ASSERT_TRUE((x0 - P->getCurrentState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
 
-    // check that we have one frame, one capture, one feature, one constraint
-    TrajectoryBasePtr T = P->getTrajectoryPtr();
+    // check that we have one frame, one capture, one feature, one factor
+    TrajectoryBasePtr T = P->getTrajectory();
     ASSERT_EQ(T->getFrameList().size(), (unsigned int) 1);
-    FrameBasePtr F = P->getLastFramePtr();
+    FrameBasePtr F = P->getLastFrame();
     ASSERT_EQ(F->getCaptureList().size(), (unsigned int) 1);
     CaptureBasePtr C = F->getCaptureList().front();
     ASSERT_EQ(C->getFeatureList().size(), (unsigned int) 1);
     FeatureBasePtr f = C->getFeatureList().front();
-    ASSERT_EQ(f->getConstraintList().size(), (unsigned int) 1);
+    ASSERT_EQ(f->getFactorList().size(), (unsigned int) 1);
 
-    // check that the constraint is absolute (no pointers to other F, f, or L)
-    ConstraintBasePtr c = f->getConstraintList().front();
-    ASSERT_FALSE(c->getFrameOtherPtr());
-    ASSERT_FALSE(c->getLandmarkOtherPtr());
+    // check that the factor is absolute (no pointers to other F, f, or L)
+    FactorBasePtr c = f->getFactorList().front();
+    ASSERT_FALSE(c->getFrameOther());
+    ASSERT_FALSE(c->getLandmarkOther());
 
     // check that the Feature measurement and covariance are the ones provided
     ASSERT_TRUE((x0 - f->getMeasurement()).isMuchSmallerThan(1, Constants::EPS_SMALL));
@@ -146,25 +146,25 @@ TEST(Problem, SetOrigin_PO_3D)
     P->setPrior(x0, P0, t0, 1.0);
 
     // check that no sensor has been added
-    ASSERT_EQ(P->getHardwarePtr()->getSensorList().size(), (unsigned int) 0);
+    ASSERT_EQ(P->getHardware()->getSensorList().size(), (unsigned int) 0);
 
     // check that the state is correct
     ASSERT_TRUE((x0 - P->getCurrentState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
 
-    // check that we have one frame, one capture, one feature, one constraint
-    TrajectoryBasePtr T = P->getTrajectoryPtr();
+    // check that we have one frame, one capture, one feature, one factor
+    TrajectoryBasePtr T = P->getTrajectory();
     ASSERT_EQ(T->getFrameList().size(), (unsigned int) 1);
-    FrameBasePtr F = P->getLastFramePtr();
+    FrameBasePtr F = P->getLastFrame();
     ASSERT_EQ(F->getCaptureList().size(), (unsigned int) 1);
     CaptureBasePtr C = F->getCaptureList().front();
     ASSERT_EQ(C->getFeatureList().size(), (unsigned int) 1);
     FeatureBasePtr f = C->getFeatureList().front();
-    ASSERT_EQ(f->getConstraintList().size(), (unsigned int) 1);
+    ASSERT_EQ(f->getFactorList().size(), (unsigned int) 1);
 
-    // check that the constraint is absolute (no pointers to other F, f, or L)
-    ConstraintBasePtr c = f->getConstraintList().front();
-    ASSERT_FALSE(c->getFrameOtherPtr());
-    ASSERT_FALSE(c->getLandmarkOtherPtr());
+    // check that the factor is absolute (no pointers to other F, f, or L)
+    FactorBasePtr c = f->getFactorList().front();
+    ASSERT_FALSE(c->getFrameOther());
+    ASSERT_FALSE(c->getLandmarkOther());
 
     // check that the Feature measurement and covariance are the ones provided
     ASSERT_TRUE((x0 - f->getMeasurement()).isMuchSmallerThan(1, Constants::EPS_SMALL));
@@ -190,7 +190,7 @@ TEST(Problem, emplaceFrame_factory)
     ASSERT_EQ(f2->getType().compare("POV 3D"), 0);
 
     // check that all frames are effectively in the trajectory
-    ASSERT_EQ(P->getTrajectoryPtr()->getFrameList().size(), (unsigned int) 3);
+    ASSERT_EQ(P->getTrajectory()->getFrameList().size(), (unsigned int) 3);
 
     // check that all frames are linked to Problem
     ASSERT_EQ(f0->getProblem(), P);
@@ -207,12 +207,12 @@ TEST(Problem, StateBlocks)
 
     // 2 state blocks, fixed
     SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
-    ASSERT_EQ(P->getStateBlockList().size(), (unsigned int) 2);
+    ASSERT_EQ(P->getStateBlockPtrList().size(), (unsigned int) 2);
     ASSERT_EQ(P->getStateBlockNotificationMap().size(), (unsigned int) 2);
 
     // 3 state blocks, fixed
     SensorBasePtr    St = P->installSensor   ("CAMERA", "camera",   xs, wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
-    ASSERT_EQ(P->getStateBlockList().size(), (unsigned int) (2 + 3));
+    ASSERT_EQ(P->getStateBlockPtrList().size(), (unsigned int) (2 + 3));
     ASSERT_EQ(P->getStateBlockNotificationMap().size(), (unsigned int) (2 + 3));
 
     ProcessorParamsTrackerFeaturePtr params = std::make_shared<ProcessorParamsTrackerFeature>();
@@ -226,14 +226,14 @@ TEST(Problem, StateBlocks)
 
     // 2 state blocks, estimated
     P->emplaceFrame("PO 3D", KEY_FRAME, xs, 0);
-    ASSERT_EQ(P->getStateBlockList().size(), (unsigned int)(2 + 3 + 2));
+    ASSERT_EQ(P->getStateBlockPtrList().size(), (unsigned int)(2 + 3 + 2));
     ASSERT_EQ(P->getStateBlockNotificationMap().size(), (unsigned int)(2 + 3 + 2));
 
     //    P->print(4,1,1,1);
 
     // change some SB properties
     St->unfixExtrinsics();
-    ASSERT_EQ(P->getStateBlockList().size(), (unsigned int)(2 + 3 + 2));
+    ASSERT_EQ(P->getStateBlockPtrList().size(), (unsigned int)(2 + 3 + 2));
     ASSERT_EQ(P->getStateBlockNotificationMap().size(),(unsigned int)(2 + 3 + 2 /*+ 2*/)); // XXX: 2 more notifications on the same SB!
 
     //    P->print(4,1,1,1);

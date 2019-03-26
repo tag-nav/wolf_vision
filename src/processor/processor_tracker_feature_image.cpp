@@ -135,7 +135,7 @@ void ProcessorTrackerFeatureImage::postProcess()
 {
 }
 
-unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out,
+unsigned int ProcessorTrackerFeatureImage::trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out,
                                            FeatureMatchMap& _feature_matches)
 {
     KeyPointVector candidate_keypoints;
@@ -244,7 +244,7 @@ bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _ori
     }
 }
 
-unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int& _max_new_features, FeatureBaseList& _features_incoming_out)
+unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int& _max_new_features, FeatureBasePtrList& _features_incoming_out)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -306,12 +306,12 @@ Scalar ProcessorTrackerFeatureImage::match(cv::Mat _target_descriptor, cv::Mat _
     return normalized_score;
 }
 
-ConstraintBasePtr ProcessorTrackerFeatureImage::createConstraint(FeatureBasePtr _feature_ptr,
+FactorBasePtr ProcessorTrackerFeatureImage::createFactor(FeatureBasePtr _feature_ptr,
                                                           FeatureBasePtr _feature_other_ptr)
 {
-    ConstraintEpipolarPtr const_epipolar_ptr = std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr,
+    FactorEpipolarPtr const_epipolar_ptr = std::make_shared<FactorEpipolar>(_feature_ptr, _feature_other_ptr,
                                                                                     shared_from_this());
-    //    _feature_ptr->addConstraint(const_epipolar_ptr);
+    //    _feature_ptr->addFactor(const_epipolar_ptr);
     //    _feature_other_ptr->addConstrainedBy(const_epipolar_ptr);
     return const_epipolar_ptr;
 }
@@ -324,7 +324,7 @@ unsigned int ProcessorTrackerFeatureImage::detect(cv::Mat _image, cv::Rect& _roi
     return _new_keypoints.size();
 }
 
-void ProcessorTrackerFeatureImage::resetVisualizationFlag(FeatureBaseList& _feature_list_last)
+void ProcessorTrackerFeatureImage::resetVisualizationFlag(FeatureBasePtrList& _feature_list_last)
 {
     for (auto feature_base_last_ptr : _feature_list_last)
     {

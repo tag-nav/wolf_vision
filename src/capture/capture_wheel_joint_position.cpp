@@ -14,7 +14,7 @@ CaptureWheelJointPosition::CaptureWheelJointPosition(const TimeStamp& _ts,
 //
 
   const IntrinsicsDiffDrive intrinsics =
-      *(std::static_pointer_cast<SensorDiffDrive>(getSensorPtr())->getIntrinsics());
+      *(std::static_pointer_cast<SensorDiffDrive>(getSensor())->getIntrinsics());
 
   setDataCovariance(computeWheelJointPositionCov(getPositions(),
                                                  intrinsics.left_resolution_,

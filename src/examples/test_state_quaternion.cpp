@@ -24,9 +24,9 @@ int main (void)
 
     FrameBase pqv(t,pp,op,vp);
 
-    std::cout << "P local param: " << pqv.getPPtr()->getLocalParametrizationPtr() << std::endl;
-    std::cout << "Q local param: " << pqv.getOPtr()->getLocalParametrizationPtr() << std::endl;
-    std::cout << "V local param: " << pqv.getVPtr()->getLocalParametrizationPtr() << std::endl;
+    std::cout << "P local param: " << pqv.getP()->getLocalParametrization() << std::endl;
+    std::cout << "Q local param: " << pqv.getO()->getLocalParametrization() << std::endl;
+    std::cout << "V local param: " << pqv.getV()->getLocalParametrization() << std::endl;
 
     //    delete pp;
     //    delete op;

@@ -13,8 +13,8 @@ namespace wolf
 
 unsigned int ProcessorTrackerFeatureDummy::count_ = 0;
 
-unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBaseList& _features_last_in,
-                                                         FeatureBaseList& _features_incoming_out,
+unsigned int ProcessorTrackerFeatureDummy::trackFeatures(const FeatureBasePtrList& _features_last_in,
+                                                         FeatureBasePtrList& _features_incoming_out,
                                                          FeatureMatchMap& _feature_correspondences)
 {
     WOLF_INFO("tracking " , _features_last_in.size() , " features...");
@@ -49,7 +49,7 @@ bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
     return incoming_ptr_->getFeatureList().size() < params_tracker_feature_->min_features_for_keyframe;
 }
 
-unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out)
+unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out)
 {
     WOLF_INFO("Detecting " , _max_features , " new features..." );
 
@@ -70,13 +70,13 @@ unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int&
     return _features_incoming_out.size();
 }
 
-ConstraintBasePtr ProcessorTrackerFeatureDummy::createConstraint(FeatureBasePtr _feature_ptr,
+FactorBasePtr ProcessorTrackerFeatureDummy::createFactor(FeatureBasePtr _feature_ptr,
                                                                  FeatureBasePtr _feature_other_ptr)
 {
-    WOLF_INFO( "creating constraint: track " , _feature_other_ptr->trackId() , " last feature " , _feature_ptr->id()
+    WOLF_INFO( "creating factor: track " , _feature_other_ptr->trackId() , " last feature " , _feature_ptr->id()
                , " with origin feature " , _feature_other_ptr->id() );
 
-    auto ctr = std::make_shared<ConstraintEpipolar>(_feature_ptr, _feature_other_ptr, shared_from_this());
+    auto ctr = std::make_shared<FactorEpipolar>(_feature_ptr, _feature_other_ptr, shared_from_this());
 
     return ctr;
 }
