@@ -63,8 +63,8 @@ LandmarkBasePtr LandmarkApriltag::create(const YAML::Node& _lmk_node)
     // Create a new landmark
     LandmarkApriltagPtr lmk_ptr = std::make_shared<LandmarkApriltag>(pose, tag_id, tag_width);
     lmk_ptr->setId(id);
-    lmk_ptr->getPPtr()->setFixed(pos_fixed);
-    lmk_ptr->getOPtr()->setFixed(ori_fixed);
+    lmk_ptr->getP()->setFixed(pos_fixed);
+    lmk_ptr->getO()->setFixed(ori_fixed);
 
     return lmk_ptr;
 

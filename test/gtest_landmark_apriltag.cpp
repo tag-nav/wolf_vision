@@ -56,27 +56,27 @@ TEST_F(LandmarkApriltag_class, create)
 {
     // load original hand-written map
     problem->loadMap(wolf_root + "/src/examples/map_apriltag_1.yaml"); // this will call create()
-    ASSERT_EQ(problem->getMapPtr()->getLandmarkList().size(), 4);
-    ASSERT_EQ(problem->getMapPtr()->getLandmarkList().front()->getType(), "APRILTAG");
+    ASSERT_EQ(problem->getMap()->getLandmarkList().size(), 4);
+    ASSERT_EQ(problem->getMap()->getLandmarkList().front()->getType(), "APRILTAG");
 }
 
 TEST_F(LandmarkApriltag_class, saveToYaml)
 {
     // load original hand-written map
     problem->loadMap(wolf_root + "/src/examples/map_apriltag_1.yaml");
-    ASSERT_EQ(problem->getMapPtr()->getLandmarkList().size(), 4);
+    ASSERT_EQ(problem->getMap()->getLandmarkList().size(), 4);
 
     // write map on new file
     problem->saveMap(wolf_root + "/src/examples/map_apriltag_save.yaml"); // this will call saveToYaml()
 
     // delete existing map
-    problem->getMapPtr()->getLandmarkList().clear();
-    ASSERT_EQ(problem->getMapPtr()->getLandmarkList().size(), 0);
+    problem->getMap()->getLandmarkList().clear();
+    ASSERT_EQ(problem->getMap()->getLandmarkList().size(), 0);
 
     // reload the saved map
     problem->loadMap(wolf_root + "/src/examples/map_apriltag_save.yaml");
-    ASSERT_EQ(problem->getMapPtr()->getLandmarkList().size(), 4);
-    ASSERT_EQ(problem->getMapPtr()->getLandmarkList().front()->getType(), "APRILTAG");
+    ASSERT_EQ(problem->getMap()->getLandmarkList().size(), 4);
+    ASSERT_EQ(problem->getMap()->getLandmarkList().front()->getType(), "APRILTAG");
 }
 
 int main(int argc, char **argv)

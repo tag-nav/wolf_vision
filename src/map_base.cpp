@@ -40,7 +40,7 @@ void MapBase::addLandmarkList(LandmarkBasePtrList& _landmark_list)
 {
     for (auto lmk : _landmark_list)
         addLandmark(lmk);
-//	LandmarkBaseList lmk_list_copy = _landmark_list; //since _landmark_list will be empty after addDownNodeList()
+//	LandmarkBasePtrList lmk_list_copy = _landmark_list; //since _landmark_list will be empty after addDownNodeList()
 //    for (LandmarkBasePtr landmark_ptr : lmk_list_copy)
 //    {
 //        landmark_ptr->setMapPtr(shared_from_this());

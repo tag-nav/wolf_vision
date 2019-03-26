@@ -33,8 +33,8 @@ class ProcessorTrackerLandmarkApriltag_Wrapper : public ProcessorTrackerLandmark
         void setIncomingPtr  (const CaptureBasePtr _incoming_ptr)   { incoming_ptr_ = _incoming_ptr; }
         unsigned int getMinFeaturesForKeyframe (){return min_features_for_keyframe_;}
         Scalar getMinTimeVote (){return min_time_vote_;}
-        void setIncomingDetections(const FeatureBaseList _incoming_detections) { detections_incoming_ = _incoming_detections; }
-        void setLastDetections(const FeatureBaseList _last_detections) { detections_last_ = _last_detections; }
+        void setIncomingDetections(const FeatureBasePtrList _incoming_detections) { detections_incoming_ = _incoming_detections; }
+        void setLastDetections(const FeatureBasePtrList _last_detections) { detections_last_ = _last_detections; }
 
         // for factory
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr)
@@ -208,12 +208,12 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, voteForKeyFrame)
 TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
 {
     // No detected features
-    FeatureBaseList features_out;
+    FeatureBasePtrList features_out;
     prc_apr->detectNewFeatures(1, features_out);
     ASSERT_EQ(features_out.size(), 0);
 
     // Some detected features TODO
-    FeatureBaseList features_in;
+    FeatureBasePtrList features_in;
     Eigen::Vector3s pos;
     Eigen::Vector3s ori; //Euler angles in rad
     Eigen::Quaternions quat;
@@ -275,7 +275,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, detectNewFeatures)
     LandmarkBasePtr lmk1 = prc_apr->createLandmark(f1);
 
     // Add landmarks to the map
-    LandmarkBaseList landmark_list;
+    LandmarkBasePtrList landmark_list;
     landmark_list.push_back(lmk0);
     landmark_list.push_back(lmk1);
     problem->addLandmarkList(landmark_list);
@@ -305,7 +305,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, createLandmark)
     ASSERT_MATRIX_APPROX(lmk_april->getState(), pose_landmark, 1e-6);
 }
 
-TEST_F(ProcessorTrackerLandmarkApriltag_class, createConstraint)
+TEST_F(ProcessorTrackerLandmarkApriltag_class, createFactor)
 {
     det.id = 1;
     FeatureApriltagPtr f1 = std::make_shared<FeatureApriltag>((Vector7s()<<0,0,0,0,0,0,1).finished(), Matrix6s::Identity(), 1, det, rep_error1, rep_error2, use_rotation);
@@ -314,7 +314,7 @@ TEST_F(ProcessorTrackerLandmarkApriltag_class, createConstraint)
     LandmarkBasePtr lmk = prc_apr->createLandmark(f1);
     LandmarkApriltagPtr lmk_april = std::static_pointer_cast<LandmarkApriltag>(lmk);
 
-    ConstraintBasePtr ctr = prc_apr->createConstraint(f1, lmk);
+    FactorBasePtr ctr = prc_apr->createFactor(f1, lmk);
 
     ASSERT_TRUE(ctr->getType() == "AUTODIFF APRILTAG");
 }

@@ -135,9 +135,9 @@ wolf_add_gtest(gtest_factor_absolute gtest_factor_absolute.cpp)
 target_link_libraries(gtest_factor_absolute ${PROJECT_NAME})
 
 IF (OPENCV_FOUND AND APRILTAG_LIBRARY)
-	# ConstraintAutodiffApriltag test
-	wolf_add_gtest(gtest_constraint_autodiff_apriltag gtest_constraint_autodiff_apriltag.cpp)
-	target_link_libraries(gtest_constraint_autodiff_apriltag ${PROJECT_NAME})
+	# FactorAutodiffApriltag test
+	wolf_add_gtest(gtest_factor_autodiff_apriltag gtest_factor_autodiff_apriltag.cpp)
+	target_link_libraries(gtest_factor_autodiff_apriltag ${PROJECT_NAME})
 ENDIF(OPENCV_FOUND AND APRILTAG_LIBRARY)
 
 # FactorAutodiffDistance3D test

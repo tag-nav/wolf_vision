@@ -61,8 +61,8 @@ unsigned int ProcessorTrackerLandmark::processKnown()
     matches_landmark_from_incoming_.clear();
 
     // Find landmarks in incoming_ptr_
-    FeatureBaseList known_features_list_incoming;
-    unsigned int n = findLandmarks(getProblem()->getMapPtr()->getLandmarkList(),
+    FeatureBasePtrList known_features_list_incoming;
+    unsigned int n = findLandmarks(getProblem()->getMap()->getLandmarkList(),
                                                  known_features_list_incoming, matches_landmark_from_incoming_);
     // Append found incoming features
     incoming_ptr_->addFeatureList(known_features_list_incoming);
@@ -131,17 +131,17 @@ void ProcessorTrackerLandmark::createNewLandmarks()
     }
 }
 
-unsigned int ProcessorTrackerLandmark::processKnown()
-{
-    // Find landmarks in incoming_ptr_
-    FeatureBasePtrList known_features_list_incoming;
-    unsigned int n = findLandmarks(getProblem()->getMap()->getLandmarkList(),
-                                                 known_features_list_incoming, matches_landmark_from_incoming_);
-    // Append found incoming features
-    incoming_ptr_->addFeatureList(known_features_list_incoming);
+// unsigned int ProcessorTrackerLandmark::processKnown()
+// {
+//     // Find landmarks in incoming_ptr_
+//     FeatureBasePtrList known_features_list_incoming;
+//     unsigned int n = findLandmarks(getProblem()->getMap()->getLandmarkList(),
+//                                                  known_features_list_incoming, matches_landmark_from_incoming_);
+//     // Append found incoming features
+//     incoming_ptr_->addFeatureList(known_features_list_incoming);
 
-    return n;
-}
+//     return n;
+// }
 
 void ProcessorTrackerLandmark::establishFactors()
 {
