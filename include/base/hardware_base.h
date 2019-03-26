@@ -17,14 +17,14 @@ namespace wolf {
 class HardwareBase : public NodeBase, public std::enable_shared_from_this<HardwareBase>
 {
     private:
-        SensorBaseList sensor_list_;
+        SensorBasePtrList sensor_list_;
 
     public:
         HardwareBase();
         virtual ~HardwareBase();
 
         virtual SensorBasePtr addSensor(SensorBasePtr _sensor_ptr);
-        SensorBaseList& getSensorList();
+        SensorBasePtrList& getSensorList();
 };
 
 } // namespace wolf
@@ -33,7 +33,7 @@ class HardwareBase : public NodeBase, public std::enable_shared_from_this<Hardwa
 
 namespace wolf {
 
-inline SensorBaseList& HardwareBase::getSensorList()
+inline SensorBasePtrList& HardwareBase::getSensorList()
 {
     return sensor_list_;
 }

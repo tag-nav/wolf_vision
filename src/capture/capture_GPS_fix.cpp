@@ -28,7 +28,7 @@ void CaptureGPSFix::process()
     addFeature(std::make_shared<FeatureGPSFix>(data_,data_covariance_));
 
     // ADD CONSTRAINT
-    getFeatureList().front()->addConstraint(std::make_shared <ConstraintGPS2D>(getFeatureList().front()));
+    getFeatureList().front()->addFactor(std::make_shared <FactorGPS2D>(getFeatureList().front()));
 }
 
 } //namespace wolf

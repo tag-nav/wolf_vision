@@ -100,6 +100,7 @@ option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
 # option(BUILD_EXAMPLES "Build examples" OFF)
 set(BUILD_TESTS true)
+set(BUILD_EXAMPLES true)
 
 # Does this has any other interest
 # but for the examples ?
@@ -319,51 +320,51 @@ SET(HDRS_CAPTURE
   include/base/capture/capture_velocity.h
   include/base/capture/capture_wheel_joint_position.h
   )
-SET(HDRS_CONSTRAINT
-  include/base/constraint/constraint_block_absolute.h
-  include/base/constraint/constraint_container.h
-  include/base/constraint/constraint_corner_2D.h
-  include/base/constraint/constraint_AHP.h
-  include/base/constraint/constraint_epipolar.h
-  include/base/constraint/constraint_IMU.h
-  include/base/constraint/constraint_fix_bias.h
-  include/base/constraint/constraint_GPS_2D.h
-  include/base/constraint/constraint_GPS_pseudorange_3D.h
-  include/base/constraint/constraint_GPS_pseudorange_2D.h
-  include/base/constraint/constraint_odom_2D.h
-  include/base/constraint/constraint_odom_2D_analytic.h
-  include/base/constraint/constraint_odom_3D.h
-  include/base/constraint/constraint_point_2D.h
-  include/base/constraint/constraint_point_to_line_2D.h
-  include/base/constraint/constraint_pose_2D.h
-  include/base/constraint/constraint_pose_3D.h
-  include/base/constraint/constraint_quaternion_absolute.h
-  include/base/constraint/constraint_relative_2D_analytic.h
-  include/base/constraint/constraint_autodiff_trifocal.h
-  include/base/constraint/constraint_autodiff_distance_3D.h
-  include/base/constraint/constraint_AHP.h
-  include/base/constraint/constraint_block_absolute.h
-  include/base/constraint/constraint_container.h
-  include/base/constraint/constraint_corner_2D.h
-  include/base/constraint/constraint_diff_drive.h
-  include/base/constraint/constraint_epipolar.h
-  include/base/constraint/constraint_IMU.h
-  include/base/constraint/constraint_fix_bias.h
-  include/base/constraint/constraint_GPS_2D.h
-  include/base/constraint/constraint_GPS_pseudorange_3D.h
-  include/base/constraint/constraint_GPS_pseudorange_2D.h
-  include/base/constraint/constraint_odom_2D.h
-  include/base/constraint/constraint_odom_2D_analytic.h
-  include/base/constraint/constraint_odom_3D.h
-  include/base/constraint/constraint_point_2D.h
-  include/base/constraint/constraint_point_to_line_2D.h
-  include/base/constraint/constraint_pose_2D.h
-  include/base/constraint/constraint_pose_3D.h
-  include/base/constraint/constraint_quaternion_absolute.h
-  include/base/constraint/constraint_relative_2D_analytic.h
-  include/base/constraint/constraint_analytic.h
-  include/base/constraint/constraint_autodiff.h
-  include/base/constraint/constraint_base.h
+SET(HDRS_FACTOR
+  include/base/factor/factor_block_absolute.h
+  include/base/factor/factor_container.h
+  include/base/factor/factor_corner_2D.h
+  include/base/factor/factor_AHP.h
+  include/base/factor/factor_epipolar.h
+  include/base/factor/factor_IMU.h
+  include/base/factor/factor_fix_bias.h
+  include/base/factor/factor_GPS_2D.h
+  include/base/factor/factor_GPS_pseudorange_3D.h
+  include/base/factor/factor_GPS_pseudorange_2D.h
+  include/base/factor/factor_odom_2D.h
+  include/base/factor/factor_odom_2D_analytic.h
+  include/base/factor/factor_odom_3D.h
+  include/base/factor/factor_point_2D.h
+  include/base/factor/factor_point_to_line_2D.h
+  include/base/factor/factor_pose_2D.h
+  include/base/factor/factor_pose_3D.h
+  include/base/factor/factor_quaternion_absolute.h
+  include/base/factor/factor_relative_2D_analytic.h
+  include/base/factor/factor_autodiff_trifocal.h
+  include/base/factor/factor_autodiff_distance_3D.h
+  include/base/factor/factor_AHP.h
+  include/base/factor/factor_block_absolute.h
+  include/base/factor/factor_container.h
+  include/base/factor/factor_corner_2D.h
+  include/base/factor/factor_diff_drive.h
+  include/base/factor/factor_epipolar.h
+  include/base/factor/factor_IMU.h
+  include/base/factor/factor_fix_bias.h
+  include/base/factor/factor_GPS_2D.h
+  include/base/factor/factor_GPS_pseudorange_3D.h
+  include/base/factor/factor_GPS_pseudorange_2D.h
+  include/base/factor/factor_odom_2D.h
+  include/base/factor/factor_odom_2D_analytic.h
+  include/base/factor/factor_odom_3D.h
+  include/base/factor/factor_point_2D.h
+  include/base/factor/factor_point_to_line_2D.h
+  include/base/factor/factor_pose_2D.h
+  include/base/factor/factor_pose_3D.h
+  include/base/factor/factor_quaternion_absolute.h
+  include/base/factor/factor_relative_2D_analytic.h
+  include/base/factor/factor_analytic.h
+  include/base/factor/factor_autodiff.h
+  include/base/factor/factor_base.h
   )
 SET(HDRS_FEATURE
   include/base/feature/feature_corner_2D.h
@@ -455,9 +456,9 @@ SET(HDRS_CORE
   include/base/capture/capture_buffer.h
   include/base/capture/capture_pose.h
   include/base/capture/capture_void.h
-  include/base/constraint/constraint_analytic.h
-  include/base/constraint/constraint_autodiff.h
-  include/base/constraint/constraint_base.h
+  include/base/factor/factor_analytic.h
+  include/base/factor/factor_autodiff.h
+  include/base/factor/factor_base.h
   include/base/processor/processor_factory.h
   include/base/feature/feature_base.h
   include/base/feature/feature_match.h
@@ -499,8 +500,8 @@ SET(SRCS_CORE
   src/capture/capture_base.cpp
   src/capture/capture_pose.cpp
   src/capture/capture_void.cpp
-  src/constraint/constraint_analytic.cpp
-  src/constraint/constraint_base.cpp
+  src/factor/factor_analytic.cpp
+  src/factor/factor_base.cpp
   src/feature/feature_base.cpp
   src/feature/feature_pose.cpp
   src/frame_base.cpp
@@ -589,24 +590,24 @@ SET(SRCS_SOLVER
 #OPTIONALS
 #optional HDRS and SRCS
 IF (Ceres_FOUND)
-  SET(HDRS_WRAPPER
-    include/base/solver_suitesparse/sparse_utils.h
-    include/base/solver/solver_manager.h
-    include/base/ceres_wrapper/ceres_manager.h
-    #ceres_wrapper/qr_manager.h
-    include/base/ceres_wrapper/cost_function_wrapper.h
-    include/base/ceres_wrapper/create_numeric_diff_cost_function.h
-    include/base/ceres_wrapper/local_parametrization_wrapper.h 
-    )
-  SET(SRCS_WRAPPER
-    src/solver/solver_manager.cpp
-    src/ceres_wrapper/ceres_manager.cpp
-    #ceres_wrapper/qr_manager.cpp
-    src/ceres_wrapper/local_parametrization_wrapper.cpp 
-    )
+    SET(HDRS_WRAPPER
+      include/base/solver_suitesparse/sparse_utils.h
+      include/base/solver/solver_manager.h
+      include/base/ceres_wrapper/ceres_manager.h
+      #ceres_wrapper/qr_manager.h
+      include/base/ceres_wrapper/cost_function_wrapper.h
+      include/base/ceres_wrapper/create_numeric_diff_cost_function.h
+      include/base/ceres_wrapper/local_parametrization_wrapper.h 
+      )
+    SET(SRCS_WRAPPER
+      src/solver/solver_manager.cpp
+      src/ceres_wrapper/ceres_manager.cpp
+      #ceres_wrapper/qr_manager.cpp
+      src/ceres_wrapper/local_parametrization_wrapper.cpp 
+      )
 ELSE(Ceres_FOUND)
-    SET(HDRS_WRAPPER)
-    SET(SRCS_WRAPPER)
+  SET(HDRS_WRAPPER)
+  SET(SRCS_WRAPPER)
 ENDIF(Ceres_FOUND)
 
 IF (laser_scan_utils_FOUND)
@@ -676,8 +677,8 @@ IF (vision_utils_FOUND)
 ENDIF(vision_utils_FOUND)
 
 IF (OPENCV_FOUND AND Apriltag_FOUND)
-  SET(HDRS_CONSTRAINT ${HDRS_CONSTRAINT}
-    include/base/constraint/constraint_autodiff_apriltag.h
+  SET(HDRS_FACTOR ${HDRS_FACTOR}
+    include/base/factor/factor_autodiff_apriltag.h
     )
   SET(HDRS_FEATURE ${HDRS_FEATURE}
     include/base/feature/feature_apriltag.h
@@ -708,8 +709,8 @@ IF (cereal_FOUND)
 ENDIF(cereal_FOUND)
 
 IF (Suitesparse_FOUND)
-    #DOES NOTHING?!    
-    #ADD_SUBDIRECTORY(solver_suitesparse)
+  #DOES NOTHING?!    
+  #ADD_SUBDIRECTORY(solver_suitesparse)
 ENDIF(Suitesparse_FOUND)
 # LEAVE YAML FILES ALWAYS IN THE LAST POSITION !!
 IF(YAMLCPP_FOUND)
@@ -754,7 +755,7 @@ ADD_LIBRARY(${PROJECT_NAME}
   ${SRCS_CORE}
   ${SRCS}
   ${SRCS_CAPTURE}
-  ${SRCS_CONSTRAINT}
+  ${SRCS_FACTOR}
   ${SRCS_FEATURE}
   ${SRCS_LANDMARK}
   ${SRCS_PROCESSOR}
@@ -829,8 +830,8 @@ INSTALL(FILES ${HDRS_DTASSC}
    DESTINATION include/iri-algorithms/wolf/base/association)
 INSTALL(FILES ${HDRS_CAPTURE}
     DESTINATION include/iri-algorithms/wolf/base/capture)
-INSTALL(FILES ${HDRS_CONSTRAINT}
-    DESTINATION include/iri-algorithms/wolf/base/constraint)
+INSTALL(FILES ${HDRS_FACTOR}
+    DESTINATION include/iri-algorithms/wolf/base/factor)
 INSTALL(FILES ${HDRS_FEATURE}
     DESTINATION include/iri-algorithms/wolf/base/feature)
 INSTALL(FILES ${HDRS_SENSOR}

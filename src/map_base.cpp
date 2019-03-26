@@ -36,7 +36,7 @@ LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)
     return _landmark_ptr;
 }
 
-void MapBase::addLandmarkList(LandmarkBaseList& _landmark_list)
+void MapBase::addLandmarkList(LandmarkBasePtrList& _landmark_list)
 {
     for (auto lmk : _landmark_list)
         addLandmark(lmk);

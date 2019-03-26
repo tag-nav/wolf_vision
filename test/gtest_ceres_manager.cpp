@@ -12,8 +12,8 @@
 #include "base/sensor/sensor_base.h"
 #include "base/state_block.h"
 #include "base/capture/capture_void.h"
-#include "base/constraint/constraint_pose_2D.h"
-#include "base/constraint/constraint_quaternion_absolute.h"
+#include "base/factor/factor_pose_2D.h"
+#include "base/factor/factor_quaternion_absolute.h"
 #include "base/solver/solver_manager.h"
 #include "base/ceres_wrapper/ceres_manager.h"
 #include "base/local_parametrization_angle.h"
@@ -55,12 +55,12 @@ class CeresManagerWrapper : public CeresManager
             return ceres_problem_->NumParameterBlocks();
         };
 
-        int numConstraints()
+        int numFactors()
         {
             return ceres_problem_->NumResidualBlocks();
         };
 
-        bool isConstraintRegistered(const ConstraintBasePtr& ctr_ptr) const
+        bool isFactorRegistered(const FactorBasePtr& ctr_ptr) const
         {
             return ctr_2_residual_idx_.find(ctr_ptr) != ctr_2_residual_idx_.end() && ctr_2_costfunction_.find(ctr_ptr) != ctr_2_costfunction_.end();
         };
@@ -68,7 +68,7 @@ class CeresManagerWrapper : public CeresManager
         bool hasThisLocalParametrization(const StateBlockPtr& st, const LocalParametrizationBasePtr& local_param)
         {
             return state_blocks_local_param_.find(st) != state_blocks_local_param_.end() &&
-                   state_blocks_local_param_.at(st)->getLocalParametrizationPtr() == local_param &&
+                   state_blocks_local_param_.at(st)->getLocalParametrization() == local_param &&
                    ceres_problem_->GetParameterization(getAssociatedMemBlockPtr(st)) == state_blocks_local_param_.at(st).get();
         };
 
@@ -85,7 +85,7 @@ TEST(CeresManager, Create)
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // check double ointers to branches
-    ASSERT_EQ(P, ceres_manager_ptr->getProblemPtr());
+    ASSERT_EQ(P, ceres_manager_ptr->getProblem());
 
     // run ceres manager check
     ceres_manager_ptr->check();
@@ -312,140 +312,140 @@ TEST(CeresManager, DoubleRemoveStateBlock)
     ceres_manager_ptr->check();
 }
 
-TEST(CeresManager, AddConstraint)
+TEST(CeresManager, AddFactor)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
-    // Create (and add) constraint point 2d
+    // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
 
     // update solver
     ceres_manager_ptr->update();
 
-    // check constraint
-    ASSERT_TRUE(ceres_manager_ptr->isConstraintRegistered(c));
-    ASSERT_EQ(ceres_manager_ptr->numConstraints(), 1);
+    // check factor
+    ASSERT_TRUE(ceres_manager_ptr->isFactorRegistered(c));
+    ASSERT_EQ(ceres_manager_ptr->numFactors(), 1);
 
     // run ceres manager check
     ceres_manager_ptr->check();
 }
 
-TEST(CeresManager, DoubleAddConstraint)
+TEST(CeresManager, DoubleAddFactor)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
-    // Create (and add) constraint point 2d
+    // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
 
-    // add constraint again
-    P->addConstraint(c);
+    // add factor again
+    P->addFactor(c);
 
     // update solver
     ceres_manager_ptr->update();
 
-    // check constraint
-    ASSERT_TRUE(ceres_manager_ptr->isConstraintRegistered(c));
-    ASSERT_EQ(ceres_manager_ptr->numConstraints(), 1);
+    // check factor
+    ASSERT_TRUE(ceres_manager_ptr->isFactorRegistered(c));
+    ASSERT_EQ(ceres_manager_ptr->numFactors(), 1);
 
     // run ceres manager check
     ceres_manager_ptr->check();
 }
 
-TEST(CeresManager, RemoveConstraint)
+TEST(CeresManager, RemoveFactor)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
-    // Create (and add) constraint point 2d
+    // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
 
     // update solver
     ceres_manager_ptr->update();
 
-    // remove constraint
-    P->removeConstraint(c);
+    // remove factor
+    P->removeFactor(c);
 
     // update solver
     ceres_manager_ptr->update();
 
-    // check constraint
-    ASSERT_FALSE(ceres_manager_ptr->isConstraintRegistered(c));
-    ASSERT_EQ(ceres_manager_ptr->numConstraints(), 0);
+    // check factor
+    ASSERT_FALSE(ceres_manager_ptr->isFactorRegistered(c));
+    ASSERT_EQ(ceres_manager_ptr->numFactors(), 0);
 
     // run ceres manager check
     ceres_manager_ptr->check();
 }
 
-TEST(CeresManager, AddRemoveConstraint)
+TEST(CeresManager, AddRemoveFactor)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
-    // Create (and add) constraint point 2d
+    // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
 
-    ASSERT_TRUE(P->getConstraintNotificationMap().begin()->first == c);
+    ASSERT_TRUE(P->getFactorNotificationMap().begin()->first == c);
 
-    // remove constraint
-    P->removeConstraint(c);
+    // remove factor
+    P->removeFactor(c);
 
-    ASSERT_TRUE(P->getConstraintNotificationMap().empty());
+    ASSERT_TRUE(P->getFactorNotificationMap().empty());
 
     // update solver
     ceres_manager_ptr->update();
 
-    // check constraint
-    ASSERT_FALSE(ceres_manager_ptr->isConstraintRegistered(c));
-    ASSERT_EQ(ceres_manager_ptr->numConstraints(), 0);
+    // check factor
+    ASSERT_FALSE(ceres_manager_ptr->isFactorRegistered(c));
+    ASSERT_EQ(ceres_manager_ptr->numFactors(), 0);
 
     // run ceres manager check
     ceres_manager_ptr->check();
 }
 
-TEST(CeresManager, DoubleRemoveConstraint)
+TEST(CeresManager, DoubleRemoveFactor)
 {
     ProblemPtr P = Problem::create("PO 2D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
-    // Create (and add) constraint point 2d
+    // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    ConstraintPose2DPtr c = std::static_pointer_cast<ConstraintPose2D>(f->addConstraint(std::make_shared<ConstraintPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
 
     // update solver
     ceres_manager_ptr->update();
 
-    // remove constraint
-    P->removeConstraint(c);
+    // remove factor
+    P->removeFactor(c);
 
     // update solver
     ceres_manager_ptr->update();
 
-    // remove constraint
-    P->removeConstraint(c);
+    // remove factor
+    P->removeFactor(c);
 
     ASSERT_DEATH({
     // update solver
     ceres_manager_ptr->update();},"");
 
-    // check constraint
-    ASSERT_FALSE(ceres_manager_ptr->isConstraintRegistered(c));
-    ASSERT_EQ(ceres_manager_ptr->numConstraints(), 0);
+    // check factor
+    ASSERT_FALSE(ceres_manager_ptr->isFactorRegistered(c));
+    ASSERT_EQ(ceres_manager_ptr->numFactors(), 0);
 
     // run ceres manager check
     ceres_manager_ptr->check();
@@ -543,87 +543,87 @@ TEST(CeresManager, AddLocalParam)
     ceres_manager_ptr->check();
 }
 
-TEST(CeresManager, ConstraintsRemoveLocalParam)
+TEST(CeresManager, FactorsRemoveLocalParam)
 {
     ProblemPtr P = Problem::create("PO 3D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
-    // Create (and add) 2 constraints quaternion
+    // Create (and add) 2 factors quaternion
     FrameBasePtr                    F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
     CaptureBasePtr                  C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr                  f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    ConstraintQuaternionAbsolutePtr c1 = std::static_pointer_cast<ConstraintQuaternionAbsolute>(f->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(F->getOPtr())));
-    ConstraintQuaternionAbsolutePtr c2 = std::static_pointer_cast<ConstraintQuaternionAbsolute>(f->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(F->getOPtr())));
+    FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
+    FactorQuaternionAbsolutePtr c2 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
 
     // update solver
     ceres_manager_ptr->update();
 
     // check local param
-    ASSERT_TRUE(ceres_manager_ptr->hasLocalParametrization(F->getOPtr()));
-    ASSERT_TRUE(ceres_manager_ptr->hasThisLocalParametrization(F->getOPtr(),F->getOPtr()->getLocalParametrizationPtr()));
+    ASSERT_TRUE(ceres_manager_ptr->hasLocalParametrization(F->getO()));
+    ASSERT_TRUE(ceres_manager_ptr->hasThisLocalParametrization(F->getO(),F->getO()->getLocalParametrization()));
 
-    // check constraint
-    ASSERT_TRUE(ceres_manager_ptr->isConstraintRegistered(c1));
-    ASSERT_TRUE(ceres_manager_ptr->isConstraintRegistered(c2));
-    ASSERT_EQ(ceres_manager_ptr->numConstraints(), 2);
+    // check factor
+    ASSERT_TRUE(ceres_manager_ptr->isFactorRegistered(c1));
+    ASSERT_TRUE(ceres_manager_ptr->isFactorRegistered(c2));
+    ASSERT_EQ(ceres_manager_ptr->numFactors(), 2);
 
     // remove local param
-    F->getOPtr()->removeLocalParametrization();
+    F->getO()->removeLocalParametrization();
 
     // update solver
     ceres_manager_ptr->update();
 
     // check local param
-    ASSERT_FALSE(ceres_manager_ptr->hasLocalParametrization(F->getOPtr()));
+    ASSERT_FALSE(ceres_manager_ptr->hasLocalParametrization(F->getO()));
 
-    // check constraint
-    ASSERT_TRUE(ceres_manager_ptr->isConstraintRegistered(c1));
-    ASSERT_TRUE(ceres_manager_ptr->isConstraintRegistered(c2));
-    ASSERT_EQ(ceres_manager_ptr->numConstraints(), 2);
+    // check factor
+    ASSERT_TRUE(ceres_manager_ptr->isFactorRegistered(c1));
+    ASSERT_TRUE(ceres_manager_ptr->isFactorRegistered(c2));
+    ASSERT_EQ(ceres_manager_ptr->numFactors(), 2);
 
     // run ceres manager check
     ceres_manager_ptr->check();
 }
 
-TEST(CeresManager, ConstraintsUpdateLocalParam)
+TEST(CeresManager, FactorsUpdateLocalParam)
 {
     ProblemPtr P = Problem::create("PO 3D");
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
-    // Create (and add) 2 constraints quaternion
+    // Create (and add) 2 factors quaternion
     FrameBasePtr                    F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
     CaptureBasePtr                  C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr                  f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    ConstraintQuaternionAbsolutePtr c1 = std::static_pointer_cast<ConstraintQuaternionAbsolute>(f->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(F->getOPtr())));
-    ConstraintQuaternionAbsolutePtr c2 = std::static_pointer_cast<ConstraintQuaternionAbsolute>(f->addConstraint(std::make_shared<ConstraintQuaternionAbsolute>(F->getOPtr())));
+    FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
+    FactorQuaternionAbsolutePtr c2 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
 
     // update solver
     ceres_manager_ptr->update();
 
     // check local param
-    ASSERT_TRUE(ceres_manager_ptr->hasLocalParametrization(F->getOPtr()));
-    ASSERT_TRUE(ceres_manager_ptr->hasThisLocalParametrization(F->getOPtr(),F->getOPtr()->getLocalParametrizationPtr()));
+    ASSERT_TRUE(ceres_manager_ptr->hasLocalParametrization(F->getO()));
+    ASSERT_TRUE(ceres_manager_ptr->hasThisLocalParametrization(F->getO(),F->getO()->getLocalParametrization()));
 
-    // check constraint
-    ASSERT_TRUE(ceres_manager_ptr->isConstraintRegistered(c1));
-    ASSERT_TRUE(ceres_manager_ptr->isConstraintRegistered(c2));
-    ASSERT_EQ(ceres_manager_ptr->numConstraints(), 2);
+    // check factor
+    ASSERT_TRUE(ceres_manager_ptr->isFactorRegistered(c1));
+    ASSERT_TRUE(ceres_manager_ptr->isFactorRegistered(c2));
+    ASSERT_EQ(ceres_manager_ptr->numFactors(), 2);
 
     // remove local param
     LocalParametrizationBasePtr local_param_ptr = std::make_shared<LocalParametrizationQuaternionGlobal>();
-    F->getOPtr()->setLocalParametrizationPtr(local_param_ptr);
+    F->getO()->setLocalParametrizationPtr(local_param_ptr);
 
     // update solver
     ceres_manager_ptr->update();
 
     // check local param
-    ASSERT_TRUE(ceres_manager_ptr->hasLocalParametrization(F->getOPtr()));
-    ASSERT_TRUE(ceres_manager_ptr->hasThisLocalParametrization(F->getOPtr(),local_param_ptr));
+    ASSERT_TRUE(ceres_manager_ptr->hasLocalParametrization(F->getO()));
+    ASSERT_TRUE(ceres_manager_ptr->hasThisLocalParametrization(F->getO(),local_param_ptr));
 
-    // check constraint
-    ASSERT_TRUE(ceres_manager_ptr->isConstraintRegistered(c1));
-    ASSERT_TRUE(ceres_manager_ptr->isConstraintRegistered(c2));
-    ASSERT_EQ(ceres_manager_ptr->numConstraints(), 2);
+    // check factor
+    ASSERT_TRUE(ceres_manager_ptr->isFactorRegistered(c1));
+    ASSERT_TRUE(ceres_manager_ptr->isFactorRegistered(c2));
+    ASSERT_EQ(ceres_manager_ptr->numFactors(), 2);
 
     // run ceres manager check
     ceres_manager_ptr->check();

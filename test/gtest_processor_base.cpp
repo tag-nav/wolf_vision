@@ -89,7 +89,7 @@ TEST(ProcessorBase, KeyFrameCallback)
 //        problem->print(4,1,1,0);
 
         // Only odom creating KFs
-        ASSERT_TRUE( problem->getLastKeyFramePtr()->getType().compare("PO 2D")==0 );
+        ASSERT_TRUE( problem->getLastKeyFrame()->getType().compare("PO 2D")==0 );
     }
 }
 

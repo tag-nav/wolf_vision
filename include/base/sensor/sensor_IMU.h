@@ -38,7 +38,7 @@ class SensorIMU : public SensorBase
         Scalar a_noise; //Power Spectral Density (same for all the axis) in micro_g/ sqrt(Hz)
         Scalar w_noise; //Rate Noise Spectral Density (same for all the axis) in deg/sec/ sqrt(Hz)
 
-        //This is a trial to constraint how much can the bias change in 1 sec at most
+        //This is a trial to factor how much can the bias change in 1 sec at most
         Scalar ab_initial_stdev; //accelerometer micro_g/sec
         Scalar wb_initial_stdev; //gyroscope rad/sec
         Scalar ab_rate_stdev; //accelerometer micro_g/sec

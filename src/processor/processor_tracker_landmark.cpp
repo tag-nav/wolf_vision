@@ -76,8 +76,7 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
      *
      * First, we work on this Capture to detect new Features,
      * eventually create Landmarks with them,
-     * and in such case create the new Constraints feature-landmark.
-     *
+     * and in such case create the new Factors feature-landmark.
      * When done, we need to track these new Features to the incoming Capture.
      *
      * At the end, all new Features are appended to the lists of known Features in
@@ -132,22 +131,34 @@ void ProcessorTrackerLandmark::createNewLandmarks()
     }
 }
 
-void ProcessorTrackerLandmark::establishConstraints()
+unsigned int ProcessorTrackerLandmark::processKnown()
+{
+    // Find landmarks in incoming_ptr_
+    FeatureBasePtrList known_features_list_incoming;
+    unsigned int n = findLandmarks(getProblem()->getMap()->getLandmarkList(),
+                                                 known_features_list_incoming, matches_landmark_from_incoming_);
+    // Append found incoming features
+    incoming_ptr_->addFeatureList(known_features_list_incoming);
+
+    return n;
+}
+
+void ProcessorTrackerLandmark::establishFactors()
 {
     // Loop all features in last_ptr_
     for (auto last_feature : last_ptr_->getFeatureList())
     {
         auto lmk = matches_landmark_from_last_[last_feature]->landmark_ptr_;
-        ConstraintBasePtr ctr_ptr = createConstraint(last_feature,
+        FactorBasePtr ctr_ptr = createFactor(last_feature,
                                                      lmk);
-        if (ctr_ptr != nullptr) // constraint links
+        if (ctr_ptr != nullptr) // factor links
         {
-            last_feature->addConstraint(ctr_ptr);
+            last_feature->addFactor(ctr_ptr);
             lmk->addConstrainedBy(ctr_ptr);
-            FrameBasePtr frm = ctr_ptr->getFrameOtherPtr();
+            FrameBasePtr frm = ctr_ptr->getFrameOther();
             if (frm)
                 frm->addConstrainedBy(ctr_ptr);
-            CaptureBasePtr cap = ctr_ptr->getCaptureOtherPtr();
+            CaptureBasePtr cap = ctr_ptr->getCaptureOther();
             if (cap)
                 cap->addConstrainedBy(ctr_ptr);
         }

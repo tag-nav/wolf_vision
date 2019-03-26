@@ -9,7 +9,7 @@
 
 // Classes under test
 #include "base/processor/processor_odom_2D.h"
-#include "base/constraint/constraint_odom_2D.h"
+#include "base/factor/factor_odom_2D.h"
 
 // Wolf includes
 #include "base/sensor/sensor_odom_2D.h"
@@ -73,7 +73,7 @@ void show(const ProblemPtr& problem)
     using std::endl;
     cout << std::setprecision(4);
 
-    for (FrameBasePtr F : problem->getTrajectoryPtr()->getFrameList())
+    for (FrameBasePtr F : problem->getTrajectory()->getFrameList())
     {
         if (F->isKey())
         {
@@ -97,7 +97,7 @@ void show(const ProblemPtr& problem)
     }
 }
 
-TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
+TEST(Odom2D, FactorFix_and_FactorOdom2D)
 {
     using std::cout;
     using std::endl;
@@ -109,8 +109,8 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     //  a
     //  |
     // GND
-    // `absolute` is made with ConstraintFix
-    // `motion`   is made with ConstraintOdom2D
+    // `absolute` is made with FactorFix
+    // `motion`   is made with FactorOdom2D
 
     std::cout << std::setprecision(4);
 
@@ -132,7 +132,7 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     FrameBasePtr        F1 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
     CaptureBasePtr      C1 = F1->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
     FeatureBasePtr      f1 = C1->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
-    ConstraintBasePtr   c1 = f1->addConstraint(std::make_shared<ConstraintOdom2D>(f1, F0, nullptr));
+    FactorBasePtr   c1 = f1->addFactor(std::make_shared<FactorOdom2D>(f1, F0, nullptr));
     F0->addConstrainedBy(c1);
 
     // KF2 and motion from KF1
@@ -140,7 +140,7 @@ TEST(Odom2D, ConstraintFix_and_ConstraintOdom2D)
     FrameBasePtr        F2 = Pr->emplaceFrame(KEY_FRAME, Vector3s::Zero(), t);
     CaptureBasePtr      C2 = F2->addCapture(std::make_shared<CaptureBase>("ODOM 2D", t));
     FeatureBasePtr      f2 = C2->addFeature(std::make_shared<FeatureBase>("ODOM 2D", delta, delta_cov));
-    ConstraintBasePtr   c2 = f2->addConstraint(std::make_shared<ConstraintOdom2D>(f2, F1, nullptr));
+    FactorBasePtr   c2 = f2->addFactor(std::make_shared<FactorOdom2D>(f2, F1, nullptr));
     F1->addConstrainedBy(c2);
 
     ASSERT_TRUE(Pr->check(0));
@@ -412,7 +412,7 @@ TEST(Odom2D, KF_callback)
 //    std::cout << report << std::endl;
     ceres_manager.computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
 
-    ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
+    ASSERT_POSE2D_APPROX(problem->getLastKeyFrame()->getState() , integrated_pose_vector[n_split], 1e-6);
     ASSERT_MATRIX_APPROX(problem->getLastKeyFrameCovariance()      , integrated_cov_vector [n_split], 1e-6);
 
     ////////////////////////////////////////////////////////////////
@@ -453,7 +453,7 @@ TEST(Odom2D, KF_callback)
     ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_1) , integrated_cov_vector [m_split], 1e-6);
 
     // check other KF in the future of the split KF
-    ASSERT_POSE2D_APPROX(problem->getLastKeyFramePtr()->getState() , integrated_pose_vector[n_split], 1e-6);
+    ASSERT_POSE2D_APPROX(problem->getLastKeyFrame()->getState() , integrated_pose_vector[n_split], 1e-6);
     ASSERT_MATRIX_APPROX(problem->getFrameCovariance(keyframe_2)   , integrated_cov_vector [n_split], 1e-6);
 
     // Check full trajectory

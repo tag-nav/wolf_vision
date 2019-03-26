@@ -62,7 +62,7 @@ TEST(TrajectoryBase, ClosestKeyFrame)
 {
 
     ProblemPtr P = Problem::create("PO 2D");
-    TrajectoryBasePtr T = P->getTrajectoryPtr();
+    TrajectoryBasePtr T = P->getTrajectory();
 
     // Trajectory status:
     //  kf1   kf2    f3      frames
@@ -99,7 +99,7 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     using std::make_shared;
 
     ProblemPtr P = Problem::create("PO 2D");
-    TrajectoryBasePtr T = P->getTrajectoryPtr();
+    TrajectoryBasePtr T = P->getTrajectory();
 
     DummyNotificationProcessor N(P);
 
@@ -118,26 +118,26 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     T->addFrame(f1); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
-    ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 2);
+    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 2);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
     std::cout << __LINE__ << std::endl;
 
     T->addFrame(f2); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
-    ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 4);
+    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 4);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
     std::cout << __LINE__ << std::endl;
 
     T->addFrame(f3); // F
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 3);
-    ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 4);
+    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 4);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
     std::cout << __LINE__ << std::endl;
 
-    ASSERT_EQ(T->getLastFramePtr()->id(), f3->id());
-    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f2->id());
+    ASSERT_EQ(T->getLastFrame()->id(), f3->id());
+    ASSERT_EQ(T->getLastKeyFrame()->id(), f2->id());
     std::cout << __LINE__ << std::endl;
 
     N.update();
@@ -147,27 +147,27 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     f2->remove(); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
-    ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 2);
+    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 2);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
     std::cout << __LINE__ << std::endl;
 
-    ASSERT_EQ(T->getLastFramePtr()->id(), f3->id());
-    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f1->id());
+    ASSERT_EQ(T->getLastFrame()->id(), f3->id());
+    ASSERT_EQ(T->getLastKeyFrame()->id(), f1->id());
     std::cout << __LINE__ << std::endl;
 
     f3->remove(); // F
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
-    ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 2);
+    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 2);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
     std::cout << __LINE__ << std::endl;
 
-    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f1->id());
+    ASSERT_EQ(T->getLastKeyFrame()->id(), f1->id());
 
     f1->remove(); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 0);
-    ASSERT_EQ(P->getStateBlockList().            size(), (unsigned int) 0);
+    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 0);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
     std::cout << __LINE__ << std::endl;
 
@@ -182,7 +182,7 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     using std::make_shared;
 
     ProblemPtr P = Problem::create("PO 2D");
-    TrajectoryBasePtr T = P->getTrajectoryPtr();
+    TrajectoryBasePtr T = P->getTrajectory();
 
     // Trajectory status:
     //  kf1   kf2    f3      frames
@@ -196,23 +196,23 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     // add frames and keyframes in random order --> keyframes must be sorted after that
     T->addFrame(f2); // KF2
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getLastFramePtr()   ->id(), f2->id());
-    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f2->id());
+    ASSERT_EQ(T->getLastFrame()   ->id(), f2->id());
+    ASSERT_EQ(T->getLastKeyFrame()->id(), f2->id());
 
     T->addFrame(f3); // F3
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getLastFramePtr()   ->id(), f3->id());
-    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f2->id());
+    ASSERT_EQ(T->getLastFrame()   ->id(), f3->id());
+    ASSERT_EQ(T->getLastKeyFrame()->id(), f2->id());
 
     T->addFrame(f1); // KF1
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getLastFramePtr()   ->id(), f3->id());
-    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f2->id());
+    ASSERT_EQ(T->getLastFrame()   ->id(), f3->id());
+    ASSERT_EQ(T->getLastKeyFrame()->id(), f2->id());
 
     f3->setKey(); // set KF3
     if (debug) P->print(2,0,0,0);
-    ASSERT_EQ(T->getLastFramePtr()   ->id(), f3->id());
-    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f3->id());
+    ASSERT_EQ(T->getLastFrame()   ->id(), f3->id());
+    ASSERT_EQ(T->getLastKeyFrame()->id(), f3->id());
 
     FrameBasePtr f4 = std::make_shared<FrameBase>(NON_KEY_FRAME, 1.5, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
     T->addFrame(f4);
@@ -221,8 +221,8 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     //   1     2     3     1.5       time stamps
     // --+-----+-----+------+--->    time
     if (debug) P->print(2,0,1,0);
-    ASSERT_EQ(T->getLastFramePtr()   ->id(), f4->id());
-    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f3->id());
+    ASSERT_EQ(T->getLastFrame()   ->id(), f4->id());
+    ASSERT_EQ(T->getLastKeyFrame()->id(), f3->id());
 
     f4->setKey();
     // Trajectory status:
@@ -230,8 +230,8 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     //   1    1.5    2      3        time stamps
     // --+-----+-----+------+--->    time
     if (debug) P->print(2,0,1,0);
-    ASSERT_EQ(T->getLastFramePtr()   ->id(), f3->id());
-    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f3->id());
+    ASSERT_EQ(T->getLastFrame()   ->id(), f3->id());
+    ASSERT_EQ(T->getLastKeyFrame()->id(), f3->id());
 
     f2->setTimeStamp(4);
     // Trajectory status:
@@ -239,8 +239,8 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     //   1    1.5    3      4        time stamps
     // --+-----+-----+------+--->    time
     if (debug) P->print(2,0,1,0);
-    ASSERT_EQ(T->getLastFramePtr()   ->id(), f2->id());
-    ASSERT_EQ(T->getLastKeyFramePtr()->id(), f2->id());
+    ASSERT_EQ(T->getLastFrame()   ->id(), f2->id());
+    ASSERT_EQ(T->getLastKeyFrame()->id(), f2->id());
 
     f4->setTimeStamp(0.5);
     // Trajectory status:

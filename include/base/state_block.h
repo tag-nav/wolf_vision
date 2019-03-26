@@ -108,7 +108,7 @@ public:
 
         /** \brief Returns the state local parametrization ptr
          **/
-        LocalParametrizationBasePtr getLocalParametrizationPtr() const;
+        LocalParametrizationBasePtr getLocalParametrization() const;
 
         /** \brief Sets a local parametrization
          **/
@@ -230,7 +230,7 @@ inline bool StateBlock::hasLocalParametrization() const
     return (local_param_ptr_ != nullptr);
 }
 
-inline LocalParametrizationBasePtr StateBlock::getLocalParametrizationPtr() const
+inline LocalParametrizationBasePtr StateBlock::getLocalParametrization() const
 {
     return local_param_ptr_;
 }

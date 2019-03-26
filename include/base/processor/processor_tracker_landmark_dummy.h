@@ -35,7 +35,7 @@ class ProcessorTrackerLandmarkDummy : public ProcessorTrackerLandmark
          * \param _features_incoming_out returned list of incoming features corresponding to a landmark of _landmarks_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          */
-        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmarks_in, FeatureBaseList& _features_incoming_out,
+        virtual unsigned int findLandmarks(const LandmarkBasePtrList& _landmarks_in, FeatureBasePtrList& _features_incoming_out,
                                            LandmarkMatchMap& _feature_landmark_correspondences);
 
         /** \brief Vote for KeyFrame generation
@@ -56,7 +56,7 @@ class ProcessorTrackerLandmarkDummy : public ProcessorTrackerLandmark
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out);
 
         /** \brief Create one landmark
          *
@@ -64,13 +64,13 @@ class ProcessorTrackerLandmarkDummy : public ProcessorTrackerLandmark
          */
         virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr);
 
-        /** \brief Create a new constraint
+        /** \brief Create a new factor
          * \param _feature_ptr pointer to the Feature to constrain
          * \param _landmark_ptr LandmarkBase pointer to the Landmark constrained.
          *
          * Implement this method in derived classes.
          */
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
+        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 };
 
 inline void ProcessorTrackerLandmarkDummy::postProcess()

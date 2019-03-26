@@ -13,7 +13,7 @@ FeatureOdom2D::~FeatureOdom2D()
     //
 }
 
-void FeatureOdom2D::findConstraints()
+void FeatureOdom2D::findFactors()
 {
 
 }

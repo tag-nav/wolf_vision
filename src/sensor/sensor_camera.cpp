@@ -19,7 +19,7 @@ SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, const IntrinsicsC
 {
     assert(_extrinsics.size() == 7 && "Wrong intrinsics vector size. Should be 7 for 3D");
     useRawImages();
-    pinhole::computeCorrectionModel(getIntrinsicPtr()->getState(), distortion_, correction_);
+    pinhole::computeCorrectionModel(getIntrinsic()->getState(), distortion_, correction_);
 }
 
 SensorCamera::SensorCamera(const Eigen::VectorXs& _extrinsics, IntrinsicsCameraPtr _intrinsics_ptr) :
