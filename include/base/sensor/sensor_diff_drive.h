@@ -33,6 +33,11 @@ struct IntrinsicsDiffDrive : public IntrinsicsBase
 
   Scalar left_gain_  = 0.01;
   Scalar right_gain_ = 0.01;
+
+    IntrinsicsDiffDrive()
+    {
+        //DEFINED FOR COMPATIBILITY PURPOSES. TO BE REMOVED IN THE FUTURE.
+    }
     IntrinsicsDiffDrive(std::string _unique_name, const paramsServer& _server):
         IntrinsicsBase(_unique_name, _server)
     {

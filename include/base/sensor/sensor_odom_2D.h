@@ -15,6 +15,10 @@ struct IntrinsicsOdom2D : public IntrinsicsBase
 
         Scalar k_disp_to_disp; ///< ratio of displacement variance to displacement, for odometry noise calculation
         Scalar k_rot_to_rot; ///< ratio of rotation variance to rotation, for odometry noise calculation
+    IntrinsicsOdom2D()
+    {
+        //DEFINED FOR COMPATIBILITY PURPOSES. TO BE REMOVED IN THE FUTURE.
+    }
     IntrinsicsOdom2D(std::string _unique_name, const paramsServer& _server):
         IntrinsicsBase(_unique_name, _server)
     {

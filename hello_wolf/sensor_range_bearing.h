@@ -19,6 +19,10 @@ struct IntrinsicsRangeBearing : public IntrinsicsBase
 {
         Scalar noise_range_metres_std       = 0.05;
         Scalar noise_bearing_degrees_std    = 0.5;
+    IntrinsicsRangeBearing()
+    {
+        //DEFINED FOR COMPATIBILITY PURPOSES. TO BE REMOVED IN THE FUTURE.
+    }
     IntrinsicsRangeBearing(std::string _unique_name, const paramsServer& _server):
         IntrinsicsBase(_unique_name, _server)
     {

@@ -28,6 +28,10 @@ struct IntrinsicsIMU : public IntrinsicsBase
         Scalar wb_rate_stdev = 0.00001;
 
         virtual ~IntrinsicsIMU() = default;
+    IntrinsicsIMU()
+    {
+        //DEFINED FOR COMPATIBILITY PURPOSES. TO BE REMOVED IN THE FUTURE.
+    }
     IntrinsicsIMU(std::string _unique_name, const paramsServer& _server):
         IntrinsicsBase(_unique_name, _server)
     {

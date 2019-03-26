@@ -23,6 +23,10 @@ struct IntrinsicsOdom3D : public IntrinsicsBase
         Scalar k_rot_to_rot; ///< ratio of rotation variance to rotation, for odometry noise calculation
         Scalar min_disp_var;
         Scalar min_rot_var;
+    IntrinsicsOdom3D()
+    {
+        //DEFINED FOR COMPATIBILITY PURPOSES. TO BE REMOVED IN THE FUTURE.
+    }
     IntrinsicsOdom3D(std::string _unique_name, const paramsServer& _server):
         IntrinsicsBase(_unique_name, _server)
     {
