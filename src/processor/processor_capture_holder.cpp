@@ -26,7 +26,7 @@ void ProcessorCaptureHolder::process(CaptureBasePtr _capture_ptr)
 void ProcessorCaptureHolder::keyFrameCallback(FrameBasePtr _keyframe_ptr,
                                               const Scalar& _time_tolerance)
 {
-  assert(_keyframe_ptr->getTrajectoryPtr() != nullptr
+  assert(_keyframe_ptr->getTrajectory() != nullptr
           && "ProcessorMotion::keyFrameCallback: key frame must be in the trajectory.");
 
   // get keyframe's time stamp
@@ -48,7 +48,7 @@ void ProcessorCaptureHolder::keyFrameCallback(FrameBasePtr _keyframe_ptr,
   // add motion capture to keyframe
   if (std::abs(new_ts - existing_capture->getTimeStamp()) < _time_tolerance)
   {
-    auto frame_ptr = existing_capture->getFramePtr();
+    auto frame_ptr = existing_capture->getFrame();
 
     if (frame_ptr != _keyframe_ptr)
     {
@@ -92,11 +92,11 @@ CaptureBasePtr ProcessorCaptureHolder::findCaptureContainingTimeStamp(const Time
 //      // go to the previous motion capture
 //      if (capture_ptr == last_ptr_)
 //        capture_ptr = origin_ptr_;
-//      else if (capture_ptr->getOriginFramePtr() == nullptr)
+//      else if (capture_ptr->getOriginFrame() == nullptr)
 //        return nullptr;
 //      else
 //      {
-//        CaptureBasePtr capture_base_ptr = capture_ptr->getOriginFramePtr()->getCaptureOf(getSensorPtr());
+//        CaptureBasePtr capture_base_ptr = capture_ptr->getOriginFrame()->getCaptureOf(getSensor());
 //        if (capture_base_ptr == nullptr)
 //          return nullptr;
 //        else

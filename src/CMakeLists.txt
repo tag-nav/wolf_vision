@@ -191,25 +191,25 @@ capture/capture_GPS_fix.h
 capture/capture_IMU.h
 capture/capture_odom_2D.h
 capture/capture_odom_3D.h
-constraint/constraint_block_absolute.h
-constraint/constraint_container.h
-constraint/constraint_corner_2D.h
-constraint/constraint_AHP.h
-constraint/constraint_epipolar.h
-constraint/constraint_IMU.h
-constraint/constraint_fix_bias.h
-constraint/constraint_GPS_2D.h
-constraint/constraint_GPS_pseudorange_3D.h
-constraint/constraint_GPS_pseudorange_2D.h
-constraint/constraint_odom_2D.h
-constraint/constraint_odom_2D_analytic.h
-constraint/constraint_odom_3D.h
-constraint/constraint_point_2D.h
-constraint/constraint_point_to_line_2D.h
-constraint/constraint_pose_2D.h
-constraint/constraint_pose_3D.h
-constraint/constraint_quaternion_absolute.h
-constraint/constraint_relative_2D_analytic.h
+factor/factor_block_absolute.h
+factor/factor_container.h
+factor/factor_corner_2D.h
+factor/factor_AHP.h
+factor/factor_epipolar.h
+factor/factor_IMU.h
+factor/factor_fix_bias.h
+factor/factor_GPS_2D.h
+factor/factor_GPS_pseudorange_3D.h
+factor/factor_GPS_pseudorange_2D.h
+factor/factor_odom_2D.h
+factor/factor_odom_2D_analytic.h
+factor/factor_odom_3D.h
+factor/factor_point_2D.h
+factor/factor_point_to_line_2D.h
+factor/factor_pose_2D.h
+factor/factor_pose_3D.h
+factor/factor_quaternion_absolute.h
+factor/factor_relative_2D_analytic.h
     temp/diff_drive_tools.h
     temp/diff_drive_tools.hpp
 feature/feature_corner_2D.h
@@ -247,28 +247,28 @@ capture/capture_velocity.h
 capture/capture_wheel_joint_position.h
     )
   SET(HDRS_CONSTRAINT
-constraint/constraint_autodiff_trifocal.h
-constraint/constraint_autodiff_distance_3D.h
-constraint/constraint_AHP.h
-constraint/constraint_block_absolute.h
-constraint/constraint_container.h
-constraint/constraint_corner_2D.h
-constraint/constraint_diff_drive.h
-constraint/constraint_epipolar.h
-constraint/constraint_IMU.h
-constraint/constraint_fix_bias.h
-constraint/constraint_GPS_2D.h
-constraint/constraint_GPS_pseudorange_3D.h
-constraint/constraint_GPS_pseudorange_2D.h
-constraint/constraint_odom_2D.h
-constraint/constraint_odom_2D_analytic.h
-constraint/constraint_odom_3D.h
-constraint/constraint_point_2D.h
-constraint/constraint_point_to_line_2D.h
-constraint/constraint_pose_2D.h
-constraint/constraint_pose_3D.h
-constraint/constraint_quaternion_absolute.h
-constraint/constraint_relative_2D_analytic.h
+factor/factor_autodiff_trifocal.h
+factor/factor_autodiff_distance_3D.h
+factor/factor_AHP.h
+factor/factor_block_absolute.h
+factor/factor_container.h
+factor/factor_corner_2D.h
+factor/factor_diff_drive.h
+factor/factor_epipolar.h
+factor/factor_IMU.h
+factor/factor_fix_bias.h
+factor/factor_GPS_2D.h
+factor/factor_GPS_pseudorange_3D.h
+factor/factor_GPS_pseudorange_2D.h
+factor/factor_odom_2D.h
+factor/factor_odom_2D_analytic.h
+factor/factor_odom_3D.h
+factor/factor_point_2D.h
+factor/factor_point_to_line_2D.h
+factor/factor_pose_2D.h
+factor/factor_pose_3D.h
+factor/factor_quaternion_absolute.h
+factor/factor_relative_2D_analytic.h
     )
   SET(HDRS_FEATURE
 feature/feature_corner_2D.h
@@ -321,9 +321,9 @@ core/capture_base.h
 core/capture_buffer.h
 core/capture_pose.h
 core/capture_void.h
-core/constraint_analytic.h
-core/constraint_autodiff.h
-core/constraint_base.h
+core/factor_analytic.h
+core/factor_autodiff.h
+core/factor_base.h
 core/factory.h
 core/feature_base.h
 core/feature_match.h
@@ -364,8 +364,8 @@ SET(SRCS_CORE
 core/capture_base.cpp
 core/capture_pose.cpp
 core/capture_void.cpp
-core/constraint_analytic.cpp
-core/constraint_base.cpp
+core/factor_analytic.cpp
+core/factor_base.cpp
 core/feature_base.cpp
 core/feature_pose.cpp
 core/frame_base.cpp
@@ -535,8 +535,8 @@ ENDIF(vision_utils_FOUND)
 # Add the capture sub-directory
 # ADD_SUBDIRECTORY(captures)
 
-# Add the constraints sub-directory
-# ADD_SUBDIRECTORY(constraints)
+# Add the factors sub-directory
+# ADD_SUBDIRECTORY(factors)
 
 # Add the features sub-directory
 # ADD_SUBDIRECTORY(features)
@@ -663,7 +663,7 @@ INSTALL(FILES ${HDRS_CORE}
 INSTALL(FILES ${HDRS_CAPTURE}
     DESTINATION include/iri-algorithms/wolf/capture)
 INSTALL(FILES ${HDRS_CONSTRAINT}
-    DESTINATION include/iri-algorithms/wolf/constraint)
+    DESTINATION include/iri-algorithms/wolf/factor)
 INSTALL(FILES ${HDRS_FEATURE}
     DESTINATION include/iri-algorithms/wolf/feature)
 INSTALL(FILES ${HDRS_SENSOR}

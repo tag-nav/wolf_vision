@@ -24,7 +24,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 {
     private:
         MapBaseWPtr map_ptr_;
-        ConstraintBaseList constrained_by_list_;
+        FactorBasePtrList constrained_by_list_;
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order P, O.
 
         static unsigned int landmark_id_count_;
@@ -65,8 +65,8 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         std::vector<StateBlockPtr> getUsedStateBlockVec() const;
         StateBlockPtr getStateBlockPtr(unsigned int _i) const;
         void setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_ptr);
-        StateBlockPtr getPPtr() const;
-        StateBlockPtr getOPtr() const;
+        StateBlockPtr getP() const;
+        StateBlockPtr getO() const;
         void setPPtr(const StateBlockPtr _p_ptr);
         void setOPtr(const StateBlockPtr _o_ptr);
         virtual void registerNewStateBlocks();
@@ -87,12 +87,12 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         // Navigate wolf tree
         virtual void setProblem(ProblemPtr _problem) final;
 
-        ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        FactorBasePtr addConstrainedBy(FactorBasePtr _ctr_ptr);
         unsigned int getHits() const;
-        ConstraintBaseList& getConstrainedByList();
+        FactorBasePtrList& getConstrainedByList();
 
         void setMapPtr(const MapBasePtr _map_ptr);
-        MapBasePtr getMapPtr();
+        MapBasePtr getMap();
         void link(MapBasePtr);
         template<typename classType, typename... T>
         static std::shared_ptr<LandmarkBase> emplace(MapBasePtr _map_ptr, T&&... all);
@@ -102,7 +102,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 }
 
 #include "base/map_base.h"
-#include "base/constraint/constraint_base.h"
+#include "base/factor/factor_base.h"
 #include "base/state_block.h"
 
 namespace wolf{
@@ -119,7 +119,7 @@ inline void LandmarkBase::setProblem(ProblemPtr _problem)
     NodeBase::setProblem(_problem);
 }
 
-inline MapBasePtr LandmarkBase::getMapPtr()
+inline MapBasePtr LandmarkBase::getMap()
 {
     return map_ptr_.lock();
 }
@@ -146,7 +146,7 @@ inline unsigned int LandmarkBase::getHits() const
     return constrained_by_list_.size();
 }
 
-inline ConstraintBaseList& LandmarkBase::getConstrainedByList()
+inline FactorBasePtrList& LandmarkBase::getConstrainedByList()
 {
     return constrained_by_list_;
 }
@@ -172,12 +172,12 @@ inline void LandmarkBase::setStateBlockPtr(unsigned int _i, StateBlockPtr _sb_pt
     state_block_vec_[_i] = _sb_ptr;
 }
 
-inline StateBlockPtr LandmarkBase::getPPtr() const
+inline StateBlockPtr LandmarkBase::getP() const
 {
     return getStateBlockPtr(0);
 }
 
-inline StateBlockPtr LandmarkBase::getOPtr() const
+inline StateBlockPtr LandmarkBase::getO() const
 {
     return getStateBlockPtr(1);
 }

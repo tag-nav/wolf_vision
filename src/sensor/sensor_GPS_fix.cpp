@@ -29,7 +29,7 @@ SensorBasePtr SensorGPSFix::create(const std::string& _unique_name, const Eigen:
     assert((_extrinsics.size() == 2 || _extrinsics.size() == 3)
             && "Bad extrinsic vector size. Should be 2 for 2D, 3 for 3D.");
     SensorGPSFixPtr sen = std::make_shared<SensorGPSFix>(_extrinsics, std::static_pointer_cast<IntrinsicsGPSFix>(_intrinsics));
-    sen->getPPtr()->fix();
+    sen->getP()->fix();
     sen->setName(_unique_name);
     return sen;
 }

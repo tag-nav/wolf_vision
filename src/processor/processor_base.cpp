@@ -62,7 +62,7 @@ void ProcessorBase::remove()
         if (isMotion())
         {
             ProblemPtr P = getProblem();
-            if(P && P->getProcessorMotionPtr()->id() == this->id())
+            if(P && P->getProcessorMotion()->id() == this->id())
                 P->clearProcessorMotion();
         }
 

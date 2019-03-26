@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     Eigen::VectorXs x0(16);
     x0 << 0,1,0,   0,0,0,1,  1,0,0,  0,0,.000,  0,0,.000; // P Q V B B
 
-    //wolf_problem_ptr_->getProcessorMotionPtr()->setOrigin(x0, t);
+    //wolf_problem_ptr_->getProcessorMotion()->setOrigin(x0, t);
 
     //CaptureIMU* imu_ptr;
 

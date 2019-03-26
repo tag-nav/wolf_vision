@@ -48,7 +48,7 @@ CaptureBase::CaptureBase(const std::string& _type,
             WOLF_ERROR("Provided dynamic sensor intrinsics but the sensor intrinsics are static");
         }
 
-        getSensorPtr()->setHasCapture();
+        getSensor()->setHasCapture();
     }
     else if (_p_ptr || _o_ptr || _intr_ptr)
     {
@@ -104,7 +104,7 @@ FeatureBasePtr CaptureBase::addFeature(FeatureBasePtr _ft_ptr)
     return _ft_ptr;
 }
 
-void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
+void CaptureBase::addFeatureList(FeatureBasePtrList& _new_ft_list)
 {
     for (FeatureBasePtr feature_ptr : _new_ft_list)
     {
@@ -115,13 +115,13 @@ void CaptureBase::addFeatureList(FeatureBaseList& _new_ft_list)
     feature_list_.splice(feature_list_.end(), _new_ft_list);
 }
 
-void CaptureBase::getConstraintList(ConstraintBaseList& _ctr_list)
+void CaptureBase::getFactorList(FactorBasePtrList& _ctr_list)
 {
     for (auto f_ptr : getFeatureList())
-        f_ptr->getConstraintList(_ctr_list);
+        f_ptr->getFactorList(_ctr_list);
 }
 
-ConstraintBasePtr CaptureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+FactorBasePtr CaptureBase::addConstrainedBy(FactorBasePtr _ctr_ptr)
 {
     constrained_by_list_.push_back(_ctr_ptr);
     _ctr_ptr->setCaptureOtherPtr(shared_from_this());
@@ -130,25 +130,25 @@ ConstraintBasePtr CaptureBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
 
 StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const
 {
-    if (getSensorPtr())
+    if (getSensor())
     {
         if (_i < 2) // _i == 0 is position, 1 is orientation, 2 and onwards are intrinsics
-            if (getSensorPtr()->extrinsicsInCaptures())
+            if (getSensor()->extrinsicsInCaptures())
             {
                 assert(_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
                 return state_block_vec_[_i];
             }
             else
-                return getSensorPtr()->getStateBlockPtrStatic(_i);
+                return getSensor()->getStateBlockPtrStatic(_i);
 
         else // 2 and onwards are intrinsics
-        if (getSensorPtr()->intrinsicsInCaptures())
+        if (getSensor()->intrinsicsInCaptures())
         {
             assert(_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
             return state_block_vec_[_i];
         }
         else
-            return getSensorPtr()->getStateBlockPtrStatic(_i);
+            return getSensor()->getStateBlockPtrStatic(_i);
     }
     else // No sensor associated: assume sensor params are here
     {

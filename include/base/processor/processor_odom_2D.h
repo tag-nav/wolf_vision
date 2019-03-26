@@ -10,7 +10,7 @@
 
 #include "base/processor/processor_motion.h"
 #include "base/capture/capture_odom_2D.h"
-#include "base/constraint/constraint_odom_2D.h"
+#include "base/factor/factor_odom_2D.h"
 #include "base/rotations.h"
 
 namespace wolf {
@@ -70,7 +70,7 @@ class ProcessorOdom2D : public ProcessorMotion
                                                const MatrixXs& _data_cov,
                                                const FrameBasePtr& _frame_origin) override;
         virtual FeatureBasePtr createFeature(CaptureMotionPtr _capture_motion) override;
-        virtual ConstraintBasePtr emplaceConstraint(FeatureBasePtr _feature,
+        virtual FactorBasePtr emplaceFactor(FeatureBasePtr _feature,
                                                     CaptureBasePtr _capture_origin) override;
 
     protected:

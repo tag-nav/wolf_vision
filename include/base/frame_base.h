@@ -31,8 +31,8 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 {
     private:
         TrajectoryBaseWPtr trajectory_ptr_;
-        CaptureBaseList capture_list_;
-        ConstraintBaseList constrained_by_list_;
+        CaptureBasePtrList capture_list_;
+        FactorBasePtrList constrained_by_list_;
         std::vector<StateBlockPtr> state_block_vec_; ///< vector of state blocks, in the order: Position, Orientation, Velocity.
 
         static unsigned int frame_id_count_;
@@ -91,9 +91,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         void resizeStateBlockVec(unsigned int _size);
 
     public:
-        StateBlockPtr getPPtr() const;
-        StateBlockPtr getOPtr() const;
-        StateBlockPtr getVPtr() const;
+        StateBlockPtr getP() const;
+        StateBlockPtr getO() const;
+        StateBlockPtr getV() const;
         void setPPtr(const StateBlockPtr _p_ptr);
         void setOPtr(const StateBlockPtr _o_ptr);
         void setVPtr(const StateBlockPtr _v_ptr);
@@ -119,26 +119,26 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
     public:
         virtual void setProblem(ProblemPtr _problem) final;
 
-        TrajectoryBasePtr getTrajectoryPtr() const;
+        TrajectoryBasePtr getTrajectory() const;
         void setTrajectoryPtr(TrajectoryBasePtr _trj_ptr);
 
         FrameBasePtr getPreviousFrame() const;
         FrameBasePtr getNextFrame() const;
 
-        CaptureBaseList& getCaptureList();
+        CaptureBasePtrList& getCaptureList();
         CaptureBasePtr addCapture(CaptureBasePtr _capt_ptr);
         CaptureBasePtr getCaptureOf(const SensorBasePtr _sensor_ptr);
         CaptureBasePtr getCaptureOf(const SensorBasePtr _sensor_ptr, const std::string& type);
-        CaptureBaseList getCapturesOf(const SensorBasePtr _sensor_ptr);
+        CaptureBasePtrList getCapturesOf(const SensorBasePtr _sensor_ptr);
         void unlinkCapture(CaptureBasePtr _cap_ptr);
 
-        ConstraintBasePtr getConstraintOf(const ProcessorBasePtr _processor_ptr);
-        ConstraintBasePtr getConstraintOf(const ProcessorBasePtr _processor_ptr, const std::string& type);
+        FactorBasePtr getFactorOf(const ProcessorBasePtr _processor_ptr);
+        FactorBasePtr getFactorOf(const ProcessorBasePtr _processor_ptr, const std::string& type);
 
-        void getConstraintList(ConstraintBaseList& _ctr_list);
-        virtual ConstraintBasePtr addConstrainedBy(ConstraintBasePtr _ctr_ptr);
+        void getFactorList(FactorBasePtrList& _ctr_list);
+        virtual FactorBasePtr addConstrainedBy(FactorBasePtr _ctr_ptr);
         unsigned int getHits() const;
-        ConstraintBaseList& getConstrainedByList();
+        FactorBasePtrList& getConstrainedByList();
         void link(TrajectoryBasePtr);
         template<typename classType, typename... T>
         static std::shared_ptr<FrameBase> emplace(TrajectoryBasePtr _ptr, T&&... all);
@@ -161,7 +161,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
 #include "base/trajectory_base.h"
 #include "base/capture/capture_base.h"
-#include "base/constraint/constraint_base.h"
+#include "base/factor/factor_base.h"
 #include "base/state_block.h"
 
 namespace wolf {
@@ -204,7 +204,7 @@ inline std::vector<StateBlockPtr>& FrameBase::getStateBlockVec()
     return state_block_vec_;
 }
 
-inline StateBlockPtr FrameBase::getPPtr() const
+inline StateBlockPtr FrameBase::getP() const
 {
     return state_block_vec_[0];
 }
@@ -213,7 +213,7 @@ inline void FrameBase::setPPtr(const StateBlockPtr _p_ptr)
     state_block_vec_[0] = _p_ptr;
 }
 
-inline StateBlockPtr FrameBase::getOPtr() const
+inline StateBlockPtr FrameBase::getO() const
 {
     return state_block_vec_[1];
 }
@@ -222,7 +222,7 @@ inline void FrameBase::setOPtr(const StateBlockPtr _o_ptr)
     state_block_vec_[1] = _o_ptr;
 }
 
-inline StateBlockPtr FrameBase::getVPtr() const
+inline StateBlockPtr FrameBase::getV() const
 {
     return state_block_vec_[2];
 }
@@ -244,12 +244,12 @@ inline void FrameBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb
     state_block_vec_[_i] = _sb_ptr;
 }
 
-inline TrajectoryBasePtr FrameBase::getTrajectoryPtr() const
+inline TrajectoryBasePtr FrameBase::getTrajectory() const
 {
     return trajectory_ptr_.lock();
 }
 
-inline CaptureBaseList& FrameBase::getCaptureList()
+inline CaptureBasePtrList& FrameBase::getCaptureList()
 {
     return capture_list_;
 }
@@ -272,7 +272,7 @@ inline void FrameBase::setProblem(ProblemPtr _problem)
         cap->setProblem(_problem);
 }
 
-inline ConstraintBaseList& FrameBase::getConstrainedByList()
+inline FactorBasePtrList& FrameBase::getConstrainedByList()
 {
     return constrained_by_list_;
 }

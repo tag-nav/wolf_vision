@@ -31,8 +31,8 @@ LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,
 
     // Computing center
     WOLF_DEBUG( "Container constructor: Computing center pose... " );
-    Eigen::Vector2s container_position(getPPtr()->getState());
-    Eigen::Vector1s container_orientation(getOPtr()->getState());
+    Eigen::Vector2s container_position(getP()->getState());
+    Eigen::Vector1s container_orientation(getO()->getState());
 
     WOLF_DEBUG( "Container constructor: _corner_1_idx ", _corner_1_idx,
                 "_corner_2_idx ", _corner_2_idx );
@@ -83,8 +83,8 @@ LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,
     WOLF_DEBUG( "_corner_2_pose... ", _corner_2_pose.transpose() );
     WOLF_DEBUG( "Container center pose... ", container_position.transpose(), " ", container_orientation.transpose() );
 
-    getPPtr()->setState(container_position);
-    getOPtr()->setState(container_orientation);
+    getP()->setState(container_position);
+    getO()->setState(container_orientation);
 }
 
 //LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr, LandmarkCorner2D* _corner_A_ptr, LandmarkCorner2D* _corner_B_ptr, LandmarkCorner2D* _corner_C_ptr, LandmarkCorner2D* _corner_D_ptr, const Scalar& _witdh, const Scalar& _length) :
@@ -103,8 +103,8 @@ LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,
 //
 //    // Computing center
 //    //std::cout << "Container constructor: Computing center position... " << std::endl;
-//    Eigen::Map<Eigen::Vector2s> container_position(_p_ptr->getPtr());
-//    Eigen::Map<Eigen::VectorXs> container_orientation(_o_ptr->getPtr(), _o_ptr->getSize());
+//    Eigen::Map<Eigen::Vector2s> container_position(_p_ptr->get());
+//    Eigen::Map<Eigen::VectorXs> container_orientation(_o_ptr->get(), _o_ptr->getSize());
 //
 //    container_position = Eigen::Vector2s::Zero();
 //
@@ -112,53 +112,53 @@ LandmarkContainer::LandmarkContainer(StateBlockPtr _p_ptr, StateBlockPtr _o_ptr,
 //    // A & B
 //    if (_corner_A_ptr != nullptr && _corner_B_ptr != nullptr)
 //    {
-//        Eigen::Vector2s AB = Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getPPtr()->getPtr()) - Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getPPtr()->getPtr());
+//        Eigen::Vector2s AB = Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getP()->get()) - Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getP()->get());
 //        Eigen::Vector2s perpendicularAB;
 //        perpendicularAB << -AB(1)/AB.norm(), AB(0)/AB.norm();
-//        container_position = Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getPPtr()->getPtr()) + AB / 2 + perpendicularAB * _witdh / 2;
+//        container_position = Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getP()->get()) + AB / 2 + perpendicularAB * _witdh / 2;
 //        container_orientation(0) = atan2(AB(1),AB(0));
 //    }
 //    // C & D
 //    else if  (_corner_C_ptr != nullptr && _corner_D_ptr != nullptr)
 //    {
-//        Eigen::Vector2s CD = Eigen::Map<Eigen::Vector2s>(_corner_D_ptr->getPPtr()->getPtr()) - Eigen::Map<Eigen::Vector2s>(_corner_C_ptr->getPPtr()->getPtr());
+//        Eigen::Vector2s CD = Eigen::Map<Eigen::Vector2s>(_corner_D_ptr->getP()->get()) - Eigen::Map<Eigen::Vector2s>(_corner_C_ptr->getP()->get());
 //        Eigen::Vector2s perpendicularCD;
 //        perpendicularCD << -CD(1)/CD.norm(), CD(0)/CD.norm();
-//        container_position = Eigen::Map<Eigen::Vector2s>(_corner_C_ptr->getPPtr()->getPtr()) + CD / 2 + perpendicularCD * _witdh / 2;
+//        container_position = Eigen::Map<Eigen::Vector2s>(_corner_C_ptr->getP()->get()) + CD / 2 + perpendicularCD * _witdh / 2;
 //        container_orientation(0) = atan2(-CD(1),-CD(0));
 //    }
 //    // Short side detected
 //    // B & C
 //    else if (_corner_B_ptr != nullptr && _corner_C_ptr != nullptr)
 //    {
-//        Eigen::Vector2s BC = Eigen::Map<Eigen::Vector2s>(_corner_C_ptr->getPPtr()->getPtr()) - Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getPPtr()->getPtr());
+//        Eigen::Vector2s BC = Eigen::Map<Eigen::Vector2s>(_corner_C_ptr->getP()->get()) - Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getP()->get());
 //        Eigen::Vector2s perpendicularBC;
 //        perpendicularBC << -BC(1)/BC.norm(), BC(0)/BC.norm();
-//        container_position = Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getPPtr()->getPtr()) + BC / 2 + perpendicularBC * _length / 2;
+//        container_position = Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getP()->get()) + BC / 2 + perpendicularBC * _length / 2;
 //        container_orientation(0) = atan2(BC(1),BC(0));
 //    }
 //    // D & A
 //    else if  (_corner_D_ptr != nullptr && _corner_A_ptr != nullptr)
 //    {
-//        Eigen::Vector2s DA = Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getPPtr()->getPtr()) - Eigen::Map<Eigen::Vector2s>(_corner_D_ptr->getPPtr()->getPtr());
+//        Eigen::Vector2s DA = Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getP()->get()) - Eigen::Map<Eigen::Vector2s>(_corner_D_ptr->getP()->get());
 //        Eigen::Vector2s perpendicularDA;
 //        perpendicularDA << -DA(1)/DA.norm(), DA(0)/DA.norm();
-//        container_position = Eigen::Map<Eigen::Vector2s>(_corner_D_ptr->getPPtr()->getPtr()) + DA / 2 + perpendicularDA * _length / 2;
+//        container_position = Eigen::Map<Eigen::Vector2s>(_corner_D_ptr->getP()->get()) + DA / 2 + perpendicularDA * _length / 2;
 //        container_orientation(0) = atan2(-DA(1),-DA(0));
 //    }
 //    // Diagonal detected
 //    // A & C
 //    else if (_corner_A_ptr != nullptr && _corner_C_ptr != nullptr)
 //    {
-//        Eigen::Vector2s AC = Eigen::Map<Eigen::Vector2s>(_corner_C_ptr->getPPtr()->getPtr()) - Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getPPtr()->getPtr());
-//        container_position = Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getPPtr()->getPtr()) + AC / 2;
+//        Eigen::Vector2s AC = Eigen::Map<Eigen::Vector2s>(_corner_C_ptr->getP()->get()) - Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getP()->get());
+//        container_position = Eigen::Map<Eigen::Vector2s>(_corner_A_ptr->getP()->get()) + AC / 2;
 //        container_orientation(0) = atan2(AC(1),AC(0)) - atan2(_witdh,_length);
 //    }
 //    // B & D
 //    else if (_corner_B_ptr != nullptr && _corner_D_ptr != nullptr)
 //    {
-//        Eigen::Vector2s BD = Eigen::Map<Eigen::Vector2s>(_corner_D_ptr->getPPtr()->getPtr()) - Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getPPtr()->getPtr());
-//        container_position = Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getPPtr()->getPtr()) + BD / 2;
+//        Eigen::Vector2s BD = Eigen::Map<Eigen::Vector2s>(_corner_D_ptr->getP()->get()) - Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getP()->get());
+//        container_position = Eigen::Map<Eigen::Vector2s>(_corner_B_ptr->getP()->get()) + BD / 2;
 //        container_orientation(0) = atan2(BD(1),BD(0)) + atan2(_witdh,_length);
 //    }
 //}

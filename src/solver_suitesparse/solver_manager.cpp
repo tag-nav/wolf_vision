@@ -48,28 +48,28 @@ void SolverManager::update(const WolfProblemPtr _problem_ptr)
 		//std::cout << "state units removed!" << std::endl;
 
 		// ADD CONSTRAINTS
-		ConstraintBaseList ctr_list;
-		_problem_ptr->getTrajectoryPtr()->getConstraintList(ctr_list);
+		FactorBasePtrList ctr_list;
+		_problem_ptr->getTrajectory()->getFactorList(ctr_list);
 		//std::cout << "ctr_list.size() = " << ctr_list.size() << std::endl;
 		for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
 			if ((*ctr_it)->getPendingStatus() == ADD_PENDING)
-				addConstraint(*ctr_it);
+				addFactor(*ctr_it);
 
-		//std::cout << "constraints updated!" << std::endl;
+		//std::cout << "factors updated!" << std::endl;
 	}
 }
 
-void SolverManager::addConstraint(ConstraintBasePtr _corr_ptr)
+void SolverManager::addFactor(FactorBasePtr _corr_ptr)
 {
 	//TODO MatrixXs J; Vector e;
     // getResidualsAndJacobian(_corr_ptr, J, e);
-    // solverQR->addConstraint(_corr_ptr, J, e);
+    // solverQR->addFactor(_corr_ptr, J, e);
 
-//	constraint_map_[_corr_ptr->id()] = blockIdx;
+//	factor_map_[_corr_ptr->id()] = blockIdx;
 	_corr_ptr->setPendingStatus(NOT_PENDING);
 }
 
-void SolverManager::removeConstraint(const unsigned int& _corr_idx)
+void SolverManager::removeFactor(const unsigned int& _corr_idx)
 {
     // TODO
 }
@@ -85,31 +85,31 @@ void SolverManager::addStateUnit(StateBlockPtr _st_ptr)
 		{
 		    // TODO
 			//std::cout << "Adding Complex angle Local Parametrization to the List... " << std::endl;
-			//ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateComplexAngle*)_st_ptr)->BLOCK_SIZE, new ComplexAngleParameterization);
+			//ceres_problem_->AddParameterBlock(_st_ptr->get(), ((StateComplexAngle*)_st_ptr)->BLOCK_SIZE, new ComplexAngleParameterization);
 			break;
 		}
 		case ST_THETA:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlockPtr)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->get(), ((StateBlockPtr)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		case ST_POINT_1D:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StatePoint1D*)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->get(), ((StatePoint1D*)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		case ST_VECTOR:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlockPtr)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->get(), ((StateBlockPtr)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		case ST_POINT_3D:
 		{
 			//std::cout << "No Local Parametrization to be added" << std::endl;
-			ceres_problem_->AddParameterBlock(_st_ptr->getPtr(), ((StateBlockPtr)_st_ptr)->BLOCK_SIZE, nullptr);
+			ceres_problem_->AddParameterBlock(_st_ptr->get(), ((StateBlockPtr)_st_ptr)->BLOCK_SIZE, nullptr);
 			break;
 		}
 		default:
@@ -136,26 +136,26 @@ void SolverManager::updateStateUnitStatus(StateBlockPtr _st_ptr)
     // TODO
 
 //	if (!_st_ptr->isFixed())
-//		ceres_problem_->SetParameterBlockVariable(_st_ptr->getPtr());
+//		ceres_problem_->SetParameterBlockVariable(_st_ptr->get());
 //	else if (_st_ptr->isFixed())
-//		ceres_problem_->SetParameterBlockConstant(_st_ptr->getPtr());
+//		ceres_problem_->SetParameterBlockConstant(_st_ptr->get());
 //	else
 //		printf("\nERROR: Update state unit status with unknown status");
 //
 //	_st_ptr->setPendingStatus(NOT_PENDING);
 }
 
-ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPtr)
+ceres::CostFunction* SolverManager::createCostFunction(FactorBasePtr _corrPtr)
 {
 	//std::cout << "adding ctr " << _corrPtr->id() << std::endl;
 	//_corrPtr->print();
 
-	switch (_corrPtr->getConstraintType())
+	switch (_corrPtr->getFactorType())
 	{
 		case CTR_GPS_FIX_2D:
 		{
-			ConstraintGPS2D* specific_ptr = (ConstraintGPS2D*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintGPS2D,
+			FactorGPS2D* specific_ptr = (FactorGPS2D*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<FactorGPS2D,
 													specific_ptr->residualSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
@@ -171,8 +171,8 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPt
 		}
 		case CTR_ODOM_2D_COMPLEX_ANGLE:
 		{
-			ConstraintOdom2DComplexAngle* specific_ptr = (ConstraintOdom2DComplexAngle*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintOdom2DComplexAngle,
+			FactorOdom2DComplexAngle* specific_ptr = (FactorOdom2DComplexAngle*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<FactorOdom2DComplexAngle,
 													specific_ptr->residualSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
@@ -188,8 +188,8 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPt
 		}
 		case CTR_ODOM_2D:
 		{
-			ConstraintOdom2D* specific_ptr = (ConstraintOdom2D*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintOdom2D,
+			FactorOdom2D* specific_ptr = (FactorOdom2D*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<FactorOdom2D,
 													specific_ptr->residualSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
@@ -205,8 +205,8 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPt
 		}
 		case CTR_CORNER_2D:
 		{
-			ConstraintCorner2D* specific_ptr = (ConstraintCorner2D*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintCorner2D,
+			FactorCorner2D* specific_ptr = (FactorCorner2D*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<FactorCorner2D,
 													specific_ptr->residualSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
@@ -222,8 +222,8 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPt
 		}
 		case CTR_IMU:
 		{
-			ConstraintIMU* specific_ptr = (ConstraintIMU*)(_corrPtr);
-			return new ceres::AutoDiffCostFunction<ConstraintIMU,
+			FactorIMU* specific_ptr = (FactorIMU*)(_corrPtr);
+			return new ceres::AutoDiffCostFunction<FactorIMU,
 													specific_ptr->residualSize,
 													specific_ptr->block0Size,
 													specific_ptr->block1Size,
@@ -238,7 +238,7 @@ ceres::CostFunction* SolverManager::createCostFunction(ConstraintBasePtr _corrPt
 			break;
 		}
 		default:
-			std::cout << "Unknown constraint type! Please add it in the CeresWrapper::createCostFunction()" << std::endl;
+			std::cout << "Unknown factor type! Please add it in the CeresWrapper::createCostFunction()" << std::endl;
 
 			return nullptr;
 	}

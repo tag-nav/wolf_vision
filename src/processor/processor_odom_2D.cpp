@@ -136,8 +136,8 @@ bool ProcessorOdom2D::voteForKeyFrame()
         return true;
     }
     // Time criterion
-    WOLF_TRACE("orig t: ", origin_ptr_->getFramePtr()->getTimeStamp().get(), " current t: ", getBuffer().get().back().ts_.get() , " dt: ", getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get());
-    if (getBuffer().get().back().ts_.get() - origin_ptr_->getFramePtr()->getTimeStamp().get() > params_odom_2D_->max_time_span)
+    WOLF_TRACE("orig t: ", origin_ptr_->getFrame()->getTimeStamp().get(), " current t: ", getBuffer().get().back().ts_.get() , " dt: ", getBuffer().get().back().ts_.get() - origin_ptr_->getFrame()->getTimeStamp().get());
+    if (getBuffer().get().back().ts_.get() - origin_ptr_->getFrame()->getTimeStamp().get() > params_odom_2D_->max_time_span)
     {
         return true;
     }
@@ -152,12 +152,12 @@ CaptureMotionPtr ProcessorOdom2D::createCapture(const TimeStamp& _ts, const Sens
     return capture_odom;
 }
 
-ConstraintBasePtr ProcessorOdom2D::emplaceConstraint(FeatureBasePtr _feature, CaptureBasePtr _capture_origin)
+FactorBasePtr ProcessorOdom2D::emplaceFactor(FeatureBasePtr _feature, CaptureBasePtr _capture_origin)
 {
-    ConstraintOdom2DPtr ctr_odom = std::make_shared<ConstraintOdom2D>(_feature, _capture_origin->getFramePtr(),
+    FactorOdom2DPtr ctr_odom = std::make_shared<FactorOdom2D>(_feature, _capture_origin->getFrame(),
                                                                       shared_from_this());
-    _feature->addConstraint(ctr_odom);
-    _capture_origin->getFramePtr()->addConstrainedBy(ctr_odom);
+    _feature->addFactor(ctr_odom);
+    _capture_origin->getFrame()->addConstrainedBy(ctr_odom);
     return ctr_odom;
 }
 

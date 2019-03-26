@@ -24,12 +24,12 @@ SensorGPS::~SensorGPS()
     //
 }
 
-StateBlockPtr SensorGPS::getMapPPtr() const
+StateBlockPtr SensorGPS::getMapP() const
 {
     return getStateBlockPtrStatic(3);
 }
 
-StateBlockPtr SensorGPS::getMapOPtr() const
+StateBlockPtr SensorGPS::getMapO() const
 {
     return getStateBlockPtrStatic(4);
 }
