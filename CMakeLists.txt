@@ -411,6 +411,7 @@ SET(HDRS_DTASSC
   include/base/association/association_node.h
   include/base/association/association_tree.h
   include/base/association/association_nnls.h
+  include/base/association/matrix.h
   )
 
 SET(HDRS_CORE
