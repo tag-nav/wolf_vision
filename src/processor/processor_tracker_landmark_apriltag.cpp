@@ -203,11 +203,8 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
 
         if (!use_rotation){
 //            WOLF_INFO("Ambiguity on estimated rotation is likely");
-            // Put a very high covariance on angles measurements (low info matrix ?)
-//            cov.bottomRightCorner(3, 3) = 1000000*Eigen::Matrix3s::Identity();
-            Eigen::Matrix6s new_info = 0.001*Eigen::Matrix6s::Identity();
-            new_info.topLeftCorner(3, 3) = info.topLeftCorner(3, 3);
-            info = new_info;
+            // Put a very high covariance on angles measurements (low info matrix)
+            info.bottomRightCorner(3,3) = 0.001 * Eigen::Matrix3s::Identity();
         }
 
 //        FOR TEST ONLY
