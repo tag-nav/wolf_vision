@@ -1,11 +1,15 @@
 #edit the following line to add the librarie's header files
 FIND_PATH(
     wolf_INCLUDE_DIRS
-    # NAMES wolf.h
-    PATHS /usr/local/include/iri-algorithms/wolf)
+    NAMES wolf.found
+    PATHS /usr/local/include/iri-algorithms/wolf/base)
 #change INCLUDE_DIRS to its parent directory
-# get_filename_component(wolf_INCLUDE_DIRS ${wolf_INCLUDE_DIRS} DIRECTORY)
-MESSAGE("Found wolf include dirs: ${wolf_INCLUDE_DIRS}")
+get_filename_component(wolf_INCLUDE_DIRS ${wolf_INCLUDE_DIRS} DIRECTORY)
+IF(wolf_INCLUDE_DIRS)
+  MESSAGE("Found wolf (base) include dirs: ${wolf_INCLUDE_DIRS}")
+ELSE
+  MESSAGE("Couldn't find wolf (base) include dirs")
+ENDIF
 
 FIND_LIBRARY(
     wolf_LIBRARY

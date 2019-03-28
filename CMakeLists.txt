@@ -780,6 +780,10 @@ INSTALL(FILES ${HDRS_YAML}
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf.cmake"
     DESTINATION "lib/cmake/${PROJECT_NAME}")
 
+FILE(WRITE wolf.found "")
+INSTALL(FILES wolf.found
+  DESTINATION include/iri-algorithms/wolf/base)
+
 #install Find*.cmake
 configure_file("${CMAKE_SOURCE_DIR}/cmake_modules/wolfConfig.cmake"
                "${CMAKE_BINARY_DIR}/wolfConfig.cmake" @ONLY)
