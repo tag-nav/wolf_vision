@@ -15,7 +15,7 @@
 namespace wolf {
 
 //template class FactorAutodiff
-template <class CtrT, unsigned int RES, unsigned int B0, unsigned int B1 = 0, unsigned int B2 = 0, unsigned int B3 = 0, unsigned int B4 = 0, unsigned int B5 = 0, unsigned int B6 = 0, unsigned int B7 = 0, unsigned int B8 = 0, unsigned int B9 = 0>
+template <class FacT, unsigned int RES, unsigned int B0, unsigned int B1 = 0, unsigned int B2 = 0, unsigned int B3 = 0, unsigned int B4 = 0, unsigned int B5 = 0, unsigned int B6 = 0, unsigned int B7 = 0, unsigned int B8 = 0, unsigned int B9 = 0>
 class FactorAutodiff : public FactorBase
 {
     public:
@@ -144,7 +144,7 @@ class FactorAutodiff : public FactorBase
             // only residuals
             if (jacobians == nullptr)
             {
-                (*static_cast<CtrT const*>(this))(parameters[0],
+                (*static_cast<FacT const*>(this))(parameters[0],
                                                   parameters[1],
                                                   parameters[2],
                                                   parameters[3],
@@ -165,7 +165,7 @@ class FactorAutodiff : public FactorBase
                 updateJetsRealPart(param_vec);
 
                 // call functor
-                (*static_cast<CtrT const*>(this))(jets_0_->data(),
+                (*static_cast<FacT const*>(this))(jets_0_->data(),
                                                   jets_1_->data(),
                                                   jets_2_->data(),
                                                   jets_3_->data(),
@@ -241,7 +241,7 @@ class FactorAutodiff : public FactorBase
             updateJetsRealPart(_states_ptr);
 
             // call functor
-            (*static_cast<CtrT const*>(this))(jets_0_->data(),
+            (*static_cast<FacT const*>(this))(jets_0_->data(),
                                               jets_1_->data(),
                                               jets_2_->data(),
                                               jets_3_->data(),
@@ -301,8 +301,8 @@ class FactorAutodiff : public FactorBase
 
 ////////////////// SPECIALIZATION 9 BLOCKS ////////////////////////////////////////////////////////////////////////
 
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7,unsigned int B8>
-class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public FactorBase
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7,unsigned int B8>
+class FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public FactorBase
 {
    public:
 
@@ -420,7 +420,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public FactorBase
            // only residuals
            if (jacobians == nullptr)
            {
-               (*static_cast<CtrT const*>(this))(parameters[0],
+               (*static_cast<FacT const*>(this))(parameters[0],
                                                         parameters[1],
                                                         parameters[2],
                                                         parameters[3],
@@ -440,7 +440,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public FactorBase
                updateJetsRealPart(param_vec);
 
                // call functor
-               (*static_cast<CtrT const*>(this))(jets_0_->data(),
+               (*static_cast<FacT const*>(this))(jets_0_->data(),
                                                         jets_1_->data(),
                                                         jets_2_->data(),
                                                         jets_3_->data(),
@@ -507,7 +507,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public FactorBase
            updateJetsRealPart(_states_ptr);
 
            // call functor
-           (*static_cast<CtrT const*>(this))(jets_0_->data(),
+           (*static_cast<FacT const*>(this))(jets_0_->data(),
                                              jets_1_->data(),
                                              jets_2_->data(),
                                              jets_3_->data(),
@@ -553,8 +553,8 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0> : public FactorBase
 
 ////////////////// SPECIALIZATION 8 BLOCKS ////////////////////////////////////////////////////////////////////////
 
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7>
-class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public FactorBase
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7>
+class FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public FactorBase
 {
    public:
 
@@ -666,7 +666,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public FactorBase
            // only residuals
            if (jacobians == nullptr)
            {
-               (*static_cast<CtrT const*>(this))(parameters[0],
+               (*static_cast<FacT const*>(this))(parameters[0],
                                                         parameters[1],
                                                         parameters[2],
                                                         parameters[3],
@@ -685,7 +685,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public FactorBase
                updateJetsRealPart(param_vec);
 
                // call functor
-               (*static_cast<CtrT const*>(this))(jets_0_->data(),
+               (*static_cast<FacT const*>(this))(jets_0_->data(),
                                                         jets_1_->data(),
                                                         jets_2_->data(),
                                                         jets_3_->data(),
@@ -749,7 +749,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public FactorBase
            updateJetsRealPart(_states_ptr);
 
            // call functor
-           (*static_cast<CtrT const*>(this))(jets_0_->data(),
+           (*static_cast<FacT const*>(this))(jets_0_->data(),
                                              jets_1_->data(),
                                              jets_2_->data(),
                                              jets_3_->data(),
@@ -794,8 +794,8 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0> : public FactorBase
 
 ////////////////// SPECIALIZATION 7 BLOCKS ////////////////////////////////////////////////////////////////////////
 
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6>
-class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public FactorBase
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6>
+class FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public FactorBase
 {
    public:
 
@@ -901,7 +901,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public FactorBase
            // only residuals
            if (jacobians == nullptr)
            {
-               (*static_cast<CtrT const*>(this))(parameters[0],
+               (*static_cast<FacT const*>(this))(parameters[0],
                                                         parameters[1],
                                                         parameters[2],
                                                         parameters[3],
@@ -919,7 +919,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public FactorBase
                updateJetsRealPart(param_vec);
 
                // call functor
-               (*static_cast<CtrT const*>(this))(jets_0_->data(),
+               (*static_cast<FacT const*>(this))(jets_0_->data(),
                                                         jets_1_->data(),
                                                         jets_2_->data(),
                                                         jets_3_->data(),
@@ -980,7 +980,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public FactorBase
            updateJetsRealPart(_states_ptr);
 
            // call functor
-           (*static_cast<CtrT const*>(this))(jets_0_->data(),
+           (*static_cast<FacT const*>(this))(jets_0_->data(),
                                              jets_1_->data(),
                                              jets_2_->data(),
                                              jets_3_->data(),
@@ -1024,8 +1024,8 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0> : public FactorBase
 
 ////////////////// SPECIALIZATION 6 BLOCKS ////////////////////////////////////////////////////////////////////////
 
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5>
-class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public FactorBase
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5>
+class FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public FactorBase
 {
    public:
 
@@ -1125,7 +1125,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public FactorBase
            // only residuals
            if (jacobians == nullptr)
            {
-               (*static_cast<CtrT const*>(this))(parameters[0],
+               (*static_cast<FacT const*>(this))(parameters[0],
                                                         parameters[1],
                                                         parameters[2],
                                                         parameters[3],
@@ -1142,7 +1142,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public FactorBase
                updateJetsRealPart(param_vec);
 
                // call functor
-               (*static_cast<CtrT const*>(this))(jets_0_->data(),
+               (*static_cast<FacT const*>(this))(jets_0_->data(),
                                                         jets_1_->data(),
                                                         jets_2_->data(),
                                                         jets_3_->data(),
@@ -1200,7 +1200,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public FactorBase
            updateJetsRealPart(_states_ptr);
 
            // call functor
-           (*static_cast<CtrT const*>(this))(jets_0_->data(),
+           (*static_cast<FacT const*>(this))(jets_0_->data(),
                                              jets_1_->data(),
                                              jets_2_->data(),
                                              jets_3_->data(),
@@ -1239,8 +1239,8 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0> : public FactorBase
 
 ////////////////// SPECIALIZATION 5 BLOCKS ////////////////////////////////////////////////////////////////////////
 
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4>
-class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public FactorBase
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4>
+class FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public FactorBase
 {
    public:
 
@@ -1333,7 +1333,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public FactorBase
            // only residuals
            if (jacobians == nullptr)
            {
-               (*static_cast<CtrT const*>(this))(parameters[0],
+               (*static_cast<FacT const*>(this))(parameters[0],
                                                         parameters[1],
                                                         parameters[2],
                                                         parameters[3],
@@ -1349,7 +1349,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public FactorBase
                updateJetsRealPart(param_vec);
 
                // call functor
-               (*static_cast<CtrT const*>(this))(jets_0_->data(),
+               (*static_cast<FacT const*>(this))(jets_0_->data(),
                                                         jets_1_->data(),
                                                         jets_2_->data(),
                                                         jets_3_->data(),
@@ -1404,7 +1404,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public FactorBase
            updateJetsRealPart(_states_ptr);
 
            // call functor
-           (*static_cast<CtrT const*>(this))(jets_0_->data(),
+           (*static_cast<FacT const*>(this))(jets_0_->data(),
                                              jets_1_->data(),
                                              jets_2_->data(),
                                              jets_3_->data(),
@@ -1442,8 +1442,8 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0> : public FactorBase
 
 ////////////////// SPECIALIZATION 4 BLOCKS ////////////////////////////////////////////////////////////////////////
 
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3>
-class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public FactorBase
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3>
+class FactorAutodiff<FacT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public FactorBase
 {
    public:
 
@@ -1530,7 +1530,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public FactorBase
            // only residuals
            if (jacobians == nullptr)
            {
-               (*static_cast<CtrT const*>(this))(parameters[0],
+               (*static_cast<FacT const*>(this))(parameters[0],
                                                  parameters[1],
                                                  parameters[2],
                                                  parameters[3],
@@ -1545,7 +1545,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public FactorBase
                updateJetsRealPart(param_vec);
 
                // call functor
-               (*static_cast<CtrT const*>(this))(jets_0_->data(),
+               (*static_cast<FacT const*>(this))(jets_0_->data(),
                                                  jets_1_->data(),
                                                  jets_2_->data(),
                                                  jets_3_->data(),
@@ -1597,7 +1597,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public FactorBase
            updateJetsRealPart(_states_ptr);
 
            // call functor
-           (*static_cast<CtrT const*>(this))(jets_0_->data(),
+           (*static_cast<FacT const*>(this))(jets_0_->data(),
                                              jets_1_->data(),
                                              jets_2_->data(),
                                              jets_3_->data(),
@@ -1638,8 +1638,8 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0> : public FactorBase
 
 ////////////////// SPECIALIZATION 3 BLOCKS ////////////////////////////////////////////////////////////////////////
 
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2>
-class FactorAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public FactorBase
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2>
+class FactorAutodiff<FacT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public FactorBase
 {
    public:
 
@@ -1720,7 +1720,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public FactorBase
            // only residuals
            if (jacobians == nullptr)
            {
-               (*static_cast<CtrT const*>(this))(parameters[0],
+               (*static_cast<FacT const*>(this))(parameters[0],
                                                         parameters[1],
                                                         parameters[2],
                                                         residuals);
@@ -1734,7 +1734,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public FactorBase
                updateJetsRealPart(param_vec);
 
                // call functor
-               (*static_cast<CtrT const*>(this))(jets_0_->data(),
+               (*static_cast<FacT const*>(this))(jets_0_->data(),
                                                         jets_1_->data(),
                                                         jets_2_->data(),
                                                         residuals_jets_->data());
@@ -1783,7 +1783,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public FactorBase
            updateJetsRealPart(_states_ptr);
 
            // call functor
-           (*static_cast<CtrT const*>(this))(jets_0_->data(),
+           (*static_cast<FacT const*>(this))(jets_0_->data(),
                                              jets_1_->data(),
                                              jets_2_->data(),
                                              residuals_jets_->data());
@@ -1823,8 +1823,8 @@ class FactorAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0> : public FactorBase
 
 ////////////////// SPECIALIZATION 2 BLOCKS ////////////////////////////////////////////////////////////////////////
 
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1>
-class FactorAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public FactorBase
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1>
+class FactorAutodiff<FacT,RES,B0,B1,0,0,0,0,0,0,0,0> : public FactorBase
 {
    public:
 
@@ -1899,7 +1899,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public FactorBase
            // only residuals
            if (jacobians == nullptr)
            {
-               (*static_cast<CtrT const*>(this))(parameters[0],
+               (*static_cast<FacT const*>(this))(parameters[0],
                                                  parameters[1],
                                                  residuals);
            }
@@ -1912,7 +1912,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public FactorBase
                updateJetsRealPart(param_vec);
 
                // call functor
-               (*static_cast<CtrT const*>(this))(jets_0_->data(),
+               (*static_cast<FacT const*>(this))(jets_0_->data(),
                                                  jets_1_->data(),
                                                  residuals_jets_->data());
 
@@ -1958,7 +1958,7 @@ class FactorAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public FactorBase
            updateJetsRealPart(_states_ptr);
 
            // call functor
-           (*static_cast<CtrT const*>(this))(jets_0_->data(),
+           (*static_cast<FacT const*>(this))(jets_0_->data(),
                                              jets_1_->data(),
                                              residuals_jets_->data());
 
@@ -1997,8 +1997,8 @@ class FactorAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0> : public FactorBase
 
 ////////////////// SPECIALIZATION 1 BLOCK ////////////////////////////////////////////////////////////////////////
 
-template <class CtrT,unsigned int RES,unsigned int B0>
-class FactorAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public FactorBase
+template <class FacT,unsigned int RES,unsigned int B0>
+class FactorAutodiff<FacT,RES,B0,0,0,0,0,0,0,0,0,0> : public FactorBase
 {
    public:
 
@@ -2067,7 +2067,7 @@ class FactorAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public FactorBase
            // only residuals
            if (jacobians == nullptr)
            {
-               (*static_cast<CtrT const*>(this))(parameters[0],
+               (*static_cast<FacT const*>(this))(parameters[0],
                                                  residuals);
            }
            // also compute jacobians
@@ -2079,7 +2079,7 @@ class FactorAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public FactorBase
                updateJetsRealPart(param_vec);
 
                // call functor
-               (*static_cast<CtrT const*>(this))(jets_0_->data(),
+               (*static_cast<FacT const*>(this))(jets_0_->data(),
                                                  residuals_jets_->data());
 
                // fill the residual array
@@ -2122,7 +2122,7 @@ class FactorAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public FactorBase
            updateJetsRealPart(_states_ptr);
 
            // call functor
-           (*static_cast<CtrT const*>(this))(jets_0_->data(),
+           (*static_cast<FacT const*>(this))(jets_0_->data(),
                                              residuals_jets_->data());
 
            // fill the residual vector
@@ -2163,40 +2163,40 @@ class FactorAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0> : public FactorBase
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // state_block_sizes_
 // 10 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7,unsigned int B8,unsigned int B9>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,B9>::state_block_sizes_ = {B0,B1,B2,B3,B4,B5,B6,B7,B8,B9};
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7,unsigned int B8,unsigned int B9>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,B9>::state_block_sizes_ = {B0,B1,B2,B3,B4,B5,B6,B7,B8,B9};
 // 9 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7,unsigned int B8>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0>::state_block_sizes_ = {B0,B1,B2,B3,B4,B5,B6,B7,B8};
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7,unsigned int B8>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0>::state_block_sizes_ = {B0,B1,B2,B3,B4,B5,B6,B7,B8};
 // 8 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0>::state_block_sizes_ = {B0,B1,B2,B3,B4,B5,B6,B7};
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0>::state_block_sizes_ = {B0,B1,B2,B3,B4,B5,B6,B7};
 // 7 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0>::state_block_sizes_ = {B0,B1,B2,B3,B4,B5,B6};
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0>::state_block_sizes_ = {B0,B1,B2,B3,B4,B5,B6};
 // 6 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0>::state_block_sizes_ = {B0,B1,B2,B3,B4,B5};
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0>::state_block_sizes_ = {B0,B1,B2,B3,B4,B5};
 // 5 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0>::state_block_sizes_ = {B0,B1,B2,B3,B4};
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,0,0,0,0,0>::state_block_sizes_ = {B0,B1,B2,B3,B4};
 // 4 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0>::state_block_sizes_ = {B0,B1,B2,B3};
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,0,0,0,0,0,0>::state_block_sizes_ = {B0,B1,B2,B3};
 // 3 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0>::state_block_sizes_ = {B0,B1,B2};
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,0,0,0,0,0,0,0>::state_block_sizes_ = {B0,B1,B2};
 // 2 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0>::state_block_sizes_ = {B0,B1};
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,0,0,0,0,0,0,0,0>::state_block_sizes_ = {B0,B1};
 // 1 BLOCK
-template <class CtrT,unsigned int RES,unsigned int B0>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0>::state_block_sizes_ = {B0};
+template <class FacT,unsigned int RES,unsigned int B0>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,0,0,0,0,0,0,0,0,0>::state_block_sizes_ = {B0};
 
 // jacobian_locations_
 // 10 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7,unsigned int B8,unsigned int B9>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,B9>::jacobian_locations_ = {0,
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7,unsigned int B8,unsigned int B9>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,B9>::jacobian_locations_ = {0,
                                                                                                                B0,
                                                                                                                B0+B1,
                                                                                                                B0+B1+B2,
@@ -2207,8 +2207,8 @@ const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,
                                                                                                                B0+B1+B2+B3+B4+B5+B6+B7,
                                                                                                                B0+B1+B2+B3+B4+B5+B6+B7+B8};
 // 9 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7,unsigned int B8>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0>::jacobian_locations_ = {0,
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7,unsigned int B8>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,B6,B7,B8,0>::jacobian_locations_ = {0,
                                                                                                               B0,
                                                                                                               B0+B1,
                                                                                                               B0+B1+B2,
@@ -2218,8 +2218,8 @@ const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,
                                                                                                               B0+B1+B2+B3+B4+B5+B6,
                                                                                                               B0+B1+B2+B3+B4+B5+B6+B7};
 // 8 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0>::jacobian_locations_ = {0,
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6,unsigned int B7>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,B6,B7,0,0>::jacobian_locations_ = {0,
                                                                                                              B0,
                                                                                                              B0+B1,
                                                                                                              B0+B1+B2,
@@ -2228,8 +2228,8 @@ const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,B7,
                                                                                                              B0+B1+B2+B3+B4+B5,
                                                                                                              B0+B1+B2+B3+B4+B5+B6};
 // 7 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0>::jacobian_locations_ = {0,
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5,unsigned int B6>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,B6,0,0,0>::jacobian_locations_ = {0,
                                                                                                             B0,
                                                                                                             B0+B1,
                                                                                                             B0+B1+B2,
@@ -2237,38 +2237,38 @@ const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,B6,0,0
                                                                                                             B0+B1+B2+B3+B4,
                                                                                                             B0+B1+B2+B3+B4+B5};
 // 6 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0>::jacobian_locations_ = {0,
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4,unsigned int B5>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,B5,0,0,0,0>::jacobian_locations_ = {0,
                                                                                                            B0,
                                                                                                            B0+B1,
                                                                                                            B0+B1+B2,
                                                                                                            B0+B1+B2+B3,
                                                                                                            B0+B1+B2+B3+B4};
 // 5 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,B4,0,0,0,0,0>::jacobian_locations_ = {0,
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3,unsigned int B4>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,B4,0,0,0,0,0>::jacobian_locations_ = {0,
                                                                                                           B0,
                                                                                                           B0+B1,
                                                                                                           B0+B1+B2,
                                                                                                           B0+B1+B2+B3};
 // 4 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,B3,0,0,0,0,0,0>::jacobian_locations_ = {0,
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2,unsigned int B3>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,B3,0,0,0,0,0,0>::jacobian_locations_ = {0,
                                                                                                          B0,
                                                                                                          B0+B1,
                                                                                                          B0+B1+B2};
 // 3 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,B2,0,0,0,0,0,0,0>::jacobian_locations_ = {0,
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1,unsigned int B2>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,B2,0,0,0,0,0,0,0>::jacobian_locations_ = {0,
                                                                                                         B0,
                                                                                                         B0+B1};
 // 2 BLOCKS
-template <class CtrT,unsigned int RES,unsigned int B0,unsigned int B1>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,B1,0,0,0,0,0,0,0,0>::jacobian_locations_ = {0,
+template <class FacT,unsigned int RES,unsigned int B0,unsigned int B1>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,B1,0,0,0,0,0,0,0,0>::jacobian_locations_ = {0,
                                                                                                        B0};
 // 1 BLOCK
-template <class CtrT,unsigned int RES,unsigned int B0>
-const std::vector<unsigned int> FactorAutodiff<CtrT,RES,B0,0,0,0,0,0,0,0,0,0>::jacobian_locations_ = {0};
+template <class FacT,unsigned int RES,unsigned int B0>
+const std::vector<unsigned int> FactorAutodiff<FacT,RES,B0,0,0,0,0,0,0,0,0,0>::jacobian_locations_ = {0};
 
 } // namespace wolf
 

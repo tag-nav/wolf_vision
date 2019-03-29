@@ -99,7 +99,7 @@ class SolverQR
                 }
                 problem_ptr_->getStateBlockNotificationList().pop_front();
             }
-            // UPDATE CONSTRAINTS
+            // UPDATE FACTORS
             while (!problem_ptr_->getFactorNotificationList().empty())
             {
                 switch (problem_ptr_->getFactorNotificationList().front().notification_)
@@ -528,16 +528,16 @@ class SolverQR
             return nodes_.size();
         }
 
-        CostFunctionBasePtr createCostFunction(FactorBasePtr _corrPtr)
+        CostFunctionBasePtr createCostFunction(FactorBasePtr _fac_ptr)
         {
-            //std::cout << "adding ctr " << _corrPtr->id() << std::endl;
-            //_corrPtr->print();
+            //std::cout << "adding fac " << _fac_ptr->id() << std::endl;
+            //_fac_ptr->print();
 
-            switch (_corrPtr->getTypeId())
+            switch (_fac_ptr->getTypeId())
             {
                 case FAC_GPS_FIX_2D:
                 {
-                    FactorGPS2D* specific_ptr = (FactorGPS2D*)(_corrPtr);
+                    FactorGPS2D* specific_ptr = (FactorGPS2D*)(_fac_ptr);
                     return (CostFunctionBasePtr)(new CostFunctionSparse<FactorGPS2D, specific_ptr->residualSize,
                             specific_ptr->block0Size, specific_ptr->block1Size, specific_ptr->block2Size,
                             specific_ptr->block3Size, specific_ptr->block4Size, specific_ptr->block5Size,
@@ -547,7 +547,7 @@ class SolverQR
                 }
                 case FAC_ODOM_2D:
                 {
-                    FactorOdom2D* specific_ptr = (FactorOdom2D*)(_corrPtr);
+                    FactorOdom2D* specific_ptr = (FactorOdom2D*)(_fac_ptr);
                     return (CostFunctionBasePtr)new CostFunctionSparse<FactorOdom2D, specific_ptr->residualSize,
                             specific_ptr->block0Size, specific_ptr->block1Size, specific_ptr->block2Size,
                             specific_ptr->block3Size, specific_ptr->block4Size, specific_ptr->block5Size,
@@ -557,7 +557,7 @@ class SolverQR
                 }
                 case FAC_CORNER_2D:
                 {
-                    FactorCorner2D* specific_ptr = (FactorCorner2D*)(_corrPtr);
+                    FactorCorner2D* specific_ptr = (FactorCorner2D*)(_fac_ptr);
                     return (CostFunctionBasePtr)new CostFunctionSparse<FactorCorner2D, specific_ptr->residualSize,
                             specific_ptr->block0Size, specific_ptr->block1Size, specific_ptr->block2Size,
                             specific_ptr->block3Size, specific_ptr->block4Size, specific_ptr->block5Size,
