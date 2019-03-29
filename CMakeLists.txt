@@ -48,7 +48,7 @@ SET(CMAKE_CXX_FLAGS_RELEASE "-O3 -D_REENTRANT")
 if(UNIX)
   # GCC is not strict enough by default, so enable most of the warnings.
   set(CMAKE_CXX_FLAGS
-    "${CMAKE_CXX_FLAGS} -Werror=all -Werror=extra -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-missing-field-initializers")
+    "${CMAKE_CXX_FLAGS} -Werror=all -Werror=extra -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-missing-field-initializers -Wno-unused-but-set-variable")
 endif(UNIX)
 
 #Set compiler according C++11 support

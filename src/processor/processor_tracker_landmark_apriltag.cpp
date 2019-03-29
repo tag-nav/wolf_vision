@@ -161,7 +161,7 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         ippePoseEstimation(det, cv_K_, tag_width, M_ippe1, rep_error1, M_ippe2, rep_error2);
         // If not so sure about whether we have the right solution or not, do not create a feature
         use_rotation = ((rep_error2 / rep_error1 > ippe_min_ratio_) && rep_error1 < ippe_max_rep_error_);
-//        std::cout << "   Tag id: " << tag_id << " ippe_ratio: " << rep_error2 / rep_error1 << " rep error " << rep_error1 << std::endl;
+        //std::cout << "   Tag id: " << tag_id << " ippe_ratio: " << rep_error2 / rep_error1 << " rep error " << rep_error1 << std::endl;
         //////////////////
 
         //////////////////
@@ -204,7 +204,9 @@ void ProcessorTrackerLandmarkApriltag::preProcess()
         if (!use_rotation){
 //            WOLF_INFO("Ambiguity on estimated rotation is likely");
             // Put a very high covariance on angles measurements (low info matrix)
-            info.bottomRightCorner(3,3) = 0.001 * Eigen::Matrix3s::Identity();
+            info.bottomLeftCorner(3,3) = Eigen::Matrix3s::Zero();
+            info.topRightCorner(3,3)    = Eigen::Matrix3s::Zero();
+            info.bottomRightCorner(3,3) = 0.0001 * Eigen::Matrix3s::Identity();
         }
 
 //        FOR TEST ONLY
@@ -711,7 +713,7 @@ void ProcessorTrackerLandmarkApriltag::resetDerived()
 
             FrameBasePtr ori_frame = getOrigin()->getFrame();
             Eigen::Vector1s dist_meas; dist_meas << 0.0;
-            double dist_std = 0.2;
+            double dist_std = 0.5;
             Eigen::Matrix1s cov0(dist_std*dist_std);
 
             CaptureBasePtr capt3D = std::make_shared<CaptureBase>("Dist", getLast()->getTimeStamp());
