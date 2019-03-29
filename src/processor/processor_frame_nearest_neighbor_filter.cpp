@@ -76,10 +76,10 @@ bool ProcessorFrameNearestNeighborFilter::findCandidates(const CaptureBasePtr& /
     {
       // Check if the two frames currently evaluated are already
       // constrained one-another.
-      const FactorBasePtrList& ctr_list = key_it->getConstrainedByList();
+      const FactorBasePtrList& fac_list = key_it->getConstrainedByList();
 
       bool are_constrained = false;
-      for (const FactorBasePtr& crt : ctr_list)
+      for (const FactorBasePtr& crt : fac_list)
       {
         // Are the two frames constrained one-another ?
         if (crt->getFrameOther() == problem_ptr->getLastKeyFrame())

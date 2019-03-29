@@ -38,10 +38,10 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
     return _frame_ptr;
 }
 
-void TrajectoryBase::getFactorList(FactorBasePtrList & _ctr_list)
+void TrajectoryBase::getFactorList(FactorBasePtrList & _fac_list)
 {
 	for(auto fr_ptr : getFrameList())
-		fr_ptr->getFactorList(_ctr_list);
+		fr_ptr->getFactorList(_fac_list);
 }
 
 void TrajectoryBase::sortFrame(FrameBasePtr _frame_ptr)

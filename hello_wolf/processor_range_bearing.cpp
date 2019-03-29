@@ -89,7 +89,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
                                                             lmk,
                                                             prc,
                                                             false,
-                                                            CTR_ACTIVE);
+                                                            FAC_ACTIVE);
         ftr->addFactor(ctr);
         lmk->addConstrainedBy(ctr);
     }

@@ -190,9 +190,9 @@ inline FactorAHPPtr FactorAHP::create(const FeatureBasePtr&   _ftr_ptr,
                                               FactorStatus _status)
 {
     // construct factor
-    FactorAHPPtr ctr_ahp = std::make_shared<FactorAHP>(_ftr_ptr, _lmk_ahp_ptr, _processor_ptr, _apply_loss_function, _status);
+    FactorAHPPtr fac_ahp = std::make_shared<FactorAHP>(_ftr_ptr, _lmk_ahp_ptr, _processor_ptr, _apply_loss_function, _status);
 
-    return ctr_ahp;
+    return fac_ahp;
 }
 
 } // namespace wolf

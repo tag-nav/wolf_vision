@@ -47,7 +47,7 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
         FrameBaseIter computeFrameOrder(FrameBasePtr _frame_ptr);
 
         // factors
-        void getFactorList(FactorBasePtrList & _ctr_list);
+        void getFactorList(FactorBasePtrList & _fac_list);
 
 };
 

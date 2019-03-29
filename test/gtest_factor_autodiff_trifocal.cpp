@@ -152,7 +152,7 @@ class FactorAutodiffTrifocalTest : public testing::Test{
             I3-> addFeature(f3);
 
             // trifocal factor
-            c123 = std::make_shared<FactorAutodiffTrifocal>(f1, f2, f3, proc_trifocal, false, CTR_ACTIVE);
+            c123 = std::make_shared<FactorAutodiffTrifocal>(f1, f2, f3, proc_trifocal, false, FAC_ACTIVE);
             f3   ->addFactor   (c123);
             f1   ->addConstrainedBy(c123);
             f2   ->addConstrainedBy(c123);
@@ -710,7 +710,7 @@ class FactorAutodiffTrifocalMultiPointTest : public FactorAutodiffTrifocalTest
                 fv3.push_back(std::make_shared<FeatureBase>("PIXEL", c3p_can.col(i), pix_cov));
                 I3->addFeature(fv3.at(i));
 
-                cv123.push_back(std::make_shared<FactorAutodiffTrifocal>(fv1.at(i), fv2.at(i), fv3.at(i), proc_trifocal, false, CTR_ACTIVE));
+                cv123.push_back(std::make_shared<FactorAutodiffTrifocal>(fv1.at(i), fv2.at(i), fv3.at(i), proc_trifocal, false, FAC_ACTIVE));
                 fv3.at(i)->addFactor(cv123.at(i));
                 fv1.at(i)->addConstrainedBy(cv123.at(i));
                 fv2.at(i)->addConstrainedBy(cv123.at(i));
@@ -888,17 +888,17 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
     F3->addCapture(Cd);
     FeatureBasePtr fd = std::make_shared<FeatureBase>("DISTANCE", Vector1s(distance), Matrix1s(distance_std * distance_std));
     Cd->addFeature(fd);
-    FactorAutodiffDistance3DPtr cd = std::make_shared<FactorAutodiffDistance3D>(fd, F1, nullptr, false, CTR_ACTIVE);
+    FactorAutodiffDistance3DPtr cd = std::make_shared<FactorAutodiffDistance3D>(fd, F1, nullptr, false, FAC_ACTIVE);
     fd->addFactor(cd);
     F1->addConstrainedBy(cd);
 
-    cd->setStatus(CTR_INACTIVE);
+    cd->setStatus(FAC_INACTIVE);
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
     WOLF_DEBUG("DISTANCE CONSTRAINT INACTIVE: \n", report);
 
     problem->print(1,0,1,0);
 
-    cd->setStatus(CTR_ACTIVE);
+    cd->setStatus(FAC_ACTIVE);
     report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);
 
     // Print results

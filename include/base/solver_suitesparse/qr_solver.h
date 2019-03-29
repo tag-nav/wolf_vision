@@ -535,7 +535,7 @@ class SolverQR
 
             switch (_corrPtr->getTypeId())
             {
-                case CTR_GPS_FIX_2D:
+                case FAC_GPS_FIX_2D:
                 {
                     FactorGPS2D* specific_ptr = (FactorGPS2D*)(_corrPtr);
                     return (CostFunctionBasePtr)(new CostFunctionSparse<FactorGPS2D, specific_ptr->residualSize,
@@ -545,7 +545,7 @@ class SolverQR
                             specific_ptr->block9Size>(specific_ptr));
                     break;
                 }
-                case CTR_ODOM_2D:
+                case FAC_ODOM_2D:
                 {
                     FactorOdom2D* specific_ptr = (FactorOdom2D*)(_corrPtr);
                     return (CostFunctionBasePtr)new CostFunctionSparse<FactorOdom2D, specific_ptr->residualSize,
@@ -555,7 +555,7 @@ class SolverQR
                             specific_ptr->block9Size>(specific_ptr);
                     break;
                 }
-                case CTR_CORNER_2D:
+                case FAC_CORNER_2D:
                 {
                     FactorCorner2D* specific_ptr = (FactorCorner2D*)(_corrPtr);
                     return (CostFunctionBasePtr)new CostFunctionSparse<FactorCorner2D, specific_ptr->residualSize,

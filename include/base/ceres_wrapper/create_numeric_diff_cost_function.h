@@ -28,17 +28,17 @@ std::shared_ptr<ceres::NumericDiffCostFunction<T, ceres::CENTRAL, T::residualSiz
                                                            T::block5Size,T::block6Size,T::block7Size,T::block8Size,T::block9Size> >(std::static_pointer_cast<T>(_factor_ptr).get());
 };
 
-inline std::shared_ptr<ceres::CostFunction> createNumericDiffCostFunction(FactorBasePtr _ctr_ptr)
+inline std::shared_ptr<ceres::CostFunction> createNumericDiffCostFunction(FactorBasePtr _fac_ptr)
 {
-//    switch (_ctr_ptr->getTypeId())
+//    switch (_fac_ptr->getTypeId())
 //    {
 //        // just for testing
-//        case CTR_ODOM_2D:
-//            return createNumericDiffCostFunctionCeres<FactorOdom2D>(_ctr_ptr);
+//        case FAC_ODOM_2D:
+//            return createNumericDiffCostFunctionCeres<FactorOdom2D>(_fac_ptr);
 //
 //        /* For adding a new factor, add the #include and a case:
-//        case CTR_ENUM:
-//            return createNumericDiffCostFunctionCeres<FactorType>(_ctr_ptr);
+//        case FAC_ENUM:
+//            return createNumericDiffCostFunctionCeres<FactorType>(_fac_ptr);
 //         */
 //
 //        default:
