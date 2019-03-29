@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT_AHP_H
-#define CONSTRAINT_AHP_H
+#ifndef FACTOR_AHP_H
+#define FACTOR_AHP_H
 
 //Wolf includes
 #include "base/factor/factor_autodiff.h"
@@ -29,7 +29,7 @@ class FactorAHP : public FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>
                       const LandmarkAHPPtr&   _landmark_ptr,
                       const ProcessorBasePtr& _processor_ptr = nullptr,
                       bool              _apply_loss_function = false,
-                      FactorStatus  _status = CTR_ACTIVE);
+                      FactorStatus  _status = FAC_ACTIVE);
 
         virtual ~FactorAHP() = default;
 
@@ -56,7 +56,7 @@ class FactorAHP : public FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>
                                        const LandmarkAHPPtr&   _lmk_ahp_ptr,
                                        const ProcessorBasePtr& _processor_ptr = nullptr,
                                        bool             _apply_loss_function  = false,
-                                       FactorStatus _status               = CTR_ACTIVE);
+                                       FactorStatus _status               = FAC_ACTIVE);
 
 };
 
@@ -197,4 +197,4 @@ inline FactorAHPPtr FactorAHP::create(const FeatureBasePtr&   _ftr_ptr,
 
 } // namespace wolf
 
-#endif // CONSTRAINT_AHP_H
+#endif // FACTOR_AHP_H

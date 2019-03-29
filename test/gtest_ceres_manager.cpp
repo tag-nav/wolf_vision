@@ -62,7 +62,7 @@ class CeresManagerWrapper : public CeresManager
 
         bool isFactorRegistered(const FactorBasePtr& ctr_ptr) const
         {
-            return ctr_2_residual_idx_.find(ctr_ptr) != ctr_2_residual_idx_.end() && ctr_2_costfunction_.find(ctr_ptr) != ctr_2_costfunction_.end();
+            return fac_2_residual_idx_.find(ctr_ptr) != fac_2_residual_idx_.end() && fac_2_costfunction_.find(ctr_ptr) != fac_2_costfunction_.end();
         };
 
         bool hasThisLocalParametrization(const StateBlockPtr& st, const LocalParametrizationBasePtr& local_param)

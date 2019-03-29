@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT_BASE_H_
-#define CONSTRAINT_BASE_H_
+#ifndef FACTOR_BASE_H_
+#define FACTOR_BASE_H_
 
 // Forward declarations for node templates
 namespace wolf{
@@ -20,8 +20,8 @@ namespace wolf {
  */
 typedef enum
 {
-    CTR_INACTIVE = 0,   ///< Factor established with a frame (odometry).
-    CTR_ACTIVE = 1      ///< Factor established with absolute reference.
+    FAC_INACTIVE = 0,   ///< Factor established with a frame (odometry).
+    FAC_ACTIVE = 1      ///< Factor established with absolute reference.
 } FactorStatus;
 
 /** \brief Enumeration of jacobian computation method
@@ -47,19 +47,19 @@ class FactorBase : public NodeBase, public std::enable_shared_from_this<FactorBa
         unsigned int factor_id_;
         FactorStatus status_;                       ///< status of factor (types defined at wolf.h)
         bool apply_loss_function_;                      ///< flag for applying loss function to this factor
-        FrameBaseWPtr frame_other_ptr_;                 ///< FrameBase pointer (for category CTR_FRAME)
+        FrameBaseWPtr frame_other_ptr_;                 ///< FrameBase pointer (for category FAC_FRAME)
         CaptureBaseWPtr capture_other_ptr_;             ///< CaptureBase pointer
-        FeatureBaseWPtr feature_other_ptr_;             ///< FeatureBase pointer (for category CTR_FEATURE)
-        LandmarkBaseWPtr landmark_other_ptr_;           ///< LandmarkBase pointer (for category CTR_LANDMARK)
+        FeatureBaseWPtr feature_other_ptr_;             ///< FeatureBase pointer (for category FAC_FEATURE)
+        LandmarkBaseWPtr landmark_other_ptr_;           ///< LandmarkBase pointer (for category FAC_LANDMARK)
         ProcessorBaseWPtr processor_ptr_;               ///< ProcessorBase pointer
 
     public:
 
-        /** \brief Constructor of category CTR_ABSOLUTE
+        /** \brief Constructor of category FAC_ABSOLUTE
          **/
         FactorBase(const std::string&  _tp,
                        bool _apply_loss_function = false,
-                       FactorStatus _status = CTR_ACTIVE);
+                       FactorStatus _status = FAC_ACTIVE);
 
         /** \brief Constructor valid for all categories (FRAME, FEATURE, LANDMARK)
          **/
@@ -70,7 +70,7 @@ class FactorBase : public NodeBase, public std::enable_shared_from_this<FactorBa
                        const LandmarkBasePtr& _landmark_other_ptr,
                        const ProcessorBasePtr& _processor_ptr = nullptr,
                        bool _apply_loss_function = false,
-                       FactorStatus _status = CTR_ACTIVE);
+                       FactorStatus _status = FAC_ACTIVE);
 
         virtual ~FactorBase() = default;
 

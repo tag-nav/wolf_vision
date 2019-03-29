@@ -5,8 +5,8 @@
  *      \author: AtDinesh
  */
 
-#ifndef CONSTRAINT_BLOCK_ABSOLUTE_H_
-#define CONSTRAINT_BLOCK_ABSOLUTE_H_
+#ifndef FACTOR_BLOCK_ABSOLUTE_H_
+#define FACTOR_BLOCK_ABSOLUTE_H_
 
 //Wolf includes
 #include "base/factor/factor_analytic.h"
@@ -36,14 +36,14 @@ class FactorBlockAbsolute : public FactorAnalytic
          *
          */
         FactorBlockAbsolute(StateBlockPtr _sb_ptr,
-                                unsigned int _start_idx = 0,
-                                int _size = -1,
-                                bool _apply_loss_function = false,
-                                FactorStatus _status = CTR_ACTIVE) :
+                            unsigned int _start_idx = 0,
+                            int _size = -1,
+                            bool _apply_loss_function = false,
+                            FactorStatus _status = FAC_ACTIVE) :
             FactorAnalytic("BLOCK ABS",
-                               _apply_loss_function,
-                               _status,
-                               _sb_ptr),
+                           _apply_loss_function,
+                           _status,
+                           _sb_ptr),
             sb_size_(_sb_ptr->getSize()),
             sb_constrained_start_(_start_idx),
             sb_constrained_size_(_size == -1 ? sb_size_ : _size)
