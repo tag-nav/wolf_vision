@@ -48,9 +48,9 @@ class SolverManager
 
 	private:
 
-		virtual void addFactor(FactorBasePtr _ctr_ptr) = 0;
+		virtual void addFactor(FactorBasePtr _fac_ptr) = 0;
 
-		virtual void removeFactor(FactorBasePtr _ctr_ptr) = 0;
+		virtual void removeFactor(FactorBasePtr _fac_ptr) = 0;
 
 		virtual void addStateBlock(StateBlockPtr _st_ptr) = 0;
 

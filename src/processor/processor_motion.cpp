@@ -135,9 +135,9 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
                 // Modify existing factor --------
                 // Instead of modifying, we remove one ctr, and create a new one.
-                auto ctr_to_remove  = existing_feature->getFactorList().back(); // there is only one factor!
+                auto fac_to_remove  = existing_feature->getFactorList().back(); // there is only one factor!
                 auto new_ctr        = emplaceFactor(existing_feature, capture_for_keyframe_callback);
-                ctr_to_remove       ->remove();  // remove old factor now (otherwise c->remove() gets propagated to f, C, F, etc.)
+                fac_to_remove       ->remove();  // remove old factor now (otherwise c->remove() gets propagated to f, C, F, etc.)
             }
             break;
         }
@@ -203,7 +203,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         auto key_feature_ptr = emplaceFeature(last_ptr_);
 
         // create motion factor and link it to parent feature and other frame (which is origin's frame)
-        auto ctr_ptr = emplaceFactor(key_feature_ptr, origin_ptr_);
+        auto fac_ptr = emplaceFactor(key_feature_ptr, origin_ptr_);
 
         // create a new frame
         auto new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,

@@ -115,17 +115,17 @@ void CaptureBase::addFeatureList(FeatureBasePtrList& _new_ft_list)
     feature_list_.splice(feature_list_.end(), _new_ft_list);
 }
 
-void CaptureBase::getFactorList(FactorBasePtrList& _ctr_list)
+void CaptureBase::getFactorList(FactorBasePtrList& _fac_list)
 {
     for (auto f_ptr : getFeatureList())
-        f_ptr->getFactorList(_ctr_list);
+        f_ptr->getFactorList(_fac_list);
 }
 
-FactorBasePtr CaptureBase::addConstrainedBy(FactorBasePtr _ctr_ptr)
+FactorBasePtr CaptureBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setCaptureOtherPtr(shared_from_this());
-    return _ctr_ptr;
+    constrained_by_list_.push_back(_fac_ptr);
+    _fac_ptr->setCaptureOtherPtr(shared_from_this());
+    return _fac_ptr;
 }
 
 StateBlockPtr CaptureBase::getStateBlockPtr(unsigned int _i) const

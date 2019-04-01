@@ -62,7 +62,7 @@ class FactorAutodiffDistance3D_Test : public testing::Test
             F2->addCapture(C2);
             f2 = std::make_shared<FeatureBase>("Dist", dist, dist_cov);
             C2->addFeature(f2);
-            c2 = std::make_shared<FactorAutodiffDistance3D>(f2, F1, nullptr, false, CTR_ACTIVE);
+            c2 = std::make_shared<FactorAutodiffDistance3D>(f2, F1, nullptr, false, FAC_ACTIVE);
             f2->addFactor(c2);
             F1->addConstrainedBy(c2);
 

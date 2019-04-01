@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT_CORNER_2D_THETA_H_
-#define CONSTRAINT_CORNER_2D_THETA_H_
+#ifndef FACTOR_CORNER_2D_THETA_H_
+#define FACTOR_CORNER_2D_THETA_H_
 
 //Wolf includes
 #include "base/factor/factor_autodiff.h"
@@ -14,12 +14,22 @@ class FactorCorner2D: public FactorAutodiff<FactorCorner2D, 3,2,1,2,1>
 	public:
 
     FactorCorner2D(const FeatureBasePtr _ftr_ptr,
-                       const LandmarkCorner2DPtr _lmk_ptr,
-                       const ProcessorBasePtr& _processor_ptr,
-                       bool _apply_loss_function = false,
-                       FactorStatus _status = CTR_ACTIVE) :
+                   const LandmarkCorner2DPtr _lmk_ptr,
+                   const ProcessorBasePtr& _processor_ptr,
+                   bool _apply_loss_function = false,
+                   FactorStatus _status = FAC_ACTIVE) :
         FactorAutodiff<FactorCorner2D,3,2,1,2,1>("CORNER 2D",
-                nullptr, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFrame()->getP(),_ftr_ptr->getFrame()->getO(), _lmk_ptr->getP(), _lmk_ptr->getO())
+                                                 nullptr,
+                                                 nullptr,
+                                                 nullptr,
+                                                 _lmk_ptr,
+                                                 _processor_ptr,
+                                                 _apply_loss_function,
+                                                 _status,
+                                                 _ftr_ptr->getFrame()->getP(),
+                                                 _ftr_ptr->getFrame()->getO(),
+                                                 _lmk_ptr->getP(),
+                                                 _lmk_ptr->getO())
     {
       //
     }
@@ -28,7 +38,7 @@ class FactorCorner2D: public FactorAutodiff<FactorCorner2D, 3,2,1,2,1>
 
     LandmarkCorner2DPtr getLandmark()
     {
-      return std::static_pointer_cast<LandmarkCorner2D>( landmark_other_ptr_.lock() );
+        return std::static_pointer_cast<LandmarkCorner2D>( landmark_other_ptr_.lock() );
     }
 
     template <typename T>
@@ -37,14 +47,14 @@ class FactorCorner2D: public FactorAutodiff<FactorCorner2D, 3,2,1,2,1>
 
     static FactorBasePtr create(const FeatureBasePtr& _feature_ptr, const NodeBasePtr& _correspondant_ptr, const ProcessorBasePtr& _processor_ptr = nullptr)
     {
-      return std::make_shared<FactorCorner2D>(_feature_ptr, std::static_pointer_cast<LandmarkCorner2D>(_correspondant_ptr), _processor_ptr);
+        return std::make_shared<FactorCorner2D>(_feature_ptr, std::static_pointer_cast<LandmarkCorner2D>(_correspondant_ptr), _processor_ptr);
     }
 
 };
 
 template<typename T>
 inline bool FactorCorner2D::operator ()(const T* const _robotP, const T* const _robotO, const T* const _landmarkP,
-                                            const T* const _landmarkO, T* _residuals) const
+                                        const T* const _landmarkO, T* _residuals) const
 {
     // Mapping
     Eigen::Map<const Eigen::Matrix<T,2,1>> landmark_position_map(_landmarkP);
@@ -80,7 +90,7 @@ inline bool FactorCorner2D::operator ()(const T* const _robotP, const T* const _
     // Residuals
     residuals_map = getMeasurementSquareRootInformationUpper().topLeftCorner<3,3>().cast<T>() * residuals_map;
 
-    //std::cout << "\nCONSTRAINT: " << id() << std::endl;
+    //std::cout << "\nFACTOR: " << id() << std::endl;
     //std::cout << "Feature: " << getFeature()->id() << std::endl;
     //std::cout << "Landmark: " << lmk_ptr_->id() << std::endl;
     //std::cout << "measurement:\n\t" << getMeasurement().transpose() << std::endl;

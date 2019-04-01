@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT_CONTAINER_H_
-#define CONSTRAINT_CONTAINER_H_
+#ifndef FACTOR_CONTAINER_H_
+#define FACTOR_CONTAINER_H_
 
 //Wolf includes
 #include "base/wolf.h"
@@ -22,9 +22,19 @@ class FactorContainer: public FactorAutodiff<FactorContainer,3,2,1,2,1>
                           const LandmarkContainerPtr& _lmk_ptr,
                           const ProcessorBasePtr& _processor_ptr,
                           const unsigned int _corner,
-                          bool _apply_loss_function = false, FactorStatus _status = CTR_ACTIVE) :
+                          bool _apply_loss_function = false, FactorStatus _status = FAC_ACTIVE) :
             FactorAutodiff<FactorContainer,3,2,1,2,1>("CONTAINER",
-                                                              nullptr, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFrame()->getP(),_ftr_ptr->getFrame()->getO(), _lmk_ptr->getP(), _lmk_ptr->getO()),
+                                                      nullptr,
+                                                      nullptr,
+                                                      nullptr,
+                                                      _lmk_ptr,
+                                                      _processor_ptr,
+                                                      _apply_loss_function,
+                                                      _status,
+                                                      _ftr_ptr->getFrame()->getP(),
+                                                      _ftr_ptr->getFrame()->getO(),
+                                                      _lmk_ptr->getP(),
+                                                      _lmk_ptr->getO()),
 			lmk_ptr_(_lmk_ptr),
 			corner_(_corner)
 		{
@@ -79,7 +89,7 @@ class FactorContainer: public FactorAutodiff<FactorContainer,3,2,1,2,1>
             // Residuals
             residuals_map = getMeasurementSquareRootInformationUpper().cast<T>() * residuals_map;
 
-            //std::cout << "\nCONSTRAINT: " << id() << std::endl;
+            //std::cout << "\nFACTOR: " << id() << std::endl;
             //std::cout << "Feature: " << getFeature()->id() << std::endl;
             //std::cout << "Landmark: " << lmk_ptr_->id() << std::endl;
             //std::cout << "measurement:\n\t" << getMeasurement().transpose() << std::endl;
@@ -118,12 +128,12 @@ class FactorContainer: public FactorAutodiff<FactorContainer,3,2,1,2,1>
 
   public:
     static FactorBasePtr create(const FeatureBasePtr& _feature_ptr,
-                                    const NodeBasePtr& _correspondant_ptr,
-                                    const ProcessorBasePtr& _processor_ptr = nullptr)
+                                const NodeBasePtr& _correspondant_ptr,
+                                const ProcessorBasePtr& _processor_ptr = nullptr)
     {
-      unsigned int corner = 0; // Hard-coded, but this class is nevertheless deprecated.
+        unsigned int corner = 0; // Hard-coded, but this class is nevertheless deprecated.
 
-      return std::make_shared<FactorContainer>(_feature_ptr, std::static_pointer_cast<LandmarkContainer>(_correspondant_ptr), _processor_ptr, corner);
+        return std::make_shared<FactorContainer>(_feature_ptr, std::static_pointer_cast<LandmarkContainer>(_correspondant_ptr), _processor_ptr, corner);
     }
 
 };

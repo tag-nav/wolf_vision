@@ -5,8 +5,8 @@
  *      \author: jsola
  */
 
-#ifndef HELLO_WOLF_CONSTRAINT_RANGE_BEARING_H_
-#define HELLO_WOLF_CONSTRAINT_RANGE_BEARING_H_
+#ifndef HELLO_WOLF_FACTOR_RANGE_BEARING_H_
+#define HELLO_WOLF_FACTOR_RANGE_BEARING_H_
 
 #include "base/factor/factor_autodiff.h"
 
@@ -132,4 +132,4 @@ inline bool FactorRangeBearing::operator ()(const T* const _p_w_r, // robot posi
 }
 
 } // namespace wolf
-#endif /* HELLO_WOLF_CONSTRAINT_RANGE_BEARING_H_ */
+#endif /* HELLO_WOLF_FACTOR_RANGE_BEARING_H_ */

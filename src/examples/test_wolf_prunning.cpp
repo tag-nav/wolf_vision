@@ -82,7 +82,7 @@ int main(int argc, char** argv)
     Eigen::SparseMatrix<Scalar> Lambda(0,0);
 
     // prunning
-    FactorBasePtrList ordered_ctr_ptr;
+    FactorBasePtrList ordered_fac_ptr;
     std::list<Scalar> ordered_ig;
 
     // Ceres wrapper
@@ -358,7 +358,7 @@ int main(int argc, char** argv)
 
     for (auto c_it=factors.begin(); c_it!=factors.end(); c_it++)
     {
-        if ((*c_it)->getCategory() != CTR_FRAME) continue;
+        if ((*c_it)->getCategory() != FAC_FRAME) continue;
 
         // Measurement covariance
         Sigma_z = (*c_it)->getFeature()->getMeasurementCovariance();
@@ -507,22 +507,22 @@ int main(int argc, char** argv)
         if (IG < 2 && IG > 0 && !std::isnan(IG))
         {
             // Store as a candidate to be prunned, ordered by information gain
-            auto ordered_ctr_it = ordered_ctr_ptr.begin();
-            for (auto ordered_ig_it = ordered_ig.begin(); ordered_ig_it != ordered_ig.end(); ordered_ig_it++, ordered_ctr_it++ )
+            auto ordered_fac_it = ordered_fac_ptr.begin();
+            for (auto ordered_ig_it = ordered_ig.begin(); ordered_ig_it != ordered_ig.end(); ordered_ig_it++, ordered_fac_it++ )
                 if (IG < (*ordered_ig_it))
                 {
                     ordered_ig.insert(ordered_ig_it, IG);
-                    ordered_ctr_ptr.insert(ordered_ctr_it, (*c_it));
+                    ordered_fac_ptr.insert(ordered_fac_it, (*c_it));
                     break;
                 }
             ordered_ig.insert(ordered_ig.end(), IG);
-            ordered_ctr_ptr.insert(ordered_ctr_ptr.end(), (*c_it));
+            ordered_fac_ptr.insert(ordered_fac_ptr.end(), (*c_it));
         }
     }
 
     // PRUNNING
     std::vector<bool> any_inactive_in_frame(wolf_problem_prun->getTrajectory()->getFrameList().size(), false);
-    for (auto c_it = ordered_ctr_ptr.begin(); c_it != ordered_ctr_ptr.end(); c_it++ )
+    for (auto c_it = ordered_fac_ptr.begin(); c_it != ordered_fac_ptr.end(); c_it++ )
     {
         // Check heuristic: factor do not share node with any inactive factor
         unsigned int& index_frame = frame_ptr_2_index_prun[(*c_it)->getCapture()->getFrame()];
@@ -531,7 +531,7 @@ int main(int argc, char** argv)
         if (!any_inactive_in_frame[index_frame] && !any_inactive_in_frame[index_frame_other])
         {
             std::cout << "setting inactive" << (*c_it)->id() << std::endl;
-            (*c_it)->setStatus(CTR_INACTIVE);
+            (*c_it)->setStatus(FAC_INACTIVE);
             std::cout << "set!" << std::endl;
             any_inactive_in_frame[index_frame] = true;
             any_inactive_in_frame[index_frame_other] = true;

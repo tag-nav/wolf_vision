@@ -66,13 +66,13 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         FeatureBasePtrList& getFeatureList();
         void addFeatureList(FeatureBasePtrList& _new_ft_list);
 
-        void getFactorList(FactorBasePtrList& _ctr_list);
+        void getFactorList(FactorBasePtrList& _fac_list);
 
         SensorBasePtr getSensor() const;
         virtual void setSensorPtr(const SensorBasePtr sensor_ptr);
 
         // constrained by
-        virtual FactorBasePtr addConstrainedBy(FactorBasePtr _ctr_ptr);
+        virtual FactorBasePtr addConstrainedBy(FactorBasePtr _fac_ptr);
         unsigned int getHits() const;
         FactorBasePtrList& getConstrainedByList();
 

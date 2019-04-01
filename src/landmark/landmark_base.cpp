@@ -170,11 +170,11 @@ YAML::Node LandmarkBase::saveToYaml() const
     return node;
 }
 
-FactorBasePtr LandmarkBase::addConstrainedBy(FactorBasePtr _ctr_ptr)
+FactorBasePtr LandmarkBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setLandmarkOtherPtr(shared_from_this());
-    return _ctr_ptr;
+    constrained_by_list_.push_back(_fac_ptr);
+    _fac_ptr->setLandmarkOtherPtr(shared_from_this());
+    return _fac_ptr;
 }
 
 } // namespace wolf
