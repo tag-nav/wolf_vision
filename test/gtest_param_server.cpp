@@ -24,6 +24,9 @@ TEST(ParamsServer, Default)
   EXPECT_EQ(server.getParam<double>("should_not_exist", "2.6"), 2.6);
   EXPECT_EQ(server.getParam<bool>("my_proc_test/voting_active", "true"), false);
   EXPECT_NE(server.getParam<unsigned int>("my_proc_test/time_tolerance", "23"), 23);
+  EXPECT_THROW({ server.getParam<unsigned int>("test error"); }, std::runtime_error);
+  EXPECT_NE(server.getParam<unsigned int>("my_proc_test/time_tolerance"), 23);
+  EXPECT_EQ(server.getParam<bool>("my_proc_test/voting_active"), false);
 }
 int main(int argc, char **argv)
 {

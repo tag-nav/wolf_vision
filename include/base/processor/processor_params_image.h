@@ -24,11 +24,11 @@ struct ProcessorParamsTrackerFeatureImage : public ProcessorParamsTrackerFeature
     ProcessorParamsTrackerFeatureImage(std::string _unique_name, const paramsServer& _server):
         ProcessorParamsTrackerFeature(_unique_name, _server)
     {
-        yaml_file_params_vision_utils = _server.getParam<std::string>(_unique_name + "/yaml_file_params_vision_utils", "");
-        min_response_for_new_features = _server.getParam<Scalar>(_unique_name + "/min_response_for_new_features", "");
-        distance = _server.getParam<Scalar>(_unique_name + "/distance", "");
-        pixel_noise_std = _server.getParam<Scalar>(_unique_name + "/pixel_noise_std", "");
-        pixel_noise_var = _server.getParam<Scalar>(_unique_name + "/pixel_noise_var", "");
+        yaml_file_params_vision_utils = _server.getParam<std::string>(_unique_name + "/yaml_file_params_vision_utils");
+        min_response_for_new_features = _server.getParam<Scalar>(_unique_name + "/min_response_for_new_features");
+        distance = _server.getParam<Scalar>(_unique_name + "/distance");
+        pixel_noise_std = _server.getParam<Scalar>(_unique_name + "/pixel_noise_std");
+        pixel_noise_var = _server.getParam<Scalar>(_unique_name + "/pixel_noise_var");
     }
 };
 
@@ -46,13 +46,13 @@ struct ProcessorParamsTrackerLandmarkImage : public ProcessorParamsTrackerLandma
     ProcessorParamsTrackerLandmarkImage(std::string _unique_name, const paramsServer& _server):
         ProcessorParamsTrackerLandmark(_unique_name, _server)
     {
-        yaml_file_params_vision_utils = _server.getParam<std::string>(_unique_name + "/yaml_file_params_vision_utils", "");
+        yaml_file_params_vision_utils = _server.getParam<std::string>(_unique_name + "/yaml_file_params_vision_utils");
 
-        min_response_for_new_features = _server.getParam<Scalar>(_unique_name + "/min_response_for_new_features", "");
-        distance = _server.getParam<Scalar>(_unique_name + "/distance", "");
+        min_response_for_new_features = _server.getParam<Scalar>(_unique_name + "/min_response_for_new_features");
+        distance = _server.getParam<Scalar>(_unique_name + "/distance");
 
-        pixel_noise_std = _server.getParam<Scalar>(_unique_name + "/pixel_noise_std", "");
-        pixel_noise_var = _server.getParam<Scalar>(_unique_name + "/pixel_noise_var", "");
+        pixel_noise_std = _server.getParam<Scalar>(_unique_name + "/pixel_noise_std");
+        pixel_noise_var = _server.getParam<Scalar>(_unique_name + "/pixel_noise_var");
     }
 };
 }

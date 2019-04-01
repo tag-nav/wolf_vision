@@ -65,6 +65,14 @@ public:
             return converter<T>::convert(def_value);
         }
     }
+    template<typename T>
+    T getParam(std::string key) const {
+        if(_params.find(key) != _params.end()){
+            return converter<T>::convert(_params.find(key)->second);
+        }else{
+            throw std::runtime_error("The following key: '" + key + "' has not been found in the parameters server and no default value was provided.");
+        }
+    }
     std::vector<ParamsInitSensor> getSensors(){
         std::vector<ParamsInitSensor> rtn = std::vector<ParamsInitSensor>();
         std::transform(this->_paramsSens.begin(), this->_paramsSens.end(), back_inserter(rtn), [](const std::pair<std::string,ParamsInitSensor> v){return v.second;});

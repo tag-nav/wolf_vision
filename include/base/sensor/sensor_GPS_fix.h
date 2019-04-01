@@ -18,7 +18,7 @@ struct IntrinsicsGPSFix : public IntrinsicsBase
     IntrinsicsGPSFix(std::string _unique_name, const paramsServer& _server):
         IntrinsicsBase(_unique_name, _server)
     {
-        noise_std = _server.getParam<Eigen::Vector3s>(_unique_name + "/noise_std", "");
+        noise_std = _server.getParam<Eigen::Vector3s>(_unique_name + "/noise_std");
     }
         virtual ~IntrinsicsGPSFix() = default;
 };

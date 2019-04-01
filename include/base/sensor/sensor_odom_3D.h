@@ -30,11 +30,11 @@ struct IntrinsicsOdom3D : public IntrinsicsBase
     IntrinsicsOdom3D(std::string _unique_name, const paramsServer& _server):
         IntrinsicsBase(_unique_name, _server)
     {
-        k_disp_to_disp = _server.getParam<Scalar>(_unique_name + "/k_disp_to_disp", "");
-        k_disp_to_rot = _server.getParam<Scalar>(_unique_name + "/k_disp_to_rot", "");
-        k_rot_to_rot = _server.getParam<Scalar>(_unique_name + "/k_rot_to_rot", "");
-        min_disp_var = _server.getParam<Scalar>(_unique_name + "/min_disp_var", "");
-        min_rot_var = _server.getParam<Scalar>(_unique_name + "/min_rot_var", "");
+        k_disp_to_disp = _server.getParam<Scalar>(_unique_name + "/k_disp_to_disp");
+        k_disp_to_rot = _server.getParam<Scalar>(_unique_name + "/k_disp_to_rot");
+        k_rot_to_rot = _server.getParam<Scalar>(_unique_name + "/k_rot_to_rot");
+        min_disp_var = _server.getParam<Scalar>(_unique_name + "/min_disp_var");
+        min_rot_var = _server.getParam<Scalar>(_unique_name + "/min_rot_var");
     }
         virtual ~IntrinsicsOdom3D() = default;
 };

@@ -25,11 +25,11 @@ struct IntrinsicsCamera : public IntrinsicsBase
     IntrinsicsCamera(std::string _unique_name, const paramsServer& _server):
         IntrinsicsBase(_unique_name,  _server)
     {
-        width = _server.getParam<unsigned int>(_unique_name + "/width", "");
-        height = _server.getParam<unsigned int>(_unique_name + "/height", "");
-        pinhole_model_raw = _server.getParam<Eigen::Vector4s>(_unique_name + "/pinhole_model_raw", "");
-        pinhole_model_rectified = _server.getParam<Eigen::Vector4s>(_unique_name + "/pinhole_model_rectified", "");
-        distortion = _server.getParam<Eigen::VectorXs>(_unique_name + "/distortion", "");
+        width = _server.getParam<unsigned int>(_unique_name + "/width");
+        height = _server.getParam<unsigned int>(_unique_name + "/height");
+        pinhole_model_raw = _server.getParam<Eigen::Vector4s>(_unique_name + "/pinhole_model_raw");
+        pinhole_model_rectified = _server.getParam<Eigen::Vector4s>(_unique_name + "/pinhole_model_rectified");
+        distortion = _server.getParam<Eigen::VectorXs>(_unique_name + "/distortion");
     }
         virtual ~IntrinsicsCamera() = default;
 };

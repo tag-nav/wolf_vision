@@ -22,8 +22,8 @@ struct IntrinsicsOdom2D : public IntrinsicsBase
     IntrinsicsOdom2D(std::string _unique_name, const paramsServer& _server):
         IntrinsicsBase(_unique_name, _server)
     {
-        k_disp_to_disp = _server.getParam<Scalar>(_unique_name + "/k_disp_to_disp", "");
-        k_rot_to_rot = _server.getParam<Scalar>(_unique_name + "/k_rot_to_rot", "");
+        k_disp_to_disp = _server.getParam<Scalar>(_unique_name + "/k_disp_to_disp");
+        k_rot_to_rot = _server.getParam<Scalar>(_unique_name + "/k_rot_to_rot");
     }
 };
 

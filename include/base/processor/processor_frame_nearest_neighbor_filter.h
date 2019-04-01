@@ -42,16 +42,16 @@ struct ProcessorParamsFrameNearestNeighborFilter : public ProcessorParamsLoopClo
     ProcessorParamsFrameNearestNeighborFilter(std::string _unique_name, const paramsServer& _server):
         ProcessorParamsLoopClosure(_unique_name, _server)
     {
-        buffer_size_ = _server.getParam<int>(_unique_name + "/buffer_size", "");
-        sample_step_degree_ = _server.getParam<int>(_unique_name + "/sample_step_degree", "");
-        auto distance_type_str = _server.getParam<std::string>(_unique_name + "/distance_type", "");
+        buffer_size_ = _server.getParam<int>(_unique_name + "/buffer_size");
+        sample_step_degree_ = _server.getParam<int>(_unique_name + "/sample_step_degree");
+        auto distance_type_str = _server.getParam<std::string>(_unique_name + "/distance_type");
         if(distance_type_str.compare("LC_POINT_ELLIPSE")) distance_type_ = LoopclosureDistanceType::LC_POINT_ELLIPSE;
         else if(distance_type_str.compare("LC_ELLIPSE_ELLIPSE")) distance_type_ = LoopclosureDistanceType::LC_ELLIPSE_ELLIPSE;
         else if(distance_type_str.compare("LC_POINT_ELLIPSOID")) distance_type_ = LoopclosureDistanceType::LC_POINT_ELLIPSOID;
         else if(distance_type_str.compare("LC_ELLIPSOID_ELLIPSOID")) distance_type_ = LoopclosureDistanceType::LC_ELLIPSOID_ELLIPSOID;
         else if(distance_type_str.compare("LC_MAHALANOBIS_DISTANCE")) distance_type_ = LoopclosureDistanceType::LC_MAHALANOBIS_DISTANCE;
         else throw std::runtime_error("Failed to fetch a valid value for the enumerate LoopclosureDistanceType. Value provided: " + distance_type_str);
-        probability_ = _server.getParam<Scalar>(_unique_name + "/probability", "");
+        probability_ = _server.getParam<Scalar>(_unique_name + "/probability");
     }
   virtual ~ProcessorParamsFrameNearestNeighborFilter() = default;
 

@@ -32,13 +32,13 @@ struct ProcessorParamsTrackerFeatureTrifocal : public ProcessorParamsTrackerFeat
     ProcessorParamsTrackerFeatureTrifocal(std::string _unique_name, const paramsServer& _server):
         ProcessorParamsTrackerFeature(_unique_name, _server)
     {
-        yaml_file_params_vision_utils = _server.getParam<std::string>(_unique_name + "/yaml_file_params_vision_utils", "");
-        n_cells_h = _server.getParam<int>(_unique_name + "/n_cells_h", "");
-        n_cells_v = _server.getParam<int>(_unique_name + "/n_cells_v", "");
-        min_response_new_feature = _server.getParam<int>(_unique_name + "/min_response_new_feature", "");
-        max_euclidean_distance = _server.getParam<Scalar>(_unique_name + "/max_euclidean_distance", "");
-        pixel_noise_std = _server.getParam<Scalar>(_unique_name + "/pixel_noise_std", "");
-        min_track_length_for_factor = _server.getParam<int>(_unique_name + "/min_track_length_for_factor", "");
+        yaml_file_params_vision_utils = _server.getParam<std::string>(_unique_name + "/yaml_file_params_vision_utils");
+        n_cells_h = _server.getParam<int>(_unique_name + "/n_cells_h");
+        n_cells_v = _server.getParam<int>(_unique_name + "/n_cells_v");
+        min_response_new_feature = _server.getParam<int>(_unique_name + "/min_response_new_feature");
+        max_euclidean_distance = _server.getParam<Scalar>(_unique_name + "/max_euclidean_distance");
+        pixel_noise_std = _server.getParam<Scalar>(_unique_name + "/pixel_noise_std");
+        min_track_length_for_factor = _server.getParam<int>(_unique_name + "/min_track_length_for_factor");
     }
 };
 

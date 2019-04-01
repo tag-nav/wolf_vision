@@ -42,11 +42,11 @@ struct IntrinsicsDiffDrive : public IntrinsicsBase
         IntrinsicsBase(_unique_name, _server)
     {
 
-        left_radius_ = _server.getParam<Scalar>(_unique_name + "/left_radius_", "");
-        right_radius_ = _server.getParam<Scalar>(_unique_name + "/right_radius_", "");
-        separation_ = _server.getParam<Scalar>(_unique_name + "/separation_", "");
+        left_radius_ = _server.getParam<Scalar>(_unique_name + "/left_radius_");
+        right_radius_ = _server.getParam<Scalar>(_unique_name + "/right_radius_");
+        separation_ = _server.getParam<Scalar>(_unique_name + "/separation_");
 
-        auto model_str = _server.getParam<std::string>(_unique_name + "/model", "");
+        auto model_str = _server.getParam<std::string>(_unique_name + "/model");
         if(model_str.compare("Two_Factor_Model")) model_ = DiffDriveModel::Two_Factor_Model;
         else if(model_str.compare("Three_Factor_Model")) model_ = DiffDriveModel::Three_Factor_Model;
         else if(model_str.compare("Five_Factor_Model")) model_ = DiffDriveModel::Five_Factor_Model;
@@ -54,8 +54,8 @@ struct IntrinsicsDiffDrive : public IntrinsicsBase
 
         factors_ = _server.getParam<Eigen::VectorXs>(_unique_name + "/factors", "[1,1,1]");
 
-        left_resolution_ = _server.getParam<Scalar>(_unique_name + "/left_resolution_", "");
-        right_resolution_ = _server.getParam<Scalar>(_unique_name + "/right_resolution_", "");
+        left_resolution_ = _server.getParam<Scalar>(_unique_name + "/left_resolution_");
+        right_resolution_ = _server.getParam<Scalar>(_unique_name + "/right_resolution_");
 
         left_gain_ = _server.getParam<Scalar>(_unique_name + "/left_gain", "0.01");
         right_gain_ = _server.getParam<Scalar>(_unique_name + "/right_gain", "0.01");
