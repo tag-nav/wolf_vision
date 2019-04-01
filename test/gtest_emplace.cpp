@@ -9,11 +9,14 @@
 #include "base/logging.h"
 
 #include "base/problem.h"
+#include "base/capture/capture_IMU.h"
 #include "base/sensor/sensor_base.h"
 #include "base/sensor/sensor_odom_3D.h"
+#include "base/sensor/sensor_IMU.h"
 #include "base/processor/processor_odom_3D.h"
 #include "base/processor/processor_odom_2D.h"
 #include "base/feature/feature_odom_2D.h"
+#include "base/feature/feature_IMU.h"
 #include "base/processor/processor_tracker_feature_dummy.h"
 
 #include <iostream>
@@ -25,12 +28,7 @@ TEST(Emplace, Landmark)
 {
     ProblemPtr P = Problem::create("POV 3D");
 
-    // LandmarkBase::emplace<LandmarkBase>(MapBaseWPtr(P->getMap()),"Dummy", nullptr, nullptr);
-    // LandmarkBase::emplace<LandmarkBase>(nullptr,"Dummy", nullptr, nullptr);
     LandmarkBase::emplace<LandmarkBase>(P->getMap(),"Dummy", nullptr, nullptr);
-    // LandmarkBasePtr l = std::make_shared<LandmarkBase>("Dummy", nullptr, nullptr);
-    // P->addLandmark(l);
-    // check double ointers to branches
     ASSERT_EQ(P, P->getMap()->getLandmarkList().front()->getMap()->getProblem());
 }
 
@@ -115,18 +113,34 @@ TEST(Emplace, Factor)
     ASSERT_EQ(P, P->getTrajectory()->getFrameList().front()->getCaptureList().front()->getFeatureList().front()->getProblem());
     ASSERT_EQ(cpt, cpt->getFeatureList().front()->getCapture());
     auto cnt = FactorBase::emplace<FeatureBasePtr,FactorOdom2D>(ftr, ftr, frm);
-    // ftr->addConstrainedBy(cnt);
-    // ftr->addConstraint(cnt);
     ASSERT_NE(nullptr, ftr->getFactorList().front().get());
-    // ASSERT_NE(nullptr, P->getTrajectory()->getFrameList().front()->getCaptureList().front()->getFeatureList().front()->getConstraintList().front());
-    // ASSERT_EQ(P, P->getTrajectory()->getFrameList().front()->getCaptureList().front()->getFeatureList().front()->getConstraintList().front()->getFeature()->getCapture()->getFrame()->getTrajectory()->getProblem());
-    // ASSERT_EQ(P, P->getTrajectory()->getFrameList().front()->getCaptureList().front()->getFeatureList().front()->getConstraintList().front()->getProblem());
-    // ASSERT_EQ(ftr, cnt->getFeature());
 }
 
+TEST(Emplace, EmplaceDerived)
+{
+    ProblemPtr P = Problem::create("POV 3D");
+
+    auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
+    // LandmarkBase::emplace<LandmarkBase>(MapBaseWPtr(P->getMap()),"Dummy", nullptr, nullptr);
+    auto sen = SensorBase::emplace<SensorIMU>(P->getHardware(), Eigen::VectorXs(7), IntrinsicsIMU());
+    auto cov = Eigen::MatrixXs(2,2);
+    cov(0,0) = 1;
+    cov(1,1) = 1;
+    auto cpt = CaptureBase::emplace<CaptureIMU>(frm, TimeStamp(0), sen, Eigen::Vector6s(), cov,
+                                                Eigen::Vector6s(), frm);
+    auto cpt2 = std::static_pointer_cast<CaptureIMU>(cpt);
+    auto m = Eigen::Matrix<Scalar,9,6>();
+    for(int i = 0; i < 9; i++)
+        for(int j = 0; j < 6; j++)
+            m(i,j) = 1;
+
+    auto ftr = FeatureBase::emplace<FeatureIMU>(cpt, Eigen::VectorXs(5), cov,
+                                                Eigen::Vector6s(), m, cpt2);
+    ASSERT_EQ(sen, P->getHardware()->getSensorList().front());
+    ASSERT_EQ(P, P->getTrajectory()->getFrameList().front()->getCaptureList().front()->getFeatureList().front()->getProblem());
+}
 int main(int argc, char **argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
