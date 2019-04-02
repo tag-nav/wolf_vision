@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT_IMU_THETA_H_
-#define CONSTRAINT_IMU_THETA_H_
+#ifndef FACTOR_IMU_THETA_H_
+#define FACTOR_IMU_THETA_H_
 
 //Wolf includes
 #include "base/feature/feature_IMU.h"
@@ -21,7 +21,7 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
                       const CaptureIMUPtr& _capture_origin_ptr,
                       const ProcessorBasePtr& _processor_ptr = nullptr,
                       bool _apply_loss_function = false,
-                      FactorStatus _status = CTR_ACTIVE);
+                      FactorStatus _status = FAC_ACTIVE);
 
         virtual ~FactorIMU() = default;
 

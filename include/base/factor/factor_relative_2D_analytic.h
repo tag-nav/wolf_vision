@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT_RELATIVE_2D_ANALYTIC_H_
-#define CONSTRAINT_RELATIVE_2D_ANALYTIC_H_
+#ifndef FACTOR_RELATIVE_2D_ANALYTIC_H_
+#define FACTOR_RELATIVE_2D_ANALYTIC_H_
 
 //Wolf includes
 #include "base/factor/factor_analytic.h"
@@ -15,40 +15,40 @@ class FactorRelative2DAnalytic : public FactorAnalytic
 {
     public:
 
-        /** \brief Constructor of category CTR_FRAME
+        /** \brief Constructor of category FAC_FRAME
          **/
         FactorRelative2DAnalytic(const std::string& _tp,
                                      const FeatureBasePtr& _ftr_ptr,
                                      const FrameBasePtr& _frame_ptr,
                                      const ProcessorBasePtr& _processor_ptr = nullptr,
                                      bool _apply_loss_function = false,
-                                     FactorStatus _status = CTR_ACTIVE) :
+                                     FactorStatus _status = FAC_ACTIVE) :
             FactorAnalytic(_tp, _frame_ptr, nullptr, nullptr, nullptr, _processor_ptr, _apply_loss_function, _status, _frame_ptr->getP(), _frame_ptr->getO(), _ftr_ptr->getFrame()->getP(), _ftr_ptr->getFrame()->getO())
         {
             //
         }
 
-        /** \brief Constructor of category CTR_FEATURE
+        /** \brief Constructor of category FAC_FEATURE
          **/
         FactorRelative2DAnalytic(const std::string& _tp,
                                      const FeatureBasePtr& _ftr_ptr,
                                      const FeatureBasePtr& _ftr_other_ptr,
                                      const ProcessorBasePtr& _processor_ptr = nullptr,
                                      bool _apply_loss_function = false,
-                                     FactorStatus _status = CTR_ACTIVE) :
+                                     FactorStatus _status = FAC_ACTIVE) :
             FactorAnalytic(_tp, nullptr, nullptr, _ftr_other_ptr, nullptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFrame()->getP(), _ftr_ptr->getFrame()->getO(), _ftr_other_ptr->getFrame()->getP(), _ftr_other_ptr->getFrame()->getO() )
         {
             //
         }
 
-        /** \brief Constructor of category CTR_LANDMARK
+        /** \brief Constructor of category FAC_LANDMARK
          **/
         FactorRelative2DAnalytic(const std::string& _tp,
                                      const FeatureBasePtr& _ftr_ptr,
                                      const LandmarkBasePtr& _landmark_ptr,
                                      const ProcessorBasePtr& _processor_ptr = nullptr,
                                      bool _apply_loss_function = false,
-                                     FactorStatus _status = CTR_ACTIVE) :
+                                     FactorStatus _status = FAC_ACTIVE) :
             FactorAnalytic(_tp, nullptr, nullptr, nullptr, _landmark_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFrame()->getP(), _ftr_ptr->getFrame()->getO(), _landmark_ptr->getP(), _landmark_ptr->getO())
         {
             //

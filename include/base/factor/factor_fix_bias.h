@@ -1,6 +1,6 @@
 
-#ifndef CONSTRAINT_FIX_BIAS_H_
-#define CONSTRAINT_FIX_BIAS_H_
+#ifndef FACTOR_FIX_BIAS_H_
+#define FACTOR_FIX_BIAS_H_
 
 //Wolf includes
 #include "base/capture/capture_IMU.h"
@@ -19,7 +19,7 @@ WOLF_PTR_TYPEDEFS(FactorFixBias);
 class FactorFixBias: public FactorAutodiff<FactorFixBias,6,3,3>
 {
     public:
-        FactorFixBias(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, FactorStatus _status = CTR_ACTIVE) :
+        FactorFixBias(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, FactorStatus _status = FAC_ACTIVE) :
                 FactorAutodiff<FactorFixBias, 6, 3, 3>("FIX BIAS",
                         nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, std::static_pointer_cast<CaptureIMU>(_ftr_ptr->getCapture())->getAccBias(),
                                           std::static_pointer_cast<CaptureIMU>(_ftr_ptr->getCapture())->getGyroBias())

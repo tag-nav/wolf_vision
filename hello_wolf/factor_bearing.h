@@ -5,8 +5,8 @@
  *      Author: jsola
  */
 
-#ifndef HELLO_WOLF_CONSTRAINT_BEARING_H_
-#define HELLO_WOLF_CONSTRAINT_BEARING_H_
+#ifndef HELLO_WOLF_FACTOR_BEARING_H_
+#define HELLO_WOLF_FACTOR_BEARING_H_
 
 #include "base/factor/factor_autodiff.h"
 
@@ -88,4 +88,4 @@ inline bool FactorBearing::operator ()(const T* const _p1, const T* const _o1,
 
 } // namespace wolf
 
-#endif /* HELLO_WOLF_CONSTRAINT_BEARING_H_ */
+#endif /* HELLO_WOLF_FACTOR_BEARING_H_ */

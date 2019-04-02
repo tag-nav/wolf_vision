@@ -31,17 +31,17 @@ class FactorSparseObject : public FactorSparse<1, 2, 1>
 
 TEST(FactorSparseAnalytic, Constructor)
 {
-    FactorSparseObject<JAC_ANALYTIC> ctr_analytic(CTR_AHP, false, CTR_ACTIVE, std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1));
-    ASSERT_EQ(ctr_analytic.getJacobianMethod(),     JAC_ANALYTIC);
-    ASSERT_EQ(ctr_analytic.getApplyLossFunction(),  false);
-    ASSERT_EQ(ctr_analytic.getStatus(),             CTR_ACTIVE);
-    ASSERT_EQ(ctr_analytic.getSize(),               1);
+    FactorSparseObject<JAC_ANALYTIC> fac_analytic(FAC_AHP, false, FAC_ACTIVE, std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1));
+    ASSERT_EQ(fac_analytic.getJacobianMethod(),     JAC_ANALYTIC);
+    ASSERT_EQ(fac_analytic.getApplyLossFunction(),  false);
+    ASSERT_EQ(fac_analytic.getStatus(),             FAC_ACTIVE);
+    ASSERT_EQ(fac_analytic.getSize(),               1);
 
-    FactorSparseObject<JAC_AUTO> ctr_auto(CTR_AHP, false, CTR_ACTIVE, std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1));
-    ASSERT_EQ(ctr_auto.getJacobianMethod(), JAC_AUTO);
+    FactorSparseObject<JAC_AUTO> fac_auto(FAC_AHP, false, FAC_ACTIVE, std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1));
+    ASSERT_EQ(fac_auto.getJacobianMethod(), JAC_AUTO);
 
-    FactorSparseObject<JAC_NUMERIC> ctr_numeric(CTR_AHP, false, CTR_ACTIVE, std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1));
-    ASSERT_EQ(ctr_numeric.getJacobianMethod(), JAC_NUMERIC);
+    FactorSparseObject<JAC_NUMERIC> fac_numeric(FAC_AHP, false, FAC_ACTIVE, std::make_shared<StateBlock>(2), std::make_shared<StateBlock>(1));
+    ASSERT_EQ(fac_numeric.getJacobianMethod(), JAC_NUMERIC);
 }
 
 int main(int argc, char **argv)

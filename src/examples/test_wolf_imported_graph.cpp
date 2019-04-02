@@ -335,7 +335,7 @@ int main(int argc, char** argv)
 
     for (auto c_it=factors.begin(); c_it!=factors.end(); c_it++)
     {
-        if ((*c_it)->getCategory() != CTR_FRAME) continue;
+        if ((*c_it)->getCategory() != FAC_FRAME) continue;
 
         // ii (old)
         wolf_problem_prun->getCovarianceBlock((*c_it)->getFrameOther()->getP(), (*c_it)->getFrameOther()->getP(), Sigma_ii, 0, 0);
@@ -388,7 +388,7 @@ int main(int argc, char** argv)
         //std::cout << "IG = " << IG << std::endl;
 
         if (IG < 2)
-            (*c_it)->setStatus(CTR_INACTIVE);
+            (*c_it)->setStatus(FAC_INACTIVE);
     }
     double t_ig = ((double) clock() - t1) / CLOCKS_PER_SEC;
     std::cout << "manual sigma computation " << t_sigma_manual << "s" << std::endl;

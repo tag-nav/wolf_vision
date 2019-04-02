@@ -45,9 +45,9 @@ class SolverManagerWrapper : public SolverManager
             return state_block_fixed_.at(st);
         };
 
-        bool isFactorRegistered(const FactorBasePtr& ctr_ptr) const
+        bool isFactorRegistered(const FactorBasePtr& fac_ptr) const
         {
-            return std::find(factors_.begin(), factors_.end(), ctr_ptr) != factors_.end();
+            return std::find(factors_.begin(), factors_.end(), fac_ptr) != factors_.end();
         };
 
         bool hasThisLocalParametrization(const StateBlockPtr& st, const LocalParametrizationBasePtr& local_param) const
@@ -74,13 +74,13 @@ class SolverManagerWrapper : public SolverManager
     protected:
 
         virtual std::string solveImpl(const ReportVerbosity report_level){ return std::string("");};
-        virtual void addFactor(const FactorBasePtr& ctr_ptr)
+        virtual void addFactor(const FactorBasePtr& fac_ptr)
         {
-            factors_.push_back(ctr_ptr);
+            factors_.push_back(fac_ptr);
         };
-        virtual void removeFactor(const FactorBasePtr& ctr_ptr)
+        virtual void removeFactor(const FactorBasePtr& fac_ptr)
         {
-            factors_.remove(ctr_ptr);
+            factors_.remove(fac_ptr);
         };
         virtual void addStateBlock(const StateBlockPtr& state_ptr)
         {

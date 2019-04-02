@@ -1,6 +1,6 @@
 
-#ifndef CONSTRAINT_ANALYTIC_H_
-#define CONSTRAINT_ANALYTIC_H_
+#ifndef FACTOR_ANALYTIC_H_
+#define FACTOR_ANALYTIC_H_
 
 //Wolf includes
 #include "base/factor/factor_base.h"
@@ -18,9 +18,9 @@ class FactorAnalytic: public FactorBase
 
     public:
 
-        /** \brief Constructor of category CTR_ABSOLUTE
+        /** \brief Constructor of category FAC_ABSOLUTE
          *
-         * Constructor of category CTR_ABSOLUTE
+         * Constructor of category FAC_ABSOLUTE
          *
          **/
         FactorAnalytic(const std::string&  _tp,

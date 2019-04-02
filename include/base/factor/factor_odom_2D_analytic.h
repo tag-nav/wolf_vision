@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT_ODOM_2D_ANALYTIC_H_
-#define CONSTRAINT_ODOM_2D_ANALYTIC_H_
+#ifndef FACTOR_ODOM_2D_ANALYTIC_H_
+#define FACTOR_ODOM_2D_ANALYTIC_H_
 
 //Wolf includes
 #include "base/factor/factor_relative_2D_analytic.h"
@@ -17,7 +17,7 @@ class FactorOdom2DAnalytic : public FactorRelative2DAnalytic
                                  const FrameBasePtr& _frame_ptr,
                                  const ProcessorBasePtr& _processor_ptr = nullptr,
                                  bool _apply_loss_function = false,
-                                 FactorStatus _status = CTR_ACTIVE) :
+                                 FactorStatus _status = FAC_ACTIVE) :
             FactorRelative2DAnalytic("ODOM_2D", _ftr_ptr,
                                          _frame_ptr, _processor_ptr, _apply_loss_function, _status)
         {

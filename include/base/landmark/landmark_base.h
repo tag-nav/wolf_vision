@@ -87,7 +87,7 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         // Navigate wolf tree
         virtual void setProblem(ProblemPtr _problem) final;
 
-        FactorBasePtr addConstrainedBy(FactorBasePtr _ctr_ptr);
+        FactorBasePtr addConstrainedBy(FactorBasePtr _fac_ptr);
         unsigned int getHits() const;
         FactorBasePtrList& getConstrainedByList();
 

@@ -22,7 +22,7 @@ namespace wolf {
  *    - "FRAME"
  *    - "CAPTURE"
  *    - "FEATURE"
- *    - "CONSTRAINT"
+ *    - "FACTOR"
  *    - "MAP"
  *    - "LANDMARK"
  *

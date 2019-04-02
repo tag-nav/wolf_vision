@@ -198,7 +198,7 @@ int main(int argc, char** argv)
     featureFix_cov(5,5) = pow( .001 , 2); // yaw variance
     CaptureBasePtr cap_fix = KF1->addCapture(std::make_shared<CaptureMotion>(0, nullptr, problem_origin.head(7), 7, 6, nullptr));
     FeatureBasePtr featureFix = cap_fix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", problem_origin.head(7), featureFix_cov));
-    FactorFix3DPtr ctr_fix = std::static_pointer_cast<FactorPose3D>(featureFix->addFactor(std::make_shared<FactorPose3D>(featureFix)));
+    FactorFix3DPtr fac_fix = std::static_pointer_cast<FactorPose3D>(featureFix->addFactor(std::make_shared<FactorPose3D>(featureFix)));
 
     Eigen::MatrixXs featureFixBias_cov(6,6);
     featureFixBias_cov = Eigen::MatrixXs::Identity(6,6); 
@@ -207,7 +207,7 @@ int main(int argc, char** argv)
     CaptureBasePtr cap_fixbias = KF1->addCapture(std::make_shared<CaptureMotion>(0, nullptr, problem_origin.tail(6), featureFixBias_cov, 6, 6, nullptr));
     //create a FeatureBase to factor biases
     FeatureBasePtr featureFixBias = cap_fixbias->addFeature(std::make_shared<FeatureBase>("FIX BIAS", problem_origin.tail(6), featureFixBias_cov));
-    FactorFixBiasPtr ctr_fixBias = std::static_pointer_cast<FactorFixBias>(featureFixBias->addFactor(std::make_shared<FactorFixBias>(featureFixBias)));
+    FactorFixBiasPtr fac_fixBias = std::static_pointer_cast<FactorFixBias>(featureFixBias->addFactor(std::make_shared<FactorFixBias>(featureFixBias)));
 
     // ___Fix/Unfix stateblocks___
     // fix all Keyframes here

@@ -76,9 +76,9 @@ protected:
 
   virtual std::string solveImpl(const ReportVerbosity report_level) = 0;
 
-  virtual void addFactor(const FactorBasePtr& ctr_ptr) = 0;
+  virtual void addFactor(const FactorBasePtr& fac_ptr) = 0;
 
-  virtual void removeFactor(const FactorBasePtr& ctr_ptr) = 0;
+  virtual void removeFactor(const FactorBasePtr& fac_ptr) = 0;
 
   virtual void addStateBlock(const StateBlockPtr& state_ptr) = 0;
 

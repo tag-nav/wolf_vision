@@ -135,8 +135,8 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         FactorBasePtr getFactorOf(const ProcessorBasePtr _processor_ptr);
         FactorBasePtr getFactorOf(const ProcessorBasePtr _processor_ptr, const std::string& type);
 
-        void getFactorList(FactorBasePtrList& _ctr_list);
-        virtual FactorBasePtr addConstrainedBy(FactorBasePtr _ctr_ptr);
+        void getFactorList(FactorBasePtrList& _fac_list);
+        virtual FactorBasePtr addConstrainedBy(FactorBasePtr _fac_ptr);
         unsigned int getHits() const;
         FactorBasePtrList& getConstrainedByList();
         void link(TrajectoryBasePtr);
