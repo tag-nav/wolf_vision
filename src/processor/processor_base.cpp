@@ -77,6 +77,7 @@ void ProcessorBase::remove()
         std::cout << "Linking ProcessorBase" << std::endl;
         _sen_ptr->addProcessor(shared_from_this());
         this->setSensorPtr(_sen_ptr);
+        this->setProblem(_sen_ptr->getProblem());
     }
 /////////////////////////////////////////////////////////////////////////////////////////
 

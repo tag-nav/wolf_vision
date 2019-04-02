@@ -112,7 +112,7 @@ TEST(Emplace, Factor)
     ASSERT_EQ(P, P->getTrajectory()->getFrameList().front()->getCaptureList().front()->getFeatureList().front()->getCapture()->getFrame()->getTrajectory()->getProblem());
     ASSERT_EQ(P, P->getTrajectory()->getFrameList().front()->getCaptureList().front()->getFeatureList().front()->getProblem());
     ASSERT_EQ(cpt, cpt->getFeatureList().front()->getCapture());
-    auto cnt = FactorBase::emplace<FeatureBasePtr,FactorOdom2D>(ftr, ftr, frm);
+    auto cnt = FactorBase::emplace<FactorOdom2D>(ftr, ftr, frm);
     ASSERT_NE(nullptr, ftr->getFactorList().front().get());
 }
 

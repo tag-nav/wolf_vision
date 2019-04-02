@@ -185,7 +185,9 @@ YAML::Node LandmarkBase::saveToYaml() const
         std::cout << "Linking LandmarkBase" << std::endl;
         // this->map_ptr_.lock()->addLandmark(shared_from_this());
         this->setMapPtr(_map_ptr);
-        this->map_ptr_.lock()->addLandmark(shared_from_this());
+        _map_ptr->addLandmark(shared_from_this());
+        this->setProblem(_map_ptr->getProblem());
+        this->registerNewStateBlocks();
     }
 
 FactorBasePtr LandmarkBase::addConstrainedBy(FactorBasePtr _fac_ptr)

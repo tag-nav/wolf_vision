@@ -171,10 +171,9 @@ class FactorBase : public NodeBase, public std::enable_shared_from_this<FactorBa
          */
         void setProcessor(const ProcessorBasePtr& _processor_ptr);
 
-        template<typename otherType>
-        void link(otherType);
-        template<typename otherType, typename classType, typename... T>
-        static std::shared_ptr<FactorBase> emplace(otherType _oth_ptr, T&&... all);
+        void link(FeatureBasePtr);
+        template<typename classType, typename... T>
+        static std::shared_ptr<FactorBase> emplace(FeatureBasePtr _oth_ptr, T&&... all);
 
 //    protected:
 //        template<typename D>
@@ -214,29 +213,14 @@ namespace wolf{
 //    }
 //}
 
-template<typename OtherPtr, typename classType, typename... T>
-std::shared_ptr<FactorBase> FactorBase::emplace(OtherPtr _oth_ptr, T&&... all)
+template<typename classType, typename... T>
+std::shared_ptr<FactorBase> FactorBase::emplace(FeatureBasePtr _ftr_ptr, T&&... all)
 {
     FactorBasePtr ctr = std::make_shared<classType>(std::forward<T>(all)...);
-    ctr->link(_oth_ptr);
+    ctr->link(_ftr_ptr);
     return ctr;
 }
 
-template<typename otherType>
-void FactorBase::link(otherType _oth_ptr)
-{
-    std::cout << "Linking FactorBase" << std::endl;
-    // _oth_ptr->addConstrainedBy(shared_from_this());
-    _oth_ptr->addFactor(shared_from_this());
-    auto frame_other = this->frame_other_ptr_.lock();
-    if(frame_other != nullptr) frame_other->addConstrainedBy(shared_from_this());
-    auto capture_other = this->capture_other_ptr_.lock();
-    if(capture_other != nullptr) capture_other->addConstrainedBy(shared_from_this());
-    auto feature_other = this->feature_other_ptr_.lock();
-    if(feature_other != nullptr) feature_other->addConstrainedBy(shared_from_this());
-    auto landmark_other = this->landmark_other_ptr_.lock();
-    if(landmark_other != nullptr) landmark_other->addConstrainedBy(shared_from_this());
-}
 
 inline unsigned int FactorBase::id() const
 {

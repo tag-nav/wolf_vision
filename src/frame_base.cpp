@@ -386,6 +386,8 @@ void FrameBase::link(TrajectoryBasePtr _ptr)
     std::cout << "Linking FrameBase" << std::endl;
     _ptr->addFrame(shared_from_this());
     this->setTrajectoryPtr(_ptr);
+    this->setProblem(_ptr->getProblem());
+    if (this->isKey()) this->registerNewStateBlocks();
 }
 } // namespace wolf
 

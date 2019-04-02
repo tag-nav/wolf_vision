@@ -145,4 +145,28 @@ void FactorBase::setApplyLossFunction(const bool _apply)
         }
     }
 }
+void FactorBase::link(FeatureBasePtr _ftr_ptr)
+{
+    std::cout << "Linking FactorBase" << std::endl;
+    // _ftr_ptr->addConstrainedBy(shared_from_this());
+    _ftr_ptr->addFactor(shared_from_this());
+    this->setFeaturePtr(_ftr_ptr);
+    this->setProblem(_ftr_ptr->getProblem());
+    // add factor to be added in solver
+    if (this->getProblem() != nullptr)
+        {
+            if (this->getStatus() == FAC_ACTIVE)
+                this->getProblem()->addFactor(shared_from_this());
+        }
+    else
+        WOLF_TRACE("WARNING: ADDING CONSTRAINT ", this->id(), " TO FEATURE ", _ftr_ptr->id(), " NOT CONNECTED WITH PROBLEM.");
+    auto frame_other = this->frame_other_ptr_.lock();
+    if(frame_other != nullptr) frame_other->addConstrainedBy(shared_from_this());
+    auto capture_other = this->capture_other_ptr_.lock();
+    if(capture_other != nullptr) capture_other->addConstrainedBy(shared_from_this());
+    auto feature_other = this->feature_other_ptr_.lock();
+    if(feature_other != nullptr) feature_other->addConstrainedBy(shared_from_this());
+    auto landmark_other = this->landmark_other_ptr_.lock();
+    if(landmark_other != nullptr) landmark_other->addConstrainedBy(shared_from_this());
+}
 } // namespace wolf

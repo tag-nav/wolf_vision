@@ -148,6 +148,7 @@ Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) con
         std::cout << "Linking FeatureBase" << std::endl;
         _cpt_ptr->addFeature(shared_from_this());
         this->setCapturePtr(_cpt_ptr);
+        this->setProblem(getProblem());
     }
 
 } // namespace wolf

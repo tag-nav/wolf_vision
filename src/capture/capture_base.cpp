@@ -298,6 +298,8 @@ void CaptureBase::link(FrameBasePtr _frm_ptr)
     std::cout << "Linking CaptureBase" << std::endl;
     _frm_ptr->addCapture(shared_from_this());
     this->setFramePtr(_frm_ptr);
+    this->setProblem(_frm_ptr->getProblem());
+    this->registerNewStateBlocks();
 }
 
 } // namespace wolf
