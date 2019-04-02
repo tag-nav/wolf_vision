@@ -76,7 +76,7 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         FrameBasePtr getFrame() const;
 
         CaptureBasePtr getCapture() const;
-        void setCapturePtr(CaptureBasePtr _cap_ptr){capture_ptr_ = _cap_ptr;}
+        void setCapture(CaptureBasePtr _cap_ptr){capture_ptr_ = _cap_ptr;}
 
         FactorBasePtr addFactor(FactorBasePtr _co_ptr);
         FactorBasePtrList& getFactorList();

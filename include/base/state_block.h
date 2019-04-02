@@ -112,7 +112,7 @@ public:
 
         /** \brief Sets a local parametrization
          **/
-        void setLocalParametrizationPtr(LocalParametrizationBasePtr _local_param);
+        void setLocalParametrization(LocalParametrizationBasePtr _local_param);
 
         /** \brief Removes the state_block local parametrization
          **/
@@ -242,7 +242,7 @@ inline void StateBlock::removeLocalParametrization()
     local_param_updated_.store(true);
 }
 
-inline void StateBlock::setLocalParametrizationPtr(LocalParametrizationBasePtr _local_param)
+inline void StateBlock::setLocalParametrization(LocalParametrizationBasePtr _local_param)
 {
 	assert(_local_param != nullptr && "setting a null local parametrization");
     local_param_ptr_ = _local_param;

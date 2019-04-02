@@ -41,7 +41,7 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
         FrameBasePtr getLastKeyFrame();
         FrameBasePtr findLastKeyFrame();
         FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts);
-        void setLastKeyFramePtr(FrameBasePtr _key_frame_ptr);
+        void setLastKeyFrame(FrameBasePtr _key_frame_ptr);
         void sortFrame(FrameBasePtr _frm_ptr);
         void moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place);
         FrameBaseIter computeFrameOrder(FrameBasePtr _frame_ptr);
@@ -66,7 +66,7 @@ inline FrameBasePtr TrajectoryBase::getLastKeyFrame()
     return last_key_frame_ptr_;
 }
 
-inline void TrajectoryBase::setLastKeyFramePtr(FrameBasePtr _key_frame_ptr)
+inline void TrajectoryBase::setLastKeyFrame(FrameBasePtr _key_frame_ptr)
 {
     last_key_frame_ptr_ = _key_frame_ptr;
 }

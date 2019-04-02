@@ -74,7 +74,7 @@ class LandmarkPolyline2D : public LandmarkBase
 
         const Eigen::VectorXs getPointVector(int _i) const;
 
-        StateBlockPtr getPointStateBlockPtr(int _i);
+        StateBlockPtr getPointStateBlock(int _i);
 
         /** \brief Gets a vector of all state blocks pointers
          **/

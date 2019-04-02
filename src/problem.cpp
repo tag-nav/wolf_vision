@@ -141,7 +141,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
                                            const std::string& _corresponding_sensor_name, //
                                            const std::string& _params_filename)
 {
-    SensorBasePtr sen_ptr = getSensorPtr(_corresponding_sensor_name);
+    SensorBasePtr sen_ptr = getSensor(_corresponding_sensor_name);
     if (sen_ptr == nullptr)
         throw std::runtime_error("Sensor not found. Cannot bind Processor.");
     if (_params_filename == "")
@@ -154,7 +154,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
     }
 }
 
-SensorBasePtr Problem::getSensorPtr(const std::string& _sensor_name)
+SensorBasePtr Problem::getSensor(const std::string& _sensor_name)
 {
     auto sen_it = std::find_if(getHardware()->getSensorList().begin(),
                                getHardware()->getSensorList().end(),
@@ -746,7 +746,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                 {
                     if (i==0) cout << "    Extr " << (S->isExtrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
                     if (i==2) cout << "    Intr " << (S->isIntrinsicDynamic() ? "[Dyn]" : "[Sta]") << " = [";
-                    auto sb = S->getStateBlockPtr(i);
+                    auto sb = S->getStateBlock(i);
                     if (sb)
                     {
                         cout << (sb->isFixed() ? " Fix( " : " Est( ") << sb->getState().transpose() << " )";

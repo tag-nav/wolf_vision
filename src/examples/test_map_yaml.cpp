@@ -32,7 +32,7 @@ void print(MapBase& _map)
             std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
             std::cout << "\nLast  def: " << poly_ptr->isLastDefined();
             for (int idx = poly_ptr->getFirstId(); idx <= poly_ptr->getLastId(); idx++)
-                std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getState().transpose();
+                std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlock(idx)->getState().transpose();
             break;
         }
         else if (lmk_ptr->getType() == "AHP")

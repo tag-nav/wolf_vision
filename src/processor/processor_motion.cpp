@@ -63,7 +63,7 @@ void ProcessorMotion::splitBuffer(const wolf::CaptureMotionPtr& _capture_source,
     }
 
     // Update the existing capture
-    _capture_source->setOriginFramePtr(_keyframe_target);
+    _capture_source->setOriginFrame(_keyframe_target);
 
     // re-integrate existing buffer -- note: the result of re-integration is stored in the same buffer!
     reintegrateBuffer(_capture_source);

@@ -108,14 +108,14 @@ void LandmarkBase::removeStateBlocks()
 {
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        auto sbp = getStateBlock(i);
         if (sbp != nullptr)
         {
             if (getProblem() != nullptr)
             {
                 getProblem()->removeStateBlock(sbp);
             }
-            setStateBlockPtr(i, nullptr);
+            setStateBlock(i, nullptr);
         }
     }
 }
@@ -173,7 +173,7 @@ YAML::Node LandmarkBase::saveToYaml() const
 FactorBasePtr LandmarkBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
     constrained_by_list_.push_back(_fac_ptr);
-    _fac_ptr->setLandmarkOtherPtr(shared_from_this());
+    _fac_ptr->setLandmarkOther(shared_from_this());
     return _fac_ptr;
 }
 

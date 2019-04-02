@@ -263,7 +263,7 @@ TEST(SolverManager, AddUpdateLocalParamStateBlock)
 
     // Local param
     LocalParametrizationBasePtr local_ptr = std::make_shared<LocalParametrizationAngle>();
-    sb_ptr->setLocalParametrizationPtr(local_ptr);
+    sb_ptr->setLocalParametrization(local_ptr);
 
     // Fix state block
     sb_ptr->fix();
@@ -298,7 +298,7 @@ TEST(SolverManager, AddLocalParamRemoveLocalParamStateBlock)
 
     // Local param
     LocalParametrizationBasePtr local_ptr = std::make_shared<LocalParametrizationAngle>();
-    sb_ptr->setLocalParametrizationPtr(local_ptr);
+    sb_ptr->setLocalParametrization(local_ptr);
 
     // check flags
     ASSERT_FALSE(sb_ptr->stateUpdated());

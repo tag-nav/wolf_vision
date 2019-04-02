@@ -72,7 +72,7 @@ void FrameBase::remove()
             removeStateBlocks();
 
         if (getTrajectory()->getLastKeyFrame()->id() == this_F->id())
-            getTrajectory()->setLastKeyFramePtr(getTrajectory()->findLastKeyFrame());
+            getTrajectory()->setLastKeyFrame(getTrajectory()->findLastKeyFrame());
 
 //        std::cout << "Removed       F" << id() << std::endl;
     }
@@ -99,14 +99,14 @@ void FrameBase::removeStateBlocks()
 {
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
-        StateBlockPtr sbp = getStateBlockPtr(i);
+        StateBlockPtr sbp = getStateBlock(i);
         if (sbp != nullptr)
         {
             if (getProblem() != nullptr)
             {
                 getProblem()->removeStateBlock(sbp);
             }
-            setStateBlockPtr(i, nullptr);
+            setStateBlock(i, nullptr);
         }
     }
 }
@@ -119,7 +119,7 @@ void FrameBase::setKey()
         registerNewStateBlocks();
 
         if (getTrajectory()->getLastKeyFrame() == nullptr || getTrajectory()->getLastKeyFrame()->getTimeStamp() < time_stamp_)
-            getTrajectory()->setLastKeyFramePtr(shared_from_this());
+            getTrajectory()->setLastKeyFrame(shared_from_this());
 
         getTrajectory()->sortFrame(shared_from_this());
 
@@ -279,7 +279,7 @@ FrameBasePtr FrameBase::getNextFrame() const
 CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
 {
     capture_list_.push_back(_capt_ptr);
-    _capt_ptr->setFramePtr(shared_from_this());
+    _capt_ptr->setFrame(shared_from_this());
     _capt_ptr->setProblem(getProblem());
     _capt_ptr->registerNewStateBlocks();
     return _capt_ptr;
@@ -341,7 +341,7 @@ void FrameBase::getFactorList(FactorBasePtrList& _fac_list)
 FactorBasePtr FrameBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
     constrained_by_list_.push_back(_fac_ptr);
-    _fac_ptr->setFrameOtherPtr(shared_from_this());
+    _fac_ptr->setFrameOther(shared_from_this());
     return _fac_ptr;
 }
 

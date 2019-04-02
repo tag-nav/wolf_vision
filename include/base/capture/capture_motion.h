@@ -97,7 +97,7 @@ class CaptureMotion : public CaptureBase
 
         // Origin frame
         FrameBasePtr getOriginFrame();
-        void setOriginFramePtr(FrameBasePtr _frame_ptr);
+        void setOriginFrame(FrameBasePtr _frame_ptr);
 
         // member data:
     private:
@@ -161,7 +161,7 @@ inline FrameBasePtr CaptureMotion::getOriginFrame()
     return origin_frame_ptr_.lock();
 }
 
-inline void CaptureMotion::setOriginFramePtr(FrameBasePtr _frame_ptr)
+inline void CaptureMotion::setOriginFrame(FrameBasePtr _frame_ptr)
 {
     origin_frame_ptr_ = _frame_ptr;
 }

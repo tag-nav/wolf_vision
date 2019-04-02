@@ -34,7 +34,7 @@ class FactorAutodiffDistance3D : public FactorAutodiff<FactorAutodiffDistance3D,
                             _feat->getFrame()->getP(),
                             _frm_other->getP())
         {
-            setFeaturePtr(_feat);
+            setFeature(_feat);
         }
 
         virtual ~FactorAutodiffDistance3D() { /* nothing */ }

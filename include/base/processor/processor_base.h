@@ -184,7 +184,7 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
         SensorBasePtr getSensor();
         const SensorBasePtr getSensor() const;
-        void setSensorPtr(SensorBasePtr _sen_ptr){sensor_ptr_ = _sen_ptr;}
+        void setSensor(SensorBasePtr _sen_ptr){sensor_ptr_ = _sen_ptr;}
 
         virtual bool isMotion();
 

@@ -113,7 +113,7 @@ class FactorBase : public NodeBase, public std::enable_shared_from_this<FactorBa
         /** \brief Returns a pointer to the feature constrained from
          **/
         FeatureBasePtr getFeature() const;
-        void setFeaturePtr(const FeatureBasePtr _ft_ptr){feature_ptr_ = _ft_ptr;}
+        void setFeature(const FeatureBasePtr _ft_ptr){feature_ptr_ = _ft_ptr;}
 
         /** \brief Returns a pointer to its capture
          **/
@@ -142,22 +142,22 @@ class FactorBase : public NodeBase, public std::enable_shared_from_this<FactorBa
         /** \brief Returns a pointer to the frame constrained to
          **/
         FrameBasePtr getFrameOther() const       { return frame_other_ptr_.lock(); }
-        void setFrameOtherPtr(FrameBasePtr _frm_o)  { frame_other_ptr_ = _frm_o; }
+        void setFrameOther(FrameBasePtr _frm_o)  { frame_other_ptr_ = _frm_o; }
 
         /** \brief Returns a pointer to the frame constrained to
          **/
         CaptureBasePtr getCaptureOther() const       { return capture_other_ptr_.lock(); }
-        void setCaptureOtherPtr(CaptureBasePtr _cap_o)  { capture_other_ptr_ = _cap_o; }
+        void setCaptureOther(CaptureBasePtr _cap_o)  { capture_other_ptr_ = _cap_o; }
 
         /** \brief Returns a pointer to the feature constrained to
          **/
         FeatureBasePtr getFeatureOther() const       { return feature_other_ptr_.lock(); }
-        void setFeatureOtherPtr(FeatureBasePtr _ftr_o)  { feature_other_ptr_ = _ftr_o; }
+        void setFeatureOther(FeatureBasePtr _ftr_o)  { feature_other_ptr_ = _ftr_o; }
 
         /** \brief Returns a pointer to the landmark constrained to
          **/
         LandmarkBasePtr getLandmarkOther() const     { return landmark_other_ptr_.lock(); }
-        void setLandmarkOtherPtr(LandmarkBasePtr _lmk_o){ landmark_other_ptr_ = _lmk_o; }
+        void setLandmarkOther(LandmarkBasePtr _lmk_o){ landmark_other_ptr_ = _lmk_o; }
 
         /**
          * @brief getProcessor

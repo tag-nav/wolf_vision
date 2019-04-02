@@ -33,7 +33,7 @@ void StateBlock::setFixed(bool _fixed)
 //
 //void StateBlock::removeFromProblem(ProblemPtr _problem_ptr)
 //{
-//    _problem_ptr->removeStateBlockPtr(shared_from_this());
+//    _problem_ptr->removeStateBlock(shared_from_this());
 //}
 
 }
