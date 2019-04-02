@@ -32,9 +32,9 @@ class SolverManager
 
 		void update(const WolfProblemPtr _problem_ptr);
 
-		void addFactor(FactorBasePtr _corr_ptr);
+		void addFactor(FactorBasePtr _fac_ptr);
 
-		void removeFactor(const unsigned int& _corr_idx);
+		void removeFactor(const unsigned int& _fac_idx);
 
 		void addStateUnit(StateBlockPtr _st_ptr);
 
@@ -42,7 +42,7 @@ class SolverManager
 
 		void updateStateUnitStatus(StateBlockPtr _st_ptr);
 
-		ceres::CostFunction* createCostFunction(FactorBasePtr _corrPtr);
+		ceres::CostFunction* createCostFunction(FactorBasePtr _fac_ptr);
 };
 
 #endif

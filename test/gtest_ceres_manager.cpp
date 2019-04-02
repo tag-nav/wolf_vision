@@ -60,9 +60,9 @@ class CeresManagerWrapper : public CeresManager
             return ceres_problem_->NumResidualBlocks();
         };
 
-        bool isFactorRegistered(const FactorBasePtr& ctr_ptr) const
+        bool isFactorRegistered(const FactorBasePtr& fac_ptr) const
         {
-            return ctr_2_residual_idx_.find(ctr_ptr) != ctr_2_residual_idx_.end() && ctr_2_costfunction_.find(ctr_ptr) != ctr_2_costfunction_.end();
+            return fac_2_residual_idx_.find(fac_ptr) != fac_2_residual_idx_.end() && fac_2_costfunction_.find(fac_ptr) != fac_2_costfunction_.end();
         };
 
         bool hasThisLocalParametrization(const StateBlockPtr& st, const LocalParametrizationBasePtr& local_param)

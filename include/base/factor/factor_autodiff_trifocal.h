@@ -1,5 +1,5 @@
-#ifndef _CONSTRAINT_AUTODIFF_TRIFOCAL_H_
-#define _CONSTRAINT_AUTODIFF_TRIFOCAL_H_
+#ifndef _FACTOR_AUTODIFF_TRIFOCAL_H_
+#define _FACTOR_AUTODIFF_TRIFOCAL_H_
 
 //Wolf includes
 //#include "base/wolf.h"
@@ -23,11 +23,11 @@ class FactorAutodiffTrifocal : public FactorAutodiff<FactorAutodiffTrifocal, 3, 
         /** \brief Class constructor
          */
         FactorAutodiffTrifocal(const FeatureBasePtr& _feature_prev_ptr,
-                                   const FeatureBasePtr& _feature_origin_ptr,
-                                   const FeatureBasePtr& _feature_last_ptr,
-                                   const ProcessorBasePtr& _processor_ptr,
-                                   bool _apply_loss_function,
-                                   FactorStatus _status);
+                               const FeatureBasePtr& _feature_origin_ptr,
+                               const FeatureBasePtr& _feature_last_ptr,
+                               const ProcessorBasePtr& _processor_ptr,
+                               bool _apply_loss_function,
+                               FactorStatus _status);
 
         /** \brief Class Destructor
          */
@@ -126,31 +126,31 @@ namespace wolf
 using namespace Eigen;
 
 // Constructor
-FactorAutodiffTrifocal::FactorAutodiffTrifocal(
-        const FeatureBasePtr& _feature_prev_ptr,
-        const FeatureBasePtr& _feature_origin_ptr,
-        const FeatureBasePtr& _feature_last_ptr,
-        const ProcessorBasePtr& _processor_ptr,
-        bool _apply_loss_function,
-        FactorStatus _status) : FactorAutodiff( "TRIFOCAL PLP",
-                                                        nullptr,
-                                                        nullptr,
-                                                        _feature_origin_ptr,
-                                                        nullptr,
-                                                        _processor_ptr,
-                                                        _apply_loss_function,
-                                                        _status,
-                                                        _feature_prev_ptr->getFrame()->getP(),
-                                                        _feature_prev_ptr->getFrame()->getO(),
-                                                        _feature_origin_ptr->getFrame()->getP(),
-                                                        _feature_origin_ptr->getFrame()->getO(),
-                                                        _feature_last_ptr->getFrame()->getP(),
-                                                        _feature_last_ptr->getFrame()->getO(),
-                                                        _feature_last_ptr->getCapture()->getSensorP(),
-                                                        _feature_last_ptr->getCapture()->getSensorO() ),
-                                    feature_prev_ptr_(_feature_prev_ptr),
-                                    camera_ptr_(std::static_pointer_cast<SensorCamera>(_processor_ptr->getSensor())),
-                                    sqrt_information_upper(Matrix3s::Zero())
+FactorAutodiffTrifocal::FactorAutodiffTrifocal(const FeatureBasePtr& _feature_prev_ptr,
+                                               const FeatureBasePtr& _feature_origin_ptr,
+                                               const FeatureBasePtr& _feature_last_ptr,
+                                               const ProcessorBasePtr& _processor_ptr,
+                                               bool _apply_loss_function,
+                                               FactorStatus _status) :
+        FactorAutodiff( "TRIFOCAL PLP",
+                        nullptr,
+                        nullptr,
+                        _feature_origin_ptr,
+                        nullptr,
+                        _processor_ptr,
+                        _apply_loss_function,
+                        _status,
+                        _feature_prev_ptr->getFrame()->getP(),
+                        _feature_prev_ptr->getFrame()->getO(),
+                        _feature_origin_ptr->getFrame()->getP(),
+                        _feature_origin_ptr->getFrame()->getO(),
+                        _feature_last_ptr->getFrame()->getP(),
+                        _feature_last_ptr->getFrame()->getO(),
+                        _feature_last_ptr->getCapture()->getSensorP(),
+                        _feature_last_ptr->getCapture()->getSensorO() ),
+        feature_prev_ptr_(_feature_prev_ptr),
+        camera_ptr_(std::static_pointer_cast<SensorCamera>(_processor_ptr->getSensor())),
+        sqrt_information_upper(Matrix3s::Zero())
 {
     setFeaturePtr(_feature_last_ptr);
     Matrix3s K_inv           = camera_ptr_->getIntrinsicMatrix().inverse();
@@ -216,14 +216,14 @@ inline FeatureBasePtr FactorAutodiffTrifocal::getFeaturePrev()
 
 template<typename T>
 bool FactorAutodiffTrifocal::operator ()( const T* const _prev_pos,
-                                              const T* const _prev_quat,
-                                              const T* const _origin_pos,
-                                              const T* const _origin_quat,
-                                              const T* const _last_pos,
-                                              const T* const _last_quat,
-                                              const T* const _sen_pos,
-                                              const T* const _sen_quat,
-                                              T* _residuals) const
+                                          const T* const _prev_quat,
+                                          const T* const _origin_pos,
+                                          const T* const _origin_quat,
+                                          const T* const _last_pos,
+                                          const T* const _last_quat,
+                                          const T* const _sen_pos,
+                                          const T* const _sen_quat,
+                                          T* _residuals) const
 {
 
     // MAPS
@@ -246,15 +246,15 @@ bool FactorAutodiffTrifocal::operator ()( const T* const _prev_pos,
 
 template<typename D1, typename D2, class T, typename D3>
 inline void FactorAutodiffTrifocal::expectation(const MatrixBase<D1>&     _wtr1,
-                                                    const QuaternionBase<D2>& _wqr1,
-                                                    const MatrixBase<D1>&     _wtr2,
-                                                    const QuaternionBase<D2>& _wqr2,
-                                                    const MatrixBase<D1>&     _wtr3,
-                                                    const QuaternionBase<D2>& _wqr3,
-                                                    const MatrixBase<D1>&     _rtc,
-                                                    const QuaternionBase<D2>& _rqc,
-                                                    vision_utils::TrifocalTensorBase<T>& _tensor,
-                                                    MatrixBase<D3>&     _c2Ec1) const
+                                                const QuaternionBase<D2>& _wqr1,
+                                                const MatrixBase<D1>&     _wtr2,
+                                                const QuaternionBase<D2>& _wqr2,
+                                                const MatrixBase<D1>&     _wtr3,
+                                                const QuaternionBase<D2>& _wqr3,
+                                                const MatrixBase<D1>&     _rtc,
+                                                const QuaternionBase<D2>& _rqc,
+                                                vision_utils::TrifocalTensorBase<T>& _tensor,
+                                                MatrixBase<D3>&     _c2Ec1) const
 {
 
         typedef Translation<T, 3> TranslationType;
@@ -317,7 +317,7 @@ inline void FactorAutodiffTrifocal::expectation(const MatrixBase<D1>&     _wtr1,
 
 template<typename T, typename D1>
 inline Matrix<T, 3, 1> FactorAutodiffTrifocal::residual(const vision_utils::TrifocalTensorBase<T>& _tensor,
-                                                            const MatrixBase<D1>& _c2Ec1) const
+                                                        const MatrixBase<D1>& _c2Ec1) const
 {
     // 1. COMMON COMPUTATIONS
 
@@ -347,10 +347,10 @@ inline Matrix<T, 3, 1> FactorAutodiffTrifocal::residual(const vision_utils::Trif
 // Helper functions to be used by the above
 template<class T, typename D1, typename D2, typename D3, typename D4>
 inline Matrix<T, 3, 1> FactorAutodiffTrifocal::error_jacobians(const vision_utils::TrifocalTensorBase<T>& _tensor,
-                                                                   const MatrixBase<D1>& _c2Ec1,
-                                                                   MatrixBase<D2>& _J_e_m1,
-                                                                   MatrixBase<D3>& _J_e_m2,
-                                                                   MatrixBase<D4>& _J_e_m3)
+                                                               const MatrixBase<D1>& _c2Ec1,
+                                                               MatrixBase<D2>& _J_e_m1,
+                                                               MatrixBase<D3>& _J_e_m2,
+                                                               MatrixBase<D4>& _J_e_m3)
 {
     // 1. COMMON COMPUTATIONS
 
@@ -394,4 +394,4 @@ inline Matrix<T, 3, 1> FactorAutodiffTrifocal::error_jacobians(const vision_util
 
 }    // namespace wolf
 
-#endif /* _CONSTRAINT_AUTODIFF_TRIFOCAL_H_ */
+#endif /* _FACTOR_AUTODIFF_TRIFOCAL_H_ */

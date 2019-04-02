@@ -159,23 +159,23 @@ int main(int argc, char** argv)
     std::cout << "Landmark 1: " << lmk_1->point().transpose() << std::endl;
 
     // Factors------------------
-    FactorAHPPtr ctr_0 = FactorAHP::create(feat_0, lmk_1, nullptr);
-    feat_0->addFactor(ctr_0);
-    FactorAHPPtr ctr_1 = FactorAHP::create(feat_1, lmk_1, nullptr);
-    feat_1->addFactor(ctr_1);
-    FactorAHPPtr ctr_2 = FactorAHP::create(feat_2, lmk_1, nullptr);
-    feat_2->addFactor(ctr_2);
+    FactorAHPPtr fac_0 = FactorAHP::create(feat_0, lmk_1, nullptr);
+    feat_0->addFactor(fac_0);
+    FactorAHPPtr fac_1 = FactorAHP::create(feat_1, lmk_1, nullptr);
+    feat_1->addFactor(fac_1);
+    FactorAHPPtr fac_2 = FactorAHP::create(feat_2, lmk_1, nullptr);
+    feat_2->addFactor(fac_2);
 
     // Projections----------------------------
-    Eigen::VectorXs pix_0 = ctr_0->expectation();
+    Eigen::VectorXs pix_0 = fac_0->expectation();
     kp_0 = cv::KeyPoint(pix_0(0), pix_0(1), 0);
     feat_0->setKeypoint(kp_0);
 
-    Eigen::VectorXs pix_1 = ctr_1->expectation();
+    Eigen::VectorXs pix_1 = fac_1->expectation();
     kp_1 = cv::KeyPoint(pix_1(0), pix_1(1), 0);
     feat_1->setKeypoint(kp_1);
 
-    Eigen::VectorXs pix_2 = ctr_2->expectation();
+    Eigen::VectorXs pix_2 = fac_2->expectation();
     kp_2 = cv::KeyPoint(pix_2(0), pix_2(1), 0);
     feat_2->setKeypoint(kp_2);
 
@@ -209,13 +209,13 @@ int main(int argc, char** argv)
     std::cout << "Landmark 2: " << lmk_2->point().transpose() << std::endl;
 
     // New factors from kf3 and kf4
-    FactorAHPPtr ctr_3 = FactorAHP::create(feat_3, lmk_2, nullptr);
-    feat_3->addFactor(ctr_3);
-    FactorAHPPtr ctr_4 = FactorAHP::create(feat_4, lmk_2, nullptr);
-    feat_4->addFactor(ctr_4);
+    FactorAHPPtr fac_3 = FactorAHP::create(feat_3, lmk_2, nullptr);
+    feat_3->addFactor(fac_3);
+    FactorAHPPtr fac_4 = FactorAHP::create(feat_4, lmk_2, nullptr);
+    feat_4->addFactor(fac_4);
 
-    Eigen::Vector2s pix_3 = ctr_3->expectation();
-    Eigen::Vector2s pix_4 = ctr_4->expectation();
+    Eigen::Vector2s pix_3 = fac_3->expectation();
+    Eigen::Vector2s pix_4 = fac_4->expectation();
 
     std::cout << "pix 3: " << pix_3.transpose() << std::endl;
     std::cout << "pix 4: " << pix_4.transpose() << std::endl;

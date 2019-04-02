@@ -203,12 +203,12 @@ TEST(CaptureAutodiff, AutodiffVsAnalytic)
     capture_ptr->addFeature(feature_ptr);
 
     // CONSTRAINTS
-    FactorOdom2DPtr ctr_autodiff_ptr = std::make_shared<FactorOdom2D>(feature_ptr, fr1_ptr);
-    feature_ptr->addFactor(ctr_autodiff_ptr);
-    fr1_ptr->addConstrainedBy(ctr_autodiff_ptr);
-    FactorOdom2DAnalyticPtr ctr_analytic_ptr = std::make_shared<FactorOdom2DAnalytic>(feature_ptr, fr1_ptr);
-    feature_ptr->addFactor(ctr_analytic_ptr);
-    fr1_ptr->addConstrainedBy(ctr_analytic_ptr);
+    FactorOdom2DPtr fac_autodiff_ptr = std::make_shared<FactorOdom2D>(feature_ptr, fr1_ptr);
+    feature_ptr->addFactor(fac_autodiff_ptr);
+    fr1_ptr->addConstrainedBy(fac_autodiff_ptr);
+    FactorOdom2DAnalyticPtr fac_analytic_ptr = std::make_shared<FactorOdom2DAnalytic>(feature_ptr, fr1_ptr);
+    feature_ptr->addFactor(fac_analytic_ptr);
+    fr1_ptr->addConstrainedBy(fac_analytic_ptr);
 
     // COMPUTE JACOBIANS
 
@@ -220,13 +220,13 @@ TEST(CaptureAutodiff, AutodiffVsAnalytic)
     std::vector<const Scalar*> states_ptr({fr1_pstate.data(), fr1_ostate.data(), fr2_pstate.data(), fr2_ostate.data()});
 
     std::vector<Eigen::MatrixXs> Jautodiff, Janalytic;
-    Eigen::VectorXs residuals(ctr_autodiff_ptr->getSize());
+    Eigen::VectorXs residuals(fac_autodiff_ptr->getSize());
     clock_t t = clock();
-    ctr_autodiff_ptr->evaluate(states_ptr, residuals, Jautodiff);
+    fac_autodiff_ptr->evaluate(states_ptr, residuals, Jautodiff);
     std::cout << "autodiff evaluate: " << ((double) clock() - t) / CLOCKS_PER_SEC << "s" << std::endl;
     t = clock();
     //TODO FactorAnalytic::evaluate
-//    ctr_analytic_ptr->evaluate(states_ptr, residuals, Janalytic);
+//    fac_analytic_ptr->evaluate(states_ptr, residuals, Janalytic);
 //    std::cout << "analytic evaluate: " << ((double) clock() - t) / CLOCKS_PER_SEC << "s" << std::endl;
 //
 //    for (auto i = 0; i < Jautodiff.size(); i++)

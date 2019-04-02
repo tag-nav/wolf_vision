@@ -177,12 +177,12 @@ void LandmarkPolyline2D::defineExtreme(const bool _back)
     	getProblem()->addStateBlock(state);
 
     // remove and add all factors to the point
-    for (auto ctr_ptr : getConstrainedByList())
-        for (auto st_ptr : ctr_ptr->getStateBlockPtrVector())
+    for (auto fac_ptr : getConstrainedByList())
+        for (auto st_ptr : fac_ptr->getStateBlockPtrVector())
             if (st_ptr == state && getProblem() != nullptr)
             {
-                getProblem()->removeFactor(ctr_ptr);
-                getProblem()->addFactor(ctr_ptr);
+                getProblem()->removeFactor(fac_ptr);
+                getProblem()->addFactor(fac_ptr);
             }
 
     // update boolean
@@ -236,68 +236,68 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
     // Change factors from remove_state to remain_state
     FactorBasePtrList old_factors_list = getConstrainedByList();
     std::cout << "changing factors: " << old_factors_list.size() << std::endl;
-    FactorBasePtr new_ctr_ptr = nullptr;
-    for (auto ctr_ptr : old_factors_list)
+    FactorBasePtr new_fac_ptr = nullptr;
+    for (auto fac_ptr : old_factors_list)
     {
-        FactorPoint2DPtr ctr_point_ptr;
-        FactorPointToLine2DPtr ctr_point_line_ptr;
-        if ( (ctr_point_ptr = std::dynamic_pointer_cast<FactorPoint2D>(ctr_ptr)))
-//        if (ctr_ptr->getTypeId() == CTR_POINT_2D)
+        FactorPoint2DPtr fac_point_ptr;
+        FactorPointToLine2DPtr fac_point_line_ptr;
+        if ( (fac_point_ptr = std::dynamic_pointer_cast<FactorPoint2D>(fac_ptr)))
+//        if (fac_ptr->getTypeId() == FAC_POINT_2D)
         {
-//            FactorPoint2DPtr ctr_point_ptr = std::static_pointer_cast<FactorPoint2D>(ctr_ptr);
+//            FactorPoint2DPtr fac_point_ptr = std::static_pointer_cast<FactorPoint2D>(fac_ptr);
 
             // If landmark point constrained -> new factor
-            if (ctr_point_ptr->getLandmarkPointId() == _remove_id)
-                new_ctr_ptr = std::make_shared<FactorPoint2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeature()),
+            if (fac_point_ptr->getLandmarkPointId() == _remove_id)
+                new_fac_ptr = std::make_shared<FactorPoint2D>(std::static_pointer_cast<FeaturePolyline2D>(fac_ptr->getFeature()),
                                                                   std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
-                                                                  ctr_point_ptr->getProcessor(),
-                                                                  ctr_point_ptr->getFeaturePointId(),
+                                                                  fac_point_ptr->getProcessor(),
+                                                                  fac_point_ptr->getFeaturePointId(),
                                                                   _remain_id,
-                                                                  ctr_point_ptr->getApplyLossFunction(),
-                                                                  ctr_point_ptr->getStatus());
+                                                                  fac_point_ptr->getApplyLossFunction(),
+                                                                  fac_point_ptr->getStatus());
         }
-        else if ((ctr_point_line_ptr = std::dynamic_pointer_cast<FactorPointToLine2D>(ctr_ptr)))
-//        else if  (ctr_ptr->getTypeId() == CTR_POINT_TO_LINE_2D)
+        else if ((fac_point_line_ptr = std::dynamic_pointer_cast<FactorPointToLine2D>(fac_ptr)))
+//        else if  (fac_ptr->getTypeId() == FAC_POINT_TO_LINE_2D)
         {
-//            FactorPointToLine2DPtr ctr_point_line_ptr = std::static_pointer_cast<FactorPointToLine2D>(ctr_ptr);
+//            FactorPointToLine2DPtr fac_point_line_ptr = std::static_pointer_cast<FactorPointToLine2D>(fac_ptr);
 
             // If landmark point constrained -> new factor
-            if (ctr_point_line_ptr->getLandmarkPointId() == _remove_id)
-                new_ctr_ptr = std::make_shared<FactorPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeature()),
+            if (fac_point_line_ptr->getLandmarkPointId() == _remove_id)
+                new_fac_ptr = std::make_shared<FactorPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(fac_ptr->getFeature()),
                                                                         std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
-                                                                        ctr_point_line_ptr->getProcessor(),
-                                                                        ctr_point_line_ptr->getFeaturePointId(),
+                                                                        fac_point_line_ptr->getProcessor(),
+                                                                        fac_point_line_ptr->getFeaturePointId(),
                                                                         _remain_id,
-                                                                        ctr_point_line_ptr->getLandmarkPointAuxId(),
-                                                                        ctr_point_ptr->getApplyLossFunction(),
-                                                                        ctr_point_line_ptr->getStatus());
+                                                                        fac_point_line_ptr->getLandmarkPointAuxId(),
+                                                                        fac_point_ptr->getApplyLossFunction(),
+                                                                        fac_point_line_ptr->getStatus());
             // If landmark point is aux point -> new factor
-            else if (ctr_point_line_ptr->getLandmarkPointAuxId() == _remove_id)
-                new_ctr_ptr = std::make_shared<FactorPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(ctr_ptr->getFeature()),
+            else if (fac_point_line_ptr->getLandmarkPointAuxId() == _remove_id)
+                new_fac_ptr = std::make_shared<FactorPointToLine2D>(std::static_pointer_cast<FeaturePolyline2D>(fac_ptr->getFeature()),
                                                                         std::static_pointer_cast<LandmarkPolyline2D>(shared_from_this()),
-                                                                        ctr_point_line_ptr->getProcessor(),
-                                                                        ctr_point_line_ptr->getFeaturePointId(),
-                                                                        ctr_point_line_ptr->getLandmarkPointId(),
+                                                                        fac_point_line_ptr->getProcessor(),
+                                                                        fac_point_line_ptr->getFeaturePointId(),
+                                                                        fac_point_line_ptr->getLandmarkPointId(),
                                                                         _remain_id,
-                                                                        ctr_point_line_ptr->getApplyLossFunction(),
-                                                                        ctr_point_line_ptr->getStatus());
+                                                                        fac_point_line_ptr->getApplyLossFunction(),
+                                                                        fac_point_line_ptr->getStatus());
         }
         else
             throw std::runtime_error ("polyline factor of unknown type");
 
         // If new factor
-        if (new_ctr_ptr != nullptr)
+        if (new_fac_ptr != nullptr)
         {
-            std::cout << "created new factor: " << new_ctr_ptr->id() << std::endl;
-            std::cout << "deleting factor: " << ctr_ptr->id() << std::endl;
+            std::cout << "created new factor: " << new_fac_ptr->id() << std::endl;
+            std::cout << "deleting factor: " << fac_ptr->id() << std::endl;
 
             // add new factor
-            ctr_ptr->getFeature()->addFactor(new_ctr_ptr);
+            fac_ptr->getFeature()->addFactor(new_fac_ptr);
 
             // remove factor
-            ctr_ptr->remove();
+            fac_ptr->remove();
 
-            new_ctr_ptr = nullptr;
+            new_fac_ptr = nullptr;
         }
     }
 

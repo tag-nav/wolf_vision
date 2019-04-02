@@ -332,17 +332,17 @@ FactorBasePtr FrameBase::getFactorOf(const ProcessorBasePtr _processor_ptr)
     return nullptr;
 }
 
-void FrameBase::getFactorList(FactorBasePtrList& _ctr_list)
+void FrameBase::getFactorList(FactorBasePtrList& _fac_list)
 {
     for (auto c_ptr : getCaptureList())
-        c_ptr->getFactorList(_ctr_list);
+        c_ptr->getFactorList(_fac_list);
 }
 
-FactorBasePtr FrameBase::addConstrainedBy(FactorBasePtr _ctr_ptr)
+FactorBasePtr FrameBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setFrameOtherPtr(shared_from_this());
-    return _ctr_ptr;
+    constrained_by_list_.push_back(_fac_ptr);
+    _fac_ptr->setFrameOtherPtr(shared_from_this());
+    return _fac_ptr;
 }
 
 FrameBasePtr FrameBase::create_PO_2D(const FrameType & _tp,
