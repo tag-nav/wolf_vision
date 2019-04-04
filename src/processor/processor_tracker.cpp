@@ -161,7 +161,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             // eventually add more features
             if (last_ptr_->getFeatureList().size() < params_tracker_->min_features_for_keyframe)
             {
-                WOLF_TRACE("Adding more features...");
+                //WOLF_TRACE("Adding more features...");
                 processNew(params_tracker_->max_new_features);
             }
 
@@ -170,6 +170,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 // We create a KF
 
                 // set KF on last
+                last_ptr_->getFrame()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
                 last_ptr_->getFrame()->setKey();
 
                 // make F; append incoming to new F

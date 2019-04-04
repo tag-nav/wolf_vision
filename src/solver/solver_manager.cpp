@@ -79,6 +79,8 @@ void SolverManager::update()
     // UPDATE STATE BLOCKS (state, fix or local parameterization)
     for (auto state_ptr : wolf_problem_->getStateBlockPtrList())
     {
+        if (state_blocks_.find(state_ptr)==state_blocks_.end())
+            continue;
         assert(state_blocks_.find(state_ptr)!=state_blocks_.end() && "Updating the state of an unregistered StateBlock !");
 
         // state update
@@ -106,8 +108,8 @@ void SolverManager::update()
         }
     }
 
-    assert(wolf_problem_->getFactorNotificationMap().empty() && "wolf problem's factors notification map not empty after update");
-    assert(wolf_problem_->getStateBlockNotificationMap().empty() && "wolf problem's state_blocks notification map not empty after update");
+    //assert(wolf_problem_->getFactorNotificationMap().empty() && "wolf problem's factors notification map not empty after update");
+    //assert(wolf_problem_->getStateBlockNotificationMap().empty() && "wolf problem's state_blocks notification map not empty after update");
 }
 
 wolf::ProblemPtr SolverManager::getProblem()
