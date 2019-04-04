@@ -69,12 +69,15 @@ TEST(TrajectoryBase, ClosestKeyFrame)
     //   1     2     3       time stamps
     // --+-----+-----+--->   time
 
-    FrameBasePtr f1 = std::make_shared<FrameBase>(KEY_FRAME,     1, nullptr, nullptr);
-    FrameBasePtr f2 = std::make_shared<FrameBase>(KEY_FRAME,     2, nullptr, nullptr);
-    FrameBasePtr f3 = std::make_shared<FrameBase>(NON_KEY_FRAME, 3, nullptr, nullptr);
-    T->addFrame(f1);
-    T->addFrame(f2);
-    T->addFrame(f3);
+    // FrameBasePtr f1 = std::make_shared<FrameBase>(KEY_FRAME,     1, nullptr, nullptr);
+    // FrameBasePtr f2 = std::make_shared<FrameBase>(KEY_FRAME,     2, nullptr, nullptr);
+    // FrameBasePtr f3 = std::make_shared<FrameBase>(NON_KEY_FRAME, 3, nullptr, nullptr);
+    FrameBasePtr f1 = FrameBase::emplace<FrameBase>(T, KEY_FRAME,     1, nullptr, nullptr);
+    FrameBasePtr f2 = FrameBase::emplace<FrameBase>(T, KEY_FRAME,     2, nullptr, nullptr);
+    FrameBasePtr f3 = FrameBase::emplace<FrameBase>(T, NON_KEY_FRAME, 3, nullptr, nullptr);
+    // T->addFrame(f1);
+    // T->addFrame(f2);
+    // T->addFrame(f3);
 
     FrameBasePtr kf; // closest key-frame queried
 
@@ -112,24 +115,31 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     FrameBasePtr f2 = std::make_shared<FrameBase>(KEY_FRAME,     2, make_shared<StateBlock>(2), make_shared<StateBlock>(1, true)); // 1 fixed, 1 not
     FrameBasePtr f3 = std::make_shared<FrameBase>(NON_KEY_FRAME, 3, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
 
+    // FrameBasePtr f1 = FrameBase::emplace<FrameBase>(T, KEY_FRAME,     1, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // 2 non-fixed
+    // FrameBasePtr f2 = FrameBase::emplace<FrameBase>(T, KEY_FRAME,     2, make_shared<StateBlock>(2), make_shared<StateBlock>(1, true)); // 1 fixed, 1 not
+    // FrameBasePtr f3 = FrameBase::emplace<FrameBase>(T, NON_KEY_FRAME, 3, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
+
     std::cout << __LINE__ << std::endl;
 
     // add frames and keyframes
-    T->addFrame(f1); // KF
+    // T->addFrame(f1); // KF
+    f1->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
     ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 2);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
     std::cout << __LINE__ << std::endl;
 
-    T->addFrame(f2); // KF
+    // T->addFrame(f2); // KF
+    f2->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
     ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 4);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
     std::cout << __LINE__ << std::endl;
 
-    T->addFrame(f3); // F
+    // T->addFrame(f3); // F
+    f3->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 3);
     ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 4);
@@ -194,17 +204,20 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     FrameBasePtr f3 = std::make_shared<FrameBase>(NON_KEY_FRAME, 3, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
 
     // add frames and keyframes in random order --> keyframes must be sorted after that
-    T->addFrame(f2); // KF2
+    // T->addFrame(f2); // KF2
+    f2->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getLastFrame()   ->id(), f2->id());
     ASSERT_EQ(T->getLastKeyFrame()->id(), f2->id());
 
-    T->addFrame(f3); // F3
+    // T->addFrame(f3); // F3
+    f3->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getLastFrame()   ->id(), f3->id());
     ASSERT_EQ(T->getLastKeyFrame()->id(), f2->id());
 
-    T->addFrame(f1); // KF1
+    // T->addFrame(f1); // KF1
+    f1->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getLastFrame()   ->id(), f3->id());
     ASSERT_EQ(T->getLastKeyFrame()->id(), f2->id());
@@ -215,7 +228,8 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     ASSERT_EQ(T->getLastKeyFrame()->id(), f3->id());
 
     FrameBasePtr f4 = std::make_shared<FrameBase>(NON_KEY_FRAME, 1.5, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
-    T->addFrame(f4);
+    // T->addFrame(f4);
+    f4->link(T);
     // Trajectory status:
     //  kf1   kf2   kf3     f4       frames
     //   1     2     3     1.5       time stamps

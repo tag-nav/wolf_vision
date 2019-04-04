@@ -77,8 +77,9 @@ class FeatureIMU_test : public testing::Test
     //create Frame
         ts = problem->getProcessorMotion()->getBuffer().get().back().ts_;
         state_vec = problem->getProcessorMotion()->getCurrentState();
-   	    last_frame = std::make_shared<FrameBase>(KEY_FRAME, ts, std::make_shared<StateBlock>(state_vec.head(3)), std::make_shared<StateBlock>(state_vec.segment(3,4)), std::make_shared<StateBlock>(state_vec.head(3)));
-        problem->getTrajectory()->addFrame(last_frame);
+   	    // last_frame = std::make_shared<FrameBase>(KEY_FRAME, ts, std::make_shared<StateBlock>(state_vec.head(3)), std::make_shared<StateBlock>(state_vec.segment(3,4)), std::make_shared<StateBlock>(state_vec.head(3)));
+        last_frame = FrameBase::emplace<FrameBase>(problem->getTrajectory(), KEY_FRAME, ts, std::make_shared<StateBlock>(state_vec.head(3)), std::make_shared<StateBlock>(state_vec.segment(3,4)), std::make_shared<StateBlock>(state_vec.head(3)));
+        // problem->getTrajectory()->addFrame(last_frame);
         
     //create a feature
         delta_preint = problem->getProcessorMotion()->getMotion().delta_integr_;

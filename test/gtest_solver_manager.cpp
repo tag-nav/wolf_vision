@@ -506,9 +506,12 @@ TEST(SolverManager, AddFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    // CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    // FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    // FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f, f));
 
     // update solver
     solver_manager_ptr->update();
@@ -528,9 +531,12 @@ TEST(SolverManager, RemoveFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    // CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    // FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    // FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f, f));
 
     // update solver
     solver_manager_ptr->update();
@@ -556,9 +562,13 @@ TEST(SolverManager, AddRemoveFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    // CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
+    // FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
+    // FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f, f));
 
     ASSERT_TRUE(P->getFactorNotificationMap().begin()->first == c);
 
@@ -585,9 +595,13 @@ TEST(SolverManager, DoubleRemoveFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    // CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
+    // FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
+    // FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f, f));
 
     // update solver
     solver_manager_ptr->update();

@@ -701,19 +701,26 @@ class FactorAutodiffTrifocalMultiPointTest : public FactorAutodiffTrifocalTest
             cv123.push_back(c123);
             for (size_t i=1; i<c1p_can.cols() ; i++)
             {
-                fv1.push_back(std::make_shared<FeatureBase>("PIXEL", c1p_can.col(i), pix_cov));
-                I1->addFeature(fv1.at(i));
+                // fv1.push_back(std::make_shared<FeatureBase>("PIXEL", c1p_can.col(i), pix_cov));
+                auto f  = FeatureBase::emplace<FeatureBase>(I1, "PIXEL", c1p_can.col(i), pix_cov);
+                fv1.push_back(f);
+                // I1->addFeature(fv1.at(i));
 
-                fv2.push_back(std::make_shared<FeatureBase>("PIXEL", c2p_can.col(i), pix_cov));
-                I2->addFeature(fv2.at(i));
+                // fv2.push_back(std::make_shared<FeatureBase>("PIXEL", c2p_can.col(i), pix_cov));
+                auto f2  = FeatureBase::emplace<FeatureBase>(I2, "PIXEL", c2p_can.col(i), pix_cov);
+                fv2.push_back(f2);
+                // I2->addFeature(fv2.at(i));
 
-                fv3.push_back(std::make_shared<FeatureBase>("PIXEL", c3p_can.col(i), pix_cov));
-                I3->addFeature(fv3.at(i));
+                // fv3.push_back(std::make_shared<FeatureBase>("PIXEL", c3p_can.col(i), pix_cov));
+                auto f3  = FeatureBase::emplace<FeatureBase>(I3, "PIXEL", c3p_can.col(i), pix_cov);
+                fv3.push_back(f3);
+                // I3->addFeature(fv3.at(i));
 
-                cv123.push_back(std::make_shared<FactorAutodiffTrifocal>(fv1.at(i), fv2.at(i), fv3.at(i), proc_trifocal, false, FAC_ACTIVE));
-                fv3.at(i)->addFactor(cv123.at(i));
-                fv1.at(i)->addConstrainedBy(cv123.at(i));
-                fv2.at(i)->addConstrainedBy(cv123.at(i));
+                auto ff = std::static_pointer_cast<FactorAutodiffTrifocal>(FactorBase::emplace<FactorAutodiffTrifocal>(fv3.at(i), fv1.at(i), fv2.at(i), fv3.at(i), proc_trifocal, false, FAC_ACTIVE));
+                cv123.push_back(ff);
+                // fv3.at(i)->addFactor(cv123.at(i));
+                // fv1.at(i)->addConstrainedBy(cv123.at(i));
+                // fv2.at(i)->addConstrainedBy(cv123.at(i));
             }
 
         }
@@ -884,13 +891,16 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
     Scalar distance     = sqrt(2.0);
     Scalar distance_std = 0.1;
 
-    CaptureBasePtr Cd = std::make_shared<CaptureBase>("DISTANCE", F3->getTimeStamp());
-    F3->addCapture(Cd);
-    FeatureBasePtr fd = std::make_shared<FeatureBase>("DISTANCE", Vector1s(distance), Matrix1s(distance_std * distance_std));
-    Cd->addFeature(fd);
-    FactorAutodiffDistance3DPtr cd = std::make_shared<FactorAutodiffDistance3D>(fd, F1, nullptr, false, FAC_ACTIVE);
-    fd->addFactor(cd);
-    F1->addConstrainedBy(cd);
+    auto Cd = CaptureBase::emplace<CaptureBase>(F3, "DISTANCE", F3->getTimeStamp());
+    // CaptureBasePtr Cd = std::make_shared<CaptureBase>("DISTANCE", F3->getTimeStamp());
+    // F3->addCapture(Cd);
+    auto fd = FeatureBase::emplace<FeatureBase>(Cd, "DISTANCE", Vector1s(distance), Matrix1s(distance_std * distance_std));
+    // FeatureBasePtr fd = std::make_shared<FeatureBase>("DISTANCE", Vector1s(distance), Matrix1s(distance_std * distance_std));
+    // Cd->addFeature(fd);
+    auto cd = FactorBase::emplace<FactorAutodiffDistance3D>(fd, fd, F1, nullptr, false, FAC_ACTIVE);
+    // FACTORAUTODIFFDISTANCE3DPTR cd = std::make_shared<FactorAutodiffDistance3D>(fd, F1, nullptr, false, FAC_ACTIVE);
+    // fd->addFactor(cd);
+    // F1->addConstrainedBy(cd);
 
     cd->setStatus(FAC_INACTIVE);
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::BRIEF);

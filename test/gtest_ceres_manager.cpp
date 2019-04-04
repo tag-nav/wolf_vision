@@ -319,9 +319,12 @@ TEST(CeresManager, AddFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    // CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    // FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    // FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f,f));
 
     // update solver
     ceres_manager_ptr->update();
@@ -341,9 +344,12 @@ TEST(CeresManager, DoubleAddFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    // CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    // FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    // FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f,f));
 
     // add factor again
     P->addFactor(c);
@@ -366,9 +372,12 @@ TEST(CeresManager, RemoveFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    // CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    // FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    // FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f,f));
 
     // update solver
     ceres_manager_ptr->update();
@@ -394,9 +403,12 @@ TEST(CeresManager, AddRemoveFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    // CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    // FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    // FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f,f));
 
     ASSERT_TRUE(P->getFactorNotificationMap().begin()->first == c);
 
@@ -423,9 +435,12 @@ TEST(CeresManager, DoubleRemoveFactor)
 
     // Create (and add) factor point 2d
     FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    // CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    // FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    // FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
+    FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f,f));
 
     // update solver
     ceres_manager_ptr->update();
@@ -550,10 +565,14 @@ TEST(CeresManager, FactorsRemoveLocalParam)
 
     // Create (and add) 2 factors quaternion
     FrameBasePtr                    F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr                  C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr                  f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
-    FactorQuaternionAbsolutePtr c2 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
+    // CaptureBasePtr                  C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    // FeatureBasePtr                  f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    // FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
+    FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(FactorBase::emplace<FactorQuaternionAbsolute>(f, F->getO()));
+    // FactorQuaternionAbsolutePtr c2 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
+    FactorQuaternionAbsolutePtr c2 = std::static_pointer_cast<FactorQuaternionAbsolute>(FactorBase::emplace<FactorQuaternionAbsolute>(f, F->getO()));
 
     // update solver
     ceres_manager_ptr->update();
@@ -592,10 +611,14 @@ TEST(CeresManager, FactorsUpdateLocalParam)
 
     // Create (and add) 2 factors quaternion
     FrameBasePtr                    F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
-    CaptureBasePtr                  C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
-    FeatureBasePtr                  f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
-    FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
-    FactorQuaternionAbsolutePtr c2 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
+    // CaptureBasePtr                  C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
+    auto C = CaptureBase::emplace<CaptureVoid>(F, 0, nullptr);
+    // FeatureBasePtr                  f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
+    auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
+    // FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
+    FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(FactorBase::emplace<FactorQuaternionAbsolute>(f, F->getO()));
+    // FactorQuaternionAbsolutePtr c2 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
+    FactorQuaternionAbsolutePtr c2 = std::static_pointer_cast<FactorQuaternionAbsolute>(FactorBase::emplace<FactorQuaternionAbsolute>(f, F->getO()));
 
     // update solver
     ceres_manager_ptr->update();

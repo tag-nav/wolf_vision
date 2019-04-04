@@ -33,9 +33,12 @@ CeresManager ceres_mgr(problem);
 FrameBasePtr frm0 = problem->emplaceFrame(KEY_FRAME, problem->zeroState(), TimeStamp(0));
 
 // Capture, feature and factor from frm1 to frm0
-CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("ODOM 2D", 0, nullptr, pose, 3, 3, nullptr));
-FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("ODOM 2D", pose, data_cov));
-FactorPose2DPtr ctr0 = std::static_pointer_cast<FactorPose2D>(fea0->addFactor(std::make_shared<FactorPose2D>(fea0)));
+// CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("ODOM 2D", 0, nullptr, pose, 3, 3, nullptr));
+auto cap0 = CaptureBase::emplace<CaptureMotion>(frm0, "ODOM 2D", 0, nullptr, pose, 3, 3, nullptr);
+// FeatureBasePtr fea0 = cap0->addFeature(std::make_shared<FeatureBase>("ODOM 2D", pose, data_cov));
+auto fea0 = FeatureBase::emplace<FeatureBase>(cap0, "ODOM 2D", pose, data_cov);
+// FactorPose2DPtr ctr0 = std::static_pointer_cast<FactorPose2D>(fea0->addFactor(std::make_shared<FactorPose2D>(fea0)));
+FactorPose2DPtr ctr0 = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(fea0, fea0));
 
 ////////////////////////////////////////////////////////
 

@@ -37,8 +37,9 @@ TEST(Problem, Sensors)
     ProblemPtr P = Problem::create("POV 3D");
 
     // add a dummy sensor
-    SensorBasePtr S = std::make_shared<SensorBase>("Dummy", nullptr, nullptr, nullptr, 2, false);
-    P->addSensor(S);
+    // SensorBasePtr S = std::make_shared<SensorBase>("Dummy", nullptr, nullptr, nullptr, 2, false);
+    // P->addSensor(S);
+    auto S = SensorBase::emplace<SensorBase>(P->getHardware(), "Dummy", nullptr, nullptr, nullptr, 2, false);
 
     // check pointers
     ASSERT_EQ(P, S->getProblem());
@@ -54,12 +55,14 @@ TEST(Problem, Processor)
     ASSERT_FALSE(P->getProcessorMotion());
 
     // add a motion sensor and processor
-    SensorBasePtr Sm = std::make_shared<SensorOdom3D>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(), IntrinsicsOdom3D()); // with dummy intrinsics
-    P->addSensor(Sm);
+    // SensorBasePtr Sm = std::make_shared<SensorOdom3D>((Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(), IntrinsicsOdom3D()); // with dummy intrinsics
+    // P->addSensor(Sm);
+    auto Sm = SensorBase::emplace<SensorOdom3D>(P->getHardware(), (Eigen::Vector7s()<<0,0,0, 0,0,0,1).finished(), IntrinsicsOdom3D());
 
     // add motion processor
-    ProcessorMotionPtr Pm = std::make_shared<ProcessorOdom3D>(std::make_shared<ProcessorParamsOdom3D>());
-    Sm->addProcessor(Pm);
+    // ProcessorMotionPtr Pm = std::make_shared<ProcessorOdom3D>(std::make_shared<ProcessorParamsOdom3D>());
+    // Sm->addProcessor(Pm);
+    auto Pm = std::static_pointer_cast<ProcessorMotion>(ProcessorBase::emplace<ProcessorOdom3D>(Sm, std::make_shared<ProcessorParamsOdom3D>()));
 
     // check motion processor IS NOT set by addSensor <-- using InstallProcessor it should, see test Installers
     ASSERT_FALSE(P->getProcessorMotion());
@@ -83,8 +86,9 @@ TEST(Problem, Installers)
     params->time_tolerance = 0.1;
     params->max_new_features = 5;
     params->min_features_for_keyframe = 10;
-    ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
-    S->addProcessor(pt);
+    // ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
+    auto pt = ProcessorBase::emplace<ProcessorTrackerFeatureDummy>(S, ProcessorTrackerFeatureDummy(params));
+    // S->addProcessor(pt);
 
     // check motion processor IS NOT set
     ASSERT_FALSE(P->getProcessorMotion());
@@ -219,9 +223,9 @@ TEST(Problem, StateBlocks)
     params->time_tolerance            = 0.1;
     params->max_new_features          = 5;
     params->min_features_for_keyframe = 10;
-    ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
-
-    St->addProcessor(pt);
+    // ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
+    auto pt = ProcessorBase::emplace<ProcessorTrackerFeatureDummy>(St, ProcessorTrackerFeatureDummy(params));
+    // St->addProcessor(pt);
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
     // 2 state blocks, estimated
@@ -253,9 +257,10 @@ TEST(Problem, Covariances)
     params->time_tolerance            = 0.1;
     params->max_new_features          = 5;
     params->min_features_for_keyframe = 10;
-    ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
+    // ProcessorBasePtr pt = std::make_shared<ProcessorTrackerFeatureDummy>(ProcessorTrackerFeatureDummy(params));
+    auto pt = ProcessorBase::emplace<ProcessorTrackerFeatureDummy>(St, ProcessorTrackerFeatureDummy(params));
 
-    St->addProcessor(pt);
+    // St->addProcessor(pt);
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
     // 4 state blocks, estimated

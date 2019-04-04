@@ -67,29 +67,37 @@ TEST(FrameBase, LinksToTree)
     IntrinsicsOdom2D intrinsics_odo;
     intrinsics_odo.k_disp_to_disp = 1;
     intrinsics_odo.k_rot_to_rot = 1;
-    SensorOdom2DPtr S = make_shared<SensorOdom2D>(Vector3s::Zero(), intrinsics_odo);
-    P->getHardware()->addSensor(S);
-    FrameBasePtr F1 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
-    T->addFrame(F1);
-    FrameBasePtr F2 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
-    T->addFrame(F2);
-    CaptureMotionPtr C = make_shared<CaptureMotion>("MOTION", 1, S, Vector3s::Zero(), 3, 3, nullptr);
-    F1->addCapture(C);
+    // SensorOdom2DPtr S = make_shared<SensorOdom2D>(Vector3s::Zero(), intrinsics_odo);
+    // P->getHardware()->addSensor(S);
+    auto S = SensorBase::emplace<SensorOdom2D>(P->getHardware(), Vector3s::Zero(), intrinsics_odo);
+    // FrameBasePtr F1 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
+    // T->addFrame(F1);
+    auto F1 = FrameBase::emplace<FrameBase>(T, 1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
+    // FrameBasePtr F2 = make_shared<FrameBase>(1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
+    // T->addFrame(F2);
+    auto F2 = FrameBase::emplace<FrameBase>(T, 1, make_shared<StateBlock>(2), make_shared<StateBlock>(1));
+    // CaptureMotionPtr C = make_shared<CaptureMotion>("MOTION", 1, S, Vector3s::Zero(), 3, 3, nullptr);
+    // F1->addCapture(C);
+    auto C = CaptureBase::emplace<CaptureMotion>(F1, "MOTION", 1, S, Vector3s::Zero(), 3, 3, nullptr);
     /// @todo link sensor & proccessor
     ProcessorBasePtr p = std::make_shared<ProcessorOdom2D>(make_shared<ProcessorParamsOdom2D>());
-    FeatureBasePtr f = make_shared<FeatureBase>("f", Vector1s(1), Matrix<Scalar,1,1>::Identity()*.01);
-    C->addFeature(f);
-    FactorOdom2DPtr c = make_shared<FactorOdom2D>(f, F2, p);
-    f->addFactor(c);
+    // FeatureBasePtr f = make_shared<FeatureBase>("f", Vector1s(1), Matrix<Scalar,1,1>::Identity()*.01);
+    // C->addFeature(f);
+    auto f = FeatureBase::emplace<FeatureBase>(C, "f", Vector1s(1), Matrix<Scalar,1,1>::Identity()*.01);
+    // FactorOdom2DPtr c = make_shared<FactorOdom2D>(f, F2, p);
+    // f->addFactor(c);
+    auto c = FactorBase::emplace<FactorOdom2D>(f, f, F2, p);
 
+    //TODO: WARNING! I dropped this comprovations since the emplacing operation is now atomic.
     // c-by link F2 -> c not yet established
-    ASSERT_TRUE(F2->getConstrainedByList().empty());
+    // ASSERT_TRUE(F2->getConstrainedByList().empty());
+    ASSERT_FALSE(F2->getConstrainedByList().empty());
 
     // tree is inconsistent since we are missing the constrained_by link
-    ASSERT_FALSE(P->check(0));
+    // ASSERT_FALSE(P->check(0));
 
     // establish constrained_by link F2 -> c
-    F2->addConstrainedBy(c);
+    // F2->addConstrainedBy(c);
 
     // tree is now consistent
     ASSERT_TRUE(P->check(0));

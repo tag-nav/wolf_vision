@@ -2457,10 +2457,13 @@ TEST_F(FactorIMU_ODOM_biasTest_Move_NonNullBiasRotY, VarQ1B1B2P2Q2_InvarP1V1V2_i
     Eigen::MatrixXs featureFix_cov(6,6);
     featureFix_cov = Eigen::MatrixXs::Identity(6,6); 
     featureFix_cov(5,5) = 0.1;
-    CaptureBasePtr capfix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6, nullptr));
-    FeatureBasePtr ffix = capfix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
-    FactorFix3DPtr fac_fix = std::static_pointer_cast<FactorPose3D>(ffix->addFactor(std::make_shared<FactorPose3D>(ffix)));
-    
+    // CaptureBasePtr capfix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6, nullptr));
+    auto capfix = CaptureBase::emplace<CaptureMotion>(origin_KF, 0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6, nullptr);
+    // FeatureBasePtr ffix = capfix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
+    auto ffix = FeatureBase::emplace<FeatureBase>(capfix, "ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov);
+    // FactorFix3DPtr fac_fix = std::static_pointer_cast<FactorPose3D>(ffix->addFactor(std::make_shared<FactorPose3D>(ffix)));
+    FactorFix3DPtr fac_fix = std::static_pointer_cast<FactorPose3D>(FactorBase::emplace<FactorPose3D>(ffix, ffix));
+
     //prepare problem for solving
     origin_KF->getP()->fix();
     origin_KF->getO()->unfix();
@@ -2515,10 +2518,13 @@ TEST_F(FactorIMU_ODOM_biasTest_Move_NonNullBiasRotXY, VarQ1B1B2P2Q2_InvarP1V1V2_
     Eigen::MatrixXs featureFix_cov(6,6);
     featureFix_cov = Eigen::MatrixXs::Identity(6,6); 
     featureFix_cov(5,5) = 0.1;
-    CaptureBasePtr capfix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6, nullptr));
-    FeatureBasePtr ffix = capfix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
-    FactorFix3DPtr fac_fix = std::static_pointer_cast<FactorPose3D>(ffix->addFactor(std::make_shared<FactorPose3D>(ffix)));
-    
+    // CaptureBasePtr capfix = origin_KF->addCapture(std::make_shared<CaptureMotion>(0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6, nullptr));
+    auto capfix = CaptureBase::emplace<CaptureMotion>(origin_KF, 0, nullptr, (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), 7, 6, nullptr);
+    // FeatureBasePtr ffix = capfix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov));
+    auto ffix = FeatureBase::emplace<FeatureBase>(capfix, "ODOM 3D", (Eigen::Vector7s() << 0,0,0, 0,0,0,1).finished(), featureFix_cov);
+    // FactorFix3DPtr fac_fix = std::static_pointer_cast<FactorPose3D>(ffix->addFactor(std::make_shared<FactorPose3D>(ffix)));
+    FactorFix3DPtr fac_fix = std::static_pointer_cast<FactorPose3D>(FactorBase::emplace<FactorPose3D>(ffix, ffix));
+
     //prepare problem for solving
     origin_KF->getP()->fix();
     origin_KF->getO()->unfix();

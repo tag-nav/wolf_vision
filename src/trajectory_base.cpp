@@ -18,13 +18,8 @@ TrajectoryBase::~TrajectoryBase()
 
 FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
 {
-    // link up
-    _frame_ptr->setTrajectoryPtr(shared_from_this());
-    _frame_ptr->setProblem(getProblem());
-
     if (_frame_ptr->isKey())
     {
-        _frame_ptr->registerNewStateBlocks();
         if (last_key_frame_ptr_ == nullptr || last_key_frame_ptr_->getTimeStamp() < _frame_ptr->getTimeStamp())
             last_key_frame_ptr_ = _frame_ptr;
 

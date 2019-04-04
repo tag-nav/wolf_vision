@@ -72,23 +72,39 @@ TEST(ProcessorFrameNearestNeighborFilter, PointInEllipseRotated)
   auto stateblock_optr4 = std::make_shared<wolf::StateBlock>(state4.tail<1>());
 
   // create Keyframes
-  F1 = std::make_shared<wolf::FrameBase>(wolf::KEY_FRAME,
-                                         1,
-                                         stateblock_pptr1,
-                                         stateblock_optr1);
-  F2 = std::make_shared<wolf::FrameBase>(wolf::KEY_FRAME,
-                                         1,
-                                         stateblock_pptr2,
-                                         stateblock_optr2);
-  F3 = std::make_shared<wolf::FrameBase>(wolf::KEY_FRAME,
-                                         1,
-                                         stateblock_pptr3,
-                                         stateblock_optr3);
-  F4 = std::make_shared<wolf::FrameBase>(wolf::KEY_FRAME,
-                                         1,
-                                         stateblock_pptr4,
-                                         stateblock_optr4);
+  // F1 = std::make_shared<wolf::FrameBase>(wolf::KEY_FRAME,
+  //                                        1,
+  //                                        stateblock_pptr1,
+  //                                        stateblock_optr1);
+  // F2 = std::make_shared<wolf::FrameBase>(wolf::KEY_FRAME,
+  //                                        1,
+  //                                        stateblock_pptr2,
+  //                                        stateblock_optr2);
+  // F3 = std::make_shared<wolf::FrameBase>(wolf::KEY_FRAME,
+  //                                        1,
+  //                                        stateblock_pptr3,
+  //                                        stateblock_optr3);
+  // F4 = std::make_shared<wolf::FrameBase>(wolf::KEY_FRAME,
+  //                                        1,
+  //                                        stateblock_pptr4,
+  //                                        stateblock_optr4);
 
+  F1 = wolf::FrameBase::emplace<wolf::FrameBase>(problem->getTrajectory(),wolf::KEY_FRAME,
+                                                 1,
+                                                 stateblock_pptr1,
+                                                 stateblock_optr1);
+  F2 = wolf::FrameBase::emplace<wolf::FrameBase>(problem->getTrajectory(),wolf::KEY_FRAME,
+                                                 1,
+                                                 stateblock_pptr2,
+                                                 stateblock_optr2);
+  F3 = wolf::FrameBase::emplace<wolf::FrameBase>(problem->getTrajectory(),wolf::KEY_FRAME,
+                                                 1,
+                                                 stateblock_pptr3,
+                                                 stateblock_optr3);
+  F4 = wolf::FrameBase::emplace<wolf::FrameBase>(problem->getTrajectory(),wolf::KEY_FRAME,
+                                                 1,
+                                                 stateblock_pptr4,
+                                                 stateblock_optr4);
   // add dummy capture
   capture_dummy = std::make_shared<wolf::CaptureBase>("DUMMY",
                                                       1.0,
@@ -99,10 +115,10 @@ TEST(ProcessorFrameNearestNeighborFilter, PointInEllipseRotated)
   F4->addCapture(capture_dummy);
 
   // Add first three states to trajectory
-  problem->getTrajectory()->addFrame(F1);
-  problem->getTrajectory()->addFrame(F2);
-  problem->getTrajectory()->addFrame(F3);
-  problem->getTrajectory()->addFrame(F4);
+  // problem->getTrajectory()->addFrame(F1);
+  // problem->getTrajectory()->addFrame(F2);
+  // problem->getTrajectory()->addFrame(F3);
+  // problem->getTrajectory()->addFrame(F4);
 
   // Add same covariances for all states
   Eigen::Matrix2s position_covariance_matrix;
@@ -216,19 +232,21 @@ int main(int argc, char **argv)
   processor_params_point2d->buffer_size_ = 0;         // just exclude identical frameIDs
   processor_params_point2d->distance_type_ = wolf::LoopclosureDistanceType::LC_POINT_ELLIPSE;
 
-  processor_ptr_point2d = std::make_shared<DummyLoopCloser>(processor_params_point2d);
+  // processor_ptr_point2d = std::make_shared<DummyLoopCloser>(processor_params_point2d);
+  processor_ptr_point2d = std::static_pointer_cast<wolf::ProcessorFrameNearestNeighborFilter>(wolf::ProcessorBase::emplace<DummyLoopCloser>(sensor_ptr, processor_params_point2d));
   processor_ptr_point2d->setName("processor2Dpoint");
 
-  sensor_ptr->addProcessor(processor_ptr_point2d);
+  // sensor_ptr->addProcessor(processor_ptr_point2d);
 
   processor_params_ellipse2d->probability_ = 0.95;
   processor_params_ellipse2d->buffer_size_ = 0;         // just exclude identical frameIDs
   processor_params_ellipse2d->distance_type_ = wolf::LoopclosureDistanceType::LC_ELLIPSE_ELLIPSE;
 
-  processor_ptr_ellipse2d = std::make_shared<DummyLoopCloser>(processor_params_ellipse2d);
+  // processor_ptr_ellipse2d = std::make_shared<DummyLoopCloser>(processor_params_ellipse2d);
+  processor_ptr_ellipse2d = std::static_pointer_cast<wolf::ProcessorFrameNearestNeighborFilter>(wolf::ProcessorBase::emplace<DummyLoopCloser>(sensor_ptr, processor_params_ellipse2d));
   processor_ptr_ellipse2d->setName("processor2Dellipse");
 
-  sensor_ptr->addProcessor(processor_ptr_ellipse2d);
+  // sensor_ptr->addProcessor(processor_ptr_ellipse2d);
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

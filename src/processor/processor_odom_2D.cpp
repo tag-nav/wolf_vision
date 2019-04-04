@@ -154,10 +154,12 @@ CaptureMotionPtr ProcessorOdom2D::createCapture(const TimeStamp& _ts, const Sens
 
 FactorBasePtr ProcessorOdom2D::emplaceFactor(FeatureBasePtr _feature, CaptureBasePtr _capture_origin)
 {
-    FactorOdom2DPtr fac_odom = std::make_shared<FactorOdom2D>(_feature, _capture_origin->getFrame(),
-                                                                      shared_from_this());
-    _feature->addFactor(fac_odom);
-    _capture_origin->getFrame()->addConstrainedBy(fac_odom);
+    // FactorOdom2DPtr fac_odom = std::make_shared<FactorOdom2D>(_feature, _capture_origin->getFrame(),
+    //                                                           shared_from_this());
+    auto fac_odom = FactorBase::emplace<FactorOdom2D>(_feature, _feature, _capture_origin->getFrame(),
+                                                      shared_from_this());
+    // _feature->addFactor(fac_odom);
+    // _capture_origin->getFrame()->addConstrainedBy(fac_odom);
     return fac_odom;
 }
 
@@ -187,13 +189,6 @@ ProcessorBasePtr ProcessorOdom2D::create(const std::string& _unique_name, const 
     prc_ptr->setName(_unique_name);
 
     return prc_ptr;
-}
-
-void ProcessorOdom2D::link(SensorBasePtr _sen_ptr)
-{
-    std::cout << "Linking ProcessorOdom2D" << std::endl;
-    _sen_ptr->addProcessor(shared_from_this());
-    this->setSensorPtr(_sen_ptr);
 }
 
 }

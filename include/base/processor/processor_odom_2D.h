@@ -80,18 +80,7 @@ class ProcessorOdom2D : public ProcessorMotion
         // Factory method
     public:
         static ProcessorBasePtr create(const std::string& _unique_name, const ProcessorParamsBasePtr _params, const SensorBasePtr sensor_ptr = nullptr);
-    void link(SensorBasePtr);
-    template<typename classType, typename... T>
-    static std::shared_ptr<ProcessorOdom2D> emplace(SensorBasePtr _sen_ptr, T&&... all);
 };
-
-template<typename classType, typename... T>
-std::shared_ptr<ProcessorOdom2D> ProcessorOdom2D::emplace(SensorBasePtr _sen_ptr, T&&... all)
-{
-    ProcessorOdom2DPtr prc = std::make_shared<classType>(std::forward<T>(all)...);
-    prc->link(_sen_ptr);
-    return prc;
-}
 
 inline Eigen::VectorXs ProcessorOdom2D::deltaZero() const
 {

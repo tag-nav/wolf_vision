@@ -79,7 +79,8 @@ Problem::~Problem()
 
 void Problem::addSensor(SensorBasePtr _sen_ptr)
 {
-    getHardware()->addSensor(_sen_ptr);
+    // getHardware()->addSensor(_sen_ptr);
+    _sen_ptr->link(getHardware());
 }
 
 SensorBasePtr Problem::installSensor(const std::string& _sen_type, //
@@ -123,7 +124,8 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
 
     ProcessorBasePtr prc_ptr = ProcessorFactory::get().create(uppercase(_prc_type), _unique_processor_name, _prc_params, _corresponding_sensor_ptr);
     prc_ptr->configure(_corresponding_sensor_ptr);
-    _corresponding_sensor_ptr->addProcessor(prc_ptr);
+    // _corresponding_sensor_ptr->addProcessor(prc_ptr);
+    prc_ptr->link(_corresponding_sensor_ptr);
 
     // setting the origin in all processor motion if origin already setted
     if (prc_ptr->isMotion() && prior_is_set_)
@@ -216,7 +218,8 @@ FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, //
                                    const TimeStamp& _time_stamp)
 {
     FrameBasePtr frm = FrameFactory::get().create(_frame_structure, _frame_key_type, _time_stamp, _frame_state);
-    trajectory_ptr_->addFrame(frm);
+    // trajectory_ptr_->addFrame(frm);
+    frm->link(trajectory_ptr_);
     return frm;
 }
 
@@ -681,12 +684,16 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
         // create origin capture with the given state as data
         // Capture fix only takes 3D position and Quaternion orientation
         CapturePosePtr init_capture;
+        CaptureBasePtr init_capture_base;
+        // init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
+        // init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state, _prior_cov);
         if (trajectory_ptr_->getFrameStructure() == "POV 3D")
-            init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
+            init_capture_base = CaptureBase::emplace<CapturePose>(origin_keyframe, _ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
         else
-            init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state, _prior_cov);
+            init_capture_base = CaptureBase::emplace<CapturePose>(origin_keyframe, _ts, nullptr, _prior_state, _prior_cov);
 
-        origin_keyframe->addCapture(init_capture);
+        init_capture = std::static_pointer_cast<CapturePose>(init_capture_base);
+        // origin_keyframe->addCapture(init_capture);
 
         // emplace feature and factor
         init_capture->emplaceFeatureAndFactor();

@@ -135,14 +135,15 @@ void ProcessorTrackerLandmark::establishFactors()
                                                      lmk);
         if (fac_ptr != nullptr) // factor links
         {
-            last_feature->addFactor(fac_ptr);
-            lmk->addConstrainedBy(fac_ptr);
-            FrameBasePtr frm = fac_ptr->getFrameOther();
-            if (frm)
-                frm->addConstrainedBy(fac_ptr);
-            CaptureBasePtr cap = fac_ptr->getCaptureOther();
-            if (cap)
-                cap->addConstrainedBy(fac_ptr);
+            // last_feature->addFactor(fac_ptr);
+            fac_ptr->link(last_feature);
+            // lmk->addConstrainedBy(fac_ptr);
+            // FrameBasePtr frm = fac_ptr->getFrameOther();
+            // if (frm)
+            //     frm->addConstrainedBy(fac_ptr);
+            // CaptureBasePtr cap = fac_ptr->getCaptureOther();
+            // if (cap)
+            //     cap->addConstrainedBy(fac_ptr);
         }
     }
 }

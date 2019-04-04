@@ -99,8 +99,6 @@ FeatureBasePtr CaptureBase::addFeature(FeatureBasePtr _ft_ptr)
 {
     //std::cout << "Adding feature" << std::endl;
     feature_list_.push_back(_ft_ptr);
-    _ft_ptr->setCapturePtr(shared_from_this());
-    _ft_ptr->setProblem(getProblem());
     return _ft_ptr;
 }
 

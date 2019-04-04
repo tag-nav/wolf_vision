@@ -41,10 +41,13 @@ FrameBasePtr frm0 = problem_ptr->emplaceFrame(KEY_FRAME, problem_ptr->zeroState(
 FrameBasePtr frm1 = problem_ptr->emplaceFrame(KEY_FRAME, delta, TimeStamp(1));
 
 // Capture, feature and factor from frm1 to frm0
-CaptureBasePtr cap1 = frm1->addCapture(std::make_shared<CaptureMotion>("ODOM 3D", 1, nullptr, delta, 7, 6, nullptr));
-FeatureBasePtr fea1 = cap1->addFeature(std::make_shared<FeatureBase>("ODOM 3D", delta, data_cov));
-FactorOdom3DPtr ctr1 = std::static_pointer_cast<FactorOdom3D>(fea1->addFactor(std::make_shared<FactorOdom3D>(fea1, frm0, nullptr))); // create and add
-FactorBasePtr dummy = frm0->addConstrainedBy(ctr1);
+// CaptureBasePtr cap1 = frm1->addCapture(std::make_shared<CaptureMotion>("ODOM 3D", 1, nullptr, delta, 7, 6, nullptr));
+auto cap1 = CaptureBase::emplace<CaptureMotion>(frm1, "ODOM 3D", 1, nullptr, delta, 7, 6, nullptr);
+// FeatureBasePtr fea1 = cap1->addFeature(std::make_shared<FeatureBase>("ODOM 3D", delta, data_cov));
+auto fea1 = FeatureBase::emplace<FeatureBase>(cap1, "ODOM 3D", delta, data_cov);
+// FactorOdom3DPtr ctr1 = std::static_pointer_cast<FactorOdom3D>(fea1->addFactor(std::make_shared<FactorOdom3D>(fea1, frm0, nullptr))); // create and add
+FactorOdom3DPtr ctr1 = std::static_pointer_cast<FactorOdom3D>(FactorBase::emplace<FactorOdom3D>(fea1, fea1, frm0, nullptr)); // create and add
+// FactorBasePtr dummy = frm0->addConstrainedBy(ctr1);
 
 ////////////////////////////////////////////////////////
 

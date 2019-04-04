@@ -83,8 +83,6 @@ class NodeBase
         void setName(const std::string& _name);
         ProblemPtr getProblem() const;
         virtual void setProblem(ProblemPtr _prob_ptr);
-        // template<typename classReturn, typename classType, typename... T>
-        // static std::shared_ptr<classReturn> emplace(T&&... all);
 };
 
 } // namespace wolf

@@ -54,16 +54,6 @@ void FeatureBase::remove()
 FactorBasePtr FeatureBase::addFactor(FactorBasePtr _co_ptr)
 {
     factor_list_.push_back(_co_ptr);
-    _co_ptr->setFeaturePtr(shared_from_this());
-    _co_ptr->setProblem(getProblem());
-    // add factor to be added in solver
-    if (getProblem() != nullptr)
-    {
-        if (_co_ptr->getStatus() == FAC_ACTIVE)
-            getProblem()->addFactor(_co_ptr);
-    }
-    else
-        WOLF_TRACE("WARNING: ADDING CONSTRAINT ", _co_ptr->id(), " TO FEATURE ", this->id(), " NOT CONNECTED WITH PROBLEM.");
     return _co_ptr;
 }
 
@@ -148,7 +138,7 @@ Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) con
         std::cout << "Linking FeatureBase" << std::endl;
         _cpt_ptr->addFeature(shared_from_this());
         this->setCapturePtr(_cpt_ptr);
-        this->setProblem(getProblem());
+        this->setProblem(_cpt_ptr->getProblem());
     }
 
 } // namespace wolf

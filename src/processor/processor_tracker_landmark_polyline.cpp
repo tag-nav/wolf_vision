@@ -813,8 +813,10 @@ void ProcessorTrackerLandmarkPolyline::establishFactors()
                 if (lmk_next_point_id > polyline_landmark->getLastId())
                     lmk_next_point_id -= polyline_landmark->getNPoints();
                 //std::cout << "point-line: landmark points " << lmk_point_id << ", " << lmk_next_point_id << std::endl;
-                last_feature->addFactor(std::make_shared<FactorPointToLine2D>(polyline_feature, polyline_landmark, shared_from_this(),
-                                                                                      ftr_point_id, lmk_point_id, lmk_next_point_id));
+                // last_feature->addFactor(std::make_shared<FactorPointToLine2D>(polyline_feature, polyline_landmark, shared_from_this(),
+                //                                                                       ftr_point_id, lmk_point_id, lmk_next_point_id));
+                FactorBase::emplace<FactorPointToLine2D>(last_feature, polyline_feature, polyline_landmark, shared_from_this(),
+                                                         ftr_point_id, lmk_point_id, lmk_next_point_id);
                 //std::cout << "factor added" << std::endl;
             }
 
@@ -826,8 +828,10 @@ void ProcessorTrackerLandmarkPolyline::establishFactors()
                 if (lmk_prev_point_id < polyline_landmark->getFirstId())
                     lmk_prev_point_id += polyline_landmark->getNPoints();
                 //std::cout << "point-line: landmark points " << lmk_point_id << ", " << lmk_prev_point_id << std::endl;
-                last_feature->addFactor(std::make_shared<FactorPointToLine2D>(polyline_feature, polyline_landmark, shared_from_this(),
-                                                                                      ftr_point_id, lmk_point_id, lmk_prev_point_id));
+                // last_feature->addFactor(std::make_shared<FactorPointToLine2D>(polyline_feature, polyline_landmark, shared_from_this(),
+                //                                                                       ftr_point_id, lmk_point_id, lmk_prev_point_id));
+                FactorBase::emplace<FactorPointToLine2D>(last_feature, polyline_feature, polyline_landmark, shared_from_this(),
+                                                         ftr_point_id, lmk_point_id, lmk_prev_point_id);
                 //std::cout << "factor added" << std::endl;
             }
 
@@ -839,8 +843,10 @@ void ProcessorTrackerLandmarkPolyline::establishFactors()
 				//std::cout << "landmark first id:" << polyline_landmark->getFirstId() << std::endl;
 				//std::cout << "landmark last id:" << polyline_landmark->getLastId() << std::endl;
 				//std::cout << "landmark n points:" << polyline_landmark->getNPoints() << std::endl;
-                last_feature->addFactor(std::make_shared<FactorPoint2D>(polyline_feature, polyline_landmark, shared_from_this(),
-                                                                                ftr_point_id, lmk_point_id));
+                // last_feature->addFactor(std::make_shared<FactorPoint2D>(polyline_feature, polyline_landmark, shared_from_this(),
+                //                                                                 ftr_point_id, lmk_point_id));
+                FactorBase::emplace<FactorPoint2D>(last_feature, polyline_feature, polyline_landmark, shared_from_this(),
+                                                   ftr_point_id, lmk_point_id);
                 //std::cout << "factor added" << std::endl;
             }
         }
