@@ -215,12 +215,8 @@ TEST_F(FactorAutodiffApriltag_class, Check_tree)
             CTR_ACTIVE
     );
 
-    FactorAutodiffApriltagPtr ctr0 = std::static_pointer_cast<FactorAutodiffApriltag>(f1->addFactor(constraint));
+    f1->addFactor(constraint);
     lmk1->addConstrainedBy(constraint);
-    //check is returning true even without the lines below....
-    WOLF_WARN("I think the lines below are needed... to be checked !")
-    F1->addConstrainedBy(constraint);
-    f1->addConstrainedBy(constraint);
 
     ASSERT_TRUE(problem->check(0));
 }
@@ -236,10 +232,8 @@ TEST_F(FactorAutodiffApriltag_class, solve_F1_P_perturbated)
             CTR_ACTIVE
     );
 
-    FactorAutodiffApriltagPtr ctr0 = std::static_pointer_cast<FactorAutodiffApriltag>(f1->addFactor(constraint));
+    f1->addFactor(constraint);
     lmk1->addConstrainedBy(constraint);
-    F1->addConstrainedBy(constraint);
-    f1->addConstrainedBy(constraint);
 
     // unfix F1, perturbate state
     F1->unfix();
@@ -274,10 +268,8 @@ TEST_F(FactorAutodiffApriltag_class, solve_F1_O_perturbated)
             CTR_ACTIVE
     );
 
-    FactorAutodiffApriltagPtr ctr0 = std::static_pointer_cast<FactorAutodiffApriltag>(f1->addFactor(constraint));
+    f1->addFactor(constraint);
     lmk1->addConstrainedBy(constraint);
-    F1->addConstrainedBy(constraint);
-    f1->addConstrainedBy(constraint);
 
     // unfix F1, perturbate state
     F1->unfix();
@@ -314,10 +306,8 @@ TEST_F(FactorAutodiffApriltag_class, Check_initialization)
             CTR_ACTIVE
     );
 
-    FactorAutodiffApriltagPtr ctr0 = std::static_pointer_cast<FactorAutodiffApriltag>(f1->addFactor(constraint));
+    f1->addFactor(constraint);
     lmk1->addConstrainedBy(constraint);
-    F1->addConstrainedBy(constraint);
-    f1->addConstrainedBy(constraint);
 
     ASSERT_MATRIX_APPROX(F1->getState(), pose_robot, 1e-6);
     ASSERT_MATRIX_APPROX(f1->getMeasurement(), pose_landmark, 1e-6);
@@ -336,10 +326,8 @@ TEST_F(FactorAutodiffApriltag_class, solve_L1_P_perturbated)
             CTR_ACTIVE
     );
 
-    FactorAutodiffApriltagPtr ctr0 = std::static_pointer_cast<FactorAutodiffApriltag>(f1->addFactor(constraint));
+    f1->addFactor(constraint);
     lmk1->addConstrainedBy(constraint);
-    F1->addConstrainedBy(constraint);
-    f1->addConstrainedBy(constraint);
 
 
     // unfix lmk1, perturbate state
@@ -375,10 +363,8 @@ TEST_F(FactorAutodiffApriltag_class, solve_L1_O_perturbated)
             CTR_ACTIVE
     );
 
-    FactorAutodiffApriltagPtr ctr0 = std::static_pointer_cast<FactorAutodiffApriltag>(f1->addFactor(constraint));
+    f1->addFactor(constraint);
     lmk1->addConstrainedBy(constraint);
-    F1->addConstrainedBy(constraint);
-    f1->addConstrainedBy(constraint);
 
     // unfix F1, perturbate state
     lmk1->unfix();
@@ -414,10 +400,8 @@ TEST_F(FactorAutodiffApriltag_class, solve_L1_PO_perturbated)
             CTR_ACTIVE
     );
 
-    FactorAutodiffApriltagPtr ctr0 = std::static_pointer_cast<FactorAutodiffApriltag>(f1->addFactor(constraint));
+    f1->addFactor(constraint);
     lmk1->addConstrainedBy(constraint);
-    F1->addConstrainedBy(constraint);
-    f1->addConstrainedBy(constraint);
 
     // Change setup
     Vector3s p_w_r, p_r_c, p_c_l, p_w_l;
