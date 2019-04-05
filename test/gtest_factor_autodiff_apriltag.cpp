@@ -329,7 +329,6 @@ TEST_F(FactorAutodiffApriltag_class, solve_L1_P_perturbated)
     f1->addFactor(constraint);
     lmk1->addConstrainedBy(constraint);
 
-
     // unfix lmk1, perturbate state
     lmk1->unfix();
     Vector3s p0 = Vector3s::Random() * 0.25;
@@ -432,6 +431,7 @@ TEST_F(FactorAutodiffApriltag_class, solve_L1_PO_perturbated)
     // Change Frame
     F1->getP()->setState(p_w_r);
     F1->getO()->setState(q_w_r.coeffs());
+    F1->fix();
     ASSERT_TRUE(std::find(problem->getStateBlockPtrList().begin(), problem->getStateBlockPtrList().end(), F1->getP()) != problem->getStateBlockPtrList().end());
     ASSERT_TRUE(std::find(problem->getStateBlockPtrList().begin(), problem->getStateBlockPtrList().end(), F1->getO()) != problem->getStateBlockPtrList().end());
     ASSERT_TRUE(F1->getP()->stateUpdated());
@@ -457,17 +457,15 @@ TEST_F(FactorAutodiffApriltag_class, solve_L1_PO_perturbated)
     Quaternions e0_quat = q_w_l * exp_q(Vector3s::Random() * 0.1);
     lmk1->getP()->setState(e0_pos);
     lmk1->getO()->setState(e0_quat.coeffs());
-    F1->fix();
-    S->fixExtrinsics();
+    ASSERT_TRUE(lmk1->getP()->stateUpdated());
+    ASSERT_TRUE(lmk1->getO()->stateUpdated());
 
 //    solve
     std::string report = ceres_manager->solve(SolverManager::ReportVerbosity::QUIET); // 0: nothing, 1: BriefReport, 2: FullReport
     //WOLF_DEBUG("Landmark state after solve: ");
     //WOLF_DEBUG(lmk1->getState().transpose());
-    t_w_r << p_w_r, q_w_r.coeffs();
-    t_w_l << p_w_l, q_w_l.coeffs();
-    ASSERT_MATRIX_APPROX(F1->getState(), t_w_r, 1e-6);
-    ASSERT_MATRIX_APPROX(lmk1->getState(), t_w_l, 1e-6);
+    ASSERT_MATRIX_APPROX(F1->getState().transpose(), t_w_r.transpose(), 1e-6);
+    ASSERT_MATRIX_APPROX(lmk1->getState().transpose(), t_w_l.transpose(), 1e-6);
 
 }
 
