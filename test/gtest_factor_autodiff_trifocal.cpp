@@ -134,28 +134,35 @@ class FactorAutodiffTrifocalTest : public testing::Test{
             Matrix2s pix_cov; pix_cov.setIdentity();
 
             F1 = problem->emplaceFrame(KEY_FRAME, pose1, 1.0);
-            I1 = std::make_shared<CaptureImage>(1.0, camera, cv::Mat(2,2,CV_8UC1));
-            F1-> addCapture(I1);
-            f1 = std::make_shared<FeatureBase>("PIXEL", pix, pix_cov); // pixel at origin
-            I1-> addFeature(f1);
+            // I1 = std::make_shared<CaptureImage>(1.0, camera, cv::Mat(2,2,CV_8UC1));
+            I1 = std::static_pointer_cast<CaptureImage>(CaptureBase::emplace<CaptureImage>(F1, 1.0, camera, cv::Mat(2,2,CV_8UC1)));
+            // F1-> addCapture(I1);
+            // f1 = std::make_shared<FeatureBase>("PIXEL", pix, pix_cov); // pixel at origin
+            f1 = FeatureBase::emplace<FeatureBase>(I1, "PIXEL", pix, pix_cov); // pixel at origin
+            // I1-> addFeature(f1);
 
             F2 = problem->emplaceFrame(KEY_FRAME, pose2, 2.0);
-            I2 = std::make_shared<CaptureImage>(2.0, camera, cv::Mat(2,2,CV_8UC1));
-            F2-> addCapture(I2);
-            f2 = std::make_shared<FeatureBase>("PIXEL", pix, pix_cov); // pixel at origin
-            I2-> addFeature(f2);
+            // I2 = std::make_shared<CaptureImage>(2.0, camera, cv::Mat(2,2,CV_8UC1));
+            I2 = std::static_pointer_cast<CaptureImage>((CaptureBase::emplace<CaptureImage>(F2, 2.0, camera, cv::Mat(2,2,CV_8UC1))));
+            // F2-> addCapture(I2);
+            // f2 = std::make_shared<FeatureBase>("PIXEL", pix, pix_cov); // pixel at origin
+            f2 = FeatureBase::emplace<FeatureBase>(I2, "PIXEL", pix, pix_cov); // pixel at origin
+            // I2-> addFeature(f2);
 
             F3 = problem->emplaceFrame(KEY_FRAME, pose3, 3.0);
-            I3 = std::make_shared<CaptureImage>(3.0, camera, cv::Mat(2,2,CV_8UC1));
-            F3-> addCapture(I3);
-            f3 = std::make_shared<FeatureBase>("PIXEL", pix, pix_cov); // pixel at origin
-            I3-> addFeature(f3);
+            // I3 = std::make_shared<CaptureImage>(3.0, camera, cv::Mat(2,2,CV_8UC1));
+            I3 = std::static_pointer_cast<CaptureImage>(CaptureBase::emplace<CaptureImage>(F3, 3.0, camera, cv::Mat(2,2,CV_8UC1)));
+            // F3-> addCapture(I3);
+            // f3 = std::make_shared<FeatureBase>("PIXEL", pix, pix_cov); // pixel at origin
+            f3 = FeatureBase::emplace<FeatureBase>(I3, "PIXEL", pix, pix_cov); // pixel at origin
+            // I3-> addFeature(f3);
 
             // trifocal factor
-            c123 = std::make_shared<FactorAutodiffTrifocal>(f1, f2, f3, proc_trifocal, false, FAC_ACTIVE);
-            f3   ->addFactor   (c123);
-            f1   ->addConstrainedBy(c123);
-            f2   ->addConstrainedBy(c123);
+            // c123 = std::make_shared<FactorAutodiffTrifocal>(f1, f2, f3, proc_trifocal, false, FAC_ACTIVE);
+            c123 = std::static_pointer_cast<FactorAutodiffTrifocal>(FactorBase::emplace<FactorAutodiffTrifocal>(f3, f1, f2, f3, proc_trifocal, false, FAC_ACTIVE));
+            // f3   ->addFactor   (c123);
+            // f1   ->addConstrainedBy(c123);
+            // f2   ->addConstrainedBy(c123);
         }
 };
 
