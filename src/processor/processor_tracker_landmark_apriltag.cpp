@@ -762,33 +762,35 @@ void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
 
     // std::cout << "last_feature_list.size(): " << last_feature_list.size() << std::endl;
     // std::cout << "ori_feature_list.size(): " << ori_feature_list.size() << std::endl;
+    if (last_feature_list.size() == 0 || ori_feature_list.size() == 0){
+        return;
+    }
     
     // Among landmarks detected in origin and last, find the one that has the smallest error ratio (best confidence)
     Scalar lowest_ration = 1;  // rep_error1/rep_error2 cannot be higher than 1
     FeatureApriltagPtr best_feature;
     bool useable_feature = false;
-    if (last_feature_list.size() > 0 && ori_feature_list.size() > 0){
-        for (auto it_last = last_feature_list.begin(); it_last != last_feature_list.end(); it_last++){
-            FeatureApriltagPtr last_feat_ptr = std::static_pointer_cast<FeatureApriltag>(*it_last);
-            for (auto it_ori = ori_feature_list.begin(); it_ori != ori_feature_list.end(); it_ori++){
-                FeatureApriltagPtr ori_feat_ptr =  std::static_pointer_cast<FeatureApriltag>(*it_ori);
-                if (ori_feat_ptr->getTagId() == last_feat_ptr->getTagId()){
-                    Scalar ratio = ori_feat_ptr->getRepError1() / ori_feat_ptr->getRepError2(); 
-                    //if (ratio < lowest_ration){
-                    if (last_feat_ptr->getUserotation() && (ratio < lowest_ration)){
-                        useable_feature = true;
-                        lowest_ration = ratio;
-                        best_feature = last_feat_ptr;
-                        // std::cout << "Best feature id: " << best_feature->getTagId() << std::endl;
-                    }
+    for (auto it_last = last_feature_list.begin(); it_last != last_feature_list.end(); it_last++){
+        FeatureApriltagPtr last_feat_ptr = std::static_pointer_cast<FeatureApriltag>(*it_last);
+        for (auto it_ori = ori_feature_list.begin(); it_ori != ori_feature_list.end(); it_ori++){
+            FeatureApriltagPtr ori_feat_ptr =  std::static_pointer_cast<FeatureApriltag>(*it_ori);
+            if (ori_feat_ptr->getTagId() == last_feat_ptr->getTagId()){
+                Scalar ratio = ori_feat_ptr->getRepError1() / ori_feat_ptr->getRepError2();
+                //if (ratio < lowest_ration){
+                if (last_feat_ptr->getUserotation() && (ratio < lowest_ration)){
+                    useable_feature = true;
+                    lowest_ration = ratio;
+                    best_feature = last_feat_ptr;
+                    // std::cout << "Best feature id: " << best_feature->getTagId() << std::endl;
                 }
             }
         }
     }
     // If there is no common feature between the two images, the continuity is broken and 
     // nothing can be estimated. In the case of aprilslam alone, this result in a broken factor map
-    if (!useable_feature)
+    if (!useable_feature){
         return;
+    }
     
     // std::cout << "Best feature id after: " << best_feature->getTagId() << std::endl;
     // Retrieve cam to landmark transform
@@ -813,6 +815,7 @@ void ProcessorTrackerLandmarkApriltag::reestimateLastFrame(){
             w_M_lmk = Eigen::Translation<Scalar,3>(w_t_lmk) * w_q_lmk;
         }
     }
+
     // Compute last frame estimate
     Eigen::Affine3ds w_M_last = w_M_lmk * (last_M_cam * cam_M_lmk).inverse();
 
