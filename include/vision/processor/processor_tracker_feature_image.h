@@ -2,7 +2,7 @@
 #define PROCESSOR_TRACKER_FEATURE_IMAGE_H
 
 // Wolf includes
-#include "base/sensor/sensor_camera.h"
+#include "vision/sensor/sensor_camera.h"
 #include "vision/capture/capture_image.h"
 #include "vision/feature/feature_point_image.h"
 #include "base/state_block.h"

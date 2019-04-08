@@ -4,7 +4,7 @@
 //Wolf includes
 #include "base/capture/capture_base.h"
 #include "vision/feature/feature_point_image.h"
-#include "base/sensor/sensor_camera.h"
+#include "vision/sensor/sensor_camera.h"
 
 // Vision Utils includes
 #include "vision_utils/vision_utils.h"
