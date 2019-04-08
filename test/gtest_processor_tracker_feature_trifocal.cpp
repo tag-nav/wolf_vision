@@ -5,9 +5,9 @@
 
 #include "vision_utils.h"
 
-#include "base/processor/processor_tracker_feature_trifocal.h"
+#include "vision/processor/processor_tracker_feature_trifocal.h"
 #include "base/processor/processor_odom_3D.h"
-#include "base/capture/capture_image.h"
+#include "vision/capture/capture_image.h"
 #include "base/sensor/sensor_camera.h"
 
 using namespace Eigen;

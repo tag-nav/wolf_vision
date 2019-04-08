@@ -1,9 +1,9 @@
-#include "base/processor/processor_tracker_landmark_image.h"
+#include "vision/processor/processor_tracker_landmark_image.h"
 
-#include "base/capture/capture_image.h"
-#include "base/factor/factor_AHP.h"
+#include "vision/capture/capture_image.h"
+#include "vision/factor/factor_AHP.h"
 #include "base/feature/feature_base.h"
-#include "base/feature/feature_point_image.h"
+#include "vision/feature/feature_point_image.h"
 #include "base/frame_base.h"
 #include "base/logging.h"
 #include "base/map_base.h"

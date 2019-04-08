@@ -6,7 +6,7 @@
  */
 
 // wolf yaml
-#include "base/processor/processor_tracker_feature_trifocal.h"
+#include "vision/processor/processor_tracker_feature_trifocal.h"
 #include "base/yaml/yaml_conversion.h"
 
 // wolf

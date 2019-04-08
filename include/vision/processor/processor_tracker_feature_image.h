@@ -3,13 +3,13 @@
 
 // Wolf includes
 #include "base/sensor/sensor_camera.h"
-#include "base/capture/capture_image.h"
-#include "base/feature/feature_point_image.h"
+#include "vision/capture/capture_image.h"
+#include "vision/feature/feature_point_image.h"
 #include "base/state_block.h"
 #include "base/state_quaternion.h"
 #include "base/processor/processor_tracker_feature.h"
 #include "base/factor/factor_epipolar.h"
-#include "base/processor/processor_params_image.h"
+#include "vision/processor/processor_params_image.h"
 
 // vision_utils
 #include <detectors/detector_base.h>

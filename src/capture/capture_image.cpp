@@ -1,4 +1,4 @@
-#include "base/capture/capture_image.h"
+#include "vision/capture/capture_image.h"
 
 namespace wolf {
 

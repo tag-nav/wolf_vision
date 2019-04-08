@@ -1,11 +1,11 @@
 
 // wolf
-#include "base/processor/processor_tracker_feature_trifocal.h"
+#include "vision/processor/processor_tracker_feature_trifocal.h"
 
 #include "base/sensor/sensor_camera.h"
-#include "base/feature/feature_point_image.h"
+#include "vision/feature/feature_point_image.h"
 #include "base/factor/factor_autodiff_trifocal.h"
-#include "base/capture/capture_image.h"
+#include "vision/capture/capture_image.h"
 
 // vision_utils
 #include <vision_utils.h>

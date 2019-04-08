@@ -3,9 +3,9 @@
 
 // Wolf includes
 
-#include "base/landmark/landmark_AHP.h"
+#include "vision/landmark/landmark_AHP.h"
 #include "base/landmark/landmark_match.h"
-#include "base/processor/processor_params_image.h"
+#include "vision/processor/processor_params_image.h"
 #include "base/processor/processor_tracker_landmark.h"
 #include "base/wolf.h"
 

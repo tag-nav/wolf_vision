@@ -3,7 +3,7 @@
 
 //Wolf includes
 #include "base/processor/processor_tracker_feature.h"
-#include "base/capture/capture_image.h"
+#include "vision/capture/capture_image.h"
 
 // Vision utils
 #include <vision_utils.h>

@@ -3,7 +3,7 @@
 
 //Wolf includes
 #include "base/factor/factor_autodiff.h"
-#include "base/landmark/landmark_AHP.h"
+#include "vision/landmark/landmark_AHP.h"
 #include "base/sensor/sensor_camera.h"
 //#include "base/feature/feature_point_image.h"
 #include "base/pinhole_tools.h"

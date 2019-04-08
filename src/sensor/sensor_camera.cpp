@@ -1,4 +1,4 @@
-#include "base/sensor/sensor_camera.h"
+#include "vision/sensor/sensor_camera.h"
 
 #include "base/pinhole_tools.h"
 #include "base/state_block.h"

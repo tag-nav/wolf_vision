@@ -14,7 +14,7 @@
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>
 
-#include "base/processor/processor_params_image.h"
+#include "vision/processor/processor_params_image.h"
 
 namespace wolf
 {

@@ -1,5 +1,5 @@
 // Wolf includes
-#include "base/processor/processor_tracker_feature_image.h"
+#include "vision/processor/processor_tracker_feature_image.h"
 
 // Vision utils
 #include <detectors.h>
