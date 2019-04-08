@@ -95,14 +95,6 @@ FrameBasePtr TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
             else
                 break;
         }
-    if (closest_kf != nullptr)
-    {
-        WOLF_INFO("TrajectoryBase::closestKeyFrameToTimeStamp: returning KF", closest_kf->id(), " with state ", closest_kf->getState().transpose());
-    }
-    else
-    {
-        WOLF_INFO("TrajectoryBase::closestKeyFrameToTimeStamp: returning nullptr");
-    }
     return closest_kf;
 }
 
