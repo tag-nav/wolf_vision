@@ -170,6 +170,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 // We create a KF
 
                 // set KF on last
+                last_ptr_->getFrame()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
                 last_ptr_->getFrame()->setKey();
 
                 // make F; append incoming to new F
