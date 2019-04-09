@@ -152,17 +152,6 @@ void ProcessorTrackerFeature::establishFactors()
         feature_in_last  ->addFactor(fac_ptr);
         feature_in_origin->addConstrainedBy(fac_ptr);
 
-        if (fac_ptr != nullptr) // factor links
-        {
-            FrameBasePtr frm = fac_ptr->getFrameOther();
-            if (frm)
-                frm->addConstrainedBy(fac_ptr);
-            CaptureBasePtr cap = fac_ptr->getCaptureOther();
-            if (cap)
-                cap->addConstrainedBy(fac_ptr);
-        }
-
-
         WOLF_DEBUG( "Factor: track: " , feature_in_last->trackId(),
                     " origin: "           , feature_in_origin->id() ,
                     " from last: "        , feature_in_last->id() );
