@@ -13,6 +13,7 @@ ProcessorIMU::ProcessorIMU(ProcessorParamsIMUPtr _params_motion_IMU) :
     jacobian_delta_preint_.setIdentity(9,9);                                    // dDp'/dDp, dDv'/dDv, all zeros
     jacobian_delta_.setIdentity(9,9);                                           //
     jacobian_calib_.setZero(9,6);
+    unmeasured_perturbation_cov_ = pow(params_motion_IMU_->unmeasured_perturbation_std_, 2.0) * Eigen::Matrix<Scalar, 9, 9>::Identity();
 }
 
 ProcessorIMU::~ProcessorIMU()
@@ -204,7 +205,7 @@ FeatureBasePtr ProcessorIMU::createFeature(CaptureMotionPtr _capture_motion)
 {
     FeatureIMUPtr key_feature_ptr = std::make_shared<FeatureIMU>(
             _capture_motion->getBuffer().get().back().delta_integr_,
-            _capture_motion->getBuffer().get().back().delta_integr_cov_,
+            _capture_motion->getBuffer().get().back().delta_integr_cov_ + unmeasured_perturbation_cov_,
             _capture_motion->getBuffer().getCalibrationPreint(),
             _capture_motion->getBuffer().get().back().jacobian_calib_);
     return key_feature_ptr;
