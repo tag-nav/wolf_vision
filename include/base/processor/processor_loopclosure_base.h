@@ -20,7 +20,7 @@ struct ProcessorParamsLoopClosure : public ProcessorParamsBase
  *
  * This is an abstract class.
  *
- * It establishes constraints XXX
+ * It establishes factors XXX
  *
  * Should you need extra functionality for your derived types,
  * you can overload these two methods,

@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 
     if (USEMAP){
         problem->loadMap(wolf_root + "/src/examples/maps/map_apriltag_logitech_1234.yaml");
-        for (auto lmk : problem->getMapPtr()->getLandmarkList()){
+        for (auto lmk : problem->getMap()->getLandmarkList()){
             lmk->fix();
         }
     }
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 
     if (IMAGE_OUTPUT){
         WOLF_INFO( "====================    Draw all detections    ======================" )
-        for (auto F : problem->getTrajectoryPtr()->getFrameList())
+        for (auto F : problem->getTrajectory()->getFrameList())
         {
             if (F->isKey())
             {
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
 
 
 //    WOLF_INFO( "====================    Provide perturbed prior    ======================" )
-//    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+//    for (auto kf : problem->getTrajectory()->getFrameList())
 //    {
 //        Vector7s x;
 //        if (kf->isKey())
@@ -191,24 +191,24 @@ int main(int argc, char *argv[])
 
 
     WOLF_INFO("============= SOLVED PROBLEM : POS | EULER (DEG) ===============")
-    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+    for (auto kf : problem->getTrajectory()->getFrameList())
     {
         if (kf->isKey())
             for (auto cap : kf->getCaptureList())
             {
                 if (cap->getType() != "POSE")
                 {
-                    Vector3s T = kf->getPPtr()->getState();
-                    Vector4s qv= kf->getOPtr()->getState();
+                    Vector3s T = kf->getP()->getState();
+                    Vector4s qv= kf->getO()->getState();
                     Vector3s e = M_TODEG * R2e(q2R(qv));
                     WOLF_DEBUG("KF", kf->id(), " => ", T.transpose(), " | ", e.transpose());
                 }
             }
     }
-    for (auto lmk : problem->getMapPtr()->getLandmarkList())
+    for (auto lmk : problem->getMap()->getLandmarkList())
     {
-        Vector3s T = lmk->getPPtr()->getState();
-        Vector4s qv= lmk->getOPtr()->getState();
+        Vector3s T = lmk->getP()->getState();
+        Vector4s qv= lmk->getO()->getState();
         Vector3s e = M_TODEG * R2e(q2R(qv));
         WOLF_DEBUG(" L", lmk->id(), " => ", T.transpose(), " | ", e.transpose());
     }
@@ -220,13 +220,13 @@ int main(int argc, char *argv[])
     // Print COVARIANCES of all states
     WOLF_INFO("======== COVARIANCES OF SOLVED PROBLEM : POS | QUAT =======")
     ceres_manager->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
-    for (auto kf : problem->getTrajectoryPtr()->getFrameList())
+    for (auto kf : problem->getTrajectory()->getFrameList())
         if (kf->isKey())
         {
             Eigen::MatrixXs cov = kf->getCovariance();
             WOLF_DEBUG("KF", kf->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());
         }
-    for (auto lmk : problem->getMapPtr()->getLandmarkList())
+    for (auto lmk : problem->getMap()->getLandmarkList())
     {
         Eigen::MatrixXs cov = lmk->getCovariance();
         WOLF_DEBUG(" L", lmk->id(), "_std (sigmas) = ", cov.diagonal().transpose().array().sqrt());

@@ -41,7 +41,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmark);
  *     Each successful correspondence
  *     results in an extension of the track of the Feature up to the \b incoming Capture.
  *
- * This processor creates landmarks for new detected Features, and establishes constraints Feature-Landmark.
+ * This processor creates landmarks for new detected Features, and establishes factors Feature-Landmark.
  *
  * This tracker builds on top of the ProcessorTracker by implementing some of its pure virtual functions.
  * As a reminder, we sketch here the pipeline of the parent ProcessorTracker process() function.
@@ -53,7 +53,7 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmark);
  *     - if voteForKeyFrame()                                                       <=== IMPLEMENT
  *       - processNew() : Populate the tracker with new Features                    <--- IMPLEMENTED
  *       - makeFrame(), setKey() : Make a KeyFrame with the \b last Capture         <--- IMPLEMENTED
- *       - establishConstraints() : Establish constraints of the new Features       <--- IMPLEMENTED
+ *       - establishFactors() : Establish factors of the new Features       <--- IMPLEMENTED
  *       - reset() : Reset the tracker with the \b last Capture as the new \b origin<--- IMPLEMENTED
  *     - else
  *       - advance() : Advance the tracker one Capture ahead                        <--- IMPLEMENTED
@@ -65,8 +65,8 @@ WOLF_PTR_TYPEDEFS(ProcessorTrackerLandmark);
  *     - detectNewFeatures() : detects new Features in \b last                      <=== IMPLEMENT
  *     - createLandmark() : creates a Landmark using a new Feature                  <=== IMPLEMENT
  *     - findLandmarks() : find the new Landmarks again in \b incoming              <=== IMPLEMENT
- *   - establishConstraints() : which calls the pure virtual:
- *     - createConstraint() : create a Feature-Landmark constraint of the correct derived type <=== IMPLEMENT
+ *   - establishFactors() : which calls the pure virtual:
+ *     - createFactor() : create a Feature-Landmark factor of the correct derived type <=== IMPLEMENT
  *
  * Should you need extra functionality for your derived types, you can overload these two methods,
  *
@@ -86,7 +86,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
     protected:
 
         ProcessorParamsTrackerLandmarkPtr params_tracker_landmark_;
-        LandmarkBaseList new_landmarks_;        ///< List of new detected landmarks
+        LandmarkBasePtrList new_landmarks_;        ///< List of new detected landmarks
         LandmarkMatchMap matches_landmark_from_incoming_;
         LandmarkMatchMap matches_landmark_from_last_;
 
@@ -109,8 +109,8 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          * \return the number of landmarks found
          */
-        virtual unsigned int findLandmarks(const LandmarkBaseList&  _landmarks_in,
-                                           FeatureBaseList&         _features_incoming_out,
+        virtual unsigned int findLandmarks(const LandmarkBasePtrList&  _landmarks_in,
+                                           FeatureBasePtrList&         _features_incoming_out,
                                            LandmarkMatchMap&        _feature_landmark_correspondences) = 0;
 
         /** \brief Vote for KeyFrame generation
@@ -140,7 +140,7 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          * The function sets the member new_features_list_, the list of newly detected features
          * in last_ptr_ to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out) = 0;
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out) = 0;
 
         /** \brief Creates a landmark for each of new_features_last_
          **/
@@ -152,17 +152,17 @@ class ProcessorTrackerLandmark : public ProcessorTracker
          */
         virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr) = 0;
 
-        /** \brief Create a new constraint
+        /** \brief Create a new factor
          * \param _feature_ptr pointer to the Feature to constrain
          * \param _landmark_ptr LandmarkBase pointer to the Landmark constrained.
          *
          * Implement this method in derived classes.
          */
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr) = 0;
+        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr) = 0;
 
-        /** \brief Establish constraints between features in Capture \b last and landmarks
+        /** \brief Establish factors between features in Capture \b last and landmarks
          */
-        virtual void establishConstraints();
+        virtual void establishFactors();
 };
 
 }// namespace wolf

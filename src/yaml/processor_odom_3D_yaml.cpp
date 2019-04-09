@@ -30,6 +30,7 @@ static ProcessorParamsBasePtr createProcessorOdom3DParams(const std::string & _f
 
         ProcessorParamsOdom3DPtr params = std::make_shared<ProcessorParamsOdom3D>();
 
+        params->time_tolerance      = config["time tolerance"]      .as<Scalar>();
         params->max_time_span       = kf_vote["max time span"]      .as<Scalar>();
         params->max_buff_length     = kf_vote["max buffer length"]  .as<SizeEigen  >();
         params->dist_traveled       = kf_vote["dist traveled"]      .as<Scalar>();

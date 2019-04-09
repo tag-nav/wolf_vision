@@ -45,12 +45,12 @@ wolf_add_gtest(gtest_capture_base gtest_capture_base.cpp)
 target_link_libraries(gtest_capture_base ${PROJECT_NAME})
 
 # CaptureBase class test
-#wolf_add_gtest(gtest_constraint_sparse gtest_constraint_sparse.cpp)
-#target_link_libraries(gtest_constraint_sparse ${PROJECT_NAME})
+#wolf_add_gtest(gtest_factor_sparse gtest_factor_sparse.cpp)
+#target_link_libraries(gtest_factor_sparse ${PROJECT_NAME})
 
-# ConstraintAutodiff class test
-wolf_add_gtest(gtest_constraint_autodiff gtest_constraint_autodiff.cpp)
-target_link_libraries(gtest_constraint_autodiff ${PROJECT_NAME})
+# FactorAutodiff class test
+wolf_add_gtest(gtest_factor_autodiff gtest_factor_autodiff.cpp)
+target_link_libraries(gtest_factor_autodiff ${PROJECT_NAME})
 
 # FeatureBase classes test
 wolf_add_gtest(gtest_eigen_predicates gtest_eigen_predicates.cpp)
@@ -130,37 +130,37 @@ wolf_add_gtest(gtest_ceres_manager gtest_ceres_manager.cpp)
 target_link_libraries(gtest_ceres_manager ${PROJECT_NAME})
 ENDIF(Ceres_FOUND)
 
-# ConstraintAbs(P/O/V) classes test
-wolf_add_gtest(gtest_constraint_absolute gtest_constraint_absolute.cpp)
-target_link_libraries(gtest_constraint_absolute ${PROJECT_NAME})
+# FactorAbs(P/O/V) classes test
+wolf_add_gtest(gtest_factor_absolute gtest_factor_absolute.cpp)
+target_link_libraries(gtest_factor_absolute ${PROJECT_NAME})
 
 IF (OPENCV_FOUND AND APRILTAG_LIBRARY)
-	# ConstraintAutodiffApriltag test
-	wolf_add_gtest(gtest_constraint_autodiff_apriltag gtest_constraint_autodiff_apriltag.cpp)
-	target_link_libraries(gtest_constraint_autodiff_apriltag ${PROJECT_NAME})
+	# FactorAutodiffApriltag test
+	wolf_add_gtest(gtest_factor_autodiff_apriltag gtest_factor_autodiff_apriltag.cpp)
+	target_link_libraries(gtest_factor_autodiff_apriltag ${PROJECT_NAME})
 ENDIF(OPENCV_FOUND AND APRILTAG_LIBRARY)
 
-# ConstraintAutodiffDistance3D test
-wolf_add_gtest(gtest_constraint_autodiff_distance_3D gtest_constraint_autodiff_distance_3D.cpp)
-target_link_libraries(gtest_constraint_autodiff_distance_3D ${PROJECT_NAME})
+# FactorAutodiffDistance3D test
+wolf_add_gtest(gtest_factor_autodiff_distance_3D gtest_factor_autodiff_distance_3D.cpp)
+target_link_libraries(gtest_factor_autodiff_distance_3D ${PROJECT_NAME})
 
 IF(vision_utils_FOUND)
-# ConstraintAutodiffTrifocal test
-wolf_add_gtest(gtest_constraint_autodiff_trifocal gtest_constraint_autodiff_trifocal.cpp)
-target_link_libraries(gtest_constraint_autodiff_trifocal ${PROJECT_NAME})
+# FactorAutodiffTrifocal test
+wolf_add_gtest(gtest_factor_autodiff_trifocal gtest_factor_autodiff_trifocal.cpp)
+target_link_libraries(gtest_factor_autodiff_trifocal ${PROJECT_NAME})
 ENDIF(vision_utils_FOUND)
 
-# ConstraintOdom3D class test
-wolf_add_gtest(gtest_constraint_odom_3D gtest_constraint_odom_3D.cpp)
-target_link_libraries(gtest_constraint_odom_3D ${PROJECT_NAME})
+# FactorOdom3D class test
+wolf_add_gtest(gtest_factor_odom_3D gtest_factor_odom_3D.cpp)
+target_link_libraries(gtest_factor_odom_3D ${PROJECT_NAME})
 
-# ConstraintPose2D class test
-wolf_add_gtest(gtest_constraint_pose_2D gtest_constraint_pose_2D.cpp)
-target_link_libraries(gtest_constraint_pose_2D ${PROJECT_NAME})
+# FactorPose2D class test
+wolf_add_gtest(gtest_factor_pose_2D gtest_factor_pose_2D.cpp)
+target_link_libraries(gtest_factor_pose_2D ${PROJECT_NAME})
 
-# ConstraintPose3D class test
-wolf_add_gtest(gtest_constraint_pose_3D gtest_constraint_pose_3D.cpp)
-target_link_libraries(gtest_constraint_pose_3D ${PROJECT_NAME})
+# FactorPose3D class test
+wolf_add_gtest(gtest_factor_pose_3D gtest_factor_pose_3D.cpp)
+target_link_libraries(gtest_factor_pose_3D ${PROJECT_NAME})
 
 IF (OPENCV_FOUND AND APRILTAG_LIBRARY)
 	# FeatureApriltag test

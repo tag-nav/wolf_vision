@@ -36,32 +36,32 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
 
         // Frames
         FrameBasePtr addFrame(FrameBasePtr _frame_ptr);
-        FrameBaseList& getFrameList();
-        FrameBasePtr getLastFramePtr();
-        FrameBasePtr getLastKeyFramePtr();
-        FrameBasePtr findLastKeyFramePtr();
+        FrameBasePtrList& getFrameList();
+        FrameBasePtr getLastFrame();
+        FrameBasePtr getLastKeyFrame();
+        FrameBasePtr findLastKeyFrame();
         FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts);
         void setLastKeyFramePtr(FrameBasePtr _key_frame_ptr);
         void sortFrame(FrameBasePtr _frm_ptr);
         void moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place);
         FrameBaseIter computeFrameOrder(FrameBasePtr _frame_ptr);
 
-        // constraints
-        void getConstraintList(ConstraintBaseList & _ctr_list);
+        // factors
+        void getFactorList(FactorBasePtrList & _ctr_list);
 
 };
 
-inline FrameBaseList& TrajectoryBase::getFrameList()
+inline FrameBasePtrList& TrajectoryBase::getFrameList()
 {
     return frame_list_;
 }
 
-inline FrameBasePtr TrajectoryBase::getLastFramePtr()
+inline FrameBasePtr TrajectoryBase::getLastFrame()
 {
     return frame_list_.back();
 }
 
-inline FrameBasePtr TrajectoryBase::getLastKeyFramePtr()
+inline FrameBasePtr TrajectoryBase::getLastKeyFrame()
 {
     return last_key_frame_ptr_;
 }

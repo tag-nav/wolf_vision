@@ -10,7 +10,7 @@
 
 #include "base/wolf.h"
 #include "base/processor/processor_tracker_feature.h"
-#include "base/constraint/constraint_epipolar.h"
+#include "base/factor/factor_epipolar.h"
 
 namespace wolf
 {
@@ -36,7 +36,7 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
          * \param _features_incoming_out returned list of features found in \b incoming
          * \param _feature_correspondences returned map of correspondences: _feature_correspondences[feature_out_ptr] = feature_in_ptr
          */
-        virtual unsigned int trackFeatures(const FeatureBaseList& _features_last_in, FeatureBaseList& _features_incoming_out,
+        virtual unsigned int trackFeatures(const FeatureBasePtrList& _features_last_in, FeatureBasePtrList& _features_incoming_out,
                                            FeatureMatchMap& _feature_correspondences);
 
         /** \brief Correct the drift in incoming feature by re-comparing against the corresponding feature in origin.
@@ -65,9 +65,9 @@ class ProcessorTrackerFeatureDummy : public ProcessorTrackerFeature
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out);
 
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
+        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
 };
 

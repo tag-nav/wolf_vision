@@ -13,8 +13,8 @@
 #include "base/capture/capture_laser_2D.h"
 #include "base/feature/feature_polyline_2D.h"
 #include "base/landmark/landmark_polyline_2D.h"
-#include "base/constraint/constraint_point_2D.h"
-#include "base/constraint/constraint_point_to_line_2D.h"
+#include "base/factor/factor_point_2D.h"
+#include "base/factor/factor_point_to_line_2D.h"
 #include "base/state_block.h"
 #include "base/association/association_tree.h"
 #include "base/processor/processor_tracker_landmark.h"
@@ -96,8 +96,8 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
         laserscanutils::LineFinderIterative line_finder_;
         ProcessorParamsPolylinePtr params_;
 
-        FeatureBaseList polylines_incoming_;
-        FeatureBaseList polylines_last_;
+        FeatureBasePtrList polylines_incoming_;
+        FeatureBasePtrList polylines_last_;
 
         Eigen::Matrix2s R_sensor_world_, R_world_sensor_;
         Eigen::Matrix2s R_robot_sensor_;
@@ -116,7 +116,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
         virtual ~ProcessorTrackerLandmarkPolyline();
         virtual void configure(SensorBasePtr _sensor) { };
 
-        const FeatureBaseList& getLastPolylines() const;
+        const FeatureBasePtrList& getLastPolylines() const;
 
     protected:
 
@@ -133,7 +133,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
          * \param _features_incoming_out returned list of incoming features corresponding to a landmark of _landmarks_in
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          */
-        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmarks_in, FeatureBaseList& _features_incoming_out,
+        virtual unsigned int findLandmarks(const LandmarkBasePtrList& _landmarks_in, FeatureBasePtrList& _features_incoming_out,
                                            LandmarkMatchMap& _feature_landmark_correspondences);
 
         /** \brief Vote for KeyFrame generation
@@ -155,7 +155,7 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
          * The function sets the member new_features_list_, the list of newly detected features,
          * to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out);
 
         /** \brief Creates a landmark for each of new_features_last_
          **/
@@ -167,25 +167,25 @@ class ProcessorTrackerLandmarkPolyline : public ProcessorTrackerLandmark
          */
         virtual LandmarkBasePtr createLandmark(FeatureBasePtr _feature_ptr);
 
-        /** \brief Establish constraints between features in Captures \b last and \b origin
+        /** \brief Establish factors between features in Captures \b last and \b origin
          */
-        virtual void establishConstraints();
+        virtual void establishFactors();
 
         /** \brief look for known objects in the list of unclassified polylines
         */
-        void classifyPolilines(LandmarkBaseList& _lmk_list);
+        void classifyPolilines(LandmarkBasePtrList& _lmk_list);
 
-        /** \brief Create a new constraint
+        /** \brief Create a new factor
          * \param _feature_ptr pointer to the Feature to constrain
          * \param _landmark_ptr LandmarkBase pointer to the Landmark constrained.
          *
          * Implement this method in derived classes.
          */
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
+        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 
     private:
 
-        void extractPolylines(CaptureLaser2DPtr _capture_laser_ptr, FeatureBaseList& _polyline_list);
+        void extractPolylines(CaptureLaser2DPtr _capture_laser_ptr, FeatureBasePtrList& _polyline_list);
 
         void expectedFeature(LandmarkBasePtr _landmark_ptr, Eigen::MatrixXs& expected_feature_,
                              Eigen::MatrixXs& expected_feature_cov_);
@@ -210,7 +210,7 @@ inline ProcessorTrackerLandmarkPolyline::ProcessorTrackerLandmarkPolyline(Proces
 {
 }
 
-inline unsigned int ProcessorTrackerLandmarkPolyline::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out)
+inline unsigned int ProcessorTrackerLandmarkPolyline::detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out)
 {
     // already computed since each scan is computed in preprocess()
     _features_incoming_out = std::move(polylines_last_);
@@ -238,7 +238,7 @@ inline void ProcessorTrackerLandmarkPolyline::resetDerived()
     polylines_last_ = std::move(polylines_incoming_);
 }
 
-inline const FeatureBaseList& ProcessorTrackerLandmarkPolyline::getLastPolylines() const
+inline const FeatureBasePtrList& ProcessorTrackerLandmarkPolyline::getLastPolylines() const
 {
     return polylines_last_;
 }

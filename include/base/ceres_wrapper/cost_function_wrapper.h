@@ -3,7 +3,7 @@
 
 // WOLF
 #include "base/wolf.h"
-#include "base/constraint/constraint_analytic.h"
+#include "base/factor/factor_analytic.h"
 
 // CERES
 #include "ceres/cost_function.h"
@@ -19,25 +19,25 @@ class CostFunctionWrapper : public ceres::CostFunction
 {
     private:
 
-        ConstraintBasePtr constraint_ptr_;
+        FactorBasePtr factor_ptr_;
 
     public:
 
-        CostFunctionWrapper(ConstraintBasePtr _constraint_ptr);
+        CostFunctionWrapper(FactorBasePtr _factor_ptr);
 
         virtual ~CostFunctionWrapper();
 
         virtual bool Evaluate(const double* const * parameters, double* residuals, double** jacobians) const;
 
-        ConstraintBasePtr getConstraintPtr() const;
+        FactorBasePtr getFactor() const;
 };
 
-inline CostFunctionWrapper::CostFunctionWrapper(ConstraintBasePtr _constraint_ptr) :
-        ceres::CostFunction(), constraint_ptr_(_constraint_ptr)
+inline CostFunctionWrapper::CostFunctionWrapper(FactorBasePtr _factor_ptr) :
+        ceres::CostFunction(), factor_ptr_(_factor_ptr)
 {
-    for (auto st_block_size : constraint_ptr_->getStateSizes())
+    for (auto st_block_size : factor_ptr_->getStateSizes())
         mutable_parameter_block_sizes()->push_back(st_block_size);
-    set_num_residuals(constraint_ptr_->getSize());
+    set_num_residuals(factor_ptr_->getSize());
 }
 
 inline CostFunctionWrapper::~CostFunctionWrapper()
@@ -46,12 +46,12 @@ inline CostFunctionWrapper::~CostFunctionWrapper()
 
 inline bool CostFunctionWrapper::Evaluate(const double* const * parameters, double* residuals, double** jacobians) const
 {
-    return constraint_ptr_->evaluate(parameters, residuals, jacobians);
+    return factor_ptr_->evaluate(parameters, residuals, jacobians);
 }
 
-inline ConstraintBasePtr CostFunctionWrapper::getConstraintPtr() const
+inline FactorBasePtr CostFunctionWrapper::getFactor() const
 {
-    return constraint_ptr_;
+    return factor_ptr_;
 }
 
 } // namespace wolf

@@ -5,7 +5,7 @@
 #include "base/wolf.h"
 #include "base/processor/processor_tracker_landmark.h"
 #include "base/sensor/sensor_camera.h"
-#include "base/constraint/constraint_autodiff_distance_3D.h"
+#include "base/factor/factor_autodiff_distance_3D.h"
 
 // Apriltag
 #include <apriltag.h>
@@ -78,7 +78,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
          * \param _feature_landmark_correspondences returned map of landmark correspondences: _feature_landmark_correspondences[_feature_out_ptr] = landmark_in_ptr
          * \return the number of landmarks found
          */
-        virtual unsigned int findLandmarks(const LandmarkBaseList& _landmark_list_in, FeatureBaseList& _feature_list_out,
+        virtual unsigned int findLandmarks(const LandmarkBasePtrList& _landmark_list_in, FeatureBasePtrList& _feature_list_out,
                                            LandmarkMatchMap& _feature_landmark_correspondences);
 
         /** \brief Vote for KeyFrame generation
@@ -99,7 +99,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
          * The function sets the member new_features_list_, the list of newly detected features
          * in last_ptr_ to be used for landmark initialization.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _feature_list_out);
+        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _feature_list_out);
 
         /** \brief Create one landmark
          *
@@ -113,7 +113,7 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
          *
          * Implement this method in derived classes.
          */
-        virtual ConstraintBasePtr createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
+        virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr);
 
         virtual void configure(SensorBasePtr _sensor);
 
@@ -126,8 +126,8 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         Scalar getTagWidth(int _id) const;
         std::string getTagFamily() const;
         Eigen::Vector6s getVarVec();
-        FeatureBaseList getIncomingDetections() const;
-        FeatureBaseList getLastDetections() const;
+        FeatureBasePtrList getIncomingDetections() const;
+        FeatureBasePtrList getLastDetections() const;
         Eigen::Affine3d opencvPoseEstimation(apriltag_detection_t *_det, cv::Mat_<Scalar>, double _tag_width);
         Eigen::Affine3d umichPoseEstimation(apriltag_detection_t *_det, cv::Mat_<Scalar>, double _tag_width);
         void ippePoseEstimation(apriltag_detection_t *_det, cv::Mat_<Scalar>, double _tag_width,
@@ -165,8 +165,8 @@ class ProcessorTrackerLandmarkApriltag : public ProcessorTrackerLandmark
         int n_reset_;
 
     protected:
-        FeatureBaseList detections_incoming_;   ///< detected tags in wolf form, incoming image
-        FeatureBaseList detections_last_;       ///< detected tags in wolf form, last image
+        FeatureBasePtrList detections_incoming_;   ///< detected tags in wolf form, incoming image
+        FeatureBasePtrList detections_last_;       ///< detected tags in wolf form, last image
 
 
     // To be able to access them in unit tests
