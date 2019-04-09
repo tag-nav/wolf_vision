@@ -31,7 +31,7 @@ class LocalParametrizationWrapper : public ceres::LocalParameterization
 
         virtual int LocalSize() const;
 
-        LocalParametrizationBasePtr getLocalParametrizationPtr() const;
+        LocalParametrizationBasePtr getLocalParametrization() const;
 };
 
 using LocalParametrizationWrapperPtr = std::shared_ptr<LocalParametrizationWrapper>;
@@ -57,7 +57,7 @@ inline int LocalParametrizationWrapper::LocalSize() const
     return local_parametrization_ptr_->getLocalSize();
 }
 
-inline LocalParametrizationBasePtr LocalParametrizationWrapper::getLocalParametrizationPtr() const
+inline LocalParametrizationBasePtr LocalParametrizationWrapper::getLocalParametrization() const
 {
     return local_parametrization_ptr_;
 }

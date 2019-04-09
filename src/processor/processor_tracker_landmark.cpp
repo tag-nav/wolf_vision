@@ -65,7 +65,7 @@ unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_featu
     /* Rationale: A keyFrame will be created using the last Capture.
      * First, we work on this Capture to detect new Features,
      * eventually create Landmarks with them,
-     * and in such case create the new Constraints feature-landmark.
+     * and in such case create the new Factors feature-landmark.
      * When done, we need to track these new Features to the incoming Capture.
      * At the end, all new Features are appended to the lists of known Features in
      * the last and incoming Captures.
@@ -116,8 +116,8 @@ void ProcessorTrackerLandmark::createNewLandmarks()
 unsigned int ProcessorTrackerLandmark::processKnown()
 {
     // Find landmarks in incoming_ptr_
-    FeatureBaseList known_features_list_incoming;
-    unsigned int n = findLandmarks(getProblem()->getMapPtr()->getLandmarkList(),
+    FeatureBasePtrList known_features_list_incoming;
+    unsigned int n = findLandmarks(getProblem()->getMap()->getLandmarkList(),
                                                  known_features_list_incoming, matches_landmark_from_incoming_);
     // Append found incoming features
     incoming_ptr_->addFeatureList(known_features_list_incoming);
@@ -125,18 +125,18 @@ unsigned int ProcessorTrackerLandmark::processKnown()
     return n;
 }
 
-void ProcessorTrackerLandmark::establishConstraints()
+void ProcessorTrackerLandmark::establishFactors()
 {
     // Loop all features in last_ptr_
     for (auto last_feature : last_ptr_->getFeatureList())
     {
         auto lmk = matches_landmark_from_last_[last_feature]->landmark_ptr_;
-        ConstraintBasePtr ctr_ptr = createConstraint(last_feature,
+        FactorBasePtr fac_ptr = createFactor(last_feature,
                                                      lmk);
-        if (ctr_ptr != nullptr) // constraint links
+        if (fac_ptr != nullptr) // factor links
         {
-            last_feature->addConstraint(ctr_ptr);
-            lmk->addConstrainedBy(ctr_ptr);
+            last_feature->addFactor(fac_ptr);
+            lmk->addConstrainedBy(fac_ptr);
         }
     }
 }

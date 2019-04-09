@@ -9,7 +9,7 @@
 #include "capture_range_bearing.h"
 #include "landmark_point_2D.h"
 #include "feature_range_bearing.h"
-#include "constraint_range_bearing.h"
+#include "factor_range_bearing.h"
 
 namespace wolf
 {
@@ -17,7 +17,7 @@ namespace wolf
 ProcessorRangeBearing::ProcessorRangeBearing(const SensorRangeBearingPtr _sensor_ptr, ProcessorParamsBasePtr _params) :
         ProcessorBase("RANGE BEARING", _params)
 {
-    H_r_s   = transform(_sensor_ptr->getPPtr()->getState(), _sensor_ptr->getOPtr()->getState());
+    H_r_s   = transform(_sensor_ptr->getP()->getState(), _sensor_ptr->getO()->getState());
 }
 
 void ProcessorRangeBearing::process(CaptureBasePtr _capture)
@@ -64,15 +64,15 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
         {
             // known landmarks : recover landmark
             lmk = std::static_pointer_cast<LandmarkPoint2D>(lmk_it->second);
-            WOLF_TRACE("known lmk(", id, "): ", lmk->getPPtr()->getState().transpose());
+            WOLF_TRACE("known lmk(", id, "): ", lmk->getP()->getState().transpose());
         }
         else
         {
             // new landmark:
             // - create landmark
             lmk = std::make_shared<LandmarkPoint2D>(id, invObserve(range, bearing));
-            WOLF_TRACE("new   lmk(", id, "): ", lmk->getPPtr()->getState().transpose());
-            getProblem()->getMapPtr()->addLandmark(lmk);
+            WOLF_TRACE("new   lmk(", id, "): ", lmk->getP()->getState().transpose());
+            getProblem()->getMap()->addLandmark(lmk);
             // - add to known landmarks
             known_lmks.emplace(id, lmk);
         }
@@ -80,17 +80,17 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
         // 5. create feature
         Vector2s rb(range,bearing);
         auto ftr = std::make_shared<FeatureRangeBearing>(rb,
-                                                         getSensorPtr()->getNoiseCov());
+                                                         getSensor()->getNoiseCov());
         capture_rb->addFeature(ftr);
 
-        // 6. create constraint
+        // 6. create factor
         auto prc = shared_from_this();
-        auto ctr = std::make_shared<ConstraintRangeBearing>(capture_rb,
+        auto ctr = std::make_shared<FactorRangeBearing>(capture_rb,
                                                             lmk,
                                                             prc,
                                                             false,
-                                                            CTR_ACTIVE);
-        ftr->addConstraint(ctr);
+                                                            FAC_ACTIVE);
+        ftr->addFactor(ctr);
         lmk->addConstrainedBy(ctr);
     }
 
@@ -141,7 +141,7 @@ Eigen::Vector2s ProcessorRangeBearing::fromSensor(const Eigen::Vector2s& lmk_s) 
 
 Eigen::Vector2s ProcessorRangeBearing::toSensor(const Eigen::Vector2s& lmk_w) const
 {
-//    Trf H_w_r = transform(getSensorPtr()->getPPtr()->getState(), getSensorPtr()->getOPtr()->getState());
+//    Trf H_w_r = transform(getSensor()->getP()->getState(), getSensor()->getO()->getState());
     Trf H_w_r = transform(getProblem()->getCurrentState());
     return (H_w_r * H_r_s).inverse() * lmk_w;
 }

@@ -30,18 +30,18 @@ MapBase::~MapBase()
 LandmarkBasePtr MapBase::addLandmark(LandmarkBasePtr _landmark_ptr)
 {
     landmark_list_.push_back(_landmark_ptr);
-    _landmark_ptr->setMapPtr(shared_from_this());
+    _landmark_ptr->setMap(shared_from_this());
     _landmark_ptr->setProblem(getProblem());
     _landmark_ptr->registerNewStateBlocks();
     return _landmark_ptr;
 }
 
-void MapBase::addLandmarkList(LandmarkBaseList& _landmark_list)
+void MapBase::addLandmarkList(LandmarkBasePtrList& _landmark_list)
 {
-	LandmarkBaseList lmk_list_copy = _landmark_list; //since _landmark_list will be empty after addDownNodeList()
+	LandmarkBasePtrList lmk_list_copy = _landmark_list; //since _landmark_list will be empty after addDownNodeList()
     for (LandmarkBasePtr landmark_ptr : lmk_list_copy)
     {
-        landmark_ptr->setMapPtr(shared_from_this());
+        landmark_ptr->setMap(shared_from_this());
         landmark_ptr->setProblem(getProblem());
         landmark_ptr->registerNewStateBlocks();
     }

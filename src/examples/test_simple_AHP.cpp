@@ -12,7 +12,7 @@
 #include "base/rotations.h"
 #include "base/capture/capture_image.h"
 #include "base/landmark/landmark_AHP.h"
-#include "base/constraint/constraint_AHP.h"
+#include "base/factor/factor_AHP.h"
 #include "base/ceres_wrapper/ceres_manager.h"
 
 // Vision utils
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
      * 8. crear captures
      * 9. crear features amb les mesures de 4 i 5
      * 10. crear lmk2 des de kf3
-     * 11. crear constraint des del kf4 a lmk2, amb ancora al kf3
+     * 11. crear factor des del kf4 a lmk2, amb ancora al kf3
      * 12. solve
      * 13. lmk1 == lmk2 ?
      */
@@ -96,7 +96,7 @@ int main(int argc, char** argv)
     // ============================================================================================================
     /* 1 */
     ProblemPtr problem = Problem::create("PO 3D");
-    // One anchor frame to define the lmk, and a copy to make a constraint
+    // One anchor frame to define the lmk, and a copy to make a factor
     FrameBasePtr kf_1 = problem->emplaceFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
     FrameBasePtr kf_2 = problem->emplaceFrame(KEY_FRAME,(Vector7s()<<0,0,0,0,0,0,1).finished(), TimeStamp(0));
     // and two other frames to observe the lmk
@@ -158,24 +158,24 @@ int main(int argc, char** argv)
     lmk_1->fix();
     std::cout << "Landmark 1: " << lmk_1->point().transpose() << std::endl;
 
-    // Constraints------------------
-    ConstraintAHPPtr ctr_0 = ConstraintAHP::create(feat_0, lmk_1, nullptr);
-    feat_0->addConstraint(ctr_0);
-    ConstraintAHPPtr ctr_1 = ConstraintAHP::create(feat_1, lmk_1, nullptr);
-    feat_1->addConstraint(ctr_1);
-    ConstraintAHPPtr ctr_2 = ConstraintAHP::create(feat_2, lmk_1, nullptr);
-    feat_2->addConstraint(ctr_2);
+    // Factors------------------
+    FactorAHPPtr fac_0 = FactorAHP::create(feat_0, lmk_1, nullptr);
+    feat_0->addFactor(fac_0);
+    FactorAHPPtr fac_1 = FactorAHP::create(feat_1, lmk_1, nullptr);
+    feat_1->addFactor(fac_1);
+    FactorAHPPtr fac_2 = FactorAHP::create(feat_2, lmk_1, nullptr);
+    feat_2->addFactor(fac_2);
 
     // Projections----------------------------
-    Eigen::VectorXs pix_0 = ctr_0->expectation();
+    Eigen::VectorXs pix_0 = fac_0->expectation();
     kp_0 = cv::KeyPoint(pix_0(0), pix_0(1), 0);
     feat_0->setKeypoint(kp_0);
 
-    Eigen::VectorXs pix_1 = ctr_1->expectation();
+    Eigen::VectorXs pix_1 = fac_1->expectation();
     kp_1 = cv::KeyPoint(pix_1(0), pix_1(1), 0);
     feat_1->setKeypoint(kp_1);
 
-    Eigen::VectorXs pix_2 = ctr_2->expectation();
+    Eigen::VectorXs pix_2 = fac_2->expectation();
     kp_2 = cv::KeyPoint(pix_2(0), pix_2(1), 0);
     feat_2->setKeypoint(kp_2);
 
@@ -208,14 +208,14 @@ int main(int argc, char** argv)
     problem->addLandmark(lmk_2);
     std::cout << "Landmark 2: " << lmk_2->point().transpose() << std::endl;
 
-    // New constraints from kf3 and kf4
-    ConstraintAHPPtr ctr_3 = ConstraintAHP::create(feat_3, lmk_2, nullptr);
-    feat_3->addConstraint(ctr_3);
-    ConstraintAHPPtr ctr_4 = ConstraintAHP::create(feat_4, lmk_2, nullptr);
-    feat_4->addConstraint(ctr_4);
+    // New factors from kf3 and kf4
+    FactorAHPPtr fac_3 = FactorAHP::create(feat_3, lmk_2, nullptr);
+    feat_3->addFactor(fac_3);
+    FactorAHPPtr fac_4 = FactorAHP::create(feat_4, lmk_2, nullptr);
+    feat_4->addFactor(fac_4);
 
-    Eigen::Vector2s pix_3 = ctr_3->expectation();
-    Eigen::Vector2s pix_4 = ctr_4->expectation();
+    Eigen::Vector2s pix_3 = fac_3->expectation();
+    Eigen::Vector2s pix_4 = fac_4->expectation();
 
     std::cout << "pix 3: " << pix_3.transpose() << std::endl;
     std::cout << "pix 4: " << pix_4.transpose() << std::endl;

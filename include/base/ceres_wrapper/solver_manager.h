@@ -4,7 +4,7 @@
 //wolf includes
 #include "base/wolf.h"
 #include "base/state_block.h"
-#include "base/constraint/constraint_base.h"
+#include "base/factor/factor_base.h"
 
 namespace wolf {
 
@@ -40,17 +40,17 @@ class SolverManager
 
 		virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS) = 0;
 
-		virtual void computeCovariances(const StateBlockList& st_list) = 0;
+		virtual void computeCovariances(const StateBlockPtrList& st_list) = 0;
 
 		virtual void update();
 
-        virtual ProblemPtr getProblemPtr();
+        virtual ProblemPtr getProblem();
 
 	private:
 
-		virtual void addConstraint(ConstraintBasePtr _ctr_ptr) = 0;
+		virtual void addFactor(FactorBasePtr _fac_ptr) = 0;
 
-		virtual void removeConstraint(ConstraintBasePtr _ctr_ptr) = 0;
+		virtual void removeFactor(FactorBasePtr _fac_ptr) = 0;
 
 		virtual void addStateBlock(StateBlockPtr _st_ptr) = 0;
 

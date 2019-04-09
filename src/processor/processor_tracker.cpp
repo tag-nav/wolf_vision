@@ -110,8 +110,8 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             processKnown();
             processNew(params_tracker_->max_new_features);
 
-            // Establish constraints
-            establishConstraints();
+            // Establish factors
+            establishFactors();
 
             // Update pointers
             resetDerived();
@@ -131,7 +131,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             processKnown();
 
             // Capture last_ is added to the new keyframe
-            FrameBasePtr last_old_frame = last_ptr_->getFramePtr();
+            FrameBasePtr last_old_frame = last_ptr_->getFrame();
             last_old_frame->unlinkCapture(last_ptr_);
             last_old_frame->remove();
             pack->key_frame->addCapture(last_ptr_);
@@ -140,11 +140,11 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
             frm->addCapture(incoming_ptr_);
 
-            // Detect new Features, initialize Landmarks, create Constraints, ...
+            // Detect new Features, initialize Landmarks, create Factors, ...
             processNew(params_tracker_->max_new_features);
 
-            // Establish constraints
-            establishConstraints();
+            // Establish factors
+            establishFactors();
 
             // Update pointers
             resetDerived();
@@ -170,7 +170,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 // We create a KF
 
                 // set KF on last
-                last_ptr_->getFramePtr()->setKey();
+                last_ptr_->getFrame()->setKey();
 
                 // make F; append incoming to new F
                 FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
@@ -180,16 +180,16 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 processNew(params_tracker_->max_new_features);
 
                 //                // Set key
-                //                last_ptr_->getFramePtr()->setKey();
+                //                last_ptr_->getFrame()->setKey();
                 //
                 // Set state to the keyframe
-                last_ptr_->getFramePtr()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
+                last_ptr_->getFrame()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
 
-                // Establish constraints
-                establishConstraints();
+                // Establish factors
+                establishFactors();
 
-                // Call the new keyframe callback in order to let the other processors to establish their constraints
-                getProblem()->keyFrameCallback(last_ptr_->getFramePtr(), std::static_pointer_cast<ProcessorBase>(shared_from_this()), params_tracker_->time_tolerance);
+                // Call the new keyframe callback in order to let the other processors to establish their factors
+                getProblem()->keyFrameCallback(last_ptr_->getFrame(), std::static_pointer_cast<ProcessorBase>(shared_from_this()), params_tracker_->time_tolerance);
 
                 // Update pointers
                 resetDerived();
@@ -203,9 +203,9 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 // We do not create a KF
 
                 // Advance this
-                last_ptr_->getFramePtr()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's last Frame
+                last_ptr_->getFrame()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's last Frame
                 last_ptr_->remove();
-                incoming_ptr_->getFramePtr()->setTimeStamp(incoming_ptr_->getTimeStamp());
+                incoming_ptr_->getFrame()->setTimeStamp(incoming_ptr_->getTimeStamp());
 
                 // Update pointers
                 advanceDerived();
@@ -257,7 +257,7 @@ void ProcessorTracker::computeProcessingStep()
 
             if (kf_pack_buffer_.selectPack(last_ptr_, params_tracker_->time_tolerance))
             {
-                if (last_ptr_->getFramePtr()->isKey())
+                if (last_ptr_->getFrame()->isKey())
                 {
                     WOLF_WARN("||*||");
                     WOLF_INFO(" ... It seems you missed something!");

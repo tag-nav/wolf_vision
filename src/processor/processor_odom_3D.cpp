@@ -403,13 +403,13 @@ CaptureMotionPtr ProcessorOdom3D::createCapture(const TimeStamp& _ts, const Sens
     return capture_odom;
 }
 
-ConstraintBasePtr ProcessorOdom3D::emplaceConstraint(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin)
+FactorBasePtr ProcessorOdom3D::emplaceFactor(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin)
 {
-    ConstraintOdom3DPtr ctr_odom = std::make_shared<ConstraintOdom3D>(_feature_motion, _capture_origin->getFramePtr(),
+    FactorOdom3DPtr fac_odom = std::make_shared<FactorOdom3D>(_feature_motion, _capture_origin->getFrame(),
                                                                       shared_from_this());
-    _feature_motion->addConstraint(ctr_odom);
-    _capture_origin->getFramePtr()->addConstrainedBy(ctr_odom);
-    return ctr_odom;
+    _feature_motion->addFactor(fac_odom);
+    _capture_origin->getFrame()->addConstrainedBy(fac_odom);
+    return fac_odom;
 }
 
 FeatureBasePtr ProcessorOdom3D::createFeature(CaptureMotionPtr _capture_motion)

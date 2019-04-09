@@ -54,7 +54,7 @@ double AssociationNode::getTreeProb() const
     return tree_prob_;
 }
 
-AssociationNode* AssociationNode::upNodePtr() const
+AssociationNode* AssociationNode::upNode() const
 {
     //return &(*up_node_ptr_);
     return up_node_ptr_;

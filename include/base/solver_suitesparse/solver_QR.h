@@ -24,7 +24,7 @@ class SolverQR
         PermutationMatrix<Dynamic, Dynamic, int> acc_permutation_nodes_matrix;
 
         CCOLAMDOrdering<int> ordering, partial_ordering;
-        VectorXi nodes_ordering_constraints;
+        VectorXi nodes_ordering_factors;
 
     private:
 };

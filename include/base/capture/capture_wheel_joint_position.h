@@ -155,7 +155,7 @@ protected:
 
 //  ~CaptureWheelJointPosition() = default;
 
-////  void setSensorPtr(const SensorBasePtr sensor_ptr) override;
+////  void setSensor(const SensorBasePtr sensor_ptr) override;
 
 //  std::size_t getNumWheels() const noexcept
 //  {

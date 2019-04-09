@@ -49,8 +49,8 @@ void TrackMatrix::add(size_t _track_id, CaptureBasePtr _cap, FeatureBasePtr _ftr
     assert( (_track_id > 0) && (_track_id <= track_id_count_) && "Provided track ID does not exist. Use newTrack() instead.");
 
     _ftr->setTrackId(_track_id);
-    if (_cap != _ftr->getCapturePtr())
-        _ftr->setCapturePtr(_cap);
+    if (_cap != _ftr->getCapture())
+        _ftr->setCapture(_cap);
     tracks_[_track_id].emplace(_cap->getTimeStamp(), _ftr);
     snapshots_[_cap->id()].emplace(_track_id, _ftr);        // will create new snapshot if _cap_id   is not present
 }
@@ -62,7 +62,7 @@ void TrackMatrix::remove(size_t _track_id)
     {
         for (auto const& pair_time_ftr : tracks_.at(_track_id))
         {
-            SizeStd cap_id = pair_time_ftr.second->getCapturePtr()->id();
+            SizeStd cap_id = pair_time_ftr.second->getCapture()->id();
             snapshots_.at(cap_id).erase(_track_id);
             if (snapshots_.at(cap_id).empty())
                 snapshots_.erase(cap_id);
@@ -94,10 +94,10 @@ void TrackMatrix::remove(CaptureBasePtr _cap)
 
 void TrackMatrix::remove(FeatureBasePtr _ftr)
 {
-    // assumes _ftr->getCapturePtr() and _ftr->trackId() are valid
+    // assumes _ftr->getCapture() and _ftr->trackId() are valid
     if (_ftr)
     {
-        if (auto cap = _ftr->getCapturePtr())
+        if (auto cap = _ftr->getCapture())
         {
             tracks_   .at(_ftr->trackId()).erase(cap->getTimeStamp());
             if (tracks_.at(_ftr->trackId()).empty())
@@ -191,7 +191,7 @@ FeatureBasePtr TrackMatrix::feature(size_t _track_id, CaptureBasePtr _cap)
 
 CaptureBasePtr TrackMatrix::firstCapture(size_t _track_id)
 {
-    return firstFeature(_track_id)->getCapturePtr();
+    return firstFeature(_track_id)->getCapture();
 }
 
 }

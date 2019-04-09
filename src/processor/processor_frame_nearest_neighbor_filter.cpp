@@ -58,11 +58,11 @@ bool ProcessorFrameNearestNeighborFilter::findCandidates(const CaptureBasePtr& /
   const ProblemPtr problem_ptr = getProblem();
 
   const std::string frame_structure =
-      problem_ptr->getTrajectoryPtr()->getFrameStructure();
+      problem_ptr->getTrajectory()->getFrameStructure();
 
   // get the list of all frames
-  const FrameBaseList& frame_list = problem_ptr->
-                                    getTrajectoryPtr()->
+  const FrameBasePtrList& frame_list = problem_ptr->
+                                    getTrajectory()->
                                     getFrameList();
 
   bool found_possible_candidate = false;
@@ -72,17 +72,17 @@ bool ProcessorFrameNearestNeighborFilter::findCandidates(const CaptureBasePtr& /
     // check for LC just if frame is key frame
     // Assert that the evaluated KF has a capture of the
     // same sensor as this processor
-    if (key_it->isKey() && key_it->getCaptureOf(getSensorPtr()/*, "LASER 2D"*/) != nullptr)
+    if (key_it->isKey() && key_it->getCaptureOf(getSensor()/*, "LASER 2D"*/) != nullptr)
     {
       // Check if the two frames currently evaluated are already
       // constrained one-another.
-      const ConstraintBaseList& ctr_list = key_it->getConstrainedByList();
+      const FactorBasePtrList& fac_list = key_it->getConstrainedByList();
 
       bool are_constrained = false;
-      for (const ConstraintBasePtr& crt : ctr_list)
+      for (const FactorBasePtr& crt : fac_list)
       {
         // Are the two frames constrained one-another ?
-        if (crt->getFrameOtherPtr() == problem_ptr->getLastKeyFramePtr())
+        if (crt->getFrameOther() == problem_ptr->getLastKeyFrame())
         {
           // By this very processor ?
           if (crt->getProcessor() == shared_from_this())
@@ -127,7 +127,7 @@ bool ProcessorFrameNearestNeighborFilter::findCandidates(const CaptureBasePtr& /
         Eigen::Vector5s frame_covariance, current_covariance;
         if (!computeEllipse2D(key_it,
                               frame_covariance)) continue;
-        if (!computeEllipse2D(getProblem()->getLastKeyFramePtr(),
+        if (!computeEllipse2D(getProblem()->getLastKeyFrame(),
                               current_covariance)) continue;
         found_possible_candidate = ellipse2DIntersect(frame_covariance,
                                                       current_covariance);
@@ -160,7 +160,7 @@ bool ProcessorFrameNearestNeighborFilter::findCandidates(const CaptureBasePtr& /
         Eigen::Vector10s frame_covariance, current_covariance;
         if (!computeEllipsoid3D(key_it,
                                 frame_covariance)) continue;
-        if (!computeEllipsoid3D(getProblem()->getLastKeyFramePtr(),
+        if (!computeEllipsoid3D(getProblem()->getLastKeyFrame(),
                                 frame_covariance)) continue;
         found_possible_candidate = ellipsoid3DIntersect(frame_covariance,
                                                         current_covariance);
@@ -170,7 +170,7 @@ bool ProcessorFrameNearestNeighborFilter::findCandidates(const CaptureBasePtr& /
       case LoopclosureDistanceType::LC_MAHALANOBIS_DISTANCE:
       {
         found_possible_candidate = insideMahalanisDistance(key_it,
-                                             problem_ptr->getLastKeyFramePtr());
+                                             problem_ptr->getLastKeyFrame());
         break;
       }
 
@@ -210,7 +210,7 @@ bool ProcessorFrameNearestNeighborFilter::computeEllipse2D(const FrameBasePtr& f
   }
 
   // get position of frame AKA mean [x, y]
-  const Eigen::VectorXs frame_position  = frame_ptr->getPPtr()->getState();
+  const Eigen::VectorXs frame_position  = frame_ptr->getP()->getState();
   ellipse(0) = frame_position(0);
   ellipse(1) = frame_position(1);
 
@@ -239,7 +239,7 @@ bool ProcessorFrameNearestNeighborFilter::computeEllipsoid3D(const FrameBasePtr&
   // Ellipse description [ pos_x, pos_y, pos_z, a, b, c, quat_w, quat_z, quat_y, quat_z]
 
   // get position of frame AKA mean [x, y, z]
-  const Eigen::VectorXs frame_position  = frame_pointer->getPPtr()->getState();
+  const Eigen::VectorXs frame_position  = frame_pointer->getP()->getState();
   ellipsoid(0) = frame_position(0);
   ellipsoid(1) = frame_position(1);
   ellipsoid(2) = frame_position(2);
@@ -447,7 +447,7 @@ Scalar ProcessorFrameNearestNeighborFilter::MahalanobisDistance(const FrameBaseP
   Eigen::VectorXs traj_pose, query_pose;
 
   // get state and covariance matrix for both frames
-  if (trajectory->getPPtr()->getState().size() == 2)
+  if (trajectory->getP()->getState().size() == 2)
   {
     traj_pose.resize(3);
     query_pose.resize(3);
@@ -458,11 +458,11 @@ Scalar ProcessorFrameNearestNeighborFilter::MahalanobisDistance(const FrameBaseP
     query_pose.resize(7);
   }
 
-  traj_pose << trajectory->getPPtr()->getState(),
-               trajectory->getOPtr()->getState();
+  traj_pose << trajectory->getP()->getState(),
+               trajectory->getO()->getState();
 
-  query_pose << query->getPPtr()->getState(),
-                query->getOPtr()->getState();
+  query_pose << query->getP()->getState(),
+                query->getO()->getState();
 
   const Eigen::MatrixXs traj_covariance  = getProblem()->getFrameCovariance(trajectory);
   const Eigen::MatrixXs query_covariance = getProblem()->getFrameCovariance(query);
@@ -482,7 +482,7 @@ Scalar ProcessorFrameNearestNeighborFilter::MahalanobisDistance(const FrameBaseP
 //##############################################################################
 bool ProcessorFrameNearestNeighborFilter::frameInsideBuffer(const FrameBasePtr& frame_ptr)
 {
-  FrameBasePtr keyframe = getProblem()->getLastKeyFramePtr();
+  FrameBasePtr keyframe = getProblem()->getLastKeyFrame();
   if ( (int)frame_ptr->id() < ( (int)keyframe->id() - params_NNF->buffer_size_ ))
     return false;
   else

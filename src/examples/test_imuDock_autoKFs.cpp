@@ -13,13 +13,13 @@
 #include "base/sensor/sensor_odom_3D.h"
 #include "base/processor/processor_odom_3D.h"
 
-//Constraints headers
-#include "base/constraint/constraint_fix_bias.h"
+//Factors headers
+#include "base/factor/factor_fix_bias.h"
 
 //std
 #include <iostream>
 #include <fstream>
-#include "base/constraint/constraint_pose_3D.h"
+#include "base/factor/factor_pose_3D.h"
 
 #define OUTPUT_RESULTS
 //#define AUTO_KFS
@@ -28,15 +28,15 @@
     In this test, we use the experimental conditions needed for Humanoids 2017.
     IMU data are acquired using the docking station. 
 
-    Constraints are (supposing to KeyFrames, stateblocks or first Keyframe are noted *1 and second Keyframes's are *2) :
+    Factors are (supposing to KeyFrames, stateblocks or first Keyframe are noted *1 and second Keyframes's are *2) :
     invar       : P1, V1, V2
     var         : Q1,B1,P2,Q2,B2
 
     All Keyframes coming after KF2 are constrained just like KF2
-    constraints : Odometry constraint between KeyFrames
-                  IMU constraint
-                  FixBias constraint --> makes the problem observable (adding a big covariance on all part but a smaller one on yaw)
-                  Fix3D constraint
+    factors : Odometry factor between KeyFrames
+                  IMU factor
+                  FixBias factor --> makes the problem observable (adding a big covariance on all part but a smaller one on yaw)
+                  Fix3D factor
 
     What we expect  : Estimate biases (this will strongly depend on the actual trajectory of the IMU)
                       Estimate the position and orienttion of the IMU (check with the standard deviation using covariance matrix)
@@ -183,13 +183,13 @@ int main(int argc, char** argv)
     odom_data_input.close();
     
     //A KeyFrame should have been created (depending on time_span in processors). get all frames
-    FrameBaseList trajectory = problem->getTrajectoryPtr()->getFrameList();
+    FrameBasePtrList trajectory = problem->getTrajectory()->getFrameList();
     
 
     //#################################################### OPTIMIZATION PART
-    // ___Create needed constraints___
+    // ___Create needed factors___
 
-    //Add Fix3D constraint on first KeyFrame (with large covariance except for yaw)
+    //Add Fix3D factor on first KeyFrame (with large covariance except for yaw)
     Eigen::MatrixXs featureFix_cov(6,6);
     featureFix_cov = Eigen::MatrixXs::Identity(6,6);
     featureFix_cov.topLeftCorner(3,3) *= 1e-8; // position variances (it's fixed anyway)
@@ -198,16 +198,16 @@ int main(int argc, char** argv)
     featureFix_cov(5,5) = pow( .001 , 2); // yaw variance
     CaptureBasePtr cap_fix = KF1->addCapture(std::make_shared<CaptureMotion>(0, nullptr, problem_origin.head(7), 7, 6, nullptr));
     FeatureBasePtr featureFix = cap_fix->addFeature(std::make_shared<FeatureBase>("ODOM 3D", problem_origin.head(7), featureFix_cov));
-    ConstraintFix3DPtr ctr_fix = std::static_pointer_cast<ConstraintPose3D>(featureFix->addConstraint(std::make_shared<ConstraintPose3D>(featureFix)));
+    FactorFix3DPtr fac_fix = std::static_pointer_cast<FactorPose3D>(featureFix->addFactor(std::make_shared<FactorPose3D>(featureFix)));
 
     Eigen::MatrixXs featureFixBias_cov(6,6);
     featureFixBias_cov = Eigen::MatrixXs::Identity(6,6); 
     featureFixBias_cov.topLeftCorner(3,3) *= sensorIMU->getAbInitialStdev() * sensorIMU->getAbInitialStdev();
     featureFixBias_cov.bottomRightCorner(3,3) *= sensorIMU->getWbInitialStdev() * sensorIMU->getWbInitialStdev();
     CaptureBasePtr cap_fixbias = KF1->addCapture(std::make_shared<CaptureMotion>(0, nullptr, problem_origin.tail(6), featureFixBias_cov, 6, 6, nullptr));
-    //create a FeatureBase to constraint biases
+    //create a FeatureBase to factor biases
     FeatureBasePtr featureFixBias = cap_fixbias->addFeature(std::make_shared<FeatureBase>("FIX BIAS", problem_origin.tail(6), featureFixBias_cov));
-    ConstraintFixBiasPtr ctr_fixBias = std::static_pointer_cast<ConstraintFixBias>(featureFixBias->addConstraint(std::make_shared<ConstraintFixBias>(featureFixBias)));
+    FactorFixBiasPtr fac_fixBias = std::static_pointer_cast<FactorFixBias>(featureFixBias->addFactor(std::make_shared<FactorFixBias>(featureFixBias)));
 
     // ___Fix/Unfix stateblocks___
     // fix all Keyframes here
@@ -218,17 +218,17 @@ int main(int argc, char** argv)
         frame_imu = std::static_pointer_cast<FrameIMU>(frame);
         if(frame_imu->isKey())
         {
-            frame_imu->getPPtr()->fix();
-            frame_imu->getOPtr()->unfix();
-            frame_imu->getVPtr()->setState((Eigen::Vector3s()<<0,0,0).finished()); //fix all velocties to 0 ()
-            frame_imu->getVPtr()->fix();
-            frame_imu->getAccBiasPtr()->unfix();
-            frame_imu->getGyroBiasPtr()->unfix();
+            frame_imu->getP()->fix();
+            frame_imu->getO()->unfix();
+            frame_imu->getV()->setState((Eigen::Vector3s()<<0,0,0).finished()); //fix all velocties to 0 ()
+            frame_imu->getV()->fix();
+            frame_imu->getAccBias()->unfix();
+            frame_imu->getGyroBias()->unfix();
         }
     }
     
     //KF1 (origin) needs to be also fixed in position
-    KF1->getPPtr()->fix();
+    KF1->getP()->fix();
 
     #ifdef OUTPUT_RESULTS
         // ___OUTPUT___

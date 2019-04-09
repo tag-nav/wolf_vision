@@ -1,7 +1,7 @@
 #include "base/processor/processor_tracker_landmark_image.h"
 
 #include "base/capture/capture_image.h"
-#include "base/constraint/constraint_AHP.h"
+#include "base/factor/factor_AHP.h"
 #include "base/feature/feature_base.h"
 #include "base/feature/feature_point_image.h"
 #include "base/frame_base.h"
@@ -144,8 +144,8 @@ void ProcessorTrackerLandmarkImage::postProcess()
     feat_lmk_found_.clear();
 }
 
-unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList& _landmarks_in,
-                                                         FeatureBaseList&  _features_incoming_out,
+unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBasePtrList& _landmarks_in,
+                                                         FeatureBasePtrList&  _features_incoming_out,
                                                          LandmarkMatchMap& _feature_landmark_correspondences)
 {
     KeyPointVector candidate_keypoints;
@@ -159,13 +159,13 @@ unsigned int ProcessorTrackerLandmarkImage::findLandmarks(const LandmarkBaseList
 
         // project landmark into incoming capture
         LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_in_ptr);
-        SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(this->getSensorPtr());
+        SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(this->getSensor());
         Eigen::Vector4s point3D_hmg;
         Eigen::Vector2s pixel;
 
         landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
 
-        pixel = pinhole::projectPoint(camera->getIntrinsicPtr()->getState(),
+        pixel = pinhole::projectPoint(camera->getIntrinsic()->getState(),
                                       camera->getDistortionVector(),
                                       point3D_hmg.head<3>());
 
@@ -225,7 +225,7 @@ bool ProcessorTrackerLandmarkImage::voteForKeyFrame()
 //    return landmarks_tracked_ < params_tracker_landmark_image_->min_features_for_keyframe;
 }
 
-unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int& _max_features, FeatureBaseList& _features_incoming_out)
+unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -283,7 +283,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkImage::createLandmark(FeatureBasePtr _fe
 {
 
     FeaturePointImagePtr feat_point_image_ptr = std::static_pointer_cast<FeaturePointImage>( _feature_ptr);
-    FrameBasePtr anchor_frame = getLastPtr()->getFramePtr();
+    FrameBasePtr anchor_frame = getLast()->getFrame();
 
     Eigen::Vector2s point2D;
     point2D[0] = feat_point_image_ptr->getKeypoint().pt.x;
@@ -292,8 +292,8 @@ LandmarkBasePtr ProcessorTrackerLandmarkImage::createLandmark(FeatureBasePtr _fe
     Scalar distance = params_tracker_landmark_image_->distance; // arbitrary value
     Eigen::Vector4s vec_homogeneous;
 
-    point2D = pinhole::depixellizePoint(getSensorPtr()->getIntrinsicPtr()->getState(),point2D);
-    point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(getSensorPtr()))->getCorrectionVector(),point2D);
+    point2D = pinhole::depixellizePoint(getSensor()->getIntrinsic()->getState(),point2D);
+    point2D = pinhole::undistortPoint((std::static_pointer_cast<SensorCamera>(getSensor()))->getCorrectionVector(),point2D);
 
     Eigen::Vector3s point3D;
     point3D.head<2>() = point2D;
@@ -303,17 +303,17 @@ LandmarkBasePtr ProcessorTrackerLandmarkImage::createLandmark(FeatureBasePtr _fe
 
     vec_homogeneous = {point3D(0),point3D(1),point3D(2),1/distance};
 
-    LandmarkAHPPtr lmk_ahp_ptr = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, getSensorPtr(), feat_point_image_ptr->getDescriptor());
+    LandmarkAHPPtr lmk_ahp_ptr = std::make_shared<LandmarkAHP>(vec_homogeneous, anchor_frame, getSensor(), feat_point_image_ptr->getDescriptor());
     _feature_ptr->setLandmarkId(lmk_ahp_ptr->id());
     return lmk_ahp_ptr;
 }
 
-ConstraintBasePtr ProcessorTrackerLandmarkImage::createConstraint(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
+FactorBasePtr ProcessorTrackerLandmarkImage::createFactor(FeatureBasePtr _feature_ptr, LandmarkBasePtr _landmark_ptr)
 {
 
-    if ((std::static_pointer_cast<LandmarkAHP>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFramePtr())
+    if ((std::static_pointer_cast<LandmarkAHP>(_landmark_ptr))->getAnchorFrame() == last_ptr_->getFrame())
     {
-        return ConstraintBasePtr();
+        return FactorBasePtr();
     }
     else
     {
@@ -322,9 +322,9 @@ ConstraintBasePtr ProcessorTrackerLandmarkImage::createConstraint(FeatureBasePtr
 
         LandmarkAHPPtr landmark_ahp = std::static_pointer_cast<LandmarkAHP>(_landmark_ptr);
 
-        ConstraintAHPPtr constraint_ptr = ConstraintAHP::create(_feature_ptr, landmark_ahp, shared_from_this(), true);
+        FactorAHPPtr factor_ptr = FactorAHP::create(_feature_ptr, landmark_ahp, shared_from_this(), true);
 
-        return constraint_ptr;
+        return factor_ptr;
     }
 }
 
@@ -365,8 +365,8 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
     Transform<Scalar,3,Eigen::Affine> T_W_R0, T_W_R1, T_R0_C0, T_R1_C1;
 
     // world to anchor robot frame
-    Translation<Scalar,3>  t_w_r0(_landmark->getAnchorFrame()->getPPtr()->getState()); // sadly we cannot put a Map over a translation
-    const Quaternions q_w_r0(Eigen::Vector4s(_landmark->getAnchorFrame()->getOPtr()->getState()));
+    Translation<Scalar,3>  t_w_r0(_landmark->getAnchorFrame()->getP()->getState()); // sadly we cannot put a Map over a translation
+    const Quaternions q_w_r0(Eigen::Vector4s(_landmark->getAnchorFrame()->getO()->getState()));
     T_W_R0 = t_w_r0 * q_w_r0;
 
     // world to current robot frame
@@ -375,17 +375,17 @@ void ProcessorTrackerLandmarkImage::landmarkInCurrentCamera(const Eigen::VectorX
     T_W_R1 = t_w_r1 * q_w_r1;
 
     // anchor robot to anchor camera
-    Translation<Scalar,3>  t_r0_c0(_landmark->getAnchorSensor()->getPPtr()->getState());
-    const Quaternions q_r0_c0(Eigen::Vector4s(_landmark->getAnchorSensor()->getOPtr()->getState()));
+    Translation<Scalar,3>  t_r0_c0(_landmark->getAnchorSensor()->getP()->getState());
+    const Quaternions q_r0_c0(Eigen::Vector4s(_landmark->getAnchorSensor()->getO()->getState()));
     T_R0_C0 = t_r0_c0 * q_r0_c0;
 
     // current robot to current camera
-    Translation<Scalar,3>  t_r1_c1(this->getSensorPtr()->getPPtr()->getState());
-    const Quaternions q_r1_c1(Eigen::Vector4s(this->getSensorPtr()->getOPtr()->getState()));
+    Translation<Scalar,3>  t_r1_c1(this->getSensor()->getP()->getState());
+    const Quaternions q_r1_c1(Eigen::Vector4s(this->getSensor()->getO()->getState()));
     T_R1_C1 = t_r1_c1 * q_r1_c1;
 
     // Transform lmk from c0 to c1 and exit
-    Vector4s landmark_hmg_c0 = _landmark->getPPtr()->getState(); // lmk in anchor frame
+    Vector4s landmark_hmg_c0 = _landmark->getP()->getState(); // lmk in anchor frame
     _point3D_hmg = T_R1_C1.inverse(Eigen::Affine) * T_W_R1.inverse(Eigen::Affine) * T_W_R0 * T_R0_C0 * landmark_hmg_c0;
 }
 
@@ -447,17 +447,17 @@ void ProcessorTrackerLandmarkImage::drawLandmarks(cv::Mat _image)
     {
         unsigned int num_lmks_in_img = 0;
 
-        Eigen::VectorXs current_state = last_ptr_->getFramePtr()->getState();
-        SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensorPtr());
+        Eigen::VectorXs current_state = last_ptr_->getFrame()->getState();
+        SensorCameraPtr camera = std::static_pointer_cast<SensorCamera>(getSensor());
 
-        for (auto landmark_base_ptr : getProblem()->getMapPtr()->getLandmarkList())
+        for (auto landmark_base_ptr : getProblem()->getMap()->getLandmarkList())
         {
             LandmarkAHPPtr landmark_ptr = std::static_pointer_cast<LandmarkAHP>(landmark_base_ptr);
 
             Eigen::Vector4s point3D_hmg;
             landmarkInCurrentCamera(current_state, landmark_ptr, point3D_hmg);
 
-            Eigen::Vector2s point2D = pinhole::projectPoint(camera->getIntrinsicPtr()->getState(), // k
+            Eigen::Vector2s point2D = pinhole::projectPoint(camera->getIntrinsic()->getState(), // k
                                                             camera->getDistortionVector(),          // d
                                                             point3D_hmg.head(3));                   // v
 

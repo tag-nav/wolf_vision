@@ -19,7 +19,7 @@ TrajectoryBase::~TrajectoryBase()
 FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
 {
     // link up
-    _frame_ptr->setTrajectoryPtr(shared_from_this());
+    _frame_ptr->setTrajectory(shared_from_this());
     _frame_ptr->setProblem(getProblem());
 
     if (_frame_ptr->isKey())
@@ -38,16 +38,16 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
     return _frame_ptr;
 }
 
-void TrajectoryBase::getConstraintList(ConstraintBaseList & _ctr_list)
+void TrajectoryBase::getFactorList(FactorBasePtrList & _fac_list)
 {
 	for(auto fr_ptr : getFrameList())
-		fr_ptr->getConstraintList(_ctr_list);
+		fr_ptr->getFactorList(_fac_list);
 }
 
 void TrajectoryBase::sortFrame(FrameBasePtr _frame_ptr)
 {
     moveFrame(_frame_ptr, computeFrameOrder(_frame_ptr));
-    //    last_key_frame_ptr_ = findLastKeyFramePtr(); // done in moveFrame() just above
+    //    last_key_frame_ptr_ = findLastKeyFrame(); // done in moveFrame() just above
 }
 
 void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
@@ -56,7 +56,7 @@ void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
     {
         frame_list_.remove(_frm_ptr);
         frame_list_.insert(_place, _frm_ptr);
-        last_key_frame_ptr_ = findLastKeyFramePtr();
+        last_key_frame_ptr_ = findLastKeyFrame();
     }
 }
 
@@ -68,7 +68,7 @@ FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBasePtr _frame_ptr)
     return getFrameList().begin();
 }
 
-FrameBasePtr TrajectoryBase::findLastKeyFramePtr()
+FrameBasePtr TrajectoryBase::findLastKeyFrame()
 {
     // NOTE: Assumes keyframes are sorted by timestamp
     for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); ++frm_rit)

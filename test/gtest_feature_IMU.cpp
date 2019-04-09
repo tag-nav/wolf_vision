@@ -61,7 +61,7 @@ class FeatureIMU_test : public testing::Test
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     // give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
         imu_ptr = std::make_shared<CaptureIMU>(t, sensor_ptr, data_, Eigen::Matrix6s::Identity(), Eigen::Vector6s::Zero());
-        imu_ptr->setFramePtr(origin_frame); //to get ptr to Frm in processorIMU and then get biases
+        imu_ptr->setFrame(origin_frame); //to get ptr to Frm in processorIMU and then get biases
 
     //process data
         data_ << 2, 0, 9.8, 0, 0, 0;
@@ -75,22 +75,22 @@ class FeatureIMU_test : public testing::Test
         sensor_ptr->process(imu_ptr);
 
     //create Frame
-        ts = problem->getProcessorMotionPtr()->getBuffer().get().back().ts_;
-        state_vec = problem->getProcessorMotionPtr()->getCurrentState();
+        ts = problem->getProcessorMotion()->getBuffer().get().back().ts_;
+        state_vec = problem->getProcessorMotion()->getCurrentState();
    	    last_frame = std::make_shared<FrameBase>(KEY_FRAME, ts, std::make_shared<StateBlock>(state_vec.head(3)), std::make_shared<StateBlock>(state_vec.segment(3,4)), std::make_shared<StateBlock>(state_vec.head(3)));
-        problem->getTrajectoryPtr()->addFrame(last_frame);
+        problem->getTrajectory()->addFrame(last_frame);
         
     //create a feature
-        delta_preint = problem->getProcessorMotionPtr()->getMotion().delta_integr_;
-        delta_preint_cov = problem->getProcessorMotionPtr()->getMotion().delta_integr_cov_ + MatrixXs::Identity(9,9)*1e-08;
-        VectorXs calib_preint = problem->getProcessorMotionPtr()->getBuffer().getCalibrationPreint();
-        dD_db_jacobians = problem->getProcessorMotionPtr()->getMotion().jacobian_calib_;
+        delta_preint = problem->getProcessorMotion()->getMotion().delta_integr_;
+        delta_preint_cov = problem->getProcessorMotion()->getMotion().delta_integr_cov_ + MatrixXs::Identity(9,9)*1e-08;
+        VectorXs calib_preint = problem->getProcessorMotion()->getBuffer().getCalibrationPreint();
+        dD_db_jacobians = problem->getProcessorMotion()->getMotion().jacobian_calib_;
         feat_imu = std::make_shared<FeatureIMU>(delta_preint,
                                                 delta_preint_cov,
                                                 calib_preint,
                                                 dD_db_jacobians,
                                                 imu_ptr);
-        feat_imu->setCapturePtr(imu_ptr); //associate the feature to a capture
+        feat_imu->setCapture(imu_ptr); //associate the feature to a capture
 
     }
 
@@ -113,7 +113,7 @@ TEST_F(FeatureIMU_test, check_frame)
     // set variables
     using namespace wolf;
 
-    FrameBasePtr left_frame = feat_imu->getFramePtr();
+    FrameBasePtr left_frame = feat_imu->getFrame();
     wolf::TimeStamp t;
     left_frame->getTimeStamp(t);
     origin_frame->getTimeStamp(ts);
@@ -124,12 +124,12 @@ TEST_F(FeatureIMU_test, check_frame)
     ASSERT_TRUE(left_frame->isKey());
 
     wolf::StateBlockPtr origin_pptr, origin_optr, origin_vptr, left_pptr, left_optr, left_vptr;
-    origin_pptr = origin_frame->getPPtr();
-    origin_optr = origin_frame->getOPtr();
-    origin_vptr = origin_frame->getVPtr();
-    left_pptr = left_frame->getPPtr();
-    left_optr = left_frame->getOPtr();
-    left_vptr = left_frame->getVPtr();
+    origin_pptr = origin_frame->getP();
+    origin_optr = origin_frame->getO();
+    origin_vptr = origin_frame->getV();
+    left_pptr = left_frame->getP();
+    left_optr = left_frame->getO();
+    left_vptr = left_frame->getV();
 
     ASSERT_MATRIX_APPROX(origin_pptr->getState(), left_pptr->getState(), wolf::Constants::EPS_SMALL);
     Eigen::Map<const Eigen::Quaternions> origin_Quat(origin_optr->getState().data()), left_Quat(left_optr->getState().data());
@@ -149,15 +149,15 @@ TEST_F(FeatureIMU_test, access_members)
     ASSERT_MATRIX_APPROX(feat_imu->getMeasurement().transpose(), delta.transpose(), wolf::Constants::EPS);
 }
 
-//TEST_F(FeatureIMU_test, addConstraint)
+//TEST_F(FeatureIMU_test, addFactor)
 //{
 //    using namespace wolf;
 //
 //    FrameBasePtr frm_imu = std::static_pointer_cast<FrameBase>(last_frame);
 //    auto cap_imu = last_frame->getCaptureList().back();
-//    ConstraintIMUPtr constraint_imu = std::make_shared<ConstraintIMU>(feat_imu, std::static_pointer_cast<CaptureIMU>(cap_imu), processor_ptr_);
-//    feat_imu->addConstraint(constraint_imu);
-//    origin_frame->addConstrainedBy(constraint_imu);
+//    FactorIMUPtr factor_imu = std::make_shared<FactorIMU>(feat_imu, std::static_pointer_cast<CaptureIMU>(cap_imu), processor_ptr_);
+//    feat_imu->addFactor(factor_imu);
+//    origin_frame->addConstrainedBy(factor_imu);
 //}
 
 int main(int argc, char **argv)

@@ -69,7 +69,7 @@ class SensorCamera : public SensorBase
 
 inline bool SensorCamera::useRawImages()
 {
-    getIntrinsicPtr()->setState(pinhole_model_raw_);
+    getIntrinsic()->setState(pinhole_model_raw_);
     K_ = setIntrinsicMatrix(pinhole_model_raw_);
     using_raw_ = true;
 
@@ -78,7 +78,7 @@ inline bool SensorCamera::useRawImages()
 
 inline bool SensorCamera::useRectifiedImages()
 {
-    getIntrinsicPtr()->setState(pinhole_model_rectified_);
+    getIntrinsic()->setState(pinhole_model_rectified_);
     K_ = setIntrinsicMatrix(pinhole_model_rectified_);
     using_raw_ = false;
 

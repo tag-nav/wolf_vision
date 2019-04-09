@@ -28,14 +28,14 @@ using Eigen::Vector7s;
 using namespace wolf;
 
 void cleanupMap(const ProblemPtr& _problem, const TimeStamp& _t, Scalar _dt_max,
-                                      SizeEigen _min_constraints)
+                                      SizeEigen _min_factors)
 {
     std::list<LandmarkBasePtr> lmks_to_remove;
-    for (auto lmk : _problem->getMapPtr()->getLandmarkList())
+    for (auto lmk : _problem->getMap()->getLandmarkList())
     {
         TimeStamp t0 = std::static_pointer_cast<LandmarkAHP>(lmk)->getAnchorFrame()->getTimeStamp();
         if (_t - t0 > _dt_max)
-            if (lmk->getConstrainedByList().size() <= _min_constraints)
+            if (lmk->getConstrainedByList().size() <= _min_factors)
                 lmks_to_remove.push_back(lmk);
     }
 
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
     // Origin Key Frame is fixed
     TimeStamp t = 0;
     FrameBasePtr origin_frame = problem->emplaceFrame(KEY_FRAME, (Vector7s()<<1,0,0,0,0,0,1).finished(), t);
-    problem->getProcessorMotionPtr()->setOrigin(origin_frame);
+    problem->getProcessorMotion()->setOrigin(origin_frame);
     origin_frame->fix();
 
     std::cout << "t: " << 0 << "  \t\t\t x = ( " << problem->getCurrentState().transpose() << ")" << std::endl;
@@ -161,7 +161,7 @@ int main(int argc, char** argv)
         cap_odo->setTimeStamp(t);
 
         // previous state
-        FrameBasePtr prev_key_fr_ptr = problem->getLastKeyFramePtr();
+        FrameBasePtr prev_key_fr_ptr = problem->getLastKeyFrame();
 //        Eigen::Vector7s x_prev = problem->getCurrentState();
         Eigen::Vector7s x_prev = prev_key_fr_ptr->getState();
 
@@ -169,11 +169,11 @@ int main(int argc, char** argv)
         FrameBasePtr prev_prev_key_fr_ptr = nullptr;
         Vector7s x_prev_prev;
         Vector7s dx;
-        for (auto f_it = problem->getTrajectoryPtr()->getFrameList().rbegin(); f_it != problem->getTrajectoryPtr()->getFrameList().rend(); f_it++)
+        for (auto f_it = problem->getTrajectory()->getFrameList().rbegin(); f_it != problem->getTrajectory()->getFrameList().rend(); f_it++)
             if ((*f_it) == prev_key_fr_ptr)
             {
                 f_it++;
-                if (f_it != problem->getTrajectoryPtr()->getFrameList().rend())
+                if (f_it != problem->getTrajectory()->getFrameList().rend())
                 {
                     prev_prev_key_fr_ptr = (*f_it);
                 }
@@ -227,9 +227,9 @@ int main(int argc, char** argv)
 
         // Solve -----------------------------------------------
         // solve only when new KFs are added
-        if (problem->getTrajectoryPtr()->getFrameList().size() > number_of_KFs)
+        if (problem->getTrajectory()->getFrameList().size() > number_of_KFs)
         {
-            number_of_KFs = problem->getTrajectoryPtr()->getFrameList().size();
+            number_of_KFs = problem->getTrajectory()->getFrameList().size();
             std::string summary = ceres_manager.solve(SolverManager::ReportVerbosity::BRIEF);// 0: nothing, 1: BriefReport, 2: FullReport
             std::cout << summary << std::endl;
         }

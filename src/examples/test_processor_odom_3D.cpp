@@ -85,7 +85,7 @@ int main (int argc, char** argv)
     }
 
     problem->print(1,0,1,0);
-//    for (auto frm : problem->getTrajectoryPtr()->getFrameList())
+//    for (auto frm : problem->getTrajectory()->getFrameList())
 //    {
 //        frm->setState(problem->zeroState());
 //    }

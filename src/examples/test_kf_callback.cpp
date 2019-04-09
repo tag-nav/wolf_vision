@@ -35,8 +35,8 @@ int main()
     sen_ftr->addProcessor(prc_ftr);
     prc_ftr->setTimeTolerance(0.1);
 
-    cout << "Motion sensor    : " << problem->getProcessorMotionPtr()->getSensorPtr()->getName() << endl;
-    cout << "Motion processor : " << problem->getProcessorMotionPtr()->getName() << endl;
+    cout << "Motion sensor    : " << problem->getProcessorMotion()->getSensor()->getName() << endl;
+    cout << "Motion processor : " << problem->getProcessorMotion()->getName() << endl;
 
     TimeStamp t(0);
     cout << "=======================\n>> TIME: " << t.get() << endl;

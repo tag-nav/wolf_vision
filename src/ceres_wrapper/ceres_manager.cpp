@@ -36,8 +36,8 @@ CeresManager::CeresManager(const ProblemPtr& _wolf_problem,
 
 CeresManager::~CeresManager()
 {
-    while (!ctr_2_residual_idx_.empty())
-        removeConstraint(ctr_2_residual_idx_.begin()->first);
+    while (!fac_2_residual_idx_.empty())
+        removeFactor(fac_2_residual_idx_.begin()->first);
 }
 
 std::string CeresManager::solveImpl(const ReportVerbosity report_level)
@@ -80,14 +80,14 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
             // first create a vector containing all state blocks
             std::vector<StateBlockPtr> all_state_blocks, landmark_state_blocks;
             //frame state blocks
-            for(auto fr_ptr : wolf_problem_->getTrajectoryPtr()->getFrameList())
+            for(auto fr_ptr : wolf_problem_->getTrajectory()->getFrameList())
                 if (fr_ptr->isKey())
                     for (auto sb : fr_ptr->getStateBlockVec())
                         if (sb)
                             all_state_blocks.push_back(sb);
 
             // landmark state blocks
-            for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
+            for(auto l_ptr : wolf_problem_->getMap()->getLandmarkList())
             {
                 landmark_state_blocks = l_ptr->getUsedStateBlockVec();
                 all_state_blocks.insert(all_state_blocks.end(), landmark_state_blocks.begin(), landmark_state_blocks.end());
@@ -105,7 +105,7 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
         case CovarianceBlocksToBeComputed::ALL_MARGINALS:
         {
             // first create a vector containing all state blocks
-            for(auto fr_ptr : wolf_problem_->getTrajectoryPtr()->getFrameList())
+            for(auto fr_ptr : wolf_problem_->getTrajectory()->getFrameList())
                 if (fr_ptr->isKey())
                     for (auto sb : fr_ptr->getStateBlockVec())
                         if (sb)
@@ -119,7 +119,7 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
                                 }
 
             // landmark state blocks
-            for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
+            for(auto l_ptr : wolf_problem_->getMap()->getLandmarkList())
                 for (auto sb : l_ptr->getUsedStateBlockVec())
                     for(auto sb2 : l_ptr->getUsedStateBlockVec())
                     {
@@ -135,31 +135,31 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
             //                state_block_pairs.emplace_back(all_state_blocks[2*i],all_state_blocks[2*i+1]);
             //                state_block_pairs.emplace_back(all_state_blocks[2*i+1],all_state_blocks[2*i+1]);
             //
-            //                double_pairs.emplace_back(all_state_blocks[2*i]->getPtr(),all_state_blocks[2*i]->getPtr());
-            //                double_pairs.emplace_back(all_state_blocks[2*i]->getPtr(),all_state_blocks[2*i+1]->getPtr());
-            //                double_pairs.emplace_back(all_state_blocks[2*i+1]->getPtr(),all_state_blocks[2*i+1]->getPtr());
+            //                double_pairs.emplace_back(all_state_blocks[2*i]->get(),all_state_blocks[2*i]->get());
+            //                double_pairs.emplace_back(all_state_blocks[2*i]->get(),all_state_blocks[2*i+1]->get());
+            //                double_pairs.emplace_back(all_state_blocks[2*i+1]->get(),all_state_blocks[2*i+1]->get());
             //            }
             break;
         }
         case CovarianceBlocksToBeComputed::ROBOT_LANDMARKS:
         {
             //robot-robot
-            auto last_key_frame = wolf_problem_->getLastKeyFramePtr();
+            auto last_key_frame = wolf_problem_->getLastKeyFrame();
 
-            state_block_pairs.emplace_back(last_key_frame->getPPtr(), last_key_frame->getPPtr());
-            state_block_pairs.emplace_back(last_key_frame->getPPtr(), last_key_frame->getOPtr());
-            state_block_pairs.emplace_back(last_key_frame->getOPtr(), last_key_frame->getOPtr());
+            state_block_pairs.emplace_back(last_key_frame->getP(), last_key_frame->getP());
+            state_block_pairs.emplace_back(last_key_frame->getP(), last_key_frame->getO());
+            state_block_pairs.emplace_back(last_key_frame->getO(), last_key_frame->getO());
 
-            double_pairs.emplace_back(getAssociatedMemBlockPtr(last_key_frame->getPPtr()),
-                                      getAssociatedMemBlockPtr(last_key_frame->getPPtr()));
-            double_pairs.emplace_back(getAssociatedMemBlockPtr(last_key_frame->getPPtr()),
-                                      getAssociatedMemBlockPtr(last_key_frame->getOPtr()));
-            double_pairs.emplace_back(getAssociatedMemBlockPtr(last_key_frame->getOPtr()),
-                                      getAssociatedMemBlockPtr(last_key_frame->getOPtr()));
+            double_pairs.emplace_back(getAssociatedMemBlockPtr(last_key_frame->getP()),
+                                      getAssociatedMemBlockPtr(last_key_frame->getP()));
+            double_pairs.emplace_back(getAssociatedMemBlockPtr(last_key_frame->getP()),
+                                      getAssociatedMemBlockPtr(last_key_frame->getO()));
+            double_pairs.emplace_back(getAssociatedMemBlockPtr(last_key_frame->getO()),
+                                      getAssociatedMemBlockPtr(last_key_frame->getO()));
 
             // landmarks
             std::vector<StateBlockPtr> landmark_state_blocks;
-            for(auto l_ptr : wolf_problem_->getMapPtr()->getLandmarkList())
+            for(auto l_ptr : wolf_problem_->getMap()->getLandmarkList())
             {
                 // load state blocks vector
                 landmark_state_blocks = l_ptr->getUsedStateBlockVec();
@@ -167,11 +167,11 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
                 for (auto state_it = landmark_state_blocks.begin(); state_it != landmark_state_blocks.end(); state_it++)
                 {
                     // robot - landmark
-                    state_block_pairs.emplace_back(last_key_frame->getPPtr(), *state_it);
-                    state_block_pairs.emplace_back(last_key_frame->getOPtr(), *state_it);
-                    double_pairs.emplace_back(getAssociatedMemBlockPtr(last_key_frame->getPPtr()),
+                    state_block_pairs.emplace_back(last_key_frame->getP(), *state_it);
+                    state_block_pairs.emplace_back(last_key_frame->getO(), *state_it);
+                    double_pairs.emplace_back(getAssociatedMemBlockPtr(last_key_frame->getP()),
                                               getAssociatedMemBlockPtr((*state_it)));
-                    double_pairs.emplace_back(getAssociatedMemBlockPtr(last_key_frame->getOPtr()),
+                    double_pairs.emplace_back(getAssociatedMemBlockPtr(last_key_frame->getO()),
                                               getAssociatedMemBlockPtr((*state_it)));
 
                     // landmark marginal
@@ -204,7 +204,7 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
 }
 
-void CeresManager::computeCovariances(const StateBlockList& st_list)
+void CeresManager::computeCovariances(const StateBlockPtrList& st_list)
 {
     //std::cout << "CeresManager: computing covariances..." << std::endl;
 
@@ -243,40 +243,40 @@ void CeresManager::computeCovariances(const StateBlockList& st_list)
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
 }
 
-void CeresManager::addConstraint(const ConstraintBasePtr& ctr_ptr)
+void CeresManager::addFactor(const FactorBasePtr& fac_ptr)
 {
-    assert(ctr_2_costfunction_.find(ctr_ptr) == ctr_2_costfunction_.end() && "adding a constraint that is already in the ctr_2_costfunction_ map");
+    assert(fac_2_costfunction_.find(fac_ptr) == fac_2_costfunction_.end() && "adding a factor that is already in the fac_2_costfunction_ map");
 
-    auto cost_func_ptr = createCostFunction(ctr_ptr);
-    ctr_2_costfunction_[ctr_ptr] = cost_func_ptr;
+    auto cost_func_ptr = createCostFunction(fac_ptr);
+    fac_2_costfunction_[fac_ptr] = cost_func_ptr;
 
     std::vector<Scalar*> res_block_mem;
-    res_block_mem.reserve(ctr_ptr->getStateBlockPtrVector().size());
-    for (const StateBlockPtr& st : ctr_ptr->getStateBlockPtrVector())
+    res_block_mem.reserve(fac_ptr->getStateBlockPtrVector().size());
+    for (const StateBlockPtr& st : fac_ptr->getStateBlockPtrVector())
     {
         res_block_mem.emplace_back( getAssociatedMemBlockPtr(st) );
     }
 
-    auto loss_func_ptr = (ctr_ptr->getApplyLossFunction()) ? new ceres::CauchyLoss(0.5) : nullptr;
+    auto loss_func_ptr = (fac_ptr->getApplyLossFunction()) ? new ceres::CauchyLoss(0.5) : nullptr;
 
-    assert(ctr_2_residual_idx_.find(ctr_ptr) == ctr_2_residual_idx_.end() && "adding a constraint that is already in the ctr_2_residual_idx_ map");
+    assert(fac_2_residual_idx_.find(fac_ptr) == fac_2_residual_idx_.end() && "adding a factor that is already in the fac_2_residual_idx_ map");
 
-    ctr_2_residual_idx_[ctr_ptr] = ceres_problem_->AddResidualBlock(cost_func_ptr.get(),
+    fac_2_residual_idx_[fac_ptr] = ceres_problem_->AddResidualBlock(cost_func_ptr.get(),
                                                                     loss_func_ptr,
                                                                     res_block_mem);
 
-    assert((unsigned int)(ceres_problem_->NumResidualBlocks()) == ctr_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
+    assert((unsigned int)(ceres_problem_->NumResidualBlocks()) == fac_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
-void CeresManager::removeConstraint(const ConstraintBasePtr& _ctr_ptr)
+void CeresManager::removeFactor(const FactorBasePtr& _fac_ptr)
 {
-    assert(ctr_2_residual_idx_.find(_ctr_ptr) != ctr_2_residual_idx_.end() && "removing a constraint that is not in the ctr_2_residual map");
+    assert(fac_2_residual_idx_.find(_fac_ptr) != fac_2_residual_idx_.end() && "removing a factor that is not in the fac_2_residual map");
 
-    ceres_problem_->RemoveResidualBlock(ctr_2_residual_idx_[_ctr_ptr]);
-    ctr_2_residual_idx_.erase(_ctr_ptr);
-    ctr_2_costfunction_.erase(_ctr_ptr);
+    ceres_problem_->RemoveResidualBlock(fac_2_residual_idx_[_fac_ptr]);
+    fac_2_residual_idx_.erase(_fac_ptr);
+    fac_2_costfunction_.erase(_fac_ptr);
 
-    assert((unsigned int)(ceres_problem_->NumResidualBlocks()) == ctr_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
+    assert((unsigned int)(ceres_problem_->NumResidualBlocks()) == fac_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
 void CeresManager::addStateBlock(const StateBlockPtr& state_ptr)
@@ -287,7 +287,7 @@ void CeresManager::addStateBlock(const StateBlockPtr& state_ptr)
         state_blocks_local_param_.find(state_ptr)==state_blocks_local_param_.end())
     {
         auto p = state_blocks_local_param_.emplace(state_ptr,
-                                                   std::make_shared<LocalParametrizationWrapper>(state_ptr->getLocalParametrizationPtr()));
+                                                   std::make_shared<LocalParametrizationWrapper>(state_ptr->getLocalParametrization()));
 
         local_parametrization_ptr = p.first->second.get();
     }
@@ -322,23 +322,23 @@ void CeresManager::updateStateBlockLocalParametrization(const StateBlockPtr& sta
     /* in ceres the easiest way to update (add or remove) a local parameterization
      * of a state block (parameter block in ceres) is remove & add:
      *    - the state block: The associated memory block (that identified the parameter_block) is and MUST be the same
-     *    - all involved constraints (residual_blocks in ceres)
+     *    - all involved factors (residual_blocks in ceres)
      */
 
-    // get all involved constraints
-    ConstraintBaseList involved_constraints;
-    for (auto pair : ctr_2_costfunction_)
+    // get all involved factors
+    FactorBasePtrList involved_factors;
+    for (auto pair : fac_2_costfunction_)
         for (const StateBlockPtr& st : pair.first->getStateBlockPtrVector())
             if (st == state_ptr)
             {
                 // store
-                involved_constraints.push_back(pair.first);
+                involved_factors.push_back(pair.first);
                 break;
             }
 
-    // Remove all involved constraints (it does not remove any parameter block)
-    for (auto ctr : involved_constraints)
-        removeConstraint(ctr);
+    // Remove all involved factors (it does not remove any parameter block)
+    for (auto fac : involved_factors)
+        removeFactor(fac);
 
     // Remove state block (it removes all involved residual blocks but they just were removed)
     removeStateBlock(state_ptr);
@@ -346,9 +346,9 @@ void CeresManager::updateStateBlockLocalParametrization(const StateBlockPtr& sta
     // Add state block
     addStateBlock(state_ptr);
 
-    // Add all involved constraints
-    for (auto ctr : involved_constraints)
-        addConstraint(ctr);
+    // Add all involved factors
+    for (auto fac : involved_factors)
+        addFactor(fac);
 }
 
 bool CeresManager::hasConverged()
@@ -371,17 +371,17 @@ Scalar CeresManager::finalCost()
     return Scalar(summary_.final_cost);
 }
 
-ceres::CostFunctionPtr CeresManager::createCostFunction(const ConstraintBasePtr& _ctr_ptr)
+ceres::CostFunctionPtr CeresManager::createCostFunction(const FactorBasePtr& _fac_ptr)
 {
-    assert(_ctr_ptr != nullptr);
+    assert(_fac_ptr != nullptr);
 
     // analitic & autodiff jacobian
-    if (_ctr_ptr->getJacobianMethod() == JAC_ANALYTIC || _ctr_ptr->getJacobianMethod() == JAC_AUTO)
-        return std::make_shared<CostFunctionWrapper>(_ctr_ptr);
+    if (_fac_ptr->getJacobianMethod() == JAC_ANALYTIC || _fac_ptr->getJacobianMethod() == JAC_AUTO)
+        return std::make_shared<CostFunctionWrapper>(_fac_ptr);
 
     // numeric jacobian
-    else if (_ctr_ptr->getJacobianMethod() == JAC_NUMERIC)
-        return createNumericDiffCostFunction(_ctr_ptr);
+    else if (_fac_ptr->getJacobianMethod() == JAC_NUMERIC)
+        return createNumericDiffCostFunction(_fac_ptr);
 
     else
         throw std::invalid_argument( "Wrong Jacobian Method!" );
@@ -390,8 +390,8 @@ ceres::CostFunctionPtr CeresManager::createCostFunction(const ConstraintBasePtr&
 void CeresManager::check()
 {
     // Check numbers
-    assert(ceres_problem_->NumResidualBlocks() == ctr_2_costfunction_.size());
-    assert(ceres_problem_->NumResidualBlocks() == ctr_2_residual_idx_.size());
+    assert(ceres_problem_->NumResidualBlocks() == fac_2_costfunction_.size());
+    assert(ceres_problem_->NumResidualBlocks() == fac_2_residual_idx_.size());
     assert(ceres_problem_->NumParameterBlocks() == state_blocks_.size());
 
     // Check parameter blocks
@@ -399,20 +399,20 @@ void CeresManager::check()
         assert(ceres_problem_->HasParameterBlock(state_block_pair.second.data()));
 
     // Check residual blocks
-    for (auto&& ctr_res_pair : ctr_2_residual_idx_)
+    for (auto&& fac_res_pair : fac_2_residual_idx_)
     {
         // costfunction - residual
-        assert(ctr_2_costfunction_.find(ctr_res_pair.first) != ctr_2_costfunction_.end());
-        assert(ctr_2_costfunction_[ctr_res_pair.first].get() == ceres_problem_->GetCostFunctionForResidualBlock(ctr_res_pair.second));
+        assert(fac_2_costfunction_.find(fac_res_pair.first) != fac_2_costfunction_.end());
+        assert(fac_2_costfunction_[fac_res_pair.first].get() == ceres_problem_->GetCostFunctionForResidualBlock(fac_res_pair.second));
 
-        // constraint - residual
-        assert(ctr_res_pair.first == static_cast<const CostFunctionWrapper*>(ceres_problem_->GetCostFunctionForResidualBlock(ctr_res_pair.second))->getConstraintPtr());
+        // factor - residual
+        assert(fac_res_pair.first == static_cast<const CostFunctionWrapper*>(ceres_problem_->GetCostFunctionForResidualBlock(fac_res_pair.second))->getFactor());
 
         // parameter blocks - state blocks
         std::vector<Scalar*> param_blocks;
-        ceres_problem_->GetParameterBlocksForResidualBlock(ctr_res_pair.second, &param_blocks);
+        ceres_problem_->GetParameterBlocksForResidualBlock(fac_res_pair.second, &param_blocks);
         auto i = 0;
-        for (const StateBlockPtr& st : ctr_res_pair.first->getStateBlockPtrVector())
+        for (const StateBlockPtr& st : fac_res_pair.first->getStateBlockPtrVector())
         {
             assert(getAssociatedMemBlockPtr(st) == param_blocks[i]);
             i++;

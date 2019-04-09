@@ -52,9 +52,9 @@ using namespace wolf;
 //  std::cout << "033[1;33m [WARN]:033[0m gtest for ProcessorTrackerFeatureTrifocal detectNewFeatures is empty." << std::endl;
 //}
 //
-//TEST(ProcessorTrackerFeatureTrifocal, createConstraint)
+//TEST(ProcessorTrackerFeatureTrifocal, createFactor)
 //{
-//  std::cout << "033[1;33m [WARN]:033[0m gtest for ProcessorTrackerFeatureTrifocal createConstraint is empty." << std::endl;
+//  std::cout << "033[1;33m [WARN]:033[0m gtest for ProcessorTrackerFeatureTrifocal createFactor is empty." << std::endl;
 //}
 
 TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
@@ -137,11 +137,11 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
         capt_trk = make_shared<CaptureImage>(t, sens_trk, image);
         proc_trk->process(capt_trk);
 
-        CaptureBasePtr prev = proc_trk->getPrevOriginPtr();
+        CaptureBasePtr prev = proc_trk->getPrevOrigin();
         problem->print(2,0,0,0);
 
         // Only odom creating KFs
-        ASSERT_TRUE( problem->getLastKeyFramePtr()->getType().compare("PO 3D")==0 );
+        ASSERT_TRUE( problem->getLastKeyFrame()->getType().compare("PO 3D")==0 );
     }
 }
 

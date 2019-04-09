@@ -63,7 +63,7 @@ void ProcessorMotion::splitBuffer(const wolf::CaptureMotionPtr& _capture_source,
     }
 
     // Update the existing capture
-    _capture_source->setOriginFramePtr(_keyframe_target);
+    _capture_source->setOriginFrame(_keyframe_target);
 
     // re-integrate existing buffer -- note: the result of re-integration is stored in the same buffer!
     reintegrateBuffer(_capture_source);
@@ -102,11 +102,11 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             auto existing_capture = findCaptureContainingTimeStamp(ts_from_callback);
 
             // Find the frame acting as the capture's origin
-            auto keyframe_origin = existing_capture->getOriginFramePtr();
+            auto keyframe_origin = existing_capture->getOriginFrame();
 
             // emplace a new motion capture to the new keyframe
             auto capture_for_keyframe_callback = emplaceCapture(keyframe_from_callback,
-                                                                getSensorPtr(),
+                                                                getSensor(),
                                                                 ts_from_callback,
                                                                 Eigen::VectorXs::Zero(data_size_),
                                                                 existing_capture->getDataCovariance(),
@@ -121,10 +121,10 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             // create motion feature and add it to the capture
             auto new_feature = emplaceFeature(capture_for_keyframe_callback);
 
-            // create motion constraint and add it to the feature, and constrain to the other capture (origin)
-            emplaceConstraint(new_feature, keyframe_origin->getCaptureOf(getSensorPtr()) );
+            // create motion factor and add it to the feature, and constrain to the other capture (origin)
+            emplaceFactor(new_feature, keyframe_origin->getCaptureOf(getSensor()) );
 
-            // modify existing feature and constraint (if they exist in the existing capture)
+            // modify existing feature and factor (if they exist in the existing capture)
             if (!existing_capture->getFeatureList().empty())
             {
                 auto existing_feature = existing_capture->getFeatureList().back(); // there is only one feature!
@@ -133,11 +133,11 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
                 existing_feature->setMeasurement          (existing_capture->getBuffer().get().back().delta_integr_);
                 existing_feature->setMeasurementCovariance(existing_capture->getBuffer().get().back().delta_integr_cov_);
 
-                // Modify existing constraint --------
+                // Modify existing factor --------
                 // Instead of modifying, we remove one ctr, and create a new one.
-                auto ctr_to_remove  = existing_feature->getConstraintList().back(); // there is only one constraint!
-                auto new_ctr        = emplaceConstraint(existing_feature, capture_for_keyframe_callback);
-                ctr_to_remove       ->remove();  // remove old constraint now (otherwise c->remove() gets propagated to f, C, F, etc.)
+                auto fac_to_remove  = existing_feature->getFactorList().back(); // there is only one factor!
+                auto new_ctr        = emplaceFactor(existing_feature, capture_for_keyframe_callback);
+                fac_to_remove       ->remove();  // remove old factor now (otherwise c->remove() gets propagated to f, C, F, etc.)
             }
             break;
         }
@@ -149,12 +149,12 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             TimeStamp    ts_from_callback       = keyframe_from_callback->getTimeStamp();
 
             // Find the frame acting as the capture's origin
-            auto keyframe_origin = last_ptr_->getOriginFramePtr();
+            auto keyframe_origin = last_ptr_->getOriginFrame();
 
             // emplace a new motion capture to the new keyframe
             VectorXs calib = last_ptr_->getCalibration();
             auto capture_for_keyframe_callback = emplaceCapture(keyframe_from_callback,
-                                                                getSensorPtr(),
+                                                                getSensor(),
                                                                 ts_from_callback,
                                                                 Eigen::VectorXs::Zero(data_size_),
                                                                 last_ptr_->getDataCovariance(),
@@ -169,8 +169,8 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             // create motion feature and add it to the capture
             auto feature_for_keyframe_callback = emplaceFeature(capture_for_keyframe_callback);
 
-            // create motion constraint and add it to the feature, and constrain to the other capture (origin)
-            emplaceConstraint(feature_for_keyframe_callback, keyframe_origin->getCaptureOf(getSensorPtr()) );
+            // create motion factor and add it to the feature, and constrain to the other capture (origin)
+            emplaceFactor(feature_for_keyframe_callback, keyframe_origin->getCaptureOf(getSensor()) );
 
             // reset processor origin
             origin_ptr_ = capture_for_keyframe_callback;
@@ -190,20 +190,20 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
     // Update state and time stamps
     last_ptr_->setTimeStamp(getCurrentTimeStamp());
-    last_ptr_->getFramePtr()->setTimeStamp(getCurrentTimeStamp());
-    last_ptr_->getFramePtr()->setState(getCurrentState());
+    last_ptr_->getFrame()->setTimeStamp(getCurrentTimeStamp());
+    last_ptr_->getFrame()->setState(getCurrentState());
 
     if (voteForKeyFrame() && permittedKeyFrame())
     {
         // Set the frame of last_ptr as key
-        auto key_frame_ptr = last_ptr_->getFramePtr();
+        auto key_frame_ptr = last_ptr_->getFrame();
         key_frame_ptr->setKey();
 
         // create motion feature and add it to the key_capture
         auto key_feature_ptr = emplaceFeature(last_ptr_);
 
-        // create motion constraint and link it to parent feature and other frame (which is origin's frame)
-        auto ctr_ptr = emplaceConstraint(key_feature_ptr, origin_ptr_);
+        // create motion factor and link it to parent feature and other frame (which is origin's frame)
+        auto fac_ptr = emplaceFactor(key_feature_ptr, origin_ptr_);
 
         // create a new frame
         auto new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
@@ -211,7 +211,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
                                                         getCurrentTimeStamp());
         // create a new capture
         auto new_capture_ptr = emplaceCapture(new_frame_ptr,
-                                              getSensorPtr(),
+                                              getSensor(),
                                               key_frame_ptr->getTimeStamp(),
                                               Eigen::VectorXs::Zero(data_size_),
                                               Eigen::MatrixXs::Zero(data_size_, data_size_),
@@ -260,8 +260,8 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
     if (capture_motion)  // We found a CaptureMotion whose buffer contains the time stamp
     {
         // Get origin state and calibration
-        VectorXs state_0          = capture_motion->getOriginFramePtr()->getState();
-        CaptureBasePtr cap_orig   = capture_motion->getOriginFramePtr()->getCaptureOf(getSensorPtr());
+        VectorXs state_0          = capture_motion->getOriginFrame()->getState();
+        CaptureBasePtr cap_orig   = capture_motion->getOriginFrame()->getCaptureOf(getSensor());
         VectorXs calib            = cap_orig->getCalibration();
 
         // Get delta and correct it with new calibration params
@@ -273,7 +273,7 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 
         // Compose on top of origin state using the buffered time stamp, not the query time stamp
         // TODO Interpolate the delta to produce a state at the query time stamp _ts
-        Scalar dt = motion.ts_ - capture_motion->getBuffer().get().front().ts_; // = _ts - capture_motion->getOriginPtr()->getTimeStamp();
+        Scalar dt = motion.ts_ - capture_motion->getBuffer().get().front().ts_; // = _ts - capture_motion->getOrigin()->getTimeStamp();
         statePlusDelta(state_0, delta, dt, _x);
     }
     else
@@ -297,19 +297,19 @@ FrameBasePtr ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const 
 void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 {
     assert(_origin_frame && "ProcessorMotion::setOrigin: Provided frame pointer is nullptr.");
-    assert(_origin_frame->getTrajectoryPtr() != nullptr
+    assert(_origin_frame->getTrajectory() != nullptr
             && "ProcessorMotion::setOrigin: origin frame must be in the trajectory.");
     assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
 
     // -------- ORIGIN ---------
     // emplace (empty) origin Capture
     origin_ptr_ = emplaceCapture(_origin_frame,
-                                 getSensorPtr(),
+                                 getSensor(),
                                  _origin_frame->getTimeStamp(),
                                  Eigen::VectorXs::Zero(data_size_),
                                  Eigen::MatrixXs::Zero(data_size_, data_size_),
-                                 getSensorPtr()->getCalibration(),
-                                 getSensorPtr()->getCalibration(),
+                                 getSensor()->getCalibration(),
+                                 getSensor()->getCalibration(),
                                  nullptr);
 
     // ---------- LAST ----------
@@ -319,12 +319,12 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
                                                     _origin_frame->getTimeStamp());
     // emplace (emtpy) last Capture
     last_ptr_ = emplaceCapture(new_frame_ptr,
-                               getSensorPtr(),
+                               getSensor(),
                                _origin_frame->getTimeStamp(),
                                Eigen::VectorXs::Zero(data_size_),
                                Eigen::MatrixXs::Zero(data_size_, data_size_),
-                               getSensorPtr()->getCalibration(),
-                               getSensorPtr()->getCalibration(),
+                               getSensor()->getCalibration(),
+                               getSensor()->getCalibration(),
                                _origin_frame);
 
     // clear and reset buffer
@@ -394,7 +394,7 @@ void ProcessorMotion::integrateOneStep()
 void ProcessorMotion::reintegrateBuffer(CaptureMotionPtr _capture_ptr)
 {
     // start with empty motion
-    _capture_ptr->getBuffer().get().push_front(motionZero(_capture_ptr->getOriginFramePtr()->getTimeStamp()));
+    _capture_ptr->getBuffer().get().push_front(motionZero(_capture_ptr->getOriginFrame()->getTimeStamp()));
 
     VectorXs calib = _capture_ptr->getCalibrationPreint();
 
@@ -534,12 +534,12 @@ CaptureMotionPtr ProcessorMotion::findCaptureContainingTimeStamp(const TimeStamp
     FrameBasePtr     frame          = nullptr;
     CaptureBasePtr   capture        = nullptr;
     CaptureMotionPtr capture_motion = nullptr;
-    for (auto frame_rev_iter = getProblem()->getTrajectoryPtr()->getFrameList().rbegin();
-            frame_rev_iter != getProblem()->getTrajectoryPtr()->getFrameList().rend();
+    for (auto frame_rev_iter = getProblem()->getTrajectory()->getFrameList().rbegin();
+            frame_rev_iter != getProblem()->getTrajectory()->getFrameList().rend();
             ++frame_rev_iter)
     {
         frame   = *frame_rev_iter;
-        capture = frame->getCaptureOf(getSensorPtr());
+        capture = frame->getCaptureOf(getSensor());
         if (capture != nullptr)
         {
             // Rule 1 satisfied! We found a Capture belonging to this processor's Sensor ==> it is a CaptureMotion

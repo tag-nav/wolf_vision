@@ -28,8 +28,8 @@ class CeresManager : public SolverManager
 {
     protected:
 
-        std::map<ConstraintBasePtr, ceres::ResidualBlockId> ctr_2_residual_idx_;
-        std::map<ConstraintBasePtr, ceres::CostFunctionPtr> ctr_2_costfunction_;
+        std::map<FactorBasePtr, ceres::ResidualBlockId> fac_2_residual_idx_;
+        std::map<FactorBasePtr, ceres::CostFunctionPtr> fac_2_costfunction_;
 
         std::map<StateBlockPtr, LocalParametrizationWrapperPtr> state_blocks_local_param_;
 
@@ -51,7 +51,7 @@ class CeresManager : public SolverManager
         virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks
                                         = CovarianceBlocksToBeComputed::ROBOT_LANDMARKS) override;
 
-        virtual void computeCovariances(const StateBlockList& st_list) override;
+        virtual void computeCovariances(const StateBlockPtrList& st_list) override;
 
         virtual bool hasConverged() override;
 
@@ -69,9 +69,9 @@ class CeresManager : public SolverManager
 
         std::string solveImpl(const ReportVerbosity report_level) override;
 
-        void addConstraint(const ConstraintBasePtr& ctr_ptr) override;
+        void addFactor(const FactorBasePtr& fac_ptr) override;
 
-        void removeConstraint(const ConstraintBasePtr& ctr_ptr) override;
+        void removeFactor(const FactorBasePtr& fac_ptr) override;
 
         void addStateBlock(const StateBlockPtr& state_ptr) override;
 
@@ -81,7 +81,7 @@ class CeresManager : public SolverManager
 
         void updateStateBlockLocalParametrization(const StateBlockPtr& state_ptr) override;
 
-        ceres::CostFunctionPtr createCostFunction(const ConstraintBasePtr& _ctr_ptr);
+        ceres::CostFunctionPtr createCostFunction(const FactorBasePtr& _fac_ptr);
 };
 
 inline ceres::Solver::Summary CeresManager::getSummary()

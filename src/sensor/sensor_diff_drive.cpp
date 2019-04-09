@@ -62,7 +62,7 @@ SensorBasePtr SensorDiffDrive::create(const std::string& _unique_name,
 //  return intrinsics_;
 //}
 
-//void SensorDiffDrive::initIntrisicsPtr()
+//void SensorDiffDrive::initIntrisics()
 //{
 //  assert(intrinsic_ptr_ == nullptr &&
 //         "SensorDiffDrive::initIntrisicsPtr should only be called once at construction.");

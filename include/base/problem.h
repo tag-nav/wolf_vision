@@ -38,10 +38,10 @@ class Problem : public std::enable_shared_from_this<Problem>
         TrajectoryBasePtr   trajectory_ptr_;
         MapBasePtr          map_ptr_;
         ProcessorMotionPtr  processor_motion_ptr_;
-        StateBlockList      state_block_list_;
+        StateBlockPtrList      state_block_list_;
         std::map<std::pair<StateBlockPtr, StateBlockPtr>, Eigen::MatrixXs> covariances_;
         SizeEigen state_size_, state_cov_size_, dim_;
-        std::map<ConstraintBasePtr, Notification> constraint_notification_map_;
+        std::map<FactorBasePtr, Notification> factor_notification_map_;
         std::map<StateBlockPtr, Notification> state_block_notification_map_;
         bool prior_is_set_;
 
@@ -59,7 +59,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         SizeEigen getDim() const;
 
         // Hardware branch ------------------------------------
-        HardwareBasePtr getHardwarePtr();
+        HardwareBasePtr getHardware();
         void addSensor(SensorBasePtr _sen_ptr);
 
         /** \brief Factory method to install (create and add) sensors only from its properties
@@ -87,7 +87,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         /** \brief get a sensor pointer by its name
          * \param _sensor_name The sensor name, as it was installed with installSensor()
          */
-        SensorBasePtr getSensorPtr(const std::string& _sensor_name);
+        SensorBasePtr getSensor(const std::string& _sensor_name);
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *
@@ -124,10 +124,10 @@ class Problem : public std::enable_shared_from_this<Problem>
         void setProcessorMotion(ProcessorMotionPtr _processor_motion_ptr);
         ProcessorMotionPtr setProcessorMotion(const std::string& _unique_processor_name);
         void clearProcessorMotion();
-        ProcessorMotionPtr& getProcessorMotionPtr();
+        ProcessorMotionPtr& getProcessorMotion();
 
         // Trajectory branch ----------------------------------
-        TrajectoryBasePtr getTrajectoryPtr();
+        TrajectoryBasePtr getTrajectory();
         virtual FrameBasePtr setPrior(const Eigen::VectorXs& _prior_state, //
                                       const Eigen::MatrixXs& _prior_cov, //
                                       const TimeStamp& _ts,
@@ -190,8 +190,8 @@ class Problem : public std::enable_shared_from_this<Problem>
                                   const TimeStamp& _time_stamp);
 
         // Frame getters
-        FrameBasePtr    getLastFramePtr         ( );
-        FrameBasePtr    getLastKeyFramePtr      ( );
+        FrameBasePtr    getLastFrame         ( );
+        FrameBasePtr    getLastKeyFrame      ( );
         FrameBasePtr    closestKeyFrameToTimeStamp(const TimeStamp& _ts);
 
         /** \brief Give the permission to a processor to create a new keyFrame
@@ -221,9 +221,9 @@ class Problem : public std::enable_shared_from_this<Problem>
         bool priorIsSet() const;
 
         // Map branch -----------------------------------------
-        MapBasePtr getMapPtr();
+        MapBasePtr getMap();
         LandmarkBasePtr addLandmark(LandmarkBasePtr _lmk_ptr);
-        void addLandmarkList(LandmarkBaseList& _lmk_list);
+        void addLandmarkList(LandmarkBasePtrList& _lmk_list);
         void loadMap(const std::string& _filename_dot_yaml);
         void saveMap(const std::string& _filename_dot_yaml, //
                      const std::string& _map_name = "Map automatically saved by Wolf");
@@ -245,7 +245,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Gets a reference to the state blocks list
          */
-        StateBlockList& getStateBlockList();
+        StateBlockPtrList& getStateBlockPtrList();
 
         /** \brief Notifies a new state block to be added to the solver manager
          */
@@ -255,27 +255,27 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         void removeStateBlock(StateBlockPtr _state_ptr);
 
-        /** \brief Gets a map of constraint notification to be handled by the solver
+        /** \brief Gets a map of factor notification to be handled by the solver
          */
         std::map<StateBlockPtr,Notification>& getStateBlockNotificationMap();
 
-        /** \brief Notifies a new constraint to be added to the solver manager
+        /** \brief Notifies a new factor to be added to the solver manager
          */
-        ConstraintBasePtr addConstraint(ConstraintBasePtr _constraint_ptr);
+        FactorBasePtr addFactor(FactorBasePtr _factor_ptr);
 
-        /** \brief Notifies a constraint to be removed from the solver manager
+        /** \brief Notifies a factor to be removed from the solver manager
          */
-        void removeConstraint(ConstraintBasePtr _constraint_ptr);
+        void removeFactor(FactorBasePtr _factor_ptr);
 
-        /** \brief Gets a map of constraint notification to be handled by the solver
+        /** \brief Gets a map of factor notification to be handled by the solver
          */
-        std::map<ConstraintBasePtr, Notification>& getConstraintNotificationMap();
+        std::map<FactorBasePtr, Notification>& getFactorNotificationMap();
 
         // Print and check ---------------------------------------
         /**
          * \brief print wolf tree
          * \param depth :        levels to show ( 0: H, T, M : 1: H:S:p, T:F, M:L ; 2: T:F:C ; 3: T:F:C:f ; 4: T:F:C:f:c )
-         * \param constr_by:     show constraints pointing to F, f and L.
+         * \param constr_by:     show factors pointing to F, f and L.
          * \param metric :       show metric info (status, time stamps, state vectors, measurements)
          * \param state_blocks : show state blocks
          */
@@ -303,7 +303,7 @@ inline bool Problem::priorIsSet() const
     return prior_is_set_;
 }
 
-inline ProcessorMotionPtr& Problem::getProcessorMotionPtr()
+inline ProcessorMotionPtr& Problem::getProcessorMotion()
 {
     return processor_motion_ptr_;
 }
@@ -313,9 +313,9 @@ inline std::map<StateBlockPtr,Notification>& Problem::getStateBlockNotificationM
     return state_block_notification_map_;
 }
 
-inline std::map<ConstraintBasePtr,Notification>& Problem::getConstraintNotificationMap()
+inline std::map<FactorBasePtr,Notification>& Problem::getFactorNotificationMap()
 {
-    return constraint_notification_map_;
+    return factor_notification_map_;
 }
 
 } // namespace wolf

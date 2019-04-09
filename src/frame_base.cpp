@@ -1,6 +1,6 @@
 
 #include "base/frame_base.h"
-#include "base/constraint/constraint_base.h"
+#include "base/factor/factor_base.h"
 #include "base/trajectory_base.h"
 #include "base/capture/capture_base.h"
 #include "base/state_block.h"
@@ -71,8 +71,8 @@ void FrameBase::remove()
         if ( isKey() )
             removeStateBlocks();
 
-        if (getTrajectoryPtr()->getLastKeyFramePtr()->id() == this_F->id())
-            getTrajectoryPtr()->setLastKeyFramePtr(getTrajectoryPtr()->findLastKeyFramePtr());
+        if (getTrajectory()->getLastKeyFrame()->id() == this_F->id())
+            getTrajectory()->setLastKeyFrame(getTrajectory()->findLastKeyFrame());
 
 //        std::cout << "Removed       F" << id() << std::endl;
     }
@@ -81,8 +81,8 @@ void FrameBase::remove()
 void FrameBase::setTimeStamp(const TimeStamp& _ts)
 {
     time_stamp_ = _ts;
-    if (isKey() && getTrajectoryPtr() != nullptr)
-        getTrajectoryPtr()->sortFrame(shared_from_this());
+    if (isKey() && getTrajectory() != nullptr)
+        getTrajectory()->sortFrame(shared_from_this());
 }
 
 void FrameBase::registerNewStateBlocks()
@@ -99,14 +99,14 @@ void FrameBase::removeStateBlocks()
 {
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
-        StateBlockPtr sbp = getStateBlockPtr(i);
+        StateBlockPtr sbp = getStateBlock(i);
         if (sbp != nullptr)
         {
             if (getProblem() != nullptr)
             {
                 getProblem()->removeStateBlock(sbp);
             }
-            setStateBlockPtr(i, nullptr);
+            setStateBlock(i, nullptr);
         }
     }
 }
@@ -118,10 +118,10 @@ void FrameBase::setKey()
         type_ = KEY_FRAME;
         registerNewStateBlocks();
 
-        if (getTrajectoryPtr()->getLastKeyFramePtr() == nullptr || getTrajectoryPtr()->getLastKeyFramePtr()->getTimeStamp() < time_stamp_)
-            getTrajectoryPtr()->setLastKeyFramePtr(shared_from_this());
+        if (getTrajectory()->getLastKeyFrame() == nullptr || getTrajectory()->getLastKeyFrame()->getTimeStamp() < time_stamp_)
+            getTrajectory()->setLastKeyFrame(shared_from_this());
 
-        getTrajectoryPtr()->sortFrame(shared_from_this());
+        getTrajectory()->sortFrame(shared_from_this());
 
 //        WOLF_DEBUG("Set KF", this->id());
     }
@@ -229,18 +229,18 @@ Eigen::MatrixXs FrameBase::getCovariance() const
 FrameBasePtr FrameBase::getPreviousFrame() const
 {
     //std::cout << "finding previous frame of " << this->frame_id_ << std::endl;
-    if (getTrajectoryPtr() == nullptr)
+    if (getTrajectory() == nullptr)
         //std::cout << "This Frame is not linked to any trajectory" << std::endl;
 
-    assert(getTrajectoryPtr() != nullptr && "This Frame is not linked to any trajectory");
+    assert(getTrajectory() != nullptr && "This Frame is not linked to any trajectory");
 
     //look for the position of this node in the upper list (frame list of trajectory)
-    for (auto f_it = getTrajectoryPtr()->getFrameList().rbegin(); f_it != getTrajectoryPtr()->getFrameList().rend(); f_it++ )
+    for (auto f_it = getTrajectory()->getFrameList().rbegin(); f_it != getTrajectory()->getFrameList().rend(); f_it++ )
     {
         if ( this->frame_id_ == (*f_it)->id() )
         {
         	f_it++;
-        	if (f_it != getTrajectoryPtr()->getFrameList().rend())
+        	if (f_it != getTrajectory()->getFrameList().rend())
             {
                 //std::cout << "previous frame found!" << std::endl;
                 return *f_it;
@@ -259,11 +259,11 @@ FrameBasePtr FrameBase::getPreviousFrame() const
 FrameBasePtr FrameBase::getNextFrame() const
 {
     //std::cout << "finding next frame of " << this->frame_id_ << std::endl;
-	auto f_it = getTrajectoryPtr()->getFrameList().rbegin();
+	auto f_it = getTrajectory()->getFrameList().rbegin();
 	f_it++; //starting from second last frame
 
     //look for the position of this node in the frame list of trajectory
-    while (f_it != getTrajectoryPtr()->getFrameList().rend())
+    while (f_it != getTrajectory()->getFrameList().rend())
     {
         if ( this->frame_id_ == (*f_it)->id())
         {
@@ -279,7 +279,7 @@ FrameBasePtr FrameBase::getNextFrame() const
 CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
 {
     capture_list_.push_back(_capt_ptr);
-    _capt_ptr->setFramePtr(shared_from_this());
+    _capt_ptr->setFrame(shared_from_this());
     _capt_ptr->setProblem(getProblem());
     _capt_ptr->registerNewStateBlocks();
     return _capt_ptr;
@@ -288,7 +288,7 @@ CaptureBasePtr FrameBase::addCapture(CaptureBasePtr _capt_ptr)
 CaptureBasePtr FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr, const std::string& type)
 {
     for (CaptureBasePtr capture_ptr : getCaptureList())
-        if (capture_ptr->getSensorPtr() == _sensor_ptr && capture_ptr->getType() == type)
+        if (capture_ptr->getSensor() == _sensor_ptr && capture_ptr->getType() == type)
             return capture_ptr;
     return nullptr;
 }
@@ -296,16 +296,16 @@ CaptureBasePtr FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr, const st
 CaptureBasePtr FrameBase::getCaptureOf(const SensorBasePtr _sensor_ptr)
 {
     for (CaptureBasePtr capture_ptr : getCaptureList())
-        if (capture_ptr->getSensorPtr() == _sensor_ptr)
+        if (capture_ptr->getSensor() == _sensor_ptr)
             return capture_ptr;
     return nullptr;
 }
 
-CaptureBaseList FrameBase::getCapturesOf(const SensorBasePtr _sensor_ptr)
+CaptureBasePtrList FrameBase::getCapturesOf(const SensorBasePtr _sensor_ptr)
 {
-    CaptureBaseList captures;
+    CaptureBasePtrList captures;
     for (CaptureBasePtr capture_ptr : getCaptureList())
-        if (capture_ptr->getSensorPtr() == _sensor_ptr)
+        if (capture_ptr->getSensor() == _sensor_ptr)
             captures.push_back(capture_ptr);
     return captures;
 }
@@ -316,33 +316,33 @@ void FrameBase::unlinkCapture(CaptureBasePtr _cap_ptr)
     capture_list_.remove(_cap_ptr);
 }
 
-ConstraintBasePtr FrameBase::getConstraintOf(const ProcessorBasePtr _processor_ptr, const std::string& type)
+FactorBasePtr FrameBase::getFactorOf(const ProcessorBasePtr _processor_ptr, const std::string& type)
 {
-    for (const ConstraintBasePtr& constaint_ptr : getConstrainedByList())
+    for (const FactorBasePtr& constaint_ptr : getConstrainedByList())
         if (constaint_ptr->getProcessor() == _processor_ptr && constaint_ptr->getType() == type)
             return constaint_ptr;
     return nullptr;
 }
 
-ConstraintBasePtr FrameBase::getConstraintOf(const ProcessorBasePtr _processor_ptr)
+FactorBasePtr FrameBase::getFactorOf(const ProcessorBasePtr _processor_ptr)
 {
-    for (const ConstraintBasePtr& constaint_ptr : getConstrainedByList())
+    for (const FactorBasePtr& constaint_ptr : getConstrainedByList())
         if (constaint_ptr->getProcessor() == _processor_ptr)
             return constaint_ptr;
     return nullptr;
 }
 
-void FrameBase::getConstraintList(ConstraintBaseList& _ctr_list)
+void FrameBase::getFactorList(FactorBasePtrList& _fac_list)
 {
     for (auto c_ptr : getCaptureList())
-        c_ptr->getConstraintList(_ctr_list);
+        c_ptr->getFactorList(_fac_list);
 }
 
-ConstraintBasePtr FrameBase::addConstrainedBy(ConstraintBasePtr _ctr_ptr)
+FactorBasePtr FrameBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setFrameOtherPtr(shared_from_this());
-    return _ctr_ptr;
+    constrained_by_list_.push_back(_fac_ptr);
+    _fac_ptr->setFrameOther(shared_from_this());
+    return _fac_ptr;
 }
 
 FrameBasePtr FrameBase::create_PO_2D(const FrameType & _tp,
