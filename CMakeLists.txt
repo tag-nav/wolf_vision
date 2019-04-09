@@ -319,8 +319,9 @@ INSTALL(FILES ${HDRS_SERIALIZATION}
   DESTINATION include/iri-algorithms/wolf/${PROJECT_NAME}/serialization)
 INSTALL(FILES ${HDRS_YAML}
   DESTINATION include/iri-algorithms/wolf/${PROJECT_NAME}/yaml)
+
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf${PROJECT_NAME}.cmake"
-  DESTINATION "lib/cmake/${PROJECT_NAME}")
+  DESTINATION "lib/cmake/wolf${PROJECT_NAME}")
 FILE(WRITE vision.found "")
 INSTALL(FILES vision.found
   DESTINATION include/iri-algorithms/wolf/${PROJECT_NAME})
