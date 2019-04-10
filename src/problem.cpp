@@ -367,6 +367,7 @@ void Problem::addLandmarkList(LandmarkBasePtrList& _lmk_list)
 
 StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 {
+    std::lock_guard<std::mutex> lock(mut_state_block_notifications_);
     //std::cout << "Problem::addStateBlockPtr " << _state_ptr.get() << std::endl;
 
     // Add add notification
@@ -384,6 +385,7 @@ StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 
 void Problem::removeStateBlock(StateBlockPtr _state_ptr)
 {
+    std::lock_guard<std::mutex> lock(mut_state_block_notifications_);
     //std::cout << "Problem::removeStateBlockPtr " << _state_ptr.get() << std::endl;
 
     // Check if there is already a notification for this state block
@@ -407,6 +409,7 @@ void Problem::removeStateBlock(StateBlockPtr _state_ptr)
 
 FactorBasePtr Problem::addFactor(FactorBasePtr _factor_ptr)
 {
+    std::lock_guard<std::mutex> lock(mut_factor_notifications_);
     //std::cout << "Problem::addFactorPtr " << _factor_ptr->id() << std::endl;
 
     // Add ADD notification
@@ -425,6 +428,7 @@ FactorBasePtr Problem::addFactor(FactorBasePtr _factor_ptr)
 
 void Problem::removeFactor(FactorBasePtr _factor_ptr)
 {
+    std::lock_guard<std::mutex> lock(mut_factor_notifications_);
     //std::cout << "Problem::removeFactorPtr " << _factor_ptr->id() << std::endl;
 
     // Check if there is already a notification for this state block
@@ -446,6 +450,7 @@ void Problem::removeFactor(FactorBasePtr _factor_ptr)
 
 void Problem::clearCovariance()
 {
+    std::lock_guard<std::mutex> lock(mut_covariances_);
     covariances_.clear();
 }
 
@@ -454,6 +459,7 @@ void Problem::addCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, c
     assert(_state1->getSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
     assert(_state2->getSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
 
+    std::lock_guard<std::mutex> lock(mut_covariances_);
     covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)] = _cov;
 }
 
@@ -462,6 +468,7 @@ void Problem::addCovarianceBlock(StateBlockPtr _state1, const Eigen::MatrixXs& _
     assert(_state1->getSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
     assert(_state1->getSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
 
+    std::lock_guard<std::mutex> lock(mut_covariances_);
     covariances_[std::make_pair(_state1, _state1)] = _cov;
 }
 
@@ -481,6 +488,8 @@ bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, E
 
     assert(_row + _state1->getSize() <= _cov.rows() && _col + _state2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
 
+    std::lock_guard<std::mutex> lock(mut_covariances_);
+
     if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)) != covariances_.end())
         _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
                 covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)];
@@ -498,6 +507,8 @@ bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, E
 
 bool Problem::getCovarianceBlock(std::map<StateBlockPtr, unsigned int> _sb_2_idx, Eigen::MatrixXs& _cov)
 {
+    std::lock_guard<std::mutex> lock(mut_covariances_);
+
     // fill covariance
     for (auto it1 = _sb_2_idx.begin(); it1 != _sb_2_idx.end(); it1++)
         for (auto it2 = it1; it2 != _sb_2_idx.end(); it2++)

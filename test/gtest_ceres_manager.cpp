@@ -398,12 +398,10 @@ TEST(CeresManager, AddRemoveFactor)
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
 
-    ASSERT_TRUE(P->getFactorNotificationMap().begin()->first == c);
-
     // remove factor
     P->removeFactor(c);
 
-    ASSERT_TRUE(P->getFactorNotificationMap().empty());
+    ASSERT_TRUE(P->consumeFactorNotificationMap().empty()); // add+remove = empty
 
     // update solver
     ceres_manager_ptr->update();
