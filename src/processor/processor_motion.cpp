@@ -285,8 +285,7 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
         VectorXs delta            = capture_motion->correctDelta( motion.delta_integr_, delta_step);
 
         // Compose on top of origin state using the buffered time stamp, not the query time stamp
-        // TODO Interpolate the delta to produce a state at the query time stamp _ts
-        Scalar dt = motion.ts_ - capture_motion->getBuffer().get().front().ts_; // = _ts - capture_motion->getOrigin()->getTimeStamp();
+        Scalar dt = motion.ts_ - capture_motion->getBuffer().get().front().ts_;
         statePlusDelta(state_0, delta, dt, _x);
     }
     else
