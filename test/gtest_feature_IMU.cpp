@@ -61,7 +61,7 @@ class FeatureIMU_test : public testing::Test
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     // give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
         imu_ptr = std::make_shared<CaptureIMU>(t, sensor_ptr, data_, Eigen::Matrix6s::Identity(), Eigen::Vector6s::Zero());
-        imu_ptr->setFramePtr(origin_frame); //to get ptr to Frm in processorIMU and then get biases
+        imu_ptr->setFrame(origin_frame); //to get ptr to Frm in processorIMU and then get biases
 
     //process data
         data_ << 2, 0, 9.8, 0, 0, 0;
@@ -90,7 +90,7 @@ class FeatureIMU_test : public testing::Test
                                                 calib_preint,
                                                 dD_db_jacobians,
                                                 imu_ptr);
-        feat_imu->setCapturePtr(imu_ptr); //associate the feature to a capture
+        feat_imu->setCapture(imu_ptr); //associate the feature to a capture
 
     }
 

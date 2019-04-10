@@ -137,12 +137,6 @@ void ProcessorTrackerLandmark::establishFactors()
         {
             last_feature->addFactor(fac_ptr);
             lmk->addConstrainedBy(fac_ptr);
-            FrameBasePtr frm = fac_ptr->getFrameOther();
-            if (frm)
-                frm->addConstrainedBy(fac_ptr);
-            CaptureBasePtr cap = fac_ptr->getCaptureOther();
-            if (cap)
-                cap->addConstrainedBy(fac_ptr);
         }
     }
 }

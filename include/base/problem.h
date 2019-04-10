@@ -95,7 +95,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         /** \brief get a sensor pointer by its name
          * \param _sensor_name The sensor name, as it was installed with installSensor()
          */
-        SensorBasePtr getSensorPtr(const std::string& _sensor_name);
+        SensorBasePtr getSensor(const std::string& _sensor_name);
 
         /** \brief Factory method to install (create, and add to sensor) processors only from its properties
          *

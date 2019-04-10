@@ -31,8 +31,8 @@ class FactorPointToLine2D: public FactorAutodiff<FactorPointToLine2D, 1,2,1,2,1,
                             unsigned int _ftr_point_id, int _lmk_point_id,  int _lmk_point_aux_id,
                             bool _apply_loss_function = false, FactorStatus _status = FAC_ACTIVE) :
         FactorAutodiff<FactorPointToLine2D, 1,2,1,2,1,2,2>("POINT TO LINE 2D",
-                nullptr, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFrame()->getP(), _ftr_ptr->getFrame()->getO(), _lmk_ptr->getP(), _lmk_ptr->getO(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id), _lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)),
-        landmark_point_id_(_lmk_point_id), landmark_point_aux_id_(_lmk_point_aux_id), feature_point_id_(_ftr_point_id), point_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_id)), point_aux_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_aux_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
+                nullptr, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFrame()->getP(), _ftr_ptr->getFrame()->getO(), _lmk_ptr->getP(), _lmk_ptr->getO(), _lmk_ptr->getPointStateBlock(_lmk_point_id), _lmk_ptr->getPointStateBlock(_lmk_point_aux_id)),
+        landmark_point_id_(_lmk_point_id), landmark_point_aux_id_(_lmk_point_aux_id), feature_point_id_(_ftr_point_id), point_state_ptr_(_lmk_ptr->getPointStateBlock(_lmk_point_id)), point_aux_state_ptr_(_lmk_ptr->getPointStateBlock(_lmk_point_aux_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
     {
         //std::cout << "FactorPointToLine2D" << std::endl;
         Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A

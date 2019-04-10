@@ -581,7 +581,6 @@ IF (laser_scan_utils_FOUND)
   SET(HDRS_PROCESSOR ${HDRS_PROCESSOR}
     include/base/processor/processor_tracker_feature_corner.h
     include/base/processor/processor_tracker_landmark_corner.h
-    include/base/processor/processor_tracker_landmark_polyline.h
     )
   SET(HDRS_SENSOR ${HDRS_SENSOR}
     include/base/sensor/sensor_laser_2D.h
@@ -590,7 +589,6 @@ IF (laser_scan_utils_FOUND)
     src/sensor/sensor_laser_2D.cpp
     src/processor/processor_tracker_feature_corner.cpp
     src/processor/processor_tracker_landmark_corner.cpp
-    src/processor/processor_tracker_landmark_polyline.cpp
     )
 ENDIF(laser_scan_utils_FOUND)
 

@@ -30,11 +30,11 @@ class FactorPoint2D: public FactorAutodiff<FactorPoint2D, 2,2,1,2,1,2>
                       const ProcessorBasePtr& _processor_ptr,
                       unsigned int _ftr_point_id, int _lmk_point_id, bool _apply_loss_function = false, FactorStatus _status = FAC_ACTIVE) :
         FactorAutodiff<FactorPoint2D,2,2,1,2,1,2>("POINT 2D",
-                nullptr, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFrame()->getP(), _ftr_ptr->getFrame()->getO(), _lmk_ptr->getP(), _lmk_ptr->getO(), _lmk_ptr->getPointStateBlockPtr(_lmk_point_id)),
-        feature_point_id_(_ftr_point_id), landmark_point_id_(_lmk_point_id), point_state_ptr_(_lmk_ptr->getPointStateBlockPtr(_lmk_point_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
+                nullptr, nullptr, nullptr, _lmk_ptr, _processor_ptr, _apply_loss_function, _status, _ftr_ptr->getFrame()->getP(), _ftr_ptr->getFrame()->getO(), _lmk_ptr->getP(), _lmk_ptr->getO(), _lmk_ptr->getPointStateBlock(_lmk_point_id)),
+        feature_point_id_(_ftr_point_id), landmark_point_id_(_lmk_point_id), point_state_ptr_(_lmk_ptr->getPointStateBlock(_lmk_point_id)), measurement_(_ftr_ptr->getPoints().col(_ftr_point_id)), measurement_covariance_(_ftr_ptr->getPointsCov().middleCols(_ftr_point_id*2,2))
     {
         //std::cout << "Constriant point: feature " << _ftr_ptr->id() << " landmark " << _lmk_ptr->id() << "(point " << _lmk_point_id << ")" << std::endl;
-        //std::cout << "landmark state block " << _lmk_ptr->getPointStateBlockPtr(_lmk_point_id)->getVector().transpose() << std::endl;
+        //std::cout << "landmark state block " << _lmk_ptr->getPointStateBlock(_lmk_point_id)->getVector().transpose() << std::endl;
         Eigen::LLT<Eigen::MatrixXs> lltOfA(measurement_covariance_); // compute the Cholesky decomposition of A
         Eigen::MatrixXs measurement_sqrt_covariance = lltOfA.matrixU();
         measurement_sqrt_information_ = measurement_sqrt_covariance.inverse().transpose(); // retrieve factor U  in the decomposition

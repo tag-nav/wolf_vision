@@ -54,7 +54,7 @@ void FeatureBase::remove()
 FactorBasePtr FeatureBase::addFactor(FactorBasePtr _co_ptr)
 {
     factor_list_.push_back(_co_ptr);
-    _co_ptr->setFeaturePtr(shared_from_this());
+    _co_ptr->setFeature(shared_from_this());
     _co_ptr->setProblem(getProblem());
     // add factor to be added in solver
     if (getProblem() != nullptr)
@@ -75,7 +75,7 @@ FrameBasePtr FeatureBase::getFrame() const
 FactorBasePtr FeatureBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
     constrained_by_list_.push_back(_fac_ptr);
-    _fac_ptr->setFeatureOtherPtr(shared_from_this());
+    _fac_ptr->setFeatureOther(shared_from_this());
     return _fac_ptr;
 }
 

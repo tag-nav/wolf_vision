@@ -462,7 +462,7 @@ TEST(CeresManager, AddStateBlockLocalParam)
 
     // Local param
     LocalParametrizationBasePtr local_param_ptr = std::make_shared<LocalParametrizationAngle>();
-    sb_ptr->setLocalParametrizationPtr(local_param_ptr);
+    sb_ptr->setLocalParametrization(local_param_ptr);
 
     // add stateblock
     P->addStateBlock(sb_ptr);
@@ -489,7 +489,7 @@ TEST(CeresManager, RemoveLocalParam)
 
     // Local param
     LocalParametrizationBasePtr local_param_ptr = std::make_shared<LocalParametrizationAngle>();
-    sb_ptr->setLocalParametrizationPtr(local_param_ptr);
+    sb_ptr->setLocalParametrization(local_param_ptr);
 
     // add stateblock
     P->addStateBlock(sb_ptr);
@@ -530,7 +530,7 @@ TEST(CeresManager, AddLocalParam)
 
     // Local param
     LocalParametrizationBasePtr local_param_ptr = std::make_shared<LocalParametrizationAngle>();
-    sb_ptr->setLocalParametrizationPtr(local_param_ptr);
+    sb_ptr->setLocalParametrization(local_param_ptr);
 
     // update solver
     ceres_manager_ptr->update();
@@ -611,7 +611,7 @@ TEST(CeresManager, FactorsUpdateLocalParam)
 
     // remove local param
     LocalParametrizationBasePtr local_param_ptr = std::make_shared<LocalParametrizationQuaternionGlobal>();
-    F->getO()->setLocalParametrizationPtr(local_param_ptr);
+    F->getO()->setLocalParametrization(local_param_ptr);
 
     // update solver
     ceres_manager_ptr->update();

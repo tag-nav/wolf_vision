@@ -57,7 +57,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void setTimeStampToNow();
 
         FrameBasePtr getFrame() const;
-        void setFramePtr(const FrameBasePtr _frm_ptr);
+        void setFrame(const FrameBasePtr _frm_ptr);
         void unlinkFromFrame(){frame_ptr_.reset();}
 
         virtual void setProblem(ProblemPtr _problem) final;
@@ -69,7 +69,7 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         void getFactorList(FactorBasePtrList& _fac_list);
 
         SensorBasePtr getSensor() const;
-        virtual void setSensorPtr(const SensorBasePtr sensor_ptr);
+        virtual void setSensor(const SensorBasePtr sensor_ptr);
 
         // constrained by
         virtual FactorBasePtr addConstrainedBy(FactorBasePtr _fac_ptr);
@@ -79,8 +79,8 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
         // State blocks
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
         std::vector<StateBlockPtr>& getStateBlockVec();
-        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
-        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
+        StateBlockPtr getStateBlock(unsigned int _i) const;
+        void setStateBlock(unsigned int _i, const StateBlockPtr _sb_ptr);
 
         StateBlockPtr getSensorP() const;
         StateBlockPtr getSensorO() const;
@@ -143,24 +143,24 @@ inline std::vector<StateBlockPtr>& CaptureBase::getStateBlockVec()
     return state_block_vec_;
 }
 
-inline void CaptureBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
+inline void CaptureBase::setStateBlock(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
     state_block_vec_[_i] = _sb_ptr;
 }
 
 inline StateBlockPtr CaptureBase::getSensorP() const
 {
-    return getStateBlockPtr(0);
+    return getStateBlock(0);
 }
 
 inline StateBlockPtr CaptureBase::getSensorO() const
 {
-    return getStateBlockPtr(1);
+    return getStateBlock(1);
 }
 
 inline StateBlockPtr CaptureBase::getSensorIntrinsic() const
 {
-    return getStateBlockPtr(2);
+    return getStateBlock(2);
 }
 
 inline unsigned int CaptureBase::id()
@@ -173,7 +173,7 @@ inline FrameBasePtr CaptureBase::getFrame() const
     return frame_ptr_.lock();
 }
 
-inline void CaptureBase::setFramePtr(const FrameBasePtr _frm_ptr)
+inline void CaptureBase::setFrame(const FrameBasePtr _frm_ptr)
 {
     frame_ptr_ = _frm_ptr;
 }
@@ -203,7 +203,7 @@ inline SensorBasePtr CaptureBase::getSensor() const
     return sensor_ptr_.lock();
 }
 
-inline void CaptureBase::setSensorPtr(const SensorBasePtr sensor_ptr)
+inline void CaptureBase::setSensor(const SensorBasePtr sensor_ptr)
 {
   sensor_ptr_ = sensor_ptr;
 }

@@ -86,17 +86,17 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
         std::vector<StateBlockPtr>& getStateBlockVec();
     protected:
-        StateBlockPtr getStateBlockPtr(unsigned int _i) const;
-        void setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr);
+        StateBlockPtr getStateBlock(unsigned int _i) const;
+        void setStateBlock(unsigned int _i, const StateBlockPtr _sb_ptr);
         void resizeStateBlockVec(unsigned int _size);
 
     public:
         StateBlockPtr getP() const;
         StateBlockPtr getO() const;
         StateBlockPtr getV() const;
-        void setPPtr(const StateBlockPtr _p_ptr);
-        void setOPtr(const StateBlockPtr _o_ptr);
-        void setVPtr(const StateBlockPtr _v_ptr);
+        void setP(const StateBlockPtr _p_ptr);
+        void setO(const StateBlockPtr _o_ptr);
+        void setV(const StateBlockPtr _v_ptr);
         void registerNewStateBlocks();
         void removeStateBlocks();
 
@@ -120,7 +120,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         virtual void setProblem(ProblemPtr _problem) final;
 
         TrajectoryBasePtr getTrajectory() const;
-        void setTrajectoryPtr(TrajectoryBasePtr _trj_ptr);
+        void setTrajectory(TrajectoryBasePtr _trj_ptr);
 
         FrameBasePtr getPreviousFrame() const;
         FrameBasePtr getNextFrame() const;
@@ -197,7 +197,7 @@ inline StateBlockPtr FrameBase::getP() const
 {
     return state_block_vec_[0];
 }
-inline void FrameBase::setPPtr(const StateBlockPtr _p_ptr)
+inline void FrameBase::setP(const StateBlockPtr _p_ptr)
 {
     state_block_vec_[0] = _p_ptr;
 }
@@ -206,7 +206,7 @@ inline StateBlockPtr FrameBase::getO() const
 {
     return state_block_vec_[1];
 }
-inline void FrameBase::setOPtr(const StateBlockPtr _o_ptr)
+inline void FrameBase::setO(const StateBlockPtr _o_ptr)
 {
     state_block_vec_[1] = _o_ptr;
 }
@@ -216,18 +216,18 @@ inline StateBlockPtr FrameBase::getV() const
     return state_block_vec_[2];
 }
 
-inline void FrameBase::setVPtr(const StateBlockPtr _v_ptr)
+inline void FrameBase::setV(const StateBlockPtr _v_ptr)
 {
     state_block_vec_[2] = _v_ptr;
 }
 
-inline StateBlockPtr FrameBase::getStateBlockPtr(unsigned int _i) const
+inline StateBlockPtr FrameBase::getStateBlock(unsigned int _i) const
 {
     assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
     return state_block_vec_[_i];
 }
 
-inline void FrameBase::setStateBlockPtr(unsigned int _i, const StateBlockPtr _sb_ptr)
+inline void FrameBase::setStateBlock(unsigned int _i, const StateBlockPtr _sb_ptr)
 {
     assert (_i < state_block_vec_.size() && "Requested a state block pointer out of the vector range!");
     state_block_vec_[_i] = _sb_ptr;
@@ -266,7 +266,7 @@ inline FactorBasePtrList& FrameBase::getConstrainedByList()
     return constrained_by_list_;
 }
 
-inline void FrameBase::setTrajectoryPtr(TrajectoryBasePtr _trj_ptr)
+inline void FrameBase::setTrajectory(TrajectoryBasePtr _trj_ptr)
 {
     trajectory_ptr_ = _trj_ptr;
 }

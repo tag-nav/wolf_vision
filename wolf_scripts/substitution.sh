@@ -10,7 +10,8 @@ for file in $(ag 'Ptr\(' . -o); do
     # subs_line=${line}s/${subs}/${subs%List}PtrList/gp
     # echo $subs_line
     # sed -n -e $line's/Ptr\( \)*(\( \)*)/\1(\2)/gp' $target
-    sed -i -e $line's/Ptr\( \)*(\( \)*)/\1(\2)/g' $target
+    # sed -n -e $line's/Ptr\( \)*(\( \)*)/\1(\2)/gp' $target
+    sed -i -e $line's/(/(/g' $target
 done
 
 # for file in $(ag -l -g constraint $folder); do

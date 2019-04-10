@@ -54,7 +54,7 @@ int main(int argc, char** argv)
     
     // Create one capture to store the IMU data arriving from (sensor / callback / file / etc.)
     CaptureIMUPtr imu_ptr( std::make_shared<CaptureIMU>(t, sensor_ptr, data_, Eigen::Matrix6s::Identity()) );
-    imu_ptr->setFramePtr(wolf_problem_ptr_->getTrajectory()->getFrameList().back());
+    imu_ptr->setFrame(wolf_problem_ptr_->getTrajectory()->getFrameList().back());
 
     // set variables
     using namespace std;
@@ -87,7 +87,7 @@ int main(int argc, char** argv)
     delta_preint_cov = wolf_problem_ptr_->getProcessorMotion()->getCurrentDeltaPreintCov();
     delta_preint = wolf_problem_ptr_->getProcessorMotion()->getMotion().delta_integr_;
     std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
-    feat_imu->setCapturePtr(imu_ptr);
+    feat_imu->setCapture(imu_ptr);
 
         //create a factorIMU
     FactorIMUPtr factor_imu = std::make_shared<FactorIMU>(feat_imu, last_frame);
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
 
     //reset origin of motion to new frame
     wolf_problem_ptr_->getProcessorMotion()->setOrigin(last_frame);
-    imu_ptr->setFramePtr(last_frame);
+    imu_ptr->setFrame(last_frame);
     }
     /// ******************************************************************************************** ///
 
@@ -148,7 +148,7 @@ int main(int argc, char** argv)
     delta_preint_cov = wolf_problem_ptr_->getProcessorMotion()->getCurrentDeltaPreintCov();
     delta_preint = wolf_problem_ptr_->getProcessorMotion()->getMotion().delta_integr_;
     std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
-    feat_imu->setCapturePtr(imu_ptr);
+    feat_imu->setCapture(imu_ptr);
 
         //create a factorIMU
     FactorIMUPtr factor_imu = std::make_shared<FactorIMU>(feat_imu, last_frame);
@@ -176,7 +176,7 @@ int main(int argc, char** argv)
 
     //reset origin of motion to new frame
     wolf_problem_ptr_->getProcessorMotion()->setOrigin(last_frame);
-    imu_ptr->setFramePtr(last_frame);
+    imu_ptr->setFrame(last_frame);
     }
 
     mpu_clock = 0.004046;
@@ -206,7 +206,7 @@ int main(int argc, char** argv)
     delta_preint_cov = wolf_problem_ptr_->getProcessorMotion()->getCurrentDeltaPreintCov();
     delta_preint = wolf_problem_ptr_->getProcessorMotion()->getMotion().delta_integr_;
     std::shared_ptr<FeatureIMU> feat_imu = std::make_shared<FeatureIMU>(delta_preint, delta_preint_cov);
-    feat_imu->setCapturePtr(imu_ptr);
+    feat_imu->setCapture(imu_ptr);
 
         //create a factorIMU
     FactorIMUPtr factor_imu = std::make_shared<FactorIMU>(feat_imu, last_frame);
