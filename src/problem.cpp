@@ -368,14 +368,6 @@ void Problem::addLandmarkList(LandmarkBasePtrList& _lmk_list)
 StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 {
     //std::cout << "Problem::addStateBlockPtr " << _state_ptr.get() << std::endl;
-    if(std::find(state_block_list_.begin(),state_block_list_.end(),_state_ptr) != state_block_list_.end())
-    {
-        WOLF_WARN("Adding a state block that has already been added");
-        return _state_ptr;
-    }
-
-    // add the state unit to the list
-    state_block_list_.push_back(_state_ptr);
 
     // Add add notification
     // Check if there is already a notification for this state block
@@ -393,15 +385,6 @@ StateBlockPtr Problem::addStateBlock(StateBlockPtr _state_ptr)
 void Problem::removeStateBlock(StateBlockPtr _state_ptr)
 {
     //std::cout << "Problem::removeStateBlockPtr " << _state_ptr.get() << std::endl;
-    //assert(std::find(state_block_list_.begin(),state_block_list_.end(),_state_ptr) != state_block_list_.end() && "Removing a state_block that hasn't been added or already removed");
-    if(std::find(state_block_list_.begin(),state_block_list_.end(),_state_ptr) == state_block_list_.end())
-    {
-        WOLF_WARN("Removing a state_block that hasn't been added or already removed");
-        return;
-    }
-
-    // add the state unit to the list
-    state_block_list_.remove(_state_ptr);
 
     // Check if there is already a notification for this state block
     auto notification_it = state_block_notification_map_.find(_state_ptr);
@@ -664,11 +647,6 @@ FrameBasePtr Problem::getLastFrame()
 FrameBasePtr Problem::getLastKeyFrame()
 {
     return trajectory_ptr_->getLastKeyFrame();
-}
-
-StateBlockPtrList& Problem::getStateBlockPtrList()
-{
-    return state_block_list_;
 }
 
 FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov, const TimeStamp& _ts, const Scalar _time_tolerance)

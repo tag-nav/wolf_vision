@@ -38,7 +38,6 @@ class Problem : public std::enable_shared_from_this<Problem>
         TrajectoryBasePtr   trajectory_ptr_;
         MapBasePtr          map_ptr_;
         ProcessorMotionPtr  processor_motion_ptr_;
-        StateBlockPtrList      state_block_list_;
         std::map<std::pair<StateBlockPtr, StateBlockPtr>, Eigen::MatrixXs> covariances_;
         SizeEigen state_size_, state_cov_size_, dim_;
         std::map<FactorBasePtr, Notification> factor_notification_map_;
@@ -242,10 +241,6 @@ class Problem : public std::enable_shared_from_this<Problem>
         Eigen::MatrixXs getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr);
 
         // Solver management ----------------------------------------
-
-        /** \brief Gets a reference to the state blocks list
-         */
-        StateBlockPtrList& getStateBlockPtrList();
 
         /** \brief Notifies a new state block to be added to the solver manager
          */

@@ -118,21 +118,18 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     T->addFrame(f1); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
-    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 2);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
     std::cout << __LINE__ << std::endl;
 
     T->addFrame(f2); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
-    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 4);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
     std::cout << __LINE__ << std::endl;
 
     T->addFrame(f3); // F
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 3);
-    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 4);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
     std::cout << __LINE__ << std::endl;
 
@@ -147,7 +144,6 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     f2->remove(); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
-    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 2);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
     std::cout << __LINE__ << std::endl;
 
@@ -158,7 +154,6 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     f3->remove(); // F
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
-    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 2);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
     std::cout << __LINE__ << std::endl;
 
@@ -167,7 +162,6 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     f1->remove(); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 0);
-    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 0);
     ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
     std::cout << __LINE__ << std::endl;
 

@@ -46,7 +46,7 @@ void SolverManager::update()
             }
             else
             {
-                WOLF_DEBUG("Tried adding an already registered StateBlock.");
+                WOLF_DEBUG("Tried to add an already added !");
             }
         }
         else
@@ -77,12 +77,9 @@ void SolverManager::update()
     }
 
     // UPDATE STATE BLOCKS (state, fix or local parameterization)
-    for (auto state_ptr : wolf_problem_->getStateBlockPtrList())
+    for (auto state_pair : state_blocks_)
     {
-        if (state_blocks_.find(state_ptr)==state_blocks_.end())
-            continue;
-
-        assert(state_blocks_.find(state_ptr)!=state_blocks_.end() && "Updating the state of an unregistered StateBlock !");
+        auto state_ptr = state_pair.first;
 
         // state update
         if (state_ptr->stateUpdated())
