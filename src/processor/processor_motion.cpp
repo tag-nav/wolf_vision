@@ -65,7 +65,16 @@ void ProcessorMotion::splitBuffer(const wolf::CaptureMotionPtr& _capture_source,
     // Update the existing capture
     _capture_source->setOriginFramePtr(_keyframe_target);
 
-    // re-integrate existing buffer -- note: the result of re-integration is stored in the same buffer!
+//    // Get optimized calibration params from 'origin' keyframe
+//    VectorXs calib_preint_optim = _capture_source->getOriginFrame()->getCaptureOf(getSensor())->getCalibration();
+//
+//    // Write the calib params into the capture before re-integration
+//    _capture_source->setCalibrationPreint(calib_preint_optim);
+
+    // re-integrate target capture's buffer -- note: the result of re-integration is stored in the same buffer!
+    reintegrateBuffer(_capture_target);
+
+    // re-integrate source capture's buffer -- note: the result of re-integration is stored in the same buffer!
     reintegrateBuffer(_capture_source);
 }
 
@@ -99,19 +108,21 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             TimeStamp ts_from_callback = keyframe_from_callback->getTimeStamp();
 
             // find the capture whose buffer is affected by the new keyframe
-            auto existing_capture = findCaptureContainingTimeStamp(ts_from_callback);
+            auto existing_capture = findCaptureContainingTimeStamp(ts_from_callback); // k
 
             // Find the frame acting as the capture's origin
-            auto keyframe_origin = existing_capture->getOriginFrame();
+            auto keyframe_origin = existing_capture->getOriginFrame(); // i
+
+            auto capture_origin = std::static_pointer_cast<CaptureMotion>(keyframe_origin->getCaptureOf(getSensor()));
 
             // emplace a new motion capture to the new keyframe
-            auto capture_for_keyframe_callback = emplaceCapture(keyframe_from_callback,
+            auto capture_for_keyframe_callback = emplaceCapture(keyframe_from_callback, // j
                                                                 getSensor(),
                                                                 ts_from_callback,
                                                                 Eigen::VectorXs::Zero(data_size_),
-                                                                existing_capture->getDataCovariance(),
-                                                                existing_capture->getCalibration(),
-                                                                existing_capture->getCalibration(),
+                                                                capture_origin->getDataCovariance(),
+                                                                capture_origin->getCalibration(),
+                                                                capture_origin->getCalibration(),
                                                                 keyframe_origin);
 
             // split the buffer
@@ -152,12 +163,12 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             auto keyframe_origin = last_ptr_->getOriginFrame();
 
             // emplace a new motion capture to the new keyframe
-            VectorXs calib = last_ptr_->getCalibration();
+            VectorXs calib = origin_ptr_->getCalibration();
             auto capture_for_keyframe_callback = emplaceCapture(keyframe_from_callback,
                                                                 getSensor(),
                                                                 ts_from_callback,
                                                                 Eigen::VectorXs::Zero(data_size_),
-                                                                last_ptr_->getDataCovariance(),
+                                                                origin_ptr_->getDataCovariance(),
                                                                 calib,
                                                                 calib,
                                                                 keyframe_origin);
