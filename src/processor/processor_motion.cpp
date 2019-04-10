@@ -162,15 +162,17 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             // Find the frame acting as the capture's origin
             auto keyframe_origin = last_ptr_->getOriginFrame();
 
+            // Get calibration params for preintegration from origin, since it has chances to have optimized values
+            VectorXs calib_preint = origin_ptr_->getCalibration();
+
             // emplace a new motion capture to the new keyframe
-            VectorXs calib = origin_ptr_->getCalibration();
             auto capture_for_keyframe_callback = emplaceCapture(keyframe_from_callback,
                                                                 getSensor(),
                                                                 ts_from_callback,
                                                                 Eigen::VectorXs::Zero(data_size_),
                                                                 origin_ptr_->getDataCovariance(),
-                                                                calib,
-                                                                calib,
+                                                                calib_preint,
+                                                                calib_preint,
                                                                 keyframe_origin);
 
             // split the buffer
