@@ -18,10 +18,10 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
 {
     public:
         FactorIMU(const FeatureIMUPtr& _ftr_ptr,
-                      const CaptureIMUPtr& _capture_origin_ptr,
-                      const ProcessorBasePtr& _processor_ptr = nullptr,
-                      bool _apply_loss_function = false,
-                      FactorStatus _status = CTR_ACTIVE);
+                  const CaptureIMUPtr& _capture_origin_ptr,
+                  const ProcessorBasePtr& _processor_ptr = nullptr,
+                  bool _apply_loss_function = false,
+                  FactorStatus _status = CTR_ACTIVE);
 
         virtual ~FactorIMU() = default;
 
@@ -141,10 +141,10 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
 ///////////////////// IMPLEMENTAITON ////////////////////////////
 
 inline FactorIMU::FactorIMU(const FeatureIMUPtr&    _ftr_ptr,
-                                    const CaptureIMUPtr&    _cap_origin_ptr,
-                                    const ProcessorBasePtr& _processor_ptr,
-                                    bool                    _apply_loss_function,
-                                    FactorStatus        _status) :
+                            const CaptureIMUPtr&    _cap_origin_ptr,
+                            const ProcessorBasePtr& _processor_ptr,
+                            bool                    _apply_loss_function,
+                            FactorStatus        _status) :
                 FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>( // ...
                         "IMU",
                         _cap_origin_ptr->getFrame(),
@@ -183,14 +183,14 @@ inline FactorIMU::FactorIMU(const FeatureIMUPtr&    _ftr_ptr,
 
 template<typename T>
 inline bool FactorIMU::operator ()(const T* const _p1,
-                                       const T* const _q1,
-                                       const T* const _v1,
-                                       const T* const _b1,
-                                       const T* const _p2,
-                                       const T* const _q2,
-                                       const T* const _v2,
-                                       const T* const _b2,
-                                       T* _res) const
+                                   const T* const _q1,
+                                   const T* const _v1,
+                                   const T* const _b1,
+                                   const T* const _p2,
+                                   const T* const _q2,
+                                   const T* const _v2,
+                                   const T* const _b2,
+                                   T* _res) const
 {
     using namespace Eigen;
 
@@ -216,16 +216,16 @@ inline bool FactorIMU::operator ()(const T* const _p1,
 
 template<typename D1, typename D2, typename D3>
 inline bool FactorIMU::residual(const Eigen::MatrixBase<D1> &       _p1,
-                                    const Eigen::QuaternionBase<D2> &   _q1,
-                                    const Eigen::MatrixBase<D1> &       _v1,
-                                    const Eigen::MatrixBase<D1> &       _ab1,
-                                    const Eigen::MatrixBase<D1> &       _wb1,
-                                    const Eigen::MatrixBase<D1> &       _p2,
-                                    const Eigen::QuaternionBase<D2> &   _q2,
-                                    const Eigen::MatrixBase<D1> &       _v2,
-                                    const Eigen::MatrixBase<D1> &       _ab2,
-                                    const Eigen::MatrixBase<D1> &       _wb2,
-                                    Eigen::MatrixBase<D3> &             _res) const
+                                const Eigen::QuaternionBase<D2> &   _q1,
+                                const Eigen::MatrixBase<D1> &       _v1,
+                                const Eigen::MatrixBase<D1> &       _ab1,
+                                const Eigen::MatrixBase<D1> &       _wb1,
+                                const Eigen::MatrixBase<D1> &       _p2,
+                                const Eigen::QuaternionBase<D2> &   _q2,
+                                const Eigen::MatrixBase<D1> &       _v2,
+                                const Eigen::MatrixBase<D1> &       _ab2,
+                                const Eigen::MatrixBase<D1> &       _wb2,
+                                Eigen::MatrixBase<D3> &             _res) const
 {
 
     /*  Help for the IMU residual function
