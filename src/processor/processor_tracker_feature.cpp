@@ -21,7 +21,7 @@ ProcessorTrackerFeature::~ProcessorTrackerFeature()
 {
 }
 
-unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_features)
+unsigned int ProcessorTrackerFeature::processNew(const int& _max_new_features)
 {
     /* Rationale: A keyFrame will be created using the last Capture.
      * First, we work on the last Capture to detect new Features,
