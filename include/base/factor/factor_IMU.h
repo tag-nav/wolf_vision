@@ -25,7 +25,7 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
 
         virtual ~FactorIMU() = default;
 
-        /* \brief : compute the residual from the state blocks being iterated by the solver.
+        /** \brief : compute the residual from the state blocks being iterated by the solver.
             -> computes the expected measurement
             -> corrects actual measurement with new bias
             -> compares the corrected measurement with the expected one
@@ -42,11 +42,13 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
                          const T* const _b2,
                          T* _res) const;
 
-        // Estimation error given the states in the wolf tree
+        /** \brief Estimation error given the states in the wolf tree
+         *
+         */
         Eigen::Vector9s error();
 
 
-        /* \brief : compute the residual from the state blocks being iterated by the solver. (same as operator())
+        /** \brief : compute the residual from the state blocks being iterated by the solver. (same as operator())
             -> computes the expected measurement
             -> corrects actual measurement with new bias
             -> compares the corrected measurement with the expected one
@@ -75,7 +77,7 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
                       const Eigen::MatrixBase<D1> &     _wb2,
                       Eigen::MatrixBase<D3> &           _res) const;
 
-        /* Function expectation(...)
+        /** Function expectation(...)
          * params :
          * Vector3s _p1 : position in imu frame
          * Vector4s _q1 : orientation quaternion in imu frame
@@ -100,7 +102,7 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
                          Eigen::QuaternionBase<D4> &        _qe,
                          Eigen::MatrixBase<D3> &            _ve) const;
 
-        /* \brief : return the expected delta given the state blocks in the wolf tree
+        /** \brief : return the expected delta given the state blocks in the wolf tree
         */
         Eigen::VectorXs expectation() const;
 
@@ -125,7 +127,7 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
         const Scalar dt_; ///< delta-time and delta-time-squared between keyframes
         const Scalar ab_rate_stdev_, wb_rate_stdev_; //stdev for standard_deviation (= sqrt(variance))
         
-        /* bias covariance and bias residuals
+        /** bias covariance and bias residuals
          *
          * continuous bias covariance matrix for accelerometer would then be A_r = diag(ab_stdev_^2, ab_stdev_^2, ab_stdev_^2)
          * To compute bias residuals, we will need to do (sqrt(A_r)).inverse() * ab_error
