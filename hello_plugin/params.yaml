@@ -15,16 +15,16 @@ config:
     -
       type: "ODOM 2D"
       name: "processor1"
-      sensorname: "odom"
+      sensor name: "odom"
     -
       type: "RANGE BEARING"
       name: "rb_processor"
-      sensorname: "rb"
+      sensor name: "rb"
     -
       type: "ODOM 2D"
       name: "my_proc_test"
-      sensorname: "odom"
-      follow: "../hello_plugin/params_conf.yaml"
+      sensor name: "odom"
+      follow: "../hello_plugin/params_conf.yaml" #Config continues in this file
 files:
   - "/home/jcasals/workspace/wip/wolf/lib/libsensor_odom.so"
   - "/home/jcasals/workspace/wip/wolf/lib/librange_bearing.so"

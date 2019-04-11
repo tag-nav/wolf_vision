@@ -171,12 +171,12 @@ void parserYAML::walkTreeR(YAML::Node n, vector<string>& tags, string hdr){
     case YAML::NodeType::Map : {
         for(const auto& kv : n){
             //If the key's value starts with a $ (i.e. $key) then its value is parsed as a literal map,
-            //otherwise the parser recursively parses the map
+            //otherwise the parser recursively parses the map.
             regex r("^\\$.*");
             if(not regex_match(kv.first.as<string>(), r)){
                 /*
                 If key=="follow" then the parser will assume that the value is a path and will parse
-                the (expected) yaml file at the specified path. Note that this does not increase the header depth
+                the (expected) yaml file at the specified path. Note that this does not increase the header depth.
                 The following example shows how the header remains unafected:
                 @my_main_config                |  @some_path
                 - cov_det: 1                   |  - my_value : 23
@@ -235,7 +235,7 @@ void parserYAML::parseFirstLevel(string file){
         _paramsSens.push_back(pSensor);
     }
     for(const auto& kv : n_config["processors"]){
-        ParamsInitProcessor pProc = {kv["type"].Scalar(), kv["name"].Scalar(), kv["sensorname"].Scalar(), kv};
+        ParamsInitProcessor pProc = {kv["type"].Scalar(), kv["name"].Scalar(), kv["sensor name"].Scalar(), kv};
         _paramsProc.push_back(pProc);
     }
     for(const auto& kv : n_config["callbacks"]){
