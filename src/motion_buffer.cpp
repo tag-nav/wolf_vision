@@ -107,7 +107,8 @@ void MotionBuffer::getMotion(const TimeStamp& _ts, Motion& _motion) const
 
 void MotionBuffer::split(const TimeStamp& _ts, MotionBuffer& _buffer_part_before_ts)
 {
-    assert((container_.front().ts_ <= _ts) && "Query time stamp out of buffer bounds");
+    assert((container_.front().ts_ <= _ts) && "Error: Query time stamp is greater than the buffer's last tick");
+    assert((container_.back().ts_ >= _ts) && "Error: Query time stamp is smaller than the buffer's first tick");
 
     _buffer_part_before_ts.setCalibrationPreint(calib_preint_);
 

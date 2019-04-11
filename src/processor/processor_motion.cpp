@@ -115,14 +115,17 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
 
             auto capture_origin = std::static_pointer_cast<CaptureMotion>(keyframe_origin->getCaptureOf(getSensor()));
 
+            // Get calibration params for preintegration from origin, since it has chances to have optimized values
+            VectorXs calib_origin = capture_origin->getCalibration();
+
             // emplace a new motion capture to the new keyframe
             auto capture_for_keyframe_callback = emplaceCapture(keyframe_from_callback, // j
                                                                 getSensor(),
                                                                 ts_from_callback,
                                                                 Eigen::VectorXs::Zero(data_size_),
                                                                 capture_origin->getDataCovariance(),
-                                                                capture_origin->getCalibration(),
-                                                                capture_origin->getCalibration(),
+                                                                calib_origin,
+                                                                calib_origin,
                                                                 keyframe_origin);
 
             // split the buffer
@@ -163,7 +166,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
             auto keyframe_origin = last_ptr_->getOriginFrame();
 
             // Get calibration params for preintegration from origin, since it has chances to have optimized values
-            VectorXs calib_preint = origin_ptr_->getCalibration();
+            VectorXs calib_origin = origin_ptr_->getCalibration();
 
             // emplace a new motion capture to the new keyframe
             auto capture_for_keyframe_callback = emplaceCapture(keyframe_from_callback,
@@ -171,8 +174,8 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
                                                                 ts_from_callback,
                                                                 Eigen::VectorXs::Zero(data_size_),
                                                                 origin_ptr_->getDataCovariance(),
-                                                                calib_preint,
-                                                                calib_preint,
+                                                                calib_origin,
+                                                                calib_origin,
                                                                 keyframe_origin);
 
             // split the buffer

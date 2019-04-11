@@ -203,12 +203,12 @@ CaptureMotionPtr ProcessorIMU::createCapture(const TimeStamp& _ts,
 
 FeatureBasePtr ProcessorIMU::createFeature(CaptureMotionPtr _capture_motion)
 {
-    FeatureIMUPtr key_feature_ptr = std::make_shared<FeatureIMU>(
+    FeatureIMUPtr feature = std::make_shared<FeatureIMU>(
             _capture_motion->getBuffer().get().back().delta_integr_,
             _capture_motion->getBuffer().get().back().delta_integr_cov_ + unmeasured_perturbation_cov_,
             _capture_motion->getBuffer().getCalibrationPreint(),
             _capture_motion->getBuffer().get().back().jacobian_calib_);
-    return key_feature_ptr;
+    return feature;
 }
 
 FactorBasePtr ProcessorIMU::emplaceFactor(FeatureBasePtr _feature_motion, CaptureBasePtr _capture_origin)
