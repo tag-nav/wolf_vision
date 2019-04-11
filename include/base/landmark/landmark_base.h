@@ -72,7 +72,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         Eigen::VectorXs getState() const;
         void getState(Eigen::VectorXs& _state) const;
         bool getCovariance(Eigen::MatrixXs& _cov) const;
-        Eigen::MatrixXs getCovariance() const;
 
     protected:
         virtual void removeStateBlocks();

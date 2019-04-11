@@ -94,11 +94,6 @@ void LandmarkBase::registerNewStateBlocks()
     }
 }
 
-Eigen::MatrixXs LandmarkBase::getCovariance() const
-{
-    return getProblem()->getLandmarkCovariance(shared_from_this());
-}
-
 bool LandmarkBase::getCovariance(Eigen::MatrixXs& _cov) const
 {
     return getProblem()->getLandmarkCovariance(shared_from_this(), _cov);
