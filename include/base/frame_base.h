@@ -140,8 +140,8 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         unsigned int getHits() const;
         FactorBasePtrList& getConstrainedByList();
         void link(TrajectoryBasePtr);
-        // template<typename classType, typename... T>
-        // static std::shared_ptr<FrameBase> emplace(TrajectoryBasePtr _ptr, T&&... all);
+        template<typename classType, typename... T>
+        static std::shared_ptr<FrameBase> emplace(TrajectoryBasePtr _ptr, T&&... all);
 
     public:
         static FrameBasePtr create_PO_2D (const FrameType & _tp,
@@ -166,13 +166,13 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
 namespace wolf {
 
-//template<typename classType, typename... T>
-//std::shared_ptr<FrameBase> FrameBase::emplace(TrajectoryBasePtr _ptr, T&&... all)
-//{
-//    FrameBasePtr frm = std::make_shared<classType>(std::forward<T>(all)...);
-//    frm->link(_ptr);
-//    return frm;
-//}
+template<typename classType, typename... T>
+std::shared_ptr<FrameBase> FrameBase::emplace(TrajectoryBasePtr _ptr, T&&... all)
+{
+    FrameBasePtr frm = std::make_shared<classType>(std::forward<T>(all)...);
+    frm->link(_ptr);
+    return frm;
+}
 
 inline unsigned int FrameBase::id()
 {
