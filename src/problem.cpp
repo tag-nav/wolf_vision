@@ -564,6 +564,16 @@ bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& 
 
     const auto& state_bloc_vec = _frame_ptr->getStateBlockVec();
 
+    // computing size
+    SizeEigen sz = 0;
+    for (const auto& sb : state_bloc_vec)
+        if (sb)
+            sz += sb->getSize();
+
+    // resizing
+    _covariance = Eigen::MatrixXs(sz, sz);
+
+    // filling covariance
     for (const auto& sb_i : state_bloc_vec)
     {
         if (sb_i)
@@ -583,23 +593,10 @@ bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& 
     return success;
 }
 
-Eigen::MatrixXs Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr)
-{
-    SizeEigen sz = 0;
-    for (const auto& sb : _frame_ptr->getStateBlockVec())
-        if (sb)
-            sz += sb->getSize();
-
-    Eigen::MatrixXs covariance(sz, sz);
-
-    getFrameCovariance(_frame_ptr, covariance);
-    return covariance;
-}
-
-Eigen::MatrixXs Problem::getLastKeyFrameCovariance()
+bool Problem::getLastKeyFrameCovariance(Eigen::MatrixXs& cov)
 {
     FrameBasePtr frm = getLastKeyFrame();
-    return getFrameCovariance(frm);
+    return getFrameCovariance(frm, cov);
 }
 
 bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::MatrixXs& _covariance)
@@ -609,6 +606,17 @@ bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::M
 
     const auto& state_bloc_vec = _landmark_ptr->getStateBlockVec();
 
+    // computing size
+    SizeEigen sz = 0;
+    for (const auto& sb : state_bloc_vec)
+        if (sb)
+            sz += sb->getSize();
+
+    // resizing
+    _covariance = Eigen::MatrixXs(sz, sz);
+
+    // filling covariance
+
     for (const auto& sb_i : state_bloc_vec)
     {
         if (sb_i)
@@ -626,19 +634,6 @@ bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::M
         }
     }
     return success;
-}
-
-Eigen::MatrixXs Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr)
-{
-    SizeEigen sz = 0;
-    for (const auto& sb : _landmark_ptr->getStateBlockVec())
-        if (sb)
-            sz += sb->getSize();
-
-    Eigen::MatrixXs covariance(sz, sz);
-
-    getLandmarkCovariance(_landmark_ptr, covariance);
-    return covariance;
 }
 
 MapBasePtr Problem::getMap()

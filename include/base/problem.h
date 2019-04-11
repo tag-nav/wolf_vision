@@ -236,10 +236,8 @@ class Problem : public std::enable_shared_from_this<Problem>
         bool getCovarianceBlock(std::map<StateBlockPtr, unsigned int> _sb_2_idx, Eigen::MatrixXs& _cov);
         bool getCovarianceBlock(StateBlockPtr _state, Eigen::MatrixXs& _cov, const int _row_and_col = 0);
         bool getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& _covariance);
-        Eigen::MatrixXs getFrameCovariance(FrameBaseConstPtr _frame_ptr);
-        Eigen::MatrixXs getLastKeyFrameCovariance();
+        bool getLastKeyFrameCovariance(Eigen::MatrixXs& _covariance);
         bool getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::MatrixXs& _covariance);
-        Eigen::MatrixXs getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr);
 
         // Solver management ----------------------------------------
 
