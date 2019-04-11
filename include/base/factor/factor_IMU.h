@@ -41,7 +41,11 @@ class FactorIMU : public FactorAutodiff<FactorIMU, 15, 3, 4, 3, 6, 3, 4, 3, 6>
                          const T* const _v2,
                          const T* const _b2,
                          T* _res) const;
-        
+
+        // Estimation error given the states in the wolf tree
+        Eigen::Vector9s error();
+
+
         /* \brief : compute the residual from the state blocks being iterated by the solver. (same as operator())
             -> computes the expected measurement
             -> corrects actual measurement with new bias
@@ -212,6 +216,30 @@ inline bool FactorIMU::operator ()(const T* const _p1,
     residual(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, res);
 
     return true;
+}
+
+Eigen::Vector9s FactorIMU::error()
+{
+    Vector6s bias = capture_other_ptr_.lock()->getCalibration();
+
+    Map<const Vector3s > acc_bias(bias.data());
+    Map<const Vector3s > gyro_bias(bias.data() + 3);
+
+    Eigen::Vector9s delta_exp = expectation();
+
+    Eigen::Vector9s delta_preint = getMeasurement();
+
+    Eigen::Vector9s delta_step;
+
+    delta_step.head<3>()     = dDp_dab_ * (acc_bias - acc_bias_preint_ ) + dDp_dwb_ * (gyro_bias - gyro_bias_preint_);
+    delta_step.segment<3>(3) =                                       dDq_dwb_ * (gyro_bias - gyro_bias_preint_);
+    delta_step.tail<3>()     = dDv_dab_ * (acc_bias - acc_bias_preint_ ) + dDv_dwb_ * (gyro_bias - gyro_bias_preint_);
+
+    Eigen::VectorXs delta_corr = imu::plus(delta_preint, delta_step);
+
+    Eigen::Vector9s res = imu::diff(delta_exp, delta_corr);
+
+    return res;
 }
 
 template<typename D1, typename D2, typename D3>
