@@ -31,19 +31,11 @@ namespace wolf {
 /**
  * \brief scalar type for the Wolf project
  *
- * This typedef makes it possible to recompile the whole Wolf project with double, float, or other precisions.
- *
- * To change the project precision, just edit wolf.h and change the precision of this typedef.
- *
  * Do NEVER forget to use Wolf scalar definitions when you code!!!
  *
  * Do NEVER use plain Eigen scalar types!!! (This is redundant with the above. But just to make sure you behave!)
- *
- * The ONLY exception to this rule is when you need special precision. The ONLY example by now is the time stamp which uses double.
  */
-//typedef float Scalar;         // Use this for float, 32 bit precision
-typedef double Scalar;        // Use this for double, 64 bit precision
-//typedef long double Scalar;   // Use this for long double, 128 bit precision
+typedef double Scalar;
 
 /**
  * \brief Vector and Matrices size type for the Wolf project
