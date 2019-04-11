@@ -246,9 +246,17 @@ int main()
     ceres->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
     for (auto kf : problem->getTrajectory()->getFrameList())
         if (kf->isKey())
-            WOLF_TRACE("KF", kf->id(), "_cov = \n", kf->getCovariance());
+        {
+            Eigen::MatrixXs cov;
+            kf->getCovariance(cov);
+            WOLF_TRACE("KF", kf->id(), "_cov = \n", cov);
+        }
     for (auto lmk : problem->getMap()->getLandmarkList())
-        WOLF_TRACE("L", lmk->id(), "_cov = \n", lmk->getCovariance());
+        {
+            Eigen::MatrixXs cov;
+            lmk->getCovariance(cov);
+            WOLF_TRACE("L", lmk->id(), "_cov = \n", cov);
+        }
     std::cout << std::endl;
 
     WOLF_TRACE("======== FINAL PRINT FOR INTERPRETATION =======")
