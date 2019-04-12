@@ -18,7 +18,7 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTracker);
 struct ProcessorParamsTracker : public ProcessorParamsBase
 {
         unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
-        unsigned int max_new_features;
+        int max_new_features;                   ///< maximum nbr. of new features to be processed when adding a keyframe (-1: unlimited. 0: none.)
 };
 
 WOLF_PTR_TYPEDEFS(ProcessorTracker);
@@ -181,7 +181,7 @@ class ProcessorTracker : public ProcessorBase
         /**\brief Process new Features or Landmarks
          *
          */
-        virtual unsigned int processNew(const unsigned int& _max_features) = 0;
+        virtual unsigned int processNew(const int& _max_features) = 0;
 
         /**\brief Creates and adds factors from last_ to origin_
          *

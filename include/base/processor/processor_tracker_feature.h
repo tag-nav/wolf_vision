@@ -143,17 +143,19 @@ class ProcessorTrackerFeature : public ProcessorTracker
         /**\brief Process new Features
          *
          */
-        virtual unsigned int processNew(const unsigned int& _max_features);
+        virtual unsigned int processNew(const int& _max_features);
 
         /** \brief Detect new Features
-         * \param _max_features maximum number of features detected
+         * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
+         * \param _features_last_out The list of detected Features.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
-         * The function sets the member new_features_last_, the list of newly detected features.
+         * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
+         * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBasePtrList& _features_incoming_out) = 0;
+        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_last_out) = 0;
 
         /** \brief Create a new factor and link it to the wolf tree
          * \param _feature_ptr pointer to the parent Feature
