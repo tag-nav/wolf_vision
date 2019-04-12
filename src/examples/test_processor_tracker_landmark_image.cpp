@@ -98,7 +98,7 @@ int main(int argc, char** argv)
     //=====================================================
     // Origin Key Frame is fixed
     TimeStamp t = 0;
-    FrameBasePtr origin_frame = problem->emplaceFrame(KEY_FRAME, (Vector7s()<<1,0,0,0,0,0,1).finished(), t);
+    FrameBasePtr origin_frame = problem->emplaceFrame(ESTIMATED_FRAME, (Vector7s()<<1,0,0,0,0,0,1).finished(), t);
     problem->getProcessorMotion()->setOrigin(origin_frame);
     origin_frame->fix();
 

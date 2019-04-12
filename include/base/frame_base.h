@@ -22,8 +22,9 @@ namespace wolf {
  */
 typedef enum
 {
-    NON_KEY_FRAME = 0,  ///< Regular frame. It does not play at optimization.
-    KEY_FRAME = 1       ///< key frame. It plays at optimizations.
+    KEY_ESTIMATED = 2, ///< estimated key frame. It plays at optimizations.
+    ESTIMATED = 1,     ///< estimated frame. It plays at optimizations.
+    NON_ESTIMATED = 0  ///< Regular frame. It does not play at optimization.
 } FrameType;
 
 //class FrameBase
@@ -38,9 +39,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
         static unsigned int frame_id_count_;
 
     protected:
-        unsigned int frame_id_;
-        FrameType type_;     ///< type of frame. Either NON_KEY_FRAME or KEY_FRAME. (types defined at wolf.h)
-        TimeStamp time_stamp_;     ///< frame time stamp
+        unsigned int frame_id_; ///< frame id
+        FrameType type_;        ///< type of frame. Either KEY_ESTIMATED, KEY_ESTIMATED or NON_ESTIMATED. (types defined above)
+        TimeStamp time_stamp_;  ///< frame time stamp
         
     public:
         /** \brief Constructor of non-key Frame with only time stamp
@@ -71,9 +72,9 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
     public:
         unsigned int id();
 
-        // KeyFrame / NonKeyFrame
-        bool isKey() const;
-        void setKey();
+        // Estimated / Non estimated
+        bool isEstimated() const;
+        void setEstimated();
 
         // Frame values ------------------------------------------------
     public:
@@ -167,9 +168,9 @@ inline unsigned int FrameBase::id()
     return frame_id_;
 }
 
-inline bool FrameBase::isKey() const
+inline bool FrameBase::isEstimated() const
 {
-    return (type_ == KEY_FRAME);
+    return (type_ == ESTIMATED || type_ == KEY_ESTIMATED);
 }
 
 inline void FrameBase::getTimeStamp(TimeStamp& _ts) const

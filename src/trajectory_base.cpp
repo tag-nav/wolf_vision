@@ -22,7 +22,7 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
     _frame_ptr->setTrajectory(shared_from_this());
     _frame_ptr->setProblem(getProblem());
 
-    if (_frame_ptr->isKey())
+    if (_frame_ptr->isEstimated())
     {
         _frame_ptr->registerNewStateBlocks();
         if (last_key_frame_ptr_ == nullptr || last_key_frame_ptr_->getTimeStamp() < _frame_ptr->getTimeStamp())
@@ -63,7 +63,7 @@ void TrajectoryBase::moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place)
 FrameBaseIter TrajectoryBase::computeFrameOrder(FrameBasePtr _frame_ptr)
 {
     for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); frm_rit++)
-        if ((*frm_rit)!= _frame_ptr && (*frm_rit)->isKey() && (*frm_rit)->getTimeStamp() <= _frame_ptr->getTimeStamp())
+        if ((*frm_rit)!= _frame_ptr && (*frm_rit)->isEstimated() && (*frm_rit)->getTimeStamp() <= _frame_ptr->getTimeStamp())
             return frm_rit.base();
     return getFrameList().begin();
 }
@@ -72,7 +72,7 @@ FrameBasePtr TrajectoryBase::findLastKeyFrame()
 {
     // NOTE: Assumes keyframes are sorted by timestamp
     for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); ++frm_rit)
-        if ((*frm_rit)->isKey())
+        if ((*frm_rit)->isEstimated())
             return (*frm_rit);
 
     return nullptr;
@@ -84,7 +84,7 @@ FrameBasePtr TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
     Scalar min_dt = 1e9;
 
     for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); frm_rit++)
-        if ((*frm_rit)->isKey())
+        if ((*frm_rit)->isEstimated())
         {
             Scalar dt = std::fabs((*frm_rit)->getTimeStamp() - _ts);
             if (dt < min_dt)

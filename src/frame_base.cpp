@@ -16,7 +16,7 @@ FrameBase::FrameBase(const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _
             trajectory_ptr_(),
             state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
             frame_id_(++frame_id_count_),
-            type_(NON_KEY_FRAME),
+            type_(NON_ESTIMATED),
             time_stamp_(_ts)
 {
     state_block_vec_[0] = _p_ptr;
@@ -39,7 +39,7 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
                 
 FrameBase::~FrameBase()
 {
-    if ( isKey() )
+    if ( isEstimated() )
         removeStateBlocks();
 }
 
@@ -68,7 +68,7 @@ void FrameBase::remove()
         }
 
         // Remove Frame State Blocks
-        if ( isKey() )
+        if ( isEstimated() )
             removeStateBlocks();
 
         if (getTrajectory()->getLastKeyFrame()->id() == this_F->id())
@@ -81,7 +81,7 @@ void FrameBase::remove()
 void FrameBase::setTimeStamp(const TimeStamp& _ts)
 {
     time_stamp_ = _ts;
-    if (isKey() && getTrajectory() != nullptr)
+    if (isEstimated() && getTrajectory() != nullptr)
         getTrajectory()->sortFrame(shared_from_this());
 }
 
@@ -111,11 +111,11 @@ void FrameBase::removeStateBlocks()
     }
 }
 
-void FrameBase::setKey()
+void FrameBase::setEstimated()
 {
-    if (type_ != KEY_FRAME)
+    if (type_ == NON_ESTIMATED )
     {
-        type_ = KEY_FRAME;
+        type_ = ESTIMATED;
         registerNewStateBlocks();
 
         if (getTrajectory()->getLastKeyFrame() == nullptr || getTrajectory()->getLastKeyFrame()->getTimeStamp() < time_stamp_)
@@ -170,7 +170,7 @@ void FrameBase::setState(const Eigen::VectorXs& _state)
     for (StateBlockPtr sb : state_block_vec_)
         if (sb && (index < _st_size))
         {
-            sb->setState(_state.segment(index, sb->getSize()), isKey());
+            sb->setState(_state.segment(index, sb->getSize()), isEstimated());
             index += sb->getSize();
         }
 }

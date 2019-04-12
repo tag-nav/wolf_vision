@@ -197,7 +197,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     {
         // Set the frame of last_ptr as key
         auto key_frame_ptr = last_ptr_->getFrame();
-        key_frame_ptr->setKey();
+        key_frame_ptr->setEstimated();
 
         // create motion feature and add it to the key_capture
         auto key_feature_ptr = emplaceFeature(last_ptr_);
@@ -206,7 +206,7 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
         auto fac_ptr = emplaceFactor(key_feature_ptr, origin_ptr_);
 
         // create a new frame
-        auto new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
+        auto new_frame_ptr = getProblem()->emplaceFrame(NON_ESTIMATED,
                                                         getCurrentState(),
                                                         getCurrentTimeStamp());
         // create a new capture
@@ -288,7 +288,7 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 
 FrameBasePtr ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
-    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(KEY_FRAME, _x_origin, _ts_origin);
+    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(ESTIMATED_FRAME, _x_origin, _ts_origin);
     setOrigin(key_frame_ptr);
 
     return key_frame_ptr;
@@ -299,7 +299,7 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
     assert(_origin_frame && "ProcessorMotion::setOrigin: Provided frame pointer is nullptr.");
     assert(_origin_frame->getTrajectory() != nullptr
             && "ProcessorMotion::setOrigin: origin frame must be in the trajectory.");
-    assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
+    assert(_origin_frame->isEstimated() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
 
     // -------- ORIGIN ---------
     // emplace (empty) origin Capture
@@ -314,7 +314,7 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
 
     // ---------- LAST ----------
     // Make non-key-frame for last Capture
-    auto new_frame_ptr = getProblem()->emplaceFrame(NON_KEY_FRAME,
+    auto new_frame_ptr = getProblem()->emplaceFrame(NON_ESTIMATED,
                                                     _origin_frame->getState(),
                                                     _origin_frame->getTimeStamp());
     // emplace (emtpy) last Capture

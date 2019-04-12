@@ -278,7 +278,7 @@ int main(int argc, char** argv)
     wolf::FrameBasePtrList frame_list = wolf_problem_ptr_->getTrajectory()->getFrameList();
     for(FrameBasePtr frm_ptr : frame_list)
     {
-        if(frm_ptr->isKey())
+        if(frm_ptr->isEstimated())
         {   
             //prepare needed variables
             FrameIMUPtr frmIMU_ptr = std::static_pointer_cast<FrameIMU>(frm_ptr);
@@ -324,7 +324,7 @@ int main(int argc, char** argv)
 
     for(FrameBasePtr frm_ptr : frame_list)
     {
-        if(frm_ptr->isKey())
+        if(frm_ptr->isEstimated())
         {
             FactorBasePtrList fac_list =  frm_ptr->getConstrainedByList();
             for(FactorBasePtr fac_ptr : fac_list)

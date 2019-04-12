@@ -77,7 +77,7 @@ class FeatureIMU_test : public testing::Test
     //create Frame
         ts = problem->getProcessorMotion()->getBuffer().get().back().ts_;
         state_vec = problem->getProcessorMotion()->getCurrentState();
-   	    last_frame = std::make_shared<FrameBase>(KEY_FRAME, ts, std::make_shared<StateBlock>(state_vec.head(3)), std::make_shared<StateBlock>(state_vec.segment(3,4)), std::make_shared<StateBlock>(state_vec.head(3)));
+   	    last_frame = std::make_shared<FrameBase>(ESTIMATED_FRAME, ts, std::make_shared<StateBlock>(state_vec.head(3)), std::make_shared<StateBlock>(state_vec.segment(3,4)), std::make_shared<StateBlock>(state_vec.head(3)));
         problem->getTrajectory()->addFrame(last_frame);
         
     //create a feature
@@ -119,9 +119,9 @@ TEST_F(FeatureIMU_test, check_frame)
     origin_frame->getTimeStamp(ts);
 
     ASSERT_NEAR(t.get(), ts.get(), wolf::Constants::EPS_SMALL) << "t != ts \t t=" << t << "\t ts=" << ts << std::endl;
-    ASSERT_TRUE(origin_frame->isKey());
-    ASSERT_TRUE(last_frame->isKey());
-    ASSERT_TRUE(left_frame->isKey());
+    ASSERT_TRUE(origin_frame->isEstimated());
+    ASSERT_TRUE(last_frame->isEstimated());
+    ASSERT_TRUE(left_frame->isEstimated());
 
     wolf::StateBlockPtr origin_pptr, origin_optr, origin_vptr, left_pptr, left_optr, left_vptr;
     origin_pptr = origin_frame->getP();

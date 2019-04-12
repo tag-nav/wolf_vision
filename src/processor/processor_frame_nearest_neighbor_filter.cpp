@@ -72,7 +72,7 @@ bool ProcessorFrameNearestNeighborFilter::findCandidates(const CaptureBasePtr& /
     // check for LC just if frame is key frame
     // Assert that the evaluated KF has a capture of the
     // same sensor as this processor
-    if (key_it->isKey() && key_it->getCaptureOf(getSensor()/*, "LASER 2D"*/) != nullptr)
+    if (key_it->isEstimated() && key_it->getCaptureOf(getSensor()/*, "LASER 2D"*/) != nullptr)
     {
       // Check if the two frames currently evaluated are already
       // constrained one-another.

@@ -75,7 +75,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
         case FIRST_TIME_WITHOUT_PACK :
         {
-            FrameBasePtr kfrm = getProblem()->emplaceFrame(KEY_FRAME, incoming_ptr_->getTimeStamp());
+            FrameBasePtr kfrm = getProblem()->emplaceFrame(ESTIMATED_FRAME, incoming_ptr_->getTimeStamp());
             kfrm->addCapture(incoming_ptr_);
 
             // Process info
@@ -101,7 +101,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         } // @suppress("No break at end of case")
         case SECOND_TIME_WITHOUT_PACK :
         {
-            FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+            FrameBasePtr frm = getProblem()->emplaceFrame(NON_ESTIMATED, incoming_ptr_->getTimeStamp());
             frm->addCapture(incoming_ptr_);
 
             // We have a last_ Capture with no features, so we do not process known features, and we do not vote for KF.
@@ -137,7 +137,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
             pack->key_frame->addCapture(last_ptr_);
 
             // Create new frame
-            FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+            FrameBasePtr frm = getProblem()->emplaceFrame(NON_ESTIMATED, incoming_ptr_->getTimeStamp());
             frm->addCapture(incoming_ptr_);
 
             // Detect new Features, initialize Landmarks, create Factors, ...
@@ -171,10 +171,10 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
                 // set KF on last
                 last_ptr_->getFrame()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
-                last_ptr_->getFrame()->setKey();
+                last_ptr_->getFrame()->setEstimated();
 
                 // make F; append incoming to new F
-                FrameBasePtr frm = getProblem()->emplaceFrame(NON_KEY_FRAME, incoming_ptr_->getTimeStamp());
+                FrameBasePtr frm = getProblem()->emplaceFrame(NON_ESTIMATED, incoming_ptr_->getTimeStamp());
                 frm->addCapture(incoming_ptr_);
 
                 // process
@@ -258,7 +258,7 @@ void ProcessorTracker::computeProcessingStep()
 
             if (kf_pack_buffer_.selectPack(last_ptr_, params_tracker_->time_tolerance))
             {
-                if (last_ptr_->getFrame()->isKey())
+                if (last_ptr_->getFrame()->isEstimated())
                 {
                     WOLF_WARN("||*||");
                     WOLF_INFO(" ... It seems you missed something!");

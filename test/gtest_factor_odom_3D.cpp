@@ -37,8 +37,8 @@ ProblemPtr problem_ptr = Problem::create("PO 3D");
 CeresManager ceres_mgr(problem_ptr);
 
 // Two frames
-FrameBasePtr frm0 = problem_ptr->emplaceFrame(KEY_FRAME, problem_ptr->zeroState(), TimeStamp(0));
-FrameBasePtr frm1 = problem_ptr->emplaceFrame(KEY_FRAME, delta, TimeStamp(1));
+FrameBasePtr frm0 = problem_ptr->emplaceFrame(ESTIMATED_FRAME, problem_ptr->zeroState(), TimeStamp(0));
+FrameBasePtr frm1 = problem_ptr->emplaceFrame(ESTIMATED_FRAME, delta, TimeStamp(1));
 
 // Capture, feature and factor from frm1 to frm0
 CaptureBasePtr cap1 = frm1->addCapture(std::make_shared<CaptureMotion>("ODOM 3D", 1, nullptr, delta, 7, 6, nullptr));

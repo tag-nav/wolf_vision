@@ -35,7 +35,7 @@ ProblemPtr problem_ptr = Problem::create("POV 3D");
 CeresManager ceres_mgr(problem_ptr);
 
 // Two frames
-FrameBasePtr frm0 = problem_ptr->emplaceFrame(KEY_FRAME, problem_ptr->zeroState(), TimeStamp(0));
+FrameBasePtr frm0 = problem_ptr->emplaceFrame(ESTIMATED_FRAME, problem_ptr->zeroState(), TimeStamp(0));
 
 // Capture, feature and factor
 CaptureBasePtr cap0 = frm0->addCapture(std::make_shared<CaptureMotion>("IMU ABS", 0, nullptr, pose10, 10, 9, nullptr));
