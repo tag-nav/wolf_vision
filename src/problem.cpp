@@ -665,7 +665,7 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
     if ( ! prior_is_set_ )
     {
         // Create origin frame
-        FrameBasePtr origin_keyframe = emplaceFrame(ESTIMATED_FRAME, _prior_state, _ts);
+        FrameBasePtr origin_keyframe = emplaceFrame(ESTIMATED, _prior_state, _ts);
 
         // create origin capture with the given state as data
         // Capture fix only takes 3D position and Quaternion orientation

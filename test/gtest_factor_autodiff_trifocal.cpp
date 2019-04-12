@@ -133,19 +133,19 @@ class FactorAutodiffTrifocalTest : public testing::Test{
             Vector2s pix(0,0);
             Matrix2s pix_cov; pix_cov.setIdentity();
 
-            F1 = problem->emplaceFrame(ESTIMATED_FRAME, pose1, 1.0);
+            F1 = problem->emplaceFrame(ESTIMATED, pose1, 1.0);
             I1 = std::make_shared<CaptureImage>(1.0, camera, cv::Mat(2,2,CV_8UC1));
             F1-> addCapture(I1);
             f1 = std::make_shared<FeatureBase>("PIXEL", pix, pix_cov); // pixel at origin
             I1-> addFeature(f1);
 
-            F2 = problem->emplaceFrame(ESTIMATED_FRAME, pose2, 2.0);
+            F2 = problem->emplaceFrame(ESTIMATED, pose2, 2.0);
             I2 = std::make_shared<CaptureImage>(2.0, camera, cv::Mat(2,2,CV_8UC1));
             F2-> addCapture(I2);
             f2 = std::make_shared<FeatureBase>("PIXEL", pix, pix_cov); // pixel at origin
             I2-> addFeature(f2);
 
-            F3 = problem->emplaceFrame(ESTIMATED_FRAME, pose3, 3.0);
+            F3 = problem->emplaceFrame(ESTIMATED, pose3, 3.0);
             I3 = std::make_shared<CaptureImage>(3.0, camera, cv::Mat(2,2,CV_8UC1));
             F3-> addCapture(I3);
             f3 = std::make_shared<FeatureBase>("PIXEL", pix, pix_cov); // pixel at origin

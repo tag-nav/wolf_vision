@@ -69,8 +69,8 @@ TEST(TrajectoryBase, ClosestKeyFrame)
     //   1     2     3       time stamps
     // --+-----+-----+--->   time
 
-    FrameBasePtr f1 = std::make_shared<FrameBase>(ESTIMATED_FRAME,     1, nullptr, nullptr);
-    FrameBasePtr f2 = std::make_shared<FrameBase>(ESTIMATED_FRAME,     2, nullptr, nullptr);
+    FrameBasePtr f1 = std::make_shared<FrameBase>(ESTIMATED,     1, nullptr, nullptr);
+    FrameBasePtr f2 = std::make_shared<FrameBase>(ESTIMATED,     2, nullptr, nullptr);
     FrameBasePtr f3 = std::make_shared<FrameBase>(NON_ESTIMATED, 3, nullptr, nullptr);
     T->addFrame(f1);
     T->addFrame(f2);
@@ -108,8 +108,8 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     //   1     2     3       time stamps
     // --+-----+-----+--->   time
 
-    FrameBasePtr f1 = std::make_shared<FrameBase>(ESTIMATED_FRAME,     1, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // 2 non-fixed
-    FrameBasePtr f2 = std::make_shared<FrameBase>(ESTIMATED_FRAME,     2, make_shared<StateBlock>(2), make_shared<StateBlock>(1, true)); // 1 fixed, 1 not
+    FrameBasePtr f1 = std::make_shared<FrameBase>(ESTIMATED,     1, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // 2 non-fixed
+    FrameBasePtr f2 = std::make_shared<FrameBase>(ESTIMATED,     2, make_shared<StateBlock>(2), make_shared<StateBlock>(1, true)); // 1 fixed, 1 not
     FrameBasePtr f3 = std::make_shared<FrameBase>(NON_ESTIMATED, 3, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
 
     std::cout << __LINE__ << std::endl;
@@ -189,8 +189,8 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
     //   1     2     3       time stamps
     // --+-----+-----+--->   time
 
-    FrameBasePtr f1 = std::make_shared<FrameBase>(ESTIMATED_FRAME,     1, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // 2 non-fixed
-    FrameBasePtr f2 = std::make_shared<FrameBase>(ESTIMATED_FRAME,     2, make_shared<StateBlock>(2), make_shared<StateBlock>(1, true)); // 1 fixed, 1 not
+    FrameBasePtr f1 = std::make_shared<FrameBase>(ESTIMATED,     1, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // 2 non-fixed
+    FrameBasePtr f2 = std::make_shared<FrameBase>(ESTIMATED,     2, make_shared<StateBlock>(2), make_shared<StateBlock>(1, true)); // 1 fixed, 1 not
     FrameBasePtr f3 = std::make_shared<FrameBase>(NON_ESTIMATED, 3, make_shared<StateBlock>(2), make_shared<StateBlock>(1)); // non-key-frame
 
     // add frames and keyframes in random order --> keyframes must be sorted after that

@@ -75,7 +75,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
         case FIRST_TIME_WITHOUT_PACK :
         {
-            FrameBasePtr kfrm = getProblem()->emplaceFrame(ESTIMATED_FRAME, incoming_ptr_->getTimeStamp());
+            FrameBasePtr kfrm = getProblem()->emplaceFrame(ESTIMATED, incoming_ptr_->getTimeStamp());
             kfrm->addCapture(incoming_ptr_);
 
             // Process info

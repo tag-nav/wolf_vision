@@ -480,7 +480,7 @@ class Process_Factor_IMU : public testing::Test
         virtual void buildProblem()
         {
             // ===================================== SET KF in Wolf tree
-            FrameBasePtr KF = problem->emplaceFrame(ESTIMATED_FRAME, x1_exact, t);
+            FrameBasePtr KF = problem->emplaceFrame(ESTIMATED, x1_exact, t);
 
             // ===================================== IMU CALLBACK
             problem->keyFrameCallback(KF, nullptr, dt/2);

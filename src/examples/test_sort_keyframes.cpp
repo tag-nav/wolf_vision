@@ -65,12 +65,12 @@ int main()
 
     printFrames(problem_ptr);
 
-    FrameBasePtr frm7 = problem_ptr->emplaceFrame(ESTIMATED_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.7));
+    FrameBasePtr frm7 = problem_ptr->emplaceFrame(ESTIMATED, Eigen::VectorXs::Zero(3), TimeStamp(0.7));
     std::cout << std::endl << "created Key Frame " << frm7->id() << " TS: " << 0.7 << std::endl;
 
     printFrames(problem_ptr);
 
-    FrameBasePtr frm8 = problem_ptr->emplaceFrame(ESTIMATED_FRAME, Eigen::VectorXs::Zero(3), TimeStamp(0.35));
+    FrameBasePtr frm8 = problem_ptr->emplaceFrame(ESTIMATED, Eigen::VectorXs::Zero(3), TimeStamp(0.35));
     std::cout << std::endl << "created Key Frame " << frm8->id() << " TS: " << 0.35 << std::endl;
 
     printFrames(problem_ptr);

@@ -72,19 +72,19 @@ TEST(ProcessorFrameNearestNeighborFilter, PointInEllipseRotated)
   auto stateblock_optr4 = std::make_shared<wolf::StateBlock>(state4.tail<1>());
 
   // create Keyframes
-  F1 = std::make_shared<wolf::FrameBase>(wolf::ESTIMATED_FRAME,
+  F1 = std::make_shared<wolf::FrameBase>(wolf::ESTIMATED,
                                          1,
                                          stateblock_pptr1,
                                          stateblock_optr1);
-  F2 = std::make_shared<wolf::FrameBase>(wolf::ESTIMATED_FRAME,
+  F2 = std::make_shared<wolf::FrameBase>(wolf::ESTIMATED,
                                          1,
                                          stateblock_pptr2,
                                          stateblock_optr2);
-  F3 = std::make_shared<wolf::FrameBase>(wolf::ESTIMATED_FRAME,
+  F3 = std::make_shared<wolf::FrameBase>(wolf::ESTIMATED,
                                          1,
                                          stateblock_pptr3,
                                          stateblock_optr3);
-  F4 = std::make_shared<wolf::FrameBase>(wolf::ESTIMATED_FRAME,
+  F4 = std::make_shared<wolf::FrameBase>(wolf::ESTIMATED,
                                          1,
                                          stateblock_pptr4,
                                          stateblock_optr4);

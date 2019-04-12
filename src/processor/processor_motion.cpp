@@ -288,7 +288,7 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 
 FrameBasePtr ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
-    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(ESTIMATED_FRAME, _x_origin, _ts_origin);
+    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(ESTIMATED, _x_origin, _ts_origin);
     setOrigin(key_frame_ptr);
 
     return key_frame_ptr;
