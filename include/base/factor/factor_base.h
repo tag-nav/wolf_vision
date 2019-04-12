@@ -7,8 +7,8 @@ class FeatureBase;
 }
 
 //Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
 
 //std includes
 
@@ -182,8 +182,8 @@ class FactorBase : public NodeBase, public std::enable_shared_from_this<FactorBa
 
 // IMPLEMENTATION //
 
-#include "base/problem.h"
-#include "base/frame_base.h"
+#include "base/problem/problem.h"
+#include "base/frame/frame_base.h"
 #include "base/feature/feature_base.h"
 #include "base/sensor/sensor_base.h"
 #include "base/landmark/landmark_base.h"

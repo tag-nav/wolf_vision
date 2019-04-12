@@ -3,8 +3,8 @@
 
 //wolf includes
 #include "base/factor/factor_GPS_2D.h"
-#include "base/wolf.h"
-#include "base/state_block.h"
+#include "base/common/wolf.h"
+#include "base/state_block/state_block.h"
 #include "../state_point.h"
 #include "../state_complex_angle.h"
 #include "../state_theta.h"

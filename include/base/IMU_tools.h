@@ -8,8 +8,8 @@
 #ifndef IMU_TOOLS_H_
 #define IMU_TOOLS_H_
 
-#include "base/wolf.h"
-#include "base/rotations.h"
+#include "base/common/wolf.h"
+#include "base/math/rotations.h"
 
 /*
  * Most functions in this file are explained in the document:

@@ -14,7 +14,7 @@
 #include "base/feature/feature_corner_2D.h"
 #include "base/landmark/landmark_corner_2D.h"
 #include "base/factor/factor_corner_2D.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 #include "base/association/association_tree.h"
 #include "base/processor/processor_tracker_landmark.h"
 

@@ -4,7 +4,7 @@
 
 //Wolf includes
 #include "base/factor/factor_base.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 
 // CERES
 #include "ceres/jet.h"

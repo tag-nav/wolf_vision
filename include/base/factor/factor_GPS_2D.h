@@ -3,9 +3,9 @@
 #define FACTOR_GPS_2D_H_
 
 //Wolf includes
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 #include "base/factor/factor_autodiff.h"
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 
 namespace wolf {
     

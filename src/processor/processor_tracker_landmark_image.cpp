@@ -4,14 +4,14 @@
 #include "base/factor/factor_AHP.h"
 #include "base/feature/feature_base.h"
 #include "base/feature/feature_point_image.h"
-#include "base/frame_base.h"
-#include "base/logging.h"
-#include "base/map_base.h"
-#include "base/pinhole_tools.h"
-#include "base/problem.h"
+#include "base/frame/frame_base.h"
+#include "base/utils/logging.h"
+#include "base/map/map_base.h"
+#include "base/math/pinhole_tools.h"
+#include "base/problem/problem.h"
 #include "base/sensor/sensor_camera.h"
-#include "base/state_block.h"
-#include "base/time_stamp.h"
+#include "base/state_block/state_block.h"
+#include "base/common/time_stamp.h"
 
 // vision_utils
 #include <detectors.h>
