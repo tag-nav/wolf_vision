@@ -15,15 +15,15 @@ config:
     -
       type: "ODOM 2D"
       name: "processor1"
-      sensorname: "odom"
+      sensor name: "odom"
     -
       type: "RANGE BEARING"
       name: "rb_processor"
-      sensorname: "rb"
+      sensor name: "rb"
     -
       type: "ODOM 2D"
       name: "my_proc_test"
-      sensorname: "odom"
+      sensor name: "odom"
       follow: "/test/params3.1.yaml"
       jump: "@/test/params3.1.yaml"
 files:

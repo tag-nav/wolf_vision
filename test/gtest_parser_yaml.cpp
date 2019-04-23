@@ -22,7 +22,7 @@ TEST(ParserYAML, RegularParse)
   // for(auto it : params)
   //   cout << it.first << " %% " << it.second << endl;
   EXPECT_EQ(params["odom/intrinsic/k_rot_to_rot"], "0.1");
-  EXPECT_EQ(params["processor1/sensorname"], "odom");
+  EXPECT_EQ(params["processor1/sensor name"], "odom");
 }
 TEST(ParserYAML, ParseMap)
 {
