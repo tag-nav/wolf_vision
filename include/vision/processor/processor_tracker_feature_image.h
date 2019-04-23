@@ -112,14 +112,16 @@ class ProcessorTrackerFeatureImage : public ProcessorTrackerFeature
         virtual bool voteForKeyFrame();
 
         /** \brief Detect new Features
-         *
-         * This is intended to create Features that are not among the Features already known in the Map.
-         *
-         * This function sets new_features_last_, the list of newly detected features.
-         *
+         * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
+         * \param _features_last_out The list of detected Features.
          * \return The number of detected Features.
+         *
+         * This function detects Features that do not correspond to known Features/Landmarks in the system.
+         *
+         * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
+         * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_new_features, FeatureBasePtrList& _features_incoming_out);
+        virtual unsigned int detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_incoming_out);
 
         virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 
