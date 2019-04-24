@@ -10,7 +10,7 @@
 
 // Wolf includes
 #include "base/capture/capture_base.h"
-#include "base/motion_buffer.h"
+#include "base/processor/motion_buffer.h"
 
 // STL includes
 #include <list>

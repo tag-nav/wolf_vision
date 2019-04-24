@@ -12,7 +12,7 @@
  *      \author: jsola
  */
 
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 
 #include "base/sensor/sensor_odom_2D.h"
 #include "base/processor/processor_odom_2D.h"

@@ -6,10 +6,10 @@
  */
 
 #include "base/factor/factor_autodiff_distance_3D.h"
-#include "base/problem.h"
-#include "base/logging.h"
+#include "base/problem/problem.h"
+#include "base/utils/logging.h"
 #include "base/ceres_wrapper/ceres_manager.h"
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 
 #include "utils_gtest.h"
 

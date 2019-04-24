@@ -5,7 +5,7 @@
 #include "base/feature/feature_IMU.h"
 #include "base/sensor/sensor_IMU.h"
 #include "base/factor/factor_autodiff.h"
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 
 //Eigen include
 

@@ -5,7 +5,7 @@
 #include "base/capture/capture_wheel_joint_position.h"
 #include "base/capture/capture_velocity.h"
 
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 #include "base/factor/factor_odom_2D.h"
 #include "base/feature/feature_diff_drive.h"
 

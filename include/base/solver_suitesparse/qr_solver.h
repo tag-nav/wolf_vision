@@ -13,7 +13,7 @@
 #include <ctime>
 
 //Wolf includes
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 #include "../factor_sparse.h"
 #include "base/factor/factor_odom_2D.h"
 #include "base/factor/factor_corner_2D.h"

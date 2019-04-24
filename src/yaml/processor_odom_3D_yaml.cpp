@@ -10,7 +10,7 @@
 
 // wolf
 #include "base/processor/processor_odom_3D.h"
-#include "base/factory.h"
+#include "base/common/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>

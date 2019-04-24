@@ -8,9 +8,9 @@ class FeatureBase;
 }
 
 //Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
-#include "base/time_stamp.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
+#include "base/common/time_stamp.h"
 
 //std includes
 
@@ -110,9 +110,9 @@ class CaptureBase : public NodeBase, public std::enable_shared_from_this<Capture
 }
 
 #include "base/sensor/sensor_base.h"
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 #include "base/feature/feature_base.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 
 namespace wolf{
 

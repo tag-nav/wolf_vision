@@ -1,8 +1,8 @@
 
 #include "base/landmark/landmark_base.h"
 #include "base/factor/factor_base.h"
-#include "base/map_base.h"
-#include "base/state_block.h"
+#include "base/map/map_base.h"
+#include "base/state_block/state_block.h"
 #include "base/yaml/yaml_conversion.h"
 
 namespace wolf {

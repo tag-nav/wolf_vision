@@ -100,7 +100,7 @@ option(_WOLF_TRACE "Enable wolf tracing macro" ON)
 
 # option(BUILD_EXAMPLES "Build examples" OFF)
 set(BUILD_TESTS true)
-set(BUILD_EXAMPLES true)
+set(BUILD_EXAMPLES false)
 
 # Does this has any other interest
 # but for the examples ?
@@ -254,41 +254,54 @@ ENDIF(GLOG_FOUND)
 
 #HEADERS
 
-SET(HDRS_BASE
-  include/base/diff_drive_tools.h
-  include/base/diff_drive_tools.hpp
-  include/base/eigen_assert.h
-  include/base/eigen_predicates.h
-  include/base/factory.h
-  include/base/frame_base.h
-  include/base/hardware_base.h
-  include/base/IMU_tools.h
-  include/base/local_parametrization_angle.h
-  include/base/local_parametrization_base.h
-  include/base/local_parametrization_homogeneous.h
-  include/base/local_parametrization_polyline_extreme.h
-  include/base/local_parametrization_quaternion.h
-  include/base/logging.h
-  include/base/make_unique.h
-  include/base/map_base.h
-  include/base/motion_buffer.h
-  include/base/node_base.h
-  include/base/pinhole_tools.h
-  include/base/problem.h
-  include/base/rotations.h
-  include/base/singleton.h
-  include/base/state_angle.h
-  include/base/state_block.h
-  include/base/state_homogeneous_3D.h
-  include/base/state_quaternion.h
-  include/base/SE3.h
-  include/base/time_stamp.h
-  include/base/track_matrix.h
-  include/base/trajectory_base.h
-  include/base/wolf.h
-  include/base/IMU_tools.h
-  include/base/local_parametrization_polyline_extreme.h
+
+SET(HDRS_COMMON
+  include/base/common/factory.h
+  include/base/common/node_base.h
+  include/base/common/time_stamp.h
+  include/base/common/wolf.h
   )
+SET(HDRS_MATH
+  include/base/math/pinhole_tools.h
+  include/base/math/SE3.h
+  include/base/math/IMU_tools.h
+  include/base/math/rotations.h
+  )
+SET(HDRS_UTILS
+  include/base/utils/eigen_assert.h
+  include/base/utils/eigen_predicates.h
+  include/base/utils/logging.h
+  include/base/utils/singleton.h
+  include/base/utils/make_unique.h
+  )
+SET(HDRS_PROBLEM
+  include/base/problem/problem.h
+  )
+SET(HDRS_HARDWARE
+  include/base/hardware/hardware_base.h
+  )
+SET(HDRS_TRAJECTORY
+  include/base/trajectory/trajectory_base.h
+  )
+SET(HDRS_MAP
+  include/base/map/map_base.h
+  )
+SET(HDRS_FRAME
+  include/base/frame/frame_base.h
+  )
+SET(HDRS_STATE_BLOCK
+  include/base/state_block/local_parametrization_angle.h
+  include/base/state_block/local_parametrization_base.h
+  include/base/state_block/local_parametrization_homogeneous.h
+  include/base/state_block/local_parametrization_polyline_extreme.h
+  include/base/state_block/local_parametrization_quaternion.h
+  include/base/state_block/state_angle.h
+  include/base/state_block/state_block.h
+  include/base/state_block/state_homogeneous_3D.h
+  include/base/state_block/state_quaternion.h
+  include/base/state_block/local_parametrization_polyline_extreme.h
+  )
+
 SET(HDRS_CAPTURE
   include/base/capture/capture_base.h
   include/base/capture/capture_buffer.h
@@ -383,29 +396,33 @@ SET(HDRS_LANDMARK
   include/base/landmark/landmark_polyline_2D.h
   )
 SET(HDRS_PROCESSOR
+  include/base/processor/diff_drive_tools.h
+  include/base/processor/diff_drive_tools.hpp
+  include/base/processor/motion_buffer.h
+  include/base/processor/processor_IMU.h
+  include/base/processor/processor_IMU.h
+  include/base/processor/processor_base.h
   include/base/processor/processor_capture_holder.h
   include/base/processor/processor_diff_drive.h
+  include/base/processor/processor_factory.h
+  include/base/processor/processor_factory.h
   include/base/processor/processor_frame_nearest_neighbor_filter.h
-  include/base/processor/processor_IMU.h
+  include/base/processor/processor_frame_nearest_neighbor_filter.h
+  include/base/processor/processor_logging.h
+  include/base/processor/processor_loopclosure_base.h
+  include/base/processor/processor_motion.h
+  include/base/processor/processor_odom_2D.h
   include/base/processor/processor_odom_2D.h
   include/base/processor/processor_odom_3D.h
+  include/base/processor/processor_odom_3D.h
+  include/base/processor/processor_tracker.h
+  include/base/processor/processor_tracker_feature.h
+  include/base/processor/processor_tracker_feature_dummy.h
   include/base/processor/processor_tracker_feature_dummy.h
   include/base/processor/processor_tracker_landmark.h
   include/base/processor/processor_tracker_landmark_dummy.h
-  include/base/processor/processor_frame_nearest_neighbor_filter.h
-  include/base/processor/processor_IMU.h
-  include/base/processor/processor_odom_2D.h
-  include/base/processor/processor_odom_3D.h
-  include/base/processor/processor_tracker_feature_dummy.h
   include/base/processor/processor_tracker_landmark_dummy.h
-  include/base/processor/processor_factory.h
-  include/base/processor/processor_logging.h
-  include/base/processor/processor_base.h
-  include/base/processor/processor_factory.h
-  include/base/processor/processor_loopclosure_base.h
-  include/base/processor/processor_motion.h
-  include/base/processor/processor_tracker_feature.h
-  include/base/processor/processor_tracker.h
+  include/base/processor/track_matrix.h
   )
 SET(HDRS_SENSOR
   include/base/sensor/sensor_base.h
@@ -427,101 +444,55 @@ SET(HDRS_SENSOR
 SET(HDRS_SOLVER
   include/base/solver/solver_manager.h
   )
-# [Add generic derived header before this line]
 
 SET(HDRS_DTASSC
-  include/base/track_matrix.h
   include/base/association/association_solver.h
   include/base/association/association_node.h
   include/base/association/association_tree.h
   include/base/association/association_nnls.h
   )
 
-SET(HDRS_CORE 
-  include/base/capture/capture_base.h
-  include/base/capture/capture_buffer.h
-  include/base/capture/capture_pose.h
-  include/base/capture/capture_void.h
-  include/base/factor/factor_analytic.h
-  include/base/factor/factor_autodiff.h
-  include/base/factor/factor_base.h
-  include/base/processor/processor_factory.h
-  include/base/feature/feature_base.h
-  include/base/feature/feature_match.h
-  include/base/feature/feature_pose.h
-  include/base/frame_base.h
-  include/base/hardware_base.h
-  include/base/landmark/landmark_base.h
-  include/base/local_parametrization_angle.h
-  include/base/local_parametrization_base.h
-  include/base/local_parametrization_homogeneous.h
-  include/base/local_parametrization_quaternion.h
-  include/base/processor/processor_logging.h
-  include/base/map_base.h
-  include/base/motion_buffer.h
-  include/base/node_base.h
-  include/base/problem.h
-  include/base/processor/processor_base.h
-  include/base/processor/processor_loopclosure_base.h
-  include/base/processor/processor_motion.h
-  include/base/processor/processor_tracker_feature.h
-  include/base/processor/processor_tracker.h
-  include/base/rotations.h
-  include/base/sensor/sensor_base.h
-  include/base/processor/processor_factory.h
-  include/base/singleton.h
-  include/base/state_angle.h
-  include/base/state_block.h
-  include/base/state_homogeneous_3D.h
-  include/base/state_quaternion.h
-  include/base/SE3.h
-  include/base/time_stamp.h
-  include/base/track_matrix.h
-  include/base/trajectory_base.h
-  include/base/wolf.h
-  )
 
 #SOURCES
-SET(SRCS_CORE 
-  src/capture/capture_base.cpp
-  src/capture/capture_pose.cpp
-  src/capture/capture_void.cpp
-  src/factor/factor_analytic.cpp
-  src/factor/factor_base.cpp
-  src/feature/feature_base.cpp
-  src/feature/feature_pose.cpp
-  src/frame_base.cpp
-  src/hardware_base.cpp
-  src/landmark/landmark_base.cpp
-  src/local_parametrization_base.cpp
-  src/local_parametrization_homogeneous.cpp
-  src/local_parametrization_quaternion.cpp
-  src/map_base.cpp
-  src/motion_buffer.cpp
-  src/node_base.cpp
-  src/problem.cpp
-  src/processor/processor_base.cpp
-  src/processor/processor_loopclosure_base.cpp
-  src/processor/processor_motion.cpp
-  src/processor/processor_tracker.cpp
-  src/sensor/sensor_base.cpp
-  src/state_block.cpp
-  src/time_stamp.cpp
-  src/track_matrix.cpp
-  src/trajectory_base.cpp
+SET(SRCS_PROBLEM
+  src/problem/problem.cpp
   )
-
-SET(SRCS_BASE
-  src/capture/capture_motion.cpp
-  src/processor/processor_capture_holder.cpp
-  # examples/test_processor_tracker_landmark.cpp
+SET(SRCS_HARDWARE
+  src/hardware/hardware_base.cpp
+  )
+SET(SRCS_TRAJECTORY
+  src/trajectory/trajectory_base.cpp
+  )
+SET(SRCS_MAP
+  src/map/map_base.cpp
+  )
+SET(SRCS_FRAME
+  src/frame/frame_base.cpp
+  )
+SET(SRCS_STATE_BLOCK
+  src/state_block/state_block.cpp
+  src/state_block/local_parametrization_base.cpp
+  src/state_block/local_parametrization_homogeneous.cpp
+  src/state_block/local_parametrization_quaternion.cpp
+  src/state_block/local_parametrization_polyline_extreme.cpp
+  )
+SET(SRCS_COMMON
+  src/common/node_base.cpp
+  src/common/time_stamp.cpp
+  )
+SET(SRCS_MATH
+  )
+SET(SRCS_UTILS
   )
 
 SET(SRCS
-  src/local_parametrization_polyline_extreme.cpp
   test/processor_IMU_UnitTester.cpp
   )
 SET(SRCS_CAPTURE
+  src/capture/capture_motion.cpp
+  src/capture/capture_base.cpp
+  src/capture/capture_pose.cpp
+  src/capture/capture_void.cpp
   src/capture/capture_GPS_fix.cpp
   src/capture/capture_IMU.cpp
   src/capture/capture_odom_2D.cpp
@@ -529,33 +500,48 @@ SET(SRCS_CAPTURE
   src/capture/capture_velocity.cpp
   src/capture/capture_wheel_joint_position.cpp
   )
+SET(SRCS_FACTOR
+  src/factor/factor_analytic.cpp
+  src/factor/factor_base.cpp
+  )
 SET(SRCS_FEATURE
-  src/feature/feature_corner_2D.cpp
-  src/feature/feature_diff_drive.cpp
   src/feature/feature_GPS_fix.cpp
   src/feature/feature_GPS_pseudorange.cpp
   src/feature/feature_IMU.cpp
+  src/feature/feature_base.cpp
+  src/feature/feature_corner_2D.cpp
+  src/feature/feature_diff_drive.cpp
   src/feature/feature_odom_2D.cpp
   src/feature/feature_polyline_2D.cpp
+  src/feature/feature_pose.cpp
   )
 SET(SRCS_LANDMARK
   src/landmark/landmark_corner_2D.cpp
   src/landmark/landmark_container.cpp
   src/landmark/landmark_line_2D.cpp
   src/landmark/landmark_polyline_2D.cpp
+  src/landmark/landmark_base.cpp
   )
 SET(SRCS_PROCESSOR
-  src/processor/processor_frame_nearest_neighbor_filter.cpp
-  src/processor/processor_diff_drive.cpp
+  src/processor/motion_buffer.cpp
   src/processor/processor_IMU.cpp
+  src/processor/processor_base.cpp
+  src/processor/processor_capture_holder.cpp
+  src/processor/processor_diff_drive.cpp
+  src/processor/processor_frame_nearest_neighbor_filter.cpp
+  src/processor/processor_loopclosure_base.cpp
+  src/processor/processor_motion.cpp
   src/processor/processor_odom_2D.cpp
   src/processor/processor_odom_3D.cpp
+  src/processor/processor_tracker.cpp
   src/processor/processor_tracker_feature.cpp
   src/processor/processor_tracker_feature_dummy.cpp
-  src/processor/processor_tracker_landmark_dummy.cpp
   src/processor/processor_tracker_landmark.cpp
+  src/processor/processor_tracker_landmark_dummy.cpp
+  src/processor/track_matrix.cpp
   )
 SET(SRCS_SENSOR
+  src/sensor/sensor_base.cpp
   src/sensor/sensor_camera.cpp
   src/sensor/sensor_diff_drive.cpp
   src/sensor/sensor_GPS.cpp
@@ -704,17 +690,25 @@ ENDIF(YAMLCPP_FOUND)
 ADD_LIBRARY(${PROJECT_NAME} 
   SHARED 
   ${SRCS_BASE} 
-  ${SRCS_CORE}
-  ${SRCS}
   ${SRCS_CAPTURE}
+  ${SRCS_COMMON}
+  ${SRCS_DTASSC} 
   ${SRCS_FACTOR}
   ${SRCS_FEATURE}
+  ${SRCS_FRAME}
+  ${SRCS_HARDWARE}
   ${SRCS_LANDMARK}
+  ${SRCS_MAP}
+  ${SRCS_MATH}
+  ${SRCS_PROBLEM}
   ${SRCS_PROCESSOR}
   ${SRCS_SENSOR}
-  #${SRCS_DTASSC} 
   ${SRCS_SOLVER}
+  ${SRCS_STATE_BLOCK}
+  ${SRCS_TRAJECTORY}
+  ${SRCS_UTILS}
   ${SRCS_WRAPPER}
+  ${SRCS}
   )
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 
@@ -764,40 +758,56 @@ ENDIF(BUILD_EXAMPLES)
 
 #=============================================================
 INSTALL(TARGETS ${PROJECT_NAME} EXPORT ${PROJECT_NAME}Targets
-      RUNTIME DESTINATION bin
-      LIBRARY DESTINATION lib/iri-algorithms
-      ARCHIVE DESTINATION lib/iri-algorithms)
+  RUNTIME DESTINATION bin
+  LIBRARY DESTINATION lib/iri-algorithms
+  ARCHIVE DESTINATION lib/iri-algorithms)
 
 install(EXPORT ${PROJECT_NAME}Targets DESTINATION lib/cmake/${PROJECT_NAME})
 #install headers
-INSTALL(FILES ${HDRS_BASE}
-    DESTINATION include/iri-algorithms/wolf/base)
+INSTALL(FILES ${HDRS_MATH}
+  DESTINATION include/iri-algorithms/wolf/base/math)
+INSTALL(FILES ${HDRS_UTILS}
+  DESTINATION include/iri-algorithms/wolf/base/utils)
+INSTALL(FILES ${HDRS_PROBLEM}
+  DESTINATION include/iri-algorithms/wolf/base/problem)
+INSTALL(FILES ${HDRS_HARDWARE}
+  DESTINATION include/iri-algorithms/wolf/base/hardware)
+INSTALL(FILES ${HDRS_TRAJECTORY}
+  DESTINATION include/iri-algorithms/wolf/base/trajectory)
+INSTALL(FILES ${HDRS_MAP}
+  DESTINATION include/iri-algorithms/wolf/base/map)
+INSTALL(FILES ${HDRS_FRAME}
+  DESTINATION include/iri-algorithms/wolf/base/frame)
+INSTALL(FILES ${HDRS_STATE_BLOCK}
+  DESTINATION include/iri-algorithms/wolf/base/state_block)
+INSTALL(FILES ${HDRS_COMMON}
+  DESTINATION include/iri-algorithms/wolf/base/common)
 INSTALL(FILES ${HDRS_DTASSC}
-   DESTINATION include/iri-algorithms/wolf/base/association)
+  DESTINATION include/iri-algorithms/wolf/base/association)
 INSTALL(FILES ${HDRS_CAPTURE}
-    DESTINATION include/iri-algorithms/wolf/base/capture)
+   DESTINATION include/iri-algorithms/wolf/base/capture)
 INSTALL(FILES ${HDRS_FACTOR}
-    DESTINATION include/iri-algorithms/wolf/base/factor)
+  DESTINATION include/iri-algorithms/wolf/base/factor)
 INSTALL(FILES ${HDRS_FEATURE}
-    DESTINATION include/iri-algorithms/wolf/base/feature)
+  DESTINATION include/iri-algorithms/wolf/base/feature)
 INSTALL(FILES ${HDRS_SENSOR}
-    DESTINATION include/iri-algorithms/wolf/base/sensor)
+  DESTINATION include/iri-algorithms/wolf/base/sensor)
 INSTALL(FILES ${HDRS_PROCESSOR}
-    DESTINATION include/iri-algorithms/wolf/base/processor)
+  DESTINATION include/iri-algorithms/wolf/base/processor)
 INSTALL(FILES ${HDRS_LANDMARK}
-    DESTINATION include/iri-algorithms/wolf/base/landmark)
+  DESTINATION include/iri-algorithms/wolf/base/landmark)
 INSTALL(FILES ${HDRS_WRAPPER}
-    DESTINATION include/iri-algorithms/wolf/base/ceres_wrapper)
+  DESTINATION include/iri-algorithms/wolf/base/ceres_wrapper)
 INSTALL(FILES ${HDRS_SOLVER_SUITESPARSE}
-   DESTINATION include/iri-algorithms/wolf/base/solver_suitesparse)
+  DESTINATION include/iri-algorithms/wolf/base/solver_suitesparse)
 INSTALL(FILES ${HDRS_SOLVER}
-    DESTINATION include/iri-algorithms/wolf/base/solver)
+  DESTINATION include/iri-algorithms/wolf/base/solver)
 INSTALL(FILES ${HDRS_SERIALIZATION}
-    DESTINATION include/iri-algorithms/wolf/base/serialization)
+  DESTINATION include/iri-algorithms/wolf/base/serialization)
 INSTALL(FILES ${HDRS_YAML}
-    DESTINATION include/iri-algorithms/wolf/base/yaml)
+  DESTINATION include/iri-algorithms/wolf/base/yaml)
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf.cmake"
-    DESTINATION "lib/cmake/${PROJECT_NAME}")
+  DESTINATION "lib/cmake/${PROJECT_NAME}")
 
 #install Find*.cmake
 configure_file("${CMAKE_SOURCE_DIR}/cmake_modules/wolfConfig.cmake"

@@ -12,8 +12,8 @@
 #include "base/processor/processor_tracker.h"
 #include "base/capture/capture_base.h"
 #include "base/feature/feature_match.h"
-#include "base/track_matrix.h"
-#include "base/wolf.h"
+#include "base/processor/track_matrix.h"
+#include "base/common/wolf.h"
 
 namespace wolf
 {

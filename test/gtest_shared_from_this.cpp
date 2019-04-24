@@ -1,5 +1,5 @@
 #include "utils_gtest.h"
-#include "base/node_base.h"
+#include "base/common/node_base.h"
 
 class CChildBase;
 

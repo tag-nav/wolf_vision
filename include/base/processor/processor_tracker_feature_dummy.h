@@ -8,7 +8,7 @@
 #ifndef PROCESSOR_TRACKER_FEATURE_DUMMY_H_
 #define PROCESSOR_TRACKER_FEATURE_DUMMY_H_
 
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 #include "base/processor/processor_tracker_feature.h"
 #include "base/factor/factor_epipolar.h"
 

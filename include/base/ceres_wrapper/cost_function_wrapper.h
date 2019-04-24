@@ -2,7 +2,7 @@
 #define TRUNK_SRC_COST_FUNCTION_WRAPPER_H_
 
 // WOLF
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 #include "base/factor/factor_analytic.h"
 
 // CERES

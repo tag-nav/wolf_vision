@@ -6,9 +6,9 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/problem.h"
+#include "base/problem/problem.h"
 #include "base/ceres_wrapper/ceres_manager.h"
 #include "base/sensor/sensor_odom_3D.h"
 

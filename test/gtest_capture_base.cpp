@@ -8,7 +8,7 @@
 #include "utils_gtest.h"
 
 #include "base/capture/capture_base.h"
-#include "base/state_angle.h"
+#include "base/state_block/state_angle.h"
 
 using namespace wolf;
 using namespace Eigen;

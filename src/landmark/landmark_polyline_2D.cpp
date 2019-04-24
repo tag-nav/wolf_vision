@@ -7,11 +7,11 @@
 
 #include "base/feature/feature_polyline_2D.h"
 #include "base/landmark/landmark_polyline_2D.h"
-#include "base/local_parametrization_polyline_extreme.h"
+#include "base/state_block/local_parametrization_polyline_extreme.h"
 #include "base/factor/factor_point_2D.h"
 #include "base/factor/factor_point_to_line_2D.h"
-#include "base/state_block.h"
-#include "base/factory.h"
+#include "base/state_block/state_block.h"
+#include "base/common/factory.h"
 #include "base/yaml/yaml_conversion.h"
 
 namespace wolf

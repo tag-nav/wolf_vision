@@ -10,9 +10,9 @@
 
 //Wolf includes
 #include "base/factor/factor_autodiff.h"
-#include "base/local_parametrization_quaternion.h"
-#include "base/frame_base.h"
-#include "base/rotations.h"
+#include "base/state_block/local_parametrization_quaternion.h"
+#include "base/frame/frame_base.h"
+#include "base/math/rotations.h"
 
 namespace wolf {
 

@@ -9,7 +9,7 @@
 #define FACTOR_ODOM_3D_H_
 
 #include "base/factor/factor_autodiff.h"
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 
 namespace wolf
 {

@@ -6,7 +6,7 @@
 #include "base/landmark/landmark_AHP.h"
 #include "base/sensor/sensor_camera.h"
 //#include "base/feature/feature_point_image.h"
-#include "base/pinhole_tools.h"
+#include "base/math/pinhole_tools.h"
 
 #include <iomanip> //setprecision
 
