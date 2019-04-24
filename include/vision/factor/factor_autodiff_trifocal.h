@@ -2,7 +2,7 @@
 #define _FACTOR_AUTODIFF_TRIFOCAL_H_
 
 //Wolf includes
-//#include "base/wolf.h"
+//#include "base/common/wolf.h"
 #include "base/factor/factor_autodiff.h"
 #include "vision/sensor/sensor_camera.h"
 
@@ -118,7 +118,7 @@ class FactorAutodiffTrifocal : public FactorAutodiff<FactorAutodiffTrifocal, 3, 
 } // namespace wolf
 
 // Includes for implentation
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 
 namespace wolf
 {

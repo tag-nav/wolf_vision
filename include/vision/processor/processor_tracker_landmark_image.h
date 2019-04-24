@@ -7,7 +7,7 @@
 #include "base/landmark/landmark_match.h"
 #include "vision/processor/processor_params_image.h"
 #include "base/processor/processor_tracker_landmark.h"
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 
 #include <algorithms/activesearch/alg_activesearch.h>
 #include <descriptors/descriptor_base.h>

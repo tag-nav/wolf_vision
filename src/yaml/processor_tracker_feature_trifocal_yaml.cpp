@@ -10,7 +10,7 @@
 #include "base/yaml/yaml_conversion.h"
 
 // wolf
-#include "base/factory.h"
+#include "base/common/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>

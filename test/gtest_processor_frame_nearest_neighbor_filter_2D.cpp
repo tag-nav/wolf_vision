@@ -7,7 +7,7 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
 #include "base/sensor/sensor_odom_2D.h"
 #include "base/processor/processor_frame_nearest_neighbor_filter.h"

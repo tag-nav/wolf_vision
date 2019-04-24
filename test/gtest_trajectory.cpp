@@ -6,11 +6,11 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/problem.h"
-#include "base/trajectory_base.h"
-#include "base/frame_base.h"
+#include "base/problem/problem.h"
+#include "base/trajectory/trajectory_base.h"
+#include "base/frame/frame_base.h"
 
 #include <iostream>
 
