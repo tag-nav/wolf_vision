@@ -6,7 +6,7 @@
  */
 
 #include "base/processor/processor_tracker_landmark.h"
-#include "base/map_base.h"
+#include "base/map/map_base.h"
 
 #include <utility>
 
@@ -60,7 +60,7 @@ void ProcessorTrackerLandmark::resetDerived()
     //            std::cout << "\t" << match.first->id() << " to " << match.second.landmark_ptr_->id() << std::endl;
 }
 
-unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_features)
+unsigned int ProcessorTrackerLandmark::processNew(const int& _max_features)
 {
     /* Rationale: A keyFrame will be created using the last Capture.
      * First, we work on this Capture to detect new Features,

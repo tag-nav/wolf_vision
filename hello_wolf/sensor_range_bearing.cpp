@@ -6,7 +6,7 @@
  */
 
 #include "sensor_range_bearing.h"
-#include "base/state_angle.h"
+#include "base/state_block/state_angle.h"
 
 namespace wolf
 {

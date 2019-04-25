@@ -1,8 +1,8 @@
 
 #include "base/landmark/landmark_base.h"
 #include "base/factor/factor_base.h"
-#include "base/map_base.h"
-#include "base/state_block.h"
+#include "base/map/map_base.h"
+#include "base/state_block/state_block.h"
 #include "base/yaml/yaml_conversion.h"
 
 namespace wolf {
@@ -94,11 +94,6 @@ void LandmarkBase::registerNewStateBlocks()
     }
 }
 
-Eigen::MatrixXs LandmarkBase::getCovariance() const
-{
-    return getProblem()->getLandmarkCovariance(shared_from_this());
-}
-
 bool LandmarkBase::getCovariance(Eigen::MatrixXs& _cov) const
 {
     return getProblem()->getLandmarkCovariance(shared_from_this(), _cov);
@@ -122,11 +117,7 @@ void LandmarkBase::removeStateBlocks()
 
 Eigen::VectorXs LandmarkBase::getState() const
 {
-    SizeEigen size = 0;
-    for (StateBlockPtr sb : state_block_vec_)
-        if (sb)
-            size += sb->getSize();
-    Eigen::VectorXs state(size);
+    Eigen::VectorXs state;
 
     getState(state);
 
@@ -140,10 +131,9 @@ void LandmarkBase::getState(Eigen::VectorXs& _state) const
         if (sb)
             size += sb->getSize();
 
-    assert(_state.size() == size && "Wrong state vector size");
+    _state = Eigen::VectorXs(size);
 
     SizeEigen index = 0;
-
     for (StateBlockPtr sb : state_block_vec_)
         if (sb)
         {

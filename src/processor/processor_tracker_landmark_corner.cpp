@@ -1,5 +1,5 @@
 #include "base/processor/processor_tracker_landmark_corner.h"
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 
 namespace wolf
 {
@@ -375,10 +375,13 @@ LandmarkBasePtr ProcessorTrackerLandmarkCorner::createLandmark(FeatureBasePtr _f
                                               _feature_ptr->getMeasurement()(3));
 }
 
-unsigned int ProcessorTrackerLandmarkCorner::detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out)
+unsigned int ProcessorTrackerLandmarkCorner::detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_incoming_out)
 {
-    // already computed since each scan is computed in preprocess()
+    // in corners_last_ remain all not tracked corners, already computed in preprocess()
     _features_incoming_out = std::move(corners_last_);
+    if (_max_features != -1 && _features_incoming_out.size() > _max_features)
+        _features_incoming_out.resize(_max_features);
+
     return _features_incoming_out.size();
 }
 

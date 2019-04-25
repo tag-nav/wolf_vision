@@ -8,9 +8,9 @@ class StateBlock;
 }
 
 //Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
-#include "base/time_stamp.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
+#include "base/common/time_stamp.h"
 
 //std includes
 
@@ -72,7 +72,6 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
         Eigen::VectorXs getState() const;
         void getState(Eigen::VectorXs& _state) const;
         bool getCovariance(Eigen::MatrixXs& _cov) const;
-        Eigen::MatrixXs getCovariance() const;
 
     protected:
         virtual void removeStateBlocks();
@@ -97,9 +96,9 @@ class LandmarkBase : public NodeBase, public std::enable_shared_from_this<Landma
 
 }
 
-#include "base/map_base.h"
+#include "base/map/map_base.h"
 #include "base/factor/factor_base.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 
 namespace wolf{
 

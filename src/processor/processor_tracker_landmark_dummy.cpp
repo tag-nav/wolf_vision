@@ -63,16 +63,25 @@ bool ProcessorTrackerLandmarkDummy::voteForKeyFrame()
     return incoming_ptr_->getFeatureList().size() < 4;
 }
 
-unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out)
+unsigned int ProcessorTrackerLandmarkDummy::detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_incoming_out)
 {
     std::cout << "\tProcessorTrackerLandmarkDummy::detectNewFeatures" << std::endl;
 
-    // detecting 5 new features
-    for (unsigned int i = 1; i <= _max_features; i++)
+    unsigned int max_features = _max_features;
+
+    if (max_features == -1)
+    {
+        max_features = 10;
+        WOLF_INFO("max_features unlimited, setting it to " , max_features);
+    }
+
+    // detecting new features
+    for (unsigned int i = 1; i <= max_features; i++)
     {
         n_feature_++;
-        _features_incoming_out.push_back(
-                std::make_shared<FeatureBase>("POINT IMAGE", n_feature_ * Eigen::Vector1s::Ones(), Eigen::MatrixXs::Ones(1, 1)));
+        _features_incoming_out.push_back(std::make_shared<FeatureBase>("POINT IMAGE",
+                                                                       n_feature_ * Eigen::Vector1s::Ones(),
+                                                                       Eigen::MatrixXs::Ones(1, 1)));
         std::cout << "\t\tfeature " << _features_incoming_out.back()->getMeasurement() << " detected!" << std::endl;
     }
     return _features_incoming_out.size();

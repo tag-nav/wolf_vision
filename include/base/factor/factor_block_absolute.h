@@ -11,7 +11,7 @@
 //Wolf includes
 #include "base/factor/factor_analytic.h"
 #include "base/factor/factor_autodiff.h"
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 
 namespace wolf {
 

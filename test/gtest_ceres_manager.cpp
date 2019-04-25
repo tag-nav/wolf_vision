@@ -6,18 +6,18 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/problem.h"
+#include "base/problem/problem.h"
 #include "base/sensor/sensor_base.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 #include "base/capture/capture_void.h"
 #include "base/factor/factor_pose_2D.h"
 #include "base/factor/factor_quaternion_absolute.h"
 #include "base/solver/solver_manager.h"
 #include "base/ceres_wrapper/ceres_manager.h"
-#include "base/local_parametrization_angle.h"
-#include "base/local_parametrization_quaternion.h"
+#include "base/state_block/local_parametrization_angle.h"
+#include "base/state_block/local_parametrization_quaternion.h"
 
 #include "ceres/ceres.h"
 

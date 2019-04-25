@@ -49,12 +49,19 @@ bool ProcessorTrackerFeatureDummy::voteForKeyFrame()
     return incoming_ptr_->getFeatureList().size() < params_tracker_feature_->min_features_for_keyframe;
 }
 
-unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out)
+unsigned int ProcessorTrackerFeatureDummy::detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_incoming_out)
 {
+    unsigned int max_features = _max_features;
+
+    if (max_features == -1)
+    {
+        max_features = 10;
+        WOLF_INFO("max_features unlimited, setting it to " , max_features);
+    }
     WOLF_INFO("Detecting " , _max_features , " new features..." );
 
     // detecting new features
-    for (unsigned int i = 1; i <= _max_features; i++)
+    for (unsigned int i = 0; i < max_features; i++)
     {
         n_feature_++;
         FeatureBasePtr ftr(std::make_shared<FeatureBase>("POINT IMAGE",

@@ -1,6 +1,6 @@
 #include "base/solver/solver_manager.h"
-#include "base/trajectory_base.h"
-#include "base/map_base.h"
+#include "base/trajectory/trajectory_base.h"
+#include "base/map/map_base.h"
 #include "base/landmark/landmark_base.h"
 
 namespace wolf {

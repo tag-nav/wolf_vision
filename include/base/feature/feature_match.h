@@ -2,7 +2,7 @@
 #define FEATURE_MATCH_H_
 
 // Wolf includes
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 
 //wolf nampseace
 namespace wolf {

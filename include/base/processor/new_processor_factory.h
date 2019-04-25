@@ -15,7 +15,7 @@ struct ProcessorParamsBase;
 }
 
 // wolf
-#include "base/factory.h"
+#include "base/common/factory.h"
 
 // std
 

@@ -134,7 +134,7 @@ bool ProcessorTrackerFeatureTrifocal::isInlier(const cv::KeyPoint& _kp_last, con
 }
 
 
-unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned int& _max_new_features, FeatureBasePtrList& _features_incoming_out)
+unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_incoming_out)
 {
 //    // DEBUG =====================================
 //    clock_t debug_tStart;
@@ -143,7 +143,7 @@ unsigned int ProcessorTrackerFeatureTrifocal::detectNewFeatures(const unsigned i
 //    WOLF_TRACE("======== DetectNewFeatures =========");
 //    // ===========================================
 
-    for (unsigned int n_iterations = 0; n_iterations < _max_new_features; ++n_iterations)
+    for (unsigned int n_iterations = 0; _max_new_features == -1 || n_iterations < _max_new_features; ++n_iterations)
     {
         Eigen::Vector2i cell_last;
         if (capture_last_->grid_features_->pickEmptyTrackingCell(cell_last))

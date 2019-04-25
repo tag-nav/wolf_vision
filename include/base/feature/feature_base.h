@@ -8,8 +8,8 @@ class FactorBase;
 }
 
 //Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
 
 //std includes
 

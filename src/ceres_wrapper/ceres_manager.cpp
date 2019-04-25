@@ -1,9 +1,9 @@
 #include "base/ceres_wrapper/ceres_manager.h"
 #include "base/ceres_wrapper/create_numeric_diff_cost_function.h"
-#include "base/trajectory_base.h"
-#include "base/map_base.h"
+#include "base/trajectory/trajectory_base.h"
+#include "base/map/map_base.h"
 #include "base/landmark/landmark_base.h"
-#include "base/make_unique.h"
+#include "base/utils/make_unique.h"
 
 namespace wolf {
 

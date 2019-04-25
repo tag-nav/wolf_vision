@@ -11,8 +11,8 @@
 #include "base/processor/processor_motion.h"
 #include "base/capture/capture_odom_2D.h"
 #include "base/factor/factor_odom_2D.h"
-#include "base/rotations.h"
 #include "base/params_server.hpp"
+#include "base/math/rotations.h"
 
 namespace wolf {
 

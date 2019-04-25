@@ -1,6 +1,6 @@
 #include "utils_gtest.h"
 
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
 #include "base/ceres_wrapper/ceres_manager.h"
 #include "base/processor/processor_tracker_feature_trifocal.h"
