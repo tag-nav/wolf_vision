@@ -7,7 +7,7 @@ class SensorBase;
 }
 
 // Wolf includes
-#include "base/params_server.hpp"
+#include "base/utils/params_server.hpp"
 #include "base/common/wolf.h"
 #include "base/common/node_base.h"
 #include "base/common/time_stamp.h"

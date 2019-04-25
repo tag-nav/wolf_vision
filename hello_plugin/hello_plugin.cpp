@@ -5,17 +5,17 @@
  *      Author: jcasals
  */
 #include "base/sensor/sensor_base.h"
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 // #include "sensor_odom_2D.cpp"
 #include <yaml-cpp/yaml.h>
 #include "base/yaml/parser_yaml.hpp"
-#include "base/params_server.hpp"
+#include "base/utils/params_server.hpp"
 
 #include "../hello_wolf/capture_range_bearing.h"
 #include "../hello_wolf/feature_range_bearing.h"
 #include "../hello_wolf/factor_range_bearing.h"
 #include "../hello_wolf/landmark_point_2D.h"
-#include "base/loader.hpp"
+#include "base/utils/loader.hpp"
 #include "base/processor/processor_odom_2D.h"
 
 #include "base/solver/solver_factory.h"
@@ -162,11 +162,17 @@ int main(int argc, char** argv) {
     // GET COVARIANCES of all states
     WOLF_TRACE("======== COVARIANCES OF SOLVED PROBLEM =======")
     ceres->computeCovariances(SolverManager::CovarianceBlocksToBeComputed::ALL_MARGINALS);
-    for (auto kf : problem->getTrajectory()->getFrameList())
+    for (auto kf : problem->getTrajectory()->getFrameList()){
         if (kf->isKey())
-            WOLF_TRACE("KF", kf->id(), "_cov = \n", kf->getCovariance());
-    for (auto lmk : problem->getMap()->getLandmarkList())
-        WOLF_TRACE("L", lmk->id(), "_cov = \n", lmk->getCovariance());
+            {
+                Eigen::MatrixXs cov;
+                WOLF_TRACE("KF", kf->id(), "_cov = \n", kf->getCovariance(cov));
+            }
+        for (auto lmk : problem->getMap()->getLandmarkList()) {
+            Eigen::MatrixXs cov;
+            WOLF_TRACE("L", lmk->id(), "_cov = \n", lmk->getCovariance(cov));
+        }
+    }
     std::cout << std::endl;
 
     WOLF_TRACE("======== FINAL PRINT FOR INTERPRETATION =======")

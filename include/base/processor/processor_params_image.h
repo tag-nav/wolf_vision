@@ -4,7 +4,7 @@
 // wolf
 #include "base/processor/processor_tracker_feature.h"
 #include "base/processor/processor_tracker_landmark.h"
-#include "base/params_server.hpp"
+#include "base/utils/params_server.hpp"
 
 namespace wolf
 {

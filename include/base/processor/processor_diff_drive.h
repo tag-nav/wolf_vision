@@ -9,7 +9,7 @@
 #define _WOLF_PROCESSOR_DIFF_DRIVE_H_
 
 #include "base/processor/processor_motion.h"
-#include "base/params_server.hpp"
+#include "base/utils/params_server.hpp"
 #include "base/processor/diff_drive_tools.h"
 
 namespace wolf {

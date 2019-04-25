@@ -18,13 +18,14 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsTracker);
 struct ProcessorParamsTracker : public ProcessorParamsBase
 {
     unsigned int min_features_for_keyframe; ///< minimum nbr. of features to vote for keyframe
+    int max_new_features;                   ///< maximum nbr. of new features to be processed when adding a keyframe (-1: unlimited. 0: none.)
+
     ProcessorParamsTracker() = default;
     ProcessorParamsTracker(std::string _unique_name, const wolf::paramsServer & _server):
         ProcessorParamsBase(_unique_name, _server)
     {
         min_features_for_keyframe = _server.getParam<unsigned int>(_unique_name + "/min_features_for_keyframe", "1");
-        max_new_features = _server.getParam<unsigned int>(_unique_name + "/max_new_features", "10");
-    }
+        max_new_features = _server.getParam<int>(_unique_name + "/max_new_features", "-1");
     }
 };
 

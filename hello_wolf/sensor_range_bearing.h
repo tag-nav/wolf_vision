@@ -9,7 +9,7 @@
 #define HELLO_WOLF_SENSOR_RANGE_BEARING_H_
 
 #include "base/sensor/sensor_base.h"
-#include "base/params_server.hpp"
+#include "base/utils/params_server.hpp"
 
 namespace wolf
 {

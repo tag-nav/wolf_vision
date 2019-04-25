@@ -3,7 +3,7 @@
 
 // Wolf related headers
 #include "base/processor/processor_loopclosure_base.h"
-#include "base/params_server.hpp"
+#include "base/utils/params_server.hpp"
 #include "base/state_block/state_block.h"
 
 namespace wolf{

@@ -5,17 +5,17 @@
  *      Author: jcasals
  */
 #include "base/sensor/sensor_base.h"
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 // #include "sensor_odom_2D.cpp"
 #include <yaml-cpp/yaml.h>
 #include "base/yaml/parser_yaml.hpp"
-#include "base/params_server.hpp"
+#include "base/utils/params_server.hpp"
 
 #include "../hello_wolf/capture_range_bearing.h"
 #include "../hello_wolf/feature_range_bearing.h"
 #include "../hello_wolf/factor_range_bearing.h"
 #include "../hello_wolf/landmark_point_2D.h"
-#include "base/loader.hpp"
+#include "base/utils/loader.hpp"
 #include "base/processor/processor_odom_2D.h"
 
 #include "base/solver/solver_factory.h"

@@ -10,7 +10,7 @@
 
 // Enable project-specific definitions and macros
 #include "internal/config.h"
-#include "base/params_server.hpp"
+#include "base/utils/params_server.hpp"
 #include "base/utils/logging.h"
 
 //includes from Eigen lib

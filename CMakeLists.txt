@@ -273,6 +273,9 @@ SET(HDRS_UTILS
   include/base/utils/logging.h
   include/base/utils/singleton.h
   include/base/utils/make_unique.h
+  include/base/utils/params_server.hpp
+  include/base/utils/converter.h
+  include/base/utils/loader.hpp
   )
 SET(HDRS_PROBLEM
   include/base/problem/problem.h
@@ -429,14 +432,14 @@ SET(HDRS_DTASSC
   include/base/association/association_nnls.h
   include/base/association/matrix.h
   )
+SET(HDRS_YAML
+  include/base/yaml/parser_yaml.hpp
+  )
 
 
 #SOURCES
 SET(SRCS_PROBLEM
   src/problem/problem.cpp
-  )
-SET(HDRS_YAML
-  include/base/yaml/parser_yaml.hpp
   )
 SET(SRCS_HARDWARE
   src/hardware/hardware_base.cpp
@@ -480,6 +483,7 @@ SET(SRCS_CAPTURE
   src/capture/capture_odom_3D.cpp
   src/capture/capture_velocity.cpp
   src/capture/capture_wheel_joint_position.cpp
+  src/capture/capture_image.cpp
   )
 SET(SRCS_FACTOR
   src/factor/factor_analytic.cpp
@@ -495,6 +499,7 @@ SET(SRCS_FEATURE
   src/feature/feature_odom_2D.cpp
   src/feature/feature_polyline_2D.cpp
   src/feature/feature_pose.cpp
+  src/feature/feature_point_image.cpp
   )
 SET(SRCS_LANDMARK
   src/landmark/landmark_corner_2D.cpp
@@ -614,10 +619,6 @@ IF (vision_utils_FOUND)
     include/base/landmark/landmark_point_3D.h
     include/base/landmark/landmark_AHP.h
     )
-  SET(SRCS ${SRCS}
-    src/capture/capture_image.cpp
-    src/feature/feature_point_image.cpp
-    )
   SET(SRCS_LANDMARK ${SRCS_LANDMARK}
     src/landmark/landmark_point_3D.cpp
     src/landmark/landmark_AHP.cpp
@@ -655,7 +656,7 @@ IF(YAMLCPP_FOUND)
     src/yaml/sensor_IMU_yaml.cpp
     )
   IF(laser_scan_utils_FOUND)
-    SET(SRCS ${SRCS_YAML}
+    SET(SRCS_YAML ${SRCS_YAML}
       src/yaml/sensor_laser_2D_yaml.cpp
       )
   ENDIF(laser_scan_utils_FOUND)
@@ -670,6 +671,7 @@ ENDIF(YAMLCPP_FOUND)
 # create the shared library
 ADD_LIBRARY(${PROJECT_NAME} 
   SHARED 
+  ${SRCS}
   ${SRCS_BASE} 
   ${SRCS_CAPTURE}
   ${SRCS_COMMON}

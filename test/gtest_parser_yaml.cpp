@@ -1,6 +1,6 @@
 #include "utils_gtest.h"
-#include "base/converter.h"
-#include "base/wolf.h"
+#include "base/utils/converter.h"
+#include "base/common/wolf.h"
 #include "base/yaml/parser_yaml.hpp"
 
 using namespace std;

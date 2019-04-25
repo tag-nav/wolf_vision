@@ -11,7 +11,7 @@
 // Wolf
 #include "base/capture/capture_motion.h"
 #include "base/processor/processor_base.h"
-#include "base/params_server.hpp"
+#include "base/utils/params_server.hpp"
 #include "base/common/time_stamp.h"
 
 // std

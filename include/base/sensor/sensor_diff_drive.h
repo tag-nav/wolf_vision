@@ -10,7 +10,7 @@
 
 //wolf includes
 #include "base/sensor/sensor_base.h"
-#include "base/params_server.hpp"
+#include "base/utils/params_server.hpp"
 #include "base/processor/diff_drive_tools.h"
 
 namespace wolf {

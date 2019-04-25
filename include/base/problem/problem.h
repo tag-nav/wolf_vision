@@ -14,7 +14,7 @@ struct ProcessorParamsBase;
 }
 
 //wolf includes
-#include "base/params_server.hpp"
+#include "base/utils/params_server.hpp"
 #include "base/sensor/new_sensor_factory.h"
 #include "base/processor/new_processor_factory.h"
 #include "base/common/wolf.h"

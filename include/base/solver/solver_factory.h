@@ -15,7 +15,7 @@ struct IntrinsicsBase;
 }
 
 // wolf
-#include "base/factory.h"
+#include "base/common/factory.h"
 #include "base/solver/solver_manager.h"
 
 namespace wolf
