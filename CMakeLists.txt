@@ -483,7 +483,6 @@ SET(SRCS_CAPTURE
   src/capture/capture_odom_3D.cpp
   src/capture/capture_velocity.cpp
   src/capture/capture_wheel_joint_position.cpp
-  src/capture/capture_image.cpp
   )
 SET(SRCS_FACTOR
   src/factor/factor_analytic.cpp
@@ -499,7 +498,6 @@ SET(SRCS_FEATURE
   src/feature/feature_odom_2D.cpp
   src/feature/feature_polyline_2D.cpp
   src/feature/feature_pose.cpp
-  src/feature/feature_point_image.cpp
   )
 SET(SRCS_LANDMARK
   src/landmark/landmark_corner_2D.cpp
@@ -619,6 +617,9 @@ IF (vision_utils_FOUND)
     include/base/landmark/landmark_point_3D.h
     include/base/landmark/landmark_AHP.h
     )
+  SET(SRCS_CAPTURE ${SRCS_CAPTURE}
+    src/capture/capture_image.cpp
+    )
   SET(SRCS_LANDMARK ${SRCS_LANDMARK}
     src/landmark/landmark_point_3D.cpp
     src/landmark/landmark_AHP.cpp
@@ -627,6 +628,9 @@ IF (vision_utils_FOUND)
     src/processor/processor_tracker_feature_trifocal.cpp
     src/processor/processor_tracker_feature_image.cpp
     src/processor/processor_tracker_landmark_image.cpp
+    )
+  SET(SRCS_FEATURE ${SRCS_FEATURE}
+    src/feature/feature_point_image.cpp
     )
 ENDIF(vision_utils_FOUND)
 #SUBDIRECTORIES
