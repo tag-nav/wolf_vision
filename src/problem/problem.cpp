@@ -562,7 +562,7 @@ bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& 
     SizeEigen sz = 0;
     for (const auto& sb : state_bloc_vec)
         if (sb)
-            sz += sb->getSize();
+            sz += sb->getLocalSize();
 
     // resizing
     _covariance = Eigen::MatrixXs(sz, sz);
@@ -578,10 +578,10 @@ bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& 
                 if (sb_j)
                 {
                     success = success && getCovarianceBlock(sb_i, sb_j, _covariance, i, j);
-                    j += sb_j->getSize();
+                    j += sb_j->getLocalSize();
                 }
             }
-            i += sb_i->getSize();
+            i += sb_i->getLocalSize();
         }
     }
     return success;
@@ -604,7 +604,7 @@ bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::M
     SizeEigen sz = 0;
     for (const auto& sb : state_bloc_vec)
         if (sb)
-            sz += sb->getSize();
+            sz += sb->getLocalSize();
 
     // resizing
     _covariance = Eigen::MatrixXs(sz, sz);
@@ -621,10 +621,10 @@ bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::M
                 if (sb_j)
                 {
                     success = success && getCovarianceBlock(sb_i, sb_j, _covariance, i, j);
-                    j += sb_j->getSize();
+                    j += sb_j->getLocalSize();
                 }
             }
-            i += sb_i->getSize();
+            i += sb_i->getLocalSize();
         }
     }
     return success;
