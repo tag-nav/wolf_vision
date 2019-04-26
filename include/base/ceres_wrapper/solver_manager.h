@@ -40,7 +40,7 @@ class SolverManager
 
 		virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS) = 0;
 
-		virtual void computeCovariances(const StateBlockPtrList& st_list) = 0;
+		virtual void computeCovariances(const std::vector<StateBlockPtr>& st_list) = 0;
 
 		virtual void update();
 

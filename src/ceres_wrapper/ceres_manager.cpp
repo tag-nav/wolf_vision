@@ -62,7 +62,7 @@ std::string CeresManager::solveImpl(const ReportVerbosity report_level)
 }
 
 void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks)
-{
+{   
     // update problem
     update();
 
@@ -195,16 +195,16 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
         for (unsigned int i = 0; i < double_pairs.size(); i++)
         {
             Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> cov(state_block_pairs[i].first->getSize(),state_block_pairs[i].second->getSize());
-            covariance_->GetCovarianceBlock(double_pairs[i].first, double_pairs[i].second, cov.data());
+            covariance_->GetCovarianceBlockInTangentSpace(double_pairs[i].first, double_pairs[i].second, cov.data());
             wolf_problem_->addCovarianceBlock(state_block_pairs[i].first, state_block_pairs[i].second, cov);
-            //std::cout << "getted covariance " << std::endl << cov << std::endl;
+            std::cout << "covariance got switch: " << std::endl << cov << std::endl;
         }
     }
     else
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
 }
 
-void CeresManager::computeCovariances(const StateBlockPtrList& st_list)
+void CeresManager::computeCovariances(const std::vector<StateBlockPtr>& st_list)
 {
     //std::cout << "CeresManager: computing covariances..." << std::endl;
 
@@ -235,9 +235,9 @@ void CeresManager::computeCovariances(const StateBlockPtrList& st_list)
         for (unsigned int i = 0; i < double_pairs.size(); i++)
         {
             Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> cov(state_block_pairs[i].first->getSize(),state_block_pairs[i].second->getSize());
-            covariance_->GetCovarianceBlock(double_pairs[i].first, double_pairs[i].second, cov.data());
+            covariance_->GetCovarianceBlockInTangentSpace(double_pairs[i].first, double_pairs[i].second, cov.data());
             wolf_problem_->addCovarianceBlock(state_block_pairs[i].first, state_block_pairs[i].second, cov);
-            //std::cout << "getted covariance " << std::endl << cov << std::endl;
+            std::cout << "covariance got from st_list: " << std::endl << cov << std::endl;
         }
     else
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
