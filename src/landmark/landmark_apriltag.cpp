@@ -1,7 +1,7 @@
 
 #include "base/landmark/landmark_apriltag.h"
-#include "base/factory.h"
-#include "base/rotations.h"
+#include "base/common/factory.h"
+#include "base/math/rotations.h"
 #include "base/yaml/yaml_conversion.h"
 
 namespace wolf {

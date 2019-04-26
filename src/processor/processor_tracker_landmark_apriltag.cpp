@@ -2,12 +2,12 @@
 
 #include "base/capture/capture_image.h"
 #include "base/sensor/sensor_camera.h"
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 #include "base/feature/feature_apriltag.h"
 #include "base/factor/factor_autodiff_apriltag.h"
 #include "base/landmark/landmark_apriltag.h"
-#include "base/state_quaternion.h"
-#include "base/pinhole_tools.h"
+#include "base/state_block/state_quaternion.h"
+#include "base/math/pinhole_tools.h"
 
 // April tags
 #include "common/homography.h"
@@ -391,7 +391,7 @@ FactorBasePtr ProcessorTrackerLandmarkApriltag::createFactor(FeatureBasePtr _fea
             std::static_pointer_cast<LandmarkApriltag>(_landmark_ptr),
             std::static_pointer_cast<FeatureApriltag> (_feature_ptr ),
             true,
-            CTR_ACTIVE
+            FAC_ACTIVE
     );
     return constraint;
 }
@@ -430,7 +430,7 @@ LandmarkBasePtr ProcessorTrackerLandmarkApriltag::createLandmark(FeatureBasePtr 
     return new_landmark;
 }
 
-unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _new_features_last)
+unsigned int ProcessorTrackerLandmarkApriltag::detectNewFeatures(const int& _max_features, FeatureBasePtrList& _new_features_last)
 {
     LandmarkBasePtrList& landmark_list = getProblem()->getMap()->getLandmarkList();
     for (auto feature_in_image : detections_last_)
@@ -722,8 +722,7 @@ void ProcessorTrackerLandmarkApriltag::resetDerived()
             CaptureBasePtr capt3D = std::make_shared<CaptureBase>("Dist", getLast()->getTimeStamp());
             getLast()->getFrame()->addCapture(capt3D);
             FeatureBasePtr feat_dist = capt3D->addFeature(std::make_shared<FeatureBase>("Dist", dist_meas, cov0));
-            // FactorAutodiffDistance3DPtr cstr = std::make_shared<FactorAutodiffDistance3D>(feat_dist, ori_frame, shared_from_this, false, CTR_ACTIVE);
-            FactorAutodiffDistance3DPtr cstr = std::make_shared<FactorAutodiffDistance3D>(feat_dist, ori_frame, nullptr, false, CTR_ACTIVE);
+            FactorAutodiffDistance3DPtr cstr = std::make_shared<FactorAutodiffDistance3D>(feat_dist, ori_frame, nullptr, false, FAC_ACTIVE);
             feat_dist->addFactor(cstr);
             ori_frame->addConstrainedBy(cstr);    
         }
