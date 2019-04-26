@@ -2,7 +2,7 @@
 #define FACTOR_CONTAINER_H_
 
 //Wolf includes
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 #include "base/factor/factor_autodiff.h"
 #include "base/landmark/landmark_container.h"
 

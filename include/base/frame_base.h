@@ -18,7 +18,7 @@ class StateBlock;
 
 namespace wolf {
 
-/** \brief Enumeration of frame types: key-frame or non-key-frame
+/** \brief Enumeration of frame types
  */
 typedef enum
 {

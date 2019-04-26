@@ -13,8 +13,8 @@
 
 // Wolf includes
 #include "base/sensor/sensor_odom_2D.h"
-#include "base/state_block.h"
-#include "base/wolf.h"
+#include "base/state_block/state_block.h"
+#include "base/common/wolf.h"
 #include "base/ceres_wrapper/ceres_manager.h"
 
 // STL includes

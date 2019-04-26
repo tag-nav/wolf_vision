@@ -1,5 +1,5 @@
 #include "base/factor/factor_base.h"
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 #include "base/landmark/landmark_base.h"
 
 namespace wolf {

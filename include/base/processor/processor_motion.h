@@ -11,7 +11,7 @@
 // Wolf
 #include "base/capture/capture_motion.h"
 #include "base/processor/processor_base.h"
-#include "base/time_stamp.h"
+#include "base/common/time_stamp.h"
 
 // std
 #include <iomanip>
@@ -476,7 +476,7 @@ class ProcessorMotion : public ProcessorBase
 
 }
 
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 
 namespace wolf{
 

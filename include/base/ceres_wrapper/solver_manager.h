@@ -2,8 +2,8 @@
 #define SOLVER_MANAGER_H_
 
 //wolf includes
-#include "base/wolf.h"
-#include "base/state_block.h"
+#include "base/common/wolf.h"
+#include "base/state_block/state_block.h"
 #include "base/factor/factor_base.h"
 
 namespace wolf {

@@ -15,7 +15,7 @@ struct ProcessorParamsBase;
 }
 
 // wolf
-#include "base/factory.h"
+#include "base/common/factory.h"
 
 // std
 
@@ -155,7 +155,7 @@ namespace wolf
  *     \code
  *     #include "base/sensor/sensor_odom_2D.h"
  *     #include "base/processor/processor_odom_2D.h"
- *     #include "base/problem.h"
+ *     #include "base/problem/problem.h"
  *
  *     Problem problem(FRM_PO_2D);
  *     problem.installSensor    ( "ODOM 2D" , "Main odometer" , extrinsics      , &intrinsics );

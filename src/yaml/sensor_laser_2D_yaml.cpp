@@ -10,7 +10,7 @@
 
 // wolf
 //#include "base/intrinsics_factory.h"
-#include "base/factory.h"
+#include "base/common/factory.h"
 #include "base/sensor/sensor_laser_2D.h"
 
 // yaml library

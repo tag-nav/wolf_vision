@@ -8,12 +8,12 @@
 #include "base/capture/capture_IMU.h"
 #include "base/processor/processor_IMU.h"
 #include "base/sensor/sensor_IMU.h"
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 #include "base/ceres_wrapper/ceres_manager.h"
 
 #include <cmath>

@@ -1,6 +1,6 @@
 #include "base/sensor/sensor_base.h"
-#include "base/state_block.h"
-#include "base/state_quaternion.h"
+#include "base/state_block/state_block.h"
+#include "base/state_block/state_quaternion.h"
 #include "base/factor/factor_block_absolute.h"
 #include "base/factor/factor_quaternion_absolute.h"
 

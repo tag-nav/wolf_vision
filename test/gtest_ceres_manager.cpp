@@ -6,18 +6,18 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/problem.h"
+#include "base/problem/problem.h"
 #include "base/sensor/sensor_base.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 #include "base/capture/capture_void.h"
 #include "base/factor/factor_pose_2D.h"
 #include "base/factor/factor_quaternion_absolute.h"
 #include "base/solver/solver_manager.h"
 #include "base/ceres_wrapper/ceres_manager.h"
-#include "base/local_parametrization_angle.h"
-#include "base/local_parametrization_quaternion.h"
+#include "base/state_block/local_parametrization_angle.h"
+#include "base/state_block/local_parametrization_quaternion.h"
 
 #include "ceres/ceres.h"
 
@@ -398,12 +398,10 @@ TEST(CeresManager, AddRemoveFactor)
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
 
-    ASSERT_TRUE(P->getFactorNotificationMap().begin()->first == c);
-
     // remove factor
     P->removeFactor(c);
 
-    ASSERT_TRUE(P->getFactorNotificationMap().empty());
+    ASSERT_TRUE(P->consumeFactorNotificationMap().empty()); // add+remove = empty
 
     // update solver
     ceres_manager_ptr->update();

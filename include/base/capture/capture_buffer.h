@@ -8,8 +8,8 @@
 #ifndef _WOLF_CAPTURE_BUFFER_H_
 #define _WOLF_CAPTURE_BUFFER_H_
 
-#include "base/wolf.h"
-#include "base/time_stamp.h"
+#include "base/common/wolf.h"
+#include "base/common/time_stamp.h"
 
 #include <list>
 #include <algorithm>

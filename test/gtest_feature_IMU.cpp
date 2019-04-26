@@ -2,12 +2,12 @@
 #include "base/capture/capture_IMU.h"
 #include "base/processor/processor_IMU.h"
 #include "base/sensor/sensor_IMU.h"
-#include "base/wolf.h"
-#include "base/problem.h"
-#include "base/state_block.h"
-#include "base/state_quaternion.h"
+#include "base/common/wolf.h"
+#include "base/problem/problem.h"
+#include "base/state_block/state_block.h"
+#include "base/state_block/state_quaternion.h"
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
 class FeatureIMU_test : public testing::Test
 {

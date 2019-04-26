@@ -6,8 +6,8 @@
 #include "base/capture/capture_IMU.h"
 #include "base/feature/feature_IMU.h"
 #include "base/factor/factor_autodiff.h"
-#include "base/frame_base.h"
-#include "base/rotations.h"
+#include "base/frame/frame_base.h"
+#include "base/math/rotations.h"
 
 //#include "ceres/jet.h"
 

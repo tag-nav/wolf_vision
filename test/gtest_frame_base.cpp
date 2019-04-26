@@ -6,9 +6,9 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 #include "base/sensor/sensor_odom_2D.h"
 #include "base/processor/processor_odom_2D.h"
 #include "base/factor/factor_odom_2D.h"
@@ -129,7 +129,7 @@ TEST(FrameBase, LinksToTree)
     ASSERT_TRUE(F1->getCaptureList().empty());
 }
 
-#include "base/state_quaternion.h"
+#include "base/state_block/state_quaternion.h"
 TEST(FrameBase, GetSetState)
 {
     // Create PQV_3D state blocks

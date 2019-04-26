@@ -4,8 +4,8 @@
 
 //Wolf includes
 #include "base/factor/factor_autodiff.h"
-#include "base/frame_base.h"
-#include "base/rotations.h"
+#include "base/frame/frame_base.h"
+#include "base/math/rotations.h"
 
 namespace wolf {
 

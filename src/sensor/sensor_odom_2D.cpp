@@ -1,6 +1,6 @@
 #include "base/sensor/sensor_odom_2D.h"
-#include "base/state_block.h"
-#include "base/state_angle.h"
+#include "base/state_block/state_block.h"
+#include "base/state_block/state_angle.h"
 
 namespace wolf {
 

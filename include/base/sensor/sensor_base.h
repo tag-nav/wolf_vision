@@ -9,9 +9,9 @@ class StateBlock;
 }
 
 //Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
-#include "base/time_stamp.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
+#include "base/common/time_stamp.h"
 
 //std includes
 
@@ -190,8 +190,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
 }
 
-#include "base/problem.h"
-#include "base/hardware_base.h"
+#include "base/problem/problem.h"
+#include "base/hardware/hardware_base.h"
 #include "base/capture/capture_base.h"
 #include "base/processor/processor_base.h"
 
