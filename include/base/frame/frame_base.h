@@ -18,12 +18,13 @@ class StateBlock;
 
 namespace wolf {
 
-/** \brief Enumeration of frame types: key-frame or non-key-frame
+/** \brief Enumeration of frame types
  */
 typedef enum
 {
-    NON_KEY_FRAME = 0,  ///< Regular frame. It does not play at optimization.
-    KEY_FRAME = 1       ///< key frame. It plays at optimizations.
+    IMPORTANT = 2,     ///< estimated important frame. It plays at optimizations.
+    ESTIMATED = 1,     ///< estimated frame. It plays at optimizations.
+    NON_ESTIMATED = 0  ///< Regular frame. It does not play at optimization.
 } FrameType;
 
 //class FrameBase
@@ -71,9 +72,13 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
     public:
         unsigned int id();
 
-        // KeyFrame / NonKeyFrame
-        bool isKey() const;
-        void setKey();
+        // Important / Non Important
+        bool isImportant() const;
+        void setImportant();
+
+        // Estimated / Non estimated
+        bool isEstimated() const;
+        void setEstimated();
 
         // Frame values ------------------------------------------------
     public:
@@ -167,9 +172,14 @@ inline unsigned int FrameBase::id()
     return frame_id_;
 }
 
-inline bool FrameBase::isKey() const
+inline bool FrameBase::isImportant() const
 {
-    return (type_ == KEY_FRAME);
+    return (type_ == IMPORTANT);
+}
+
+inline bool FrameBase::isEstimated() const
+{
+    return (type_ == IMPORTANT || type_ == ESTIMATED);
 }
 
 inline void FrameBase::getTimeStamp(TimeStamp& _ts) const

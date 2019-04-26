@@ -138,7 +138,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Emplace frame from string frame_structure
          * \param _frame_structure String indicating the frame structure.
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _frame_key_type Either IMPORTANT, ESTIMATED or NON_ESTIMATED
          * \param _frame_state State vector; must match the size and format of the chosen frame structure
          * \param _time_stamp Time stamp of the frame
          *
@@ -154,7 +154,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Emplace frame from string frame_structure without state
          * \param _frame_structure String indicating the frame structure.
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _frame_key_type Either IMPORTANT, ESTIMATED or NON_ESTIMATED
          * \param _time_stamp Time stamp of the frame
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem:
@@ -167,7 +167,7 @@ class Problem : public std::enable_shared_from_this<Problem>
                                   const TimeStamp& _time_stamp);
 
         /** \brief Emplace frame from string frame_structure without structure
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _frame_key_type Either IMPORTANT, ESTIMATED or NON_ESTIMATED
          * \param _frame_state State vector; must match the size and format of the chosen frame structure
          * \param _time_stamp Time stamp of the frame
          *
@@ -181,7 +181,7 @@ class Problem : public std::enable_shared_from_this<Problem>
                                   const TimeStamp& _time_stamp);
 
         /** \brief Emplace frame from string frame_structure without structure nor state
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _frame_key_type Either IMPORTANT, ESTIMATED or NON_ESTIMATED
          * \param _time_stamp Time stamp of the frame
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem:
@@ -193,9 +193,11 @@ class Problem : public std::enable_shared_from_this<Problem>
                                   const TimeStamp& _time_stamp);
 
         // Frame getters
-        FrameBasePtr    getLastFrame         ( );
-        FrameBasePtr    getLastKeyFrame      ( );
-        FrameBasePtr    closestKeyFrameToTimeStamp(const TimeStamp& _ts);
+        FrameBasePtr getLastFrame( ) const;
+        FrameBasePtr getLastImportantFrame( ) const;
+        FrameBasePtr getLastEstimatedFrame( ) const;
+        FrameBasePtr closestImportantFrameToTimeStamp(const TimeStamp& _ts) const;
+        FrameBasePtr closestEstimatedFrameToTimeStamp(const TimeStamp& _ts) const;
 
         /** \brief Give the permission to a processor to create a new keyFrame
          *

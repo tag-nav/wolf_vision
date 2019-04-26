@@ -127,7 +127,7 @@ ProcessorBasePtr Problem::installProcessor(const std::string& _prc_type, //
 
     // setting the origin in all processor motion if origin already setted
     if (prc_ptr->isMotion() && prior_is_set_)
-        (std::static_pointer_cast<ProcessorMotion>(prc_ptr))->setOrigin(getLastKeyFrame());
+        (std::static_pointer_cast<ProcessorMotion>(prc_ptr))->setOrigin(getLastImportantFrame());
 
     // setting the main processor motion
     if (prc_ptr->isMotion() && processor_motion_ptr_ == nullptr)
@@ -251,8 +251,8 @@ void Problem::getCurrentState(Eigen::VectorXs& state)
 {
     if (processor_motion_ptr_ != nullptr)
         processor_motion_ptr_->getCurrentState(state);
-    else if (trajectory_ptr_->getLastKeyFrame() != nullptr)
-        trajectory_ptr_->getLastKeyFrame()->getState(state);
+    else if (trajectory_ptr_->getLastImportantFrame() != nullptr)
+        trajectory_ptr_->getLastImportantFrame()->getState(state);
     else
         state = zeroState();
 }
@@ -264,10 +264,10 @@ void Problem::getCurrentStateAndStamp(Eigen::VectorXs& state, TimeStamp& ts)
         processor_motion_ptr_->getCurrentState(state);
         processor_motion_ptr_->getCurrentTimeStamp(ts);
     }
-    else if (trajectory_ptr_->getLastKeyFrame() != nullptr)
+    else if (trajectory_ptr_->getLastImportantFrame() != nullptr)
     {
-        trajectory_ptr_->getLastKeyFrame()->getTimeStamp(ts);
-        trajectory_ptr_->getLastKeyFrame()->getState(state);
+        trajectory_ptr_->getLastImportantFrame()->getTimeStamp(ts);
+        trajectory_ptr_->getLastImportantFrame()->getState(state);
     }
     else
         state = zeroState();
@@ -278,7 +278,7 @@ void Problem::getState(const TimeStamp& _ts, Eigen::VectorXs& state)
     // try to get the state from processor_motion if any, otherwise...
     if (processor_motion_ptr_ == nullptr || !processor_motion_ptr_->getState(_ts, state))
     {
-        FrameBasePtr closest_frame = trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
+        FrameBasePtr closest_frame = trajectory_ptr_->closestEstimatedFrameToTimeStamp(_ts);
         if (closest_frame != nullptr)
             closest_frame->getState(state);
         else
@@ -583,7 +583,7 @@ bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& 
 
 bool Problem::getLastKeyFrameCovariance(Eigen::MatrixXs& cov)
 {
-    FrameBasePtr frm = getLastKeyFrame();
+    FrameBasePtr frm = getLastImportantFrame();
     return getFrameCovariance(frm, cov);
 }
 
@@ -639,14 +639,29 @@ HardwareBasePtr Problem::getHardware()
     return hardware_ptr_;
 }
 
-FrameBasePtr Problem::getLastFrame()
+FrameBasePtr Problem::getLastFrame() const
 {
     return trajectory_ptr_->getLastFrame();
 }
 
-FrameBasePtr Problem::getLastKeyFrame()
+FrameBasePtr Problem::getLastImportantFrame() const
 {
-    return trajectory_ptr_->getLastKeyFrame();
+    return trajectory_ptr_->getLastImportantFrame();
+}
+
+FrameBasePtr Problem::getLastEstimatedFrame() const
+{
+    return trajectory_ptr_->getLastEstimatedFrame();
+}
+
+FrameBasePtr Problem::closestImportantFrameToTimeStamp(const TimeStamp& _ts) const
+{
+    return trajectory_ptr_->closestImportantFrameToTimeStamp(_ts);
+}
+
+FrameBasePtr Problem::closestEstimatedFrameToTimeStamp(const TimeStamp& _ts) const
+{
+    return trajectory_ptr_->closestEstimatedFrameToTimeStamp(_ts);
 }
 
 FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen::MatrixXs& _prior_cov, const TimeStamp& _ts, const Scalar _time_tolerance)
@@ -654,7 +669,7 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
     if ( ! prior_is_set_ )
     {
         // Create origin frame
-        FrameBasePtr origin_keyframe = emplaceFrame(KEY_FRAME, _prior_state, _ts);
+        FrameBasePtr origin_keyframe = emplaceFrame(IMPORTANT, _prior_state, _ts);
 
         // create origin capture with the given state as data
         // Capture fix only takes 3D position and Quaternion orientation
@@ -763,10 +778,10 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
                         std::cout << "    pm" << p->id() << " " << p->getType() << endl;
                         ProcessorMotionPtr pm = std::static_pointer_cast<ProcessorMotion>(p);
                         if (pm->getOrigin())
-                            cout << "      o: C" << pm->getOrigin()->id() << " - " << (pm->getOrigin()->getFrame()->isKey() ? "  KF" : "  F")
+                            cout << "      o: C" << pm->getOrigin()->id() << " - " << (pm->getOrigin()->getFrame()->isEstimated() ? (pm->getOrigin()->getFrame()->isImportant() ? "  KF" : "  EF" ) : "  F")
                             << pm->getOrigin()->getFrame()->id() << endl;
                         if (pm->getLast())
-                            cout << "      l: C" << pm->getLast()->id() << " - " << (pm->getLast()->getFrame()->isKey() ? "  KF" : "  F")
+                            cout << "      l: C" << pm->getLast()->id() << " - " << (pm->getLast()->getFrame()->isEstimated() ? (pm->getLast()->getFrame()->isImportant() ? "  KF" : " EF") : "  F")
                             << pm->getLast()->getFrame()->id() << endl;
                         if (pm->getIncoming())
                             cout << "      i: C" << pm->getIncoming()->id() << endl;
@@ -781,14 +796,14 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
 //                            if (ptt)
 //                            {
 //                                if (ptt->getPrevOrigin())
-//                                    cout << "      p: C" << ptt->getPrevOrigin()->id() << " - " << (ptt->getPrevOrigin()->getFrame()->isKey() ? "  KF" : "  F")
+//                                    cout << "      p: C" << ptt->getPrevOrigin()->id() << " - " << (ptt->getPrevOrigin()->getFrame()->isEstimated() ? (ptt->getPrevOrigin()->getFrame()->isImportant() ? "  KF" : " EF") : "  F")
 //                                    << ptt->getPrevOrigin()->getFrame()->id() << endl;
 //                            }
                             if (pt->getOrigin())
-                                cout << "      o: C" << pt->getOrigin()->id() << " - " << (pt->getOrigin()->getFrame()->isKey() ? "  KF" : "  F")
+                                cout << "      o: C" << pt->getOrigin()->id() << " - " << (pt->getOrigin()->getFrame()->isEstimated() ? (pt->getOrigin()->getFrame()->isImportant() ? "  KF" : " EF") : "  F")
                                 << pt->getOrigin()->getFrame()->id() << endl;
                             if (pt->getLast())
-                                cout << "      l: C" << pt->getLast()->id() << " - " << (pt->getLast()->getFrame()->isKey() ? "  KF" : "  F")
+                                cout << "      l: C" << pt->getLast()->id() << " - " << (pt->getLast()->getFrame()->isEstimated() ? (pt->getLast()->getFrame()->isImportant() ? "  KF" : " EF") : "  F")
                                 << pt->getLast()->getFrame()->id() << endl;
                             if (pt->getIncoming())
                                 cout << "      i: C" << pt->getIncoming()->id() << endl;
@@ -804,7 +819,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
         // Frames =======================================================================================
         for (auto F : getTrajectory()->getFrameList())
         {
-            cout << (F->isKey() ? "  KF" : "  F") << F->id() << ((depth < 2) ? " -- " + std::to_string(F->getCaptureList().size()) + "C  " : "");
+            cout << (F->isEstimated() ? (F->isImportant() ? "  KF" : " EF") : "  F") << F->id() << ((depth < 2) ? " -- " + std::to_string(F->getCaptureList().size()) + "C  " : "");
             if (constr_by)
             {
                 cout << "  <-- ";
@@ -961,11 +976,6 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
     cout << endl;
 }
 
-FrameBasePtr Problem::closestKeyFrameToTimeStamp(const TimeStamp& _ts)
-{
-    return trajectory_ptr_->closestKeyFrameToTimeStamp(_ts);
-}
-
 bool Problem::check(int verbose_level)
 {
     using std::cout;
@@ -1045,7 +1055,7 @@ bool Problem::check(int verbose_level)
     {
         if (verbose_level > 0)
         {
-            cout << (F->isKey() ? "  KF" : "  F") << F->id() << " @ " << F.get() << endl;
+            cout << (F->isEstimated() ? (F->isImportant() ? "  KF" : " EF") : "  F") << F->id() << " @ " << F.get() << endl;
             cout << "    -> P @ " << F->getProblem().get() << endl;
             cout << "    -> T @ " << F->getTrajectory().get() << endl;
             for (auto sb : F->getStateBlockVec())

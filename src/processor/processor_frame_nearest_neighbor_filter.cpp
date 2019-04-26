@@ -82,7 +82,7 @@ bool ProcessorFrameNearestNeighborFilter::findCandidates(const CaptureBasePtr& /
       for (const FactorBasePtr& crt : fac_list)
       {
         // Are the two frames constrained one-another ?
-        if (crt->getFrameOther() == problem_ptr->getLastKeyFrame())
+        if (crt->getFrameOther() == problem_ptr->getLastImportantFrame())
         {
           // By this very processor ?
           if (crt->getProcessor() == shared_from_this())
@@ -127,7 +127,7 @@ bool ProcessorFrameNearestNeighborFilter::findCandidates(const CaptureBasePtr& /
         Eigen::Vector5s frame_covariance, current_covariance;
         if (!computeEllipse2D(key_it,
                               frame_covariance)) continue;
-        if (!computeEllipse2D(getProblem()->getLastKeyFrame(),
+        if (!computeEllipse2D(getProblem()->getLastImportantFrame(),
                               current_covariance)) continue;
         found_possible_candidate = ellipse2DIntersect(frame_covariance,
                                                       current_covariance);
@@ -160,7 +160,7 @@ bool ProcessorFrameNearestNeighborFilter::findCandidates(const CaptureBasePtr& /
         Eigen::Vector10s frame_covariance, current_covariance;
         if (!computeEllipsoid3D(key_it,
                                 frame_covariance)) continue;
-        if (!computeEllipsoid3D(getProblem()->getLastKeyFrame(),
+        if (!computeEllipsoid3D(getProblem()->getLastImportantFrame(),
                                 frame_covariance)) continue;
         found_possible_candidate = ellipsoid3DIntersect(frame_covariance,
                                                         current_covariance);
@@ -170,7 +170,7 @@ bool ProcessorFrameNearestNeighborFilter::findCandidates(const CaptureBasePtr& /
       case LoopclosureDistanceType::LC_MAHALANOBIS_DISTANCE:
       {
         found_possible_candidate = insideMahalanisDistance(key_it,
-                                             problem_ptr->getLastKeyFrame());
+                                             problem_ptr->getLastImportantFrame());
         break;
       }
 
@@ -496,7 +496,7 @@ Scalar ProcessorFrameNearestNeighborFilter::MahalanobisDistance(const FrameBaseP
 //##############################################################################
 bool ProcessorFrameNearestNeighborFilter::frameInsideBuffer(const FrameBasePtr& frame_ptr)
 {
-  FrameBasePtr keyframe = getProblem()->getLastKeyFrame();
+  FrameBasePtr keyframe = getProblem()->getLastImportantFrame();
   if ( (int)frame_ptr->id() < ( (int)keyframe->id() - params_NNF->buffer_size_ ))
     return false;
   else

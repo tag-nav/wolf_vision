@@ -25,7 +25,8 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
 
     protected:
         std::string frame_structure_;  // Defines the structure of the Frames in the Trajectory.
-        FrameBasePtr last_key_frame_ptr_; // keeps pointer to the last key frame
+        FrameBasePtr last_important_frame_ptr_; // keeps pointer to the last important frame
+        FrameBasePtr last_estimated_frame_ptr_; // keeps pointer to the last estimated frame
         
     public:
         TrajectoryBase(const std::string& _frame_sturcture);
@@ -37,18 +38,21 @@ class TrajectoryBase : public NodeBase, public std::enable_shared_from_this<Traj
         // Frames
         FrameBasePtr addFrame(FrameBasePtr _frame_ptr);
         FrameBasePtrList& getFrameList();
-        FrameBasePtr getLastFrame();
-        FrameBasePtr getLastKeyFrame();
-        FrameBasePtr findLastKeyFrame();
-        FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts);
-        void setLastKeyFrame(FrameBasePtr _key_frame_ptr);
+        const FrameBasePtrList& getFrameList() const;
+        FrameBasePtr getLastFrame() const;
+        FrameBasePtr getLastImportantFrame() const;
+        FrameBasePtr getLastEstimatedFrame() const;
+        FrameBasePtr closestImportantFrameToTimeStamp(const TimeStamp& _ts) const;
+        FrameBasePtr closestEstimatedFrameToTimeStamp(const TimeStamp& _ts) const;
         void sortFrame(FrameBasePtr _frm_ptr);
-        void moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place);
-        FrameBaseIter computeFrameOrder(FrameBasePtr _frame_ptr);
+        void updateLastFrames();
 
         // factors
         void getFactorList(FactorBasePtrList & _fac_list);
 
+    protected:
+        FrameBaseIter computeFrameOrder(FrameBasePtr _frame_ptr);
+        void moveFrame(FrameBasePtr _frm_ptr, FrameBaseIter _place);
 };
 
 inline FrameBasePtrList& TrajectoryBase::getFrameList()
@@ -56,19 +60,24 @@ inline FrameBasePtrList& TrajectoryBase::getFrameList()
     return frame_list_;
 }
 
-inline FrameBasePtr TrajectoryBase::getLastFrame()
+inline const FrameBasePtrList& TrajectoryBase::getFrameList() const
+{
+    return frame_list_;
+}
+
+inline FrameBasePtr TrajectoryBase::getLastFrame() const
 {
     return frame_list_.back();
 }
 
-inline FrameBasePtr TrajectoryBase::getLastKeyFrame()
+inline FrameBasePtr TrajectoryBase::getLastImportantFrame() const
 {
-    return last_key_frame_ptr_;
+    return last_important_frame_ptr_;
 }
 
-inline void TrajectoryBase::setLastKeyFrame(FrameBasePtr _key_frame_ptr)
+inline FrameBasePtr TrajectoryBase::getLastEstimatedFrame() const
 {
-    last_key_frame_ptr_ = _key_frame_ptr;
+    return last_estimated_frame_ptr_;
 }
 
 inline std::string TrajectoryBase::getFrameStructure() const

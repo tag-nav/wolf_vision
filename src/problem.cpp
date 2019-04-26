@@ -665,7 +665,7 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
     if ( ! prior_is_set_ )
     {
         // Create origin frame
-        FrameBasePtr origin_keyframe = emplaceFrame(ESTIMATED, _prior_state, _ts);
+        FrameBasePtr origin_keyframe = emplaceFrame(IMPORTANT, _prior_state, _ts);
 
         // create origin capture with the given state as data
         // Capture fix only takes 3D position and Quaternion orientation
@@ -792,7 +792,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
 //                            if (ptt)
 //                            {
 //                                if (ptt->getPrevOrigin())
-//                                    cout << "      p: C" << ptt->getPrevOrigin()->id() << " - " << (ptt->getPrevOrigin()->getFrame()->isKey() ? "  KF" : "  F")
+//                                    cout << "      p: C" << ptt->getPrevOrigin()->id() << " - " << (ptt->getPrevOrigin()->getFrame()->isEstimated() ? "  KF" : "  F")
 //                                    << ptt->getPrevOrigin()->getFrame()->id() << endl;
 //                            }
                             if (pt->getOrigin())
@@ -815,7 +815,7 @@ void Problem::print(int depth, bool constr_by, bool metric, bool state_blocks)
         // Frames =======================================================================================
         for (auto F : getTrajectory()->getFrameList())
         {
-            cout << (F->isEstimated() ? "  KF" : "  F") << F->id() << ((depth < 2) ? " -- " + std::to_string(F->getCaptureList().size()) + "C  " : "");
+            cout << (F->isEstimated() ? (F->isImportant() ? "  KF" : "  EF") : "  F") << F->id() << ((depth < 2) ? " -- " + std::to_string(F->getCaptureList().size()) + "C  " : "");
             if (constr_by)
             {
                 cout << "  <-- ";
