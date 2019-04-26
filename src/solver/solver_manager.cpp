@@ -1,6 +1,6 @@
 #include "base/solver/solver_manager.h"
-#include "base/trajectory_base.h"
-#include "base/map_base.h"
+#include "base/trajectory/trajectory_base.h"
+#include "base/map/map_base.h"
 #include "base/landmark/landmark_base.h"
 
 namespace wolf {
@@ -14,16 +14,16 @@ SolverManager::SolverManager(const ProblemPtr& _wolf_problem) :
 void SolverManager::update()
 {
     // REMOVE CONSTRAINTS
-    auto ctr_notification_it = wolf_problem_->getFactorNotificationMap().begin();
-    while ( ctr_notification_it != wolf_problem_->getFactorNotificationMap().end() )
+    auto fac_notification_it = wolf_problem_->getFactorNotificationMap().begin();
+    while ( fac_notification_it != wolf_problem_->getFactorNotificationMap().end() )
     {
-        if (ctr_notification_it->second == REMOVE)
+        if (fac_notification_it->second == REMOVE)
         {
-            removeFactor(ctr_notification_it->first);
-            ctr_notification_it = wolf_problem_->getFactorNotificationMap().erase(ctr_notification_it);
+            removeFactor(fac_notification_it->first);
+            fac_notification_it = wolf_problem_->getFactorNotificationMap().erase(fac_notification_it);
         }
         else
-            ctr_notification_it++;
+            fac_notification_it++;
     }
 
     // ADD/REMOVE STATE BLOCS
@@ -67,18 +67,21 @@ void SolverManager::update()
     }
 
     // ADD CONSTRAINTS
-    ctr_notification_it = wolf_problem_->getFactorNotificationMap().begin();
-    while (ctr_notification_it != wolf_problem_->getFactorNotificationMap().end())
+    fac_notification_it = wolf_problem_->getFactorNotificationMap().begin();
+    while (fac_notification_it != wolf_problem_->getFactorNotificationMap().end())
     {
         assert(wolf_problem_->getFactorNotificationMap().begin()->second == ADD && "unexpected factor notification value after all REMOVE have been processed, this should be ADD");
 
         addFactor(wolf_problem_->getFactorNotificationMap().begin()->first);
-        ctr_notification_it = wolf_problem_->getFactorNotificationMap().erase(ctr_notification_it);
+        fac_notification_it = wolf_problem_->getFactorNotificationMap().erase(fac_notification_it);
     }
 
     // UPDATE STATE BLOCKS (state, fix or local parameterization)
     for (auto state_ptr : wolf_problem_->getStateBlockPtrList())
     {
+        if (state_blocks_.find(state_ptr)==state_blocks_.end())
+            continue;
+
         assert(state_blocks_.find(state_ptr)!=state_blocks_.end() && "Updating the state of an unregistered StateBlock !");
 
         // state update
@@ -106,8 +109,8 @@ void SolverManager::update()
         }
     }
 
-    assert(wolf_problem_->getFactorNotificationMap().empty() && "wolf problem's factors notification map not empty after update");
-    assert(wolf_problem_->getStateBlockNotificationMap().empty() && "wolf problem's state_blocks notification map not empty after update");
+    //assert(wolf_problem_->getFactorNotificationMap().empty() && "wolf problem's factors notification map not empty after update");
+    //assert(wolf_problem_->getStateBlockNotificationMap().empty() && "wolf problem's state_blocks notification map not empty after update");
 }
 
 wolf::ProblemPtr SolverManager::getProblem()

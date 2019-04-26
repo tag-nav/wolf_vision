@@ -1,6 +1,6 @@
 #include "base/solver/solver_manager.h"
-#include "base/trajectory_base.h"
-#include "base/map_base.h"
+#include "base/trajectory/trajectory_base.h"
+#include "base/map/map_base.h"
 #include "base/landmark/landmark_base.h"
 
 namespace wolf {
@@ -21,15 +21,15 @@ void SolverManager::update()
     //std::cout << wolf_problem_->getFactorNotificationList().size() << " factor notifications" << std::endl;
 
 	// REMOVE CONSTRAINTS
-	auto ctr_notification_it = wolf_problem_->getFactorNotificationList().begin();
-	while ( ctr_notification_it != wolf_problem_->getFactorNotificationList().end() )
-		if (ctr_notification_it->notification_ == REMOVE)
+	auto fac_notification_it = wolf_problem_->getFactorNotificationList().begin();
+	while ( fac_notification_it != wolf_problem_->getFactorNotificationList().end() )
+		if (fac_notification_it->notification_ == REMOVE)
 		{
-			removeFactor(ctr_notification_it->factor_ptr_);
-			ctr_notification_it = wolf_problem_->getFactorNotificationList().erase(ctr_notification_it);
+			removeFactor(fac_notification_it->factor_ptr_);
+			fac_notification_it = wolf_problem_->getFactorNotificationList().erase(fac_notification_it);
 		}
 		else
-			ctr_notification_it++;
+			fac_notification_it++;
 
 	// REMOVE STATE BLOCKS
 	auto state_notification_it = wolf_problem_->getStateBlockNotificationList().begin();

@@ -2,8 +2,8 @@
 #define _WOLF_SOLVER_MANAGER_H_
 
 //wolf includes
-#include "base/wolf.h"
-#include "base/state_block.h"
+#include "base/common/wolf.h"
+#include "base/state_block/state_block.h"
 #include "base/factor/factor_base.h"
 
 namespace wolf {
@@ -76,9 +76,9 @@ protected:
 
   virtual std::string solveImpl(const ReportVerbosity report_level) = 0;
 
-  virtual void addFactor(const FactorBasePtr& ctr_ptr) = 0;
+  virtual void addFactor(const FactorBasePtr& fac_ptr) = 0;
 
-  virtual void removeFactor(const FactorBasePtr& ctr_ptr) = 0;
+  virtual void removeFactor(const FactorBasePtr& fac_ptr) = 0;
 
   virtual void addStateBlock(const StateBlockPtr& state_ptr) = 0;
 

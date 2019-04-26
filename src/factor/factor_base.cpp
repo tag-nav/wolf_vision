@@ -1,5 +1,5 @@
 #include "base/factor/factor_base.h"
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 #include "base/landmark/landmark_base.h"
 
 namespace wolf {
@@ -123,9 +123,9 @@ void FactorBase::setStatus(FactorStatus _status)
         std::cout << "factor not linked with 'top', only status changed" << std::endl;
     else if (_status != status_)
     {
-        if (_status == CTR_ACTIVE)
+        if (_status == FAC_ACTIVE)
             getProblem()->addFactor(shared_from_this());
-        else if (_status == CTR_INACTIVE)
+        else if (_status == FAC_INACTIVE)
             getProblem()->removeFactor(shared_from_this());
     }
     status_ = _status;

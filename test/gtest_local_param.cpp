@@ -6,13 +6,13 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/local_parametrization_quaternion.h"
-#include "base/local_parametrization_homogeneous.h"
-#include "base/rotations.h"
+#include "base/state_block/local_parametrization_quaternion.h"
+#include "base/state_block/local_parametrization_homogeneous.h"
+#include "base/math/rotations.h"
 
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 
 #include <iostream>
 

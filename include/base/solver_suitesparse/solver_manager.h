@@ -3,8 +3,8 @@
 
 //wolf includes
 #include "base/factor/factor_GPS_2D.h"
-#include "base/wolf.h"
-#include "base/state_block.h"
+#include "base/common/wolf.h"
+#include "base/state_block/state_block.h"
 #include "../state_point.h"
 #include "../state_complex_angle.h"
 #include "../state_theta.h"
@@ -32,9 +32,9 @@ class SolverManager
 
 		void update(const WolfProblemPtr _problem_ptr);
 
-		void addFactor(FactorBasePtr _corr_ptr);
+		void addFactor(FactorBasePtr _fac_ptr);
 
-		void removeFactor(const unsigned int& _corr_idx);
+		void removeFactor(const unsigned int& _fac_idx);
 
 		void addStateUnit(StateBlockPtr _st_ptr);
 
@@ -42,7 +42,7 @@ class SolverManager
 
 		void updateStateUnitStatus(StateBlockPtr _st_ptr);
 
-		ceres::CostFunction* createCostFunction(FactorBasePtr _corrPtr);
+		ceres::CostFunction* createCostFunction(FactorBasePtr _fac_ptr);
 };
 
 #endif

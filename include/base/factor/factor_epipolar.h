@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT_EPIPOLAR_H
-#define CONSTRAINT_EPIPOLAR_H
+#ifndef FACTOR_EPIPOLAR_H
+#define FACTOR_EPIPOLAR_H
 
 #include "base/factor/factor_base.h"
 
@@ -15,7 +15,7 @@ class FactorEpipolar : public FactorBase
                            const FeatureBasePtr& _feature_other_ptr,
                            const ProcessorBasePtr& _processor_ptr = nullptr,
                            bool _apply_loss_function = false,
-                           FactorStatus _status = CTR_ACTIVE);
+                           FactorStatus _status = FAC_ACTIVE);
 
         virtual ~FactorEpipolar() = default;
 
@@ -66,4 +66,4 @@ inline FactorBasePtr FactorEpipolar::create(const FeatureBasePtr& _feature_ptr, 
 
 } // namespace wolf
 
-#endif // CONSTRAINT_EPIPOLAR_H
+#endif // FACTOR_EPIPOLAR_H

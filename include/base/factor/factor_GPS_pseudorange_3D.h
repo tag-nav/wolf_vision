@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT_GPS_PSEUDORANGE_3D_H_
-#define CONSTRAINT_GPS_PSEUDORANGE_3D_H_
+#ifndef FACTOR_GPS_PSEUDORANGE_3D_H_
+#define FACTOR_GPS_PSEUDORANGE_3D_H_
 
 #define LIGHT_SPEED 299792458
 
@@ -38,7 +38,7 @@ class FactorGPSPseudorange3D: public FactorAutodiff<FactorGPSPseudorange3D, 1, 3
 =======
         FactorGPSPseudorange3D(FeatureBasePtr _ftr_ptr, const ProcessorBasePtr& _pr_ptr,
                                    bool _apply_loss_function = false, 
-                                   FactorStatus _status = CTR_ACTIVE) :
+                                   FactorStatus _status = FAC_ACTIVE) :
              FactorAutodiff<FactorGPSPseudorange3D, 1, 3, 4, 3, 1, 3, 4>("GPS PR 3D",
                                                                                  nullptr, nullptr, nullptr, nullptr, _pr_ptr, _apply_loss_function, _status,
                             _ftr_ptr->getFrame()->getP(), // position of the vehicle's frame with respect to map frame
@@ -149,4 +149,4 @@ inline bool FactorGPSPseudorange3D::operator ()(const T* const _vehicle_p, const
 
 } // namespace wolf
 
-#endif //CONSTRAINT_GPS_PSEUDORANGE_3D_H_
+#endif //FACTOR_GPS_PSEUDORANGE_3D_H_

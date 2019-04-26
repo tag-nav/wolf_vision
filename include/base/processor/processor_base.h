@@ -7,10 +7,10 @@ class SensorBase;
 }
 
 // Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
-#include "base/time_stamp.h"
-#include "base/frame_base.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
+#include "base/common/time_stamp.h"
+#include "base/frame/frame_base.h"
 
 // std
 #include <memory>
@@ -184,7 +184,7 @@ class ProcessorBase : public NodeBase, public std::enable_shared_from_this<Proce
 
         SensorBasePtr getSensor();
         const SensorBasePtr getSensor() const;
-        void setSensorPtr(SensorBasePtr _sen_ptr){sensor_ptr_ = _sen_ptr;}
+        void setSensor(SensorBasePtr _sen_ptr){sensor_ptr_ = _sen_ptr;}
 
         virtual bool isMotion();
 

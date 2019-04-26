@@ -5,11 +5,11 @@
  *      Author: jsola
  */
 
-#ifndef CONSTRAINT_ODOM_3D_H_
-#define CONSTRAINT_ODOM_3D_H_
+#ifndef FACTOR_ODOM_3D_H_
+#define FACTOR_ODOM_3D_H_
 
 #include "base/factor/factor_autodiff.h"
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 
 namespace wolf
 {
@@ -24,7 +24,7 @@ class FactorOdom3D : public FactorAutodiff<FactorOdom3D,6,3,4,3,4>
                          const FrameBasePtr& _frame_past_ptr,
                          const ProcessorBasePtr& _processor_ptr = nullptr,
                          bool _apply_loss_function = false,
-                         FactorStatus _status = CTR_ACTIVE);
+                         FactorStatus _status = FAC_ACTIVE);
 
         virtual ~FactorOdom3D() = default;
 
@@ -228,4 +228,4 @@ inline bool FactorOdom3D::operator ()(const T* const _p_current, const T* const 
 
 } /* namespace wolf */
 
-#endif /* CONSTRAINT_ODOM_3D_H_ */
+#endif /* FACTOR_ODOM_3D_H_ */

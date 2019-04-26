@@ -48,12 +48,12 @@ void SolverManager::update(const WolfProblemPtr _problem_ptr)
 		//std::cout << "state units removed!" << std::endl;
 
 		// ADD CONSTRAINTS
-		FactorBasePtrList ctr_list;
-		_problem_ptr->getTrajectory()->getFactorList(ctr_list);
-		//std::cout << "ctr_list.size() = " << ctr_list.size() << std::endl;
-		for(auto ctr_it = ctr_list.begin(); ctr_it!=ctr_list.end(); ctr_it++)
-			if ((*ctr_it)->getPendingStatus() == ADD_PENDING)
-				addFactor(*ctr_it);
+		FactorBasePtrList fac_list;
+		_problem_ptr->getTrajectory()->getFactorList(fac_list);
+		//std::cout << "fac_list.size() = " << fac_list.size() << std::endl;
+		for(auto fac_it = fac_list.begin(); fac_it!=fac_list.end(); fac_it++)
+			if ((*fac_it)->getPendingStatus() == ADD_PENDING)
+				addFactor(*fac_it);
 
 		//std::cout << "factors updated!" << std::endl;
 	}
@@ -152,7 +152,7 @@ ceres::CostFunction* SolverManager::createCostFunction(FactorBasePtr _corrPtr)
 
 	switch (_corrPtr->getFactorType())
 	{
-		case CTR_GPS_FIX_2D:
+		case FAC_GPS_FIX_2D:
 		{
 			FactorGPS2D* specific_ptr = (FactorGPS2D*)(_corrPtr);
 			return new ceres::AutoDiffCostFunction<FactorGPS2D,
@@ -169,7 +169,7 @@ ceres::CostFunction* SolverManager::createCostFunction(FactorBasePtr _corrPtr)
 													specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
-		case CTR_ODOM_2D_COMPLEX_ANGLE:
+		case FAC_ODOM_2D_COMPLEX_ANGLE:
 		{
 			FactorOdom2DComplexAngle* specific_ptr = (FactorOdom2DComplexAngle*)(_corrPtr);
 			return new ceres::AutoDiffCostFunction<FactorOdom2DComplexAngle,
@@ -186,7 +186,7 @@ ceres::CostFunction* SolverManager::createCostFunction(FactorBasePtr _corrPtr)
 													specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
-		case CTR_ODOM_2D:
+		case FAC_ODOM_2D:
 		{
 			FactorOdom2D* specific_ptr = (FactorOdom2D*)(_corrPtr);
 			return new ceres::AutoDiffCostFunction<FactorOdom2D,
@@ -203,7 +203,7 @@ ceres::CostFunction* SolverManager::createCostFunction(FactorBasePtr _corrPtr)
 													specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
-		case CTR_CORNER_2D:
+		case FAC_CORNER_2D:
 		{
 			FactorCorner2D* specific_ptr = (FactorCorner2D*)(_corrPtr);
 			return new ceres::AutoDiffCostFunction<FactorCorner2D,
@@ -220,7 +220,7 @@ ceres::CostFunction* SolverManager::createCostFunction(FactorBasePtr _corrPtr)
 													specific_ptr->block9Size>(specific_ptr);
 			break;
 		}
-		case CTR_IMU:
+		case FAC_IMU:
 		{
 			FactorIMU* specific_ptr = (FactorIMU*)(_corrPtr);
 			return new ceres::AutoDiffCostFunction<FactorIMU,

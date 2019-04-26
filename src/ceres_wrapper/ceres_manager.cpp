@@ -1,9 +1,9 @@
 #include "base/ceres_wrapper/ceres_manager.h"
 #include "base/ceres_wrapper/create_numeric_diff_cost_function.h"
-#include "base/trajectory_base.h"
-#include "base/map_base.h"
+#include "base/trajectory/trajectory_base.h"
+#include "base/map/map_base.h"
 #include "base/landmark/landmark_base.h"
-#include "base/make_unique.h"
+#include "base/utils/make_unique.h"
 
 namespace wolf {
 
@@ -36,8 +36,8 @@ CeresManager::CeresManager(const ProblemPtr& _wolf_problem,
 
 CeresManager::~CeresManager()
 {
-    while (!ctr_2_residual_idx_.empty())
-        removeFactor(ctr_2_residual_idx_.begin()->first);
+    while (!fac_2_residual_idx_.empty())
+        removeFactor(fac_2_residual_idx_.begin()->first);
 }
 
 std::string CeresManager::solveImpl(const ReportVerbosity report_level)
@@ -243,40 +243,40 @@ void CeresManager::computeCovariances(const StateBlockPtrList& st_list)
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
 }
 
-void CeresManager::addFactor(const FactorBasePtr& ctr_ptr)
+void CeresManager::addFactor(const FactorBasePtr& fac_ptr)
 {
-    assert(ctr_2_costfunction_.find(ctr_ptr) == ctr_2_costfunction_.end() && "adding a factor that is already in the ctr_2_costfunction_ map");
+    assert(fac_2_costfunction_.find(fac_ptr) == fac_2_costfunction_.end() && "adding a factor that is already in the fac_2_costfunction_ map");
 
-    auto cost_func_ptr = createCostFunction(ctr_ptr);
-    ctr_2_costfunction_[ctr_ptr] = cost_func_ptr;
+    auto cost_func_ptr = createCostFunction(fac_ptr);
+    fac_2_costfunction_[fac_ptr] = cost_func_ptr;
 
     std::vector<Scalar*> res_block_mem;
-    res_block_mem.reserve(ctr_ptr->getStateBlockPtrVector().size());
-    for (const StateBlockPtr& st : ctr_ptr->getStateBlockPtrVector())
+    res_block_mem.reserve(fac_ptr->getStateBlockPtrVector().size());
+    for (const StateBlockPtr& st : fac_ptr->getStateBlockPtrVector())
     {
         res_block_mem.emplace_back( getAssociatedMemBlockPtr(st) );
     }
 
-    auto loss_func_ptr = (ctr_ptr->getApplyLossFunction()) ? new ceres::CauchyLoss(0.5) : nullptr;
+    auto loss_func_ptr = (fac_ptr->getApplyLossFunction()) ? new ceres::CauchyLoss(0.5) : nullptr;
 
-    assert(ctr_2_residual_idx_.find(ctr_ptr) == ctr_2_residual_idx_.end() && "adding a factor that is already in the ctr_2_residual_idx_ map");
+    assert(fac_2_residual_idx_.find(fac_ptr) == fac_2_residual_idx_.end() && "adding a factor that is already in the fac_2_residual_idx_ map");
 
-    ctr_2_residual_idx_[ctr_ptr] = ceres_problem_->AddResidualBlock(cost_func_ptr.get(),
+    fac_2_residual_idx_[fac_ptr] = ceres_problem_->AddResidualBlock(cost_func_ptr.get(),
                                                                     loss_func_ptr,
                                                                     res_block_mem);
 
-    assert((unsigned int)(ceres_problem_->NumResidualBlocks()) == ctr_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
+    assert((unsigned int)(ceres_problem_->NumResidualBlocks()) == fac_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
-void CeresManager::removeFactor(const FactorBasePtr& _ctr_ptr)
+void CeresManager::removeFactor(const FactorBasePtr& _fac_ptr)
 {
-    assert(ctr_2_residual_idx_.find(_ctr_ptr) != ctr_2_residual_idx_.end() && "removing a factor that is not in the ctr_2_residual map");
+    assert(fac_2_residual_idx_.find(_fac_ptr) != fac_2_residual_idx_.end() && "removing a factor that is not in the fac_2_residual map");
 
-    ceres_problem_->RemoveResidualBlock(ctr_2_residual_idx_[_ctr_ptr]);
-    ctr_2_residual_idx_.erase(_ctr_ptr);
-    ctr_2_costfunction_.erase(_ctr_ptr);
+    ceres_problem_->RemoveResidualBlock(fac_2_residual_idx_[_fac_ptr]);
+    fac_2_residual_idx_.erase(_fac_ptr);
+    fac_2_costfunction_.erase(_fac_ptr);
 
-    assert((unsigned int)(ceres_problem_->NumResidualBlocks()) == ctr_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
+    assert((unsigned int)(ceres_problem_->NumResidualBlocks()) == fac_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
 }
 
 void CeresManager::addStateBlock(const StateBlockPtr& state_ptr)
@@ -327,7 +327,7 @@ void CeresManager::updateStateBlockLocalParametrization(const StateBlockPtr& sta
 
     // get all involved factors
     FactorBasePtrList involved_factors;
-    for (auto pair : ctr_2_costfunction_)
+    for (auto pair : fac_2_costfunction_)
         for (const StateBlockPtr& st : pair.first->getStateBlockPtrVector())
             if (st == state_ptr)
             {
@@ -337,8 +337,8 @@ void CeresManager::updateStateBlockLocalParametrization(const StateBlockPtr& sta
             }
 
     // Remove all involved factors (it does not remove any parameter block)
-    for (auto ctr : involved_factors)
-        removeFactor(ctr);
+    for (auto fac : involved_factors)
+        removeFactor(fac);
 
     // Remove state block (it removes all involved residual blocks but they just were removed)
     removeStateBlock(state_ptr);
@@ -347,8 +347,8 @@ void CeresManager::updateStateBlockLocalParametrization(const StateBlockPtr& sta
     addStateBlock(state_ptr);
 
     // Add all involved factors
-    for (auto ctr : involved_factors)
-        addFactor(ctr);
+    for (auto fac : involved_factors)
+        addFactor(fac);
 }
 
 bool CeresManager::hasConverged()
@@ -371,17 +371,17 @@ Scalar CeresManager::finalCost()
     return Scalar(summary_.final_cost);
 }
 
-ceres::CostFunctionPtr CeresManager::createCostFunction(const FactorBasePtr& _ctr_ptr)
+ceres::CostFunctionPtr CeresManager::createCostFunction(const FactorBasePtr& _fac_ptr)
 {
-    assert(_ctr_ptr != nullptr);
+    assert(_fac_ptr != nullptr);
 
     // analitic & autodiff jacobian
-    if (_ctr_ptr->getJacobianMethod() == JAC_ANALYTIC || _ctr_ptr->getJacobianMethod() == JAC_AUTO)
-        return std::make_shared<CostFunctionWrapper>(_ctr_ptr);
+    if (_fac_ptr->getJacobianMethod() == JAC_ANALYTIC || _fac_ptr->getJacobianMethod() == JAC_AUTO)
+        return std::make_shared<CostFunctionWrapper>(_fac_ptr);
 
     // numeric jacobian
-    else if (_ctr_ptr->getJacobianMethod() == JAC_NUMERIC)
-        return createNumericDiffCostFunction(_ctr_ptr);
+    else if (_fac_ptr->getJacobianMethod() == JAC_NUMERIC)
+        return createNumericDiffCostFunction(_fac_ptr);
 
     else
         throw std::invalid_argument( "Wrong Jacobian Method!" );
@@ -390,8 +390,8 @@ ceres::CostFunctionPtr CeresManager::createCostFunction(const FactorBasePtr& _ct
 void CeresManager::check()
 {
     // Check numbers
-    assert(ceres_problem_->NumResidualBlocks() == ctr_2_costfunction_.size());
-    assert(ceres_problem_->NumResidualBlocks() == ctr_2_residual_idx_.size());
+    assert(ceres_problem_->NumResidualBlocks() == fac_2_costfunction_.size());
+    assert(ceres_problem_->NumResidualBlocks() == fac_2_residual_idx_.size());
     assert(ceres_problem_->NumParameterBlocks() == state_blocks_.size());
 
     // Check parameter blocks
@@ -399,20 +399,20 @@ void CeresManager::check()
         assert(ceres_problem_->HasParameterBlock(state_block_pair.second.data()));
 
     // Check residual blocks
-    for (auto&& ctr_res_pair : ctr_2_residual_idx_)
+    for (auto&& fac_res_pair : fac_2_residual_idx_)
     {
         // costfunction - residual
-        assert(ctr_2_costfunction_.find(ctr_res_pair.first) != ctr_2_costfunction_.end());
-        assert(ctr_2_costfunction_[ctr_res_pair.first].get() == ceres_problem_->GetCostFunctionForResidualBlock(ctr_res_pair.second));
+        assert(fac_2_costfunction_.find(fac_res_pair.first) != fac_2_costfunction_.end());
+        assert(fac_2_costfunction_[fac_res_pair.first].get() == ceres_problem_->GetCostFunctionForResidualBlock(fac_res_pair.second));
 
         // factor - residual
-        assert(ctr_res_pair.first == static_cast<const CostFunctionWrapper*>(ceres_problem_->GetCostFunctionForResidualBlock(ctr_res_pair.second))->getFactor());
+        assert(fac_res_pair.first == static_cast<const CostFunctionWrapper*>(ceres_problem_->GetCostFunctionForResidualBlock(fac_res_pair.second))->getFactor());
 
         // parameter blocks - state blocks
         std::vector<Scalar*> param_blocks;
-        ceres_problem_->GetParameterBlocksForResidualBlock(ctr_res_pair.second, &param_blocks);
+        ceres_problem_->GetParameterBlocksForResidualBlock(fac_res_pair.second, &param_blocks);
         auto i = 0;
-        for (const StateBlockPtr& st : ctr_res_pair.first->getStateBlockPtrVector())
+        for (const StateBlockPtr& st : fac_res_pair.first->getStateBlockPtrVector())
         {
             assert(getAssociatedMemBlockPtr(st) == param_blocks[i]);
             i++;

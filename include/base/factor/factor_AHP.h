@@ -1,12 +1,12 @@
-#ifndef CONSTRAINT_AHP_H
-#define CONSTRAINT_AHP_H
+#ifndef FACTOR_AHP_H
+#define FACTOR_AHP_H
 
 //Wolf includes
 #include "base/factor/factor_autodiff.h"
 #include "base/landmark/landmark_AHP.h"
 #include "base/sensor/sensor_camera.h"
 //#include "base/feature/feature_point_image.h"
-#include "base/pinhole_tools.h"
+#include "base/math/pinhole_tools.h"
 
 #include <iomanip> //setprecision
 
@@ -29,7 +29,7 @@ class FactorAHP : public FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>
                       const LandmarkAHPPtr&   _landmark_ptr,
                       const ProcessorBasePtr& _processor_ptr = nullptr,
                       bool              _apply_loss_function = false,
-                      FactorStatus  _status = CTR_ACTIVE);
+                      FactorStatus  _status = FAC_ACTIVE);
 
         virtual ~FactorAHP() = default;
 
@@ -56,7 +56,7 @@ class FactorAHP : public FactorAutodiff<FactorAHP, 2, 3, 4, 3, 4, 4>
                                        const LandmarkAHPPtr&   _lmk_ahp_ptr,
                                        const ProcessorBasePtr& _processor_ptr = nullptr,
                                        bool             _apply_loss_function  = false,
-                                       FactorStatus _status               = CTR_ACTIVE);
+                                       FactorStatus _status               = FAC_ACTIVE);
 
 };
 
@@ -190,11 +190,11 @@ inline FactorAHPPtr FactorAHP::create(const FeatureBasePtr&   _ftr_ptr,
                                               FactorStatus _status)
 {
     // construct factor
-    FactorAHPPtr ctr_ahp = std::make_shared<FactorAHP>(_ftr_ptr, _lmk_ahp_ptr, _processor_ptr, _apply_loss_function, _status);
+    FactorAHPPtr fac_ahp = std::make_shared<FactorAHP>(_ftr_ptr, _lmk_ahp_ptr, _processor_ptr, _apply_loss_function, _status);
 
-    return ctr_ahp;
+    return fac_ahp;
 }
 
 } // namespace wolf
 
-#endif // CONSTRAINT_AHP_H
+#endif // FACTOR_AHP_H

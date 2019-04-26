@@ -5,14 +5,14 @@
  *      \author: AtDinesh
  */
 
-#ifndef CONSTRAINT_QUATERNION_ABSOLUTE_H_
-#define CONSTRAINT_QUATERNION_ABSOLUTE_H_
+#ifndef FACTOR_QUATERNION_ABSOLUTE_H_
+#define FACTOR_QUATERNION_ABSOLUTE_H_
 
 //Wolf includes
 #include "base/factor/factor_autodiff.h"
-#include "base/local_parametrization_quaternion.h"
-#include "base/frame_base.h"
-#include "base/rotations.h"
+#include "base/state_block/local_parametrization_quaternion.h"
+#include "base/frame/frame_base.h"
+#include "base/math/rotations.h"
 
 namespace wolf {
 
@@ -23,7 +23,7 @@ class FactorQuaternionAbsolute: public FactorAutodiff<FactorQuaternionAbsolute,3
 {
     public:
 
-        FactorQuaternionAbsolute(StateBlockPtr _sb_ptr, bool _apply_loss_function = false, FactorStatus _status = CTR_ACTIVE) :
+        FactorQuaternionAbsolute(StateBlockPtr _sb_ptr, bool _apply_loss_function = false, FactorStatus _status = FAC_ACTIVE) :
             FactorAutodiff<FactorQuaternionAbsolute,3,4>("QUATERNION ABS",
                     nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _sb_ptr)
         {

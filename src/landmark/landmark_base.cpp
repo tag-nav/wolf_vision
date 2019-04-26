@@ -1,8 +1,8 @@
 
 #include "base/landmark/landmark_base.h"
 #include "base/factor/factor_base.h"
-#include "base/map_base.h"
-#include "base/state_block.h"
+#include "base/map/map_base.h"
+#include "base/state_block/state_block.h"
 #include "base/yaml/yaml_conversion.h"
 
 namespace wolf {
@@ -94,11 +94,6 @@ void LandmarkBase::registerNewStateBlocks()
     }
 }
 
-Eigen::MatrixXs LandmarkBase::getCovariance() const
-{
-    return getProblem()->getLandmarkCovariance(shared_from_this());
-}
-
 bool LandmarkBase::getCovariance(Eigen::MatrixXs& _cov) const
 {
     return getProblem()->getLandmarkCovariance(shared_from_this(), _cov);
@@ -108,25 +103,21 @@ void LandmarkBase::removeStateBlocks()
 {
     for (unsigned int i = 0; i < state_block_vec_.size(); i++)
     {
-        auto sbp = getStateBlockPtr(i);
+        auto sbp = getStateBlock(i);
         if (sbp != nullptr)
         {
             if (getProblem() != nullptr)
             {
                 getProblem()->removeStateBlock(sbp);
             }
-            setStateBlockPtr(i, nullptr);
+            setStateBlock(i, nullptr);
         }
     }
 }
 
 Eigen::VectorXs LandmarkBase::getState() const
 {
-    SizeEigen size = 0;
-    for (StateBlockPtr sb : state_block_vec_)
-        if (sb)
-            size += sb->getSize();
-    Eigen::VectorXs state(size);
+    Eigen::VectorXs state;
 
     getState(state);
 
@@ -140,10 +131,9 @@ void LandmarkBase::getState(Eigen::VectorXs& _state) const
         if (sb)
             size += sb->getSize();
 
-    assert(_state.size() == size && "Wrong state vector size");
+    _state = Eigen::VectorXs(size);
 
     SizeEigen index = 0;
-
     for (StateBlockPtr sb : state_block_vec_)
         if (sb)
         {
@@ -170,11 +160,11 @@ YAML::Node LandmarkBase::saveToYaml() const
     return node;
 }
 
-FactorBasePtr LandmarkBase::addConstrainedBy(FactorBasePtr _ctr_ptr)
+FactorBasePtr LandmarkBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setLandmarkOtherPtr(shared_from_this());
-    return _ctr_ptr;
+    constrained_by_list_.push_back(_fac_ptr);
+    _fac_ptr->setLandmarkOther(shared_from_this());
+    return _fac_ptr;
 }
 
 } // namespace wolf

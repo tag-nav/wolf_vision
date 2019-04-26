@@ -1,8 +1,8 @@
 #include "base/sensor/sensor_camera.h"
 
-#include "base/pinhole_tools.h"
-#include "base/state_block.h"
-#include "base/state_quaternion.h"
+#include "base/math/pinhole_tools.h"
+#include "base/state_block/state_block.h"
+#include "base/state_block/state_quaternion.h"
 
 namespace wolf
 {

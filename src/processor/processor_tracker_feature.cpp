@@ -21,7 +21,7 @@ ProcessorTrackerFeature::~ProcessorTrackerFeature()
 {
 }
 
-unsigned int ProcessorTrackerFeature::processNew(const unsigned int& _max_new_features)
+unsigned int ProcessorTrackerFeature::processNew(const int& _max_new_features)
 {
     /* Rationale: A keyFrame will be created using the last Capture.
      * First, we work on the last Capture to detect new Features,
@@ -151,20 +151,9 @@ void ProcessorTrackerFeature::establishFactors()
         FeatureBasePtr feature_in_origin = pair_trkid_pair.second.first;
         FeatureBasePtr feature_in_last   = pair_trkid_pair.second.second;
 
-        auto ctr_ptr  = createFactor(feature_in_last, feature_in_origin);
-        feature_in_last  ->addFactor(ctr_ptr);
-        feature_in_origin->addConstrainedBy(ctr_ptr);
-
-        if (ctr_ptr != nullptr) // factor links
-        {
-            FrameBasePtr frm = ctr_ptr->getFrameOther();
-            if (frm)
-                frm->addConstrainedBy(ctr_ptr);
-            CaptureBasePtr cap = ctr_ptr->getCaptureOther();
-            if (cap)
-                cap->addConstrainedBy(ctr_ptr);
-        }
-
+        auto fac_ptr  = createFactor(feature_in_last, feature_in_origin);
+        feature_in_last  ->addFactor(fac_ptr);
+        feature_in_origin->addConstrainedBy(fac_ptr);
 
         WOLF_DEBUG( "Factor: track: " , feature_in_last->trackId(),
                     " origin: "           , feature_in_origin->id() ,

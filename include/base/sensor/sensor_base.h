@@ -9,9 +9,9 @@ class StateBlock;
 }
 
 //Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
-#include "base/time_stamp.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
+#include "base/common/time_stamp.h"
 
 //std includes
 
@@ -94,7 +94,7 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         virtual void setProblem(ProblemPtr _problem) final;
 
         HardwareBasePtr getHardware();
-        void setHardwarePtr(const HardwareBasePtr _hw_ptr);
+        void setHardware(const HardwareBasePtr _hw_ptr);
 
         ProcessorBasePtr addProcessor(ProcessorBasePtr _proc_ptr);
         ProcessorBasePtrList& getProcessorList();
@@ -108,8 +108,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         const std::vector<StateBlockPtr>& getStateBlockVec() const;
         std::vector<StateBlockPtr>& getStateBlockVec();
         StateBlockPtr getStateBlockPtrStatic(unsigned int _i) const;
-        StateBlockPtr getStateBlockPtr(unsigned int _i);
-        StateBlockPtr getStateBlockPtr(unsigned int _i, const TimeStamp& _ts);
+        StateBlockPtr getStateBlock(unsigned int _i);
+        StateBlockPtr getStateBlock(unsigned int _i, const TimeStamp& _ts);
         void setStateBlockPtrStatic(unsigned int _i, const StateBlockPtr _sb_ptr);
         void resizeStateBlockVec(unsigned int _size);
 
@@ -118,15 +118,15 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
         bool isStateBlockDynamic(unsigned int _i, const TimeStamp& _ts);
         bool isStateBlockDynamic(unsigned int _i);
 
-        StateBlockPtr getPPtr(const TimeStamp _ts);
-        StateBlockPtr getOPtr(const TimeStamp _ts);
-        StateBlockPtr getIntrinsicPtr(const TimeStamp _ts);
+        StateBlockPtr getP(const TimeStamp _ts);
+        StateBlockPtr getO(const TimeStamp _ts);
+        StateBlockPtr getIntrinsic(const TimeStamp _ts);
         StateBlockPtr getP() ;
         StateBlockPtr getO();
         StateBlockPtr getIntrinsic();
-        void setPPtr(const StateBlockPtr _p_ptr);
-        void setOPtr(const StateBlockPtr _o_ptr);
-        void setIntrinsicPtr(const StateBlockPtr _intr_ptr);
+        void setP(const StateBlockPtr _p_ptr);
+        void setO(const StateBlockPtr _o_ptr);
+        void setIntrinsic(const StateBlockPtr _intr_ptr);
         void removeStateBlocks();
 
         void fix();
@@ -190,8 +190,8 @@ class SensorBase : public NodeBase, public std::enable_shared_from_this<SensorBa
 
 }
 
-#include "base/problem.h"
-#include "base/hardware_base.h"
+#include "base/problem/problem.h"
+#include "base/hardware/hardware_base.h"
 #include "base/capture/capture_base.h"
 #include "base/processor/processor_base.h"
 
@@ -263,22 +263,22 @@ inline HardwareBasePtr SensorBase::getHardware()
     return hardware_ptr_.lock();
 }
 
-inline void SensorBase::setPPtr(const StateBlockPtr _p_ptr)
+inline void SensorBase::setP(const StateBlockPtr _p_ptr)
 {
     setStateBlockPtrStatic(0, _p_ptr);
 }
 
-inline void SensorBase::setOPtr(const StateBlockPtr _o_ptr)
+inline void SensorBase::setO(const StateBlockPtr _o_ptr)
 {
     setStateBlockPtrStatic(1, _o_ptr);
 }
 
-inline void SensorBase::setIntrinsicPtr(const StateBlockPtr _intr_ptr)
+inline void SensorBase::setIntrinsic(const StateBlockPtr _intr_ptr)
 {
     setStateBlockPtrStatic(2, _intr_ptr);
 }
 
-inline void SensorBase::setHardwarePtr(const HardwareBasePtr _hw_ptr)
+inline void SensorBase::setHardware(const HardwareBasePtr _hw_ptr)
 {
     hardware_ptr_ = _hw_ptr;
 }

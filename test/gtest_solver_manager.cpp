@@ -6,16 +6,16 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/problem.h"
+#include "base/problem/problem.h"
 #include "base/sensor/sensor_base.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 #include "base/capture/capture_void.h"
 #include "base/factor/factor_pose_2D.h"
 #include "base/solver/solver_manager.h"
-#include "base/local_parametrization_base.h"
-#include "base/local_parametrization_angle.h"
+#include "base/state_block/local_parametrization_base.h"
+#include "base/state_block/local_parametrization_angle.h"
 
 #include <iostream>
 
@@ -45,9 +45,9 @@ class SolverManagerWrapper : public SolverManager
             return state_block_fixed_.at(st);
         };
 
-        bool isFactorRegistered(const FactorBasePtr& ctr_ptr) const
+        bool isFactorRegistered(const FactorBasePtr& fac_ptr) const
         {
-            return std::find(factors_.begin(), factors_.end(), ctr_ptr) != factors_.end();
+            return std::find(factors_.begin(), factors_.end(), fac_ptr) != factors_.end();
         };
 
         bool hasThisLocalParametrization(const StateBlockPtr& st, const LocalParametrizationBasePtr& local_param) const
@@ -74,13 +74,13 @@ class SolverManagerWrapper : public SolverManager
     protected:
 
         virtual std::string solveImpl(const ReportVerbosity report_level){ return std::string("");};
-        virtual void addFactor(const FactorBasePtr& ctr_ptr)
+        virtual void addFactor(const FactorBasePtr& fac_ptr)
         {
-            factors_.push_back(ctr_ptr);
+            factors_.push_back(fac_ptr);
         };
-        virtual void removeFactor(const FactorBasePtr& ctr_ptr)
+        virtual void removeFactor(const FactorBasePtr& fac_ptr)
         {
-            factors_.remove(ctr_ptr);
+            factors_.remove(fac_ptr);
         };
         virtual void addStateBlock(const StateBlockPtr& state_ptr)
         {
@@ -263,7 +263,7 @@ TEST(SolverManager, AddUpdateLocalParamStateBlock)
 
     // Local param
     LocalParametrizationBasePtr local_ptr = std::make_shared<LocalParametrizationAngle>();
-    sb_ptr->setLocalParametrizationPtr(local_ptr);
+    sb_ptr->setLocalParametrization(local_ptr);
 
     // Fix state block
     sb_ptr->fix();
@@ -298,7 +298,7 @@ TEST(SolverManager, AddLocalParamRemoveLocalParamStateBlock)
 
     // Local param
     LocalParametrizationBasePtr local_ptr = std::make_shared<LocalParametrizationAngle>();
-    sb_ptr->setLocalParametrizationPtr(local_ptr);
+    sb_ptr->setLocalParametrization(local_ptr);
 
     // check flags
     ASSERT_FALSE(sb_ptr->stateUpdated());

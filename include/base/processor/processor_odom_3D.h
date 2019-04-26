@@ -12,7 +12,7 @@
 #include "base/sensor/sensor_odom_3D.h"
 #include "base/capture/capture_odom_3D.h"
 #include "base/factor/factor_odom_3D.h"
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 #include <cmath>
 
 namespace wolf {

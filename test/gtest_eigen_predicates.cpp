@@ -1,6 +1,6 @@
 #include "utils_gtest.h"
 
-#include "base/eigen_predicates.h"
+#include "base/utils/eigen_predicates.h"
 
 TEST(TestEigenPredicates, TestEigenDynPredZero)
 {

@@ -1,9 +1,9 @@
-#ifndef CONSTRAINT_ODOM_2D_THETA_H_
-#define CONSTRAINT_ODOM_2D_THETA_H_
+#ifndef FACTOR_ODOM_2D_THETA_H_
+#define FACTOR_ODOM_2D_THETA_H_
 
 //Wolf includes
 #include "base/factor/factor_autodiff.h"
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 
 //#include "ceres/jet.h"
 
@@ -18,7 +18,7 @@ class FactorOdom2D : public FactorAutodiff<FactorOdom2D, 3, 2, 1, 2, 1>
         FactorOdom2D(const FeatureBasePtr& _ftr_ptr,
                          const FrameBasePtr& _frame_other_ptr,
                          const ProcessorBasePtr& _processor_ptr = nullptr,
-                         bool _apply_loss_function = false, FactorStatus _status = CTR_ACTIVE) :
+                         bool _apply_loss_function = false, FactorStatus _status = FAC_ACTIVE) :
              FactorAutodiff<FactorOdom2D, 3, 2, 1, 2, 1>("ODOM 2D",
                                                                  _frame_other_ptr, nullptr, nullptr, nullptr,
                                                                  _processor_ptr,

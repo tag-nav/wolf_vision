@@ -8,8 +8,8 @@ class FactorBase;
 }
 
 //Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
 
 //std includes
 
@@ -83,17 +83,17 @@ class FeatureBase : public NodeBase, public std::enable_shared_from_this<Feature
         FrameBasePtr getFrame() const;
 
         CaptureBasePtr getCapture() const;
-        void setCapturePtr(CaptureBasePtr _cap_ptr){capture_ptr_ = _cap_ptr;}
+        void setCapture(CaptureBasePtr _cap_ptr){capture_ptr_ = _cap_ptr;}
 
         FactorBasePtr addFactor(FactorBasePtr _co_ptr);
         FactorBasePtrList& getFactorList();
 
-        virtual FactorBasePtr addConstrainedBy(FactorBasePtr _ctr_ptr);
+        virtual FactorBasePtr addConstrainedBy(FactorBasePtr _fac_ptr);
         unsigned int getHits() const;
         FactorBasePtrList& getConstrainedByList();
 
         // all factors
-        void getFactorList(FactorBasePtrList & _ctr_list);
+        void getFactorList(FactorBasePtrList & _fac_list);
 
     private:
         Eigen::MatrixXs computeSqrtUpper(const Eigen::MatrixXs& _M) const;

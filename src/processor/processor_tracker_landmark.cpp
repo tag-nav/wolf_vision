@@ -6,7 +6,7 @@
  */
 
 #include "base/processor/processor_tracker_landmark.h"
-#include "base/map_base.h"
+#include "base/map/map_base.h"
 
 #include <utility>
 
@@ -70,7 +70,7 @@ unsigned int ProcessorTrackerLandmark::processKnown()
     return n;
 }
 
-unsigned int ProcessorTrackerLandmark::processNew(const unsigned int& _max_features)
+unsigned int ProcessorTrackerLandmark::processNew(const int& _max_features)
 {
     /* Rationale: A keyFrame will be created using the last Capture.
      *
@@ -149,18 +149,12 @@ void ProcessorTrackerLandmark::establishFactors()
     for (auto last_feature : last_ptr_->getFeatureList())
     {
         auto lmk = matches_landmark_from_last_[last_feature]->landmark_ptr_;
-        FactorBasePtr ctr_ptr = createFactor(last_feature,
+        FactorBasePtr fac_ptr = createFactor(last_feature,
                                                      lmk);
-        if (ctr_ptr != nullptr) // factor links
+        if (fac_ptr != nullptr) // factor links
         {
-            last_feature->addFactor(ctr_ptr);
-            lmk->addConstrainedBy(ctr_ptr);
-            FrameBasePtr frm = ctr_ptr->getFrameOther();
-            if (frm)
-                frm->addConstrainedBy(ctr_ptr);
-            CaptureBasePtr cap = ctr_ptr->getCaptureOther();
-            if (cap)
-                cap->addConstrainedBy(ctr_ptr);
+            last_feature->addFactor(fac_ptr);
+            lmk->addConstrainedBy(fac_ptr);
         }
     }
 }

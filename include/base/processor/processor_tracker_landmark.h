@@ -129,18 +129,19 @@ class ProcessorTrackerLandmark : public ProcessorTracker
         /** \brief Process new Features
          *
          */
-        unsigned int processNew(const unsigned int& _max_features);
+        unsigned int processNew(const int& _max_features);
 
-        /** \brief Detect new Features in last Capture
-         * \param _max_features The maximum number of features to detect.
+        /** \brief Detect new Features
+         * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
+         * \param _features_last_out The list of detected Features.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Landmarks in the system.
          *
-         * The function sets the member new_features_list_, the list of newly detected features
-         * in last_ptr_ to be used for landmark initialization.
+         * The function is called in ProcessorTrackerLandmark::processNew() to set the member new_features_last_,
+         * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out) = 0;
+        virtual unsigned int detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_incoming_out) = 0;
 
         /** \brief Creates a landmark for each of new_features_last_
          **/

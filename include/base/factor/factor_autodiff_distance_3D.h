@@ -5,8 +5,8 @@
  *      \author: jsola
  */
 
-#ifndef CONSTRAINT_AUTODIFF_DISTANCE_3D_H_
-#define CONSTRAINT_AUTODIFF_DISTANCE_3D_H_
+#ifndef FACTOR_AUTODIFF_DISTANCE_3D_H_
+#define FACTOR_AUTODIFF_DISTANCE_3D_H_
 
 #include "base/factor/factor_autodiff.h"
 
@@ -19,30 +19,30 @@ class FactorAutodiffDistance3D : public FactorAutodiff<FactorAutodiffDistance3D,
 {
     public:
         FactorAutodiffDistance3D(const FeatureBasePtr&   _feat,
-                                     const FrameBasePtr&     _frm_other,
-                                     const ProcessorBasePtr& _processor_ptr,
-                                     bool                    _apply_loss_function,
-                                     FactorStatus        _status) :
-                                         FactorAutodiff("DISTANCE 3D",
-                                                            _frm_other,
-                                                            nullptr,
-                                                            nullptr,
-                                                            nullptr,
-                                                            _processor_ptr,
-                                                            _apply_loss_function,
-                                                            _status,
-                                                            _feat->getFrame()->getP(),
-                                                            _frm_other->getP())
+                                 const FrameBasePtr&     _frm_other,
+                                 const ProcessorBasePtr& _processor_ptr,
+                                 bool                    _apply_loss_function,
+                                 FactorStatus            _status) :
+            FactorAutodiff("DISTANCE 3D",
+                            _frm_other,
+                            nullptr,
+                            nullptr,
+                            nullptr,
+                            _processor_ptr,
+                            _apply_loss_function,
+                            _status,
+                            _feat->getFrame()->getP(),
+                            _frm_other->getP())
         {
-            setFeaturePtr(_feat);
+            setFeature(_feat);
         }
 
         virtual ~FactorAutodiffDistance3D() { /* nothing */ }
 
         template<typename T>
         bool operator () (const T* const _pos1,
-                                  const T* const _pos2,
-                                  T* _residual) const
+                          const T* const _pos2,
+                          T* _residual) const
         {
             using namespace Eigen;
 
@@ -67,4 +67,4 @@ class FactorAutodiffDistance3D : public FactorAutodiff<FactorAutodiffDistance3D,
 
 } /* namespace wolf */
 
-#endif /* CONSTRAINT_AUTODIFF_DISTANCE_3D_H_ */
+#endif /* FACTOR_AUTODIFF_DISTANCE_3D_H_ */

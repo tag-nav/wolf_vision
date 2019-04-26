@@ -5,7 +5,7 @@
 #include "base/capture/capture_wheel_joint_position.h"
 #include "base/capture/capture_velocity.h"
 
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 #include "base/factor/factor_odom_2D.h"
 #include "base/feature/feature_diff_drive.h"
 
@@ -212,14 +212,14 @@ CaptureMotionPtr ProcessorDiffDrive::createCapture(const TimeStamp& _ts,
 FactorBasePtr ProcessorDiffDrive::emplaceFactor(FeatureBasePtr _feature,
                                                         CaptureBasePtr _capture_origin)
 {
-  FactorOdom2DPtr ctr_odom =
+  FactorOdom2DPtr fac_odom =
       std::make_shared<FactorOdom2D>(_feature, _capture_origin->getFrame(),
                                          shared_from_this());
 
-  _feature->addFactor(ctr_odom);
-  _capture_origin->getFrame()->addConstrainedBy(ctr_odom);
+  _feature->addFactor(fac_odom);
+  _capture_origin->getFrame()->addConstrainedBy(fac_odom);
 
-  return ctr_odom;
+  return fac_odom;
 }
 
 FeatureBasePtr ProcessorDiffDrive::createFeature(CaptureMotionPtr _capture_motion)

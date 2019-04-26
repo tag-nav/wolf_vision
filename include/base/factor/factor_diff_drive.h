@@ -5,12 +5,12 @@
  *  \author: Jeremie Deray
  */
 
-#ifndef WOLF_CONSTRAINT_DIFF_DRIVE_H_
-#define WOLF_CONSTRAINT_DIFF_DRIVE_H_
+#ifndef WOLF_FACTOR_DIFF_DRIVE_H_
+#define WOLF_FACTOR_DIFF_DRIVE_H_
 
 //Wolf includes
 #include "base/factor/factor_autodiff.h"
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 #include "base/feature/feature_diff_drive.h"
 #include "base/capture/capture_wheel_joint_position.h"
 
@@ -43,7 +43,7 @@ public:
                       const CaptureWheelJointPositionPtr& _capture_origin_ptr,
                       const ProcessorBasePtr& _processor_ptr = nullptr,
                       const bool _apply_loss_function = false,
-                      const FactorStatus _status = CTR_ACTIVE) :
+                      const FactorStatus _status = FAC_ACTIVE) :
     Base("DIFF DRIVE", _capture_origin_ptr->getFrame(), _capture_origin_ptr,
          nullptr, nullptr, _processor_ptr,
          _apply_loss_function, _status,
@@ -136,4 +136,4 @@ FactorDiffDrive::operator ()(const T* const _p1, const T* const _o1, const T* co
 
 } // namespace wolf
 
-#endif /* WOLF_CONSTRAINT_DIFF_DRIVE_H_ */
+#endif /* WOLF_FACTOR_DIFF_DRIVE_H_ */

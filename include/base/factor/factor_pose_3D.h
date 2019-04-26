@@ -1,11 +1,11 @@
 
-#ifndef CONSTRAINT_POSE_3D_H_
-#define CONSTRAINT_POSE_3D_H_
+#ifndef FACTOR_POSE_3D_H_
+#define FACTOR_POSE_3D_H_
 
 //Wolf includes
 #include "base/factor/factor_autodiff.h"
-#include "base/frame_base.h"
-#include "base/rotations.h"
+#include "base/frame/frame_base.h"
+#include "base/math/rotations.h"
 
 namespace wolf {
 
@@ -16,7 +16,7 @@ class FactorPose3D: public FactorAutodiff<FactorPose3D,6,3,4>
 {
     public:
 
-        FactorPose3D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, FactorStatus _status = CTR_ACTIVE) :
+        FactorPose3D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, FactorStatus _status = FAC_ACTIVE) :
             FactorAutodiff<FactorPose3D,6,3,4>("POSE 3D", nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _ftr_ptr->getFrame()->getP(), _ftr_ptr->getFrame()->getO())
         {
             //

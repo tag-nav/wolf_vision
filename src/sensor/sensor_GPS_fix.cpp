@@ -1,6 +1,6 @@
 #include "base/sensor/sensor_GPS_fix.h"
-#include "base/state_block.h"
-#include "base/state_quaternion.h"
+#include "base/state_block/state_block.h"
+#include "base/state_block/state_quaternion.h"
 
 namespace wolf {
 

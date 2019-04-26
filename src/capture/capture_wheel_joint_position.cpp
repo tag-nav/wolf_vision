@@ -1,6 +1,6 @@
 #include "base/capture/capture_wheel_joint_position.h"
 #include "base/sensor/sensor_diff_drive.h"
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 
 namespace wolf {
 

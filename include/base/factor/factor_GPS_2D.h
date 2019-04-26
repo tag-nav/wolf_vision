@@ -1,11 +1,11 @@
 
-#ifndef CONSTRAINT_GPS_2D_H_
-#define CONSTRAINT_GPS_2D_H_
+#ifndef FACTOR_GPS_2D_H_
+#define FACTOR_GPS_2D_H_
 
 //Wolf includes
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 #include "base/factor/factor_autodiff.h"
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 
 namespace wolf {
     
@@ -15,7 +15,7 @@ class FactorGPS2D : public FactorAutodiff<FactorGPS2D, 2, 2>
 {
     public:
 
-        FactorGPS2D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, FactorStatus _status = CTR_ACTIVE) :
+        FactorGPS2D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, FactorStatus _status = FAC_ACTIVE) :
             FactorAutodiff<FactorGPS2D, 2, 2>("GPS 2D", nullptr, nullptr, nullptr, nullptr, nullptr, _apply_loss_function, _status, _ftr_ptr->getFrame()->getP())
         {
             //

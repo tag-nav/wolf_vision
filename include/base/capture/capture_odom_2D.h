@@ -10,7 +10,7 @@
 
 #include "base/capture/capture_motion.h"
 
-#include "base/rotations.h"
+#include "base/math/rotations.h"
 
 namespace wolf
 {

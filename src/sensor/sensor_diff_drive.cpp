@@ -1,7 +1,7 @@
 #include "base/sensor/sensor_diff_drive.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 #include "base/capture/capture_motion.h"
-#include "base/eigen_assert.h"
+#include "base/utils/eigen_assert.h"
 
 namespace wolf {
 

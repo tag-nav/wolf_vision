@@ -2,8 +2,8 @@
 #define SOLVER_MANAGER_H_
 
 //wolf includes
-#include "base/wolf.h"
-#include "base/state_block.h"
+#include "base/common/wolf.h"
+#include "base/state_block/state_block.h"
 #include "base/factor/factor_base.h"
 
 namespace wolf {
@@ -48,9 +48,9 @@ class SolverManager
 
 	private:
 
-		virtual void addFactor(FactorBasePtr _ctr_ptr) = 0;
+		virtual void addFactor(FactorBasePtr _fac_ptr) = 0;
 
-		virtual void removeFactor(FactorBasePtr _ctr_ptr) = 0;
+		virtual void removeFactor(FactorBasePtr _fac_ptr) = 0;
 
 		virtual void addStateBlock(StateBlockPtr _st_ptr) = 0;
 

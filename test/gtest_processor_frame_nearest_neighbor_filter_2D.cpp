@@ -7,7 +7,7 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
 #include "base/sensor/sensor_odom_2D.h"
 #include "base/processor/processor_frame_nearest_neighbor_filter.h"
@@ -148,7 +148,7 @@ TEST(ProcessorFrameNearestNeighborFilter, PointInEllipseRotated)
                                                         1.2,
                                                         sensor_ptr);
   // Make 3rd frame last Keyframe
-  problem->getTrajectory()->setLastKeyFramePtr(F3);
+  problem->getTrajectory()->setLastKeyFrame(F3);
 
   // trigger search for loopclosure
   processor_ptr_point2d->process(incomming_dummy);
@@ -181,7 +181,7 @@ TEST(ProcessorFrameNearestNeighborFilter, EllipseEllipseRotatedCrosscovariance)
                                position_covariance_matrix);
 
   // Make 3rd frame last Keyframe
-  problem->getTrajectory()->setLastKeyFramePtr(F3);
+  problem->getTrajectory()->setLastKeyFrame(F3);
 
   // trigger search for loopclosure
   processor_ptr_ellipse2d->process(incomming_dummy);
@@ -193,7 +193,7 @@ TEST(ProcessorFrameNearestNeighborFilter, EllipseEllipseRotatedCrosscovariance)
   ASSERT_EQ(testloops[1]->id(), (unsigned int) 2);
 
   // Make 4th frame last Keyframe
-  problem->getTrajectory()->setLastKeyFramePtr(F4);
+  problem->getTrajectory()->setLastKeyFrame(F4);
 
   // trigger search for loopclosure again
   processor_ptr_ellipse2d->process(incomming_dummy);

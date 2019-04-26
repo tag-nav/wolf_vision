@@ -8,7 +8,7 @@
 #ifndef TRUNK_SRC_SOLVER_COST_FUNCTION_BASE_H_
 #define TRUNK_SRC_SOLVER_COST_FUNCTION_BASE_H_
 
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 #include <Eigen/StdVector>
 
 class CostFunctionBase

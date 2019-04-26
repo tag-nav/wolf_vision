@@ -1,11 +1,11 @@
 
-#ifndef CONSTRAINT_POSE_2D_H_
-#define CONSTRAINT_POSE_2D_H_
+#ifndef FACTOR_POSE_2D_H_
+#define FACTOR_POSE_2D_H_
 
 //Wolf includes
 #include "base/factor/factor_autodiff.h"
-#include "base/frame_base.h"
-#include "base/rotations.h"
+#include "base/frame/frame_base.h"
+#include "base/math/rotations.h"
 
 //#include "ceres/jet.h"
 
@@ -17,7 +17,7 @@ WOLF_PTR_TYPEDEFS(FactorPose2D);
 class FactorPose2D: public FactorAutodiff<FactorPose2D,3,2,1>
 {
     public:
-        FactorPose2D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, FactorStatus _status = CTR_ACTIVE) :
+        FactorPose2D(FeatureBasePtr _ftr_ptr, bool _apply_loss_function = false, FactorStatus _status = FAC_ACTIVE) :
                 FactorAutodiff<FactorPose2D, 3, 2, 1>("POSE 2D", nullptr, nullptr, nullptr, nullptr, nullptr,_apply_loss_function, _status, _ftr_ptr->getFrame()->getP(), _ftr_ptr->getFrame()->getO())
         {
 //            std::cout << "created FactorPose2D " << std::endl;

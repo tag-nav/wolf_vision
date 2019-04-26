@@ -5,12 +5,12 @@
  *      \author: jsola
  */
 
-#include "base/wolf.h"
-#include "base/problem.h"
-#include "base/map_base.h"
+#include "base/common/wolf.h"
+#include "base/problem/problem.h"
+#include "base/map/map_base.h"
 #include "base/landmark/landmark_polyline_2D.h"
 #include "base/landmark/landmark_AHP.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 #include "base/yaml/yaml_conversion.h"
 
 #include <iostream>
@@ -32,7 +32,7 @@ void print(MapBase& _map)
             std::cout << "\nFirst def: " << poly_ptr->isFirstDefined();
             std::cout << "\nLast  def: " << poly_ptr->isLastDefined();
             for (int idx = poly_ptr->getFirstId(); idx <= poly_ptr->getLastId(); idx++)
-                std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlockPtr(idx)->getState().transpose();
+                std::cout << "\n  point: " << idx << ": " << poly_ptr->getPointStateBlock(idx)->getState().transpose();
             break;
         }
         else if (lmk_ptr->getType() == "AHP")

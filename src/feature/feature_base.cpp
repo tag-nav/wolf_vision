@@ -67,12 +67,12 @@ void FeatureBase::remove()
 FactorBasePtr FeatureBase::addFactor(FactorBasePtr _co_ptr)
 {
     factor_list_.push_back(_co_ptr);
-    _co_ptr->setFeaturePtr(shared_from_this());
+    _co_ptr->setFeature(shared_from_this());
     _co_ptr->setProblem(getProblem());
     // add factor to be added in solver
     if (getProblem() != nullptr)
     {
-        if (_co_ptr->getStatus() == CTR_ACTIVE)
+        if (_co_ptr->getStatus() == FAC_ACTIVE)
             getProblem()->addFactor(_co_ptr);
     }
     else
@@ -85,11 +85,11 @@ FrameBasePtr FeatureBase::getFrame() const
     return capture_ptr_.lock()->getFrame();
 }
 
-FactorBasePtr FeatureBase::addConstrainedBy(FactorBasePtr _ctr_ptr)
+FactorBasePtr FeatureBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
-    constrained_by_list_.push_back(_ctr_ptr);
-    _ctr_ptr->setFeatureOtherPtr(shared_from_this());
-    return _ctr_ptr;
+    constrained_by_list_.push_back(_fac_ptr);
+    _fac_ptr->setFeatureOther(shared_from_this());
+    return _fac_ptr;
 }
 
 FactorBasePtrList& FeatureBase::getFactorList()
@@ -97,9 +97,9 @@ FactorBasePtrList& FeatureBase::getFactorList()
     return factor_list_;
 }
 
-void FeatureBase::getFactorList(FactorBasePtrList & _ctr_list)
+void FeatureBase::getFactorList(FactorBasePtrList & _fac_list)
 {
-    _ctr_list.insert(_ctr_list.end(), factor_list_.begin(), factor_list_.end());
+    _fac_list.insert(_fac_list.end(), factor_list_.begin(), factor_list_.end());
 }
 
 void FeatureBase::setMeasurementCovariance(const Eigen::MatrixXs & _meas_cov)

@@ -14,7 +14,7 @@
 #include "base/feature/feature_corner_2D.h"
 #include "base/landmark/landmark_corner_2D.h"
 #include "base/factor/factor_corner_2D.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 #include "base/association/association_tree.h"
 #include "base/processor/processor_tracker_feature.h"
 
@@ -106,16 +106,16 @@ class ProcessorTrackerFeatureCorner : public ProcessorTrackerFeature
         virtual bool voteForKeyFrame();
 
         /** \brief Detect new Features
-         * \param _capture_ptr Capture for feature detection. Defaults to incoming_ptr_.
-         * \param _new_features_list The list of detected Features. Defaults to member new_features_list_.
+         * \param _max_features maximum number of features detected (-1: unlimited. 0: none)
+         * \param _features_last_out The list of detected Features.
          * \return The number of detected Features.
          *
          * This function detects Features that do not correspond to known Features/Landmarks in the system.
          *
-         * The function sets the member new_features_list_, the list of newly detected features,
-         * to be used for landmark initialization.
+         * The function is called in ProcessorTrackerFeature::processNew() to set the member new_features_last_,
+         * the list of newly detected features of the capture last_ptr_.
          */
-        virtual unsigned int detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out);
+        virtual unsigned int detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_incoming_out);
 
         virtual FactorBasePtr createFactor(FeatureBasePtr _feature_ptr, FeatureBasePtr _feature_other_ptr);
 

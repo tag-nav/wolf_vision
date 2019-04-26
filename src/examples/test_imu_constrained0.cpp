@@ -2,12 +2,12 @@
 #include "base/capture/capture_IMU.h"
 #include "base/processor/processor_IMU.h"
 #include "base/sensor/sensor_IMU.h"
-#include "base/wolf.h"
-#include "base/problem.h"
+#include "base/common/wolf.h"
+#include "base/problem/problem.h"
 #include "base/sensor/sensor_odom_3D.h"
 #include "base/factor/factor_odom_3D.h"
-#include "base/state_block.h"
-#include "base/state_quaternion.h"
+#include "base/state_block/state_block.h"
+#include "base/state_block/state_quaternion.h"
 #include "base/processor/processor_odom_3D.h"
 #include "base/ceres_wrapper/ceres_manager.h"
 
@@ -326,26 +326,26 @@ int main(int argc, char** argv)
     {
         if(frm_ptr->isKey())
         {
-            FactorBasePtrList ctr_list =  frm_ptr->getConstrainedByList();
-            for(FactorBasePtr ctr_ptr : ctr_list)
+            FactorBasePtrList fac_list =  frm_ptr->getConstrainedByList();
+            for(FactorBasePtr fac_ptr : fac_list)
             {
-                if(ctr_ptr->getTypeId() == CTR_IMU)
+                if(fac_ptr->getTypeId() == FAC_IMU)
                 {
-                    //Eigen::VectorXs prev_KF_state(ctr_ptr->getFrameOther()->getState());
-                    //Eigen::VectorXs curr_KF_state(ctr_ptr->getFeature()->getFrame()->getState());
-                    p1      = ctr_ptr->getFrameOther()->getP()->getState();
-                    q1_vec  = ctr_ptr->getFrameOther()->getO()->getState();
-                    v1      = ctr_ptr->getFrameOther()->getV()->getState();
-                    ab1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOther())->getAccBias()->getState();
-                    wb1     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFrameOther())->getGyroBias()->getState();
+                    //Eigen::VectorXs prev_KF_state(fac_ptr->getFrameOther()->getState());
+                    //Eigen::VectorXs curr_KF_state(fac_ptr->getFeature()->getFrame()->getState());
+                    p1      = fac_ptr->getFrameOther()->getP()->getState();
+                    q1_vec  = fac_ptr->getFrameOther()->getO()->getState();
+                    v1      = fac_ptr->getFrameOther()->getV()->getState();
+                    ab1     = std::static_pointer_cast<FrameIMU>(fac_ptr->getFrameOther())->getAccBias()->getState();
+                    wb1     = std::static_pointer_cast<FrameIMU>(fac_ptr->getFrameOther())->getGyroBias()->getState();
 
-                    p2      = ctr_ptr->getFeature()->getFrame()->getP()->getState();
-                    q2_vec  = ctr_ptr->getFeature()->getFrame()->getO()->getState();
-                    v2      = ctr_ptr->getFeature()->getFrame()->getV()->getState();
-                    ab2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeature()->getFrame())->getAccBias()->getState();
-                    wb2     = std::static_pointer_cast<FrameIMU>(ctr_ptr->getFeature()->getFrame())->getGyroBias()->getState();
+                    p2      = fac_ptr->getFeature()->getFrame()->getP()->getState();
+                    q2_vec  = fac_ptr->getFeature()->getFrame()->getO()->getState();
+                    v2      = fac_ptr->getFeature()->getFrame()->getV()->getState();
+                    ab2     = std::static_pointer_cast<FrameIMU>(fac_ptr->getFeature()->getFrame())->getAccBias()->getState();
+                    wb2     = std::static_pointer_cast<FrameIMU>(fac_ptr->getFeature()->getFrame())->getGyroBias()->getState();
 
-                    std::static_pointer_cast<FactorIMU>(ctr_ptr)->residual(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
+                    std::static_pointer_cast<FactorIMU>(fac_ptr)->residual(p1, q1, v1, ab1, wb1, p2, q2, v2, ab2, wb2, IMU_residuals);
                     std::cout << "IMU residuals : " << IMU_residuals.transpose() << std::endl;
                 }
             }

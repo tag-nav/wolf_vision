@@ -1,5 +1,5 @@
-#ifndef CONSTRAINT_GPS_PSEUDORANGE_2D_H_
-#define CONSTRAINT_GPS_PSEUDORANGE_2D_H_
+#ifndef FACTOR_GPS_PSEUDORANGE_2D_H_
+#define FACTOR_GPS_PSEUDORANGE_2D_H_
 
 #define LIGHT_SPEED_ 299792458
 
@@ -29,7 +29,7 @@ class FactorGPSPseudorange2D : public FactorAutodiff<FactorGPSPseudorange2D, 1, 
     public:
         FactorGPSPseudorange2D(const FeatureBasePtr& _ftr_ptr, const ProcessorBasePtr& _pr_ptr,
                                    bool _apply_loss_function = false, 
-                                   FactorStatus _status = CTR_ACTIVE) :
+                                   FactorStatus _status = FAC_ACTIVE) :
            FactorAutodiff<FactorGPSPseudorange2D, 1, 2, 1, 3, 1, 3, 1>("GPS PR 2D",
                                                                                nullptr,
                                                                                nullptr,
@@ -238,4 +238,4 @@ inline bool FactorGPSPseudorange2D::operator ()(const T* const _vehicle_p, const
 
 } // namespace wolf
 
-#endif //CONSTRAINT_GPS_PSEUDORANGE_2D_H_
+#endif //FACTOR_GPS_PSEUDORANGE_2D_H_
