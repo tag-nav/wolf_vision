@@ -54,6 +54,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
     public:
         static ProblemPtr create(const std::string& _frame_structure); // USE THIS AS A CONSTRUCTOR!
+        static ProblemPtr autoSetup(const std::string& _frame_structure, const std::string& _yaml_file);
         virtual ~Problem();
 
         // Properties -----------------------------------------

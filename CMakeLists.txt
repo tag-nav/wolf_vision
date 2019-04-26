@@ -697,7 +697,7 @@ ADD_LIBRARY(${PROJECT_NAME}
   ${SRCS_WRAPPER}
   ${SRCS_YAML}
   )
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT} dl)
 
 #Link the created libraries
 #=============================================================

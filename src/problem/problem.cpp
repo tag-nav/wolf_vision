@@ -11,6 +11,9 @@
 #include "base/sensor/sensor_factory.h"
 #include "base/processor/processor_factory.h"
 #include "base/state_block/state_block.h"
+#include "base/yaml/parser_yaml.hpp"
+#include "base/utils/params_server.hpp"
+#include "base/utils/loader.hpp"
 
 
 // IRI libs includes
@@ -70,6 +73,37 @@ ProblemPtr Problem::create(const std::string& _frame_structure)
     ProblemPtr p(new Problem(_frame_structure)); // We use `new` and not `make_shared` since the Problem constructor is private and cannot be passed to `make_shared`.
     p->setup();
     return p->shared_from_this();
+}
+ProblemPtr Problem::autoSetup(const std::string& _frame_structure, const std::string& _yaml_file)
+{
+    auto p = Problem::create(_frame_structure);
+    // string file = "/home/jcasals/catkin_ws/src/wolf_ros_wrapper/src/params.yaml";
+    parserYAML parser = parserYAML(_yaml_file);
+    parser.parse();
+    paramsServer server = paramsServer(parser.getParams(), parser.sensorsSerialization(), parser.processorsSerialization());
+    // cout << "PRINTING SERVER MAP" << endl;
+    // server.print();
+    // cout << "-----------------------------------" << endl;
+    auto loaders = vector<Loader*>();
+    for(auto it : parser.getFiles()) {
+        cout << "LOADING " << it << endl;
+        auto l = new LoaderRaw(it);
+        l->load();
+        loaders.push_back(l);
+    }
+    //TODO: To be fixed. This prior should be set in here, but now it is set externally.
+   // setPrior(Eigen::Vector3s::Zero(), 0.1*Eigen::Matrix3s::Identity(), TimeStamp(), Scalar(0.1));
+   auto sensorMap = map<string, SensorBasePtr>();
+   auto procesorMap = map<string, ProcessorBasePtr>();
+   for(auto s : server.getSensors()){
+       cout << s._name << " " << s._type << endl;
+       sensorMap.insert(pair<string, SensorBasePtr>(s._name,p->installSensor(s._type, s._name, server)));
+   }
+   for(auto s : server.getProcessors()){
+       cout << s._name << " " << s._type << " " << s._name_assoc_sensor << endl;
+       procesorMap.insert(pair<string, ProcessorBasePtr>(s._name,p->installProcessor(s._type, s._name, s._name_assoc_sensor, server)));
+   }
+   return p;
 }
 
 Problem::~Problem()
