@@ -19,6 +19,7 @@ struct ProcessorParamsBase;
 #include "base/state_block/state_block.h"
 
 // std includes
+#include <mutex>
 
 namespace wolf {
 
@@ -38,11 +39,13 @@ class Problem : public std::enable_shared_from_this<Problem>
         TrajectoryBasePtr   trajectory_ptr_;
         MapBasePtr          map_ptr_;
         ProcessorMotionPtr  processor_motion_ptr_;
-        StateBlockPtrList      state_block_list_;
         std::map<std::pair<StateBlockPtr, StateBlockPtr>, Eigen::MatrixXs> covariances_;
         SizeEigen state_size_, state_cov_size_, dim_;
         std::map<FactorBasePtr, Notification> factor_notification_map_;
         std::map<StateBlockPtr, Notification> state_block_notification_map_;
+        mutable std::mutex mut_factor_notifications_;
+        mutable std::mutex mut_state_block_notifications_;
+        mutable std::mutex mut_covariances_;
         bool prior_is_set_;
 
     private: // CAUTION: THESE METHODS ARE PRIVATE, DO NOT MAKE THEM PUBLIC !!
@@ -241,10 +244,6 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         // Solver management ----------------------------------------
 
-        /** \brief Gets a reference to the state blocks list
-         */
-        StateBlockPtrList& getStateBlockPtrList();
-
         /** \brief Notifies a new state block to be added to the solver manager
          */
         StateBlockPtr addStateBlock(StateBlockPtr _state_ptr);
@@ -253,9 +252,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         void removeStateBlock(StateBlockPtr _state_ptr);
 
-        /** \brief Gets a map of factor notification to be handled by the solver
+        /** \brief Returns the map of factor notification to be handled by the solver (the map stored in this is emptied)
          */
-        std::map<StateBlockPtr,Notification>& getStateBlockNotificationMap();
+        std::map<StateBlockPtr,Notification> consumeStateBlockNotificationMap();
 
         /** \brief Notifies a new factor to be added to the solver manager
          */
@@ -265,9 +264,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         void removeFactor(FactorBasePtr _factor_ptr);
 
-        /** \brief Gets a map of factor notification to be handled by the solver
+        /** \brief Returns the map of factor notification to be handled by the solver (the map stored in this is emptied)
          */
-        std::map<FactorBasePtr, Notification>& getFactorNotificationMap();
+        std::map<FactorBasePtr, Notification> consumeFactorNotificationMap();
 
         // Print and check ---------------------------------------
         /**
@@ -306,14 +305,16 @@ inline ProcessorMotionPtr& Problem::getProcessorMotion()
     return processor_motion_ptr_;
 }
 
-inline std::map<StateBlockPtr,Notification>& Problem::getStateBlockNotificationMap()
+inline std::map<StateBlockPtr,Notification> Problem::consumeStateBlockNotificationMap()
 {
-    return state_block_notification_map_;
+    std::lock_guard<std::mutex> lock(mut_state_block_notifications_);
+    return std::move(state_block_notification_map_);
 }
 
-inline std::map<FactorBasePtr,Notification>& Problem::getFactorNotificationMap()
+inline std::map<FactorBasePtr,Notification> Problem::consumeFactorNotificationMap()
 {
-    return factor_notification_map_;
+    std::lock_guard<std::mutex> lock(mut_factor_notifications_);
+    return std::move(factor_notification_map_);
 }
 
 } // namespace wolf
