@@ -38,7 +38,7 @@ class QRManager : public SolverManager
 
         virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks = ROBOT_LANDMARKS);
 
-        virtual void computeCovariances(const StateBlockPtrList& _sb_list);
+        virtual void computeCovariances(const std::vector<StateBlockPtr>& _sb_list);
 
     private:
 

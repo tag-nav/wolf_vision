@@ -490,7 +490,7 @@ bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, E
     //else if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)) != covariances_.end())
     //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)].transpose() << std::endl;
 
-    assert(_row + _state1->getSize() <= _cov.rows() && _col + _state2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+    assert(_row + _state1->getLocalSize() <= _cov.rows() && _col + _state2->getLocalSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
 
     if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)) != covariances_.end())
         _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
