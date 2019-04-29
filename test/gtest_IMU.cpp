@@ -490,7 +490,7 @@ class Process_Factor_IMU : public testing::Test
             capture_imu = make_shared<CaptureIMU>(t+dt, sensor_imu, data, sensor_imu->getNoiseCov());
             processor_imu->process(capture_imu);
 
-            KF_1 = problem->getLastKeyFrame();
+            KF_1 = problem->getLastEstimatedFrame();
             C_1  = KF_1->getCaptureList().front(); // front is IMU
             CM_1 = static_pointer_cast<CaptureMotion>(C_1);
 

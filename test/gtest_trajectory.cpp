@@ -60,7 +60,7 @@ struct DummyNotificationProcessor
 /// Set to true if you want debug info
 bool debug = false;
 
-TEST(TrajectoryBase, ClosestKeyFrame)
+TEST(TrajectoryBase, ClosestEstimatedFrame)
 {
 
     ProblemPtr P = Problem::create("PO 2D");
@@ -80,19 +80,19 @@ TEST(TrajectoryBase, ClosestKeyFrame)
 
     FrameBasePtr kf; // closest key-frame queried
 
-    kf = T->closestKeyFrameToTimeStamp(-0.8);                // before all keyframes    --> return f0
+    kf = T->closestEstimatedFrameToTimeStamp(-0.8);                // before all keyframes    --> return f0
     ASSERT_EQ(kf->id(), f1->id());                           // same id!
 
-    kf = T->closestKeyFrameToTimeStamp(1.1);                 // between keyframes       --> return f1
+    kf = T->closestEstimatedFrameToTimeStamp(1.1);                 // between keyframes       --> return f1
     ASSERT_EQ(kf->id(), f1->id());                           // same id!
 
-    kf = T->closestKeyFrameToTimeStamp(1.9);                 // between keyframes       --> return f2
+    kf = T->closestEstimatedFrameToTimeStamp(1.9);                 // between keyframes       --> return f2
     ASSERT_EQ(kf->id(), f2->id());                           // same id!
 
-    kf = T->closestKeyFrameToTimeStamp(2.6);                 // between keyframe and frame, but closer to frame --> return f2
+    kf = T->closestEstimatedFrameToTimeStamp(2.6);                 // between keyframe and frame, but closer to frame --> return f2
     ASSERT_EQ(kf->id(), f2->id());                           // same id!
 
-    kf = T->closestKeyFrameToTimeStamp(3.2);                 // after the last frame    --> return f2
+    kf = T->closestEstimatedFrameToTimeStamp(3.2);                 // after the last frame    --> return f2
     ASSERT_EQ(kf->id(), f2->id());                           // same id!
 }
 

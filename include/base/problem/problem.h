@@ -199,21 +199,37 @@ class Problem : public std::enable_shared_from_this<Problem>
         FrameBasePtr closestImportantFrameToTimeStamp(const TimeStamp& _ts) const;
         FrameBasePtr closestEstimatedFrameToTimeStamp(const TimeStamp& _ts) const;
 
-        /** \brief Give the permission to a processor to create a new keyFrame
+        /** \brief Give the permission to a processor to create a new important Frame
          *
-         * This should implement a black list of processors that have forbidden keyframe creation.
+         * This should implement a black list of processors that have forbidden important frame creation.
          *   - This decision is made at problem level, not at processor configuration level.
-         *   - Therefore, if you want to permanently configure a processor for not creating keyframes, see Processor::voting_active_ and its accessors.
+         *   - Therefore, if you want to permanently configure a processor for not creating important frames, see Processor::voting_active_ and its accessors.
          */
-        bool permitKeyFrame(ProcessorBasePtr _processor_ptr);
+        bool permitImportantFrame(ProcessorBasePtr _processor_ptr);
 
-        /** \brief New key frame callback
+        /** \brief New important frame callback
          *
-         * New key frame callback: It should be called by any processor that creates a new keyframe. It calls the keyFrameCallback of the rest of processors.
+         * New important frame callback: It should be called by any processor that creates a new important frame. It calls the importantFrameCallback of the rest of processors.
          */
-        void keyFrameCallback(FrameBasePtr _keyframe_ptr, //
+        void importantFrameCallback(FrameBasePtr _frame_ptr, //
                               ProcessorBasePtr _processor_ptr, //
                               const Scalar& _time_tolerance);
+
+        /** \brief Give the permission to a processor to create a new estimated Frame
+         *
+         * This should implement a black list of processors that have forbidden estimated frame creation.
+         *   - This decision is made at problem level, not at processor configuration level.
+         *   - Therefore, if you want to permanently configure a processor for not creating estimated frames, see Processor::voting_active_ and its accessors.
+         */
+        bool permitEstimatedFrame(ProcessorBasePtr _processor_ptr);
+
+        /** \brief New estimated frame callback
+         *
+         * New estimated frame callback: It should be called by any processor that creates a new estimated frame. It calls the estimatedFrameCallback of the processor motion.
+         */
+        void estimatedFrameCallback(FrameBasePtr _frame_ptr, //
+                                    ProcessorBasePtr _processor_ptr, //
+                                    const Scalar& _time_tolerance);
 
         // State getters
         Eigen::VectorXs getCurrentState         ( );
@@ -241,7 +257,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         bool getCovarianceBlock(std::map<StateBlockPtr, unsigned int> _sb_2_idx, Eigen::MatrixXs& _cov);
         bool getCovarianceBlock(StateBlockPtr _state, Eigen::MatrixXs& _cov, const int _row_and_col = 0);
         bool getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& _covariance);
-        bool getLastKeyFrameCovariance(Eigen::MatrixXs& _covariance);
+        bool getLastImportantFrameCovariance(Eigen::MatrixXs& _covariance);
         bool getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::MatrixXs& _covariance);
 
         // Solver management ----------------------------------------

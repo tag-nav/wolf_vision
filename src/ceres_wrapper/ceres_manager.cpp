@@ -144,7 +144,7 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
         case CovarianceBlocksToBeComputed::ROBOT_LANDMARKS:
         {
             //robot-robot
-            auto last_key_frame = wolf_problem_->getLastKeyFrame();
+            auto last_key_frame = wolf_problem_->getLastImportantFrame();
 
             state_block_pairs.emplace_back(last_key_frame->getP(), last_key_frame->getP());
             state_block_pairs.emplace_back(last_key_frame->getP(), last_key_frame->getO());
