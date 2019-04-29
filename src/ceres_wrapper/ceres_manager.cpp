@@ -259,6 +259,9 @@ void CeresManager::addFactor(const FactorBasePtr& fac_ptr)
 
     auto loss_func_ptr = (fac_ptr->getApplyLossFunction()) ? new ceres::CauchyLoss(0.5) : nullptr;
 
+    //std::cout << "Added residual block corresponding to constraint " << std::static_pointer_cast<CostFunctionWrapper>(cost_func_ptr)->getConstraintPtr()->getType() << std::static_pointer_cast<CostFunctionWrapper>(cost_func_ptr)->getConstraintPtr()->id() <<std::endl;
+
+    assert((unsigned int)(ceres_problem_->NumResidualBlocks()) == fac_2_residual_idx_.size() && "ceres residuals different from wrapper residuals");
     assert(fac_2_residual_idx_.find(fac_ptr) == fac_2_residual_idx_.end() && "adding a factor that is already in the fac_2_residual_idx_ map");
 
     fac_2_residual_idx_[fac_ptr] = ceres_problem_->AddResidualBlock(cost_func_ptr.get(),
@@ -296,11 +299,15 @@ void CeresManager::addStateBlock(const StateBlockPtr& state_ptr)
                                       state_ptr->getSize(),
                                       local_parametrization_ptr);
 
+    if (state_ptr->isFixed())
+        ceres_problem_->SetParameterBlockConstant(getAssociatedMemBlockPtr(state_ptr));
+
     updateStateBlockStatus(state_ptr);
 }
 
 void CeresManager::removeStateBlock(const StateBlockPtr& state_ptr)
 {
+    //std::cout << "CeresManager::removeStateBlock " << state_ptr.get() << " - " << getAssociatedMemBlockPtr(state_ptr) << std::endl;
     assert(state_ptr);
     ceres_problem_->RemoveParameterBlock(getAssociatedMemBlockPtr(state_ptr));
     state_blocks_local_param_.erase(state_ptr);
