@@ -26,11 +26,12 @@ static ProcessorParamsBasePtr createProcessorIMUParams(const std::string & _file
 
     if (config["processor type"].as<std::string>() == "IMU")
     {
+        YAML::Node kf_vote = config["keyframe vote"];
+
         ProcessorParamsIMUPtr params = std::make_shared<ProcessorParamsIMU>();
         params->time_tolerance = config["time tolerance"]           .as<Scalar>();
         params->unmeasured_perturbation_std_ = config["unmeasured perturbation std"].as<Scalar>();
 
-        YAML::Node kf_vote = config["keyframe vote"];
         params->max_time_span       = kf_vote["max time span"]      .as<Scalar>();
         params->max_buff_length     = kf_vote["max buffer length"]  .as<SizeEigen  >();
         params->dist_traveled       = kf_vote["dist traveled"]      .as<Scalar>();

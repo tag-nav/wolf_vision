@@ -21,7 +21,6 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsOdom2D);
 struct ProcessorParamsOdom2D : public ProcessorParamsMotion
 {
     Scalar cov_det                  = 1.0;      // 1 rad^2
-    Scalar unmeasured_perturbation_std = 0.001;    // no particular dimension: the same for displacement and angle
 };
 
 class ProcessorOdom2D : public ProcessorMotion
@@ -75,7 +74,6 @@ class ProcessorOdom2D : public ProcessorMotion
 
     protected:
         ProcessorParamsOdom2DPtr params_odom_2D_;
-        MatrixXs unmeasured_perturbation_cov_;
 
         // Factory method
     public:
