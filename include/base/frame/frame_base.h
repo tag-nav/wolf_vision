@@ -74,6 +74,7 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
 
         // get type
         bool isKey() const;
+        bool isAuxiliary() const;
         bool isEstimated() const;
 
         // set type
@@ -175,6 +176,11 @@ inline unsigned int FrameBase::id()
 inline bool FrameBase::isKey() const
 {
     return (type_ == KEY);
+}
+
+inline bool FrameBase::isAuxiliary() const
+{
+    return (type_ == AUXILIARY);
 }
 
 inline bool FrameBase::isEstimated() const
