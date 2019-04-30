@@ -31,8 +31,11 @@ FrameBasePtr TrajectoryBase::addFrame(FrameBasePtr _frame_ptr)
         // register state blocks
         _frame_ptr->registerNewStateBlocks();
 
-        // sort and update last_estimated and last_important
+        // sort
         sortFrame(_frame_ptr);
+
+        // update last_estimated and last_key
+        updateLastFrames();
     }
 
     return _frame_ptr;
@@ -71,7 +74,7 @@ void TrajectoryBase::updateLastFrames()
 {
     bool last_estimated_set = false;
 
-    // NOTE: Assumes keyframes are sorted by timestamp
+    // NOTE: Assumes estimated (key or auxiliary) frames are sorted by timestamp
     for (auto frm_rit = getFrameList().rbegin(); frm_rit != getFrameList().rend(); ++frm_rit)
         if ((*frm_rit)->isEstimated())
         {
@@ -80,22 +83,22 @@ void TrajectoryBase::updateLastFrames()
                 last_estimated_frame_ptr_ = (*frm_rit);
                 last_estimated_set = true;
             }
-            if ((*frm_rit)->isImportant())
+            if ((*frm_rit)->isKey())
             {
-                last_important_frame_ptr_ = (*frm_rit);
+                last_key_frame_ptr_ = (*frm_rit);
                 break;
             }
         }
 }
 
-FrameBasePtr TrajectoryBase::closestImportantFrameToTimeStamp(const TimeStamp& _ts) const
+FrameBasePtr TrajectoryBase::closestKeyFrameToTimeStamp(const TimeStamp& _ts) const
 {
-    // NOTE: Assumes keyframes are sorted by timestamp
+    // NOTE: Assumes estimated (key or auxiliary) frames are sorted by timestamp
     FrameBasePtr closest_kf = nullptr;
     Scalar min_dt = 1e9;
 
     for (auto frm_rit = frame_list_.rbegin(); frm_rit != frame_list_.rend(); frm_rit++)
-        if ((*frm_rit)->isImportant())
+        if ((*frm_rit)->isKey())
         {
             Scalar dt = std::fabs((*frm_rit)->getTimeStamp() - _ts);
             if (dt < min_dt)
@@ -111,6 +114,7 @@ FrameBasePtr TrajectoryBase::closestImportantFrameToTimeStamp(const TimeStamp& _
 
 FrameBasePtr TrajectoryBase::closestEstimatedFrameToTimeStamp(const TimeStamp& _ts) const
 {
+    // NOTE: Assumes estimated (key or auxiliary) frames are sorted by timestamp
     FrameBasePtr closest_kf = nullptr;
     Scalar min_dt = 1e9;
 
