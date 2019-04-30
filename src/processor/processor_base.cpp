@@ -26,6 +26,11 @@ bool ProcessorBase::permittedKeyFrame()
     return isVotingActive() && getProblem()->permitKeyFrame(shared_from_this());
 }
 
+bool ProcessorBase::permittedAuxFrame()
+{
+    return isVotingAuxActive() && getProblem()->permitAuxFrame(shared_from_this());
+}
+
 FrameBasePtr ProcessorBase::emplaceFrame(FrameType _type, CaptureBasePtr _capture_ptr)
 {
     std::cout << "Making " << (_type == KEY ? "key-" : (_type == AUXILIARY ? "aux-" : "")) << "frame" << std::endl;
