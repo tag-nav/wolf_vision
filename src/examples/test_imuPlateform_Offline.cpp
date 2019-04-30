@@ -215,7 +215,7 @@ int main(int argc, char** argv)
     wolf::FrameBasePtrList frame_list = wolf_problem_ptr_->getTrajectory()->getFrameList();
     for(FrameBasePtr frm_ptr : frame_list)
     {
-        if(frm_ptr->isEstimated())
+        if(frm_ptr->isKey())
         {   
             //prepare needed variables
             FrameIMUPtr frmIMU_ptr = std::static_pointer_cast<FrameIMU>(frm_ptr);

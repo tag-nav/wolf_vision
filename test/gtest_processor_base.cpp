@@ -59,7 +59,7 @@ TEST(ProcessorBase, KeyFrameCallback)
 
     std::cout << "sensor & processor created and added to wolf problem" << std::endl;
 
-    // Sequence to test Important Frame creations (callback calls)
+    // Sequence to test Key Frame creations (callback calls)
 
     // initialize
     TimeStamp   t(0.0);
@@ -89,7 +89,7 @@ TEST(ProcessorBase, KeyFrameCallback)
 //        problem->print(4,1,1,0);
 
         // Only odom creating KFs
-        ASSERT_TRUE( problem->getLastImportantFrame()->getType().compare("PO 2D")==0 );
+        ASSERT_TRUE( problem->getLastKeyFrame()->getType().compare("PO 2D")==0 );
     }
 }
 

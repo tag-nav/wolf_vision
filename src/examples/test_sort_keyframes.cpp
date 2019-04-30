@@ -24,7 +24,7 @@ void printFrames(ProblemPtr _problem_ptr)
 {
     std::cout << "TRAJECTORY:" << std::endl;
     for (auto frm : _problem_ptr->getTrajectory()->getFrameList())
-        std::cout << "\t " << (frm->isEstimated() ? "KEY FRAME: " : "FRAME: ") << frm->id() << " - TS: " << frm->getTimeStamp().getSeconds() << "." << frm->getTimeStamp().getNanoSeconds() << std::endl;
+        std::cout << "\t " << (frm->isKey() ? "KEY FRAME: " : "FRAME: ") << frm->id() << " - TS: " << frm->getTimeStamp().getSeconds() << "." << frm->getTimeStamp().getNanoSeconds() << std::endl;
 }
 
 int main()
@@ -65,12 +65,12 @@ int main()
 
     printFrames(problem_ptr);
 
-    FrameBasePtr frm7 = problem_ptr->emplaceFrame(ESTIMATED, Eigen::VectorXs::Zero(3), TimeStamp(0.7));
+    FrameBasePtr frm7 = problem_ptr->emplaceFrame(KEY, Eigen::VectorXs::Zero(3), TimeStamp(0.7));
     std::cout << std::endl << "created Key Frame " << frm7->id() << " TS: " << 0.7 << std::endl;
 
     printFrames(problem_ptr);
 
-    FrameBasePtr frm8 = problem_ptr->emplaceFrame(ESTIMATED, Eigen::VectorXs::Zero(3), TimeStamp(0.35));
+    FrameBasePtr frm8 = problem_ptr->emplaceFrame(KEY, Eigen::VectorXs::Zero(3), TimeStamp(0.35));
     std::cout << std::endl << "created Key Frame " << frm8->id() << " TS: " << 0.35 << std::endl;
 
     printFrames(problem_ptr);

@@ -22,9 +22,9 @@ namespace wolf {
  */
 typedef enum
 {
-    IMPORTANT = 2,     ///< estimated important frame. It plays at optimizations.
-    ESTIMATED = 1,     ///< estimated frame. It plays at optimizations.
-    NON_ESTIMATED = 0  ///< Regular frame. It does not play at optimization.
+    KEY = 2,          ///< key frame. It plays at optimizations (estimated).
+    AUXILIARY = 1,    ///< auxiliary frame. It plays at optimizations (estimated).
+    NON_ESTIMATED = 0 ///< regular frame. It does not play at optimization.
 } FrameType;
 
 //class FrameBase
@@ -72,13 +72,13 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
     public:
         unsigned int id();
 
-        // Important / Non Important
-        bool isImportant() const;
-        void setImportant();
-
-        // Estimated / Non estimated
+        // get type
+        bool isKey() const;
         bool isEstimated() const;
-        void setEstimated();
+
+        // set type
+        void setKey();
+        void setAuxiliary();
 
         // Frame values ------------------------------------------------
     public:
@@ -172,14 +172,14 @@ inline unsigned int FrameBase::id()
     return frame_id_;
 }
 
-inline bool FrameBase::isImportant() const
+inline bool FrameBase::isKey() const
 {
-    return (type_ == IMPORTANT);
+    return (type_ == KEY);
 }
 
 inline bool FrameBase::isEstimated() const
 {
-    return (type_ == IMPORTANT || type_ == ESTIMATED);
+    return (type_ == KEY || type_ == AUXILIARY);
 }
 
 inline void FrameBase::getTimeStamp(TimeStamp& _ts) const

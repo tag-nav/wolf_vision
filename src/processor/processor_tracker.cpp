@@ -75,7 +75,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
         }
         case FIRST_TIME_WITHOUT_PACK :
         {
-            FrameBasePtr kfrm = getProblem()->emplaceFrame(ESTIMATED, incoming_ptr_->getTimeStamp());
+            FrameBasePtr kfrm = getProblem()->emplaceFrame(KEY, incoming_ptr_->getTimeStamp());
             kfrm->addCapture(incoming_ptr_);
 
             // Process info
@@ -171,7 +171,7 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
 
                 // set KF on last
                 last_ptr_->getFrame()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
-                last_ptr_->getFrame()->setEstimated();
+                last_ptr_->getFrame()->setKey();
 
                 // make F; append incoming to new F
                 FrameBasePtr frm = getProblem()->emplaceFrame(NON_ESTIMATED, incoming_ptr_->getTimeStamp());
@@ -180,9 +180,6 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 // process
                 processNew(params_tracker_->max_new_features);
 
-                //                // Set key
-                //                last_ptr_->getFrame()->setKey();
-                //
                 // Set state to the keyframe
                 last_ptr_->getFrame()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
 
@@ -258,7 +255,7 @@ void ProcessorTracker::computeProcessingStep()
 
             if (kf_pack_buffer_.selectPack(last_ptr_, params_tracker_->time_tolerance))
             {
-                if (last_ptr_->getFrame()->isEstimated())
+                if (last_ptr_->getFrame()->isKey())
                 {
                     WOLF_WARN("||*||");
                     WOLF_INFO(" ... It seems you missed something!");

@@ -72,19 +72,19 @@ TEST(ProcessorFrameNearestNeighborFilter, PointInEllipseRotated)
   auto stateblock_optr4 = std::make_shared<wolf::StateBlock>(state4.tail<1>());
 
   // create Keyframes
-  F1 = std::make_shared<wolf::FrameBase>(wolf::ESTIMATED,
+  F1 = std::make_shared<wolf::FrameBase>(wolf::KEY,
                                          1,
                                          stateblock_pptr1,
                                          stateblock_optr1);
-  F2 = std::make_shared<wolf::FrameBase>(wolf::ESTIMATED,
+  F2 = std::make_shared<wolf::FrameBase>(wolf::KEY,
                                          1,
                                          stateblock_pptr2,
                                          stateblock_optr2);
-  F3 = std::make_shared<wolf::FrameBase>(wolf::ESTIMATED,
+  F3 = std::make_shared<wolf::FrameBase>(wolf::KEY,
                                          1,
                                          stateblock_pptr3,
                                          stateblock_optr3);
-  F4 = std::make_shared<wolf::FrameBase>(wolf::ESTIMATED,
+  F4 = std::make_shared<wolf::FrameBase>(wolf::KEY,
                                          1,
                                          stateblock_pptr4,
                                          stateblock_optr4);
@@ -147,7 +147,7 @@ TEST(ProcessorFrameNearestNeighborFilter, PointInEllipseRotated)
   incomming_dummy = std::make_shared<wolf::CaptureBase>("DUMMY",
                                                         1.2,
                                                         sensor_ptr);
-  // Make 3rd frame last Important frame
+  // Make 3rd frame last Key frame
   F3->setTimeStamp(wolf::TimeStamp(2.0));
   problem->getTrajectory()->sortFrame(F3);
 
@@ -181,7 +181,7 @@ TEST(ProcessorFrameNearestNeighborFilter, EllipseEllipseRotatedCrosscovariance)
   problem->addCovarianceBlock( F4->getP(), F4->getP(),
                                position_covariance_matrix);
 
-  // Make 3rd frame last Important frame
+  // Make 3rd frame last Key frame
   F3->setTimeStamp(wolf::TimeStamp(2.0));
   problem->getTrajectory()->sortFrame(F3);
 
@@ -194,7 +194,7 @@ TEST(ProcessorFrameNearestNeighborFilter, EllipseEllipseRotatedCrosscovariance)
   ASSERT_EQ(testloops[0]->id(), (unsigned int) 1);
   ASSERT_EQ(testloops[1]->id(), (unsigned int) 2);
 
-  // Make 4th frame last Important frame
+  // Make 4th frame last Key frame
   F4->setTimeStamp(wolf::TimeStamp(3.0));
   problem->getTrajectory()->sortFrame(F4);
 

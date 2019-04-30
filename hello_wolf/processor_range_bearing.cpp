@@ -41,7 +41,7 @@ void ProcessorRangeBearing::process(CaptureBasePtr _capture)
     if (!kf)
     {
         // No KeyFrame callback received -- we assume a KF is available to hold this _capture (checked in assert below)
-        kf = getProblem()->closestImportantFrameToTimeStamp(_capture->getTimeStamp());
+        kf = getProblem()->closestKeyFrameToTimeStamp(_capture->getTimeStamp());
         assert( (fabs(kf->getTimeStamp() - _capture->getTimeStamp()) < params_->time_tolerance) && "Could not find a KF close enough to _capture!");
     }
 

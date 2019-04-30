@@ -193,11 +193,11 @@ void ProcessorMotion::process(CaptureBasePtr _incoming_ptr)
     last_ptr_->getFrame()->setTimeStamp(getCurrentTimeStamp());
     last_ptr_->getFrame()->setState(getCurrentState());
 
-    if (voteForKeyFrame() && permittedKeyFrame())
+    if (permittedKeyFrame() && voteForKeyFrame())
     {
         // Set the frame of last_ptr as key
         auto key_frame_ptr = last_ptr_->getFrame();
-        key_frame_ptr->setEstimated();
+        key_frame_ptr->setKey();
 
         // create motion feature and add it to the key_capture
         auto key_feature_ptr = emplaceFeature(last_ptr_);
@@ -288,7 +288,7 @@ bool ProcessorMotion::getState(const TimeStamp& _ts, Eigen::VectorXs& _x)
 
 FrameBasePtr ProcessorMotion::setOrigin(const Eigen::VectorXs& _x_origin, const TimeStamp& _ts_origin)
 {
-    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(ESTIMATED, _x_origin, _ts_origin);
+    FrameBasePtr key_frame_ptr = getProblem()->emplaceFrame(KEY, _x_origin, _ts_origin);
     setOrigin(key_frame_ptr);
 
     return key_frame_ptr;
@@ -299,7 +299,7 @@ void ProcessorMotion::setOrigin(FrameBasePtr _origin_frame)
     assert(_origin_frame && "ProcessorMotion::setOrigin: Provided frame pointer is nullptr.");
     assert(_origin_frame->getTrajectory() != nullptr
             && "ProcessorMotion::setOrigin: origin frame must be in the trajectory.");
-    assert(_origin_frame->isEstimated() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
+    assert(_origin_frame->isKey() && "ProcessorMotion::setOrigin: origin frame must be KEY FRAME.");
 
     // -------- ORIGIN ---------
     // emplace (empty) origin Capture

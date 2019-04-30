@@ -28,7 +28,7 @@ bool ProcessorBase::permittedKeyFrame()
 
 FrameBasePtr ProcessorBase::emplaceFrame(FrameType _type, CaptureBasePtr _capture_ptr)
 {
-    std::cout << "Making " << (_type == ESTIMATED? "key-" : "") << "frame" << std::endl;
+    std::cout << "Making " << (_type == KEY ? "key-" : (_type == AUXILIARY ? "aux-" : "")) << "frame" << std::endl;
 
     FrameBasePtr new_frame_ptr = getProblem()->emplaceFrame(_type, _capture_ptr->getTimeStamp());
     new_frame_ptr->addCapture(_capture_ptr);

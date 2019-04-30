@@ -226,7 +226,7 @@ CaptureBasePtr SensorBase::lastKeyCapture(void)
     FrameBaseRevIter frame_rev_it = frame_list.rbegin();
     while (frame_rev_it != frame_list.rend())
     {
-        if ((*frame_rev_it)->isEstimated())
+        if ((*frame_rev_it)->isKey())
         {
             capture = (*frame_rev_it)->getCaptureOf(shared_from_this());
             if (capture)

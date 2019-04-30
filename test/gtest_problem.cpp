@@ -112,7 +112,7 @@ TEST(Problem, SetOrigin_PO_2D)
     ASSERT_EQ(P->getHardware()->getSensorList().size(), (unsigned int) 0);
 
     // check that the state is correct
-    ASSERT_TRUE((x0 - P->getCurrentState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_MATRIX_APPROX(x0, P->getCurrentState(), Constants::EPS_SMALL );
 
     // check that we have one frame, one capture, one feature, one factor
     TrajectoryBasePtr T = P->getTrajectory();
@@ -130,8 +130,8 @@ TEST(Problem, SetOrigin_PO_2D)
     ASSERT_FALSE(c->getLandmarkOther());
 
     // check that the Feature measurement and covariance are the ones provided
-    ASSERT_TRUE((x0 - f->getMeasurement()).isMuchSmallerThan(1, Constants::EPS_SMALL));
-    ASSERT_TRUE((P0 - f->getMeasurementCovariance()).isMuchSmallerThan(1, Constants::EPS_SMALL));
+    ASSERT_MATRIX_APPROX(x0, f->getMeasurement(), Constants::EPS_SMALL );
+    ASSERT_MATRIX_APPROX(P0, f->getMeasurementCovariance(), Constants::EPS_SMALL );
 
     //    P->print(4,1,1,1);
 }
@@ -177,9 +177,9 @@ TEST(Problem, emplaceFrame_factory)
 {
     ProblemPtr P = Problem::create("PO 2D");
 
-    FrameBasePtr f0 = P->emplaceFrame("PO 2D",    ESTIMATED, VectorXs(3),  TimeStamp(0.0));
-    FrameBasePtr f1 = P->emplaceFrame("PO 3D",    ESTIMATED, VectorXs(7),  TimeStamp(1.0));
-    FrameBasePtr f2 = P->emplaceFrame("POV 3D",   ESTIMATED, VectorXs(10), TimeStamp(2.0));
+    FrameBasePtr f0 = P->emplaceFrame("PO 2D",    KEY, VectorXs(3),  TimeStamp(0.0));
+    FrameBasePtr f1 = P->emplaceFrame("PO 3D",    KEY, VectorXs(7),  TimeStamp(1.0));
+    FrameBasePtr f2 = P->emplaceFrame("POV 3D",   KEY, VectorXs(10), TimeStamp(2.0));
 
     //    std::cout << "f0: type PO 2D?    "  << f0->getType() << std::endl;
     //    std::cout << "f1: type PO 3D?    "  << f1->getType() << std::endl;
@@ -223,7 +223,7 @@ TEST(Problem, StateBlocks)
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
     // 2 state blocks, estimated
-    P->emplaceFrame("PO 3D", ESTIMATED, xs, 0);
+    P->emplaceFrame("PO 3D", KEY, xs, 0);
     ASSERT_EQ(P->consumeStateBlockNotificationMap().size(), (unsigned int)(/*2 + 3*/ + 2)); // consume empties the notification map, so only should contain notification since last call
 
     //    P->print(4,1,1,1);
@@ -256,7 +256,7 @@ TEST(Problem, Covariances)
 
     // 4 state blocks, estimated
     St->unfixExtrinsics();
-    FrameBasePtr F = P->emplaceFrame("PO 3D", ESTIMATED, xs, 0);
+    FrameBasePtr F = P->emplaceFrame("PO 3D", KEY, xs, 0);
 
     // set covariance (they are not computed without a solver)
     P->addCovarianceBlock(F->getP(), Eigen::Matrix3s::Identity());

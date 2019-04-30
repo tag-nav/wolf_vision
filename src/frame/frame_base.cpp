@@ -39,8 +39,6 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
                 
 FrameBase::~FrameBase()
 {
-    if ( isEstimated() )
-        removeStateBlocks();
 }
 
 void FrameBase::remove()
@@ -71,7 +69,8 @@ void FrameBase::remove()
         if ( isEstimated() )
             removeStateBlocks();
 
-        if (getTrajectory()->getLastImportantFrame()->id() == this_F->id() || getTrajectory()->getLastEstimatedFrame()->id() == this_F->id())
+
+        if (getTrajectory()->getLastKeyFrame()->id() == this_F->id() || getTrajectory()->getLastEstimatedFrame()->id() == this_F->id())
             getTrajectory()->updateLastFrames();
 
 //        std::cout << "Removed       F" << id() << std::endl;
@@ -111,28 +110,27 @@ void FrameBase::removeStateBlocks()
     }
 }
 
-void FrameBase::setImportant()
+void FrameBase::setKey()
 {
-    if (type_ == NON_ESTIMATED)
-    {
+    // register if previously not estimated
+    if (!isEstimated())
         registerNewStateBlocks();
-        getTrajectory()->sortFrame(shared_from_this());
 
-//        WOLF_DEBUG("Set Important", this->id());
-    }
-    type_ = IMPORTANT;
+    // WOLF_DEBUG("Set Key", this->id());
+    type_ = KEY;
+    getTrajectory()->sortFrame(shared_from_this());
+    getTrajectory()->updateLastFrames();
 }
 
-void FrameBase::setEstimated()
+void FrameBase::setAuxiliary()
 {
-    if (type_ == NON_ESTIMATED)
-    {
+    if (!isEstimated())
         registerNewStateBlocks();
-        getTrajectory()->sortFrame(shared_from_this());
 
-//        WOLF_DEBUG("Set Estimated", this->id());
-    }
-    type_ = ESTIMATED;
+    // WOLF_DEBUG("Set Auxiliary", this->id());
+    type_ = AUXILIARY;
+    getTrajectory()->sortFrame(shared_from_this());
+    getTrajectory()->updateLastFrames();
 }
 
 void FrameBase::fix()
@@ -178,7 +176,7 @@ void FrameBase::setState(const Eigen::VectorXs& _state)
     for (StateBlockPtr sb : state_block_vec_)
         if (sb && (index < _st_size))
         {
-            sb->setState(_state.segment(index, sb->getSize()), isEstimated());
+            sb->setState(_state.segment(index, sb->getSize()), isEstimated()); // do not notify if state block is not estimated by the solver
             index += sb->getSize();
         }
 }
