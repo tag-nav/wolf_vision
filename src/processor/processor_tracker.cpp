@@ -196,6 +196,38 @@ void ProcessorTracker::process(CaptureBasePtr const _incoming_ptr)
                 incoming_ptr_ = nullptr;
 
             }
+            /* TODO: create an auxiliary frame
+            else if (voteForAuxFrame() && permittedAuxFrame())
+            {
+                // We create an Auxiliary Frame
+
+                // set AuxF on last
+                last_ptr_->getFrame()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
+                last_ptr_->getFrame()->setAuxiliary();
+
+                // make F; append incoming to new F
+                FrameBasePtr frm = getProblem()->emplaceFrame(NON_ESTIMATED, incoming_ptr_->getTimeStamp());
+                frm->addCapture(incoming_ptr_);
+
+                // Set state to the keyframe
+                last_ptr_->getFrame()->setState(getProblem()->getState(last_ptr_->getTimeStamp()));
+
+                // Establish factors
+                establishFactors();
+
+                // Call the new auxframe callback in order to let the ProcessorMotion to establish their factors
+                getProblem()->auxFrameCallback(last_ptr_->getFrame(), std::static_pointer_cast<ProcessorBase>(shared_from_this()), params_tracker_->time_tolerance);
+
+                // Advance this
+                last_ptr_->getFrame()->addCapture(incoming_ptr_); // Add incoming Capture to the tracker's last Frame
+                // do not remove! last_ptr_->remove();
+                incoming_ptr_->getFrame()->setTimeStamp(incoming_ptr_->getTimeStamp());
+
+                // Update pointers
+                advanceDerived();
+                last_ptr_   = incoming_ptr_;
+                incoming_ptr_ = nullptr;
+            }*/
             else
             {
                 // We do not create a KF
