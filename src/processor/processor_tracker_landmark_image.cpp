@@ -9,7 +9,7 @@
 #include "base/map/map_base.h"
 #include "base/math/pinhole_tools.h"
 #include "base/problem/problem.h"
-#include "base/sensor/sensor_camera.h"
+#include "vision/sensor/sensor_camera.h"
 #include "base/state_block/state_block.h"
 #include "base/common/time_stamp.h"
 
