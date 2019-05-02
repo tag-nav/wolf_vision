@@ -13,11 +13,14 @@
 #include "common/homography.h"
 #include "common/zarray.h"
 
-#include <tag36h11.h>
-#include <tag36h10.h>
-#include <tag36artoolkit.h>
+#include <tag16h5.h>
 #include <tag25h9.h>
-#include <tag25h7.h>
+#include <tag36h11.h>
+#include <tagCircle21h7.h>
+#include <tagCircle49h12.h>
+#include <tagCustom48h12.h>
+#include <tagStandard41h12.h>
+#include <tagStandard52h13.h>
 
 #include "base/processor/ippe.h"
 
@@ -58,22 +61,28 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
 
     // configure apriltag detector
     std::string famname(_params_tracker_landmark_apriltag->tag_family_);
-    if (famname == "tag36h11")
-        tag_family_ = *tag36h11_create();
-    else if (famname == "tag36h10")
-        tag_family_ = *tag36h10_create();
-    else if (famname == "tag36artoolkit")
-        tag_family_ = *tag36artoolkit_create();
+    if (famname == "tag16h5")
+        tag_family_ = *tag16h5_create();
     else if (famname == "tag25h9")
         tag_family_ = *tag25h9_create();
-    else if (famname == "tag25h7")
-        tag_family_ = *tag25h7_create();
+    else if (famname == "tag36h11")
+        tag_family_ = *tag36h11_create();
+    else if (famname == "tagCircle21h7")
+        tag_family_ = *tagCircle21h7_create();
+    else if (famname == "tagCircle49h12")
+        tag_family_ = *tagCircle49h12_create();
+    else if (famname == "tagCustom48h12")
+        tag_family_ = *tagCustom48h12_create();
+    else if (famname == "tagStandard41h12")
+        tag_family_ = *tagStandard41h12_create();
+    else if (famname == "tagStandard52h13")
+        tag_family_ = *tagStandard52h13_create();
     else {
-        WOLF_ERROR("Unrecognized tag family name. Use e.g. \"tag36h11\".");
+        WOLF_ERROR(famname, ": Unrecognized tag family name. Use e.g. \"tag36h11\".");
         exit(-1);
     }
 
-    tag_family_.black_border     = _params_tracker_landmark_apriltag->tag_black_border_;
+    // tag_family_.black_border     = _params_tracker_landmark_apriltag->tag_black_border_;
 
     detector_ = *apriltag_detector_create();
     apriltag_detector_add_family(&detector_, &tag_family_);
@@ -83,8 +92,6 @@ ProcessorTrackerLandmarkApriltag::ProcessorTrackerLandmarkApriltag( ProcessorPar
     detector_.nthreads          = _params_tracker_landmark_apriltag->nthreads_;
     detector_.debug             = _params_tracker_landmark_apriltag->debug_;
     detector_.refine_edges      = _params_tracker_landmark_apriltag->refine_edges_;
-    detector_.refine_decode     = _params_tracker_landmark_apriltag->refine_decode_;
-    detector_.refine_pose       = _params_tracker_landmark_apriltag->refine_pose_;
 }
 
 // Destructor

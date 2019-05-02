@@ -329,7 +329,7 @@ TEST(Odom2D, KF_callback)
     params->angle_turned    = 6.28;
     params->max_time_span   = 100;
     params->cov_det         = 100;
-    params->unmeasured_perturbation_std = 0.000001;
+    params->unmeasured_perturbation_std = 0.0000001;
     Matrix3s unmeasured_cov = params->unmeasured_perturbation_std*params->unmeasured_perturbation_std*Matrix3s::Identity();
     ProcessorBasePtr prc_base = problem->installProcessor("ODOM 2D", "odom", sensor_odom2d, params);
     ProcessorOdom2DPtr processor_odom2d = std::static_pointer_cast<ProcessorOdom2D>(prc_base);
