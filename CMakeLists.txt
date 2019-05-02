@@ -335,9 +335,9 @@ INSTALL(FILES ${HDRS_YAML}
 
 INSTALL(FILES "${CMAKE_SOURCE_DIR}/cmake_modules/Findwolf${PROJECT_NAME}.cmake"
   DESTINATION "lib/cmake/wolf${PROJECT_NAME}")
-FILE(WRITE vision.found "")
-INSTALL(FILES vision.found
-  DESTINATION include/iri-algorithms/wolf/${PROJECT_NAME})
+FILE(WRITE ${PROJECT_NAME}.found "")
+INSTALL(FILES ${PROJECT_NAME}.found
+  DESTINATION include/iri-algorithms/wolf/plugin_${PROJECT_NAME})
 #install Find*.cmake
 configure_file("${CMAKE_SOURCE_DIR}/cmake_modules/wolf${PROJECT_NAME}Config.cmake"
                "${CMAKE_BINARY_DIR}/wolf${PROJECT_NAME}Config.cmake" @ONLY)
