@@ -207,13 +207,11 @@ TEST(Problem, StateBlocks)
 
     // 2 state blocks, fixed
     SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
-    ASSERT_EQ(P->getStateBlockPtrList().size(), (unsigned int) 2);
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(), (unsigned int) 2);
+    ASSERT_EQ(P->consumeStateBlockNotificationMap().size(), (unsigned int) 2);
 
     // 3 state blocks, fixed
     SensorBasePtr    St = P->installSensor   ("CAMERA", "camera",   xs, wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
-    ASSERT_EQ(P->getStateBlockPtrList().size(), (unsigned int) (2 + 3));
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(), (unsigned int) (2 + 3));
+    ASSERT_EQ(P->consumeStateBlockNotificationMap().size(), (unsigned int) (/*2 + */3)); // consume empties the notification map, so only should contain notification since last call
 
     ProcessorParamsTrackerFeaturePtr params = std::make_shared<ProcessorParamsTrackerFeature>();
     params->time_tolerance            = 0.1;
@@ -226,15 +224,13 @@ TEST(Problem, StateBlocks)
 
     // 2 state blocks, estimated
     P->emplaceFrame("PO 3D", KEY_FRAME, xs, 0);
-    ASSERT_EQ(P->getStateBlockPtrList().size(), (unsigned int)(2 + 3 + 2));
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(), (unsigned int)(2 + 3 + 2));
+    ASSERT_EQ(P->consumeStateBlockNotificationMap().size(), (unsigned int)(/*2 + 3*/ + 2)); // consume empties the notification map, so only should contain notification since last call
 
     //    P->print(4,1,1,1);
 
     // change some SB properties
     St->unfixExtrinsics();
-    ASSERT_EQ(P->getStateBlockPtrList().size(), (unsigned int)(2 + 3 + 2));
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(),(unsigned int)(2 + 3 + 2 /*+ 2*/)); // XXX: 2 more notifications on the same SB!
+    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // changes in state_blocks status (fix/state/localparam) does not raise a notification in problem, only ADD/REMOVE
 
     //    P->print(4,1,1,1);
 }

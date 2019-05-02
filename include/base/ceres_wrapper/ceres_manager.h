@@ -9,7 +9,7 @@
 //wolf includes
 #include "base/solver/solver_manager.h"
 #include "base/ceres_wrapper/cost_function_wrapper.h"
-#include "local_parametrization_wrapper.h"
+#include "base/ceres_wrapper/local_parametrization_wrapper.h"
 #include "base/ceres_wrapper/create_numeric_diff_cost_function.h"
 
 namespace ceres {
@@ -47,6 +47,11 @@ class CeresManager : public SolverManager
         ~CeresManager();
 
         ceres::Solver::Summary getSummary();
+
+        std::unique_ptr<ceres::Problem>& getCeresProblem()
+        {
+            return ceres_problem_;
+        }
 
         virtual void computeCovariances(CovarianceBlocksToBeComputed _blocks
                                         = CovarianceBlocksToBeComputed::ROBOT_LANDMARKS) override;
