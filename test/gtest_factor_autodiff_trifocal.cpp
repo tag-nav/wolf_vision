@@ -1,11 +1,11 @@
 #include "utils_gtest.h"
 
-#include "base/utils/logging.h"
+#include "core/utils/logging.h"
 
-#include "base/ceres_wrapper/ceres_manager.h"
-#include "base/processor/processor_tracker_feature_trifocal.h"
-#include "base/capture/capture_image.h"
-#include "base/factor/factor_autodiff_trifocal.h"
+#include "core/ceres_wrapper/ceres_manager.h"
+#include "core/processor/processor_tracker_feature_trifocal.h"
+#include "core/capture/capture_image.h"
+#include "core/factor/factor_autodiff_trifocal.h"
 
 using namespace Eigen;
 using namespace wolf;
@@ -849,7 +849,7 @@ TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_scale)
     }
 }
 
-#include "base/factor/factor_autodiff_distance_3D.h"
+#include "core/factor/factor_autodiff_distance_3D.h"
 
 TEST_F(FactorAutodiffTrifocalMultiPointTest, solve_multi_point_distance)
 {

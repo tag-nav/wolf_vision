@@ -392,7 +392,7 @@ ProcessorBasePtr ProcessorTrackerFeatureImage::create(const std::string& _unique
 } // namespace wolf
 
 // Register in the SensorFactory
-#include "base/processor/processor_factory.h"
+#include "core/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("IMAGE FEATURE", ProcessorTrackerFeatureImage)
 } // namespace wolf

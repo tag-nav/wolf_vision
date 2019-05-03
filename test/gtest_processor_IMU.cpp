@@ -5,16 +5,16 @@
  *      \author: jsola
  */
 
-#include "base/capture/capture_IMU.h"
-#include "base/processor/processor_IMU.h"
-#include "base/sensor/sensor_IMU.h"
-#include "base/common/wolf.h"
+#include "core/capture/capture_IMU.h"
+#include "core/processor/processor_IMU.h"
+#include "core/sensor/sensor_IMU.h"
+#include "core/common/wolf.h"
 
 #include "utils_gtest.h"
-#include "base/utils/logging.h"
+#include "core/utils/logging.h"
 
-#include "base/math/rotations.h"
-#include "base/ceres_wrapper/ceres_manager.h"
+#include "core/math/rotations.h"
+#include "core/ceres_wrapper/ceres_manager.h"
 
 #include <cmath>
 #include <iostream>

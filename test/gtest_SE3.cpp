@@ -6,7 +6,7 @@
  */
 
 
-#include "base/math/SE3.h"
+#include "core/math/SE3.h"
 #include "utils_gtest.h"
 
 

@@ -6,15 +6,15 @@
  */
 
 //Wolf
-#include "base/capture/capture_IMU.h"
-#include "base/factor/factor_pose_3D.h"
-#include "base/processor/processor_IMU.h"
-#include "base/sensor/sensor_IMU.h"
-#include "base/processor/processor_odom_3D.h"
+#include "core/capture/capture_IMU.h"
+#include "core/factor/factor_pose_3D.h"
+#include "core/processor/processor_IMU.h"
+#include "core/sensor/sensor_IMU.h"
+#include "core/processor/processor_odom_3D.h"
 #include "ceres_wrapper/ceres_manager.h"
 
 #include "utils_gtest.h"
-#include "base/utils/logging.h"
+#include "core/utils/logging.h"
 
 #include <iostream>
 #include <fstream>

@@ -2,7 +2,7 @@
 #define SENSOR_CAMERA_H
 
 //wolf includes
-#include "base/sensor/sensor_base.h"
+#include "core/sensor/sensor_base.h"
 
 namespace wolf
 {

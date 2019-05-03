@@ -9,7 +9,7 @@
 #include "utils_gtest.h"
 
 #include "src/sensor/sensor_camera.cpp"
-#include "base/sensor/sensor_factory.h"
+#include "core/sensor/sensor_factory.h"
 
 using namespace wolf;
 

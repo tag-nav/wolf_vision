@@ -6,11 +6,11 @@
  */
 
 #include "utils_gtest.h"
-#include "base/utils/logging.h"
+#include "core/utils/logging.h"
 
-#include "base/problem/problem.h"
-#include "base/ceres_wrapper/ceres_manager.h"
-#include "base/sensor/sensor_odom_3D.h"
+#include "core/problem/problem.h"
+#include "core/ceres_wrapper/ceres_manager.h"
+#include "core/sensor/sensor_odom_3D.h"
 
 #include <iostream>
 

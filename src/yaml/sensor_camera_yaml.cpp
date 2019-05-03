@@ -6,11 +6,11 @@
  */
 
 // wolf yaml
-#include "base/yaml/yaml_conversion.h"
+#include "core/yaml/yaml_conversion.h"
 
 // wolf
 #include "vision/sensor/sensor_camera.h"
-#include "base/common/factory.h"
+#include "core/common/factory.h"
 
 // yaml-cpp library
 #include <yaml-cpp/yaml.h>

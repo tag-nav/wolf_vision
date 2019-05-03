@@ -9,8 +9,8 @@
 #include <Eigen/Geometry>
 
 //Wolf
-#include "base/common/wolf.h"
-#include "base/math/rotations.h"
+#include "core/common/wolf.h"
+#include "core/math/rotations.h"
 
 //std
 #include <iostream>

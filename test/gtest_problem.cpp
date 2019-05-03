@@ -6,13 +6,13 @@
  */
 
 #include "utils_gtest.h"
-#include "base/utils/logging.h"
+#include "core/utils/logging.h"
 
-#include "base/problem/problem.h"
-#include "base/sensor/sensor_base.h"
-#include "base/sensor/sensor_odom_3D.h"
-#include "base/processor/processor_odom_3D.h"
-#include "base/processor/processor_tracker_feature_dummy.h"
+#include "core/problem/problem.h"
+#include "core/sensor/sensor_base.h"
+#include "core/sensor/sensor_odom_3D.h"
+#include "core/processor/processor_odom_3D.h"
+#include "core/processor/processor_tracker_feature_dummy.h"
 
 #include <iostream>
 

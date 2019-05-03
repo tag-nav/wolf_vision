@@ -2,8 +2,8 @@
 #define PROCESSOR_IMAGE_PARAMS_H
 
 // wolf
-#include "base/processor/processor_tracker_feature.h"
-#include "base/processor/processor_tracker_landmark.h"
+#include "core/processor/processor_tracker_feature.h"
+#include "core/processor/processor_tracker_landmark.h"
 
 namespace wolf
 {

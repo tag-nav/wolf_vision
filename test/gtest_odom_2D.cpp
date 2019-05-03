@@ -8,14 +8,14 @@
 #include "utils_gtest.h"
 
 // Classes under test
-#include "base/processor/processor_odom_2D.h"
-#include "base/factor/factor_odom_2D.h"
+#include "core/processor/processor_odom_2D.h"
+#include "core/factor/factor_odom_2D.h"
 
 // Wolf includes
-#include "base/sensor/sensor_odom_2D.h"
-#include "base/state_block/state_block.h"
-#include "base/common/wolf.h"
-#include "base/ceres_wrapper/ceres_manager.h"
+#include "core/sensor/sensor_odom_2D.h"
+#include "core/state_block/state_block.h"
+#include "core/common/wolf.h"
+#include "core/ceres_wrapper/ceres_manager.h"
 
 // STL includes
 #include <map>
@@ -26,7 +26,7 @@
 // General includes
 #include <iostream>
 #include <iomanip>      // std::setprecision
-#include "base/capture/capture_pose.h"
+#include "core/capture/capture_pose.h"
 
 using namespace wolf;
 using namespace Eigen;

@@ -5,10 +5,10 @@
 #include "vision/sensor/sensor_camera.h"
 #include "vision/capture/capture_image.h"
 #include "vision/feature/feature_point_image.h"
-#include "base/state_block/state_block.h"
-#include "base/state_block/state_quaternion.h"
-#include "base/processor/processor_tracker_feature.h"
-#include "base/factor/factor_epipolar.h"
+#include "core/state_block/state_block.h"
+#include "core/state_block/state_quaternion.h"
+#include "core/processor/processor_tracker_feature.h"
+#include "core/factor/factor_epipolar.h"
 #include "vision/processor/processor_params_image.h"
 
 // vision_utils

@@ -3,8 +3,8 @@
 #define PROCESSOR_IMU_UNITTESTER_H
 
 // Wolf
-#include "base/processor/processor_IMU.h"
-#include "base/processor/processor_motion.h"
+#include "core/processor/processor_IMU.h"
+#include "core/processor/processor_motion.h"
 
 namespace wolf {
     struct IMU_jac_bias{ //struct used for checking jacobians by finite difference
@@ -196,8 +196,8 @@ namespace wolf {
 /////////////////////////////////////////////////////////
 
 // Wolf
-#include "base/state_block/state_block.h"
-#include "base/math/rotations.h"
+#include "core/state_block/state_block.h"
+#include "core/math/rotations.h"
 
 namespace wolf{
 

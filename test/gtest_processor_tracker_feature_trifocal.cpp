@@ -1,12 +1,12 @@
 #include "utils_gtest.h"
 
-#include "base/common/wolf.h"
-#include "base/utils/logging.h"
+#include "core/common/wolf.h"
+#include "core/utils/logging.h"
 
 #include "vision_utils.h"
 
 #include "vision/processor/processor_tracker_feature_trifocal.h"
-#include "base/processor/processor_odom_3D.h"
+#include "core/processor/processor_odom_3D.h"
 #include "vision/capture/capture_image.h"
 #include "vision/sensor/sensor_camera.h"
 

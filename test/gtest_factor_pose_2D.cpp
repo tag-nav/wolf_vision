@@ -5,12 +5,12 @@
  *      \author: jsola
  */
 
-#include "base/factor/factor_pose_2D.h"
+#include "core/factor/factor_pose_2D.h"
 #include "utils_gtest.h"
 
-#include "base/capture/capture_motion.h"
+#include "core/capture/capture_motion.h"
 
-#include "base/ceres_wrapper/ceres_manager.h"
+#include "core/ceres_wrapper/ceres_manager.h"
 
 using namespace Eigen;
 using namespace wolf;

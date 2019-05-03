@@ -6,13 +6,13 @@
  */
 
 #include "utils_gtest.h"
-#include "base/utils/logging.h"
+#include "core/utils/logging.h"
 
-#include "base/frame/frame_base.h"
-#include "base/sensor/sensor_odom_2D.h"
-#include "base/processor/processor_odom_2D.h"
-#include "base/factor/factor_odom_2D.h"
-#include "base/capture/capture_motion.h"
+#include "core/frame/frame_base.h"
+#include "core/sensor/sensor_odom_2D.h"
+#include "core/processor/processor_odom_2D.h"
+#include "core/factor/factor_odom_2D.h"
+#include "core/capture/capture_motion.h"
 
 #include <iostream>
 
@@ -129,7 +129,7 @@ TEST(FrameBase, LinksToTree)
     ASSERT_TRUE(F1->getCaptureList().empty());
 }
 
-#include "base/state_block/state_quaternion.h"
+#include "core/state_block/state_quaternion.h"
 TEST(FrameBase, GetSetState)
 {
     // Create PQV_3D state blocks

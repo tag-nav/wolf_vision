@@ -6,15 +6,15 @@
  */
 
 //Wolf
-#include "base/processor/processor_IMU.h"
-#include "base/sensor/sensor_IMU.h"
-#include "base/common/wolf.h"
-#include "base/sensor/sensor_odom_3D.h"
-#include "base/processor/processor_odom_3D.h"
-#include "base/ceres_wrapper/ceres_manager.h"
+#include "core/processor/processor_IMU.h"
+#include "core/sensor/sensor_IMU.h"
+#include "core/common/wolf.h"
+#include "core/sensor/sensor_odom_3D.h"
+#include "core/processor/processor_odom_3D.h"
+#include "core/ceres_wrapper/ceres_manager.h"
 
 #include "utils_gtest.h"
-#include "base/utils/logging.h"
+#include "core/utils/logging.h"
 
 // make my life easier
 using namespace Eigen;

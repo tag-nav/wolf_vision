@@ -1,8 +1,8 @@
 #include "vision/landmark/landmark_AHP.h"
 
-#include "base/state_block/state_homogeneous_3D.h"
-#include "base/common/factory.h"
-#include "base/yaml/yaml_conversion.h"
+#include "core/state_block/state_homogeneous_3D.h"
+#include "core/common/factory.h"
+#include "core/yaml/yaml_conversion.h"
 
 namespace wolf {
 

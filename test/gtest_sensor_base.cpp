@@ -5,7 +5,7 @@
  *      \author: jsola
  */
 
-#include "base/sensor/sensor_base.h"
+#include "core/sensor/sensor_base.h"
 
 #include "utils_gtest.h"
 

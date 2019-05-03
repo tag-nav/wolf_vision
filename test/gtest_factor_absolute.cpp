@@ -6,11 +6,11 @@
  */
 
 #include "utils_gtest.h"
-#include "base/factor/factor_block_absolute.h"
-#include "base/factor/factor_quaternion_absolute.h"
-#include "base/capture/capture_motion.h"
+#include "core/factor/factor_block_absolute.h"
+#include "core/factor/factor_quaternion_absolute.h"
+#include "core/capture/capture_motion.h"
 
-#include "base/ceres_wrapper/ceres_manager.h"
+#include "core/ceres_wrapper/ceres_manager.h"
 
 using namespace Eigen;
 using namespace wolf;

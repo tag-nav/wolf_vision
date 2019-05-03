@@ -1,8 +1,8 @@
 #include "vision/sensor/sensor_camera.h"
 
-#include "base/math/pinhole_tools.h"
-#include "base/state_block/state_block.h"
-#include "base/state_block/state_quaternion.h"
+#include "core/math/pinhole_tools.h"
+#include "core/state_block/state_block.h"
+#include "core/state_block/state_quaternion.h"
 
 namespace wolf
 {
@@ -63,7 +63,7 @@ SensorBasePtr SensorCamera::create(const std::string& _unique_name, //
 } // namespace wolf
 
 // Register in the SensorFactory
-#include "base/sensor/sensor_factory.h"
+#include "core/sensor/sensor_factory.h"
 namespace wolf
 {
 WOLF_REGISTER_SENSOR("CAMERA", SensorCamera)

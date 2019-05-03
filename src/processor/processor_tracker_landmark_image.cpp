@@ -2,16 +2,16 @@
 
 #include "vision/capture/capture_image.h"
 #include "vision/factor/factor_AHP.h"
-#include "base/feature/feature_base.h"
+#include "core/feature/feature_base.h"
 #include "vision/feature/feature_point_image.h"
-#include "base/frame/frame_base.h"
-#include "base/utils/logging.h"
-#include "base/map/map_base.h"
-#include "base/math/pinhole_tools.h"
-#include "base/problem/problem.h"
+#include "core/frame/frame_base.h"
+#include "core/utils/logging.h"
+#include "core/map/map_base.h"
+#include "core/math/pinhole_tools.h"
+#include "core/problem/problem.h"
 #include "vision/sensor/sensor_camera.h"
-#include "base/state_block/state_block.h"
-#include "base/common/time_stamp.h"
+#include "core/state_block/state_block.h"
+#include "core/common/time_stamp.h"
 
 // vision_utils
 #include <detectors.h>
@@ -501,7 +501,7 @@ ProcessorBasePtr ProcessorTrackerLandmarkImage::create(const std::string& _uniqu
 } // namespace wolf
 
 // Register in the SensorFactory
-#include "base/processor/processor_factory.h"
+#include "core/processor/processor_factory.h"
 namespace wolf {
 WOLF_REGISTER_PROCESSOR("IMAGE LANDMARK", ProcessorTrackerLandmarkImage)
 } // namespace wolf

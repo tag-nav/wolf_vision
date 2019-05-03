@@ -2,7 +2,7 @@
 #define _PROCESSOR_TRACKER_FEATURE_TRIFOCAL_H_
 
 //Wolf includes
-#include "base/processor/processor_tracker_feature.h"
+#include "core/processor/processor_tracker_feature.h"
 #include "vision/capture/capture_image.h"
 
 // Vision utils

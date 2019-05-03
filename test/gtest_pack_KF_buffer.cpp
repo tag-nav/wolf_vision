@@ -7,13 +7,13 @@
 //Wolf
 #include "utils_gtest.h"
 
-#include "base/processor/processor_odom_2D.h"
-#include "base/sensor/sensor_odom_2D.h"
+#include "core/processor/processor_odom_2D.h"
+#include "core/sensor/sensor_odom_2D.h"
 
-#include "base/processor/processor_tracker_feature_dummy.h"
-#include "base/capture/capture_void.h"
+#include "core/processor/processor_tracker_feature_dummy.h"
+#include "core/capture/capture_void.h"
 
-#include "base/problem/problem.h"
+#include "core/problem/problem.h"
 
 // STL
 #include <iterator>

@@ -7,10 +7,10 @@
 
 #include "utils_gtest.h"
 
-#include "base/factor/factor_odom_3D.h"
-#include "base/capture/capture_motion.h"
+#include "core/factor/factor_odom_3D.h"
+#include "core/capture/capture_motion.h"
 
-#include "base/ceres_wrapper/ceres_manager.h"
+#include "core/ceres_wrapper/ceres_manager.h"
 
 using namespace Eigen;
 using namespace wolf;

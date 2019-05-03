@@ -2,7 +2,7 @@
 #define LANDMARK_AHP_H
 
 //Wolf includes
-#include "base/landmark/landmark_base.h"
+#include "core/landmark/landmark_base.h"
 
 // yaml
 #include <yaml-cpp/yaml.h>

@@ -7,12 +7,12 @@
 
 #include "utils_gtest.h"
 
-#include "base/sensor/sensor_odom_2D.h"
-#include "base/capture/capture_void.h"
-#include "base/feature/feature_odom_2D.h"
-#include "base/factor/factor_odom_2D.h"
-#include "base/factor/factor_odom_2D_analytic.h"
-#include "base/factor/factor_autodiff.h"
+#include "core/sensor/sensor_odom_2D.h"
+#include "core/capture/capture_void.h"
+#include "core/feature/feature_odom_2D.h"
+#include "core/factor/factor_odom_2D.h"
+#include "core/factor/factor_odom_2D_analytic.h"
+#include "core/factor/factor_autodiff.h"
 
 using namespace wolf;
 using namespace Eigen;

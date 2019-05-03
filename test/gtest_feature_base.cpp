@@ -5,7 +5,7 @@
  *      Author: jsola
  */
 
-#include "base/feature/feature_base.h"
+#include "core/feature/feature_base.h"
 
 #include "utils_gtest.h"
 

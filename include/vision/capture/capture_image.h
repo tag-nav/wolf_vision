@@ -2,7 +2,7 @@
 #define CAPTURE_IMAGE_H
 
 //Wolf includes
-#include "base/capture/capture_base.h"
+#include "core/capture/capture_base.h"
 #include "vision/feature/feature_point_image.h"
 #include "vision/sensor/sensor_camera.h"
 

@@ -6,11 +6,11 @@
  */
 
 #include "utils_gtest.h"
-#include "base/utils/logging.h"
+#include "core/utils/logging.h"
 
-#include "base/processor/motion_buffer.h"
+#include "core/processor/motion_buffer.h"
 
-#include "base/common/wolf.h"
+#include "core/common/wolf.h"
 
 #include <iostream>
 
