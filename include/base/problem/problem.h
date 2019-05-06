@@ -140,7 +140,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Emplace frame from string frame_structure
          * \param _frame_structure String indicating the frame structure.
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _frame_key_type Either KEY, AUXILIARY or NON_ESTIMATED
          * \param _frame_state State vector; must match the size and format of the chosen frame structure
          * \param _time_stamp Time stamp of the frame
          *
@@ -156,7 +156,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Emplace frame from string frame_structure without state
          * \param _frame_structure String indicating the frame structure.
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _frame_key_type Either KEY, AUXILIARY or NON_ESTIMATED
          * \param _time_stamp Time stamp of the frame
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem:
@@ -169,7 +169,7 @@ class Problem : public std::enable_shared_from_this<Problem>
                                   const TimeStamp& _time_stamp);
 
         /** \brief Emplace frame from string frame_structure without structure
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _frame_key_type Either KEY, AUXILIARY or NON_ESTIMATED
          * \param _frame_state State vector; must match the size and format of the chosen frame structure
          * \param _time_stamp Time stamp of the frame
          *
@@ -183,7 +183,7 @@ class Problem : public std::enable_shared_from_this<Problem>
                                   const TimeStamp& _time_stamp);
 
         /** \brief Emplace frame from string frame_structure without structure nor state
-         * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
+         * \param _frame_key_type Either KEY, AUXILIARY or NON_ESTIMATED
          * \param _time_stamp Time stamp of the frame
          *
          * This acts as a Frame factory, but also takes care to update related lists in WolfProblem:
@@ -195,23 +195,41 @@ class Problem : public std::enable_shared_from_this<Problem>
                                   const TimeStamp& _time_stamp);
 
         // Frame getters
-        FrameBasePtr    getLastFrame         ( );
-        FrameBasePtr    getLastKeyFrame      ( );
-        FrameBasePtr    closestKeyFrameToTimeStamp(const TimeStamp& _ts);
+        FrameBasePtr getLastFrame( ) const;
+        FrameBasePtr getLastKeyFrame( ) const;
+        FrameBasePtr getLastKeyOrAuxFrame( ) const;
+        FrameBasePtr closestKeyFrameToTimeStamp(const TimeStamp& _ts) const;
+        FrameBasePtr closestKeyOrAuxFrameToTimeStamp(const TimeStamp& _ts) const;
 
-        /** \brief Give the permission to a processor to create a new keyFrame
+        /** \brief Give the permission to a processor to create a new key Frame
          *
-         * This should implement a black list of processors that have forbidden keyframe creation.
+         * This should implement a black list of processors that have forbidden key frame creation.
          *   - This decision is made at problem level, not at processor configuration level.
-         *   - Therefore, if you want to permanently configure a processor for not creating keyframes, see Processor::voting_active_ and its accessors.
+         *   - Therefore, if you want to permanently configure a processor for not creating key frames, see Processor::voting_active_ and its accessors.
          */
         bool permitKeyFrame(ProcessorBasePtr _processor_ptr);
 
         /** \brief New key frame callback
          *
-         * New key frame callback: It should be called by any processor that creates a new keyframe. It calls the keyFrameCallback of the rest of processors.
+         * New key frame callback: It should be called by any processor that creates a new key frame. It calls the keyFrameCallback of the rest of processors.
          */
         void keyFrameCallback(FrameBasePtr _keyframe_ptr, //
+                              ProcessorBasePtr _processor_ptr, //
+                              const Scalar& _time_tolerance);
+
+        /** \brief Give the permission to a processor to create a new auxiliary Frame
+         *
+         * This should implement a black list of processors that have forbidden auxiliary frame creation.
+         *   - This decision is made at problem level, not at processor configuration level.
+         *   - Therefore, if you want to permanently configure a processor for not creating estimated frames, see Processor::voting_active_ and its accessors.
+         */
+        bool permitAuxFrame(ProcessorBasePtr _processor_ptr);
+
+        /** \brief New auxiliary frame callback
+         *
+         * New auxiliary frame callback: It should be called by any processor that creates a new auxiliary frame. It calls the auxiliaryFrameCallback of the processor motion.
+         */
+        void auxFrameCallback(FrameBasePtr _frame_ptr, //
                               ProcessorBasePtr _processor_ptr, //
                               const Scalar& _time_tolerance);
 
@@ -242,6 +260,7 @@ class Problem : public std::enable_shared_from_this<Problem>
         bool getCovarianceBlock(StateBlockPtr _state, Eigen::MatrixXs& _cov, const int _row_and_col = 0);
         bool getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& _covariance);
         bool getLastKeyFrameCovariance(Eigen::MatrixXs& _covariance);
+        bool getLastKeyOrAuxFrameCovariance(Eigen::MatrixXs& _covariance);
         bool getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::MatrixXs& _covariance);
 
         // Solver management ----------------------------------------

@@ -61,7 +61,7 @@ class SolverManagerWrapper : public SolverManager
         };
 
         virtual void computeCovariances(const CovarianceBlocksToBeComputed blocks){};
-        virtual void computeCovariances(const StateBlockPtrList& st_list){};
+        virtual void computeCovariances(const std::vector<StateBlockPtr>& st_list){};
 
         // The following are dummy implementations
         bool    hasConverged()  { return true;      }
@@ -504,7 +504,7 @@ TEST(SolverManager, AddFactor)
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
@@ -531,7 +531,7 @@ TEST(SolverManager, RemoveFactor)
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
@@ -564,7 +564,7 @@ TEST(SolverManager, AddRemoveFactor)
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
@@ -598,7 +598,7 @@ TEST(SolverManager, DoubleRemoveFactor)
     StateBlockPtr sb_ptr = std::make_shared<StateBlock>(state);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));

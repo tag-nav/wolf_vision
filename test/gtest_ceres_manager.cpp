@@ -318,7 +318,7 @@ TEST(CeresManager, AddFactor)
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
@@ -340,7 +340,7 @@ TEST(CeresManager, DoubleAddFactor)
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
@@ -365,7 +365,7 @@ TEST(CeresManager, RemoveFactor)
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
@@ -393,7 +393,7 @@ TEST(CeresManager, AddRemoveFactor)
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
@@ -420,7 +420,7 @@ TEST(CeresManager, DoubleRemoveFactor)
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
-    FrameBasePtr        F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr        F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr      C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr      f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(f->addFactor(std::make_shared<FactorPose2D>(f)));
@@ -547,7 +547,7 @@ TEST(CeresManager, FactorsRemoveLocalParam)
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) 2 factors quaternion
-    FrameBasePtr                    F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr                    F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr                  C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr                  f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
@@ -589,7 +589,7 @@ TEST(CeresManager, FactorsUpdateLocalParam)
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) 2 factors quaternion
-    FrameBasePtr                    F = P->emplaceFrame(KEY_FRAME, P->zeroState(), TimeStamp(0));
+    FrameBasePtr                    F = P->emplaceFrame(KEY, P->zeroState(), TimeStamp(0));
     CaptureBasePtr                  C = F->addCapture(std::make_shared<CaptureVoid>(0, nullptr));
     FeatureBasePtr                  f = C->addFeature(std::make_shared<FeatureBase>("ODOM 2D", Vector3s::Zero(), Matrix3s::Identity()));
     FactorQuaternionAbsolutePtr c1 = std::static_pointer_cast<FactorQuaternionAbsolute>(f->addFactor(std::make_shared<FactorQuaternionAbsolute>(F->getO())));
