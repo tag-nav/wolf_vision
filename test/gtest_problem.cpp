@@ -9,6 +9,7 @@
 #include "base/utils/logging.h"
 
 #include "base/problem/problem.h"
+#include "base/solver/solver_manager.h"
 #include "base/sensor/sensor_base.h"
 #include "base/sensor/sensor_odom_3D.h"
 #include "base/processor/processor_odom_3D.h"
@@ -19,11 +20,36 @@
 using namespace wolf;
 using namespace Eigen;
 
+
+WOLF_PTR_TYPEDEFS(DummySolverManager);
+
+struct DummySolverManager : public SolverManager
+{
+  DummySolverManager(const ProblemPtr& _problem)
+    : SolverManager(_problem)
+  {
+    //
+  }
+  virtual void computeCovariances(const CovarianceBlocksToBeComputed blocks){};
+  virtual void computeCovariances(const std::vector<StateBlockPtr>& st_list){};
+  virtual bool hasConverged(){return true;};
+  virtual SizeStd iterations(){return 0;};
+  virtual Scalar initialCost(){return 0;};
+  virtual Scalar finalCost(){return 0;};
+  virtual std::string solveImpl(const ReportVerbosity report_level){return std::string("");};
+  virtual void addFactor(const FactorBasePtr& fac_ptr){};
+  virtual void removeFactor(const FactorBasePtr& fac_ptr){};
+  virtual void addStateBlock(const StateBlockPtr& state_ptr){};
+  virtual void removeStateBlock(const StateBlockPtr& state_ptr){};
+  virtual void updateStateBlockStatus(const StateBlockPtr& state_ptr){};
+  virtual void updateStateBlockLocalParametrization(const StateBlockPtr& state_ptr){};
+};
+
 TEST(Problem, create)
 {
     ProblemPtr P = Problem::create("POV 3D");
 
-    // check double ointers to branches
+    // check double pointers to branches
     ASSERT_EQ(P, P->getHardware()->getProblem());
     ASSERT_EQ(P, P->getTrajectory()->getProblem());
     ASSERT_EQ(P, P->getMap()->getProblem());
@@ -109,20 +135,20 @@ TEST(Problem, SetOrigin_PO_2D)
     P->setPrior(x0, P0, t0, 1.0);
 
     // check that no sensor has been added
-    ASSERT_EQ(P->getHardware()->getSensorList().size(), (unsigned int) 0);
+    ASSERT_EQ(P->getHardware()->getSensorList().size(), (SizeStd) 0);
 
     // check that the state is correct
     ASSERT_MATRIX_APPROX(x0, P->getCurrentState(), Constants::EPS_SMALL );
 
     // check that we have one frame, one capture, one feature, one factor
     TrajectoryBasePtr T = P->getTrajectory();
-    ASSERT_EQ(T->getFrameList().size(), (unsigned int) 1);
+    ASSERT_EQ(T->getFrameList().size(), (SizeStd) 1);
     FrameBasePtr F = P->getLastFrame();
-    ASSERT_EQ(F->getCaptureList().size(), (unsigned int) 1);
+    ASSERT_EQ(F->getCaptureList().size(), (SizeStd) 1);
     CaptureBasePtr C = F->getCaptureList().front();
-    ASSERT_EQ(C->getFeatureList().size(), (unsigned int) 1);
+    ASSERT_EQ(C->getFeatureList().size(), (SizeStd) 1);
     FeatureBasePtr f = C->getFeatureList().front();
-    ASSERT_EQ(f->getFactorList().size(), (unsigned int) 1);
+    ASSERT_EQ(f->getFactorList().size(), (SizeStd) 1);
 
     // check that the factor is absolute (no pointers to other F, f, or L)
     FactorBasePtr c = f->getFactorList().front();
@@ -146,20 +172,20 @@ TEST(Problem, SetOrigin_PO_3D)
     P->setPrior(x0, P0, t0, 1.0);
 
     // check that no sensor has been added
-    ASSERT_EQ(P->getHardware()->getSensorList().size(), (unsigned int) 0);
+    ASSERT_EQ(P->getHardware()->getSensorList().size(), (SizeStd) 0);
 
     // check that the state is correct
     ASSERT_TRUE((x0 - P->getCurrentState()).isMuchSmallerThan(1, Constants::EPS_SMALL));
 
     // check that we have one frame, one capture, one feature, one factor
     TrajectoryBasePtr T = P->getTrajectory();
-    ASSERT_EQ(T->getFrameList().size(), (unsigned int) 1);
+    ASSERT_EQ(T->getFrameList().size(), (SizeStd) 1);
     FrameBasePtr F = P->getLastFrame();
-    ASSERT_EQ(F->getCaptureList().size(), (unsigned int) 1);
+    ASSERT_EQ(F->getCaptureList().size(), (SizeStd) 1);
     CaptureBasePtr C = F->getCaptureList().front();
-    ASSERT_EQ(C->getFeatureList().size(), (unsigned int) 1);
+    ASSERT_EQ(C->getFeatureList().size(), (SizeStd) 1);
     FeatureBasePtr f = C->getFeatureList().front();
-    ASSERT_EQ(f->getFactorList().size(), (unsigned int) 1);
+    ASSERT_EQ(f->getFactorList().size(), (SizeStd) 1);
 
     // check that the factor is absolute (no pointers to other F, f, or L)
     FactorBasePtr c = f->getFactorList().front();
@@ -190,7 +216,7 @@ TEST(Problem, emplaceFrame_factory)
     ASSERT_EQ(f2->getType().compare("POV 3D"), 0);
 
     // check that all frames are effectively in the trajectory
-    ASSERT_EQ(P->getTrajectory()->getFrameList().size(), (unsigned int) 3);
+    ASSERT_EQ(P->getTrajectory()->getFrameList().size(), (SizeStd) 3);
 
     // check that all frames are linked to Problem
     ASSERT_EQ(f0->getProblem(), P);
@@ -207,11 +233,11 @@ TEST(Problem, StateBlocks)
 
     // 2 state blocks, fixed
     SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
-    ASSERT_EQ(P->consumeStateBlockNotificationMap().size(), (unsigned int) 2);
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd) 2);
 
     // 3 state blocks, fixed
     SensorBasePtr    St = P->installSensor   ("CAMERA", "camera",   xs, wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
-    ASSERT_EQ(P->consumeStateBlockNotificationMap().size(), (unsigned int) (/*2 + */3)); // consume empties the notification map, so only should contain notification since last call
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd) (2 + 3));
 
     ProcessorParamsTrackerFeaturePtr params = std::make_shared<ProcessorParamsTrackerFeature>();
     params->time_tolerance            = 0.1;
@@ -223,16 +249,40 @@ TEST(Problem, StateBlocks)
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
     // 2 state blocks, estimated
-    P->emplaceFrame("PO 3D", KEY, xs, 0);
-    ASSERT_EQ(P->consumeStateBlockNotificationMap().size(), (unsigned int)(/*2 + 3*/ + 2)); // consume empties the notification map, so only should contain notification since last call
+    auto KF = P->emplaceFrame("PO 3D", KEY, xs, 0);
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd)(2 + 3 + 2));
+
+    // Notifications
+    Notification notif;
+    ASSERT_TRUE(P->getStateBlockNotification(KF->getP(), notif));
+    ASSERT_EQ(notif, ADD);
+    ASSERT_TRUE(P->getStateBlockNotification(KF->getO(), notif));
+    ASSERT_EQ(notif, ADD);
 
     //    P->print(4,1,1,1);
 
     // change some SB properties
     St->unfixExtrinsics();
-    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // changes in state_blocks status (fix/state/localparam) does not raise a notification in problem, only ADD/REMOVE
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd)(2 + 3 + 2)); // changes in state_blocks status (fix/state/localparam) does not raise a notification in problem, only ADD/REMOVE
 
     //    P->print(4,1,1,1);
+
+    // consume notifications
+    DummySolverManagerPtr SM = std::make_shared<DummySolverManager>(P);
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd)(2 + 3 + 2));
+    SM->update(); // calls P->consumeStateBlockNotificationMap();
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd) (0)); // consume empties the notification map
+
+    // remove frame
+    auto SB_P = KF->getP();
+    auto SB_O = KF->getO();
+    KF->remove();
+    ASSERT_EQ(P->getStateBlockNotificationMapSize(), (SizeStd)(2));
+    ASSERT_TRUE(P->getStateBlockNotification(SB_P, notif));
+    ASSERT_EQ(notif, REMOVE);
+    ASSERT_TRUE(P->getStateBlockNotification(SB_O, notif));
+    ASSERT_EQ(notif, REMOVE);
+
 }
 
 TEST(Problem, Covariances)

@@ -425,6 +425,16 @@ void Problem::removeStateBlock(StateBlockPtr _state_ptr)
         state_block_notification_map_[_state_ptr] = REMOVE;
 }
 
+bool Problem::getStateBlockNotification(const StateBlockPtr& sb_ptr, Notification& notif) const
+{
+    std::lock_guard<std::mutex> lock(mut_state_block_notifications_);
+    if (state_block_notification_map_.find(sb_ptr) == state_block_notification_map_.end())
+        return false;
+
+    notif = state_block_notification_map_.at(sb_ptr);
+    return true;
+}
+
 FactorBasePtr Problem::addFactor(FactorBasePtr _factor_ptr)
 {
     std::lock_guard<std::mutex> lock(mut_factor_notifications_);
@@ -464,6 +474,16 @@ void Problem::removeFactor(FactorBasePtr _factor_ptr)
     // Add REMOVE notification
     else
         factor_notification_map_[_factor_ptr] = REMOVE;
+}
+
+bool Problem::getFactorNotification(const FactorBasePtr& fac_ptr, Notification& notif) const
+{
+    std::lock_guard<std::mutex> lock(mut_factor_notifications_);
+    if (factor_notification_map_.find(fac_ptr) == factor_notification_map_.end())
+        return false;
+
+    notif = factor_notification_map_.at(fac_ptr);
+    return true;
 }
 
 void Problem::clearCovariance()

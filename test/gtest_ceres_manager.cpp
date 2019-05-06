@@ -401,7 +401,7 @@ TEST(CeresManager, AddRemoveFactor)
     // remove factor
     P->removeFactor(c);
 
-    ASSERT_TRUE(P->consumeFactorNotificationMap().empty()); // add+remove = empty
+    ASSERT_TRUE(P->getFactorNotificationMapSize() == 0); // add+remove = empty
 
     // update solver
     ceres_manager_ptr->update();
