@@ -9,7 +9,7 @@
 #define TRUNK_SRC_SOLVER_COST_FUNCTION_SPARSE_BASE_H_
 
 //wolf includes
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 #include "cost_function_base.h"
 
 // CERES JET

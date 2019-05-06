@@ -9,7 +9,7 @@
 #define _WOLF_PROCESSOR_DIFF_DRIVE_H_
 
 #include "base/processor/processor_motion.h"
-#include "base/diff_drive_tools.h"
+#include "base/processor/diff_drive_tools.h"
 
 namespace wolf {
 
@@ -29,7 +29,6 @@ struct ProcessorParamsDiffDrive : public ProcessorParamsMotion
 //  {
 //      time_tolerance = _time_tolerance;
 //  }
-  Scalar unmeasured_perturbation_std = 0.0001;
 };
 
 /**
@@ -62,7 +61,6 @@ protected:
 
   /// @brief Intrinsic params
   ProcessorParamsDiffDrivePtr params_motion_diff_drive_;
-  MatrixXs unmeasured_perturbation_cov_;
 
   virtual void computeCurrentDelta(const Eigen::VectorXs& _data,
                                    const Eigen::MatrixXs& _data_cov,

@@ -4,14 +4,14 @@
 #include "base/factor/factor_AHP.h"
 #include "base/feature/feature_base.h"
 #include "base/feature/feature_point_image.h"
-#include "base/frame_base.h"
-#include "base/logging.h"
-#include "base/map_base.h"
-#include "base/pinhole_tools.h"
-#include "base/problem.h"
+#include "base/frame/frame_base.h"
+#include "base/utils/logging.h"
+#include "base/map/map_base.h"
+#include "base/math/pinhole_tools.h"
+#include "base/problem/problem.h"
 #include "base/sensor/sensor_camera.h"
-#include "base/state_block.h"
-#include "base/time_stamp.h"
+#include "base/state_block/state_block.h"
+#include "base/common/time_stamp.h"
 
 // vision_utils
 #include <detectors.h>
@@ -225,7 +225,7 @@ bool ProcessorTrackerLandmarkImage::voteForKeyFrame()
 //    return landmarks_tracked_ < params_tracker_landmark_image_->min_features_for_keyframe;
 }
 
-unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out)
+unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_incoming_out)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -233,7 +233,7 @@ unsigned int ProcessorTrackerLandmarkImage::detectNewFeatures(const unsigned int
     cv::KeyPointsFilter keypoint_filter;
     unsigned int n_new_features = 0;
 
-    for (unsigned int n_iterations = 0; n_iterations < _max_features; n_iterations++)
+    for (unsigned int n_iterations = 0; _max_features == -1 || n_iterations < _max_features; n_iterations++)
     {
         if (active_search_ptr_->pickEmptyRoi(roi))
         {

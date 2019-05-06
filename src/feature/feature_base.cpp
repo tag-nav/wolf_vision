@@ -65,7 +65,7 @@ FrameBasePtr FeatureBase::getFrame() const
 FactorBasePtr FeatureBase::addConstrainedBy(FactorBasePtr _fac_ptr)
 {
     constrained_by_list_.push_back(_fac_ptr);
-    _fac_ptr->setFeatureOtherPtr(shared_from_this());
+    _fac_ptr->setFeatureOther(shared_from_this());
     return _fac_ptr;
 }
 
@@ -137,7 +137,7 @@ Eigen::MatrixXs FeatureBase::computeSqrtUpper(const Eigen::MatrixXs & _info) con
     {
         std::cout << "Linking FeatureBase" << std::endl;
         _cpt_ptr->addFeature(shared_from_this());
-        this->setCapturePtr(_cpt_ptr);
+        this->setCapture(_cpt_ptr);
         this->setProblem(_cpt_ptr->getProblem());
     }
 

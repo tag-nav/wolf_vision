@@ -7,11 +7,11 @@
 
 #include "base/feature/feature_polyline_2D.h"
 #include "base/landmark/landmark_polyline_2D.h"
-#include "base/local_parametrization_polyline_extreme.h"
+#include "base/state_block/local_parametrization_polyline_extreme.h"
 #include "base/factor/factor_point_2D.h"
 #include "base/factor/factor_point_to_line_2D.h"
-#include "base/state_block.h"
-#include "base/factory.h"
+#include "base/state_block/state_block.h"
+#include "base/common/factory.h"
 #include "base/yaml/yaml_conversion.h"
 
 namespace wolf
@@ -26,9 +26,9 @@ LandmarkPolyline2D::LandmarkPolyline2D(StateBlockPtr _p_ptr, StateBlockPtr _o_pt
         point_state_ptr_vector_.push_back(std::make_shared<StateBlock>(_points.col(i).head<2>()));
 
     if (!first_defined_)
-        point_state_ptr_vector_.front()->setLocalParametrizationPtr(std::make_shared<LocalParametrizationPolylineExtreme>(point_state_ptr_vector_[1]));
+        point_state_ptr_vector_.front()->setLocalParametrization(std::make_shared<LocalParametrizationPolylineExtreme>(point_state_ptr_vector_[1]));
     if (!last_defined_)
-        point_state_ptr_vector_.back()->setLocalParametrizationPtr(std::make_shared<LocalParametrizationPolylineExtreme>(point_state_ptr_vector_[point_state_ptr_vector_.size() - 2]));
+        point_state_ptr_vector_.back()->setLocalParametrization(std::make_shared<LocalParametrizationPolylineExtreme>(point_state_ptr_vector_[point_state_ptr_vector_.size() - 2]));
 
     assert(point_state_ptr_vector_.front()->hasLocalParametrization() ? !first_defined_ : first_defined_);
     assert(point_state_ptr_vector_.back()->hasLocalParametrization() ? !last_defined_ : last_defined_);
@@ -67,7 +67,7 @@ const Eigen::VectorXs LandmarkPolyline2D::getPointVector(int _i) const
     return point_state_ptr_vector_[_i-first_id_]->getState();
 }
 
-StateBlockPtr LandmarkPolyline2D::getPointStateBlockPtr(int _i)
+StateBlockPtr LandmarkPolyline2D::getPointStateBlock(int _i)
 {
 	assert(_i-first_id_ >= 0 && _i-first_id_ <= (int)(point_state_ptr_vector_.size()) && "out of range!");
 	return point_state_ptr_vector_[_i-first_id_];
@@ -230,7 +230,7 @@ void LandmarkPolyline2D::mergePoints(int _remove_id, int _remain_id)
     assert(_remain_id < getLastId() || last_defined_);
 
     // take a defined extreme as remaining
-    StateBlockPtr remove_state = getPointStateBlockPtr(_remove_id);
+    StateBlockPtr remove_state = getPointStateBlock(_remove_id);
     std::cout << "state block to remove " << remove_state->getState().transpose() << std::endl;
 
     // Change factors from remove_state to remain_state

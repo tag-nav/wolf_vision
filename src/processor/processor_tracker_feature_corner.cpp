@@ -107,10 +107,13 @@ bool ProcessorTrackerFeatureCorner::voteForKeyFrame()
     return incoming_ptr_->getFeatureList().size() < params_tracker_feature_corner_->n_corners_th;
 }
 
-unsigned int ProcessorTrackerFeatureCorner::detectNewFeatures(const unsigned int& _max_features, FeatureBasePtrList& _features_incoming_out)
+unsigned int ProcessorTrackerFeatureCorner::detectNewFeatures(const int& _max_features, FeatureBasePtrList& _features_incoming_out)
 {
     // in corners_last_ remain all not tracked corners
     _features_incoming_out = std::move(corners_last_);
+    if (_max_features != -1 && _features_incoming_out.size() > _max_features)
+        _features_incoming_out.resize(_max_features);
+
     return _features_incoming_out.size();
 }
 

@@ -196,8 +196,8 @@ namespace wolf {
 /////////////////////////////////////////////////////////
 
 // Wolf
-#include "base/state_block.h"
-#include "base/rotations.h"
+#include "base/state_block/state_block.h"
+#include "base/math/rotations.h"
 
 namespace wolf{
 

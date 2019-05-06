@@ -4,7 +4,7 @@
 //Wolf includes
 #include "base/capture/capture_IMU.h"
 #include "base/feature/feature_base.h"
-#include "base/wolf.h"
+#include "base/common/wolf.h"
 
 //std includes
 

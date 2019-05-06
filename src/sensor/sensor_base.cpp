@@ -1,6 +1,6 @@
 #include "base/sensor/sensor_base.h"
-#include "base/state_block.h"
-#include "base/state_quaternion.h"
+#include "base/state_block/state_block.h"
+#include "base/state_block/state_quaternion.h"
 #include "base/factor/factor_block_absolute.h"
 #include "base/factor/factor_quaternion_absolute.h"
 
@@ -262,34 +262,34 @@ CaptureBasePtr SensorBase::lastCapture(const TimeStamp& _ts)
     return capture;
 }
 
-StateBlockPtr SensorBase::getPPtr(const TimeStamp _ts)
+StateBlockPtr SensorBase::getP(const TimeStamp _ts)
 {
-    return getStateBlockPtr(0, _ts);
+    return getStateBlock(0, _ts);
 }
 
-StateBlockPtr SensorBase::getOPtr(const TimeStamp _ts)
+StateBlockPtr SensorBase::getO(const TimeStamp _ts)
 {
-    return getStateBlockPtr(1, _ts);
+    return getStateBlock(1, _ts);
 }
 
-StateBlockPtr SensorBase::getIntrinsicPtr(const TimeStamp _ts)
+StateBlockPtr SensorBase::getIntrinsic(const TimeStamp _ts)
 {
-    return getStateBlockPtr(2, _ts);
+    return getStateBlock(2, _ts);
 }
 
 StateBlockPtr SensorBase::getP()
 {
-    return getStateBlockPtr(0);
+    return getStateBlock(0);
 }
 
 StateBlockPtr SensorBase::getO()
 {
-    return getStateBlockPtr(1);
+    return getStateBlock(1);
 }
 
 StateBlockPtr SensorBase::getIntrinsic()
 {
-    return getStateBlockPtr(2);
+    return getStateBlock(2);
 }
 
 SizeEigen SensorBase::computeCalibSize() const
@@ -323,7 +323,7 @@ Eigen::VectorXs SensorBase::getCalibration() const
 
 bool SensorBase::process(const CaptureBasePtr capture_ptr)
 {
-    capture_ptr->setSensorPtr(shared_from_this());
+    capture_ptr->setSensor(shared_from_this());
 
     for (const auto processor : processor_list_)
     {
@@ -339,22 +339,22 @@ ProcessorBasePtr SensorBase::addProcessor(ProcessorBasePtr _proc_ptr)
     return _proc_ptr;
 }
 
-StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i)
+StateBlockPtr SensorBase::getStateBlock(unsigned int _i)
 {
     CaptureBasePtr cap;
 
     if (isStateBlockDynamic(_i, cap))
-        return cap->getStateBlockPtr(_i);
+        return cap->getStateBlock(_i);
 
     return getStateBlockPtrStatic(_i);
 }
 
-StateBlockPtr SensorBase::getStateBlockPtr(unsigned int _i, const TimeStamp& _ts)
+StateBlockPtr SensorBase::getStateBlock(unsigned int _i, const TimeStamp& _ts)
 {
     CaptureBasePtr cap;
 
     if (isStateBlockDynamic(_i, _ts, cap))
-        return cap->getStateBlockPtr(_i);
+        return cap->getStateBlock(_i);
 
     return getStateBlockPtrStatic(_i);
 }
@@ -407,7 +407,7 @@ void SensorBase::setProblem(ProblemPtr _problem)
 void SensorBase::link(HardwareBasePtr _hw_ptr)
 {
     std::cout << "Linking SensorBase" << std::endl;
-    this->setHardwarePtr(_hw_ptr);
+    this->setHardware(_hw_ptr);
     this->getHardware()->addSensor(shared_from_this());
     this->setProblem(_hw_ptr->getProblem());
     this->registerNewStateBlocks();

@@ -1,5 +1,5 @@
 #include "base/factor/factor_base.h"
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 #include "base/landmark/landmark_base.h"
 
 namespace wolf {
@@ -150,7 +150,7 @@ void FactorBase::link(FeatureBasePtr _ftr_ptr)
     std::cout << "Linking FactorBase" << std::endl;
     // _ftr_ptr->addConstrainedBy(shared_from_this());
     _ftr_ptr->addFactor(shared_from_this());
-    this->setFeaturePtr(_ftr_ptr);
+    this->setFeature(_ftr_ptr);
     this->setProblem(_ftr_ptr->getProblem());
     // add factor to be added in solver
     if (this->getProblem() != nullptr)

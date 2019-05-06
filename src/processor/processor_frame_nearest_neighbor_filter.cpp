@@ -200,8 +200,12 @@ bool ProcessorFrameNearestNeighborFilter::computeEllipse2D(const FrameBasePtr& f
                                                            Eigen::Vector5s& ellipse)
 {
   // get 3x3 covariance matrix AKA variance
-  const Eigen::MatrixXs covariance =
-      getProblem()->getFrameCovariance(frame_ptr);
+  Eigen::MatrixXs covariance;
+  if (!getProblem()->getFrameCovariance(frame_ptr, covariance))
+  {
+      WOLF_WARN("Frame covariance not found!");
+      return false;
+  }
 
   if (!isCovariance(covariance))
   {
@@ -245,9 +249,18 @@ bool ProcessorFrameNearestNeighborFilter::computeEllipsoid3D(const FrameBasePtr&
   ellipsoid(2) = frame_position(2);
 
   // get 9x9 covariance matrix AKA variance
-  const Eigen::MatrixXs covariance = getProblem()->getFrameCovariance(frame_pointer);
+  Eigen::MatrixXs covariance;
+  if (!getProblem()->getFrameCovariance(frame_pointer, covariance))
+  {
+      WOLF_WARN("Frame covariance not found!");
+      return false;
+  }
 
-  if (!isCovariance(covariance)) return false;
+  if (!isCovariance(covariance))
+  {
+      WOLF_WARN("Covariance is not proper !");
+      return false;
+  }
 
   Eigen::SelfAdjointEigenSolver<Eigen::Matrix3s> solver(covariance.block(0,0,3,3));
   const Scalar eigenvalue1 = solver.eigenvalues()[0];     // smaller value
@@ -464,10 +477,11 @@ Scalar ProcessorFrameNearestNeighborFilter::MahalanobisDistance(const FrameBaseP
   query_pose << query->getP()->getState(),
                 query->getO()->getState();
 
-  const Eigen::MatrixXs traj_covariance  = getProblem()->getFrameCovariance(trajectory);
-  const Eigen::MatrixXs query_covariance = getProblem()->getFrameCovariance(query);
-
-  if ( !isCovariance(traj_covariance) || !isCovariance(query_covariance))
+  Eigen::MatrixXs traj_covariance, query_covariance;
+  if ( !getProblem()->getFrameCovariance(trajectory, traj_covariance) ||
+       !getProblem()->getFrameCovariance(query, query_covariance) ||
+       !isCovariance(traj_covariance) ||
+       !isCovariance(query_covariance))
     return distance;
 
   const Eigen::MatrixXs covariance = traj_covariance * query_covariance.transpose();

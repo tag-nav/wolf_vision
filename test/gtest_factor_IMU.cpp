@@ -14,7 +14,7 @@
 #include "ceres_wrapper/ceres_manager.h"
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
 #include <iostream>
 #include <fstream>

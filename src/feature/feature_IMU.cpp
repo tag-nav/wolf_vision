@@ -13,7 +13,7 @@ FeatureIMU::FeatureIMU(const Eigen::VectorXs& _delta_preintegrated,
     jacobian_bias_(_dD_db_jacobians)
 {
     if (_cap_imu_ptr)
-        this->setCapturePtr(_cap_imu_ptr);
+        this->setCapture(_cap_imu_ptr);
 }
 
 FeatureIMU::FeatureIMU(CaptureMotionPtr _cap_imu_ptr):
@@ -22,7 +22,7 @@ FeatureIMU::FeatureIMU(CaptureMotionPtr _cap_imu_ptr):
         gyro_bias_preint_(_cap_imu_ptr->getCalibrationPreint().tail<3>()),
         jacobian_bias_(_cap_imu_ptr->getJacobianCalib())
 {
-    this->setCapturePtr(_cap_imu_ptr);
+    this->setCapture(_cap_imu_ptr);
 }
 
 FeatureIMU::~FeatureIMU()

@@ -6,9 +6,9 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/problem.h"
+#include "base/problem/problem.h"
 #include "base/capture/capture_IMU.h"
 #include "base/sensor/sensor_base.h"
 #include "base/sensor/sensor_odom_3D.h"

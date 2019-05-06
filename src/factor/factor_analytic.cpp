@@ -1,5 +1,5 @@
 #include "base/factor/factor_analytic.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 
 namespace wolf {
 

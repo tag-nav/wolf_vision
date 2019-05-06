@@ -10,7 +10,7 @@
 
 //Wolf includes
 #include "base/factor/factor_autodiff.h"
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 #include "base/feature/feature_diff_drive.h"
 #include "base/capture/capture_wheel_joint_position.h"
 

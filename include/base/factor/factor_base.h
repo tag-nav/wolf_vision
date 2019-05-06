@@ -7,8 +7,8 @@ class FeatureBase;
 }
 
 //Wolf includes
-#include "base/wolf.h"
-#include "base/node_base.h"
+#include "base/common/wolf.h"
+#include "base/common/node_base.h"
 
 //std includes
 
@@ -113,7 +113,7 @@ class FactorBase : public NodeBase, public std::enable_shared_from_this<FactorBa
         /** \brief Returns a pointer to the feature constrained from
          **/
         FeatureBasePtr getFeature() const;
-        void setFeaturePtr(const FeatureBasePtr _ft_ptr){feature_ptr_ = _ft_ptr;}
+        void setFeature(const FeatureBasePtr _ft_ptr){feature_ptr_ = _ft_ptr;}
 
         /** \brief Returns a pointer to its capture
          **/
@@ -142,22 +142,22 @@ class FactorBase : public NodeBase, public std::enable_shared_from_this<FactorBa
         /** \brief Returns a pointer to the frame constrained to
          **/
         FrameBasePtr getFrameOther() const       { return frame_other_ptr_.lock(); }
-        void setFrameOtherPtr(FrameBasePtr _frm_o)  { frame_other_ptr_ = _frm_o; }
+        void setFrameOther(FrameBasePtr _frm_o)  { frame_other_ptr_ = _frm_o; }
 
         /** \brief Returns a pointer to the frame constrained to
          **/
         CaptureBasePtr getCaptureOther() const       { return capture_other_ptr_.lock(); }
-        void setCaptureOtherPtr(CaptureBasePtr _cap_o)  { capture_other_ptr_ = _cap_o; }
+        void setCaptureOther(CaptureBasePtr _cap_o)  { capture_other_ptr_ = _cap_o; }
 
         /** \brief Returns a pointer to the feature constrained to
          **/
         FeatureBasePtr getFeatureOther() const       { return feature_other_ptr_.lock(); }
-        void setFeatureOtherPtr(FeatureBasePtr _ftr_o)  { feature_other_ptr_ = _ftr_o; }
+        void setFeatureOther(FeatureBasePtr _ftr_o)  { feature_other_ptr_ = _ftr_o; }
 
         /** \brief Returns a pointer to the landmark constrained to
          **/
         LandmarkBasePtr getLandmarkOther() const     { return landmark_other_ptr_.lock(); }
-        void setLandmarkOtherPtr(LandmarkBasePtr _lmk_o){ landmark_other_ptr_ = _lmk_o; }
+        void setLandmarkOther(LandmarkBasePtr _lmk_o){ landmark_other_ptr_ = _lmk_o; }
 
         /**
          * @brief getProcessor
@@ -186,8 +186,8 @@ class FactorBase : public NodeBase, public std::enable_shared_from_this<FactorBa
 
 // IMPLEMENTATION //
 
-#include "base/problem.h"
-#include "base/frame_base.h"
+#include "base/problem/problem.h"
+#include "base/frame/frame_base.h"
 #include "base/feature/feature_base.h"
 #include "base/sensor/sensor_base.h"
 #include "base/landmark/landmark_base.h"

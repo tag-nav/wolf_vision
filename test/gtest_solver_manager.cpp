@@ -6,16 +6,16 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/problem.h"
+#include "base/problem/problem.h"
 #include "base/sensor/sensor_base.h"
-#include "base/state_block.h"
+#include "base/state_block/state_block.h"
 #include "base/capture/capture_void.h"
 #include "base/factor/factor_pose_2D.h"
 #include "base/solver/solver_manager.h"
-#include "base/local_parametrization_base.h"
-#include "base/local_parametrization_angle.h"
+#include "base/state_block/local_parametrization_base.h"
+#include "base/state_block/local_parametrization_angle.h"
 
 #include <iostream>
 
@@ -263,7 +263,7 @@ TEST(SolverManager, AddUpdateLocalParamStateBlock)
 
     // Local param
     LocalParametrizationBasePtr local_ptr = std::make_shared<LocalParametrizationAngle>();
-    sb_ptr->setLocalParametrizationPtr(local_ptr);
+    sb_ptr->setLocalParametrization(local_ptr);
 
     // Fix state block
     sb_ptr->fix();
@@ -298,7 +298,7 @@ TEST(SolverManager, AddLocalParamRemoveLocalParamStateBlock)
 
     // Local param
     LocalParametrizationBasePtr local_ptr = std::make_shared<LocalParametrizationAngle>();
-    sb_ptr->setLocalParametrizationPtr(local_ptr);
+    sb_ptr->setLocalParametrization(local_ptr);
 
     // check flags
     ASSERT_FALSE(sb_ptr->stateUpdated());
@@ -445,13 +445,14 @@ TEST(SolverManager, AddUpdatedStateBlock)
     ASSERT_TRUE(sb_ptr->fixUpdated());
     ASSERT_TRUE(sb_ptr->stateUpdated());
 
-    // == When an ADD is notified, all previous notifications should be cleared (if not consumption of notifs) ==
+    // == When an ADD is notified: a ADD notification should be stored ==
 
     // add state_block
     P->addStateBlock(sb_ptr);
 
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(),1);
-    ASSERT_EQ(P->getStateBlockNotificationMap().begin()->second,ADD);
+    auto state_block_notification_map = P->consumeStateBlockNotificationMap();
+    ASSERT_EQ(state_block_notification_map.size(),1);
+    ASSERT_EQ(state_block_notification_map.begin()->second,ADD);
 
     // == Insert OTHER notifications ==
 
@@ -462,37 +463,30 @@ TEST(SolverManager, AddUpdatedStateBlock)
     // Fix --> FLAG
     sb_ptr->unfix();
 
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(),1); // only ADD notification (fix and state are flags in sb)
+    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // No new notifications (fix and set state are flags in sb)
 
-    // == REMOVE should clear the previous notification (ADD) in the stack ==
+    // == When an REMOVE is notified: a REMOVE notification should be stored ==
 
     // remove state_block
     P->removeStateBlock(sb_ptr);
 
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(),0);// ADD + REMOVE = EMPTY
+    state_block_notification_map = P->consumeStateBlockNotificationMap();
+    ASSERT_EQ(state_block_notification_map.size(),1);
+    ASSERT_EQ(state_block_notification_map.begin()->second,REMOVE);
 
-    // == UPDATES + REMOVE should clear the list of notifications ==
+    // == ADD + REMOVE: notification map should be empty ==
+    P->addStateBlock(sb_ptr);
+    P->removeStateBlock(sb_ptr);
+    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty());
 
+    // == UPDATES should clear the list of notifications ==
     // add state_block
     P->addStateBlock(sb_ptr);
 
     // update solver
     solver_manager_ptr->update();
 
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(),0); // After solver_manager->update, notifications should be empty
-
-    // Fix
-    sb_ptr->fix();
-
-    // Set State
-    state_2 = 2*state;
-    sb_ptr->setState(state_2);
-
-    // remove state_block
-    P->removeStateBlock(sb_ptr);
-
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(),1);
-    ASSERT_EQ(P->getStateBlockNotificationMap().begin()->second, REMOVE);
+    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // After solver_manager->update, notifications should be empty
 }
 
 TEST(SolverManager, AddFactor)
@@ -570,12 +564,10 @@ TEST(SolverManager, AddRemoveFactor)
     auto f = FeatureBase::emplace<FeatureBase>(C, "ODOM 2D", Vector3s::Zero(), Matrix3s::Identity());
     FactorPose2DPtr c = std::static_pointer_cast<FactorPose2D>(FactorBase::emplace<FactorPose2D>(f, f));
 
-    ASSERT_TRUE(P->getFactorNotificationMap().begin()->first == c);
-
     // add factor
     P->removeFactor(c);
 
-    ASSERT_TRUE(P->getFactorNotificationMap().empty());
+    ASSERT_TRUE(P->consumeFactorNotificationMap().empty()); // ADD+REMOVE = empty
 
     // update solver
     solver_manager_ptr->update();

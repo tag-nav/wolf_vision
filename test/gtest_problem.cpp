@@ -6,9 +6,9 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/problem.h"
+#include "base/problem/problem.h"
 #include "base/sensor/sensor_base.h"
 #include "base/sensor/sensor_odom_3D.h"
 #include "base/processor/processor_odom_3D.h"
@@ -211,13 +211,11 @@ TEST(Problem, StateBlocks)
 
     // 2 state blocks, fixed
     SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
-    ASSERT_EQ(P->getStateBlockPtrList().size(), (unsigned int) 2);
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(), (unsigned int) 2);
+    ASSERT_EQ(P->consumeStateBlockNotificationMap().size(), (unsigned int) 2);
 
     // 3 state blocks, fixed
     SensorBasePtr    St = P->installSensor   ("CAMERA", "camera",   xs, wolf_root + "/src/examples/camera_params_ueye_sim.yaml");
-    ASSERT_EQ(P->getStateBlockPtrList().size(), (unsigned int) (2 + 3));
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(), (unsigned int) (2 + 3));
+    ASSERT_EQ(P->consumeStateBlockNotificationMap().size(), (unsigned int) (/*2 + */3)); // consume empties the notification map, so only should contain notification since last call
 
     ProcessorParamsTrackerFeaturePtr params = std::make_shared<ProcessorParamsTrackerFeature>();
     params->time_tolerance            = 0.1;
@@ -230,15 +228,13 @@ TEST(Problem, StateBlocks)
 
     // 2 state blocks, estimated
     P->emplaceFrame("PO 3D", KEY_FRAME, xs, 0);
-    ASSERT_EQ(P->getStateBlockPtrList().size(), (unsigned int)(2 + 3 + 2));
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(), (unsigned int)(2 + 3 + 2));
+    ASSERT_EQ(P->consumeStateBlockNotificationMap().size(), (unsigned int)(/*2 + 3*/ + 2)); // consume empties the notification map, so only should contain notification since last call
 
     //    P->print(4,1,1,1);
 
     // change some SB properties
     St->unfixExtrinsics();
-    ASSERT_EQ(P->getStateBlockPtrList().size(), (unsigned int)(2 + 3 + 2));
-    ASSERT_EQ(P->getStateBlockNotificationMap().size(),(unsigned int)(2 + 3 + 2 /*+ 2*/)); // XXX: 2 more notifications on the same SB!
+    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // changes in state_blocks status (fix/state/localparam) does not raise a notification in problem, only ADD/REMOVE
 
     //    P->print(4,1,1,1);
 }
@@ -267,11 +263,20 @@ TEST(Problem, Covariances)
     St->unfixExtrinsics();
     FrameBasePtr F = P->emplaceFrame("PO 3D", KEY_FRAME, xs, 0);
 
-    Eigen::MatrixXs Cov = P->getFrameCovariance(F);
+    // set covariance (they are not computed without a solver)
+    P->addCovarianceBlock(F->getP(), Eigen::Matrix3s::Identity());
+    P->addCovarianceBlock(F->getO(), Eigen::Matrix4s::Identity());
+    P->addCovarianceBlock(F->getP(), F->getO(), Eigen::Matrix<Scalar,3,4>::Zero());
+
+    // get covariance
+    Eigen::MatrixXs Cov;
+    ASSERT_TRUE(P->getFrameCovariance(F, Cov));
 
     // FIXME Frame covariance should be 6x6, but it is actually 7x7 (the state of the state blocks, not of the local parametrizations)
+    // JV: The local parameterization projects the covariance to the state size.
     ASSERT_EQ(Cov.cols() , 7);
     ASSERT_EQ(Cov.rows() , 7);
+    ASSERT_MATRIX_APPROX(Cov, Eigen::Matrix7s::Identity(), 1e-12);
 
 }
 

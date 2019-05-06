@@ -6,11 +6,11 @@
  */
 
 #include "utils_gtest.h"
-#include "base/logging.h"
+#include "base/utils/logging.h"
 
-#include "base/problem.h"
-#include "base/trajectory_base.h"
-#include "base/frame_base.h"
+#include "base/problem/problem.h"
+#include "base/trajectory/trajectory_base.h"
+#include "base/frame/frame_base.h"
 
 #include <iostream>
 
@@ -31,10 +31,12 @@ struct DummyNotificationProcessor
       FAIL() << "problem_ is nullptr !";
     }
 
-    auto sb_noti_pair = problem_->getStateBlockNotificationMap().begin();
-    while (sb_noti_pair != problem_->getStateBlockNotificationMap().end())
+    auto sb_noti_map = problem_->consumeStateBlockNotificationMap();
+    ASSERT_TRUE(problem_->consumeStateBlockNotificationMap().empty()); // consume should empty the notification map
+
+    while (!sb_noti_map.empty())
     {
-        switch (sb_noti_pair->second)
+        switch (sb_noti_map.begin()->second)
         {
           case ADD:
           {
@@ -47,9 +49,9 @@ struct DummyNotificationProcessor
           default:
             throw std::runtime_error("SolverManager::update: State Block notification must be ADD or REMOVE.");
         }
-        sb_noti_pair = problem_->getStateBlockNotificationMap().erase(sb_noti_pair);
+        sb_noti_map.erase(sb_noti_map.begin());
     }
-    ASSERT_TRUE(problem_->getStateBlockNotificationMap().empty());
+    ASSERT_TRUE(sb_noti_map.empty());
   }
 
   ProblemPtr problem_;
@@ -126,24 +128,20 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     f1->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
-    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 2);
-    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
+    ASSERT_EQ(P->consumeStateBlockNotificationMap(). size(), (unsigned int) 2);
     std::cout << __LINE__ << std::endl;
 
     // T->addFrame(f2); // KF
     f2->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
-    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 4);
-    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
     std::cout << __LINE__ << std::endl;
 
     // T->addFrame(f3); // F
     f3->link(T);
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 3);
-    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 4);
-    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
+    ASSERT_EQ(P->consumeStateBlockNotificationMap(). size(), (unsigned int) 2); // consumeStateBlockNotificationMap empties the notification map, 2 state blocks were notified since last call to consumeStateBlockNotificationMap
     std::cout << __LINE__ << std::endl;
 
     ASSERT_EQ(T->getLastFrame()->id(), f3->id());
@@ -151,14 +149,14 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     std::cout << __LINE__ << std::endl;
 
     N.update();
+    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // consumeStateBlockNotificationMap was called in update() so it should be empty
     std::cout << __LINE__ << std::endl;
 
     // remove frames and keyframes
     f2->remove(); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 2);
-    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 2);
-    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
+    ASSERT_EQ(P->consumeStateBlockNotificationMap(). size(), (unsigned int) 2); // consumeStateBlockNotificationMap empties the notification map, 2 state blocks were notified since last call to consumeStateBlockNotificationMap
     std::cout << __LINE__ << std::endl;
 
     ASSERT_EQ(T->getLastFrame()->id(), f3->id());
@@ -168,8 +166,6 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     f3->remove(); // F
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 1);
-    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 2);
-    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 2);
     std::cout << __LINE__ << std::endl;
 
     ASSERT_EQ(T->getLastKeyFrame()->id(), f1->id());
@@ -177,13 +173,11 @@ TEST(TrajectoryBase, Add_Remove_Frame)
     f1->remove(); // KF
     if (debug) P->print(2,0,0,0);
     ASSERT_EQ(T->getFrameList().                 size(), (unsigned int) 0);
-    ASSERT_EQ(P->getStateBlockPtrList().            size(), (unsigned int) 0);
-    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 4);
     std::cout << __LINE__ << std::endl;
 
     N.update();
 
-    ASSERT_EQ(P->getStateBlockNotificationMap(). size(), (unsigned int) 0);
+    ASSERT_TRUE(P->consumeStateBlockNotificationMap().empty()); // consumeStateBlockNotificationMap was called in update() so it should be empty
     std::cout << __LINE__ << std::endl;
 }
 

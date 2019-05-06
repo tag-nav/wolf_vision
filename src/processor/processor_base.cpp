@@ -1,7 +1,7 @@
 #include "base/processor/processor_base.h"
 #include "base/processor/processor_motion.h"
 #include "base/capture/capture_base.h"
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 
 namespace wolf {
 
@@ -77,7 +77,7 @@ void ProcessorBase::remove()
     {
         std::cout << "Linking ProcessorBase" << std::endl;
         _sen_ptr->addProcessor(shared_from_this());
-        this->setSensorPtr(_sen_ptr);
+        this->setSensor(_sen_ptr);
         this->setProblem(_sen_ptr->getProblem());
     }
 /////////////////////////////////////////////////////////////////////////////////////////

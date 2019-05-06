@@ -8,7 +8,7 @@
 #include "utils_gtest.h"
 
 #include "base/capture/capture_base.h"
-#include "base/state_angle.h"
+#include "base/state_block/state_angle.h"
 
 using namespace wolf;
 using namespace Eigen;
@@ -109,7 +109,7 @@ TEST(CaptureBase, process)
     SensorBasePtr S(std::make_shared<SensorBase>("DUMMY", nullptr, nullptr, nullptr, 2));
     CaptureBasePtr C(std::make_shared<CaptureBase>("DUMMY", 1.5, nullptr));
     ASSERT_DEATH({C->process();},""); // No sensor in the capture should fail
-    C->setSensorPtr(S);
+    C->setSensor(S);
     ASSERT_TRUE(C->process()); // This should not fail (although it does nothing)
 }
 

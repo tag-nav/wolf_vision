@@ -11,7 +11,7 @@
 // Wolf
 #include "base/capture/capture_motion.h"
 #include "base/processor/processor_base.h"
-#include "base/time_stamp.h"
+#include "base/common/time_stamp.h"
 
 // std
 #include <iomanip>
@@ -23,10 +23,11 @@ WOLF_STRUCT_PTR_TYPEDEFS(ProcessorParamsMotion);
 
 struct ProcessorParamsMotion : public ProcessorParamsBase
 {
-        Scalar max_time_span    = 0.5;
-        unsigned int max_buff_length  = 10;
-        Scalar dist_traveled    = 5;
-        Scalar angle_turned     = 0.5;
+        Scalar unmeasured_perturbation_std  = 1e-4;
+        Scalar max_time_span                = 0.5;
+        unsigned int max_buff_length        = 10;
+        Scalar dist_traveled                = 5;
+        Scalar angle_turned                 = 0.5;
 };
 
 /** \brief class for Motion processors
@@ -472,11 +473,12 @@ class ProcessorMotion : public ProcessorBase
         Eigen::MatrixXs jacobian_delta_;        ///< jacobian of delta composition w.r.t current delta
         Eigen::MatrixXs jacobian_calib_;        ///< jacobian of delta preintegration wrt calibration params
         Eigen::MatrixXs jacobian_delta_calib_;  ///< jacobian of delta wrt calib params
+        Eigen::MatrixXs unmeasured_perturbation_cov_; ///< Covariance of unmeasured DoF to avoid singularity
 };
 
 }
 
-#include "base/frame_base.h"
+#include "base/frame/frame_base.h"
 
 namespace wolf{
 

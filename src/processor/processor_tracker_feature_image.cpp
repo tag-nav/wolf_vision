@@ -244,7 +244,7 @@ bool ProcessorTrackerFeatureImage::correctFeatureDrift(const FeatureBasePtr _ori
     }
 }
 
-unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int& _max_new_features, FeatureBasePtrList& _features_incoming_out)
+unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const int& _max_new_features, FeatureBasePtrList& _features_incoming_out)
 {
     cv::Rect roi;
     KeyPointVector new_keypoints;
@@ -252,7 +252,7 @@ unsigned int ProcessorTrackerFeatureImage::detectNewFeatures(const unsigned int&
     cv::KeyPointsFilter keypoint_filter;
     unsigned int n_new_features = 0;
 
-    for (unsigned int n_iterations = 0; _max_new_features == 0 || n_iterations < _max_new_features; n_iterations++)
+    for (unsigned int n_iterations = 0; _max_new_features == -1 || n_iterations < _max_new_features; n_iterations++)
     {
 
         if (active_search_ptr_->pickEmptyRoi(roi))
