@@ -62,7 +62,7 @@ std::string CeresManager::solveImpl(const ReportVerbosity report_level)
 }
 
 void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks)
-{
+{   
     // update problem
     update();
 
@@ -81,7 +81,7 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
             std::vector<StateBlockPtr> all_state_blocks, landmark_state_blocks;
             //frame state blocks
             for(auto fr_ptr : wolf_problem_->getTrajectory()->getFrameList())
-                if (fr_ptr->isKey())
+                if (fr_ptr->isKeyOrAux())
                     for (auto sb : fr_ptr->getStateBlockVec())
                         if (sb)
                             all_state_blocks.push_back(sb);
@@ -106,7 +106,7 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
         {
             // first create a vector containing all state blocks
             for(auto fr_ptr : wolf_problem_->getTrajectory()->getFrameList())
-                if (fr_ptr->isKey())
+                if (fr_ptr->isKeyOrAux())
                     for (auto sb : fr_ptr->getStateBlockVec())
                         if (sb)
                             for(auto sb2 : fr_ptr->getStateBlockVec())
@@ -194,17 +194,16 @@ void CeresManager::computeCovariances(const CovarianceBlocksToBeComputed _blocks
         // STORE DESIRED COVARIANCES
         for (unsigned int i = 0; i < double_pairs.size(); i++)
         {
-            Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> cov(state_block_pairs[i].first->getSize(),state_block_pairs[i].second->getSize());
-            covariance_->GetCovarianceBlock(double_pairs[i].first, double_pairs[i].second, cov.data());
+            Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> cov(state_block_pairs[i].first->getLocalSize(),state_block_pairs[i].second->getLocalSize());
+            covariance_->GetCovarianceBlockInTangentSpace(double_pairs[i].first, double_pairs[i].second, cov.data());
             wolf_problem_->addCovarianceBlock(state_block_pairs[i].first, state_block_pairs[i].second, cov);
-            //std::cout << "getted covariance " << std::endl << cov << std::endl;
+            // std::cout << "covariance got switch: " << std::endl << cov << std::endl;
         }
     }
     else
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
 }
-
-void CeresManager::computeCovariances(const StateBlockPtrList& st_list)
+void CeresManager::computeCovariances(const std::vector<StateBlockPtr>& st_list)
 {
     //std::cout << "CeresManager: computing covariances..." << std::endl;
 
@@ -234,10 +233,10 @@ void CeresManager::computeCovariances(const StateBlockPtrList& st_list)
         // STORE DESIRED COVARIANCES
         for (unsigned int i = 0; i < double_pairs.size(); i++)
         {
-            Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> cov(state_block_pairs[i].first->getSize(),state_block_pairs[i].second->getSize());
-            covariance_->GetCovarianceBlock(double_pairs[i].first, double_pairs[i].second, cov.data());
+            Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor> cov(state_block_pairs[i].first->getLocalSize(),state_block_pairs[i].second->getLocalSize());
+            covariance_->GetCovarianceBlockInTangentSpace(double_pairs[i].first, double_pairs[i].second, cov.data());
             wolf_problem_->addCovarianceBlock(state_block_pairs[i].first, state_block_pairs[i].second, cov);
-            //std::cout << "getted covariance " << std::endl << cov << std::endl;
+            // std::cout << "covariance got from st_list: " << std::endl << cov << std::endl;
         }
     else
         std::cout << "WARNING: Couldn't compute covariances!" << std::endl;
