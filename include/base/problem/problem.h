@@ -252,13 +252,9 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         void removeStateBlock(StateBlockPtr _state_ptr);
 
-        /** \brief Returns the size of the map of state block notification
+        /** \brief Returns the map of factor notification to be handled by the solver (the map stored in this is emptied)
          */
-        SizeStd getStateBlockNotificationMapSize() const;
-
-        /** \brief Returns if the state block has been notified, and the notification via parameter
-         */
-        bool getStateBlockNotification(const StateBlockPtr& sb_ptr, Notification& notif) const;
+        std::map<StateBlockPtr,Notification> consumeStateBlockNotificationMap();
 
         /** \brief Notifies a new factor to be added to the solver manager
          */
@@ -268,24 +264,10 @@ class Problem : public std::enable_shared_from_this<Problem>
          */
         void removeFactor(FactorBasePtr _factor_ptr);
 
-        /** \brief Returns the size of the map of factor notification
-         */
-        SizeStd getFactorNotificationMapSize() const;
-
-        /** \brief Returns if the factor has been notified, and the notification via parameter
-         */
-        bool getFactorNotification(const FactorBasePtr& fac_ptr, Notification& notif) const;
-
-    protected:
-        /** \brief Returns the map of state block notification to be handled by the solver (the map stored in this is emptied)
-         */
-        std::map<StateBlockPtr,Notification> consumeStateBlockNotificationMap();
-
         /** \brief Returns the map of factor notification to be handled by the solver (the map stored in this is emptied)
          */
         std::map<FactorBasePtr, Notification> consumeFactorNotificationMap();
 
-    public:
         // Print and check ---------------------------------------
         /**
          * \brief print wolf tree
@@ -329,24 +311,11 @@ inline std::map<StateBlockPtr,Notification> Problem::consumeStateBlockNotificati
     return std::move(state_block_notification_map_);
 }
 
-inline SizeStd Problem::getStateBlockNotificationMapSize() const
-{
-    std::lock_guard<std::mutex> lock(mut_state_block_notifications_);
-    return state_block_notification_map_.size();
-}
-
 inline std::map<FactorBasePtr,Notification> Problem::consumeFactorNotificationMap()
 {
     std::lock_guard<std::mutex> lock(mut_factor_notifications_);
     return std::move(factor_notification_map_);
 }
-
-inline wolf::SizeStd Problem::getFactorNotificationMapSize() const
-{
-    std::lock_guard<std::mutex> lock(mut_factor_notifications_);
-    return factor_notification_map_.size();
-}
-
 
 } // namespace wolf
 
