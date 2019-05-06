@@ -31,7 +31,7 @@ struct DummySolverManager : public SolverManager
     //
   }
   virtual void computeCovariances(const CovarianceBlocksToBeComputed blocks){};
-  virtual void computeCovariances(const StateBlockPtrList& st_list){};
+  virtual void computeCovariances(const std::vector<StateBlockPtr>& st_list){};
   virtual bool hasConverged(){return true;};
   virtual SizeStd iterations(){return 0;};
   virtual Scalar initialCost(){return 0;};
