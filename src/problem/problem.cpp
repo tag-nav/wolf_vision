@@ -450,8 +450,8 @@ void Problem::clearCovariance()
 
 void Problem::addCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, const Eigen::MatrixXs& _cov)
 {
-    assert(_state1->getSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
-    assert(_state2->getSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
+    assert(_state1->getLocalSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
+    assert(_state2->getLocalSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
 
     std::lock_guard<std::mutex> lock(mut_covariances_);
     covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)] = _cov;
@@ -459,8 +459,8 @@ void Problem::addCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, c
 
 void Problem::addCovarianceBlock(StateBlockPtr _state1, const Eigen::MatrixXs& _cov)
 {
-    assert(_state1->getSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
-    assert(_state1->getSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
+    assert(_state1->getLocalSize() == (unsigned int ) _cov.rows() && "wrong covariance block size");
+    assert(_state1->getLocalSize() == (unsigned int ) _cov.cols() && "wrong covariance block size");
 
     std::lock_guard<std::mutex> lock(mut_covariances_);
     covariances_[std::make_pair(_state1, _state1)] = _cov;
@@ -472,23 +472,23 @@ bool Problem::getCovarianceBlock(StateBlockPtr _state1, StateBlockPtr _state2, E
     //std::cout << "entire cov to be filled:" << std::endl << _cov << std::endl;
     //std::cout << "_row " << _row << std::endl;
     //std::cout << "_col " << _col << std::endl;
-    //std::cout << "_state1 size: " << _state1->getSize() << std::endl;
-    //std::cout << "_state2 size: " << _state2->getSize() << std::endl;
-    //std::cout << "part of cov to be filled:" << std::endl <<  _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) << std::endl;
+    //std::cout << "_state1 tangent space size: " << _state1->getLocalSize() << std::endl;
+    //std::cout << "_state2 tangent space size: " << _state2->getLocalSize() << std::endl;
+    //std::cout << "part of cov to be filled:" << std::endl <<  _cov.block(_row, _col, _state1->getLocalSize(), _state2->getLocalSize()) << std::endl;
     //if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)) != covariances_.end())
     //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)] << std::endl;
     //else if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)) != covariances_.end())
     //    std::cout << "stored cov" << std::endl << covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)].transpose() << std::endl;
 
-    assert(_row + _state1->getSize() <= _cov.rows() && _col + _state2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+    assert(_row + _state1->getLocalSize() <= _cov.rows() && _col + _state2->getLocalSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
 
     std::lock_guard<std::mutex> lock(mut_covariances_);
 
     if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)) != covariances_.end())
-        _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
+        _cov.block(_row, _col, _state1->getLocalSize(), _state2->getLocalSize()) =
                 covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state1, _state2)];
     else if (covariances_.find(std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)) != covariances_.end())
-       _cov.block(_row, _col, _state1->getSize(), _state2->getSize()) =
+       _cov.block(_row, _col, _state1->getLocalSize(), _state2->getLocalSize()) =
                 covariances_[std::pair<StateBlockPtr, StateBlockPtr>(_state2, _state1)].transpose();
     else
     {
@@ -515,23 +515,23 @@ bool Problem::getCovarianceBlock(std::map<StateBlockPtr, unsigned int> _sb_2_idx
             // search st1 & st2
             if (covariances_.find(pair_12) != covariances_.end())
             {
-                assert(_sb_2_idx[sb1] + sb1->getSize() <= _cov.rows() &&
-                       _sb_2_idx[sb2] + sb2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
-                assert(_sb_2_idx[sb2] + sb2->getSize() <= _cov.rows() &&
-                       _sb_2_idx[sb1] + sb1->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+                assert(_sb_2_idx[sb1] + sb1->getLocalSize() <= _cov.rows() &&
+                       _sb_2_idx[sb2] + sb2->getLocalSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+                assert(_sb_2_idx[sb2] + sb2->getLocalSize() <= _cov.rows() &&
+                       _sb_2_idx[sb1] + sb1->getLocalSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
 
-                _cov.block(_sb_2_idx[sb1], _sb_2_idx[sb2], sb1->getSize(), sb2->getSize()) = covariances_[pair_12];
-                _cov.block(_sb_2_idx[sb2], _sb_2_idx[sb1], sb2->getSize(), sb1->getSize()) = covariances_[pair_12].transpose();
+                _cov.block(_sb_2_idx[sb1], _sb_2_idx[sb2], sb1->getLocalSize(), sb2->getLocalSize()) = covariances_[pair_12];
+                _cov.block(_sb_2_idx[sb2], _sb_2_idx[sb1], sb2->getLocalSize(), sb1->getLocalSize()) = covariances_[pair_12].transpose();
             }
             else if (covariances_.find(pair_21) != covariances_.end())
             {
-                assert(_sb_2_idx[sb1] + sb1->getSize() <= _cov.rows() &&
-                       _sb_2_idx[sb2] + sb2->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
-                assert(_sb_2_idx[sb2] + sb2->getSize() <= _cov.rows() &&
-                       _sb_2_idx[sb1] + sb1->getSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+                assert(_sb_2_idx[sb1] + sb1->getLocalSize() <= _cov.rows() &&
+                       _sb_2_idx[sb2] + sb2->getLocalSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
+                assert(_sb_2_idx[sb2] + sb2->getLocalSize() <= _cov.rows() &&
+                       _sb_2_idx[sb1] + sb1->getLocalSize() <= _cov.cols() && "Problem::getCovarianceBlock: Bad matrix covariance size!");
 
-                _cov.block(_sb_2_idx[sb1], _sb_2_idx[sb2], sb1->getSize(), sb2->getSize()) = covariances_[pair_21].transpose();
-                _cov.block(_sb_2_idx[sb2], _sb_2_idx[sb1], sb2->getSize(), sb1->getSize()) = covariances_[pair_21];
+                _cov.block(_sb_2_idx[sb1], _sb_2_idx[sb2], sb1->getLocalSize(), sb2->getLocalSize()) = covariances_[pair_21].transpose();
+                _cov.block(_sb_2_idx[sb2], _sb_2_idx[sb1], sb2->getLocalSize(), sb1->getLocalSize()) = covariances_[pair_21];
             }
             else
                 return false;
@@ -556,7 +556,7 @@ bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& 
     SizeEigen sz = 0;
     for (const auto& sb : state_bloc_vec)
         if (sb)
-            sz += sb->getSize();
+            sz += sb->getLocalSize();
 
     // resizing
     _covariance = Eigen::MatrixXs(sz, sz);
@@ -572,10 +572,10 @@ bool Problem::getFrameCovariance(FrameBaseConstPtr _frame_ptr, Eigen::MatrixXs& 
                 if (sb_j)
                 {
                     success = success && getCovarianceBlock(sb_i, sb_j, _covariance, i, j);
-                    j += sb_j->getSize();
+                    j += sb_j->getLocalSize();
                 }
             }
-            i += sb_i->getSize();
+            i += sb_i->getLocalSize();
         }
     }
     return success;
@@ -598,7 +598,7 @@ bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::M
     SizeEigen sz = 0;
     for (const auto& sb : state_bloc_vec)
         if (sb)
-            sz += sb->getSize();
+            sz += sb->getLocalSize();
 
     // resizing
     _covariance = Eigen::MatrixXs(sz, sz);
@@ -615,10 +615,10 @@ bool Problem::getLandmarkCovariance(LandmarkBaseConstPtr _landmark_ptr, Eigen::M
                 if (sb_j)
                 {
                     success = success && getCovarianceBlock(sb_i, sb_j, _covariance, i, j);
-                    j += sb_j->getSize();
+                    j += sb_j->getLocalSize();
                 }
             }
-            i += sb_i->getSize();
+            i += sb_i->getLocalSize();
         }
     }
     return success;

@@ -260,18 +260,16 @@ TEST(Problem, Covariances)
 
     // set covariance (they are not computed without a solver)
     P->addCovarianceBlock(F->getP(), Eigen::Matrix3s::Identity());
-    P->addCovarianceBlock(F->getO(), Eigen::Matrix4s::Identity());
-    P->addCovarianceBlock(F->getP(), F->getO(), Eigen::Matrix<Scalar,3,4>::Zero());
+    P->addCovarianceBlock(F->getO(), Eigen::Matrix3s::Identity());
+    P->addCovarianceBlock(F->getP(), F->getO(), Eigen::Matrix3s::Zero());
 
     // get covariance
     Eigen::MatrixXs Cov;
     ASSERT_TRUE(P->getFrameCovariance(F, Cov));
 
-    // FIXME Frame covariance should be 6x6, but it is actually 7x7 (the state of the state blocks, not of the local parametrizations)
-    // JV: The local parameterization projects the covariance to the state size.
-    ASSERT_EQ(Cov.cols() , 7);
-    ASSERT_EQ(Cov.rows() , 7);
-    ASSERT_MATRIX_APPROX(Cov, Eigen::Matrix7s::Identity(), 1e-12);
+    ASSERT_EQ(Cov.cols() , 6);
+    ASSERT_EQ(Cov.rows() , 6);
+    ASSERT_MATRIX_APPROX(Cov, Eigen::Matrix6s::Identity(), 1e-12);
 
 }
 

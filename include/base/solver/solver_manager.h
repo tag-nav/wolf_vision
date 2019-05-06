@@ -53,7 +53,7 @@ public:
 
   virtual void computeCovariances(const CovarianceBlocksToBeComputed blocks) = 0;
 
-  virtual void computeCovariances(const StateBlockPtrList& st_list) = 0;
+  virtual void computeCovariances(const std::vector<StateBlockPtr>& st_list) = 0;
 
   virtual bool hasConverged() = 0;
 

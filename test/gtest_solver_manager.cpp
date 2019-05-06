@@ -61,7 +61,7 @@ class SolverManagerWrapper : public SolverManager
         };
 
         virtual void computeCovariances(const CovarianceBlocksToBeComputed blocks){};
-        virtual void computeCovariances(const StateBlockPtrList& st_list){};
+        virtual void computeCovariances(const std::vector<StateBlockPtr>& st_list){};
 
         // The following are dummy implementations
         bool    hasConverged()  { return true;      }
