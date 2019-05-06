@@ -27,28 +27,27 @@ namespace
 std::string uppercase(std::string s) {for (auto & c: s) c = std::toupper(c); return s;}
 }
 
-Problem::Problem(const std::string& _frame_structure) :
+Problem::Problem(const std::string& _frame_structure, SizeEigen _dim) :
         hardware_ptr_(std::make_shared<HardwareBase>()),
         trajectory_ptr_(std::make_shared<TrajectoryBase>(_frame_structure)),
         map_ptr_(std::make_shared<MapBase>()),
         processor_motion_ptr_(),
-        prior_is_set_(false)
+        prior_is_set_(false),
+        frame_structure_(_frame_structure)
 {
-    if (_frame_structure == "PO 2D")
+    if (_frame_structure == "PO" and _dim == 2)
     {
         state_size_ = 3;
         state_cov_size_ = 3;
         dim_ = 2;
-    }
-
-    else if (_frame_structure == "PO 3D")
+    }else if (_frame_structure == "PO" and _dim == 3)
     {
         state_size_ = 7;
         state_cov_size_ = 6;
         dim_ = 3;
-    }
-    else if (_frame_structure == "POV 3D")
+    } else if (_frame_structure == "POV" and _dim == 3)
     {
+        std::cout << "HOLA" << std::endl;
         state_size_ = 10;
         state_cov_size_ = 9;
         dim_ = 3;
@@ -65,9 +64,9 @@ void Problem::setup()
     map_ptr_       -> setProblem(shared_from_this());
 }
 
-ProblemPtr Problem::create(const std::string& _frame_structure)
+    ProblemPtr Problem::create(const std::string& _frame_structure, SizeEigen _dim)
 {
-    ProblemPtr p(new Problem(_frame_structure)); // We use `new` and not `make_shared` since the Problem constructor is private and cannot be passed to `make_shared`.
+    ProblemPtr p(new Problem(_frame_structure, _dim)); // We use `new` and not `make_shared` since the Problem constructor is private and cannot be passed to `make_shared`.
     p->setup();
     return p->shared_from_this();
 }
@@ -213,34 +212,40 @@ void Problem::clearProcessorMotion()
 }
 
 FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, //
+                                   const SizeEigen _dim, //
                                    FrameType _frame_key_type, //
                                    const Eigen::VectorXs& _frame_state, //
                                    const TimeStamp& _time_stamp)
 {
-    FrameBasePtr frm = FrameFactory::get().create(_frame_structure, _frame_key_type, _time_stamp, _frame_state);
-    // trajectory_ptr_->addFrame(frm);
-    frm->link(trajectory_ptr_);
+    // FrameBasePtr frm = FrameFactory::get().create(_frame_structure, _frame_key_type, _time_stamp, _frame_state);
+    // FrameBasePtr frm = std::make_shared<FrameBase>(_frame_structure, _dim, _frame_key_type, _time_stamp, _frame_state);
+    // // trajectory_ptr_->addFrame(frm);
+    // frm->link(trajectory_ptr_);
+    auto frm = FrameBase::emplace<FrameBase>(trajectory_ptr_, _frame_structure, _dim, _frame_key_type, _time_stamp, _frame_state);
     return frm;
 }
 
 FrameBasePtr Problem::emplaceFrame(const std::string& _frame_structure, //
+                                   const SizeEigen _dim, //
                                    FrameType _frame_key_type, //
                                    const TimeStamp& _time_stamp)
 {
-    return emplaceFrame(_frame_structure, _frame_key_type, getState(_time_stamp), _time_stamp);
+    return emplaceFrame(_frame_structure, _dim, _frame_key_type, getState(_time_stamp), _time_stamp);
 }
 
 FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, //
                                    const Eigen::VectorXs& _frame_state, //
                                    const TimeStamp& _time_stamp)
 {
-    return emplaceFrame(trajectory_ptr_->getFrameStructure(), _frame_key_type, _frame_state, _time_stamp);
+    // return emplaceFrame(trajectory_ptr_->getFrameStructure(), _frame_key_type, _frame_state, _time_stamp);
+    return emplaceFrame(this->getFrameStructure(), this->getDim(), _frame_key_type, _frame_state, _time_stamp);
 }
 
 FrameBasePtr Problem::emplaceFrame(FrameType _frame_key_type, //
                                    const TimeStamp& _time_stamp)
 {
-    return emplaceFrame(trajectory_ptr_->getFrameStructure(), _frame_key_type, _time_stamp);
+    // return emplaceFrame(trajectory_ptr_->getFrameStructure(), _frame_key_type, _time_stamp);
+    return emplaceFrame(this->getFrameStructure(), this->getDim(), _frame_key_type, _time_stamp);
 }
 
 Eigen::VectorXs Problem::getCurrentState()
@@ -310,6 +315,10 @@ void Problem::getFrameStructureSize(SizeEigen& _x_size, SizeEigen& _cov_size) co
 SizeEigen Problem::getDim() const
 {
     return dim_;
+}
+std::string Problem::getFrameStructure() const
+{
+    return frame_structure_;
 }
 
 Eigen::VectorXs Problem::zeroState()
@@ -665,7 +674,7 @@ FrameBasePtr Problem::setPrior(const Eigen::VectorXs& _prior_state, const Eigen:
         CaptureBasePtr init_capture_base;
         // init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
         // init_capture = std::make_shared<CapturePose>(_ts, nullptr, _prior_state, _prior_cov);
-        if (trajectory_ptr_->getFrameStructure() == "POV 3D")
+        if (this->getFrameStructure() == "POV" and this->getDim() == 3)
             init_capture_base = CaptureBase::emplace<CapturePose>(origin_keyframe, _ts, nullptr, _prior_state.head(7), _prior_cov.topLeftCorner(6,6));
         else
             init_capture_base = CaptureBase::emplace<CapturePose>(origin_keyframe, _ts, nullptr, _prior_state, _prior_cov);

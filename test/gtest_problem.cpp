@@ -21,7 +21,7 @@ using namespace Eigen;
 
 TEST(Problem, create)
 {
-    ProblemPtr P = Problem::create("POV 3D");
+    ProblemPtr P = Problem::create("POV", 3);
 
     // check double ointers to branches
     ASSERT_EQ(P, P->getHardware()->getProblem());
@@ -34,7 +34,7 @@ TEST(Problem, create)
 
 TEST(Problem, Sensors)
 {
-    ProblemPtr P = Problem::create("POV 3D");
+    ProblemPtr P = Problem::create("POV", 3);
 
     // add a dummy sensor
     // SensorBasePtr S = std::make_shared<SensorBase>("Dummy", nullptr, nullptr, nullptr, 2, false);
@@ -49,7 +49,7 @@ TEST(Problem, Sensors)
 
 TEST(Problem, Processor)
 {
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
 
     // check motion processor is null
     ASSERT_FALSE(P->getProcessorMotion());
@@ -76,7 +76,7 @@ TEST(Problem, Processor)
 TEST(Problem, Installers)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     Eigen::Vector7s xs;
 
     SensorBasePtr    S = P->installSensor   ("ODOM 3D", "odometer",        xs,         wolf_root + "/src/examples/sensor_odom_3D.yaml");
@@ -105,7 +105,7 @@ TEST(Problem, Installers)
 
 TEST(Problem, SetOrigin_PO_2D)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     TimeStamp       t0(0);
     Eigen::VectorXs x0(3); x0 << 1,2,3;
     Eigen::MatrixXs P0(3,3); P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
@@ -142,7 +142,7 @@ TEST(Problem, SetOrigin_PO_2D)
 
 TEST(Problem, SetOrigin_PO_3D)
 {
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     TimeStamp       t0(0);
     Eigen::VectorXs x0(7); x0 << 1,2,3,4,5,6,7;
     Eigen::MatrixXs P0(6,6); P0.setIdentity(); P0 *= 0.1; // P0 is 0.1*Id
@@ -179,11 +179,11 @@ TEST(Problem, SetOrigin_PO_3D)
 
 TEST(Problem, emplaceFrame_factory)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
 
-    FrameBasePtr f0 = P->emplaceFrame("PO 2D",    KEY_FRAME, VectorXs(3),  TimeStamp(0.0));
-    FrameBasePtr f1 = P->emplaceFrame("PO 3D",    KEY_FRAME, VectorXs(7),  TimeStamp(1.0));
-    FrameBasePtr f2 = P->emplaceFrame("POV 3D",   KEY_FRAME, VectorXs(10), TimeStamp(2.0));
+    FrameBasePtr f0 = P->emplaceFrame("PO", 2,    KEY_FRAME, VectorXs(3),  TimeStamp(0.0));
+    FrameBasePtr f1 = P->emplaceFrame("PO", 3,    KEY_FRAME, VectorXs(7),  TimeStamp(1.0));
+    FrameBasePtr f2 = P->emplaceFrame("POV", 3,   KEY_FRAME, VectorXs(10), TimeStamp(2.0));
 
     //    std::cout << "f0: type PO 2D?    "  << f0->getType() << std::endl;
     //    std::cout << "f1: type PO 3D?    "  << f1->getType() << std::endl;
@@ -206,7 +206,7 @@ TEST(Problem, StateBlocks)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
 
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     Eigen::Vector7s xs;
 
     // 2 state blocks, fixed
@@ -227,7 +227,7 @@ TEST(Problem, StateBlocks)
     ProcessorBasePtr pm = P->installProcessor("ODOM 3D",            "odom integrator",      "odometer", wolf_root + "/src/examples/processor_odom_3D.yaml");
 
     // 2 state blocks, estimated
-    P->emplaceFrame("PO 3D", KEY_FRAME, xs, 0);
+    P->emplaceFrame("PO", 3, KEY_FRAME, xs, 0);
     ASSERT_EQ(P->consumeStateBlockNotificationMap().size(), (unsigned int)(/*2 + 3*/ + 2)); // consume empties the notification map, so only should contain notification since last call
 
     //    P->print(4,1,1,1);
@@ -243,7 +243,7 @@ TEST(Problem, Covariances)
 {
     std::string wolf_root = _WOLF_ROOT_DIR;
 
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     Eigen::Vector7s xs;
 
     SensorBasePtr    Sm = P->installSensor   ("ODOM 3D", "odometer",xs, wolf_root + "/src/examples/sensor_odom_3D.yaml");
@@ -261,7 +261,7 @@ TEST(Problem, Covariances)
 
     // 4 state blocks, estimated
     St->unfixExtrinsics();
-    FrameBasePtr F = P->emplaceFrame("PO 3D", KEY_FRAME, xs, 0);
+    FrameBasePtr F = P->emplaceFrame("PO", 3, KEY_FRAME, xs, 0);
 
     // set covariance (they are not computed without a solver)
     P->addCovarianceBlock(F->getP(), Eigen::Matrix3s::Identity());

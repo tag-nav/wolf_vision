@@ -52,7 +52,7 @@ class FactorAutodiffDistance3D_Test : public testing::Test
             dist = Vector1s(sqrt(2.0));
             dist_cov = Matrix1s(0.01);
 
-            problem = Problem::create("PO 3D");
+            problem = Problem::create("PO", 3);
             ceres_manager = std::make_shared<CeresManager>(problem);
 
             F1 = problem->emplaceFrame        (KEY_FRAME, pose1, 1.0);

@@ -37,6 +37,51 @@ FrameBase::FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr 
     state_block_vec_[2] = _v_ptr;
 }
 
+FrameBase::FrameBase(const std::string _frame_structure, const SizeEigen _dim, const FrameType & _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x) :
+           NodeBase("FRAME", "Base"),
+           trajectory_ptr_(),
+           state_block_vec_(3), // allow for 3 state blocks by default. Resize in derived constructors if needed.
+           frame_id_(++frame_id_count_),
+           type_(_tp),
+           time_stamp_(_ts)
+{
+    if(_frame_structure.compare("PO") == 0 and _dim == 2){
+        // auto _x = Eigen::VectorXs::Zero(3);
+        assert(_x.size() == 3 && "Wrong state vector size. Should be 3 for 2D!");
+        StateBlockPtr p_ptr ( std::make_shared<StateBlock>    (_x.head    <2> ( ) ) );
+        StateBlockPtr o_ptr ( std::make_shared<StateAngle>    ((Scalar) _x(2) ) );
+        StateBlockPtr v_ptr ( nullptr );
+        state_block_vec_[0] = p_ptr;
+        state_block_vec_[1] = o_ptr;
+        state_block_vec_[2] = v_ptr;
+        this->setType("PO 2D");
+    }else if(_frame_structure.compare("PO") == 0 and _dim == 3){
+        // auto _x = Eigen::VectorXs::Zero(7);
+        assert(_x.size() == 7 && "Wrong state vector size. Should be 7 for 3D!");
+        StateBlockPtr p_ptr ( std::make_shared<StateBlock>      (_x.head    <3> ( ) ) );
+        StateBlockPtr o_ptr ( std::make_shared<StateQuaternion> (_x.tail    <4> ( ) ) );
+        StateBlockPtr v_ptr ( nullptr );
+        state_block_vec_[0] = p_ptr;
+        state_block_vec_[1] = o_ptr;
+        state_block_vec_[2] = v_ptr;
+        this->setType("PO 3D");
+    }else if(_frame_structure.compare("POV") == 0 and _dim == 3){
+        // auto _x = Eigen::VectorXs::Zero(10);
+        assert(_x.size() == 10 && "Wrong state vector size. Should be 10 for 3D!");
+        StateBlockPtr p_ptr ( std::make_shared<StateBlock>      (_x.head    <3> ( ) ) );
+        StateBlockPtr o_ptr ( std::make_shared<StateQuaternion> (_x.segment <4> (3) ) );
+        StateBlockPtr v_ptr ( std::make_shared<StateBlock>      (_x.tail    <3> ( ) ) );
+        state_block_vec_[0] = p_ptr;
+        state_block_vec_[1] = o_ptr;
+        state_block_vec_[2] = v_ptr;
+        this->setType("POV 3D");
+    }else{
+        std::cout << _frame_structure << " ^^ " << _dim << std::endl;
+        throw std::runtime_error("Unknown frame structure");
+    }
+
+}
+
 FrameBase::~FrameBase()
 {
     if ( isKey() )

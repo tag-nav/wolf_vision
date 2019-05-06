@@ -71,7 +71,7 @@ TEST(ProcessorTrackerFeatureTrifocal, KeyFrameCallback)
     Scalar dt = 0.01;
 
     // Wolf problem
-    ProblemPtr problem = Problem::create("PO 3D");
+    ProblemPtr problem = Problem::create("PO", 3);
 
     // Install tracker (sensor and processor)
     IntrinsicsCameraPtr intr = make_shared<IntrinsicsCamera>(); // TODO init params or read from YAML

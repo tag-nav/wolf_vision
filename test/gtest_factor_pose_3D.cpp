@@ -32,7 +32,7 @@ Matrix6s data_cov = data_var.asDiagonal();
 Vector7s x0 = pose6toPose7(pose + Vector6s::Random()*0.25);
 
 // Problem and solver
-ProblemPtr problem = Problem::create("PO 3D");
+ProblemPtr problem = Problem::create("PO", 3);
 CeresManager ceres_mgr(problem);
 
 // Two frames

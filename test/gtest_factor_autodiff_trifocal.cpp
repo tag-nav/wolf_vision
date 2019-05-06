@@ -112,7 +112,7 @@ class FactorAutodiffTrifocalTest : public testing::Test{
             pose_cam  << pos_cam, vquat_cam;
 
             // Build problem
-            problem = Problem::create("PO 3D");
+            problem = Problem::create("PO", 3);
             ceres::Solver::Options options;
             ceres_manager = std::make_shared<CeresManager>(problem, options);
 

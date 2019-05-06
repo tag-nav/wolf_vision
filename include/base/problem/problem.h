@@ -47,19 +47,22 @@ class Problem : public std::enable_shared_from_this<Problem>
         mutable std::mutex mut_state_block_notifications_;
         mutable std::mutex mut_covariances_;
         bool prior_is_set_;
+        std::string frame_structure_;
 
     private: // CAUTION: THESE METHODS ARE PRIVATE, DO NOT MAKE THEM PUBLIC !!
         Problem(const std::string& _frame_structure); // USE create() below !!
+        Problem(const std::string& _frame_structure, SizeEigen _dim); // USE create() below !!
         void setup();
 
     public:
-        static ProblemPtr create(const std::string& _frame_structure); // USE THIS AS A CONSTRUCTOR!
+        static ProblemPtr create(const std::string& _frame_structure, SizeEigen _dim); // USE THIS AS A CONSTRUCTOR!
         virtual ~Problem();
 
         // Properties -----------------------------------------
         SizeEigen getFrameStructureSize() const;
         void getFrameStructureSize(SizeEigen& _x_size, SizeEigen& _cov_size) const;
         SizeEigen getDim() const;
+        std::string getFrameStructure() const;
 
         // Hardware branch ------------------------------------
         HardwareBasePtr getHardware();
@@ -138,6 +141,7 @@ class Problem : public std::enable_shared_from_this<Problem>
 
         /** \brief Emplace frame from string frame_structure
          * \param _frame_structure String indicating the frame structure.
+         * \param _dim variable indicating the dimension of the problem
          * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
          * \param _frame_state State vector; must match the size and format of the chosen frame structure
          * \param _time_stamp Time stamp of the frame
@@ -148,12 +152,14 @@ class Problem : public std::enable_shared_from_this<Problem>
          *   - If it is key-frame, update state-block lists in Problem
          */
         FrameBasePtr emplaceFrame(const std::string& _frame_structure, //
+                                  const SizeEigen _dim, //
                                   FrameType _frame_key_type, //
                                   const Eigen::VectorXs& _frame_state, //
                                   const TimeStamp& _time_stamp);
 
         /** \brief Emplace frame from string frame_structure without state
          * \param _frame_structure String indicating the frame structure.
+         * \param _dim variable indicating the dimension of the problem
          * \param _frame_key_type Either KEY_FRAME or NON_KEY_FRAME
          * \param _time_stamp Time stamp of the frame
          *
@@ -163,6 +169,7 @@ class Problem : public std::enable_shared_from_this<Problem>
          *   - If it is key-frame, update state-block lists in Problem
          */
         FrameBasePtr emplaceFrame(const std::string& _frame_structure, //
+                                  const SizeEigen _dim, //
                                   FrameType _frame_key_type, //
                                   const TimeStamp& _time_stamp);
 

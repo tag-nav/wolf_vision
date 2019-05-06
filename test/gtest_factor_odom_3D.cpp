@@ -33,7 +33,7 @@ Vector7s x0 = data2delta(Vector6s::Random()*0.25);
 Vector7s x1 = data2delta(data + Vector6s::Random()*0.25);
 
 // Problem and solver
-ProblemPtr problem_ptr = Problem::create("PO 3D");
+ProblemPtr problem_ptr = Problem::create("PO", 3);
 CeresManager ceres_mgr(problem_ptr);
 
 // Two frames

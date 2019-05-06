@@ -64,6 +64,8 @@ class FrameBase : public NodeBase, public std::enable_shared_from_this<FrameBase
          **/        
         FrameBase(const FrameType & _tp, const TimeStamp& _ts, StateBlockPtr _p_ptr, StateBlockPtr _o_ptr = nullptr, StateBlockPtr _v_ptr = nullptr);
 
+        FrameBase(const std::string _frame_structure, const SizeEigen _dim, const FrameType & _tp, const TimeStamp& _ts, const Eigen::VectorXs& _x);
+
         virtual ~FrameBase();
         virtual void remove();
 

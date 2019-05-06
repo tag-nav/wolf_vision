@@ -22,6 +22,7 @@ void CapturePose::emplaceFeatureAndFactor()
     // addFeature(feature_pose);
     auto feature_pose = FeatureBase::emplace<FeaturePose>(shared_from_this(), data_, data_covariance_);
 
+    std::cout << data_.size() << " ~~ " << data_covariance_.rows() << "x" << data_covariance_.cols() << std::endl;
     // Emplace factor
     if (data_.size() == 3 && data_covariance_.rows() == 3 && data_covariance_.cols() == 3 )
         FactorBase::emplace<FactorPose2D>(feature_pose, feature_pose);

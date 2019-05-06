@@ -25,7 +25,7 @@ struct DummyLoopCloser : public wolf::ProcessorFrameNearestNeighborFilter
 };
 
 // Declare Wolf problem
-wolf::ProblemPtr problem = wolf::Problem::create("PO 2D");
+wolf::ProblemPtr problem = wolf::Problem::create("PO", 2);
 
 // Declare Sensor
 Eigen::Vector3s odom_extrinsics = Eigen::Vector3s(0,0,0);

@@ -62,7 +62,7 @@ TEST(FrameBase, LinksBasic)
 TEST(FrameBase, LinksToTree)
 {
     // Problem with 2 frames and one motion factor between them
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     TrajectoryBasePtr T = P->getTrajectory();
     IntrinsicsOdom2D intrinsics_odo;
     intrinsics_odo.k_disp_to_disp = 1;

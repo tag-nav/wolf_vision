@@ -26,7 +26,7 @@ using namespace Eigen;
 
 TEST(Emplace, Landmark)
 {
-    ProblemPtr P = Problem::create("POV 3D");
+    ProblemPtr P = Problem::create("POV", 3);
 
     LandmarkBase::emplace<LandmarkBase>(P->getMap(),"Dummy", nullptr, nullptr);
     ASSERT_EQ(P, P->getMap()->getLandmarkList().front()->getMap()->getProblem());
@@ -34,14 +34,14 @@ TEST(Emplace, Landmark)
 
 TEST(Emplace, Sensor)
 {
-    ProblemPtr P = Problem::create("POV 3D");
+    ProblemPtr P = Problem::create("POV", 3);
 
     SensorBase::emplace<SensorBase>(P->getHardware(), "Dummy", nullptr, nullptr, nullptr, 2, false);
     ASSERT_EQ(P, P->getHardware()->getSensorList().front()->getHardware()->getProblem());
 }
 TEST(Emplace, Frame)
 {
-    ProblemPtr P = Problem::create("POV 3D");
+    ProblemPtr P = Problem::create("POV", 3);
 
     ASSERT_NE(P->getTrajectory(), nullptr);
     FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
@@ -50,7 +50,7 @@ TEST(Emplace, Frame)
 
 TEST(Emplace, Processor)
 {
-    ProblemPtr P = Problem::create("POV 3D");
+    ProblemPtr P = Problem::create("POV", 3);
 
     auto sen = SensorBase::emplace<SensorBase>(P->getHardware(), "Dummy", nullptr, nullptr, nullptr, 2, false);
     auto prc = ProcessorOdom2D::emplace<ProcessorOdom2D>(sen, std::make_shared<ProcessorParamsOdom2D>());
@@ -61,7 +61,7 @@ TEST(Emplace, Processor)
 
 TEST(Emplace, Capture)
 {
-    ProblemPtr P = Problem::create("POV 3D");
+    ProblemPtr P = Problem::create("POV", 3);
 
     ASSERT_NE(P->getTrajectory(), nullptr);
     auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
@@ -75,7 +75,7 @@ TEST(Emplace, Capture)
 
 TEST(Emplace, Feature)
 {
-    ProblemPtr P = Problem::create("POV 3D");
+    ProblemPtr P = Problem::create("POV", 3);
 
     ASSERT_NE(P->getTrajectory(), nullptr);
     auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
@@ -95,7 +95,7 @@ TEST(Emplace, Feature)
 }
 TEST(Emplace, Factor)
 {
-    ProblemPtr P = Problem::create("POV 3D");
+    ProblemPtr P = Problem::create("POV", 3);
 
     ASSERT_NE(P->getTrajectory(), nullptr);
     auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
@@ -118,7 +118,7 @@ TEST(Emplace, Factor)
 
 TEST(Emplace, EmplaceDerived)
 {
-    ProblemPtr P = Problem::create("POV 3D");
+    ProblemPtr P = Problem::create("POV", 3);
 
     auto frm = FrameBase::emplace<FrameBase>(P->getTrajectory(),  KEY_FRAME, TimeStamp(0), std::make_shared<StateBlock>(2,true), std::make_shared<StateBlock>(2,true));
     // LandmarkBase::emplace<LandmarkBase>(MapBaseWPtr(P->getMap()),"Dummy", nullptr, nullptr);

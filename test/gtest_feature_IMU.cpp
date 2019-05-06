@@ -34,7 +34,7 @@ class FeatureIMU_test : public testing::Test
         using std::static_pointer_cast;
 
         // Wolf problem
-        problem = Problem::create("POV 3D");
+        problem = Problem::create("POV", 3);
         Eigen::VectorXs IMU_extrinsics(7);
         IMU_extrinsics << 0,0,0, 0,0,0,1; // IMU pose in the robot
         IntrinsicsIMUPtr sen_imu_params = std::make_shared<IntrinsicsIMU>();

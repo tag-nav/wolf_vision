@@ -107,7 +107,7 @@ class SolverManagerWrapper : public SolverManager
 
 TEST(SolverManager, Create)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // check double pointers to branches
@@ -116,7 +116,7 @@ TEST(SolverManager, Create)
 
 TEST(SolverManager, AddStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -135,7 +135,7 @@ TEST(SolverManager, AddStateBlock)
 
 TEST(SolverManager, DoubleAddStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -160,7 +160,7 @@ TEST(SolverManager, DoubleAddStateBlock)
 
 TEST(SolverManager, UpdateStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -208,7 +208,7 @@ TEST(SolverManager, UpdateStateBlock)
 
 TEST(SolverManager, AddUpdateStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -246,7 +246,7 @@ TEST(SolverManager, AddUpdateStateBlock)
 
 TEST(SolverManager, AddUpdateLocalParamStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -289,7 +289,7 @@ TEST(SolverManager, AddUpdateLocalParamStateBlock)
 
 TEST(SolverManager, AddLocalParamRemoveLocalParamStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -336,7 +336,7 @@ TEST(SolverManager, AddLocalParamRemoveLocalParamStateBlock)
 
 TEST(SolverManager, RemoveStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -361,7 +361,7 @@ TEST(SolverManager, RemoveStateBlock)
 
 TEST(SolverManager, AddRemoveStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -383,7 +383,7 @@ TEST(SolverManager, AddRemoveStateBlock)
 
 TEST(SolverManager, RemoveUpdateStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -402,7 +402,7 @@ TEST(SolverManager, RemoveUpdateStateBlock)
 
 TEST(SolverManager, DoubleRemoveStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -427,7 +427,7 @@ TEST(SolverManager, DoubleRemoveStateBlock)
 
 TEST(SolverManager, AddUpdatedStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -491,7 +491,7 @@ TEST(SolverManager, AddUpdatedStateBlock)
 
 TEST(SolverManager, AddFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -516,7 +516,7 @@ TEST(SolverManager, AddFactor)
 
 TEST(SolverManager, RemoveFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -547,7 +547,7 @@ TEST(SolverManager, RemoveFactor)
 
 TEST(SolverManager, AddRemoveFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block
@@ -578,7 +578,7 @@ TEST(SolverManager, AddRemoveFactor)
 
 TEST(SolverManager, DoubleRemoveFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     SolverManagerWrapperPtr solver_manager_ptr = std::make_shared<SolverManagerWrapper>(P);
 
     // Create State block

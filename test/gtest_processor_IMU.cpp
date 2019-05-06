@@ -48,7 +48,7 @@ class ProcessorIMUt : public testing::Test
         std::string wolf_root = _WOLF_ROOT_DIR;
 
         // Wolf problem
-        problem = Problem::create("POV 3D");
+        problem = Problem::create("POV", 3);
         Vector7s extrinsics = (Vector7s() << 0,0,0, 0,0,0,1).finished();
         sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
         ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", wolf_root + "/src/examples/processor_imu.yaml");
@@ -97,7 +97,7 @@ TEST(ProcessorIMU_constructors, ALL)
 
     //Factory constructor without yaml
     std::string wolf_root = _WOLF_ROOT_DIR;
-    ProblemPtr problem = Problem::create("POV 3D");
+    ProblemPtr problem = Problem::create("POV", 3);
     Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
     SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics, wolf_root + "/src/examples/sensor_imu.yaml");
     ProcessorBasePtr processor_ptr = problem->installProcessor("IMU", "IMU pre-integrator", "Main IMU", "");
@@ -127,7 +127,7 @@ TEST(ProcessorIMU, voteForKeyFrame)
     std::string wolf_root = _WOLF_ROOT_DIR;
 
     // Wolf problem
-    ProblemPtr problem = Problem::create("POV 3D");
+    ProblemPtr problem = Problem::create("POV", 3);
     Vector7s extrinsics = (Vector7s()<<1,0,0, 0,0,0,1).finished();
     SensorBasePtr sensor_ptr = problem->installSensor("IMU", "Main IMU", extrinsics,  wolf_root + "/src/examples/sensor_imu.yaml");
     ProcessorParamsIMUPtr prc_imu_params = std::make_shared<ProcessorParamsIMU>();
@@ -144,7 +144,6 @@ TEST(ProcessorIMU, voteForKeyFrame)
     x0 << 0,0,0,  0,0,0,1,  0,0,0;
     MatrixXs P0(9,9); P0.setIdentity();
     problem->setPrior(x0, P0, t, 0.01);
-
     //data variable and covariance matrix
     // since we integrate only a few times, give the capture a big covariance, otherwise it will be so small that it won't pass following assertions
     Vector6s data;

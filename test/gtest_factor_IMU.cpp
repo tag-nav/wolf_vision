@@ -58,7 +58,7 @@ class FactorIMU_biasTest_Static_NullBias : public testing::Test
 
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("POV 3D");
+        wolf_problem_ptr_ = Problem::create("POV", 3);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -144,7 +144,7 @@ class FactorIMU_biasTest_Static_NonNullAccBias : public testing::Test
 
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("POV 3D");
+        wolf_problem_ptr_ = Problem::create("POV", 3);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -228,7 +228,7 @@ class FactorIMU_biasTest_Static_NonNullGyroBias : public testing::Test
 
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("POV 3D");
+        wolf_problem_ptr_ = Problem::create("POV", 3);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -312,7 +312,7 @@ class FactorIMU_biasTest_Static_NonNullBias : public testing::Test
 
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("POV 3D");
+        wolf_problem_ptr_ = Problem::create("POV", 3);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -398,7 +398,7 @@ class FactorIMU_biasTest_Move_NullBias : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("POV 3D");
+        wolf_problem_ptr_ = Problem::create("POV", 3);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -485,7 +485,7 @@ class FactorIMU_biasTest_Move_NonNullBias : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("POV 3D");
+        wolf_problem_ptr_ = Problem::create("POV", 3);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -568,7 +568,7 @@ class FactorIMU_biasTest_Move_NonNullBiasRotCst : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("POV 3D");
+        wolf_problem_ptr_ = Problem::create("POV", 3);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -661,7 +661,7 @@ class FactorIMU_biasTest_Move_NonNullBiasRotAndVCst : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("POV 3D");
+        wolf_problem_ptr_ = Problem::create("POV", 3);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -762,7 +762,7 @@ class FactorIMU_biasTest_Move_NonNullBiasRot : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("POV 3D");
+        wolf_problem_ptr_ = Problem::create("POV", 3);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -864,7 +864,7 @@ class FactorIMU_ODOM_biasTest_Move_NonNullBiasRot : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        problem = Problem::create("POV 3D");
+        problem = Problem::create("POV", 3);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -1045,7 +1045,7 @@ class FactorIMU_ODOM_biasTest_Move_NonNullBiasRotY : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("POV 3D");
+        wolf_problem_ptr_ = Problem::create("POV", 3);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;
@@ -1186,7 +1186,7 @@ class FactorIMU_ODOM_biasTest_Move_NonNullBiasRotXY : public testing::Test
         
         //===================================================== SETTING PROBLEM
         // WOLF PROBLEM
-        wolf_problem_ptr_ = Problem::create("POV 3D");
+        wolf_problem_ptr_ = Problem::create("POV", 3);
 
         // CERES WRAPPER
         ceres::Solver::Options ceres_options;

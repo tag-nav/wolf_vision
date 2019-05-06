@@ -31,7 +31,7 @@ Eigen::Matrix<wolf::Scalar, 9, 9> data_cov = 0.2 * Eigen::Matrix<Scalar,9,9>::Id
 Vector10s x0 = pose9toPose10(pose + Vector9s::Random()*0.25);
 
 // Problem and solver
-ProblemPtr problem_ptr = Problem::create("POV 3D");
+ProblemPtr problem_ptr = Problem::create("POV", 3);
 CeresManager ceres_mgr(problem_ptr);
 
 // Two frames

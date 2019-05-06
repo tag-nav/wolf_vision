@@ -63,7 +63,7 @@ bool debug = false;
 TEST(TrajectoryBase, ClosestKeyFrame)
 {
 
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     TrajectoryBasePtr T = P->getTrajectory();
 
     // Trajectory status:
@@ -103,7 +103,7 @@ TEST(TrajectoryBase, Add_Remove_Frame)
 {
     using std::make_shared;
 
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     TrajectoryBasePtr T = P->getTrajectory();
 
     DummyNotificationProcessor N(P);
@@ -185,7 +185,7 @@ TEST(TrajectoryBase, KeyFramesAreSorted)
 {
     using std::make_shared;
 
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     TrajectoryBasePtr T = P->getTrajectory();
 
     // Trajectory status:

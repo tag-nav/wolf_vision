@@ -81,7 +81,7 @@ class CeresManagerWrapper : public CeresManager
 
 TEST(CeresManager, Create)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // check double ointers to branches
@@ -93,7 +93,7 @@ TEST(CeresManager, Create)
 
 TEST(CeresManager, AddStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -116,7 +116,7 @@ TEST(CeresManager, AddStateBlock)
 
 TEST(CeresManager, DoubleAddStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -145,7 +145,7 @@ TEST(CeresManager, DoubleAddStateBlock)
 
 TEST(CeresManager, UpdateStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -176,7 +176,7 @@ TEST(CeresManager, UpdateStateBlock)
 
 TEST(CeresManager, AddUpdateStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -203,7 +203,7 @@ TEST(CeresManager, AddUpdateStateBlock)
 
 TEST(CeresManager, RemoveStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -235,7 +235,7 @@ TEST(CeresManager, RemoveStateBlock)
 
 TEST(CeresManager, AddRemoveStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -261,7 +261,7 @@ TEST(CeresManager, AddRemoveStateBlock)
 
 TEST(CeresManager, RemoveUpdateStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -286,7 +286,7 @@ TEST(CeresManager, RemoveUpdateStateBlock)
 
 TEST(CeresManager, DoubleRemoveStateBlock)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -314,7 +314,7 @@ TEST(CeresManager, DoubleRemoveStateBlock)
 
 TEST(CeresManager, AddFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
@@ -339,7 +339,7 @@ TEST(CeresManager, AddFactor)
 
 TEST(CeresManager, DoubleAddFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
@@ -367,7 +367,7 @@ TEST(CeresManager, DoubleAddFactor)
 
 TEST(CeresManager, RemoveFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
@@ -398,7 +398,7 @@ TEST(CeresManager, RemoveFactor)
 
 TEST(CeresManager, AddRemoveFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
@@ -428,7 +428,7 @@ TEST(CeresManager, AddRemoveFactor)
 
 TEST(CeresManager, DoubleRemoveFactor)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) factor point 2d
@@ -466,7 +466,7 @@ TEST(CeresManager, DoubleRemoveFactor)
 
 TEST(CeresManager, AddStateBlockLocalParam)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -493,7 +493,7 @@ TEST(CeresManager, AddStateBlockLocalParam)
 
 TEST(CeresManager, RemoveLocalParam)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -525,7 +525,7 @@ TEST(CeresManager, RemoveLocalParam)
 
 TEST(CeresManager, AddLocalParam)
 {
-    ProblemPtr P = Problem::create("PO 2D");
+    ProblemPtr P = Problem::create("PO", 2);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create State block
@@ -558,7 +558,7 @@ TEST(CeresManager, AddLocalParam)
 
 TEST(CeresManager, FactorsRemoveLocalParam)
 {
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) 2 factors quaternion
@@ -604,7 +604,7 @@ TEST(CeresManager, FactorsRemoveLocalParam)
 
 TEST(CeresManager, FactorsUpdateLocalParam)
 {
-    ProblemPtr P = Problem::create("PO 3D");
+    ProblemPtr P = Problem::create("PO", 3);
     CeresManagerWrapperPtr ceres_manager_ptr = std::make_shared<CeresManagerWrapper>(P);
 
     // Create (and add) 2 factors quaternion

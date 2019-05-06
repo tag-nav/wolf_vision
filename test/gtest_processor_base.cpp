@@ -35,7 +35,7 @@ TEST(ProcessorBase, KeyFrameCallback)
     Scalar dt = 0.01;
 
     // Wolf problem
-    ProblemPtr problem = Problem::create("PO 2D");
+    ProblemPtr problem = Problem::create("PO", 2);
 
     // Install tracker (sensor and processor)
     // SensorBasePtr sens_trk = make_shared<SensorBase>("FEATURE", std::make_shared<StateBlock>(Eigen::VectorXs::Zero(2)),
